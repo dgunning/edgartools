@@ -25,6 +25,14 @@ def set_edgar_identity(name: str, email: str):
 
 def get_edgar_identity():
     identity = os.environ.get(edgar_identity)
+    assert identity, """
+    Environment variable EDGAR_IDENTITY not found.
+    
+    Set environent variable `EDGAR_IDENTITY` to a string used to identify you to the SEC edgar service
+    
+    example
+        EDGAR_IDENTITY=First Name name@email.com
+    """
     return identity
 
 
