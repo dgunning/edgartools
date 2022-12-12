@@ -1,0 +1,6 @@
+/.pytest_cache/
+/.ruff_cache/
+/**/.ipynb_checkpoints/
+.idea/
+# Ignore dynaconf secret files
+.secrets.*
