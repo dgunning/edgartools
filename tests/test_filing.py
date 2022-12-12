@@ -1,9 +1,15 @@
+import datetime
+
+import pytest
+
 from edgar import get_filings, Filings, Filing
 from edgar.filing import form_specs, company_specs, FilingHomepage
 import humanize
 import re
 import httpx
 import pandas as pd
+from functools import lru_cache
+import tempfile
 
 pd.options.display.max_colwidth = 200
 
@@ -64,21 +70,76 @@ def test_read_form_filing_index_xbrl():
     assert re.match(r'\d{10}\-\d{2}\-\d{6}', filings.filing_index[4][-1].as_py())
 
 
+@lru_cache(maxsize=8)
+def cached_filings(year: int, quarter: int, index: str):
+    return get_filings(year, quarter, index=index)
+
+
 def test_filings_date_range():
-    filings: Filings = get_filings(2021, 1, index="xbrl")
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
     start_date, end_date = filings.date_range
     print(start_date, end_date)
     assert end_date > start_date
 
 
 def test_filings_repr():
-    filings: Filings = get_filings(2021, 1, index="xbrl")
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
     filings_repr = str(filings)
     assert filings_repr
 
 
+def test_filing_head():
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
+    assert len(filings) > 100
+    top_10_filings = filings.head(10)
+    assert len(top_10_filings) == 10
+
+    # Try to get 20 filings should still return 10
+    assert len(top_10_filings.head(20)) == 10
+
+    # Try to get zero rows
+    with pytest.raises(AssertionError):
+        top_10_filings.head(0)
+
+    # Try to get negative rows
+    with pytest.raises(AssertionError):
+        top_10_filings.head(-1)
+
+    assert filings[0] == top_10_filings[0]
+
+
+def test_filing_tail():
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
+    assert len(filings) > 100
+    bottom_10_filings = filings.tail(10)
+    assert len(bottom_10_filings) == 10
+
+    # Try to get 20 filings should still return 10
+    assert len(bottom_10_filings.head(20)) == 10
+
+    # Try to get zero rows
+    with pytest.raises(AssertionError):
+        bottom_10_filings.tail(0)
+
+    # Try to get negative rows
+    with pytest.raises(AssertionError):
+        bottom_10_filings.tail(-1)
+
+    assert filings[-1] == bottom_10_filings[-1]
+
+
+def test_filings_latest():
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
+    latest_filings = filings.latest(20)
+    assert len(latest_filings) == 20
+    start_date, end_date = latest_filings.date_range
+    assert (start_date.year, start_date.month, start_date.day) == (2021, 3, 31)
+    assert (end_date.year, end_date.month, end_date.day) == (2021, 3, 31)
+    print(latest_filings)
+
+
 def test_iterate_filings():
-    filings: Filings = get_filings(2021, 1, index="xbrl")
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
     count = 0
     for filing in filings:
         assert filing
@@ -166,9 +227,10 @@ def test_company_specs():
     assert company_specs.schema.names[:2] == ['company', 'form']
 
 
-def test_open_homepage():
-    carbo_10K.open_homepage()
-
-
-def test_open_filing():
-    carbo_10K.open_filing()
+def test_filings_toduckdb():
+    filings = cached_filings(2022, 3, "xbrl")
+    filings_db = filings.to_duckdb()
+    result_df = filings_db.execute("""
+    select * from filings where form=='10-Q'
+    """).df()
+    assert len(result_df.form.drop_duplicates()) == 1

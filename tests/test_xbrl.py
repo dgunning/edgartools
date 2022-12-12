@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def test_filing_xbrl_parse():
-    xbrl_text = Path('docs/crr.xbrl.xml').read_text()
+    xbrl_text = Path('data/crr.xbrl.xml').read_text()
     filing_xbrl: FilingXbrl = FilingXbrl.parse(xbrl_text)
     assert filing_xbrl
     assert not filing_xbrl.facts.empty

@@ -11,7 +11,7 @@ from edgar.filing import Filing
 
 def test_parse_company_submission_json():
     # Company.parse_company_json()
-    with Path('docs/company_submission.json').open("r") as f:
+    with Path('data/company_submission.json').open("r") as f:
         cjson = json.load(f)
     # print(cjson)
     company = parse_company_submissions(cjson)
@@ -95,10 +95,12 @@ def test_company_get_filings_for_multiple_forms():
 def test_company_filings_repr():
     company: Company = Company.for_ticker("EXPE")
     expe_filings = company.get_filings()
-    # filings_repr = str(filings)
+    filings_repr = str(expe_filings)
 
 
-def test_get_latest_10K_10Q():
+def test_get_latest_10k_10q():
     company = Company.for_ticker('NVDA')
-    filings = company.get_filings("10-K", "10-Q")
-    print(filings)
+    filings: CompanyFilings = company.get_filings("10-K", "10-Q")
+    latest_filings = filings.latest(4)
+    assert len(latest_filings) == 4
+    print(latest_filings.to_pandas())
