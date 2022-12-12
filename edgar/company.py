@@ -130,6 +130,9 @@ class Company(BaseModel):
             ]
         )
 
+    def __repr__(self):
+        return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
+
     def _repr_html_(self):
         return f"""
         <h3>{self.name}</h3>
