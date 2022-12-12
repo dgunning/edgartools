@@ -12,6 +12,7 @@ import httpx
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
+import pyarrow.parquet as pq
 import pyarrow.csv as pa_csv
 from fastcore.basics import listify
 from fastcore.parallel import parallel
@@ -200,15 +201,35 @@ def get_filings(year: Years,
 
 
 class Filings:
+    """
+    A container for filings
+    """
 
     def __init__(self,
                  filing_index: pa.Table):
         self.filing_index: pa.Table = filing_index
 
     def to_pandas(self) -> pd.DataFrame:
+        """Return the filing index as a python dataframe"""
         return self.filing_index.to_pandas()
 
+    def to_duckdb(self):
+        """return an in memory duck db instance over the filings"""
+        import duckdb
+        con = duckdb.connect(database=':memory:')
+        con.register('filings', self.filing_index)
+        return con
+
+    def save_parquet(self, location: str):
+        """Save the filing index as parquet"""
+        pq.write_table(self.filing_index, location)
+
+    def save(self, location: str):
+        """Save the filing index as parquet"""
+        self.save_parquet(location)
+
     def get_filing_at(self, item: int):
+        """Get the filing at the specified index"""
         return Filing(
             cik=self.filing_index['cik'][item].as_py(),
             company=self.filing_index['company'][item].as_py(),
@@ -219,8 +240,34 @@ class Filings:
 
     @property
     def date_range(self) -> Tuple[datetime]:
+        """Return a tuple of the start and end dates in the filing index"""
         min_max_dates = pc.min_max(self.filing_index['filingDate']).as_py()
         return min_max_dates['min'], min_max_dates['max']
+
+    def latest(self, n: int) -> int:
+        """Get the latest n filings"""
+        sort_indices = pc.sort_indices(self.filing_index, sort_keys=[("filingDate", "descending")])
+        sort_indices_top = sort_indices[:min(n, len(sort_indices))]
+        latest_filing_index = pc.take(data=self.filing_index, indices=sort_indices_top)
+        return Filings(latest_filing_index)
+
+    def __head(self, n):
+        assert n > 0, "The number of filings to select - `n`, should be greater than 0"
+        return self.filing_index.slice(0, min(n, len(self.filing_index)))
+
+    def head(self, n: int):
+        """Get the first n filings"""
+        selection = self.__head(n)
+        return Filings(selection)
+
+    def __tail(self, n):
+        assert n > 0, "The number of filings to select - `n`, should be greater than 0"
+        return self.filing_index.slice(max(0, len(self.filing_index) - n), len(self.filing_index))
+
+    def tail(self, n: int):
+        """Get the last n filings"""
+        selection = self.__tail(n)
+        return Filings(selection)
 
     def __getitem__(self, item):
         return self.get_filing_at(item)
@@ -246,6 +293,9 @@ class Filings:
 
 
 class Filing:
+    """
+    An SEC filing
+    """
 
     def __init__(self,
                  cik: int,
@@ -287,6 +337,15 @@ class Filing:
             homepage_html = download_text(self.homepage_url)
             self._filing_homepage = FilingHomepage.from_html(homepage_html, form=self.form)
         return self._filing_homepage
+
+    def __hash__(self):
+        return hash(self.accession_no)
+
+    def __eq__(self, other):
+        return isinstance(other, Filing) and self.accession_no == other.accession_no
+
+    def __ne__(self, other):
+        return not self == other
 
     def __repr__(self):
         return (f"Filing(form='{self.form}', company='{self.company}', cik={self.cik}, "
