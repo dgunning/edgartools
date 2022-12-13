@@ -244,12 +244,15 @@ class Filings:
         min_max_dates = pc.min_max(self.filing_index['filingDate']).as_py()
         return min_max_dates['min'], min_max_dates['max']
 
-    def latest(self, n: int) -> int:
+    def latest(self, n: int = 1) -> int:
         """Get the latest n filings"""
         sort_indices = pc.sort_indices(self.filing_index, sort_keys=[("filingDate", "descending")])
         sort_indices_top = sort_indices[:min(n, len(sort_indices))]
         latest_filing_index = pc.take(data=self.filing_index, indices=sort_indices_top)
-        return Filings(latest_filing_index)
+        filings = Filings(latest_filing_index)
+        if len(filings) == 1:
+            return filings[0]
+        return filings
 
     def __head(self, n):
         assert n > 0, "The number of filings to select - `n`, should be greater than 0"

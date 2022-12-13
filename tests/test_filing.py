@@ -138,6 +138,7 @@ def test_filings_latest():
     print(latest_filings)
 
 
+
 def test_iterate_filings():
     filings: Filings = cached_filings(2021, 1, index="xbrl")
     count = 0
