@@ -1,19 +1,19 @@
 import itertools
 import os.path
 import re
-from bs4 import BeautifulSoup
+import webbrowser
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
 from typing import Tuple, List, Dict
 
-import webbrowser
 import httpx
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
-import pyarrow.parquet as pq
 import pyarrow.csv as pa_csv
+import pyarrow.parquet as pq
+from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
 from pydantic import BaseModel
@@ -209,9 +209,10 @@ class Filings:
                  filing_index: pa.Table):
         self.filing_index: pa.Table = filing_index
 
-    def to_pandas(self) -> pd.DataFrame:
+    def to_pandas(self, *columns) -> pd.DataFrame:
         """Return the filing index as a python dataframe"""
-        return self.filing_index.to_pandas()
+        df = self.filing_index.to_pandas()
+        return df.filter(columns) if len(columns) > 0 else df
 
     def to_duckdb(self):
         """return an in memory duck db instance over the filings"""
