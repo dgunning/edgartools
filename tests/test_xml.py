@@ -1,20 +1,36 @@
 from bs4 import BeautifulSoup
-from edgar.xml import child_value
-import pyarrow.compute as pc
 
-from edgar import Company
+from edgar.xml import child_value, child_text, value_or_footnote
 
 
 def test_child_value():
     soup = BeautifulSoup(
         """
-        
+        <root>
+            <child>
+            <value>Music</value>
+            </child>
+        </root>   
         """, features="xml"
     )
+    root = soup.find("root")
+    assert child_value(root, "child") == "Music"
+    assert child_text(root, "child").strip() == "Music"
 
 
-def test_parse_xbrl():
-    company = Company.for_ticker('SNOW')
-    obj = company.get_filings("10-Q")
-    print(obj)
-    print(pc.min_max(obj.filing_index['filingDate']).as_py())
+def test_value_or_footnote():
+    soup = BeautifulSoup(
+        """
+        <root>
+            <child>
+            <footnote id="F1"/>
+            </child>
+        </root>   
+        """, features="xml"
+    )
+    root = soup.find("root")
+    child = root.find("child")
+    assert value_or_footnote(child) == "F1"
+
+
+
