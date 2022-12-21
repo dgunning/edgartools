@@ -1,13 +1,14 @@
 from functools import lru_cache
 from typing import List, Dict, Optional
 
+import duckdb
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
-import duckdb
 from pydantic import BaseModel
-from edgar.filing import Filing, Filings
+from fastcore.basics import listify
 from edgar.core import http_client
+from edgar.filing import Filing, Filings
 
 __all__ = [
     'Address',
@@ -31,6 +32,9 @@ class Address(BaseModel):
 
 
 class CompanyFacts:
+    """
+    Contains company facts data
+    """
 
     def __init__(self,
                  cik: int,
@@ -68,6 +72,9 @@ class CompanyFilings(Filings):
         self.cik = cik
         self.company_name = company_name
 
+    def __getitem__(self, item):
+        return self.get_filing_at(item)
+
     def get_filing_at(self, item: int):
         return Filing(
             cik=self.cik,
@@ -76,6 +83,21 @@ class CompanyFilings(Filings):
             date=self.filing_index['filingDate'][item].as_py(),
             accession_no=self.filing_index['accessionNumber'][item].as_py(),
         )
+
+    def latest(self, n: int = 1) -> int:
+        """Get the latest n filings"""
+        sort_indices = pc.sort_indices(self.filing_index, sort_keys=[("filingDate", "descending")])
+        sort_indices_top = sort_indices[:min(n, len(sort_indices))]
+        latest_filing_index = pc.take(data=self.filing_index, indices=sort_indices_top)
+        filings = CompanyFilings(latest_filing_index,
+                                 cik=self.cik,
+                                 company_name=self.company_name)
+        if len(filings) == 1:
+            return filings[0]
+        return filings
+
+    def __repr__(self):
+        return f"{self.company_name} {self.cik} {super().__repr__()}"
 
 
 class Company(BaseModel):
@@ -95,7 +117,7 @@ class Company(BaseModel):
     flags: str
     business_address: Address
     mailing_address: Address
-    filings: Filings
+    filings: CompanyFilings
 
     @classmethod
     def for_cik(cls, cik: int):
@@ -103,7 +125,7 @@ class Company(BaseModel):
 
     @classmethod
     def for_ticker(cls, ticker: str):
-        cik = get_ticker_to_cik_lookup().get(ticker)
+        cik = get_ticker_to_cik_lookup().get(ticker.upper())
         if cik:
             return Company.for_cik(cik)
 
@@ -111,11 +133,38 @@ class Company(BaseModel):
     def get_facts(self):
         return get_company_facts(self.cik)
 
-    def get_filings(self, *form: str):
+    def get_filings(self,
+                    *,
+                    form: str | List = None,
+                    accession_number: str | List = None,
+                    file_number: str | List = None,
+                    is_xbrl: bool = None,
+                    is_inline_xbrl: bool = None
+                    ):
+        """
+        Get the company's filings and optionally filter by multiple conditions
+        :param form: The form e.g. '10-K'
+        :param accession_number: The accession number
+        :param file_number: The file number
+        :param is_xbrl: Whether the filing is xbrl
+        :param is_inline_xbrl: Whether the filing is inline_xbrl
+        :return: The CompanyFiling instance
+        """
         company_filings = self.filings.filing_index
-        if len(form) > 0:
+
+        if form:
+            company_filings = company_filings.filter(pc.is_in(company_filings['form'], pa.array(listify(form))))
+        if accession_number:
             company_filings = company_filings.filter(
-                pc.is_in(self.filings.filing_index['form'], pa.array(form)))
+                pc.is_in(company_filings['accessionNumber'], pa.array(listify(accession_number))))
+        if file_number:
+            company_filings = company_filings.filter(pc.is_in(company_filings['fileNumber'],
+                                                              pa.array(listify(file_number))))
+        if is_xbrl is not None:
+            company_filings = company_filings.filter(pc.equal(company_filings['isXBRL'], int(is_xbrl)))
+        if is_inline_xbrl is not None:
+            company_filings = company_filings.filter(pc.equal(company_filings['isInlineXBRL'], int(is_inline_xbrl)))
+
         return CompanyFilings(company_filings,
                               cik=self.cik,
                               company_name=self.name)
