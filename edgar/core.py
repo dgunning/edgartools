@@ -1,13 +1,13 @@
-from functools import lru_cache
-import httpx
 import gzip
-from io import BytesIO
 import os
+from functools import lru_cache
+from io import BytesIO
 
+import httpx
 
 __all__ = [
-    'get_edgar_identity',
-    'set_edgar_identity',
+    'get_identity',
+    'set_identity',
     'http_client',
     'download_text',
     'download_file',
@@ -19,11 +19,22 @@ limits = httpx.Limits(max_connections=10)
 edgar_identity = 'EDGAR_IDENTITY'
 
 
-def set_edgar_identity(name: str, email: str):
-    os.environ[edgar_identity] = f"{name} {email}"
+def set_identity(user_identity: str):
+    """
+    This function sets the environment variable EDGAR_IDENTITY to the identity you will use to call Edgar
+
+    This user identity looks like
+
+        "Sample Company Name AdminContact@<sample company domain>.com"
+
+    See https://www.sec.gov/os/accessing-edgar-data
+
+    :param user_identity:
+    """
+    os.environ[edgar_identity] = user_identity
 
 
-def get_edgar_identity():
+def get_identity():
     identity = os.environ.get(edgar_identity)
     assert identity, """
     Environment variable EDGAR_IDENTITY not found.
@@ -38,7 +49,7 @@ def get_edgar_identity():
 
 @lru_cache(maxsize=1)
 def client_headers():
-    return {'User-Agent': get_edgar_identity()}
+    return {'User-Agent': get_identity()}
 
 
 def http_client():

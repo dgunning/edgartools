@@ -1,4 +1,4 @@
-from edgar.core import decode_content, get_edgar_identity, set_edgar_identity, client_headers
+from edgar.core import decode_content, get_identity, set_identity, client_headers
 import re
 
 
@@ -8,18 +8,22 @@ def test_decode_content():
     assert decode_content(text.encode('latin-1')) == text
 
 
+def test_decode_latin1():
+    text = "Mbappe vs Messi"
+    assert decode_content(text.encode("latin-1")) == text
+
+
 def test_get_identity():
-    identity = get_edgar_identity()
+    identity = get_identity()
     assert identity
 
 
 def test_set_identity():
-    old_identity = get_edgar_identity()
-    name, email = ' '.join(old_identity.split(' ')[:2]), old_identity.split(' ')[2]
-    set_edgar_identity("Mike Tirico", "mtirico@cal.com")
-    assert get_edgar_identity() == "Mike Tirico mtirico@cal.com"
-    set_edgar_identity(name, email)
+    old_identity = get_identity()
+    set_identity("Mike Tirico mtirico@cal.com")
+    assert get_identity() == "Mike Tirico mtirico@cal.com"
+    set_identity(old_identity)
 
 
 def test_get_header():
-    assert client_headers()['User-Agent'] == get_edgar_identity()
+    assert client_headers()['User-Agent'] == get_identity()
