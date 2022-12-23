@@ -158,7 +158,7 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
                        index: str
                        ):
     year, quarter = year_and_quarter
-    url = full_index_url.format(year, quarter, index, "idx")
+    url = full_index_url.format(year, quarter, index, "gz")
     index_text = download_text(url=url, client=client)
     if index == "xbrl":
         index_table = read_pipe_delimited_index(index_text)
