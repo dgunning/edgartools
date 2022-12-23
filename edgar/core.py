@@ -4,6 +4,14 @@ from functools import lru_cache
 from io import BytesIO
 
 import httpx
+from rich.logging import RichHandler
+import logging.config
+
+
+logging.basicConfig(
+    level="INFO", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
+)
+
 
 __all__ = [
     'get_identity',
@@ -19,6 +27,8 @@ default_http_timeout: int = 5
 limits = httpx.Limits(max_connections=10)
 edgar_identity = 'EDGAR_IDENTITY'
 
+logger = logging.getLogger('edgar')
+
 
 def set_identity(user_identity: str):
     """
@@ -33,6 +43,7 @@ def set_identity(user_identity: str):
     :param user_identity:
     """
     os.environ[edgar_identity] = user_identity
+    logger.info(f"Identity of the Edgar REST client set to [{user_identity}]")
 
 
 def get_identity():
