@@ -1,4 +1,8 @@
-from edgar.core import decode_content, get_identity, set_identity, client_headers
+from edgar.core import (decode_content,
+                        get_identity,
+                        set_identity,
+                        client_headers,
+                        download_file)
 import re
 
 
@@ -27,3 +31,13 @@ def test_set_identity():
 
 def test_get_header():
     assert client_headers()['User-Agent'] == get_identity()
+
+
+def test_download_index_file():
+    xbrl_gz = download_file('https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.gz')
+    assert isinstance(xbrl_gz, bytes)
+    assert len(xbrl_gz) > 10000
+
+    xbrl_idx = download_file('https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.idx')
+    assert isinstance(xbrl_idx, str)
+

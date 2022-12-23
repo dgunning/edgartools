@@ -11,7 +11,8 @@ __all__ = [
     'http_client',
     'download_text',
     'download_file',
-    'decode_content'
+    'decode_content',
+    'repr_df'
 ]
 
 default_http_timeout: int = 5
@@ -90,3 +91,10 @@ def download_file(url: str,
 
 def download_text(url: str, client: httpx.Client | httpx.AsyncClient = None):
     return download_file(url, client, text=True)
+
+
+def repr_df(df, hide_index: bool = True):
+    disp = df.style
+    if hide_index:
+        disp = disp.hide(axis="index")
+    return disp._repr_html_()
