@@ -4,10 +4,18 @@ from pathlib import Path
 import pyarrow.compute as pc
 import pyarrow as pa
 from rich import print
-
+from functools import lru_cache
 from edgar.company import *
 from edgar.company import parse_company_submissions
 from edgar.filing import Filing
+
+
+@lru_cache(maxsize=16)
+def get_test_company(cik=None, ticker=None):
+    if cik:
+        return Company.for_cik(cik)
+    elif ticker:
+        return Company.for_ticker(ticker)
 
 
 def test_parse_company_submission_json():
@@ -42,6 +50,12 @@ def test_get_company_facts_db():
     print(df)
     assert not df.start.isnull().all()
     assert not df.end.isnull().all()
+
+
+def test_company_get_facts():
+    company = get_test_company(1318605)
+    facts = company.get_facts()
+    assert facts
 
 
 def test_company_for_cik():

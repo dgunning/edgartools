@@ -7,7 +7,7 @@ import pyarrow as pa
 import pyarrow.compute as pc
 from pydantic import BaseModel
 from fastcore.basics import listify
-from edgar.core import http_client
+from edgar.core import http_client, repr_df
 from edgar.filing import Filing, Filings
 
 __all__ = [
@@ -51,6 +51,9 @@ class CompanyFacts:
         con = duckdb.connect(database=':memory:')
         con.register('facts', self.facts)
         return con
+
+    def to_pandas(self):
+        return self.facts.to_pandas()
 
     def __len__(self):
         return len(self.facts)
@@ -119,6 +122,10 @@ class Company(BaseModel):
     mailing_address: Address
     filings: CompanyFilings
 
+    @property
+    def industry(self):
+        return self.sic_description
+
     @classmethod
     def for_cik(cls, cik: int):
         return get_company_submissions(cik)
@@ -129,7 +136,6 @@ class Company(BaseModel):
         if cik:
             return Company.for_cik(cik)
 
-    @lru_cache(maxsize=1)
     def get_facts(self):
         return get_company_facts(self.cik)
 
@@ -169,23 +175,16 @@ class Company(BaseModel):
                               cik=self.cik,
                               company_name=self.name)
 
-    def summary(self):
-        return pd.DataFrame(
-            [
-                {'CIK': self.cik,
-                 'Ticker': ','.join(self.tickers),
-                 'Industry': self.sic_description,
-                 'Exchange(s)': ','.join(self.exchanges)}
-            ]
-        )
-
     def __repr__(self):
         return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
 
     def _repr_html_(self):
+        summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category':self.category}])
+        ticker_info = pd.DataFrame({"Exchange": self.exchanges, "Ticker": self.tickers })
         return f"""
         <h3>{self.name}</h3>
-        {self.summary().style.hide(axis="index")._repr_html_()}
+        {repr_df(summary)}
+        {repr_df(ticker_info)}
         """
 
     @staticmethod
@@ -227,34 +226,6 @@ class Company(BaseModel):
         return CompanyFilings(filings_table,
                               cik=cik,
                               company_name=company_name)
-
-
-def parse_company_facts(fjson: Dict[str, object]):
-    unit_dfs = []
-    fact_meta_lst = []
-    columns = ['namespace', 'fact', 'val', 'accn', 'start', 'end', 'fy', 'fp', 'form', 'filed', 'frame']
-
-    for namespace, namespace_json in fjson['facts'].items():
-        for fact, fact_json in namespace_json.items():
-            # Metadata about the facts
-            fact_meta_lst.append({'fact': fact,
-                                  'label': fact_json['label'],
-                                  'description': fact_json['description']})
-
-            for unit_key, unit_json in fact_json['units'].items():
-                unit_data = (pd.DataFrame(unit_json)
-                             .assign(namespace=namespace,
-                                     fact=fact,
-                                     label=fact_json['label'])
-                             .filter(columns)
-                             )
-                unit_dfs.append(unit_data)
-
-    facts = pa.Table.from_pandas(pd.concat(unit_dfs, ignore_index=True))
-    return CompanyFacts(cik=fjson['cik'],
-                        name=fjson['entityName'],
-                        facts=facts,
-                        fact_meta=pd.DataFrame(fact_meta_lst))
 
 
 def parse_company_submissions(cjson: Dict[str, object]):
@@ -305,6 +276,34 @@ def get_json(data_url: str):
 def get_company_submissions(cik: int):
     submission_json = get_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
     return parse_company_submissions(submission_json)
+
+
+def parse_company_facts(fjson: Dict[str, object]):
+    unit_dfs = []
+    fact_meta_lst = []
+    columns = ['namespace', 'fact', 'val', 'accn', 'start', 'end', 'fy', 'fp', 'form', 'filed', 'frame']
+
+    for namespace, namespace_json in fjson['facts'].items():
+        for fact, fact_json in namespace_json.items():
+            # Metadata about the facts
+            fact_meta_lst.append({'fact': fact,
+                                  'label': fact_json['label'],
+                                  'description': fact_json['description']})
+
+            for unit_key, unit_json in fact_json['units'].items():
+                unit_data = (pd.DataFrame(unit_json)
+                             .assign(namespace=namespace,
+                                     fact=fact,
+                                     label=fact_json['label'])
+                             .filter(columns)
+                             )
+                unit_dfs.append(unit_data)
+
+    facts = pa.Table.from_pandas(pd.concat(unit_dfs, ignore_index=True))
+    return CompanyFacts(cik=fjson['cik'],
+                        name=fjson['entityName'],
+                        facts=facts,
+                        fact_meta=pd.DataFrame(fact_meta_lst))
 
 
 @lru_cache(maxsize=32)
