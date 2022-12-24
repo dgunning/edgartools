@@ -18,11 +18,6 @@ pip install edgar
 
 ## Usage
 
-## Filing API
-
-```python
-filings = get_filings(2021)
-```
 
 ## Company API
 
@@ -66,13 +61,80 @@ snow = Company.for_ticker("snow")
 Company.for_cik(1832950)
 ```
 
-### Get company filings
-To get the company's filings use `get_filings()`. This gets all the company's filings, unless you apply filters.
+### Get filings for a company
+To get the company's filings use `get_filings()`. This gets all the company's filings that are available from the Edgar submissions endpoint.
+
 ```python
 company.get_filings()
 ```
+### Filtering filings
+You can filter the company filings using a number of different parameters.
+
+```python
+class CompanyFilings:
+    
+    ...
+    
+    def get_filings(self,
+                    *,
+                    form: str | List = None,
+                    accession_number: str | List = None,
+                    file_number: str | List = None,
+                    is_xbrl: bool = None,
+                    is_inline_xbrl: bool = None
+                    ):
+        """
+        Get the company's filings and optionally filter by multiple criteria
+        :param form: The form as a string e.g. '10-K' or List of strings ['10-Q', '10-K']
+        :param accession_number: The accession number that uniquely identifies an SEC filing e.g. 0001640147-22-000100
+        :param file_number: The file number e.g. 001-39504
+        :param is_xbrl: Whether the filing is xbrl
+        :param is_inline_xbrl: Whether the filing is inline_xbrl
+        :return: The CompanyFiling instance with the filings that match the filters
+        """
+```
+
+
+#### The CompanyFilings class
+The result of `get_filings()` is a `CompanyFilings` class. This class contains a pyarrow table with the filings
+and provides convenient functions for working with filings.
+You can access the underlying pyarrow `Table` using the `.data` property
+
+```python
+filings = company.get_filings()
+
+# Get the underlying Table
+data: pa.Table = filings.data
+```
+
+#### Get a filing by index
+To access a filing in the CompanyFilings use the bracket `[]` notation e.g. `filings[2]`
+```python
+filings[2]
+```
+
+#### Get the latest filing
+
+The `CompanyFilings` class has a `latest` function that will return the latest `Filing`. 
+So, to get the latest **10-Q** filing, you do the following
+```python
+# Latest filing makes sense if you filter by form  type e.g. 10-Q
+snow_10Qs = snow.get_filings(form='10-Q')
+latest_10Q = snow_10Qs.latest()
+
+# Or chain the function calls
+snow.get_filings(form='10-Q').latest()
+```
+
 
 ### Get company facts
+
+
+## Filing API
+
+```python
+filings = get_filings(2021)
+```
 
 
 ## License
