@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "edgar"
-description = ''
+description = 'Access edgar filings in python'
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
@@ -38,9 +38,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/unknown/edgar#readme"
-Issues = "https://github.com/unknown/edgar/issues"
-Source = "https://github.com/unknown/edgar"
+Documentation = "https://github.com/dgunning/edgar#readme"
+Issues = "https://github.com/dgunning/edgar/issues"
+Source = "https://github.com/dgunning/edgar"
 
 [tool.hatch.version]
 path = "edgar/__about__.py"
@@ -52,7 +52,10 @@ dependencies = [
   "pytest-env",
   "pyinstrument",
   "ruff",
-  "jupyter"
+  "jupyter",
+  "mkdocs",
+  "mkdocstrings[python]",
+  "mkdocs-material"
 ]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests {args}"
