@@ -5,10 +5,49 @@
 
 -----
 
-**Table of Contents**
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="#demo">Features</a></li>
+      </ul>
+    </li>
+    <li>
+        <a href="#installation">Installation</a>
+    </li>
+    <li>
+        <a href="#usage">Usage</a>
+        <ul>
+            <li><a href="#using-the-company-api">Using the Company API</a></li>
+            <li><a href="#using-the-filing-api">Using the Filing API</a></li>
+      </ul>
+    </li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
 
-- [Installation](#installation)
-- [License](#license)
+# About the project
+
+## Demo
+
+```python
+from edgar import *
+
+set_identity("Malik Smith msmith@aol.com")
+
+snow = Company.for_ticker("SNOW")
+snow_10Q = snow.get_filings("10-Q").latest()
+html = snow_10Q.html()
+```
+
+## Features
 
 # Installation
 
@@ -204,7 +243,11 @@ filing_xbrl = filing.xbrl()
 filings = get_filings(2021)
 ```
 
+# Contributing
+
 
 ## License
 
 `edgar` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+## Contact
