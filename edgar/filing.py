@@ -207,23 +207,23 @@ class Filings:
 
     def __init__(self,
                  filing_index: pa.Table):
-        self.filing_index: pa.Table = filing_index
+        self.data: pa.Table = filing_index
 
     def to_pandas(self, *columns) -> pd.DataFrame:
         """Return the filing index as a python dataframe"""
-        df = self.filing_index.to_pandas()
+        df = self.data.to_pandas()
         return df.filter(columns) if len(columns) > 0 else df
 
     def to_duckdb(self):
         """return an in memory duck db instance over the filings"""
         import duckdb
         con = duckdb.connect(database=':memory:')
-        con.register('filings', self.filing_index)
+        con.register('filings', self.data)
         return con
 
     def save_parquet(self, location: str):
         """Save the filing index as parquet"""
-        pq.write_table(self.filing_index, location)
+        pq.write_table(self.data, location)
 
     def save(self, location: str):
         """Save the filing index as parquet"""
@@ -232,24 +232,24 @@ class Filings:
     def get_filing_at(self, item: int):
         """Get the filing at the specified index"""
         return Filing(
-            cik=self.filing_index['cik'][item].as_py(),
-            company=self.filing_index['company'][item].as_py(),
-            form=self.filing_index['form'][item].as_py(),
-            date=self.filing_index['filingDate'][item].as_py(),
-            accession_no=self.filing_index['accessionNumber'][item].as_py(),
+            cik=self.data['cik'][item].as_py(),
+            company=self.data['company'][item].as_py(),
+            form=self.data['form'][item].as_py(),
+            date=self.data['filingDate'][item].as_py(),
+            accession_no=self.data['accessionNumber'][item].as_py(),
         )
 
     @property
     def date_range(self) -> Tuple[datetime]:
         """Return a tuple of the start and end dates in the filing index"""
-        min_max_dates = pc.min_max(self.filing_index['filingDate']).as_py()
+        min_max_dates = pc.min_max(self.data['filingDate']).as_py()
         return min_max_dates['min'], min_max_dates['max']
 
     def latest(self, n: int = 1) -> int:
         """Get the latest n filings"""
-        sort_indices = pc.sort_indices(self.filing_index, sort_keys=[("filingDate", "descending")])
+        sort_indices = pc.sort_indices(self.data, sort_keys=[("filingDate", "descending")])
         sort_indices_top = sort_indices[:min(n, len(sort_indices))]
-        latest_filing_index = pc.take(data=self.filing_index, indices=sort_indices_top)
+        latest_filing_index = pc.take(data=self.data, indices=sort_indices_top)
         filings = Filings(latest_filing_index)
         if len(filings) == 1:
             return filings[0]
@@ -257,7 +257,7 @@ class Filings:
 
     def __head(self, n):
         assert n > 0, "The number of filings to select - `n`, should be greater than 0"
-        return self.filing_index.slice(0, min(n, len(self.filing_index)))
+        return self.data.slice(0, min(n, len(self.data)))
 
     def head(self, n: int):
         """Get the first n filings"""
@@ -266,7 +266,7 @@ class Filings:
 
     def __tail(self, n):
         assert n > 0, "The number of filings to select - `n`, should be greater than 0"
-        return self.filing_index.slice(max(0, len(self.filing_index) - n), len(self.filing_index))
+        return self.data.slice(max(0, len(self.data) - n), len(self.data))
 
     def tail(self, n: int):
         """Get the last n filings"""
@@ -277,14 +277,14 @@ class Filings:
         return self.get_filing_at(item)
 
     def __len__(self):
-        return len(self.filing_index)
+        return len(self.data)
 
     def __iter__(self):
         self.n = 0
         return self
 
     def __next__(self):
-        if self.n <= len(self.filing_index):
+        if self.n <= len(self.data):
             filing: Filing = self[self.n]
             self.n += 1
             return filing
@@ -293,7 +293,7 @@ class Filings:
 
     def __repr__(self):
         start_date, end_date = self.date_range
-        return f"Filings - {len(self.filing_index):,} in total from {start_date} to {end_date}"
+        return f"Filings - {len(self.data):,} in total from {start_date} to {end_date}"
 
 
 class Filing:

@@ -17,57 +17,57 @@ pd.options.display.max_colwidth = 200
 def test_read_form_filing_index_year_and_quarter():
     filings: Filings = get_filings(2021, 1)
     assert filings
-    assert filings.filing_index
+    assert filings.data
     assert 500000 > len(filings) > 300000
 
     df = filings.to_pandas()
-    assert len(df) == len(filings) == len(filings.filing_index)
-    assert filings.filing_index.column_names == ['form', 'company', 'cik', 'filingDate', 'accessionNumber']
-    print(filings.filing_index.schema)
-    print('Bytes', humanize.naturalsize(filings.filing_index.nbytes, binary=True))
-    assert filings.filing_index[0][0].as_py() == '1-A'
+    assert len(df) == len(filings) == len(filings.data)
+    assert filings.data.column_names == ['form', 'company', 'cik', 'filingDate', 'accessionNumber']
+    print(filings.data.schema)
+    print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
+    assert filings.data[0][0].as_py() == '1-A'
 
 
 def test_read_form_filing_index_year():
     filings: Filings = get_filings(2021)
     assert filings
-    assert filings.filing_index
+    assert filings.data
     assert 1500000 > len(filings) > 1000000
 
     df = filings.to_pandas()
-    assert len(df) == len(filings) == len(filings.filing_index)
-    assert filings.filing_index.column_names == ['form', 'company', 'cik', 'filingDate', 'accessionNumber']
-    print(filings.filing_index.schema)
+    assert len(df) == len(filings) == len(filings.data)
+    assert filings.data.column_names == ['form', 'company', 'cik', 'filingDate', 'accessionNumber']
+    print(filings.data.schema)
 
-    print('Bytes', humanize.naturalsize(filings.filing_index.nbytes, binary=True))
+    print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
 
 
 def test_read_company_filing_index_year_and_quarter():
     company_filings: Filings = get_filings(year=2022, quarter=2, index="company")
     assert company_filings
-    assert company_filings.filing_index
+    assert company_filings.data
     assert 500000 > len(company_filings) > 200000
 
     df = company_filings.to_pandas()
-    assert len(df) == len(company_filings) == len(company_filings.filing_index)
-    assert company_filings.filing_index.column_names == ['company', 'form', 'cik', 'filingDate', 'accessionNumber']
-    print(company_filings.filing_index.schema)
+    assert len(df) == len(company_filings) == len(company_filings.data)
+    assert company_filings.data.column_names == ['company', 'form', 'cik', 'filingDate', 'accessionNumber']
+    print(company_filings.data.schema)
 
-    print('Bytes', humanize.naturalsize(company_filings.filing_index.nbytes, binary=True))
+    print('Bytes', humanize.naturalsize(company_filings.data.nbytes, binary=True))
 
 
 def test_read_form_filing_index_xbrl():
     filings: Filings = get_filings(2021, 1, index="xbrl")
-    assert filings.filing_index
+    assert filings.data
     assert 40000 > len(filings) > 10000
 
     df = filings.to_pandas()
-    assert len(df) == len(filings) == len(filings.filing_index)
-    assert filings.filing_index.column_names == ['cik', 'company', 'form', 'filingDate', 'accessionNumber']
-    print(filings.filing_index.schema)
+    assert len(df) == len(filings) == len(filings.data)
+    assert filings.data.column_names == ['cik', 'company', 'form', 'filingDate', 'accessionNumber']
+    print(filings.data.schema)
     print(filings.to_pandas())
-    print('Bytes', humanize.naturalsize(filings.filing_index.nbytes, binary=True))
-    assert re.match(r'\d{10}\-\d{2}\-\d{6}', filings.filing_index[4][-1].as_py())
+    print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
+    assert re.match(r'\d{10}\-\d{2}\-\d{6}', filings.data[4][-1].as_py())
 
 
 @lru_cache(maxsize=8)
