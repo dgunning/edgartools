@@ -88,7 +88,7 @@ def test_company_get_filings_for_form():
     company: Company = Company.for_ticker("EXPE")
     tenk_filings: CompanyFilings = company.get_filings(form='10-K')
     print(tenk_filings)
-    assert pc.all(pc.equal(tenk_filings.filing_index['form'], '10-K'))
+    assert pc.all(pc.equal(tenk_filings.data['form'], '10-K'))
     filing: Filing = tenk_filings[0]
     assert filing
     assert filing.form == '10-K'
@@ -101,7 +101,7 @@ def test_company_get_filings_for_multiple_forms():
     company: Company = Company.for_ticker("EXPE")
     company_filings = company.get_filings(form=['10-K', '10-Q', '8-K'])
     print(company_filings)
-    form_list = pc.unique(company_filings.filing_index['form']).tolist()
+    form_list = pc.unique(company_filings.data['form']).tolist()
     assert sorted(form_list) == ['10-K', '10-Q', '8-K']
 
 

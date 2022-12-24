@@ -82,16 +82,16 @@ class CompanyFilings(Filings):
         return Filing(
             cik=self.cik,
             company=self.company_name,
-            form=self.filing_index['form'][item].as_py(),
-            date=self.filing_index['filingDate'][item].as_py(),
-            accession_no=self.filing_index['accessionNumber'][item].as_py(),
+            form=self.data['form'][item].as_py(),
+            date=self.data['filingDate'][item].as_py(),
+            accession_no=self.data['accessionNumber'][item].as_py(),
         )
 
     def latest(self, n: int = 1) -> int:
         """Get the latest n filings"""
-        sort_indices = pc.sort_indices(self.filing_index, sort_keys=[("filingDate", "descending")])
+        sort_indices = pc.sort_indices(self.data, sort_keys=[("filingDate", "descending")])
         sort_indices_top = sort_indices[:min(n, len(sort_indices))]
-        latest_filing_index = pc.take(data=self.filing_index, indices=sort_indices_top)
+        latest_filing_index = pc.take(data=self.data, indices=sort_indices_top)
         filings = CompanyFilings(latest_filing_index,
                                  cik=self.cik,
                                  company_name=self.company_name)
@@ -101,6 +101,13 @@ class CompanyFilings(Filings):
 
     def __repr__(self):
         return f"{self.company_name} {self.cik} {super().__repr__()}"
+
+    def _repr_html_(self):
+        start_date, end_date = self.date_range
+        return f"""
+            <h3>Filings for {self.company_name} - {self.cik}</h3>
+            {repr_df(pd.DataFrame([{'Count': len(self), 'Start': start_date, 'End':end_date}]))}
+        """
 
 
 class Company(BaseModel):
@@ -148,15 +155,15 @@ class Company(BaseModel):
                     is_inline_xbrl: bool = None
                     ):
         """
-        Get the company's filings and optionally filter by multiple conditions
-        :param form: The form e.g. '10-K'
-        :param accession_number: The accession number
-        :param file_number: The file number
+        Get the company's filings and optionally filter by multiple criteria
+        :param form: The form as a string e.g. '10-K' or List of strings ['10-Q', '10-K']
+        :param accession_number: The accession number that uniquely identifies an SEC filing e.g. 0001640147-22-000100
+        :param file_number: The file number e.g. 001-39504
         :param is_xbrl: Whether the filing is xbrl
         :param is_inline_xbrl: Whether the filing is inline_xbrl
-        :return: The CompanyFiling instance
+        :return: The CompanyFiling instance with the filings that match the filters
         """
-        company_filings = self.filings.filing_index
+        company_filings = self.filings.data
 
         if form:
             company_filings = company_filings.filter(pc.is_in(company_filings['form'], pa.array(listify(form))))
