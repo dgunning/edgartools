@@ -10,14 +10,39 @@
 - [Installation](#installation)
 - [License](#license)
 
-## Installation
+# Installation
 
 ```console
 pip install edgar
 ```
 
-## Usage
+# Usage
 
+
+## Set your Edgar user identity
+
+Before you can access the SEC Edgar API you need to set the identity that you will use to access Edgar.
+This is usually your name and email, or a company name and email.
+```bash
+Sample Company Name AdminContact@<sample company domain>.com
+```
+
+The user identity is sent in the User-Agent string and the Edgar API will refuse to respond to your request without it.
+
+EdgarTools will look for an environment variable called `EDGAR_IDENTITY` and use that in each request.
+So, you need to set this environment variable before using it.
+```bash
+export EDGAR_IDENTITY="Michael Mccallum mcalum@gmail.com"
+```
+Alternatively, you can call `set_identity` which does the same thing.
+
+```python
+from edgar import set_identity
+set_identity("Michael Mccallum mcalum@gmail.com")
+```
+
+
+For more detail see https://www.sec.gov/os/accessing-edgar-data
 
 ## Company API
 
