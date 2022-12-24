@@ -13,7 +13,7 @@
 # Installation
 
 ```console
-pip install edgar
+pip install edgartools
 ```
 
 # Usage
@@ -154,6 +154,49 @@ snow.get_filings(form='10-Q').latest()
 
 ### Get company facts
 
+## Working with a Filing
+
+Once you have a filing you can do many things with it including getting the html text of the filing, get xbrl or xml, or list all the files in the filing.
+
+### Getting the html text of a filing
+
+```python
+html = filing.html()
+```
+
+
+To get the html text of the filing call `filing.html()`
+
+### Get the Homepage Url
+
+`filing.homepage_url` returns the homepage url of the filing. This is the main index page which lists
+all the files attached in the filing
+
+### Get the filing homepage
+
+To get access to all the documents on the filing you would call `filing.get_homepage()`.
+This gives you access to the `FilingHomepage` class that you can use to list all the documents
+and datafiles on the filing.
+
+
+### Working with XBRL filings
+
+Some filings are in **XBRL (eXtensible Business Markup Language)** format. 
+These are mainly the newer filings, as the SEC has started requiring this for newer filings.
+
+If a filing is in XBRL format then it opens up a lot more ways to get structured data about that specific filing and also 
+about the company referred to in that filing.
+
+The `Filing` class has an `xbrl` function that will download, parse and structure the filing's XBRL document if one exists.
+If it does not exist, then `filing.xbrl()` will return `None`.
+
+The function `filing.xbrl()` returns a `FilingXbrl` instance, which wraps the data, and provides convenient
+ways of working with the xbrl data.
+
+
+```python
+filing_xbrl = filing.xbrl()
+```
 
 ## Filing API
 
