@@ -37,17 +37,31 @@
 
 ## Demo
 
+Get the Common Shares Issued amount from Snowflake's latest 10-Q filing
 ```python
-from edgar import *
-
-set_identity("Malik Smith msmith@aol.com")
-
-snow = Company.for_ticker("SNOW")
-snow_10Q = snow.get_filings("10-Q").latest()
-html = snow_10Q.html()
+(Company.for_ticker("SNOW")
+        .get_filings(form="10-Q")
+        .latest()
+        .xbrl()
+        .db().execute(
+        """select fact, value, units from facts 
+           where fact = 'CommonStockSharesIssued' limit 1
+        """
+    ).df()
+)
 ```
 
+![Common Shares Issued](common-shares-issued.png)
+
 ## Features
+
+- Download listings of Edgar filing by year, quarter since 1994
+- Select an individual filing and download the html, XML or content of any attached file
+- View a filing XBRL as a dataframe and query it with SQL
+- Search for company by ticker or CIK
+- Get a company's filings 
+- Get a dataset of company's **facts** e.g. **CommonSharesOutstanding**
+- Query a company's fact as SQL
 
 # Installation
 
