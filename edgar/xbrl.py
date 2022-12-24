@@ -1,8 +1,11 @@
-from pydantic import BaseModel
+from functools import lru_cache
 from typing import Dict
+
 import pandas as pd
 from bs4 import BeautifulSoup
-from edgar.xml import child_text, child_value
+from pydantic import BaseModel
+
+from edgar.xml import child_text
 
 __all__ = [
     'FilingXbrl',
@@ -22,6 +25,31 @@ class FilingXbrl:
                  namespace_info: NamespaceInfo):
         self.facts: pd.DataFrame = facts
         self.namepace_info: NamespaceInfo = namespace_info
+
+    def _dei_value(self, fact: str):
+        res = self.facts.query(f"namespace=='dei' & fact=='{fact}' ")
+        if not res.empty:
+            return res.value.item()
+
+    @property
+    def company_name(self):
+        return self._dei_value('EntityRegistrantName')
+
+    @property
+    def cik(self):
+        val = self._dei_value('EntityCentralIndexKey')
+        return int(val) if val else None
+
+    @property
+    def form_type(self):
+        return self._dei_value('DocumentType')
+
+    @lru_cache(maxsize=1)
+    def db(self):
+        import duckdb
+        con = duckdb.connect(database=':memory:')
+        con.register('facts', self.facts)
+        return con
 
     @classmethod
     def parse(cls, xbrl_text: str):
@@ -94,3 +122,6 @@ class FilingXbrl:
                                )
             return cls(facts=facts_dataframe,
                        namespace_info=NamespaceInfo(xmlns=xmlns, namespace2tag=namespace2tag))
+
+    def __repr__(self):
+        return f"""Filing XBRL({self.company_name} {self.cik} {self.form_type})"""
