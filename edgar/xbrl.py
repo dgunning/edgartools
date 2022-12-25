@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from edgar.xml import child_text
 from edgar.core import log
+import duckdb
 
 __all__ = [
     'FilingXbrl',
@@ -47,7 +48,6 @@ class FilingXbrl:
 
     @lru_cache(maxsize=1)
     def to_duckdb(self):
-        import duckdb
         con = duckdb.connect(database=':memory:')
         con.register('facts', self.facts)
         log.info("Created an in-memory DuckDB database with table 'facts'")
@@ -70,60 +70,61 @@ class FilingXbrl:
         def get_context(context_ref: str):
             context = context_map.get(context_ref)
             if context:
-                start, end = context.get('period', (None, None))
-                dimensions: Union[str, None] = context.get('dimensions')
-                return start, end, dimensions
+                start_date, end_date = context.get('period', (None, None))
+                dims: Union[str, None] = context.get('dimensions')
+                return start_date, end_date, dims
             else:
                 return None, None, None
 
         for ctx in xbrl_tag.find_all('context', recursive=False):
-            id = ctx.attrs['id']
-            context_map[id] = {'id': child_text(ctx, 'identifier')}
+            context_id = ctx.attrs['id']
+            context_map[context_id] = {'id': child_text(ctx, 'identifier')}
             instant = child_text(ctx, 'instant')
             if instant:
-                context_map[id]['period'] = instant, instant
+                context_map[context_id]['period'] = instant, instant
             else:
-                context_map[id]['period'] = child_text(ctx, 'startDate'), child_text(ctx, 'endDate')
+                context_map[context_id]['period'] = child_text(ctx, 'startDate'), child_text(ctx, 'endDate')
 
             # Parse segments
             segment = ctx.find('segment')
             if segment:
-                context_map[id]['dimensions'] = {m.attrs['dimension']: m.text
-                                                 for m in
-                                                 segment.find_all('xbrldi:explicitMember')}
+                context_map[context_id]['dimensions'] = {m.attrs['dimension']: m.text
+                                                         for m in
+                                                         segment.find_all('xbrldi:explicitMember')}
 
-            # Parse units
-            for unit in xbrl_tag.find_all('unit', recursive=False):
-                unit_id = unit.attrs['id']
-                divide = unit.find('divide')
-                if divide:
-                    numerator = child_text(divide.find('unitNumerator'), 'measure')
-                    denominator = child_text(divide.find('unitDenominator'), 'measure')
-                    unit_map[unit_id] = f"{numerator} per {denominator}"
-                else:
-                    unit_map[unit_id] = child_text(unit, 'measure') or ''
+        # Parse units
+        for unit in xbrl_tag.find_all('unit', recursive=False):
+            unit_id = unit.attrs['id']
+            divide = unit.find('divide')
+            if divide:
+                numerator = child_text(divide.find('unitNumerator'), 'measure')
+                denominator = child_text(divide.find('unitDenominator'), 'measure')
+                unit_map[unit_id] = f"{numerator} per {denominator}"
+            else:
+                unit_map[unit_id] = child_text(unit, 'measure') or ''
 
-                # Remove iso427 from units
-                unit_map[unit_id] = unit_map[unit_id].replace('iso4217:', '')
+            # Remove iso427 from units
+            unit_map[unit_id] = unit_map[unit_id].replace('iso4217:', '')
 
-            # Now parse facts
-            facts = []
-            for tag in xbrl_tag.find_all(recursive=False):
-                if 'contextRef' in tag.attrs or 'unitRef' in tag.attrs:
-                    start, end, dimensions = get_context(tag.attrs.get('contextRef'))
-                    units = get_unit(tag.attrs.get('unitRef'))
-                    facts.append({'namespace': namespace2tag.get(tag.namespace),
-                                  'fact': tag.name,
-                                  'value': tag.text,
-                                  'units': units,
-                                  'start_date': start,
-                                  'end_date': end,
-                                  'dimensions': dimensions})
-            facts_dataframe = (pd.DataFrame(facts)
-                               .assign(value=lambda df: df.value.replace({'true': True, 'false': False}))
-                               )
-            return cls(facts=facts_dataframe,
-                       namespace_info=NamespaceInfo(xmlns=xmlns, namespace2tag=namespace2tag))
+        # Now parse facts
+        facts = []
+        for tag in xbrl_tag.find_all(recursive=False):
+            if 'contextRef' in tag.attrs or 'unitRef' in tag.attrs:
+                ctx_ref = tag.attrs.get('contextRef')
+                start, end, dimensions = get_context(ctx_ref)
+                units = get_unit(tag.attrs.get('unitRef'))
+                facts.append({'namespace': namespace2tag.get(tag.namespace),
+                              'fact': tag.name,
+                              'value': tag.text,
+                              'units': units,
+                              'start_date': start,
+                              'end_date': end,
+                              'dimensions': dimensions})
+        facts_dataframe = (pd.DataFrame(facts)
+                           .assign(value=lambda df: df.value.replace({'true': True, 'false': False}))
+                           )
+        return cls(facts=facts_dataframe,
+                   namespace_info=NamespaceInfo(xmlns=xmlns, namespace2tag=namespace2tag))
 
     def __repr__(self):
         return f"""Filing XBRL({self.company_name} {self.cik} {self.form_type})"""
