@@ -291,6 +291,32 @@ filings = get_filings(2022, index="xbrl")
 
 The `get_filings` returns a `Filings` class, which wraps the data returned and provide convenient ways for working with filings.
 
+#### Convert the filings to a pandas dataframe
+
+The filings data is stored in the `Filings` class as a `pyarrow.Table`. You can get the data as a pandas dataframe using
+`to_pandas`
+```python
+df = filings.to_pandas()
+```
+
+#### Use DuckDB to query the filings
+
+A conveient way to query the filings data is to use **DuckDB**. If you call the `to_duckdb` function, you get an in-memory
+DuckDB database instance, with the filings registered as a table called `filings`.
+Then you can work directy with the DuckDB database, and run SQL against the filings data.
+
+In this example, we filter filings for **S-1** form types.
+
+```python
+db = filings.to_duckdb()
+# a duckdb.DuckDBPyConnection
+
+# Query the filings for S-1 filings and return a dataframe
+db.execute("""
+select * from filings where Form == 'S-1'
+""").df()
+```
+
 # Contributing
 
 
