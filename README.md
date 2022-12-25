@@ -38,17 +38,18 @@
 ## Demo
 
 Get the Common Shares Issued amount from Snowflake's latest 10-Q filing
+
 ```python
 (Company.for_ticker("SNOW")
-        .get_filings(form="10-Q")
-        .latest()
-        .xbrl()
-        .db().execute(
-        """select fact, value, units from facts 
-           where fact = 'CommonStockSharesIssued' limit 1
-        """
-    ).df()
-)
+ .get_filings(form="10-Q")
+ .latest()
+ .xbrl()
+ .to_duckdb().execute(
+    """select fact, value, units from facts 
+       where fact = 'CommonStockSharesIssued' limit 1
+    """
+).df()
+ )
 ```
 
 ![Common Shares Issued](common-shares-issued.png)
@@ -322,6 +323,6 @@ select * from filings where Form == 'S-1'
 
 ## License
 
-`edgar` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`edgartools` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
 
 ## Contact
