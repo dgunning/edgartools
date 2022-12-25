@@ -18,7 +18,7 @@ from fastcore.basics import listify
 from fastcore.parallel import parallel
 from pydantic import BaseModel
 
-from edgar.core import http_client, download_text, download_file
+from edgar.core import http_client, download_text, download_file, log
 from edgar.xbrl import FilingXbrl
 
 __all__ = [
@@ -219,6 +219,7 @@ class Filings:
         import duckdb
         con = duckdb.connect(database=':memory:')
         con.register('filings', self.data)
+        log.info("Created an in-memory DuckDB database with table 'filings'")
         return con
 
     def save_parquet(self, location: str):

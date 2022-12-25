@@ -9,9 +9,13 @@ import httpx
 from rich.logging import RichHandler
 
 logging.basicConfig(
-    level="INFO", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
+    level="INFO",
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(rich_tracebacks=True)]
 )
 
+log = logging.getLogger("rich")
 
 __all__ = [
     'get_identity',
@@ -20,14 +24,13 @@ __all__ = [
     'download_text',
     'download_file',
     'decode_content',
-    'repr_df'
+    'repr_df',
+    'log'
 ]
 
 default_http_timeout: int = 5
 limits = httpx.Limits(max_connections=10)
 edgar_identity = 'EDGAR_IDENTITY'
-
-logger = logging.getLogger('edgar')
 
 
 def set_identity(user_identity: str):
@@ -43,7 +46,7 @@ def set_identity(user_identity: str):
     :param user_identity:
     """
     os.environ[edgar_identity] = user_identity
-    logger.info(f"Identity of the Edgar REST client set to [{user_identity}]")
+    log.info(f"Identity of the Edgar REST client set to [{user_identity}]")
 
 
 def get_identity():

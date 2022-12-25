@@ -47,7 +47,7 @@ class CompanyFacts:
         self.fact_meta: pd.DataFrame = fact_meta
 
     @lru_cache(maxsize=1)
-    def db(self):
+    def to_duckdb(self):
         con = duckdb.connect(database=':memory:')
         con.register('facts', self.facts)
         return con

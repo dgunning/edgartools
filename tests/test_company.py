@@ -42,7 +42,7 @@ def test_get_company_facts():
 
 def test_get_company_facts_db():
     company_facts: CompanyFacts = get_company_facts(1318605)
-    db = company_facts.db()
+    db = company_facts.to_duckdb()
     df = db.execute("""
     select * from facts
     """).df()

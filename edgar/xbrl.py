@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
 from edgar.xml import child_text
+from edgar.core import log
 
 __all__ = [
     'FilingXbrl',
@@ -45,10 +46,11 @@ class FilingXbrl:
         return self._dei_value('DocumentType')
 
     @lru_cache(maxsize=1)
-    def db(self):
+    def to_duckdb(self):
         import duckdb
         con = duckdb.connect(database=':memory:')
         con.register('facts', self.facts)
+        log.info("Created an in-memory DuckDB database with table 'facts'")
         return con
 
     @classmethod
@@ -69,7 +71,7 @@ class FilingXbrl:
             context = context_map.get(context_ref)
             if context:
                 start, end = context.get('period', (None, None))
-                dimensions: Union[str,None] = context.get('dimensions')
+                dimensions: Union[str, None] = context.get('dimensions')
                 return start, end, dimensions
             else:
                 return None, None, None

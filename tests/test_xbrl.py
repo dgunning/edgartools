@@ -20,7 +20,7 @@ def test_filing_xbrl_properties():
 
 def test_filing_xbrl_db():
     filing_xbrl: FilingXbrl = FilingXbrl.parse(Path('data/crr.xbrl.xml').read_text())
-    db = filing_xbrl.db()
+    db = filing_xbrl.to_duckdb()
     df = db.execute("select fact, value from facts").df()
     assert 'fact' in df
     assert 'value' in df
