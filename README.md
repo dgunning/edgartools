@@ -35,6 +35,8 @@
 
 # About the project
 
+**`edgartools`** makes working with Edgar filings easy and fun.
+
 ## Demo
 
 Get the Common Shares Issued amount from Snowflake's latest 10-Q filing
