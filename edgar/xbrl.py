@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Dict
+from typing import Dict, Union
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -69,7 +69,7 @@ class FilingXbrl:
             context = context_map.get(context_ref)
             if context:
                 start, end = context.get('period', (None, None))
-                dimensions: str | None = context.get('dimensions')
+                dimensions: Union[str,None] = context.get('dimensions')
                 return start, end, dimensions
             else:
                 return None, None, None

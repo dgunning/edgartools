@@ -1,12 +1,12 @@
 import gzip
+import logging.config
 import os
 from functools import lru_cache
 from io import BytesIO
+from typing import Union
 
 import httpx
 from rich.logging import RichHandler
-import logging.config
-
 
 logging.basicConfig(
     level="INFO", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
@@ -78,7 +78,7 @@ def decode_content(content: bytes):
 
 
 def download_file(url: str,
-                  client: httpx.Client | httpx.AsyncClient = None,
+                  client: Union[httpx.Client, httpx.AsyncClient] = None,
                   text: bool = None):
     # reason_phrase = 'Too Many Requests' status_code = 429
     if not client:
@@ -100,7 +100,7 @@ def download_file(url: str,
         r.raise_for_status()
 
 
-def download_text(url: str, client: httpx.Client | httpx.AsyncClient = None):
+def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
     return download_file(url, client, text=True)
 
 

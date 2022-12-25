@@ -5,7 +5,7 @@ import webbrowser
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Union
 
 import httpx
 import pandas as pd
@@ -49,8 +49,8 @@ quarters_in_year: List[int] = list(range(1, 5))
 
 YearAndQuarter = Tuple[int, int]
 YearAndQuarters = List[YearAndQuarter]
-Years = int | List[int] | range
-Quarters = int | List[int] | range
+Years = Union[int, List[int], range]
+Quarters = Union[int, List[int], range]
 
 
 @lru_cache(maxsize=1)
@@ -154,7 +154,7 @@ def read_pipe_delimited_index(index_text: str) -> pa.Table:
 
 
 def fetch_filing_index(year_and_quarter: YearAndQuarter,
-                       client: httpx.Client | httpx.AsyncClient,
+                       client: Union[httpx.Client, httpx.AsyncClient],
                        index: str
                        ):
     year, quarter = year_and_quarter
@@ -397,7 +397,7 @@ class FilingHomepage:
         self.filing_files: Dict[str, pd.DataFrame] = filing_files
         self.form = form
 
-    def get_by_seq(self, seq: int | str):
+    def get_by_seq(self, seq: Union[int, str]):
         query = f"Seq=='{seq}'"
         return self.get_matching_document(query) or self.get_matching_datafile(query)
 

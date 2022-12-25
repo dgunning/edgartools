@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 
 import duckdb
 import pandas as pd
@@ -106,7 +106,7 @@ class CompanyFilings(Filings):
         start_date, end_date = self.date_range
         return f"""
             <h3>Filings for {self.company_name} - {self.cik}</h3>
-            {repr_df(pd.DataFrame([{'Count': len(self), 'Start': start_date, 'End':end_date}]))}
+            {repr_df(pd.DataFrame([{'Count': len(self), 'Start': start_date, 'End': end_date}]))}
         """
 
 
@@ -148,9 +148,9 @@ class Company(BaseModel):
 
     def get_filings(self,
                     *,
-                    form: str | List = None,
-                    accession_number: str | List = None,
-                    file_number: str | List = None,
+                    form: Union[str, List] = None,
+                    accession_number: Union[str, List] = None,
+                    file_number: Union[str, List] = None,
                     is_xbrl: bool = None,
                     is_inline_xbrl: bool = None
                     ):
@@ -186,8 +186,8 @@ class Company(BaseModel):
         return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
 
     def _repr_html_(self):
-        summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category':self.category}])
-        ticker_info = pd.DataFrame({"Exchange": self.exchanges, "Ticker": self.tickers })
+        summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category': self.category}])
+        ticker_info = pd.DataFrame({"Exchange": self.exchanges, "Ticker": self.tickers})
         return f"""
         <h3>{self.name}</h3>
         {repr_df(summary)}
