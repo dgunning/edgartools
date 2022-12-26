@@ -40,22 +40,40 @@
 
 ## Demo
 
-Get the Common Shares Issued amount from Snowflake's latest 10-Q filing
+#### Get the Common Shares Issued amount from Snowflake's latest 10-Q filing
 
 ```python
 (Company.for_ticker("SNOW")
- .get_filings(form="10-Q")
- .latest()
- .xbrl()
- .to_duckdb().execute(
-    """select fact, value, units from facts 
-       where fact = 'CommonStockSharesIssued' limit 1
-    """
-).df()
- )
+        .get_filings(form="10-Q")
+        .latest()
+        .xbrl()
+        .to_duckdb().execute(
+        """select fact, value, units, end_date from facts 
+           where fact = 'CommonStockSharesIssued' 
+           order by end_date desc limit 1
+        """
+    ).df()
+)
 ```
 
 ![Common Shares Issued](https://github.com/dgunning/edgartools/blob/main/common-shares-issued.png)
+
+This example shows what can be done with **edgartools**.
+
+Under the hood the code does the following
+
+1. Use the ticker **"SNOW"** to get the company's cik from the [Company Tickers JSON](https://www.sec.gov/file/company-tickers)
+2. From the **cik** get the company's filings from the submissions endpoint `https://data.sec.gov/submissions/CIK{cik:010}.json`
+3. Select the latest 10-Q filing
+4. Download the XBRL file for that filing
+5. Convert the XBRL data into a pandas dataframe
+6. Register the dataframe as a DuckDB table
+7. Execute the SQL and convert to a dataframe
+
+You might not want to chain the operations like this, and strictly speaking it might not be the most efficient, 
+given how much work happens within those lines of code. This guide will show you step by step
+how to easily get SEC filing data and text into your analytic workflows.
+
 
 ## Features
 
@@ -65,7 +83,7 @@ Get the Common Shares Issued amount from Snowflake's latest 10-Q filing
 - Search for company by ticker or CIK
 - Get a company's filings 
 - Get a dataset of company's **facts** e.g. **CommonSharesOutstanding**
-- Query a company's fact as SQL
+- Query a company's fact as SQL using an in-memory **DuckDB** database
 
 # Installation
 
