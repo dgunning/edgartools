@@ -13,7 +13,7 @@
       <a href="#about-the-project">About The Project</a>
       <ul>
         <li><a href="#demo">Demo</a></li>
-        <li><a href="#demo">Features</a></li>
+        <li><a href="#features">Features</a></li>
       </ul>
     </li>
     <li>
@@ -22,8 +22,9 @@
     <li>
         <a href="#usage">Usage</a>
         <ul>
+            <li><a href="#setting-your-edgar-user-identity">Setting your Edgar user identity</a></li>
             <li><a href="#using-the-company-api">Using the Company API</a></li>
-            <li><a href="#using-the-filing-api">Using the Filings API</a></li>
+            <li><a href="#using-the-filings-api">Using the Filings API</a></li>
       </ul>
     </li>
     <li><a href="#contributing">Contributing</a></li>
@@ -100,7 +101,7 @@ set_identity("Michael Mccallum mcalum@gmail.com")
 
 For more detail see https://www.sec.gov/os/accessing-edgar-data
 
-## Company API
+## Using the Company API
 
 With the company API you find a company using the **cik** or **ticker**. 
 From the company you can access all their historical **filings**,
@@ -116,7 +117,7 @@ For the edgar client API, just use the numbers and omit the leading zeroes.
 ```python
 company = Company.for_cik(1318605)
 ```
-![expe](expe.png)
+![expe](https://github.com/dgunning/edgartools/blob/main/expe.png)
 
 
 
@@ -323,8 +324,10 @@ select * from filings where Form == 'S-1'
 # Contributing
 
 
-## License
+# License
 
 `edgartools` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
 
 ## Contact
+
+[LinkedIn](https://www.linkedin.com/in/dwight-gunning-860124/)
