@@ -35,7 +35,7 @@
 
 # About the project
 
-**`edgartools`** makes working with Edgar filings easy and fun.
+**`edgartools`** is a library for working Edgar filings in analytic workflows.
 
 ## Demo
 
