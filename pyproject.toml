@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "edgar"
+name = "edgartools"
 description = 'Access edgar filings in python'
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
-keywords = []
+keywords = ["sec", "edgar", "filings", "company", "python", "finance", "financial", "reports"]
 authors = [
   { name = "Dwight Gunning", email = "dgunning@gmail.com" },
 ]
@@ -38,9 +38,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/dgunning/edgar#readme"
-Issues = "https://github.com/dgunning/edgar/issues"
-Source = "https://github.com/dgunning/edgar"
+Documentation = "https://github.com/dgunning/edgartools#readme"
+Issues = "https://github.com/dgunning/edgartools/issues"
+Source = "https://github.com/dgunning/edgartools"
 
 [tool.hatch.version]
 path = "edgar/__about__.py"
@@ -93,3 +93,4 @@ line-length = 120
 env = [
     "EDGAR_IDENTITY=Dev Gunning developer-gunning@gmail.com",
 ]
+
