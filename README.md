@@ -55,7 +55,7 @@
 )
 ```
 
-![Common Shares Issued](https://github.com/dgunning/edgartools/blob/main/common-shares-issued.png)
+![Common Shares Issued](https://raw.githubusercontent.com/dgunning/edgartools/main/common-shares-issued.png)
 
 This example shows what can be done with **edgartools**.
 
@@ -134,7 +134,7 @@ For the edgar client API, just use the numbers and omit the leading zeroes.
 ```python
 company = Company.for_cik(1318605)
 ```
-![expe](https://github.com/dgunning/edgartools/blob/main/expe.png)
+![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/expe.png)
 
 
 
@@ -152,7 +152,7 @@ or `Company.for_ticker("SNOW")`
 snow = Company.for_ticker("snow")
 ```
 
-![snow inspect](https://github.com/dgunning/edgartools/blob/main/snow-inspect.png)
+![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/snow-inspect.png)
 ### 
 
 
