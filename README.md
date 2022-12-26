@@ -55,7 +55,7 @@ Get the Common Shares Issued amount from Snowflake's latest 10-Q filing
  )
 ```
 
-![Common Shares Issued](common-shares-issued.png)
+![Common Shares Issued](https://github.com/dgunning/edgartools/blob/main/common-shares-issued.png)
 
 ## Features
 
@@ -135,7 +135,7 @@ or `Company.for_ticker("SNOW")`
 snow = Company.for_ticker("snow")
 ```
 
-![snow inspect](snow-inspect.png)
+![snow inspect](https://github.com/dgunning/edgartools/blob/main/snow-inspect.png)
 ### 
 
 
