@@ -1,7 +1,7 @@
 # edgartools 
 
-[![PyPI - Version](https://img.shields.io/pypi/v/edgar.svg)](https://pypi.org/project/edgartools)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/edgar.svg)](https://pypi.org/project/edgartools)
+[![PyPI - Version](https://img.shields.io/pypi/v/edgartools.svg)](https://pypi.org/project/edgartools)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/edgartools.svg)](https://pypi.org/project/edgartools)
 
 -----
 
