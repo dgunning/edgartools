@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "edgartools"
-description = 'Access edgar filings in python'
+description = 'Powerful easy to use library for accessing edgar filings'
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
