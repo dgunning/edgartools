@@ -2,7 +2,7 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/edgartools.svg)](https://pypi.org/project/edgartools)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/edgartools.svg)](https://pypi.org/project/edgartools)
-
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml)
 -----
 
 <!-- TABLE OF CONTENTS -->
@@ -82,7 +82,7 @@ how to easily get SEC filing data and text into your analytic workflows.
 - Search for company by ticker or CIK
 - Get a company's filings 
 - Get a dataset of company's **facts** e.g. **CommonSharesOutstanding**
-- Query a company's fact as SQL using an in-memory **DuckDB** database
+- Query a company's facts as SQL using an in-memory **DuckDB** database
 
 # Installation
 
