@@ -5,3 +5,4 @@
 # Ignore dynaconf secret files
 .secrets.*
 /.coverage
+/notebooks/
