@@ -1,13 +1,23 @@
 from functools import lru_cache
 from typing import Dict, Union
 
+import duckdb
 import pandas as pd
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
-from edgar.xml import child_text
 from edgar.core import log
-import duckdb
+from edgar.xml import child_text
+
+"""
+This module parses XBRL documents into objects that contain the structured data
+The main capability is to convert XBRL documents into FilingXbrl objects.
+
+This wraps the underlying data read from the XBL document.
+Unlike other XBRL parsing tools, this does not do full XBRL parsing with schema validation etc, but is sufficient
+for getting data from XBRL document. So it's quite a bit faster since it does not have to download anything.
+
+"""
 
 __all__ = [
     'FilingXbrl',
@@ -21,6 +31,12 @@ class NamespaceInfo(BaseModel):
 
 
 class FilingXbrl:
+
+    """
+    Represents the XBRL data for a single filing.
+    It wraps the underlying dataset of facts into a `facts` property.
+
+    """
 
     def __init__(self,
                  facts: pd.DataFrame,
