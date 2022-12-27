@@ -3,6 +3,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/edgartools.svg)](https://pypi.org/project/edgartools)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/edgartools.svg)](https://pypi.org/project/edgartools)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml)
+![GitHub](https://img.shields.io/github/license/dgunning/edgartools)
 -----
 
 <!-- TABLE OF CONTENTS -->
