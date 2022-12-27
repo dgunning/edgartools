@@ -228,6 +228,40 @@ snow.get_filings(form='10-Q').latest()
 
 ### Get company facts
 
+Facts are an interesting and important dataset about a company accumlated from data the company provides to the SEC.
+Company facts are available for a company on the Company Facts`f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010}.json"`
+It is a JSON endpoint and `edgartools` parses the JSON into a structured dataset - a `pyarrow.Table`.
+
+#### Getting facts for a company
+To get company facts, first get the company, then call `company.get_facts()`
+```python
+company = Company.for_ticker("SNOW")
+company_facts = company.get_facts()
+```
+The result is a `CompanyFacts` object which wraps the underlying facts and provides convenient ways of working
+with the facts data. To get access to the underyling data use the `facts` property.
+
+You can get the facts as a pandas dataframe by calling `to_pandas`
+
+```python
+df = company_facts.to_pandas()
+```
+
+Facts differ among companies. To see what facts are available you can use the `facts_meta` property.
+
+#### Getting the facts as a DuckDB table
+Ypu can convert the facts to a DuckDB database which allows you to query the facts using SQL.
+
+```python
+    company_facts: CompanyFacts = get_company_facts(1318605)
+    db = company_facts.to_duckdb()
+    df = db.execute("""
+    select * from facts
+    """).df()
+```
+
+
+
 ## Working with a Filing
 
 Once you have a filing you can do many things with it including getting the html text of the filing, get xbrl or xml, or list all the files in the filing.
