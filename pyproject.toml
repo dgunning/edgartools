@@ -38,7 +38,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/dgunning/edgartools#readme"
+Documentation = "https://dgunning.github.io/edgartools/"
 Issues = "https://github.com/dgunning/edgartools/issues"
 Source = "https://github.com/dgunning/edgartools"
 
