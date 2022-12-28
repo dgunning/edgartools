@@ -1,3 +1,15 @@
-site_name: Edgar
+site_name: edgartools
 theme:
   name: "material"
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+
+nav:
+  - Documentation: index.md
+  - How-To Guides: how-to-guides.md
+  - reference.md
