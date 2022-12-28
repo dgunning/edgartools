@@ -3,7 +3,7 @@
 ![edgar-tools-logo](https://raw.githubusercontent.com/dgunning/edgartools/main/edgar-tools.png)
 
 [![PyPI - Version](https://img.shields.io/pypi/v/edgartools.svg)](https://pypi.org/project/edgartools)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/edgartools.svg)](https://pypi.org/project/edgartools)
+![GitHub last commit](https://img.shields.io/github/last-commit/dgunning/edgartools)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/dgunning/edgartools/badge)](https://www.codefactor.io/repository/github/dgunning/edgartools)
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
