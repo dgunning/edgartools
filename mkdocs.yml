@@ -11,5 +11,4 @@ plugins:
 
 nav:
   - Documentation: index.md
-  - How-To Guides: how-to-guides.md
   - reference.md
