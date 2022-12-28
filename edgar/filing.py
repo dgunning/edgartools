@@ -21,6 +21,14 @@ from pydantic import BaseModel
 from edgar.core import http_client, download_text, download_file, log
 from edgar.xbrl import FilingXbrl
 
+""" Contain functionality for working with SEC filing indexes and filings
+
+The module contains the following functions
+
+- `get_filings(year, quarter, index)`
+
+"""
+
 __all__ = [
     'get_filings',
     'Filing',
@@ -194,6 +202,18 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
 def get_filings(year: Years,
                 quarter: Quarters = None,
                 index="form"):
+    """ Get filings indexes from Edgar
+
+    Examples
+
+    >>> from edgar import get_filings
+    >>> filings = get_filings(2021) # Get filings for a year
+
+    :param year:
+    :param quarter:
+    :param index:
+    :return:
+    """
     year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
     filing_index = get_filings_for_quarters(year_and_quarters, index=index)
 
@@ -299,7 +319,7 @@ class Filings:
 
 class Filing:
     """
-    An SEC filing
+    A single SEC filing. Allow you to access the documents and data for that filing
     """
 
     def __init__(self,
@@ -358,6 +378,9 @@ class Filing:
 
 
 class FilingDocument(BaseModel):
+    """
+    A document on the filing
+    """
     seq: int
     description: str
     form: str
@@ -391,6 +414,9 @@ class FilingDocument(BaseModel):
 
 
 class FilingHomepage:
+    """
+    A class that represents the homepage for the filing allowing us to get the documents and datafiles
+    """
 
     def __init__(self,
                  filing_files: Dict[str, pd.DataFrame],

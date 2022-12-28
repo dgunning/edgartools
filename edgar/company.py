@@ -111,6 +111,9 @@ class CompanyFilings(Filings):
 
 
 class Company(BaseModel):
+    """
+    A company populated from a call to the company submissions endpoint
+    """
     class Config:
         arbitrary_types_allowed = True
 
@@ -156,11 +159,17 @@ class Company(BaseModel):
                     ):
         """
         Get the company's filings and optionally filter by multiple criteria
-        :param form: The form as a string e.g. '10-K' or List of strings ['10-Q', '10-K']
-        :param accession_number: The accession number that uniquely identifies an SEC filing e.g. 0001640147-22-000100
-        :param file_number: The file number e.g. 001-39504
-        :param is_xbrl: Whether the filing is xbrl
-        :param is_inline_xbrl: Whether the filing is inline_xbrl
+
+        form: The form as a string e.g. '10-K' or List of strings ['10-Q', '10-K']
+
+        accession_number: The accession number that uniquely identifies an SEC filing e.g. 0001640147-22-000100
+
+        file_number: The file number e.g. 001-39504
+
+        is_xbrl: Whether the filing is xbrl
+
+        is_inline_xbrl: Whether the filing is inline_xbrl
+
         :return: The CompanyFiling instance with the filings that match the filters
         """
         company_filings = self.filings.data
