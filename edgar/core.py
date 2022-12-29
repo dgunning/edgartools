@@ -5,11 +5,15 @@ import threading
 from _thread import interrupt_main
 from functools import lru_cache
 from io import BytesIO
-from typing import Union
+from typing import Union, Optional
 
 import httpx
+import pandas as pd
+import pyarrow as pa
+from rich import box
 from rich.logging import RichHandler
 from rich.prompt import Prompt
+from rich.table import Table
 
 logging.basicConfig(
     level="INFO",
@@ -28,7 +32,9 @@ __all__ = [
     'download_text',
     'download_file',
     'decode_content',
+    'df_to_table',
     'repr_df',
+    'repr_rich',
     'log'
 ]
 
@@ -162,3 +168,73 @@ def repr_df(df, hide_index: bool = True):
     if hide_index:
         disp = disp.hide(axis="index")
     return disp._repr_html_()
+
+
+def df_to_table(
+        df: Union[pd.DataFrame, pa.Table],
+        index_name: Optional[str] = None,
+        max_rows: int = 20) -> Table:
+    """
+    Convert a dataframe to a rich table
+
+    :param index_name: The name of the index
+    :param df: The dataframe to convert to a rich Table
+    :param max_rows: The maximum number of rows in the rich Table
+    :return: a rich Table
+    """
+    if isinstance(df, pa.Table):
+        # For speed, learn to sample the head and tail of the pyarrow table
+        df = df.to_pandas()
+
+    rich_table = Table(box=box.ROUNDED)
+    index_name = str(index_name) if index_name else ""
+    rich_table.add_column(index_name)
+
+    for column in df.columns:
+        rich_table.add_column(str(column))
+
+    print()
+    if len(df) > max_rows:
+        head = df.head(max_rows // 2)
+        tail = df.tail(max_rows // 2)
+        data_for_display = pd.concat([head,
+                                      pd.DataFrame([{col: '...' for col in df.columns}], index=['...']),
+                                      tail])
+    else:
+        data_for_display = df
+
+    data_for_display = data_for_display.reset_index()
+
+    for index, value_list in enumerate(data_for_display.values.tolist()):
+        # row = [str(index)] if show_index else []
+        row = [str(x) for x in value_list]
+        rich_table.add_row(*row)
+
+    return rich_table
+
+
+def repr_rich(renderable) -> str:
+    """
+    This renders a rich object to a string
+
+    It implements one of the methods of capturing output listed here
+
+    https://rich.readthedocs.io/en/stable/console.html#capturing-output
+
+     This is the recommended method if you are testing console output in unit tests
+
+        from io import StringIO
+        from rich.console import Console
+        console = Console(file=StringIO())
+        console.print("[bold red]Hello[/] World")
+        str_output = console.file.getvalue()
+
+    :param renderable:
+    :return:
+    """
+    from rich.console import Console
+    console = Console()
+    with console.capture() as capture:
+        console.print(renderable)
+    str_output = capture.get()
+    return str_output

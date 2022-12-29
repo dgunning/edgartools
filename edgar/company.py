@@ -9,6 +9,9 @@ from pydantic import BaseModel
 from fastcore.basics import listify
 from edgar.core import http_client, repr_df
 from edgar.filing import Filing, Filings
+from edgar.core import df_to_table, repr_rich
+from rich.console import Group
+from rich.text import Text
 
 __all__ = [
     'Address',
@@ -61,8 +64,15 @@ class CompanyFacts:
     def num_facts(self):
         return len(self.fact_meta)
 
+    def __rich__(self) -> str:
+        return Group(
+            Text(f"Company Facts({self.name} [{self.cik}] {len(self.facts):,} total facts)")
+            ,
+            df_to_table(self.facts)
+        )
+
     def __repr__(self):
-        return f"Company Facts({self.name} [{self.cik}] {len(self.facts):,} total facts)"
+        return repr_rich(self.__rich__())
 
 
 class CompanyFilings(Filings):
@@ -114,6 +124,7 @@ class Company(BaseModel):
     """
     A company populated from a call to the company submissions endpoint
     """
+
     class Config:
         arbitrary_types_allowed = True
 

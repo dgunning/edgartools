@@ -17,8 +17,9 @@ from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
 from pydantic import BaseModel
-
-from edgar.core import http_client, download_text, download_file, log
+from rich.console import Group
+from rich.text import Text
+from edgar.core import http_client, download_text, download_file, log, df_to_table, repr_rich
 from edgar.xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -312,9 +313,16 @@ class Filings:
         else:
             raise StopIteration
 
-    def __repr__(self):
+    def __rich__(self) -> str:
         start_date, end_date = self.date_range
-        return f"Filings - {len(self.data):,} in total from {start_date} to {end_date}"
+        return Group(
+            Text(f"Filings - {len(self.data):,} in total from {start_date} to {end_date}")
+            ,
+            df_to_table(self.data)
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 
 class Filing:

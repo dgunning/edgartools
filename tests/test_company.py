@@ -2,8 +2,6 @@ import json
 from pathlib import Path
 
 import pyarrow.compute as pc
-import pyarrow as pa
-from rich import print
 from functools import lru_cache
 from edgar.company import *
 from edgar.company import parse_company_submissions
@@ -56,6 +54,13 @@ def test_company_get_facts():
     company = get_test_company(1318605)
     facts = company.get_facts()
     assert facts
+
+
+def test_company_get_facts_repr():
+    company = get_test_company(1318605)
+    facts = company.get_facts()
+    facts_repr = str(facts)
+    assert 'Tesla' in facts_repr
 
 
 def test_company_for_cik():

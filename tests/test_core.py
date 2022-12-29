@@ -1,11 +1,17 @@
+import pandas as pd
+
 from edgar.core import (decode_content,
                         get_identity,
                         set_identity,
                         ask_for_identity,
+                        repr_rich,
                         client_headers,
+                        df_to_table,
                         download_file)
 import re
+from rich.table import Table
 import pytest
+
 
 def test_decode_content():
     text = "Kyle Walker vs Mbappe"
@@ -71,3 +77,18 @@ def test_download_index_file():
 
     xbrl_idx = download_file('https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.idx')
     assert isinstance(xbrl_idx, str)
+
+
+def test_df_to_rich_table():
+    df = pd.read_csv('data/cereal.csv')
+    table: Table = df_to_table(df)
+    assert table
+    assert len(table.rows) == 21
+
+
+def test_repr_rich():
+    df = pd.read_csv('data/cereal.csv',
+                     usecols=['name', 'mfr', 'type', 'calories', 'protein', 'fat', 'sodium'])
+    table: Table = df_to_table(df)
+    value = repr_rich(table)
+    assert '100% Bran' in value
