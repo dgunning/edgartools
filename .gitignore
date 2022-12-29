@@ -6,3 +6,4 @@
 .secrets.*
 /.coverage
 /notebooks/
+/site/
