@@ -4,8 +4,9 @@
 from edgar.company import (Company,
                            CompanyFacts,
                            CompanyFilings,
-                           get_company_tickers,
+                           get_company,
                            get_company_facts,
+                           get_company_tickers,
                            get_company_submissions,
                            get_ticker_to_cik_lookup)
 from edgar.core import (get_identity,

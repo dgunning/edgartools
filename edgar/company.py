@@ -1,7 +1,9 @@
+import logging
 from functools import lru_cache
 from typing import List, Dict, Optional, Union
 
 import duckdb
+import httpx
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -18,6 +20,7 @@ __all__ = [
     'Company',
     'CompanyFacts',
     'CompanyFilings',
+    'get_company',
     'get_company_facts',
     'get_company_tickers',
     'get_company_submissions',
@@ -120,28 +123,41 @@ class CompanyFilings(Filings):
         """
 
 
-class Company(BaseModel):
+class Company:
     """
     A company populated from a call to the company submissions endpoint
     """
 
-    class Config:
-        arbitrary_types_allowed = True
-
-    cik: int
-    name: str
-    tickers: List[str]
-    exchanges: List[str]
-    sic: int
-    sic_description: str
-    category: str
-    fiscal_year_end: str
-    entity_type: str
-    phone: str
-    flags: str
-    business_address: Address
-    mailing_address: Address
-    filings: CompanyFilings
+    def __init__(self,
+                 cik: int,
+                 name: str,
+                 tickers: List[str],
+                 exchanges: List[str],
+                 sic: int,
+                 sic_description: str,
+                 category: str,
+                 fiscal_year_end: str,
+                 entity_type: str,
+                 phone: str,
+                 flags: str,
+                 business_address: Address,
+                 mailing_address: Address,
+                 filings: CompanyFilings,
+                 ):
+        self.cik: int = cik
+        self.name: str = name
+        self.tickers: List[str] = tickers
+        self.exchanges: List[str] = exchanges
+        self.sic: int = sic
+        self.sic_description: str = sic_description
+        self.category: str = category
+        self.fiscal_year_end: str = fiscal_year_end
+        self.entity_type: str = entity_type
+        self.phone: str = phone
+        self.flags: str = flags
+        self.business_address: Address = business_address
+        self.mailing_address: Address = mailing_address
+        self.filings: CompanyFilings = filings
 
     @property
     def industry(self):
@@ -157,8 +173,11 @@ class Company(BaseModel):
         if cik:
             return Company.for_cik(cik)
 
-    def get_facts(self):
-        return get_company_facts(self.cik)
+    def get_facts(self) -> CompanyFacts:
+        try:
+            return get_company_facts(self.cik)
+        except NoCompanyFactsFound:
+            return None
 
     def get_filings(self,
                     *,
@@ -260,7 +279,7 @@ def parse_company_submissions(cjson: Dict[str, object]):
     business_addr = cjson['addresses']['business']
     cik = cjson['cik']
     company_name = cjson["name"]
-    return Company(cik=cik,
+    return Company(cik=int(cik),
                    name=company_name,
                    tickers=cjson['tickers'],
                    exchanges=cjson['exchanges'],
@@ -289,6 +308,22 @@ def parse_company_submissions(cjson: Dict[str, object]):
                    ),
                    filings=Company.parse_filings(cjson['filings'], cik=cik, company_name=company_name)
                    )
+
+
+def get_company(*,
+                cik: int = None,
+                ticker: str = None) -> Company:
+    """
+    Get a company by cik or ticker
+    :param cik: The cik
+    :param ticker: The ticker
+    :return:
+    """
+    if cik:
+        return Company.for_cik(cik)
+    elif ticker:
+        return Company.for_ticker(ticker)
+    raise AssertionError("Provide either a cik or ticker")
 
 
 def get_json(data_url: str):
@@ -333,10 +368,25 @@ def parse_company_facts(fjson: Dict[str, object]):
                         fact_meta=pd.DataFrame(fact_meta_lst))
 
 
+class NoCompanyFactsFound(Exception):
+
+    def __init__(self, cik: int):
+        super().__init__()
+        self.message = f"""No Company facts found for cik {cik}"""
+
+
 @lru_cache(maxsize=32)
 def get_company_facts(cik: int):
-    company_facts_json = get_json(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010}.json")
-    return parse_company_facts(company_facts_json)
+    company_facts_url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010}.json"
+    try:
+        company_facts_json = get_json(company_facts_url)
+        return parse_company_facts(company_facts_json)
+    except httpx.HTTPStatusError as err:
+        if err.response.status_code == 404:
+            logging.warning(f"No company facts found on url {company_facts_url}")
+            raise NoCompanyFactsFound(cik=cik)
+        else:
+            raise
 
 
 @lru_cache(maxsize=32)

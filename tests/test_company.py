@@ -92,7 +92,6 @@ def test_company_get_filings():
 def test_company_get_filings_for_form():
     company: Company = Company.for_ticker("EXPE")
     tenk_filings: CompanyFilings = company.get_filings(form='10-K')
-    print(tenk_filings)
     assert pc.all(pc.equal(tenk_filings.data['form'], '10-K'))
     filing: Filing = tenk_filings[0]
     assert filing
@@ -105,7 +104,6 @@ def test_company_get_filings_for_form():
 def test_company_get_filings_for_multiple_forms():
     company: Company = Company.for_ticker("EXPE")
     company_filings = company.get_filings(form=['10-K', '10-Q', '8-K'])
-    print(company_filings)
     form_list = pc.unique(company_filings.data['form']).tolist()
     assert sorted(form_list) == ['10-K', '10-Q', '8-K']
 
@@ -184,3 +182,13 @@ def test_get_filings_multiple_filters():
     filings_df = filings.to_pandas("form", "filingDate", 'isXBRL', "isInlineXBRL")
     assert filings_df.isInlineXBRL.all()
     assert set(filings_df.form.tolist()) == {"10-Q", "10-K"}
+
+
+def test_get_company_by_cik():
+    company = get_company(cik=1554646)
+    assert company.name == 'NEXPOINT SECURITIES, INC.'
+
+
+def test_get_company_by_ticker():
+    company = get_company(ticker="SNOW")
+    assert company.cik == 1640147
