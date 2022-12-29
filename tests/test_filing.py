@@ -138,7 +138,6 @@ def test_filings_latest():
     print(latest_filings)
 
 
-
 def test_iterate_filings():
     filings: Filings = cached_filings(2021, 1, index="xbrl")
     count = 0
@@ -147,8 +146,6 @@ def test_iterate_filings():
         count += 1
         if count >= 10:
             break
-
-    print(filings)
 
 
 carbo_10K = Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, date='2018-03-08',

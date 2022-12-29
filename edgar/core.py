@@ -1,12 +1,15 @@
 import gzip
 import logging.config
 import os
+import threading
+from _thread import interrupt_main
 from functools import lru_cache
 from io import BytesIO
 from typing import Union
 
 import httpx
 from rich.logging import RichHandler
+from rich.prompt import Prompt
 
 logging.basicConfig(
     level="INFO",
@@ -20,6 +23,7 @@ log = logging.getLogger("rich")
 __all__ = [
     'get_identity',
     'set_identity',
+    'ask_for_identity',
     'http_client',
     'download_text',
     'download_file',
@@ -49,16 +53,62 @@ def set_identity(user_identity: str):
     log.info(f"Identity of the Edgar REST client set to [{user_identity}]")
 
 
-def get_identity():
-    identity = os.environ.get(edgar_identity)
-    assert identity, """
-    Environment variable EDGAR_IDENTITY not found.
-    
-    Set environent variable `EDGAR_IDENTITY` to a string used to identify you to the SEC edgar service
-    
-    example
-        EDGAR_IDENTITY=First Name name@email.com
+identity_prompt = """
+[bold turquoise4]Identify your client to SEC Edgar[/bold turquoise4]
+------------------------------------------------------------------------------
+
+Before running [bold]edgartools[/bold] it needs to know the UserAgent string to send to Edgar.
+See https://www.sec.gov/os/accessing-edgar-data
+
+This can be set in the environment variable [bold green]EDGAR_IDENTITY[/bold green].
+
+1. Set an OS environment variable 
+    [bold]EDGAR_IDENTITY=[green]Name email@domain.com[/green][/bold] 
+2. Or a Python environment variable
+    import os
+    [bold]os.environ['EDGAR_IDENTITY']=[green]"Name email@domain.com"[/green][/bold]
+3. Or use [bold magenta]edgartools.set_identity[/bold magenta]
+    from edgar import set_identity
+    [bold]set_identity([green]'Name email@domain.com'[/green])[/bold]
+
+But since you are already using [bold]edgartools[/bold] you can set it here
+
+Enter your [bold green]EDGAR_IDENTITY[/bold green] e.g. [bold italic green]Name email@domain.com[/bold italic green]
+"""
+
+
+def ask_for_identity(user_prompt: str = identity_prompt,
+                     timeout: int = 60):
+    timer = threading.Timer(timeout, interrupt_main)
+    timer.start()
+
+    try:
+        # Prompt the user for input
+        input_str = Prompt.ask(user_prompt)
+
+        # Strip the newline character from the end of the input string
+        input_str = input_str.strip()
+    except KeyboardInterrupt:
+        # If the timeout is reached, raise a TimeoutError exception
+        message = "You did not enter your Edgar user identity. Try again .. or set environment variable EDGAR_IDENTITY"
+        log.warning(message)
+        raise TimeoutError(message)
+    finally:
+        # Cancel the timer to prevent it from interrupting the main thread
+        timer.cancel()
+
+    return input_str
+
+
+def get_identity() -> str:
     """
+    Get the sec identity used to set the UserAgent string
+    :return:
+    """
+    identity = os.environ.get(edgar_identity)
+    if not identity:
+        identity = ask_for_identity()
+        os.environ[edgar_identity] = identity
     return identity
 
 
