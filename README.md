@@ -110,8 +110,15 @@ The user identity is sent in the User-Agent string and the Edgar API will refuse
 
 EdgarTools will look for an environment variable called `EDGAR_IDENTITY` and use that in each request.
 So, you need to set this environment variable before using it.
+
+### Setting EDGAR_IDENTITY in Linux/Mac
 ```bash
 export EDGAR_IDENTITY="Michael Mccallum mcalum@gmail.com"
+```
+
+### Setting EDGAR_IDENTITY in Windows Powershell
+```bash
+ $Env:EDGAR_IDENTITY="Michael Mccallum mcalum@gmail.com"
 ```
 Alternatively, you can call `set_identity` which does the same thing.
 
@@ -332,12 +339,16 @@ You can also use `"company"` but this will give you the same dataset as `"form"`
 filings = get_filings(2021)
 ```
 
+![Filings in 2021](https://raw.githubusercontent.com/dgunning/edgartools/main/filings_2021.jpg)
+
 #### Get filings for 2021 quarter 4
+Instead of getting the filings for an entire year, you can get the filings for a quarter.
 ```python
 filings = get_filings(2021, 4)
 ```
 
 #### Get filings between 2010 and 2019
+You can get the filings for a range of years, since the `year` parameter accepts a value, a list or a range.
 ```python
 filings = get_filings(range(2010, 2020))
 ```
@@ -358,6 +369,35 @@ The filings data is stored in the `Filings` class as a `pyarrow.Table`. You can 
 ```python
 df = filings.to_pandas()
 ```
+
+## Working with an individual Filing
+
+Once you have retrieved Filings you can access individual filings using the bracket `[]` notation.
+```python
+filings = get_filings(2021)
+filing = filings[0]
+```
+![Filings in 2021](https://raw.githubusercontent.com/dgunning/edgartools/main/filings_2021.jpg)
+Pay attention to the index value displayed for the filings. This is the value you 
+will use to get the individual filing.
+```python
+filing = filings[0]
+```
+![A single filing](https://raw.githubusercontent.com/dgunning/edgartools/main/single_filing.png)
+
+### Open a filing
+
+You can open the filing in your browser using `filing.open()`
+```python
+filing.open()
+```
+
+### Open the Filing Homepage
+You can open the filing homepage in the browser using `filing.open_homepage()`
+```python
+filing.open()
+```
+
 
 #### Use DuckDB to query the filings
 
