@@ -7,7 +7,6 @@ import httpx
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
-from pydantic import BaseModel
 from fastcore.basics import listify
 from edgar.core import http_client, repr_df
 from edgar.filing import Filing, Filings
@@ -28,13 +27,26 @@ __all__ = [
 ]
 
 
-class Address(BaseModel):
-    street1: str
-    street2: Optional[str]
-    city: str
-    state_or_country: str
-    zipcode: str
-    state_or_country_desc: str
+class Address:
+    def __init__(self,
+                 street1: str,
+                 street2: Optional[str],
+                 city: str,
+                 state_or_country: str,
+                 zipcode: str,
+                 state_or_country_desc: str
+                 ):
+        self.street1: str = street1
+        self.street2: Optional[str] = street2
+        self.city: str = city
+        self.state_or_country: str = state_or_country
+        self.zipcode: str = zipcode
+        self.state_or_country_desc: str = state_or_country_desc
+
+    def __repr__(self):
+        return (f'Address(street1="{self.street1 or ""}", street2="{self.street2 or ""}", city="{self.city or ""}",'
+                f'zipcode="{self.zipcode or ""}", state_or_country="{self.state_or_country}")'
+                )
 
 
 class CompanyFacts:
