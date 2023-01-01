@@ -1,17 +1,24 @@
-import datetime
+import re
+from functools import lru_cache
+from pathlib import Path
 
+import httpx
+import humanize
+import pandas as pd
 import pytest
 
-from edgar import get_filings, Filings, Filing
-from edgar.filing import form_specs, company_specs, FilingHomepage
-import humanize
-import re
-import httpx
-import pandas as pd
-from functools import lru_cache
-import tempfile
+from edgar import get_filings, Filings, Filing, get_company
+from edgar.filing import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
 
 pd.options.display.max_colwidth = 200
+
+
+def test_read_fixed_width_index():
+    index_text = Path('data/form.20200318.idx').read_text()
+    index_data = read_fixed_width_index(index_text, form_specs)
+    index_df = index_data.to_pandas()
+    invalid_accession = index_df.query("~accessionNumber.str.match('[0-9]{10}\-[0-9]{2}\-[0-9]{6}')")
+    assert len(invalid_accession) == 0
 
 
 def test_read_form_filing_index_year_and_quarter():
@@ -68,6 +75,14 @@ def test_read_form_filing_index_xbrl():
     print(filings.to_pandas())
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
     assert re.match(r'\d{10}\-\d{2}\-\d{6}', filings.data[4][-1].as_py())
+
+
+def test_get_filings_gets_correct_accession_number():
+    # Get the filings and test that the accession number is correct for all rows e.g. 0001185185-20-000088
+    filings: Filings = get_filings(2021, 1)
+    data = filings.data.to_pandas()
+    misparsed_accessions = data.query("accessionNumber.str.endswith('.')")
+    assert len(misparsed_accessions) == 0
 
 
 @lru_cache(maxsize=8)
@@ -135,21 +150,19 @@ def test_filings_latest():
     start_date, end_date = latest_filings.date_range
     assert (start_date.year, start_date.month, start_date.day) == (2021, 3, 31)
     assert (end_date.year, end_date.month, end_date.day) == (2021, 3, 31)
-    print(latest_filings)
 
 
 def test_iterate_filings():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
-    count = 0
-    for filing in filings:
+    filings: Filings = cached_filings(2021, 1, index="xbrl").head(10)
+    for index, filing in enumerate(filings):
         assert filing
-        count += 1
-        if count >= 10:
-            break
 
 
 carbo_10K = Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, date='2018-03-08',
                    accession_no='0001564590-18-004771')
+
+four37_capital_staff_filing = Filing(form='SEC STAFF ACTION', company='437 CAPITAL Fund Corp', cik=1805559,
+                                     date='2022-03-24', accession_no='9999999997-22-001189')
 
 
 def test_filing_homepage_url():
@@ -158,26 +171,41 @@ def test_filing_homepage_url():
     assert r.status_code == 200
 
 
+def test_filing_primary_document():
+    homepage_url = four37_capital_staff_filing.homepage_url
+    assert homepage_url == 'https://www.sec.gov/Archives/edgar/data/1805559/9999999997-22-001189-index.html'
+    homepage: FilingHomepage = four37_capital_staff_filing.homepage
+    assert homepage
+    primary_document = homepage.primary_document
+    assert primary_document
+    company = get_company(cik=1805559)
+    filings = company.get_filings()
+    print(filings.to_pandas("form", "filingDate", "primaryDocument"))
+    filing = filings[0]
+    print(filing)
+
+
 def test_filing_homepage_for_filing():
-    filing_homepage: FilingHomepage = carbo_10K.get_homepage()
+    filing_homepage: FilingHomepage = carbo_10K.homepage
     assert 'Description'
     assert len(filing_homepage.documents) > 8
     assert len(filing_homepage.datafiles) >= 6
+    assert filing_homepage.url == carbo_10K.url
 
 
 def test_filing_document():
-    assert carbo_10K.get_homepage().filing_document.url == \
+    assert carbo_10K.homepage.primary_document.url == \
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
 
 
 def test_xbrl_document():
-    xbrl_document = carbo_10K.get_homepage().xbrl_document
+    xbrl_document = carbo_10K.homepage.xbrl_document
     assert xbrl_document.url == \
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-20171231.xml'
 
 
 def test_get_matching_document():
-    filing_document = carbo_10K.get_homepage().get_matching_document("Seq=='1'")
+    filing_document = carbo_10K.homepage.get_matching_document("Seq=='1'")
     assert filing_document
     assert filing_document.seq == 1
     assert filing_document.path == '/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
@@ -187,17 +215,17 @@ def test_get_matching_document():
 
 
 def test_filing_homepage_get_by_seq():
-    filing_document = carbo_10K.get_homepage().get_by_seq(1)
+    filing_document = carbo_10K.homepage.get_by_seq(1)
     assert filing_document
-    assert carbo_10K.get_homepage().get_by_seq(1) == carbo_10K.get_homepage().get_by_seq("1")
+    assert carbo_10K.homepage.get_by_seq(1) == carbo_10K.homepage.get_by_seq("1")
 
     # Now get a datafile by seq
-    datafile = carbo_10K.get_homepage().get_by_seq(17)
+    datafile = carbo_10K.homepage.get_by_seq(17)
     print(datafile)
 
 
 def test_download_filing_document():
-    filing_document = carbo_10K.get_homepage().get_matching_document("Seq=='1'")
+    filing_document = carbo_10K.homepage.get_matching_document("Seq=='1'")
     contents = filing_document.download()
     assert '<html>' in contents
 
@@ -232,3 +260,41 @@ def test_filings_toduckdb():
     select * from filings where form=='10-Q'
     """).df()
     assert len(result_df.form.drop_duplicates()) == 1
+
+
+def test_filing_primary_document():
+    filing = Filing(form='DEF 14A', company='180 DEGREE CAPITAL CORP. /NY/', cik=893739, date='2020-03-25',
+                    accession_no='0000893739-20-000019')
+    primary_document: FilingDocument = filing.primary_document
+    assert primary_document
+    assert primary_document.url == \
+           'https://www.sec.gov/Archives/edgar/data/893739/000089373920000019/annualmeetingproxy2020-doc.htm'
+    assert primary_document.extension == '.htm'
+    assert primary_document.seq == 1
+
+
+barclays_filing = Filing(form='ATS-N/MA', company='BARCLAYS CAPITAL INC.', cik=851376, date='2020-02-21',
+                         accession_no='0000851376-20-000003')
+
+
+def test_filing_primary_document_seq_5():
+    primary_document: FilingDocument = barclays_filing.primary_document
+    assert primary_document
+    assert primary_document.url == \
+           'https://www.sec.gov/Archives/edgar/data/851376/000085137620000003/xslATSN_COVER_X01/coverpage.xml'
+    assert primary_document.extension == '.xml'
+    assert primary_document.seq == 5
+
+
+def test_filing_html():
+    filing = Filing(form='10-K', company='10x Genomics, Inc.',
+                    cik=1770787, date='2020-02-27',
+                    accession_no='0001193125-20-052640')
+    html = filing.html()
+    assert html
+    assert "<HTML>" in html
+
+
+def test_filing_html_is_non_for_xml_filing():
+    html = barclays_filing.html()
+    assert html is None

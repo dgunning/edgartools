@@ -5,7 +5,7 @@ import webbrowser
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
-from typing import Tuple, List, Dict, Union
+from typing import Tuple, List, Dict, Union, Optional
 
 import httpx
 import pandas as pd
@@ -19,6 +19,7 @@ from fastcore.parallel import parallel
 from pydantic import BaseModel
 from rich.console import Group
 from rich.text import Text
+
 from edgar.core import http_client, download_text, download_file, log, df_to_table, repr_rich
 from edgar.xbrl import FilingXbrl
 
@@ -34,6 +35,8 @@ __all__ = [
     'get_filings',
     'Filing',
     'Filings',
+    'FilingXbrl',
+    'FilingDocument',
     'FilingHomepage',
     'available_quarters'
 ]
@@ -99,7 +102,7 @@ form_specs = FileSpecs(
      ("company", (12, 74), pa.string()),
      ("cik", (74, 82), pa.int32()),
      ("filingDate", (85, 97), pa.string()),
-     ("accessionNumber", (-33, -13), pa.string())
+     ("accessionNumber", (97, 141), pa.string())
      ]
 )
 company_specs = FileSpecs(
@@ -107,7 +110,7 @@ company_specs = FileSpecs(
      ("form", (62, 74), pa.string()),
      ("cik", (74, 82), pa.int32()),
      ("filingDate", (85, 97), pa.string()),
-     ("accessionNumber", (-33, -13), pa.string())
+     ("accessionNumber", (97, 141), pa.string())
      ]
 )
 
@@ -133,6 +136,10 @@ def read_fixed_width_index(index_text: str,
 
     # Change the CIK to int
     arrays[2] = pa.compute.cast(arrays[2], pa.int32())
+
+    # Get the accession number from the file path
+    arrays[4] = pa.compute.utf8_slice_codeunits(
+        pa.compute.utf8_rtrim(arrays[4], characters=".txt"), start=-20)
 
     return pa.Table.from_arrays(
         arrays=arrays,
@@ -306,23 +313,34 @@ class Filings:
         return self
 
     def __next__(self):
-        if self.n <= len(self.data):
+        if self.n < len(self.data):
             filing: Filing = self[self.n]
             self.n += 1
             return filing
         else:
             raise StopIteration
 
+    @property
+    def summary(self):
+        start_date, end_date = self.date_range
+        return f"Filings - {len(self.data):,} in total from {start_date} to {end_date}"
+
     def __rich__(self) -> str:
         start_date, end_date = self.date_range
         return Group(
-            Text(f"Filings - {len(self.data):,} in total from {start_date} to {end_date}")
+            Text(self.summary)
             ,
             df_to_table(self.data)
         )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+    def _repr_html_(self):
+        return f"""
+        <h3>{self.summary}</h3>
+        {self.data.to_pandas()._repr_html_()}
+        """
 
 
 class Filing:
@@ -343,11 +361,18 @@ class Filing:
         self.accession_no = accession_no
         self._filing_homepage = None
 
-    def html(self):
-        return self.get_homepage().filing_document.download()
+    @property
+    def primary_document(self):
+        return self.homepage.primary_document
+
+    def html(self) -> Optional[str]:
+        """Returns the html contents of the primary document if it is html"""
+        primary_document = self.primary_document
+        if primary_document.extension == '.htm':
+            return primary_document.download()
 
     def xbrl(self) -> FilingXbrl:
-        xbrl_document = self.get_homepage().xbrl_document
+        xbrl_document = self.homepage.xbrl_document
         if xbrl_document:
             xbrl_text = xbrl_document.download()
             return FilingXbrl.parse(xbrl_text)
@@ -356,19 +381,25 @@ class Filing:
         """Open the homepage in the browser"""
         webbrowser.open(self.homepage_url)
 
-    def open_filing(self):
+    def open(self):
         """Open the main filing document"""
-        webbrowser.open(self.get_homepage().filing_document.url)
+        webbrowser.open(self.homepage.primary_document.url)
 
     @property
-    def homepage_url(self):
+    def homepage_url(self) -> str:
         return f"{sec_edgar}/data/{self.cik}/{self.accession_no}-index.html"
 
-    @lru_cache(maxsize=1)
-    def get_homepage(self):
+    @property
+    def url(self) -> str:
+        return self.homepage_url
+
+    @property
+    def homepage(self):
         if not self._filing_homepage:
             homepage_html = download_text(self.homepage_url)
-            self._filing_homepage = FilingHomepage.from_html(homepage_html, form=self.form)
+            self._filing_homepage = FilingHomepage.from_html(homepage_html,
+                                                             url=self.homepage_url,
+                                                             description=self.description)
         return self._filing_homepage
 
     def __hash__(self):
@@ -380,9 +411,13 @@ class Filing:
     def __ne__(self, other):
         return not self == other
 
-    def __repr__(self):
+    @property
+    def description(self):
         return (f"Filing(form='{self.form}', company='{self.company}', cik={self.cik}, "
                 f"date='{self.date}', accession_no='{self.accession_no}')")
+
+    def __repr__(self):
+        return self.description
 
 
 class FilingDocument(BaseModel):
@@ -396,11 +431,19 @@ class FilingDocument(BaseModel):
     path: str
 
     @property
+    def extension(self):
+        return os.path.splitext(self.path)[1]
+
+    @property
     def url(self) -> str:
         """
         :return: The full sec url
         """
         return f"{sec_dot_gov}{self.path}"
+
+    def open(self):
+        """Open the filing document"""
+        webbrowser.open(self.url)
 
     @property
     def name(self) -> str:
@@ -411,10 +454,14 @@ class FilingDocument(BaseModel):
         assert dataframe_row.shape == (5,), ("Cannot create a FilingDocument from the dataframe .. "
                                              "should only be one row from which to create the FilingDocument "
                                              )
+        try:
+            size = int(dataframe_row.Size)
+        except ValueError:
+            size = 0
         return cls(seq=dataframe_row.Seq,
                    description=dataframe_row.Description,
                    form=dataframe_row.Type,
-                   size=int(dataframe_row.Size),
+                   size=size,
                    path=dataframe_row.Url)
 
     def download(self):
@@ -428,9 +475,11 @@ class FilingHomepage:
 
     def __init__(self,
                  filing_files: Dict[str, pd.DataFrame],
-                 form: str):
+                 url: str,
+                 description: str):
         self.filing_files: Dict[str, pd.DataFrame] = filing_files
-        self.form = form
+        self.url: str = url
+        self.description = description
 
     def get_by_seq(self, seq: Union[int, str]):
         query = f"Seq=='{seq}'"
@@ -450,10 +499,17 @@ class FilingHomepage:
             rec = res.iloc[0]
             return FilingDocument.from_dataframe_row(rec)
 
+    def open(self):
+        webbrowser.open(self.url)
+
     @property
-    def filing_document(self):
-        document: FilingDocument = self.get_matching_document(f"Description=='{self.form}'")
-        return document
+    def primary_document(self) -> FilingDocument:
+        """Get the primary document of the filing.
+        The primary document is always the first sequentially. Usually "Seq == 1"
+        The primary document also has the extension 'htm', 'xml', 'pdf', 'txt' or 'paper'
+        """
+        first = self.documents.iloc[0]
+        return FilingDocument.from_dataframe_row(first)
 
     @property
     def xbrl_document(self):
@@ -472,7 +528,10 @@ class FilingHomepage:
         return self.filing_files.get("Data Files")
 
     @classmethod
-    def from_html(cls, homepage_html: str, form: str):
+    def from_html(cls,
+                  homepage_html: str,
+                  url:str,
+                  description: str):
         soup = BeautifulSoup(homepage_html, features="html.parser")
         filing_files = dict()
         tables = soup.find_all("table", class_="tableFile")
@@ -489,4 +548,9 @@ class FilingHomepage:
             filing_files[summary] = (pd.DataFrame(records, columns=column_names)
                                      .filter(['Seq', 'Description', 'Type', 'Size', 'Url'])
                                      )
-        return cls(filing_files, form=form)
+        return cls(filing_files,
+                   url=url,
+                   description=description)
+
+    def __repr__(self):
+        return f"Homepage for {self.description}"
