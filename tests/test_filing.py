@@ -182,7 +182,7 @@ def test_filing_primary_document():
     filings = company.get_filings()
     print(filings.to_pandas("form", "filingDate", "primaryDocument"))
     filing = filings[0]
-    print(filing)
+    assert filing
 
 
 def test_filing_homepage_for_filing():

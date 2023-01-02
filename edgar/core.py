@@ -35,7 +35,8 @@ __all__ = [
     'df_to_table',
     'repr_df',
     'repr_rich',
-    'log'
+    'log',
+    'get_bool'
 ]
 
 default_http_timeout: int = 5
@@ -238,3 +239,9 @@ def repr_rich(renderable) -> str:
         console.print(renderable)
     str_output = capture.get()
     return str_output
+
+
+def get_bool(value: str = None):
+    if not value:
+        return None
+    return bool(value)
