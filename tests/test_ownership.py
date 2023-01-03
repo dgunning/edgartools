@@ -1,8 +1,12 @@
-from edgar.ownership import *
-from edgar.ownership import security, underlying_security
 from pathlib import Path
+
 from rich import print
-from bs4 import BeautifulSoup
+
+from edgar.ownership import *
+
+snow_form3 = OwnershipDocument.from_xml(Path('data/form3.snow.xml').read_text())
+snow_form3_nonderiv = OwnershipDocument.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
+snow_form4 = OwnershipDocument.from_xml(Path('data/form4.snow.xml').read_text())
 
 
 def test_translate():
@@ -10,17 +14,7 @@ def test_translate():
     assert translate_ownership('D') == 'Direct'
 
 
-def test_parse_security():
-    tag = (BeautifulSoup("<root><securityTitle><value>Series E</value></securityTitle></root>", "xml")
-           .find("root"))
-    assert security(tag) == ("security", "Series E")
-
-
-def test_parse_underlying_security():
-    tag = (BeautifulSoup("<root><underlyingSecurityTitle><value>Series E</value></underlyingSecurityTitle></root>",
-                         "xml")
-           .find("root"))
-    assert underlying_security(tag) == ("underlying_security", "Series E")
+holding_xml = Path("data/derivative_holding.xml").read_text()
 
 
 def test_parse_form3_with_derivatives():
@@ -100,7 +94,62 @@ def test_parse_form3_with_non_derivatives():
                                                  "reporting person hereunder")
 
 
+def test_post_transaction_values():
+    transaction: NonDerivativeTransaction = snow_form4.non_derivatives.transactions[0]
+    print(transaction)
+    assert transaction.security == 'Class A Common Stock'
+    assert transaction.transaction_date == '2022-12-13'
+    assert transaction.form == '4'
+    assert transaction.equity_swap == False
+    assert transaction.transaction_code == "M"
+    assert transaction.acquired_disposed == 'A'
+    assert transaction.num_shares == '200000'
+
+
+def test_derivative_holdings_get_item():
+    print()
+    print(snow_form3.derivatives.holdings.data)
+    holding = snow_form3.derivatives.holdings[0]
+    assert holding.security == 'Series E Preferred Stock'
+    assert holding.underlying_security == 'Class B Common Stock [F2,F3]'
+    assert holding.underlying_shares == '134018.0'
+    assert holding.exercise_price == "[F1]"
+    assert holding.exercise_date == "[F1]"
+    assert holding.expiration_date == "[F1]"
+    assert holding.direct_indirect == 'I'
+    assert holding.ownership_nature == 'Limited Partnership [F4]'
+
+
+def test_non_derivative_holding_get_item():
+    print()
+    holding = snow_form3_nonderiv.non_derivatives.holdings[0]
+    assert holding.security == 'Class A Common Stock'
+    assert holding.direct_indirect == 'I'
+    assert holding.nature_of_ownership == 'See footnote [F1]'
+    print(holding)
+
+
+def test_derivative_transaction_get_item():
+    transaction = snow_form4.derivatives.transactions[0]
+    assert transaction.num_shares == '200000'
+    assert transaction.share_price == '0'
+    assert transaction.form == '4'
+    assert transaction.equity_swap == False
+    assert transaction.transaction_code == 'M'
+    assert transaction.acquired_disposed == 'A'
+    assert transaction.exercise_date == '[F16]'
+    assert transaction.exercise_price == '8.88'
+    assert transaction.underlying_shares == '200000.0'
+    assert transaction.underlying_security == 'Class A Common Stock'
+
+
 def test_reporting_relationship():
     ownership = OwnershipDocument.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
     print(ownership.reporting_relationship)
     assert ownership.reporting_relationship.is_ten_pct_owner
+
+
+def test_parse_form4():
+    ownership = OwnershipDocument.from_xml(Path('data/form4.snow.xml').read_text())
+    print(ownership)
+    print(ownership.derivatives.transactions)

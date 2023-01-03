@@ -1,13 +1,12 @@
+from dataclasses import dataclass
 from typing import List, Dict, Union, Optional, Tuple
 
 import pandas as pd
 from bs4 import BeautifulSoup
 from bs4 import Tag
 
-
-from edgar.xml import (child_text, child_value, child_value_or_footnote, value_or_footnote)
 from edgar.core import get_bool
-
+from edgar.xml import (child_text, child_value)
 
 __all__ = [
     'translate_ownership',
@@ -15,13 +14,19 @@ __all__ = [
     'Owner',
     'Address',
     'Footnotes',
-    'HoldingsHolder',
     'OwnerSignature',
     'TransactionCode',
-    'TransactionsHolder',
     'OwnershipDocument',
+    'DerivativeHolding',
+    'DerivativeHoldings',
+    'NonDerivativeHolding',
+    'NonDerivativeHoldings',
+    'DerivativeTransaction',
+    'DerivativeTransactions',
     'ReportingRelationship',
     'PostTransactionAmounts',
+    'NonDerivativeTransaction',
+    'NonDerivativeTransactions',
 
 ]
 
@@ -180,21 +185,7 @@ class DataHolder:
         if self.empty:
             return f"{self.name} (no data)"
         else:
-            return f"{self.name} - {len(self)} items"
-
-
-class TransactionsHolder(DataHolder):
-
-    def __init__(self,
-                 data: pd.DataFrame = None):
-        super().__init__(data, "Transactions")
-
-
-class HoldingsHolder(DataHolder):
-
-    def __init__(self,
-                 data: pd.DataFrame = None):
-        super().__init__(data, "Holdings")
+            return f"{self.name} - {len(self)} item(s)"
 
 
 class Footnotes:
@@ -222,74 +213,14 @@ class Footnotes:
                 tag: Tag):
         footnotes_el = tag.find("footnotes")
         return cls(
-            {el.attrs['id']: el.text
+            {el.attrs['id']: el.text.strip()
              for el in footnotes_el.find_all("footnote")
              } if footnotes_el else {}
         )
 
 
-def security(tag: Tag) -> Tuple[str, str]:
-    return 'security', child_value(tag, 'securityTitle')
-
-
-def underlying_security(tag: Tag) -> Tuple[str, str]:
-    return 'underlying_security', child_value(tag, 'underlyingSecurityTitle')
-
-
-def underlying_shares(tag: Tag) -> Tuple[str, str]:
-    return 'underlying_shares', child_value(tag, 'underlyingSecurityShares')
-
-
-def transaction_date(tag: Tag) -> Tuple[str, str]:
-    return 'transaction_date', child_value(tag, 'transactionDate')
-
-
-def num_shares(tag: Tag) -> Tuple[str, str]:
-    return 'num_shares', child_text(tag, 'transactionShares')
-
-
-def remaining_shares(tag: Tag) -> Tuple[str, str]:
-    return 'remaining_shares', child_value(tag, 'sharesOwnedFollowingTransaction')
-
-
-def share_price(tag: Tag) -> Tuple[str, str]:
-    return 'share_price', child_text(tag, 'transactionPricePerShare')
-
-
-def acquired_displosed(tag: Tag) -> Tuple[str, str]:
-    return 'acquired_displosed', child_text(tag, 'transactionAcquiredDisplodedCode')
-
-
-def ownership(tag: Tag) -> Tuple[str, str]:
-    return 'ownership', child_text(tag, 'directOrIndirectOwnership')
-
-
-def form_type(tag: Tag) -> Tuple[str, str]:
-    return 'form', child_text(tag, 'transactionFormType')
-
-
-def transaction_code(tag: Tag) -> Tuple[str, str]:
-    return 'transaction_code', child_text(tag, 'transactionCode')
-
-
-def equity_swap(tag: Tag) -> Tuple[str, str]:
-    return 'equity_swap', child_text(tag, 'equitySwapInvolved')
-
-
 def transaction_footnote_id(tag: Tag) -> Tuple[str, str]:
     return 'footnote', tag.attrs.get("id") if tag else None
-
-
-def exercise_price(tag: Tag) -> Tuple[str, str]:
-    return 'exercise_price', child_value_or_footnote(tag, 'conversionOrExercisePrice')
-
-
-def exercise_date(tag: Tag) -> Tuple[str, str]:
-    return 'exercise_date', child_value_or_footnote(tag, 'exerciseDate')
-
-
-def expiration_date(tag: Tag) -> Tuple[str, str]:
-    return 'expiration_date', child_value_or_footnote(tag, 'expirationDate')
 
 
 def get_footnotes(tag: Tag) -> str:
@@ -298,13 +229,118 @@ def get_footnotes(tag: Tag) -> str:
     ])
 
 
-class NonDerivativeTable:
+@dataclass(frozen=True)
+class DerivativeHolding:
+    security: str
+    underlying_security: str
+    exercise_price: str
+    exercise_date: str
+    expiration_date: str
+    underlying_shares: int
+    direct_indirect: str
+    ownership_nature: str
+
+
+@dataclass(frozen=True)
+class NonDerivativeHolding:
+    security: str
+    direct_indirect: str
+    nature_of_ownership: str
+
+
+@dataclass(frozen=True)
+class DerivativeTransaction:
+    security: str
+    underlying_security: str
+    underlying_shares: str
+    exercise_price: object
+    exercise_date: str
+    expiration_date: str
+    num_shares: object
+    ownership: str
+    share_price: str
+    acquired_disposed: str
+    transaction_date: str
+    remaining_shares: str
+    form: str
+    transaction_code: str
+    equity_swap: str
+    footnotes: str
+
+
+@dataclass(frozen=True)
+class NonDerivativeTransaction:
+    security: str
+    transaction_date: str
+    num_shares: int
+    remaining_shares: int
+    share_price: float
+    acquired_disposed: str
+    direct_indirect: str
+    form: str
+    transaction_code: str
+    equity_swap: str
+    footnotes: str
+
+
+class DerivativeHoldings(DataHolder):
 
     def __init__(self,
-                 holdings: HoldingsHolder,
-                 transactions: TransactionsHolder):
-        self.holdings: HoldingsHolder = holdings
-        self.transactions: TransactionsHolder = transactions
+                 data: pd.DataFrame = None):
+        super().__init__(data, "DerivativeHoldings")
+
+    def __getitem__(self, item):
+        if not self.empty:
+            rec = self.data.iloc[item]
+            return DerivativeHolding(**rec)
+
+
+class NonDerivativeHoldings(DataHolder):
+
+    def __init__(self,
+                 data: pd.DataFrame = None):
+        super().__init__(data, "NonDerivativeHoldings")
+
+    def __getitem__(self, item):
+        if not self.empty:
+            rec = self.data.iloc[item]
+            return NonDerivativeHolding(**rec)
+
+
+class DerivativeTransactions(DataHolder):
+
+    def __init__(self,
+                 data: pd.DataFrame = None):
+        super().__init__(data, "DerivativeTransactions")
+
+    def __getitem__(self, item):
+        if not self.empty:
+            rec = self.data.iloc[item]
+            return DerivativeTransaction(**rec)
+
+
+class NonDerivativeTransactions(DataHolder):
+
+    def __init__(self,
+                 data: pd.DataFrame = None):
+        super().__init__(data, "NonDerivativeTransactions")
+
+    def __getitem__(self, item):
+        if not self.empty:
+            rec = self.data.iloc[item]
+            return NonDerivativeTransaction(**rec)
+
+
+class NonDerivativeTable:
+    """
+    Contains non-derivative holdings and transactions
+    """
+
+    def __init__(self,
+                 holdings: NonDerivativeHoldings,
+                 transactions: NonDerivativeTransactions):
+        self.holdings: NonDerivativeHoldings = holdings
+        self.transactions: NonDerivativeTransactions = transactions
 
     @property
     def has_holdings(self):
@@ -322,51 +358,34 @@ class NonDerivativeTable:
     def extract(cls,
                 table: Tag = None):
         if not table:
-            return cls(holdings=HoldingsHolder(), transactions=TransactionsHolder())
+            return cls(holdings=NonDerivativeHoldings(), transactions=NonDerivativeTransactions())
         transactions = NonDerivativeTable.extract_transactions(table)
         holdings = NonDerivativeTable.extract_holdings(table)
         return cls(transactions=transactions, holdings=holdings)
 
     @staticmethod
-    def extract_holdings(table: Tag) -> HoldingsHolder:
+    def extract_holdings(table: Tag) -> NonDerivativeHoldings:
         holding_tags = table.find_all("nonDerivativeHolding")
         if len(holding_tags) == 0:
-            return HoldingsHolder()
+            return NonDerivativeHoldings()
 
         holdings = []
         for holding_tag in holding_tags:
-            ownership_nature = holding_tag.find("ownershipNature")
+            ownership_nature_tag = holding_tag.find("ownershipNature")
             holding = dict(
                 [
-                    security(holding_tag),
-                    ownership(ownership_nature)
+                    ('security', child_value(holding_tag, 'securityTitle')),
+                    ('direct_indirect', child_value(ownership_nature_tag, 'directOrIndirectOwnership')),
+                    ('nature_of_ownership', child_value(ownership_nature_tag, 'natureOfOwnership')),
                 ]
             )
 
-            nature_of_ownership = ownership_nature.find("natureOfOwnership")
-            if nature_of_ownership:
-                holding['nature_of_onership'] = value_or_footnote(nature_of_ownership)
-
-            # Post transaction amounts
-            post_trans_tag = holding_tag.find("postTransactionAmounts")
-            if post_trans_tag:
-                holding.update(
-                    dict([
-                        remaining_shares(post_trans_tag)
-                    ])
-                )
-                shares_remaining = post_trans_tag.find("sharesPwnedFollowingTransaction")
-                if shares_remaining:
-                    shares_remaining_footnotes = get_footnotes(shares_remaining)
-                    if shares_remaining_footnotes:
-                        holding['footnote'] = shares_remaining_footnotes
-
             holdings.append(holding)
 
-        return HoldingsHolder(pd.DataFrame(holdings))
+        return NonDerivativeHoldings(pd.DataFrame(holdings))
 
     @staticmethod
-    def extract_transactions(table: Tag) -> TransactionsHolder:
+    def extract_transactions(table: Tag) -> NonDerivativeTransactions:
         """
         Extract transactions from the table tag
         :param table:
@@ -374,38 +393,41 @@ class NonDerivativeTable:
         """
         transaction_tags = table.find_all("nonDerivativeTransaction")
         if len(transaction_tags) == 0:
-            return TransactionsHolder()
+            return NonDerivativeTransactions()
         transactions = []
-        for trans_tag in transaction_tags:
-            trans_amt_tag = trans_tag.find("transactionAmounts")
-            ownership_nature = trans_tag.find("ownershipNature")
-            post_trans_tag = trans_tag.find("postTransactionAmounts")
+        for transaction_tag in transaction_tags:
+            transaction_amt_tag = transaction_tag.find("transactionAmounts")
+            ownership_nature_tag = transaction_tag.find("ownershipNature")
+            post_transaction_tag = transaction_tag.find("postTransactionAmounts")
+
             transaction = dict(
                 [
-                    security(trans_tag),
-                    transaction_date(trans_tag),
-                    num_shares(trans_amt_tag),
-                    remaining_shares(post_trans_tag),
-                    share_price(trans_amt_tag),
-                    acquired_displosed(trans_amt_tag),
-                    ownership(ownership_nature)
+                    ('security', child_value(transaction_tag, 'securityTitle')),
+                    ('transaction_date', child_value(transaction_tag, 'transactionDate')),
+                    ('num_shares', child_text(transaction_amt_tag, 'transactionShares')),
+                    ('remaining_shares', child_text(post_transaction_tag, 'sharesOwnedFollowingTransaction')),
+                    ('share_price', child_text(transaction_amt_tag, 'transactionPricePerShare')),
+                    ('acquired_disposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
+                    ('direct_indirect', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
                 ]
             )
-            trans_coding_tag = trans_tag.find("transactionCoding")
-            if trans_coding_tag:
-                footnote_tag = trans_coding_tag.find("footnoteId")
+            transaction_coding_tag = transaction_tag.find("transactionCoding")
+            if transaction_coding_tag:
                 transaction_coding = dict(
                     [
-                        form_type(trans_coding_tag),
-                        transaction_code(trans_coding_tag),
-                        equity_swap(trans_coding_tag),
-                        transaction_footnote_id(footnote_tag)
+                        ('form', child_text(transaction_coding_tag, 'transactionFormType')),
+                        ('transaction_code', child_text(transaction_coding_tag, 'transactionCode')),
+                        ('equity_swap', get_bool(child_text(transaction_coding_tag, 'equitySwapInvolved'))),
+                        ('footnotes', get_footnotes(transaction_coding_tag))
                     ]
                 )
                 transaction.update(transaction_coding)
 
             transactions.append(transaction)
-        return TransactionsHolder(pd.DataFrame(transactions))
+        return NonDerivativeTransactions(pd.DataFrame(transactions))
+
+    def __repr__(self):
+        return f"Non-Derivatives - {len(self.holdings)} holding(s) {len(self.transactions)} transaction(s)"
 
 
 class DerivativeTable:
@@ -414,10 +436,10 @@ class DerivativeTable:
     """
 
     def __init__(self,
-                 holdings: HoldingsHolder,
-                 transactions:TransactionsHolder):
-        self.holdings: HoldingsHolder = holdings
-        self.transactions: TransactionsHolder = transactions
+                 holdings: DerivativeHoldings,
+                 transactions: DerivativeTransactions):
+        self.holdings: DerivativeHoldings = holdings
+        self.transactions: DerivativeTransactions = transactions
 
     @property
     def has_holdings(self):
@@ -435,87 +457,90 @@ class DerivativeTable:
     def extract(cls,
                 table: Tag = None):
         if not table:
-            return cls(holdings=HoldingsHolder(), transactions=TransactionsHolder())
+            return cls(holdings=DerivativeHoldings(), transactions=DerivativeTransactions())
         transactions = cls.extract_transactions(table)
         holdings = cls.extract_holdings(table)
         return cls(transactions=transactions, holdings=holdings)
 
     @staticmethod
-    def extract_transactions(table: Tag) -> TransactionsHolder:
+    def extract_transactions(table: Tag) -> DerivativeTransactions:
         trans_tags = table.find_all("derivativeTransaction")
         if len(trans_tags) == 0:
-            return TransactionsHolder()
+            return DerivativeTransactions()
 
         transactions = []
-        for trans_tag in trans_tags:
-            trans_amt_el = trans_tag.find("transactionAmounts")
-            underlying_tag = trans_tag.find("underlyingSecurity")
-            ownership_nature_tag = trans_tag.find("ownershipNature")
-            post_trans_tag = trans_tag.find("postTransactionAmounts")
+        for transaction_tag in trans_tags:
+            transaction_amt_tag = transaction_tag.find("transactionAmounts")
+            underlying_tag = transaction_tag.find("underlyingSecurity")
+            ownership_nature_tag = transaction_tag.find("ownershipNature")
+            post_transaction_tag = transaction_tag.find("postTransactionAmounts")
 
             transaction = dict(
                 [
-                    security(trans_tag),
-                    underlying_security(underlying_tag),
-                    exercise_price(trans_tag),
-                    exercise_date(trans_tag),
-                    expiration_date(trans_tag),
-                    num_shares(trans_amt_el),
-                    underlying_shares(underlying_tag),
-                    ownership(ownership_nature_tag),
-                    share_price(trans_amt_el),
-                    acquired_displosed(trans_amt_el),
-                    transaction_date(trans_tag),
-                    remaining_shares(post_trans_tag)
+                    ('security', child_value(transaction_tag, 'securityTitle')),
+                    ('underlying_security', child_value(underlying_tag, 'underlyingSecurityTitle')),
+                    ('underlying_shares', child_value(underlying_tag, 'underlyingSecurityShares')),
+                    ('exercise_price', child_value(transaction_tag, 'conversionOrExercisePrice')),
+                    ('exercise_date', child_value(transaction_tag, 'exerciseDate')),
+                    ('expiration_date', child_value(transaction_tag, 'expirationDate')),
+                    ('num_shares', child_text(transaction_tag, 'transactionShares')),
+                    ('ownership', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
+                    ('share_price', child_text(transaction_amt_tag, 'transactionPricePerShare')),
+                    ('acquired_disposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
+                    ('transaction_date', child_value(transaction_tag, 'transactionDate')),
+                    ('remaining_shares', child_text(post_transaction_tag, 'sharesOwnedFollowingTransaction')),
                 ]
             )
 
             # Add transaction coding
-            trans_coding_tag = trans_tag.find("transactionCoding")
-            if trans_coding_tag:
-                footnote_tag = trans_coding_tag.find("footnoteId")
+            transaction_coding_tag = transaction_tag.find("transactionCoding")
+            if transaction_coding_tag:
                 transaction_coding = dict(
                     [
-                        form_type(trans_coding_tag),
-                        transaction_code(trans_coding_tag),
-                        equity_swap(trans_coding_tag),
-                        transaction_footnote_id(footnote_tag)
+                        ('form', child_text(transaction_coding_tag, 'transactionFormType')),
+                        ('transaction_code', child_text(transaction_coding_tag, 'transactionCode')),
+                        ('equity_swap', get_bool(child_text(transaction_coding_tag, 'equitySwapInvolved'))),
+                        ('footnotes', get_footnotes(transaction_coding_tag))
                     ]
                 )
                 transaction.update(transaction_coding)
             transactions.append(transaction)
-        return TransactionsHolder(pd.DataFrame(transactions))
+        return DerivativeTransactions(pd.DataFrame(transactions))
 
     @staticmethod
-    def extract_holdings(table: Tag) -> HoldingsHolder:
+    def extract_holdings(table: Tag) -> DerivativeHoldings:
         holding_tags = table.find_all("derivativeHolding")
         if len(holding_tags) == 0:
-            return HoldingsHolder()
+            return DerivativeHoldings()
         holdings = []
         for holding_tag in holding_tags:
-            underlying_tag = holding_tag.find("underlyingSecurity")
+            underlying_security_tag = holding_tag.find("underlyingSecurity")
             ownership_nature = holding_tag.find("ownershipNature")
 
             holding = dict(
                 [
-                    security(holding_tag),
-                    underlying_security(underlying_tag),
-                    exercise_price(holding_tag),
-                    exercise_date(holding_tag),
-                    expiration_date(holding_tag),
-                    underlying_shares(underlying_tag),
-                    ownership(ownership_nature)
+                    ('security', child_value(holding_tag, 'securityTitle')),
+                    ('underlying_security', child_value(underlying_security_tag, 'underlyingSecurityTitle')),
+                    ('underlying_shares', child_value(underlying_security_tag, 'underlyingSecurityShares')),
+                    ('exercise_price', child_value(holding_tag, 'conversionOrExercisePrice')),
+                    ('exercise_date', child_value(holding_tag, 'exerciseDate')),
+                    ('expiration_date', child_value(holding_tag, 'expirationDate')),
+                    ('direct_indirect', child_text(ownership_nature, 'directOrIndirectOwnership')),
+                    ('ownership_nature', child_value(ownership_nature, 'natureOfOwnership')),
                 ]
             )
             holdings.append(holding)
-        return HoldingsHolder(pd.DataFrame(holdings))
+        return DerivativeHoldings(pd.DataFrame(holdings))
+
+    def __repr__(self):
+        return f"Derivatives - {len(self.holdings)} holding(s) {len(self.transactions)} transaction(s)"
 
 
 class OwnershipDocument:
 
     def __init__(self,
                  form: str,
-                 footnotes: Dict[str, str],
+                 footnotes: Footnotes,
                  issuer: Issuer,
                  reporting_owner: Owner,
                  reporting_owner_address: Address,
@@ -527,7 +552,7 @@ class OwnershipDocument:
                  remarks: str
                  ):
         self.form: str = form
-        self.footnotes: Dict[str, str] = footnotes
+        self.footnotes: Footnotes = footnotes
         self.issuer: Issuer = issuer
         self.reporting_owner: Owner = reporting_owner
         self.reporting_owner_address: Address = reporting_owner_address

@@ -244,4 +244,6 @@ def repr_rich(renderable) -> str:
 def get_bool(value: str = None):
     if not value:
         return None
-    return bool(value)
+    if value == '1' or value == 1:
+        return True
+    return False
