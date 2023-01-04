@@ -48,7 +48,7 @@ def test_parse_form3_with_derivatives():
     assert ownership.non_derivatives.holdings.empty
     assert ownership.non_derivatives.transactions.empty
 
-    # Derivatives are not empty .. there are holdings
+    # Derivatives are not empty ... there are holdings
     assert not ownership.derivatives.empty
     assert ownership.derivatives.has_holdings
     assert not ownership.derivatives.holdings.empty
