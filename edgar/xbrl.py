@@ -4,7 +4,6 @@ from typing import Dict, Union
 import duckdb
 import pandas as pd
 from bs4 import BeautifulSoup
-from pydantic import BaseModel
 
 from edgar.core import log
 from edgar.xml import child_text
@@ -25,13 +24,20 @@ __all__ = [
 ]
 
 
-class NamespaceInfo(BaseModel):
-    xmlns: str
-    namespace2tag: Dict[str, str]
+class NamespaceInfo:
+
+    def __init__(self,
+                 xmlns: str,
+                 namespace2tag: Dict[str, str]
+                 ):
+        self.xmlns: str = xmlns
+        self.namespace2tag: Dict[str, str] = namespace2tag
+
+    def __repr__(self):
+        return f"NamespaceInfo(xmlns={self.xmlns}, namespace2tag={self.namespace2tag})"
 
 
 class FilingXbrl:
-
     """
     Represents the XBRL data for a single filing.
     It wraps the underlying dataset of facts into a `facts` property.
