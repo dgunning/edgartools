@@ -32,8 +32,7 @@ dependencies = [
   "lxml>=4.4",
   "rich>=12.6.0",
   "fastcore>=1.5.20",
-  "humanize>=4.0.0",
-  "pydantic>=1.10",
+  "humanize>=4.0.0"
 ]
 dynamic = ["version"]
 
