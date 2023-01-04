@@ -15,6 +15,9 @@ containing data about transactions and holdings.
 
 ## Getting Ownership Documents
 
+- get a form **3**, **4**, or **5** filing
+- get the xml document
+- call `OwnershipDocument.from_xml()`
 
 ```python
 from edgar import Company
@@ -38,7 +41,9 @@ ownership = OwnershipDocument.from_xml(xml)
 
 ## Derivative Table
 
-This contains data on derivative holdings and transactions.
+This contains data on derivative holdings and transactions. To access it call
+`ownership_document.derivatives`.
+
 ### Derivative Holdings
 To access derivative transactions use `ownership.derivatives.holdings`
 
@@ -53,7 +58,9 @@ ownership.derivatives.transactions[0]
 ![Derivative Transaction](https://raw.githubusercontent.com/dgunning/edgartools/main/derivative_transaction.png)
 
 ## Non Derivative Table
-This contains data on non-derivative holdings and transactions.
+This contains data on non-derivative holdings and transactions. To access it call
+`ownership_document.non_
+derivatives`.
 
 ### Non Derivative Holdings
 To access derivative holdings use `ownership.non_derivatives.holdings`
@@ -61,8 +68,11 @@ To access derivative holdings use `ownership.non_derivatives.holdings`
 You can access individual holdings using the `[]` notation.
 
 ```python
-ownership.non_derivatives.holdings[0]
+holding = ownership.non_derivatives.holdings[0]
+holding
 ```
+![Non Derivative Holding](https://raw.githubusercontent.com/dgunning/edgartools/main/non_derivative_holding.png)
+
 
 ### Non Derivative Transactions
 To access derivative transactions use `ownership.non_derivatives.transactions`
@@ -70,5 +80,6 @@ To access derivative transactions use `ownership.non_derivatives.transactions`
 You can access individual transactions using the `[]` notation.
 
 ```python
-ownership.non_derivatives.transactions[0]
+transaction = ownership.non_derivatives.transactions[0]
+transaction
 ```
