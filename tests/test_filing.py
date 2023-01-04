@@ -323,7 +323,7 @@ def test_filing_homepage_primary_documents():
 
     primary_html = primary_documents[0]
     assert primary_html.seq == '1'
-    assert primary_html.document == 'es220296680_4-davis.html' # Displayed as html
+    assert primary_html.document == 'es220296680_4-davis.html'  # Displayed as html
     assert primary_html.description == 'OWNERSHIP DOCUMENT'
     assert primary_html.path.endswith('xslF345X03/es220296680_4-davis.xml')
     assert primary_html.display_extension == '.html'
@@ -336,19 +336,25 @@ def test_filing_homepage_primary_documents():
     assert primary_xml.display_extension == '.xml'
 
 
+orion_form4 = Filing(form='4', company='Orion Engineered Carbons S.A.',
+                     cik=1609804, date='2022-11-04',
+                     accession_no='0000950142-22-003095')
+
+
 def test_filing_primary_xml_document():
-    filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
-                    cik=1609804, date='2022-11-04',
-                    accession_no='0000950142-22-003095')
-    xml_document = filing.homepage.primary_xml_document
+    xml_document = orion_form4.homepage.primary_xml_document
     print(xml_document)
     assert xml_document.display_extension == ".xml"
     assert xml_document.document == "es220296680_4-davis.xml"
     assert xml_document.path == "/Archives/edgar/data/1300650/000095014222003095/es220296680_4-davis.xml"
 
-    html_document = filing.homepage.primary_html_document
+    html_document = orion_form4.homepage.primary_html_document
     print(html_document)
     assert html_document.display_extension == ".html"
     assert html_document.document == "es220296680_4-davis.html"
     assert html_document.path == "/Archives/edgar/data/1300650/000095014222003095/xslF345X03/es220296680_4-davis.xml"
 
+
+def test_filing_xml_downoads_xml_if_filing_has_xml():
+    assert carbo_10K.xml() is None
+    assert orion_form4.xml()

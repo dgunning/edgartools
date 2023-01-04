@@ -3,6 +3,7 @@ from pathlib import Path
 from rich import print
 
 from edgar.ownership import *
+from edgar.filing import Filing
 
 snow_form3 = OwnershipDocument.from_xml(Path('data/form3.snow.xml').read_text())
 snow_form3_nonderiv = OwnershipDocument.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
@@ -171,3 +172,15 @@ def test_parse_form5():
     assert holding.nature_of_ownership == 'Trust [F3]'
 
 
+def test_ownership_from_filing_xml_document():
+    filing = Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
+                    date='2013-04-29', accession_no='0001477932-13-002021')
+    xml = filing.xml()
+    ownership_document: OwnershipDocument = OwnershipDocument.from_xml(xml)
+    assert ownership_document.issuer.name == 'Olivia Inc.'
+
+    print(ownership_document.derivatives)
+    print(ownership_document.non_derivatives)
+    holding = ownership_document.non_derivatives.holdings[0]
+    assert holding.security == 'Common Stock'
+    assert holding.direct_indirect == 'D'

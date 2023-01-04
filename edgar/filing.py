@@ -372,6 +372,12 @@ class Filing:
         """Returns the html contents of the primary document if it is html"""
         return self.document.download()
 
+    def xml(self) -> Optional[str]:
+        """Returns the xml contents of the primary document if it is xml"""
+        xml_document = self.homepage.primary_xml_document
+        if xml_document:
+            return xml_document.download()
+
     def xbrl(self) -> FilingXbrl:
         xbrl_document = self.homepage.xbrl_document
         if xbrl_document:
