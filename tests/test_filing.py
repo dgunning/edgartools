@@ -6,6 +6,7 @@ import httpx
 import humanize
 import pandas as pd
 import pytest
+from typing import List
 
 from edgar import get_filings, Filings, Filing, get_company
 from edgar.filing import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
@@ -194,7 +195,7 @@ def test_filing_homepage_for_filing():
 
 
 def test_filing_document():
-    assert carbo_10K.homepage.primary_document.url == \
+    assert carbo_10K.homepage.primary_html_document.url == \
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
 
 
@@ -207,21 +208,11 @@ def test_xbrl_document():
 def test_get_matching_document():
     filing_document = carbo_10K.homepage.get_matching_document("Seq=='1'")
     assert filing_document
-    assert filing_document.seq == 1
+    assert filing_document.seq == '1'
     assert filing_document.path == '/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
     assert filing_document.url == 'https://www.sec.gov/Archives/edgar/data' + \
            '/1009672/000156459018004771/crr-10k_20171231.htm'
     assert filing_document.name == 'crr-10k_20171231.htm'
-
-
-def test_filing_homepage_get_by_seq():
-    filing_document = carbo_10K.homepage.get_by_seq(1)
-    assert filing_document
-    assert carbo_10K.homepage.get_by_seq(1) == carbo_10K.homepage.get_by_seq("1")
-
-    # Now get a datafile by seq
-    datafile = carbo_10K.homepage.get_by_seq(17)
-    print(datafile)
 
 
 def test_download_filing_document():
@@ -265,12 +256,12 @@ def test_filings_toduckdb():
 def test_filing_primary_document():
     filing = Filing(form='DEF 14A', company='180 DEGREE CAPITAL CORP. /NY/', cik=893739, date='2020-03-25',
                     accession_no='0000893739-20-000019')
-    primary_document: FilingDocument = filing.primary_document
+    primary_document: FilingDocument = filing.document
     assert primary_document
     assert primary_document.url == \
            'https://www.sec.gov/Archives/edgar/data/893739/000089373920000019/annualmeetingproxy2020-doc.htm'
     assert primary_document.extension == '.htm'
-    assert primary_document.seq == 1
+    assert primary_document.seq == '1'
 
 
 barclays_filing = Filing(form='ATS-N/MA', company='BARCLAYS CAPITAL INC.', cik=851376, date='2020-02-21',
@@ -278,12 +269,12 @@ barclays_filing = Filing(form='ATS-N/MA', company='BARCLAYS CAPITAL INC.', cik=8
 
 
 def test_filing_primary_document_seq_5():
-    primary_document: FilingDocument = barclays_filing.primary_document
+    primary_document: FilingDocument = barclays_filing.document
     assert primary_document
     assert primary_document.url == \
            'https://www.sec.gov/Archives/edgar/data/851376/000085137620000003/xslATSN_COVER_X01/coverpage.xml'
     assert primary_document.extension == '.xml'
-    assert primary_document.seq == 5
+    assert primary_document.seq == '5'
 
 
 def test_filing_html():
@@ -295,6 +286,69 @@ def test_filing_html():
     assert "<HTML>" in html
 
 
-def test_filing_html_is_non_for_xml_filing():
+def test_primary_xml_for_10k():
+    filing = Filing(form='10-K', company='10x Genomics, Inc.',
+                    cik=1770787, date='2020-02-27',
+                    accession_no='0001193125-20-052640')
+    xml_document = filing.homepage.primary_xml_document
+    assert xml_document is None
+    html_document = filing.document
+    assert html_document
+    primary_documents = filing.homepage.primary_documents
+    print(primary_documents)
+    assert len(primary_documents) == 1
+
+
+def test_filing_html_is_xhtml_for_xml_filing():
     html = barclays_filing.html()
-    assert html is None
+    assert "-//W3C//DTD XHTML 1.0 Strict//EN" in html
+
+
+def test_filing_homepage_get_minimum_seq():
+    filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
+                    cik=1609804, date='2022-11-04',
+                    accession_no='0000950142-22-003095')
+    min_seq = filing.homepage.min_seq()
+    assert min_seq == '1'
+    print(min_seq)
+
+
+def test_filing_homepage_primary_documents():
+    filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
+                    cik=1609804, date='2022-11-04',
+                    accession_no='0000950142-22-003095')
+    print()
+    primary_documents: List[FilingDocument] = filing.homepage.primary_documents
+    assert len(primary_documents) == 2
+
+    primary_html = primary_documents[0]
+    assert primary_html.seq == '1'
+    assert primary_html.document == 'es220296680_4-davis.html' # Displayed as html
+    assert primary_html.description == 'OWNERSHIP DOCUMENT'
+    assert primary_html.path.endswith('xslF345X03/es220296680_4-davis.xml')
+    assert primary_html.display_extension == '.html'
+
+    primary_xml = primary_documents[1]
+    assert primary_xml.seq == '1'
+    assert primary_xml.document == 'es220296680_4-davis.xml'
+    assert primary_xml.description == 'OWNERSHIP DOCUMENT'
+    assert primary_xml.path.endswith('000095014222003095/es220296680_4-davis.xml')
+    assert primary_xml.display_extension == '.xml'
+
+
+def test_filing_primary_xml_document():
+    filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
+                    cik=1609804, date='2022-11-04',
+                    accession_no='0000950142-22-003095')
+    xml_document = filing.homepage.primary_xml_document
+    print(xml_document)
+    assert xml_document.display_extension == ".xml"
+    assert xml_document.document == "es220296680_4-davis.xml"
+    assert xml_document.path == "/Archives/edgar/data/1300650/000095014222003095/es220296680_4-davis.xml"
+
+    html_document = filing.homepage.primary_html_document
+    print(html_document)
+    assert html_document.display_extension == ".html"
+    assert html_document.document == "es220296680_4-davis.html"
+    assert html_document.path == "/Archives/edgar/data/1300650/000095014222003095/xslF345X03/es220296680_4-davis.xml"
+
