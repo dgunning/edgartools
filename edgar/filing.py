@@ -16,7 +16,7 @@ import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
-from pydantic import BaseModel
+from dataclasses import dataclass
 from rich.console import Group
 from rich.text import Text
 
@@ -362,14 +362,15 @@ class Filing:
         self._filing_homepage = None
 
     @property
-    def primary_document(self):
-        return self.homepage.primary_document
+    def document(self):
+        return self.homepage.primary_html_document
+
+    def primary_documents(self):
+        return self.homepage.primary_documents
 
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
-        primary_document = self.primary_document
-        if primary_document.extension == '.htm':
-            return primary_document.download()
+        return self.document.download()
 
     def xbrl(self) -> FilingXbrl:
         xbrl_document = self.homepage.xbrl_document
@@ -383,7 +384,7 @@ class Filing:
 
     def open(self):
         """Open the main filing document"""
-        webbrowser.open(self.homepage.primary_document.url)
+        webbrowser.open(self.document.url)
 
     @property
     def homepage_url(self) -> str:
@@ -420,19 +421,35 @@ class Filing:
         return self.description
 
 
-class FilingDocument(BaseModel):
+@dataclass(frozen=True)
+class FilingDocument:
     """
     A document on the filing
+
     """
     seq: int
     description: str
+    document: str
     form: str
     size: int
     path: str
 
     @property
     def extension(self):
+        """The actual extension of the filing document
+         Usually one of .xml or .html or .pdf or .txt or .paper
+         """
         return os.path.splitext(self.path)[1]
+
+    @property
+    def display_extension(self) -> str:
+        """This is the extension displayed in the html e.g. "es220296680_4-davis.html"
+        The actual extension would be "es220296680_4-davis.xml", that displays as html in the browser
+
+        >>> .html
+
+        """
+        return os.path.splitext(self.document)[1]
 
     @property
     def url(self) -> str:
@@ -451,15 +468,14 @@ class FilingDocument(BaseModel):
 
     @classmethod
     def from_dataframe_row(cls, dataframe_row: pd.Series):
-        assert dataframe_row.shape == (5,), ("Cannot create a FilingDocument from the dataframe .. "
-                                             "should only be one row from which to create the FilingDocument "
-                                             )
+
         try:
             size = int(dataframe_row.Size)
         except ValueError:
             size = 0
         return cls(seq=dataframe_row.Seq,
                    description=dataframe_row.Description,
+                   document=dataframe_row.Document,
                    form=dataframe_row.Type,
                    size=size,
                    path=dataframe_row.Url)
@@ -481,10 +497,6 @@ class FilingHomepage:
         self.url: str = url
         self.description = description
 
-    def get_by_seq(self, seq: Union[int, str]):
-        query = f"Seq=='{seq}'"
-        return self.get_matching_document(query) or self.get_matching_datafile(query)
-
     def get_matching_document(self,
                               query: str):
         res = self.documents.query(query)
@@ -502,14 +514,39 @@ class FilingHomepage:
     def open(self):
         webbrowser.open(self.url)
 
+    def min_seq(self) -> str:
+        """Get the minimum document sequence from the Seq column"""
+        return str(min([int(seq) for seq in self.documents.Seq.tolist() if seq and seq.isdigit()]))
+
     @property
-    def primary_document(self) -> FilingDocument:
-        """Get the primary document of the filing.
-        The primary document is always the first sequentially. Usually "Seq == 1"
-        The primary document also has the extension 'htm', 'xml', 'pdf', 'txt' or 'paper'
+    @lru_cache(maxsize=2)
+    def primary_documents(self) -> List[FilingDocument]:
         """
-        first = self.documents.iloc[0]
-        return FilingDocument.from_dataframe_row(first)
+        Get the documents listed as primary for the filing
+        :return:
+        """
+        min_seq = self.min_seq()
+        doc_results = self.documents.query(f"Seq=='{min_seq}'")
+        return [
+            FilingDocument.from_dataframe_row(self.documents.iloc[index])
+            for index in doc_results.index
+        ]
+
+    @property
+    def primary_xml_document(self) -> Optional[FilingDocument]:
+        """Get the primary xml document on the filing"""
+        for doc in self.primary_documents:
+            if doc.display_extension == ".xml":
+                return doc
+
+    @property
+    def primary_html_document(self) -> Optional[FilingDocument]:
+        """Get the primary xml document on the filing"""
+        for doc in self.primary_documents:
+            if doc.display_extension == ".html" or doc.display_extension == '.htm':
+                return doc
+        # Shouldn't get here but just open the first document
+        return self.primary_documents[0]
 
     @property
     def xbrl_document(self):
@@ -530,7 +567,7 @@ class FilingHomepage:
     @classmethod
     def from_html(cls,
                   homepage_html: str,
-                  url:str,
+                  url: str,
                   description: str):
         soup = BeautifulSoup(homepage_html, features="html.parser")
         filing_files = dict()
@@ -546,7 +583,7 @@ class FilingHomepage:
                 cell_values = [cell.text for cell in cells] + [link["href"] if link else None]
                 records.append(cell_values)
             filing_files[summary] = (pd.DataFrame(records, columns=column_names)
-                                     .filter(['Seq', 'Description', 'Type', 'Size', 'Url'])
+                                     .filter(['Seq', 'Description', 'Document', 'Type', 'Size', 'Url'])
                                      )
         return cls(filing_files,
                    url=url,

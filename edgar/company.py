@@ -21,6 +21,7 @@ __all__ = [
     'CompanyFilings',
     'get_company',
     'get_company_facts',
+    'get_company_concept',
     'get_company_tickers',
     'get_company_submissions',
     'get_ticker_to_cik_lookup'
@@ -186,6 +187,10 @@ class Company:
             return Company.for_cik(cik)
 
     def get_facts(self) -> CompanyFacts:
+        """
+        Get the company facts
+        :return: CompanyFacts
+        """
         try:
             return get_company_facts(self.cik)
         except NoCompanyFactsFound:
