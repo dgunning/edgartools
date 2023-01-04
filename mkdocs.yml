@@ -11,4 +11,5 @@ plugins:
 
 nav:
   - Documentation: index.md
+  - ownership.md
   - reference.md
