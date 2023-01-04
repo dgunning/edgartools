@@ -294,7 +294,7 @@ def test_primary_xml_for_10k():
     assert xml_document is None
     html_document = filing.document
     assert html_document
-    primary_documents = filing.homepage.primary_documents
+    primary_documents = filing.primary_documents
     print(primary_documents)
     assert len(primary_documents) == 1
 

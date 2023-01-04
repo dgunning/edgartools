@@ -365,6 +365,7 @@ class Filing:
     def document(self):
         return self.homepage.primary_html_document
 
+    @property
     def primary_documents(self):
         return self.homepage.primary_documents
 
