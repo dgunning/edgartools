@@ -117,7 +117,7 @@ def test_derivative_holdings_get_item():
     assert holding.exercise_date == "[F1]"
     assert holding.expiration_date == "[F1]"
     assert holding.direct_indirect == 'I'
-    assert holding.ownership_nature == 'Limited Partnership [F4]'
+    assert holding.nature_of_ownership == 'Limited Partnership [F4]'
 
 
 def test_non_derivative_holding_get_item():
@@ -149,7 +149,25 @@ def test_reporting_relationship():
     assert ownership.reporting_relationship.is_ten_pct_owner
 
 
-def test_parse_form4():
-    ownership = OwnershipDocument.from_xml(Path('data/form4.snow.xml').read_text())
+def test_parse_form5():
+    ownership = OwnershipDocument.from_xml(Path('data/form5.snow.xml').read_text())
+    print()
     print(ownership)
-    print(ownership.derivatives.transactions)
+    print(ownership.derivatives)
+    print(ownership.non_derivatives)
+    assert ownership.form == "5"
+    assert ownership.issuer.name == 'Snowflake Inc.'
+    assert ownership.issuer.cik == '0001640147'
+    assert ownership.derivatives.empty
+    assert not ownership.non_derivatives.empty
+    assert len(ownership.non_derivatives.transactions) == 1
+    assert len(ownership.non_derivatives.holdings) == 2
+
+    assert not ownership.reporting_relationship.is_ten_pct_owner
+
+    holding = ownership.non_derivatives.holdings[0]
+    assert holding.security == 'Class A Common Stock'
+    assert holding.direct_indirect == 'I'
+    assert holding.nature_of_ownership == 'Trust [F3]'
+
+

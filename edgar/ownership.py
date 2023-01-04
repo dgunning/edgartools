@@ -238,7 +238,7 @@ class DerivativeHolding:
     expiration_date: str
     underlying_shares: int
     direct_indirect: str
-    ownership_nature: str
+    nature_of_ownership: str
 
 
 @dataclass(frozen=True)
@@ -257,7 +257,7 @@ class DerivativeTransaction:
     exercise_date: str
     expiration_date: str
     num_shares: object
-    ownership: str
+    direct_indirect: str
     share_price: str
     acquired_disposed: str
     transaction_date: str
@@ -484,7 +484,7 @@ class DerivativeTable:
                     ('exercise_date', child_value(transaction_tag, 'exerciseDate')),
                     ('expiration_date', child_value(transaction_tag, 'expirationDate')),
                     ('num_shares', child_text(transaction_tag, 'transactionShares')),
-                    ('ownership', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
+                    ('direct_indirect', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
                     ('share_price', child_text(transaction_amt_tag, 'transactionPricePerShare')),
                     ('acquired_disposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
                     ('transaction_date', child_value(transaction_tag, 'transactionDate')),
@@ -526,7 +526,7 @@ class DerivativeTable:
                     ('exercise_date', child_value(holding_tag, 'exerciseDate')),
                     ('expiration_date', child_value(holding_tag, 'expirationDate')),
                     ('direct_indirect', child_text(ownership_nature, 'directOrIndirectOwnership')),
-                    ('ownership_nature', child_value(ownership_nature, 'natureOfOwnership')),
+                    ('nature_of_ownership', child_value(ownership_nature, 'natureOfOwnership')),
                 ]
             )
             holdings.append(holding)

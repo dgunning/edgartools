@@ -1,0 +1,129 @@
+<ownershipDocument>
+    <schemaVersion>X0306</schemaVersion>
+    <documentType>5</documentType>
+    <periodOfReport>2022-01-31</periodOfReport>
+    <notSubjectToSection16>0</notSubjectToSection16>
+    <form3HoldingsReported>0</form3HoldingsReported>
+    <form4TransactionsReported>0</form4TransactionsReported>
+    <issuer>
+        <issuerCik>0001640147</issuerCik>
+        <issuerName>Snowflake Inc.</issuerName>
+        <issuerTradingSymbol>SNOW</issuerTradingSymbol>
+    </issuer>
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001397798</rptOwnerCik>
+            <rptOwnerName>McMahon John Dennis</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>C/O SNOWFLAKE INC.</rptOwnerStreet1>
+            <rptOwnerStreet2>106 EAST BABCOCK STREET, SUITE 3A</rptOwnerStreet2>
+            <rptOwnerCity>BOZEMAN</rptOwnerCity>
+            <rptOwnerState>MT</rptOwnerState>
+            <rptOwnerZipCode>59715</rptOwnerZipCode>
+            <rptOwnerStateDescription/>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>1</isDirector>
+            <isOfficer>0</isOfficer>
+            <isTenPercentOwner>0</isTenPercentOwner>
+            <isOther>0</isOther>
+            <officerTitle/>
+            <otherText/>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+    <nonDerivativeTable>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Class A Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2021-12-23</value>
+            </transactionDate>
+            <transactionCoding>
+                <transactionFormType>5</transactionFormType>
+                <transactionCode>G</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+                <footnoteId id="F1"/>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>61386</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>0</value>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>54666</value>
+                    <footnoteId id="F2"/>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeHolding>
+            <securityTitle>
+                <value>Class A Common Stock</value>
+            </securityTitle>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>151188</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>I</value>
+                </directOrIndirectOwnership>
+                <natureOfOwnership>
+                    <value>Trust</value>
+                    <footnoteId id="F3"/>
+                </natureOfOwnership>
+            </ownershipNature>
+        </nonDerivativeHolding>
+        <nonDerivativeHolding>
+            <securityTitle>
+                <value>Class A Common Stock</value>
+            </securityTitle>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>125737</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>I</value>
+                </directOrIndirectOwnership>
+                <natureOfOwnership>
+                    <value>Trust</value>
+                    <footnoteId id="F4"/>
+                </natureOfOwnership>
+            </ownershipNature>
+        </nonDerivativeHolding>
+    </nonDerivativeTable>
+    <derivativeTable/>
+    <footnotes>
+        <footnote id="F1">Represents shares that the Reporting Person transferred for no consideration.</footnote>
+        <footnote id="F2">Includes shares to be issued in connection with the vesting of one or more restricted stock
+            units.
+        </footnote>
+        <footnote id="F3">The shares are held by The John McMahon Software Irrevocable Trust for which the Reporting
+            Person's immediate family members are the beneficiaries.
+        </footnote>
+        <footnote id="F4">The shares are held by the John McMahon 1995 Family Trust for which the Reporting Person is a
+            trustee.
+        </footnote>
+    </footnotes>
+    <remarks/>
+    <ownerSignature>
+        <signatureName>/s/ Travis Shrout, Attorney-in-Fact</signatureName>
+        <signatureDate>2022-03-11</signatureDate>
+    </ownerSignature>
+</ownershipDocument>
