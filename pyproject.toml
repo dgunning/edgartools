@@ -44,6 +44,12 @@ Source = "https://github.com/dgunning/edgartools"
 [tool.hatch.version]
 path = "edgar/__about__.py"
 
+[tool.hatch.build]
+include = [
+  "edgar/*.py",
+  "edgar/data/*",
+]
+
 [tool.hatch.envs.default]
 dependencies = [
   "pytest",
