@@ -5,6 +5,7 @@ from edgar.core import (decode_content,
                         set_identity,
                         ask_for_identity,
                         repr_rich,
+                        Result,
                         client_headers,
                         df_to_table,
                         download_file)
@@ -92,3 +93,19 @@ def test_repr_rich():
     table: Table = df_to_table(df)
     value = repr_rich(table)
     assert '100% Bran' in value
+
+
+def test_result():
+    result = Result.Ok(value=1)
+    assert result.success
+    assert not result.failure
+    assert result.value == 1
+
+    assert "Success" in str(result)
+
+    result = Result.Fail("Does not work")
+    assert result.failure
+    assert not result.success
+    assert not result.value
+    assert result.error == "Does not work"
+    assert "Failure" in str(result)

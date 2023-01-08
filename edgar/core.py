@@ -25,18 +25,19 @@ logging.basicConfig(
 log = logging.getLogger("rich")
 
 __all__ = [
+    'log',
+    'Result',
+    'repr_df',
+    'get_bool',
+    'repr_rich',
+    'df_to_table',
+    'http_client',
     'get_identity',
     'set_identity',
-    'ask_for_identity',
-    'http_client',
     'download_text',
     'download_file',
     'decode_content',
-    'df_to_table',
-    'repr_df',
-    'repr_rich',
-    'log',
-    'get_bool'
+    'ask_for_identity',
 ]
 
 default_http_timeout: int = 5
@@ -241,9 +242,54 @@ def repr_rich(renderable) -> str:
     return str_output
 
 
-def get_bool(value: str = None):
+def get_bool(value: str = None) -> bool:
+    """Convert the value to a boolean"""
     if not value:
         return None
     if value == '1' or value == 1:
         return True
     return False
+
+
+class Result:
+
+    """
+    This class represents the result of an operation which can succeed or fail.
+    It allows for handling the failures more gracefully that using error handling
+    """
+    def __init__(self,
+                 success: bool,
+                 error: str,
+                 value: object):
+        self.success = success
+        self.error = error
+        self.value = value
+
+    @property
+    def failure(self) -> bool:
+        """:return True if the operation failed"""
+        return not self.success
+
+    def __str__(self):
+        if self.success:
+            return f'[Success]'
+        else:
+            return f'[Failure] "{self.error}"'
+
+    def __repr__(self):
+        if self.success:
+            return f"Result (success={self.success})"
+        else:
+            return f'Result (success={self.success}, message="{self.error}")'
+
+    @classmethod
+    def Fail(cls,
+             error: str):
+        """Create a Result for a failed operation"""
+        return cls(False, error=error, value=None)
+
+    @classmethod
+    def Ok(cls,
+           value: object):
+        """Create a Result for a successful operation"""
+        return cls(success=True, value=value, error=None)
