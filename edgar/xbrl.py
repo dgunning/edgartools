@@ -1,11 +1,11 @@
 from functools import lru_cache
-from typing import Dict, Union
+from typing import Dict, Union, Tuple
 
 import duckdb
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from edgar.core import log
+from edgar.core import log, repr_df
 from edgar.xml import child_text
 
 """
@@ -16,6 +16,8 @@ This wraps the underlying data read from the XBL document.
 Unlike other XBRL parsing tools, this does not do full XBRL parsing with schema validation etc, but is sufficient
 for getting data from XBRL document. So it's quite a bit faster since it does not have to download anything.
 
+See https://specifications.xbrl.org/presentation.html
+
 """
 
 __all__ = [
@@ -25,6 +27,9 @@ __all__ = [
 
 
 class NamespaceInfo:
+    """
+    This class contains the namespace tags and links parsed from the start of an (XBRL) XML document
+    """
 
     def __init__(self,
                  xmlns: str,
@@ -33,8 +38,25 @@ class NamespaceInfo:
         self.xmlns: str = xmlns
         self.namespace2tag: Dict[str, str] = namespace2tag
 
+    def __len__(self):
+        return len(self.namespace2tag)
+
+    def summary(self) -> pd.DataFrame:
+        return (pd.DataFrame(self.namespace2tag.items(),
+                             columns=['namespace', 'taxonomy'])
+                .filter(['taxonomy', 'namespace'])
+                .sort_values('taxonomy')
+                .reset_index(drop=True)
+                )
+
     def __repr__(self):
         return f"NamespaceInfo(xmlns={self.xmlns}, namespace2tag={self.namespace2tag})"
+
+    def _repr_html_(self):
+        return f"""
+        <h4>Namespaces</h4>
+        {repr_df(self.summary())}
+        """
 
 
 class FilingXbrl:
@@ -48,7 +70,7 @@ class FilingXbrl:
                  facts: pd.DataFrame,
                  namespace_info: NamespaceInfo):
         self.facts: pd.DataFrame = facts
-        self.namepace_info: NamespaceInfo = namespace_info
+        self.namespace_info: NamespaceInfo = namespace_info
 
     def _dei_value(self, fact: str):
         res = self.facts.query(f"namespace=='dei' & fact=='{fact}' ")
@@ -89,7 +111,8 @@ class FilingXbrl:
         def get_unit(unit_ref: str):
             return unit_map.get(unit_ref)
 
-        def get_context(context_ref: str):
+        def get_context(context_ref: str) -> Tuple[str, str, Union[str, None]]:
+            """Get the value of the context for that context id"""
             context = context_map.get(context_ref)
             if context:
                 start_date, end_date = context.get('period', (None, None))
@@ -148,5 +171,20 @@ class FilingXbrl:
         return cls(facts=facts_dataframe,
                    namespace_info=NamespaceInfo(xmlns=xmlns, namespace2tag=namespace2tag))
 
+    def summary(self) -> pd.DataFrame:
+        """Summarize this FilingXBRL as a dataframe"""
+        return pd.DataFrame(
+            [{"company": self.company_name,
+              "cik": self.cik,
+              "form": self.form_type,
+              "namespaces": len(self.namespace_info),
+              "facts": len(self.facts), }]
+        )
+
     def __repr__(self):
         return f"""Filing XBRL({self.company_name} {self.cik} {self.form_type})"""
+
+    def _repr_html_(self):
+        return f"""<h4>Extracted XBRL</h4>
+        {repr_df(self.summary())} 
+        """

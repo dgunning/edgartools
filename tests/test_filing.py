@@ -189,9 +189,23 @@ def test_filing_primary_document():
 def test_filing_homepage_for_filing():
     filing_homepage: FilingHomepage = carbo_10K.homepage
     assert 'Description'
+    assert filing_homepage.url == carbo_10K.url
+
+
+def test_filing_homepage_documents_and_datafiles():
+    filing_homepage: FilingHomepage = carbo_10K.homepage
+    assert 'Description'
     assert len(filing_homepage.documents) > 8
     assert len(filing_homepage.datafiles) >= 6
     assert filing_homepage.url == carbo_10K.url
+
+
+def test_get_matching_files():
+    document_files = carbo_10K.homepage.get_matching_files("table=='Document Format Files'")
+    assert len(document_files) >= 12
+
+    data_files = carbo_10K.homepage.get_matching_files("table=='Data Files'")
+    assert len(data_files) >= 6
 
 
 def test_filing_document():
@@ -205,8 +219,8 @@ def test_xbrl_document():
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-20171231.xml'
 
 
-def test_get_matching_document():
-    filing_document = carbo_10K.homepage.get_matching_document("Seq=='1'")
+def test_filing_homepage_get_file():
+    filing_document = carbo_10K.homepage.get_file(seq=1)
     assert filing_document
     assert filing_document.seq == '1'
     assert filing_document.path == '/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
@@ -216,7 +230,7 @@ def test_get_matching_document():
 
 
 def test_download_filing_document():
-    filing_document = carbo_10K.homepage.get_matching_document("Seq=='1'")
+    filing_document = carbo_10K.homepage.primary_html_document
     contents = filing_document.download()
     assert '<html>' in contents
 

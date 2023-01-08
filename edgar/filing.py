@@ -491,32 +491,30 @@ class FilingDocument:
         return download_file(self.url)
 
 
+# These are the columns on the table on the filing homepage
+filing_file_cols = ['Seq', 'Description', 'Document', 'Type', 'Size', 'Url']
+
+
 class FilingHomepage:
     """
     A class that represents the homepage for the filing allowing us to get the documents and datafiles
     """
 
     def __init__(self,
-                 filing_files: Dict[str, pd.DataFrame],
+                 files: pd.DataFrame,
                  url: str,
                  description: str):
-        self.filing_files: Dict[str, pd.DataFrame] = filing_files
+        self.files: pd.DataFrame = files
         self.url: str = url
         self.description = description
 
-    def get_matching_document(self,
-                              query: str):
-        res = self.documents.query(query)
+    def get_file(self,
+                 *,
+                 seq: int) -> FilingDocument:
+        """ get the filing document that matches the seq"""
+        res = self.files.query(f"Seq=='{seq}'")
         if not res.empty:
-            rec = res.iloc[0]
-            return FilingDocument.from_dataframe_row(rec)
-
-    def get_matching_datafile(self,
-                              query: str):
-        res = self.datafiles.query(query)
-        if not res.empty:
-            rec = res.iloc[0]
-            return FilingDocument.from_dataframe_row(rec)
+            return FilingDocument.from_dataframe_row(res.iloc[0])
 
     def open(self):
         webbrowser.open(self.url)
@@ -559,24 +557,39 @@ class FilingHomepage:
     def xbrl_document(self):
         xbrl_document_query = \
             "Description.isin(['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT'])"
-        document: FilingDocument = self.get_matching_datafile(xbrl_document_query)
-        if document:
-            return document
+        matching_files = self.get_matching_files(xbrl_document_query)
+        if not matching_files.empty:
+            rec = matching_files.iloc[0]
+            return FilingDocument.from_dataframe_row(rec)
+
+    def get_matching_files(self,
+                           query: str) -> pd.DataFrame:
+        """ return the files that match the query"""
+        return self.files.query(query).reset_index(drop=True).filter(filing_file_cols)
 
     @property
-    def documents(self):
-        return self.filing_files.get("Document Format Files")
+    def documents(self) -> pd.DataFrame:
+        """ returns the files that are in the "Document Format Files" table of the homepage"""
+        return self.get_matching_files("table=='Document Format Files'")
 
     @property
     def datafiles(self):
-        return self.filing_files.get("Data Files")
+        """ returns the files that are in the "Data Files" table of the homepage"""
+        return self.get_matching_files("table=='Data Files'")
 
     @classmethod
     def from_html(cls,
                   homepage_html: str,
                   url: str,
                   description: str):
+        """Parse the HTML and create the Homepage from it"""
+
+        # It is html so use "html.parser" (instead of "xml", or "lxml")
         soup = BeautifulSoup(homepage_html, features="html.parser")
+
+        # Keep track of the tables as dataframes so we can append later
+        dfs = []
+
         filing_files = dict()
         tables = soup.find_all("table", class_="tableFile")
         for table in tables:
@@ -584,15 +597,25 @@ class FilingHomepage:
             rows = table.find_all("tr")
             column_names = [th.text for th in rows[0].find_all("th")] + ["Url"]
             records = []
+
+            # Add the rows from the table
             for row in rows[1:]:
                 cells = row.find_all("td")
                 link = cells[2].a
                 cell_values = [cell.text for cell in cells] + [link["href"] if link else None]
                 records.append(cell_values)
-            filing_files[summary] = (pd.DataFrame(records, columns=column_names)
-                                     .filter(['Seq', 'Description', 'Document', 'Type', 'Size', 'Url'])
-                                     )
-        return cls(filing_files,
+
+            # Now create the dataframe
+            table_as_df = (pd.DataFrame(records, columns=column_names)
+                           .filter(filing_file_cols)
+                           .assign(table=summary)
+                           )
+            dfs.append(table_as_df)
+
+        # Now concat into a single dataframe
+        files = pd.concat(dfs, ignore_index=True)
+
+        return cls(files,
                    url=url,
                    description=description)
 
