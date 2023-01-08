@@ -273,7 +273,7 @@ class Result:
 
     def __str__(self):
         if self.success:
-            return f'[Success]'
+            return '[Success]'
         else:
             return f'[Failure] "{self.error}"'
 

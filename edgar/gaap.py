@@ -42,6 +42,8 @@ def exists_in_gaap(prefix: str, name: str) -> bool:
         return Result.Ok(value=gaap_item in gaap)
     except TypeError as err:
         return Result.Fail(f"Cannot load the GAAP data .. error was {err}")
+    except FileNotFoundError as err:
+        return Result.Fail(f"Cannot load the GAAP data .. {err}")
 
 
 @lru_cache(maxsize=2)

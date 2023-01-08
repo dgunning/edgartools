@@ -5,7 +5,7 @@ import webbrowser
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
-from typing import Tuple, List, Dict, Union, Optional
+from typing import Tuple, List,  Union, Optional
 
 import httpx
 import pandas as pd
@@ -590,7 +590,6 @@ class FilingHomepage:
         # Keep track of the tables as dataframes so we can append later
         dfs = []
 
-        filing_files = dict()
         tables = soup.find_all("table", class_="tableFile")
         for table in tables:
             summary = table.attrs.get("summary")
