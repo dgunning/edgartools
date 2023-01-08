@@ -4,22 +4,25 @@ from typing import List, Dict, Optional, Union
 
 import duckdb
 import httpx
+import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 from fastcore.basics import listify
-from edgar.core import http_client, repr_df
-from edgar.filing import Filing, Filings
-from edgar.core import df_to_table, repr_rich
 from rich.console import Group
 from rich.text import Text
+from dataclasses import dataclass
+
+from edgar.core import http_client, repr_df, log, Result, df_to_table, repr_rich
+from edgar.filing import Filing, Filings
 
 __all__ = [
     'Address',
     'Company',
+    'get_company',
     'CompanyFacts',
     'CompanyFilings',
-    'get_company',
+    'CompanyConcept',
     'get_company_facts',
     'get_company_concept',
     'get_company_tickers',
@@ -47,6 +50,35 @@ class Address:
     def __repr__(self):
         return (f'Address(street1="{self.street1 or ""}", street2="{self.street2 or ""}", city="{self.city or ""}",'
                 f'zipcode="{self.zipcode or ""}", state_or_country="{self.state_or_country}")'
+                )
+
+
+class Fact:
+
+    def __init__(self,
+                 end: str,
+                 value: object,
+                 accn: str,
+                 fy: str,
+                 fp: str,
+                 form: str,
+                 filed: str,
+                 frame: str,
+                 unit: str
+                 ):
+        self.end: str = end
+        self.value: object = value
+        self.accn: str = accn
+        self.fy: str = fy
+        self.fp: str = fp
+        self.form: str = form
+        self.filed: str = filed
+        self.frame: str = frame
+        self.unit: str = unit
+
+    def __repr__(self):
+        return (f"Fact(value={self.value}, unit={self.unit}, form={self.form}, accession={self.accn} "
+                f"filed={self.filed}, fy={self.fy}, fp={self.fp}, frame={self.frame})"
                 )
 
 
@@ -406,13 +438,99 @@ def get_company_facts(cik: int):
             raise
 
 
+@dataclass(frozen=True)
+class Concept:
+    taxonomy: str
+    tag: str
+    label: str
+    description: str
+
+
+class CompanyConcept:
+
+    def __init__(self,
+                 cik: str,
+                 entity_name: str,
+                 concept: Concept,
+                 data: pa.Table):
+        self.cik: str = cik
+        self.entity_name: str = entity_name
+        self.concept: Concept = concept
+        self.data: pa.Table = data
+
+    @staticmethod
+    def create_fact(row) -> Fact:
+        return Fact(
+            end=row.end,
+            value=row.val,
+            accn=row.accn,
+            fy=row.fy,
+            fp=row.fp,
+            form=row.form,
+            filed=row.filed,
+            frame=row.frame,
+            unit=row.unit
+        )
+
+    def latest(self) -> List[Fact]:
+        return (self.data
+                .assign(cnt=self.data.groupby(['unit']).cumcount())
+                .query("cnt==0")
+                )
+
+    def __repr__(self):
+        return f"CompanyConcept({self.concept.taxonomy}:{self.concept.tag}, {self.entity_name} - {self.cik})"
+
+    @classmethod
+    def from_json(cls,
+                  cjson: Dict[str, object]):
+        data = pd.concat([
+            (pd.DataFrame(unit_data)
+             .assign(unit=unit, frame=lambda df: df.frame.replace(np.nan, None))
+             .filter(['filed', 'val', 'unit', 'fy', 'fp', 'end', 'form', 'accn', 'frame'])
+             )
+            for unit, unit_data in cjson["units"].items()
+        ])
+        return cls(
+            cik=cjson['cik'],
+            entity_name=cjson["entityName"],
+            concept=Concept(
+                taxonomy=cjson["taxonomy"],
+                tag=cjson["tag"],
+                label=cjson["tag"],
+                description=cjson["description"],
+            )
+            , data=data
+        )
+
+
 @lru_cache(maxsize=32)
 def get_company_concept(cik: int,
                         taxonomy: str,
                         concept: str):
-    company_concept_json = get_json(
-        f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik:010}/{taxonomy}/{concept}.json")
-    return company_concept_json
+    try:
+        company_concept_json = get_json(
+            f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik:010}/{taxonomy}/{concept}.json")
+        company_concept: CompanyConcept = CompanyConcept.from_json(company_concept_json)
+        return Result.Ok(value=company_concept)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            # Get the company
+            company = Company.for_cik(int(cik))
+            if not company:
+                return Result.Fail("No company found for cik {cik}")
+            from edgar.gaap import gaap
+            gaap_item = f"{taxonomy}:{concept}"
+            if gaap_item in gaap:
+                # The taxonomy and concepts exist but not for that company
+                error_message = f"{gaap_item} does not exist for company {company.name} [{cik}]"
+                log.error(error_message)
+                return Result.Fail(error=error_message)
+            else:
+                # The taxonomy and concepts do not exist
+                error_message = f"{gaap_item} does not exist in GAAP. See https://fasb.org/xbrl"
+                log.error(error_message)
+                return Result.Fail(error=error_message)
 
 
 def get_company_tickers():

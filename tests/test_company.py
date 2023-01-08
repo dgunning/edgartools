@@ -4,7 +4,7 @@ from pathlib import Path
 import pyarrow.compute as pc
 from functools import lru_cache
 from edgar.company import *
-from edgar.company import parse_company_submissions
+from edgar.company import parse_company_submissions, CompanyConcept
 from edgar.filing import Filing
 
 
@@ -192,3 +192,34 @@ def test_get_company_by_cik():
 def test_get_company_by_ticker():
     company = get_company(ticker="SNOW")
     assert company.cik == 1640147
+
+
+def test_get_company_concept():
+    concept = get_company_concept(1640147,
+                                  taxonomy="us-gaap",
+                                  concept="AccountsPayableCurrent")
+    if not concept.success:
+        print(concept.error)
+    assert concept.success
+    latest = concept.value.latest()
+    assert len(latest) == 1
+    print(latest)
+    data = [CompanyConcept.create_fact(row) for row in latest.itertuples()]
+    assert len(data) == 1
+    assert data[0].form in ['10-Q', '10-K']
+
+
+def test_get_company_concept_with_taxonomy_missing():
+    concept = get_company_concept(1640147,
+                                  taxonomy="us-missing",
+                                  concept="AccountsPayableCurrent")
+    assert concept.failure
+    assert concept.error == 'us-missing:AccountsPayableCurrent does not exist in GAAP. See https://fasb.org/xbrl'
+
+
+def test_get_company_concept_with_concept_missing():
+    concept = get_company_concept(1640147,
+                                  taxonomy="us-gaap",
+                                  concept="AccountsPayableDoesNotExist")
+    assert concept.failure
+    assert concept.error == "us-gaap:AccountsPayableDoesNotExist does not exist in GAAP. See https://fasb.org/xbrl"
