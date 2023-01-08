@@ -1,4 +1,5 @@
 import pandas as pd
+import importlib
 
 from edgar.core import (decode_content,
                         get_identity,
@@ -6,6 +7,7 @@ from edgar.core import (decode_content,
                         ask_for_identity,
                         repr_rich,
                         Result,
+                        get_resource,
                         client_headers,
                         df_to_table,
                         download_file)
@@ -109,3 +111,8 @@ def test_result():
     assert not result.value
     assert result.error == "Does not work"
     assert "Failure" in str(result)
+
+
+def test_get_resource():
+    data_dir = get_resource('data')
+    assert str(data_dir).endswith('data')

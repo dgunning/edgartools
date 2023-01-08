@@ -32,6 +32,7 @@ __all__ = [
     'repr_rich',
     'df_to_table',
     'http_client',
+    'get_resource',
     'get_identity',
     'set_identity',
     'download_text',
@@ -252,11 +253,11 @@ def get_bool(value: str = None) -> bool:
 
 
 class Result:
-
     """
     This class represents the result of an operation which can succeed or fail.
     It allows for handling the failures more gracefully that using error handling
     """
+
     def __init__(self,
                  success: bool,
                  error: str,
@@ -293,3 +294,9 @@ class Result:
            value: object):
         """Create a Result for a successful operation"""
         return cls(success=True, value=value, error=None)
+
+
+def get_resource(file: str):
+    import importlib
+    import edgar
+    return importlib.resources.path(edgar, file)

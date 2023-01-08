@@ -519,9 +519,9 @@ def get_company_concept(cik: int,
             company = Company.for_cik(int(cik))
             if not company:
                 return Result.Fail("No company found for cik {cik}")
-            from edgar.gaap import gaap
+            from edgar.gaap import get_gaap
             gaap_item = f"{taxonomy}:{concept}"
-            if gaap_item in gaap:
+            if gaap_item in get_gaap():
                 # The taxonomy and concepts exist but not for that company
                 error_message = f"{gaap_item} does not exist for company {company.name} [{cik}]"
                 log.error(error_message)

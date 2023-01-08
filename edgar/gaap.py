@@ -1,15 +1,19 @@
-from pathlib import Path
 import pandas as pd
+from edgar.core import get_resource
+from functools import lru_cache
 
-here = Path(__file__).parent
+data_dir = get_resource('data')
 
 __all__ = [
     'Gaap',
-    'gaap'
+    'get_gaap'
 ]
 
 
 class Gaap:
+    """
+    Contains information about GAAP
+    """
 
     def __init__(self,
                  gaap_data: pd.DataFrame):
@@ -17,7 +21,7 @@ class Gaap:
 
     @classmethod
     def load(cls):
-        data = pd.read_csv(here / 'data' / 'GAAP_Taxonomy_2022.csv')
+        data = pd.read_csv(data_dir / 'GAAP_Taxonomy_2022.csv')
         return Gaap(gaap_data=data)
 
     def __contains__(self, item: str):
@@ -29,4 +33,6 @@ class Gaap:
             return item in self.data.prefix.unique()
 
 
-gaap = Gaap.load()
+@lru_cache(maxsize=2)
+def get_gaap():
+    return Gaap.load()
