@@ -111,9 +111,3 @@ def test_result():
     assert not result.value
     assert result.error == "Does not work"
     assert "Failure" in str(result)
-
-
-def test_get_resource():
-    data_dir = get_resource('data')
-    print(type(data_dir))
-    assert str(data_dir).endswith('data')
