@@ -1,4 +1,5 @@
 import logging
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import List, Dict, Optional, Union
 
@@ -11,7 +12,6 @@ import pyarrow.compute as pc
 from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
-from dataclasses import dataclass
 
 from edgar.core import http_client, repr_df, log, Result, df_to_table, repr_rich
 from edgar.filing import Filing, Filings
@@ -519,22 +519,9 @@ def get_company_concept(cik: int,
             company = Company.for_cik(int(cik))
             if not company:
                 return Result.Fail("No company found for cik {cik}")
-            from edgar.gaap import exists_in_gaap
-            # Check if the taxonomy and concept exists in gaap
-            exists_result: Result = exists_in_gaap(taxonomy, concept)
-            if exists_result.success:
-                if exists_result.value:
-                    # The taxonomy and concepts exist but not for that company
-                    error_message = f"{taxonomy}:{concept} does not exist for company {company.name} [{cik}]"
-                    log.error(error_message)
-                    return Result.Fail(error=error_message)
-                else:
-                    # The taxonomy and concepts do not exist
-                    error_message = f"{taxonomy}:{concept} does not exist in GAAP. See https://fasb.org/xbrl"
-                    log.error(error_message)
-                    return Result.Fail(error=error_message)
             else:
-                error_message = f"Cannot get the GAAP data .. error was {exists_result.error}"
+                error_message = (f"{taxonomy}:{concept} does not exist for company {company.name} [{cik}]. "
+                                 "See https://fasb.org/xbrl")
                 log.error(error_message)
                 return Result.Fail(error=error_message)
 

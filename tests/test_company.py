@@ -209,10 +209,11 @@ def test_get_company_concept():
 
 def test_get_company_concept_with_taxonomy_missing():
     concept = get_company_concept(1640147,
-                                  taxonomy="us-missing",
+                                  taxonomy="not-gap",
                                   concept="AccountsPayableCurrent")
     assert concept.failure
-    #assert concept.error == 'us-missing:AccountsPayableCurrent does not exist in GAAP. See https://fasb.org/xbrl'
+    assert concept.error == ("not-gap:AccountsPayableCurrent does not exist for company Snowflake Inc. [1640147]. "
+                             "See https://fasb.org/xbrl")
 
 
 def test_get_company_concept_with_concept_missing():
@@ -220,4 +221,5 @@ def test_get_company_concept_with_concept_missing():
                                   taxonomy="us-gaap",
                                   concept="AccountsPayableDoesNotExist")
     assert concept.failure
-    #assert concept.error == "us-gaap:AccountsPayableDoesNotExist does not exist in GAAP. See https://fasb.org/xbrl"
+    assert concept.error == ("us-gaap:AccountsPayableDoesNotExist does not exist for company Snowflake Inc. [1640147]. "
+                             "See https://fasb.org/xbrl")
