@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Tuple
 
 import duckdb
 import httpx
@@ -19,14 +19,16 @@ from edgar.filing import Filing, Filings
 __all__ = [
     'Address',
     'Company',
+    'get_concept',
     'get_company',
     'CompanyFacts',
+    'CompanyFiling',
     'CompanyFilings',
     'CompanyConcept',
     'get_company_facts',
-    'get_company_concept',
     'get_company_tickers',
     'get_company_submissions',
+    'parse_company_submissions',
     'get_ticker_to_cik_lookup'
 ]
 
@@ -79,6 +81,42 @@ class Fact:
     def __repr__(self):
         return (f"Fact(value={self.value}, unit={self.unit}, form={self.form}, accession={self.accn} "
                 f"filed={self.filed}, fy={self.fy}, fp={self.fp}, frame={self.frame})"
+                )
+
+
+class CompanyFiling(Filing):
+
+    def __init__(self,
+                 cik: int,
+                 company: str,
+                 form: str,
+                 filing_date: str,
+                 report_date: str,
+                 accession_no: str,
+                 file_number: str,
+                 items: str,
+                 size: int,
+                 primary_document: str,
+                 primary_doc_description: str,
+                 is_xbrl: bool,
+                 is_inline_xbrl: str):
+        super().__init__(cik=cik, company=company, form=form, filing_date=filing_date, accession_no=accession_no)
+        self.report_date = report_date
+        self.file_number: str = file_number
+        self.items: str = items
+        self.size: int = size
+        self.primary_document: str = primary_document
+        self.primary_doc_description: str = primary_doc_description
+        self.is_xbrl: bool = is_xbrl
+        self.is_inline_xbrl: bool = is_inline_xbrl
+
+    def get_related_filings(self):
+        """Get all the filings related to this one"""
+        return self.get_entity().get_filings(file_number=self.file_number, sort_by="filingDate")
+
+    def __str__(self):
+        return (f"CompanyFiling(company={self.company}, cik={self.cik}, form={self.form}, "
+                f"filing_date={self.filing_date}, accession_no={self.accession_no})"
                 )
 
 
@@ -137,12 +175,20 @@ class CompanyFilings(Filings):
         return self.get_filing_at(item)
 
     def get_filing_at(self, item: int):
-        return Filing(
+        return CompanyFiling(
             cik=self.cik,
             company=self.company_name,
             form=self.data['form'][item].as_py(),
-            date=self.data['filingDate'][item].as_py(),
+            filing_date=self.data['filingDate'][item].as_py(),
+            report_date=self.data['reportDate'][item].as_py(),
             accession_no=self.data['accessionNumber'][item].as_py(),
+            file_number=self.data['fileNumber'][item].as_py(),
+            items=self.data['items'][item].as_py(),
+            size=self.data['size'][item].as_py(),
+            primary_document=self.data['primaryDocument'][item].as_py(),
+            primary_doc_description=self.data['primaryDocDescription'][item].as_py(),
+            is_xbrl=self.data['isXBRL'][item].as_py(),
+            is_inline_xbrl=self.data['isInlineXBRL'][item].as_py()
         )
 
     def latest(self, n: int = 1) -> int:
@@ -234,7 +280,8 @@ class Company:
                     accession_number: Union[str, List] = None,
                     file_number: Union[str, List] = None,
                     is_xbrl: bool = None,
-                    is_inline_xbrl: bool = None
+                    is_inline_xbrl: bool = None,
+                    sort_by:Union[str, List[Tuple[str, str]]] = None
                     ):
         """
         Get the company's filings and optionally filter by multiple criteria
@@ -265,6 +312,9 @@ class Company:
             company_filings = company_filings.filter(pc.equal(company_filings['isXBRL'], int(is_xbrl)))
         if is_inline_xbrl is not None:
             company_filings = company_filings.filter(pc.equal(company_filings['isInlineXBRL'], int(is_inline_xbrl)))
+
+        if sort_by:
+            company_filings = company_filings.sort_by(sort_by)
 
         return CompanyFilings(company_filings,
                               cik=self.cik,
@@ -479,7 +529,9 @@ class CompanyConcept:
                 )
 
     def __repr__(self):
-        return f"CompanyConcept({self.concept.taxonomy}:{self.concept.tag}, {self.entity_name} - {self.cik})"
+        return (f"CompanyConcept({self.concept.taxonomy}:{self.concept.tag}, {self.entity_name} - {self.cik})"
+                "\n"
+                f"{self.data}")
 
     @classmethod
     def from_json(cls,
@@ -487,7 +539,9 @@ class CompanyConcept:
         data = pd.concat([
             (pd.DataFrame(unit_data)
              .assign(unit=unit, frame=lambda df: df.frame.replace(np.nan, None))
-             .filter(['filed', 'val', 'unit', 'fy', 'fp', 'end', 'form', 'accn', 'frame'])
+             .filter(['filed', 'val', 'unit', 'fy', 'fp', 'end', 'form', 'frame', 'accn'])
+             .sort_values(["filed"], ascending=[False])
+             .reset_index(drop=True)
              )
             for unit, unit_data in cjson["units"].items()
         ])
@@ -505,14 +559,25 @@ class CompanyConcept:
 
 
 @lru_cache(maxsize=32)
-def get_company_concept(cik: int,
-                        taxonomy: str,
-                        concept: str):
+def get_concept(cik: int,
+                taxonomy: str,
+                concept: str):
+    """
+    The company-concept API returns all the XBRL disclosures from a single company (CIK) and concept
+     (a taxonomy and tag) into a single JSON file, with a separate array of facts for each units on measure
+     that the company has chosen to disclose (e.g. net profits reported in U.S. dollars and in Canadian dollars).
+
+    https://data.sec.gov/api/xbrl/companyconcept/CIK##########/us-gaap/AccountsPayableCurrent.json
+    :param cik: The company cik
+    :param taxonomy: The taxonomy e.g. "us-gaap"
+    :param concept: The concept or tag e.g. AccountsPayableCurrent
+    :return: a CompanyConcept
+    """
     try:
         company_concept_json = get_json(
             f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik:010}/{taxonomy}/{concept}.json")
         company_concept: CompanyConcept = CompanyConcept.from_json(company_concept_json)
-        return Result.Ok(value=company_concept)
+        return company_concept
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             # Get the company

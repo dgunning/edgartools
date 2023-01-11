@@ -174,7 +174,7 @@ def test_parse_form5():
 
 def test_ownership_from_filing_xml_document():
     filing = Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
-                    date='2013-04-29', accession_no='0001477932-13-002021')
+                    filing_date='2013-04-29', accession_no='0001477932-13-002021')
     xml = filing.xml()
     ownership_document: OwnershipDocument = OwnershipDocument.from_xml(xml)
     assert ownership_document.issuer.name == 'Olivia Inc.'

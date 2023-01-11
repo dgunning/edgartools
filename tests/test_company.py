@@ -4,7 +4,7 @@ from pathlib import Path
 import pyarrow.compute as pc
 from functools import lru_cache
 from edgar.company import *
-from edgar.company import parse_company_submissions, CompanyConcept
+from edgar.company import parse_company_submissions, CompanyConcept, CompanyFiling
 from edgar.filing import Filing
 
 
@@ -51,9 +51,10 @@ def test_get_company_facts_db():
 
 
 def test_company_get_facts():
-    company = get_test_company(1318605)
+    company = get_test_company(ticker="TSLA")
     facts = company.get_facts()
     assert facts
+    assert len(facts) > 100
 
 
 def test_company_get_facts_repr():
@@ -93,11 +94,11 @@ def test_company_get_filings_for_form():
     company: Company = Company.for_ticker("EXPE")
     tenk_filings: CompanyFilings = company.get_filings(form='10-K')
     assert pc.all(pc.equal(tenk_filings.data['form'], '10-K'))
-    filing: Filing = tenk_filings[0]
+    filing: CompanyFiling = tenk_filings[0]
     assert filing
     assert filing.form == '10-K'
     assert filing.cik == 1324424
-    assert isinstance(filing.date, str)
+    assert isinstance(filing.filing_date, str)
     assert isinstance(filing.accession_no, str)
 
 
@@ -184,6 +185,19 @@ def test_get_filings_multiple_filters():
     assert set(filings_df.form.tolist()) == {"10-Q", "10-K"}
 
 
+def test_company_filing_get_related_filings():
+    company = Company.for_cik(1841925)
+    filings = company.get_filings(form=["S-1", "S-1/A"], is_inline_xbrl=True)
+    filing = filings[0]
+    print(filing)
+    related_filings = filing.get_related_filings()
+    assert len(related_filings) > 8
+    # They all have the same fileNumber
+    file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))
+    assert len(file_numbers) == 1
+    assert file_numbers[0] == filing.file_number
+
+
 def test_get_company_by_cik():
     company = get_company(cik=1554646)
     assert company.name == 'NEXPOINT SECURITIES, INC.'
@@ -195,31 +209,30 @@ def test_get_company_by_ticker():
 
 
 def test_get_company_concept():
-    concept = get_company_concept(1640147,
-                                  taxonomy="us-gaap",
-                                  concept="AccountsPayableCurrent")
-    if concept.success:
-        latest = concept.value.latest()
-        assert len(latest) == 1
-        print(latest)
-        data = [CompanyConcept.create_fact(row) for row in latest.itertuples()]
-        assert len(data) == 1
-        assert data[0].form in ['10-Q', '10-K']
+    concept = get_concept(1640147,
+                          taxonomy="us-gaap",
+                          concept="AccountsPayableCurrent")
+    latest = concept.latest()
+    assert len(latest) == 1
+    print(latest)
+    data = [CompanyConcept.create_fact(row) for row in latest.itertuples()]
+    assert len(data) == 1
+    assert data[0].form in ['10-Q', '10-K']
 
 
 def test_get_company_concept_with_taxonomy_missing():
-    concept = get_company_concept(1640147,
-                                  taxonomy="not-gap",
-                                  concept="AccountsPayableCurrent")
+    concept = get_concept(1640147,
+                          taxonomy="not-gap",
+                          concept="AccountsPayableCurrent")
     assert concept.failure
     assert concept.error == ("not-gap:AccountsPayableCurrent does not exist for company Snowflake Inc. [1640147]. "
                              "See https://fasb.org/xbrl")
 
 
 def test_get_company_concept_with_concept_missing():
-    concept = get_company_concept(1640147,
-                                  taxonomy="us-gaap",
-                                  concept="AccountsPayableDoesNotExist")
+    concept = get_concept(1640147,
+                          taxonomy="us-gaap",
+                          concept="AccountsPayableDoesNotExist")
     assert concept.failure
     assert concept.error == ("us-gaap:AccountsPayableDoesNotExist does not exist for company Snowflake Inc. [1640147]. "
                              "See https://fasb.org/xbrl")

@@ -264,7 +264,7 @@ class Filings:
             cik=self.data['cik'][item].as_py(),
             company=self.data['company'][item].as_py(),
             form=self.data['form'][item].as_py(),
-            date=self.data['filingDate'][item].as_py(),
+            filing_date=self.data['filingDate'][item].as_py(),
             accession_no=self.data['accessionNumber'][item].as_py(),
         )
 
@@ -352,12 +352,12 @@ class Filing:
                  cik: int,
                  company: str,
                  form: str,
-                 date: str,
+                 filing_date: str,
                  accession_no: str):
         self.cik = cik
         self.company = company
         self.form = form
-        self.date = date
+        self.filing_date = filing_date
         self.accession_no = accession_no
         self._filing_homepage = None
 
@@ -410,6 +410,22 @@ class Filing:
                                                              description=self.description)
         return self._filing_homepage
 
+    def get_entity(self):
+        """Get the company to which this filing belongs"""
+        from edgar.company import Company
+        return Company.for_cik(self.cik)
+
+    def get_related_filings(self):
+        """Get all the filings related to this one
+        There is no file number on this base Filing class so first get the company,
+
+        then this filing then get the related filings
+        """
+        company = self.get_entity()
+        filings = company.get_filings(accession_number=self.accession_no)
+        file_number = filings[0].file_number
+        return company.get_filings(file_number=file_number, sort_by="filingDate")
+
     def __hash__(self):
         return hash(self.accession_no)
 
@@ -422,7 +438,7 @@ class Filing:
     @property
     def description(self):
         return (f"Filing(form='{self.form}', company='{self.company}', cik={self.cik}, "
-                f"date='{self.date}', accession_no='{self.accession_no}')")
+                f"date='{self.filing_date}', accession_no='{self.accession_no}')")
 
     def __repr__(self):
         return self.description

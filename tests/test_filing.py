@@ -159,11 +159,11 @@ def test_iterate_filings():
         assert filing
 
 
-carbo_10K = Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, date='2018-03-08',
+carbo_10K = Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, filing_date='2018-03-08',
                    accession_no='0001564590-18-004771')
 
 four37_capital_staff_filing = Filing(form='SEC STAFF ACTION', company='437 CAPITAL Fund Corp', cik=1805559,
-                                     date='2022-03-24', accession_no='9999999997-22-001189')
+                                     filing_date='2022-03-24', accession_no='9999999997-22-001189')
 
 
 def test_filing_homepage_url():
@@ -268,7 +268,7 @@ def test_filings_toduckdb():
 
 
 def test_filing_primary_document():
-    filing = Filing(form='DEF 14A', company='180 DEGREE CAPITAL CORP. /NY/', cik=893739, date='2020-03-25',
+    filing = Filing(form='DEF 14A', company='180 DEGREE CAPITAL CORP. /NY/', cik=893739, filing_date='2020-03-25',
                     accession_no='0000893739-20-000019')
     primary_document: FilingDocument = filing.document
     assert primary_document
@@ -278,7 +278,7 @@ def test_filing_primary_document():
     assert primary_document.seq == '1'
 
 
-barclays_filing = Filing(form='ATS-N/MA', company='BARCLAYS CAPITAL INC.', cik=851376, date='2020-02-21',
+barclays_filing = Filing(form='ATS-N/MA', company='BARCLAYS CAPITAL INC.', cik=851376, filing_date='2020-02-21',
                          accession_no='0000851376-20-000003')
 
 
@@ -293,7 +293,7 @@ def test_filing_primary_document_seq_5():
 
 def test_filing_html():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
-                    cik=1770787, date='2020-02-27',
+                    cik=1770787, filing_date='2020-02-27',
                     accession_no='0001193125-20-052640')
     html = filing.html()
     assert html
@@ -302,7 +302,7 @@ def test_filing_html():
 
 def test_primary_xml_for_10k():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
-                    cik=1770787, date='2020-02-27',
+                    cik=1770787, filing_date='2020-02-27',
                     accession_no='0001193125-20-052640')
     xml_document = filing.homepage.primary_xml_document
     assert xml_document is None
@@ -320,7 +320,7 @@ def test_filing_html_is_xhtml_for_xml_filing():
 
 def test_filing_homepage_get_minimum_seq():
     filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
-                    cik=1609804, date='2022-11-04',
+                    cik=1609804, filing_date='2022-11-04',
                     accession_no='0000950142-22-003095')
     min_seq = filing.homepage.min_seq()
     assert min_seq == '1'
@@ -329,7 +329,7 @@ def test_filing_homepage_get_minimum_seq():
 
 def test_filing_homepage_primary_documents():
     filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
-                    cik=1609804, date='2022-11-04',
+                    cik=1609804, filing_date='2022-11-04',
                     accession_no='0000950142-22-003095')
     print()
     primary_documents: List[FilingDocument] = filing.homepage.primary_documents
@@ -351,7 +351,7 @@ def test_filing_homepage_primary_documents():
 
 
 orion_form4 = Filing(form='4', company='Orion Engineered Carbons S.A.',
-                     cik=1609804, date='2022-11-04',
+                     cik=1609804, filing_date='2022-11-04',
                      accession_no='0000950142-22-003095')
 
 
@@ -372,3 +372,15 @@ def test_filing_primary_xml_document():
 def test_filing_xml_downoads_xml_if_filing_has_xml():
     assert carbo_10K.xml() is None
     assert orion_form4.xml()
+
+
+def test_filing_get_entity():
+    company = carbo_10K.get_entity()
+    assert company.cik == carbo_10K.cik
+
+
+def test_get_related_filings():
+    related_filings = carbo_10K.get_related_filings()
+    assert len(related_filings) > 200
+    file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))
+    assert len(file_numbers) == 1
