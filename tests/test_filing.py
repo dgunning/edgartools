@@ -384,3 +384,10 @@ def test_get_related_filings():
     assert len(related_filings) > 200
     file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))
     assert len(file_numbers) == 1
+
+
+def test_print_filings():
+    filings = get_filings(2022, 1, "xbrl")
+    print(filings)
+    print("Works")
+
