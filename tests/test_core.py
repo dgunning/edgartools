@@ -5,6 +5,7 @@ from edgar.core import (decode_content,
                         get_identity,
                         set_identity,
                         ask_for_identity,
+                        display_size,
                         repr_rich,
                         Result,
                         get_resource,
@@ -111,3 +112,13 @@ def test_result():
     assert not result.value
     assert result.error == "Does not work"
     assert "Failure" in str(result)
+
+
+def test_display_size():
+    assert display_size(117000) == "114.3 KB"
+    assert display_size(1170000) == "1.1 MB"
+    assert display_size("117000") == "114.3 KB"
+    assert display_size("1170000") == "1.1 MB"
+    assert display_size(None) == ""
+    assert display_size("aaa") == ""
+    assert display_size("\x01") == ""

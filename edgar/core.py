@@ -308,4 +308,7 @@ def display_size(size: Optional[int]) -> str:
     """
     :return the size in KB or MB as a string
     """
-    return humanize.naturalsize(int(size), binary=True).replace("i", "") if size else ""
+    if size:
+        if isinstance(size, int) or size.isdigit():
+            return humanize.naturalsize(int(size), binary=True).replace("i", "")
+    return  ""
