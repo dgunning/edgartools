@@ -13,7 +13,7 @@ from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
 
-from edgar.core import http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size, get_bool
+from edgar.core import http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size
 from edgar.filing import Filing, Filings
 
 __all__ = [

@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Dict, Union, Tuple, List
+from typing import Dict, Union, Tuple
 
 import duckdb
 import pandas as pd
@@ -83,7 +83,7 @@ class XbrlFacts:
 
     def __rich__(self) -> str:
         return Group(
-            Text(f"Facts"),
+            Text("Facts"),
             df_to_rich_table(self.data[['namespace', 'fact', 'value']].set_index('fact'),
                              max_rows=20),
         )
@@ -221,9 +221,9 @@ class FilingXbrl:
         return Group(
             Text(f"Form {self.form_type} Extracted XBRL"),
             df_to_rich_table(self.summary().set_index("company")),
-            Text(f"Facts"),
+            Text("Facts"),
             df_to_rich_table(self.facts.data[['namespace', 'fact', 'value', 'units', 'end_date']], max_rows=10),
-            Text(f"Taxonomies"),
+            Text("Taxonomies"),
             df_to_rich_table(self.namespace_info.summary())
         )
 
