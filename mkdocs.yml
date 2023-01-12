@@ -10,7 +10,9 @@ plugins:
             show_source: false
 
 nav:
-  - Documentation: index.md
-  - ownership.md
+  - Overview: index.md
+  - using-the-filings-api.md
+  - using-the-company-api.md
   - working-with-xbrl.md
+  - ownership.md
   - reference.md
