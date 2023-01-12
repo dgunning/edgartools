@@ -5,7 +5,7 @@ import webbrowser
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
-from typing import Tuple, List,  Union, Optional
+from typing import Tuple, List, Union, Optional
 
 import httpx
 import pandas as pd
@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from rich.console import Group
 from rich.text import Text
 
-from edgar.core import http_client, download_text, download_file, log, df_to_table, repr_rich
+from edgar.core import http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size
 from edgar.xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -326,11 +326,10 @@ class Filings:
         return f"Filings - {len(self.data):,} in total from {start_date} to {end_date}"
 
     def __rich__(self) -> str:
-        start_date, end_date = self.date_range
         return Group(
             Text(self.summary)
             ,
-            df_to_table(self.data)
+            df_to_rich_table(self.data)
         )
 
     def __repr__(self):
@@ -407,7 +406,7 @@ class Filing:
             homepage_html = download_text(self.homepage_url)
             self._filing_homepage = FilingHomepage.from_html(homepage_html,
                                                              url=self.homepage_url,
-                                                             description=self.description)
+                                                             filing=self)
         return self._filing_homepage
 
     def get_entity(self):
@@ -435,13 +434,46 @@ class Filing:
     def __ne__(self, other):
         return not self == other
 
-    @property
-    def description(self):
-        return (f"Filing(form='{self.form}', company='{self.company}', cik={self.cik}, "
-                f"date='{self.filing_date}', accession_no='{self.accession_no}')")
+    def summary(self) -> pd.DataFrame:
+        """Return a summary of this filing as a dataframe"""
+        return pd.DataFrame([{'form': self.form,
+                              'filed': self.filing_date,
+                              'company': self.company,
+                              'cik': self.cik,
+                              "accession_no": self.accession_no}]).set_index("accession_no")
+
+    def __str__(self):
+        """
+        Return a string version of this filing e.g.
+
+        Filing(form='10-K', filing_date='2018-03-08', company='CARBO CERAMICS INC',
+              cik=1009672, accession_no='0001564590-18-004771')
+        :return:
+        """
+        return (f"Filing(form='{self.form}', filing_date='{self.filing_date}', company='{self.company}', "
+                f"cik={self.cik}, accession_no='{self.accession_no}')")
+
+    def __rich__(self) -> str:
+        """
+        Produce a table version of this filing e.g.
+        ┌──────────────────────┬──────┬────────────┬────────────────────┬─────────┐
+        │                      │ form │ filed      │ company            │ cik     │
+        ├──────────────────────┼──────┼────────────┼────────────────────┼─────────┤
+        │ 0001564590-18-004771 │ 10-K │ 2018-03-08 │ CARBO CERAMICS INC │ 1009672 │
+        └──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
+        :return: a rich table version of this filing
+        """
+        return df_to_rich_table(self.summary())
+
+    def __rich__repr__(self):
+        yield "accession_no", self.accession_no
+        yield "form", self.form
+        yield "filed", self.filed
+        yield "company", self.company
+        yield "cik", self.cik
 
     def __repr__(self):
-        return self.description
+        return repr_rich(self.__rich__())
 
 
 @dataclass(frozen=True)
@@ -519,10 +551,10 @@ class FilingHomepage:
     def __init__(self,
                  files: pd.DataFrame,
                  url: str,
-                 description: str):
+                 filing: Filing):
         self.files: pd.DataFrame = files
         self.url: str = url
-        self.description = description
+        self.filing: Filing = filing
 
     def get_file(self,
                  *,
@@ -597,7 +629,7 @@ class FilingHomepage:
     def from_html(cls,
                   homepage_html: str,
                   url: str,
-                  description: str):
+                  filing: Filing):
         """Parse the HTML and create the Homepage from it"""
 
         # It is html so use "html.parser" (instead of "xml", or "lxml")
@@ -632,7 +664,31 @@ class FilingHomepage:
 
         return cls(files,
                    url=url,
-                   description=description)
+                   filing=filing)
+
+    @staticmethod
+    def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
+        return (data
+                .filter(["Seq", "Document", "Description", "Size"])
+                .assign(Size=data.Size.apply(display_size))
+                .set_index("Seq")
+                )
+
+    def __str__(self):
+        return f"Homepage for {self.description}"
 
     def __repr__(self):
-        return f"Homepage for {self.description}"
+        return repr_rich(self.__rich__())
+
+    def __rich__(self):
+        return Group(
+            df_to_rich_table(self.filing.summary(), index_name="Filing"),
+            Group(Text("Documents"),
+                  df_to_rich_table(FilingHomepage.summarize_files(self.documents), index_name="Seq")
+                  ),
+            Group(Text("Datafiles"),
+                  df_to_rich_table(
+                      FilingHomepage.summarize_files(self.datafiles), index_name="Seq"),
+                  ) if self.datafiles is not None else Text(""),
+
+        )

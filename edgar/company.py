@@ -13,7 +13,7 @@ from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
 
-from edgar.core import http_client, repr_df, log, Result, df_to_table, repr_rich
+from edgar.core import http_client, repr_df, log, Result, df_to_rich_table, repr_rich
 from edgar.filing import Filing, Filings
 
 __all__ = [
@@ -154,7 +154,7 @@ class CompanyFacts:
         return Group(
             Text(f"Company Facts({self.name} [{self.cik}] {len(self.facts):,} total facts)")
             ,
-            df_to_table(self.facts)
+            df_to_rich_table(self.facts)
         )
 
     def __repr__(self):

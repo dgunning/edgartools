@@ -9,7 +9,7 @@ from edgar.core import (decode_content,
                         Result,
                         get_resource,
                         client_headers,
-                        df_to_table,
+                        df_to_rich_table,
                         download_file)
 import re
 from rich.table import Table
@@ -84,7 +84,7 @@ def test_download_index_file():
 
 def test_df_to_rich_table():
     df = pd.read_csv('data/cereal.csv')
-    table: Table = df_to_table(df)
+    table: Table = df_to_rich_table(df)
     assert table
     assert len(table.rows) == 21
 
@@ -92,7 +92,7 @@ def test_df_to_rich_table():
 def test_repr_rich():
     df = pd.read_csv('data/cereal.csv',
                      usecols=['name', 'mfr', 'type', 'calories', 'protein', 'fat', 'sodium'])
-    table: Table = df_to_table(df)
+    table: Table = df_to_rich_table(df)
     value = repr_rich(table)
     assert '100% Bran' in value
 

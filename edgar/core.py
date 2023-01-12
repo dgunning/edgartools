@@ -8,6 +8,7 @@ from io import BytesIO
 from typing import Union, Optional
 
 import httpx
+import humanize
 import pandas as pd
 import pyarrow as pa
 from rich import box
@@ -30,8 +31,8 @@ __all__ = [
     'repr_df',
     'get_bool',
     'repr_rich',
-    'df_to_table',
     'http_client',
+    'display_size',
     'get_resource',
     'get_identity',
     'set_identity',
@@ -39,6 +40,7 @@ __all__ = [
     'download_file',
     'decode_content',
     'ask_for_identity',
+    'df_to_rich_table',
 ]
 
 default_http_timeout: int = 5
@@ -173,7 +175,7 @@ def repr_df(df, hide_index: bool = True):
     return disp._repr_html_()
 
 
-def df_to_table(
+def df_to_rich_table(
         df: Union[pd.DataFrame, pa.Table],
         index_name: Optional[str] = None,
         max_rows: int = 20) -> Table:
@@ -300,3 +302,10 @@ def get_resource(file: str):
     import importlib
     import edgar
     return importlib.resources.path(edgar, file)
+
+
+def display_size(size: Optional[int]) -> str:
+    """
+    :return the size in KB or MB as a string
+    """
+    return humanize.naturalsize(int(size), binary=True).replace("i", "") if size else ""

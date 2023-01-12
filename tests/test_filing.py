@@ -10,6 +10,7 @@ from typing import List
 
 from edgar import get_filings, Filings, Filing, get_company
 from edgar.filing import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
+from rich import print
 
 pd.options.display.max_colwidth = 200
 
@@ -391,3 +392,25 @@ def test_print_filings():
     print(filings)
     print("Works")
 
+
+def test_filing_str():
+    filing_str = str(carbo_10K)
+    assert str(carbo_10K.cik) in filing_str
+    assert str(carbo_10K.company) in filing_str
+    assert str(carbo_10K.form) in filing_str
+    assert str(carbo_10K.filing_date) in filing_str
+    print(filing_str)
+
+
+def test_filing_repr():
+    filing_repr = carbo_10K.__repr__()
+    assert str(carbo_10K.cik) in filing_repr
+    assert str(carbo_10K.company) in filing_repr
+    assert str(carbo_10K.form) in filing_repr
+    assert str(carbo_10K.filing_date) in filing_repr
+    print(carbo_10K)
+
+
+def test_filing_homepage_repr():
+    homepage = carbo_10K.homepage
+    print(homepage.__repr__())
