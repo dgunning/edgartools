@@ -1,8 +1,10 @@
 import json
+from functools import lru_cache
 from pathlib import Path
 
+import pandas as pd
 import pyarrow.compute as pc
-from functools import lru_cache
+
 from edgar.company import *
 from edgar.company import parse_company_submissions, CompanyConcept, CompanyFiling
 from edgar.filing import Filing
@@ -236,3 +238,18 @@ def test_get_company_concept_with_concept_missing():
     assert concept.failure
     assert concept.error == ("us-gaap:AccountsPayableDoesNotExist does not exist for company Snowflake Inc. [1640147]. "
                              "See https://fasb.org/xbrl")
+
+
+def test_company_filings_summary():
+    company = get_test_company(cik=1318605)
+    filings = company.get_filings()
+    filing_summary = filings.data_summary()
+    assert isinstance(filing_summary, pd.DataFrame)
+    print(filing_summary)
+    print(filing_summary.dtypes)
+
+
+def test_company_filings_test_company_get_facts_repr():
+    company = get_test_company(cik=1318605)
+    filings = company.get_filings()
+    print(filings)

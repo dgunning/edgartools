@@ -1,6 +1,7 @@
 from edgar.xbrl import FilingXbrl
 from pathlib import Path
 import pandas as pd
+from rich import print
 
 
 def test_filing_xbrl_parse():
@@ -29,3 +30,9 @@ def test_filing_xbrl_db():
                         where fact == 'CommonStockSharesIssued' and end_date == '2017-12-31' """).df()
     assert df.iloc[0].value == '27133614'
     print('\n',df)
+
+
+def test_xbrl_repr():
+    filing_xbrl: FilingXbrl = FilingXbrl.parse(Path('data/crr.xbrl.xml').read_text())
+    print(filing_xbrl)
+    print(filing_xbrl.facts)

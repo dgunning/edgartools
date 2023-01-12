@@ -13,7 +13,7 @@ from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
 
-from edgar.core import http_client, repr_df, log, Result, df_to_rich_table, repr_rich
+from edgar.core import http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size, get_bool
 from edgar.filing import Filing, Filings
 
 __all__ = [
@@ -203,8 +203,28 @@ class CompanyFilings(Filings):
             return filings[0]
         return filings
 
-    def __repr__(self):
+    def __str__(self):
         return f"{self.company_name} {self.cik} {super().__repr__()}"
+
+    @lru_cache(maxsize=2)
+    def data_summary(self) -> pd.DataFrame:
+        return (self.data
+                .to_pandas()
+                .assign(size=lambda df: df['size'].apply(display_size),
+                        isXBRL=lambda df: df.isXBRL.map({'1': True, 1: True}).fillna(""),
+                        )
+                .filter(["form", "filingDate", "accessionNumber", "isXBRL"])
+                .rename(columns={"filingDate": "filed", "isXBRL": "xbrl"})
+                )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    def __rich__(self) -> str:
+        return Group(
+            Text(self.summary),
+            df_to_rich_table(self.data_summary())
+        )
 
     def _repr_html_(self):
         start_date, end_date = self.date_range
@@ -281,7 +301,7 @@ class Company:
                     file_number: Union[str, List] = None,
                     is_xbrl: bool = None,
                     is_inline_xbrl: bool = None,
-                    sort_by:Union[str, List[Tuple[str, str]]] = None
+                    sort_by: Union[str, List[Tuple[str, str]]] = None
                     ):
         """
         Get the company's filings and optionally filter by multiple criteria

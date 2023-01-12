@@ -1,12 +1,13 @@
 from functools import lru_cache
-from typing import Dict, Union, Tuple
+from typing import Dict, Union, Tuple, List
 
 import duckdb
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from edgar.core import log, repr_df
+from edgar.core import log, repr_df, repr_rich, df_to_rich_table
 from edgar.xml import child_text
+from rich.console import Group, Text
 
 """
 This module parses XBRL documents into objects that contain the structured data
@@ -59,6 +60,35 @@ class NamespaceInfo:
         """
 
 
+class XbrlFacts:
+
+    def __init__(self, data: pd.DataFrame):
+        self.data = data
+
+    def __len__(self):
+        return len(self.data)
+
+    def query(self, expr, **kwargs):
+        return self.data.query(expr, **kwargs)
+
+    @property
+    def empty(self) -> bool:
+        return self.data.empty
+
+    def __str__(self):
+        return f"XBRL Facts {len(self.facts)} facts"
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    def __rich__(self) -> str:
+        return Group(
+            Text(f"Facts"),
+            df_to_rich_table(self.data[['namespace', 'fact', 'value']].set_index('fact'),
+                             max_rows=20),
+        )
+
+
 class FilingXbrl:
     """
     Represents the XBRL data for a single filing.
@@ -69,11 +99,11 @@ class FilingXbrl:
     def __init__(self,
                  facts: pd.DataFrame,
                  namespace_info: NamespaceInfo):
-        self.facts: pd.DataFrame = facts
+        self.facts: pd.DataFrame = XbrlFacts(facts)
         self.namespace_info: NamespaceInfo = namespace_info
 
     def _dei_value(self, fact: str):
-        res = self.facts.query(f"namespace=='dei' & fact=='{fact}' ")
+        res = self.facts.data.query(f"namespace=='dei' & fact=='{fact}' ")
         if not res.empty:
             return res.value.item()
 
@@ -93,7 +123,7 @@ class FilingXbrl:
     @lru_cache(maxsize=1)
     def to_duckdb(self):
         con = duckdb.connect(database=':memory:')
-        con.register('facts', self.facts)
+        con.register('facts', self.facts.data)
         log.info("Created an in-memory DuckDB database with table 'facts'")
         return con
 
@@ -181,8 +211,21 @@ class FilingXbrl:
               "facts": len(self.facts), }]
         )
 
-    def __repr__(self):
+    def __str__(self):
         return f"""Filing XBRL({self.company_name} {self.cik} {self.form_type})"""
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    def __rich__(self) -> str:
+        return Group(
+            Text(f"Form {self.form_type} Extracted XBRL"),
+            df_to_rich_table(self.summary().set_index("company")),
+            Text(f"Facts"),
+            df_to_rich_table(self.facts.data[['namespace', 'fact', 'value', 'units', 'end_date']], max_rows=10),
+            Text(f"Taxonomies"),
+            df_to_rich_table(self.namespace_info.summary())
+        )
 
     def _repr_html_(self):
         return f"""<h4>Extracted XBRL</h4>

@@ -247,7 +247,7 @@ def repr_rich(renderable) -> str:
 
 def get_bool(value: str = None) -> bool:
     """Convert the value to a boolean"""
-    if not value:
+    if value is None:
         return None
     if value == '1' or value == 1:
         return True
@@ -311,4 +311,4 @@ def display_size(size: Optional[int]) -> str:
     if size:
         if isinstance(size, int) or size.isdigit():
             return humanize.naturalsize(int(size), binary=True).replace("i", "")
-    return  ""
+    return ""
