@@ -358,6 +358,22 @@ filings = get_filings(range(2010, 2020))
 filings = get_filings(2022, index="xbrl")
 ```
 
+
+#### Filtering Filings by form
+You can filter by form type by providing a form or list of forms.
+```python
+filings = get_filings(2022, form="10-K")
+
+# Filter by list of forms
+filings = get_filings(2022, form=["10-K", "10-Q"])
+```
+
+This will include form amendments e.g. "10-K/A" and "10-Q/A". To not include these set `amendments=False`
+```python
+# Filter by list of forms not including amendments
+filings = get_filings(2022, form=["10-K", "10-Q"], amendments=False)
+```
+
 ### The Filings class
 
 The `get_filings` returns a `Filings` class, which wraps the data returned and provide convenient ways for working with filings.
