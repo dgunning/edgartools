@@ -2,6 +2,7 @@ import itertools
 import os.path
 import re
 import webbrowser
+from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
@@ -16,7 +17,6 @@ import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
-from dataclasses import dataclass
 from rich.console import Group
 from rich.text import Text
 
@@ -207,27 +207,6 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
     return final_index_table
 
 
-def get_filings(year: Years,
-                quarter: Quarters = None,
-                index="form"):
-    """ Get filings indexes from Edgar
-
-    Examples
-
-    >>> from edgar import get_filings
-    >>> filings = get_filings(2021) # Get filings for a year
-
-    :param year:
-    :param quarter:
-    :param index:
-    :return:
-    """
-    year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
-    filing_index = get_filings_for_quarters(year_and_quarters, index=index)
-
-    return Filings(filing_index)
-
-
 class Filings:
     """
     A container for filings
@@ -283,6 +262,24 @@ class Filings:
         if len(filings) == 1:
             return filings[0]
         return filings
+
+    def filter(self,
+               form: Union[str, List[str]],
+               amendments: bool = None):
+        """
+        Filter the filings
+        :param form: The form or list of forms to filter by
+        :param amendments: Whether to include amendments to the forms e.g include "10-K/A" if filtering for "10-K"
+        :return: The filtered filings
+        """
+        forms = form
+        if forms:
+            forms = listify(forms)
+            # If amendments then add amendments
+            if amendments:
+                forms = list(set(forms + [f"{val}/A" for val in forms]))
+            filing_index = self.data.filter(pc.is_in(self.data['form'], pa.array(forms)))
+        return Filings(filing_index)
 
     def __head(self, n):
         assert n > 0, "The number of filings to select - `n`, should be greater than 0"
@@ -340,6 +337,50 @@ class Filings:
         <h3>{self.summary}</h3>
         {self.data.to_pandas()._repr_html_()}
         """
+
+
+def get_filings(year: Years,
+                quarter: Quarters = None,
+                form: Union[str, List[str]] = None,
+                amendments: bool = True,
+                index="form") -> Filings:
+    """
+    Downloads the filing index for a given year or list of years, and a quarter or list of quarters.
+
+    So you can download for 2020, [2020,2021,2022] or range(2020, 2023)
+
+    Examples
+
+    >>> from edgar import get_filings
+
+    >>> filings = get_filings(2021) # Get filings for 2021
+
+    >>> filings = get_filings(2021, 4) # Get filings for 2021 Q4
+
+    >>> filings = get_filings(2021, [3,4]) # Get filings for 2021 Q3 and Q4
+
+    >>> filings = get_filings([2020, 2021]) # Get filings for 2020 and 2021
+
+    >>> filings = get_filings([2020, 2021], 4) # Get filings for Q4 of 2020 and 2021
+
+    >>> filings = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021
+
+
+    :param year The year of the filing
+    :param quarter The quarter of the filing
+    :param form The form or forms as a string e.g. "10-K" or a List ["10-K", "8-K"]
+    :param amendments If True will expand the list of forms to include amendments e.g. "10-K/A"
+    :param index The index type - "form" or "company" or "xbrl"
+    :return:
+    """
+    year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
+    filing_index = get_filings_for_quarters(year_and_quarters, index=index)
+
+    filings = Filings(filing_index)
+
+    if form:
+        return filings.filter(form=form, amendments=amendments)
+    return filings
 
 
 class Filing:
@@ -463,7 +504,9 @@ class Filing:
         └──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
         :return: a rich table version of this filing
         """
-        return df_to_rich_table(self.summary())
+        return Group(Text(f"Form {self.form} Filing"),
+                     df_to_rich_table(self.summary(), index_name=f"accession_no")
+                     )
 
     def __rich__repr__(self):
         yield "accession_no", self.accession_no

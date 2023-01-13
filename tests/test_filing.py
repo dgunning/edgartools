@@ -73,8 +73,6 @@ def test_read_form_filing_index_xbrl():
     df = filings.to_pandas()
     assert len(df) == len(filings) == len(filings.data)
     assert filings.data.column_names == ['cik', 'company', 'form', 'filingDate', 'accessionNumber']
-    print(filings.data.schema)
-    print(filings.to_pandas())
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
     assert re.match(r'\d{10}\-\d{2}\-\d{6}', filings.data[4][-1].as_py())
 
@@ -123,6 +121,18 @@ def test_filing_head():
         top_10_filings.head(-1)
 
     assert filings[0] == top_10_filings[0]
+
+
+def test_filter_filings_by_form():
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
+    forms = list(set(filings.data['form'].to_pylist()))
+    assert len(forms) > 25
+
+    tenk_filings = filings.filter(form="10-Q")
+    assert list(set(tenk_filings.data['form'].to_pylist())) == ["10-Q"]
+
+    tenk_filings = filings.filter(form="10-Q", amendments=True)
+    assert set(tenk_filings.data['form'].to_pylist()) == {"10-Q", '10-Q/A'}
 
 
 def test_filing_tail():
@@ -260,7 +270,7 @@ def test_company_specs():
 
 
 def test_filings_toduckdb():
-    filings = cached_filings(2022, 3, "xbrl")
+    filings = cached_filings(2022, 3, index="xbrl")
     filings_db = filings.to_duckdb()
     result_df = filings_db.execute("""
     select * from filings where form=='10-Q'
@@ -414,3 +424,19 @@ def test_filing_repr():
 def test_filing_homepage_repr():
     homepage = carbo_10K.homepage
     print(homepage.__repr__())
+
+
+def test_filing_filter_by_form():
+    filings = get_filings(2014, 4, form="10-K")
+    assert set(filings.data['form'].to_pylist()) == {'10-K', '10-K/A'}
+
+    filings = get_filings(2014, 4, form=["10-K", "8-K"])
+    assert set(filings.data['form'].to_pylist()) == {'10-K', '10-K/A', '8-K', '8-K/A'}
+
+
+def test_filing_filter_by_form_no_amendments():
+    filings = get_filings(2014,
+                          4,
+                          form="10-K",
+                          amendments=False)
+    assert set(filings.data['form'].to_pylist()) == {'10-K'}
