@@ -9,6 +9,8 @@ from edgar.company import *
 from edgar.company import parse_company_submissions, CompanyConcept, CompanyFiling
 from edgar.filing import Filing
 
+from rich import print
+
 
 @lru_cache(maxsize=16)
 def get_test_company(cik=None, ticker=None):
@@ -64,6 +66,12 @@ def test_company_get_facts_repr():
     facts = company.get_facts()
     facts_repr = str(facts)
     assert 'Tesla' in facts_repr
+
+
+def test_company_filing_repr():
+    company = get_test_company(1318605)
+    filing = company.get_filings()[0]
+    print(filing)
 
 
 def test_company_for_cik():
