@@ -505,7 +505,7 @@ class Filing:
         :return: a rich table version of this filing
         """
         return Group(Text(f"Form {self.form} Filing"),
-                     df_to_rich_table(self.summary(), index_name=f"accession_no")
+                     df_to_rich_table(self.summary(), index_name="accession_no")
                      )
 
     def __rich__repr__(self):
@@ -725,7 +725,8 @@ class FilingHomepage:
 
     def __rich__(self):
         return Group(
-            df_to_rich_table(self.filing.summary(), index_name="Filing"),
+            Text(f"Form {self.filing.form} Filing"),
+            df_to_rich_table(self.filing.summary(), index_name="accession_no"),
             Group(Text("Documents"),
                   df_to_rich_table(FilingHomepage.summarize_files(self.documents), index_name="Seq")
                   ),
