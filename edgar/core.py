@@ -175,6 +175,15 @@ def repr_df(df, hide_index: bool = True):
     return disp._repr_html_()
 
 
+table_styles = {
+    'form': 'green',
+    'company': 'cyan',
+    'entity': 'cyan',
+    'filingDate': 'cyan',
+    'filed': 'cyan'
+}
+
+
 def df_to_rich_table(
         df: Union[pd.DataFrame, pa.Table],
         index_name: Optional[str] = None,
@@ -196,9 +205,8 @@ def df_to_rich_table(
     rich_table.add_column(index_name)
 
     for column in df.columns:
-        rich_table.add_column(str(column))
+        rich_table.add_column(column, style=table_styles.get(column))
 
-    print()
     if len(df) > max_rows:
         head = df.head(max_rows // 2)
         tail = df.tail(max_rows // 2)
