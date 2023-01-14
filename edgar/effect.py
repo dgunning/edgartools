@@ -85,8 +85,7 @@ class Effect:
     def source_accession_no(self):
         return self.effectiveness_data.accession_no
 
-    @property
-    def source_filing(self):
+    def get_source_filing(self):
         if self.source_accession_no:
             """Search for the source filing using the accession number"""
             company = get_company(cik=self.cik)

@@ -66,14 +66,14 @@ def test_edgar_submission_from_xml_format_2():
 
 def test_effect_filing_source_filing():
     edgar_submission: Effect = Effect.from_xml(effect_xml_1)
-    source_filing = edgar_submission.source_filing
+    source_filing = edgar_submission.get_source_filing()
     assert source_filing
     assert source_filing.accession_no == edgar_submission.source_accession_no
 
 
 def test_effect_get_source_filing_by_file_number():
     edgar_submission: Effect = Effect.from_xml(effect_xml_2)
-    source_filing = edgar_submission.source_filing
+    source_filing = edgar_submission.get_source_filing()
     assert source_filing.form == "S-1"
 
 
