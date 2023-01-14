@@ -69,14 +69,12 @@ def test_effect_filing_source_filing():
     source_filing = edgar_submission.source_filing
     assert source_filing
     assert source_filing.accession_no == edgar_submission.source_accession_no
-    print(source_filing)
 
 
 def test_effect_get_source_filing_by_file_number():
     edgar_submission: Effect = Effect.from_xml(effect_xml_2)
     source_filing = edgar_submission.source_filing
     assert source_filing.form == "S-1"
-    print(source_filing)
 
 
 def test_effect_repr():
