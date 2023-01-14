@@ -120,7 +120,6 @@ class CompanyFiling(Filing):
                 )
 
 
-
 class CompanyFacts:
     """
     Contains company facts data

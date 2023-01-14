@@ -478,9 +478,9 @@ class Filing:
     def summary(self) -> pd.DataFrame:
         """Return a summary of this filing as a dataframe"""
         return pd.DataFrame([{'form': self.form,
-                              'filed': self.filing_date,
                               'company': self.company,
                               'cik': self.cik,
+                              'filed': self.filing_date,
                               "accession_no": self.accession_no}]).set_index("accession_no")
 
     def __str__(self):
