@@ -9,9 +9,8 @@ from edgar.core import get_bool
 from edgar.xml import (child_text, child_value)
 
 __all__ = [
-    'translate_ownership',
-    'Issuer',
     'Owner',
+    'Issuer',
     'Address',
     'Footnotes',
     'OwnerSignature',
@@ -19,6 +18,7 @@ __all__ = [
     'OwnershipDocument',
     'DerivativeHolding',
     'DerivativeHoldings',
+    'translate_ownership',
     'NonDerivativeHolding',
     'NonDerivativeHoldings',
     'DerivativeTransaction',
@@ -27,7 +27,6 @@ __all__ = [
     'PostTransactionAmounts',
     'NonDerivativeTransaction',
     'NonDerivativeTransactions',
-
 ]
 
 IntString = Union[str, int]
