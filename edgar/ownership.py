@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 from typing import List, Dict, Union, Optional, Tuple
-from edgar.core import repr_rich, df_to_rich_table
-from rich.console import Group, Text
-from rich.panel import Panel
+
 import pandas as pd
 from bs4 import BeautifulSoup
 from bs4 import Tag
+from rich.console import Group, Text
+from rich.panel import Panel
 
 from edgar.core import get_bool
+from edgar.core import repr_rich, df_to_rich_table
 from edgar.xml import (child_text, child_value)
 
 __all__ = [
@@ -210,11 +211,23 @@ class Footnotes:
             default_value: str = None):
         return self._footnotes.get(footnote_id, default_value)
 
+    def summary(self) -> pd.DataFrame:
+        return pd.DataFrame([(k, v) for k, v in self._footnotes.items()],
+                            columns=["id", "footnote"]).set_index("id")
+
     def __len__(self):
         return len(self._footnotes)
 
-    def __repr__(self):
+    def __str__(self):
         return str(self._footnotes)
+
+    def __rich__(self) -> str:
+        return Group(Text("Footnotes", style="bold"),
+                     df_to_rich_table(self.summary(), index_name="id"),
+                     )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
     @classmethod
     def extract(cls,
@@ -314,7 +327,7 @@ class DerivativeHoldings(DataHolder):
         )
 
     def __rich__(self) -> str:
-        return Group(Text(f"Holdings"),
+        return Group(Text("Holdings", style="bold"),
                      df_to_rich_table(self.summary().set_index('security'), index_name='security')
                      )
 
@@ -340,7 +353,7 @@ class NonDerivativeHoldings(DataHolder):
         return self.data
 
     def __rich__(self) -> str:
-        return Group(Text(f"Holdings"),
+        return Group(Text("Holdings", style="bold"),
                      df_to_rich_table(self.summary().set_index('security'), index_name='security')
                      )
 
@@ -374,7 +387,7 @@ class DerivativeTransactions(DataHolder):
                 )
 
     def __rich__(self) -> str:
-        return Group(Text(f"Transactions"),
+        return Group(Text("Transactions", style="bold"),
                      df_to_rich_table(self.summary(), index_name='date')
                      )
 
@@ -405,7 +418,7 @@ class NonDerivativeTransactions(DataHolder):
                 )
 
     def __rich__(self) -> str:
-        return Group(Text(f"Transactions"),
+        return Group(Text("Transactions", style="bold"),
                      df_to_rich_table(self.summary().set_index('date'), index_name='date')
                      )
 
@@ -512,8 +525,8 @@ class NonDerivativeTable:
 
     def __rich__(self) -> str:
         return Panel(Group(
-            self.holdings.__rich__(),
-            self.transactions.__rich__()
+            Text("0 non derivative holdings") if self.holdings.empty else self.holdings.__rich__(),
+            Text("0 non derivative transactions") if self.transactions.empty else self.transactions.__rich__()
         ), title="Non Derivatives"
         )
 
@@ -625,8 +638,8 @@ class DerivativeTable:
 
     def __rich__(self) -> str:
         return Panel(Group(
-            self.holdings.__rich__(),
-            self.transactions.__rich__()
+            Text("0 derivative holdings") if self.holdings.empty else self.holdings.__rich__(),
+            Text("0 derivative transactions") if self.transactions.empty else self.transactions.__rich__()
         ), title="Derivatives"
         )
 
@@ -757,11 +770,13 @@ class Ownership:
         return ownership_document
 
     def __rich__(self) -> str:
-        return Group(Panel(df_to_rich_table(self.summary(), index_name='ticker'),
-                           title=f"Form {self.form} {FORM_DESCRIPTIONS.get(self.form, '')}",
-                           title_align="left"),
+        return Group(Panel(
+                        Group(
+                            Text(f"Form {self.form} {FORM_DESCRIPTIONS.get(self.form, '')}", style="bold green"),
+                            df_to_rich_table(self.summary(), index_name='ticker'))),
                      self.non_derivatives.__rich__(),
-                     self.derivatives.__rich__()
+                     self.derivatives.__rich__(),
+                     self.footnotes.__rich__()
                      )
 
     def __repr__(self):

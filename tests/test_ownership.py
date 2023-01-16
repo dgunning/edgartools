@@ -43,6 +43,8 @@ def test_ownership_repr():
     ownership = Ownership.from_xml(form3_content)
     print(ownership)
 
+    #print(ownership.footnotes)
+
 
 def test_parse_form3_with_derivatives():
     form3_content = Path('data/form3.snow.xml').read_text()
