@@ -180,7 +180,9 @@ table_styles = {
     'company': 'cyan',
     'entity': 'cyan',
     'filingDate': 'cyan',
-    'filed': 'cyan'
+    'filed': 'cyan',
+    'security': 'cyan',
+    'reporting owner': 'cyan'
 }
 
 
@@ -202,7 +204,7 @@ def df_to_rich_table(
 
     rich_table = Table(box=box.ROUNDED)
     index_name = str(index_name) if index_name else ""
-    rich_table.add_column(index_name)
+    rich_table.add_column(index_name, style=table_styles.get(index_name) )
 
     for column in df.columns:
         rich_table.add_column(column, style=table_styles.get(column))

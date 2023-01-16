@@ -5,9 +5,9 @@ from rich import print
 from edgar.ownership import *
 from edgar.filing import Filing
 
-snow_form3 = OwnershipDocument.from_xml(Path('data/form3.snow.xml').read_text())
-snow_form3_nonderiv = OwnershipDocument.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
-snow_form4 = OwnershipDocument.from_xml(Path('data/form4.snow.xml').read_text())
+snow_form3 = Ownership.from_xml(Path('data/form3.snow.xml').read_text())
+snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
+snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
 
 
 def test_translate():
@@ -18,9 +18,35 @@ def test_translate():
 holding_xml = Path("data/derivative_holding.xml").read_text()
 
 
+def test_derivative_table_repr():
+    form3_content = Path('data/form3.snow.xml').read_text()
+    ownership = Ownership.from_xml(form3_content)
+    print()
+    print(snow_form4.derivatives.transactions)
+    print(ownership.derivatives.holdings)
+    print(ownership.derivatives.transactions)
+    print(ownership.derivatives)
+
+
+def test_non_derivatives_repr():
+    form3_content = Path('data/form3.snow.nonderiv.xml').read_text()
+    print()
+    ownership = Ownership.from_xml(form3_content)
+    print(snow_form4.non_derivatives.transactions)
+    print(ownership.non_derivatives.holdings)
+    print(ownership.non_derivatives)
+
+
+def test_ownership_repr():
+    form3_content = Path('data/form3.snow.xml').read_text()
+    print()
+    ownership = Ownership.from_xml(form3_content)
+    print(ownership)
+
+
 def test_parse_form3_with_derivatives():
     form3_content = Path('data/form3.snow.xml').read_text()
-    ownership = OwnershipDocument.from_xml(form3_content)
+    ownership = Ownership.from_xml(form3_content)
     print(ownership)
 
     # There should be a footnotes section
@@ -68,7 +94,7 @@ def test_parse_form3_with_derivatives():
 
 def test_parse_form3_with_non_derivatives():
     form3_content = Path('data/form3.snow.nonderiv.xml').read_text()
-    ownership = OwnershipDocument.from_xml(form3_content)
+    ownership = Ownership.from_xml(form3_content)
     assert ownership.form == "3"
     assert ownership.issuer.name == "Snowflake Inc."
     assert ownership.issuer.cik == "0001640147"
@@ -99,12 +125,12 @@ def test_post_transaction_values():
     transaction: NonDerivativeTransaction = snow_form4.non_derivatives.transactions[0]
     print(transaction)
     assert transaction.security == 'Class A Common Stock'
-    assert transaction.transaction_date == '2022-12-13'
+    assert transaction.date == '2022-12-13'
     assert transaction.form == '4'
     assert transaction.equity_swap == False
     assert transaction.transaction_code == "M"
     assert transaction.acquired_disposed == 'A'
-    assert transaction.num_shares == '200000'
+    assert transaction.shares == '200000'
 
 
 def test_derivative_holdings_get_item():
@@ -112,7 +138,7 @@ def test_derivative_holdings_get_item():
     print(snow_form3.derivatives.holdings.data)
     holding = snow_form3.derivatives.holdings[0]
     assert holding.security == 'Series E Preferred Stock'
-    assert holding.underlying_security == 'Class B Common Stock [F2,F3]'
+    assert holding.underlying == 'Class B Common Stock [F2,F3]'
     assert holding.underlying_shares == '134018.0'
     assert holding.exercise_price == "[F1]"
     assert holding.exercise_date == "[F1]"
@@ -125,15 +151,15 @@ def test_non_derivative_holding_get_item():
     print()
     holding = snow_form3_nonderiv.non_derivatives.holdings[0]
     assert holding.security == 'Class A Common Stock'
-    assert holding.direct_indirect == 'I'
-    assert holding.nature_of_ownership == 'See footnote [F1]'
+    assert not holding.direct
+    assert holding.ownership_nature == 'See footnote [F1]'
     print(holding)
 
 
 def test_derivative_transaction_get_item():
     transaction = snow_form4.derivatives.transactions[0]
-    assert transaction.num_shares == '200000'
-    assert transaction.share_price == '0'
+    assert transaction.shares == '200000'
+    assert transaction.price == '0'
     assert transaction.form == '4'
     assert transaction.equity_swap == False
     assert transaction.transaction_code == 'M'
@@ -141,17 +167,17 @@ def test_derivative_transaction_get_item():
     assert transaction.exercise_date == '[F16]'
     assert transaction.exercise_price == '8.88'
     assert transaction.underlying_shares == '200000.0'
-    assert transaction.underlying_security == 'Class A Common Stock'
+    assert transaction.underlying == 'Class A Common Stock'
 
 
 def test_reporting_relationship():
-    ownership = OwnershipDocument.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
+    ownership = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
     print(ownership.reporting_relationship)
     assert ownership.reporting_relationship.is_ten_pct_owner
 
 
 def test_parse_form5():
-    ownership = OwnershipDocument.from_xml(Path('data/form5.snow.xml').read_text())
+    ownership = Ownership.from_xml(Path('data/form5.snow.xml').read_text())
     print()
     print(ownership)
     print(ownership.derivatives)
@@ -168,19 +194,26 @@ def test_parse_form5():
 
     holding = ownership.non_derivatives.holdings[0]
     assert holding.security == 'Class A Common Stock'
-    assert holding.direct_indirect == 'I'
-    assert holding.nature_of_ownership == 'Trust [F3]'
+    assert not holding.direct
+    assert holding.ownership_nature == 'Trust [F3]'
 
 
 def test_ownership_from_filing_xml_document():
     filing = Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
                     filing_date='2013-04-29', accession_no='0001477932-13-002021')
     xml = filing.xml()
-    ownership_document: OwnershipDocument = OwnershipDocument.from_xml(xml)
+    ownership_document: Ownership = Ownership.from_xml(xml)
     assert ownership_document.issuer.name == 'Olivia Inc.'
 
     print(ownership_document.derivatives)
     print(ownership_document.non_derivatives)
     holding = ownership_document.non_derivatives.holdings[0]
     assert holding.security == 'Common Stock'
-    assert holding.direct_indirect == 'D'
+    assert holding.direct
+
+
+def test_no_securities_owned():
+    form3_nosecurities = Ownership.from_xml(Path('data/form3.nosecurities.xml').read_text())
+    assert form3_nosecurities.no_securities
+    print()
+    print(form3_nosecurities)

@@ -15,3 +15,4 @@ from edgar.filing import (Filing,
                           Filings,
                           get_filings,
                           FilingHomepage)
+from edgar.ownership import Ownership
