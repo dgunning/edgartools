@@ -174,6 +174,10 @@ class CompanyFilings(Filings):
     def __getitem__(self, item):
         return self.get_filing_at(item)
 
+    @property
+    def empty(self):
+        return len(self.data) == 0
+
     def get_filing_at(self, item: int):
         return CompanyFiling(
             cik=self.cik,

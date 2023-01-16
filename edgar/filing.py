@@ -463,8 +463,9 @@ class Filing:
         """
         company = self.get_entity()
         filings = company.get_filings(accession_number=self.accession_no)
-        file_number = filings[0].file_number
-        return company.get_filings(file_number=file_number, sort_by="filingDate")
+        if not filings.empty:
+            file_number = filings[0].file_number
+            return company.get_filings(file_number=file_number, sort_by="filingDate")
 
     def __hash__(self):
         return hash(self.accession_no)
