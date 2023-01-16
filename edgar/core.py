@@ -11,6 +11,7 @@ import httpx
 import humanize
 import pandas as pd
 import pyarrow as pa
+from charset_normalizer import detect
 from rich import box
 from rich.logging import RichHandler
 from rich.prompt import Prompt
@@ -43,7 +44,7 @@ __all__ = [
     'df_to_rich_table',
 ]
 
-default_http_timeout: int = 5
+default_http_timeout: int = 10
 limits = httpx.Limits(max_connections=10)
 edgar_identity = 'EDGAR_IDENTITY'
 
@@ -123,6 +124,10 @@ def get_identity() -> str:
     return identity
 
 
+def autodetect(content):
+    return detect(content).get("encoding")
+
+
 @lru_cache(maxsize=1)
 def client_headers():
     return {'User-Agent': get_identity()}
@@ -131,7 +136,8 @@ def client_headers():
 def http_client():
     return httpx.Client(headers=client_headers(),
                         timeout=default_http_timeout,
-                        limits=limits)
+                        limits=limits,
+                        default_encoding=autodetect)
 
 
 def decode_content(content: bytes):
@@ -143,7 +149,7 @@ def decode_content(content: bytes):
 
 def download_file(url: str,
                   client: Union[httpx.Client, httpx.AsyncClient] = None,
-                  text: bool = None):
+                  as_text: bool = None):
     # reason_phrase = 'Too Many Requests' status_code = 429
     if not client:
         client = http_client()
@@ -153,19 +159,21 @@ def download_file(url: str,
             binary_file = BytesIO(r.content)
             with gzip.open(binary_file, 'rb') as f:
                 file_content = f.read()
-                if text:
+                if as_text:
                     return decode_content(file_content)
                 return file_content
         else:
-            if text or r.encoding == 'utf-8':
+            # If we explicitely asked for text or there is an encoding, try to return text
+            if as_text or r.encoding:
                 return r.text
+            # Should get here for jpg and PDFs
             return r.content
     else:
         r.raise_for_status()
 
 
 def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
-    return download_file(url, client, text=True)
+    return download_file(url, client, as_text=True)
 
 
 def repr_df(df, hide_index: bool = True):
@@ -204,7 +212,7 @@ def df_to_rich_table(
 
     rich_table = Table(box=box.ROUNDED)
     index_name = str(index_name) if index_name else ""
-    rich_table.add_column(index_name, style=table_styles.get(index_name) )
+    rich_table.add_column(index_name, style=table_styles.get(index_name))
 
     for column in df.columns:
         rich_table.add_column(column, style=table_styles.get(column))
@@ -322,3 +330,5 @@ def display_size(size: Optional[int]) -> str:
         if isinstance(size, int) or size.isdigit():
             return humanize.naturalsize(int(size), binary=True).replace("i", "")
     return ""
+
+

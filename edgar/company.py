@@ -301,6 +301,7 @@ class Company:
     def get_filings(self,
                     *,
                     form: Union[str, List] = None,
+                    date: Union[str, Tuple[str, str]] = None,
                     accession_number: Union[str, List] = None,
                     file_number: Union[str, List] = None,
                     is_xbrl: bool = None,
@@ -324,11 +325,19 @@ class Company:
         """
         company_filings = self.filings.data
 
-        if form:
-            company_filings = company_filings.filter(pc.is_in(company_filings['form'], pa.array(listify(form))))
+        # Filter by accession number
         if accession_number:
             company_filings = company_filings.filter(
                 pc.is_in(company_filings['accessionNumber'], pa.array(listify(accession_number))))
+            if len(company_filings) >= 1:
+                # We found the single filing or oops, didn't find any
+                return CompanyFilings(company_filings, cik=self.cik, company_name=self.name)
+
+        # Filter by form
+        if form:
+            company_filings = company_filings.filter(pc.is_in(company_filings['form'], pa.array(listify(form))))
+
+        # Filter by file number
         if file_number:
             company_filings = company_filings.filter(pc.is_in(company_filings['fileNumber'],
                                                               pa.array(listify(file_number))))

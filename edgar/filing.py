@@ -188,6 +188,12 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
 
 def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
                              index="form"):
+    """
+    Get the filings for the quarters
+    :param year_and_quarters:
+    :param index: The index to use - "form", "company", or "xbrl"
+    :return:
+    """
     with http_client() as client:
         if len(year_and_quarters) == 1:
             _, final_index_table = fetch_filing_index(year_and_quarter=year_and_quarters[0],
@@ -403,26 +409,36 @@ class Filing:
 
     @property
     def document(self):
+        """
+        :return: The primary display document on the filing, generally HTML but can be XHTML
+        """
         return self.homepage.primary_html_document
 
     @property
     def primary_documents(self):
+        """
+        :return: a list of the primary documents on the filing, generally HTML or XHTML and optionally XML
+        """
         return self.homepage.primary_documents
 
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
-        return self.document.download()
+        return self.document.download(text=True)
 
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
         xml_document = self.homepage.primary_xml_document
         if xml_document:
-            return xml_document.download()
+            return xml_document.download(text=True)
 
-    def xbrl(self) -> FilingXbrl:
+    def xbrl(self) -> Optional[FilingXbrl]:
+        """
+        Get the XBRL document for the filing, parsed and as a FilingXbrl object
+        :return: Get the XBRL document for the filing, parsed and as a FilingXbrl object, or None
+        """
         xbrl_document = self.homepage.xbrl_document
         if xbrl_document:
-            xbrl_text = xbrl_document.download()
+            xbrl_text = xbrl_document.download(text=True)
             return FilingXbrl.parse(xbrl_text)
 
     def open_homepage(self):
@@ -443,6 +459,10 @@ class Filing:
 
     @property
     def homepage(self):
+        """
+        Get the homepage for the filing
+        :return: the FilingHomepage
+        """
         if not self._filing_homepage:
             homepage_html = download_text(self.homepage_url)
             self._filing_homepage = FilingHomepage.from_html(homepage_html,
@@ -579,8 +599,9 @@ class FilingDocument:
                    size=size,
                    path=dataframe_row.Url)
 
-    def download(self):
-        return download_file(self.url)
+    def download(self,
+                 text: bool = None):
+        return download_file(self.url, as_text=text)
 
 
 # These are the columns on the table on the filing homepage
@@ -710,14 +731,6 @@ class FilingHomepage:
                    url=url,
                    filing=filing)
 
-    @staticmethod
-    def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
-        return (data
-                .filter(["Seq", "Document", "Description", "Size"])
-                .assign(Size=data.Size.apply(display_size))
-                .set_index("Seq")
-                )
-
     def __str__(self):
         return f"Homepage for {self.description}"
 
@@ -729,11 +742,19 @@ class FilingHomepage:
             Text(f"Form {self.filing.form} Filing"),
             df_to_rich_table(self.filing.summary(), index_name="accession_no"),
             Group(Text("Documents"),
-                  df_to_rich_table(FilingHomepage.summarize_files(self.documents), index_name="Seq")
+                  df_to_rich_table(summarize_files(self.documents), index_name="Seq")
                   ),
             Group(Text("Datafiles"),
                   df_to_rich_table(
-                      FilingHomepage.summarize_files(self.datafiles), index_name="Seq"),
+                      summarize_files(self.datafiles), index_name="Seq"),
                   ) if self.datafiles is not None else Text(""),
 
         )
+
+
+def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
+    return (data
+            .filter(["Seq", "Document", "Description", "Size"])
+            .assign(Size=data.Size.apply(display_size))
+            .set_index("Seq")
+            )

@@ -8,7 +8,7 @@ from edgar.core import (decode_content,
                         display_size,
                         repr_rich,
                         Result,
-                        get_resource,
+                        http_client,
                         client_headers,
                         df_to_rich_table,
                         download_file)
@@ -122,3 +122,20 @@ def test_display_size():
     assert display_size(None) == ""
     assert display_size("aaa") == ""
     assert display_size("\x01") == ""
+
+
+def test_detect_charset():
+    url = 'https://www.sec.gov/Archives/edgar/data/1089113/000165495420002467/a7664f.htm'
+    client = http_client()
+    r = client.get(url)
+    print(r.encoding)
+    assert r.encoding == 'ascii'
+
+
+def test_download_image():
+    url = 'https://www.sec.gov/Archives/edgar/data/1640147/000164014722000023/snow-20220131_g1.jpg'
+    client = http_client()
+    r = client.get(url)
+    print(r.encoding)
+    print(r.content)
+    download_file(url)
