@@ -21,7 +21,7 @@ containing data about transactions and holdings.
 
 ```python
 from edgar import Company
-from edgar.ownership import OwnershipDocument
+from edgar.ownership import Ownership
 
 # Get Snowflake
 company = Company.for_ticker("SNOW")
@@ -36,7 +36,7 @@ filing = filings[0]
 xml = filing.xml()
 
 # Now get the OwnershipDocument
-ownership = OwnershipDocument.from_xml(xml)
+ownership = Ownership.from_xml(xml)
 ```
 
 ## Derivative Table
