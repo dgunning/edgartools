@@ -112,7 +112,7 @@ class CompanyFiling(Filing):
 
     def get_related_filings(self):
         """Get all the filings related to this one"""
-        return self.get_entity().get_filings(file_number=self.file_number, sort_by="filingDate")
+        return self.get_entity().get_filings(file_number=self.file_number, sort_by="filing_date")
 
     def __str__(self):
         return (f"CompanyFiling(company={self.company}, cik={self.cik}, form={self.form}, "
@@ -183,7 +183,7 @@ class CompanyFilings(Filings):
             cik=self.cik,
             company=self.company_name,
             form=self.data['form'][item].as_py(),
-            filing_date=self.data['filingDate'][item].as_py(),
+            filing_date=self.data['filing_date'][item].as_py(),
             report_date=self.data['reportDate'][item].as_py(),
             accession_no=self.data['accessionNumber'][item].as_py(),
             file_number=self.data['fileNumber'][item].as_py(),
@@ -197,7 +197,7 @@ class CompanyFilings(Filings):
 
     def latest(self, n: int = 1) -> int:
         """Get the latest n filings"""
-        sort_indices = pc.sort_indices(self.data, sort_keys=[("filingDate", "descending")])
+        sort_indices = pc.sort_indices(self.data, sort_keys=[("filing_date", "descending")])
         sort_indices_top = sort_indices[:min(n, len(sort_indices))]
         latest_filing_index = pc.take(data=self.data, indices=sort_indices_top)
         filings = CompanyFilings(latest_filing_index,
@@ -217,8 +217,8 @@ class CompanyFilings(Filings):
                 .assign(size=lambda df: df['size'].apply(display_size),
                         isXBRL=lambda df: df.isXBRL.map({'1': True, 1: True}).fillna(""),
                         )
-                .filter(["form", "filingDate", "accessionNumber", "isXBRL"])
-                .rename(columns={"filingDate": "filed", "isXBRL": "xbrl"})
+                .filter(["form", "filing_date", "accessionNumber", "isXBRL"])
+                .rename(columns={"filing_date": "filed", "isXBRL": "xbrl"})
                 )
 
     def __repr__(self):
@@ -387,7 +387,7 @@ class Company:
              pa.array(rjson['primaryDocDescription'])
              ],
             names=['accessionNumber',
-                   'filingDate',
+                   'filing_date',
                    'reportDate',
                    'acceptanceDateTime',
                    'act',

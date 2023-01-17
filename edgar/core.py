@@ -1,11 +1,12 @@
 import gzip
 import logging.config
 import os
+import re
 import threading
 from _thread import interrupt_main
 from functools import lru_cache
 from io import BytesIO
-from typing import Union, Optional
+from typing import Union, Optional, Tuple
 
 import httpx
 import humanize
@@ -16,6 +17,7 @@ from rich import box
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 from rich.table import Table
+from datetime import datetime
 
 logging.basicConfig(
     level="INFO",
@@ -31,6 +33,7 @@ __all__ = [
     'Result',
     'repr_df',
     'get_bool',
+    'extract_dates',
     'repr_rich',
     'http_client',
     'display_size',
@@ -43,6 +46,11 @@ __all__ = [
     'ask_for_identity',
     'df_to_rich_table',
 ]
+
+# Date patterns
+YYYY_MM_DD = "\\d{4}-\\d{2}-\\d{2}"
+DATE_PATTERN = re.compile(YYYY_MM_DD)
+DATE_RANGE_PATTERN = re.compile(f"({YYYY_MM_DD})?:?(({YYYY_MM_DD})?)?")
 
 default_http_timeout: int = 10
 limits = httpx.Limits(max_connections=10)
@@ -124,6 +132,40 @@ def get_identity() -> str:
     return identity
 
 
+def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
+    """
+    Split a date or a date range into start_date and end_date
+    >>> split_date("2022-03-04")
+          2022-03-04, None, False
+    >>> split_date("2022-03-04:2022-04-05")
+        2022-03-04, 2022-04-05, True
+    >>> split_date("2022-03-04:")
+        2022-03-04, None, True
+    >>> split_date(":2022-03-04")
+        None, 2022-03-04, True
+    :param date: The date to split
+    :return:
+    """
+    match = re.match(DATE_RANGE_PATTERN, date)
+    if match:
+        start_date, _, end_date = match.groups()
+        try:
+            start_date_tm = datetime.strptime(start_date, "%Y-%m-%d") if start_date else None
+            end_date_tm = datetime.strptime(end_date, "%Y-%m-%d") if end_date else None
+            if start_date_tm or end_date_tm:
+                return start_date_tm, end_date_tm, ":" in date
+        except ValueError:
+            log.error(f"The date {date} cannot be extracted using date pattern YYYY-MM-DD")
+    log.error(f"""
+    Cannot extract a date or date range from string {date}
+    Provide either 
+        1. A date in the format "YYYY-MM-DD" e.g. "2022-10-27"
+        2. A date range in the format "YYYY-MM-DD:YYYY-MM-DD" e.g. "2022-10-01:2022-10-27"
+        3. A partial date range "YYYY-MM-DD:" to specify dates after the value e.g.  "2022-10-01:"
+        4. A partial date range ":YYYY-MM-DD" to specify dates before the value  e.g. ":2022-10-27"
+    """)
+
+
 def autodetect(content):
     return detect(content).get("encoding")
 
@@ -188,9 +230,11 @@ table_styles = {
     'company': 'cyan',
     'entity': 'cyan',
     'filingDate': 'cyan',
+    'filing_date': 'cyan',
     'filed': 'cyan',
     'security': 'cyan',
-    'reporting owner': 'cyan'
+    'reporting owner': 'cyan',
+    'fact': 'cyan'
 }
 
 
@@ -330,5 +374,3 @@ def display_size(size: Optional[int]) -> str:
         if isinstance(size, int) or size.isdigit():
             return humanize.naturalsize(int(size), binary=True).replace("i", "")
     return ""
-
-

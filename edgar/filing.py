@@ -19,8 +19,10 @@ from fastcore.basics import listify
 from fastcore.parallel import parallel
 from rich.console import Group
 from rich.text import Text
+from datetime import datetime
 
-from edgar.core import http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size
+from edgar.core import (http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size,
+                        extract_dates)
 from edgar.xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -101,7 +103,7 @@ form_specs = FileSpecs(
     [("form", (0, 12), pa.string()),
      ("company", (12, 74), pa.string()),
      ("cik", (74, 82), pa.int32()),
-     ("filingDate", (85, 97), pa.string()),
+     ("filing_date", (85, 97), pa.string()),
      ("accessionNumber", (97, 141), pa.string())
      ]
 )
@@ -109,7 +111,7 @@ company_specs = FileSpecs(
     [("company", (0, 62), pa.string()),
      ("form", (62, 74), pa.string()),
      ("cik", (74, 82), pa.int32()),
-     ("filingDate", (85, 97), pa.string()),
+     ("filing_date", (85, 97), pa.string()),
      ("accessionNumber", (97, 141), pa.string())
      ]
 )
@@ -137,6 +139,11 @@ def read_fixed_width_index(index_text: str,
     # Change the CIK to int
     arrays[2] = pa.compute.cast(arrays[2], pa.int32())
 
+    # Convert filingdate from string to date
+    # Some files have %Y%m-%d other %Y%m%d
+    date_format = '%Y-%m-%d' if len(arrays[3][0].as_py()) == 10 else '%Y%m%d'
+    arrays[3] = pc.cast(pc.strptime(arrays[3], date_format, 'us'), pa.date32())
+
     # Get the accession number from the file path
     arrays[4] = pa.compute.utf8_slice_codeunits(
         pa.compute.utf8_rtrim(arrays[4], characters=".txt"), start=-20)
@@ -157,7 +164,7 @@ def read_pipe_delimited_index(index_text: str) -> pa.Table:
         BytesIO(index_text.encode()),
         parse_options=pa_csv.ParseOptions(delimiter="|"),
         read_options=pa_csv.ReadOptions(skip_rows=10,
-                                        column_names=['cik', 'company', 'form', 'filingDate', 'accessionNumber'])
+                                        column_names=['cik', 'company', 'form', 'filing_date', 'accessionNumber'])
     )
     index_table = index_table.set_column(
         0,
@@ -177,17 +184,17 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
     url = full_index_url.format(year, quarter, index, "gz")
     index_text = download_text(url=url, client=client)
     if index == "xbrl":
-        index_table = read_pipe_delimited_index(index_text)
+        index_table: pa.Table = read_pipe_delimited_index(index_text)
     else:
         # Read as a fixed width index file
         file_specs = form_specs if index == "form" else company_specs
-        index_table = read_fixed_width_index(index_text,
-                                             file_specs=file_specs)
+        index_table: pa.Table = read_fixed_width_index(index_text,
+                                                       file_specs=file_specs)
     return (year, quarter), index_table
 
 
 def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
-                             index="form"):
+                             index="form") -> pa.Table:
     """
     Get the filings for the quarters
     :param year_and_quarters:
@@ -209,7 +216,7 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
                                             )
             quarter_and_indexes_sorted = sorted(quarters_and_indexes, key=lambda d: d[0])
             index_tables = [fd[1] for fd in quarter_and_indexes_sorted]
-            final_index_table = pa.concat_tables(index_tables, promote=False)
+            final_index_table: pa.Table = pa.concat_tables(index_tables, promote=False)
     return final_index_table
 
 
@@ -249,19 +256,19 @@ class Filings:
             cik=self.data['cik'][item].as_py(),
             company=self.data['company'][item].as_py(),
             form=self.data['form'][item].as_py(),
-            filing_date=self.data['filingDate'][item].as_py(),
+            filing_date=self.data['filing_date'][item].as_py(),
             accession_no=self.data['accessionNumber'][item].as_py(),
         )
 
     @property
     def date_range(self) -> Tuple[datetime]:
         """Return a tuple of the start and end dates in the filing index"""
-        min_max_dates = pc.min_max(self.data['filingDate']).as_py()
+        min_max_dates = pc.min_max(self.data['filing_date']).as_py()
         return min_max_dates['min'], min_max_dates['max']
 
     def latest(self, n: int = 1) -> int:
         """Get the latest n filings"""
-        sort_indices = pc.sort_indices(self.data, sort_keys=[("filingDate", "descending")])
+        sort_indices = pc.sort_indices(self.data, sort_keys=[("filing_date", "descending")])
         sort_indices_top = sort_indices[:min(n, len(sort_indices))]
         latest_filing_index = pc.take(data=self.data, indices=sort_indices_top)
         filings = Filings(latest_filing_index)
@@ -270,21 +277,41 @@ class Filings:
         return filings
 
     def filter(self,
-               form: Union[str, List[str]],
-               amendments: bool = None):
+               form: Union[str, List[str]] = None,
+               amendments: bool = None,
+               filing_date: str = None):
         """
         Filter the filings
         :param form: The form or list of forms to filter by
         :param amendments: Whether to include amendments to the forms e.g include "10-K/A" if filtering for "10-K"
+        :param filing_date: The filing date
         :return: The filtered filings
         """
+        filing_index = self.data
         forms = form
         if forms:
             forms = listify(forms)
             # If amendments then add amendments
             if amendments:
                 forms = list(set(forms + [f"{val}/A" for val in forms]))
-            filing_index = self.data.filter(pc.is_in(self.data['form'], pa.array(forms)))
+            filing_index = filing_index.filter(pc.is_in(filing_index['form'], pa.array(forms)))
+
+        if filing_date:
+            # Check if it's a date range
+            date_parts = extract_dates(filing_date)
+            if not date_parts:
+                return None
+
+            start_date, end_date, is_range = date_parts
+            if is_range:
+                if start_date:
+                    filing_index = filing_index.filter(pc.field('filing_date') >= pc.scalar(start_date))
+                if end_date:
+                    filing_index = filing_index.filter(pc.field('filing_date') <= pc.scalar(end_date))
+            else:
+                # filter by filings on date
+                filing_index = filing_index.filter(pc.field('filing_date') == pc.scalar(start_date))
+
         return Filings(filing_index)
 
     def __head(self, n):
@@ -304,6 +331,10 @@ class Filings:
         """Get the last n filings"""
         selection = self.__tail(n)
         return Filings(selection)
+
+    @property
+    def empty(self) -> bool:
+        return len(self.data) == 0
 
     def __getitem__(self, item):
         return self.get_filing_at(item)
@@ -349,6 +380,7 @@ def get_filings(year: Years,
                 quarter: Quarters = None,
                 form: Union[str, List[str]] = None,
                 amendments: bool = True,
+                filing_date: str = None,
                 index="form") -> Filings:
     """
     Downloads the filing index for a given year or list of years, and a quarter or list of quarters.
@@ -371,11 +403,20 @@ def get_filings(year: Years,
 
     >>> filings = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021
 
+    >>> filings = get_filings(2021, 4, form="D") # Get filings for 2021 Q4 for form D
+
+    >>> filings = get_filings(2021, 4, filing_date="2021-10-01") # Get filings for 2021 Q4 on "2021-10-01"
+
+    >>> filings = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") # Get filings for 2021 Q4 between
+                                                                            # "2021-10-01" and "2021-10-10"
+
 
     :param year The year of the filing
     :param quarter The quarter of the filing
     :param form The form or forms as a string e.g. "10-K" or a List ["10-K", "8-K"]
     :param amendments If True will expand the list of forms to include amendments e.g. "10-K/A"
+    :param filing_date The filing date to filter by in YYYY-MM-DD format
+                e.g. filing_date="2022-01-17" or filing_date="2022-01-17:2022-02-28"
     :param index The index type - "form" or "company" or "xbrl"
     :return:
     """
@@ -384,8 +425,8 @@ def get_filings(year: Years,
 
     filings = Filings(filing_index)
 
-    if form:
-        return filings.filter(form=form, amendments=amendments)
+    if form or filing_date:
+        return filings.filter(form=form, amendments=amendments, filing_date=filing_date)
     return filings
 
 
@@ -485,7 +526,7 @@ class Filing:
         filings = company.get_filings(accession_number=self.accession_no)
         if not filings.empty:
             file_number = filings[0].file_number
-            return company.get_filings(file_number=file_number, sort_by="filingDate")
+            return company.get_filings(file_number=file_number, sort_by="filing_date")
 
     def __hash__(self):
         return hash(self.accession_no)
@@ -501,7 +542,7 @@ class Filing:
         return pd.DataFrame([{'form': self.form,
                               'company': self.company,
                               'cik': self.cik,
-                              'filed': self.filing_date,
+                              'filing_date': self.filing_date,
                               "accession_no": self.accession_no}]).set_index("accession_no")
 
     def __str__(self):
@@ -519,7 +560,7 @@ class Filing:
         """
         Produce a table version of this filing e.g.
         ┌──────────────────────┬──────┬────────────┬────────────────────┬─────────┐
-        │                      │ form │ filed      │ company            │ cik     │
+        │                      │ form │ filing_date      │ company            │ cik     │
         ├──────────────────────┼──────┼────────────┼────────────────────┼─────────┤
         │ 0001564590-18-004771 │ 10-K │ 2018-03-08 │ CARBO CERAMICS INC │ 1009672 │
         └──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
@@ -532,7 +573,7 @@ class Filing:
     def __rich__repr__(self):
         yield "accession_no", self.accession_no
         yield "form", self.form
-        yield "filed", self.filed
+        yield "filing_date", self.filing_date
         yield "company", self.company
         yield "cik", self.cik
 

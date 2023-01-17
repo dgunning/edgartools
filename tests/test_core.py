@@ -1,6 +1,8 @@
+import datetime
+
 import pandas as pd
 import importlib
-
+from datetime import datetime
 from edgar.core import (decode_content,
                         get_identity,
                         set_identity,
@@ -11,7 +13,8 @@ from edgar.core import (decode_content,
                         http_client,
                         client_headers,
                         df_to_rich_table,
-                        download_file)
+                        download_file,
+                        extract_dates)
 import re
 from rich.table import Table
 import pytest
@@ -139,3 +142,14 @@ def test_download_image():
     print(r.encoding)
     print(r.content)
     download_file(url)
+
+
+def test_extract_dates():
+    assert extract_dates("2022-03-04") == (datetime.strptime("2022-03-04", "%Y-%m-%d"), None, False)
+    assert extract_dates("2022-03-04:") == (datetime.strptime("2022-03-04", "%Y-%m-%d"), None, True)
+    assert extract_dates(":2022-03-04") == (None, datetime.strptime("2022-03-04", "%Y-%m-%d"), True)
+    assert extract_dates("2022-03-04:2022-04-04") == (
+    datetime.strptime("2022-03-04", "%Y-%m-%d"), datetime.strptime("2022-04-04", "%Y-%m-%d"), True)
+
+    # Invalid dates
+    extract_dates("2022-44-44")

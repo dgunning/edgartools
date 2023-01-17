@@ -31,7 +31,7 @@ def test_read_form_filing_index_year_and_quarter():
 
     df = filings.to_pandas()
     assert len(df) == len(filings) == len(filings.data)
-    assert filings.data.column_names == ['form', 'company', 'cik', 'filingDate', 'accessionNumber']
+    assert filings.data.column_names == ['form', 'company', 'cik', 'filing_date', 'accessionNumber']
     print(filings.data.schema)
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
     assert filings.data[0][0].as_py() == '1-A'
@@ -45,7 +45,7 @@ def test_read_form_filing_index_year():
 
     df = filings.to_pandas()
     assert len(df) == len(filings) == len(filings.data)
-    assert filings.data.column_names == ['form', 'company', 'cik', 'filingDate', 'accessionNumber']
+    assert filings.data.column_names == ['form', 'company', 'cik', 'filing_date', 'accessionNumber']
     print(filings.data.schema)
 
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
@@ -59,7 +59,7 @@ def test_read_company_filing_index_year_and_quarter():
 
     df = company_filings.to_pandas()
     assert len(df) == len(company_filings) == len(company_filings.data)
-    assert company_filings.data.column_names == ['company', 'form', 'cik', 'filingDate', 'accessionNumber']
+    assert company_filings.data.column_names == ['company', 'form', 'cik', 'filing_date', 'accessionNumber']
     print(company_filings.data.schema)
 
     print('Bytes', humanize.naturalsize(company_filings.data.nbytes, binary=True))
@@ -72,21 +72,21 @@ def test_read_form_filing_index_xbrl():
 
     df = filings.to_pandas()
     assert len(df) == len(filings) == len(filings.data)
-    assert filings.data.column_names == ['cik', 'company', 'form', 'filingDate', 'accessionNumber']
+    assert filings.data.column_names == ['cik', 'company', 'form', 'filing_date', 'accessionNumber']
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
     assert re.match(r'\d{10}\-\d{2}\-\d{6}', filings.data[4][-1].as_py())
 
 
 def test_get_filings_gets_correct_accession_number():
     # Get the filings and test that the accession number is correct for all rows e.g. 0001185185-20-000088
-    filings: Filings = get_filings(2021, 1)
+    filings: Filings = cached_filings(2021, 1)
     data = filings.data.to_pandas()
     misparsed_accessions = data.query("accessionNumber.str.endswith('.')")
     assert len(misparsed_accessions) == 0
 
 
 @lru_cache(maxsize=8)
-def cached_filings(year: int, quarter: int, index: str):
+def cached_filings(year: int, quarter: int, index: str = "form"):
     return get_filings(year, quarter, index=index)
 
 
@@ -133,6 +133,19 @@ def test_filter_filings_by_form():
 
     tenk_filings = filings.filter(form="10-Q", amendments=True)
     assert set(tenk_filings.data['form'].to_pylist()) == {"10-Q", '10-Q/A'}
+
+
+def test_filter_filings_by_date():
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
+    filtered_filings = filings.filter(filing_date='2021-03-04')
+    assert len(set(filtered_filings.data['filing_date'].to_pylist())) == 1
+    assert not filtered_filings.empty
+    assert len(filtered_filings) < len(filings)
+
+    # filter by form and date
+    filings_by_date_and_form = filings.filter(form=['10-Q'], filing_date='2021-03-04')
+    assert list(set(filings_by_date_and_form.data['form'].to_pylist())) == ['10-Q']
+    assert len(set(filings_by_date_and_form.data['filing_date'].to_pylist())) == 1
 
 
 def test_filing_tail():
@@ -192,7 +205,7 @@ def test_filing_primary_document():
     assert primary_document
     company = get_company(cik=1805559)
     filings = company.get_filings()
-    print(filings.to_pandas("form", "filingDate", "primaryDocument"))
+    print(filings.to_pandas("form", "filing_date", "primaryDocument"))
     filing = filings[0]
     assert filing
 
@@ -432,6 +445,35 @@ def test_filing_filter_by_form():
 
     filings = get_filings(2014, 4, form=["10-K", "8-K"])
     assert set(filings.data['form'].to_pylist()) == {'10-K', '10-K/A', '8-K', '8-K/A'}
+
+
+def test_filter_by_date():
+    # Test non-xbrl filings
+    filings = get_filings(2022, 3)
+    filings_on_date = filings.filter(filing_date='2022-08-10')
+    filing_dates = [d.strftime('%Y-%m-%d') for d in set(filings_on_date.data['filing_date'].to_pylist())]
+    assert filing_dates == ['2022-08-10']
+
+    # Test filter by date range
+    filings_for_range = filings.filter(filing_date='2022-08-10:2022-08-16')
+    filing_dates = [d.strftime('%Y-%m-%d') for d in set(filings_for_range.data['filing_date'].to_pylist())]
+    assert sorted(filing_dates) == ['2022-08-10', '2022-08-11', '2022-08-12', '2022-08-15', '2022-08-16']
+
+
+def test_filter_invalid_date():
+    filings = cached_filings(2022, 3)
+    filtered = filings.filter(filing_date="2022-08:")
+    assert not filtered
+
+
+def test_filter_by_date_xbrl():
+    # Test XBRL filings
+    filings = get_filings(2022, 3, index="xbrl")
+    filings_on_date = filings.filter(filing_date='2022-08-10')
+    assert not filings.empty
+    assert len(filings) > 500
+    filing_dates = [d.strftime('%Y-%m-%d') for d in set(filings_on_date.data['filing_date'].to_pylist())]
+    assert filing_dates == ['2022-08-10']
 
 
 def test_filing_filter_by_form_no_amendments():
