@@ -100,6 +100,15 @@ def test_company_get_filings():
     assert len(company_filings) == len(company.filings)
 
 
+def test_company_filings_filter_by_date():
+    expe = get_test_company(ticker="EXPE")
+    filings = expe.filings
+    filtered_filings = filings.filter(filing_date="2023-01-04:")
+    print(filtered_filings)
+    assert not filtered_filings.empty
+    assert len(filtered_filings) < len(expe.filings)
+
+
 def test_company_get_filings_for_form():
     company: Company = Company.for_ticker("EXPE")
     tenk_filings: CompanyFilings = company.get_filings(form='10-K')
@@ -108,8 +117,18 @@ def test_company_get_filings_for_form():
     assert filing
     assert filing.form == '10-K'
     assert filing.cik == 1324424
-    assert isinstance(filing.filing_date, str)
     assert isinstance(filing.accession_no, str)
+
+
+def test_company_get_form_by_date():
+    company: Company = Company.for_ticker("EXPE")
+    filings = company.get_filings(filing_date="2022-11-01:2023-01-20")
+    assert not filings.empty
+    assert len(filings) < len(company.get_filings())
+    print(filings)
+
+    filings_10k = company.get_filings(filing_date="2022-11-01:2023-01-20", form="10-Q")
+    assert len(filings_10k) == 1
 
 
 def test_company_get_filings_for_multiple_forms():

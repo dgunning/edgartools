@@ -13,7 +13,8 @@ from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
 
-from edgar.core import http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size
+from edgar.core import (http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size, filter_by_date,
+                        InvalidDateException)
 from edgar.filing import Filing, Filings
 
 __all__ = [
@@ -195,6 +196,16 @@ class CompanyFilings(Filings):
             is_inline_xbrl=self.data['isInlineXBRL'][item].as_py()
         )
 
+    def filter(self,
+               form: Union[str, List[str]] = None,
+               amendments: bool = None,
+               filing_date: str = None,
+               date: str = None):
+        # The super filter returns Filings. We want CompanyFilings
+        res = super().filter(form, amendments, filing_date, date)
+        if res:
+            return CompanyFilings(data=res.data, cik=self.cik, company_name=self.company_name)
+
     def latest(self, n: int = 1) -> int:
         """Get the latest n filings"""
         sort_indices = pc.sort_indices(self.data, sort_keys=[("filing_date", "descending")])
@@ -301,9 +312,10 @@ class Company:
     def get_filings(self,
                     *,
                     form: Union[str, List] = None,
-                    date: Union[str, Tuple[str, str]] = None,
                     accession_number: Union[str, List] = None,
                     file_number: Union[str, List] = None,
+                    filing_date: Union[str, Tuple[str, str]] = None,
+                    date: Union[str, Tuple[str, str]] = None,
                     is_xbrl: bool = None,
                     is_inline_xbrl: bool = None,
                     sort_by: Union[str, List[Tuple[str, str]]] = None
@@ -346,6 +358,15 @@ class Company:
         if is_inline_xbrl is not None:
             company_filings = company_filings.filter(pc.equal(company_filings['isInlineXBRL'], int(is_inline_xbrl)))
 
+        filing_date = filing_date or date
+        if filing_date:
+            # Filter by date
+            try:
+                company_filings = filter_by_date(company_filings, filing_date, 'filing_date')
+            except InvalidDateException as e:
+                log.error(e)
+                return None
+
         if sort_by:
             company_filings = company_filings.sort_by(sort_by)
 
@@ -353,57 +374,59 @@ class Company:
                               cik=self.cik,
                               company_name=self.name)
 
-    def __repr__(self):
-        return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
 
-    def _repr_html_(self):
-        summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category': self.category}])
-        ticker_info = pd.DataFrame({"Exchange": self.exchanges, "Ticker": self.tickers})
-        return f"""
+def __repr__(self):
+    return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
+
+
+def _repr_html_(self):
+    summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category': self.category}])
+    ticker_info = pd.DataFrame({"Exchange": self.exchanges, "Ticker": self.tickers})
+    return f"""
         <h3>{self.name}</h3>
         {repr_df(summary)}
         {repr_df(ticker_info)}
         """
 
-    @staticmethod
-    def parse_filings(filings_json: Dict[str, object],
-                      cik: int,
-                      company_name: str):
-        rjson: Dict[str, List[object]] = filings_json['recent']
 
-        filings_table = pa.Table.from_arrays(
-            [pa.array(rjson['accessionNumber']),
-             pa.array(rjson['filingDate']),
-             pa.array(rjson['reportDate']),
-             pa.array(rjson['acceptanceDateTime']),
-             pa.array(rjson['act']),
-             pa.array(rjson['form']),
-             pa.array(rjson['fileNumber']),
-             pa.array(rjson['items']),
-             pa.array(rjson['size']),
-             pa.array(rjson['isXBRL']),
-             pa.array(rjson['isInlineXBRL']),
-             pa.array(rjson['primaryDocument']),
-             pa.array(rjson['primaryDocDescription'])
-             ],
-            names=['accessionNumber',
-                   'filing_date',
-                   'reportDate',
-                   'acceptanceDateTime',
-                   'act',
-                   'form',
-                   'fileNumber',
-                   'items',
-                   'size',
-                   'isXBRL',
-                   'isInlineXBRL',
-                   'primaryDocument',
-                   'primaryDocDescription'
-                   ]
-        )
-        return CompanyFilings(filings_table,
-                              cik=cik,
-                              company_name=company_name)
+def parse_filings(filings_json: Dict[str, object],
+                  cik: int,
+                  company_name: str):
+    rjson: Dict[str, List[object]] = filings_json['recent']
+
+    filings_table = pa.Table.from_arrays(
+        [pa.array(rjson['accessionNumber']),
+         pc.cast(pc.strptime(pa.array(rjson['filingDate']), '%Y-%m-%d', 'us'), pa.date32()),
+         pa.array(rjson['reportDate']),
+         pa.array(rjson['acceptanceDateTime']),
+         pa.array(rjson['act']),
+         pa.array(rjson['form']),
+         pa.array(rjson['fileNumber']),
+         pa.array(rjson['items']),
+         pa.array(rjson['size']),
+         pa.array(rjson['isXBRL']),
+         pa.array(rjson['isInlineXBRL']),
+         pa.array(rjson['primaryDocument']),
+         pa.array(rjson['primaryDocDescription'])
+         ],
+        names=['accessionNumber',
+               'filing_date',
+               'reportDate',
+               'acceptanceDateTime',
+               'act',
+               'form',
+               'fileNumber',
+               'items',
+               'size',
+               'isXBRL',
+               'isInlineXBRL',
+               'primaryDocument',
+               'primaryDocDescription'
+               ]
+    )
+    return CompanyFilings(filings_table,
+                          cik=cik,
+                          company_name=company_name)
 
 
 def parse_company_submissions(cjson: Dict[str, object]):
@@ -438,7 +461,7 @@ def parse_company_submissions(cjson: Dict[str, object]):
                        state_or_country=business_addr['stateOrCountry'],
                        zipcode=business_addr['zipCode'],
                    ),
-                   filings=Company.parse_filings(cjson['filings'], cik=cik, company_name=company_name)
+                   filings=parse_filings(cjson['filings'], cik=cik, company_name=company_name)
                    )
 
 

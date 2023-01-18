@@ -1,6 +1,8 @@
 import datetime
 
 import pandas as pd
+import pyarrow as pa
+import pyarrow.compute as pc
 import importlib
 from datetime import datetime
 from edgar.core import (decode_content,
@@ -10,7 +12,9 @@ from edgar.core import (decode_content,
                         display_size,
                         repr_rich,
                         Result,
+                        filter_by_date,
                         http_client,
+                        InvalidDateException,
                         client_headers,
                         df_to_rich_table,
                         download_file,
@@ -149,7 +153,27 @@ def test_extract_dates():
     assert extract_dates("2022-03-04:") == (datetime.strptime("2022-03-04", "%Y-%m-%d"), None, True)
     assert extract_dates(":2022-03-04") == (None, datetime.strptime("2022-03-04", "%Y-%m-%d"), True)
     assert extract_dates("2022-03-04:2022-04-04") == (
-    datetime.strptime("2022-03-04", "%Y-%m-%d"), datetime.strptime("2022-04-04", "%Y-%m-%d"), True)
+        datetime.strptime("2022-03-04", "%Y-%m-%d"), datetime.strptime("2022-04-04", "%Y-%m-%d"), True)
 
     # Invalid dates
-    extract_dates("2022-44-44")
+    with pytest.raises(InvalidDateException):
+        extract_dates("2022-44-44")
+
+
+def test_invalid_date_exception():
+    exception = InvalidDateException("Something went wrong")
+    assert str(exception) == "Something went wrong"
+
+
+def test_filter_by_date():
+    arrays = [pa.array(['a', 'b', 'c']),
+              pa.array([3, 2, 1]),
+              pc.cast(pc.strptime(pa.array(['2013-04-24', '2015-12-03', '2017-08-10']), '%Y-%m-%d', 'us'), pa.date32())]
+
+    # arrays[2] = pc.cast(pc.strptime(arrays[2], '%Y-%m-%d', 'us'), pa.date32())
+    table = pa.Table.from_arrays(arrays,
+                                 names=['item', 'value', 'date']
+                                 )
+
+    assert len(filter_by_date(table, '2013-04-24', 'date')) == 1
+    assert len(filter_by_date(table, '2013-04-24:2016-04-24', 'date')) == 2

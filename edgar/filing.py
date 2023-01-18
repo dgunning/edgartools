@@ -19,10 +19,9 @@ from fastcore.basics import listify
 from fastcore.parallel import parallel
 from rich.console import Group
 from rich.text import Text
-from datetime import datetime
 
 from edgar.core import (http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size,
-                        extract_dates)
+                        filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException)
 from edgar.xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -42,8 +41,7 @@ __all__ = [
     'FilingHomepage',
     'available_quarters'
 ]
-sec_dot_gov = "https://www.sec.gov"
-sec_edgar = "https://www.sec.gov/Archives/edgar"
+
 full_index_url = "https://www.sec.gov/Archives/edgar/full-index/{}/QTR{}/{}.{}"
 
 filing_homepage_url_re = re.compile(f"{sec_edgar}/data/[0-9]{1,}/[0-9]{10}-[0-9]{2}-[0-9]{4}-index.html")
@@ -279,12 +277,14 @@ class Filings:
     def filter(self,
                form: Union[str, List[str]] = None,
                amendments: bool = None,
-               filing_date: str = None):
+               filing_date: str = None,
+               date: str = None):
         """
         Filter the filings
         :param form: The form or list of forms to filter by
         :param amendments: Whether to include amendments to the forms e.g include "10-K/A" if filtering for "10-K"
         :param filing_date: The filing date
+        :param date: An alias for the filing date
         :return: The filtered filings
         """
         filing_index = self.data
@@ -296,21 +296,14 @@ class Filings:
                 forms = list(set(forms + [f"{val}/A" for val in forms]))
             filing_index = filing_index.filter(pc.is_in(filing_index['form'], pa.array(forms)))
 
+        # filing_date and date are aliases
+        filing_date = filing_date or date
         if filing_date:
-            # Check if it's a date range
-            date_parts = extract_dates(filing_date)
-            if not date_parts:
+            try:
+                filing_index = filter_by_date(filing_index, filing_date, 'filing_date')
+            except InvalidDateException as e:
+                log.error(e)
                 return None
-
-            start_date, end_date, is_range = date_parts
-            if is_range:
-                if start_date:
-                    filing_index = filing_index.filter(pc.field('filing_date') >= pc.scalar(start_date))
-                if end_date:
-                    filing_index = filing_index.filter(pc.field('filing_date') <= pc.scalar(end_date))
-            else:
-                # filter by filings on date
-                filing_index = filing_index.filter(pc.field('filing_date') == pc.scalar(start_date))
 
         return Filings(filing_index)
 
@@ -374,6 +367,8 @@ class Filings:
         <h3>{self.summary}</h3>
         {self.data.to_pandas()._repr_html_()}
         """
+
+
 
 
 def get_filings(year: Years,

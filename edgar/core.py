@@ -12,6 +12,7 @@ import httpx
 import humanize
 import pandas as pd
 import pyarrow as pa
+import pyarrow.compute as pc
 from charset_normalizer import detect
 from rich import box
 from rich.logging import RichHandler
@@ -33,18 +34,22 @@ __all__ = [
     'Result',
     'repr_df',
     'get_bool',
-    'extract_dates',
+    'sec_edgar',
     'repr_rich',
     'http_client',
+    'sec_dot_gov',
     'display_size',
+    'extract_dates',
     'get_resource',
     'get_identity',
     'set_identity',
     'download_text',
     'download_file',
     'decode_content',
+    'filter_by_date',
     'ask_for_identity',
     'df_to_rich_table',
+    'InvalidDateException'
 ]
 
 # Date patterns
@@ -55,6 +60,10 @@ DATE_RANGE_PATTERN = re.compile(f"({YYYY_MM_DD})?:?(({YYYY_MM_DD})?)?")
 default_http_timeout: int = 10
 limits = httpx.Limits(max_connections=10)
 edgar_identity = 'EDGAR_IDENTITY'
+
+# SEC urls
+sec_dot_gov = "https://www.sec.gov"
+sec_edgar = "https://www.sec.gov/Archives/edgar"
 
 
 def set_identity(user_identity: str):
@@ -132,6 +141,12 @@ def get_identity() -> str:
     return identity
 
 
+class InvalidDateException(Exception):
+
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
     """
     Split a date or a date range into start_date and end_date
@@ -156,7 +171,7 @@ def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
                 return start_date_tm, end_date_tm, ":" in date
         except ValueError:
             log.error(f"The date {date} cannot be extracted using date pattern YYYY-MM-DD")
-    log.error(f"""
+    raise InvalidDateException(f"""
     Cannot extract a date or date range from string {date}
     Provide either 
         1. A date in the format "YYYY-MM-DD" e.g. "2022-10-27"
@@ -164,6 +179,23 @@ def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
         3. A partial date range "YYYY-MM-DD:" to specify dates after the value e.g.  "2022-10-01:"
         4. A partial date range ":YYYY-MM-DD" to specify dates before the value  e.g. ":2022-10-27"
     """)
+
+
+def filter_by_date(data: pa.Table,
+                   date: str,
+                   date_col: str):
+    # Extract the date parts ... this should raise an exception if we cannot
+    date_parts = extract_dates(date)
+    start_date, end_date, is_range = date_parts
+    if is_range:
+        if start_date:
+            filtered_data = data.filter(pc.field(date_col) >= pc.scalar(start_date))
+        if end_date:
+            filtered_data = filtered_data.filter(pc.field(date_col) <= pc.scalar(end_date))
+    else:
+        # filter by filings on date
+        filtered_data = data.filter(pc.field(date_col) == pc.scalar(start_date))
+    return filtered_data
 
 
 def autodetect(content):
