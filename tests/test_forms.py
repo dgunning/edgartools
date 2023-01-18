@@ -4,12 +4,12 @@ from edgar.form import SecForms
 
 
 def test_list_forms():
-    forms = SecForms()
+    forms = SecForms.load()
     assert len(forms) > 100
 
 
 def test_forms_summary():
-    forms = SecForms()
+    forms = SecForms.load()
     summary = forms.summary()
     assert len(summary) == len(forms)
     print()
@@ -17,7 +17,7 @@ def test_forms_summary():
 
 
 def test_forms_get_form():
-    forms = SecForms()
+    forms = SecForms.load()
     form = forms.get_form('10-K')
     assert form
     assert form.form == '10-K'
