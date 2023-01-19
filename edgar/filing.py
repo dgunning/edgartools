@@ -21,7 +21,7 @@ from rich.console import Group
 from rich.text import Text
 
 from edgar.core import (http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size,
-                        filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException)
+                        filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString)
 from edgar.xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -275,7 +275,7 @@ class Filings:
         return filings
 
     def filter(self,
-               form: Union[str, List[str]] = None,
+               form: Union[str, List[IntString]] = None,
                amendments: bool = None,
                filing_date: str = None,
                date: str = None):
@@ -290,7 +290,8 @@ class Filings:
         filing_index = self.data
         forms = form
         if forms:
-            forms = listify(forms)
+            # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
+            forms = [str(el) for el in listify(forms)]
             # If amendments then add amendments
             if amendments:
                 forms = list(set(forms + [f"{val}/A" for val in forms]))
@@ -369,11 +370,9 @@ class Filings:
         """
 
 
-
-
 def get_filings(year: Years,
                 quarter: Quarters = None,
-                form: Union[str, List[str]] = None,
+                form: Union[str, List[IntString]] = None,
                 amendments: bool = True,
                 filing_date: str = None,
                 index="form") -> Filings:

@@ -36,6 +36,7 @@ __all__ = [
     'get_bool',
     'sec_edgar',
     'repr_rich',
+    'IntString',
     'http_client',
     'sec_dot_gov',
     'display_size',
@@ -51,6 +52,8 @@ __all__ = [
     'df_to_rich_table',
     'InvalidDateException'
 ]
+
+IntString = Union[str, int]
 
 # Date patterns
 YYYY_MM_DD = "\\d{4}-\\d{2}-\\d{2}"

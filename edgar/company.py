@@ -374,19 +374,17 @@ class Company:
                               cik=self.cik,
                               company_name=self.name)
 
+    def __repr__(self):
+        return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
 
-def __repr__(self):
-    return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
-
-
-def _repr_html_(self):
-    summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category': self.category}])
-    ticker_info = pd.DataFrame({"Exchange": self.exchanges, "Ticker": self.tickers})
-    return f"""
-        <h3>{self.name}</h3>
-        {repr_df(summary)}
-        {repr_df(ticker_info)}
-        """
+    def _repr_html_(self):
+        summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category': self.category}])
+        ticker_info = pd.DataFrame({"Exchange": self.exchanges, "Ticker": self.tickers})
+        return f"""
+            <h3>{self.name}</h3>
+            {repr_df(summary)}
+            {repr_df(ticker_info)}
+            """
 
 
 def parse_filings(filings_json: Dict[str, object],
