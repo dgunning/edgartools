@@ -14,7 +14,7 @@ __all__ = [
 @lru_cache(maxsize=1)
 def list_forms():
     forms_html = download_text('https://www.sec.gov/forms', http_client())
-    soup = BeautifulSoup(forms_html, features="html")
+    soup = BeautifulSoup(forms_html, features="lxml")
     data_table = soup.find("table")
     tbody = data_table.find("tbody")
 
