@@ -12,7 +12,7 @@ It is a number, but is sometimes shown in SEC Edgar resources as a string padded
 For the edgar client API, just use the numbers and omit the leading zeroes.
 
 ```python
-company = Company.for_cik(1318605)
+company = Company(1318605)
 ```
 ![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/expe.png)
 
@@ -26,10 +26,10 @@ This makes it two calls versus one for the cik company lookup, but is sometimes 
 Note that some companies have multiple tickers, so you technically cannot get SEC filings for a ticker.
 You instead get the SEC filings for the company to which the ticker belongs.
 
-The ticker is case-insensitive so you can use `Company.for_ticker("snow")`
-or `Company.for_ticker("SNOW")`
+The ticker is case-insensitive so you can use `Company("snow")`
+or `Company("SNOW")`
 ```python
-snow = Company.for_ticker("snow")
+snow = Company("snow")
 ```
 
 ![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/snow-inspect.png)
@@ -37,7 +37,7 @@ snow = Company.for_ticker("snow")
 
 
 ```python
-Company.for_cik(1832950)
+Company(1832950)
 ```
 
 ## Get filings for a company
@@ -115,7 +115,7 @@ It is a JSON endpoint and `edgartools` parses the JSON into a structured dataset
 ### Getting facts for a company
 To get company facts, first get the company, then call `company.get_facts()`
 ```python
-company = Company.for_ticker("SNOW")
+company = Company("SNOW")
 company_facts = company.get_facts()
 ```
 The result is a `CompanyFacts` object which wraps the underlying facts and provides convenient ways of working
