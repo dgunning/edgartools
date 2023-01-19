@@ -269,7 +269,9 @@ table_styles = {
     'filed': 'cyan',
     'security': 'cyan',
     'reporting owner': 'cyan',
-    'fact': 'cyan'
+    'fact': 'cyan',
+    'industry': 'cyan',
+    'ticker': 'green'
 }
 
 

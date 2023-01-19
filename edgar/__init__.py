@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 from edgar.company import (Company,
+                           CompanyData,
                            CompanyFacts,
                            CompanyFilings,
                            get_company,
