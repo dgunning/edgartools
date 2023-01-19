@@ -88,13 +88,13 @@ class Effect:
     def get_source_filing(self):
         if self.source_accession_no:
             """Search for the source filing using the accession number"""
-            company = get_company(cik=int(self.cik))
+            company = get_company(int(self.cik))
             filings = company.get_filings(accession_number=self.source_accession_no)
             if len(filings) == 1:
                 return filings[0]
         elif self.effectiveness_data.file_number and self.effectiveness_data.form:
             """Search for the source filing using the file number and form"""
-            company = get_company(cik=int(self.cik))
+            company = get_company(int(self.cik))
             filings = company.get_filings(file_number=self.effectiveness_data.file_number,
                                           form=self.effectiveness_data.form)
             if len(filings) > 0:

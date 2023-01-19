@@ -1,4 +1,5 @@
 import logging
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import List, Dict, Optional, Union, Tuple
@@ -13,13 +14,14 @@ from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
 
-from edgar.core import (http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size, filter_by_date,
-                        InvalidDateException)
+from edgar.core import (http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size,
+                        filter_by_date, IntString, InvalidDateException)
 from edgar.filing import Filing, Filings
 
 __all__ = [
     'Address',
     'Company',
+    'CompanyData',
     'get_concept',
     'get_company',
     'CompanyFacts',
@@ -249,7 +251,7 @@ class CompanyFilings(Filings):
         """
 
 
-class Company:
+class CompanyData:
     """
     A company populated from a call to the company submissions endpoint
     """
@@ -297,7 +299,7 @@ class Company:
     def for_ticker(cls, ticker: str):
         cik = get_ticker_to_cik_lookup().get(ticker.upper())
         if cik:
-            return Company.for_cik(cik)
+            return CompanyData.for_cik(cik)
 
     def get_facts(self) -> CompanyFacts:
         """
@@ -347,7 +349,8 @@ class Company:
 
         # Filter by form
         if form:
-            company_filings = company_filings.filter(pc.is_in(company_filings['form'], pa.array(listify(form))))
+            forms = pa.array([str(f) for f in listify(form)])
+            company_filings = company_filings.filter(pc.is_in(company_filings['form'], forms))
 
         # Filter by file number
         if file_number:
@@ -374,16 +377,40 @@ class Company:
                               cik=self.cik,
                               company_name=self.name)
 
-    def __repr__(self):
+    @lru_cache(maxsize=1)
+    def summary(self) -> pd.DataFrame:
+        return pd.DataFrame([{'company': self.name,
+                              'cik': self.cik,
+                              'category': self.category,
+                              'industry': self.sic_description}]).set_index('cik')
+
+    @lru_cache(maxsize=1)
+    def ticker_info(self) -> pd.DataFrame:
+        return pd.DataFrame({"exchange": self.exchanges, "ticker": self.tickers}).set_index("ticker")
+
+    def __str__(self):
         return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
+
+    def __rich__(self) -> str:
+        ticker_str = f"[{self.tickers[0]}]" if len(self.tickers) == 1 else ""
+        company_text = f"{self.name} {ticker_str}"
+        return Group(
+            Text(company_text, style="bold green"),
+            df_to_rich_table(self.summary()
+                             .filter(['category', 'industry']),
+                             index_name="cik"),
+            df_to_rich_table(self.ticker_info(), index_name="ticker") if len(self.tickers) > 1 else Text("")
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
     def _repr_html_(self):
         summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category': self.category}])
-        ticker_info = pd.DataFrame({"Exchange": self.exchanges, "Ticker": self.tickers})
         return f"""
             <h3>{self.name}</h3>
             {repr_df(summary)}
-            {repr_df(ticker_info)}
+            {repr_df(self.ticker_info())}
             """
 
 
@@ -432,51 +459,80 @@ def parse_company_submissions(cjson: Dict[str, object]):
     business_addr = cjson['addresses']['business']
     cik = cjson['cik']
     company_name = cjson["name"]
-    return Company(cik=int(cik),
-                   name=company_name,
-                   tickers=cjson['tickers'],
-                   exchanges=cjson['exchanges'],
-                   sic=cjson['sic'],
-                   sic_description=cjson['sicDescription'],
-                   category=cjson['category'],
-                   fiscal_year_end=cjson['fiscalYearEnd'],
-                   entity_type=cjson['entityType'],
-                   phone=cjson['phone'],
-                   flags=cjson['flags'],
-                   mailing_address=Address(
-                       street1=mailing_addr['street1'],
-                       street2=mailing_addr['street2'],
-                       city=mailing_addr['city'],
-                       state_or_country_desc=mailing_addr['stateOrCountryDescription'],
-                       state_or_country=mailing_addr['stateOrCountry'],
-                       zipcode=mailing_addr['zipCode'],
-                   ),
-                   business_address=Address(
-                       street1=business_addr['street1'],
-                       street2=business_addr['street2'],
-                       city=business_addr['city'],
-                       state_or_country_desc=business_addr['stateOrCountryDescription'],
-                       state_or_country=business_addr['stateOrCountry'],
-                       zipcode=business_addr['zipCode'],
-                   ),
-                   filings=parse_filings(cjson['filings'], cik=cik, company_name=company_name)
-                   )
+    return CompanyData(cik=int(cik),
+                       name=company_name,
+                       tickers=cjson['tickers'],
+                       exchanges=cjson['exchanges'],
+                       sic=cjson['sic'],
+                       sic_description=cjson['sicDescription'],
+                       category=cjson['category'],
+                       fiscal_year_end=cjson['fiscalYearEnd'],
+                       entity_type=cjson['entityType'],
+                       phone=cjson['phone'],
+                       flags=cjson['flags'],
+                       mailing_address=Address(
+                           street1=mailing_addr['street1'],
+                           street2=mailing_addr['street2'],
+                           city=mailing_addr['city'],
+                           state_or_country_desc=mailing_addr['stateOrCountryDescription'],
+                           state_or_country=mailing_addr['stateOrCountry'],
+                           zipcode=mailing_addr['zipCode'],
+                       ),
+                       business_address=Address(
+                           street1=business_addr['street1'],
+                           street2=business_addr['street2'],
+                           city=business_addr['city'],
+                           state_or_country_desc=business_addr['stateOrCountryDescription'],
+                           state_or_country=business_addr['stateOrCountry'],
+                           zipcode=business_addr['zipCode'],
+                       ),
+                       filings=parse_filings(cjson['filings'], cik=cik, company_name=company_name)
+                       )
 
 
-def get_company(*,
-                cik: int = None,
-                ticker: str = None) -> Company:
+def get_company(company_identifier: IntString) -> CompanyData:
     """
-    Get a company by cik or ticker
-    :param cik: The cik
-    :param ticker: The ticker
+        Get a company by cik or ticker
+
+        Get company by ticker e.g.
+
+        >>> get_company("SNOW") or get_company("tsla")
+
+        Get company by cik e.g.
+
+        >>> get_company(1090990)
+
+    :param company_identifier: The company identifier. Can be a cik or a ticker
     :return:
     """
-    if cik:
-        return Company.for_cik(cik)
-    elif ticker:
-        return Company.for_ticker(ticker)
-    raise AssertionError("Provide either a cik or ticker")
+    is_int_cik = isinstance(company_identifier, int)
+    # Sometimes the cik is left zero padded e.g. 000198706
+    is_string_cik = isinstance(company_identifier, str) and company_identifier.isdigit()
+    is_cik = is_int_cik or is_string_cik
+
+    if is_cik:
+        # Cast to int to handle zero-padding
+        return CompanyData.for_cik(int(company_identifier))
+
+    # Get by ticker
+    is_ticker = isinstance(company_identifier, str) and re.match("[A-Za-z]{1,6}", company_identifier, re.IGNORECASE)
+
+    if is_ticker:
+        return CompanyData.for_ticker(company_identifier)
+
+    log.warn("""
+    To use get_company() provide a valid cik or ticker.
+    
+    e.g. to get by cik
+    >>> get_company(91184670) or get_company("0091184670")
+    
+    or to get by ticker
+    
+    >>> get_company("SNOW") or get_company("snow")
+    """)
+
+
+Company = get_company
 
 
 def get_json(data_url: str):
@@ -635,7 +691,7 @@ def get_concept(cik: int,
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             # Get the company
-            company = Company.for_cik(int(cik))
+            company = CompanyData.for_cik(int(cik))
             if not company:
                 return Result.Fail("No company found for cik {cik}")
             else:

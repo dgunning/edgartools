@@ -351,7 +351,8 @@ class Filings:
     @property
     def summary(self):
         start_date, end_date = self.date_range
-        return f"Filings - {len(self.data):,} in total from {start_date} to {end_date}"
+        range_str = f" from {start_date} to {end_date}" if start_date else ""
+        return f"Filings - {len(self.data):,} in total {range_str}"
 
     def __rich__(self) -> str:
         return Group(
@@ -507,8 +508,8 @@ class Filing:
 
     def get_entity(self):
         """Get the company to which this filing belongs"""
-        from edgar.company import Company
-        return Company.for_cik(self.cik)
+        from edgar.company import CompanyData
+        return CompanyData.for_cik(self.cik)
 
     def get_related_filings(self):
         """Get all the filings related to this one

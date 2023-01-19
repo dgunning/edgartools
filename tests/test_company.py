@@ -13,11 +13,24 @@ from rich import print
 
 
 @lru_cache(maxsize=16)
-def get_test_company(cik=None, ticker=None):
-    if cik:
-        return Company.for_cik(cik)
-    elif ticker:
-        return Company.for_ticker(ticker)
+def get_test_company(company_identifier):
+    return get_company(company_identifier)
+
+
+def test_company_repr():
+    company = get_test_company("NVDA")
+    print()
+    print(company)
+    assert 'NVDA' in company.__repr__()
+    assert 'Large accelerated filer' in company.__repr__()
+    assert '1045810' in company.__repr__()
+    assert 'Semiconductors & Related Devices' in company.__repr__()
+
+    company_with_2_tickers = get_test_company(4904)
+    assert all(ticker in company_with_2_tickers.__repr__() for ticker in ["AEP", "AEPPZ"])
+
+    company_with_more_tickers = get_test_company(310522)
+    assert all(ticker in company_with_more_tickers.__repr__() for ticker in ["FNMA", "FNMAG", "FNMAK"])
 
 
 def test_parse_company_submission_json():
@@ -29,7 +42,7 @@ def test_parse_company_submission_json():
 
 
 def test_get_company_submissions():
-    company: Company = get_company_submissions(1318605)
+    company: CompanyData = get_company_submissions(1318605)
     assert company
     assert company.cik == 1318605
     print(company)
@@ -55,7 +68,7 @@ def test_get_company_facts_db():
 
 
 def test_company_get_facts():
-    company = get_test_company(ticker="TSLA")
+    company = get_test_company("TSLA")
     facts = company.get_facts()
     assert facts
     assert len(facts) > 100
@@ -75,13 +88,13 @@ def test_company_filing_repr():
 
 
 def test_company_for_cik():
-    company: Company = Company.for_cik(1318605)
+    company: CompanyData = CompanyData.for_cik(1318605)
     assert company
     assert company.cik == 1318605
 
 
 def test_company_for_ticker():
-    company: Company = Company.for_ticker("EXPE")
+    company: CompanyData = CompanyData.for_ticker("EXPE")
     print(company)
     assert company
     assert company.cik == 1324424
@@ -95,13 +108,13 @@ def test_get_company_tickers():
 
 
 def test_company_get_filings():
-    company: Company = Company.for_ticker("EXPE")
+    company: CompanyData = CompanyData.for_ticker("EXPE")
     company_filings = company.get_filings()
     assert len(company_filings) == len(company.filings)
 
 
 def test_company_filings_filter_by_date():
-    expe = get_test_company(ticker="EXPE")
+    expe = get_test_company("EXPE")
     filings = expe.filings
     filtered_filings = filings.filter(filing_date="2023-01-04:")
     print(filtered_filings)
@@ -110,7 +123,7 @@ def test_company_filings_filter_by_date():
 
 
 def test_company_get_filings_for_form():
-    company: Company = Company.for_ticker("EXPE")
+    company: CompanyData = CompanyData.for_ticker("EXPE")
     tenk_filings: CompanyFilings = company.get_filings(form='10-K')
     assert pc.all(pc.equal(tenk_filings.data['form'], '10-K'))
     filing: CompanyFiling = tenk_filings[0]
@@ -121,7 +134,7 @@ def test_company_get_filings_for_form():
 
 
 def test_company_get_form_by_date():
-    company: Company = Company.for_ticker("EXPE")
+    company: CompanyData = CompanyData.for_ticker("EXPE")
     filings = company.get_filings(filing_date="2022-11-01:2023-01-20")
     assert not filings.empty
     assert len(filings) < len(company.get_filings())
@@ -132,27 +145,27 @@ def test_company_get_form_by_date():
 
 
 def test_company_get_filings_for_multiple_forms():
-    company: Company = Company.for_ticker("EXPE")
+    company: CompanyData = CompanyData.for_ticker("EXPE")
     company_filings = company.get_filings(form=['10-K', '10-Q', '8-K'])
     form_list = pc.unique(company_filings.data['form']).tolist()
     assert sorted(form_list) == ['10-K', '10-Q', '8-K']
 
 
 def test_get_company_for_ticker_lowercase():
-    company: Company = Company.for_ticker("expe")
+    company: CompanyData = CompanyData.for_ticker("expe")
     assert company
     assert company.tickers == ["EXPE"]
 
 
 def test_company_filings_repr():
-    company: Company = Company.for_ticker("EXPE")
+    company: CompanyData = CompanyData.for_ticker("EXPE")
     expe_filings: CompanyFilings = company.get_filings()
     filings_repr = str(expe_filings)
     assert "Expedia" in filings_repr
 
 
 def test_get_latest_10k_10q():
-    company = Company.for_ticker('NVDA')
+    company = CompanyData.for_ticker('NVDA')
     filings: CompanyFilings = company.get_filings(form=["10-K", "10-Q"])
     latest_filings = filings.latest(4)
     assert len(latest_filings) == 4
@@ -160,14 +173,14 @@ def test_get_latest_10k_10q():
 
 
 def test_filings_latest_one():
-    company = Company.for_ticker('NVDA')
+    company = CompanyData.for_ticker('NVDA')
     filing = company.get_filings(form='10-Q').latest()
     assert filing.form == '10-Q'
     assert isinstance(filing, Filing)
 
 
 def test_company_filings_to_pandas():
-    company = Company.for_cik(886744)
+    company = CompanyData.for_cik(886744)
     company_filings = company.get_filings()
     filings_df = company_filings.to_pandas()
     print(filings_df.columns)
@@ -177,7 +190,7 @@ def test_company_filings_to_pandas():
 
 
 def test_company_get_filings_by_file_number():
-    company = Company.for_cik(886744)
+    company = CompanyData.for_cik(886744)
     filings_for_file: CompanyFilings = company.get_filings(file_number='333-225184')
     assert filings_for_file
     print(filings_for_file.to_pandas("form", "accessionNumber"))
@@ -187,27 +200,27 @@ def test_company_get_filings_by_file_number():
 
 
 def test_company_get_filings_by_assession_number():
-    company = Company.for_cik(886744)
+    company = CompanyData.for_cik(886744)
     filings_for_file: CompanyFilings = company.get_filings(accession_number='0001206774-18-001992')
     assert len(filings_for_file) == 1
 
 
 def test_get_filings_xbrl():
-    company = Company.for_ticker("SNOW")
+    company = CompanyData.for_ticker("SNOW")
     xbrl_filings = company.get_filings(is_xbrl=True)
     assert xbrl_filings.to_pandas("isXBRL").isXBRL.all()
     assert company.get_filings(is_xbrl=False).to_pandas().isXBRL.drop_duplicates().tolist() == [False]
 
 
 def test_get_filings_inline_xbrl():
-    company = Company.for_ticker("SNOW")
+    company = CompanyData.for_ticker("SNOW")
     xbrl_filings = company.get_filings(is_inline_xbrl=True)
     assert xbrl_filings.to_pandas("isInlineXBRL").isInlineXBRL.all()
     assert company.get_filings(is_xbrl=False).to_pandas().isInlineXBRL.drop_duplicates().tolist() == [False]
 
 
 def test_get_filings_multiple_filters():
-    company = Company.for_ticker("SNOW")
+    company = CompanyData.for_ticker("SNOW")
     filings = company.get_filings(form=["10-Q", "10-K"], is_inline_xbrl=True)
     filings_df = filings.to_pandas("form", "filingDate", 'isXBRL', "isInlineXBRL")
     assert filings_df.isInlineXBRL.all()
@@ -215,7 +228,7 @@ def test_get_filings_multiple_filters():
 
 
 def test_company_filing_get_related_filings():
-    company = Company.for_cik(1841925)
+    company = CompanyData.for_cik(1841925)
     filings = company.get_filings(form=["S-1", "S-1/A"], is_inline_xbrl=True)
     filing = filings[0]
     print(filing)
@@ -239,12 +252,15 @@ def test_company_related_filings_none():
 
 
 def test_get_company_by_cik():
-    company = get_company(cik=1554646)
+    company = get_company(1554646)
     assert company.name == 'NEXPOINT SECURITIES, INC.'
+
+    company = Company(1554646)
+    assert company.cik == 1554646
 
 
 def test_get_company_by_ticker():
-    company = get_company(ticker="SNOW")
+    company = get_company("SNOW")
     assert company.cik == 1640147
 
 
@@ -279,7 +295,7 @@ def test_get_company_concept_with_concept_missing():
 
 
 def test_company_filings_summary():
-    company = get_test_company(cik=1318605)
+    company = get_test_company(1318605)
     filings = company.get_filings()
     filing_summary = filings.data_summary()
     assert isinstance(filing_summary, pd.DataFrame)
@@ -288,6 +304,6 @@ def test_company_filings_summary():
 
 
 def test_company_filings_test_company_get_facts_repr():
-    company = get_test_company(cik=1318605)
+    company = get_test_company(1318605)
     filings = company.get_filings()
     print(filings)

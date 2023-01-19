@@ -203,7 +203,7 @@ def test_filing_primary_document():
     assert homepage
     primary_document = homepage.primary_document
     assert primary_document
-    company = get_company(cik=1805559)
+    company = get_company(1805559)
     filings = company.get_filings()
     print(filings.to_pandas("form", "filing_date", "primaryDocument"))
     filing = filings[0]

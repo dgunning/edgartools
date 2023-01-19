@@ -20,11 +20,11 @@ containing data about transactions and holdings.
 - call `OwnershipDocument.from_xml()`
 
 ```python
-from edgar import Company
+from edgar import CompanyData
 from edgar.ownership import Ownership
 
 # Get Snowflake
-company = Company.for_ticker("SNOW")
+company = CompanyData.for_ticker("SNOW")
 
 # Get Form 4 filings for Snowflake
 filings = company.get_filings(form="4")
