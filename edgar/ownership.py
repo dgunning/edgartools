@@ -8,7 +8,7 @@ from rich.console import Group, Text
 from rich.panel import Panel
 
 from edgar.core import get_bool
-from edgar.core import repr_rich, df_to_rich_table
+from edgar.core import repr_rich, df_to_rich_table, IntString
 from edgar.xml import (child_text, child_value)
 
 __all__ = [
@@ -31,8 +31,6 @@ __all__ = [
     'NonDerivativeTransaction',
     'NonDerivativeTransactions',
 ]
-
-IntString = Union[str, int]
 
 
 def translate(value: str, translations: Dict[str, str]) -> str:

@@ -1,4 +1,4 @@
-from edgar.form import SecForms
+from edgar.form import list_forms
 
 __all__ = [
     'list_takedown_forms'
@@ -8,5 +8,5 @@ takedown_forms = ["424A", "424B1", "424B2", "424B3", "424B4", "424B5", "424B6", 
 
 
 def list_takedown_forms():
-    sec_forms = SecForms.load()
+    sec_forms = list_forms()
     return sec_forms.data.query("Form.isin(@takedown_forms)", engine="python")

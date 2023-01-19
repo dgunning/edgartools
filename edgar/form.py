@@ -28,7 +28,7 @@ def list_forms():
                      "SECNumber": cells[3].text.replace("SEC Number:", "").strip(),
                      "Topics": cells[4].text.replace("Topic(s):", "").strip()
                      })
-    return pd.DataFrame(rows)
+    return SecForms(pd.DataFrame(rows))
 
 
 @dataclass(frozen=True)
@@ -62,7 +62,7 @@ class SecForm:
 class SecForms:
 
     def __init__(self,
-                 data:pd.DataFrame):
+                 data: pd.DataFrame):
         self.data = data
 
     def get_form(self, form: str):
