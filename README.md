@@ -144,7 +144,7 @@ It is a number, but is sometimes shown in SEC Edgar resources as a string padded
 For the edgar client API, just use the numbers and omit the leading zeroes.
 
 ```python
-company = Company(1318605)
+company = Company(1324424)
 ```
 ![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/expe.png)
 
