@@ -169,8 +169,9 @@ class CompanyFilings(Filings):
     def __init__(self,
                  data: pa.Table,
                  cik: int,
-                 company_name: str):
-        super().__init__(data)
+                 company_name: str,
+                 page_index_start: int = None):
+        super().__init__(data, page_index_start=page_index_start)
         self.cik = cik
         self.company_name = company_name
 
@@ -223,10 +224,9 @@ class CompanyFilings(Filings):
     def __str__(self):
         return f"{self.company_name} {self.cik} {super().__repr__()}"
 
-    @lru_cache(maxsize=2)
-    def data_summary(self) -> pd.DataFrame:
-        return (self.data
-                .to_pandas()
+    @staticmethod
+    def summarize(data) -> pd.DataFrame:
+        return (data
                 .assign(size=lambda df: df['size'].apply(display_size),
                         isXBRL=lambda df: df.isXBRL.map({'1': True, 1: True}).fillna(""),
                         )
@@ -234,13 +234,40 @@ class CompanyFilings(Filings):
                 .rename(columns={"filing_date": "filed", "isXBRL": "xbrl"})
                 )
 
+    def next(self) -> Optional[pa.Table]:
+        """Show the next page"""
+        data_page = self.data_pager.next()
+        if data_page is None:
+            return None
+        start_index, _ = self.data_pager._current_range
+        return CompanyFilings(data_page,
+                              cik=self.cik,
+                              company_name=self.company_name,
+                              page_index_start=start_index)
+
+    def previous(self) -> Optional[pa.Table]:
+        """
+        Show the previous page of the data
+        :return:
+        """
+        data_page = self.data_pager.previous()
+        if data_page is None:
+            return None
+        start_index, _ = self.data_pager._current_range
+        return CompanyFilings(data_page,
+                              cik=self.cik,
+                              company_name=self.company_name,
+                              page_index_start=start_index)
+
     def __repr__(self):
         return repr_rich(self.__rich__())
 
     def __rich__(self) -> str:
+        page = self.data_pager.current().to_pandas()
+        page.index = self._page_index()
         return Group(
-            Text(self.summary),
-            df_to_rich_table(self.data_summary())
+            df_to_rich_table(CompanyFilings.summarize(page)),
+            Text(self.summary)
         )
 
     def _repr_html_(self):

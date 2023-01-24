@@ -177,3 +177,33 @@ def test_filter_by_date():
 
     assert len(filter_by_date(table, '2013-04-24', 'date')) == 1
     assert len(filter_by_date(table, '2013-04-24:2016-04-24', 'date')) == 2
+
+
+def test_dataframe_pager():
+    from edgar.core import DataPager
+    import numpy as np
+    df = pd.DataFrame({'A': np.random.randint(0, 100, size=150),
+                       'B': np.random.randint(0, 100, size=150)})
+    pager = DataPager(df, 100)
+    # Test getting the first page
+    first_page = pager.current()
+    assert len(first_page) == 100
+
+    # Test getting the next page
+    second_page = pager.next()
+    assert len(second_page) == 50
+    assert all(first_page.iloc[-1] != second_page.iloc[0])
+
+    # Test getting the previous page
+    prev_page = pager.previous()
+    assert len(prev_page) == 100
+    assert all(first_page == prev_page)
+
+    # Test going to the next page again
+    next_page = pager.next()
+    assert len(next_page) == 50
+    assert all(second_page == next_page)
+
+    # Test going to the next page when there is no more page
+    last_page = pager.next()
+    assert last_page is None

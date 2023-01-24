@@ -4,6 +4,7 @@ import os
 import re
 import threading
 from _thread import interrupt_main
+from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
 from typing import Union, Optional, Tuple
@@ -18,7 +19,6 @@ from rich import box
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 from rich.table import Table
-from datetime import datetime
 
 logging.basicConfig(
     level="INFO",
@@ -37,6 +37,7 @@ __all__ = [
     'sec_edgar',
     'repr_rich',
     'IntString',
+    'DataPager',
     'http_client',
     'sec_dot_gov',
     'display_size',
@@ -50,6 +51,7 @@ __all__ = [
     'filter_by_date',
     'ask_for_identity',
     'df_to_rich_table',
+    'default_page_size',
     'InvalidDateException'
 ]
 
@@ -61,6 +63,7 @@ DATE_PATTERN = re.compile(YYYY_MM_DD)
 DATE_RANGE_PATTERN = re.compile(f"({YYYY_MM_DD})?:?(({YYYY_MM_DD})?)?")
 
 default_http_timeout: int = 10
+default_page_size = 30
 limits = httpx.Limits(max_connections=10)
 edgar_identity = 'EDGAR_IDENTITY'
 
@@ -411,3 +414,48 @@ def display_size(size: Optional[int]) -> str:
         if isinstance(size, int) or size.isdigit():
             return humanize.naturalsize(int(size), binary=True).replace("i", "")
     return ""
+
+
+class DataPager:
+    def __init__(self,
+                 data: Union[pa.Table, pd.DataFrame],
+                 page_size=default_page_size):
+        self.data: Union[pa.Table, pd.DataFrame] = data
+        self.page_size = page_size
+        self.total_pages = (len(self.data) // page_size) + 1
+        self.current_page = 1
+
+    def next(self):
+        """Get the next page of data"""
+        if self.current_page < self.total_pages:
+            self.current_page += 1
+            return self.current()
+        else:
+            return None
+
+    def previous(self):
+        """Get the previous page of data"""
+        if self.current_page > 1:
+            self.current_page -= 1
+            return self.current()
+        else:
+            return None
+
+    @property
+    def _current_range(self) -> Tuple[int, int]:
+        """Get the current start and end index for the data"""
+        start_index = (self.current_page - 1) * self.page_size
+        end_index = min(len(self.data), start_index + self.page_size)
+        return start_index, end_index
+
+    def current(self) -> pa.Table:
+        """
+        Get the current data page as a pyarrow Table
+        :return:
+        """
+        start_index = (self.current_page - 1) * self.page_size
+        end_index = start_index + self.page_size
+        if isinstance(self.data, pa.Table):
+            return self.data.slice(offset=start_index, length=self.page_size)
+        else:
+            return self.data.iloc[start_index:end_index]

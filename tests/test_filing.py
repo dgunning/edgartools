@@ -9,6 +9,7 @@ import pytest
 from typing import List
 
 from edgar import get_filings, Filings, Filing, get_company
+from edgar.core import default_page_size
 from edgar.filing import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
 from rich import print
 
@@ -411,9 +412,29 @@ def test_get_related_filings():
 
 
 def test_print_filings():
-    filings = get_filings(2022, 1, "xbrl")
+    filings = get_filings(2022, 1, index="xbrl")
     print(filings)
     print("Works")
+
+    # Filter by form and see if it still prints
+    ten_k_filings = filings.filter(form="10-K")
+    print(ten_k_filings)
+
+    # Filter with non-existent form
+    loop_filings = ten_k_filings.filter("LOOP")
+    print(loop_filings)
+
+
+def test_create_filings_with_empty_table():
+    filings = get_filings(2022, 1, index="xbrl")
+    data = filings.filter(form="LOOP").data
+    filings_copy = Filings(filing_index=data)
+    page = filings_copy.data_pager.current()
+    assert len(page) == 0
+    print(page)
+    print(filings_copy)
+    assert len(filings_copy) == 0
+    assert filings_copy.empty
 
 
 def test_filing_str():
@@ -482,3 +503,19 @@ def test_filing_filter_by_form_no_amendments():
                           form="10-K",
                           amendments=False)
     assert set(filings.data['form'].to_pylist()) == {'10-K'}
+
+
+def test_filings_next_and_previous():
+    filings: Filings = cached_filings(2021, 1, index="xbrl")
+    print(filings)
+    page2 = filings.next()
+    assert len(page2) == default_page_size
+    print(page2)
+    page3 = filings.next()
+    print(page3)
+    page2_again = filings.previous()
+    print(page2_again)
+
+    assert page2[0].accession_no == page2_again[0].accession_no
+    assert filings.previous()
+    assert not filings.previous()

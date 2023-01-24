@@ -21,7 +21,7 @@ from rich.console import Group
 from rich.text import Text
 
 from edgar.core import (http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size,
-                        filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString)
+                        filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -224,8 +224,12 @@ class Filings:
     """
 
     def __init__(self,
-                 filing_index: pa.Table):
+                 filing_index: pa.Table,
+                 page_index_start: int = None):
         self.data: pa.Table = filing_index
+        self.data_pager = DataPager(self.data)
+        # This keeps track of where the index should start in case this is just a page in the Filings
+        self._page_index_start = page_index_start
 
     def to_pandas(self, *columns) -> pd.DataFrame:
         """Return the filing index as a python dataframe"""
@@ -330,6 +334,33 @@ class Filings:
     def empty(self) -> bool:
         return len(self.data) == 0
 
+    def current(self):
+        """Display the current page .. which is the default for this filings object"""
+        return self
+
+    def next(self) -> Optional[pa.Table]:
+        """Show the next page"""
+        data_page = self.data_pager.next()
+        if data_page is None:
+            return None
+        start_index, _ = self.data_pager._current_range
+        return Filings(data_page, page_index_start=start_index)
+
+    def previous(self) -> Optional[pa.Table]:
+        """
+        Show the previous page of the data
+        :return:
+        """
+        data_page = self.data_pager.previous()
+        if data_page is None:
+            return None
+        start_index, _ = self.data_pager._current_range
+        return Filings(data_page, page_index_start=start_index)
+
+    def prev(self):
+        """Alias for self.previous()"""
+        return self.previous()
+
     def __getitem__(self, item):
         return self.get_filing_at(item)
 
@@ -351,14 +382,26 @@ class Filings:
     @property
     def summary(self):
         start_date, end_date = self.date_range
-        range_str = f" from {start_date} to {end_date}" if start_date else ""
+        range_str = f"from {start_date} to {end_date}" if start_date else ""
         return f"Filings - {len(self.data):,} in total {range_str}"
 
+    def _page_index(self) -> range:
+        """Create the range index to set on the page dataframe depending on where in the data we are
+        """
+        if self._page_index_start:
+            return range(self._page_index_start,
+                         self._page_index_start
+                         + min(self.data_pager.page_size, len(self.data)))  # set the index to the size of the page
+        else:
+            return range(*self.data_pager._current_range)
+
     def __rich__(self) -> str:
+        page = self.data_pager.current().to_pandas()
+        page.index = self._page_index()
+
         return Group(
+            df_to_rich_table(page, max_rows=len(page)),
             Text(self.summary)
-            ,
-            df_to_rich_table(self.data)
         )
 
     def __repr__(self):

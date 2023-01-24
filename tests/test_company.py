@@ -8,6 +8,7 @@ import pyarrow.compute as pc
 from edgar.company import *
 from edgar.company import parse_company_submissions, CompanyConcept, CompanyFiling
 from edgar.filing import Filing
+from edgar.core import default_page_size
 
 from rich import print
 
@@ -294,16 +295,45 @@ def test_get_company_concept_with_concept_missing():
                              "See https://fasb.org/xbrl")
 
 
-def test_company_filings_summary():
-    company = get_test_company(1318605)
-    filings = company.get_filings()
-    filing_summary = filings.data_summary()
-    assert isinstance(filing_summary, pd.DataFrame)
-    print(filing_summary)
-    print(filing_summary.dtypes)
-
-
 def test_company_filings_test_company_get_facts_repr():
     company = get_test_company(1318605)
     filings = company.get_filings()
     print(filings)
+
+
+def test_filings_next_and_previous():
+    # Get company filings
+    company = get_test_company(1318605)
+    company_filings = company.get_filings()
+
+    print()
+    # Get the next page
+    next_page = company_filings.next()
+    assert len(next_page) == default_page_size
+    print(next_page)
+
+    # Get the next page again
+    page3 = company_filings.next()
+    print(page3)
+
+    # Get the previous page
+    page2_again = company_filings.previous()
+    print(page2_again)
+
+    assert next_page[0].accession_no == page2_again[0].accession_no
+    #assert filings.previous()
+    #assert not filings.previous()
+
+    # Filter the company filings
+    eightk_filings = company_filings.filter(form=["8-K"])
+    print(eightk_filings.previous())
+    print(eightk_filings.previous())
+    print(eightk_filings.previous())
+    print(eightk_filings.previous())
+
+    print(eightk_filings.next())
+    print(eightk_filings.next())
+    print(eightk_filings.next())
+    print(eightk_filings.next())
+
+
