@@ -62,8 +62,8 @@ YYYY_MM_DD = "\\d{4}-\\d{2}-\\d{2}"
 DATE_PATTERN = re.compile(YYYY_MM_DD)
 DATE_RANGE_PATTERN = re.compile(f"({YYYY_MM_DD})?:?(({YYYY_MM_DD})?)?")
 
-default_http_timeout: int = 10
-default_page_size = 30
+default_http_timeout: int = 12
+default_page_size = 50
 limits = httpx.Limits(max_connections=10)
 edgar_identity = 'EDGAR_IDENTITY'
 
