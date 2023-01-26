@@ -519,3 +519,16 @@ def test_filings_next_and_previous():
     assert page2[0].accession_no == page2_again[0].accession_no
     assert filings.previous()
     assert not filings.previous()
+
+
+def test_get_filings_for_future_period(capsys):
+    filings = get_filings(2050, 1)
+    assert filings is None
+
+
+def test_get_filings_default():
+    filings = get_filings()
+    assert not filings.empty
+    filings = get_filings(form="8-K")
+    assert not filings.empty
+    print(filings)

@@ -65,10 +65,19 @@ Years = Union[int, List[int], range]
 Quarters = Union[int, List[int], range]
 
 
-@lru_cache(maxsize=1)
-def available_quarters() -> YearAndQuarters:
+def current_year_and_quarter() -> Tuple[int, int]:
     now = datetime.now()
     current_year, current_quarter = now.year, (now.month - 1) // 3 + 1
+    return current_year, current_quarter
+
+
+@lru_cache(maxsize=1)
+def available_quarters() -> YearAndQuarters:
+    """
+    Get a list of year and quarter tuples
+    :return:
+    """
+    current_year, current_quarter = current_year_and_quarter()
     start_quarters = [(1994, 3), (1994, 4)]
     in_between_quarters = list(itertools.product(range(1995, current_year), range(1, 5)))
     end_quarters = list(itertools.product([current_year], range(1, current_quarter + 1)))
@@ -77,6 +86,12 @@ def available_quarters() -> YearAndQuarters:
 
 def expand_quarters(year: Years,
                     quarter: int = None) -> YearAndQuarters:
+    """
+    Expand the list of years and a list of quarters to a full list of tuples covering the full range
+    :param year: The year or years
+    :param quarter: The quarter or quarters
+    :return:
+    """
     years = listify(year)
     quarters = listify(quarter) if quarter else quarters_in_year
     return [yq
@@ -86,6 +101,9 @@ def expand_quarters(year: Years,
 
 
 class FileSpecs:
+    """
+    A specification for a fixed width file
+    """
 
     def __init__(self, specs: List[Tuple[str, Tuple[int, int], pa.lib.DataType]]):
         self.splits = list(zip(*specs))[1]
@@ -218,6 +236,12 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
     return final_index_table
 
 
+@dataclass
+class FilingsState:
+    page_start: int
+    num_filings: int
+
+
 class Filings:
     """
     A container for filings
@@ -225,11 +249,11 @@ class Filings:
 
     def __init__(self,
                  filing_index: pa.Table,
-                 page_index_start: int = None):
+                 original_state: FilingsState = None):
         self.data: pa.Table = filing_index
         self.data_pager = DataPager(self.data)
         # This keeps track of where the index should start in case this is just a page in the Filings
-        self._page_index_start = page_index_start
+        self._original_state = original_state or FilingsState(0, len(self.data))
 
     def to_pandas(self, *columns) -> pd.DataFrame:
         """Return the filing index as a python dataframe"""
@@ -342,9 +366,11 @@ class Filings:
         """Show the next page"""
         data_page = self.data_pager.next()
         if data_page is None:
+            log.warning("End of data .. use prev() \u2190 ")
             return None
         start_index, _ = self.data_pager._current_range
-        return Filings(data_page, page_index_start=start_index)
+        filings_state = FilingsState(page_start=start_index, num_filings=len(self))
+        return Filings(data_page, original_state=filings_state)
 
     def previous(self) -> Optional[pa.Table]:
         """
@@ -353,9 +379,11 @@ class Filings:
         """
         data_page = self.data_pager.previous()
         if data_page is None:
+            log.warning(" No previous data .. use next() \u2192 ")
             return None
         start_index, _ = self.data_pager._current_range
-        return Filings(data_page, page_index_start=start_index)
+        filings_state = FilingsState(page_start=start_index, num_filings=len(self))
+        return Filings(data_page, original_state=filings_state)
 
     def prev(self):
         """Alias for self.previous()"""
@@ -383,14 +411,15 @@ class Filings:
     def summary(self):
         start_date, end_date = self.date_range
         range_str = f"from {start_date} to {end_date}" if start_date else ""
-        return f"Filings - {len(self.data):,} in total {range_str}"
+        return (f"Showing {self.data_pager.page_size} filings of "
+                f"{self._original_state.num_filings:,} total {range_str}")
 
     def _page_index(self) -> range:
         """Create the range index to set on the page dataframe depending on where in the data we are
         """
-        if self._page_index_start:
-            return range(self._page_index_start,
-                         self._page_index_start
+        if self._original_state:
+            return range(self._original_state.page_start,
+                         self._original_state.page_start
                          + min(self.data_pager.page_size, len(self.data)))  # set the index to the size of the page
         else:
             return range(*self.data_pager._current_range)
@@ -414,7 +443,7 @@ class Filings:
         """
 
 
-def get_filings(year: Years,
+def get_filings(year: Years = None,
                 quarter: Quarters = None,
                 form: Union[str, List[IntString]] = None,
                 amendments: bool = True,
@@ -458,7 +487,21 @@ def get_filings(year: Years,
     :param index The index type - "form" or "company" or "xbrl"
     :return:
     """
+    # Get the year or default to the current year
+    if not year:
+        year, quarter = current_year_and_quarter()
+
     year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
+    if len(year_and_quarters) == 0:
+        log.warning(f"""
+    Provide a year between 1994 and {datetime.now().year} and optionally a quarter (1-4) for which the SEC has filings. 
+    
+        e.g. filings = get_filings(2023) OR
+             filings = get_filings(2023, 1)
+    
+    (You specified the year {year} and quarter {quarter})   
+        """)
+        return None
     filing_index = get_filings_for_quarters(year_and_quarters, index=index)
 
     filings = Filings(filing_index)

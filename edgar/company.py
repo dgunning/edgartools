@@ -16,7 +16,7 @@ from rich.text import Text
 
 from edgar.core import (http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size,
                         filter_by_date, IntString, InvalidDateException)
-from edgar.filing import Filing, Filings
+from edgar.filing import Filing, Filings, FilingsState
 
 __all__ = [
     'Address',
@@ -170,8 +170,8 @@ class CompanyFilings(Filings):
                  data: pa.Table,
                  cik: int,
                  company_name: str,
-                 page_index_start: int = None):
-        super().__init__(data, page_index_start=page_index_start)
+                 original_state: FilingsState = None):
+        super().__init__(data, original_state=original_state)
         self.cik = cik
         self.company_name = company_name
 
@@ -240,10 +240,11 @@ class CompanyFilings(Filings):
         if data_page is None:
             return None
         start_index, _ = self.data_pager._current_range
+        filings_state = FilingsState(page_start=start_index, num_filings=len(self))
         return CompanyFilings(data_page,
                               cik=self.cik,
                               company_name=self.company_name,
-                              page_index_start=start_index)
+                              original_state=filings_state)
 
     def previous(self) -> Optional[pa.Table]:
         """
@@ -254,10 +255,11 @@ class CompanyFilings(Filings):
         if data_page is None:
             return None
         start_index, _ = self.data_pager._current_range
+        filings_state = FilingsState(page_start=start_index, num_filings=len(self))
         return CompanyFilings(data_page,
                               cik=self.cik,
                               company_name=self.company_name,
-                              page_index_start=start_index)
+                              original_state=filings_state)
 
     def __repr__(self):
         return repr_rich(self.__rich__())
