@@ -238,6 +238,7 @@ class CompanyFilings(Filings):
         """Show the next page"""
         data_page = self.data_pager.next()
         if data_page is None:
+            log.warning("End of data .. use prev() \u2190 ")
             return None
         start_index, _ = self.data_pager._current_range
         filings_state = FilingsState(page_start=start_index, num_filings=len(self))
@@ -253,6 +254,7 @@ class CompanyFilings(Filings):
         """
         data_page = self.data_pager.previous()
         if data_page is None:
+            log.warning(" No previous data .. use next() \u2192 ")
             return None
         start_index, _ = self.data_pager._current_range
         filings_state = FilingsState(page_start=start_index, num_filings=len(self))
@@ -268,7 +270,7 @@ class CompanyFilings(Filings):
         page = self.data_pager.current().to_pandas()
         page.index = self._page_index()
         return Group(
-            df_to_rich_table(CompanyFilings.summarize(page)),
+            df_to_rich_table(CompanyFilings.summarize(page), max_rows=len(page)),
             Text(self.summary)
         )
 
