@@ -274,6 +274,7 @@ table_styles = {
     'reporting owner': 'cyan',
     'fact': 'cyan',
     'industry': 'cyan',
+    'document': 'cyan',
     'ticker': 'green'
 }
 

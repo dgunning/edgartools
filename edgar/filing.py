@@ -725,6 +725,18 @@ class FilingDocument:
                  text: bool = None):
         return download_file(self.url, as_text=text)
 
+    def summary(self) -> pd.DataFrame:
+        """Return a summary of this filing as a dataframe"""
+        return pd.DataFrame([{'seq': self.seq,
+                              'form': self.form,
+                              'document': self.document,
+                              'description': self.description}]).set_index("seq")
+
+    def __rich__(self) -> str:
+        return df_to_rich_table(self.summary(), index_name="seq")
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 # These are the columns on the table on the filing homepage
 filing_file_cols = ['Seq', 'Description', 'Document', 'Type', 'Size', 'Url']
