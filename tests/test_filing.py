@@ -52,20 +52,6 @@ def test_read_form_filing_index_year():
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
 
 
-def test_read_company_filing_index_year_and_quarter():
-    company_filings: Filings = get_filings(year=2022, quarter=2, index="company")
-    assert company_filings
-    assert company_filings.data
-    assert 500000 > len(company_filings) > 200000
-
-    df = company_filings.to_pandas()
-    assert len(df) == len(company_filings) == len(company_filings.data)
-    assert company_filings.data.column_names == ['company', 'form', 'cik', 'filing_date', 'accessionNumber']
-    print(company_filings.data.schema)
-
-    print('Bytes', humanize.naturalsize(company_filings.data.nbytes, binary=True))
-
-
 def test_read_form_filing_index_xbrl():
     filings: Filings = get_filings(2021, 1, index="xbrl")
     assert filings.data
@@ -532,3 +518,19 @@ def test_get_filings_default():
     filings = get_filings(form="8-K")
     assert not filings.empty
     print(filings)
+
+
+def test_filings_get_by_index_or_accession_number():
+    filings = cached_filings(2022, 1)
+    print()
+    filing: Filing = filings.get("0001721868-22-000010")
+
+    assert filing.cik == 884380
+    assert filing.accession_no == "0001721868-22-000010"
+
+    # Invalid accession number
+    assert filings.get("0001721868-22") is None
+
+    filing_one_hundred = filings.get(100)
+    filing_100 = filings.get("100")
+    assert filing_100.accession_no == filing_one_hundred.accession_no

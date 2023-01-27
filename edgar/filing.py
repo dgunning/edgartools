@@ -64,6 +64,8 @@ YearAndQuarters = List[YearAndQuarter]
 Years = Union[int, List[int], range]
 Quarters = Union[int, List[int], range]
 
+accession_number_re = re.compile(r"\d{10}\-\d{2}\-\d{6}$")
+
 
 def current_year_and_quarter() -> Tuple[int, int]:
     now = datetime.now()
@@ -388,6 +390,30 @@ class Filings:
     def prev(self):
         """Alias for self.previous()"""
         return self.previous()
+
+    def get(self, index_or_accession_number: IntString):
+        """
+        Get the Filing at that index location or that has the accession number
+        >>> filings.get(100)
+
+        >>> filings.get("0001721868-22-000010")
+
+        :param index_or_accession_number:
+        :return:
+        """
+        if isinstance(index_or_accession_number, int) or index_or_accession_number.isdigit():
+            return self.get_filing_at(int(index_or_accession_number))
+        else:
+            accession_number = index_or_accession_number.strip()
+            mask = pc.equal(self.data['accessionNumber'], accession_number)
+            idx = mask.index(True).as_py()
+            if idx > -1:
+                return self.get_filing_at(idx)
+            if not accession_number_re.match(accession_number):
+                log.warn(
+                    f"Invalid accession number [{accession_number}]"
+                    "\n  valid accession number [0000000000-00-000000]"
+                )
 
     def __getitem__(self, item):
         return self.get_filing_at(item)
@@ -737,6 +763,7 @@ class FilingDocument:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
 
 # These are the columns on the table on the filing homepage
 filing_file_cols = ['Seq', 'Description', 'Document', 'Type', 'Size', 'Url']

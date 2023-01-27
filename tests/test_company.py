@@ -1,13 +1,13 @@
 import json
 from functools import lru_cache
 from pathlib import Path
-
+import humanize
 import pandas as pd
 import pyarrow.compute as pc
 
 from edgar.company import *
 from edgar.company import parse_company_submissions, CompanyConcept, CompanyFiling
-from edgar.filing import Filing
+from edgar.filing import Filing, get_filings
 from edgar.core import default_page_size
 
 from rich import print
@@ -153,20 +153,20 @@ def test_company_get_filings_for_multiple_forms():
 
 
 def test_get_company_for_ticker_lowercase():
-    company: CompanyData = CompanyData.for_ticker("expe")
+    company: CompanyData = Company("expe")
     assert company
     assert company.tickers == ["EXPE"]
 
 
 def test_company_filings_repr():
-    company: CompanyData = CompanyData.for_ticker("EXPE")
+    company: CompanyData = Company("EXPE")
     expe_filings: CompanyFilings = company.get_filings()
     filings_repr = str(expe_filings)
     assert "Expedia" in filings_repr
 
 
 def test_get_latest_10k_10q():
-    company = CompanyData.for_ticker('NVDA')
+    company = Company('NVDA')
     filings: CompanyFilings = company.get_filings(form=["10-K", "10-Q"])
     latest_filings = filings.latest(4)
     assert len(latest_filings) == 4
@@ -174,14 +174,14 @@ def test_get_latest_10k_10q():
 
 
 def test_filings_latest_one():
-    company = CompanyData.for_ticker('NVDA')
+    company = Company('NVDA')
     filing = company.get_filings(form='10-Q').latest()
     assert filing.form == '10-Q'
     assert isinstance(filing, Filing)
 
 
 def test_company_filings_to_pandas():
-    company = CompanyData.for_cik(886744)
+    company = Company(886744)
     company_filings = company.get_filings()
     filings_df = company_filings.to_pandas()
     print(filings_df.columns)
@@ -191,7 +191,7 @@ def test_company_filings_to_pandas():
 
 
 def test_company_get_filings_by_file_number():
-    company = CompanyData.for_cik(886744)
+    company = Company(886744)
     filings_for_file: CompanyFilings = company.get_filings(file_number='333-225184')
     assert filings_for_file
     print(filings_for_file.to_pandas("form", "accessionNumber"))
@@ -201,13 +201,13 @@ def test_company_get_filings_by_file_number():
 
 
 def test_company_get_filings_by_assession_number():
-    company = CompanyData.for_cik(886744)
+    company = Company(886744)
     filings_for_file: CompanyFilings = company.get_filings(accession_number='0001206774-18-001992')
     assert len(filings_for_file) == 1
 
 
 def test_get_filings_xbrl():
-    company = CompanyData.for_ticker("SNOW")
+    company = Company("SNOW")
     xbrl_filings = company.get_filings(is_xbrl=True)
     assert xbrl_filings.to_pandas("isXBRL").isXBRL.all()
     assert company.get_filings(is_xbrl=False).to_pandas().isXBRL.drop_duplicates().tolist() == [False]
@@ -301,6 +301,37 @@ def test_company_filings_test_company_get_facts_repr():
     print(filings)
 
 
+def test_read_company_filing_index_year_and_quarter():
+    company_filings = get_filings(year=2022, quarter=2, index="company")
+    assert company_filings
+    assert company_filings.data
+    assert 500000 > len(company_filings) > 200000
+
+    df = company_filings.to_pandas()
+    assert len(df) == len(company_filings) == len(company_filings.data)
+    assert company_filings.data.column_names == ['company', 'form', 'cik', 'filing_date', 'accessionNumber']
+    print(company_filings.data.schema)
+
+    print('Bytes', humanize.naturalsize(company_filings.data.nbytes, binary=True))
+
+
+def test_filings_get_by_index_or_accession_number():
+    expe = get_test_company("EXPE")
+    filings = expe.filings
+
+    filing: Filing = filings.get("0001225208-23-000231")
+
+    assert int(filing.cik) == int(expe.cik)
+    assert filing.accession_no == "0001225208-23-000231"
+
+    # Invalid accession number
+    assert filings.get("0001225208-23-") is None
+
+    filing_one_hundred = filings.get(100)
+    filing_100 = filings.get("100")
+    assert filing_100.accession_no == filing_one_hundred.accession_no
+
+
 def test_filings_next_and_previous():
     # Get company filings
     company = get_test_company(1318605)
@@ -321,8 +352,8 @@ def test_filings_next_and_previous():
     print(page2_again)
 
     assert next_page[0].accession_no == page2_again[0].accession_no
-    #assert filings.previous()
-    #assert not filings.previous()
+    # assert filings.previous()
+    # assert not filings.previous()
 
     # Filter the company filings
     eightk_filings = company_filings.filter(form=["8-K"])
@@ -335,5 +366,3 @@ def test_filings_next_and_previous():
     print(eightk_filings.next())
     print(eightk_filings.next())
     print(eightk_filings.next())
-
-
