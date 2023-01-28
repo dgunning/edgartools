@@ -269,9 +269,10 @@ class CompanyFilings(Filings):
     def __rich__(self) -> str:
         page = self.data_pager.current().to_pandas()
         page.index = self._page_index()
+        page_info = f"Showing {len(page)} filings of {self._original_state.num_filings:,} total"
         return Group(
             df_to_rich_table(CompanyFilings.summarize(page), max_rows=len(page)),
-            Text(self.summary)
+            Text(page_info)
         )
 
     def _repr_html_(self):
@@ -426,7 +427,7 @@ class CompanyData:
         ticker_str = f"[{self.tickers[0]}]" if len(self.tickers) == 1 else ""
         company_text = f"{self.name} {ticker_str}"
         return Group(
-            Text(company_text, style="bold green"),
+            Text(company_text, style="bold"),
             df_to_rich_table(self.summary()
                              .filter(['category', 'industry']),
                              index_name="cik"),

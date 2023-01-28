@@ -769,13 +769,13 @@ class Ownership:
 
     def __rich__(self) -> str:
         return Group(Panel(
-                        Group(
-                            Text(f"Form {self.form} {FORM_DESCRIPTIONS.get(self.form, '')}", style="bold green"),
-                            df_to_rich_table(self.summary(), index_name='ticker'))),
-                     self.non_derivatives.__rich__(),
-                     self.derivatives.__rich__(),
-                     self.footnotes.__rich__()
-                     )
+            Group(
+                Text(f"Form {self.form} {FORM_DESCRIPTIONS.get(self.form, '')}", style="bold dark_sea_green4"),
+                df_to_rich_table(self.summary(), index_name='ticker'))),
+            self.non_derivatives.__rich__(),
+            self.derivatives.__rich__(),
+            self.footnotes.__rich__()
+        )
 
     def __repr__(self):
         return repr_rich(self.__rich__())

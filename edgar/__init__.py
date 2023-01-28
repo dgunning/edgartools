@@ -17,3 +17,4 @@ from edgar.filing import (Filing,
                           get_filings,
                           FilingHomepage)
 from edgar.ownership import Ownership
+from edgar.effect import Effect

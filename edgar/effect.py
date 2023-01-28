@@ -102,18 +102,19 @@ class Effect:
 
     @lru_cache(maxsize=1)
     def summary(self) -> pd.DataFrame:
-        return pd.DataFrame([{"live": self.is_live,
+        return pd.DataFrame([{"cik": self.cik,
                               "entity": self.entity,
-                              "cik": self.cik,
-                              "effective": self.effective_date}]).set_index("effective")
+                              "source": self.source_submission_type or "",
+                              "live": self.is_live,
+                              "effective": self.effective_date}]).set_index("entity")
 
     def __str__(self):
         return (f"EffectSubmission(effective='{self.effective_date}', type='{self.submission_type}', "
                 f"is_live={self.is_live}, entity='{self.entity}')")
 
     def __rich__(self) -> str:
-        return Group(Text(f"{self.submission_type} filing for form {self.source_submission_type} filing"),
-                     df_to_rich_table(self.summary(), index_name="effective")
+        return Group(Text(f"{self.submission_type} filing for form {self.source_submission_type} filing", style="bold"),
+                     df_to_rich_table(self.summary(), index_name="entity")
                      )
 
     def __repr__(self):

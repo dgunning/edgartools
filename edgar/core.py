@@ -264,18 +264,17 @@ def repr_df(df, hide_index: bool = True):
 
 
 table_styles = {
-    'form': 'green',
-    'company': 'cyan',
-    'entity': 'cyan',
-    'filingDate': 'cyan',
-    'filing_date': 'cyan',
-    'filed': 'cyan',
-    'security': 'cyan',
-    'reporting owner': 'cyan',
-    'fact': 'cyan',
-    'industry': 'cyan',
-    'document': 'cyan',
-    'ticker': 'green'
+    'form': 'dark_sea_green4',
+    'company': 'bold deep_sky_blue1',
+    'entity': 'deep_sky_blue1',
+    'filingDate': 'bold deep_sky_blue1',
+    'filing_date': 'bold deep_sky_blue1',
+    'filed': 'bold deep_sky_blue1',
+    'security': 'deep_sky_blue1',
+    'issuer': 'deep_sky_blue1',
+    'fact': 'deep_sky_blue1',
+    'industry': 'deep_sky_blue1',
+    'document': 'deep_sky_blue1'
 }
 
 
@@ -297,10 +296,12 @@ def df_to_rich_table(
 
     rich_table = Table(box=box.ROUNDED)
     index_name = str(index_name) if index_name else ""
-    rich_table.add_column(index_name, style=table_styles.get(index_name))
+    index_style = table_styles.get(index_name)
+    rich_table.add_column(index_name, style=index_style, header_style=index_style)
 
     for column in df.columns:
-        rich_table.add_column(column, style=table_styles.get(column))
+        style_name = table_styles.get(column)
+        rich_table.add_column(column, style=style_name, header_style=style_name)
 
     if len(df) > max_rows:
         head = df.head(max_rows // 2)

@@ -454,9 +454,14 @@ class Filings:
         page = self.data_pager.current().to_pandas()
         page.index = self._page_index()
 
+        # Show paging information
+        start_date, end_date = self.date_range
+        range_str = f"from {start_date} to {end_date}" if start_date else ""
+        page_info = f"Showing {len(page)} filings of {self._original_state.num_filings:,} total {range_str}"
+
         return Group(
             df_to_rich_table(page, max_rows=len(page)),
-            Text(self.summary)
+            Text(page_info)
         )
 
     def __repr__(self):
@@ -673,7 +678,7 @@ class Filing:
         └──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
         :return: a rich table version of this filing
         """
-        return Group(Text(f"Form {self.form} Filing"),
+        return Group(Text(f"{self.form} filing", style="bold"),
                      df_to_rich_table(self.summary(), index_name="accession_no")
                      )
 
@@ -900,12 +905,12 @@ class FilingHomepage:
 
     def __rich__(self):
         return Group(
-            Text(f"Form {self.filing.form} Filing"),
+            Text(f"{self.filing.form} filing", style="bold"),
             df_to_rich_table(self.filing.summary(), index_name="accession_no"),
-            Group(Text("Documents"),
+            Group(Text("Documents", style="bold"),
                   df_to_rich_table(summarize_files(self.documents), index_name="Seq")
                   ),
-            Group(Text("Datafiles"),
+            Group(Text("Datafiles", style="bold"),
                   df_to_rich_table(
                       summarize_files(self.datafiles), index_name="Seq"),
                   ) if self.datafiles is not None else Text(""),
