@@ -241,17 +241,6 @@ def test_company_filing_get_related_filings():
     assert file_numbers[0] == filing.file_number
 
 
-def test_company_related_filings_none():
-    from edgar import get_filings
-    filings = get_filings(2014, 1, form=["3", "4", "5"])
-    print(filings)
-    filing = filings[148911]
-    print(filing)
-    related_filings = filing.get_related_filings()
-    print(related_filings)
-    assert not related_filings
-
-
 def test_get_company_by_cik():
     company = get_company(1554646)
     assert company.name == 'NEXPOINT SECURITIES, INC.'

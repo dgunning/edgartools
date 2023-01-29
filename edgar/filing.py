@@ -538,7 +538,10 @@ def get_filings(year: Years = None,
     filings = Filings(filing_index)
 
     if form or filing_date:
-        return filings.filter(form=form, amendments=amendments, filing_date=filing_date)
+        filings = filings.filter(form=form, amendments=amendments, filing_date=filing_date)
+
+    # Finally sort by filing date
+    filings = Filings(filings.data.sort_by([("filing_date", "descending")]))
     return filings
 
 
