@@ -28,8 +28,8 @@
         <a href="#usage">Usage</a>
         <ul>
             <li><a href="#setting-your-edgar-user-identity">Setting your Edgar user identity</a></li>
+            <li><a href="#getting-filings">Getting Filings</a></li>
             <li><a href="#using-the-company-api">Using the Company API</a></li>
-            <li><a href="#using-the-filings-api">Using the Filings API</a></li>
       </ul>
     </li>
     <li><a href="#contributing">Contributing</a></li>
