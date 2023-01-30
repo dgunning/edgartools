@@ -1,6 +1,6 @@
 
 
-![edgar-tools-logo](https://raw.githubusercontent.com/dgunning/edgartools/main/edgar-tools.png)
+![edgar-tools-logo](https://raw.githubusercontent.com/dgunning/edgartools/main/images/edgar-tools.png)
 
 [![PyPI - Version](https://img.shields.io/pypi/v/edgartools.svg)](https://pypi.org/project/edgartools)
 ![GitHub last commit](https://img.shields.io/github/last-commit/dgunning/edgartools)
@@ -60,7 +60,7 @@
 )
 ```
 
-![Common Shares Issued](https://raw.githubusercontent.com/dgunning/edgartools/main/common-shares-issued.png)
+![Common Shares Issued](https://raw.githubusercontent.com/dgunning/edgartools/main/images/common-shares-issued.png)
 
 This example shows what can be done with **edgartools**.
 
@@ -126,9 +126,193 @@ Alternatively, you can call `set_identity` which does the same thing.
 from edgar import set_identity
 set_identity("Michael Mccallum mcalum@gmail.com")
 ```
-
-
 For more detail see https://www.sec.gov/os/accessing-edgar-data
+
+
+## Getting filings
+To get started import from edgar and use the `get_filings` function.
+```python
+from edgar import *
+
+filings = get_filings()
+```
+
+This gets the list of filings for the current year and quarter into a `Filings` object. 
+
+![Get Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/get_filings.jpg)
+
+If you need a different date range you can specify a year or years and a quarter or quarters.
+These are valid ways to specify the date range or filter by form or by filing date.
+
+```python
+
+    >>> filings = get_filings(2021) # Get filings for 2021
+
+    >>> filings = get_filings(2021, 4) # Get filings for 2021 Q4
+
+    >>> filings = get_filings(2021, [3,4]) # Get filings for 2021 Q3 and Q4
+
+    >>> filings = get_filings([2020, 2021]) # Get filings for 2020 and 2021
+
+    >>> filings = get_filings([2020, 2021], 4) # Get filings for Q4 of 2020 and 2021
+
+    >>> filings = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021
+
+    >>> filings = get_filings(2021, 4, form="D") # Get filings for 2021 Q4 for form D
+
+    >>> filings = get_filings(2021, 4, filing_date="2021-10-01") # Get filings for 2021 Q4 on "2021-10-01"
+
+    >>> filings = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") # Get filings for 2021 Q4 between
+                                                                            # "2021-10-01" and "2021-10-10"
+```
+
+### Convert the filings to a pandas dataframe
+
+The filings data is stored in the `Filings` class as a `pyarrow.Table`. You can get the data as a pandas dataframe using
+`to_pandas`
+```python
+df = filings.to_pandas()
+```
+
+
+## Navigating filings
+
+The Filings object allows you to navigate through filings using `filings.next()` and `filings.prev()`. 
+This shows you pages of the data - the page size is about 50. 
+
+```python
+# To see the next page of data
+filings.next()
+
+# To see the previous page
+filings.prev()
+
+# To see the current page
+filings.current()
+```
+
+![Get Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filings_next.jpg)
+
+## Filtering filings
+
+You can filter the filings object using te `filter()` function. This allows you to filter
+by filing date, or by form.
+
+### Filtering filings by date
+
+To filter by filing date specify the filing date in **YYYY-MM-DD** format e.g. **2022-01-24**
+(Note the parameters `date` and `filing_date` are equivalent aliases for each other)
+```python
+filings.filter(date="2021-01-24") # or filings.filter(filing_date="2021-01-24")
+```
+You can specify a filing date range using the colon
+
+```python
+filings.filter(date="2021-01-12:2021-02-28") 
+```
+To filter by dates before a specified date use `:YYYY-MM-DD'
+
+```python
+filings.filter(date=":2021-02-28") 
+```
+
+To filter by dates after a specified date use `YYYY-MM-DD:'
+
+```python
+filings.filter(date="2021-02-28:") 
+```
+
+### Filtering filings by form
+
+You can filter filings by form using the `form` parameter. 
+
+```python
+filings.filter(form="10-K") 
+```
+
+To filter by form e.g. **10-K** and include form amendments use `amendments = True`. 
+
+```python
+filings.filter(form="10-K", amendments=True) 
+```
+![Filter with amendments](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filter_amendments.jpg)
+
+## Getting a single filing
+
+You can get a single filing from the filings using the bracket operator `[]`, 
+specifying the index of the filing. The index is the value displayed in the leftmost
+position in the filings table. For example, to get the **10-Q** for **Costco** in the table above
+use `filings[3]`
+
+```python
+filing = filings[3]
+```
+
+![Costco 10Q filing](https://raw.githubusercontent.com/dgunning/edgartools/main/images/costco_10Q.jpg)
+
+### View the filing homepage
+You can view the filing homepage in the terminal using `filing.homepage`
+
+This gives you access to the `FilingHomepage` class that you can use to list all the documents
+and datafiles on the filing.
+
+```python
+filing.homepage
+```
+![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_homepage.jpg)
+
+### Open a filing
+
+You can open the filing in your browser using `filing.open()`. This will work on environments with access to the browser, 
+will probably not work on a remote server.
+```python
+filing.open()
+```
+
+### Open the Filing Homepage
+You can open the filing homepage in the browser using `filing.homepage.open()`.
+```python
+filing.homepage.open()
+```
+
+### Working with XBRL filings
+
+Some filings are in **XBRL (eXtensible Business Markup Language)** format. 
+These are mainly the newer filings, as the SEC has started requiring this for newer filings.
+
+If a filing is in XBRL format then it opens up a lot more ways to get structured data about that specific filing and also 
+about the company referred to in that filing.
+
+The `Filing` class has an `xbrl` function that will download, parse and structure the filing's XBRL document if one exists.
+If it does not exist, then `filing.xbrl()` will return `None`.
+
+The function `filing.xbrl()` returns a `FilingXbrl` instance, which wraps the data, and provides convenient
+ways of working with the xbrl data.
+
+
+```python
+filing_xbrl = filing.xbrl()
+```
+
+
+#### Use DuckDB to query the filings
+
+A conveient way to query the filings data is to use **DuckDB**. If you call the `to_duckdb` function, you get an in-memory
+DuckDB database instance, with the filings registered as a table called `filings`.
+Then you can work directy with the DuckDB database, and run SQL against the filings data.
+
+In this example, we filter filings for **S-1** form types.
+
+```python
+db = filings.to_duckdb()
+# a duckdb.DuckDBPyConnection
+
+# Query the filings for S-1 filings and return a dataframe
+db.execute("""
+select * from filings where Form == 'S-1'
+""").df()
+```
+
 
 ## Using the Company API
 
@@ -146,7 +330,7 @@ For the edgar client API, just use the numbers and omit the leading zeroes.
 ```python
 company = Company(1324424)
 ```
-![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/expe.png)
+![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/images/expe.png)
 
 
 
@@ -164,7 +348,7 @@ or `Company("SNOW")`
 snow = Company("snow")
 ```
 
-![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/snow-inspect.png)
+![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/images/snow-inspect.png)
 ### 
 
 
@@ -273,165 +457,6 @@ Ypu can convert the facts to a DuckDB database which allows you to query the fac
 ```
 
 
-
-## Working with a Filing
-
-Once you have a filing you can do many things with it including getting the html text of the filing, get xbrl or xml, or list all the files in the filing.
-
-### Getting the html text of a filing
-
-```python
-html = filing.html()
-```
-
-
-To get the html text of the filing call `filing.html()`
-
-### Get the Homepage Url
-
-`filing.homepage_url` returns the homepage url of the filing. This is the main index page which lists
-all the files attached in the filing
-
-### Get the filing homepage
-
-To get access to all the documents on the filing you would call `filing.get_homepage()`.
-This gives you access to the `FilingHomepage` class that you can use to list all the documents
-and datafiles on the filing.
-
-
-### Working with XBRL filings
-
-Some filings are in **XBRL (eXtensible Business Markup Language)** format. 
-These are mainly the newer filings, as the SEC has started requiring this for newer filings.
-
-If a filing is in XBRL format then it opens up a lot more ways to get structured data about that specific filing and also 
-about the company referred to in that filing.
-
-The `Filing` class has an `xbrl` function that will download, parse and structure the filing's XBRL document if one exists.
-If it does not exist, then `filing.xbrl()` will return `None`.
-
-The function `filing.xbrl()` returns a `FilingXbrl` instance, which wraps the data, and provides convenient
-ways of working with the xbrl data.
-
-
-```python
-filing_xbrl = filing.xbrl()
-```
-
-## Using the Filings API
-
-The **Filings API** allows you to get the Edgar filing indexes published by the SEC.
-You would use it to get a bulk dataset of SEC filings for a given time period. With this dataset, you could filter by form type, by date or by company, 
-though if you intend to filter by a singe company, you should use the Company API.
-
-### The get_filings function
-The main way to use the Filings API is by `get_filings`
-
-`get_filings` accepts the following parameters
-- **year** a year `2015`, a List of years `[2013, 2015]` or a `range(2013, 2016)` 
-- **quarter** a quarter `2`, a List of quarters `[1,2,3]` or a `range(1,3)` 
-- **index** this is the type of index. By default it is `"form"`. If you want only XBRL filings use `"xbrl"`. 
-You can also use `"company"` but this will give you the same dataset as `"form"`, sorted by company instead of by form
-
-#### Get filings for 2021
-
-```python
-filings = get_filings(2021)
-```
-
-![Filings in 2021](https://raw.githubusercontent.com/dgunning/edgartools/main/filings_2021.jpg)
-
-#### Get filings for 2021 quarter 4
-Instead of getting the filings for an entire year, you can get the filings for a quarter.
-```python
-filings = get_filings(2021, 4)
-```
-
-#### Get filings between 2010 and 2019
-You can get the filings for a range of years, since the `year` parameter accepts a value, a list or a range.
-```python
-filings = get_filings(range(2010, 2020))
-```
-
-#### Get XBRL filings for 2022
-```python
-filings = get_filings(2022, index="xbrl")
-```
-
-
-#### Filtering Filings by form
-You can filter by form type by providing a form or list of forms.
-```python
-filings = get_filings(2022, form="10-K")
-
-# Filter by list of forms
-filings = get_filings(2022, form=["10-K", "10-Q"])
-```
-
-This will include form amendments e.g. "10-K/A" and "10-Q/A". To not include these set `amendments=False`
-```python
-# Filter by list of forms not including amendments
-filings = get_filings(2022, form=["10-K", "10-Q"], amendments=False)
-```
-
-### The Filings class
-
-The `get_filings` returns a `Filings` class, which wraps the data returned and provide convenient ways for working with filings.
-
-#### Convert the filings to a pandas dataframe
-
-The filings data is stored in the `Filings` class as a `pyarrow.Table`. You can get the data as a pandas dataframe using
-`to_pandas`
-```python
-df = filings.to_pandas()
-```
-
-## Working with an individual Filing
-
-Once you have retrieved Filings you can access individual filings using the bracket `[]` notation.
-```python
-filings = get_filings(2021)
-filing = filings[0]
-```
-![Filings in 2021](https://raw.githubusercontent.com/dgunning/edgartools/main/filings_2021.jpg)
-Pay attention to the index value displayed for the filings. This is the value you 
-will use to get the individual filing.
-```python
-filing = filings[0]
-```
-![A single filing](https://raw.githubusercontent.com/dgunning/edgartools/main/single_filing.png)
-
-### Open a filing
-
-You can open the filing in your browser using `filing.open()`
-```python
-filing.open()
-```
-
-### Open the Filing Homepage
-You can open the filing homepage in the browser using `filing.open_homepage()`
-```python
-filing.open()
-```
-
-
-#### Use DuckDB to query the filings
-
-A conveient way to query the filings data is to use **DuckDB**. If you call the `to_duckdb` function, you get an in-memory
-DuckDB database instance, with the filings registered as a table called `filings`.
-Then you can work directy with the DuckDB database, and run SQL against the filings data.
-
-In this example, we filter filings for **S-1** form types.
-
-```python
-db = filings.to_duckdb()
-# a duckdb.DuckDBPyConnection
-
-# Query the filings for S-1 filings and return a dataframe
-db.execute("""
-select * from filings where Form == 'S-1'
-""").df()
-```
 
 # Contributing
 
