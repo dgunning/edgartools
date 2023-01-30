@@ -40,7 +40,8 @@
 
 # About the project
 
-**`edgartools`** is a library for working Edgar filings in analytic workflows.
+**`edgartools`** is a library for working with SEC Edgar filings. You can query, filter and select any filing since 1994 and view the filing's html, text, xml or structured data.
+
 
 ## Demo
 
@@ -191,7 +192,29 @@ filings.prev()
 filings.current()
 ```
 
-![Get Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filings_next.jpg)
+![Get next filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filings_next.jpg)
+
+## Getting the latest filings
+
+You can get the latest **n** filings by filing_date from a filings using `filings.latest()`.
+
+If you provide the parameter `n` it will return the latest `n` filings.
+
+```python
+filing = filings.latest(n=5)
+filing
+```
+![Latest filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_filings.jpg)
+
+
+If you omit this parameter, or set `n=1` it will return a single `Filings object.
+
+```python
+filing = filings.latest()
+filing
+```
+![Latest filing](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_filing.jpg)
+
 
 ## Filtering filings
 
@@ -293,6 +316,8 @@ ways of working with the xbrl data.
 ```python
 filing_xbrl = filing.xbrl()
 ```
+
+![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/10Q_xbrl.jpg)
 
 
 #### Use DuckDB to query the filings
