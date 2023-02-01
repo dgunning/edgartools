@@ -45,6 +45,9 @@ def test_parse_offering_xml():
     assert offering.offering_data.is_equity
     assert offering.offering_data.is_pooled_investment
 
+    # business combination
+    assert offering.offering_data.business_combination_transaction.is_business_combination == False
+
     # Investment Fund Info
     assert offering.offering_data.industry_group.industry_group_type == "REITS and Finance"
     assert offering.offering_data.industry_group.investment_fund_info is None
