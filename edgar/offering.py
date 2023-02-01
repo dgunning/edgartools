@@ -177,7 +177,7 @@ class OfferingData:
         self.more_than_one_year: bool = more_than_one_year
         self.is_equity = is_equity
         self.is_pooled_investment = is_pooled_investment
-        self.business_combination_transaction: BusinessCombinationTransaction = business_combination_transaction,
+        self.business_combination_transaction: BusinessCombinationTransaction = business_combination_transaction
         self.minimum_investment = minimum_investment
         self.sales_compensation_recipients: List[SalesCompensationRecipient] = sales_compensation_recipients or []
         self.offering_sales_amounts = offering_sales_amounts
