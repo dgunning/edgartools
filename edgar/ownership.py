@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Tuple
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -9,6 +9,7 @@ from rich.panel import Panel
 
 from edgar.core import get_bool
 from edgar.core import repr_rich, df_to_rich_table, IntString
+from edgar.party import Address
 from edgar.xml import (child_text, child_value)
 
 __all__ = [
@@ -73,28 +74,6 @@ class Issuer:
 
     def __repr__(self):
         return f"Issuer(cik='{self.cik or ''}', name={self.name or ''}, ticker={self.ticker or ''})"
-
-
-class Address:
-
-    def __init__(self,
-                 street1: str,
-                 street2: Optional[str] = None,
-                 city: Optional[str] = None,
-                 state: Optional[str] = None,
-                 zipcode: Optional[str] = None,
-                 state_description: Optional[str] = None
-                 ):
-        self.street1: str = street1
-        self.street2: Optional[str] = street2
-        self.city: Optional[str] = city
-        self.state: Optional[str] = state
-        self.zipcode: Optional[str] = zipcode
-        self.state_description: Optional[str] = state_description
-
-    def __repr__(self):
-        return (f"Address(street1='{self.street1}', street2={self.street2}, city={self.city}, "
-                f"zipcode={self.zipcode}, state={self.state})")
 
 
 class ReportingRelationship:
@@ -729,9 +708,9 @@ class Ownership:
             street1=child_text(reporting_owner_address_tag, "rptOwnerStreet1"),
             street2=child_text(reporting_owner_address_tag, "rptOwnerStreet2"),
             city=child_text(reporting_owner_address_tag, "rptOwnerCity"),
-            state=child_text(reporting_owner_address_tag, "rptOwnerState"),
+            state_or_country=child_text(reporting_owner_address_tag, "rptOwnerState"),
             zipcode=child_text(reporting_owner_address_tag, "rptOwnerZipCode"),
-            state_description=child_text(reporting_owner_address_tag, "rptOwnerStateDescription")
+            state_or_country_description=child_text(reporting_owner_address_tag, "rptOwnerStateDescription")
         )
 
         reporting_owner_rel_tag = reporting_owner_tag.find("reportingOwnerRelationship")

@@ -18,3 +18,4 @@ from edgar.filing import (Filing,
                           FilingHomepage)
 from edgar.ownership import Ownership
 from edgar.effect import Effect
+from edgar.offering import Offering

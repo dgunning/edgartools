@@ -1,0 +1,155 @@
+from edgar.core import IntString, repr_rich
+from typing import List, Optional
+from bs4 import Tag
+from edgar.xml import child_text, child_value
+from rich.console import Console, ConsoleOptions, RenderResult, Group
+from rich.table import Table
+
+__all__ = [
+    'Address',
+    'Issuer',
+    'Person'
+]
+
+
+class Address:
+
+    def __init__(self,
+                 street1: str,
+                 street2: Optional[str] = None,
+                 city: Optional[str] = None,
+                 state_or_country: Optional[str] = None,
+                 state_or_country_description: Optional[str] = None,
+                 zipcode: Optional[str] = None
+                 ):
+        self.street1: str = street1
+        self.street2: Optional[str] = street2
+        self.city: Optional[str] = city
+        self.state_or_country: Optional[str] = state_or_country
+        self.state_or_country_description: Optional[str] = state_or_country_description
+        self.zipcode: Optional[str] = zipcode
+
+    def __repr__(self):
+        return (f"Address(street1='{self.street1}', street2={self.street2}, city={self.city}, "
+                f"zipcode={self.zipcode}, state={self.state_or_country})")
+
+
+class Issuer:
+    """
+     <primaryIssuer>
+        <cik>0001961089</cik>
+        <entityName>1685 38th REIT, L.L.C.</entityName>
+        <issuerAddress>
+            <street1>2029 CENTURY PARK EAST</street1>
+            <street2>SUITE 1370</street2>
+            <city>LOS ANGELES</city>
+            <stateOrCountry>CA</stateOrCountry>
+            <stateOrCountryDescription>CALIFORNIA</stateOrCountryDescription>
+            <zipCode>90067</zipCode>
+        </issuerAddress>
+        <issuerPhoneNumber>424-313-1550</issuerPhoneNumber>
+        <jurisdictionOfInc>DELAWARE</jurisdictionOfInc>
+        <issuerPreviousNameList>
+            <value>None</value>
+        </issuerPreviousNameList>
+        <edgarPreviousNameList>
+            <value>None</value>
+        </edgarPreviousNameList>
+        <entityType>Limited Liability Company</entityType>
+        <yearOfInc>
+            <withinFiveYears>true</withinFiveYears>
+            <value>2022</value>
+        </yearOfInc>
+    </primaryIssuer>
+
+    """
+
+    def __init__(self,
+                 cik: IntString,
+                 entity_name: str,
+                 entity_type: str,
+                 primary_address: Address,
+                 phone_number: str,
+                 jurisdiction: str,
+                 issuer_previous_names: List[str],
+                 edgar_previous_names: List[str],
+                 year_of_incorporation: IntString,
+                 incorporated_within_5_years: bool):
+        self.cik = cik
+        self.entity_name: str = entity_name
+        self.entity_type = entity_type
+        self.primary_address: Address = primary_address
+        self.phone_number: str = phone_number
+        self.issuer_previous_names = issuer_previous_names
+        self.edgar_previous_names = edgar_previous_names
+        self.jurisdiction: str = jurisdiction
+        self.year_of_incorporation = year_of_incorporation
+        self.incorporated_within_5_years: bool = incorporated_within_5_years
+
+    @classmethod
+    def from_xml(cls, issuer_el: Tag):
+        # edgar previous names
+        edgar_previous_names_el = issuer_el.find("edgarPreviousNameList")
+        edgar_previous_names = [el.text
+                                for el in edgar_previous_names_el.find_all("value")
+                                if el.text != 'None'] if edgar_previous_names_el else []
+
+        # issuer previous names
+        issuer_previous_names_el = issuer_el.find("issuerPreviousNameList")
+        issuer_previous_names = [el.text
+                                 for el in issuer_previous_names_el.find_all("value")
+                                 if el.text != 'None'] if issuer_previous_names_el else []
+
+        year_of_inc_el = issuer_el.find("yearOfInc")
+
+        # Address
+        issuer_address_el = issuer_el.find("issuerAddress")
+        address: Address = Address(
+            street1=child_text(issuer_address_el, "street1"),
+            street2=child_text(issuer_address_el, "street2"),
+            city=child_text(issuer_address_el, "city"),
+            state_or_country=child_text(issuer_address_el, "stateOrCountry"),
+            state_or_country_description=child_text(issuer_address_el, "stateOrCountryDescription"),
+            zipcode=child_text(issuer_address_el, "zipCode")
+        )
+
+        return cls(
+            cik=child_text(issuer_el, "cik"),
+            entity_name=child_text(issuer_el, "entityName"),
+            phone_number=child_text(issuer_el, "issuerPhoneNumber"),
+            jurisdiction=child_text(issuer_el, "jurisdictionOfInc"),
+            entity_type=child_text(issuer_el, "entityType"),
+            edgar_previous_names=edgar_previous_names,
+            primary_address=address,
+            issuer_previous_names=issuer_previous_names,
+            year_of_incorporation=child_value(issuer_el, "yearOfInc"),
+            incorporated_within_5_years=year_of_inc_el and child_text(year_of_inc_el, "withinFiveYears") == "true"
+        )
+
+    def __rich__(self):
+        table = Table("issuer", "entity type", "incorporated")
+        table.add_row(self.entity_name, self.entity_type, self.year_of_incorporation)
+        return Group(table)
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
+class Person:
+
+    def __init__(self,
+                 first_name: str,
+                 last_name: str,
+                 address: Address = None):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.address: Address = address
+
+    def __str__(self):
+        return f"{self.first_name} {self.first_name}"
+
+    def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
+        yield f"{self.first_name} {self.last_name}"
+
+
+
