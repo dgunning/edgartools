@@ -282,7 +282,7 @@ and datafiles on the filing.
 ```python
 filing.homepage
 ```
-![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_homepage.jpg)
+![Filing homepage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_homepage.jpg)
 
 ### Open a filing
 
@@ -373,7 +373,7 @@ or `Company("SNOW")`
 snow = Company("snow")
 ```
 
-![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/images/snow-inspect.png)
+![snow](https://raw.githubusercontent.com/dgunning/edgartools/main/images/snow.jpg)
 ### 
 
 
