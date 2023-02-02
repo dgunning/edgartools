@@ -20,7 +20,7 @@ def test_read_fixed_width_index():
     index_text = Path('data/form.20200318.idx').read_text()
     index_data = read_fixed_width_index(index_text, form_specs)
     index_df = index_data.to_pandas()
-    invalid_accession = index_df.query("~accessionNumber.str.match('[0-9]{10}\\-[0-9]{2}\\-[0-9]{6}')")
+    invalid_accession = index_df.query("~accession_number.str.match('[0-9]{10}\\-[0-9]{2}\\-[0-9]{6}')")
     assert len(invalid_accession) == 0
 
 
@@ -32,7 +32,7 @@ def test_read_form_filing_index_year_and_quarter():
 
     df = filings.to_pandas()
     assert len(df) == len(filings) == len(filings.data)
-    assert filings.data.column_names == ['form', 'company', 'cik', 'filing_date', 'accessionNumber']
+    assert filings.data.column_names == ['form', 'company', 'cik', 'filing_date', 'accession_number']
     print(filings.data.schema)
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
     assert filings.data[0][0].as_py() == '1-A'
@@ -46,7 +46,7 @@ def test_read_form_filing_index_year():
 
     df = filings.to_pandas()
     assert len(df) == len(filings) == len(filings.data)
-    assert filings.data.column_names == ['form', 'company', 'cik', 'filing_date', 'accessionNumber']
+    assert filings.data.column_names == ['form', 'company', 'cik', 'filing_date', 'accession_number']
     print(filings.data.schema)
 
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
@@ -59,7 +59,7 @@ def test_read_form_filing_index_xbrl():
 
     df = filings.to_pandas()
     assert len(df) == len(filings) == len(filings.data)
-    assert filings.data.column_names == ['cik', 'company', 'form', 'filing_date', 'accessionNumber']
+    assert filings.data.column_names == ['cik', 'company', 'form', 'filing_date', 'accession_number']
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
     assert re.match(r'\d{10}\-\d{2}\-\d{6}', filings.data[4][-1].as_py())
 
@@ -68,7 +68,7 @@ def test_get_filings_gets_correct_accession_number():
     # Get the filings and test that the accession number is correct for all rows e.g. 0001185185-20-000088
     filings: Filings = cached_filings(2021, 1)
     data = filings.data.to_pandas()
-    misparsed_accessions = data.query("accessionNumber.str.endswith('.')")
+    misparsed_accessions = data.query("accession_number.str.endswith('.')")
     assert len(misparsed_accessions) == 0
 
 

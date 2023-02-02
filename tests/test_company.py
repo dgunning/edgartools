@@ -298,7 +298,7 @@ def test_read_company_filing_index_year_and_quarter():
 
     df = company_filings.to_pandas()
     assert len(df) == len(company_filings) == len(company_filings.data)
-    assert company_filings.data.column_names == ['company', 'form', 'cik', 'filing_date', 'accessionNumber']
+    assert company_filings.data.column_names == ['company', 'form', 'cik', 'filing_date', 'accession_number']
     print(company_filings.data.schema)
 
     print('Bytes', humanize.naturalsize(company_filings.data.nbytes, binary=True))

@@ -122,7 +122,7 @@ form_specs = FileSpecs(
      ("company", (12, 74), pa.string()),
      ("cik", (74, 82), pa.int32()),
      ("filing_date", (85, 97), pa.string()),
-     ("accessionNumber", (97, 141), pa.string())
+     ("accession_number", (97, 141), pa.string())
      ]
 )
 company_specs = FileSpecs(
@@ -130,7 +130,7 @@ company_specs = FileSpecs(
      ("form", (62, 74), pa.string()),
      ("cik", (74, 82), pa.int32()),
      ("filing_date", (85, 97), pa.string()),
-     ("accessionNumber", (97, 141), pa.string())
+     ("accession_number", (97, 141), pa.string())
      ]
 )
 
@@ -182,14 +182,14 @@ def read_pipe_delimited_index(index_text: str) -> pa.Table:
         BytesIO(index_text.encode()),
         parse_options=pa_csv.ParseOptions(delimiter="|"),
         read_options=pa_csv.ReadOptions(skip_rows=10,
-                                        column_names=['cik', 'company', 'form', 'filing_date', 'accessionNumber'])
+                                        column_names=['cik', 'company', 'form', 'filing_date', 'accession_number'])
     )
     index_table = index_table.set_column(
         0,
         "cik",
         pa.compute.cast(index_table[0], pa.int32())
     ).set_column(4,
-                 "accessionNumber",
+                 "accession_number",
                  pc.utf8_slice_codeunits(index_table[4], start=-24, stop=-4))
     return index_table
 
@@ -285,7 +285,7 @@ class Filings:
             company=self.data['company'][item].as_py(),
             form=self.data['form'][item].as_py(),
             filing_date=self.data['filing_date'][item].as_py(),
-            accession_no=self.data['accessionNumber'][item].as_py(),
+            accession_no=self.data['accession_number'][item].as_py(),
         )
 
     @property
@@ -405,7 +405,7 @@ class Filings:
             return self.get_filing_at(int(index_or_accession_number))
         else:
             accession_number = index_or_accession_number.strip()
-            mask = pc.equal(self.data['accessionNumber'], accession_number)
+            mask = pc.equal(self.data['accession_number'], accession_number)
             idx = mask.index(True).as_py()
             if idx > -1:
                 return self.get_filing_at(idx)

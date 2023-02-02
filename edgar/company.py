@@ -189,7 +189,7 @@ class CompanyFilings(Filings):
             form=self.data['form'][item].as_py(),
             filing_date=self.data['filing_date'][item].as_py(),
             report_date=self.data['reportDate'][item].as_py(),
-            accession_no=self.data['accessionNumber'][item].as_py(),
+            accession_no=self.data['accession_number'][item].as_py(),
             file_number=self.data['fileNumber'][item].as_py(),
             items=self.data['items'][item].as_py(),
             size=self.data['size'][item].as_py(),
@@ -230,7 +230,7 @@ class CompanyFilings(Filings):
                 .assign(size=lambda df: df['size'].apply(display_size),
                         isXBRL=lambda df: df.isXBRL.map({'1': True, 1: True}).fillna(""),
                         )
-                .filter(["form", "filing_date", "accessionNumber", "isXBRL"])
+                .filter(["form", "filing_date", "accession_number", "isXBRL"])
                 .rename(columns={"filing_date": "filed", "isXBRL": "xbrl"})
                 )
 
@@ -374,7 +374,7 @@ class CompanyData:
         # Filter by accession number
         if accession_number:
             company_filings = company_filings.filter(
-                pc.is_in(company_filings['accessionNumber'], pa.array(listify(accession_number))))
+                pc.is_in(company_filings['accession_number'], pa.array(listify(accession_number))))
             if len(company_filings) >= 1:
                 # We found the single filing or oops, didn't find any
                 return CompanyFilings(company_filings, cik=self.cik, company_name=self.name)
@@ -466,7 +466,7 @@ def parse_filings(filings_json: Dict[str, object],
          pa.array(rjson['primaryDocument']),
          pa.array(rjson['primaryDocDescription'])
          ],
-        names=['accessionNumber',
+        names=['accession_number',
                'filing_date',
                'reportDate',
                'acceptanceDateTime',
