@@ -55,7 +55,13 @@ def value_or_footnote(el: Tag) -> Optional[str]:
 
 
 def child_text(parent: Tag,
-               child: str):
+               child: str) -> str:
+    """
+    Get the text of the child element if it exists or None
+    :param parent: The parent tag
+    :param child: The name of the child element
+    :return: the text of the child element if it exists or None
+    """
     el = parent.find(child)
     if el:
         return el.text.strip()
@@ -64,6 +70,14 @@ def child_text(parent: Tag,
 def child_value(parent: Tag,
                 child: str,
                 default_value: str = None) -> str:
+    """
+    Get the text of the value tag within the child tag if it exists or None
+
+    :param parent: The parent tag
+    :param child: The name of the child element
+    :param default_value: The default value to return if the value is None
+    :return: the text of the child element if it exists or None
+    """
     el = parent.find(child)
     if el:
         return value_with_footnotes(el)
