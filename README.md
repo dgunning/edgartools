@@ -27,7 +27,7 @@
     <li>
         <a href="#usage">Usage</a>
         <ul>
-            <li><a href="#setting-your-edgar-user-identity">Setting your Edgar user identity</a></li>
+            <li><a href="#set-your-edgar-user-identity">Set your Edgar user identity</a></li>
             <li><a href="#getting-filings">Getting Filings</a></li>
             <li><a href="#using-the-company-api">Using the Company API</a></li>
       </ul>
