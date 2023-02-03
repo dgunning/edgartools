@@ -4,8 +4,15 @@
 
 ::: edgar.filing
 
-::: edgar.xbrl
+::: edgar.effect
 
 ::: edgar.ownership
 
+::: edgar.offering
+
+::: edgar.party
+
+::: edgar.xml
+
+::: edgar.xbrl
 

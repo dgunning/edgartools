@@ -1,4 +1,4 @@
-# Using the Company API
+# The Company API
 
 With the company API you find a company using the **cik** or **ticker**. 
 From the company you can access all their historical **filings**,
@@ -14,7 +14,7 @@ For the edgar client API, just use the numbers and omit the leading zeroes.
 ```python
 company = Company(1318605)
 ```
-![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/expe.png)
+![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/images/expe.png)
 
 
 
@@ -32,7 +32,7 @@ or `Company("SNOW")`
 snow = Company("snow")
 ```
 
-![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/snow-inspect.png)
+![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/images/snow.jpg)
 
 
 
