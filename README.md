@@ -40,55 +40,46 @@
 
 # About the project
 
-**`edgartools`** is a library for working with SEC Edgar filings. You can query, filter and select any filing since 1994 and view the filing's html, text, xml or structured data.
+**`edgartools`** is one of the nicest looking EDGAR libraries out there.
+You can query, filter and select any filing since 1994 and view the filing's html, text, xml or structured data.
 
 
 ## Demo
 
-#### Get the Common Shares Issued amount from Snowflake's latest 10-Q filing
+#### Get the latest 10 form D filings and view the first in the browser
 
 ```python
-(Company("SNOW")
-        .get_filings(form="10-Q")
-        .latest()
-        .xbrl()
-        .to_duckdb().execute(
-        """select fact, value, units, end_date from facts 
-           where fact = 'CommonStockSharesIssued' 
-           order by end_date desc limit 1
-        """
-    ).df()
-)
+from edgar import *
+
+# Get form D filings for the last quarter of 2022 
+filings = get_filings(2022, 4, form="D")
+
+# Get the latest 10 filings from the list 
+latest_10_filings = filings.latest(10)
+
+# Of the 10 latest filings open the 1st in the browser
+latest_10_filings[0].open()
 ```
-
-![Common Shares Issued](https://raw.githubusercontent.com/dgunning/edgartools/main/images/common-shares-issued.png)
-
-This example shows what can be done with **edgartools**.
-
-Under the hood the code does the following
-
-1. Use the ticker **"SNOW"** to get the company's cik from the [Company Tickers JSON](https://www.sec.gov/file/company-tickers)
-2. From the **cik** get the company's filings from the submissions endpoint `https://data.sec.gov/submissions/CIK{cik:010}.json`
-3. Select the latest 10-Q filing
-4. Download the XBRL file for that filing
-5. Convert the XBRL data into a pandas dataframe
-6. Register the dataframe as a DuckDB table
-7. Execute the SQL and convert to a dataframe
-
-You might not want to chain the operations like this, and strictly speaking it might not be the most efficient, 
-given how much work happens within those lines of code. This guide will show you step by step
-how to easily get SEC filing data and text into your analytic workflows.
+![10 D Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/10_D_filings.jpg)
 
 
 ## Features
 
-- Download listings of Edgar filing by year, quarter since 1994
-- Select an individual filing and download the html, XML or content of any attached file
-- View a filing XBRL as a dataframe and query it with SQL
+### Start with filings, filter down to a filing
+
+- View filings since 1994 to today
+- Filter filings by **form e.g. 10K**, **filing date** etc.
+- Page through filings using **next()** and **prev()**
+- Select and view a filing in the terminal, or open in the browser
+- Download any file from any filing
+- Parse XML for **Offering, Ownership** and other filing types
+- Automatically parse a filing's XBRL into a pandas dataframe
+
+### Start with a Company, get their filings and Facts
 - Search for company by ticker or CIK
-- Get a company's filings 
-- Get a dataset of company's **facts** e.g. **CommonSharesOutstanding**
-- Query a company's facts as SQL using an in-memory **DuckDB** database
+- View a company's filings
+- Page through filings using **next()** and **prev()**
+- Get a company **facts** e.g. **CommonSharesOutstanding** as a dataframe
 
 # Installation
 
