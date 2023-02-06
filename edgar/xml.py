@@ -1,15 +1,34 @@
-from bs4 import Tag
-from typing import Optional, Tuple
+from bs4 import Tag, BeautifulSoup
+from typing import Optional, Tuple, Union
+from decimal import Decimal
 
 __all__ = [
     'child_text',
     'child_value',
+    'find_element',
     'get_footnote_ids',
+    'optional_decimal',
     'value_or_footnote',
     'extract_child_text',
     'extract_child_value',
     'value_with_footnotes',
 ]
+
+
+def find_element(
+        xml_tag_or_string: Union[str, BeautifulSoup, Tag],
+        element_name) -> Tag:
+    """
+    Find the element with that name in the string or Tag
+    :param xml_tag_or_string: either a string xml or
+    :param element_name:
+    :return: An element
+    """
+    if isinstance(xml_tag_or_string, Tag):
+        return xml_tag_or_string.find(element_name)
+    elif isinstance(xml_tag_or_string, str) and "<" in xml_tag_or_string:
+        soup: BeautifulSoup = BeautifulSoup(xml_tag_or_string, features="xml")
+        return soup.find(element_name)
 
 
 def get_footnote_ids(tag: Tag,
@@ -84,6 +103,13 @@ def child_value(parent: Tag,
     return default_value
 
 
+def optional_decimal(parent: Tag,
+                     child: str) -> Optional[Decimal]:
+    text = child_text(parent, child)
+    if text:
+        return Decimal(text)
+
+
 def extract_child_text(tag: Tag,
                        key: str,
                        child_tag_name: str) -> Tuple[str, str]:
@@ -107,4 +133,3 @@ def extract_child_value(tag: Tag,
       :param child_tag_name The child tag name
     """
     return key, child_value(tag, child_tag_name)
-
