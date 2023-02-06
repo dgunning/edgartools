@@ -476,17 +476,19 @@ class FundReport:
         return fund_report
 
     @property
-    def financials_table(self) -> Table:
+    def fund_summary_table(self) -> Table:
         # Financials
         financials_table = Table("Assets",
                                  "Liabilities",
                                  "Net Assets",
-                                 "Securities",
-                                 title="Financial Summary", title_style="bold", box=box.SIMPLE)
+                                 "Investments",
+                                 "Period",
+                                 title="Fund Summary", title_style="bold", box=box.SIMPLE)
         financials_table.add_row(moneyfmt(self.fund_info.total_assets, curr="$", places=0),
                                  moneyfmt(self.fund_info.total_liabilities, curr="$", places=0),
                                  moneyfmt(self.fund_info.net_assets, curr="$", places=0),
-                                 f"{len(self.investments)}"
+                                 f"{len(self.investments)}",
+                                 f"{self.general_info.reg_period_date} - {self.general_info.reg_period_end}"
                                  )
         return financials_table
 
@@ -536,7 +538,7 @@ class FundReport:
                       title="Investments", title_style="bold", box=box.SIMPLE
                       )
         for investment in self.investments:
-            table.add_row(investment.name,
+            table.add_row(f"{investment.name} {investment.title}",
                           investment.cusip,
                           moneyfmt(investment.balance, curr='', places=0),
                           moneyfmt(investment.value_usd),
@@ -548,7 +550,7 @@ class FundReport:
     def __rich__(self):
         return Group(
             Text(self.name),
-            self.financials_table,
+            self.fund_summary_table,
             self.investments_table,
             self.metrics_table,
             self.credit_spread_table
