@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xsi:schemaLocation="http://www.sec.gov/edgar/nport eis_NPORT_Filer.xsd" xmlns="http://www.sec.gov/edgar/nport" xmlns:com="http://www.sec.gov/edgar/common" xmlns:ncom="http://www.sec.gov/edgar/nportcommon" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!--<schemaVersion>X0101</schemaVersion>-->
+  <!-- DISCLAIMER:  This is a sample XML submission document for demonstration purposes only and should not be copied verbatim as part of a submission. -->  
+<!-- Please refer to the EDGAR NPORT XML Technical Specification and the related EDGAR NPORT Schemas for complete filer-constructed submission information.-->
+<!-- Please be aware that these schema locations are for informational purposes only and should not be considered as required items in the EDGAR NPORT Schema. -->
+<!-- If a reference to a style sheet is included the submission will be suspended by EDGAR.  Please do not include any references to style sheets.--> 
+ <headerData>
+    <submissionType>NPORT-NP</submissionType>
+	<isConfidential>true</isConfidential>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <filer>
+        <fileNumber>811-21044</fileNumber>
+        <issuerCredentials>
+          <cik>0000350001</cik>
+          <ccc>filerccc#1</ccc>
+        </issuerCredentials>
+      </filer>
+      <contact>
+        <name>token</name>
+        <phone>token</phone>
+        <email>test1@test.com</email>
+      </contact>
+      <notifications>
+        <notificationEmailAddress>test2@test.com</notificationEmailAddress>
+      </notifications>
+      <seriesClassInfo>
+        <seriesId>S000014703</seriesId>
+        <classId>C000003978</classId>
+      </seriesClassInfo>
+      <flags>
+        <returnCopyFlag>false</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+        <confirmingCopyFlag>true</confirmingCopyFlag>
+      </flags>
+      <invstCompanyType>N-1A</invstCompanyType>
+      <!--<invstCompanyType>N-2</invstCompanyType>-->
+    </filerInfo>
+  </headerData>
+  <formData>
+    <genInfo>
+      <regName>token</regName>
+      <regFileNumber>811-21044</regFileNumber>
+      <regCik>0000350001</regCik>
+      <regLei>12345678901234567812</regLei>
+      <regStreet1>token</regStreet1>
+      <regStreet2>token</regStreet2>
+      <regCity>token</regCity>
+      <!--<regCountry>AF</regCountry>-->
+      <regStateConditional regCountry="US" regState="US-AL"/>
+      <regZipOrPostalCode>token</regZipOrPostalCode>
+      <regPhone>121212121212</regPhone>
+      <seriesName>token</seriesName>
+      <seriesId>S000014703</seriesId>
+      <seriesLei>12345678901234567812</seriesLei>
+      <repPdEnd>2017-12-31</repPdEnd>
+      <repPdDate>2017-07-01</repPdDate>
+      <isFinalFiling>Y</isFinalFiling>
+    </genInfo>
+    <fundInfo>
+      <totAssets>0.0</totAssets>
+      <totLiabs>123456789012345678901234</totLiabs>
+      <!--DECIMAL_NON_NEGATIVE_TYPE_36_12-->
+      <netAssets>-123456789012345678901234</netAssets>
+      <!--DECIMAL_TYPE_36_12-->
+      <assetsAttrMiscSec>5</assetsAttrMiscSec>
+      <assetsInvested>0.0</assetsInvested>
+      <amtPayOneYrBanksBorr>0.0</amtPayOneYrBanksBorr>
+      <amtPayOneYrCtrldComp>0.0</amtPayOneYrCtrldComp>
+      <amtPayOneYrOthAffil>0.0</amtPayOneYrOthAffil>
+      <amtPayOneYrOther>0.0</amtPayOneYrOther>
+      <amtPayAftOneYrBanksBorr>0.0</amtPayAftOneYrBanksBorr>
+      <amtPayAftOneYrCtrldComp>0.0</amtPayAftOneYrCtrldComp>
+      <amtPayAftOneYrOthAffil>0.0</amtPayAftOneYrOthAffil>
+      <amtPayAftOneYrOther>0.0</amtPayAftOneYrOther>
+      <delayDeliv>0.0</delayDeliv>
+      <standByCommit>0.0</standByCommit>
+      <liquidPref>0.0</liquidPref>
+      <curMetrics>
+        <curMetric>
+          <curCd>AED</curCd>
+          <intrstRtRiskdv01 period10Yr="0.0" period1Yr="0.0" period30Yr="0.0" period3Mon="0.0" period5Yr="0.0"/>
+          <intrstRtRiskdv100 period10Yr="0.0" period1Yr="0.0" period30Yr="0.0" period3Mon="0.0" period5Yr="0.0"/>
+        </curMetric>
+      </curMetrics>
+      <creditSprdRiskInvstGrade period10Yr="0.0" period1Yr="0.0" period30Yr="0.0" period3Mon="0.0" period5Yr="0.0"/>
+      <creditSprdRiskNonInvstGrade period10Yr="0.0" period1Yr="0.0" period30Yr="0.0" period3Mon="0.0" period5Yr="0.0"/>
+      <borrowers>
+        <borrower aggrVal="0.0" lei="1234560000" name="token"/>
+      </borrowers>
+      <!--<isNonCashCollateral>N</isNonCashCollateral>-->
+      <aggregateCondition isNonCashCollateral="Y">
+        <aggregateInfos>
+          <aggregateInfo amt="N/A" collatrl="3.1">
+            <invstCat>ABS</invstCat>
+            <!--<invstCatConditional invstCat="other instrument" otherDesc=";olasdf;ialdflaknf" />-->
+          </aggregateInfo>
+        </aggregateInfos>
+      </aggregateCondition>
+      <returnInfo>
+        <monthlyTotReturns>
+          <!--<monthlyTotReturn rtn1="+123456789012345678901234" rtn2="N/A" rtn3="-100.0"/>-->
+          <monthlyTotReturn classId="C000003978" rtn1="1" rtn2="N/A" rtn3="-100"/>
+          <!--DECIMAL2_TYPE_36_12-->
+        </monthlyTotReturns>
+        <monthlyReturnCats>
+          <commodityContracts>
+            <mon1 netRealizedGain="N/A" netUnrealizedAppr="-5.55"/>
+            <!--DECIMAL_TYPE_NA_36_12-->
+            <mon2 netRealizedGain="-12345678901234567890123.1" netUnrealizedAppr="-123456789012.123456789012"/>
+            <mon3 netRealizedGain="+5" netUnrealizedAppr="+123456789012.123456789012"/>
+            <forwardCategory>
+              <instrMon1 netRealizedGain="0" netUnrealizedAppr="5.55"/>
+              <instrMon2 netRealizedGain="-1" netUnrealizedAppr="5.55"/>
+              <instrMon3 netRealizedGain="N/A" netUnrealizedAppr="5.55"/>
+            </forwardCategory>
+          </commodityContracts>
+        </monthlyReturnCats>
+        <othMon1 netRealizedGain="-2345" netUnrealizedAppr="5.55"/>
+        <othMon2 netRealizedGain="N/A" netUnrealizedAppr="5.55"/>
+        <othMon3 netRealizedGain="5.55" netUnrealizedAppr="5"/>
+      </returnInfo>
+      <mon1Flow redemption="5.123456789012" reinvestment="5.123456789012" sales="5.123456789012"/>
+      <mon2Flow redemption="N/A" reinvestment="N/A" sales="N/A"/>
+      <mon3Flow redemption="N/A" reinvestment="N/A" sales="N/A"/>
+      <liquidInvst>
+        <highlyLiquidInvst>5.55</highlyLiquidInvst>
+        <daysOfHolding>31</daysOfHolding>
+        <isChangeRepPd>N</isChangeRepPd>
+        <!--<liquidInvConditional>
+					<isChangeRepPd>Y</isChangeRepPd>
+					<rptPdChanges>
+						<rptPdChange>5.55</rptPdChange>
+					</rptPdChanges>
+				</liquidInvConditional>-->
+      </liquidInvst>
+      
+        <derivTrans>
+          <derivTran classification="MLI" fundPct="5"/>
+          <derivTran classification="LLI" fundPct="5.55"/>
+          <derivTran classification="ILI" fundPct="5.55"/>
+        </derivTrans>
+    </fundInfo>
+    <invstOrSecs>
+      <invstOrSec>
+        <!--<notDissem></notDissem>-->
+        <name>token</name>
+        <lei>1234567890</lei>
+        <title>1</title>
+        <cusip>AHJNP*#A1</cusip>
+        <identifiers>
+          <isin value="USAHJNP*@#11"/>
+          <!--<isin value="123456789012" />-->
+        </identifiers>
+        <balance>0.0</balance>
+        <units>NS</units>
+        <descOthUnits>token</descOthUnits>
+        <curCd>USD</curCd>
+        <!--<currencyConditional curCd="AED" exchangeRt="5.555"/>-->
+        <!--try other value here-->
+        <valUSD>0.0</valUSD>
+        <pctVal>0.0</pctVal>
+        <payoffProfile>Long</payoffProfile>
+        <!--<assetCat>STIV</assetCat>-->
+        <assetConditional assetCat="OTHER" desc="DLFKJASDFKJLSADF"/>
+        <!--<issuerCat>CORP</issuerCat>-->
+        <issuerConditional issuerCat="OTHER" desc="dsfadfadfad"/>
+        <invCountry>AF</invCountry>
+        <invOthCountry>AF</invOthCountry>
+        <isRestrictedSec>Y</isRestrictedSec>
+		<!-- fundCat with Multiple categories.-->
+		 <!-- <fundCat>N/A</fundCat>  -->
+        <fundCats>
+			<fundCat category="HLI" pct="60"/>
+			<fundCat category="MLI" pct="40"/>
+			<circumstances>DIFF_LIQUIDITY_FEATURES</circumstances>
+		</fundCats>
+        <fairValLevel>1</fairValLevel>
+        <debtSec>
+          <maturityDt>2700-01-01</maturityDt>
+          <couponKind>Fixed</couponKind>
+          <annualizedRt>-5.55</annualizedRt>
+          <isDefault>Y</isDefault>
+          <areIntrstPmntsInArrs>Y</areIntrstPmntsInArrs>
+          <isPaidKind>Y</isPaidKind>
+          <isMandatoryConvrtbl>Y</isMandatoryConvrtbl>
+          <isContngtConvrtbl>Y</isContngtConvrtbl>
+          <dbtSecRefInstruments>
+             <dbtSecRefInstrument>
+			  <name>token</name>
+			  <title>token</title>
+			  <curCd>AED</curCd>
+			  <identifiers>
+				<cusip value="123456789"/>
+			  </identifiers>
+			 </dbtSecRefInstrument>
+			  <dbtSecRefInstrument>
+			  <name>token2</name>
+			  <title>token2</title>
+			  <curCd>AED</curCd>
+			  <identifiers>
+				<cusip value="123456789"/>
+			  </identifiers>
+			 </dbtSecRefInstrument>
+		  </dbtSecRefInstruments>			  
+          <currencyInfos>
+            <currencyInfo convRatio="5.55" curCd="AED"/>
+          </currencyInfos>
+          <delta>5.55</delta>
+        </debtSec>
+        <repurchaseAgrmt>
+          <transCat>Repurchase</transCat>
+          <!--<clearedCentCparty centralCounterparty="token" isCleared="Y"/>-->
+          <notClearedCentCparty isCleared="N">
+            <counterpartyInfos>
+              <counterpartyInfo name="name" lei="N/A"/>
+            </counterpartyInfos>
+          </notClearedCentCparty>
+          <isTriParty>Y</isTriParty>
+          <repurchaseRt>5.55</repurchaseRt>
+          <maturityDt>N/A</maturityDt>
+          <repurchaseCollaterals>
+            <repurchaseCollateral>
+              <principalAmt>5.55</principalAmt>
+              <principalCd>AED</principalCd>
+              <collateralVal>555555555555555555555555</collateralVal>
+              <collateralCd>AED</collateralCd>
+              <!--<invstCat>ABS</invstCat>-->
+              <invstCatConditional invstCat="Other instrument" desc="dsfadfadsfa"/>
+            </repurchaseCollateral>
+          </repurchaseCollaterals>
+        </repurchaseAgrmt>
+        <derivativeInfo>
+          <fwdDeriv derivCat="FWD">
+          <counterparties>
+            <counterpartyName>token</counterpartyName>
+            <counterpartyLei>7777888800</counterpartyLei>
+            </counterparties>
+            <payOffProf>Long</payOffProf>
+            <descRefInstrmnt>
+              <nestedDerivInfo>
+                <fwdDeriv derivCat="FWD">
+                 <counterparties>
+                  <counterpartyName>token</counterpartyName>
+                  <counterpartyLei>7777888800</counterpartyLei>
+                  </counterparties>
+                  <payOffProf>Long</payOffProf>
+                  <descRefInstrmnt>
+                    <nestedDerivInfo>
+                      <swapDeriv derivCat="SWP">
+                       <counterparties>
+                        <counterpartyName>token</counterpartyName>
+                        <counterpartyLei>7777888800</counterpartyLei>
+                        </counterparties>
+                        <descRefInstrmnt>
+                          <nestedDerivInfo>
+                            <optionSwaptionWarrantDeriv derivCat="OPT">
+                             <counterparties>
+                              <counterpartyName>token</counterpartyName>
+                              <counterpartyLei>7777888800</counterpartyLei>
+                              </counterparties>
+                              <putOrCall>Put</putOrCall>
+                              <writtenOrPur>Written</writtenOrPur>
+                              <descRefInstrmnt>
+                                <!--<nestedDerivInfo>  
+																	<futrDeriv derivCat="FUT">
+																		<counterpartyName>token</counterpartyName>
+																		<counterpartyLei>7777888800</counterpartyLei>
+																		<payOffProf>Long</payOffProf>   
+																		<descRefInstrmnt>-->
+                                <!--<nestedDerivInfo>
+																				<othDeriv derivCat="OTH" othDesc="asdfasdadf">
+																					<counterpartyName>token</counterpartyName>
+																					<counterpartyLei>7777888800</counterpartyLei>
+																					<descRefInstrmnt>-->
+                                <nestedDerivInfo>
+                                  <othDeriv derivCat="OTH" othDesc="asdfasdadf">
+                                   <counterparties>
+                                    <counterpartyName>token</counterpartyName>
+                                    <counterpartyLei>7777888800</counterpartyLei>
+                                    </counterparties>
+                                    <descRefInstrmnt>
+                                      <indexBasketInfo>
+                                        <indexName>afasdfadf</indexName>
+                                        <indexIdentifier>asedfadsfads</indexIdentifier>
+                                        <narrativeDesc>fasdfadsfadsf</narrativeDesc>
+                                        <components>
+                                          <component>
+                                            <othIndName>adsadsads</othIndName>
+                                            <identifiers>
+                                              <isin value="AZ1234567890"/>
+                                            </identifiers>
+                                            <othIndNotAmt>5</othIndNotAmt>
+                                            <othIndCurCd>AED</othIndCurCd>
+                                            <othIndValue>5</othIndValue>
+                                            <othIndIssCurCd>AED</othIndIssCurCd>
+                                          </component>
+                                        </components>
+                                      </indexBasketInfo>
+                                    </descRefInstrmnt>
+                                    <terminationDt>2017-09-09</terminationDt>
+                                    <notionalAmts>
+                                      <notionalAmt amt="5.55" curCd="AED"/>
+                                    </notionalAmts>
+                                  </othDeriv>
+                                </nestedDerivInfo>
+                                <!--<otherRefInst>
+																							<issuerName>asdadsfads</issuerName>
+																							<issueTitle>asdfasdfads</issueTitle>
+																							<identifiers>
+																								<isin value="AZ1234567890"/>
+																							</identifiers>
+																						</otherRefInst>-->
+                                <!--</descRefInstrmnt>
+																					<terminationDt>2017-09-09</terminationDt>
+																					<notionalAmts>
+																						<notionalAmt amt="5.55" curCd="AED"/>
+																					</notionalAmts>
+																				</othDeriv>
+																			</nestedDerivInfo>-->
+                                <!--</descRefInstrmnt>
+																		<expDate>2017-09-09</expDate>
+																		<notionalAmt>5.55</notionalAmt>
+																		<curCd>AED</curCd>
+																	</futrDeriv>
+																</nestedDerivInfo>-->
+                              </descRefInstrmnt>
+                              <principalAmt>5.55</principalAmt>
+                              <curCd>AED</curCd>
+                              <exercisePrice>5.55</exercisePrice>
+                              <exercisePriceCurCd>AED</exercisePriceCurCd>
+                              <expDt>9999-09-09</expDt>
+                            </optionSwaptionWarrantDeriv>
+                          </nestedDerivInfo>
+                        </descRefInstrmnt>
+                        <!--<swapFlag>Y</swapFlag>-->
+                        <!--<fixedRecDesc fixedOrFloating="Fixed" fixedRt="5" curCd="AED" amount="5.55"/>-->
+                        <floatingRecDesc fixedOrFloating="Floating" floatingRtIndex="ABC" floatingRtSpread="5" curCd="AED" pmntAmt="5.55">
+                          <rtResetTenors>
+                            <rtResetTenor resetDt="Day" resetDtUnit="5" rateTenor="Day" rateTenorUnit="5"/>
+                          </rtResetTenors>
+                        </floatingRecDesc>
+                        <!--<fixedOrFloating>None</fixedOrFloating>-->
+                        <!--<fixedPmntDesc fixedOrFloating="Fixed" fixedRt="5" curCd="AED" amount="5.55"/>-->
+                        <floatingPmntDesc fixedOrFloating="Floating" floatingRtIndex="ABC" floatingRtSpread="5" curCd="AED" pmntAmt="5.55">
+                          <rtResetTenors>
+                            <rtResetTenor resetDt="Day" resetDtUnit="5" rateTenor="Day" rateTenorUnit="5"/>
+                          </rtResetTenors>
+                        </floatingPmntDesc>
+                        <!--<fixedOrFloating>None</fixedOrFloating>-->
+                        <terminationDt>2017-09-09</terminationDt>
+                        <upfrontPmnt>5.55</upfrontPmnt>
+                        <pmntCurCd>AED</pmntCurCd>
+                        <upfrontRcpt>5</upfrontRcpt>
+                        <rcptCurCd>AED</rcptCurCd>
+                        <notionalAmt>5</notionalAmt>
+                        <curCd>AED</curCd>
+                      </swapDeriv>
+                    </nestedDerivInfo>
+                  </descRefInstrmnt>
+                  <expDate>2017-09-09</expDate>
+                  <notionalAmt>5.55</notionalAmt>
+                  <curCd>AED</curCd>
+                </fwdDeriv>
+              </nestedDerivInfo>
+            </descRefInstrmnt>
+            <expDate>2017-09-09</expDate>
+            <notionalAmt>5.55</notionalAmt>
+            <curCd>AED</curCd>
+            <unrealizedAppr>5.55</unrealizedAppr>
+          </fwdDeriv>
+        </derivativeInfo>
+        <securityLending>
+          <!--<isCashCollateral>N</isCashCollateral>-->
+          <cashCollateralCondition isCashCollateral="Y" cashCollateralVal="-5.55"/>
+          <!--<isNonCashCollateral>N</isNonCashCollateral>-->
+          <nonCashCollateralCondition isNonCashCollateral="Y" nonCashCollateralVal="5.55"/>
+          <!--<isLoanByFund>N</isLoanByFund>-->
+          <loanByFundCondition isLoanByFund="Y" loanVal="5.55"/>
+        </securityLending>
+      </invstOrSec>
+    </invstOrSecs>
+    <explntrNotes>
+      <explntrNote note="token" noteItem="A.1.a"/>
+    </explntrNotes>
+    <signature>
+      <ncom:dateSigned>2001-01-01</ncom:dateSigned>
+      <ncom:nameOfApplicant>token</ncom:nameOfApplicant>
+      <ncom:signature>token</ncom:signature>
+      <ncom:signerName>token</ncom:signerName>
+      <ncom:title>token</ncom:title>
+    </signature>
+  </formData>
+  <documents>
+    <com:document>
+      <com:conformedName>file2.txt</com:conformedName>
+      <com:conformedDocumentType>COVER</com:conformedDocumentType>
+      <com:contents>KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqDQpGaWZ0aCBkb2N1bWVu
+dA0KDQogICAgICAgIFNQRUNJTUVOIC0gTk9UIEFOIE9GRklDSUFMIEZJTElORw0KDQoqKioq
+KioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioNCg0K</com:contents>
+    </com:document>
+  </documents>
+</edgarSubmission>

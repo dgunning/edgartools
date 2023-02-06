@@ -1,0 +1,2675 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://www.sec.gov/edgar/common" xmlns:xs="http://www.w3.org/2001/XMLSchema" 	xmlns:ns1="http://www.sec.gov/edgar/statecodes" targetNamespace="http://www.sec.gov/edgar/common"
+		   elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://www.sec.gov/edgar/statecodes"
+			   schemaLocation="eis_stateCodes.xsd" />
+	<xs:simpleType name="SCHEMA_VERSION_TYPE">
+		<xs:annotation>
+			<xs:documentation> The schema version element applies only to the submission's primary document. It does not apply to the submission file. This element should not be included in a Reduced Content submission. EDGAR inserts this element in the version of the primary document that gets disseminated. If you do provide a value for this element and it does not match the current version of this schemafile being used by EDGAR, then EDGAR will generate a WARNING.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:length value="5" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NEW_FILE_NUM_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="NEW" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TRUE_FALSE_TYPE">
+		<xs:restriction base="xs:boolean">
+			<xs:pattern value="true" />
+			<xs:pattern value="false" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="RELATED_FORM_TYPE">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="10-D"/>
+			<xs:enumeration value="10-D/A"/>
+			<xs:enumeration value="ABS-EE"/>
+			<xs:enumeration value="ABS-EE/A"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ACCELERATED_STATUS_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Non-Accelerated Filer" />
+			<xs:enumeration value="Accelerated Filer" />
+			<xs:enumeration value="Large Accelerated Filer" />
+			<xs:enumeration value="Not Applicable" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="CIK_TYPE">
+		<xs:annotation>
+			<xs:documentation>SEC supplied CIK for the Filer. Enter up to 10 numeric characters. When fewer than 10 characters are entered, the field will be pre filled with zeroes.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{1,10}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DATE_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{1,2}-\d{1,2}-\d{4}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DATE_TYPE2">
+		<xs:annotation>
+			<xs:documentation>For MM/DD/YYYY date format</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{1,2}/\d{1,2}/\d{4}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="CCC_TYPE">
+		<xs:annotation>
+			<xs:documentation>Your CIK confirmation code [CCC]. Field is 8 characters, at least one of which must be a numeral and at least one must be a @, #, $, or *; case-sensitive.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:length value="8" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FILE_NUMBER_TYPE">
+		<xs:annotation>
+			<xs:documentation>Your SEC-supplied file number. Required for amendments to 1933 Act registration statements and with specific form types listed in Appendix B. Field is up to 17 characters, and only one file number for each registrant.</xs:documentation>
+			<xs:documentation />
+			<xs:documentation>The prefix may contain 1-3 digits, the sequence number may contain 1-8 digits, the optional suffix may contain 1-4 characters, and the fields are separated with a hyphen.
+			</xs:documentation>
+			<xs:documentation>Sample value: 333-00000-1.</xs:documentation>
+			<xs:documentation />
+			<xs:documentation>Valid prefixes for this submission type are 002-, 033-, and 333-.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:pattern
+					value="\d{1,3}-\d{1,8}-[a-zA-Z0-9]{1,4}|\d{1,3}-\d{1,8}|24R-\d{1,8}-[a-zA-Z0-9]{1,4}|24R-\d{1,8}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FILE_NUMBER_TYPE_2">
+		<xs:annotation>
+			<xs:documentation>Your SEC-supplied file number. Required for amendments to 1933 Act registration statements and with specific form types listed in Appendix B. Field is up to 17 characters, and only one file number for each registrant.</xs:documentation>
+			<xs:documentation />
+			<xs:documentation>The prefix may contain 1-3 digits, the sequence number may contain 1-8 digits, the optional suffix may contain 1-4 characters, and the fields are separated with a hyphen. Sample value: 333-00000-1.</xs:documentation>
+		</xs:annotation>
+		<xs:union memberTypes="FILE_NUMBER_TYPE NEW_FILE_NUM_TYPE" />
+	</xs:simpleType>
+	<xs:complexType name="DEPOSITOR_TYPE">
+		<xs:sequence>
+			<xs:element name="depositorId" type="CIK_TYPE" minOccurs="0" />
+			<xs:element name="depositorFileNumber" type="FILE_NUMBER_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SUCCESSOR_TYPE">
+		<xs:sequence>
+			<xs:element name="successorFilingFlag" type="YES_NO_TYPE"
+						minOccurs="1" />
+			<xs:element name="successorFileNumber" type="FILE_NUMBER_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="ENTITY_NAME_TYPE">
+		<xs:annotation>
+			<xs:documentation>A Company Name can be up to 150 characters.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="150" />
+			<xs:pattern value="([A-Za-z0-9\s!\\#$(),.:;`=@'\-{}|/&amp;]+)" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ENTITY_NAME_TYPE_256">
+		<xs:annotation>
+			<xs:documentation>A Company Name can be up to 256 characters.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="256" />
+			<xs:pattern value="([A-Za-z0-9\s!\\#$(),.:;=@'\-{}|/&amp;]+)" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTERNET_ADDRESS_TYPE">
+		<xs:annotation>
+			<xs:documentation>New EDGAR contact Internet identification. Field must be in standard Internet address format, including exactly one "@" character, at least one "." after the "@", one or more EDGAR acceptable characters before the "@" and one or more acceptable EDGAR characters before and after each existing "." Address may be up to 80 characters long.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="80" />
+			<xs:minLength value="4" />
+			<xs:pattern
+					value="([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,7}|[0-9]{1,3})(\]?)" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INV_COMPANY_TYPE">
+		<xs:annotation>
+			<xs:documentation>Identifies the investment company type of the acquiring company. Choose a value from the list displayed when the arrow is selected.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="N-1A" />
+			<xs:enumeration value="N-1" />
+			<xs:enumeration value="N-2" />
+			<xs:enumeration value="N-3" />
+			<xs:enumeration value="N-4" />
+			<xs:enumeration value="N-5" />
+			<xs:enumeration value="N-6" />
+			<xs:enumeration value="S-1 or S-3" />
+			<xs:enumeration value="S-6" />
+			<xs:enumeration value="OTHER" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LIVE_TEST_TYPE">
+		<xs:annotation>
+			<xs:documentation>Marks submission to be treated as a LIVE filing.Unless the "TEST" button is selected, the filing will be treated by EDGAR as a live filing and, if accepted, be disseminated. Submit live filings in LIVE mode if using EDGARLink Online. A filing with TEST selected cannot be changed into a live filing.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="LIVE" />
+			<xs:enumeration value="TEST" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="RPT_OWNER_RELATIONSHIP_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="DIRECTOR" />
+			<xs:enumeration value="OFFICER" />
+			<xs:enumeration value="OWNER" />
+			<xs:enumeration value="OTHER" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="US_STATE_CODES">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="AL" />
+			<xs:enumeration value="AK" />
+			<xs:enumeration value="AZ" />
+			<xs:enumeration value="AR" />
+			<xs:enumeration value="CA" />
+			<xs:enumeration value="CO" />
+			<xs:enumeration value="CT" />
+			<xs:enumeration value="DE" />
+			<xs:enumeration value="DC" />
+			<xs:enumeration value="FL" />
+			<xs:enumeration value="GA" />
+			<xs:enumeration value="HI" />
+			<xs:enumeration value="ID" />
+			<xs:enumeration value="IL" />
+			<xs:enumeration value="IN" />
+			<xs:enumeration value="IA" />
+			<xs:enumeration value="KS" />
+			<xs:enumeration value="KY" />
+			<xs:enumeration value="LA" />
+			<xs:enumeration value="ME" />
+			<xs:enumeration value="MD" />
+			<xs:enumeration value="MA" />
+			<xs:enumeration value="MI" />
+			<xs:enumeration value="MN" />
+			<xs:enumeration value="MS" />
+			<xs:enumeration value="MO" />
+			<xs:enumeration value="MT" />
+			<xs:enumeration value="NE" />
+			<xs:enumeration value="NV" />
+			<xs:enumeration value="NH" />
+			<xs:enumeration value="NJ" />
+			<xs:enumeration value="NM" />
+			<xs:enumeration value="NY" />
+			<xs:enumeration value="NC" />
+			<xs:enumeration value="ND" />
+			<xs:enumeration value="OH" />
+			<xs:enumeration value="OK" />
+			<xs:enumeration value="OR" />
+			<xs:enumeration value="PA" />
+			<xs:enumeration value="RI" />
+			<xs:enumeration value="SC" />
+			<xs:enumeration value="SD" />
+			<xs:enumeration value="TN" />
+			<xs:enumeration value="TX" />
+			<xs:enumeration value="UT" />
+			<xs:enumeration value="VT" />
+			<xs:enumeration value="VA" />
+			<xs:enumeration value="WA" />
+			<xs:enumeration value="WV" />
+			<xs:enumeration value="WI" />
+			<xs:enumeration value="WY" />
+			<xs:enumeration value="PR" />
+			<xs:enumeration value="VI" />
+			<!-- ALABAMA -->
+			<!-- ALASKA -->
+			<!-- ARIZONA -->
+			<!-- ARKANSAS -->
+			<!-- CALIFORNIA -->
+			<!-- COLORADO -->
+			<!-- CONNECTICUT -->
+			<!-- DELAWARE -->
+			<!-- DISTRICT OF COLUMBIA -->
+			<!-- FLORIDA -->
+			<!-- GEORGIA -->
+			<!-- HAWAII -->
+			<!-- IDAHO -->
+			<!-- ILLINOIS -->
+			<!-- INDIANA -->
+			<!-- IOWA -->
+			<!-- KANSAS -->
+			<!-- KENTUCKY -->
+			<!-- LOUISIANA -->
+			<!-- MAINE -->
+			<!-- MARYLAND -->
+			<!-- MASSACHUSETTS -->
+			<!-- MICHIGAN -->
+			<!-- MINNESOTA -->
+			<!-- MISSISSIPPI -->
+			<!-- MISSOURI -->
+			<!-- MONTANA -->
+			<!-- NEBRASKA -->
+			<!-- NEVADA -->
+			<!-- NEW HAMPSHIRE -->
+			<!-- NEW JERSEY -->
+			<!-- NEW MEXICO -->
+			<!-- NEW YORK -->
+			<!-- NORTH CAROLINA -->
+			<!-- NORTH DAKOTA -->
+			<!-- OHIO -->
+			<!-- OKLAHOMA -->
+			<!-- OREGON -->
+			<!-- PENNSYLVANIA -->
+			<!-- RHODE ISLAND -->
+			<!-- SOUTH CAROLINA -->
+			<!-- SOUTH DAKOTA -->
+			<!-- TENNESSEE -->
+			<!-- TEXAS -->
+			<!-- UTAH -->
+			<!-- VERMONT -->
+			<!-- VIRGINIA -->
+			<!-- WASHINGTON -->
+			<!-- WEST VIRGINIA -->
+			<!-- WISCONSIN -->
+			<!-- WYOMING -->
+			<!-- PUERTO RICO -->
+			<!-- VIRGIN ISLANDS, U.S. -->
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="US_STATE_CODES_AND_TERRITORIES">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="AL" />
+			<xs:enumeration value="AK" />
+			<xs:enumeration value="AZ" />
+			<xs:enumeration value="AR" />
+			<xs:enumeration value="CA" />
+			<xs:enumeration value="CO" />
+			<xs:enumeration value="CT" />
+			<xs:enumeration value="DE" />
+			<xs:enumeration value="DC" />
+			<xs:enumeration value="FL" />
+			<xs:enumeration value="GA" />
+			<xs:enumeration value="GU" />
+			<xs:enumeration value="HI" />
+			<xs:enumeration value="ID" />
+			<xs:enumeration value="IL" />
+			<xs:enumeration value="IN" />
+			<xs:enumeration value="IA" />
+			<xs:enumeration value="KS" />
+			<xs:enumeration value="KY" />
+			<xs:enumeration value="LA" />
+			<xs:enumeration value="ME" />
+			<xs:enumeration value="MD" />
+			<xs:enumeration value="MA" />
+			<xs:enumeration value="MI" />
+			<xs:enumeration value="MN" />
+			<xs:enumeration value="MS" />
+			<xs:enumeration value="MO" />
+			<xs:enumeration value="MT" />
+			<xs:enumeration value="NE" />
+			<xs:enumeration value="NV" />
+			<xs:enumeration value="NH" />
+			<xs:enumeration value="NJ" />
+			<xs:enumeration value="NM" />
+			<xs:enumeration value="NY" />
+			<xs:enumeration value="NC" />
+			<xs:enumeration value="ND" />
+			<xs:enumeration value="OH" />
+			<xs:enumeration value="OK" />
+			<xs:enumeration value="OR" />
+			<xs:enumeration value="PA" />
+			<xs:enumeration value="PR" />
+			<xs:enumeration value="RI" />
+			<xs:enumeration value="SC" />
+			<xs:enumeration value="SD" />
+			<xs:enumeration value="TN" />
+			<xs:enumeration value="TX" />
+			<xs:enumeration value="UT" />
+			<xs:enumeration value="VT" />
+			<xs:enumeration value="VI" />
+			<xs:enumeration value="VA" />
+			<xs:enumeration value="WA" />
+			<xs:enumeration value="WV" />
+			<xs:enumeration value="WI" />
+			<xs:enumeration value="WY" />
+			<xs:enumeration value="B5" />
+			<xs:enumeration value="1V" />
+			<!-- ALABAMA -->
+			<!-- ALASKA -->
+			<!-- ARIZONA -->
+			<!-- ARKANSAS -->
+			<!-- CALIFORNIA -->
+			<!-- COLORADO -->
+			<!-- CONNECTICUT -->
+			<!-- DELAWARE -->
+			<!-- DISTRICT OF COLUMBIA -->
+			<!-- FLORIDA -->
+			<!-- GEORGIA -->
+			<!-- GUAM -->
+			<!-- HAWAII -->
+			<!-- IDAHO -->
+			<!-- ILLINOIS -->
+			<!-- INDIANA -->
+			<!-- IOWA -->
+			<!-- KANSAS -->
+			<!-- KENTUCKY -->
+			<!-- LOUISIANA -->
+			<!-- MAINE -->
+			<!-- MARYLAND -->
+			<!-- MASSACHUSETTS -->
+			<!-- MICHIGAN -->
+			<!-- MINNESOTA -->
+			<!-- MISSISSIPPI -->
+			<!-- MISSOURI -->
+			<!-- MONTANA -->
+			<!-- NEBRASKA -->
+			<!-- NEVADA -->
+			<!-- NEW HAMPSHIRE -->
+			<!-- NEW JERSEY -->
+			<!-- NEW MEXICO -->
+			<!-- NEW YORK -->
+			<!-- NORTH CAROLINA -->
+			<!-- NORTH DAKOTA -->
+			<!-- OHIO -->
+			<!-- OKLAHOMA -->
+			<!-- OREGON -->
+			<!-- PENNSYLVANIA -->
+			<!-- PUERTO RICO -->
+			<!-- RHODE ISLAND -->
+			<!-- SOUTH CAROLINA -->
+			<!-- SOUTH DAKOTA -->
+			<!-- TENNESSEE -->
+			<!-- TEXAS -->
+			<!-- UTAH -->
+			<!-- VERMONT -->
+			<!-- VIRGIN ISLANDS, U.S. -->
+			<!-- VIRGINIA -->
+			<!-- WASHINGTON -->
+			<!-- WEST VIRGINIA -->
+			<!-- WISCONSIN -->
+			<!-- WYOMING -->
+			<!-- AMERICAN SAMOA -->
+			<!-- NORTHERN MARIANA ISLANDS -->
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NON_US_COUNTRY_CODES">
+		<xs:annotation>
+			<xs:documentation>
+				Set of Country Codes (excluding US) according to EDGAR
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="A0" />
+			<xs:enumeration value="A1" />
+			<xs:enumeration value="A2" />
+			<xs:enumeration value="A3" />
+			<xs:enumeration value="A4" />
+			<xs:enumeration value="A5" />
+			<xs:enumeration value="A6" />
+			<xs:enumeration value="A7" />
+			<xs:enumeration value="A8" />
+			<xs:enumeration value="A9" />
+			<xs:enumeration value="B0" />
+			<xs:enumeration value="Z4" />
+			<xs:enumeration value="B2" />
+			<xs:enumeration value="Y6" />
+			<xs:enumeration value="B3" />
+			<xs:enumeration value="B4" />
+			<xs:enumeration value="B5" />
+			<xs:enumeration value="B6" />
+			<xs:enumeration value="B7" />
+			<xs:enumeration value="1A" />
+			<xs:enumeration value="B8" />
+			<xs:enumeration value="B9" />
+			<xs:enumeration value="C1" />
+			<xs:enumeration value="1B" />
+			<xs:enumeration value="1C" />
+			<xs:enumeration value="C3" />
+			<xs:enumeration value="C4" />
+			<xs:enumeration value="1D" />
+			<xs:enumeration value="C5" />
+			<xs:enumeration value="C6" />
+			<xs:enumeration value="C7" />
+			<xs:enumeration value="C8" />
+			<xs:enumeration value="1F" />
+			<xs:enumeration value="C9" />
+			<xs:enumeration value="D1" />
+			<xs:enumeration value="G6" />
+			<xs:enumeration value="D0" />
+			<xs:enumeration value="D2" />
+			<xs:enumeration value="D3" />
+			<xs:enumeration value="1E" />
+			<xs:enumeration value="B1" />
+			<xs:enumeration value="D4" />
+			<xs:enumeration value="D5" />
+			<xs:enumeration value="D6" />
+			<xs:enumeration value="D9" />
+			<xs:enumeration value="E0" />
+			<xs:enumeration value="X2" />
+			<xs:enumeration value="E2" />
+			<xs:enumeration value="E3" />
+			<xs:enumeration value="E4" />
+			<xs:enumeration value="E8" />
+			<xs:enumeration value="E9" />
+			<xs:enumeration value="F0" />
+			<xs:enumeration value="F2" />
+			<xs:enumeration value="F3" />
+			<xs:enumeration value="F4" />
+			<xs:enumeration value="F6" />
+			<xs:enumeration value="F7" />
+			<xs:enumeration value="F8" />
+			<xs:enumeration value="F9" />
+			<xs:enumeration value="G0" />
+			<xs:enumeration value="Y3" />
+			<xs:enumeration value="G1" />
+			<xs:enumeration value="G2" />
+			<xs:enumeration value="L7" />
+			<xs:enumeration value="1M" />
+			<xs:enumeration value="G3" />
+			<xs:enumeration value="G4" />
+			<xs:enumeration value="2N" />
+			<xs:enumeration value="G7" />
+			<xs:enumeration value="1G" />
+			<xs:enumeration value="G9" />
+			<xs:enumeration value="G8" />
+			<xs:enumeration value="H1" />
+			<xs:enumeration value="H2" />
+			<xs:enumeration value="H3" />
+			<xs:enumeration value="H4" />
+			<xs:enumeration value="1J" />
+			<xs:enumeration value="1H" />
+			<xs:enumeration value="H5" />
+			<xs:enumeration value="H7" />
+			<xs:enumeration value="H6" />
+			<xs:enumeration value="H8" />
+			<xs:enumeration value="H9" />
+			<xs:enumeration value="I0" />
+			<xs:enumeration value="I3" />
+			<xs:enumeration value="I4" />
+			<xs:enumeration value="2C" />
+			<xs:enumeration value="I5" />
+			<xs:enumeration value="I6" />
+			<xs:enumeration value="2Q" />
+			<xs:enumeration value="2M" />
+			<xs:enumeration value="J0" />
+			<xs:enumeration value="J1" />
+			<xs:enumeration value="J3" />
+			<xs:enumeration value="J4" />
+			<xs:enumeration value="J5" />
+			<xs:enumeration value="J6" />
+			<xs:enumeration value="GU" />
+			<xs:enumeration value="J8" />
+			<xs:enumeration value="Y7" />
+			<xs:enumeration value="J9" />
+			<xs:enumeration value="S0" />
+			<xs:enumeration value="K0" />
+			<xs:enumeration value="K1" />
+			<xs:enumeration value="K4" />
+			<xs:enumeration value="X4" />
+			<xs:enumeration value="K2" />
+			<xs:enumeration value="K3" />
+			<xs:enumeration value="K5" />
+			<xs:enumeration value="K6" />
+			<xs:enumeration value="K7" />
+			<xs:enumeration value="K8" />
+			<xs:enumeration value="K9" />
+			<xs:enumeration value="L0" />
+			<xs:enumeration value="L2" />
+			<xs:enumeration value="Y8" />
+			<xs:enumeration value="L3" />
+			<xs:enumeration value="L6" />
+			<xs:enumeration value="L8" />
+			<xs:enumeration value="M0" />
+			<xs:enumeration value="Y9" />
+			<xs:enumeration value="M2" />
+			<xs:enumeration value="1P" />
+			<xs:enumeration value="M3" />
+			<xs:enumeration value="J2" />
+			<xs:enumeration value="M4" />
+			<xs:enumeration value="M5" />
+			<xs:enumeration value="M6" />
+			<xs:enumeration value="1N" />
+			<xs:enumeration value="M7" />
+			<xs:enumeration value="1R" />
+			<xs:enumeration value="M8" />
+			<xs:enumeration value="M9" />
+			<xs:enumeration value="N0" />
+			<xs:enumeration value="N1" />
+			<xs:enumeration value="N2" />
+			<xs:enumeration value="1Q" />
+			<xs:enumeration value="N4" />
+			<xs:enumeration value="N5" />
+			<xs:enumeration value="1U" />
+			<xs:enumeration value="N6" />
+			<xs:enumeration value="N7" />
+			<xs:enumeration value="N8" />
+			<xs:enumeration value="N9" />
+			<xs:enumeration value="O0" />
+			<xs:enumeration value="O1" />
+			<xs:enumeration value="1T" />
+			<xs:enumeration value="O2" />
+			<xs:enumeration value="O3" />
+			<xs:enumeration value="O4" />
+			<xs:enumeration value="2P" />
+			<xs:enumeration value="O5" />
+			<xs:enumeration value="1K" />
+			<xs:enumeration value="1S" />
+			<xs:enumeration value="O9" />
+			<xs:enumeration value="P0" />
+			<xs:enumeration value="Z5" />
+			<xs:enumeration value="P1" />
+			<xs:enumeration value="P2" />
+			<xs:enumeration value="P3" />
+			<xs:enumeration value="E1" />
+			<xs:enumeration value="T6" />
+			<xs:enumeration value="P5" />
+			<xs:enumeration value="P6" />
+			<xs:enumeration value="P7" />
+			<xs:enumeration value="P8" />
+			<xs:enumeration value="1W" />
+			<xs:enumeration value="Q2" />
+			<xs:enumeration value="Q3" />
+			<xs:enumeration value="Q4" />
+			<xs:enumeration value="Q5" />
+			<xs:enumeration value="Q6" />
+			<xs:enumeration value="Q7" />
+			<xs:enumeration value="1V" />
+			<xs:enumeration value="Q8" />
+			<xs:enumeration value="P4" />
+			<xs:enumeration value="R0" />
+			<xs:enumeration value="1Y" />
+			<xs:enumeration value="1X" />
+			<xs:enumeration value="R1" />
+			<xs:enumeration value="R2" />
+			<xs:enumeration value="R4" />
+			<xs:enumeration value="R5" />
+			<xs:enumeration value="R6" />
+			<xs:enumeration value="R8" />
+			<xs:enumeration value="R9" />
+			<xs:enumeration value="S1" />
+			<xs:enumeration value="S3" />
+			<xs:enumeration value="S4" />
+			<xs:enumeration value="S5" />
+			<xs:enumeration value="1Z" />
+			<xs:enumeration value="S6" />
+			<xs:enumeration value="Z0" />
+			<xs:enumeration value="U8" />
+			<xs:enumeration value="U7" />
+			<xs:enumeration value="U9" />
+			<xs:enumeration value="Z1" />
+			<xs:enumeration value="V0" />
+			<xs:enumeration value="V1" />
+			<xs:enumeration value="Y0" />
+			<xs:enumeration value="S8" />
+			<xs:enumeration value="S9" />
+			<xs:enumeration value="T0" />
+			<xs:enumeration value="T1" />
+			<xs:enumeration value="Z2" />
+			<xs:enumeration value="T2" />
+			<xs:enumeration value="T8" />
+			<xs:enumeration value="U0" />
+			<xs:enumeration value="2B" />
+			<xs:enumeration value="2A" />
+			<xs:enumeration value="D7" />
+			<xs:enumeration value="U1" />
+			<xs:enumeration value="T3" />
+			<xs:enumeration value="1L" />
+			<xs:enumeration value="U3" />
+			<xs:enumeration value="F1" />
+			<xs:enumeration value="V2" />
+			<xs:enumeration value="V3" />
+			<xs:enumeration value="L9" />
+			<xs:enumeration value="V6" />
+			<xs:enumeration value="V7" />
+			<xs:enumeration value="V8" />
+			<xs:enumeration value="V9" />
+			<xs:enumeration value="F5" />
+			<xs:enumeration value="2D" />
+			<xs:enumeration value="W0" />
+			<xs:enumeration value="W1" />
+			<xs:enumeration value="Z3" />
+			<xs:enumeration value="W2" />
+			<xs:enumeration value="W3" />
+			<xs:enumeration value="W4" />
+			<xs:enumeration value="W5" />
+			<xs:enumeration value="W6" />
+			<xs:enumeration value="W8" />
+			<xs:enumeration value="2E" />
+			<xs:enumeration value="W7" />
+			<xs:enumeration value="2G" />
+			<xs:enumeration value="W9" />
+			<xs:enumeration value="2H" />
+			<xs:enumeration value="C0" />
+			<xs:enumeration value="X0" />
+			<xs:enumeration value="2J" />
+			<xs:enumeration value="X3" />
+			<xs:enumeration value="2K" />
+			<xs:enumeration value="2L" />
+			<xs:enumeration value="X5" />
+			<xs:enumeration value="Q1" />
+			<xs:enumeration value="D8" />
+			<xs:enumeration value="X8" />
+			<xs:enumeration value="U5" />
+			<xs:enumeration value="T7" />
+			<xs:enumeration value="Y4" />
+			<xs:enumeration value="Y5" />
+			<xs:enumeration value="XX" />
+			<xs:enumeration value="C2" />
+			<xs:enumeration value="E5" />
+			<xs:enumeration value="E7" />
+			<xs:enumeration value="G5" />
+			<xs:enumeration value="I7" />
+			<xs:enumeration value="X9" />
+			<xs:enumeration value="I8" />
+			<xs:enumeration value="I9" />
+			<xs:enumeration value="L1" />
+			<xs:enumeration value="L4" />
+			<xs:enumeration value="L5" />
+			<xs:enumeration value="M1" />
+			<xs:enumeration value="O6" />
+			<xs:enumeration value="Q9" />
+			<xs:enumeration value="R3" />
+			<xs:enumeration value="T4" />
+			<xs:enumeration value="U2" />
+			<xs:enumeration value="U4" />
+			<xs:enumeration value="U6" />
+			<xs:enumeration value="X7" />
+			<xs:enumeration value="2F" />
+			<xs:enumeration value="Y2" />
+			<!-- ALBERTA, CANADA -->
+			<!-- BRITISH COLUMBIA, CANADA -->
+			<!-- MANITOBA, CANADA -->
+			<!-- NEW BRUNSWICK, CANADA -->
+			<!-- NEWFOUNDLAND, CANADA -->
+			<!-- NOVA SCOTIA, CANADA -->
+			<!-- ONTARIO, CANADA -->
+			<!-- PRINCE EDWARD ISLAND, CANADA -->
+			<!-- QUEBEC, CANADA -->
+			<!-- SASKATCHEWAN, CANADA -->
+			<!-- YUKON, CANADA -->
+			<!-- CANADA (FEDERAL LEVEL) -->
+			<!-- AFGHANISTAN -->
+			<!-- ALAND ISLANDS -->
+			<!-- ALBANIA -->
+			<!-- ALGERIA -->
+			<!-- AMERICAN SAMOA -->
+			<!-- ANDORRA -->
+			<!-- ANGOLA -->
+			<!-- ANGUILLA -->
+			<!-- ANTARCTICA -->
+			<!-- ANTIGUA AND BARBUDA -->
+			<!-- ARGENTINA -->
+			<!-- ARMENIA -->
+			<!-- ARUBA -->
+			<!-- AUSTRALIA -->
+			<!-- AUSTRIA -->
+			<!-- AZERBAIJAN -->
+			<!-- BAHAMAS -->
+			<!-- BAHRAIN -->
+			<!-- BANGLADESH -->
+			<!-- BARBADOS -->
+			<!-- BELARUS -->
+			<!-- BELGIUM -->
+			<!-- BELIZE -->
+			<!-- BENIN -->
+			<!-- BERMUDA -->
+			<!-- BHUTAN -->
+			<!-- BOLIVIA -->
+			<!-- BOSNIA AND HERZEGOVINA -->
+			<!-- BOTSWANA -->
+			<!-- BOUVET ISLAND -->
+			<!-- BRAZIL -->
+			<!-- BRITISH INDIAN OCEAN TERRITORY -->
+			<!-- BRUNEI DARUSSALAM -->
+			<!-- BULGARIA -->
+			<!-- BURKINA FASO -->
+			<!-- BURUNDI -->
+			<!-- CAMBODIA -->
+			<!-- CAMEROON -->
+			<!-- CAPE VERDE -->
+			<!-- CAYMAN ISLANDS -->
+			<!-- CENTRAL AFRICAN REPUBLIC -->
+			<!-- CHAD -->
+			<!-- CHILE -->
+			<!-- CHINA -->
+			<!-- CHRISTMAS ISLAND -->
+			<!-- COCOS (KEELING) ISLANDS -->
+			<!-- COLOMBIA -->
+			<!-- COMOROS -->
+			<!-- CONGO -->
+			<!-- CONGO, THE DEMOCRATIC REPUBLIC OF THE -->
+			<!-- COOK ISLANDS -->
+			<!-- COSTA RICA -->
+			<!-- COTE D'IVOIRE -->
+			<!-- CROATIA -->
+			<!-- CUBA -->
+			<!-- CYPRUS -->
+			<!-- CZECH REPUBLIC -->
+			<!-- DENMARK -->
+			<!-- DJIBOUTI -->
+			<!-- DOMINICA -->
+			<!-- DOMINICAN REPUBLIC -->
+			<!-- ECUADOR -->
+			<!-- EGYPT -->
+			<!-- EL SALVADOR -->
+			<!-- EQUATORIAL GUINEA -->
+			<!-- ERITREA -->
+			<!-- ESTONIA -->
+			<!-- ETHIOPIA -->
+			<!-- FALKLAND ISLANDS (MALVINAS) -->
+			<!-- FAROE ISLANDS -->
+			<!-- FIJI -->
+			<!-- FINLAND -->
+			<!-- FRANCE -->
+			<!-- FRENCH GUIANA -->
+			<!-- FRENCH POLYNESIA -->
+			<!-- FRENCH SOUTHERN TERRITORIES -->
+			<!-- GABON -->
+			<!-- GAMBIA -->
+			<!-- GEORGIA (COUNTRY) -->
+			<!-- GERMANY -->
+			<!-- GHANA -->
+			<!-- GIBRALTAR -->
+			<!-- GREECE -->
+			<!-- GREENLAND -->
+			<!-- GRENADA -->
+			<!-- GUADELOUPE -->
+			<!-- GUAM -->
+			<!-- GUATEMALA -->
+			<!-- GUERNSEY -->
+			<!-- GUINEA -->
+			<!-- GUINEA-BISSAU -->
+			<!-- GUYANA -->
+			<!-- HAITI -->
+			<!-- HEARD ISLAND AND MCDONALD ISLANDS -->
+			<!-- HOLY SEE (VATICAN CITY STATE) -->
+			<!-- HONDURAS -->
+			<!-- HONG KONG -->
+			<!-- HUNGARY -->
+			<!-- ICELAND -->
+			<!-- INDIA -->
+			<!-- INDONESIA -->
+			<!-- IRAN, ISLAMIC REPUBLIC OF -->
+			<!-- IRAQ -->
+			<!-- IRELAND -->
+			<!-- ISLE OF MAN -->
+			<!-- ISRAEL -->
+			<!-- ITALY -->
+			<!-- JAMAICA -->
+			<!-- JAPAN -->
+			<!-- JERSEY -->
+			<!-- JORDAN -->
+			<!-- KAZAKSTAN -->
+			<!-- KENYA -->
+			<!-- KIRIBATI -->
+			<!-- KOREA, DEMOCRATIC PEOPLE'S REPUBLIC OF -->
+			<!-- KOREA, REPUBLIC OF -->
+			<!-- KUWAIT -->
+			<!-- KYRGYZSTAN -->
+			<!-- LAO PEOPLE'S DEMOCRATIC REPUBLIC -->
+			<!-- LATVIA -->
+			<!-- LEBANON -->
+			<!-- LESOTHO -->
+			<!-- LIBERIA -->
+			<!-- LIBYAN ARAB JAMAHIRIYA -->
+			<!-- LIECHTENSTEIN -->
+			<!-- LITHUANIA -->
+			<!-- LUXEMBOURG -->
+			<!-- MACAU -->
+			<!-- MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF -->
+			<!-- MADAGASCAR -->
+			<!-- MALAWI -->
+			<!-- MALAYSIA -->
+			<!-- MALDIVES -->
+			<!-- MALI -->
+			<!-- MALTA -->
+			<!-- MARSHALL ISLANDS -->
+			<!-- MARTINIQUE -->
+			<!-- MAURITANIA -->
+			<!-- MAURITIUS -->
+			<!-- MAYOTTE -->
+			<!-- MEXICO -->
+			<!-- MICRONESIA, FEDERATED STATES OF -->
+			<!-- MOLDOVA, REPUBLIC OF -->
+			<!-- MONACO -->
+			<!-- MONGOLIA -->
+			<!-- MONTENEGRO -->
+			<!-- MONTSERRAT -->
+			<!-- MOROCCO -->
+			<!-- MOZAMBIQUE -->
+			<!-- MYANMAR -->
+			<!-- NAMIBIA -->
+			<!-- NAURU -->
+			<!-- NEPAL -->
+			<!-- NETHERLANDS -->
+			<!-- NETHERLANDS ANTILLES -->
+			<!-- NEW CALEDONIA -->
+			<!-- NEW ZEALAND -->
+			<!-- NICARAGUA -->
+			<!-- NIGER -->
+			<!-- NIGERIA -->
+			<!-- NIUE -->
+			<!-- NORFOLK ISLAND -->
+			<!-- NORTHERN MARIANA ISLANDS -->
+			<!-- NORWAY -->
+			<!-- OMAN -->
+			<!-- PAKISTAN -->
+			<!-- PALAU -->
+			<!-- PALESTINIAN TERRITORY, OCCUPIED -->
+			<!-- PANAMA -->
+			<!-- PAPUA NEW GUINEA -->
+			<!-- PARAGUAY -->
+			<!-- PERU -->
+			<!-- PHILIPPINES -->
+			<!-- PITCAIRN -->
+			<!-- POLAND -->
+			<!-- PORTUGAL -->
+			<!-- QATAR -->
+			<!-- REUNION -->
+			<!-- ROMANIA -->
+			<!-- RUSSIAN FEDERATION -->
+			<!-- RWANDA -->
+			<!-- SAINT BARTHELEMY -->
+			<!-- SAINT HELENA -->
+			<!-- SAINT KITTS AND NEVIS -->
+			<!-- SAINT LUCIA -->
+			<!-- SAINT MARTIN -->
+			<!-- SAINT PIERRE AND MIQUELON -->
+			<!-- SAINT VINCENT AND THE GRENADINES -->
+			<!-- SAMOA -->
+			<!-- SAN MARINO -->
+			<!-- SAO TOME AND PRINCIPE -->
+			<!-- SAUDI ARABIA -->
+			<!-- SENEGAL -->
+			<!-- SERBIA -->
+			<!-- SEYCHELLES -->
+			<!-- SIERRA LEONE -->
+			<!-- SINGAPORE -->
+			<!-- SLOVAKIA -->
+			<!-- SLOVENIA -->
+			<!-- SOLOMON ISLANDS -->
+			<!-- SOMALIA -->
+			<!-- SOUTH AFRICA -->
+			<!-- SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS -->
+			<!-- SPAIN -->
+			<!-- SRI LANKA -->
+			<!-- SUDAN -->
+			<!-- SURINAME -->
+			<!-- SVALBARD AND JAN MAYEN -->
+			<!-- SWAZILAND -->
+			<!-- SWEDEN -->
+			<!-- SWITZERLAND -->
+			<!-- SYRIAN ARAB REPUBLIC -->
+			<!-- TAIWAN -->
+			<!-- TAJIKISTAN -->
+			<!-- TANZANIA, UNITED REPUBLIC OF -->
+			<!-- THAILAND -->
+			<!-- TIMOR-LESTE -->
+			<!-- TOGO -->
+			<!-- TOKELAU -->
+			<!-- TONGA -->
+			<!-- TRINIDAD AND TOBAGO -->
+			<!-- TUNISIA -->
+			<!-- TURKEY -->
+			<!-- TURKMENISTAN -->
+			<!-- TURKS AND CAICOS ISLANDS -->
+			<!-- TUVALU -->
+			<!-- UGANDA -->
+			<!-- UKRAINE -->
+			<!-- UNITED ARAB EMIRATES -->
+			<!-- UNITED KINGDOM -->
+			<!-- UNITED STATES MINOR OUTLYING ISLANDS -->
+			<!-- URUGUAY -->
+			<!-- UZBEKISTAN -->
+			<!-- VANUATU -->
+			<!-- VENEZUELA -->
+			<!-- VIET NAM -->
+			<!-- VIRGIN ISLANDS, BRITISH -->
+			<!-- WALLIS AND FUTUNA -->
+			<!-- WESTERN SAHARA -->
+			<!-- YEMEN -->
+			<!-- ZAMBIA -->
+			<!-- ZIMBABWE -->
+			<!-- UNKNOWN -->
+			<!-- The rest of these are obsolete codes. -->
+			<!-- ASHMORE & CARTIER IS -->
+			<!-- CANAL ZONE -->
+			<!-- CANTON/ENDERBURY IS -->
+			<!-- CZECHOSLOVAKIA -->
+			<!-- GAZA STRIP -->
+			<!-- GERMANY (BERLIN) -->
+			<!-- GERMANY (WEST) -->
+			<!-- GERMANY, FED. REP. -->
+			<!-- IRAQ-SAUDI -->
+			<!-- ISRAEL-JORDAN -->
+			<!-- ISRAEL-SYRIA -->
+			<!-- JOHNSTON ATOLL -->
+			<!-- MIDWAY ISLAND -->
+			<!-- PACIFIC ISLANDS TRU -->
+			<!-- PARACEL ISLANDS -->
+			<!-- SOUTHERN RHODESIA -->
+			<!-- SOVIET UNION -->
+			<!-- SPANISH NORTH AFRICA -->
+			<!-- SPRATLY ISLAND -->
+			<!-- WAKE ISLAND -->
+			<!-- EAST TIMOR -->
+			<!-- YUGOSLAVIA -->
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SUBMISSION_TYPE">
+		<xs:annotation>
+			<xs:documentation>Type of submission you are filing. Choose a value from the appropriate family of Submission Types.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="10-12B" />
+			<xs:enumeration value="10-12B/A" />
+			<xs:enumeration value="10-12G" />
+			<xs:enumeration value="10-12G/A" />
+			<xs:enumeration value="10-D" />
+			<xs:enumeration value="10-D/A" />
+			<xs:enumeration value="10-K" />
+			<xs:enumeration value="10-K/A" />
+			<xs:enumeration value="10KSB" />
+			<xs:enumeration value="10KSB/A" />
+			<xs:enumeration value="10-KT" />
+			<xs:enumeration value="10-KT/A" />
+			<xs:enumeration value="10-Q" />
+			<xs:enumeration value="10-Q/A" />
+			<xs:enumeration value="10-QT" />
+			<xs:enumeration value="10-QT/A" />
+			<xs:enumeration value="11-K" />
+			<xs:enumeration value="11-K/A" />
+			<xs:enumeration value="11-KT" />
+			<xs:enumeration value="11-KT/A" />
+			<xs:enumeration value="13H" />
+			<xs:enumeration value="13H-A" />
+			<xs:enumeration value="13H-I" />
+			<xs:enumeration value="13H-R" />
+			<xs:enumeration value="13H/A" />
+			<xs:enumeration value="13H-T" />
+			<xs:enumeration value="144" />
+			<xs:enumeration value="144/A" />
+			<xs:enumeration value="15-12B" />
+			<xs:enumeration value="15-12B/A" />
+			<xs:enumeration value="15-12G" />
+			<xs:enumeration value="15-12G/A" />
+			<xs:enumeration value="15-15D" />
+			<xs:enumeration value="15-15D/A" />
+			<xs:enumeration value="15F-12B" />
+			<xs:enumeration value="15F-12B/A" />
+			<xs:enumeration value="15F-12G" />
+			<xs:enumeration value="15F-12G/A" />
+			<xs:enumeration value="15F-15D" />
+			<xs:enumeration value="15F-15D/A" />
+			<xs:enumeration value="18-12B" />
+			<xs:enumeration value="18-12B/A" />
+			<xs:enumeration value="18-12G" />
+			<xs:enumeration value="18-12G/A" />
+			<xs:enumeration value="18-K" />
+			<xs:enumeration value="18-K/A" />
+			<xs:enumeration value="1-E AD" />
+			<xs:enumeration value="1-E AD/A" />
+			<xs:enumeration value="1-E" />
+			<xs:enumeration value="1-E/A" />
+			<xs:enumeration value="20-F" />
+			<xs:enumeration value="20-F/A" />
+			<xs:enumeration value="20FR12B" />
+			<xs:enumeration value="20FR12B/A" />
+			<xs:enumeration value="20FR12G" />
+			<xs:enumeration value="20FR12G/A" />
+			<xs:enumeration value="24F-2NT" />
+			<xs:enumeration value="24F-2NT/A" />
+			<xs:enumeration value="25" />
+			<xs:enumeration value="25/A" />
+			<xs:enumeration value="2-E" />
+			<xs:enumeration value="2-E/A" />
+			<xs:enumeration value="305B2" />
+			<xs:enumeration value="305B2/A" />
+			<xs:enumeration value="40-17F1" />
+			<xs:enumeration value="40-17F1/A" />
+			<xs:enumeration value="40-17F2" />
+			<xs:enumeration value="40-17F2/A" />
+			<xs:enumeration value="40-17G" />
+			<xs:enumeration value="40-17G/A" />
+			<xs:enumeration value="40-17GCS" />
+			<xs:enumeration value="40-17GCS/A" />
+			<xs:enumeration value="40-24B2" />
+			<xs:enumeration value="40-24B2/A" />
+			<xs:enumeration value="40-33" />
+			<xs:enumeration value="40-33/A" />
+			<xs:enumeration value="40-6B" />
+			<xs:enumeration value="40-6B/A" />
+			<xs:enumeration value="40-8B25" />
+			<xs:enumeration value="40-8F-2" />
+			<xs:enumeration value="40-8F-2/A" />
+			<xs:enumeration value="40-APP" />
+			<xs:enumeration value="40-APP/A" />
+			<xs:enumeration value="40-F" />
+			<xs:enumeration value="40-F/A" />
+			<xs:enumeration value="40FR12B" />
+			<xs:enumeration value="40FR12B/A" />
+			<xs:enumeration value="40FR12G" />
+			<xs:enumeration value="40FR12G/A" />
+			<xs:enumeration value="40-OIP" />
+			<xs:enumeration value="40-OIP/A" />
+			<xs:enumeration value="424A" />
+			<xs:enumeration value="424B1" />
+			<xs:enumeration value="424B2" />
+			<xs:enumeration value="424B3" />
+			<xs:enumeration value="424B4" />
+			<xs:enumeration value="424B5" />
+			<xs:enumeration value="424B7" />
+			<xs:enumeration value="424B8" />
+			<xs:enumeration value="424H" />
+			<xs:enumeration value="424H/A" />
+			<xs:enumeration value="424I"/>
+			<xs:enumeration value="425" />
+			<xs:enumeration value="485APOS" />
+			<xs:enumeration value="485BPOS" />
+			<xs:enumeration value="485BXT" />
+			<xs:enumeration value="486APOS" />
+			<xs:enumeration value="486BPOS" />
+			<xs:enumeration value="486BXT" />
+			<xs:enumeration value="487" />
+			<xs:enumeration value="497" />
+			<xs:enumeration value="497AD" />
+			<xs:enumeration value="497H2" />
+			<xs:enumeration value="497J" />
+			<xs:enumeration value="497K1" />
+			<xs:enumeration value="497K2" />
+			<xs:enumeration value="497K3A" />
+			<xs:enumeration value="497K3B" />
+			<xs:enumeration value="6-K" />
+			<xs:enumeration value="6-K/A" />
+			<xs:enumeration value="8-A12B" />
+			<xs:enumeration value="8-A12B/A" />
+			<xs:enumeration value="8-A12G" />
+			<xs:enumeration value="8-A12G/A" />
+			<xs:enumeration value="8-K" />
+			<xs:enumeration value="8-K/A" />
+			<xs:enumeration value="8-K12B" />
+			<xs:enumeration value="8-K12B/A" />
+			<xs:enumeration value="8-K12G3" />
+			<xs:enumeration value="8-K12G3/A" />
+			<xs:enumeration value="8-K15D5" />
+			<xs:enumeration value="8-K15D5/A" />
+			<xs:enumeration value="ABS-15G" />
+			<xs:enumeration value="ABS-15G/A" />
+			<xs:enumeration value="ABS-EE" />
+			<xs:enumeration value="ABS-EE/A" />
+			<xs:enumeration value="ANNLRPT" />
+			<xs:enumeration value="ANNLRPT/A" />
+			<xs:enumeration value="ARS" />
+			<xs:enumeration value="ARS/A" />
+			<xs:enumeration value="AW" />
+			<xs:enumeration value="AW WD" />
+			<xs:enumeration value="C" />
+			<xs:enumeration value="C-W" />
+			<xs:enumeration value="C-U" />
+			<xs:enumeration value="C-U-W" />
+			<xs:enumeration value="C/A" />
+			<xs:enumeration value="C/A-W" />
+			<xs:enumeration value="C-AR" />
+			<xs:enumeration value="C-AR-W" />
+			<xs:enumeration value="C-AR/A" />
+			<xs:enumeration value="C-AR/A-W" />
+			<xs:enumeration value="C-TR" />
+			<xs:enumeration value="C-TR-W" />
+			<xs:enumeration value="CB" />
+			<xs:enumeration value="CB/A" />
+			<xs:enumeration value="CFPORTAL" />
+			<xs:enumeration value="CFPORTAL/A" />
+			<xs:enumeration value="CFPORTAL-W" />
+			<xs:enumeration value="DEF 14A" />
+			<xs:enumeration value="DEF 14C" />
+			<xs:enumeration value="DEFA14A" />
+			<xs:enumeration value="DEFA14C" />
+			<xs:enumeration value="DEFC14A" />
+			<xs:enumeration value="DEFC14C" />
+			<xs:enumeration value="DEFM14A" />
+			<xs:enumeration value="DEFM14C" />
+			<xs:enumeration value="DEFN14A" />
+			<xs:enumeration value="DEFR14A" />
+			<xs:enumeration value="DEFR14C" />
+			<xs:enumeration value="DEL AM" />
+			<xs:enumeration value="DFAN14A" />
+			<xs:enumeration value="DFRN14A" />
+			<xs:enumeration value="DSTRBRPT" />
+			<xs:enumeration value="DSTRBRPT/A" />
+			<xs:enumeration value="SBS DISPUTE NOTICE" />
+			<xs:enumeration value="SBS DISPUTE NOTICE/A" />
+			<xs:enumeration value="F-1" />
+			<xs:enumeration value="F-1/A" />
+			<xs:enumeration value="F-10" />
+			<xs:enumeration value="F-10/A" />
+			<xs:enumeration value="F-10EF" />
+			<xs:enumeration value="F-10POS" />
+			<xs:enumeration value="F-1MEF" />
+			<xs:enumeration value="F-3" />
+			<xs:enumeration value="F-3/A" />
+			<xs:enumeration value="F-3ASR" />
+			<xs:enumeration value="F-3D" />
+			<xs:enumeration value="F-3DPOS" />
+			<xs:enumeration value="F-3MEF" />
+			<xs:enumeration value="F-4" />
+			<xs:enumeration value="F-4/A" />
+			<xs:enumeration value="F-4EF" />
+			<xs:enumeration value="F-4MEF" />
+			<xs:enumeration value="F-4 POS" />
+			<xs:enumeration value="F-6" />
+			<xs:enumeration value="F-6/A" />
+			<xs:enumeration value="F-6EF" />
+			<xs:enumeration value="F-6 POS" />
+			<xs:enumeration value="F-7" />
+			<xs:enumeration value="F-7/A" />
+			<xs:enumeration value="F-7 POS" />
+			<xs:enumeration value="F-8" />
+			<xs:enumeration value="F-8/A" />
+			<xs:enumeration value="F-80" />
+			<xs:enumeration value="F-80/A" />
+			<xs:enumeration value="F-8 POS" />
+			<xs:enumeration value="F-80POS" />
+			<xs:enumeration value="F-9" />
+			<xs:enumeration value="F-9/A" />
+			<xs:enumeration value="F-9EF" />
+			<xs:enumeration value="F-9 POS" />
+			<xs:enumeration value="F-N" />
+			<xs:enumeration value="F-N/A" />
+			<xs:enumeration value="FWP" />
+			<xs:enumeration value="F-X" />
+			<xs:enumeration value="F-X/A" />
+			<xs:enumeration value="N-1" />
+			<xs:enumeration value="N-1/A" />
+			<xs:enumeration value="N-14" />
+			<xs:enumeration value="N-14/A" />
+			<xs:enumeration value="N-14 8C" />
+			<xs:enumeration value="N-14 8C/A" />
+			<xs:enumeration value="N-14MEF" />
+			<xs:enumeration value="N-18F1" />
+			<xs:enumeration value="N-18F1/A" />
+			<xs:enumeration value="N-1 A" />
+			<xs:enumeration value="N-1A/A" />
+			<xs:enumeration value="N-2" />
+			<xs:enumeration value="N-2/A" />
+			<xs:enumeration value="N-23C-2" />
+			<xs:enumeration value="N-23C-2/A" />
+			<xs:enumeration value="N-23C3A" />
+			<xs:enumeration value="N-23C3A/A" />
+			<xs:enumeration value="N-23C3B" />
+			<xs:enumeration value="N-23C3B/A" />
+			<xs:enumeration value="N-23C3C" />
+			<xs:enumeration value="N-23C3C/A" />
+			<xs:enumeration value="N-27D-1" />
+			<xs:enumeration value="N-27D-1/A" />
+			<xs:enumeration value="N-2ASR"/>
+			<xs:enumeration value="N-2 POSASR"/>			
+			<xs:enumeration value="N-2MEF" />
+			<xs:enumeration value="N-3" />
+			<xs:enumeration value="N-3/A" />
+			<xs:enumeration value="N-30B-2" />
+			<xs:enumeration value="N-30D" />
+			<xs:enumeration value="N-30D/A" />
+			<xs:enumeration value="N-4" />
+			<xs:enumeration value="N-4/A" />
+			<xs:enumeration value="N-5" />
+			<xs:enumeration value="N-5/A" />
+			<xs:enumeration value="N-54A" />
+			<xs:enumeration value="N-54A/A" />
+			<xs:enumeration value="N-54C" />
+			<xs:enumeration value="N-54C/A" />
+			<xs:enumeration value="N-6" />
+			<xs:enumeration value="N-6/A" />
+			<xs:enumeration value="N-6F" />
+			<xs:enumeration value="N-6F/A" />
+			<xs:enumeration value="N-8A" />
+			<xs:enumeration value="N-8A/A" />
+			<xs:enumeration value="N-8B-2" />
+			<xs:enumeration value="N-8B-2/A" />
+			<xs:enumeration value="N-8B-3" />
+			<xs:enumeration value="N-8B-3/A" />
+			<xs:enumeration value="N-8B-4" />
+			<xs:enumeration value="N-8B-4/A" />
+			<xs:enumeration value="N-8F" />
+			<xs:enumeration value="N-CEN"/>
+			<xs:enumeration value="N-CEN/A"/>
+			<xs:enumeration value="NPORT-P" />
+			<xs:enumeration value="NPORT-NP" />
+			<xs:enumeration value="NPORT-P/A" />
+			<xs:enumeration value="NPORT-NP/A" />
+			<xs:enumeration value="N-8F/A" />
+			<xs:enumeration value="N-CSR" />
+			<xs:enumeration value="N-CSR/A" />
+			<xs:enumeration value="N-CSRS" />
+			<xs:enumeration value="N-CSRS/A" />
+			<xs:enumeration value="N-PX" />
+			<xs:enumeration value="N-PX/A" />
+			<xs:enumeration value="N-PX-FM" />
+			<xs:enumeration value="N-PX-FM/A" />
+			<xs:enumeration value="N-Q" />
+			<xs:enumeration value="N-Q/A" />
+			<xs:enumeration value="NSAR-A" />
+			<xs:enumeration value="NSAR-A/A" />
+			<xs:enumeration value="NSAR-AT" />
+			<xs:enumeration value="NSAR-AT/A" />
+			<xs:enumeration value="NSAR-B" />
+			<xs:enumeration value="NSAR-B/A" />
+			<xs:enumeration value="NSAR-BT" />
+			<xs:enumeration value="NSAR-BT/A" />
+			<xs:enumeration value="NSAR-U" />
+			<xs:enumeration value="NSAR-U/A" />
+			<xs:enumeration value="NT 10-D" />
+			<xs:enumeration value="NT 10-D/A" />
+			<xs:enumeration value="NT 10-K" />
+			<xs:enumeration value="NT 10-K/A" />
+			<xs:enumeration value="NT 10-Q" />
+			<xs:enumeration value="NT 10-Q/A" />
+			<xs:enumeration value="NT 11-K" />
+			<xs:enumeration value="NT 11-K/A" />
+			<xs:enumeration value="NT 15D2" />
+			<xs:enumeration value="NT 15D2/A" />
+			<xs:enumeration value="NT 20-F" />
+			<xs:enumeration value="NT 20-F/A" />
+			<xs:enumeration value="NT-NCSR" />
+			<xs:enumeration value="NT-NCSR/A" />
+			<xs:enumeration value="NT-NSAR" />
+			<xs:enumeration value="NT-NSAR/A" />
+			<xs:enumeration value="N-VP"/>
+			<xs:enumeration value="N-VP/A"/>
+			<xs:enumeration value="POS 8C" />
+			<xs:enumeration value="POS AM" />
+			<xs:enumeration value="POS AMI" />
+			<xs:enumeration value="POS EX" />
+			<xs:enumeration value="POS462B" />
+			<xs:enumeration value="POS462C" />
+			<xs:enumeration value="POSASR" />
+			<xs:enumeration value="PRE 14A" />
+			<xs:enumeration value="PRE 14C" />
+			<xs:enumeration value="PREC14A" />
+			<xs:enumeration value="PREC14C" />
+			<xs:enumeration value="PREM14A" />
+			<xs:enumeration value="PREM14C" />
+			<xs:enumeration value="PREN14A" />
+			<xs:enumeration value="PRER14A" />
+			<xs:enumeration value="PRER14C" />
+			<xs:enumeration value="PRRN14A" />
+			<xs:enumeration value="PX14A6G" />
+			<xs:enumeration value="PX14A6N" />
+			<xs:enumeration value="QRTLYRPT" />
+			<xs:enumeration value="QRTLYRPT/A" />
+			<xs:enumeration value="RW" />
+			<xs:enumeration value="RW WD" />
+			<xs:enumeration value="S-1" />
+			<xs:enumeration value="S-1/A" />
+			<xs:enumeration value="S-11" />
+			<xs:enumeration value="S-11/A" />
+			<xs:enumeration value="S-11MEF" />
+			<xs:enumeration value="S-1MEF" />
+			<xs:enumeration value="S-20" />
+			<xs:enumeration value="S-20/A" />
+			<xs:enumeration value="S-3" />
+			<xs:enumeration value="S-3/A" />
+			<xs:enumeration value="S-3ASR" />
+			<xs:enumeration value="S-3D" />
+			<xs:enumeration value="S-3DPOS" />
+			<xs:enumeration value="S-3MEF" />
+			<xs:enumeration value="S-4" />
+			<xs:enumeration value="S-4/A" />
+			<xs:enumeration value="S-4 POS" />
+			<xs:enumeration value="S-4EF" />
+			<xs:enumeration value="S-4MEF" />
+			<xs:enumeration value="S-6" />
+			<xs:enumeration value="S-6/A" />
+			<xs:enumeration value="S-8 POS" />
+			<xs:enumeration value="S-8" />
+			<xs:enumeration value="S-B" />
+			<xs:enumeration value="S-B/A" />
+			<xs:enumeration value="S-BMEF" />
+			<xs:enumeration value="SC 13D" />
+			<xs:enumeration value="SC 13D/A" />
+			<xs:enumeration value="SC 13E1" />
+			<xs:enumeration value="SC 13E1/A" />
+			<xs:enumeration value="SC 13E3" />
+			<xs:enumeration value="SC 13E3/A" />
+			<xs:enumeration value="SC 13G" />
+			<xs:enumeration value="SC 13G/A" />
+			<xs:enumeration value="SC 14D9" />
+			<xs:enumeration value="SC 14D9/A" />
+			<xs:enumeration value="SC 14F1" />
+			<xs:enumeration value="SC 14F1/A" />
+			<xs:enumeration value="SC TO-C" />
+			<xs:enumeration value="SC TO-I" />
+			<xs:enumeration value="SC TO-I/A" />
+			<xs:enumeration value="SC TO-T" />
+			<xs:enumeration value="SC TO-T/A" />
+			<xs:enumeration value="SC13E4F" />
+			<xs:enumeration value="SC13E4F/A" />
+			<xs:enumeration value="SC14D1F" />
+			<xs:enumeration value="SC14D1F/A" />
+			<xs:enumeration value="SC14D9C" />
+			<xs:enumeration value="SC14D9F" />
+			<xs:enumeration value="SC14D9F/A" />
+			<xs:enumeration value="SDR-CCO" />
+			<xs:enumeration value="SDR-CCO/A" />
+			<xs:enumeration value="SH-ER" />
+			<xs:enumeration value="SH-ER/A" />
+			<xs:enumeration value="SH-NT" />
+			<xs:enumeration value="SH-NT/A" />
+			<xs:enumeration value="SP 15D2" />
+			<xs:enumeration value="SP 15D2/A" />
+			<xs:enumeration value="SUPPL" />
+			<xs:enumeration value="T-3" />
+			<xs:enumeration value="T-3/A" />
+			<xs:enumeration value="T-6" />
+			<xs:enumeration value="T-6/A" />
+			<xs:enumeration value="UNDER" />
+			<xs:enumeration value="UNDER/A" />
+			<xs:enumeration value="ETR" />
+			<xs:enumeration value="N-PX-NT" />
+			<xs:enumeration value="N-PX-NT/A" />
+			<xs:enumeration value="N-PX-VR" />
+			<xs:enumeration value="N-PX-VR/A" />
+			<xs:enumeration value="N-PX-CR" />
+			<xs:enumeration value="N-PX-CR/A" />
+			<xs:enumeration value="N-PXCON" />
+			<xs:enumeration value="N-PXCON/A" />
+			<xs:enumeration value="N-PXCONP" />
+			<xs:enumeration value="N-PXCONP/A" />
+			<xs:enumeration value="DRS" />
+			<xs:enumeration value="DRS/A" />
+			<xs:enumeration value="DRSLTR" />
+			<xs:enumeration value="SD" />
+			<xs:enumeration value="SD/A" />
+			<xs:enumeration value="SF-1" />
+			<xs:enumeration value="SF-1/A" />
+			<xs:enumeration value="SF-1MEF" />
+			<xs:enumeration value="SF-3" />
+			<xs:enumeration value="SF-3/A" />
+			<xs:enumeration value="SF-3MEF" />
+			<xs:enumeration value="DOS" />
+			<xs:enumeration value="DOS/A" />
+			<xs:enumeration value="DOSLTR" />
+			<xs:enumeration value="1-A" />
+			<xs:enumeration value="1-A/A" />
+			<xs:enumeration value="1-A-W" />
+			<xs:enumeration value="1-A-W/A" />
+			<xs:enumeration value="1-A POS" />
+			<xs:enumeration value="1-K" />
+			<xs:enumeration value="1-K/A" />
+			<xs:enumeration value="1-Z" />
+			<xs:enumeration value="1-Z/A" />
+			<xs:enumeration value="1-SA" />
+			<xs:enumeration value="1-SA/A" />
+			<xs:enumeration value="1-U" />
+			<xs:enumeration value="1-U/A" />
+			<xs:enumeration value="SDR" />
+			<xs:enumeration value="SDR/A" />
+			<xs:enumeration value="SDR-A" />
+			<xs:enumeration value="SDR-W" />
+			<xs:enumeration value="253G1" />
+			<xs:enumeration value="253G2" />
+			<xs:enumeration value="253G3" />
+			<xs:enumeration value="253G4" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TAX_ID_TYPE">
+		<xs:annotation>
+			<xs:documentation>Subject company's IRS employer identification code. Field is 10 characters long which including the dash. Sample: 22-7777777</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{2}[\-]?\d{7}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ACT_TYPE">
+		<xs:annotation>
+			<xs:documentation>For certain filings by investment companies, the tag identifies Act or Acts when the form type may be filed under more than one Act. Valid values when required are 33, 34, 40, or 33 40. Choose value from the list displayed when the arrow is selected.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="33" />
+			<xs:enumeration value="40" />
+			<xs:enumeration value="33 40" />
+			<xs:enumeration value="34" />
+			<xs:enumeration value="NE" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NAME_TYPE">
+		<xs:annotation>
+			<xs:documentation>Identifies a person to contact if there are questions about the submission (field up to 30 characters).
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="30" />
+			<xs:pattern
+					value="[A-Za-z0-9!#-$%():;'@\*\+\-/=\?\^_`~{|},. \\\s&lt;&gt;&amp;&quot;\[\]]{1,30}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NAME_TYPE_60">
+		<xs:annotation>
+			<xs:documentation>Identifies a person to contact if there are questions about the submission (field up to 60 characters).
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="60" />
+			<xs:pattern
+					value="[A-Za-z0-9!#-$%():;'@\*\+\-/=\?\^_`~{|},. \\\s&lt;&gt;&amp;&quot;\[\]]{1,60}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="NAME_TYPE_150">
+		<xs:annotation>
+			<xs:documentation>Identifies a person to contact if there are questions about the submission (field up to 150 characters).
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="150" />
+			<xs:pattern
+					value="[A-Za-z0-9!#-$%():;'@\*\+\-/=\?\^_`~{|},. \\\s&lt;&gt;&amp;&quot;\[\]]{1,150}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="PHONE_TYPE">
+		<xs:annotation>
+			<xs:documentation>Phone number of the contact person; maximum field	size is 20 alphanumeric characters. Hyphens may be included to improve readability.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="20" />
+			<xs:pattern value="[a-zA-Z0-9\-]{1,20}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="CONTACT_TYPE">
+		<xs:sequence>
+			<xs:element name="name" type="NAME_TYPE" minOccurs="0" />
+			<xs:element name="phoneNumber" type="PHONE_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FLAG_TYPE">
+		<xs:sequence>
+			<xs:element name="confirmingCopyFlag" type="TRUE_FALSE_TYPE"
+						minOccurs="0" />
+			<xs:element name="delayingAmendmentFlag" type="TRUE_FALSE_TYPE"
+						minOccurs="0" />
+			<xs:element name="overrideInternetFlag" type="TRUE_FALSE_TYPE"
+						minOccurs="0" />
+			<xs:element name="returnCopyFlag" type="TRUE_FALSE_TYPE"
+						minOccurs="0" />
+			<xs:element name="serialFlag" type="TRUE_FALSE_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NOTIFICATION_TYPE">
+		<xs:sequence>
+			<xs:element name="internetNotificationAddress" type="INTERNET_ADDRESS_TYPE"
+						maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="SRO_TYPE">
+		<xs:annotation>
+			<xs:documentation>Identifies one or more stock exchanges or other self-regulatory organizations on which the issuer's securities are listed or traded. Choose values from the list displayed. If none applies, select the value "NONE".
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="NONE" />
+			<xs:enumeration value="AMEX" />
+			<xs:enumeration value="ARCA" />
+			<xs:enumeration value="BSE" />
+			<xs:enumeration value="CBOE" />
+			<xs:enumeration value="CHX" />
+			<xs:enumeration value="FINRA" />
+			<xs:enumeration value="ISE" />
+			<xs:enumeration value="NASD" />
+			<xs:enumeration value="NSX" />
+			<xs:enumeration value="NYSE" />
+			<xs:enumeration value="PCX" />
+			<xs:enumeration value="PHLX" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SROS_TYPE">
+		<xs:annotation>
+			<xs:documentation>Identifies one or more stock exchanges or other self-regulatory organizations on which the issuer's securities are listed or traded. Choose values from the list displayed. If none applies, select the value "NONE".
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="sroId" type="SRO_TYPE" maxOccurs="13" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="INVESTMENT_COMPANY_TYPE">
+		<xs:annotation>
+			<xs:documentation>Identifies the investment company type of the filer. Choose a value from the list displayed when the arrow is selected.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="isImCompany" type="TRUE_FALSE_TYPE"
+						minOccurs="0" />
+			<xs:element name="invCompanyType" type="INV_COMPANY_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="MODULE_SEGMENT_NAME_TYPE">
+		<xs:annotation>
+			<xs:documentation> Identifies a module or segment name.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="15" />
+			<xs:pattern value="[a-zA-Z][-_a-zA-Z0-9]*" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="MODULE_OR_SEGMENT_FLAG">
+		<xs:annotation>
+			<xs:documentation> M: is module. S: is segment</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="M" />
+			<xs:enumeration value="S" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="MODULE_SEGMENT_FORM_TYPE">
+		<xs:union memberTypes="SUBMISSION_TYPE DOCUMENT_TYPE" />
+	</xs:simpleType>
+	<xs:complexType name="MODULE_SEGMENT_TYPE">
+		<xs:annotation>
+			<xs:documentation> Single module segment type</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="modOrSegFlag" type="MODULE_OR_SEGMENT_FLAG" />
+			<xs:element name="nickName" type="MODULE_SEGMENT_NAME_TYPE" />
+			<xs:element name="cik" type="CIK_TYPE" minOccurs="0" />
+			<xs:element name="ccc" type="CCC_TYPE" minOccurs="0" />
+			<xs:element name="documentType" type="MODULE_SEGMENT_FORM_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="MODULES_SEGMENT_TYPE">
+		<xs:annotation>
+			<xs:documentation>Group of module segment type elements
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="moduleSegment" type="MODULE_SEGMENT_TYPE"
+						maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="DOCUMENT_TYPE">
+		<xs:annotation>
+			<xs:documentation>Enter the type of this document. Select a value from the list displayed when the arrow is selected. Type any additional characters in the field to accurately specify a valid	EDGAR document type.</xs:documentation>
+		</xs:annotation>
+		<xs:union memberTypes="BASE_DOCUMENT_TYPE OPEN_DOCUMENT_TYPE" />
+	</xs:simpleType>
+	<xs:simpleType name="OPEN_DOCUMENT_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="4" />
+			<xs:maxLength value="128" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BASE_DOCUMENT_TYPE">
+		<xs:annotation>
+			<xs:documentation>Enter the type of this document. Select a value from the list displayed when the arrow is selected. Type any additional characters in the field to accurately specify a valid	EDGAR document type.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="CORRESP" />
+			<xs:enumeration value="COVER" />
+			<xs:enumeration value="EU-1" />
+			<xs:enumeration value="EX-1" />
+			<xs:enumeration value="EX-1.01" />
+			<xs:enumeration value="EX-10" />
+			<xs:enumeration value="EX-100.CAL" />
+			<xs:enumeration value="EX-100.DEF" />
+			<xs:enumeration value="EX-100.INS" />
+			<xs:enumeration value="EX-100.LAB" />
+			<xs:enumeration value="EX-100.PRE" />
+			<xs:enumeration value="EX-100.REF" />
+			<xs:enumeration value="EX-100.SCH" />
+			<xs:enumeration value="EX-101.CAL" />
+			<xs:enumeration value="EX-101.DEF" />
+			<xs:enumeration value="EX-101.INS" />
+			<xs:enumeration value="EX-101.LAB" />
+			<xs:enumeration value="EX-101.PRE" />
+			<xs:enumeration value="EX-101.REF" />
+			<xs:enumeration value="EX-101.SCH" />
+			<xs:enumeration value="EX-11" />
+			<xs:enumeration value="EX-12" />
+			<xs:enumeration value="EX-13" />
+			<xs:enumeration value="EX-14" />
+			<xs:enumeration value="EX-15" />
+			<xs:enumeration value="EX-16" />
+			<xs:enumeration value="EX-17" />
+			<xs:enumeration value="EX-18" />
+			<xs:enumeration value="EX-19" />
+			<xs:enumeration value="EX-2" />
+			<xs:enumeration value="EX-2.01.CAL" />
+			<xs:enumeration value="EX-2.01.DEF" />
+			<xs:enumeration value="EX-2.01.INS" />
+			<xs:enumeration value="EX-2.01.LAB" />
+			<xs:enumeration value="EX-2.01.PRE" />
+			<xs:enumeration value="EX-2.01.REF" />
+			<xs:enumeration value="EX-2.01.SCH" />
+			<xs:enumeration value="EX-20" />
+			<xs:enumeration value="EX-21" />
+			<xs:enumeration value="EX-22" />
+			<xs:enumeration value="EX-23" />
+			<xs:enumeration value="EX-24" />
+			<xs:enumeration value="EX-25" />
+			<xs:enumeration value="EX-25/A" />
+			<xs:enumeration value="EX-26" />
+			<xs:enumeration value="EX-3" />
+			<xs:enumeration value="EX-31" />
+			<xs:enumeration value="EX-32" />
+			<xs:enumeration value="EX-33" />
+			<xs:enumeration value="EX-34" />
+			<xs:enumeration value="EX-35" />
+			<xs:enumeration value="EX-36" />
+			<xs:enumeration value="EX-4" />
+			<xs:enumeration value="EX-5" />
+			<xs:enumeration value="EX-7" />
+			<xs:enumeration value="EX-8" />
+			<xs:enumeration value="EX-9" />
+			<xs:enumeration value="EX-95" />
+			<xs:enumeration value="EX-96" />
+			<xs:enumeration value="EX-99" />
+			<xs:enumeration value="EX-99.1 CHARTER" />
+			<xs:enumeration value="EX-99.10 12B1 PLAN" />
+			<xs:enumeration value="EX-99.11 OPIN COUNSL" />
+			<xs:enumeration value="EX-99.12 REV RULING" />
+			<xs:enumeration value="EX-99.12 TAX OPINION" />
+			<xs:enumeration value="EX-99.13 OTH CONTRCT" />
+			<xs:enumeration value="EX-99.14 OTH CONSENT" />
+			<xs:enumeration value="EX-99.15 OTH FIN ST" />
+			<xs:enumeration value="EX-99.16 PWR OF ATTY" />
+			<xs:enumeration value="EX-99.17 (as approp)" />
+			<xs:enumeration value="EX-99.2 BYLAWS" />
+			<xs:enumeration value="EX-99.2 OPIN COUNSEL" />
+			<xs:enumeration value="EX-99.2A CHARTER" />
+			<xs:enumeration value="EX-99.2B BYLAWS" />
+			<xs:enumeration value="EX-99.2C VOTING TRST" />
+			<xs:enumeration value="EX-99.2D HOLDERS RTS" />
+			<xs:enumeration value="EX-99.2E DIV REIN PL" />
+			<xs:enumeration value="EX-99.2F SUBSID DEBT" />
+			<xs:enumeration value="EX-99.2G ADVSR CONTR" />
+			<xs:enumeration value="EX-99.2H DISTR CONTR" />
+			<xs:enumeration value="EX-99.2I O&amp;D BENEFTS" />
+			<xs:enumeration value="EX-99.2J CUST CONTR" />
+			<xs:enumeration value="EX-99.2K OTH CONTRCT" />
+			<xs:enumeration value="EX-99.2L OPIN COUNSL" />
+			<xs:enumeration value="EX-99.2M CNSNT SRVCE" />
+			<xs:enumeration value="EX-99.2N OTH CONSENT" />
+			<xs:enumeration value="EX-99.2O OTH FIN ST" />
+			<xs:enumeration value="EX-99.2P STOCK LTR" />
+			<xs:enumeration value="EX-99.2Q RETRMT PLAN" />
+			<xs:enumeration value="EX-99.2R CODE ETH" />
+			<xs:enumeration value="EX-99.20 OPIN COUNSL" />
+			<xs:enumeration value="EX-99.21 7-R" />
+			<xs:enumeration value="EX-99.22 BD REG" />
+			<xs:enumeration value="EX-99.3 OTHER FIN ST" />
+			<xs:enumeration value="EX-99.3 VOTING TRUST" />
+			<xs:enumeration value="EX-99.31 MA-NR" />
+			<xs:enumeration value="EX-99.32 APP CRT DOC" />
+			<xs:enumeration value="EX-99.33 APP REG DOC" />
+			<xs:enumeration value="EX-99.34 OPIN COUNSL" />
+			<xs:enumeration value="EX-99.3a BD-DIR-RESO"/>
+			<xs:enumeration value="EX-99.3b BYLAWS"/>
+			<xs:enumeration value="EX-99.3c CUST-AGRMET" />
+			<xs:enumeration value="EX-99.3d ADVSR CONTR" />
+			<xs:enumeration value="EX-99.3e UNDER CONTR" />
+			<xs:enumeration value="EX-99.3f CONTRACTS" />
+			<xs:enumeration value="EX-99.3g APPLICATION" />
+			<xs:enumeration value="EX-99.3h BYLAWS INS" />
+			<xs:enumeration value="EX-99.3i REINS CONTR" />
+			<xs:enumeration value="EX-99.3j PROFIT SHAR" />
+			<xs:enumeration value="EX-99.3k ADMIN CONTR" />
+			<xs:enumeration value="EX-99.3l OTH MAT CON" />
+			<xs:enumeration value="EX-99.3m LEGAL OPIN" />
+			<xs:enumeration value="EX-99.3n OTH OPINION" />
+			<xs:enumeration value="EX-99.3o OMITD FIN" />
+			<xs:enumeration value="EX-99.3p INIT CAP AG" />
+			<xs:enumeration value="EX-99.3q CODE ETH" />
+			<xs:enumeration value="EX-99.3r FORM OF ISP" />
+			<xs:enumeration value="EX-99.4 ACQ AGREEMNT" />
+			<xs:enumeration value="EX-99.4 UNREG ISSUER" />
+			<xs:enumeration value="EX-99.4a BD-DIR-RESO"/>
+			<xs:enumeration value="EX-99.4b CUST-AGRMET" />
+			<xs:enumeration value="EX-99.4c UNDER CONTR" />
+			<xs:enumeration value="EX-99.4d CONTRACTS" />
+			<xs:enumeration value="EX-99.4e APPLICATION" />
+			<xs:enumeration value="EX-99.4f DEP CERT/BY"/>
+			<xs:enumeration value="EX-99.4g REINS CONTR" />
+			<xs:enumeration value="EX-99.4h PARTIC AGR" />
+			<xs:enumeration value="EX-99.4i ADMIN CONTR" />
+			<xs:enumeration value="EX-99.4j OTH MAT CON" />
+			<xs:enumeration value="EX-99.4k LEGAL OPIN"/>
+			<xs:enumeration value="EX-99.4l OTH OPINION" />
+			<xs:enumeration value="EX-99.4m OMITD FIN" />
+			<xs:enumeration value="EX-99.4n INIT CAP AG" />
+			<xs:enumeration value="EX-99.4o FORM OF ISP" />
+			<xs:enumeration value="EX-99.4 ACQ AGREEMNT" />
+			<xs:enumeration value="EX-99.4 UNREG ISSUER" />
+			<xs:enumeration value="EX-99.5 HOLDERS RTS" />
+			<xs:enumeration value="EX-99.6 ADVSER CONTR" />
+			<xs:enumeration value="EX-99.7 DISTR CONTR" />
+			<xs:enumeration value="EX-99.77B ACCT LTTR" />
+			<xs:enumeration value="EX-99.77C VOTES" />
+			<xs:enumeration value="EX-99.77D POLICIES" />
+			<xs:enumeration value="EX-99.77E LEGAL" />
+			<xs:enumeration value="EX-99.77F CHNG DEBT" />
+			<xs:enumeration value="EX-99.77G DEFAULTS" />
+			<xs:enumeration value="EX-99.77H CHNG CNTRL" />
+			<xs:enumeration value="EX-99.77I NEW SECUR" />
+			<xs:enumeration value="EX-99.77J REVALUATN" />
+			<xs:enumeration value="EX-99.77K CHNG ACCNT" />
+			<xs:enumeration value="EX-99.77L NEW ACCTNG" />
+			<xs:enumeration value="EX-99.77M MERGERS" />
+			<xs:enumeration value="EX-99.77N RULE 2A-7" />
+			<xs:enumeration value="EX-99.77O RULE 10F-3" />
+			<xs:enumeration value="EX-99.77P EXMPT INFO" />
+			<xs:enumeration value="EX-99.77Q1 OTHR EXHB" />
+			<xs:enumeration value="EX-99.77Q2 ITEM 405" />
+			<xs:enumeration value="EX-99.8 O&amp;D BENEFTS" />
+			<xs:enumeration value="EX-99.9 CUST CONTRCT" />
+			<xs:enumeration value="EX-99.906 CERT" />
+			<xs:enumeration value="EX-99.a BD-DIR-RESOL" />
+			<xs:enumeration value="EX-99.a CHARTER" />
+			<xs:enumeration value="EX-99.A1 INDNTR ORGN" />
+			<xs:enumeration value="EX-99.A10 PERIODC PP" />
+			<xs:enumeration value="EX-99.A11 CODE ETH" />
+			<xs:enumeration value="EX-99.A2 INDNTR PMT" />
+			<xs:enumeration value="EX-99.A3A DIST CONTR" />
+			<xs:enumeration value="EX-99.A3B DEALER AGR" />
+			<xs:enumeration value="EX-99.A3C SCH COMMIS" />
+			<xs:enumeration value="EX-99.A4 OTHER AGRMT" />
+			<xs:enumeration value="EX-99.A5 FORM/SECRTY" />
+			<xs:enumeration value="EX-99.A6 CERT/BYLAWS" />
+			<xs:enumeration value="EX-99.A7 INSR POLICY" />
+			<xs:enumeration value="EX-99.A8 DEPOSIT AGR" />
+			<xs:enumeration value="EX-99.A9 OTHER CONTR" />
+			<xs:enumeration value="EX-99.b BYLAWS" />
+			<xs:enumeration value="EX-99.b CUST-AGRMETS" />
+			<xs:enumeration value="EX-99.B1 NOTIC/SHLDR" />
+			<xs:enumeration value="EX-99.B2 ANRPT/SHLDR" />
+			<xs:enumeration value="EX-99.c HOLDERS RTS" />
+			<xs:enumeration value="EX-99.c UNDER CONTRT" />
+			<xs:enumeration value="EX-99.C1 ACCT CONSNT" />
+			<xs:enumeration value="EX-99.C2 EVAL CONSNT" />
+			<xs:enumeration value="EX-99.C3 RTG AGY OPN" />
+			<xs:enumeration value="EX-99.C4 TAX OPINION" />
+			<xs:enumeration value="EX-99.C5 REV RULING" />
+			<xs:enumeration value="EX-99.C6 OTHER OPIN" />
+			<xs:enumeration value="EX-99.CERT" />
+			<xs:enumeration value="EX-99.CODE ETH" />
+			<xs:enumeration value="EX-99.d ADVSR CONTR" />
+			<xs:enumeration value="EX-99.d CONTRACTS" />
+			<xs:enumeration value="EX-99.e APPLICATIONS" />
+			<xs:enumeration value="EX-99.e UNDR CONTR" />
+			<xs:enumeration value="EX-99.f BONUS PROFIT" />
+			<xs:enumeration value="EX-99.f DEP CERT/BYL" />
+			<xs:enumeration value="EX-99.g CUST AGREEMT" />
+			<xs:enumeration value="EX-99.g REINS CONTRT" />
+			<xs:enumeration value="EX-99.h OTH MAT CONT" />
+			<xs:enumeration value="EX-99.h PARTIC AGREE" />
+			<xs:enumeration value="EX-99.i ADMIN CONTRT" />
+			<xs:enumeration value="EX-99.i LEGAL OPININ" />
+			<xs:enumeration value="EX-99.j OTH MAT CONT" />
+			<xs:enumeration value="EX-99.j OTHER OPININ" />
+			<xs:enumeration value="EX-99.k LEGAL OPININ" />
+			<xs:enumeration value="EX-99.k OMT FIN STAT" />
+			<xs:enumeration value="EX-99.l ACTUARIAL OP" />
+			<xs:enumeration value="EX-99.l INT CAP AGRE" />
+			<xs:enumeration value="EX-99.m 12B-1 PLAN" />
+			<xs:enumeration value="EX-99.m CALCULATION" />
+			<xs:enumeration value="EX-99.n 18F-3 PLAN" />
+			<xs:enumeration value="EX-99.n OTH OPINIONS" />
+			<xs:enumeration value="EX-99.o OMITD FIN ST" />
+			<xs:enumeration value="EX-99.p CODE ETH" />
+			<xs:enumeration value="EX-99.p INIT CAP AGR" />
+			<xs:enumeration value="EX-99.q REDEEM EXEMP" />
+			<xs:enumeration value="EX-99.r FORM OF ISP" />
+			<xs:enumeration value="EX-99.A SDR AGRMNT" />
+			<xs:enumeration value="EX-99.A SDR SUMMARY" />
+			<xs:enumeration value="EX-99.B SDR" />
+			<xs:enumeration value="EX-99.C SDR" />
+			<xs:enumeration value="EX-99.D SDR" />
+			<xs:enumeration value="EX-99.E SDR" />
+			<xs:enumeration value="EX-99.F SDR" />
+			<xs:enumeration value="EX-99.G SDR" />
+			<xs:enumeration value="EX-99.H SDR" />
+			<xs:enumeration value="EX-99.I SDR CNTRCT" />
+			<xs:enumeration value="EX-99.I SDR SUMMARY" />
+			<xs:enumeration value="EX-99.IND PUB ACCT" />
+			<xs:enumeration value="EX-99.J SDR" />
+			<xs:enumeration value="EX-99.K SDR" />
+			<xs:enumeration value="EX-99.K SDR.INS" />
+			<xs:enumeration value="EX-99.K SDR.SCH" />
+			<xs:enumeration value="EX-99.K SDR.PRE" />
+			<xs:enumeration value="EX-99.K SDR.LAB" />
+			<xs:enumeration value="EX-99.K SDR.CAL" />
+			<xs:enumeration value="EX-99.K SDR.REF" />
+			<xs:enumeration value="EX-99.L SDR" />
+			<xs:enumeration value="EX-99.L SDR.INS" />
+			<xs:enumeration value="EX-99.L SDR.SCH" />
+			<xs:enumeration value="EX-99.L SDR.PRE" />
+			<xs:enumeration value="EX-99.L SDR.LAB" />
+			<xs:enumeration value="EX-99.L SDR.CAL" />
+			<xs:enumeration value="EX-99.L SDR.REF" />
+			<xs:enumeration value="EX-99.M SDR" />
+			<xs:enumeration value="EX-99.N SDR" />
+			<xs:enumeration value="EX-99.O SDR" />
+			<xs:enumeration value="EX-99.P SDR" />
+			<xs:enumeration value="EX-99.Q SDR" />
+			<xs:enumeration value="EX-99.R SDR" />
+			<xs:enumeration value="EX-99.S SDR" />
+			<xs:enumeration value="EX-99.T SDR" />
+			<xs:enumeration value="EX-99.U SDR" />
+			<xs:enumeration value="EX-99.V SDR" />
+			<xs:enumeration value="EX-99.W SDR" />
+			<xs:enumeration value="EX-99.X SDR" />
+			<xs:enumeration value="EX-99.Y SDR" />
+			<xs:enumeration value="EX-99.Z SDR" />
+			<xs:enumeration value="EX-99.AA SDR" />
+			<xs:enumeration value="EX-99.BB SDR" />
+			<xs:enumeration value="EX-99.CC SDR" />
+			<xs:enumeration value="EX-99.DD SDR" />
+			<xs:enumeration value="EX-99.EE SDR" />
+			<xs:enumeration value="EX-99.FF SDR" />
+			<xs:enumeration value="EX-99.GG SDR" />
+			<xs:enumeration value="EX-99.HH SDR" />
+			<xs:enumeration value="EX-99.II SDR" />
+			<xs:enumeration value="EX-99.Rule23C1" />
+			<xs:enumeration value="EX-102" />
+			<xs:enumeration value="EX-103" />
+			<xs:enumeration value="EX-106" />
+			<xs:enumeration value="EX-FILING FEES" />
+			<xs:enumeration value="GRAPHIC" />
+			<xs:enumeration value="ORGCHART" />
+			<xs:enumeration value="EX1SA-1 UNDR AGMT" />
+			<xs:enumeration value="EX1SA-2A CHARTER" />
+			<xs:enumeration value="EX1SA-2B BYLAWS" />
+			<xs:enumeration value="EX1SA-3 HLDRS RTS" />
+			<xs:enumeration value="EX1SA-4 SUBS AGMT" />
+			<xs:enumeration value="EX1SA-5 VOTG TRST" />
+			<xs:enumeration value="EX1SA-6 MAT CTRCT" />
+			<xs:enumeration value="EX1SA-7 ACQ AGMT" />
+			<xs:enumeration value="EX1SA-8 ESCW AGMT" />
+			<xs:enumeration value="EX1SA-9 ACCT LTR" />
+			<xs:enumeration value="EX1SA-10 PWR ATTY" />
+			<xs:enumeration value="EX1SA-11 CONSENT" />
+			<xs:enumeration value="EX1SA-12 OPN CNSL" />
+			<xs:enumeration value="EX1SA-13 TST WTRS" />
+			<xs:enumeration value="EX1SA-14 CNSNT SV" />
+			<xs:enumeration value="EX1SA-17 GNTR/ISSR" />
+			<xs:enumeration value="EX1U-1 UNDR AGMT " />
+			<xs:enumeration value="EX1U-2A CHARTER" />
+			<xs:enumeration value="EX1U-2B BYLAWS" />
+			<xs:enumeration value="EX1U-3 HLDRS RTS" />
+			<xs:enumeration value="EX1U-4 SUBS AGMT" />
+			<xs:enumeration value="EX1U-5 VOTG TRST" />
+			<xs:enumeration value="EX1U-6 MAT CTRCT" />
+			<xs:enumeration value="EX1U-7 ACQ AGMT" />
+			<xs:enumeration value="EX1U-8 ESCW AGMT" />
+			<xs:enumeration value="EX1U-9 ACCT LTR" />
+			<xs:enumeration value="EX1U-10 PWR ATTY" />
+			<xs:enumeration value="EX1U-11 CONSENT" />
+			<xs:enumeration value="EX1U-12 OPN CNSL" />
+			<xs:enumeration value="EX1U-13 TST WTRS" />
+			<xs:enumeration value="EX1U-14 CNSNT SV" />
+			<xs:enumeration value="EX1U-17 GNTR/ISSR" />
+			<xs:enumeration value="PART II AND III" />
+			<xs:enumeration value="EX1A-1 UNDR AGMT" />
+			<xs:enumeration value="EX1A-2A CHARTER" />
+			<xs:enumeration value="EX1A-2B BYLAWS" />
+			<xs:enumeration value="EX1A-3 HLDRS RTS" />
+			<xs:enumeration value="EX1A-4 SUBS AGMT" />
+			<xs:enumeration value="EX1A-5 VOTG TRST" />
+			<xs:enumeration value="EX1A-6 MAT CTRCT" />
+			<xs:enumeration value="EX1A-7 ACQ AGMT" />
+			<xs:enumeration value="EX1A-8 ESCW AGMT" />
+			<xs:enumeration value="EX1A-9 ACCT LTR" />
+			<xs:enumeration value="EX1A-10 PWR ATTY" />
+			<xs:enumeration value="EX1A-11 CONSENT" />
+			<xs:enumeration value="EX1A-12 OPN CNSL" />
+			<xs:enumeration value="EX1A-13 TST WTRS" />
+			<xs:enumeration value="EX1A-14 CNSNT SV" />
+			<xs:enumeration value="EX1A-17 GNTR/ISSR"/>
+			<xs:enumeration value="PART II" />
+			<xs:enumeration value="EX1K-1 UNDR AGMT" />
+			<xs:enumeration value="EX1K2A CHARTER" />
+			<xs:enumeration value="EX1K-2B BYLAWS" />
+			<xs:enumeration value="EX1K-3 HLDRS RTS" />
+			<xs:enumeration value="EX1K-4 SUBS AGMT" />
+			<xs:enumeration value="EX1K-5 VOTG TRST" />
+			<xs:enumeration value="EX1K-6 MAT CTRCT" />
+			<xs:enumeration value="EX1K-7 ACQ AGMT" />
+			<xs:enumeration value="EX1K-8 ESCW AGMT" />
+			<xs:enumeration value="EX1K-9 ACCT LTR" />
+			<xs:enumeration value="EX1K-10 PWR ATTY" />
+			<xs:enumeration value="EX1K-11 CONSENT" />
+			<xs:enumeration value="EX1K-12 OPN CNSL" />
+			<xs:enumeration value="EX1K-13 TST WTRS" />
+			<xs:enumeration value="EX1K-14 CNSNT SV" />
+			<xs:enumeration value="EX1K-17 GNTR/ISSR" />
+			<xs:enumeration value="EX-99.E1 NRSRO" />
+			<xs:enumeration value="EX-99.E2 NRSRO" />
+			<xs:enumeration value="EX-99.E3 NRSRO" />
+			<xs:enumeration value="EX-99.E4 NRSRO" />
+			<xs:enumeration value="EX-99.E5 NRSRO" />
+			<xs:enumeration value="EX-99.E6 NRSRO" />
+			<xs:enumeration value="EX-99.E7 NRSRO" />
+			<xs:enumeration value="EX-99.E8 NRSRO" />
+			<xs:enumeration value="EX-99.E9 NRSRO" />
+			<xs:enumeration value="EX-99.Ra1 NRSRO" />
+			<xs:enumeration value="EX-99.Ra2 NRSRO" />
+			<xs:enumeration value="EX-99.Ra3 NRSRO" />
+			<xs:enumeration value="EX-99.Ra4 NRSRO" />
+			<xs:enumeration value="EX-99.Ra5 NRSRO" />
+			<xs:enumeration value="EX-99.Ra6 NRSRO" />
+			<xs:enumeration value="EX-99.Ra6S NRSRO" />
+			<xs:enumeration value="EX-99.Ra7 NRSRO" />
+			<xs:enumeration value="EX-99.Ra7S NRSRO" />
+			<xs:enumeration value="EX-99.Ra8 NRSRO" />
+			<xs:enumeration value="SDR-CR" />
+			<xs:enumeration value="SDR-FR" />
+			<xs:enumeration value="SDR-CR/A" />
+			<xs:enumeration value="SDR-FR/A" />
+			<xs:enumeration value="LEGAL PROCEEDINGS" />
+			<xs:enumeration value="FINANCIAL SUPPORT" />
+			<xs:enumeration value="INTERNAL CONTROL RPT" />
+			<xs:enumeration value="CHG ACCT PRINCIPLES" />
+			<xs:enumeration value="EXEMPT ORDER INFO" />
+			<xs:enumeration value="OTHER REQUIRED INFO" />
+			<xs:enumeration value="MATERIAL AMENDMENTS" />
+			<xs:enumeration value="INST DEFINING RIGHTS" />
+			<xs:enumeration value="ADVISORY CONTRACTS" />
+			<xs:enumeration value="ITEM 405 REG S-K" />
+			<xs:enumeration value="CODE OF ETHICS" />
+			<xs:enumeration value="NPORT-EX" />
+			<xs:enumeration value="ADD EXHB" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SUB_DOCUMENT_TYPE">
+		<xs:union memberTypes="SUBMISSION_TYPE DOCUMENT_TYPE" />
+	</xs:simpleType>
+	<xs:simpleType name="DOCUMENT_NAME_TYPE">
+		<xs:annotation>
+			<xs:documentation>Read-only field displaying the name of an attached document.</xs:documentation>
+			<xs:documentation />
+			<xs:documentation>File names must be upper or lower case and no	longer than thirty-two (32) characters in length. The names must start with a letter (a-z) or a number and may contain numbers (0-9) with no spaces. File names may contain any number of periods (.), hyphens (-), and underscore (_) characters and must end with *.htm, *.txt, *.pdf, *.fil, *.jpg, *.gif, *.xml or *.xsd extensions.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="32" />
+			<xs:pattern
+					value="([a-zA-Z0-9]+[\w\._\-]*)([\.](([hH][tT][mM])|([tT][xX][tT])|([pP][dD][fF])|([xX][mM][lL])|([jJ][pP][gG])|([gG][iI][fF])|([fF][iI][lL])|([xX][sS][dD])))" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DOCUMENT_DESCRIPTION_TYPE">
+		<xs:annotation>
+			<xs:documentation>An optional field offering you the opportunity to	describe the attached document. Field is up to 255 characters.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="255" />
+			<xs:minLength value="1" />
+			<xs:pattern
+					value="[A-Za-z0-9!#-$%():;'@\*\+\-/=\?\^_`~{|},. \\\s&lt;&gt;&amp;&quot;\[\]]{1,255}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DOCUMENT_MIME_BLOCK_TYPE">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="EDGAR_DOCUMENT_TYPE">
+		<xs:annotation>
+			<xs:documentation>Document names must be lower case and no longer than thirty-two (32) characters in length. The names must start with a letter (a-z) and may contain numbers (0-9) with no spaces. Document names may contain one period (.), one hyphen (-), and one underscore (_) character and must end with *.htm, *.txt, *.pdf, *.fil, *.jpg, *.gif, *.xml or *.xsd extensions.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="conformedName" type="DOCUMENT_NAME_TYPE" />
+			<xs:element name="conformedDocumentType" type="SUB_DOCUMENT_TYPE" />
+			<xs:element name="relatedFormType" type="RELATED_FORM_TYPE" minOccurs="0"/>
+			<xs:element name="description" type="DOCUMENT_DESCRIPTION_TYPE"
+						minOccurs="0" />
+			<xs:element name="contents" type="DOCUMENT_MIME_BLOCK_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EDGAR_DOCUMENTS_TYPE">
+		<xs:sequence>
+			<xs:element name="document" type="EDGAR_DOCUMENT_TYPE"
+						maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CONFIDENTIAL_DOCUMENT_TYPE">
+		<xs:annotation>
+			<xs:documentation>Document names must be lower case and no longer
+				than thirty-two (32) characters in length. The names must start with
+				a letter (a-z) and may contain numbers (0-9) with no spaces.
+				Document names may contain one period (.), one hyphen (-), and one
+				underscore (_) character and must end with *.htm, *.txt, *.pdf,
+				*.fil, *.jpg, *.gif, *.xml or *.xsd extensions.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="conformedName" type="DOCUMENT_NAME_TYPE"
+						minOccurs="0" />
+			<xs:element name="conformedDocumentType" type="SUB_DOCUMENT_TYPE"
+						minOccurs="0" />
+			<xs:element name="description" type="DOCUMENT_DESCRIPTION_TYPE"
+						minOccurs="0" />
+			<xs:element name="contents" type="DOCUMENT_MIME_BLOCK_TYPE"
+						minOccurs="0" />
+			<xs:element name="confidentiality" type="TRUE_FALSE_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CONFIDENTIAL_DOCUMENTS_TYPE">
+		<xs:sequence>
+			<xs:element name="document" type="CONFIDENTIAL_DOCUMENT_TYPE"
+						minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CONFIDENTIAL_DOCUMENT_TYPE1">
+		<xs:annotation>
+			<xs:documentation>Document names must be lower case and no longer than thirty-two (32) characters in length. The names must start with a letter (a-z) and may contain numbers (0-9) with no spaces. Document names may contain one period (.), one hyphen (-), and one underscore (_) character and must end with *.htm, *.txt, *.pdf, *.fil, *.jpg, *.gif, *.xml or *.xsd extensions.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="conformedName" type="DOCUMENT_NAME_TYPE" />
+			<xs:element name="conformedDocumentType" type="SUB_DOCUMENT_TYPE" />
+			<xs:element name="description" type="DOCUMENT_DESCRIPTION_TYPE"
+						minOccurs="0" />
+			<xs:element name="contents" type="DOCUMENT_MIME_BLOCK_TYPE" />
+			<xs:element name="confidentiality" type="TRUE_FALSE_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CONFIDENTIAL_DOCUMENTS_TYPE1">
+		<xs:sequence>
+			<xs:element name="document" type="CONFIDENTIAL_DOCUMENT_TYPE1"
+						maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="DEPOSITORY_TYPE">
+		<xs:annotation>
+			<xs:documentation>The name of the depository bank (field up to 50 characters).</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="50" />
+			<xs:pattern
+					value="[A-Za-z0-9!#-$%():;'@\*\+\-/=\?\^_`~{|},. \\\s&lt;&gt;&amp;&quot;\[\]]{1,50}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE20_8">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="20" />
+			<xs:fractionDigits value="8" />
+			<xs:maxInclusive value="999999999999.99999999" />
+			<xs:minInclusive value="-999999999999.99999999" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE7_2_NONNEGATIVE">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="9" />
+			<xs:fractionDigits value="2" />
+			<xs:maxInclusive value="9999999.99" />
+			<xs:minInclusive value="0" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE14_2">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="14" />
+			<xs:fractionDigits value="2" />
+			<xs:pattern value="[\+\-]?\d{0,12}\.\d\d" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE14_2_FIXED">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="16" />
+			<xs:fractionDigits value="2" />
+			<xs:pattern value="[\+\-]?\d{0,14}\.\d\d" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE15_3">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="15" />
+			<xs:fractionDigits value="3" />
+			<xs:pattern value="[\+\-]?\d{0,12}\.\d\d\d" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE16_4">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="16" />
+			<xs:fractionDigits value="4" />
+			<xs:pattern value="[\+\-]?\d{0,12}\.\d\d\d\d" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE12_5_FIXED">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="17" />
+			<xs:fractionDigits value="5" />
+			<xs:pattern value="[\+\-]?\d{0,12}\.\d\d\d\d\d" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE7_5_FIXED">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="12" />
+			<xs:fractionDigits value="5" />
+			<xs:pattern value="[\+\-]?\d{0,7}\.\d\d\d\d\d" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMAL_TYPE7_2_FIXED">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="9" />
+			<xs:fractionDigits value="2" />
+			<xs:pattern value="[\+\-]?\d{0,7}\.\d\d" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="YES_NO_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Y" />
+			<xs:enumeration value="N" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="YEAR_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{4,4}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FISCAL_YEAR_TYPE_2">
+		<xs:annotation>
+			<xs:documentation>Updated fiscal year end value. Acceptable values are in the format MM/DD, for example, 12/31, 03/30, 06/30, 2/28.
+			</xs:documentation>
+			<xs:documentation />
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{2,2}/\d{2,2}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="FISCAL_YEAR_TYPE">
+		<xs:sequence>
+			<xs:element name="fiscalYearEnd" type="FISCAL_YEAR_TYPE_2"
+						maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="STRING_1_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_10_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="10" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_12_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="12" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_20_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="20" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_25_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="25" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_30_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="30" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_40_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="40" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_50_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="50" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_60_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="60" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_80_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="80" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_100_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="100" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_150_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="150" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_200_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="200" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_250_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="250" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_255_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="255" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_256_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="256" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_4000_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="4000" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_1K_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="1000" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_1K_RESTRICTED_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:maxLength value="1000" />
+			<xs:minLength value="1" />
+			<xs:pattern
+					value="[A-Za-z0-9!#-$%():;'@\*\+\-/=\?\^_`~{|},. \\\s&lt;&gt;&amp;&quot;\[\]]{1,1000}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_10K_TYPE">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+			<xs:maxLength value="10000" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STRING_20K_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="20000" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STREET_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="40" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ZIP_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="10" />
+			<xs:pattern value="[0-9A-Za-z #\-]*" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="ADDRESS_TYPE">
+		<xs:sequence>
+			<xs:element name="street1" type="STREET_TYPE" />
+			<xs:element name="street2" type="STREET_TYPE" minOccurs="0" />
+			<xs:element name="city" type="STRING_30_TYPE" />
+			<xs:element name="stateOrCountry" type="ns1:STATE_COUNTRY_CODE" />
+			<xs:element name="zipCode" type="ZIP_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FILER_TYPE">
+		<xs:sequence>
+			<xs:element name="filerId" type="CIK_TYPE" />
+			<xs:element name="filerCcc" type="CCC_TYPE" />
+			<xs:element name="filerFileNumber" type="FILE_NUMBER_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="ID_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{1,10}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="OTHER_TYPE">
+		<xs:sequence>
+			<xs:element name="other" default="Other" />
+			<xs:element name="otherSpecification" type="STRING_255_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="OTHER_TYPE_2">
+		<xs:sequence>
+			<xs:element name="other" default="Other" />
+			<xs:element name="otherSpecification" type="STRING_1K_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="US_COUNTRY_CODE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="X1" />
+			<!-- UNITED STATES -->
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STATE_COUNTRY_TYPE_LIST">
+		<xs:union memberTypes="NON_US_COUNTRY_CODES US_STATE_CODES US_COUNTRY_CODE" />
+	</xs:simpleType>
+	<xs:complexType name="STATE_COUNTRY_TYPE">
+		<xs:sequence>
+			<xs:element name="stateOrCountry" type="ns1:STATE_COUNTRY_CODE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="ACCESSION_NUMBER_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="[*]{0}|[0-9]{1,10}\-[0-9]{1,2}\-[0-9]{1,6}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- START OF SBSE COMMON ELEMENTS -->
+	<xs:simpleType name="WEBSITE_URL_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="60" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SIGNATURE_TYPE">
+		<xs:sequence>
+			<xs:element name="dateSigned" type="DATE_TYPE" />
+			<xs:element name="nameOfApplicant" type="ENTITY_NAME_TYPE" />
+			<xs:element name="signature" type="ENTITY_NAME_TYPE" />
+			<xs:element name="signerName" type="ENTITY_NAME_TYPE" />
+			<xs:element name="title" type="STRING_150_TYPE" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NAME_TYPE_2">
+		<xs:sequence>
+			<xs:element name="firstName" type="STRING_150_TYPE" />
+			<xs:element name="middleName" type="STRING_150_TYPE"
+						minOccurs="0" />
+			<xs:element name="lastName" type="STRING_150_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="CRD_NUMBER_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="9" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SIGNATURE_TYPE_2">
+		<xs:sequence>
+			<xs:element name="signature" type="STRING_150_TYPE" />
+			<xs:element name="signerName" type="ENTITY_NAME_TYPE" />
+			<xs:element name="title" type="STRING_150_TYPE" />
+			<xs:element name="date" type="DATE_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="STRING_NUMERIC_3_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{1,10}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DATE_MM_YYYY_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="\d{2,2}/\d{4,4}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SIGNATURE_TYPE_3">
+		<xs:sequence>
+			<xs:element name="signature" type="STRING_150_TYPE" />
+			<xs:element name="signerName" type="STRING_150_TYPE" />
+			<xs:element name="title" type="STRING_150_TYPE" />
+			<xs:element name="date" type="DATE_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<!-- END OF SBSE COMMON ELEMENTS -->
+	<xs:simpleType name="INTEGER_TYPE_2">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="99" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_TYPE_2_A">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="-99" />
+			<xs:maxInclusive value="99" />
+			<xs:pattern value="[\+\-]?\d{0,2}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_TYPE_3">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="999" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_TYPE_8">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="99999999" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_TYPE_8_A">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="-99999999" />
+			<xs:maxInclusive value="99999999" />
+			<xs:pattern value="[\+\-]?\d{0,8}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_TYPE_10">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="1" />
+			<xs:maxInclusive value="9999999999" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INT_24">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="-999999999999999999999999" />
+			<xs:maxInclusive value="999999999999999999999999" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_NONNEGATIVE_7">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:totalDigits value="7" fixed="true" />
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- START OF TA-2 COMMON ELEMENTS -->
+
+	<xs:simpleType name="INTEGER_NONNEGATIVE_11">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:minInclusive value="0" />
+			<xs:maxInclusive value="99999999999" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_NONNEGATIVE_12">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:totalDigits value="12" fixed="true" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="PERCENTAGE_TYPE">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0.00" />
+			<xs:maxInclusive value="100.00" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- END OF TA-2 COMMON ELEMENTS -->
+
+	<xs:complexType name="FILER_CREDENTIALS">
+		<xs:sequence>
+			<xs:element name="cik" type="CIK_TYPE" />
+			<xs:element name="ccc" type="CCC_TYPE" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EDGARLITE_ADDRESS_TYPE">
+		<xs:sequence>
+			<xs:element name="street1" type="STREET_TYPE" />
+			<xs:element name="street2" type="STREET_TYPE" minOccurs="0" />
+			<xs:element name="city" type="STRING_30_TYPE" />
+			<xs:element name="stateOrCountryCode" type="ns1:STATE_COUNTRY_CODE" />
+			<xs:element name="stateOrCountry" type="STRING_50_TYPE"
+						minOccurs="0" />
+			<xs:element name="zipCode" type="ZIP_TYPE" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CONTACT_EMAIL_TYPE">
+		<xs:sequence>
+			<xs:element name="contactName" type="NAME_TYPE" minOccurs="0" />
+			<xs:element name="contactPhoneNumber" type="EDGAR_PHONE_TYPE"
+						minOccurs="0" />
+			<xs:element name="contactEmailAddress" type="INTERNET_ADDRESS_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SIGNATURE_TYPE_4">
+		<xs:sequence>
+			<xs:element name="signatureName" type="STRING_30_TYPE" />
+			<xs:element name="signatureTitle" type="STRING_150_TYPE" />
+			<xs:element name="signaturePhoneNumber" type="EDGAR_PHONE_TYPE" />
+			<xs:element name="signatureDate" type="xs:date" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="EDGAR_PHONE_TYPE">
+		<xs:annotation>
+			<xs:documentation>This is the preferred PHONE_TYPE as it follows the
+				pattern used when creating an Entity via Filer Management.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="20" />
+			<xs:pattern value="[a-zA-Z0-9\s#(),.\-]{1,20}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ABS_ASSET_CLASS_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Residential mortgages - Prime" />
+			<xs:enumeration value="Residential mortgages - Non-Prime" />
+			<xs:enumeration value="Residential mortgages - HELOC" />
+			<xs:enumeration value="Residential mortgages - Reverse Mortgages" />
+			<xs:enumeration value="Residential mortgages - Manufactured Housing" />
+			<xs:enumeration value="Residential mortgages - Other/Combined" />
+			<xs:enumeration value="Commercial mortgages" />
+			<xs:enumeration value="Auto loans" />
+			<xs:enumeration value="Auto leases" />
+			<xs:enumeration value="Equipment leases" />
+			<xs:enumeration value="Equipment loans" />
+			<xs:enumeration value="Student loans" />
+			<xs:enumeration value="Floorplan financings" />
+			<xs:enumeration value="Debt Securities" />
+			<xs:enumeration value="Resecuritization" />
+			<xs:enumeration value="Credit card" />
+			<xs:enumeration value="Other" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ABS_SUB_ASSET_CLASS_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Residential mortgages - Prime" />
+			<xs:enumeration value="Residential mortgages - Non-Prime" />
+			<xs:enumeration value="Residential mortgages - HELOC" />
+			<xs:enumeration value="Residential mortgages - Reverse Mortgages" />
+			<xs:enumeration value="Residential mortgages - Manufactured Housing" />
+			<xs:enumeration value="Residential mortgages - Other/Combined" />
+			<xs:enumeration value="Commercial mortgages" />
+			<xs:enumeration value="Auto loans" />
+			<xs:enumeration value="Auto leases" />
+			<xs:enumeration value="Equipment leases" />
+			<xs:enumeration value="Equipment loans" />
+			<xs:enumeration value="Student loans" />
+			<xs:enumeration value="Floorplan financings" />
+			<xs:enumeration value="Debt Securities" />
+			<xs:enumeration value="Credit card" />
+			<xs:enumeration value="Other" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="ABS_ASSET_CLASS_TYPES">
+		<xs:sequence>
+			<xs:element name="absAssetClass" type="ABS_ASSET_CLASS_TYPE"
+						minOccurs="0" maxOccurs="17" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ABS_SUB_ASSET_CLASS_TYPES">
+		<xs:sequence>
+			<xs:element name="absSubAssetClass" type="ABS_SUB_ASSET_CLASS_TYPE"
+						minOccurs="0" maxOccurs="16" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="IRS_OR_SSN">
+		<xs:choice>
+			<xs:element name="irsNum" type="TAX_ID_TYPE" />
+			<xs:element name="ssn" type="SSN_TYPE" />
+		</xs:choice>
+	</xs:complexType>
+	<xs:simpleType name="SSN_TYPE">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d{3}-\d{2}-\d{4}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="WEBSITE_URL_TYPE_256">
+		<xs:restriction base="xs:token">
+			<xs:minLength value="1" />
+			<xs:maxLength value="256" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="INDIVIDUAL_NAME_TYPE">
+		<xs:sequence>
+			<xs:element name="prefix" type="STRING_30_TYPE" minOccurs="0" />
+			<xs:element name="firstName" type="STRING_40_TYPE"
+						minOccurs="0" />
+			<xs:element name="middleName" type="STRING_30_TYPE"
+						minOccurs="0" />
+			<xs:element name="lastName" type="STRING_30_TYPE"
+						minOccurs="0" />
+			<xs:element name="suffix" type="STRING_30_TYPE" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="EXACT_OR_EXPLANATION">
+		<xs:sequence>
+			<xs:element name="date" type="DATE_TYPE" />
+			<xs:element name="exactOrExplanation" type="EXACT_OR_EXPLANATION_OPTIONS" />
+			<xs:element name="explanationInfo" type="STRING_1K_TYPE"
+						minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="EXACT_OR_EXPLANATION_OPTIONS">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Exact" />
+			<xs:enumeration value="Explanation" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="MONTH_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="January" />
+			<xs:enumeration value="February" />
+			<xs:enumeration value="March" />
+			<xs:enumeration value="April" />
+			<xs:enumeration value="May" />
+			<xs:enumeration value="June" />
+			<xs:enumeration value="July" />
+			<xs:enumeration value="August" />
+			<xs:enumeration value="September" />
+			<xs:enumeration value="October" />
+			<xs:enumeration value="November" />
+			<xs:enumeration value="December" />
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
