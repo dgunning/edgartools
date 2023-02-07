@@ -2,13 +2,15 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Union, List, Dict
+from functools import lru_cache
 
+import pandas as pd
 from bs4 import Tag
 from rich import box
 from rich.console import Group, Text
 from rich.table import Table
 
-from edgar.core import repr_rich, moneyfmt
+from edgar.core import repr_rich, moneyfmt, df_to_rich_table
 from edgar.xml import find_element, child_text, optional_decimal
 
 FUND_FORMS = ["NPORT-P", "NPORT-EX"]
@@ -315,6 +317,42 @@ class FundReport:
     def name(self):
         return f"{self.general_info.name} - {self.general_info.series_name}"
 
+    @lru_cache(maxsize=2)
+    def investment_data(self) -> pd.DataFrame:
+        """
+        :return: The investments as a pandas dataframe
+        """
+        return pd.DataFrame(
+            [{
+                "name": investment.name,
+                "title": investment.title,
+                "lei": investment.lei,
+                "cusip": investment.cusip,
+                "ticker": investment.identifiers.ticker,
+                "isin": investment.identifiers.isin,
+                "balance": investment.balance,
+                "units": investment.units,
+                "desc_other_units": investment.desc_other_units,
+                "value_usd": investment.value_usd,
+                "pct_value": investment.pct_value,
+                "payoff_profile": investment.payoff_profile,
+                "asset_category": investment.asset_category,
+                "issuer_category": investment.issuer_category,
+                "currency_code": investment.currency_code,
+                "investment_country": investment.investment_country,
+                "restricted": investment.is_restricted_security,
+                "maturity_date": investment.debt_security.maturity_date if investment.debt_security else pd.NA,
+                "annualized_rate": investment.debt_security.annualized_rate if investment.debt_security else pd.NA,
+                "is_default": investment.debt_security.is_default if investment.debt_security else pd.NA,
+                "cash_collateral": investment.security_lending.is_cash_collateral
+                if investment.security_lending else pd.NA,
+                "non_cash_collateral": investment.security_lending.is_non_cash_collateral
+                if investment.security_lending else pd.NA
+            }
+                for investment in self.investments
+            ]
+        ).sort_values(['value_usd', 'name', 'title'], ascending=[False, True, True]).reset_index(drop=True)
+
     @classmethod
     def from_xml(cls,
                  xml: Union[str, Tag]):
@@ -450,6 +488,10 @@ class FundReport:
             else:
                 issuer_category = child_text(investment_or_sec_tag, "issuerCat")
 
+                [
+
+                ]
+
             investments_or_security = InvestmentOrSecurity(
                 name=child_text(investment_or_sec_tag, "name"),
                 lei=child_text(investment_or_sec_tag, "lei"),
@@ -471,6 +513,7 @@ class FundReport:
                 debt_security=DebtSecurity.from_xml(investment_or_sec_tag.find("debtSec")),
                 security_lending=SecurityLending.from_xml(investment_or_sec_tag.find("securityLending"))
             )
+
             investments_or_securities.append(investments_or_security)
 
         fund_report = FundReport(header=header,
@@ -488,7 +531,7 @@ class FundReport:
                                  "Net Assets",
                                  "Investments",
                                  "Period",
-                                 title="Fund Summary", title_style="bold", box=box.SIMPLE)
+                                 title="Fund Summary", title_style="bold deep_sky_blue1", box=box.SIMPLE)
         financials_table.add_row(moneyfmt(self.fund_info.total_assets, curr="$", places=0),
                                  moneyfmt(self.fund_info.total_liabilities, curr="$", places=0),
                                  moneyfmt(self.fund_info.net_assets, curr="$", places=0),
@@ -500,7 +543,7 @@ class FundReport:
     @property
     def metrics_table(self):
         table = Table("Metric", "Currency", "3 month", "1 year", "5 year", "10 year", "30 year",
-                      title="Interest Rate Sensitivity", title_style="bold", box=box.SIMPLE)
+                      title="Interest Rate Sensitivity", title_style="bold deep_sky_blue1", box=box.SIMPLE)
 
         for currency, current_metric in self.fund_info.current_metrics.items():
             table.add_row("Dollar Value 01",
@@ -528,7 +571,7 @@ class FundReport:
                 self.fund_info.credit_spread_risk_non_investment_grade):
             return Text(" ")
         table = Table("Metric", "3 month", "1 year", "5 year", "10 year", "30 year",
-                      title="Credit Spread Risk", title_style="bold", box=box.SIMPLE)
+                      title="Credit Spread Risk", title_style="bold deep_sky_blue1", box=box.SIMPLE)
         if self.fund_info.credit_spread_risk_investment_grade:
             table.add_row("Investment Grade",
                           moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period3Mon),
@@ -546,27 +589,25 @@ class FundReport:
         return table
 
     @property
+    @lru_cache(maxsize=2)
     def investments_table(self):
-        table = Table("Investment", "CUSIP", "Balance", "Value", "Pct", "Category",
-                      title="Investments", title_style="bold", box=box.SIMPLE, row_styles=["bold", ""]
-                      )
-        for investment in self.investments:
-            table.add_row(f"{investment.name} {investment.title}",
-                          investment.cusip,
-                          moneyfmt(investment.balance, curr='', places=0),
-                          moneyfmt(investment.value_usd),
-                          moneyfmt(investment.pct_value, curr='', places=1),
-                          f"{investment.issuer_category or ''} {investment.asset_category or ''}",
-                          )
-        return table
+        investments = (self.investment_data()
+                       .assign(Name=lambda df: df.name,
+                               Title=lambda df: df.title,
+                               Cusip=lambda df: df.cusip,
+                               Value=lambda df: df.value_usd.apply(moneyfmt, curr='$', places=0),
+                               Percent=lambda df: df.pct_value.apply(moneyfmt, curr='', places=1),
+                               Category=lambda df: df.issuer_category + " " + df.asset_category)
+                       ).filter(['Name', 'Title', 'Cusip', 'Category', 'Value', 'Percent'])
+        return df_to_rich_table(investments, title="Investments", title_style="bold deep_sky_blue1", max_rows=2000)
 
     def __rich__(self):
         return Group(
-            Text(self.name),
+            Text(self.name, style="bold dark_sea_green4"),
             self.fund_summary_table,
-            self.investments_table,
             self.metrics_table,
-            self.credit_spread_table
+            self.credit_spread_table,
+            self.investments_table
         )
 
     def __repr__(self):

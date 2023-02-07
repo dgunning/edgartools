@@ -15,6 +15,7 @@ from edgar.core import (get_identity,
 from edgar.filing import (Filing,
                           Filings,
                           get_filings,
+                          get_funds,
                           get_fund_filings,
                           FilingHomepage)
 from edgar.ownership import Ownership

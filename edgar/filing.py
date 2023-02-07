@@ -34,9 +34,10 @@ The module contains the following functions
 """
 
 __all__ = [
-    'get_filings',
     'Filing',
     'Filings',
+    'get_filings',
+    'get_funds',
     'FilingXbrl',
     'FilingDocument',
     'FilingHomepage',
@@ -462,7 +463,7 @@ class Filings:
         page_info = f"Showing {len(page)} filings of {self._original_state.num_filings:,} total {range_str}"
 
         return Group(
-            df_to_rich_table(page, max_rows=len(page)),
+            df_to_rich_table(page, max_rows=len(page), title="Filings"),
             Text(page_info)
         )
 
@@ -549,7 +550,7 @@ def get_filings(year: Years = None,
 
 # Fund filings
 get_fund_filings = partial(get_filings, form=FUND_FORMS)
-
+get_funds = get_fund_filings
 
 class Filing:
     """

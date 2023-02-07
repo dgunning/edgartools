@@ -50,6 +50,13 @@ def test_fund_from_xml():
     print(fund_report)
 
 
+def test_fund_investment_data_as_pandas():
+    print()
+    fund_report = FundReport.from_xml(fund_xml)
+    investment_data = fund_report.investment_data()
+    assert all(column in investment_data for column in ["name", "title", "balance", "investment_country"])
+
+
 def test_parse_sample_1():
     fund_report = FundReport.from_xml(Path('data/nport/samples/N-PORT Sample 1.xml').read_text())
     print()
@@ -110,7 +117,7 @@ def test_get_fund_filings():
     print(fund_filings)
     assert pc.unique(fund_filings.data['form']).to_pylist() == ['NPORT-P', 'NPORT-P/A']
     filings_jan: Filings = fund_filings.filter(date="2021-01-01:2021-01-31")
-    #print(filings_jan)
+    # print(filings_jan)
     min_date, max_date = filings_jan.date_range
     assert min_date >= datetime.strptime('2021-01-01', "%Y-%m-%d").date()
     assert max_date <= datetime.strptime('2021-01-31', "%Y-%m-%d").date()

@@ -228,7 +228,7 @@ class CompanyFilings(Filings):
     def summarize(data) -> pd.DataFrame:
         return (data
                 .assign(size=lambda df: df['size'].apply(display_size),
-                        isXBRL=lambda df: df.isXBRL.map({'1': True, 1: True}).fillna(""),
+                        isXBRL=lambda df: df.isXBRL.map({'1': "\u2713", 1: "\u2713"}).fillna(""),
                         )
                 .filter(["form", "filing_date", "accession_number", "isXBRL"])
                 .rename(columns={"filing_date": "filed", "isXBRL": "xbrl"})
@@ -271,7 +271,9 @@ class CompanyFilings(Filings):
         page.index = self._page_index()
         page_info = f"Showing {len(page)} filings of {self._original_state.num_filings:,} total"
         return Group(
-            df_to_rich_table(CompanyFilings.summarize(page), max_rows=len(page)),
+            df_to_rich_table(CompanyFilings.summarize(page),
+                             max_rows=len(page),
+                             title=f"Filings for {self.company_name} [{self.cik}]"),
             Text(page_info)
         )
 

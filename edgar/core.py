@@ -267,11 +267,9 @@ def repr_df(df, hide_index: bool = True):
 
 table_styles = {
     'form': 'dark_sea_green4',
-    'company': 'bold deep_sky_blue1',
-    'entity': 'deep_sky_blue1',
-    'filingDate': 'bold deep_sky_blue1',
-    'filing_date': 'bold deep_sky_blue1',
-    'filed': 'bold deep_sky_blue1',
+    'filingDate': 'deep_sky_blue1',
+    'filing_date': 'deep_sky_blue1',
+    'filed': 'deep_sky_blue1',
     'security': 'deep_sky_blue1',
     'issuer': 'deep_sky_blue1',
     'fact': 'deep_sky_blue1',
@@ -283,20 +281,27 @@ table_styles = {
 def df_to_rich_table(
         df: Union[pd.DataFrame, pa.Table],
         index_name: Optional[str] = None,
-        max_rows: int = 20) -> Table:
+        title: str = "",
+        title_style:str= "",
+        max_rows: int = 20,
+        table_box: box = box.SIMPLE) -> Table:
     """
     Convert a dataframe to a rich table
+
 
     :param index_name: The name of the index
     :param df: The dataframe to convert to a rich Table
     :param max_rows: The maximum number of rows in the rich Table
+    :param title: The title of the Table
+    :param title_style: The title of the Table
+    :param table_box: The rich box style e.g. box.SIMPLE
     :return: a rich Table
     """
     if isinstance(df, pa.Table):
         # For speed, learn to sample the head and tail of the pyarrow table
         df = df.to_pandas()
 
-    rich_table = Table(box=box.ROUNDED)
+    rich_table = Table(box=table_box, row_styles=["bold", ""], title=title, title_style=title_style or "bold")
     index_name = str(index_name) if index_name else ""
     index_style = table_styles.get(index_name)
     rich_table.add_column(index_name, style=index_style, header_style=index_style)
@@ -491,7 +496,7 @@ def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
     '<0.02>'
 
     """
-    q = Decimal(10) ** -places      # 2 places --> '0.01'
+    q = Decimal(10) ** -places  # 2 places --> '0.01'
     sign, digits, exp = value.quantize(q).as_tuple()
     result = []
     digits = list(map(str, digits))
