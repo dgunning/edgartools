@@ -105,8 +105,12 @@ class CurrentMetric:
     # See https://www.investopedia.com/terms/d/dollar-duration.asp
 
 
-def decimal_or_NA(value: str):
+def decimal_or_na(value: str):
     return value if value == "N/A" else Decimal(value)
+
+
+def datetime_or_na(value: str):
+    return value if value == "N/A" else datetime.strptime(value, "%Y-%m-%d")
 
 
 @dataclass(frozen=True)
@@ -120,9 +124,9 @@ class MonthlyTotalReturn:
     def from_xml(cls, tag: Tag):
         return cls(
             class_id=tag.attrs.get("classId"),
-            return1=decimal_or_NA(tag.attrs.get("rtn1")),
-            return2=decimal_or_NA(tag.attrs.get("rtn2")),
-            return3=decimal_or_NA(tag.attrs.get("rtn3"))
+            return1=decimal_or_na(tag.attrs.get("rtn1")),
+            return2=decimal_or_na(tag.attrs.get("rtn2")),
+            return3=decimal_or_na(tag.attrs.get("rtn3"))
         )
 
 
@@ -136,8 +140,8 @@ class RealizedChange:
                  tag):
         if tag:
             return cls(
-                net_realized_gain=decimal_or_NA(tag.attrs.get("netRealizedGain")),
-                net_unrealized_appreciation=decimal_or_NA(tag.attrs.get("netUnrealizedAppr"))
+                net_realized_gain=decimal_or_na(tag.attrs.get("netRealizedGain")),
+                net_unrealized_appreciation=decimal_or_na(tag.attrs.get("netUnrealizedAppr"))
             )
 
 
@@ -152,9 +156,9 @@ class MonthlyFlow:
                  tag):
         if tag:
             return cls(
-                redemption=decimal_or_NA(tag.attrs.get("redemption")),
-                reinvestment=decimal_or_NA(tag.attrs.get("reinvestment")),
-                sales=decimal_or_NA(tag.attrs.get("sales"))
+                redemption=decimal_or_na(tag.attrs.get("redemption")),
+                reinvestment=decimal_or_na(tag.attrs.get("reinvestment")),
+                sales=decimal_or_na(tag.attrs.get("sales"))
             )
 
 
@@ -211,7 +215,7 @@ class DebtSecurity:
                  tag: Tag):
         if tag and tag.name == "debtSec":
             return cls(
-                maturity_date=datetime.strptime(child_text(tag, "maturityDt"), "%Y-%m-%d"),
+                maturity_date=datetime_or_na(child_text(tag, "maturityDt")),
                 coupon_kind=child_text(tag, "couponKind"),
                 annualized_rate=optional_decimal(tag, "annualizedRt"),
                 is_default=child_text(tag, "isDefault") == "Y",
@@ -376,13 +380,14 @@ class FundReport:
         # Current metrics
         current_metrics_tag = fund_info_tag.find("curMetrics")
         current_metrics = {}
-        for curr_metric_tag in current_metrics_tag.find_all("curMetric"):
-            currency = child_text(curr_metric_tag, "curCd")
-            current_metrics[currency] = CurrentMetric(
-                currency=currency,
-                intrstRtRiskdv01=PeriodType.from_xml(curr_metric_tag.find("intrstRtRiskdv01")),
-                intrstRtRiskdv100=PeriodType.from_xml(curr_metric_tag.find("intrstRtRiskdv100"))
-            )
+        if current_metrics_tag:
+            for curr_metric_tag in current_metrics_tag.find_all("curMetric"):
+                currency = child_text(curr_metric_tag, "curCd")
+                current_metrics[currency] = CurrentMetric(
+                    currency=currency,
+                    intrstRtRiskdv01=PeriodType.from_xml(curr_metric_tag.find("intrstRtRiskdv01")),
+                    intrstRtRiskdv100=PeriodType.from_xml(curr_metric_tag.find("intrstRtRiskdv100"))
+                )
 
         # Return Info
         return_info_tag = fund_info_tag.find("returnInfo")
@@ -494,11 +499,12 @@ class FundReport:
 
     @property
     def metrics_table(self):
-        table = Table("Metric", "3 month", "1 year", "5 year", "10 year", "30 year",
+        table = Table("Metric", "Currency", "3 month", "1 year", "5 year", "10 year", "30 year",
                       title="Interest Rate Sensitivity", title_style="bold", box=box.SIMPLE)
 
         for currency, current_metric in self.fund_info.current_metrics.items():
             table.add_row("Dollar Value 01",
+                          currency,
                           moneyfmt(current_metric.intrstRtRiskdv01.period3Mon),
                           moneyfmt(current_metric.intrstRtRiskdv01.period1Yr),
                           moneyfmt(current_metric.intrstRtRiskdv01.period5Yr),
@@ -506,6 +512,7 @@ class FundReport:
                           moneyfmt(current_metric.intrstRtRiskdv01.period30Yr)
                           )
             table.add_row("Dollar Value 100",
+                          currency,
                           moneyfmt(current_metric.intrstRtRiskdv100.period3Mon, ),
                           moneyfmt(current_metric.intrstRtRiskdv100.period1Yr),
                           moneyfmt(current_metric.intrstRtRiskdv100.period5Yr),
@@ -516,26 +523,32 @@ class FundReport:
 
     @property
     def credit_spread_table(self):
+        if not (
+                self.fund_info.credit_spread_risk_investment_grade or
+                self.fund_info.credit_spread_risk_non_investment_grade):
+            return Text(" ")
         table = Table("Metric", "3 month", "1 year", "5 year", "10 year", "30 year",
                       title="Credit Spread Risk", title_style="bold", box=box.SIMPLE)
-        table.add_row("Investment Grade",
-                      moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period3Mon),
-                      moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period1Yr),
-                      moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period5Yr),
-                      moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period10Yr),
-                      moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period30Yr))
-        table.add_row("Non Investment Grade",
-                      moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period3Mon),
-                      moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period1Yr),
-                      moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period5Yr),
-                      moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period10Yr),
-                      moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period30Yr))
+        if self.fund_info.credit_spread_risk_investment_grade:
+            table.add_row("Investment Grade",
+                          moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period3Mon),
+                          moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period1Yr),
+                          moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period5Yr),
+                          moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period10Yr),
+                          moneyfmt(self.fund_info.credit_spread_risk_investment_grade.period30Yr))
+        if self.fund_info.credit_spread_risk_non_investment_grade:
+            table.add_row("Non Investment Grade",
+                          moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period3Mon),
+                          moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period1Yr),
+                          moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period5Yr),
+                          moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period10Yr),
+                          moneyfmt(self.fund_info.credit_spread_risk_non_investment_grade.period30Yr))
         return table
 
     @property
     def investments_table(self):
         table = Table("Investment", "CUSIP", "Balance", "Value", "Pct", "Category",
-                      title="Investments", title_style="bold", box=box.SIMPLE
+                      title="Investments", title_style="bold", box=box.SIMPLE, row_styles=["bold", ""]
                       )
         for investment in self.investments:
             table.add_row(f"{investment.name} {investment.title}",

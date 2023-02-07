@@ -4,6 +4,8 @@ from pathlib import Path
 
 from rich import print
 
+import pyarrow.compute as pc
+from edgar.filing import get_fund_filings, Filings
 from edgar.fund_report import FundReport, CurrentMetric
 
 fund_xml = Path('data/NPORT.Dupree.xml').read_text()
@@ -40,11 +42,11 @@ def test_fund_from_xml():
     assert fund_report.fund_info.monthly_flow1.sales == Decimal("141189.21")
     assert fund_report.fund_info.monthly_flow2.redemption == Decimal("1069086.08")
     assert fund_report.fund_info.monthly_flow3.reinvestment == Decimal("31270.28")
-    
+
     # Investments
     assert fund_report.investments[0].asset_category == "DBT"
     assert fund_report.investments[0].issuer_category == "MUN"
-    
+
     print(fund_report)
 
 
@@ -100,3 +102,15 @@ def test_parse_sample_5():
     fund_report = FundReport.from_xml(Path('data/nport/samples/N-PORT Sample 5.xml').read_text())
     print()
     print(fund_report)
+
+
+def test_get_fund_filings():
+    fund_filings: Filings = get_fund_filings(year=2021, quarter=1)
+    print()
+    print(fund_filings)
+    assert pc.unique(fund_filings.data['form']).to_pylist() == ['NPORT-P', 'NPORT-P/A']
+    filings_jan: Filings = fund_filings.filter(date="2021-01-01:2021-01-31")
+    #print(filings_jan)
+    min_date, max_date = filings_jan.date_range
+    assert min_date >= datetime.strptime('2021-01-01', "%Y-%m-%d").date()
+    assert max_date <= datetime.strptime('2021-01-31', "%Y-%m-%d").date()

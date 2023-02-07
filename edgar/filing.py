@@ -4,7 +4,7 @@ import re
 import webbrowser
 from dataclasses import dataclass
 from datetime import datetime
-from functools import lru_cache
+from functools import lru_cache, partial
 from io import BytesIO
 from typing import Tuple, List, Union, Optional
 
@@ -23,6 +23,7 @@ from rich.text import Text
 from edgar.core import (http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.xbrl import FilingXbrl
+from edgar.fund_report import FUND_FORMS
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -39,6 +40,7 @@ __all__ = [
     'FilingXbrl',
     'FilingDocument',
     'FilingHomepage',
+    'get_fund_filings',
     'available_quarters'
 ]
 
@@ -543,6 +545,10 @@ def get_filings(year: Years = None,
     # Finally sort by filing date
     filings = Filings(filings.data.sort_by([("filing_date", "descending")]))
     return filings
+
+
+# Fund filings
+get_fund_filings = partial(get_filings, form=FUND_FORMS)
 
 
 class Filing:
