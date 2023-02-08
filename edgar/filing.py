@@ -69,6 +69,8 @@ Quarters = Union[int, List[int], range]
 
 accession_number_re = re.compile(r"\d{10}\-\d{2}\-\d{6}$")
 
+xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
+
 
 def current_year_and_quarter() -> Tuple[int, int]:
     now = datetime.now()
@@ -552,6 +554,7 @@ def get_filings(year: Years = None,
 get_fund_filings = partial(get_filings, form=FUND_FORMS)
 get_funds = get_fund_filings
 
+
 class Filing:
     """
     A single SEC filing. Allow you to access the documents and data for that filing
@@ -844,9 +847,10 @@ class FilingHomepage:
 
     @property
     def xbrl_document(self):
-        xbrl_document_query = \
-            "Description.isin(['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT'])"
-        matching_files = self.get_matching_files(xbrl_document_query)
+        """Find and return the xbrl document."""
+
+        # Change from .query syntax due to differences in how pandas executes queries on online environmments
+        matching_files = self.files[self.files.Description.isin(xbrl_document_types)]
         if not matching_files.empty:
             rec = matching_files.iloc[0]
             return FilingDocument.from_dataframe_row(rec)
