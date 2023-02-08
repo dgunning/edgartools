@@ -854,7 +854,7 @@ class FilingHomepage:
     def get_matching_files(self,
                            query: str) -> pd.DataFrame:
         """ return the files that match the query"""
-        return self.files.query(query).reset_index(drop=True).filter(filing_file_cols)
+        return self.files.query(query, engine="python").reset_index(drop=True).filter(filing_file_cols)
 
     @property
     def documents(self) -> pd.DataFrame:
