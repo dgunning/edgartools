@@ -39,6 +39,7 @@ __all__ = [
     'get_filings',
     'get_funds',
     'FilingXbrl',
+    'FilingsState',
     'FilingDocument',
     'FilingHomepage',
     'get_fund_filings',

@@ -14,7 +14,7 @@ from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
 
-from edgar.core import (http_client, repr_df, log, Result, df_to_rich_table, repr_rich, display_size,
+from edgar.core import (http_client, log, Result, df_to_rich_table, repr_rich, display_size,
                         filter_by_date, IntString, InvalidDateException)
 from edgar.filing import Filing, Filings, FilingsState
 

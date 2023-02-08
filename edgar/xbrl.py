@@ -4,10 +4,10 @@ from typing import Dict, Union, Tuple
 import duckdb
 import pandas as pd
 from bs4 import BeautifulSoup
-
-from edgar.core import log, repr_df, repr_rich, df_to_rich_table
-from edgar.xml import child_text
 from rich.console import Group, Text
+
+from edgar.core import log, repr_rich, df_to_rich_table
+from edgar.xml import child_text
 
 """
 This module parses XBRL documents into objects that contain the structured data
