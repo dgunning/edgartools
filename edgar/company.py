@@ -277,13 +277,6 @@ class CompanyFilings(Filings):
             Text(page_info)
         )
 
-    def _repr_html_(self):
-        start_date, end_date = self.date_range
-        return f"""
-            <h3>Filings for {self.company_name} - {self.cik}</h3>
-            {repr_df(pd.DataFrame([{'Count': len(self), 'Start': start_date, 'End': end_date}]))}
-        """
-
 
 class CompanyData:
     """
@@ -438,14 +431,6 @@ class CompanyData:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
-
-    def _repr_html_(self):
-        summary = pd.DataFrame([{'CIK': self.cik, 'Industry': self.industry, 'Category': self.category}])
-        return f"""
-            <h3>{self.name}</h3>
-            {repr_df(summary)}
-            {repr_df(self.ticker_info())}
-            """
 
 
 def parse_filings(filings_json: Dict[str, object],

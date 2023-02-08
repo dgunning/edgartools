@@ -53,12 +53,6 @@ class NamespaceInfo:
     def __repr__(self):
         return f"NamespaceInfo(xmlns={self.xmlns}, namespace2tag={self.namespace2tag})"
 
-    def _repr_html_(self):
-        return f"""
-        <h4>Namespaces</h4>
-        {repr_df(self.summary())}
-        """
-
 
 class XbrlFacts:
 
@@ -227,7 +221,3 @@ class FilingXbrl:
             df_to_rich_table(self.namespace_info.summary())
         )
 
-    def _repr_html_(self):
-        return f"""<h4>Extracted XBRL</h4>
-        {repr_df(self.summary())} 
-        """

@@ -472,12 +472,6 @@ class Filings:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def _repr_html_(self):
-        return f"""
-        <h3>{self.summary}</h3>
-        {self.data.to_pandas()._repr_html_()}
-        """
-
 
 def get_filings(year: Years = None,
                 quarter: Quarters = None,
