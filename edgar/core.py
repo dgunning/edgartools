@@ -2,6 +2,7 @@ import gzip
 import logging.config
 import os
 import re
+import warnings
 import threading
 from _thread import interrupt_main
 from datetime import datetime
@@ -261,7 +262,13 @@ def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = Non
 def repr_df(df, hide_index: bool = True):
     disp = df.style
     if hide_index:
-        disp = disp.hide(axis="index")
+        # TODO
+        # Note this is deprecated in pandas 1.4.0 but needed to support python 3.7/pandas 1.3.5
+        # Should be instead
+        # disp = disp.hide(axis="index")
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            disp = disp.hide_index()
     return disp._repr_html_()
 
 
