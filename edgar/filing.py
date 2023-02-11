@@ -741,7 +741,8 @@ class FilingDocument:
         """
         :return: The full sec url
         """
-        return f"{sec_dot_gov}{self.path}"
+        # Never use the ixbrl viewer
+        return f"{sec_dot_gov}{self.path}".replace("ix?doc=/", "")
 
     def open(self):
         """Open the filing document"""

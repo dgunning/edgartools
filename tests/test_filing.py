@@ -311,6 +311,20 @@ def test_filing_html():
     assert "<HTML>" in html
 
 
+def test_filing_html_for_ixbrl_filing():
+    filing = Filing(form='10-Q', company='1 800 FLOWERS COM INC',
+                    cik=1084869, filing_date='2023-02-10',
+                    accession_no='0001437749-23-002992')
+    html = filing.html()
+    assert html
+    assert "1-800-FLOWERS.COM" in html
+
+    filing = Filing(form='10-Q', company='RALPH LAUREN CORP',
+                    cik=1037038, filing_date='2023-02-10',
+                    accession_no='0001037038-23-000009')
+    assert "RALPH LAUREN" in filing.html()
+
+
 def test_filing_text():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
