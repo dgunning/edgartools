@@ -311,6 +311,20 @@ def test_filing_html():
     assert "<HTML>" in html
 
 
+def test_filing_text():
+    filing = Filing(form='10-K', company='10x Genomics, Inc.',
+                    cik=1770787, filing_date='2020-02-27',
+                    accession_no='0001193125-20-052640')
+    text_document = filing.homepage.text_document
+    assert text_document.description == "Complete submission text file"
+    assert text_document.document == "0001193125-20-052640.txt"
+    assert text_document
+    # Get the text
+    text = filing.text()
+    assert text
+    assert "ACCESSION NUMBER:		0001193125-20-052640" in text
+
+
 def test_primary_xml_for_10k():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',

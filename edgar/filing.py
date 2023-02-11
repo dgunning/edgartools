@@ -588,9 +588,14 @@ class Filing:
 
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
-        xml_document = self.homepage.primary_xml_document
+        xml_document: FilingDocument = self.homepage.primary_xml_document
         if xml_document:
             return xml_document.download(text=True)
+
+    def text(self) -> str:
+        """Return the complete text submission file"""
+        text_document: FilingDocument = self.homepage.text_document
+        return text_document.download(text=True)
 
     def xbrl(self) -> Optional[FilingXbrl]:
         """
@@ -830,6 +835,12 @@ class FilingHomepage:
         for doc in self.primary_documents:
             if doc.display_extension == ".xml":
                 return doc
+
+    @property
+    def text_document(self) -> FilingDocument:
+        "Get the full text submission file"
+        res = self.files[self.files.Description == "Complete submission text file"]
+        return FilingDocument.from_dataframe_row(res.iloc[0])
 
     @property
     def primary_html_document(self) -> Optional[FilingDocument]:
