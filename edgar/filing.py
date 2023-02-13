@@ -607,6 +607,15 @@ class Filing:
             xbrl_text = xbrl_document.download(text=True)
             return FilingXbrl.parse(xbrl_text)
 
+    def data_object(self):
+        """ Get this filing as the data object that it might be"""
+        from edgar import obj
+        return obj(self)
+
+    def obj(self):
+        """Alias for data_object()"""
+        return self.data_object()
+
     def open_homepage(self):
         """Open the homepage in the browser"""
         webbrowser.open(self.homepage_url)

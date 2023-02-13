@@ -1,3 +1,12 @@
+"""
+Ownership contains the domain model for forms
+- 3 initial ownership
+- 4 changes in ownership and
+- 5 annual ownership statement
+
+The top level object is Ownership
+
+"""
 from dataclasses import dataclass
 from typing import List, Dict, Tuple
 
@@ -626,7 +635,7 @@ class DerivativeTable:
 
 class Ownership:
     """
-    Contains information from ownership documents - Forms 3,4 and 5
+    Contains information from ownership documents - Forms 3, 4 and 5
     """
 
     def __init__(self,
