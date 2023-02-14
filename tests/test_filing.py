@@ -309,6 +309,16 @@ def test_filing_html():
     html = filing.html()
     assert html
     assert "<HTML>" in html
+    assert "10x Genomics, Inc." in html
+
+
+def test_filing_markdown():
+    filing = Filing(form='10-K', company='10x Genomics, Inc.',
+                    cik=1770787, filing_date='2020-02-27',
+                    accession_no='0001193125-20-052640')
+    markdown = filing.markdown()
+    assert markdown
+    assert "10x Genomics, Inc." in markdown
 
 
 def test_filing_html_for_ixbrl_filing():

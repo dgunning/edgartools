@@ -17,13 +17,15 @@ import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
-from rich.console import Group
+from rich.console import Group, Console
+from rich.markdown import Markdown
 from rich.text import Text
 
 from edgar.core import (http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.xbrl import FilingXbrl
 from edgar.fund_report import FUND_FORMS
+from markdownify import markdownify
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -441,10 +443,8 @@ class Filings:
 
     @property
     def summary(self):
-        start_date, end_date = self.date_range
-        range_str = f"from {start_date} to {end_date}" if start_date else ""
-        return (f"Showing {self.data_pager.page_size} filings of "
-                f"{self._original_state.num_filings:,} total {range_str}")
+        return (f"Showing {self.data_pager.page_size} of "
+                f"{self._original_state.num_filings:,} filings")
 
     def _page_index(self) -> range:
         """Create the range index to set on the page dataframe depending on where in the data we are
@@ -461,9 +461,7 @@ class Filings:
         page.index = self._page_index()
 
         # Show paging information
-        start_date, end_date = self.date_range
-        range_str = f"from {start_date} to {end_date}" if start_date else ""
-        page_info = f"Showing {len(page)} filings of {self._original_state.num_filings:,} total {range_str}"
+        page_info = f"Showing {len(page)} of {self._original_state.num_filings:,} filings"
 
         return Group(
             df_to_rich_table(page, max_rows=len(page), title="Filings"),
@@ -596,6 +594,15 @@ class Filing:
         """Return the complete text submission file"""
         text_document: FilingDocument = self.homepage.text_document
         return text_document.download(text=True)
+
+    def markdown(self) -> str:
+        """return the markdown version of this filing html"""
+        return markdownify(self.html())
+
+    def view(self):
+        """Preview this filing's primary document as markdown. This should display in the console"""
+        console = Console()
+        console.print(Markdown(self.markdown()))
 
     def xbrl(self) -> Optional[FilingXbrl]:
         """
