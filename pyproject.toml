@@ -27,13 +27,14 @@ dependencies = [
   "httpx>=0.23.1",
   "pandas>=1.1.5",
   "duckdb>=0.6.0",
-  "pyarrow>=10.0.0",
+  "pyarrow>=9.0.0",
   "bs4==0.0.1",
   "lxml>=4.4",
   "rich>=12.6.0",
   "fastcore>=1.5.20",
   "humanize>=4.0.0",
-  "charset-normalizer>3.0.0"
+  "charset-normalizer>2.1.1",
+  "markdownify>0.11.0"
 ]
 dynamic = ["version"]
 
