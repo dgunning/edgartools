@@ -1,9 +1,12 @@
-from edgar.core import IntString, repr_rich
 from typing import List, Optional
+
 from bs4 import Tag
-from edgar.xml import child_text, child_value
 from rich.console import Console, ConsoleOptions, RenderResult, Group
 from rich.table import Table
+
+from edgar._rich import repr_rich
+from edgar._xml import child_text, child_value
+from edgar.core import IntString
 
 __all__ = [
     'Address',

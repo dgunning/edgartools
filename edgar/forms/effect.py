@@ -1,11 +1,10 @@
 from bs4 import BeautifulSoup
 import pandas as pd
-from edgar.core import repr_rich, df_to_rich_table
+from edgar._rich import repr_rich, df_to_rich_table
 from rich.console import Group, Text
 from functools import lru_cache
-from edgar.xml import child_text
+from edgar._xml import child_text
 from typing import Optional
-from edgar import get_company
 
 __all__ = [
     'Filer',
@@ -86,6 +85,7 @@ class Effect:
         return self.effectiveness_data.accession_no
 
     def get_source_filing(self):
+        from edgar import get_company
         if self.source_accession_no:
             """Search for the source filing using the accession number"""
             company = get_company(int(self.cik))

@@ -1,4 +1,4 @@
-from edgar.form import list_forms
+from edgar.forms import list_forms
 
 __all__ = [
     'list_takedown_forms'

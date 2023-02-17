@@ -1,6 +1,7 @@
-from bs4 import Tag, BeautifulSoup
-from typing import Optional, Tuple, Union
 from decimal import Decimal
+from typing import Optional, Tuple, Union
+
+from bs4 import Tag, BeautifulSoup
 
 __all__ = [
     'child_text',

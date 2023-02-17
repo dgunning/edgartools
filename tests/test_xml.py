@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from pathlib import Path
-from edgar.xml import child_value, child_text, value_or_footnote, get_footnote_ids, value_with_footnotes, find_element, \
+from edgar._xml import child_value, child_text, value_or_footnote, get_footnote_ids, value_with_footnotes, find_element, \
     optional_decimal
 from decimal import Decimal
 

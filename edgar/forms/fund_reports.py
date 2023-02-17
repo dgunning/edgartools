@@ -10,8 +10,9 @@ from rich import box
 from rich.console import Group, Text
 from rich.table import Table
 
-from edgar.core import repr_rich, moneyfmt, df_to_rich_table
-from edgar.xml import find_element, child_text, optional_decimal
+from edgar._rich import repr_rich, df_to_rich_table
+from edgar.core import moneyfmt
+from edgar._xml import find_element, child_text, optional_decimal
 
 FUND_FORMS = ["NPORT-P", "NPORT-EX"]
 

@@ -10,7 +10,7 @@ from typing import List
 
 from edgar import get_filings, Filings, Filing, get_company
 from edgar.core import default_page_size
-from edgar.filing import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
+from edgar._filings import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
 from rich import print
 
 pd.options.display.max_colwidth = 200
@@ -267,15 +267,6 @@ def test_company_specs():
     assert company_specs.splits[0] == (0, 62)
     assert company_specs.splits[1] == (62, 74)
     assert company_specs.schema.names[:2] == ['company', 'form']
-
-
-def test_filings_toduckdb():
-    filings = cached_filings(2022, 3, index="xbrl")
-    filings_db = filings.to_duckdb()
-    result_df = filings_db.execute("""
-    select * from filings where form=='10-Q'
-    """).df()
-    assert len(result_df.form.drop_duplicates()) == 1
 
 
 def test_filing_primary_document():

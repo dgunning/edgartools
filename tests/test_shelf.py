@@ -1,6 +1,6 @@
 from rich import print
 
-from edgar.shelf import list_takedown_forms
+from edgar.forms.shelfofferings import list_takedown_forms
 
 
 def test_list_takedown_forms():

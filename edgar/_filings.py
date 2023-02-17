@@ -22,10 +22,11 @@ from rich.console import Group, Console
 from rich.text import Text
 
 from edgar._markdown import MarkdownContent
-from edgar.core import (http_client, download_text, download_file, log, df_to_rich_table, repr_rich, display_size,
+from edgar._rich import df_to_rich_table, repr_rich
+from edgar._xbrl import FilingXbrl
+from edgar.core import (http_client, download_text, download_file, log, display_size,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
-from edgar.fund_report import FUND_FORMS
-from edgar.xbrl import FilingXbrl
+from edgar.forms.fund_reports import FUND_FORMS
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -270,13 +271,6 @@ class Filings:
         df = self.data.to_pandas()
         return df.filter(columns) if len(columns) > 0 else df
 
-    def to_duckdb(self):
-        """return an in memory duck db instance over the filings"""
-        import duckdb
-        con = duckdb.connect(database=':memory:')
-        con.register('filings', self.data)
-        log.info("Created an in-memory DuckDB database with table 'filings'")
-        return con
 
     def save_parquet(self, location: str):
         """Save the filing index as parquet"""
@@ -654,7 +648,7 @@ class Filing:
 
     def get_entity(self):
         """Get the company to which this filing belongs"""
-        from edgar.company import CompanyData
+        from edgar._companies import CompanyData
         return CompanyData.for_cik(self.cik)
 
     def get_related_filings(self):

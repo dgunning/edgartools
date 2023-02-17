@@ -1,12 +1,13 @@
 import re
 
 from markdownify import markdownify
+from rich import box
 from rich.console import Group
+from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
-from rich.markdown import Markdown
-from rich import box
-from edgar.core import repr_rich
+
+from edgar._rich import repr_rich
 
 __all__ = [
     'convert_table',

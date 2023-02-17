@@ -16,10 +16,11 @@ from bs4 import Tag
 from rich.console import Group, Text
 from rich.panel import Panel
 
+from edgar._party import Address
+from edgar._rich import repr_rich, df_to_rich_table
+from edgar._xml import (child_text, child_value)
+from edgar.core import IntString
 from edgar.core import get_bool
-from edgar.core import repr_rich, df_to_rich_table, IntString
-from edgar.party import Address
-from edgar.xml import (child_text, child_value)
 
 __all__ = [
     'Owner',

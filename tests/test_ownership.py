@@ -2,8 +2,8 @@ from pathlib import Path
 
 from rich import print
 
-from edgar.ownership import *
-from edgar.filing import Filing
+from edgar.forms.ownership import *
+from edgar._filings import Filing
 
 snow_form3 = Ownership.from_xml(Path('data/form3.snow.xml').read_text())
 snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())

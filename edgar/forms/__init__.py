@@ -1,9 +1,12 @@
+from dataclasses import dataclass
+from functools import lru_cache
+
 import pandas as pd
 from bs4 import BeautifulSoup
-from edgar.core import download_text, http_client, df_to_rich_table, repr_rich, sec_dot_gov
-from functools import lru_cache
 from rich.console import Group, Text
-from dataclasses import dataclass
+
+from edgar._rich import df_to_rich_table, repr_rich
+from edgar.core import download_text, http_client, sec_dot_gov
 
 __all__ = [
     'SecForms',

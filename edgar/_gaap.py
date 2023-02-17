@@ -1,6 +1,8 @@
-import pandas as pd
-from edgar.core import get_resource, Result
 from functools import lru_cache
+
+import pandas as pd
+
+from edgar.core import get_resource, Result
 
 data_dir = get_resource('data')
 

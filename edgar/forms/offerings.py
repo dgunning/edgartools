@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup, Tag
-from edgar.xml import child_text, child_value
-from edgar.party import Issuer, Person, Address
-from edgar.core import repr_rich
+from edgar._xml import child_text, child_value
+from edgar._party import Issuer, Person, Address
+from edgar._rich import repr_rich
 from rich.table import Table
 from rich.console import Group, Text, RenderableType
 from typing import List

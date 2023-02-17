@@ -5,8 +5,8 @@ from pathlib import Path
 from rich import print
 
 import pyarrow.compute as pc
-from edgar.filing import get_fund_filings, Filings
-from edgar.fund_report import FundReport, CurrentMetric
+from edgar import get_fund_filings, Filings
+from edgar.forms.fund_reports import FundReport, CurrentMetric
 
 fund_xml = Path('data/NPORT.Dupree.xml').read_text()
 

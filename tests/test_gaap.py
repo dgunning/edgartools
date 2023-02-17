@@ -1,4 +1,4 @@
-from edgar.gaap import get_gaap
+from edgar._gaap import get_gaap
 from edgar.core import log
 
 

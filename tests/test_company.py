@@ -5,9 +5,9 @@ import humanize
 import pandas as pd
 import pyarrow.compute as pc
 
-from edgar.company import *
-from edgar.company import parse_company_submissions, CompanyConcept, CompanyFiling
-from edgar.filing import Filing, get_filings
+from edgar._companies import *
+from edgar._companies import parse_company_submissions, CompanyConcept, CompanyFiling
+from edgar._filings import Filing, get_filings
 from edgar.core import default_page_size
 
 from rich import print
@@ -54,18 +54,6 @@ def test_get_company_facts():
     assert company_facts
     assert len(company_facts) > 100
     assert "1318605" in str(company_facts)
-
-
-def test_get_company_facts_db():
-    company_facts: CompanyFacts = get_company_facts(1318605)
-    db = company_facts.to_duckdb()
-    df = db.execute("""
-    select * from facts
-    """).df()
-    print()
-    print(df)
-    assert not df.start.isnull().all()
-    assert not df.end.isnull().all()
 
 
 def test_company_get_facts():

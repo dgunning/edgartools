@@ -5,18 +5,17 @@ import pyarrow as pa
 import pyarrow.compute as pc
 import importlib
 from datetime import datetime
+from edgar._rich import *
 from edgar.core import (decode_content,
                         get_identity,
                         set_identity,
                         ask_for_identity,
                         display_size,
-                        repr_rich,
                         Result,
                         filter_by_date,
                         http_client,
                         InvalidDateException,
                         client_headers,
-                        df_to_rich_table,
                         download_file,
                         extract_dates)
 import re

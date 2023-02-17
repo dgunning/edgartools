@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import List, Dict, Optional, Union, Tuple
 
-import duckdb
 import httpx
 import numpy as np
 import pandas as pd
@@ -14,9 +13,10 @@ from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
 
-from edgar.core import (http_client, log, Result, df_to_rich_table, repr_rich, display_size,
+from edgar._filings import Filing, Filings, FilingsState
+from edgar._rich import df_to_rich_table, repr_rich
+from edgar.core import (http_client, log, Result, display_size,
                         filter_by_date, IntString, InvalidDateException)
-from edgar.filing import Filing, Filings, FilingsState
 
 __all__ = [
     'Address',
@@ -102,7 +102,7 @@ class CompanyFiling(Filing):
                  primary_document: str,
                  primary_doc_description: str,
                  is_xbrl: bool,
-                 is_inline_xbrl: str):
+                 is_inline_xbrl: bool):
         super().__init__(cik=cik, company=company, form=form, filing_date=filing_date, accession_no=accession_no)
         self.report_date = report_date
         self.file_number: str = file_number
@@ -138,12 +138,6 @@ class CompanyFacts:
         self.facts: pa.Table = facts
         self.fact_meta: pd.DataFrame = fact_meta
 
-    @lru_cache(maxsize=1)
-    def to_duckdb(self):
-        con = duckdb.connect(database=':memory:')
-        con.register('facts', self.facts)
-        return con
-
     def to_pandas(self):
         return self.facts.to_pandas()
 
@@ -153,7 +147,7 @@ class CompanyFacts:
     def num_facts(self):
         return len(self.fact_meta)
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         return Group(
             Text(f"Company Facts({self.name} [{self.cik}] {len(self.facts):,} total facts)")
             ,
@@ -209,7 +203,7 @@ class CompanyFilings(Filings):
         if res:
             return CompanyFilings(data=res.data, cik=self.cik, company_name=self.company_name)
 
-    def latest(self, n: int = 1) -> int:
+    def latest(self, n: int = 1):
         """Get the latest n filings"""
         sort_indices = pc.sort_indices(self.data, sort_keys=[("filing_date", "descending")])
         sort_indices_top = sort_indices[:min(n, len(sort_indices))]
@@ -234,7 +228,7 @@ class CompanyFilings(Filings):
                 .rename(columns={"filing_date": "filed", "isXBRL": "xbrl"})
                 )
 
-    def next(self) -> Optional[pa.Table]:
+    def next(self):
         """Show the next page"""
         data_page = self.data_pager.next()
         if data_page is None:
@@ -247,7 +241,7 @@ class CompanyFilings(Filings):
                               company_name=self.company_name,
                               original_state=filings_state)
 
-    def previous(self) -> Optional[pa.Table]:
+    def previous(self):
         """
         Show the previous page of the data
         :return:
@@ -266,7 +260,7 @@ class CompanyFilings(Filings):
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         page = self.data_pager.current().to_pandas()
         page.index = self._page_index()
         page_info = f"Showing {len(page)} filings of {self._original_state.num_filings:,} total"
@@ -328,7 +322,7 @@ class CompanyData:
         if cik:
             return CompanyData.for_cik(cik)
 
-    def get_facts(self) -> CompanyFacts:
+    def get_facts(self) -> Optional[CompanyFacts]:
         """
         Get the company facts
         :return: CompanyFacts

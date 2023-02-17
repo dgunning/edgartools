@@ -1,13 +1,11 @@
-from functools import lru_cache
 from typing import Dict, Union, Tuple
 
-import duckdb
 import pandas as pd
 from bs4 import BeautifulSoup
 from rich.console import Group, Text
 
-from edgar.core import log, repr_rich, df_to_rich_table
-from edgar.xml import child_text
+from edgar._rich import repr_rich, df_to_rich_table
+from edgar._xml import child_text
 
 """
 This module parses XBRL documents into objects that contain the structured data
@@ -75,7 +73,7 @@ class XbrlFacts:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         return Group(
             Text("Facts"),
             df_to_rich_table(self.data[['namespace', 'fact', 'value']].set_index('fact'),
@@ -93,7 +91,7 @@ class FilingXbrl:
     def __init__(self,
                  facts: pd.DataFrame,
                  namespace_info: NamespaceInfo):
-        self.facts: pd.DataFrame = XbrlFacts(facts)
+        self.facts: XbrlFacts = XbrlFacts(facts)
         self.namespace_info: NamespaceInfo = namespace_info
 
     def _dei_value(self, fact: str):
@@ -113,13 +111,6 @@ class FilingXbrl:
     @property
     def form_type(self):
         return self._dei_value('DocumentType')
-
-    @lru_cache(maxsize=1)
-    def to_duckdb(self):
-        con = duckdb.connect(database=':memory:')
-        con.register('facts', self.facts.data)
-        log.info("Created an in-memory DuckDB database with table 'facts'")
-        return con
 
     @classmethod
     def parse(cls, xbrl_text: str):
@@ -211,7 +202,7 @@ class FilingXbrl:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         return Group(
             Text(f"Form {self.form_type} Extracted XBRL"),
             df_to_rich_table(self.summary().set_index("company")),
@@ -220,4 +211,3 @@ class FilingXbrl:
             Text("Taxonomies"),
             df_to_rich_table(self.namespace_info.summary())
         )
-

@@ -1,6 +1,6 @@
 from rich import print
 
-from edgar.form import SecForms, list_forms
+from edgar.forms import list_forms
 
 
 def test_list_forms():

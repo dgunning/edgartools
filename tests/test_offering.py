@@ -1,7 +1,7 @@
 from pathlib import Path
-from edgar.offering import Offering
-from edgar.party import Person
-from rich import print, inspect
+from edgar.forms.offerings import Offering
+from edgar._party import Person
+from rich import print
 
 formD_xml1 = Path("data/D.1685REIT.xml").read_text()
 formD_xml2 = Path("data/D.APFund.xml").read_text()
