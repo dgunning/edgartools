@@ -129,18 +129,6 @@ df = company_facts.to_pandas()
 
 Facts differ among companies. To see what facts are available you can use the `facts_meta` property.
 
-### Getting the facts as a DuckDB table
-Ypu can convert the facts to a DuckDB database which allows you to query the facts using SQL.
-
-```python
-    company_facts: CompanyFacts = get_company_facts(1318605)
-    db = company_facts.to_duckdb()
-    df = db.execute("""
-    select * from facts
-    """).df()
-```
-
-
 
 # Working with a Filing
 

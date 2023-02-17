@@ -167,6 +167,25 @@ You can open the filing homepage in the browser using `filing.homepage.open()`.
 filing.homepage.open()
 ```
 
+### View the filing as Markdown
+You can view the filing's HTML content as markdown in the console using `view()`. It works for all filing types
+but can be a little slow for filings with large HTML files
+```python
+filing.view()
+```
+
+### Get the filing's html
+You can get the html content of the filing using`.html()`
+```python
+filing.html()
+```
+
+### Get the filing's html as Markdown
+You can get the html content as markdown using`.markdown()`
+```python
+filing.markdown()
+```
+
 ### Working with XBRL filings
 
 Some filings are in **XBRL (eXtensible Business Markup Language)** format. 
@@ -189,20 +208,4 @@ filing_xbrl = filing.xbrl()
 ![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/10Q_xbrl.jpg)
 
 
-#### Use DuckDB to query the filings
 
-A conveient way to query the filings data is to use **DuckDB**. If you call the `to_duckdb` function, you get an in-memory
-DuckDB database instance, with the filings registered as a table called `filings`.
-Then you can work directy with the DuckDB database, and run SQL against the filings data.
-
-In this example, we filter filings for **S-1** form types.
-
-```python
-db = filings.to_duckdb()
-# a duckdb.DuckDBPyConnection
-
-# Query the filings for S-1 filings and return a dataframe
-db.execute("""
-select * from filings where Form == 'S-1'
-""").df()
-```
