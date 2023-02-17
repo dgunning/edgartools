@@ -6,7 +6,7 @@ from rich import print
 
 import pyarrow.compute as pc
 from edgar import get_fund_filings, Filings
-from edgar.forms.fund_reports import FundReport, CurrentMetric
+from edgar.fundreports import FundReport, CurrentMetric
 
 fund_xml = Path('data/NPORT.Dupree.xml').read_text()
 

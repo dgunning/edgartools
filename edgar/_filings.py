@@ -26,7 +26,7 @@ from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar.core import (http_client, download_text, download_file, log, display_size,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
-from edgar.forms.fund_reports import FUND_FORMS
+from edgar.fundreports import FUND_FORMS
 
 """ Contain functionality for working with SEC filing indexes and filings
 

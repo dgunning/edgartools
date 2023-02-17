@@ -23,10 +23,10 @@ from edgar._filings import (Filing,
 from edgar._xbrl import FilingXbrl
 from edgar.core import (get_identity,
                         set_identity)
-from edgar.forms.effect import Effect
-from edgar.forms.fund_reports import FundReport
-from edgar.forms.offerings import Offering
-from edgar.forms.ownership import Ownership
+from edgar.effect import Effect
+from edgar.fundreports import FundReport
+from edgar.offerings import Offering
+from edgar.ownership import Ownership
 
 
 def matches_form(sec_filing: Filing,

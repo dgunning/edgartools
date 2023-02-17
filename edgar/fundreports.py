@@ -14,13 +14,13 @@ from edgar._rich import repr_rich, df_to_rich_table
 from edgar.core import moneyfmt
 from edgar._xml import find_element, child_text, optional_decimal
 
-FUND_FORMS = ["NPORT-P", "NPORT-EX"]
-
 __all__ = [
-    'FUND_FORMS',
     "FundReport",
-    "CurrentMetric"
+    "CurrentMetric",
+    "FUND_FORMS"
 ]
+
+FUND_FORMS = ["NPORT-P", "NPORT-EX"]
 
 
 @dataclass(frozen=True)

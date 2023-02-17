@@ -21,7 +21,7 @@ containing data about transactions and holdings.
 
 ```python
 from edgar import CompanyData
-from edgar.forms.ownership import Ownership
+from edgar.ownership import Ownership
 
 # Get Snowflake
 company = CompanyData.for_ticker("SNOW")

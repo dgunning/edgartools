@@ -2,7 +2,7 @@ from pathlib import Path
 
 from rich import print
 
-from edgar.forms.ownership import *
+from edgar.ownership import *
 from edgar._filings import Filing
 
 snow_form3 = Ownership.from_xml(Path('data/form3.snow.xml').read_text())

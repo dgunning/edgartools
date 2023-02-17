@@ -10,8 +10,11 @@ from edgar.core import download_text, http_client, sec_dot_gov
 
 __all__ = [
     'SecForms',
-    'list_forms'
+    'list_forms',
+    'FUND_FORMS'
 ]
+
+FUND_FORMS = ["NPORT-P", "NPORT-EX"]
 
 
 @lru_cache(maxsize=1)

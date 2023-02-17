@@ -1,5 +1,5 @@
 from pathlib import Path
-from edgar.forms.offerings import Offering
+from edgar.offerings import Offering
 from edgar._party import Person
 from rich import print
 
