@@ -1,18 +1,10 @@
 # API Reference
 
-::: edgar.company
+::: edgar._filings
 
-::: edgar.filing
+::: edgar._companies
 
-::: edgar.effect
+::: edgar.forms
 
-::: edgar.ownership
-
-::: edgar.offering
-
-::: edgar.party
-
-::: edgar.xml
-
-::: edgar.xbrl
+::: edgar._xbrl
 
