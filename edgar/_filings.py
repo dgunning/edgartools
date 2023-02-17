@@ -20,6 +20,7 @@ from fastcore.parallel import parallel
 from markdownify import markdownify
 from rich.console import Group, Console
 from rich.text import Text
+from rich.panel import Panel
 
 from edgar._markdown import MarkdownContent
 from edgar._rich import df_to_rich_table, repr_rich
@@ -271,7 +272,6 @@ class Filings:
         df = self.data.to_pandas()
         return df.filter(columns) if len(columns) > 0 else df
 
-
     def save_parquet(self, location: str):
         """Save the filing index as parquet"""
         pq.write_table(self.data, location)
@@ -457,9 +457,11 @@ class Filings:
         # Show paging information
         page_info = f"Showing {len(page)} of {self._original_state.num_filings:,} filings"
 
-        return Group(
-            df_to_rich_table(page, max_rows=len(page), title="Filings"),
-            Text(page_info)
+        return Panel(
+            Group(
+                df_to_rich_table(page, max_rows=len(page)),
+                Text(page_info)
+            ), title="Filings"
         )
 
     def __repr__(self):

@@ -12,6 +12,7 @@ import pyarrow.compute as pc
 from fastcore.basics import listify
 from rich.console import Group
 from rich.text import Text
+from rich.panel import Panel
 
 from edgar._filings import Filing, Filings, FilingsState
 from edgar._rich import df_to_rich_table, repr_rich
@@ -148,10 +149,10 @@ class CompanyFacts:
         return len(self.fact_meta)
 
     def __rich__(self):
-        return Group(
-            Text(f"Company Facts({self.name} [{self.cik}] {len(self.facts):,} total facts)")
-            ,
-            df_to_rich_table(self.facts)
+        return Panel(
+            Group(
+                df_to_rich_table(self.facts)
+            ), title=f"Company Facts({self.name} [{self.cik}] {len(self.facts):,} total facts)"
         )
 
     def __repr__(self):
@@ -264,11 +265,13 @@ class CompanyFilings(Filings):
         page = self.data_pager.current().to_pandas()
         page.index = self._page_index()
         page_info = f"Showing {len(page)} filings of {self._original_state.num_filings:,} total"
-        return Group(
-            df_to_rich_table(CompanyFilings.summarize(page),
-                             max_rows=len(page),
-                             title=f"Filings for {self.company_name} [{self.cik}]"),
-            Text(page_info)
+        return Panel(
+            Group(
+                df_to_rich_table(CompanyFilings.summarize(page),
+                                 max_rows=len(page),
+                                 ),
+                Text(page_info)
+            ), title=f"Filings for {self.company_name} [{self.cik}]"
         )
 
 
@@ -415,12 +418,13 @@ class CompanyData:
     def __rich__(self) -> str:
         ticker_str = f"[{self.tickers[0]}]" if len(self.tickers) == 1 else ""
         company_text = f"{self.name} {ticker_str}"
-        return Group(
-            Text(company_text, style="bold"),
-            df_to_rich_table(self.summary()
-                             .filter(['category', 'industry']),
-                             index_name="cik"),
-            df_to_rich_table(self.ticker_info(), index_name="ticker") if len(self.tickers) > 1 else Text("")
+        return Panel(
+            Group(
+                df_to_rich_table(self.summary()
+                                 .filter(['category', 'industry']),
+                                 index_name="cik"),
+                df_to_rich_table(self.ticker_info(), index_name="ticker") if len(self.tickers) > 1 else Text("")
+            ), title=company_text
         )
 
     def __repr__(self):

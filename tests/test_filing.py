@@ -88,6 +88,8 @@ def test_filings_repr():
     filings: Filings = cached_filings(2021, 1, index="xbrl")
     filings_repr = str(filings)
     assert filings_repr
+    print()
+    print(filings_repr)
 
 
 def test_filing_head():
