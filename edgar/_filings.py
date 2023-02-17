@@ -651,7 +651,7 @@ class Filing:
         from edgar._companies import CompanyData
         return CompanyData.for_cik(self.cik)
 
-    def get_related_filings(self):
+    def related_filings(self):
         """Get all the filings related to this one
         There is no file number on this base Filing class so first get the company,
 

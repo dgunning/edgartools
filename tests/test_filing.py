@@ -420,7 +420,7 @@ def test_filing_get_entity():
 
 
 def test_get_related_filings():
-    related_filings = carbo_10K.get_related_filings()
+    related_filings = carbo_10K.related_filings()
     assert len(related_filings) > 200
     file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))
     assert len(file_numbers) == 1

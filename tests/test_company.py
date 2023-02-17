@@ -221,7 +221,7 @@ def test_company_filing_get_related_filings():
     filings = company.get_filings(form=["S-1", "S-1/A"], is_inline_xbrl=True)
     filing = filings[0]
     print(filing)
-    related_filings = filing.get_related_filings()
+    related_filings = filing.related_filings()
     assert len(related_filings) > 8
     # They all have the same fileNumber
     file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))

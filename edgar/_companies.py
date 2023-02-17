@@ -113,7 +113,7 @@ class CompanyFiling(Filing):
         self.is_xbrl: bool = is_xbrl
         self.is_inline_xbrl: bool = is_inline_xbrl
 
-    def get_related_filings(self):
+    def related_filings(self):
         """Get all the filings related to this one"""
         return self.get_entity().get_filings(file_number=self.file_number, sort_by="filing_date")
 
