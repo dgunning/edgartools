@@ -5,6 +5,7 @@ import pyarrow as pa
 import pyarrow.compute as pc
 import importlib
 from datetime import datetime
+import edgar
 from edgar._rich import *
 from edgar.core import (decode_content,
                         get_identity,
@@ -16,6 +17,7 @@ from edgar.core import (decode_content,
                         http_client,
                         InvalidDateException,
                         client_headers,
+                        crawl, cautious, normal,
                         download_file,
                         extract_dates)
 import re
@@ -206,3 +208,13 @@ def test_dataframe_pager():
     # Test going to the next page when there is no more page
     last_page = pager.next()
     assert last_page is None
+
+
+def test_settings():
+    assert edgar.settings.max_connections == 10
+
+    edgar.settings = crawl
+    assert edgar.settings.max_connections == 2
+
+    edgar.settings = crawl
+    assert edgar.settings.max_connections == 2

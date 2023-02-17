@@ -21,7 +21,11 @@ from edgar._filings import (Filing,
                             get_fund_filings,
                             FilingHomepage)
 from edgar._xbrl import FilingXbrl
-from edgar.core import (get_identity,
+from edgar.core import (settings,
+                        crawl,
+                        cautious,
+                        normal,
+                        get_identity,
                         set_identity)
 from edgar.effect import Effect
 from edgar.fundreports import FundReport

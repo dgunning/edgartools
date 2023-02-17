@@ -5,6 +5,7 @@ import re
 import threading
 import warnings
 from _thread import interrupt_main
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
@@ -35,6 +36,10 @@ __all__ = [
     'repr_df',
     'get_bool',
     'moneyfmt',
+    'settings',
+    'normal',
+    'crawl',
+    'cautious',
     'sec_edgar',
     'IntString',
     'DataPager',
@@ -63,7 +68,44 @@ DATE_RANGE_PATTERN = re.compile(f"({YYYY_MM_DD})?:?(({YYYY_MM_DD})?)?")
 
 default_http_timeout: int = 12
 default_page_size = 50
-limits = httpx.Limits(max_connections=10)
+default_max_connections = 10
+
+limits = httpx.Limits(max_connections=default_max_connections)
+
+
+@dataclass
+class EdgarSettings:
+    http_timeout: int
+    max_connections: int
+
+    @property
+    @lru_cache(maxsize=1)
+    def limits(self):
+        return httpx.Limits(max_connections=default_max_connections)
+
+    def __eq__(self, othr):
+        return (isinstance(othr, type(self))
+                and (self.http_timeout, self.max_connections) ==
+                (othr.http_timeout, othr.max_connections))
+
+    def __hash__(self):
+        return hash((self.http_timeout, self.max_connections))
+
+
+# Modes of accessing edgar
+
+# The normal mode of accessing edgar
+normal = EdgarSettings(http_timeout=12, max_connections=10)
+
+# A bit more cautious mode of accessing edgar
+cautious = EdgarSettings(http_timeout=15, max_connections=5)
+
+# Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
+crawl = EdgarSettings(http_timeout=20, max_connections=2)
+
+# Use normal mode
+settings = normal
+
 edgar_identity = 'EDGAR_IDENTITY'
 
 # SEC urls
@@ -214,8 +256,8 @@ def client_headers():
 
 def http_client():
     return httpx.Client(headers=client_headers(),
-                        timeout=default_http_timeout,
-                        limits=limits,
+                        timeout=settings.http_timeout,
+                        limits=settings.limits,
                         default_encoding=autodetect)
 
 
@@ -266,7 +308,6 @@ def repr_df(df, hide_index: bool = True):
             warnings.simplefilter("ignore")
             disp = disp.hide_index()
     return disp._repr_html_()
-
 
 
 def get_bool(value: str = None) -> bool:
