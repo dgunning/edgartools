@@ -276,7 +276,7 @@ def download_file(url: str,
     if not client:
         client = http_client()
         
-    r = retry_call(client.get, fargs=[url], delay=5)
+    r = retry_call(client.get, fargs=[url], tries=5, delay=3)
     if r.status_code == 200:
         if url.endswith("gz"):
             binary_file = BytesIO(r.content)
