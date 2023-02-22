@@ -20,6 +20,7 @@ import pyarrow.compute as pc
 from charset_normalizer import detect
 from rich.logging import RichHandler
 from rich.prompt import Prompt
+from retry.api import retry_call
 
 logging.basicConfig(
     level="INFO",
@@ -274,7 +275,8 @@ def download_file(url: str,
     # reason_phrase = 'Too Many Requests' status_code = 429
     if not client:
         client = http_client()
-    r = client.get(url)
+        
+    r = retry_call(client.get, fargs=[url], delay=5)
     if r.status_code == 200:
         if url.endswith("gz"):
             binary_file = BytesIO(r.content)
