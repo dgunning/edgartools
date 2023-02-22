@@ -18,6 +18,7 @@ from edgar._filings import Filing, Filings, FilingsState
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import (http_client, log, Result, display_size,
                         filter_by_date, IntString, InvalidDateException)
+from edgar.search import TextSearchIndex
 
 __all__ = [
     'Address',
@@ -27,8 +28,11 @@ __all__ = [
     'get_company',
     'CompanyFacts',
     'CompanyFiling',
+    'company_search',
     'CompanyFilings',
     'CompanyConcept',
+    'CompanySearchResults',
+    'CompanySearchIndex',
     'get_company_facts',
     'get_company_tickers',
     'get_company_submissions',
@@ -723,8 +727,8 @@ def get_company_tickers():
         "https://www.sec.gov/files/company_tickers.json"
     )
     ticker_df = (pd.DataFrame(list(tickers_json.values()))
-                 .set_axis(['CIK', 'Ticker', 'Company'], axis=1)
-                 .astype({'CIK': pd.Int64Dtype()})
+                 .set_axis(['cik', 'ticker', 'company'], axis=1)
+                 .astype({'cik': pd.Int64Dtype()})
                  )
     return ticker_df
 
@@ -736,3 +740,60 @@ def get_ticker_to_cik_lookup():
     return {value['ticker']: value['cik_str']
             for value in tickers_json.values()
             }
+
+
+class CompanySearchResults:
+
+    def __init__(self,
+                 data: pd.DataFrame,
+                 query: str):
+        self.data = data
+        self.query = query
+
+    def __len__(self):
+        return len(self.data)
+
+    def empty(self):
+        return self.data.empty()
+
+    def __getitem__(self, item):
+        record = self.data.iloc[item]
+        return CompanyData.for_cik(record.cik)
+
+    def __rich__(self):
+        return Panel(
+            Group(
+                df_to_rich_table(self.data)
+            ), title=f'Results for "{self.query}"'
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
+company_types_re = r"(L\.?L\.?C\.?|Inc\.?|Ltd\.?|L\.?P\.?|/[A-Za-z]{2,3}/?| CORP(ORATION)?|PLC| AG)$"
+
+
+def preprocess_company(company: str) -> str:
+    """preprocess the company name for storing in the search index"""
+    comp = re.sub(company_types_re, "", company.lower(), flags=re.IGNORECASE)
+    comp = re.sub(r"\.|,", "", comp)
+    return comp.strip()
+
+
+def company_search(company: str):
+    companies = get_company_tickers()
+    company_index = CompanySearchIndex(data=companies[['cik', 'company']])
+    results = company_index.similar(company)
+    return CompanySearchResults(data=results.reset_index(), query=company)
+
+
+class CompanySearchIndex(TextSearchIndex):
+
+    def __init__(self,
+                 data: pd.DataFrame):
+        data = (data.drop_duplicates(subset='cik')
+                .set_index('cik')
+                .assign(company_idx=lambda df: np.vectorize(preprocess_company)(df.company))
+                )
+        super().__init__(data, 'company_idx')

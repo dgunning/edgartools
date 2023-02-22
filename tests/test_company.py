@@ -1,16 +1,16 @@
 import json
 from functools import lru_cache
 from pathlib import Path
+
 import humanize
-import pandas as pd
 import pyarrow.compute as pc
+from rich import print
 
 from edgar._companies import *
-from edgar._companies import parse_company_submissions, CompanyConcept, CompanyFiling
+from edgar._companies import (parse_company_submissions, CompanyConcept, CompanyFiling, company_search,
+                              CompanySearchIndex, preprocess_company)
 from edgar._filings import Filing, get_filings
 from edgar.core import default_page_size
-
-from rich import print
 
 
 @lru_cache(maxsize=16)
@@ -343,3 +343,41 @@ def test_filings_next_and_previous():
     print(eightk_filings.next())
     print(eightk_filings.next())
     print(eightk_filings.next())
+
+
+def test_search_for_company():
+    results = company_search('Robinsons')
+    print()
+    assert len(results) >= 10
+    print(results)
+    print(results[0])
+    assert results[0]
+
+
+def test_search():
+    text_index = CompanySearchIndex(get_filings()
+                                    .to_pandas('company', 'cik'))
+    res = text_index.similar('Tesla')
+    assert not res.empty > 0
+    print()
+    print(res)
+    print(text_index.similar('Tensile'))
+    print(text_index.similar('Deniel Testa'))
+
+
+def test_preprocess_company():
+    assert preprocess_company('Tesla Inc') == 'tesla'
+    assert preprocess_company('Apple Hospitality REIT, Inc.') == 'apple hospitality reit'
+    assert preprocess_company('ModivCare Inc') == 'modivcare'
+    assert preprocess_company('Coliseum Capital Partners II, L.P') == 'coliseum capital partners ii'
+    assert preprocess_company('Hartree Partners, LP') == 'hartree partners'
+    assert preprocess_company('James River Group Holdings, Ltd.') == 'james river group holdings'
+    assert preprocess_company('BANK OF MONTREAL /CAN/') == 'bank of montreal'
+    assert preprocess_company('AGCO CORP /DE') == 'agco corp'
+    assert preprocess_company('OSHKOSH CORP') == 'oshkosh'
+    assert preprocess_company('SEALED AIR CORP/DE') == 'sealed air corp'
+    assert preprocess_company('MARINE PRODUCTS CORP') == 'marine products'
+    assert preprocess_company('BARCLAYS BANK PLC') == 'barclays bank'
+    assert preprocess_company('SIGNATURE SECURITIES GROUP CORPORATION') == 'signature securities group'
+    assert preprocess_company('UBS AG') == 'ubs'
+    assert preprocess_company('GRABAG') == 'grabag'
