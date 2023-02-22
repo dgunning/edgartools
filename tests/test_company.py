@@ -7,7 +7,7 @@ import pyarrow.compute as pc
 from rich import print
 
 from edgar._companies import *
-from edgar._companies import (parse_company_submissions, CompanyConcept, CompanyFiling, company_search,
+from edgar._companies import (parse_company_submissions, CompanyConcept, CompanyFiling, find_company,
                               CompanySearchIndex, preprocess_company)
 from edgar._filings import Filing, get_filings
 from edgar.core import default_page_size
@@ -346,7 +346,7 @@ def test_filings_next_and_previous():
 
 
 def test_search_for_company():
-    results = company_search('Robinsons')
+    results = find_company('Robinsons')
     print()
     assert len(results) >= 10
     print(results)

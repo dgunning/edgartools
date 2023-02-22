@@ -28,7 +28,7 @@ __all__ = [
     'get_company',
     'CompanyFacts',
     'CompanyFiling',
-    'company_search',
+    'find_company',
     'CompanyFilings',
     'CompanyConcept',
     'CompanySearchResults',
@@ -722,6 +722,7 @@ def get_concept(cik: int,
                 return Result.Fail(error=error_message)
 
 
+@lru_cache(maxsize=1)
 def get_company_tickers():
     tickers_json = get_json(
         "https://www.sec.gov/files/company_tickers.json"
@@ -781,7 +782,8 @@ def preprocess_company(company: str) -> str:
     return comp.strip()
 
 
-def company_search(company: str):
+@lru_cache(maxsize=16)
+def find_company(company: str):
     companies = get_company_tickers()
     company_index = CompanySearchIndex(data=companies[['cik', 'company']])
     results = company_index.similar(company)
