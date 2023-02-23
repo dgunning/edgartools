@@ -23,10 +23,10 @@ from edgar._filings import (Filing,
                             get_fund_filings,
                             FilingHomepage)
 from edgar._xbrl import FilingXbrl
-from edgar.core import (settings,
-                        crawl,
-                        cautious,
-                        normal,
+from edgar.core import (edgar_mode,
+                        CRAWL,
+                        CAUTION,
+                        NORMAL,
                         get_identity,
                         set_identity)
 from edgar.effect import Effect

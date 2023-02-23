@@ -17,7 +17,7 @@ from edgar.core import (decode_content,
                         http_client,
                         InvalidDateException,
                         client_headers,
-                        crawl, cautious, normal,
+                        CRAWL, CAUTION, NORMAL,
                         download_file,
                         extract_dates)
 import re
@@ -211,10 +211,10 @@ def test_dataframe_pager():
 
 
 def test_settings():
-    assert edgar.settings.max_connections == 10
+    assert edgar.edgar_mode.max_connections == 10
 
-    edgar.settings = crawl
-    assert edgar.settings.max_connections == 2
+    edgar.edgar_mode = CAUTION
+    assert edgar.edgar_mode.max_connections == 5
 
-    edgar.settings = crawl
-    assert edgar.settings.max_connections == 2
+    edgar.edgar_mode = CRAWL
+    assert edgar.edgar_mode.max_connections == 2

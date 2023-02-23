@@ -37,10 +37,10 @@ __all__ = [
     'repr_df',
     'get_bool',
     'moneyfmt',
-    'settings',
-    'normal',
-    'crawl',
-    'cautious',
+    'edgar_mode',
+    'NORMAL',
+    'CRAWL',
+    'CAUTION',
     'sec_edgar',
     'IntString',
     'DataPager',
@@ -70,6 +70,7 @@ DATE_RANGE_PATTERN = re.compile(f"({YYYY_MM_DD})?:?(({YYYY_MM_DD})?)?")
 default_http_timeout: int = 12
 default_page_size = 50
 default_max_connections = 10
+default_retries = 3
 
 limits = httpx.Limits(max_connections=default_max_connections)
 
@@ -78,6 +79,7 @@ limits = httpx.Limits(max_connections=default_max_connections)
 class EdgarSettings:
     http_timeout: int
     max_connections: int
+    retries: int = 3
 
     @property
     @lru_cache(maxsize=1)
@@ -86,26 +88,26 @@ class EdgarSettings:
 
     def __eq__(self, othr):
         return (isinstance(othr, type(self))
-                and (self.http_timeout, self.max_connections) ==
-                (othr.http_timeout, othr.max_connections))
+                and (self.http_timeout, self.max_connections, self.retries) ==
+                (othr.http_timeout, othr.max_connections, othr.retries))
 
     def __hash__(self):
-        return hash((self.http_timeout, self.max_connections))
+        return hash((self.http_timeout, self.max_connections, self.retries))
 
 
 # Modes of accessing edgar
 
 # The normal mode of accessing edgar
-normal = EdgarSettings(http_timeout=12, max_connections=10)
+NORMAL = EdgarSettings(http_timeout=12, max_connections=10)
 
 # A bit more cautious mode of accessing edgar
-cautious = EdgarSettings(http_timeout=15, max_connections=5)
+CAUTION = EdgarSettings(http_timeout=15, max_connections=5)
 
 # Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
-crawl = EdgarSettings(http_timeout=20, max_connections=2)
+CRAWL = EdgarSettings(http_timeout=20, max_connections=2, retries=2)
 
 # Use normal mode
-settings = normal
+edgar_mode = NORMAL
 
 edgar_identity = 'EDGAR_IDENTITY'
 
@@ -257,8 +259,8 @@ def client_headers():
 
 def http_client():
     return httpx.Client(headers=client_headers(),
-                        timeout=settings.http_timeout,
-                        limits=settings.limits,
+                        timeout=edgar_mode.http_timeout,
+                        limits=edgar_mode.limits,
                         default_encoding=autodetect)
 
 
