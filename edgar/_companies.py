@@ -567,6 +567,11 @@ def get_json(data_url: str):
 @lru_cache(maxsize=32)
 def get_company_submissions(cik: int):
     submission_json = get_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
+    # check for older submission files
+    for i in submission_json['filings']['files']:
+        old_sub = get_json("https://data.sec.gov/submissions/" + i['name'])
+        for i in old_sub:
+            submission_json['filings']['recent'][i] += old_sub[i]
     return parse_company_submissions(submission_json)
 
 
