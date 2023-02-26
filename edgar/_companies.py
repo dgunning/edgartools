@@ -553,6 +553,7 @@ def get_company(company_identifier: IntString) -> CompanyData:
     """)
 
 
+# This is an alias for get_company allowing for this -> Company("SNOW")
 Company = get_company
 
 
@@ -565,13 +566,22 @@ def get_json(data_url: str):
 
 
 @lru_cache(maxsize=32)
-def get_company_submissions(cik: int):
-    submission_json = get_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
-    # check for older submission files
-    for i in submission_json['filings']['files']:
-        old_sub = get_json("https://data.sec.gov/submissions/" + i['name'])
-        for i in old_sub:
-            submission_json['filings']['recent'][i] += old_sub[i]
+def get_company_submissions(cik: int) -> CompanyData:
+    """Get the company filings for a given cik"""
+    try:
+        submission_json = get_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
+    except httpx.HTTPStatusError as e:
+        # Handle the case where the cik is invalid and not found on Edgar
+        if e.response.status_code == 404:
+            log.error(f"No company found for CIK {cik}")
+            return None
+        else:
+            raise
+            # check for older submission files
+    for old_file in submission_json['filings']['files']:
+        old_sub = get_json("https://data.sec.gov/submissions/" + old_file['name'])
+        for column in old_sub:
+            submission_json['filings']['recent'][column] += old_sub[column]
     return parse_company_submissions(submission_json)
 
 

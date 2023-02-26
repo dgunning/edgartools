@@ -1,7 +1,8 @@
 import json
 from functools import lru_cache
 from pathlib import Path
-
+import pytest
+import httpx
 import humanize
 import pyarrow.compute as pc
 from rich import print
@@ -46,7 +47,17 @@ def test_get_company_submissions():
     company: CompanyData = get_company_submissions(1318605)
     assert company
     assert company.cik == 1318605
-    print(company)
+    filings = company.get_filings()
+    assert len(filings) > 1000
+
+    # We can get the earliest filing for TESLA and it is a REGDEX
+    filing = filings[-1]
+    assert filing.form == "REGDEX"
+
+
+def test_no_company_for_cik():
+    company = Company(-1)
+    assert company is None
 
 
 def test_get_company_facts():
