@@ -238,8 +238,9 @@ def filter_by_date(data: pa.Table,
     date_parts = extract_dates(date)
     start_date, end_date, is_range = date_parts
     if is_range:
+        filtered_data = data
         if start_date:
-            filtered_data = data.filter(pc.field(date_col) >= pc.scalar(start_date))
+            filtered_data = filtered_data.filter(pc.field(date_col) >= pc.scalar(start_date))
         if end_date:
             filtered_data = filtered_data.filter(pc.field(date_col) <= pc.scalar(end_date))
     else:

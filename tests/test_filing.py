@@ -1,3 +1,4 @@
+import datetime
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -496,6 +497,17 @@ def test_filter_by_date():
     filings_for_range = filings.filter(filing_date='2022-08-10:2022-08-16')
     filing_dates = [d.strftime('%Y-%m-%d') for d in set(filings_for_range.data['filing_date'].to_pylist())]
     assert sorted(filing_dates) == ['2022-08-10', '2022-08-11', '2022-08-12', '2022-08-15', '2022-08-16']
+
+    # Partial date range
+    filings_before = filings.filter(filing_date=':2022-08-16')
+    assert not filings_before.empty
+    end_date = filings_before.date_range[1]
+    assert end_date == datetime.datetime.strptime("2022-08-16", "%Y-%m-%d").date()
+
+    filings_after = filings.filter(filing_date='2022-08-16:')
+    assert not filings_after.empty
+    start_date = filings_after.date_range[0]
+    assert start_date == datetime.datetime.strptime("2022-08-16", "%Y-%m-%d").date()
 
 
 def test_filter_invalid_date():
