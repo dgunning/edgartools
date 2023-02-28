@@ -120,42 +120,67 @@ set_identity("Michael Mccallum mcalum@gmail.com")
 ```
 For more detail see https://www.sec.gov/os/accessing-edgar-data
 
+## Usage
 
-## Getting filings
-To get started import from edgar and use the `get_filings` function.
+### Importing edgar
+
 ```python
 from edgar import *
-
-filings = get_filings()
 ```
 
-This gets the list of filings for the current year and quarter into a `Filings` object. 
-
-![Get Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/get_filings.jpg)
-
-If you need a different date range you can specify a year or years and a quarter or quarters.
-These are valid ways to specify the date range or filter by form or by filing date.
-
+### Getting filings
 ```python
 
-    >>> filings = get_filings(2021) # Get filings for 2021
+# Get filings for the current year and quarter
+filings = get_filings() 
 
-    >>> filings = get_filings(2021, 4) # Get filings for 2021 Q4
+# Get filings for 2022
+filings = get_filings(2022)                 # OR filings = get_filings(year=2022)
 
-    >>> filings = get_filings(2021, [3,4]) # Get filings for 2021 Q3 and Q4
+# Get filings for 2022 quarter 4
+filings = get_filings(2022, 4)              # OR filings = get_filings(year=2022, quarter=4)
 
-    >>> filings = get_filings([2020, 2021]) # Get filings for 2020 and 2021
+# Get filings for 2020, 2021 and 2022
+filings = get_filings([2020, 2021, 2022])   # OR filings = get_filings(year=range(2020, 2023))
 
-    >>> filings = get_filings([2020, 2021], 4) # Get filings for Q4 of 2020 and 2021
+# Get filings for 2020 quarters 1 and 2
+filings = get_filings(2020, quarter=[1,2])
+```
+![Get filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/get_filings.jpg)
 
-    >>> filings = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021
 
-    >>> filings = get_filings(2021, 4, form="D") # Get filings for 2021 Q4 for form D
 
-    >>> filings = get_filings(2021, 4, filing_date="2021-10-01") # Get filings for 2021 Q4 on "2021-10-01"
+### Filtering filings
 
-    >>> filings = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") # Get filings for 2021 Q4 between
-                                                                            # "2021-10-01" and "2021-10-10"
+```python
+# Filter for form D
+filings.filter(form="D")
+
+# Filter for form 10-K and 10-Q 
+filings.filter(form=["10-K", "10-Q"])
+
+# When you filter by form e.g. "D" it includes amendments e.g. "D\A". You can omit amendments
+filings.filter(form="D", amendments=False)
+
+# Filter by filing_date. date and filing_date mean the same thing
+# Get all filings on 2023-02-23
+filings.filter(date="2023-02-23")                      
+# OR
+filings.filter(filing_date="2023-02-23")
+
+# Filter to get all filings between 2023-01-23 and 2023-02-23     
+filings.filter(date="2023-01-23:2023-02-23")
+
+# Filter to get all filings since 2023-01-23   
+filings.filter(date="2023-01-23")
+
+# Filter to get all filings before 2023-02-23     
+filings.filter(date=":2023-02-23")
+```
+
+### Combining getting and filtering
+```python
+get_filings(2022, form="D")
 ```
 
 ### Convert the filings to a pandas dataframe
