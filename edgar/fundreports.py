@@ -318,11 +318,17 @@ class FundReport:
     def name(self):
         return f"{self.general_info.name} - {self.general_info.series_name}"
 
+    @property
+    def has_investments(self):
+        return len(self.investments) > 0
+
     @lru_cache(maxsize=2)
     def investment_data(self) -> pd.DataFrame:
         """
         :return: The investments as a pandas dataframe
         """
+        if len(self.investments) == 0:
+            return pd.DataFrame(columns=['name', 'title', 'cusip', 'ticker', 'balance', 'units'])
         return pd.DataFrame(
             [{
                 "name": investment.name,
@@ -472,50 +478,52 @@ class FundReport:
         )
 
         # Investments or securities
-        investment_or_secs_tag = form_data_tag.find("invstOrSecs")
         investments_or_securities = []
-        for investment_or_sec_tag in investment_or_secs_tag.find_all("invstOrSec"):
-            # issuer conditional
-            asset_conditional_tag = investment_or_sec_tag.find("assetConditional")
-            if asset_conditional_tag:
-                asset_category = asset_conditional_tag.attrs.get("assetCat")
-            else:
-                asset_category = child_text(investment_or_sec_tag, "assetCat")
+        investment_or_secs_tag = form_data_tag.find("invstOrSecs")
+        if investment_or_secs_tag:
+            investments_or_securities = []
+            for investment_or_sec_tag in investment_or_secs_tag.find_all("invstOrSec"):
+                # issuer conditional
+                asset_conditional_tag = investment_or_sec_tag.find("assetConditional")
+                if asset_conditional_tag:
+                    asset_category = asset_conditional_tag.attrs.get("assetCat")
+                else:
+                    asset_category = child_text(investment_or_sec_tag, "assetCat")
 
-            # issuer conditional
-            issuer_conditional_tag = investment_or_sec_tag.find("issuerConditional")
-            if issuer_conditional_tag:
-                issuer_category = issuer_conditional_tag.attrs.get("issuerCat")
-            else:
-                issuer_category = child_text(investment_or_sec_tag, "issuerCat")
+                # issuer conditional
+                issuer_conditional_tag = investment_or_sec_tag.find("issuerConditional")
+                if issuer_conditional_tag:
+                    issuer_category = issuer_conditional_tag.attrs.get("issuerCat")
+                else:
+                    issuer_category = child_text(investment_or_sec_tag, "issuerCat")
 
-                [
+                    [
 
-                ]
+                    ]
 
-            investments_or_security = InvestmentOrSecurity(
-                name=child_text(investment_or_sec_tag, "name"),
-                lei=child_text(investment_or_sec_tag, "lei"),
-                title=child_text(investment_or_sec_tag, "title"),
-                cusip=child_text(investment_or_sec_tag, "cusip"),
-                identifiers=Identifiers.from_xml(investment_or_secs_tag.find("identifiers")),
-                balance=optional_decimal(investment_or_sec_tag, "balance"),
-                units=child_text(investment_or_sec_tag, "units"),
-                desc_other_units=child_text(investment_or_sec_tag, "descOthUnits"),
-                currency_code=child_text(investment_or_sec_tag, "curCd"),
-                value_usd=optional_decimal(investment_or_sec_tag, "valUSD"),
-                pct_value=optional_decimal(investment_or_sec_tag, "pctVal"),
-                payoff_profile=child_text(investment_or_sec_tag, "payoffProfile"),
-                asset_category=asset_category,
-                issuer_category=issuer_category,
-                investment_country=child_text(investment_or_sec_tag, "invCountry"),
-                is_restricted_security=child_text(investment_or_sec_tag, "isRestrictedSec") == "Y",
-                fair_value_level=child_text(investment_or_sec_tag, "fairValLevel"),
-                debt_security=DebtSecurity.from_xml(investment_or_sec_tag.find("debtSec")),
-                security_lending=SecurityLending.from_xml(investment_or_sec_tag.find("securityLending"))
-            )
+                investments_or_security = InvestmentOrSecurity(
+                    name=child_text(investment_or_sec_tag, "name"),
+                    lei=child_text(investment_or_sec_tag, "lei"),
+                    title=child_text(investment_or_sec_tag, "title"),
+                    cusip=child_text(investment_or_sec_tag, "cusip"),
+                    identifiers=Identifiers.from_xml(investment_or_secs_tag.find("identifiers")),
+                    balance=optional_decimal(investment_or_sec_tag, "balance"),
+                    units=child_text(investment_or_sec_tag, "units"),
+                    desc_other_units=child_text(investment_or_sec_tag, "descOthUnits"),
+                    currency_code=child_text(investment_or_sec_tag, "curCd"),
+                    value_usd=optional_decimal(investment_or_sec_tag, "valUSD"),
+                    pct_value=optional_decimal(investment_or_sec_tag, "pctVal"),
+                    payoff_profile=child_text(investment_or_sec_tag, "payoffProfile"),
+                    asset_category=asset_category,
+                    issuer_category=issuer_category,
+                    investment_country=child_text(investment_or_sec_tag, "invCountry"),
+                    is_restricted_security=child_text(investment_or_sec_tag, "isRestrictedSec") == "Y",
+                    fair_value_level=child_text(investment_or_sec_tag, "fairValLevel"),
+                    debt_security=DebtSecurity.from_xml(investment_or_sec_tag.find("debtSec")),
+                    security_lending=SecurityLending.from_xml(investment_or_sec_tag.find("securityLending"))
+                )
 
-            investments_or_securities.append(investments_or_security)
+                investments_or_securities.append(investments_or_security)
 
         fund_report = FundReport(header=header,
                                  general_info=general_info,
@@ -592,14 +600,16 @@ class FundReport:
     @property
     @lru_cache(maxsize=2)
     def investments_table(self):
-        investments = (self.investment_data()
-                       .assign(Name=lambda df: df.name,
-                               Title=lambda df: df.title,
-                               Cusip=lambda df: df.cusip,
-                               Value=lambda df: df.value_usd.apply(moneyfmt, curr='$', places=0),
-                               Percent=lambda df: df.pct_value.apply(moneyfmt, curr='', places=1),
-                               Category=lambda df: df.issuer_category + " " + df.asset_category)
-                       ).filter(['Name', 'Title', 'Cusip', 'Category', 'Value', 'Percent'])
+        investments = self.investment_data()
+        if not investments.empty:
+            investments = (investments
+                           .assign(Name=lambda df: df.name,
+                                   Title=lambda df: df.title,
+                                   Cusip=lambda df: df.cusip,
+                                   Value=lambda df: df.value_usd.apply(moneyfmt, curr='$', places=0),
+                                   Percent=lambda df: df.pct_value.apply(moneyfmt, curr='', places=1),
+                                   Category=lambda df: df.issuer_category + " " + df.asset_category)
+                           ).filter(['Name', 'Title', 'Cusip', 'Category', 'Value', 'Percent'])
         return df_to_rich_table(investments, title="Investments", title_style="bold deep_sky_blue1", max_rows=2000)
 
     def __rich__(self):
