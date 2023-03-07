@@ -119,6 +119,10 @@ class HtmlBlocks:
         self.blocks: List[Block] = blocks
 
     @property
+    def empty(self):
+        return len(self.blocks) == 0
+
+    @property
     def tables(self) -> List[TableBlock]:
         return [block for block in self.blocks if isinstance(block, TableBlock)]
 

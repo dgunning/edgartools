@@ -599,3 +599,7 @@ def test_search_for_text_in_filing():
     results = carbo_10K.search("risks")
     assert isinstance(results, HtmlBlocks)
     assert all("risks" in block.text for block in results.blocks)
+
+    # test when the search returns no results
+    results = carbo_10K.search("Glendenning")
+    assert results.empty
