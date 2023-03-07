@@ -35,7 +35,8 @@ dependencies = [
   "charset-normalizer>2.1.1",
   "markdownify>0.11.0",
   "retry>=0.9.2",
-  "textdistance[extras]>=4.5.0"
+  "textdistance[extras]>=4.5.0",
+  "rank_bm25==0.2.1"
 ]
 dynamic = ["version"]
 
