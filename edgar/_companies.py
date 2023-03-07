@@ -18,7 +18,7 @@ from edgar._filings import Filing, Filings, FilingsState
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import (http_client, log, Result, display_size,
                         filter_by_date, IntString, InvalidDateException)
-from edgar.search import TextSearchIndex
+from edgar.search import SimilaritySearchIndex
 
 __all__ = [
     'Address',
@@ -766,6 +766,9 @@ class CompanySearchResults:
         self.data = data
         self.query = query
 
+    def cik_match_lookup(self):
+        return self.data[['cik', 'match']].set_index('cik').to_dict()['match']
+
     def __len__(self):
         return len(self.data)
 
@@ -805,7 +808,7 @@ def find_company(company: str):
     return CompanySearchResults(data=results.reset_index(), query=company)
 
 
-class CompanySearchIndex(TextSearchIndex):
+class CompanySearchIndex(SimilaritySearchIndex):
 
     def __init__(self,
                  data: pd.DataFrame):

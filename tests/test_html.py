@@ -33,3 +33,20 @@ def test_htmlblock_tables():
 
 def test_chomp():
     assert chomp("<b> foo</b>") == ('', '', '<b> foo</b>')
+
+
+def test_table_blocks_text():
+    blocks: HtmlBlocks = HtmlBlocks.read(blackrock_8k)
+    table = blocks.tables[0]
+    print()
+    print(table.text)
+    assert "DELAWARE" in table.text.split("\n")[0]
+
+
+def test_html_block_search():
+    blocks: HtmlBlocks = HtmlBlocks.read(blackrock_8k)
+    results = blocks.search("financial")
+    assert len(results) == 2
+    assert len(blocks.search("Barney")) == 0
+
+

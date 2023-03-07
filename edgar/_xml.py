@@ -21,8 +21,8 @@ def find_element(
         element_name) -> Tag:
     """
     Find the element with that name in the string or Tag
-    :param xml_tag_or_string: either a string xml or
-    :param element_name:
+    :param xml_tag_or_string: either an exml tag or string containing xml
+    :param element_name: The name of the element to find
     :return: An element
     """
     if isinstance(xml_tag_or_string, Tag):

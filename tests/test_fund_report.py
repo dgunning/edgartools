@@ -121,3 +121,8 @@ def test_get_fund_filings():
     min_date, max_date = filings_jan.date_range
     assert min_date >= datetime.strptime('2021-01-01', "%Y-%m-%d").date()
     assert max_date <= datetime.strptime('2021-01-31', "%Y-%m-%d").date()
+
+
+def test_fund_no_investment_sec_tag():
+    fund_report = FundReport.from_xml(Path('data/NPORT.AdvancedSeries.xml').read_text())
+    print(fund_report)

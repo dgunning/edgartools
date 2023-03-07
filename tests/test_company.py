@@ -392,3 +392,5 @@ def test_preprocess_company():
     assert preprocess_company('SIGNATURE SECURITIES GROUP CORPORATION') == 'signature securities group'
     assert preprocess_company('UBS AG') == 'ubs'
     assert preprocess_company('GRABAG') == 'grabag'
+
+

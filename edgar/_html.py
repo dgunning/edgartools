@@ -6,9 +6,11 @@ from bs4 import BeautifulSoup, NavigableString, Comment, Doctype
 from rich.console import Group
 from rich.markdown import Markdown
 from rich.panel import Panel
+from edgar.search import BM25SearchIndex
 
 from edgar._markdown import convert_table
 from edgar._rich import repr_rich
+from functools import lru_cache
 
 convert_heading_re = re.compile(r'convert_h(\d+)')
 line_beginning_re = re.compile(r'^', re.MULTILINE)
@@ -80,7 +82,7 @@ class TextBlock(Block):
         self.text: str = text.strip()
 
     def __str__(self):
-        return f"Text Block\n {'-' * 40}\n{self.text}"
+        return self.text
 
     def __rich__(self):
         return Markdown(self.text)
@@ -94,14 +96,24 @@ class TableBlock(Block):
     def __init__(self, table_md: str):
         self.table_markdown: str = table_md
 
+    @property
+    def text(self):
+        return "\n".join(repr(self).split("\n")[3:])
+
     def __rich__(self):
         return convert_table(self.table_markdown)
 
     def __repr__(self):
         return repr_rich(self.__rich__())
 
+    def __str__(self):
+        return self.text
+
 
 class HtmlBlocks:
+    """
+    Contain the content of an HTML page divided into blocks
+    """
 
     def __init__(self, blocks: List[Block]):
         self.blocks: List[Block] = blocks
@@ -119,11 +131,6 @@ class HtmlBlocks:
             md += block.to_markdown() + "\n"
         return md
 
-    def __rich__(self):
-        return Panel(
-            Group(*self.blocks)
-        )
-
     @classmethod
     def read(cls, html: str):
         blocks = read_blocks(html)
@@ -132,8 +139,20 @@ class HtmlBlocks:
     def __len__(self):
         return len(self.blocks)
 
+    def __rich__(self):
+        return Panel(
+            Group(*self.blocks)
+        )
+
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+    @lru_cache(maxsize=1)
+    def __search_index(self):
+        return BM25SearchIndex(self.blocks, text_fn=lambda b: str(b))
+
+    def search(self, query: str):
+        return HtmlBlocks(self.__search_index().search(query))
 
 
 class HtmlBlockConverter(object):
@@ -181,8 +200,8 @@ class HtmlBlockConverter(object):
         blocks: List[Block] = []
 
         if node.name == "table":
-            table_block = [self.convert_table(node, '', convert_as_inline=False)]
-            return table_block
+            table_block = self.convert_table(node, '', convert_as_inline=False)
+            return [table_block] if table_block else []
 
         # markdown headings or cells can't include
         # block elements (elements w/newlines)
@@ -448,7 +467,10 @@ class HtmlBlockConverter(object):
 
     def convert_table(self, table, text, convert_as_inline):
         # Find the number of columns in the table
-        num_cols = max([len(row.find_all(['th', 'td'])) for row in table.find_all('tr')])
+        rows = table.find_all('tr')
+        if len(rows) == 0:
+            return None
+        num_cols = max([len(row.find_all(['th', 'td'])) for row in rows])
 
         # Loop through each row and column to build the Markdown table
         markdown_table = ''

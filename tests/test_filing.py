@@ -11,7 +11,9 @@ from typing import List
 
 from edgar import get_filings, Filings, Filing, get_company
 from edgar.core import default_page_size
+from edgar._companies import CompanySearchResults
 from edgar._filings import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
+from edgar._html import HtmlBlocks
 from rich import print
 
 pd.options.display.max_colwidth = 200
@@ -578,3 +580,22 @@ def test_filings_get_by_index_or_accession_number():
     filing_one_hundred = filings.get(100)
     filing_100 = filings.get("100")
     assert filing_100.accession_no == filing_one_hundred.accession_no
+
+
+def test_find_company():
+    filings = cached_filings(2022, 1)
+    company_search_filings: Filings = filings.find('Tailwind International Acquisition')
+    print()
+    print(company_search_filings)
+    companies = company_search_filings.data['company'].to_pylist()
+    assert 'Tailwind International Acquisition Corp.' in companies
+
+    print(filings.find('SCHWEITZER'))
+
+
+def test_search_for_text_in_filing():
+    print()
+    #print(carbo_10K.markdown())
+    results = carbo_10K.search("risks")
+    assert isinstance(results, HtmlBlocks)
+    assert all("risks" in block.text for block in results.blocks)

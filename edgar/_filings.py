@@ -25,6 +25,7 @@ from rich.panel import Panel
 from edgar._markdown import MarkdownContent
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
+from edgar._html import HtmlBlocks
 from edgar.core import (http_client, download_text, download_file, log, display_size,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.fundreports import FUND_FORMS
@@ -417,6 +418,26 @@ class Filings:
                     "\n  valid accession number [0000000000-00-000000]"
                 )
 
+    def find(self,
+             company_search_str: str):
+        from edgar._companies import find_company
+
+        # Search for the company
+        search_results = find_company(company_search_str)
+        cik_match_lookup = search_results.cik_match_lookup()
+
+        # Filter filings that are in the search results
+        ciks = search_results.data.cik.tolist()
+        filing_index = self.data.filter(pc.is_in(self.data['cik'], pa.array(ciks)))
+
+        # Sort by the match score
+        score_values = pa.array([cik_match_lookup.get(cik.as_py()) for cik in filing_index.column("cik")])
+        filing_index = filing_index.append_column("match", score_values)
+        filing_index = filing_index.sort_by([('match', 'descending'), ('company', 'ascending')]).drop(['match'])
+
+        # Need to sort by
+        return Filings(filing_index)
+
     def __getitem__(self, item):
         return self.get_filing_at(item)
 
@@ -626,6 +647,14 @@ class Filing:
     def open(self):
         """Open the main filing document"""
         webbrowser.open(self.document.url)
+
+    @lru_cache(maxsize=1)
+    def __get_html_blocks(self):
+        return HtmlBlocks.read(self.html())
+
+    def search(self, query: str):
+        """Search for the query string in the filing HTML"""
+        return self.__get_html_blocks().search(query)
 
     @property
     def homepage_url(self) -> str:

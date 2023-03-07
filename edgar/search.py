@@ -1,12 +1,18 @@
 import pandas as pd
 import textdistance
+from rank_bm25 import BM25Okapi
+from typing import List, Callable
+import re
+import string
+
+PUNCTUATION = re.compile('[%s]' % re.escape(string.punctuation))
 
 __all__ = [
-    'TextSearchIndex'
+    'SimilaritySearchIndex'
 ]
 
 
-class TextSearchIndex:
+class SimilaritySearchIndex:
 
     def __init__(self,
                  data: pd.DataFrame,
@@ -30,4 +36,63 @@ class TextSearchIndex:
         return df[cols]
 
     def __repr__(self):
-        return f"TextSearchIndex(search_column='{self.search_column}')"
+        return f"SimilaritySearchIndex(search_column='{self.search_column}')"
+
+
+Corpus = List[str]
+
+
+def tokenize(text):
+    return text.split()
+
+
+def lowercase_filter(tokens):
+    return [token.lower() for token in tokens]
+
+
+def punctuation_filter(tokens):
+    return [PUNCTUATION.sub('', token) for token in tokens]
+
+
+STOPWORDS = set(['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have',
+                 'i', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you',
+                 'do', 'at', 'this', 'but', 'his', 'by', 'from'])
+
+
+def stopword_filter(tokens):
+    return [token for token in tokens if token not in STOPWORDS]
+
+
+def preprocess(text: str):
+    tokens = tokenize(text)
+    tokens = lowercase_filter(tokens)
+    tokens = punctuation_filter(tokens)
+    tokens = stopword_filter(tokens)
+    return tokens
+
+
+def preprocess_documents(documents: List[str]) -> Corpus:
+    return [preprocess(document) for document in documents]
+
+
+class BM25SearchIndex:
+
+    def __init__(self,
+                 document_objs: List[object],
+                 text_fn: Callable = None):
+        if text_fn:
+            self.corpus: Corpus = [preprocess(text_fn(doc)) for doc in document_objs]
+        else:
+            self.corpus: Corpus = [preprocess(doc) for doc in document_objs]
+        self.document_objs = document_objs
+        self.bm25: BM25Okapi = BM25Okapi(self.corpus)
+
+    def __len__(self):
+        return len(self.document_objs)
+
+    def search(self, query: str, topn=20):
+        preprocessed_query = preprocess(query)
+        scores = self.bm25.get_scores(preprocessed_query)
+        doc_scores = zip(self.document_objs, scores)
+        doc_scores_sorted = sorted([doc for doc in doc_scores if doc[1] > 0], key=lambda t: t[1])[::-1]
+        return [doc[0] for doc in doc_scores_sorted if doc[1] > 0]
