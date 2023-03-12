@@ -19,16 +19,16 @@ from fastcore.basics import listify
 from fastcore.parallel import parallel
 from markdownify import markdownify
 from rich.console import Group, Console
-from rich.text import Text
 from rich.panel import Panel
+from rich.text import Text
 
 from edgar._markdown import MarkdownContent
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
-from edgar._html import HtmlBlocks
 from edgar.core import (http_client, download_text, download_file, log, display_size,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.fundreports import FUND_FORMS
+from edgar.search import BM25SearchIndex
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -649,12 +649,17 @@ class Filing:
         webbrowser.open(self.document.url)
 
     @lru_cache(maxsize=1)
-    def __get_html_blocks(self):
-        return HtmlBlocks.read(self.html())
+    def sections(self) -> List[str]:
+        return re.split(r"\n\s*\n", self.markdown())
 
-    def search(self, query: str):
+    @lru_cache(maxsize=1)
+    def __get_bm25_search_index(self):
+        return BM25SearchIndex(self.sections())
+
+    def search(self,
+               query: str):
         """Search for the query string in the filing HTML"""
-        return self.__get_html_blocks().search(query)
+        return self.__get_bm25_search_index().search(query)
 
     @property
     def homepage_url(self) -> str:

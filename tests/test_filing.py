@@ -13,7 +13,6 @@ from edgar import get_filings, Filings, Filing, get_company
 from edgar.core import default_page_size
 from edgar._companies import CompanySearchResults
 from edgar._filings import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
-from edgar._html import HtmlBlocks
 from rich import print
 
 pd.options.display.max_colwidth = 200
@@ -593,13 +592,14 @@ def test_find_company():
     print(filings.find('SCHWEITZER'))
 
 
+def test_filing_sections():
+    sections = carbo_10K.sections()
+    assert len(sections) > 20
+    print(sections[10])
+
+
 def test_search_for_text_in_filing():
     print()
-    #print(carbo_10K.markdown())
     results = carbo_10K.search("risks")
-    assert isinstance(results, HtmlBlocks)
-    assert all("risks" in block.text for block in results.blocks)
-
-    # test when the search returns no results
-    results = carbo_10K.search("Glendenning")
-    assert results.empty
+    assert len(results) > 10
+    print(results)
