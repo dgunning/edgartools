@@ -1,0 +1,3566 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../ownership/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.2">
+    
+    
+      
+        <title>API Reference - edgartools</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7bf56d0a.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="edgartools" class="md-header__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            edgartools
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="edgartools" class="md-nav__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    edgartools
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-the-filings-api/" class="md-nav__link">
+        The Filings API
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-the-company-api/" class="md-nav__link">
+        The Company API
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../working-with-xbrl/" class="md-nav__link">
+        Working with XBRL
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ownership/" class="md-nav__link">
+        Ownership Documents
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          API Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        API Reference
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings" class="md-nav__link">
+    edgar._filings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.FileSpecs" class="md-nav__link">
+    FileSpecs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.Filing" class="md-nav__link">
+    Filing
+  </a>
+  
+    <nav class="md-nav" aria-label="Filing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.document" class="md-nav__link">
+    document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.homepage" class="md-nav__link">
+    homepage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.primary_documents" class="md-nav__link">
+    primary_documents
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.__rich__" class="md-nav__link">
+    __rich__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.__str__" class="md-nav__link">
+    __str__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.data_object" class="md-nav__link">
+    data_object()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.get_entity" class="md-nav__link">
+    get_entity()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.html" class="md-nav__link">
+    html()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.markdown" class="md-nav__link">
+    markdown()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.obj" class="md-nav__link">
+    obj()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.open" class="md-nav__link">
+    open()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.open_homepage" class="md-nav__link">
+    open_homepage()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.related_filings" class="md-nav__link">
+    related_filings()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.search" class="md-nav__link">
+    search()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.summary" class="md-nav__link">
+    summary()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.text" class="md-nav__link">
+    text()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.view" class="md-nav__link">
+    view()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.xbrl" class="md-nav__link">
+    xbrl()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.xml" class="md-nav__link">
+    xml()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument" class="md-nav__link">
+    FilingDocument
+  </a>
+  
+    <nav class="md-nav" aria-label="FilingDocument">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.display_extension" class="md-nav__link">
+    display_extension
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.extension" class="md-nav__link">
+    extension
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.url" class="md-nav__link">
+    url
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.open" class="md-nav__link">
+    open()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.summary" class="md-nav__link">
+    summary()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage" class="md-nav__link">
+    FilingHomepage
+  </a>
+  
+    <nav class="md-nav" aria-label="FilingHomepage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.datafiles" class="md-nav__link">
+    datafiles
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.documents" class="md-nav__link">
+    documents
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.primary_documents" class="md-nav__link">
+    primary_documents
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.primary_html_document" class="md-nav__link">
+    primary_html_document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.primary_xml_document" class="md-nav__link">
+    primary_xml_document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.text_document" class="md-nav__link">
+    text_document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.xbrl_document" class="md-nav__link">
+    xbrl_document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.from_html" class="md-nav__link">
+    from_html()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.get_file" class="md-nav__link">
+    get_file()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.get_matching_files" class="md-nav__link">
+    get_matching_files()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.min_seq" class="md-nav__link">
+    min_seq()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.FilingXbrl" class="md-nav__link">
+    FilingXbrl
+  </a>
+  
+    <nav class="md-nav" aria-label="FilingXbrl">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._xbrl.FilingXbrl.summary" class="md-nav__link">
+    summary()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.Filings" class="md-nav__link">
+    Filings
+  </a>
+  
+    <nav class="md-nav" aria-label="Filings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.date_range" class="md-nav__link">
+    date_range
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.current" class="md-nav__link">
+    current()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.filter" class="md-nav__link">
+    filter()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.get" class="md-nav__link">
+    get()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.get_filing_at" class="md-nav__link">
+    get_filing_at()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.head" class="md-nav__link">
+    head()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.latest" class="md-nav__link">
+    latest()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.next" class="md-nav__link">
+    next()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.prev" class="md-nav__link">
+    prev()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.previous" class="md-nav__link">
+    previous()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.save" class="md-nav__link">
+    save()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.save_parquet" class="md-nav__link">
+    save_parquet()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.tail" class="md-nav__link">
+    tail()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.to_pandas" class="md-nav__link">
+    to_pandas()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.available_quarters" class="md-nav__link">
+    available_quarters()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.expand_quarters" class="md-nav__link">
+    expand_quarters()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.get_filings" class="md-nav__link">
+    get_filings()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.get_filings_for_quarters" class="md-nav__link">
+    get_filings_for_quarters()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.read_fixed_width_index" class="md-nav__link">
+    read_fixed_width_index()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.read_pipe_delimited_index" class="md-nav__link">
+    read_pipe_delimited_index()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies" class="md-nav__link">
+    edgar._companies
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyData" class="md-nav__link">
+    CompanyData
+  </a>
+  
+    <nav class="md-nav" aria-label="CompanyData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyData.get_facts" class="md-nav__link">
+    get_facts()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyData.get_filings" class="md-nav__link">
+    get_filings()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFacts" class="md-nav__link">
+    CompanyFacts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFiling" class="md-nav__link">
+    CompanyFiling
+  </a>
+  
+    <nav class="md-nav" aria-label="CompanyFiling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFiling.related_filings" class="md-nav__link">
+    related_filings()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFilings" class="md-nav__link">
+    CompanyFilings
+  </a>
+  
+    <nav class="md-nav" aria-label="CompanyFilings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFilings.latest" class="md-nav__link">
+    latest()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFilings.next" class="md-nav__link">
+    next()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFilings.previous" class="md-nav__link">
+    previous()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.get_company" class="md-nav__link">
+    get_company()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.get_company_submissions" class="md-nav__link">
+    get_company_submissions()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.get_concept" class="md-nav__link">
+    get_concept()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.preprocess_company" class="md-nav__link">
+    preprocess_company()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar.forms" class="md-nav__link">
+    edgar.forms
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._xbrl" class="md-nav__link">
+    edgar._xbrl
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._xbrl.FilingXbrl" class="md-nav__link">
+    FilingXbrl
+  </a>
+  
+    <nav class="md-nav" aria-label="FilingXbrl">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._xbrl.FilingXbrl.summary" class="md-nav__link">
+    summary()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._xbrl.NamespaceInfo" class="md-nav__link">
+    NamespaceInfo
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings" class="md-nav__link">
+    edgar._filings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.FileSpecs" class="md-nav__link">
+    FileSpecs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.Filing" class="md-nav__link">
+    Filing
+  </a>
+  
+    <nav class="md-nav" aria-label="Filing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.document" class="md-nav__link">
+    document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.homepage" class="md-nav__link">
+    homepage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.primary_documents" class="md-nav__link">
+    primary_documents
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.__rich__" class="md-nav__link">
+    __rich__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.__str__" class="md-nav__link">
+    __str__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.data_object" class="md-nav__link">
+    data_object()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.get_entity" class="md-nav__link">
+    get_entity()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.html" class="md-nav__link">
+    html()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.markdown" class="md-nav__link">
+    markdown()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.obj" class="md-nav__link">
+    obj()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.open" class="md-nav__link">
+    open()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.open_homepage" class="md-nav__link">
+    open_homepage()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.related_filings" class="md-nav__link">
+    related_filings()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.search" class="md-nav__link">
+    search()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.summary" class="md-nav__link">
+    summary()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.text" class="md-nav__link">
+    text()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.view" class="md-nav__link">
+    view()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.xbrl" class="md-nav__link">
+    xbrl()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filing.xml" class="md-nav__link">
+    xml()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument" class="md-nav__link">
+    FilingDocument
+  </a>
+  
+    <nav class="md-nav" aria-label="FilingDocument">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.display_extension" class="md-nav__link">
+    display_extension
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.extension" class="md-nav__link">
+    extension
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.url" class="md-nav__link">
+    url
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.open" class="md-nav__link">
+    open()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingDocument.summary" class="md-nav__link">
+    summary()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage" class="md-nav__link">
+    FilingHomepage
+  </a>
+  
+    <nav class="md-nav" aria-label="FilingHomepage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.datafiles" class="md-nav__link">
+    datafiles
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.documents" class="md-nav__link">
+    documents
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.primary_documents" class="md-nav__link">
+    primary_documents
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.primary_html_document" class="md-nav__link">
+    primary_html_document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.primary_xml_document" class="md-nav__link">
+    primary_xml_document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.text_document" class="md-nav__link">
+    text_document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.xbrl_document" class="md-nav__link">
+    xbrl_document
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.from_html" class="md-nav__link">
+    from_html()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.get_file" class="md-nav__link">
+    get_file()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.get_matching_files" class="md-nav__link">
+    get_matching_files()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.FilingHomepage.min_seq" class="md-nav__link">
+    min_seq()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.FilingXbrl" class="md-nav__link">
+    FilingXbrl
+  </a>
+  
+    <nav class="md-nav" aria-label="FilingXbrl">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._xbrl.FilingXbrl.summary" class="md-nav__link">
+    summary()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.Filings" class="md-nav__link">
+    Filings
+  </a>
+  
+    <nav class="md-nav" aria-label="Filings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.date_range" class="md-nav__link">
+    date_range
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.current" class="md-nav__link">
+    current()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.filter" class="md-nav__link">
+    filter()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.get" class="md-nav__link">
+    get()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.get_filing_at" class="md-nav__link">
+    get_filing_at()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.head" class="md-nav__link">
+    head()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.latest" class="md-nav__link">
+    latest()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.next" class="md-nav__link">
+    next()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.prev" class="md-nav__link">
+    prev()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.previous" class="md-nav__link">
+    previous()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.save" class="md-nav__link">
+    save()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.save_parquet" class="md-nav__link">
+    save_parquet()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.tail" class="md-nav__link">
+    tail()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._filings.Filings.to_pandas" class="md-nav__link">
+    to_pandas()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.available_quarters" class="md-nav__link">
+    available_quarters()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.expand_quarters" class="md-nav__link">
+    expand_quarters()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.get_filings" class="md-nav__link">
+    get_filings()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.get_filings_for_quarters" class="md-nav__link">
+    get_filings_for_quarters()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.read_fixed_width_index" class="md-nav__link">
+    read_fixed_width_index()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._filings.read_pipe_delimited_index" class="md-nav__link">
+    read_pipe_delimited_index()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies" class="md-nav__link">
+    edgar._companies
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyData" class="md-nav__link">
+    CompanyData
+  </a>
+  
+    <nav class="md-nav" aria-label="CompanyData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyData.get_facts" class="md-nav__link">
+    get_facts()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyData.get_filings" class="md-nav__link">
+    get_filings()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFacts" class="md-nav__link">
+    CompanyFacts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFiling" class="md-nav__link">
+    CompanyFiling
+  </a>
+  
+    <nav class="md-nav" aria-label="CompanyFiling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFiling.related_filings" class="md-nav__link">
+    related_filings()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFilings" class="md-nav__link">
+    CompanyFilings
+  </a>
+  
+    <nav class="md-nav" aria-label="CompanyFilings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFilings.latest" class="md-nav__link">
+    latest()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFilings.next" class="md-nav__link">
+    next()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar._companies.CompanyFilings.previous" class="md-nav__link">
+    previous()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.get_company" class="md-nav__link">
+    get_company()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.get_company_submissions" class="md-nav__link">
+    get_company_submissions()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.get_concept" class="md-nav__link">
+    get_concept()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._companies.preprocess_company" class="md-nav__link">
+    preprocess_company()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar.forms" class="md-nav__link">
+    edgar.forms
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._xbrl" class="md-nav__link">
+    edgar._xbrl
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._xbrl.FilingXbrl" class="md-nav__link">
+    FilingXbrl
+  </a>
+  
+    <nav class="md-nav" aria-label="FilingXbrl">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar._xbrl.FilingXbrl.summary" class="md-nav__link">
+    summary()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edgar._xbrl.NamespaceInfo" class="md-nav__link">
+    NamespaceInfo
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="api-reference">API Reference</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+<a id="edgar._filings"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._filings.FileSpecs" class="doc doc-heading">
+        <code>FileSpecs</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>A specification for a fixed width file</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._filings.Filing" class="doc doc-heading">
+        <code>Filing</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>A single SEC filing. Allow you to access the documents and data for that filing</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.Filing.document" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">document</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>:return: The primary display document on the filing, generally HTML but can be XHTML</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.Filing.homepage" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">homepage</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the homepage for the filing
+:return: the FilingHomepage</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.Filing.primary_documents" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">primary_documents</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>:return: a list of the primary documents on the filing, generally HTML or XHTML and optionally XML</p>
+  </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.__rich__" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">__rich__</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Produce a table version of this filing e.g.
+┌──────────────────────┬──────┬────────────┬────────────────────┬─────────┐
+│                      │ form │ filing_date      │ company            │ cik     │
+├──────────────────────┼──────┼────────────┼────────────────────┼─────────┤
+│ 0001564590-18-004771 │ 10-K │ 2018-03-08 │ CARBO CERAMICS INC │ 1009672 │
+└──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
+:return: a rich table version of this filing</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.__str__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__str__</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Return a string version of this filing e.g.</p>
+<p>Filing(form='10-K', filing_date='2018-03-08', company='CARBO CERAMICS INC',
+      cik=1009672, accession_no='0001564590-18-004771')
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.data_object" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">data_object</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get this filing as the data object that it might be</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.get_entity" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_entity</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the company to which this filing belongs</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.html" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">html</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the html contents of the primary document if it is html</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.markdown" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">markdown</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>return the markdown version of this filing html</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.obj" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">obj</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Alias for data_object()</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.open" class="doc doc-heading">
+<code class="highlight language-python"><span class="nb">open</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Open the main filing document</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.open_homepage" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">open_homepage</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Open the homepage in the browser</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.related_filings" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">related_filings</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get all the filings related to this one
+There is no file number on this base Filing class so first get the company,</p>
+<p>then this filing then get the related filings</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.search" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">search</span><span class="p">(</span><span class="n">query</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Search for the query string in the filing HTML</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.summary" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">summary</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Return a summary of this filing as a dataframe</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.text" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">text</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Return the complete text submission file</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.view" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">view</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Preview this filing's primary document as markdown. This should display in the console</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.xbrl" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">xbrl</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the XBRL document for the filing, parsed and as a FilingXbrl object
+:return: Get the XBRL document for the filing, parsed and as a FilingXbrl object, or None</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filing.xml" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">xml</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the xml contents of the primary document if it is xml</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._filings.FilingDocument" class="doc doc-heading">
+        <code>FilingDocument</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>A document on the filing</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingDocument.display_extension" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">display_extension</span><span class="p">:</span> <span class="nb">str</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>This is the extension displayed in the html e.g. "es220296680_4-davis.html"
+The actual extension would be "es220296680_4-davis.xml", that displays as html in the browser</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>.html</p>
+</blockquote>
+</blockquote>
+</blockquote>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingDocument.extension" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">extension</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The actual extension of the filing document
+Usually one of .xml or .html or .pdf or .txt or .paper</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingDocument.url" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">url</span><span class="p">:</span> <span class="nb">str</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>:return: The full sec url</p>
+  </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.FilingDocument.open" class="doc doc-heading">
+<code class="highlight language-python"><span class="nb">open</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Open the filing document</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.FilingDocument.summary" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">summary</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Return a summary of this filing as a dataframe</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._filings.FilingHomepage" class="doc doc-heading">
+        <code>FilingHomepage</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>A class that represents the homepage for the filing allowing us to get the documents and datafiles</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.datafiles" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">datafiles</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>returns the files that are in the "Data Files" table of the homepage</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.documents" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">documents</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>returns the files that are in the "Document Format Files" table of the homepage</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.primary_documents" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">primary_documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">FilingDocument</span><span class="p">]</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-cached"><code>cached</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the documents listed as primary for the filing
+:return:</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.primary_html_document" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">primary_html_document</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FilingDocument</span><span class="p">]</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the primary xml document on the filing</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.primary_xml_document" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">primary_xml_document</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FilingDocument</span><span class="p">]</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the primary xml document on the filing</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.text_document" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">text_document</span><span class="p">:</span> <span class="n">FilingDocument</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the full text submission file</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.xbrl_document" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">xbrl_document</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Find and return the xbrl document.</p>
+  </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.from_html" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">from_html</span><span class="p">(</span><span class="n">homepage_html</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">filing</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Parse the HTML and create the Homepage from it</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.get_file" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_file</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>get the filing document that matches the seq</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.get_matching_files" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_matching_files</span><span class="p">(</span><span class="n">query</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>return the files that match the query</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.FilingHomepage.min_seq" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">min_seq</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the minimum document sequence from the Seq column</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._filings.FilingXbrl" class="doc doc-heading">
+        <code>FilingXbrl</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Represents the XBRL data for a single filing.
+It wraps the underlying dataset of facts into a <code>facts</code> property.</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._xbrl.FilingXbrl.summary" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">summary</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Summarize this FilingXBRL as a dataframe</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._filings.Filings" class="doc doc-heading">
+        <code>Filings</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>A container for filings</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="edgar._filings.Filings.date_range" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">date_range</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Return a tuple of the start and end dates in the filing index</p>
+  </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.current" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">current</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Display the current page .. which is the default for this filings object</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.filter" class="doc doc-heading">
+<code class="highlight language-python"><span class="nb">filter</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">amendments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filing_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Filter the filings
+:param form: The form or list of forms to filter by
+:param amendments: Whether to include amendments to the forms e.g include "10-K/A" if filtering for "10-K"
+:param filing_date: The filing date
+:param date: An alias for the filing date
+:return: The filtered filings</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.get" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get</span><span class="p">(</span><span class="n">index_or_accession_number</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the Filing at that index location or that has the accession number</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>filings.get(100)</p>
+<p>filings.get("0001721868-22-000010")</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>:param index_or_accession_number:
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.get_filing_at" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_filing_at</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the filing at the specified index</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.head" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the first n filings</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.latest" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">latest</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the latest n filings</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.next" class="doc doc-heading">
+<code class="highlight language-python"><span class="nb">next</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Show the next page</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.prev" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">prev</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Alias for self.previous()</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.previous" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">previous</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Show the previous page of the data
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.save" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">save</span><span class="p">(</span><span class="n">location</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Save the filing index as parquet</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.save_parquet" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">save_parquet</span><span class="p">(</span><span class="n">location</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Save the filing index as parquet</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.tail" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">tail</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the last n filings</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._filings.Filings.to_pandas" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">to_pandas</span><span class="p">(</span><span class="o">*</span><span class="n">columns</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Return the filing index as a python dataframe</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._filings.available_quarters" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">available_quarters</span><span class="p">()</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-cached"><code>cached</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get a list of year and quarter tuples
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._filings.expand_quarters" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">expand_quarters</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">quarter</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Expand the list of years and a list of quarters to a full list of tuples covering the full range
+:param year: The year or years
+:param quarter: The quarter or quarters
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._filings.get_filings" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_filings</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quarter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">amendments</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filing_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;form&#39;</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Downloads the filing index for a given year or list of years, and a quarter or list of quarters.</p>
+<p>So you can download for 2020, [2020,2021,2022] or range(2020, 2023)</p>
+<p>Examples</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>from edgar import get_filings</p>
+<p>filings = get_filings(2021) # Get filings for 2021</p>
+<p>filings = get_filings(2021, 4) # Get filings for 2021 Q4</p>
+<p>filings = get_filings(2021, [3,4]) # Get filings for 2021 Q3 and Q4</p>
+<p>filings = get_filings([2020, 2021]) # Get filings for 2020 and 2021</p>
+<p>filings = get_filings([2020, 2021], 4) # Get filings for Q4 of 2020 and 2021</p>
+<p>filings = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021</p>
+<p>filings = get_filings(2021, 4, form="D") # Get filings for 2021 Q4 for form D</p>
+<p>filings = get_filings(2021, 4, filing_date="2021-10-01") # Get filings for 2021 Q4 on "2021-10-01"</p>
+<p>filings = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") # Get filings for 2021 Q4 between
+                                                                        # "2021-10-01" and "2021-10-10"</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>:param year The year of the filing
+:param quarter The quarter of the filing
+:param form The form or forms as a string e.g. "10-K" or a List ["10-K", "8-K"]
+:param amendments If True will expand the list of forms to include amendments e.g. "10-K/A"
+:param filing_date The filing date to filter by in YYYY-MM-DD format
+            e.g. filing_date="2022-01-17" or filing_date="2022-01-17:2022-02-28"
+:param index The index type - "form" or "company" or "xbrl"
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._filings.get_filings_for_quarters" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_filings_for_quarters</span><span class="p">(</span><span class="n">year_and_quarters</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;form&#39;</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the filings for the quarters
+:param year_and_quarters:
+:param index: The index to use - "form", "company", or "xbrl"
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._filings.read_fixed_width_index" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">read_fixed_width_index</span><span class="p">(</span><span class="n">index_text</span><span class="p">,</span> <span class="n">file_specs</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Read the index text as a fixed width file
+:param index_text: The index text as downloaded from SEC Edgar
+:param file_specs: The file specs containing the column definitions
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._filings.read_pipe_delimited_index" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">read_pipe_delimited_index</span><span class="p">(</span><span class="n">index_text</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Read the index file as a pipe delimited index
+:param index_text: The index text as read from SEC Edgar
+:return: The index data as a pyarrow table</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+<a id="edgar._companies"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._companies.CompanyData" class="doc doc-heading">
+        <code>CompanyData</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>A company populated from a call to the company submissions endpoint</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._companies.CompanyData.get_facts" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_facts</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the company facts
+:return: CompanyFacts</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._companies.CompanyData.get_filings" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_filings</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">accession_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filing_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_xbrl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_inline_xbrl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort_by</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the company's filings and optionally filter by multiple criteria</p>
+<p>form: The form as a string e.g. '10-K' or List of strings ['10-Q', '10-K']</p>
+<p>accession_number: The accession number that uniquely identifies an SEC filing e.g. 0001640147-22-000100</p>
+<p>file_number: The file number e.g. 001-39504</p>
+<p>is_xbrl: Whether the filing is xbrl</p>
+<p>is_inline_xbrl: Whether the filing is inline_xbrl</p>
+<p>:return: The CompanyFiling instance with the filings that match the filters</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._companies.CompanyFacts" class="doc doc-heading">
+        <code>CompanyFacts</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Contains company facts data</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._companies.CompanyFiling" class="doc doc-heading">
+        <code>CompanyFiling</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+      <p class="doc doc-class-bases">
+        Bases: <code><a class="autorefs autorefs-internal" title="edgar._filings.Filing" href="#edgar._filings.Filing">Filing</a></code></p>
+
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._companies.CompanyFiling.related_filings" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">related_filings</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get all the filings related to this one</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._companies.CompanyFilings" class="doc doc-heading">
+        <code>CompanyFilings</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+      <p class="doc doc-class-bases">
+        Bases: <code><a class="autorefs autorefs-internal" title="edgar._filings.Filings" href="#edgar._filings.Filings">Filings</a></code></p>
+
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._companies.CompanyFilings.latest" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">latest</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the latest n filings</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._companies.CompanyFilings.next" class="doc doc-heading">
+<code class="highlight language-python"><span class="nb">next</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Show the next page</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._companies.CompanyFilings.previous" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">previous</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Show the previous page of the data
+:return:</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._companies.get_company" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_company</span><span class="p">(</span><span class="n">company_identifier</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <pre><code>Get a company by cik or ticker
+
+Get company by ticker e.g.
+
+&gt;&gt;&gt; get_company("SNOW") or get_company("tsla")
+
+Get company by cik e.g.
+
+&gt;&gt;&gt; get_company(1090990)
+</code></pre>
+<p>:param company_identifier: The company identifier. Can be a cik or a ticker
+:return:</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._companies.get_company_submissions" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_company_submissions</span><span class="p">(</span><span class="n">cik</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-cached"><code>cached</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get the company filings for a given cik</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._companies.get_concept" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_concept</span><span class="p">(</span><span class="n">cik</span><span class="p">,</span> <span class="n">taxonomy</span><span class="p">,</span> <span class="n">concept</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-cached"><code>cached</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The company-concept API returns all the XBRL disclosures from a single company (CIK) and concept
+ (a taxonomy and tag) into a single JSON file, with a separate array of facts for each units on measure
+ that the company has chosen to disclose (e.g. net profits reported in U.S. dollars and in Canadian dollars).</p>
+<p>https://data.sec.gov/api/xbrl/companyconcept/CIK##########/us-gaap/AccountsPayableCurrent.json
+:param cik: The company cik
+:param taxonomy: The taxonomy e.g. "us-gaap"
+:param concept: The concept or tag e.g. AccountsPayableCurrent
+:return: a CompanyConcept</p>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="edgar._companies.preprocess_company" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">preprocess_company</span><span class="p">(</span><span class="n">company</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>preprocess the company name for storing in the search index</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+<a id="edgar.forms"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+<a id="edgar._xbrl"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._xbrl.FilingXbrl" class="doc doc-heading">
+        <code>FilingXbrl</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Represents the XBRL data for a single filing.
+It wraps the underlying dataset of facts into a <code>facts</code> property.</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="edgar._xbrl.FilingXbrl.summary" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">summary</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Summarize this FilingXBRL as a dataframe</p>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="edgar._xbrl.NamespaceInfo" class="doc doc-heading">
+        <code>NamespaceInfo</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>This class contains the namespace tags and links parsed from the start of an (XBRL) XML document</p>
+
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.fc8c2696.min.js"></script>
+      
+    
+  </body>
+</html>
