@@ -598,8 +598,24 @@ def test_filing_sections():
     print(sections[10])
 
 
-def test_search_for_text_in_filing():
+def test_search_for_text_in_filing_with_bm25():
     print()
     results = carbo_10K.search("risks")
     assert len(results) > 10
+    print(results)
+
+
+def test_search_for_text_with_regex():
+    print()
+
+    filing = Filing(company="NORDSTROM INC", cik=72333, form="8-K",
+                    filing_date="2023-03-06", accession_no="0000072333-23-000015")
+    results = filing.search(r"Item\s5.02", regex=True)
+    assert len(results) > 0
+    print(results)
+
+    filing = Filing(company="BLACKROCK INC", cik=1364742, form="8-K",
+                    filing_date="2023-02-24", accession_no="0001193125-23-048785")
+    results = filing.search(r"Item\s5.02",  regex=True)
+    assert len(results) > 0
     print(results)

@@ -1,5 +1,6 @@
 import re
-from typing import List, Callable
+import unicodedata
+from typing import List, Callable, Tuple
 
 import pandas as pd
 import textdistance
@@ -17,7 +18,8 @@ PUNCTUATION = re.compile('[%s]' % re.escape(r"""!"#&'()*+,-/:;<=>?@[\]^`{|}~""")
 __all__ = [
     'SimilaritySearchIndex',
     'SearchResults',
-    'BM25SearchIndex',
+    'BM25Search',
+    'RegexSearch',
     'preprocess'
 ]
 
@@ -89,6 +91,17 @@ def numeric_shape(tokens: List[str]) -> List[str]:
     return toks
 
 
+def return_spaces_to_items(tokens: List[str]) -> List[str]:
+    toks = []
+    pattern = r"item_(\d+(\.\d+)?)"
+    for token in tokens:
+        if re.fullmatch(pattern, token):
+            toks += re.sub(pattern, r"item \1", token).split(" ")
+        else:
+            toks.append(token)
+    return toks
+
+
 def preprocess(text: str):
     text = text.lower()
     text = convert_items_to_tokens(text)
@@ -96,6 +109,7 @@ def preprocess(text: str):
     tokens = punctuation_filter(tokens)
     tokens = stopword_filter(tokens)
     tokens = numeric_shape(tokens)
+    tokens = return_spaces_to_items(tokens)
     return tokens
 
 
@@ -103,30 +117,33 @@ def preprocess_documents(documents: List[str]) -> Corpus:
     return [preprocess(document) for document in documents]
 
 
+LocAndDoc = Tuple[str, int]
+
+
 class SearchResults:
 
     def __init__(self,
                  query: str,
-                 result_sections: List[str],
+                 sections: LocAndDoc,
                  tables: bool = True
                  ):
         self.query: str = query
-        self.result_sections: List[str] = result_sections
+        self.sections: LocAndDoc = sections
         self._show_tables = tables
 
     def __len__(self):
-        return len(self.result_sections)
+        return len(self.sections)
 
     def __rich__(self):
         _md = ""
         renderables = []
         title = f"Search results for '{self.query}'"
-        for section in self.result_sections:
-            if section.startswith("|  |") and self._show_tables:
-                table = convert_table(section)
+        for loc, doc in self.sections:
+            if doc.startswith("|  |") and self._show_tables:
+                table = convert_table(doc)
                 renderables.append(table)
             else:
-                renderables.append(Markdown(section + "\n\n---"))
+                renderables.append(Markdown(doc + "\n\n---"))
         return Panel(
             Group(*renderables), title=title, subtitle=title, box=box.ROUNDED
         )
@@ -135,20 +152,31 @@ class SearchResults:
         return repr_rich(self.__rich__())
 
 
-class BM25SearchIndex:
+class BM25Search:
 
     def __init__(self,
                  document_objs: List[object],
                  text_fn: Callable = None):
         if text_fn:
-            self.corpus: Corpus = [preprocess(text_fn(doc)) for doc in document_objs]
+            self.corpus: Corpus = [BM25Search.preprocess(text_fn(doc)) for doc in document_objs]
         else:
-            self.corpus: Corpus = [preprocess(doc) for doc in document_objs]
+            self.corpus: Corpus = [BM25Search.preprocess(doc) for doc in document_objs]
         self.document_objs = document_objs
         self.bm25: BM25Okapi = BM25Okapi(self.corpus)
 
     def __len__(self):
         return len(self.document_objs)
+
+    @staticmethod
+    def preprocess(text: str):
+        text = text.lower()
+        text = convert_items_to_tokens(text)
+        tokens = tokenize(text)
+        tokens = punctuation_filter(tokens)
+        tokens = stopword_filter(tokens)
+        tokens = numeric_shape(tokens)
+        tokens = return_spaces_to_items(tokens)
+        return tokens
 
     def search(self,
                query: str,
@@ -157,6 +185,35 @@ class BM25SearchIndex:
         scores = self.bm25.get_scores(preprocessed_query)
         doc_scores = zip(self.document_objs, scores)
         doc_scores_sorted = sorted([doc for doc in doc_scores if doc[1] > 0], key=lambda t: t[1])[::-1]
+        # Return the list of location and document
         return SearchResults(query=query,
-                             result_sections=[doc[0] for doc in doc_scores_sorted if doc[1] > 0],
+                             sections=[(loc, doc_score[0])
+                                       for loc, doc_score in enumerate(doc_scores_sorted)
+                                       if doc_score[1] > 0],
                              tables=tables)
+
+
+class RegexSearch:
+
+    def __init__(self,
+                 documents: List[object]):
+        self.document_objs = [RegexSearch.preprocess(document) for document in documents]
+
+    def __len__(self):
+        return len(self.document_objs)
+
+    @staticmethod
+    def preprocess(text: str):
+        text = text.replace("&#160;", " ")
+        return text
+
+    def search(self,
+               query: str,
+               tables: bool = True):
+        return SearchResults(
+            query=query,
+            sections=[(loc, doc)
+                      for loc, doc in enumerate(self.document_objs)
+                      if re.search(query, doc, flags=re.IGNORECASE)],
+            tables=tables
+        )

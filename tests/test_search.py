@@ -1,15 +1,40 @@
 import re
 from pathlib import Path
-
-from edgar.search import BM25SearchIndex
-from edgar.search import numeric_shape, preprocess, convert_items_to_tokens
+from edgar.search import numeric_shape, preprocess, convert_items_to_tokens, RegexSearch, BM25Search
+from rich import print
+from markdownify import markdownify
 
 blackrock_8k = Path('data/form8K.Blackrock.html').read_text()
+document_sections = re.split(r"\n\s*\n", markdownify(blackrock_8k))
 
 
 def test_create_bm25_search_index():
-    bm25: BM25SearchIndex = BM25SearchIndex(re.split(r"\n\s*\n", blackrock_8k))
+    bm25: BM25Search = BM25Search(document_sections)
     assert bm25
+    search_results = bm25.search("financial")
+    assert len(search_results) == 2
+
+    # Search for item
+    print()
+    results = bm25.search("Item 5.02")
+    print(results)
+    assert len(results) > 0
+
+    results = bm25.search("Item 9.02")
+    print(results)
+    assert len(results) > 0
+
+
+def test_regex_search_preprocess():
+    assert RegexSearch.preprocess("Item&#160;5.02") == "Item 5.02"
+
+
+def test_regex_search():
+    regex_search: RegexSearch = RegexSearch(document_sections)
+    search_results = regex_search.search(r"Item\s5.02")
+    print()
+    print(search_results)
+    assert len(search_results) > 0
 
 
 def test_numeric_shape():

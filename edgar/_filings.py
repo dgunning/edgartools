@@ -28,7 +28,7 @@ from edgar._xbrl import FilingXbrl
 from edgar.core import (http_client, download_text, download_file, log, display_size,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.fundreports import FUND_FORMS
-from edgar.search import BM25SearchIndex
+from edgar.search import BM25Search, RegexSearch
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -654,11 +654,18 @@ class Filing:
 
     @lru_cache(maxsize=1)
     def __get_bm25_search_index(self):
-        return BM25SearchIndex(self.sections())
+        return BM25Search(self.sections())
+
+    @lru_cache(maxsize=1)
+    def __get_regex_search_index(self):
+        return RegexSearch(self.sections())
 
     def search(self,
-               query: str):
+               query: str,
+               regex=False):
         """Search for the query string in the filing HTML"""
+        if regex:
+            return self.__get_regex_search_index().search(query)
         return self.__get_bm25_search_index().search(query)
 
     @property
