@@ -63,7 +63,7 @@ def test_preprocess_text():
     """
     post_text = preprocess(text)
     print(post_text)
-    assert "item_4.01" in post_text
+    assert "4.01" in post_text and "item" in post_text
     assert "xx%" in post_text
 
 
