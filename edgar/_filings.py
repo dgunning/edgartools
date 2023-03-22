@@ -635,7 +635,7 @@ class Filing:
     def data_object(self):
         """ Get this filing as the data object that it might be"""
         from edgar import obj
-        return obj(self)
+        return obj(self) or self
 
     def obj(self):
         """Alias for data_object()"""

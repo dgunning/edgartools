@@ -59,3 +59,6 @@ def test_obj():
     filing_xbrl = filing_10k.data_object()
     assert filing_xbrl
 
+    filing = Filing(form='1-A/A', filing_date='2023-03-21', company='CancerVAX, Inc.', cik=1905495,
+                    accession_no='0001493152-23-008348')
+    assert filing.obj() == filing
