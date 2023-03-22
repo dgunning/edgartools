@@ -29,6 +29,7 @@ from edgar.core import (http_client, download_text, download_file, log, display_
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.fundreports import FUND_FORMS
 from edgar.search import BM25Search, RegexSearch
+from edgar._markdown import html_to_markdown
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -614,7 +615,7 @@ class Filing:
 
     def markdown(self) -> str:
         """return the markdown version of this filing html"""
-        return markdownify(self.html())
+        return html_to_markdown(self.html())
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""

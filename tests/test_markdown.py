@@ -2,7 +2,7 @@ from pathlib import Path
 
 from rich import print
 
-from edgar._markdown import convert_table, MarkdownContent
+from edgar._markdown import convert_table, MarkdownContent, fix_markdown
 
 
 def test_convert_markdown_table():
@@ -50,3 +50,30 @@ def test_markdown_content_html_with_no_tables():
     print()
     text = repr(markdown_content)
     assert text
+
+
+def test_fix_markdown():
+    # Fix no space between consecutive sentences
+    md = """
+    A copy of this press release is hereby incorporated as Exhibit 99.1  │
+    Condition.On Match 23, 2023
+    """
+    assert "Condition.On" in md
+    assert "Condition. On" in fix_markdown(md)
+
+    md = """
+    Item\n5.02 A copy of this press release is hereby incorporated as Exhibit 99.1  │
+    Condition.On Match 23, 2023
+    """
+    assert "Item\n5.02" in md
+    assert "Item 5.02" in fix_markdown(md)
+
+    # Fix no newline between items
+    md = """
+    A copy of this press release is hereby incorporated as Exhibit 99.1  │
+    │ hereto. Item 9.01. Financial Statements and Exhibits. (d) Exhibits Exhibit 99.1 - Press Release issued March 16,
+    │ 2023Exhibit 104 – Cover Page Interactive Data File (embedded within Inline XBRL document)
+    """
+    assert ". Item 9.01" in md
+    md_fixed = fix_markdown(md)
+    assert ".\n Item 9.01" in md_fixed

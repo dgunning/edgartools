@@ -11,7 +11,9 @@ from edgar._rich import repr_rich
 
 __all__ = [
     'convert_table',
-    'MarkdownContent'
+    'MarkdownContent',
+    'markdown_to_rich',
+    "fix_markdown"
 ]
 
 
@@ -38,6 +40,52 @@ def convert_table(table_markdown: str):
 skip_tags = ["<DOCUMENT>", "<TYPE>", "<SEQUENCE>", "<FILENAME>", "<DESCRIPTION>", "<TEXT>"]
 
 
+def markdown_to_rich(md: str, title: str = "") -> Markdown:
+    """Convert the markdown to rich .. handling tables better than rich"""
+    content = []
+    buf = ""
+    table_buf = ""
+    is_table = False
+    for line in md.split("\n"):
+        if is_table:
+            if not line.strip():
+                table = convert_table(table_buf)
+                content.append(table)
+                is_table = False
+                table_buf = ""
+            else:
+                table_buf += line + "\n"
+        else:
+            if "|  |" in line:
+                markdown = Markdown(buf)
+                buf = ""
+                table_buf = line + "\n"
+                content.append(markdown)
+                is_table = True
+            else:
+                buf += line + "\n"
+    if buf:
+        content.append(Markdown(buf))
+    return Panel(Group(*content), title=title, subtitle=title, box=box.ROUNDED)
+
+
+def fix_markdown(md: str):
+
+    # Clean up issues with not spaces between sentences like "Condition.On"
+    md = re.sub(r"([a-z]\.)([A-Z])", r"\1 \2", md)
+
+    # And fix split Item numbers e.g. "Item\n5.02"
+    md = re.sub(r"(Item)\n\s?(\d.\d{,2})", r"\1 \2", md)
+
+    # Fix items not on newlines e.g. ". Item 5.02"
+    md = re.sub(r"\. (Item)\s?(\d.\d{,2})", r".\n \1 \2", md)
+    return md
+
+
+def html_to_markdown(html: str) -> str:
+    return fix_markdown(markdownify(html))
+
+
 class MarkdownContent:
 
     def __init__(self,
@@ -51,31 +99,7 @@ class MarkdownContent:
         self.title = title
 
     def __rich__(self):
-        content = []
-        buf = ""
-        table_buf = ""
-        is_table = False
-        for line in self.md.split("\n"):
-            if is_table:
-                if not line.strip():
-                    table = convert_table(table_buf)
-                    content.append(table)
-                    is_table = False
-                    table_buf = ""
-                else:
-                    table_buf += line + "\n"
-            else:
-                if "|  |" in line:
-                    markdown = Markdown(buf)
-                    buf = ""
-                    table_buf = line + "\n"
-                    content.append(markdown)
-                    is_table = True
-                else:
-                    buf += line + "\n"
-        if buf:
-            content.append(Markdown(buf))
-        return Panel(Group(*content), title=self.title, subtitle=self.title, box=box.ROUNDED)
+        return markdown_to_rich(self.md, title=self.title)
 
     def __repr__(self):
         return repr_rich(self.__rich__())

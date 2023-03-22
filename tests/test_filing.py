@@ -11,7 +11,6 @@ from typing import List
 
 from edgar import get_filings, Filings, Filing, get_company
 from edgar.core import default_page_size
-from edgar._companies import CompanySearchResults
 from edgar._filings import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
 from rich import print
 
@@ -598,6 +597,16 @@ def test_filing_sections():
     print(sections[10])
 
 
+def test_filing_with_complex_sections():
+    filing = Filing(form='8-K', filing_date='2023-03-15', company='ADOBE INC.', cik=796343,
+                    accession_no='0000796343-23-000044')
+
+    sections = filing.sections()
+    for section in sections:
+        if "Item 2.0.2" in section:
+            assert "Financial Condition. On March 15, 2023," in section
+
+
 def test_search_for_text_in_filing_with_bm25():
     print()
     results = carbo_10K.search("risks")
@@ -616,6 +625,6 @@ def test_search_for_text_with_regex():
 
     filing = Filing(company="BLACKROCK INC", cik=1364742, form="8-K",
                     filing_date="2023-02-24", accession_no="0001193125-23-048785")
-    results = filing.search(r"Item\s5.02",  regex=True)
+    results = filing.search(r"Item\s5.02", regex=True)
     assert len(results) > 0
     print(results)

@@ -1,17 +1,21 @@
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 
 import pandas as pd
 from bs4 import BeautifulSoup
 from rich.console import Group, Text
+from rich.markdown import Markdown
 
+from edgar._markdown import markdown_to_rich
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import download_text, http_client, sec_dot_gov
 
 __all__ = [
     'SecForms',
     'list_forms',
-    'FUND_FORMS'
+    'FUND_FORMS',
+    'EightK'
 ]
 
 FUND_FORMS = ["NPORT-P", "NPORT-EX"]
@@ -103,3 +107,73 @@ class SecForms:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+
+def find_section(pattern, sections):
+    for index, section in enumerate(sections):
+        if re.search(pattern, section):
+            return index, section
+
+
+@dataclass(frozen=True)
+class FilingItem:
+    item_num: str
+    text: str
+
+    def __str__(self):
+        return f"""
+        ## {self.item_num}
+        {self.text}
+        """
+
+    def __rich__(self):
+        return Markdown(str(self))
+
+
+class EightK:
+
+    def __init__(self, filing):
+        assert filing.form in ['8-K', '8-K\A'], f"This form should be an 8-K but was {filing.form}"
+        self._filing = filing
+        self.items = [
+            FilingItem(item_num, item_text)
+            for item_num, item_text
+            in EightK.find_items(filing)
+        ]
+
+    def to_markdown(self):
+        return '\n'.join([str(item) for item in self.items])
+
+    def __rich__(self):
+        return markdown_to_rich(self.to_markdown())
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    @staticmethod
+    def find_items(filing):
+        sections = filing.sections()
+        emerging_section = find_section(r'If\W+an\W+emerging\W+growth\W+company', sections)
+        # If not found then start at top
+        emerging_loc = emerging_section[0] if emerging_section else 0
+
+        signature = find_section("SIGNATURES?", sections)
+        if not signature:
+            signature = find_section(r"this\W+report\W+to\W+be\W+signed\W+on\W+its\W+behalf\W+by\W+the\W+undersigned",
+                                        sections)
+        signature_loc = signature[0]
+
+        current_item_num = None
+        current_item = ""
+        for section in sections[emerging_loc + 1: signature_loc]:
+            for line in section.split("\n"):
+                match = re.match(r"\W*(Item\s\d.\d{2})\.?(.*)?", line, re.IGNORECASE)
+                if match:
+                    if current_item:
+                        yield current_item_num, current_item.strip()
+                    current_item_num, header = match.groups()
+                    current_item = header.strip() + "\n" if header else ""
+                else:
+                    if current_item_num is not None:
+                        current_item += line + "\n"
+        yield current_item_num, current_item.strip()

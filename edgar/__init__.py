@@ -33,6 +33,7 @@ from edgar.effect import Effect
 from edgar.fundreports import FundReport
 from edgar.offerings import Offering
 from edgar.ownership import Ownership
+from edgar.forms import EightK
 
 
 def matches_form(sec_filing: Filing,
@@ -52,6 +53,8 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :param sec_filing: The filing
     :return:
     """
+    if matches_form(sec_filing, "8-K"):
+        return EightK(sec_filing)
     xml = sec_filing.xml()
     if xml:
         if matches_form(sec_filing, ["3", "4", "5"]):
