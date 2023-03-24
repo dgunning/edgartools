@@ -1,12 +1,13 @@
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+import pytest
 
 from rich import print
 
 import pyarrow.compute as pc
-from edgar import get_fund_filings, Filings
-from edgar.fundreports import FundReport, CurrentMetric
+from edgar import get_fund_filings, Filings, Filing
+from edgar.fundreports import FundReport, CurrentMetric, ThirteenF
 
 fund_xml = Path('data/NPORT.Dupree.xml').read_text()
 
@@ -125,4 +126,43 @@ def test_get_fund_filings():
 
 def test_fund_no_investment_sec_tag():
     fund_report = FundReport.from_xml(Path('data/NPORT.AdvancedSeries.xml').read_text())
-    print(fund_report)
+    assert fund_report.fund_info.return_info.monthly_total_returns
+
+
+def test_parse_infotable():
+    infotable = ThirteenF.parse_infotable_xml(Path("data/13F-HR.infotable.xml").read_text())
+    assert len(infotable) == 255
+
+
+def test_thirteenf():
+    filing = Filing(form='13F-HR', filing_date='2023-03-23', company='METLIFE INC', cik=1099219,
+                    accession_no='0001140361-23-013281')
+    thirteenf = ThirteenF(filing)
+    assert thirteenf
+    assert thirteenf.filing
+    assert thirteenf.has_infotable()
+    assert len(thirteenf.infotable) == 6
+
+    print()
+    print(thirteenf)
+
+    # Call data object
+    assert isinstance(filing.obj(), ThirteenF)
+
+    # 13F-NT
+    filing = Filing(form='13F-NT', filing_date='2023-03-17', company='Jasopt Investments Bahamas Ltd', cik=1968770,
+                    accession_no='0000950123-23-002952')
+    thirteenf = ThirteenF(filing)
+    assert not thirteenf.has_infotable()
+    assert not thirteenf.infotable_xml
+    assert not thirteenf.infotable_html
+    assert not thirteenf.infotable
+
+    print(thirteenf)
+
+    # Should throw an AssertionError
+    filing = Filing(form='10-K', filing_date='2023-03-23', company='ADMA BIOLOGICS, INC.', cik=1368514,
+                    accession_no='0001140361-23-013467')
+    with pytest.raises(AssertionError):
+        ThirteenF(filing)
+

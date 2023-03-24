@@ -12,11 +12,14 @@ from rich.table import Table
 
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar.core import moneyfmt
+from rich.panel import Panel
 from edgar._xml import find_element, child_text, optional_decimal
 
 __all__ = [
     "FundReport",
     "CurrentMetric",
+    'ThirteenF',
+    "THIRTEENF_FORMS",
     "FUND_FORMS"
 ]
 
@@ -619,6 +622,107 @@ class FundReport:
             self.metrics_table,
             self.credit_spread_table,
             self.investments_table
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
+THIRTEENF_FORMS = ['13F-HR', "13F-HR/A", "13F-NT", "13F-NT/A", "13F-CTR", "13F-CTR/A"]
+
+
+class ThirteenF:
+
+    def __init__(self, filing):
+        assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"
+        self.filing = filing
+
+    def has_infotable(self):
+        return self.filing.form in ['13F-HR', "13F-HR/A"]
+
+    @property
+    def form(self):
+        return self.filing.form
+
+    @property
+    @lru_cache(maxsize=1)
+    def infotable_xml(self):
+        from edgar._filings import FilingDocument
+        if self.has_infotable():
+            matching_files = self.filing.homepage.get_matching_files(
+                "Type=='INFORMATION TABLE' & Document.str.endswith('xml')")
+            return FilingDocument.from_dataframe_row(matching_files.iloc[0]).download()
+
+    @property
+    @lru_cache(maxsize=1)
+    def infotable_html(self):
+        from edgar._filings import FilingDocument
+        if self.has_infotable():
+            matching_files = self.filing.homepage.get_matching_files(
+                "Type=='INFORMATION TABLE' & Document.str.endswith('html')")
+            return FilingDocument.from_dataframe_row(matching_files.iloc[0]).download()
+
+    @property
+    @lru_cache(maxsize=1)
+    def infotable(self):
+        if self.has_infotable():
+            return ThirteenF.parse_infotable_xml(self.infotable_xml)
+
+    @staticmethod
+    def parse_infotable_xml(infotable_xml: str):
+        root = find_element(infotable_xml, "informationTable")
+        rows = []
+        for info_tag in root.find_all("infoTable"):
+            info_table = dict()
+
+            info_table['Issuer'] = child_text(info_tag, "nameOfIssuer")
+            info_table['Class'] = child_text(info_tag, "titleOfClass")
+            info_table['Cusip'] = child_text(info_tag, "cusip")
+            info_table['Value'] = int(child_text(info_tag, "value"))
+
+            # Shares of payment amount
+            shares_tag = info_tag.find("shrsOrPrnAmt")
+            info_table['SharesPrnAmount'] = child_text(shares_tag, "sshPrnamt")
+            info_table['SharesPrnType'] = child_text(shares_tag, "sshPrnamtType")
+
+            info_table["PutCall"] = child_text(shares_tag, "putCall")
+            info_table['InvestmentDiscretion'] = child_text(info_tag, "investmentDiscretion")
+
+            # Voting authority
+            voting_auth_tag = info_tag.find("votingAuthority")
+            info_table['VotingAuthSole'] = int(child_text(voting_auth_tag, "Sole"))
+            info_table['VotingAuthShared'] = int(child_text(voting_auth_tag, "Shared"))
+            info_table['VotingAuthNone'] = int(child_text(voting_auth_tag, "None"))
+            rows.append(info_table)
+
+        table = pd.DataFrame(rows)
+        return table
+
+    def _infotable_summary(self):
+        if self.has_infotable():
+            return (self.infotable
+                    .filter(['Issuer', 'Value', 'SharesPrnAmount', 'VotingAuthShared'])
+                    .rename(columns={'SharesPrnAmount': 'Shares'})
+                    .assign(Value=lambda df: df.Value)
+                    .sort_values(['Value'], ascending=False)
+                    )
+
+    def __rich__(self):
+        title = f"{self.form} {self.filing.company}"
+        summary = Table("Company", "Form", "Filing Date")
+        summary.add_row(self.filing.company, self.filing.form, self.filing.filing_date)
+
+        content = [summary]
+
+        # info table
+        if self.has_infotable():
+            table = Table("", "Issuer", "Amount", "Value")
+            for index, row in enumerate(self._infotable_summary().itertuples()):
+                table.add_row(str(index), row.Issuer, f"{row.Shares}", f"${row.Value:,.0f}", )
+            content.append(table)
+
+        return Panel(
+            Group(*content), title=title, subtitle=title
         )
 
     def __repr__(self):
