@@ -1,0 +1,268 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* Reset Reloaded - http://meyerweb.com/eric/thoughts/2007/05/01/reset-reloaded/ */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+}
+/* remember to define focus styles! */
+:focus {
+	outline: 0;
+}
+body {
+	line-height: 1;
+	color: black;
+	background: white;
+}
+ul {
+	list-style:disc;
+}
+ul, ol {
+	padding:0 0 0 40px
+}
+blockquote {
+	padding:0 20px
+}
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+caption, th, td {
+	text-align: left;
+	font-weight: normal;
+}
+blockquote:before, blockquote:after, q:before, q:after {
+	content: "";
+}
+blockquote, q {
+	quotes: "" "";
+}
+/* END Reset Reloaded */
+
+body {
+	font-family:"Times New Roman", Times, serif;
+	margin:10px
+}
+h1, h2, h3 {
+	color:#000;
+	font-weight:bold
+}
+h4, h5, h6 {
+	font-weight:bold
+}
+h1 {
+	font-size:1.6em;
+	padding:8px;
+	margin:6px 0;
+	text-align:center;
+	text-transform:uppercase;
+	font-family:Arial, Helvetica, sans-serif
+}
+h2 {
+	font-size:1.2em;
+	padding:6px;
+	margin:24px 0 4px 0;
+	text-align:center;
+	text-transform:uppercase;
+}
+h3 {
+	font-size:1.1em;
+	padding:4px;
+	margin:16px 0 4px 0
+}
+h4 {
+	font-size:1.0em;
+	padding:2px;
+	margin:2px 0
+}
+h5 {
+	font-size:1.0em;
+	padding:2px;
+	margin:2px 0
+}
+h6 {
+	font-size:1.0em;
+	padding:2px;
+	margin:2px 0
+}
+table {
+	width:100%;
+}
+td {
+	padding:8px;
+	vertical-align:top
+}
+td.label {
+	width:300px;
+	background-color:#e0e0ff
+}
+.subLabel {
+	width:180px;
+	float:left;
+	clear:both
+}
+p {
+	margin:8px
+}
+input, textarea {
+	word-wrap:break-word;
+	color:#008;
+}
+#header {
+	font-size:0.9em;
+	border:1px solid #404040
+}
+#header h2 {
+	font-size:0.8em;
+	color:inherit;
+	background-color:transparent
+}
+#header .side {
+	background-color:#666;
+	color:#fff;
+	font-weight:bold;
+	font-size:.8em;
+	width:25%
+}
+#header .title {
+	background-color:#000;
+	color:#fff;
+	font-weight:bold;
+	width:25%;
+	text-align:center;
+	vertical-align:middle
+}
+#header .center {
+	text-align:center;
+	vertical-align:middle;
+	font-weight:bold
+}
+ .content#wrapper {
+width:900px
+}
+.right {
+	text-align:right
+}
+.fullField {
+	width:100%
+}
+.pageBreak {
+	page-break-before: always
+}
+.titleCase {
+	text-transform:capitalize
+}
+.smaller {
+	font-size:.9em
+}
+.fakeBox {
+	border-bottom: 1px solid #404040;
+	padding: 2px 8px;
+	min-width:200px;
+	_width:200px;
+}
+.fakeBoxInline {
+	border-bottom: 1px solid #404040;
+	padding: 2px 8px;
+	min-width:200px;
+	_width:200px;
+	display: inline-block;
+}
+.spanTable {
+	width:auto !important;
+	_width:inherit !important
+}
+.spanTable td {
+	vertical-align:text-bottom
+}
+/* INFO TABLE CSS */
+.infoTable {
+	table-layout:fixed !important;
+	font-size:0.7em;
+	overflow:hidden !important;
+}
+.infoTable th {
+	text-align:center;
+	padding:4px 2px;
+	border-bottom:1px solid #404040;
+	text-transform:uppercase;
+	word-break:break-all;
+	font-size:0.8em;
+	letter-spacing: -1px;
+}
+.infoTable th td {
+	border-bottom:1px solid #404040;
+}
+.infoTable tr td {
+	border-bottom:1px solid #404040;
+	white-space:nowrap !important;
+	overflow:hidden !important;
+}
+.infoTable tr td:hover {
+	border:1px solid #606020;
+	border-bottom:2px solid #606020;
+	white-space:normal !important;
+	overflow:auto !important;
+	background-color:#FF9;
+	font-size:1.2em
+}
+.infoTable td {
+	margin:4px 2px;
+}
+.infoCol1 {
+	width:auto
+}
+.infoCol2 {
+	width:auto;
+}
+.infoCol3 {
+	text-align:right;
+	width:auto
+}
+.infoCol4 {
+	text-align:right;
+}
+.infoCol5 {
+	width:auto
+}
+.infoCol5a {
+	text-align:right;
+	width:auto
+}
+.infoCol5b {
+	text-align:center;
+}
+.infoCol5c {
+	text-align:center;
+	width:auto
+}
+.infoCol6 {
+}
+.infoCol7 {
+	width:auto
+}
+.infoCol8 {
+	width:auto
+}
+.infoCol8a {
+	text-align:center;
+}
+.infoCol8b {
+	text-align:center;
+	width:auto
+}
+.infoCol8c {
+	text-align:center;
+}
+.fullwidth {
+	width:100%
+}

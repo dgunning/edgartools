@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sec.gov/edgar/document/thirteenf/informationtable" xmlns:ns1="http://www.sec.gov/edgar/common" targetNamespace="http://www.sec.gov/edgar/document/thirteenf/informationtable" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://www.sec.gov/edgar/common" schemaLocation="eis_Common.xsd"/>
+	<xs:simpleType name="CUSIP_TYPE">
+		<xs:annotation>
+			<xs:documentation>Enter in Column 3 the nine (9) digit CUSIP number of the security.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[a-zA-Z0-9]{9}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FIGI_TYPE">
+		<xs:annotation>
+			<xs:documentation>Enter in Column 3 the twelve (12) digit FIGI number of the security.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[a-zA-Z0-9]{12}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_NONNEGATIVE_16_1">
+		<xs:annotation>
+			<xs:documentation>Enter in Column 4 the market value of the holding of the particular class of security.  In determining fair market value, use the value at the close of trading on the last trading day of the calendar year or quarter, as appropriate. Enter values rounded to the nearest dollar.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:totalDigits value="16" fixed="true"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_NONNEGATIVE_16">
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:totalDigits value="16" fixed="true"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SHRSPRNTYPE">
+		<xs:annotation>
+			<xs:documentation>Enter in Column 5 the abbreviation "SH" to designate shares and "PRN" to designate principal amount.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="SH"/>
+			<xs:enumeration value="PRN"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SSH_PRNAMT">
+		<xs:annotation>
+			<xs:documentation>Enter in Column 5 the total number of shares of the class of security or the principal amount of such class. List securities of the same issuer and class with respect to which the Manager exercises sole investment discretion separately from those with respect to which investment discretion is shared.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="sshPrnamt" type="INTEGER_NONNEGATIVE_16"/>
+			<xs:element name="sshPrnamtType" type="SHRSPRNTYPE"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="PUT_CALL">
+		<xs:annotation>
+			<xs:documentation>If the holdings being reported are put or call options, enter the designation "PUT" or "CALL," as appropriate.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Put"/>
+			<xs:enumeration value="Call"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INVESTMENT_DISCRETION">
+		<xs:annotation>
+			<xs:documentation>Segregate the holdings of securities of a class according to the nature of the investment discretion held by the Manager. Designate investment discretion as "sole" (SOLE); "shared-defined" (DEFINED); or "shared-other" (OTHER), as described below:
+
+See Special Instructions Information Table section 12(b)(vi) (A-C) for descriptions of investment discretion.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="SOLE"/>
+			<xs:enumeration value="DFND"/>
+			<xs:enumeration value="OTR"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INTEGER_TYPE_16_MIN_0">
+		<xs:annotation>
+			<xs:documentation>Enter the number of shares for which the Manager exercises sole, shared, or no voting authority (none) in this column, as appropriate.
+
+See Special Instructions-Information Table section 12b.(viii) for full instructions.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="9999999999999999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VOTING_AUTHORITY">
+		<xs:sequence>
+			<xs:element name="Sole" type="INTEGER_TYPE_16_MIN_0"/>
+			<xs:element name="Shared" type="INTEGER_TYPE_16_MIN_0"/>
+			<xs:element name="None" type="INTEGER_TYPE_16_MIN_0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NAME_TYPE">
+		<xs:annotation>
+			<xs:documentation>Enter the name of the issuer for each class of security reported as it appears in the current official list of Section 13(f) Securities published by the Commission in accordance with rule 13f-1(c) (the "13F List").  Reasonable abbreviations are permitted.</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="ENTITY_NAME_TYPE_STRING"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="TITLE_TYPE">
+		<xs:annotation>
+			<xs:documentation>Enter in the title of the class of the security reported as it appears under "ISSUER DESCRIPTION" on the 13F List.</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="ns1:STRING_150_TYPE"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="STRING_100_TYPE">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="100"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ENTITY_NAME_TYPE_STRING">
+		<xs:annotation>
+			<xs:documentation>A Company Name can be up to 150 characters.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+			<xs:maxLength value="150" />
+			<xs:pattern value="([A-Za-z0-9\s!\\#$(),.:;`=@'\-{}|/&amp;]+)" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="OTHER_MANAGER_TYPE">
+		<xs:annotation>
+			<xs:documentation>Identify each other Manager on whose behalf this Form 13F report is being filed with whom investment discretion is shared as to any reported holding by entering in this column the number assigned to the Manager in the List of Other Included Managers. 
+
+See Special Instructions-Information Table section 12b.(vii) for full instructions.</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="STRING_100_TYPE"/>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="INFO_TABLE">
+		<xs:sequence>
+			<xs:element name="nameOfIssuer" type="NAME_TYPE"/>
+			<xs:element name="titleOfClass" type="TITLE_TYPE"/>
+			<xs:element name="cusip" type="CUSIP_TYPE"/>
+			<xs:element name="figi" type="FIGI_TYPE" minOccurs="0"/>
+			<xs:element name="value" type="INTEGER_NONNEGATIVE_16_1"/>
+			<xs:element name="shrsOrPrnAmt" type="SSH_PRNAMT"/>
+			<xs:element name="putCall" type="PUT_CALL" minOccurs="0"/>
+			<xs:element name="investmentDiscretion" type="INVESTMENT_DISCRETION"/>
+			<xs:element name="otherManager" type="OTHER_MANAGER_TYPE" minOccurs="0"/>
+			<xs:element name="votingAuthority" type="VOTING_AUTHORITY"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="informationTable">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="infoTable" type="INFO_TABLE" maxOccurs="250000"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
