@@ -701,7 +701,8 @@ class ThirteenF:
     def _infotable_summary(self):
         if self.has_infotable():
             return (self.infotable
-                    .filter(['Issuer', 'Value', 'SharesPrnAmount', 'VotingAuthShared'])
+                    .filter(['Issuer', 'Value', 'SharesPrnAmount', 'SharesPrnType',
+                             'VotingAuthSole', 'VotingAuthShared', 'VotingAuthNone'])
                     .rename(columns={'SharesPrnAmount': 'Shares'})
                     .assign(Value=lambda df: df.Value)
                     .sort_values(['Value'], ascending=False)
@@ -709,16 +710,25 @@ class ThirteenF:
 
     def __rich__(self):
         title = f"{self.form} {self.filing.company}"
-        summary = Table("Company", "Form", "Filing Date")
-        summary.add_row(self.filing.company, self.filing.form, self.filing.filing_date)
+        summary = Table("Company", "Form", "Filing Date", box=box.SIMPLE)
+        summary.add_row(self.filing.company, self.filing.form, str(self.filing.filing_date))
 
         content = [summary]
 
         # info table
         if self.has_infotable():
-            table = Table("", "Issuer", "Amount", "Value")
+            table = Table("", "Issuer", "Amount", "Value", "SharesPrnType", "VotingSole","VotingShared","VotingNone",
+                          box=box.SIMPLE)
             for index, row in enumerate(self._infotable_summary().itertuples()):
-                table.add_row(str(index), row.Issuer, f"{row.Shares}", f"${row.Value:,.0f}", )
+                table.add_row(str(index),
+                              row.Issuer,
+                              f"{int(row.Shares):,.0f}",
+                              f"${row.Value:,.0f}",
+                              row.SharesPrnType,
+                              f"{int(row.VotingAuthSole):,.0f}",
+                              f"{int(row.VotingAuthShared):,.0f}",
+                              f"{int(row.VotingAuthNone):,.0f}"
+                              )
             content.append(table)
 
         return Panel(
