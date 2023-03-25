@@ -6,7 +6,7 @@ import threading
 import warnings
 from _thread import interrupt_main
 from dataclasses import dataclass
-from datetime import datetime
+import datetime
 from decimal import Decimal
 from functools import lru_cache
 from io import BytesIO
@@ -215,8 +215,8 @@ def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
     if match:
         start_date, _, end_date = match.groups()
         try:
-            start_date_tm = datetime.strptime(start_date, "%Y-%m-%d") if start_date else None
-            end_date_tm = datetime.strptime(end_date, "%Y-%m-%d") if end_date else None
+            start_date_tm = datetime.datetime.strptime(start_date, "%Y-%m-%d") if start_date else None
+            end_date_tm = datetime.datetime.strptime(end_date, "%Y-%m-%d") if end_date else None
             if start_date_tm or end_date_tm:
                 return start_date_tm, end_date_tm, ":" in date
         except ValueError:
@@ -232,8 +232,12 @@ def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
 
 
 def filter_by_date(data: pa.Table,
-                   date: str,
+                   date: Union[str, datetime.datetime],
                    date_col: str):
+    # If datetime convert to string
+    if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
+        date = date.strftime('%Y-%m-%d')
+
     # Extract the date parts ... this should raise an exception if we cannot
     date_parts = extract_dates(date)
     start_date, end_date, is_range = date_parts

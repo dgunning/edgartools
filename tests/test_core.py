@@ -179,6 +179,9 @@ def test_filter_by_date():
     assert len(filter_by_date(table, '2013-04-24', 'date')) == 1
     assert len(filter_by_date(table, '2013-04-24:2016-04-24', 'date')) == 2
 
+    # Use datetime to filter by date
+    assert len(filter_by_date(table, datetime.strptime('2013-04-24', '%Y-%m-%d'), 'date')) == 1
+
 
 def test_dataframe_pager():
     from edgar.core import DataPager

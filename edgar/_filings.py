@@ -298,6 +298,16 @@ class Filings:
         min_max_dates = pc.min_max(self.data['filing_date']).as_py()
         return min_max_dates['min'], min_max_dates['max']
 
+    @property
+    def start_date(self) -> str:
+        """Return the start date for the filings"""
+        return str(self.date_range[0])
+
+    @property
+    def end_date(self) -> str:
+        """Return the end date for the filings"""
+        return str(self.date_range[1])
+
     def latest(self, n: int = 1) -> int:
         """Get the latest n filings"""
         sort_indices = pc.sort_indices(self.data, sort_keys=[("filing_date", "descending")])
