@@ -33,7 +33,7 @@ if __name__ == '__main__':
     print(filing.search("financial"))
 
     # 8-K objects
-    filings = filings(form="8-K")
+    filings = filings.filter(form="8-K")
     eightk = filings[0].obj()
     assert len(eightk.items) > 0
 
