@@ -566,7 +566,8 @@ def get_json(data_url: str):
 
 
 @lru_cache(maxsize=32)
-def get_company_submissions(cik: int) -> CompanyData:
+def get_company_submissions(cik: int,
+                            include_old_filings: bool = True) -> CompanyData:
     """Get the company filings for a given cik"""
     try:
         submission_json = get_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
@@ -578,10 +579,11 @@ def get_company_submissions(cik: int) -> CompanyData:
         else:
             raise
             # check for older submission files
-    for old_file in submission_json['filings']['files']:
-        old_sub = get_json("https://data.sec.gov/submissions/" + old_file['name'])
-        for column in old_sub:
-            submission_json['filings']['recent'][column] += old_sub[column]
+    if include_old_filings:
+        for old_file in submission_json['filings']['files']:
+            old_sub = get_json("https://data.sec.gov/submissions/" + old_file['name'])
+            for column in old_sub:
+                submission_json['filings']['recent'][column] += old_sub[column]
     return parse_company_submissions(submission_json)
 
 
