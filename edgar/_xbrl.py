@@ -112,6 +112,28 @@ class FilingXbrl:
     def form_type(self):
         return self._dei_value('DocumentType')
 
+    @property
+    def fiscal_year_end_date(self):
+        res = self.facts.data.query(f"namespace=='dei' and fact=='CurrentFiscalYearEndDate' and dimensions.isnull()")
+        if not res.empty:
+            return res.iloc[0].end_date
+
+    @property
+    def fiscal_gaap(self) -> pd.DataFrame:
+        """Get the GAAP facts for the fiscal year end date"""
+        fiscal_date = self.fiscal_year_end_date
+        if fiscal_date:
+            res = self.facts.data.query(
+                f"namespace=='us-gaap' & end_date=='{fiscal_date}' and dimensions.isnull()")
+            if res.empty:
+                return None
+            return (res
+                    .filter(["fact", "value", "units"])
+                    .drop_duplicates()
+                    .sort_values(["fact", "value"])
+                    .reset_index(drop=True)
+                    )
+
     @classmethod
     def parse(cls, xbrl_text: str):
         soup = BeautifulSoup(xbrl_text, features="xml")
