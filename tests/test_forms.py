@@ -1,7 +1,7 @@
 from rich import print
 
 from edgar import Filing
-from edgar.forms import list_forms, EightK, find_section
+from edgar.forms import list_forms, EightK, TenK, find_section
 
 
 def test_list_forms():
@@ -33,12 +33,27 @@ adobe_8K = Filing(form='8-K',
                   cik=796343,
                   accession_no='0000796343-23-000044')
 
+def test_tenk_filing_with_no_gaap():
+    # This filing has no GAAP data
+    filing = Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', cik=1450722,
+           accession_no='0001213900-23-028058')
+    tenk:TenK = filing.obj()
+    assert tenk
+    assert tenk.financials is not None
 
 def test_eightk_items():
     eightk = EightK(adobe_8K)
     assert len(eightk.items) == 2
     print()
+
+    assert "Item 2.02" == eightk.items[0].item_num
+    filing = Filing(form='8-K/A', filing_date='2023-04-03', company='HIMALAYA TECHNOLOGIES, INC', cik=1409624, accession_no='0001493152-23-010558')
+    eightk = EightK(filing)
+    assert eightk.filing_date == '2023-04-03'
+    assert eightk.form == '8-K/A'
+    assert eightk.company == 'HIMALAYA TECHNOLOGIES, INC'
     print(eightk)
+
 
 
 def test_eightk_obj():
