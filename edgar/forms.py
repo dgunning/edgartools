@@ -6,16 +6,18 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from rich.console import Group, Text
 from rich.markdown import Markdown
-
+from rich.panel import Panel
 from edgar._markdown import markdown_to_rich
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import download_text, http_client, sec_dot_gov
+from edgar.financials import Financials
 
 __all__ = [
     'SecForms',
     'list_forms',
     'FUND_FORMS',
-    'EightK'
+    'EightK',
+    'TenK',
 ]
 
 FUND_FORMS = ["NPORT-P", "NPORT-EX"]
@@ -130,10 +132,57 @@ class FilingItem:
         return Markdown(str(self))
 
 
+class TenK:
+
+    def __init__(self, filing):
+        assert filing.form in ['10-K', '10-K/A'], f"This form should be a 10-K but was {filing.form}"
+        self._filing = filing
+
+    @property
+    def form(self):
+        return self._filing.form
+
+    @property
+    def company(self):
+        return self._filing.company
+
+    @property
+    def income_statement(self):
+        return self.financials.income_statement
+
+    @property
+    def balance_sheet(self):
+        return self.financials.balance_sheet
+
+    @property
+    def cash_flow_statement(self):
+        return self.financials.cash_flow_statement
+
+    @property
+    @lru_cache(1)
+    def financials(self):
+        xbrl = self._filing.xbrl()
+        if xbrl:
+            return Financials.from_gaap(xbrl.fiscal_gaap)
+
+    def __rich__(self):
+        return Panel(
+            Group(
+            self._filing.__rich__(),
+            self.financials
+            )
+        )
+
+    def __str__(self):
+        return f"""TenK('{self.company}')"""
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
 class EightK:
 
     def __init__(self, filing):
-        assert filing.form in ['8-K', '8-K\A'], f"This form should be an 8-K but was {filing.form}"
+        assert filing.form in ['8-K', '8-K/A'], f"This form should be an 8-K but was {filing.form}"
         self._filing = filing
         self.items = [
             FilingItem(item_num, item_text)
@@ -141,11 +190,28 @@ class EightK:
             in EightK.find_items(filing)
         ]
 
+    @property
+    def filing_date(self):
+        return self._filing.filing_date
+
+    @property
+    def form(self):
+        return self._filing.form
+
+    @property
+    def company(self):
+        return self._filing.company
+
     def to_markdown(self):
         return '\n'.join([str(item) for item in self.items])
 
     def __rich__(self):
-        return markdown_to_rich(self.to_markdown())
+        return Panel(
+            Group(
+                self._filing.__rich__(),
+                markdown_to_rich(self.to_markdown())
+            )
+        )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -160,7 +226,7 @@ class EightK:
         signature = find_section("SIGNATURES?", sections)
         if not signature:
             signature = find_section(r"this\W+report\W+to\W+be\W+signed\W+on\W+its\W+behalf\W+by\W+the\W+undersigned",
-                                        sections)
+                                     sections)
         signature_loc = signature[0]
 
         current_item_num = None

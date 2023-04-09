@@ -1,4 +1,4 @@
-from edgar import obj, matches_form, Filing, Ownership, Effect, FundReport, Offering, FilingXbrl
+from edgar import obj, matches_form, Filing, Ownership, Effect, FundReport, Offering, TenK
 
 
 def test_matches_form():
@@ -53,11 +53,13 @@ def test_obj():
                         company='ALLIANCEBERNSTEIN HOLDING L.P.',
                         cik=825313,
                         accession_no='0000825313-23-000011')
-    xbrl = obj(filing_10k)
-    assert isinstance(xbrl, FilingXbrl)
+    tenk = obj(filing_10k)
+    assert isinstance(tenk, TenK)
 
-    filing_xbrl = filing_10k.data_object()
-    assert filing_xbrl
+    tenk = filing_10k.data_object()
+    assert isinstance(tenk, TenK)
+
+    assert tenk.cash_flow_statement.net_cash_provided_by_operating_activities
 
     filing = Filing(form='1-A/A', filing_date='2023-03-21', company='CancerVAX, Inc.', cik=1905495,
                     accession_no='0001493152-23-008348')

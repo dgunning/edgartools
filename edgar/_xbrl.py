@@ -1,4 +1,4 @@
-from typing import Dict, Union, Tuple
+from typing import Dict, Union, Tuple, Optional
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -6,7 +6,8 @@ from rich.console import Group, Text
 
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import child_text
-
+from edgar.core import log
+from functools import lru_cache
 """
 This module parses XBRL documents into objects that contain the structured data
 The main capability is to convert XBRL documents into FilingXbrl objects.
@@ -68,7 +69,7 @@ class XbrlFacts:
         return self.data.empty
 
     def __str__(self):
-        return f"XBRL Facts {len(self.facts)} facts"
+        return f"XbrlFacts(contains {len(self)} company facts)"
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -119,18 +120,22 @@ class FilingXbrl:
             return res.iloc[0].end_date
 
     @property
-    def fiscal_gaap(self) -> pd.DataFrame:
+    @lru_cache(maxsize=1)
+    def fiscal_gaap(self) -> Optional[pd.DataFrame]:
         """Get the GAAP facts for the fiscal year end date"""
         fiscal_date = self.fiscal_year_end_date
         if fiscal_date:
             res = self.facts.data.query(
-                f"namespace=='us-gaap' & end_date=='{fiscal_date}' and dimensions.isnull()")
+                f"namespace=='us-gaap' and end_date=='{fiscal_date}' and dimensions.isnull()")
             if res.empty:
-                return None
+                # Try again with no dimensions
+                res = self.facts.data.query(f"namespace=='us-gaap' and end_date=='{fiscal_date}'")
+                log.warning(f"No non-dimensioned gaap facts in {self.form_type} XBRL for {self.company_name} [{self.cik}] "
+                            ".. using dimensioned facts. This is probably not what you want.\n"
+                            "You should probably filter by the dimensions you want")
             return (res
                     .filter(["fact", "value", "units"])
                     .drop_duplicates()
-                    .sort_values(["fact", "value"])
                     .reset_index(drop=True)
                     )
 
