@@ -3,7 +3,7 @@ import pandas as pd
 from edgar.financials import Financials
 from edgar.forms import TenK
 from pathlib import Path
-from edgar._filings import FilingDocument
+from rich import print
 
 
 def test_balance_sheet():

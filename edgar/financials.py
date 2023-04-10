@@ -12,7 +12,7 @@ __all__ = [
     'BalanceSheet',
     'CashflowStatement',
     'IncomeStatement',
-    ]
+]
 
 gaap_facts = {'Assets': 'Total Assets',
               'AssetsCurrent': 'Current Assets',
@@ -81,7 +81,6 @@ BALANCE_SHEET_FACTS = {
 
 
 class FinancialTable:
-
     """Base class for financial tables like Balance Sheet, Income Statement, Cashflow Statement"""
 
     def __init__(self,
@@ -95,7 +94,7 @@ class FinancialTable:
                 #  Get the row in res that has the largest value, numerically
                 # Also handle exception if value is not a number
                 try:
-                    res = res[res.index==res.value.astype(float).idxmax()]
+                    res = res[res.index == res.value.astype(float).idxmax()]
                 except ValueError:
                     res = res.iloc[0]
             return gaap_facts.get(fact, fact), format_currency(res.iloc[0].value) if currency else res.iloc[0].value
@@ -112,7 +111,6 @@ class FinancialTable:
 
 
 class BalanceSheet(FinancialTable):
-
     """A company's balance sheet"""
 
     def __init__(self,
@@ -171,7 +169,7 @@ class BalanceSheet(FinancialTable):
         return self.get_value('StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest')
 
     def __rich__(self):
-        assets_table = Table("", "", title='Assets', box=box.ROUNDED)
+        assets_table = Table("", "", box=box.ROUNDED, title='Assets', title_style='bold deep_sky_blue1')
         self._add_row(assets_table, 'AssetsCurrent')
         self._add_row(assets_table, 'CashAndCashEquivalentsAtCarryingValue')
         self._add_row(assets_table, 'AccountsReceivableNetCurrent')
@@ -179,7 +177,7 @@ class BalanceSheet(FinancialTable):
         self._add_row(assets_table, 'Goodwill')
         self._add_row(assets_table, 'Assets')
 
-        liab_equity_table = Table("", "", title='Liabilities and Shareholders Equity', box=box.ROUNDED)
+        liab_equity_table = Table("", "", box=box.ROUNDED, title='Liabilities and Shareholders Equity', title_style='bold deep_sky_blue1')
         self._add_row(liab_equity_table, 'LiabilitiesCurrent')
         self._add_row(liab_equity_table, 'Liabilities')
         self._add_row(liab_equity_table, 'StockholdersEquity')
@@ -233,7 +231,7 @@ class CashflowStatement(FinancialTable):
         return self.get_value('NetCashProvidedByUsedInOperatingActivities')
 
     def __rich__(self):
-        cashflow_table = Table("", "",  box=box.ROUNDED)
+        cashflow_table = Table("", "", box=box.ROUNDED)
         self._add_row(cashflow_table, 'AssetsCurrent')
         self._add_row(cashflow_table, 'DepreciationDepletionAndAmortization')
         self._add_row(cashflow_table, 'OtherNoncashIncomeExpense')
@@ -246,6 +244,7 @@ class CashflowStatement(FinancialTable):
 
     def __str__(self):
         return f"Cash Flow Statement()"
+
     def __repr__(self):
         return repr_rich(self.__rich__())
 
