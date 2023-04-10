@@ -95,3 +95,4 @@ def test_fiscal_gaap_for_10K_with_no_empty_dimensions():
     balance_sheet = financials.balance_sheet
 
     assert balance_sheet.cash_and_cash_equivalents == "$430,193"
+

@@ -8,6 +8,7 @@ from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import child_text
 from edgar.core import log
 from functools import lru_cache
+
 """
 This module parses XBRL documents into objects that contain the structured data
 The main capability is to convert XBRL documents into FilingXbrl objects.
@@ -119,20 +120,45 @@ class FilingXbrl:
         if not res.empty:
             return res.iloc[0].end_date
 
+    def _default_gaap_dimension(self,
+                                include_null_dimensions: bool = False
+                                ):
+        # The default dimension is the dimension that has the largest mean value for a set of facts
+        fact_names = ['Assets',
+                      'Liabilities',
+                      'LiabilitiesAndStockholdersEquity',
+                      'Revenues',
+                      'CashAndCashEquivalentsAtCarryingValue',
+                      'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents']
+        # Filter the facts data to these facts
+        res = self.facts.data.query(f"namespace=='us-gaap' and fact in {fact_names}")
+        # now find the single dimension that has the largest mean numeric value
+        res = (res
+               .query("value.str.isnumeric()")
+               .assign(value=lambda df: df.value.astype(float))
+               .groupby('dimensions')
+               .sum()
+               .sort_values(['value'], ascending=False)
+               .reset_index()
+               )
+        if not res.empty:
+            return res.iloc[0].dimensions
+
     @property
     @lru_cache(maxsize=1)
     def fiscal_gaap(self) -> Optional[pd.DataFrame]:
-        """Get the GAAP facts for the fiscal year end date"""
+        """Get the GAAP facts for the fiscal year-end date"""
         fiscal_date = self.fiscal_year_end_date
         if fiscal_date:
             res = self.facts.data.query(
                 f"namespace=='us-gaap' and end_date=='{fiscal_date}' and dimensions.isnull()")
             if res.empty:
-                # Try again with no dimensions
-                res = self.facts.data.query(f"namespace=='us-gaap' and end_date=='{fiscal_date}'")
-                log.warning(f"No non-dimensioned gaap facts in {self.form_type} XBRL for {self.company_name} [{self.cik}] "
-                            ".. using dimensioned facts. This is probably not what you want.\n"
-                            "You should probably filter by the dimensions you want")
+                # Look for the default gaap dimension
+                default_dimension = self._default_gaap_dimension()
+                log.warning(
+                    f"No default dimension detected in {self.form_type} XBRL for {self.company_name} [{self.cik}] "
+                    f"Using {default_dimension} as the default dimension")
+                res = self.facts.data.query(f'namespace=="us-gaap" and end_date=="{fiscal_date}" and dimensions=="{default_dimension}"')
             return (res
                     .filter(["fact", "value", "units"])
                     .drop_duplicates()
@@ -175,9 +201,9 @@ class FilingXbrl:
             # Parse segments
             segment = ctx.find('segment')
             if segment:
-                context_map[context_id]['dimensions'] = {m.attrs['dimension']: m.text
-                                                         for m in
-                                                         segment.find_all('xbrldi:explicitMember')}
+                context_map[context_id]['dimensions'] = str({m.attrs['dimension']: m.text
+                                                             for m in
+                                                             segment.find_all('xbrldi:explicitMember')})
 
         # Parse units
         for unit in xbrl_tag.find_all('unit', recursive=False):

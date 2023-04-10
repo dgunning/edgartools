@@ -294,6 +294,10 @@ class IncomeStatement(FinancialTable):
         return self.get_value('OperatingIncomeLoss')
 
     @property
+    def operating_expenses(self):
+        return self.get_value('OperatingExpenses')
+
+    @property
     def net_income(self):
         return self.get_value('NetIncomeLoss')
 

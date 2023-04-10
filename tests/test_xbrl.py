@@ -25,3 +25,7 @@ def test_xbrl_repr():
     filing_xbrl: FilingXbrl = FilingXbrl.parse(Path('data/crr.xbrl.xml').read_text())
     print(filing_xbrl)
     print(filing_xbrl.facts)
+
+def test_default_gaap_dimension():
+    filing_xbrl: FilingXbrl = FilingXbrl.parse(Path('data/crr.xbrl.xml').read_text())
+    assert filing_xbrl._default_gaap_dimension() == "{'us-gaap:ConsolidationItemsAxis': 'us-gaap:OperatingSegmentsMember', 'us-gaap:StatementBusinessSegmentsAxis': 'crr:OilfieldTechnologiesAndServicesSegmentMember'}"

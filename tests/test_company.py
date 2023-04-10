@@ -393,4 +393,10 @@ def test_preprocess_company():
     assert preprocess_company('UBS AG') == 'ubs'
     assert preprocess_company('GRABAG') == 'grabag'
 
+def test_company_financials():
+    company = Company('AAPL')
+    financials = company.financials
+    assert financials
+    assert financials.balance_sheet
+
 
