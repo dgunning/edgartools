@@ -284,6 +284,9 @@ def download_file(url: str,
         client = http_client()
         
     r = retry_call(client.get, fargs=[url], tries=5, delay=3)
+    # If we get a 301 or 302, follow the redirect
+    if r.status_code in [301, 302]:
+        return download_file(r.headers['Location'], client, as_text)
     if r.status_code == 200:
         if url.endswith("gz"):
             binary_file = BytesIO(r.content)
