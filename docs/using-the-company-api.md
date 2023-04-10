@@ -1,4 +1,4 @@
-# The Company API
+# Companies
 
 With the company API you find a company using the **cik** or **ticker**. 
 From the company you can access all their historical **filings**,

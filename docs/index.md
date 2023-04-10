@@ -77,22 +77,3 @@ You can open the filing homepage in the browser using `filing.open_homepage()`
 ```python
 filing.open()
 ```
-
-
-### Use DuckDB to query the filings
-
-A conveient way to query the filings data is to use **DuckDB**. If you call the `to_duckdb` function, you get an in-memory
-DuckDB database instance, with the filings registered as a table called `filings`.
-Then you can work directy with the DuckDB database, and run SQL against the filings data.
-
-In this example, we filter filings for **S-1** form types.
-
-```python
-db = filings.to_duckdb()
-# a duckdb.DuckDBPyConnection
-
-# Query the filings for S-1 filings and return a dataframe
-db.execute("""
-select * from filings where Form == 'S-1'
-""").df()
-```

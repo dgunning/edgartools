@@ -1,4 +1,4 @@
-# The Filings API
+# Filings
 
 To get started import from edgar and use the `get_filings` function.
 ```python
