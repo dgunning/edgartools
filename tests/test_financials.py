@@ -30,18 +30,26 @@ def test_balance_sheet():
     print(financials)
 
 
-
 def test_microsoft_financials():
     company = Company("MSFT")
-    tenk = company.get_filings(form="10-K").latest()
+    tenk = company.get_filings(form="10-K", accession_number="0001564590-22-026876").latest()
+    print(tenk.accession_no)
     gaap = tenk.xbrl().fiscal_gaap
     financials = Financials.from_gaap(gaap)
     print()
     print(financials)
 
-def test_tenk_financials():
+    # Balance Sheet data
+    balance_sheet = financials.balance_sheet
+
+    print(balance_sheet.asset_dataframe)
+    print(balance_sheet.liability_equity_dataframe)
+
+
+def test_apple_financials():
     company = Company("AAPL")
-    tenk = TenK(company.get_filings(form="10-K").latest())
+    tenk = TenK(company.get_filings(form="10-K", accession_number="0000320193-22-000108").latest())
+
 
     gaap = tenk._filing.xbrl().fiscal_gaap
     gaap.to_csv('data/apple_gaap.csv', index=False)
@@ -82,12 +90,15 @@ def test_tenk_financials():
     assert cash_flow.other_non_cash_items == "$-111,000,000"
     assert cash_flow.net_cash_provided_by_operating_activities == "$122,151,000,000"
 
+    print(tenk.financials)
+
+
 def test_fiscal_gaap_for_10K_with_no_empty_dimensions():
     # the gaap data for this 10K has no empty dimensions for us-gaap
     filing = Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', cik=1450722,
-           accession_no='0001213900-23-028058')
+                    accession_no='0001213900-23-028058')
 
-    gaap:pd.DataFrame = filing.xbrl().fiscal_gaap
+    gaap: pd.DataFrame = filing.xbrl().fiscal_gaap
     assert len(gaap) > 0
 
     # Get the company financials
@@ -95,4 +106,3 @@ def test_fiscal_gaap_for_10K_with_no_empty_dimensions():
     balance_sheet = financials.balance_sheet
 
     assert balance_sheet.cash_and_cash_equivalents == "$430,193"
-

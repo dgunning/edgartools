@@ -3,8 +3,8 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.console import Group
 from rich import box
-from typing import Union
-from edgar._rich import repr_rich
+from typing import Union, List
+from edgar._rich import repr_rich, df_to_rich_table
 import re
 
 __all__ = [
@@ -14,12 +14,16 @@ __all__ = [
     'IncomeStatement',
 ]
 
-gaap_facts = {'Assets': 'Total Assets',
+gaap_facts = {'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment': 'Accumulated Depreciation',
+              'AllowanceForDoubtfulAccountsReceivableCurrent': 'Allowance for Doubtful Accounts',
+              'Assets': 'Total Assets',
               'AssetsCurrent': 'Current Assets',
-              'CashAndCashEquivalentsAtCarryingValue': 'Cash',
               'AccountsReceivableNetCurrent': 'Accounts Receivable',
               'AvailableForSaleSecuritiesDebtSecuritiesCurrent': 'Short Term Investments',
+              'CashAndCashEquivalentsAtCarryingValue': 'Cash and Cash Equivalents',
+              'CostOfGoodsAndServicesSold': 'Cost of Revenue',
               'Goodwill': 'Goodwill',
+              'GrossProfit': 'Gross Profit',
               'Liabilities': 'Total Liabilities',
               'LiabilitiesCurrent': 'Current Liabilities',
               'RetainedEarningsAccumulatedDeficit': 'AccumulatedDeficit',
@@ -27,11 +31,27 @@ gaap_facts = {'Assets': 'Total Assets',
               'StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest': 'Stockholders Equity',
               'LiabilitiesAndStockholdersEquity': 'Liabilities & Equity',
               'RevenueFromContractWithCustomerExcludingAssessedTax': 'Total Revenue',
-              'CostOfGoodsAndServicesSold': 'Cost of Revenue',
-              'GrossProfit': 'Gross Profit',
+              'PropertyPlantAndEquipmentNet': 'Property, Plant & Equipment',
+              'OperatingLeaseRightOfUseAsset': 'Operating Lease Right of Use Asset',
               'OperatingExpenses': 'Operating Expenses',
+              'DepreciationDepletionAndAmortization': 'Depreciation & Amortization',
               'OperatingIncomeLoss': 'Operating Income or Loss',
               'NetIncomeLoss': 'Net Income',
+              'RepaymentsOfLongTermDebt': 'Repayments of Long Term Debt',
+              'InventoryNet': 'Inventories',
+              'DeferredIncomeTaxExpenseBenefit' : 'Deferred Income Tax Expense (Benefit)',
+              'OtherNoncashIncomeExpense': 'Other Noncash Income (Expense)',
+              'FiniteLivedIntangibleAssetsNet': 'Finite Lived Intangible Assets',
+              'IntangibleAssetsNetExcludingGoodwill': 'Intangible Assets',
+              'CapitalizedContractCostNetNoncurrent': 'Contract Assets',
+              'MarketableSecuritiesCurrent': 'Short Term Investments',
+              'OtherAssetsCurrent': 'Other Current Assets',
+              'PaymentsOfDividends': 'Dividends Paid',
+              'NetCashProvidedByUsedInInvestingActivities'  : 'Net Cash used in Investing Activities',
+              'NetCashProvidedByUsedInFinancingActivities'  : 'Net Cash used in Financing Activities',
+              'PaymentsForProceedsFromOtherInvestingActivities': 'Other Investing Activities',
+              'PaymentsToAcquireBusinessesNetOfCashAcquired': 'Acquisitions',
+              'PaymentsToAcquirePropertyPlantAndEquipment': 'Investents in Property, Plant & Equipment',
               'NetCashProvidedByUsedInOperatingActivities': 'Net Cash from Operating Activities'}
 
 
@@ -56,36 +76,13 @@ def get_gaap(gaap,
     return fact, ""
 
 
-BALANCE_SHEET_FACTS = {
-    'AssetsCurrent': 'Current Assets',
-    'OtherAssetsCurrent': 'Other Current Assets',
-    'CashAndCashEquivalentsAtCarryingValue': 'Cash',
-    'ShortTermInvestments': 'Short Term Investments',
-    'AllowanceForDoubtfulAccountsReceivableCurrent': 'Allowance for Doubtful Accounts',
-    'AvailableForSaleSecuritiesDebtSecuritiesCurrent': 'Short Term Investments',
-    'AccountsReceivableNetCurrent': 'Accounts Receivable',
-    'InventoryNet': 'Inventory',
-    'CapitalizedContractCostNetCurrent': 'Contract Assets',
-    'PrepaidExpenseAndOtherAssetsCurrent': 'Prepaid Expenses',
-    'AvailableForSaleSecuritiesDebtSecuritiesNoncurrent': 'Long Term Investments',
-    'PropertyPlantAndEquipmentNet': 'Property, Plant & Equipment',
-    'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment': 'Accumulated Depreciation',
-    'OperatingLeaseRightOfUseAsset': 'Operating Lease Right of Use Asset',
-    'Goodwill': 'Goodwill',
-    'FiniteLivedIntangibleAssetsNet': 'Finite Lived Intangible Assets',
-    'IntangibleAssetsNetExcludingGoodwill': 'Intangible Assets',
-    'CapitalizedContractCostNetNoncurrent': 'Contract Assets',
-    'OtherAssetsNoncurrent': 'Other Non Current Assets',
-    'Assets': 'Total Assets'
-}
-
-
 class FinancialTable:
     """Base class for financial tables like Balance Sheet, Income Statement, Cashflow Statement"""
 
     def __init__(self,
                  gaap: pd.DataFrame):
         self.gaap = gaap
+        self.fields = []
 
     def get_fact(self, fact: str, currency: bool = True):
         res = self.gaap[self.gaap.fact == fact]
@@ -109,10 +106,33 @@ class FinancialTable:
         if fact_row:
             table.add_row(*fact_row)
 
+    def _get_facts_dataframe(self, facts:List[str]):
+        return pd.DataFrame([self.get_fact(fact) for fact in facts],
+                            columns=['Fact', 'Value']).dropna().reset_index(drop=True)
+
 
 class BalanceSheet(FinancialTable):
     """A company's balance sheet"""
 
+    ASSET_FACTS = [
+        'CashAndCashEquivalentsAtCarryingValue',
+        'MarketableSecuritiesCurrent',
+        'AccountsReceivableNetCurrent',
+        'InventoryNet',
+        'OtherAssetsCurrent',
+        'AssetsCurrent',
+        'AvailableForSaleSecuritiesDebtSecuritiesCurrent',
+        'Goodwill',
+        'Assets'
+    ]
+    LIABILITY_EQUITY_FACTS = [
+        "LiabilitiesCurrent",
+        "LiabilitiesNoncurrent",
+        "Liabilities",
+        "StockholdersEquity",
+        "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+        "LiabilitiesAndStockholdersEquity"
+    ]
     def __init__(self,
                  gaap: pd.DataFrame):
         super().__init__(gaap)
@@ -165,23 +185,28 @@ class BalanceSheet(FinancialTable):
     def other_non_current_assets(self):
         return self.get_value('OtherAssetsNoncurrent')
 
+    @property
     def share_holders_equity(self):
         return self.get_value('StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest')
 
+    @property
+    def asset_dataframe(self):
+        return self._get_facts_dataframe(BalanceSheet.ASSET_FACTS)
+
+    @property
+    def liability_equity_dataframe(self):
+        return self._get_facts_dataframe(BalanceSheet.LIABILITY_EQUITY_FACTS)
+
     def __rich__(self):
         assets_table = Table("", "", box=box.ROUNDED, title='Assets', title_style='bold deep_sky_blue1')
-        self._add_row(assets_table, 'AssetsCurrent')
-        self._add_row(assets_table, 'CashAndCashEquivalentsAtCarryingValue')
-        self._add_row(assets_table, 'AccountsReceivableNetCurrent')
-        self._add_row(assets_table, 'AvailableForSaleSecuritiesDebtSecuritiesCurrent')
-        self._add_row(assets_table, 'Goodwill')
-        self._add_row(assets_table, 'Assets')
+        for row in self.asset_dataframe.itertuples():
+            assets_table.add_row(row.Fact, row.Value)
 
-        liab_equity_table = Table("", "", box=box.ROUNDED, title='Liabilities and Shareholders Equity', title_style='bold deep_sky_blue1')
-        self._add_row(liab_equity_table, 'LiabilitiesCurrent')
-        self._add_row(liab_equity_table, 'Liabilities')
-        self._add_row(liab_equity_table, 'StockholdersEquity')
-        self._add_row(liab_equity_table, 'LiabilitiesAndStockholdersEquity')
+        liab_equity_table = Table("", "", box=box.ROUNDED, title='Liabilities and Shareholders Equity',
+                                  title_style='bold deep_sky_blue1')
+        for row in self.liability_equity_dataframe.itertuples():
+            liab_equity_table.add_row(row.Fact, row.Value)
+
         return Panel(
             Group(
                 assets_table,
@@ -201,6 +226,21 @@ class BalanceSheet(FinancialTable):
 
 
 class CashflowStatement(FinancialTable):
+
+    CASHFLOW_FACTS = [
+        'NetIncomeLoss',
+        'DepreciationDepletionAndAmortization',
+        'DeferredIncomeTaxExpenseBenefit',
+        'OtherNoncashIncomeExpense',
+        'NetCashProvidedByUsedInOperatingActivities',
+        'PaymentsToAcquirePropertyPlantAndEquipment',
+        'PaymentsToAcquireBusinessesNetOfCashAcquired',
+        'PaymentsForProceedsFromOtherInvestingActivities',
+        'NetCashProvidedByUsedInInvestingActivities',
+        'RepaymentsOfLongTermDebt',
+        'NetCashProvidedByUsedInFinancingActivities',
+        'PaymentsOfDividends'
+    ]
 
     def __init__(self,
                  gaap: pd.DataFrame):
@@ -230,12 +270,14 @@ class CashflowStatement(FinancialTable):
     def net_cash_provided_by_operating_activities(self):
         return self.get_value('NetCashProvidedByUsedInOperatingActivities')
 
+    @property
+    def cashflow_dataframe(self):
+        return self._get_facts_dataframe(CashflowStatement.CASHFLOW_FACTS)
+
     def __rich__(self):
         cashflow_table = Table("", "", box=box.ROUNDED)
-        self._add_row(cashflow_table, 'AssetsCurrent')
-        self._add_row(cashflow_table, 'DepreciationDepletionAndAmortization')
-        self._add_row(cashflow_table, 'OtherNoncashIncomeExpense')
-        self._add_row(cashflow_table, 'NetCashProvidedByUsedInOperatingActivities')
+        for row in self.cashflow_dataframe.itertuples():
+            cashflow_table.add_row(row.Fact, row.Value)
         return Panel(
             Group(
                 cashflow_table
@@ -254,6 +296,16 @@ class CashflowStatement(FinancialTable):
 
 
 class IncomeStatement(FinancialTable):
+
+    INCOME_STATEMENT_FACTS = [
+        'RevenueFromContractWithCustomerExcludingAssessedTax',
+        'CostOfGoodsAndServicesSold',
+        'GrossProfit',
+        'OperatingExpenses',
+        'OperatingIncomeLoss',
+        'NetIncomeLoss',
+        'InterestExpenseIncomeNet'
+    ]
 
     def __init__(self,
                  gaap: pd.DataFrame):
@@ -308,15 +360,14 @@ class IncomeStatement(FinancialTable):
     def earnings_per_share(self):
         return self.get_value('EarningsPerShareBasic', currency=False)
 
+    @property
+    def income_statement_dataframe(self):
+        return self._get_facts_dataframe(IncomeStatement.INCOME_STATEMENT_FACTS)
+
     def __rich__(self):
-        income_table = Table("", "", box=box.SIMPLE)
-        self._add_row(income_table, 'RevenueFromContractWithCustomerExcludingAssessedTax')
-        self._add_row(income_table, 'CostOfGoodsAndServicesSold')
-        self._add_row(income_table, 'GrossProfit')
-        self._add_row(income_table, 'OperatingExpenses')
-        self._add_row(income_table, 'OperatingIncomeLoss')
-        self._add_row(income_table, 'NetIncomeLoss')
-        self._add_row(income_table, 'InterestExpenseIncomeNet')
+        income_table = Table("", "", box=box.ROUNDED)
+        for row in self.income_statement_dataframe.itertuples():
+            income_table.add_row(row.Fact, row.Value)
 
         return Panel(
             income_table,
