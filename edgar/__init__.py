@@ -34,7 +34,7 @@ from edgar.effect import Effect
 from edgar.fundreports import FundReport
 from edgar.offerings import Offering
 from edgar.ownership import Ownership
-from edgar.forms import EightK, TenK
+from edgar.forms import EightK, TenK, TenQ
 from edgar.fundreports import ThirteenF, THIRTEENF_FORMS
 
 
@@ -57,7 +57,9 @@ def obj(sec_filing: Filing) -> Optional[object]:
     """
     if matches_form(sec_filing, "8-K"):
         return EightK(sec_filing)
-    if matches_form(sec_filing, "10-K"):
+    elif matches_form(sec_filing, "10-Q"):
+        return TenQ(sec_filing)
+    elif matches_form(sec_filing, "10-K"):
         return TenK(sec_filing)
     elif matches_form(sec_filing, THIRTEENF_FORMS):
         return ThirteenF(sec_filing)

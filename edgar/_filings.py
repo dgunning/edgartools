@@ -17,19 +17,18 @@ import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
-from markdownify import markdownify
 from rich.console import Group, Console
 from rich.panel import Panel
 from rich.text import Text
 
 from edgar._markdown import MarkdownContent
+from edgar._markdown import html_to_markdown
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar.core import (http_client, download_text, download_file, log, display_size,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.fundreports import FUND_FORMS
 from edgar.search import BM25Search, RegexSearch
-from edgar._markdown import html_to_markdown
 
 """ Contain functionality for working with SEC filing indexes and filings
 

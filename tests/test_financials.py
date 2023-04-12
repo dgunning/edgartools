@@ -1,9 +1,14 @@
-from edgar import *
 import pandas as pd
-from edgar.financials import Financials
-from edgar.forms import TenK
-from pathlib import Path
 from rich import print
+
+from edgar import *
+from edgar.financials import Financials, format_currency
+from edgar.forms import TenK
+
+
+def test_format_currency():
+    assert format_currency("1000000").lstrip() == "$1,000,000"
+    assert format_currency(100000).lstrip() == "$100,000"
 
 
 def test_balance_sheet():
@@ -34,7 +39,7 @@ def test_microsoft_financials():
     company = Company("MSFT")
     tenk = company.get_filings(form="10-K", accession_number="0001564590-22-026876").latest()
     print(tenk.accession_no)
-    gaap = tenk.xbrl().fiscal_gaap
+    gaap = tenk.xbrl().gaap
     financials = Financials.from_gaap(gaap)
     print()
     print(financials)
@@ -50,8 +55,7 @@ def test_apple_financials():
     company = Company("AAPL")
     tenk = TenK(company.get_filings(form="10-K", accession_number="0000320193-22-000108").latest())
 
-
-    gaap = tenk._filing.xbrl().fiscal_gaap
+    gaap = tenk._filing.xbrl().gaap
     gaap.to_csv('data/apple_gaap.csv', index=False)
 
     # Income Statement
@@ -98,7 +102,7 @@ def test_fiscal_gaap_for_10K_with_no_empty_dimensions():
     filing = Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', cik=1450722,
                     accession_no='0001213900-23-028058')
 
-    gaap: pd.DataFrame = filing.xbrl().fiscal_gaap
+    gaap: pd.DataFrame = filing.xbrl().gaap
     assert len(gaap) > 0
 
     # Get the company financials
@@ -106,3 +110,12 @@ def test_fiscal_gaap_for_10K_with_no_empty_dimensions():
     balance_sheet = financials.balance_sheet
 
     assert balance_sheet.cash_and_cash_equivalents == "$430,193"
+
+
+def test_10Q_financials():
+    filing = Filing(form='10-Q', filing_date='2023-04-06', company='NIKE, Inc.', cik=320187,
+                    accession_no='0000320187-23-000013')
+    xbrl = filing.xbrl()
+    facts = xbrl.facts
+    with open('data/nike_10Q_facts.csv', 'w') as f:
+        f.write(facts.data.to_csv(index=False))

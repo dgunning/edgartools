@@ -12,6 +12,7 @@ __all__ = [
     'BalanceSheet',
     'CashflowStatement',
     'IncomeStatement',
+    'format_currency'
 ]
 
 gaap_facts = {'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment': 'Accumulated Depreciation',

@@ -1,7 +1,7 @@
 from rich import print
 
 from edgar import Filing
-from edgar.forms import list_forms, EightK, TenK, find_section
+from edgar.forms import list_forms, EightK, TenK, TenQ, find_section
 
 
 def test_list_forms():
@@ -33,13 +33,25 @@ adobe_8K = Filing(form='8-K',
                   cik=796343,
                   accession_no='0000796343-23-000044')
 
+
 def test_tenk_filing_with_no_gaap():
     # This filing has no GAAP data
     filing = Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', cik=1450722,
-           accession_no='0001213900-23-028058')
-    tenk:TenK = filing.obj()
+                    accession_no='0001213900-23-028058')
+    tenk: TenK = filing.obj()
     assert tenk
     assert tenk.financials is not None
+
+
+def test_tenq_filing():
+    filing = Filing(form='10-Q', filing_date='2023-04-06', company='NIKE, Inc.', cik=320187,
+                    accession_no='0000320187-23-000013')
+    tenq: TenQ = filing.obj()
+    assert tenq
+    assert tenq.financials is not None
+    assert tenq.financials.balance_sheet.asset_dataframe is not None
+    print()
+    print(tenq)
 
 def test_eightk_items():
     eightk = EightK(adobe_8K)
@@ -47,13 +59,13 @@ def test_eightk_items():
     print()
 
     assert "Item 2.02" == eightk.items[0].item_num
-    filing = Filing(form='8-K/A', filing_date='2023-04-03', company='HIMALAYA TECHNOLOGIES, INC', cik=1409624, accession_no='0001493152-23-010558')
+    filing = Filing(form='8-K/A', filing_date='2023-04-03', company='HIMALAYA TECHNOLOGIES, INC', cik=1409624,
+                    accession_no='0001493152-23-010558')
     eightk = EightK(filing)
     assert eightk.filing_date == '2023-04-03'
     assert eightk.form == '8-K/A'
     assert eightk.company == 'HIMALAYA TECHNOLOGIES, INC'
     print(eightk)
-
 
 
 def test_eightk_obj():
@@ -77,7 +89,6 @@ def test_eightk_difficult_parsing():
     eightk = filing.obj()
     print()
     print(eightk)
-
 
     filing = Filing(form='8-K', filing_date='2023-03-20', company='AFC Gamma, Inc.', cik=1822523,
                     accession_no='0001829126-23-002149')

@@ -116,7 +116,13 @@ class FilingXbrl:
 
     @property
     def fiscal_year_end_date(self):
-        res = self.facts.data.query(f"namespace=='dei' and fact=='CurrentFiscalYearEndDate' and dimensions.isnull()")
+        res = self.facts.data.query(f"namespace=='dei' and fact=='CurrentFiscalYearEndDate'")
+        if not res.empty:
+            return res.iloc[0].end_date
+
+    @property
+    def period_end_date(self):
+        res = self.facts.data.query(f"namespace=='dei' and fact=='DocumentPeriodEndDate'")
         if not res.empty:
             return res.iloc[0].end_date
 
@@ -146,19 +152,19 @@ class FilingXbrl:
 
     @property
     @lru_cache(maxsize=1)
-    def fiscal_gaap(self) -> Optional[pd.DataFrame]:
+    def gaap(self) -> Optional[pd.DataFrame]:
         """Get the GAAP facts for the fiscal year-end date"""
-        fiscal_date = self.fiscal_year_end_date
-        if fiscal_date:
+        period_end_date = self.period_end_date
+        if period_end_date:
             res = self.facts.data.query(
-                f"namespace=='us-gaap' and end_date=='{fiscal_date}' and dimensions.isnull()")
+                f"namespace=='us-gaap' and end_date=='{period_end_date}' and dimensions.isnull()")
             if res.empty:
                 # Look for the default gaap dimension
                 default_dimension = self._default_gaap_dimension()
                 log.warning(
                     f"No default dimension detected in {self.form_type} XBRL for {self.company_name} [{self.cik}] "
                     f"Using {default_dimension} as the default dimension")
-                res = self.facts.data.query(f'namespace=="us-gaap" and end_date=="{fiscal_date}" and dimensions=="{default_dimension}"')
+                res = self.facts.data.query(f'namespace=="us-gaap" and end_date=="{period_end_date}" and dimensions=="{default_dimension}"')
             return (res
                     .filter(["fact", "value", "units"])
                     .drop_duplicates()

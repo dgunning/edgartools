@@ -18,6 +18,7 @@ __all__ = [
     'FUND_FORMS',
     'EightK',
     'TenK',
+    'TenQ'
 ]
 
 FUND_FORMS = ["NPORT-P", "NPORT-EX"]
@@ -132,10 +133,9 @@ class FilingItem:
         return Markdown(str(self))
 
 
-class TenK:
+class CompanyReport:
 
     def __init__(self, filing):
-        assert filing.form in ['10-K', '10-K/A'], f"This form should be a 10-K but was {filing.form}"
         self._filing = filing
 
     @property
@@ -163,7 +163,7 @@ class TenK:
     def financials(self):
         xbrl = self._filing.xbrl()
         if xbrl:
-            return Financials.from_gaap(xbrl.fiscal_gaap)
+            return Financials.from_gaap(xbrl.gaap)
 
     def __rich__(self):
         return Panel(
@@ -173,10 +173,28 @@ class TenK:
             )
         )
 
-    def __str__(self):
-        return f"""TenK('{self.company}')"""
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+
+class TenK(CompanyReport):
+
+    def __init__(self, filing):
+        assert filing.form in ['10-K', '10-K/A'], f"This form should be a 10-K but was {filing.form}"
+        super().__init__(filing)
+
+    def __str__(self):
+        return f"""TenK('{self.company}')"""
+
+class TenQ(CompanyReport):
+
+    def __init__(self, filing):
+        assert filing.form in ['10-Q', '10-Q/A'], f"This form should be a 10-Q but was {filing.form}"
+        super().__init__(filing)
+
+    def __str__(self):
+        return f"""TenQ('{self.company}')"""
+
 
 
 class EightK:
