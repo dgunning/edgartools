@@ -1,5 +1,4 @@
 import re
-import unicodedata
 from typing import List, Callable, Tuple
 
 import pandas as pd

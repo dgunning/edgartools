@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.console import Group
 from rich import box
 from typing import Union, List
-from edgar._rich import repr_rich, df_to_rich_table
+from edgar._rich import repr_rich
 import re
 
 __all__ = [
@@ -286,7 +286,7 @@ class CashflowStatement(FinancialTable):
         )
 
     def __str__(self):
-        return f"Cash Flow Statement()"
+        return "Cash Flow Statement()"
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -379,7 +379,7 @@ class IncomeStatement(FinancialTable):
         return repr_rich(self.__rich__())
 
     def __str__(self):
-        return f"Income Statement()"
+        return "Income Statement()"
 
     @classmethod
     def from_gaap(cls, gaap: pd.DataFrame):
@@ -409,7 +409,7 @@ class Financials:
         return repr_rich(self.__rich__())
 
     def __str__(self):
-        return f"Company Financials()"
+        return "Company Financials()"
 
     @classmethod
     def from_gaap(cls,
