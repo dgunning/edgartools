@@ -35,6 +35,7 @@ from edgar.fundreports import FundReport
 from edgar.offerings import Offering
 from edgar.ownership import Ownership
 from edgar.forms import EightK, TenK, TenQ
+from edgar.form144 import Form144
 from edgar.fundreports import ThirteenF, THIRTEENF_FORMS
 
 
@@ -63,17 +64,26 @@ def obj(sec_filing: Filing) -> Optional[object]:
         return TenK(sec_filing)
     elif matches_form(sec_filing, THIRTEENF_FORMS):
         return ThirteenF(sec_filing)
-    xml = sec_filing.xml()
-    if xml:
-        if matches_form(sec_filing, ["3", "4", "5"]):
+    elif matches_form(sec_filing, "144"):
+        return Form144.from_filing(sec_filing)
+    elif matches_form(sec_filing, ["3", "4", "5"]):
+        xml = sec_filing.xml()
+        if xml:
             return Ownership.from_xml(xml)
-        elif matches_form(sec_filing, "EFFECT"):
+    elif matches_form(sec_filing, "EFFECT"):
+        xml = sec_filing.xml()
+        if xml:
             return Effect.from_xml(xml)
-        elif matches_form(sec_filing, "D"):
+    elif matches_form(sec_filing, "D"):
+        xml = sec_filing.xml()
+        if xml:
             return Offering.from_xml(xml)
-        elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
+    elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
+        xml = sec_filing.xml()
+        if xml:
             return FundReport.from_xml(xml)
-    else:
-        filing_xbrl = sec_filing.xbrl()
-        if filing_xbrl:
-            return filing_xbrl
+
+
+    filing_xbrl = sec_filing.xbrl()
+    if filing_xbrl:
+        return filing_xbrl

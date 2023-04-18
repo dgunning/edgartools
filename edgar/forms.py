@@ -12,6 +12,7 @@ from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import download_text, http_client, sec_dot_gov
 from edgar.financials import Financials
 
+
 __all__ = [
     'SecForms',
     'list_forms',
@@ -261,3 +262,4 @@ class EightK:
                     if current_item_num is not None:
                         current_item += line + "\n"
         yield current_item_num, current_item.strip()
+

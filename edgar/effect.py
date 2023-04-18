@@ -1,28 +1,19 @@
 from bs4 import BeautifulSoup
 import pandas as pd
 from edgar._rich import repr_rich, df_to_rich_table
+from edgar._party import Filer
 from rich.console import Group, Text
 from functools import lru_cache
 from edgar._xml import child_text
 from typing import Optional
 
 __all__ = [
-    'Filer',
     'EffectiveData',
     'Effect'
 ]
 
 
-class Filer:
 
-    def __init__(self,
-                 cik: str,
-                 entity_name: str,
-                 file_number: str
-                 ):
-        self.cik: str = cik
-        self.entity_name: str = entity_name
-        self.file_number: str = file_number
 
 
 class EffectiveData:
@@ -112,7 +103,7 @@ class Effect:
         return (f"EffectSubmission(effective='{self.effective_date}', type='{self.submission_type}', "
                 f"is_live={self.is_live}, entity='{self.entity}')")
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         return Group(Text(f"{self.submission_type} filing for form {self.source_submission_type} filing", style="bold"),
                      df_to_rich_table(self.summary(), index_name="entity")
                      )

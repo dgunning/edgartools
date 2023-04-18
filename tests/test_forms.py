@@ -2,6 +2,7 @@ from rich import print
 
 from edgar import Filing
 from edgar.forms import list_forms, EightK, TenK, TenQ, find_section
+from pathlib import Path
 
 
 def test_list_forms():
@@ -52,6 +53,7 @@ def test_tenq_filing():
     assert tenq.financials.balance_sheet.asset_dataframe is not None
     print()
     print(tenq)
+
 
 def test_eightk_items():
     eightk = EightK(adobe_8K)
@@ -134,3 +136,5 @@ def test_find_section():
 
     assert find_section("If\D+an\D+emerging\D+growth\D+company,\D+indicate",
                         ['ABC', '  If an emerging growth company, indicate if the Exchange Act.', '|  |\n| --'])
+
+

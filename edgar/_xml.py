@@ -1,11 +1,12 @@
 from decimal import Decimal
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List
 
 from bs4 import Tag, BeautifulSoup
 
 __all__ = [
     'child_text',
     'child_value',
+    'child_values',
     'find_element',
     'get_footnote_ids',
     'optional_decimal',
@@ -102,6 +103,17 @@ def child_value(parent: Tag,
     if el:
         return value_with_footnotes(el)
     return default_value
+
+def child_values(parent:Tag,
+                 child:str) -> List[str]:
+    """
+    Get the text of the value tag within the child tag if it exists or None
+
+    :param parent: The parent tag
+    :param child: The name of the child element
+    :return: the text of the child element if it exists or None
+    """
+    return [el.text for el in parent.find_all(child)]
 
 
 def optional_decimal(parent: Tag,

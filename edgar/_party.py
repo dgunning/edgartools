@@ -11,7 +11,8 @@ from edgar.core import IntString
 __all__ = [
     'Address',
     'Issuer',
-    'Person'
+    'Person',
+    'Filer',
 ]
 
 
@@ -153,6 +154,40 @@ class Person:
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         yield f"{self.first_name} {self.last_name}"
+
+class Filer:
+
+    def __init__(self,
+                 cik: str,
+                 entity_name: str,
+                 file_number: str
+                 ):
+        self.cik: str = cik
+        self.entity_name: str = entity_name
+        self.file_number: str = file_number
+
+    def __str__(self):
+        return f"{self.entity_name} ({self.cik})"
+    def __repr__(self):
+        return f"{self.entity_name} ({self.cik})"
+
+
+class Contact:
+
+
+    def __init__(self,
+                 name: str,
+                 phone_number: str,
+                 email: str):
+        self.name: str = name
+        self.phone_number: str = phone_number
+        self.email: str = email
+
+    def __str__(self):
+        return f"{self.name} ({self.phone_number}) {self.email}"
+
+    def __repr__(self):
+        return f"{self.name} ({self.phone_number}) {self.email}"
 
 
 
