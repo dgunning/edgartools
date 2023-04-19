@@ -16,3 +16,11 @@ def test_form144_from_filing():
                     accession_no='0001886261-22-000004')
     form144 = Form144.from_filing(filing)
     print(form144)
+
+def test_amount_sold_past_3months():
+    filing = Filing(form='144', filing_date='2023-04-17', company='DELTA AIR LINES, INC.', cik=27904,
+           accession_no='0001959173-23-000600')
+    form144:Form144 = Form144.from_filing(filing)
+    print(form144.securities_sold_past_3_months)
+    assert len(form144.securities_sold_past_3_months) == 1
+    assert form144.securities_sold_past_3_months.iloc[0].amount_sold == 5000
