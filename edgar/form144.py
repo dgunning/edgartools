@@ -262,8 +262,8 @@ class Form144:
                  relationships:List[str],
                  address:Address,
                  securities_information:pd.DataFrame,
-                 securities_to_be_sold:List[SecuritiesToBeSold],
-                 securities_sold_past_3_months: List[SecuritiesSoldPast3Months],
+                 securities_to_be_sold:pd.DataFrame,
+                 securities_sold_past_3_months: pd.DataFrame,
                  nothing_to_report:bool,
                  remarks:str,
                  notice_signature:NoticeSignature
@@ -419,10 +419,11 @@ class Form144:
                                                     title="Securities sold in past 3 months")
         for row in self.securities_sold_past_3_months.itertuples():
             securities_sold_past_3_months_table.add_row(row.security_class,
-                                                row.seller_name,
-                                                str(row.amount_of_securities_sold),
-                                                str(row.gross_proceeds),
-                                                row.seller_name)
+                                                        row.sale_date,
+                                                        str(row.amount_sold),
+                                                        str(row.gross_proceeds),
+                                                        row.seller_name
+                                                        )
 
         # Notice signature
         notice_signature_table = Table("Signature", "Date", box=box.SIMPLE, title="Notice Signature")
@@ -439,10 +440,11 @@ class Form144:
             Group(
                 self._filing.__rich__(),
                 contact_table,
-                securities_information_table,
                 securities_to_be_sold_table,
                 securities_sold_past_3_months_table,
-                Columns([notice_signature_table, plan_adoption_dates_table])
+                securities_information_table,
+                notice_signature_table,
+                plan_adoption_dates_table
             )
         )
 
