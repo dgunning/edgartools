@@ -7,3 +7,4 @@
 /.coverage
 /notebooks/
 /site/
+**/__pycache__/
