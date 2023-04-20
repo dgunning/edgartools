@@ -3,7 +3,7 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.console import Group
 from rich import box
-from typing import Union, List
+from typing import Union, List, Tuple
 from edgar._rich import repr_rich
 import re
 
@@ -40,7 +40,7 @@ gaap_facts = {'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEq
               'NetIncomeLoss': 'Net Income',
               'RepaymentsOfLongTermDebt': 'Repayments of Long Term Debt',
               'InventoryNet': 'Inventories',
-              'DeferredIncomeTaxExpenseBenefit' : 'Deferred Income Tax Expense (Benefit)',
+              'DeferredIncomeTaxExpenseBenefit': 'Deferred Income Tax Expense (Benefit)',
               'OtherNoncashIncomeExpense': 'Other Noncash Income (Expense)',
               'FiniteLivedIntangibleAssetsNet': 'Finite Lived Intangible Assets',
               'IntangibleAssetsNetExcludingGoodwill': 'Intangible Assets',
@@ -48,8 +48,8 @@ gaap_facts = {'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEq
               'MarketableSecuritiesCurrent': 'Short Term Investments',
               'OtherAssetsCurrent': 'Other Current Assets',
               'PaymentsOfDividends': 'Dividends Paid',
-              'NetCashProvidedByUsedInInvestingActivities'  : 'Net Cash used in Investing Activities',
-              'NetCashProvidedByUsedInFinancingActivities'  : 'Net Cash used in Financing Activities',
+              'NetCashProvidedByUsedInInvestingActivities': 'Net Cash used in Investing Activities',
+              'NetCashProvidedByUsedInFinancingActivities': 'Net Cash used in Financing Activities',
               'PaymentsForProceedsFromOtherInvestingActivities': 'Other Investing Activities',
               'PaymentsToAcquireBusinessesNetOfCashAcquired': 'Acquisitions',
               'PaymentsToAcquirePropertyPlantAndEquipment': 'Investents in Property, Plant & Equipment',
@@ -107,8 +107,14 @@ class FinancialTable:
         if fact_row:
             table.add_row(*fact_row)
 
-    def _get_facts_dataframe(self, facts:List[str]):
-        return pd.DataFrame([self.get_fact(fact) for fact in facts],
+    def _get_facts(self, facts: List[str]) -> List[Tuple[str, object]]:
+        for fact in facts:
+            fact_row = self.get_fact(fact)
+            if fact_row:
+                yield fact_row
+
+    def _get_facts_dataframe(self, facts: List[str]):
+        return pd.DataFrame(list(self._get_facts(facts)),
                             columns=['Fact', 'Value']).dropna().reset_index(drop=True)
 
 
@@ -134,6 +140,7 @@ class BalanceSheet(FinancialTable):
         "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
         "LiabilitiesAndStockholdersEquity"
     ]
+
     def __init__(self,
                  gaap: pd.DataFrame):
         super().__init__(gaap)
@@ -227,7 +234,6 @@ class BalanceSheet(FinancialTable):
 
 
 class CashflowStatement(FinancialTable):
-
     CASHFLOW_FACTS = [
         'NetIncomeLoss',
         'DepreciationDepletionAndAmortization',
@@ -297,7 +303,6 @@ class CashflowStatement(FinancialTable):
 
 
 class IncomeStatement(FinancialTable):
-
     INCOME_STATEMENT_FACTS = [
         'RevenueFromContractWithCustomerExcludingAssessedTax',
         'CostOfGoodsAndServicesSold',

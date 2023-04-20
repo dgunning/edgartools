@@ -96,6 +96,11 @@ def test_apple_financials():
 
     print(tenk.financials)
 
+def test_10K_with_empty_facts():
+    filing = Filing(form='10-K', filing_date='2023-04-19', company='Aurora Technology Acquisition Corp.', cik=1883788, accession_no='0001193125-23-105389')
+    tenk = filing.obj()
+    assert tenk.financials
+
 
 def test_fiscal_gaap_for_10K_with_no_empty_dimensions():
     # the gaap data for this 10K has no empty dimensions for us-gaap
@@ -119,3 +124,4 @@ def test_10Q_financials():
     facts = xbrl.facts
     with open('data/nike_10Q_facts.csv', 'w') as f:
         f.write(facts.data.to_csv(index=False))
+
