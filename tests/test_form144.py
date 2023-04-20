@@ -25,6 +25,13 @@ def test_amount_sold_past_3months():
     assert len(form144.securities_sold_past_3_months) == 1
     assert form144.securities_sold_past_3_months.iloc[0].amount_sold == 5000
 
+def test_form144_with_no_xml():
+    filing = Filing(company="Esperion Therapeutics, Inc.", cik=1434868, form='144', filing_date='2015-05-08', accession_no='0000903423-15-000301')
+    xml = filing.xml()
+    if not xml:
+        form144 = filing.obj()
+        assert form144 is None
+
 
 def test_form144_with_multiple_securities_to_be_sold():
     filing = Filing(form='144', filing_date='2023-04-18', company='Owens Corning', cik=1370946,
