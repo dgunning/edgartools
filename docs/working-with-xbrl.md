@@ -1,4 +1,4 @@
-# XBRL
+# Working with XBRL
 
 Some common filing types such as **10-K, 10-Q, 8-K** are generally filed with XBRL data, and you can get access to this data on the filing.
 
