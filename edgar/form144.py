@@ -7,7 +7,8 @@ from rich import box
 from rich.columns import Columns
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table
+from rich.table import Table, Column
+from rich.text import Text
 
 from edgar._party import Address
 from edgar._party import Filer, Contact
@@ -122,13 +123,13 @@ class SecuritiesToBeSold:
         return {
             'security_class': self.security_class,
             'acquired_date': self.acquired_date,
+            'amount_acquired': self.amount_of_securities_acquired,
             'nature_of_acquisition': self.nature_of_acquisition_transaction,
             'acquired_from': self.name_of_person_from_whom_acquired,
+            'nature_of_payment': self.nature_of_payment,
             'is_gift': self.is_gift_transaction,
             'donar_acquired_date': self.donar_acquired_date,
-            'amount_acquired': self.amount_of_securities_acquired,
-            'payment_date': self.payment_date,
-            'nature_of_payment': self.nature_of_payment
+            'payment_date': self.payment_date
         }
 
     @classmethod
@@ -253,25 +254,25 @@ class Form144:
     def __init__(self,
                  filing,
                  filer: Filer,
-                 contact:Contact,
-                 issuer_cik:str,
-                 issuer_name:str,
-                 sec_file_number:str,
-                 issuer_contact_phone:str,
-                 person_selling:str,
-                 relationships:List[str],
-                 address:Address,
-                 securities_information:pd.DataFrame,
-                 securities_to_be_sold:pd.DataFrame,
+                 contact: Contact,
+                 issuer_cik: str,
+                 issuer_name: str,
+                 sec_file_number: str,
+                 issuer_contact_phone: str,
+                 person_selling: str,
+                 relationships: List[str],
+                 address: Address,
+                 securities_information: pd.DataFrame,
+                 securities_to_be_sold: pd.DataFrame,
                  securities_sold_past_3_months: pd.DataFrame,
-                 nothing_to_report:bool,
-                 remarks:str,
-                 notice_signature:NoticeSignature
+                 nothing_to_report: bool,
+                 remarks: str,
+                 notice_signature: NoticeSignature
                  ):
         assert filing.form in ['144', '144/A'], f"This form should be a Form 144 but was {filing.form}"
         self._filing = filing
         self.filer = filer
-        self.contact:Contact = contact
+        self.contact: Contact = contact
         self.issuer_cik = issuer_cik
         self.issuer_name = issuer_name
         self.sec_file_number = sec_file_number
@@ -279,7 +280,7 @@ class Form144:
         self.person_selling = person_selling
         self.relationships = relationships
         self.address = address
-        self.securities_information:pd.DataFrame = securities_information
+        self.securities_information: pd.DataFrame = securities_information
         self.securities_to_be_sold = securities_to_be_sold
         self.securities_sold_past_3_months = securities_sold_past_3_months
         self.nothing_to_report = nothing_to_report
@@ -288,9 +289,9 @@ class Form144:
 
     def data(self):
         return pd.DataFrame(
-            [{'issuer_cik':self.issuer_cik,
-              'issuer_name':self.issuer_name,
-              'sec_file_number':self.sec_file_number,
+            [{'issuer_cik': self.issuer_cik,
+              'issuer_name': self.issuer_name,
+              'sec_file_number': self.sec_file_number,
               }]
         )
 
@@ -316,10 +317,10 @@ class Form144:
         # Contact info
         contact_el = filer_el.find('contact')
         form144['contact'] = Contact(
-                name=child_text(contact_el, 'name'),
-                phone_number=child_text(contact_el, 'phone'),
-                email=child_text(contact_el, 'email')
-            ) if contact_el else None
+            name=child_text(contact_el, 'name'),
+            phone_number=child_text(contact_el, 'phone'),
+            email=child_text(contact_el, 'email')
+        ) if contact_el else None
 
         form_data = root.find('formData')
         # Issuer
@@ -380,72 +381,81 @@ class Form144:
         return cls(filing=filing, **form144)
 
     def __rich__(self):
-        contact_table = Table("Name", "Phone", "Email", box=box.SIMPLE)
-        contact_table.add_row(self.contact.name if self.contact else "-",
-                              self.contact.phone_number if self.contact else "-",
-                              self.contact.email if self.contact else "-")
-
+        # Filer Information Table
+        filer_table = Table("Form", "Person Selling", "Company", "Issuer", box=box.SIMPLE)
+        filer_table.add_row(f"Form {self._filing.form}", self.person_selling, self._filing.company, self.issuer_name)
 
         # Securities Information Table
-        securities_information_table = Table("Security Class", "Sold", "Remaining", "Value",
-                                             "Sale Date", "Exchange", "Broker",
-                                             box=box.SIMPLE, title="Securities Information")
+        securities_information_table = Table("Security Class",
+                                             "Date of Sale",
+                                             Column(header="Units To Be Sold", style="red1"),
+                                             "Market Value",
+                                             "Shares outstanding",
+                                             "Exchange",
+                                             "Broker",
+                                             box=box.SIMPLE)
         for row in self.securities_information.itertuples():
             securities_information_table.add_row(row.security_class,
-                                                 str(row.units_sold),
-                                                 str(row.units_outstanding),
-                                                 str(row.market_value),
                                                  row.approx_sale_date,
+                                                 f"{row.units_sold:,}",
+                                                 f"${row.market_value:,.0f}",
+                                                 f"{row.units_outstanding:,}",
                                                  row.exchange_name,
                                                  row.broker_name)
 
         # Securities to be sold
-        securities_to_be_sold_table = Table("Security Class", "Date Acquired", "Nature of acquistion",
-                                            "Acquired From", "Gift", "Amount Acquired", "Payment Date",
-                                            "Nature of Payment", box=box.SIMPLE, title="Securities to be sold")
+        securities_to_be_sold_table = Table("Security Class",
+                                            "Date Acquired",
+                                            Column(header="Units Acquired", style="green"),
+                                            "Nature of acquistion",
+                                            "Acquired From",
+                                            "Gift",
+                                            "Payment Date",
+                                            "Nature of Payment",
+                                            box=box.SIMPLE)
         for row in self.securities_to_be_sold.itertuples():
             securities_to_be_sold_table.add_row(row.security_class,
                                                 row.acquired_date,
+                                                f"{row.amount_acquired:,}",
                                                 row.nature_of_acquisition,
                                                 row.acquired_from,
                                                 row.is_gift,
-                                                str(row.amount_acquired),
                                                 row.payment_date,
                                                 row.nature_of_payment)
 
         # Securities sold in past 3 months
-        securities_sold_past_3_months_table = Table("Security Class", "Sale Date", "Amount Sold",
-                                                    "Proceeds", "Seller Name", box=box.SIMPLE,
-                                                    title="Securities sold in past 3 months")
+        securities_sold_past_3_months_table = Table("Security Class", "Sale Date",
+                                                    Column(header="Amount Sold", style="red1"),
+                                                    "Proceeds", "Seller Name", box=box.SIMPLE)
         for row in self.securities_sold_past_3_months.itertuples():
             securities_sold_past_3_months_table.add_row(row.security_class,
                                                         row.sale_date,
-                                                        str(row.amount_sold),
-                                                        str(row.gross_proceeds),
+                                                        f"{row.amount_sold:,}",
+                                                        f"${row.gross_proceeds:,.2f}",
                                                         row.seller_name
                                                         )
 
         # Notice signature
-        notice_signature_table = Table("Signature", "Date", box=box.SIMPLE, title="Notice Signature")
+        notice_signature_table = Table("Signature", "Date", box=box.SIMPLE)
         notice_signature_table.add_row(self.notice_signature.signature, self.notice_signature.notice_date)
 
         # Plan adoption dates
         plan_adoption_dates_table = Table("Date", box=box.SIMPLE, title="Plan Adoption Dates")
         if len(self.notice_signature.plan_adoption_dates) == 0:
-            plan_adoption_dates_table.add_row(" "*20)
+            plan_adoption_dates_table.add_row(" " * 20)
         else:
             for date in self.notice_signature.plan_adoption_dates:
                 plan_adoption_dates_table.add_row(date)
         return Panel(
             Group(
-                self._filing.__rich__(),
-                contact_table,
-                securities_to_be_sold_table,
-                securities_sold_past_3_months_table,
-                securities_information_table,
+                filer_table,
+                Panel(securities_information_table, title="Securities Information"),
+                Panel(securities_to_be_sold_table, title="Securities To Be Sold"),
+                Panel(securities_sold_past_3_months_table, title="Securities Sold During The Past 3 Months"),
                 notice_signature_table,
-                plan_adoption_dates_table
-            )
+                Text(self.remarks or ""),
+            ),
+            #title=f"Form {self._filing.form} for {self.person_selling} at {self._filing.company_name} {self._filing.filing_date}"
         )
 
     def __repr__(self):
