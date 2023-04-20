@@ -39,7 +39,7 @@ class SecuritiesInformation:
       </securitiesInformation>
     """
     security_class: str
-    units_sold: int
+    units_to_be_sold: int
     aggregate_market_value: float
     units_outstanding: int
     approx_sale_date: str
@@ -51,7 +51,7 @@ class SecuritiesInformation:
         # Convert this object to a dictionary
         return {
             'security_class': self.security_class,
-            'units_sold': self.units_sold,
+            'units_to_be_sold': self.units_to_be_sold,
             'market_value': self.aggregate_market_value,
             'units_outstanding': self.units_outstanding,
             'approx_sale_date': self.approx_sale_date,
@@ -62,7 +62,7 @@ class SecuritiesInformation:
     @classmethod
     def from_tag(cls, tag: Tag):
         security_class = child_text(tag, 'securitiesClassTitle')
-        units_sold = child_text(tag, 'noOfUnitsSold')
+        units_to_be_sold = child_text(tag, 'noOfUnitsSold')
         aggregate_market_value = child_text(tag, 'aggregateMarketValue')
         units_outstanding = child_text(tag, 'noOfUnitsOutstanding')
         approx_sale_date = child_text(tag, 'approxSaleDate')
@@ -83,7 +83,7 @@ class SecuritiesInformation:
         )
         return cls(
             security_class=security_class,
-            units_sold=int(units_sold),
+            units_to_be_sold=int(units_to_be_sold),
             aggregate_market_value=float(aggregate_market_value) if aggregate_market_value else None,
             units_outstanding=int(units_outstanding),
             approx_sale_date=approx_sale_date,
@@ -377,8 +377,9 @@ class Form144:
         assert filing.form in ['144', '144/A'], f"This form should be a Form 144 but was {filing.form}"
         xml = filing.xml()
 
-        form144 = cls.parse_xml(xml)
-        return cls(filing=filing, **form144)
+        if xml:
+            form144 = cls.parse_xml(xml)
+            return cls(filing=filing, **form144)
 
     def __rich__(self):
         # Filer Information Table
@@ -397,7 +398,7 @@ class Form144:
         for row in self.securities_information.itertuples():
             securities_information_table.add_row(row.security_class,
                                                  row.approx_sale_date,
-                                                 f"{row.units_sold:,}",
+                                                 f"{row.units_to_be_sold:,}",
                                                  f"${row.market_value:,.0f}",
                                                  f"{row.units_outstanding:,}",
                                                  row.exchange_name,
