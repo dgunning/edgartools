@@ -4,7 +4,6 @@ from typing import Dict, List
 import pandas as pd
 from bs4 import BeautifulSoup, Tag
 from rich import box
-from rich.columns import Columns
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
@@ -14,6 +13,12 @@ from edgar._party import Address
 from edgar._party import Filer, Contact
 from edgar._rich import repr_rich
 from edgar._xml import child_text, child_values
+from edgar._companies import Company
+
+__all__ = ['Form144',
+           'concat_securities_information',
+           'concat_securities_to_be_sold'
+           ]
 
 
 @dataclass(frozen=True)
@@ -281,19 +286,39 @@ class Form144:
         self.relationships = relationships
         self.address = address
         self.securities_information: pd.DataFrame = securities_information
-        self.securities_to_be_sold = securities_to_be_sold
+        self.securities_to_be_sold: pd.DataFram = securities_to_be_sold
         self.securities_sold_past_3_months = securities_sold_past_3_months
         self.nothing_to_report = nothing_to_report
         self.remarks = remarks
         self.notice_signature = notice_signature
 
-    def data(self):
-        return pd.DataFrame(
-            [{'issuer_cik': self.issuer_cik,
-              'issuer_name': self.issuer_name,
-              'sec_file_number': self.sec_file_number,
-              }]
-        )
+    @property
+    def company(self) -> Company:
+        return Company(self.issuer_cik)
+
+    @property
+    def units_to_be_sold(self) -> int:
+        return self.securities_information.loc[0].units_to_be_sold
+
+    @property
+    def market_value(self) -> int:
+        return self.securities_information.loc[0].market_value
+
+    @property
+    def approx_sale_date(self) -> int:
+        return self.securities_information.loc[0].approx_sale_date
+
+    @property
+    def security_class(self) -> int:
+        return self.securities_information.loc[0].security_class
+
+    @property
+    def broker_name(self) -> int:
+        return self.securities_information.loc[0].broker_name
+
+    @property
+    def exchange_name(self) -> int:
+        return self.securities_information.loc[0].exchange_name
 
     @staticmethod
     def parse_xml(xml: str) -> Dict[str, object]:
@@ -383,8 +408,9 @@ class Form144:
 
     def __rich__(self):
         # Filer Information Table
-        filer_table = Table("Form", "Person Selling", "Company", "Issuer", box=box.SIMPLE)
-        filer_table.add_row(f"Form {self._filing.form}", self.person_selling, self._filing.company, self.issuer_name)
+        filer_table = Table("Form", "Person Selling", "Relationship", "Company", "Issuer", box=box.SIMPLE)
+        filer_table.add_row(f"Form {self._filing.form}", self.person_selling, ', '.join(self.relationships),
+                            self._filing.company, self.issuer_name)
 
         # Securities Information Table
         securities_information_table = Table("Security Class",
@@ -455,9 +481,16 @@ class Form144:
                 Panel(securities_sold_past_3_months_table, title="Securities Sold During The Past 3 Months"),
                 notice_signature_table,
                 Text(self.remarks or ""),
-            ),
-            #title=f"Form {self._filing.form} for {self.person_selling} at {self._filing.company_name} {self._filing.filing_date}"
+            )
         )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+
+def concat_securities_information(form144_lst: List[Form144]):
+    return pd.concat([form144.securities_information for form144 in form144_lst])
+
+
+def concat_securities_to_be_sold(form144_lst: List[Form144]):
+    return pd.concat([form144.securities_to_be_sold for form144 in form144_lst])
