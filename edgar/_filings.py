@@ -48,7 +48,9 @@ __all__ = [
     'FilingDocument',
     'FilingHomepage',
     'get_fund_filings',
-    'available_quarters'
+    'available_quarters',
+    'get_restricted_stock_filings',
+    'get_insider_transaction_filings'
 ]
 
 full_index_url = "https://www.sec.gov/Archives/edgar/full-index/{}/QTR{}/{}.{}"
@@ -573,6 +575,12 @@ def get_filings(year: Years = None,
 # Fund filings
 get_fund_filings = partial(get_filings, form=FUND_FORMS)
 get_funds = get_fund_filings
+
+# Restricted stock sales
+get_restricted_stock_filings = partial(get_filings, form=[144])
+
+# Insider transaction filings
+get_insider_transaction_filings = partial(get_filings, form=[3,4,5])
 
 
 class Filing:
