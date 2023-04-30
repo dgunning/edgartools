@@ -36,7 +36,12 @@ def test_form144_with_no_xml():
 def test_form144_with_multiple_securities_to_be_sold():
     filing = Filing(form='144', filing_date='2023-04-18', company='Owens Corning', cik=1370946,
                     accession_no='0001959173-23-000608')
-    form144 = filing.obj()
+    form144:Form144 = filing.obj()
     assert len(form144.securities_to_be_sold) == 8
-
+    assert form144.broker_name == "Fidelity Brokerage Services LLC"
+    assert form144.units_to_be_sold == 3000
+    assert form144.exchange_name == "NYSE"
+    assert form144.approx_sale_date == "04/18/2023"
+    assert form144.security_class == 'Common'
+    assert form144.market_value == 300000.0
     print(form144)
