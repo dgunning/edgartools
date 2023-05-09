@@ -21,7 +21,7 @@ def test_read_fixed_width_index():
     index_text = Path('data/form.20200318.idx').read_text()
     index_data = read_fixed_width_index(index_text, form_specs)
     index_df = index_data.to_pandas()
-    invalid_accession = index_df.query("~accession_number.str.match('[0-9]{10}\\-[0-9]{2}\\-[0-9]{6}')")
+    invalid_accession = index_df.query("~accession_number.str.match(r'[0-9]{10}\\-[0-9]{2}\\-[0-9]{6}')")
     assert len(invalid_accession) == 0
 
 
