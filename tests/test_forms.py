@@ -131,10 +131,10 @@ def test_eightk_with_no_signature_header():
 
 
 def test_find_section():
-    assert find_section("If\D+an\D+emerging\D+growth\D+company,\D+indicate",
+    assert find_section(r"If\D+an\D+emerging\D+growth\D+company,\D+indicate",
                         ['ABC', 'If\nan emerging growth company, indicate if the Exchange Act.\xa0\xa0☐', '|  |\n| --'])
 
-    assert find_section("If\D+an\D+emerging\D+growth\D+company,\D+indicate",
+    assert find_section(r"If\D+an\D+emerging\D+growth\D+company,\D+indicate",
                         ['ABC', '  If an emerging growth company, indicate if the Exchange Act.', '|  |\n| --'])
 
 

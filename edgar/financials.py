@@ -58,7 +58,7 @@ gaap_facts = {'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEq
 
 def format_currency(value: Union[str, float]):
     if isinstance(value, str):
-        if value.isdigit() or re.match("-?\d+\.?\d*", value):
+        if value.isdigit() or re.match(r"-?\d+\.?\d*", value):
             value = float(value)
         else:
             return value
