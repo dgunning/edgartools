@@ -143,7 +143,7 @@ class FilingXbrl:
                .query("value.str.isnumeric()")
                .assign(value=lambda df: df.value.astype(float))
                .groupby('dimensions')
-               .sum()
+               .sum(numeric_only=True)
                .sort_values(['value'], ascending=False)
                .reset_index()
                )
