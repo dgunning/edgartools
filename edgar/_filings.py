@@ -42,6 +42,7 @@ __all__ = [
     'Filing',
     'Filings',
     'get_filings',
+    'get_by_accession_number',
     'get_funds',
     'FilingXbrl',
     'FilingsState',
@@ -483,7 +484,7 @@ class Filings:
         else:
             return range(*self.data_pager._current_range)
 
-    def __rich__(self) -> str:
+    def __rich__(self) -> Panel:
         page = self.data_pager.current().to_pandas()
         page.index = self._page_index()
 
@@ -580,8 +581,25 @@ get_funds = get_fund_filings
 get_restricted_stock_filings = partial(get_filings, form=[144])
 
 # Insider transaction filings
-get_insider_transaction_filings = partial(get_filings, form=[3,4,5])
+get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
+
+def get_by_accession_number(accession_number: str):
+    # Verify the accession number matches 0001564590-18-004771
+    assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
+        "Not a valid accession number e.g. 0000000000-55-999999"
+    # Given an accession number find the year of the filing, which is the 2 digit year inside the dashes
+    year_digits = accession_number.split("-")[1][:2]
+    # Expand the year to the full year
+    year = int("19" + year_digits) if year_digits.startswith("1") else int("20" + year_digits)
+
+    for quarter in range(1, 5):
+        if not (year, quarter) in available_quarters():
+            break
+        filings: Filings = get_filings(int(year), quarter)
+        filing: Filing = filings.get(accession_number)
+        if filing:
+            return filing
 
 class Filing:
     """
@@ -752,7 +770,7 @@ class Filing:
         return (f"Filing(form='{self.form}', filing_date='{self.filing_date}', company='{self.company}', "
                 f"cik={self.cik}, accession_no='{self.accession_no}')")
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         """
         Produce a table version of this filing e.g.
         ┌──────────────────────┬──────┬────────────┬────────────────────┬─────────┐

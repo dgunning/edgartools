@@ -20,6 +20,7 @@ from edgar._companies import (Company,
 from edgar._filings import (Filing,
                             Filings,
                             get_filings,
+                            get_by_accession_number,
                             get_funds,
                             get_fund_filings,
                             FilingHomepage)
@@ -82,7 +83,6 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return FundReport.from_xml(xml)
-
 
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:

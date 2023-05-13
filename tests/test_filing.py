@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from typing import List
 
-from edgar import get_filings, Filings, Filing, get_company
+from edgar import get_filings, get_by_accession_number, Filings, Filing, get_company
 from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
 from rich import print
@@ -628,3 +628,15 @@ def test_search_for_text_with_regex():
     results = filing.search(r"Item\s5.02", regex=True)
     assert len(results) > 0
     print(results)
+
+
+def test_find_filing():
+    filing = get_by_accession_number("0000072333-23-000015")
+    assert filing.company == "NORDSTROM INC"
+    assert filing.cik == 72333
+    assert filing.form == "8-K"
+    assert filing.filing_date == datetime.date(2023, 3, 6)
+    assert filing.accession_no == "0000072333-23-000015"
+
+    assert get_by_accession_number("9990072333-45-000015") is None
+    assert get_by_accession_number("9990072333-22-000015") is None
