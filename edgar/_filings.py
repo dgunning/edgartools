@@ -42,7 +42,6 @@ __all__ = [
     'Filing',
     'Filings',
     'get_filings',
-    'get_by_accession_number',
     'get_funds',
     'FilingXbrl',
     'FilingsState',
@@ -583,23 +582,6 @@ get_restricted_stock_filings = partial(get_filings, form=[144])
 # Insider transaction filings
 get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
-
-def get_by_accession_number(accession_number: str):
-    # Verify the accession number matches 0001564590-18-004771
-    assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
-        "Not a valid accession number e.g. 0000000000-55-999999"
-    # Given an accession number find the year of the filing, which is the 2 digit year inside the dashes
-    year_digits = accession_number.split("-")[1][:2]
-    # Expand the year to the full year
-    year = int("19" + year_digits) if year_digits.startswith("1") else int("20" + year_digits)
-
-    for quarter in range(1, 5):
-        if not (year, quarter) in available_quarters():
-            break
-        filings: Filings = get_filings(int(year), quarter)
-        filing: Filing = filings.get(accession_number)
-        if filing:
-            return filing
 
 class Filing:
     """

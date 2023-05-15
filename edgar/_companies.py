@@ -31,6 +31,7 @@ __all__ = [
     'find_company',
     'CompanyFilings',
     'CompanyConcept',
+    'get_by_accession_number',
     'CompanySearchResults',
     'CompanySearchIndex',
     'get_company_facts',
@@ -815,6 +816,19 @@ def find_company(company: str):
     company_index = CompanySearchIndex(data=companies[['cik', 'company']])
     results = company_index.similar(company)
     return CompanySearchResults(data=results.reset_index(), query=company)
+
+
+def get_company_for_accession_number(accession_number: str):
+    # Verify the accession number matches 0001564590-18-004771
+    assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), "Not a valid accession number e.g. 0000000000-55-999999"
+    return Company(int(accession_number.split("-")[0]))
+
+def get_by_accession_number(accession_number: str):
+    company = get_company_for_accession_number(accession_number)
+    if company:
+        company_filings = company.get_filings(accession_number=accession_number)
+        if not company_filings.empty:
+            return company_filings[0]
 
 
 class CompanySearchIndex(SimilaritySearchIndex):

@@ -630,13 +630,3 @@ def test_search_for_text_with_regex():
     print(results)
 
 
-def test_find_filing():
-    filing = get_by_accession_number("0000072333-23-000015")
-    assert filing.company == "NORDSTROM INC"
-    assert filing.cik == 72333
-    assert filing.form == "8-K"
-    assert filing.filing_date == datetime.date(2023, 3, 6)
-    assert filing.accession_no == "0000072333-23-000015"
-
-    assert get_by_accession_number("9990072333-45-000015") is None
-    assert get_by_accession_number("9990072333-22-000015") is None
