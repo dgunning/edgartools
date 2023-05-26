@@ -265,7 +265,7 @@ class MunicipalAdvisorForm:
                  previous_accession_no: str,
                  contact: Contact,
                  applicant: Applicant,
-                 internet_notification_addresses: list[str],
+                 internet_notification_addresses: List[str],
                  municipal_advisor_offices: List[MunicipalAdvisorOffice],
                  employment_history: EmploymentHistory,
                  disclosures: Disclosures,
