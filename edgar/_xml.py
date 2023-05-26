@@ -6,7 +6,7 @@ from bs4 import Tag, BeautifulSoup
 __all__ = [
     'child_text',
     'child_value',
-    'child_values',
+    'child_texts',
     'find_element',
     'get_footnote_ids',
     'optional_decimal',
@@ -104,8 +104,8 @@ def child_value(parent: Tag,
         return value_with_footnotes(el)
     return default_value
 
-def child_values(parent:Tag,
-                 child:str) -> List[str]:
+def child_texts(parent:Tag,
+                child:str) -> List[str]:
     """
     Get the text of the value tag within the child tag if it exists or None
 

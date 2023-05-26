@@ -12,7 +12,7 @@ from rich.text import Text
 from edgar._party import Address
 from edgar._party import Filer, Contact
 from edgar._rich import repr_rich
-from edgar._xml import child_text, child_values
+from edgar._xml import child_text, child_texts
 from edgar._companies import Company
 
 __all__ = ['Form144',
@@ -357,7 +357,7 @@ class Form144:
         form144['person_selling'] = child_text(issuer_el, 'nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold')
 
         relationship_el = issuer_el.find('relationshipsToIssuer')
-        form144['relationships'] = child_values(relationship_el, 'relationshipToIssuer')
+        form144['relationships'] = child_texts(relationship_el, 'relationshipToIssuer')
 
         issuer_address_el = issuer_el.find("issuerAddress")
         address: Address = Address(

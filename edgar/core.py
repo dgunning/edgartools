@@ -326,7 +326,7 @@ def get_bool(value: str = None) -> bool:
     """Convert the value to a boolean"""
     if value is None:
         return None
-    if value == '1' or value == 1:
+    if value == '1' or value == 1 or value == "Y":
         return True
     return False
 

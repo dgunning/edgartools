@@ -37,6 +37,7 @@ from edgar.offerings import Offering
 from edgar.ownership import Ownership
 from edgar.forms import EightK, TenK, TenQ
 from edgar.form144 import Form144
+from edgar.muniadvisors import MunicipalAdvisorForm
 from edgar.fundreports import ThirteenF, THIRTEENF_FORMS
 
 
@@ -67,6 +68,8 @@ def obj(sec_filing: Filing) -> Optional[object]:
         return ThirteenF(sec_filing)
     elif matches_form(sec_filing, "144"):
         return Form144.from_filing(sec_filing)
+    elif matches_form(sec_filing, "MA-I"):
+        return MunicipalAdvisorForm.from_filing(sec_filing)
     elif matches_form(sec_filing, ["3", "4", "5"]):
         xml = sec_filing.xml()
         if xml:

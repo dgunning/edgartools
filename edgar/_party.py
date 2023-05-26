@@ -12,6 +12,7 @@ __all__ = [
     'Address',
     'Issuer',
     'Person',
+    'Name',
     'Filer',
 ]
 
@@ -19,7 +20,7 @@ __all__ = [
 class Address:
 
     def __init__(self,
-                 street1: str,
+                 street1: Optional[str] = None,
                  street2: Optional[str] = None,
                  city: Optional[str] = None,
                  state_or_country: Optional[str] = None,
@@ -154,6 +155,24 @@ class Person:
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         yield f"{self.first_name} {self.last_name}"
+
+
+class Name:
+
+    def __init__(self,
+                 first_name: str,
+                 middle_name: str,
+                 last_name: str):
+        self.first_name = first_name
+        self.middle_name = middle_name
+        self.last_name = last_name
+
+    def __str__(self):
+        return f"{self.first_name} {self.middle_name or ''} {self.last_name}"
+
+    def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
+        yield str(self)
+
 
 class Filer:
 
