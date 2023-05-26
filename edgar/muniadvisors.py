@@ -224,7 +224,7 @@ class EmploymentHistory:
 class Applicant:
 
     def __init__(self, name: Name,
-                 other_names: list[Name],
+                 other_names: List[Name],
                  crd: str,
                  number_of_advisory_firms: int):
         self.name: Name = name
@@ -597,13 +597,13 @@ class MunicipalAdvisorForm:
             Panel(
                 Group(
                     Text(f"Name: {self.contact.name.ljust(35)}Phone: {self.contact.phone}"),
-                ), title=f"Submission Contact Information",
+                ), title="Submission Contact Information",
             ),
             Panel(
                 Group(
                     *[Text(f"Email Address: {address}", address)
                       for address in self.internet_notification_addresses]
-                ), title=f"Notification Information",
+                ), title="Notification Information",
             ),
             Panel(
                 Group(
@@ -614,10 +614,10 @@ class MunicipalAdvisorForm:
                          f"{self.applicant.name.last_name.ljust(20)}")
                     ),
 
-                ), title=f"The Individual",
+                ), title="The Individual",
             ),
             Panel(
-                Group(*other_names_group), title=f"Other Names",
+                Group(*other_names_group), title="Other Names",
             ),
             Panel(
                 Group(
@@ -627,7 +627,7 @@ class MunicipalAdvisorForm:
                     text("Employment start date:", self.municipal_advisor_offices[0].recent_employment_commenced_date),
                     text("Has independent relationship:",
                          "Yes" if self.municipal_advisor_offices[0].is_independent_relationship else "No")
-                ), title=f"Municipal Advisory Firms Where The Individual is Employed",
+                ), title="Municipal Advisory Firms Where The Individual is Employed",
             ),
             Panel(
                 Group(
@@ -663,7 +663,7 @@ class MunicipalAdvisorForm:
                     yes_no("Caused an organization to be charged with misdemeanor",
                            self.disclosures.criminal_disclosure.is_charged_with_misdemeanor),
 
-                ), title=f"Criminal Action Disclosure",
+                ), title="Criminal Action Disclosure",
             ),
             Panel(
                 Group(
@@ -743,7 +743,7 @@ class MunicipalAdvisorForm:
                     yes_no("Found the individual to have failed to supervise another individual",
                            self.disclosures.regulatory_disclosure.is_failed_to_supervise),
 
-                ), title=f"Regulatory Disclosure",
+                ), title="Regulatory Disclosure",
             ),
             Panel(
                 Group(
@@ -760,7 +760,7 @@ class MunicipalAdvisorForm:
                     # <isFinalOrder>N</isFinalOrder>
                     yes_no("Entered a final order against the individual",
                            self.disclosures.regulatory_disclosure.is_final_order),
-                ), title=f"Regulatory Disclosure",
+                ), title="Regulatory Disclosure",
             ),
             Panel(
                 yes_no("Is the individual currently being investigated:",
@@ -786,8 +786,8 @@ class MunicipalAdvisorForm:
                     Text("Has the individual ever been the subject of a muni-advisor related complaint which:\n"),
                     yes_no("Is still pending", self.disclosures.complaint_disclosure.is_complaint_pending),
                     yes_no("Is settled", self.disclosures.complaint_disclosure.is_complaint_settled),
-                    Text(
-                        "\nHas the individual ever been the subject of a muni-advisor related fraud proceeding which\n"),
+                    Text("\n"
+                        "Has the individual ever been the subject of a muni-advisor related fraud proceeding which\n"),
                     yes_no("Is still pending", self.disclosures.complaint_disclosure.is_fraud_case_pending),
                     yes_no("Resulted in an award", self.disclosures.complaint_disclosure.is_fraud_case_resulting_award),
                     yes_no("Is settled", self.disclosures.complaint_disclosure.is_fraud_case_settled),
