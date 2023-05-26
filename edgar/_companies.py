@@ -818,6 +818,7 @@ def find_company(company: str):
     return CompanySearchResults(data=results.reset_index(), query=company)
 
 
+@lru_cache(maxsize=64)
 def get_company_for_accession_number(accession_number: str):
     # Verify the accession number matches 0001564590-18-004771
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), "Not a valid accession number e.g. 0000000000-55-999999"
