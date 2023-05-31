@@ -49,6 +49,7 @@ __all__ = [
     'FilingHomepage',
     'get_fund_filings',
     'available_quarters',
+    'get_filing_by_accession_number',
     'get_restricted_stock_filings',
     'get_insider_transaction_filings'
 ]
@@ -1016,3 +1017,11 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
             .assign(Size=data.Size.apply(display_size))
             .set_index("Seq")
             )
+
+def get_filing_by_accession_number(accession_number:str):
+    assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), "Not a valid accession number e.g. 0000000000-55-999999"
+    year = int("19" + accession_number[11:13]) if accession_number[11] == 9 else int("20" + accession_number[11:13])
+    for quarter in range(1,5):
+        filing = get_filings(year, quarter).get(accession_number)
+        if filing:
+            return filing

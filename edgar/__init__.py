@@ -15,12 +15,12 @@ from edgar._companies import (Company,
                               get_company,
                               get_company_facts,
                               get_company_tickers,
-                              get_by_accession_number,
                               get_company_submissions,
                               get_ticker_to_cik_lookup)
 from edgar._filings import (Filing,
                             Filings,
                             get_filings,
+                            get_filing_by_accession_number,
                             get_funds,
                             get_fund_filings,
                             FilingHomepage)
