@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from typing import List
 
-from edgar import get_filings, Filings, Filing, get_company
+from edgar import get_filings, Filings, Filing, get_company, get_filing_by_accession_number
 from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
 from rich import print
@@ -632,13 +632,13 @@ def test_search_for_text_with_regex():
 
 
 def test_get_by_acession_number():
-    filing = get_by_accession_number("0000072333-23-000015")
+    filing = get_filing_by_accession_number("0000072333-23-000015")
     assert filing.company == "NORDSTROM INC"
     assert filing.cik == 72333
     assert filing.form == "8-K"
     assert filing.filing_date == datetime.date(2023, 3, 6)
     assert filing.accession_no == "0000072333-23-000015"
 
-    assert get_by_accession_number("9990072333-45-000015") is None
-    assert get_by_accession_number("9990072333-22-000015") is None
+    assert get_filing_by_accession_number("9990072333-45-000015") is None
+    assert get_filing_by_accession_number("9990072333-22-000015") is None
 

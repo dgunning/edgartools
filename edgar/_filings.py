@@ -1022,6 +1022,8 @@ def get_filing_by_accession_number(accession_number:str):
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), "Not a valid accession number e.g. 0000000000-55-999999"
     year = int("19" + accession_number[11:13]) if accession_number[11] == 9 else int("20" + accession_number[11:13])
     for quarter in range(1,5):
-        filing = get_filings(year, quarter).get(accession_number)
-        if filing:
-            return filing
+        filings = get_filings(year=year, quarter=quarter)
+        if filings:
+            filing = filings.get(accession_number)
+            if filing:
+                return filing
