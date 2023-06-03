@@ -51,7 +51,7 @@ You can query, filter and select any filing since 1994 and view the filing's htm
 ```python
 from edgar import *
 
-# Get form D filings for the last quarter of 2022 
+# Get 10-K filings for the second quarter of 2023 
 ten_k_filings = get_filings(2023, 2, form="10-K")
 
 # Get the latest 20 filings from the list 
