@@ -334,7 +334,29 @@ You can get the html content as markdown using`.markdown()`
 filing.markdown()
 ```
 
-### Working with XBRL filings
+## Viewing and downloading attachments
+
+Every filing has a list of attachments. You can view the attachments using `filing.attachments`
+
+```python
+# View the attachments
+filing.attachments
+```
+![Filing attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_attachments.png)
+
+You can access each attachment using the bracket operator `[]` and the index of the attachment.
+    
+```python
+# Get the first attachment
+attachment = filing.attachments[0]
+```
+
+![Filing attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_attachment.png)
+
+You can download the attachment using `attachment.download()`. This will download the attachment to string or bytes in memory. 
+
+
+## Working with XBRL filings
 
 Some filings are in **XBRL (eXtensible Business Markup Language)** format. 
 These are mainly the newer filings, as the SEC has started requiring this for newer filings.
