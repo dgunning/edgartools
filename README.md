@@ -61,7 +61,7 @@ latest_ten_k_filings = filings.latest(20)
 latest_ten_k_filings[0].open()
 ```
 
-![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/10K_filings.jpg)
+![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_10K_filings.png)
 
 
 ## Features
