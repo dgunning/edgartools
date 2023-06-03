@@ -355,6 +355,40 @@ attachment = filing.attachments[0]
 
 You can download the attachment using `attachment.download()`. This will download the attachment to string or bytes in memory. 
 
+## Automatic parsing of filing data
+
+Now the reason you may want to download attachments is to get information contained in data files.
+For example, **13F-HR** filings have attached infotable.xml files containing data from the holding report for that filing.
+
+Fortunately, the library handles this for you. If you call `filing.obj()` it will automatically download and parse the data files
+into a data object, for several different form types. Currently, the following forms are supported:
+
+| Form                       | Data Object            | Description                           |
+|----------------------------|------------------------|---------------------------------------|
+| 10-K                       | `TenK`                 | Annual report                         |
+| 10-Q                       | `TenQ`                 | Quarterly report                      |
+| 8-K                        | `EightK`               | Current report                        |
+| MA-I                       | `MunicipalAdvisorForm` | Municipal advisor initial filing      |
+| Form 144                   | `Form144`              | Notice of proposed sale of securities |
+| D                          | `Offering`             | Offerings                             |
+| 3,4,5                      | `Ownership`            | Ownership reports                     |
+| 13F-HR                     | `ThirteenF`             | 13F Holdings Report                   |
+| NPORT-P                    | `FundReport`           | Fund Report                           |
+| EFFECT                     | `Effect`               | Notice of Effectiveness               |
+| And other filing with XBRL | `FilingXbrl`            ||
+
+For example, to get the data object for a **13F-HR** filing you can do the following:
+
+```python
+filings = get_filings(form="13F-HR")
+filing = filings[0]
+thirteenf = filing.obj()
+```
+
+![Filing attachments](images/thirteenF.png)
+
+If you call `obj()` on a filing that does not have a data file, then it will return `None`.
+
 
 ## Working with XBRL filings
 
