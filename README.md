@@ -46,21 +46,22 @@ You can query, filter and select any filing since 1994 and view the filing's htm
 
 ## Demo
 
-#### Get the latest 10 form D filings and view the first in the browser
+#### Show 20 10-K filings for the 2nd quarter of 2023 and open the first in the browser
 
 ```python
 from edgar import *
 
 # Get form D filings for the last quarter of 2022 
-filings = get_filings(2022, 4, form="D")
+ten_k_filings = get_filings(2023, 2, form="10-K")
 
-# Get the latest 10 filings from the list 
-latest_10_filings = filings.latest(10)
+# Get the latest 20 filings from the list 
+latest_ten_k_filings = filings.latest(20)
 
-# Of the 10 latest filings open the 1st in the browser
-latest_10_filings[0].open()
+# Open the 1st filing in the browser
+latest_ten_k_filings[0].open()
 ```
-![10 D Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/10_D_filings.jpg)
+
+![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/10K_filings.jpg)
 
 
 ## Features
