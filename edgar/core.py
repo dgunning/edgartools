@@ -55,6 +55,7 @@ __all__ = [
     'download_file',
     'decode_content',
     'filter_by_date',
+    'text_extensions',
     'ask_for_identity',
     'default_page_size',
     'InvalidDateException'
@@ -275,6 +276,7 @@ def decode_content(content: bytes):
     except UnicodeDecodeError:
         return content.decode('latin-1')
 
+text_extensions = [".txt", ".htm", ".html", ".xsd", ".xml", ".json", ".idx"]
 
 def download_file(url: str,
                   client: Union[httpx.Client, httpx.AsyncClient] = None,
@@ -282,6 +284,10 @@ def download_file(url: str,
     # reason_phrase = 'Too Many Requests' status_code = 429
     if not client:
         client = http_client()
+
+    if not as_text:
+        # Set the default to true if the url ends with a text extension
+        as_text = any([url.endswith(ext) for ext in text_extensions])
         
     r = retry_call(client.get, fargs=[url], tries=5, delay=3)
     # If we get a 301 or 302, follow the redirect
@@ -297,7 +303,7 @@ def download_file(url: str,
                 return file_content
         else:
             # If we explicitely asked for text or there is an encoding, try to return text
-            if as_text or r.encoding:
+            if as_text:
                 return r.text
             # Should get here for jpg and PDFs
             return r.content

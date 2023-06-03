@@ -17,6 +17,7 @@ import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
+from fastcore.parallel import parallel
 from rich.console import Group, Console
 from rich.panel import Panel
 from rich.text import Text
@@ -25,7 +26,7 @@ from edgar._markdown import MarkdownContent
 from edgar._markdown import html_to_markdown
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
-from edgar.core import (http_client, download_text, download_file, log, display_size,
+from edgar.core import (http_client, download_text, download_file, log, display_size, text_extensions,
                         filter_by_date, sec_dot_gov, sec_edgar, InvalidDateException, IntString, DataPager)
 from edgar.fundreports import FUND_FORMS
 from edgar.search import BM25Search, RegexSearch
@@ -45,7 +46,8 @@ __all__ = [
     'get_funds',
     'FilingXbrl',
     'FilingsState',
-    'FilingDocument',
+    'Attachment',
+    'Attachments',
     'FilingHomepage',
     'get_fund_filings',
     'available_quarters',
@@ -616,19 +618,24 @@ class Filing:
         """
         return self.homepage.primary_documents
 
+    @property
+    def attachments(self):
+        # Return all the attachments on the filing
+        return self.homepage.attachments
+
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
         return self.document.download(text=True)
 
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
-        xml_document: FilingDocument = self.homepage.primary_xml_document
+        xml_document: Attachment = self.homepage.primary_xml_document
         if xml_document:
             return xml_document.download(text=True)
 
     def text(self) -> str:
         """Return the complete text submission file"""
-        text_document: FilingDocument = self.homepage.text_document
+        text_document: Attachment = self.homepage.text_document
         return text_document.download(text=True)
 
     def markdown(self) -> str:
@@ -778,8 +785,31 @@ class Filing:
         return repr_rich(self.__rich__())
 
 
+class Attachments:
+
+    def __init__(self, files: pd.DataFrame):
+        self.files = files
+        # Replace \xa0 with '-' in the Seq
+        self.files['Seq'] = self.files['Seq'].str.replace('\xa0', '-')
+
+    def __getitem__(self, item):
+        if 0 <= item < len(self.files):
+            return Attachment.from_dataframe_row(self.files.iloc[item])
+
+    def __len__(self):
+        return len(self.files)
+
+    def __rich__(self):
+        return df_to_rich_table(self.files
+                                .assign(Size = lambda df: df.Size.apply(display_size))
+                                .filter(['Description', 'Document', 'Type', 'Size']), max_rows=100)
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
 @dataclass(frozen=True)
-class FilingDocument:
+class Attachment:
     """
     A document on the filing
 
@@ -838,9 +868,13 @@ class FilingDocument:
                    size=size,
                    path=dataframe_row.Url)
 
+    def is_text(self):
+        """Is this a text document"""
+        return self.extension in text_extensions
+
     def download(self,
                  text: bool = None):
-        return download_file(self.url, as_text=text)
+        return download_file(self.url, as_text=self.is_text())
 
     def summary(self) -> pd.DataFrame:
         """Return a summary of this filing as a dataframe"""
@@ -849,7 +883,7 @@ class FilingDocument:
                               'document': self.document,
                               'description': self.description}]).set_index("seq")
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         return df_to_rich_table(self.summary(), index_name="seq")
 
     def __repr__(self):
@@ -869,17 +903,17 @@ class FilingHomepage:
                  files: pd.DataFrame,
                  url: str,
                  filing: Filing):
-        self.files: pd.DataFrame = files
+        self._files: pd.DataFrame = files
         self.url: str = url
         self.filing: Filing = filing
 
     def get_file(self,
                  *,
-                 seq: int) -> FilingDocument:
+                 seq: int) -> Attachment:
         """ get the filing document that matches the seq"""
-        res = self.files.query(f"Seq=='{seq}'")
+        res = self._files.query(f"Seq=='{seq}'")
         if not res.empty:
-            return FilingDocument.from_dataframe_row(res.iloc[0])
+            return Attachment.from_dataframe_row(res.iloc[0])
 
     def open(self):
         webbrowser.open(self.url)
@@ -890,7 +924,7 @@ class FilingHomepage:
 
     @property
     @lru_cache(maxsize=2)
-    def primary_documents(self) -> List[FilingDocument]:
+    def primary_documents(self) -> List[Attachment]:
         """
         Get the documents listed as primary for the filing
         :return:
@@ -898,25 +932,25 @@ class FilingHomepage:
         min_seq = self.min_seq()
         doc_results = self.documents.query(f"Seq=='{min_seq}'")
         return [
-            FilingDocument.from_dataframe_row(self.documents.iloc[index])
+            Attachment.from_dataframe_row(self.documents.iloc[index])
             for index in doc_results.index
         ]
 
     @property
-    def primary_xml_document(self) -> Optional[FilingDocument]:
+    def primary_xml_document(self) -> Optional[Attachment]:
         """Get the primary xml document on the filing"""
         for doc in self.primary_documents:
             if doc.display_extension == ".xml":
                 return doc
 
     @property
-    def text_document(self) -> FilingDocument:
+    def text_document(self) -> Attachment:
         "Get the full text submission file"
-        res = self.files[self.files.Description == "Complete submission text file"]
-        return FilingDocument.from_dataframe_row(res.iloc[0])
+        res = self._files[self._files.Description == "Complete submission text file"]
+        return Attachment.from_dataframe_row(res.iloc[0])
 
     @property
-    def primary_html_document(self) -> Optional[FilingDocument]:
+    def primary_html_document(self) -> Optional[Attachment]:
         """Get the primary xml document on the filing"""
         for doc in self.primary_documents:
             if doc.display_extension == ".html" or doc.display_extension == '.htm':
@@ -929,15 +963,15 @@ class FilingHomepage:
         """Find and return the xbrl document."""
 
         # Change from .query syntax due to differences in how pandas executes queries on online environmments
-        matching_files = self.files[self.files.Description.isin(xbrl_document_types)]
+        matching_files = self._files[self._files.Description.isin(xbrl_document_types)]
         if not matching_files.empty:
             rec = matching_files.iloc[0]
-            return FilingDocument.from_dataframe_row(rec)
+            return Attachment.from_dataframe_row(rec)
 
     def get_matching_files(self,
                            query: str) -> pd.DataFrame:
         """ return the files that match the query"""
-        return self.files.query(query, engine="python").reset_index(drop=True).filter(filing_file_cols)
+        return self._files.query(query, engine="python").reset_index(drop=True).filter(filing_file_cols)
 
     @property
     def documents(self) -> pd.DataFrame:
@@ -948,6 +982,11 @@ class FilingHomepage:
     def datafiles(self):
         """ returns the files that are in the "Data Files" table of the homepage"""
         return self.get_matching_files("table=='Data Files'")
+
+    @property
+    @lru_cache(maxsize=2)
+    def attachments(self) -> Attachments:
+        return Attachments(self._files)
 
     @classmethod
     def from_html(cls,
@@ -1018,10 +1057,11 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
             .set_index("Seq")
             )
 
-def get_filing_by_accession_number(accession_number:str):
+
+def get_filing_by_accession_number(accession_number: str):
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), "Not a valid accession number e.g. 0000000000-55-999999"
     year = int("19" + accession_number[11:13]) if accession_number[11] == 9 else int("20" + accession_number[11:13])
-    for quarter in range(1,5):
+    for quarter in range(1, 5):
         filings = get_filings(year=year, quarter=quarter)
         if filings:
             filing = filings.get(accession_number)

@@ -3,7 +3,6 @@ import datetime
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
-import importlib
 from datetime import datetime
 import edgar
 from edgar._rich import *

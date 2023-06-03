@@ -11,7 +11,8 @@ from typing import List
 
 from edgar import get_filings, Filings, Filing, get_company, get_filing_by_accession_number
 from edgar.core import default_page_size
-from edgar._filings import FilingHomepage, FilingDocument, read_fixed_width_index, form_specs, company_specs
+from edgar._filings import FilingHomepage, Attachment, read_fixed_width_index, form_specs, company_specs, Attachments, \
+    Attachment
 from rich import print
 
 pd.options.display.max_colwidth = 200
@@ -275,7 +276,7 @@ def test_company_specs():
 def test_filing_primary_document():
     filing = Filing(form='DEF 14A', company='180 DEGREE CAPITAL CORP. /NY/', cik=893739, filing_date='2020-03-25',
                     accession_no='0000893739-20-000019')
-    primary_document: FilingDocument = filing.document
+    primary_document: Attachment = filing.document
     assert primary_document
     assert primary_document.url == \
            'https://www.sec.gov/Archives/edgar/data/893739/000089373920000019/annualmeetingproxy2020-doc.htm'
@@ -288,7 +289,7 @@ barclays_filing = Filing(form='ATS-N/MA', company='BARCLAYS CAPITAL INC.', cik=8
 
 
 def test_filing_primary_document_seq_5():
-    primary_document: FilingDocument = barclays_filing.document
+    primary_document: Attachment = barclays_filing.document
     assert primary_document
     assert primary_document.url == \
            'https://www.sec.gov/Archives/edgar/data/851376/000085137620000003/xslATSN_COVER_X01/coverpage.xml'
@@ -375,7 +376,7 @@ def test_filing_homepage_primary_documents():
                     cik=1609804, filing_date='2022-11-04',
                     accession_no='0000950142-22-003095')
     print()
-    primary_documents: List[FilingDocument] = filing.homepage.primary_documents
+    primary_documents: List[Attachment] = filing.homepage.primary_documents
     assert len(primary_documents) == 2
 
     primary_html = primary_documents[0]
@@ -588,8 +589,8 @@ def test_find_company():
     print(company_search_filings)
     companies = company_search_filings.data['company'].to_pylist()
     # Temporarily disabled until we can fix the search results ordering
-    #assert 'Tailwind International Acquisition Corp.' in companies
-    #print(filings.find('SCHWEITZER'))
+    # assert 'Tailwind International Acquisition Corp.' in companies
+    # print(filings.find('SCHWEITZER'))
 
 
 def test_filing_sections():
@@ -642,3 +643,47 @@ def test_get_by_acession_number():
     assert get_filing_by_accession_number("9990072333-45-000015") is None
     assert get_filing_by_accession_number("9990072333-22-000015") is None
 
+
+def test_attachments():
+    filing = Filing(company="BLACKROCK INC", cik=1364742, form="8-K",
+                    filing_date="2023-02-24", accession_no="0001193125-23-048785")
+    attachments = Attachments(filing.homepage._files)
+    assert len(attachments) == len(filing.homepage._files)
+
+    print(attachments)
+    attachment = attachments[2]
+    assert attachment
+    assert attachment.name == 'blk25-20230224.xsd'
+    assert attachment.url == 'https://www.sec.gov/Archives/edgar/data/1364742/000119312523048785/blk25-20230224.xsd'
+
+    text = attachment.download()
+    assert text
+    assert "<?xml version=" in text
+
+    # Test the filing homepage attachments
+    assert filing.homepage.attachments
+    assert len(filing.homepage.attachments) == 7
+
+    # Test the filing attachments
+    assert filing.attachments
+    assert len(filing.attachments) == 7
+    assert filing.attachments[4].description == "XBRL TAXONOMY EXTENSION LABEL LINKBASE"
+
+
+def test_download_filing_attachment():
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    attachments = filing.attachments
+    print(attachments)
+
+    # Get a text/htm attachment
+    attachment = attachments[0]
+    assert attachment.name == "cyber_10k.htm"
+    text = attachment.download()
+    assert isinstance(text, str)
+
+    # Get a jpg attachment
+    attachment = attachments[3]
+    assert attachment.name == "cyber_10kimg1.jpg"
+    b = attachment.download()
+    assert isinstance(b, bytes)

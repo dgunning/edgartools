@@ -647,20 +647,20 @@ class ThirteenF:
     @property
     @lru_cache(maxsize=1)
     def infotable_xml(self):
-        from edgar._filings import FilingDocument
+        from edgar._filings import Attachment
         if self.has_infotable():
             matching_files = self.filing.homepage.get_matching_files(
                 "Type=='INFORMATION TABLE' & Document.str.endswith('xml')")
-            return FilingDocument.from_dataframe_row(matching_files.iloc[0]).download()
+            return Attachment.from_dataframe_row(matching_files.iloc[0]).download()
 
     @property
     @lru_cache(maxsize=1)
     def infotable_html(self):
-        from edgar._filings import FilingDocument
+        from edgar._filings import Attachment
         if self.has_infotable():
             matching_files = self.filing.homepage.get_matching_files(
                 "Type=='INFORMATION TABLE' & Document.str.endswith('html')")
-            return FilingDocument.from_dataframe_row(matching_files.iloc[0]).download()
+            return Attachment.from_dataframe_row(matching_files.iloc[0]).download()
 
     @property
     @lru_cache(maxsize=1)

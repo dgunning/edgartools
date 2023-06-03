@@ -19,6 +19,8 @@ from edgar._companies import (Company,
                               get_ticker_to_cik_lookup)
 from edgar._filings import (Filing,
                             Filings,
+                            Attachment,
+                            Attachments,
                             get_filings,
                             get_filing_by_accession_number,
                             get_funds,
