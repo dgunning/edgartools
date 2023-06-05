@@ -149,15 +149,15 @@ class CompanyReport:
 
     @property
     def income_statement(self):
-        return self.financials.income_statement
+        return self.financials.income_statement if self.financials else None
 
     @property
     def balance_sheet(self):
-        return self.financials.balance_sheet
+        return self.financials.balance_sheet if self.financials else None
 
     @property
     def cash_flow_statement(self):
-        return self.financials.cash_flow_statement
+        return self.financials.cash_flow_statement if self.financials else None
 
     @property
     @lru_cache(1)
@@ -170,7 +170,7 @@ class CompanyReport:
         return Panel(
             Group(
             self._filing.__rich__(),
-            self.financials
+            self.financials or Text("No financial data available")
             )
         )
 

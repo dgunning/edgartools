@@ -13,6 +13,7 @@ from edgar import get_filings, Filings, Filing, get_company, get_filing_by_acces
 from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, Attachment, read_fixed_width_index, form_specs, company_specs, Attachments, \
     Attachment
+from edgar.forms import TenK
 from rich import print
 
 pd.options.display.max_colwidth = 200
@@ -692,3 +693,14 @@ def test_download_filing_attachment():
 def test_as_company_filing():
     company_filing = carbo_10K.as_company_filing()
     assert company_filing.cik == carbo_10K.cik
+
+
+def test_10K_filing_with_no_financial_data():
+    filing = Filing(form='10-K', filing_date='2023-05-26', company='CarMax Auto Owner Trust 2019-3', cik=1779026,
+                    accession_no='0001779026-23-000027')
+    tenk:TenK = filing.obj()
+    assert not tenk.financials
+    assert not tenk.balance_sheet
+    assert not tenk.income_statement
+    assert not tenk.cash_flow_statement
+    print(tenk)
