@@ -17,7 +17,6 @@ import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
-from fastcore.parallel import parallel
 from rich.console import Group, Console
 from rich.panel import Panel
 from rich.text import Text
@@ -715,11 +714,22 @@ class Filing:
                                                              filing=self)
         return self._filing_homepage
 
+    @lru_cache(maxsize=1)
     def get_entity(self):
         """Get the company to which this filing belongs"""
+        "Get the company for cik. Cache for performance"
         from edgar._companies import CompanyData
         return CompanyData.for_cik(self.cik)
 
+    @lru_cache(maxsize=1)
+    def as_company_filing(self):
+        """Get this filing as a company filing. Company Filings have more information"""
+        company = self.get_entity()
+        filings = company.get_filings(accession_number=self.accession_no)
+        if not filings.empty:
+            return filings[0]
+
+    @lru_cache(maxsize=1)
     def related_filings(self):
         """Get all the filings related to this one
         There is no file number on this base Filing class so first get the company,
@@ -764,7 +774,7 @@ class Filing:
         """
         Produce a table version of this filing e.g.
         ┌──────────────────────┬──────┬────────────┬────────────────────┬─────────┐
-        │                      │ form │ filing_date      │ company            │ cik     │
+        │                      │ form │ filing_date│ company            │ cik     │
         ├──────────────────────┼──────┼────────────┼────────────────────┼─────────┤
         │ 0001564590-18-004771 │ 10-K │ 2018-03-08 │ CARBO CERAMICS INC │ 1009672 │
         └──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
@@ -801,7 +811,7 @@ class Attachments:
 
     def __rich__(self):
         return df_to_rich_table(self.files
-                                .assign(Size = lambda df: df.Size.apply(display_size))
+                                .assign(Size=lambda df: df.Size.apply(display_size))
                                 .filter(['Description', 'Document', 'Type', 'Size']), max_rows=100)
 
     def __repr__(self):

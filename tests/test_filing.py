@@ -687,3 +687,8 @@ def test_download_filing_attachment():
     assert attachment.name == "cyber_10kimg1.jpg"
     b = attachment.download()
     assert isinstance(b, bytes)
+
+
+def test_as_company_filing():
+    company_filing = carbo_10K.as_company_filing()
+    assert company_filing.cik == carbo_10K.cik
