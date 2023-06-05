@@ -8,12 +8,13 @@ import pandas as pd
 from bs4 import Tag
 from rich import box
 from rich.console import Group, Text
-from rich.table import Table
+from rich.table import Table, Column
 
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar.core import moneyfmt
 from rich.panel import Panel
 from edgar._xml import find_element, child_text, optional_decimal
+from edgar._party import Address
 
 __all__ = [
     "FundReport",
@@ -631,11 +632,38 @@ class FundReport:
 THIRTEENF_FORMS = ['13F-HR', "13F-HR/A", "13F-NT", "13F-NT/A", "13F-CTR", "13F-CTR/A"]
 
 
+@dataclass(frozen=True)
+class FilingManager:
+    name: str
+    address: Address
+
+
+@dataclass(frozen=True)
+class OtherManager:
+    cik: str
+    name: str
+    file_number: str
+
+
+@dataclass(frozen=True)
+class PrimaryDocument13F:
+    filing_manager: FilingManager
+    report_period: datetime
+    report_calendar_or_quarter: str
+    report_type: str
+    other_managers: List[OtherManager]
+    other_included_managers_count: int
+    total_value: float
+    total_holdings: int
+    additional_information: str
+
+
 class ThirteenF:
 
     def __init__(self, filing):
         assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"
         self.filing = filing
+        self.primary_form_information = ThirteenF.parse_primary_document_xml(self.filing.xml())
 
     def has_infotable(self):
         return self.filing.form in ['13F-HR', "13F-HR/A"]
@@ -667,6 +695,81 @@ class ThirteenF:
     def infotable(self):
         if self.has_infotable():
             return ThirteenF.parse_infotable_xml(self.infotable_xml)
+
+    @property
+    def total_value(self):
+        return self.primary_form_information.total_value
+
+    @property
+    def total_holdings(self):
+        return self.primary_form_information.total_holdings
+
+    @property
+    def report_period(self):
+        return self.primary_form_information.report_period
+
+    @property
+    def filing_manager(self):
+        return self.primary_form_information.filing_manager
+
+    @staticmethod
+    def parse_primary_document_xml(primary_document_xml: str):
+        root = find_element(primary_document_xml, "edgarSubmission")
+        # Header data
+        header_data = root.find("headerData")
+        filer_info = header_data.find("filerInfo")
+        report_period = datetime.strptime(child_text(filer_info, "periodOfReport"), "%m-%d-%Y")
+
+        # Form Data
+        form_data = root.find("formData")
+        cover_page = form_data.find("coverPage")
+
+        report_calendar_or_quarter = child_text(form_data, "reportCalendarOrQuarter")
+        report_type = child_text(cover_page, "reportType")
+
+        # Filing Manager
+        filing_manager_el = cover_page.find("filingManager")
+
+        # Address
+        address_el = filing_manager_el.find("address")
+        address = Address(
+            street1=child_text(address_el, "street1"),
+            street2=child_text(address_el, "street2"),
+            city=child_text(address_el, "city"),
+            state_or_country=child_text(address_el, "stateOrCountry"),
+            zipcode=child_text(address_el, "zipCode")
+        )
+        filing_manager = FilingManager(name=child_text(filing_manager_el, "name"), address=address)
+        # Other managers
+        other_manager_info_el = cover_page.find("otherManagersInfo")
+        other_managers = [
+            OtherManager(
+                cik=child_text(other_manager_el, "cik"),
+                name=child_text(other_manager_el, "name"),
+                file_number=child_text(other_manager_el, "form13FFileNumber")
+            )
+            for other_manager_el in other_manager_info_el.find_all("otherManager")
+        ] if other_manager_info_el else []
+
+        # Summary Page
+        summary_page_el = form_data.find("summaryPage")
+        other_included_managers_count = int(child_text(summary_page_el,
+                                                       "otherIncludedManagersCount")) if summary_page_el else None
+        total_holdings = int(child_text(summary_page_el, "tableEntryTotal")) if summary_page_el else None
+        total_value = float(child_text(summary_page_el, "tableValueTotal")) if summary_page_el else None
+
+        parsed_primary_doc = PrimaryDocument13F(filing_manager=filing_manager,
+                                                report_period=report_period,
+                                                report_calendar_or_quarter=report_calendar_or_quarter,
+                                                report_type=report_type,
+                                                other_managers=other_managers,
+                                                other_included_managers_count=other_included_managers_count,
+                                                total_holdings=total_holdings,
+                                                total_value=total_value,
+                                                additional_information=child_text(cover_page, "additionalInformation")
+                                                )
+
+        return parsed_primary_doc
 
     @staticmethod
     def parse_infotable_xml(infotable_xml: str):
@@ -709,15 +812,27 @@ class ThirteenF:
                     )
 
     def __rich__(self):
-        title = f"{self.form} {self.filing.company}"
-        summary = Table("Company", "Form", "Filing Date", box=box.SIMPLE)
-        summary.add_row(self.filing.company, self.filing.form, str(self.filing.filing_date))
+        title = f"{self.form} for {self.filing.company} filed {self.filing.filing_date}"
+        summary = Table(
+                        Column("Period", style="bold deep_sky_blue1"),
+                        "Holdings",
+                        "Value",
+                        "Filing Manager",
+                        box=box.SIMPLE)
+
+        summary.add_row(
+                        datetime.strftime(self.report_period, "%Y-%m-%d"),
+                        str(self.total_holdings or "-"),
+                        f"${self.total_value:,.0f}" if self.total_value else "-",
+                        self.filing_manager.name
+                        )
 
         content = [summary]
 
         # info table
         if self.has_infotable():
-            table = Table("", "Issuer", "Amount", "Value", "SharesPrnType", "VotingSole","VotingShared","VotingNone",
+            table = Table("", "Issuer", "Amount", "Value", "SharesPrnType", "VotingSole", "VotingShared", "VotingNone",
+                          row_styles=["bold", ""],
                           box=box.SIMPLE)
             for index, row in enumerate(self._infotable_summary().itertuples()):
                 table.add_row(str(index),

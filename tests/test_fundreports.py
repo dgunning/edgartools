@@ -134,14 +134,15 @@ def test_parse_infotable():
     assert len(infotable) == 255
 
 
-def test_thirteenf():
-    filing = Filing(form='13F-HR', filing_date='2023-03-23', company='METLIFE INC', cik=1099219,
-                    accession_no='0001140361-23-013281')
+def test_thirteenf_from_filing():
+    filing = Filing(form='13F-HR', filing_date='2023-03-23', company='METLIFE INC', cik=1099219, accession_no='0001140361-23-013281')
     thirteenf = ThirteenF(filing)
     assert thirteenf
     assert thirteenf.filing
     assert thirteenf.has_infotable()
     assert len(thirteenf.infotable) == 6
+
+    #assert thirteenf.infotable.iloc[0].name_of_issuer == "METLIFE INC"
 
     print()
     print(thirteenf)
@@ -151,7 +152,7 @@ def test_thirteenf():
 
     # 13F-NT
     filing = Filing(form='13F-NT', filing_date='2023-03-17', company='Jasopt Investments Bahamas Ltd', cik=1968770,
-                    accession_no='0000950123-23-002952')
+    accession_no='0000950123-23-002952')
     thirteenf = ThirteenF(filing)
     assert not thirteenf.has_infotable()
     assert not thirteenf.infotable_xml
@@ -160,9 +161,13 @@ def test_thirteenf():
 
     print(thirteenf)
 
-    # Should throw an AssertionError
+    # Should throw an AssertionError if you try to parse a 10-K as a 13F
     filing = Filing(form='10-K', filing_date='2023-03-23', company='ADMA BIOLOGICS, INC.', cik=1368514,
                     accession_no='0001140361-23-013467')
     with pytest.raises(AssertionError):
         ThirteenF(filing)
+
+def test_parse_thirteenf_primary_xml():
+    res = ThirteenF.parse_primary_document_xml(Path("data/metlife.13F-HR.primarydoc.xml").read_text())
+    print(res)
 
