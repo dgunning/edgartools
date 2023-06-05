@@ -16,6 +16,10 @@ if __name__ == '__main__':
     filings_2014_4 = get_filings(2014, 4)
     print(filings_2014_4)
 
+    # Next and previous
+    print(filings.next())
+    print(filings.prev())
+
     # Get a company
     ge = Company("GE")
     print(ge)
@@ -36,5 +40,10 @@ if __name__ == '__main__':
     filings = filings.filter(form="8-K")
     eightk = filings[0].obj()
     assert len(eightk.items) > 0
+
+    # ThirteenF objects
+    thirteenF_filings = get_filings(form="13F-HR")
+    thirteenF = thirteenF_filings[10].obj()
+    print(thirteenF)
 
 
