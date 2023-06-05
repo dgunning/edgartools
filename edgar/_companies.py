@@ -518,6 +518,7 @@ def parse_company_submissions(cjson: Dict[str, object]):
                        )
 
 
+@lru_cache(maxsize=64)
 def get_company(company_identifier: IntString) -> CompanyData:
     """
         Get a company by cik or ticker
