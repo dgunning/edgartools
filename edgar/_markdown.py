@@ -13,6 +13,7 @@ __all__ = [
     'convert_table',
     'MarkdownContent',
     'markdown_to_rich',
+    'html_to_markdown',
     "fix_markdown"
 ]
 
