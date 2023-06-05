@@ -146,6 +146,10 @@ def test_thirteenf_from_filing():
 
     print()
     print(thirteenf)
+    assert thirteenf.total_holdings == 6
+    assert thirteenf.total_value == Decimal('11019796')
+
+    assert thirteenf.primary_form_information.signature.name == 'Steven Goulart'
 
     # Call data object
     assert isinstance(filing.obj(), ThirteenF)
@@ -160,6 +164,7 @@ def test_thirteenf_from_filing():
     assert not thirteenf.infotable
 
     print(thirteenf)
+
 
     # Should throw an AssertionError if you try to parse a 10-K as a 13F
     filing = Filing(form='10-K', filing_date='2023-03-23', company='ADMA BIOLOGICS, INC.', cik=1368514,

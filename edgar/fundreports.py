@@ -646,15 +646,37 @@ class OtherManager:
 
 
 @dataclass(frozen=True)
-class PrimaryDocument13F:
-    filing_manager: FilingManager
-    report_period: datetime
+class CoverPage:
     report_calendar_or_quarter: str
     report_type: str
+    filing_manager: FilingManager
     other_managers: List[OtherManager]
+
+
+@dataclass(frozen=True)
+class SummaryPage:
     other_included_managers_count: int
-    total_value: float
+    total_value: Decimal
     total_holdings: int
+
+
+@dataclass(frozen=True)
+class Signature:
+    name: str
+    title: str
+    phone: str
+    signature: str
+    city: str
+    state_or_country: str
+    date: str
+
+
+@dataclass(frozen=True)
+class PrimaryDocument13F:
+    report_period: datetime
+    cover_page: CoverPage
+    summary_page:SummaryPage
+    signature: Signature
     additional_information: str
 
 
@@ -698,11 +720,11 @@ class ThirteenF:
 
     @property
     def total_value(self):
-        return self.primary_form_information.total_value
+        return self.primary_form_information.summary_page.total_value
 
     @property
     def total_holdings(self):
-        return self.primary_form_information.total_holdings
+        return self.primary_form_information.summary_page.total_holdings
 
     @property
     def report_period(self):
@@ -710,7 +732,7 @@ class ThirteenF:
 
     @property
     def filing_manager(self):
-        return self.primary_form_information.filing_manager
+        return self.primary_form_information.cover_page.filing_manager
 
     @staticmethod
     def parse_primary_document_xml(primary_document_xml: str):
@@ -722,13 +744,13 @@ class ThirteenF:
 
         # Form Data
         form_data = root.find("formData")
-        cover_page = form_data.find("coverPage")
+        cover_page_el = form_data.find("coverPage")
 
         report_calendar_or_quarter = child_text(form_data, "reportCalendarOrQuarter")
-        report_type = child_text(cover_page, "reportType")
+        report_type = child_text(cover_page_el, "reportType")
 
         # Filing Manager
-        filing_manager_el = cover_page.find("filingManager")
+        filing_manager_el = cover_page_el.find("filingManager")
 
         # Address
         address_el = filing_manager_el.find("address")
@@ -741,7 +763,7 @@ class ThirteenF:
         )
         filing_manager = FilingManager(name=child_text(filing_manager_el, "name"), address=address)
         # Other managers
-        other_manager_info_el = cover_page.find("otherManagersInfo")
+        other_manager_info_el = cover_page_el.find("otherManagersInfo")
         other_managers = [
             OtherManager(
                 cik=child_text(other_manager_el, "cik"),
@@ -756,18 +778,37 @@ class ThirteenF:
         other_included_managers_count = int(child_text(summary_page_el,
                                                        "otherIncludedManagersCount")) if summary_page_el else None
         total_holdings = int(child_text(summary_page_el, "tableEntryTotal")) if summary_page_el else None
-        total_value = float(child_text(summary_page_el, "tableValueTotal")) if summary_page_el else None
+        total_value = Decimal(child_text(summary_page_el, "tableValueTotal")) if summary_page_el else None
 
-        parsed_primary_doc = PrimaryDocument13F(filing_manager=filing_manager,
-                                                report_period=report_period,
-                                                report_calendar_or_quarter=report_calendar_or_quarter,
-                                                report_type=report_type,
-                                                other_managers=other_managers,
-                                                other_included_managers_count=other_included_managers_count,
-                                                total_holdings=total_holdings,
-                                                total_value=total_value,
-                                                additional_information=child_text(cover_page, "additionalInformation")
-                                                )
+        # Signature Block
+        signature_block_el = form_data.find("signatureBlock")
+        signature = Signature(
+            name=child_text(signature_block_el, "name"),
+            title=child_text(signature_block_el, "title"),
+            phone=child_text(signature_block_el, "phone"),
+            city=child_text(signature_block_el, "city"),
+            signature=child_text(signature_block_el, "signature"),
+            state_or_country=child_text(signature_block_el, "stateOrCountry"),
+            date=child_text(signature_block_el, "signatureDate")
+        )
+
+        parsed_primary_doc = PrimaryDocument13F(
+            report_period=report_period,
+            cover_page=CoverPage(
+                filing_manager=filing_manager,
+                report_calendar_or_quarter=report_calendar_or_quarter,
+                report_type=report_type,
+                other_managers=other_managers
+            ),
+            signature=signature,
+            summary_page=SummaryPage(
+
+                other_included_managers_count=other_included_managers_count,
+                total_holdings=total_holdings,
+                total_value=total_value
+            ),
+            additional_information=child_text(cover_page_el, "additionalInformation")
+        )
 
         return parsed_primary_doc
 
@@ -814,18 +855,18 @@ class ThirteenF:
     def __rich__(self):
         title = f"{self.form} for {self.filing.company} filed {self.filing.filing_date}"
         summary = Table(
-                        Column("Period", style="bold deep_sky_blue1"),
-                        "Holdings",
-                        "Value",
-                        "Filing Manager",
-                        box=box.SIMPLE)
+            Column("Period", style="bold deep_sky_blue1"),
+            "Holdings",
+            "Value",
+            "Filing Manager",
+            box=box.SIMPLE)
 
         summary.add_row(
-                        datetime.strftime(self.report_period, "%Y-%m-%d"),
-                        str(self.total_holdings or "-"),
-                        f"${self.total_value:,.0f}" if self.total_value else "-",
-                        self.filing_manager.name
-                        )
+            datetime.strftime(self.report_period, "%Y-%m-%d"),
+            str(self.total_holdings or "-"),
+            f"${self.total_value:,.0f}" if self.total_value else "-",
+            self.filing_manager.name
+        )
 
         content = [summary]
 
