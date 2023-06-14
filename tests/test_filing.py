@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from typing import List
 
-from edgar import get_filings, Filings, Filing, get_company, get_filing_by_accession_number
+from edgar import get_filings, Filings, Filing, get_company, get_by_accession_number
 from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, SECHeader, read_fixed_width_index, form_specs, company_specs, Attachments, \
     Attachment
@@ -641,15 +641,15 @@ def test_search_for_text_with_regex():
 
 
 def test_get_by_acession_number():
-    filing = get_filing_by_accession_number("0000072333-23-000015")
+    filing = get_by_accession_number("0000072333-23-000015")
     assert filing.company == "NORDSTROM INC"
     assert filing.cik == 72333
     assert filing.form == "8-K"
     assert filing.filing_date == datetime.date(2023, 3, 6)
     assert filing.accession_no == "0000072333-23-000015"
 
-    assert get_filing_by_accession_number("9990072333-45-000015") is None
-    assert get_filing_by_accession_number("9990072333-22-000015") is None
+    assert get_by_accession_number("9990072333-45-000015") is None
+    assert get_by_accession_number("9990072333-22-000015") is None
 
 
 def test_attachments():
@@ -676,6 +676,10 @@ def test_attachments():
     assert filing.attachments
     assert len(filing.attachments) == 7
     assert filing.attachments[4].description == "XBRL TAXONOMY EXTENSION LABEL LINKBASE"
+
+    # Get the filing using the document name
+    assert filing.attachments["blk25-20230224.xsd"].description == "XBRL TAXONOMY EXTENSION SCHEMA"
+    assert filing.attachments.get("blk25-20230224.xsd").description == "XBRL TAXONOMY EXTENSION SCHEMA"
 
 
 def test_download_filing_attachment():

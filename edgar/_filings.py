@@ -55,7 +55,7 @@ __all__ = [
     'FilingHomepage',
     'get_fund_filings',
     'available_quarters',
-    'get_filing_by_accession_number',
+    'get_by_accession_number',
     'get_restricted_stock_filings',
     'get_insider_transaction_filings'
 ]
@@ -1228,8 +1228,16 @@ class Attachments:
         self.files['Seq'] = self.files['Seq'].str.replace('\xa0', '-')
 
     def __getitem__(self, item):
-        if 0 <= item < len(self.files):
-            return Attachment.from_dataframe_row(self.files.iloc[item])
+        if isinstance(item, str):
+            res = self.files[self.files['Document'] == item]
+            if not res.empty:
+                return Attachment.from_dataframe_row(res.iloc[0])
+        elif isinstance(item, int):
+            if 0 <= item < len(self.files):
+                return Attachment.from_dataframe_row(self.files.iloc[item])
+
+    def get(self, item):
+        return self.__getitem__(item)
 
     def __len__(self):
         return len(self.files)
@@ -1493,8 +1501,10 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
             )
 
 
-def get_filing_by_accession_number(accession_number: str):
-    assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), "Not a valid accession number e.g. 0000000000-55-999999"
+def get_by_accession_number(accession_number: str):
+    """Find the filing using the accession number"""
+    assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
+        f"{accession_number} is not a valid accession number .. should be 10digits-2digits-6digits"
     year = int("19" + accession_number[11:13]) if accession_number[11] == 9 else int("20" + accession_number[11:13])
     for quarter in range(1, 5):
         filings = get_filings(year=year, quarter=quarter)

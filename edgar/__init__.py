@@ -22,7 +22,7 @@ from edgar._filings import (Filing,
                             Attachment,
                             Attachments,
                             get_filings,
-                            get_filing_by_accession_number,
+                            get_by_accession_number,
                             get_funds,
                             get_fund_filings,
                             FilingHomepage)
