@@ -30,8 +30,7 @@ from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._party import Address
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
-                        filter_by_date, sec_dot_gov, InvalidDateException, IntString, DataPager, text_extensions,
-                        datefmt)
+                        filter_by_date, sec_dot_gov, InvalidDateException, IntString, DataPager, text_extensions)
 from edgar.fundreports import FUND_FORMS
 from edgar.search import BM25Search, RegexSearch
 
@@ -962,6 +961,10 @@ class SECHeader:
         # Create a dict of the values in data that are not nested dicts
         filing_metadata = {key: value for key, value in data.items() if isinstance(value, str)}
 
+        # The header text contains <ACCEPTANCE-DATETIME>20230612172243. Replace with the formatted date
+        header_text = re.sub(r'<ACCEPTANCE-DATETIME>(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})',
+               r'ACCEPTANCE-DATETIME:            \1-\2-\3 \4:\5:\6', header_text)
+
         # Remove empty lines from header_text
         header_text = '\n'.join([line for line in header_text.split('\n') if line.strip()])
 
@@ -1193,9 +1196,16 @@ class Filing:
         summary_table.add_column("CIK")
         summary_table.add_row(self.accession_no, str(self.filing_date), self.company, str(self.cik))
 
+        links_table = Table(box=box.SIMPLE)
+        links_table.add_column("Link", style="bold", header_style="bold")
+        links_table.add_column("URL")
+        links_table.add_row("\U0001F3E0 Homepage", self.homepage_url)
+        links_table.add_row("\U0001F4C4 Primary Document", self.document.url)
+        links_table.add_row("\U0001F4D2 Full Submission Text", self.text_url)
+
         return Panel(
-            summary_table,
-            title=f"{self.form} {unicode_for_form(self.form)} filing",
+            Group(summary_table, links_table),
+            title=f"{self.form} {unicode_for_form(self.form)} filing for {self.company}",
             box=box.ROUNDED
         )
 
