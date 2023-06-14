@@ -18,7 +18,8 @@ from edgar.core import (decode_content,
                         client_headers,
                         CRAWL, CAUTION, NORMAL,
                         download_file,
-                        extract_dates)
+                        extract_dates,
+                        get_text_between_tags)
 import re
 from rich.table import Table
 import pytest
@@ -220,3 +221,11 @@ def test_settings():
 
     edgar.edgar_mode = CRAWL
     assert edgar.edgar_mode.max_connections == 2
+
+
+def test_get_text_between_tags():
+    text = get_text_between_tags(
+        'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt',
+    'SEC-HEADER')
+    print(text)
+    assert 'ACCESSION NUMBER:		0001564590-18-004771' in text

@@ -1,12 +1,13 @@
+import datetime
 import gzip
 import logging.config
 import os
+import random
 import re
 import threading
 import warnings
 from _thread import interrupt_main
 from dataclasses import dataclass
-import datetime
 from decimal import Decimal
 from functools import lru_cache
 from io import BytesIO
@@ -18,9 +19,9 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 from charset_normalizer import detect
+from retry.api import retry_call
 from rich.logging import RichHandler
 from rich.prompt import Prompt
-from retry.api import retry_call
 
 logging.basicConfig(
     level="INFO",
@@ -36,6 +37,7 @@ __all__ = [
     'Result',
     'repr_df',
     'get_bool',
+    'datefmt',
     'moneyfmt',
     'edgar_mode',
     'NORMAL',
@@ -58,7 +60,8 @@ __all__ = [
     'text_extensions',
     'ask_for_identity',
     'default_page_size',
-    'InvalidDateException'
+    'InvalidDateException',
+    'get_text_between_tags'
 ]
 
 IntString = Union[str, int]
@@ -276,7 +279,9 @@ def decode_content(content: bytes):
     except UnicodeDecodeError:
         return content.decode('latin-1')
 
+
 text_extensions = [".txt", ".htm", ".html", ".xsd", ".xml", ".json", ".idx"]
+
 
 def download_file(url: str,
                   client: Union[httpx.Client, httpx.AsyncClient] = None,
@@ -288,7 +293,7 @@ def download_file(url: str,
     if not as_text:
         # Set the default to true if the url ends with a text extension
         as_text = any([url.endswith(ext) for ext in text_extensions])
-        
+
     r = retry_call(client.get, fargs=[url], tries=5, delay=3)
     # If we get a 301 or 302, follow the redirect
     if r.status_code in [301, 302]:
@@ -313,6 +318,34 @@ def download_file(url: str,
 
 def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
     return download_file(url, client, as_text=True)
+
+
+def get_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
+    if not client:
+        client = http_client()
+    tag_start = f'<{tag}>'
+    tag_end = f'</{tag}>'
+    is_header = False
+    content = ""
+
+    with retry_call(client.stream, fargs=['GET', url], tries=5, delay=3) as response:
+
+        for line in response.iter_lines():
+            if line:
+                # If line matches header_start, start capturing
+                if line.startswith(tag_start):
+                    is_header = True
+                    continue  # Skip the current line as it's the opening tag
+
+                # If line matches header_end, stop capturing
+                if line.startswith(tag_end):
+                    is_header = False
+                    break
+
+                # If within header lines, add to header_content
+                if is_header:
+                    content += line + '\n'  # Add a newline to preserve original line breaks
+    return content
 
 
 def repr_df(df, hide_index: bool = True):
@@ -491,3 +524,36 @@ def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
     build(curr)
     build(neg if sign else pos)
     return ''.join(reversed(result))
+
+
+def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
+    """Format a date as a string"""
+    if isinstance(value, str):
+        # if value matches %Y%m%d, then parse it
+        if re.match(r"^\d{8}$", value):
+            value = datetime.datetime.strptime(value, "%Y%m%d")
+        # If value matches %Y%m%d%H%M%s, then parse it
+        elif re.match(r"^\d{14}$", value):
+            value = datetime.datetime.strptime(value, "%Y%m%d%H%M%S")
+        return value.strftime(fmt)
+    else:
+        return value.strftime(fmt)
+
+def sample_table(table, n=None, frac=None, replace=False, random_state=None):
+    """Take a sample from a pyarrow Table"""
+    if random_state:
+        random.seed(random_state)
+
+    if frac is not None:
+        n = int(len(table) * frac)
+
+    if n is not None:
+        if replace:
+            indices = [random.randint(0, len(table) - 1) for _ in range(n)]
+        else:
+            indices = random.sample(range(len(table)), min(n, len(table)))
+    else:
+        indices = random.sample(range(len(table)), len(table))
+
+    return table.take(indices)
+
