@@ -598,6 +598,15 @@ get_restricted_stock_filings = partial(get_filings, form=[144])
 # Insider transaction filings
 get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
+@lru_cache(maxsize=8)
+def _get_cached_filings(year: Years = None,
+                        quarter: Quarters = None,
+                        form: Union[str, List[IntString]] = None,
+                        amendments: bool = True,
+                        filing_date: str = None,
+                        index="form") -> Filings:
+    # Get the filings but cache the result
+    return get_filings(year=year,quarter=quarter,form=form,amendments=amendments,filing_date=filing_date,index=index)
 
 def parse_filing_header(content):
     data = {}
@@ -1501,13 +1510,14 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
             )
 
 
+@lru_cache(maxsize=16)
 def get_by_accession_number(accession_number: str):
     """Find the filing using the accession number"""
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
         f"{accession_number} is not a valid accession number .. should be 10digits-2digits-6digits"
     year = int("19" + accession_number[11:13]) if accession_number[11] == 9 else int("20" + accession_number[11:13])
     for quarter in range(1, 5):
-        filings = get_filings(year=year, quarter=quarter)
+        filings = _get_cached_filings(year=year, quarter=quarter)
         if filings:
             filing = filings.get(accession_number)
             if filing:
