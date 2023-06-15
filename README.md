@@ -63,21 +63,47 @@ latest_ten_k_filings = filings.latest(20)
 
 ## Features
 
-### Start with filings, filter down to a filing
+### Working with filings
 
-- View filings since 1994 to today
-- Filter filings by **form e.g. 10K**, **filing date** etc.
-- Page through filings using **next()** and **prev()**
-- Select and view a filing in the terminal, or open in the browser
-- Download any file from any filing
-- Parse XML for **Offering, Ownership** and other filing types
-- Automatically parse a filing's XBRL into a pandas dataframe
+| Task                               | Code                                           |
+|------------------------------------|------------------------------------------------|
+| Get filings for the year to date   | `filings = get_filings()`                      |
+| Get filings for a specific year    | `filings = get_filings(2020)`                  |
+| Get filings for a specific quarter | `filings = get_filings(2020, 1)`               |
+| Get filings for multiple years     | `filings = get_filings([2020, 2021])`          |
+| Get filigs for a range of years    | `filings = get_filings(year=range(2010, 2020)` |
+| Get filings for a specific form    | `filings = get_filings(form="10-K")`           |
+| Get filings for a list of forms    | `filings = get_filings(form=["10-K", "10-Q"])` |
+| Show the next page of filings      | `filings.next()`                               |
+| Show the previous page of filings  | `filings.prev()`                               |
+| Get the first n filings            | `filings.head(20)`                             |
+| Get the last n filings             | `filings.tail(20)`                             |
+| Get the latest n filings by date   | `filings.latest(20)`                           |
+| Get a random sample of the filings | `filings.sample(20)`                          |
+| Filter filings on a date           | `filings = filings.filter(date="2020-01-01")`  |
+| Filter filings between dates       | `filings.filter(date="2020-01-01:2020-03-01")` |
+| Filter filings before a date       | `filings.filter(date=":2020-03-01")`           |  
+| Filter filings after a date        | `filings.filter(date="2020-03-01:")`           |
 
-### Start with a Company, get their filings and Facts
-- Search for company by ticker or CIK
-- View a company's filings
-- Page through filings using **next()** and **prev()**
-- Get a company **facts** e.g. **CommonSharesOutstanding** as a dataframe
+### Working with a filing
+
+| Task                                      | Code                                 |
+|-------------------------------------------|--------------------------------------|
+| Get a single filing                       | `filing = filings[3]`                |
+| Get the filing homepage                   | `filing.homepage`                    |
+| Open a filing in the browser              | `filing.open()`                      |
+| Open the filing homepage in the browser   | `filing.homepage.open()`             |
+| View the filing in the terminal           | `filing.view()`                      |
+| Get the html of the filing document       | `filing.html()`                      |
+| Get the XBRL of the filing document       | `filing.xbrl()`                      |
+| Get the filing document as markdown       | `filing.markdown()`                  |
+| Get the full submission text of a filing  | `filing.text()`                      |
+| Get and parse the data object of a filing | `filing.obj()`                       |
+| Get the filing attachments                | `filing.attachments`                 |
+| Get a single attachment                   | `attachment = filing.attachments[0]` |
+| Open an attachment in the browser         | `attachment.open()`                  |
+| Download an attachment                    | `content = attachment.download()`    |
+
 
 # Installation
 
@@ -276,25 +302,6 @@ filings.filter(form="10-K", amendments=True)
 
 ## Working with a single filing
 
-### Things you can do with a filing
-| Task                                      | Code                                 |
-|-------------------------------------------|--------------------------------------|
-| Get a single filing                       | `filing = filings[3]`                |
-| Get the filing homepage                   | `filing.homepage`                    |
-| Open a filing in the browser              | `filing.open()`                      |
-| Open the filing homepage in the browser   | `filing.homepage.open()`             |
-| View the filing in the terminal           | `filing.view()`                      |
-| Get the html of the filing document       | `filing.html()`                      |
-| Get the XBRL of the filing document       | `filing.xbrl()`                      |
-| Get the filing document as markdown       | `filing.markdown()`                  |
-| Get the full submission text of a filing  | `filing.text()`                      |
-| Get and parse the data object of a filing | `filing.obj()`                       |
-| Get the filing attachments                | `filing.attachments`                 |
-| Get a single attachment                   | `attachment = filing.attachments[0]` |
-| Open an attachment in the browser         | `attachment.open()`                  |
-| Download an attachment                    | `content = attachment.download()`    |
-
-### Get a single filing
 You can get a single filing from the filings using the bracket operator `[]`, 
 specifying the index of the filing. The index is the value displayed in the leftmost
 position in the filings table. For example, to get the **10-Q** for **Costco** in the table above
