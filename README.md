@@ -40,7 +40,7 @@
 
 # About the project
 
-**`edgartools`** is one of the nicest looking EDGAR libraries out there.
+**`edgartools`** is one of the nicest looking EDGAR libraries out there. It is also powerful and easy to use.
 You can query, filter and select any filing since 1994 and view the filing's html, text, xml or structured data.
 
 
@@ -54,14 +54,26 @@ from edgar import *
 # Get 10-K filings for the second quarter of 2023 
 ten_k_filings = get_filings(2023, 2, form="10-K")
 
-# Get the latest 20 filings from the list 
+# Get the latest 20 filings by date 
 latest_ten_k_filings = filings.latest(20)
-```
 
-![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_10K_filings.png)
+# Show the first filing 
+latest_ten_k_filings[0]
+```
+![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_10K_filing.png)
 
 
 ## Features
+
+### Getting started
+
+| Task                                 | Code                                           |
+|--------------------------------------|------------------------------------------------|
+| Set your EDGAR identity in Linux/Mac | `export EDGAR_IDENTITY="First Last email@domain.com"` |
+| Set your EDGAR identity in Windows   | `set EDGAR_IDENTITY="First Last email@domain.com"` |
+| Set identity in Windows Powershell   | `$env:EDGAR_IDENTITY="First Last email@domain.com"` |
+| Set identity in Python               | `set_identity("First Last email@domain.com"`   |
+| Importing the library                | `from edgar import *`                          |
 
 ### Working with filings
 
@@ -79,11 +91,12 @@ latest_ten_k_filings = filings.latest(20)
 | Get the first n filings            | `filings.head(20)`                             |
 | Get the last n filings             | `filings.tail(20)`                             |
 | Get the latest n filings by date   | `filings.latest(20)`                           |
-| Get a random sample of the filings | `filings.sample(20)`                          |
+| Get a random sample of the filings | `filings.sample(20)`                           |
 | Filter filings on a date           | `filings = filings.filter(date="2020-01-01")`  |
 | Filter filings between dates       | `filings.filter(date="2020-01-01:2020-03-01")` |
 | Filter filings before a date       | `filings.filter(date=":2020-03-01")`           |  
 | Filter filings after a date        | `filings.filter(date="2020-03-01:")`           |
+| Get filings as a pandas dataframe  | `filings.to_pandas()`                          |
 
 ### Working with a filing
 
@@ -104,6 +117,19 @@ latest_ten_k_filings = filings.latest(20)
 | Open an attachment in the browser         | `attachment.open()`                  |
 | Download an attachment                    | `content = attachment.download()`    |
 
+### Working with a company
+
+| Task                                     | Code                                                          |
+|------------------------------------------|---------------------------------------------------------------|
+| Get a company by ticker                  | `company = Company("AAPL")`                                   |
+| Get a company by CIK                     | `company = Company("0000320193")`                             |
+| Get company facts                        | `company.get_facts()`                                         |
+| Get company filings                      | `company.get_filings()`                                       |
+| Get company filings by form              | `company.get_filings(form="10-K")`                            |
+| Get a company filing by accession_number | `company.get_filing(accession_number="0000320193-21-000139")` |
+| Get the company's financials             | `company.financials`                                          |
+| Get the company's balance sheet          | `company.financials.balance_sheet`                            |
+| Get the company's cash flow statement    | `company.financials.cash_flow_statement`                      |
 
 # Installation
 
