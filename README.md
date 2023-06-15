@@ -67,13 +67,13 @@ latest_ten_k_filings[0]
 
 ### Getting started
 
-| Task                                 | Code                                           |
-|--------------------------------------|------------------------------------------------|
+| Task                                 | Code                                                  |
+|--------------------------------------|-------------------------------------------------------|
 | Set your EDGAR identity in Linux/Mac | `export EDGAR_IDENTITY="First Last email@domain.com"` |
-| Set your EDGAR identity in Windows   | `set EDGAR_IDENTITY="First Last email@domain.com"` |
-| Set identity in Windows Powershell   | `$env:EDGAR_IDENTITY="First Last email@domain.com"` |
-| Set identity in Python               | `set_identity("First Last email@domain.com"`   |
-| Importing the library                | `from edgar import *`                          |
+| Set your EDGAR identity in Windows   | `set EDGAR_IDENTITY="First Last email@domain.com"`    |
+| Set identity in Windows Powershell   | `$env:EDGAR_IDENTITY="First Last email@domain.com"`   |
+| Set identity in Python               | `set_identity("First Last email@domain.com")`         |
+| Importing the library                | `from edgar import *`                                 |
 
 ### Working with filings
 
