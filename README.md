@@ -56,9 +56,6 @@ ten_k_filings = get_filings(2023, 2, form="10-K")
 
 # Get the latest 20 filings from the list 
 latest_ten_k_filings = filings.latest(20)
-
-# Open the 1st filing in the browser
-latest_ten_k_filings[0].open()
 ```
 
 ![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_10K_filings.png)
@@ -277,8 +274,27 @@ filings.filter(form="10-K", amendments=True)
 ```
 ![Filter with amendments](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filter_amendments.jpg)
 
-## Getting a single filing
+## Working with a single filing
 
+### Things you can do with a filing
+| Task                                      | Code                                 |
+|-------------------------------------------|--------------------------------------|
+| Get a single filing                       | `filing = filings[3]`                |
+| Get the filing homepage                   | `filing.homepage`                    |
+| Open a filing in the browser              | `filing.open()`                      |
+| Open the filing homepage in the browser   | `filing.homepage.open()`             |
+| View the filing in the terminal           | `filing.view()`                      |
+| Get the html of the filing document       | `filing.html()`                      |
+| Get the XBRL of the filing document       | `filing.xbrl()`                      |
+| Get the filing document as markdown       | `filing.markdown()`                  |
+| Get the full submission text of a filing  | `filing.text()`                      |
+| Get and parse the data object of a filing | `filing.obj()`                       |
+| Get the filing attachments                | `filing.attachments`                 |
+| Get a single attachment                   | `attachment = filing.attachments[0]` |
+| Open an attachment in the browser         | `attachment.open()`                  |
+| Download an attachment                    | `content = attachment.download()`    |
+
+### Get a single filing
 You can get a single filing from the filings using the bracket operator `[]`, 
 specifying the index of the filing. The index is the value displayed in the leftmost
 position in the filings table. For example, to get the **10-Q** for **Costco** in the table above
