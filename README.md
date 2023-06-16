@@ -77,45 +77,47 @@ latest_ten_k_filings[0]
 
 ### Working with filings
 
-| Task                               | Code                                           |
-|------------------------------------|------------------------------------------------|
-| Get filings for the year to date   | `filings = get_filings()`                      |
-| Get filings for a specific year    | `filings = get_filings(2020)`                  |
-| Get filings for a specific quarter | `filings = get_filings(2020, 1)`               |
-| Get filings for multiple years     | `filings = get_filings([2020, 2021])`          |
+| Task                               | Code                                          |
+|------------------------------------|-----------------------------------------------|
+| Get filings for the year to date   | `filings = get_filings()`                     |
+| Get only xbrl filings              | `filings = get_filings(index="xbrl")`         |
+| Get filings for a specific year    | `filings = get_filings(2020)`                 |
+| Get filings for a specific quarter | `filings = get_filings(2020, 1)`              |
+| Get filings for multiple years     | `filings = get_filings([2020, 2021])`         |
 | Get filigs for a range of years    | `filings = get_filings(year=range(2010, 2020)` |
-| Get filings for a specific form    | `filings = get_filings(form="10-K")`           |
+| Get filings for a specific form    | `filings = get_filings(form="10-K")`          |
 | Get filings for a list of forms    | `filings = get_filings(form=["10-K", "10-Q"])` |
-| Show the next page of filings      | `filings.next()`                               |
-| Show the previous page of filings  | `filings.prev()`                               |
-| Get the first n filings            | `filings.head(20)`                             |
-| Get the last n filings             | `filings.tail(20)`                             |
-| Get the latest n filings by date   | `filings.latest(20)`                           |
-| Get a random sample of the filings | `filings.sample(20)`                           |
-| Filter filings on a date           | `filings = filings.filter(date="2020-01-01")`  |
+| Show the next page of filings      | `filings.next()`                              |
+| Show the previous page of filings  | `filings.prev()`                              |
+| Get the first n filings            | `filings.head(20)`                            |
+| Get the last n filings             | `filings.tail(20)`                            |
+| Get the latest n filings by date   | `filings.latest(20)`                          |
+| Get a random sample of the filings | `filings.sample(20)`                          |
+| Filter filings on a date           | `filings = filings.filter(date="2020-01-01")` |
 | Filter filings between dates       | `filings.filter(date="2020-01-01:2020-03-01")` |
-| Filter filings before a date       | `filings.filter(date=":2020-03-01")`           |  
-| Filter filings after a date        | `filings.filter(date="2020-03-01:")`           |
-| Get filings as a pandas dataframe  | `filings.to_pandas()`                          |
+| Filter filings before a date       | `filings.filter(date=":2020-03-01")`          |  
+| Filter filings after a date        | `filings.filter(date="2020-03-01:")`          |
+| Get filings as a pandas dataframe  | `filings.to_pandas()`                         |
 
 ### Working with a filing
 
-| Task                                      | Code                                 |
-|-------------------------------------------|--------------------------------------|
-| Get a single filing                       | `filing = filings[3]`                |
-| Get the filing homepage                   | `filing.homepage`                    |
-| Open a filing in the browser              | `filing.open()`                      |
-| Open the filing homepage in the browser   | `filing.homepage.open()`             |
-| View the filing in the terminal           | `filing.view()`                      |
-| Get the html of the filing document       | `filing.html()`                      |
-| Get the XBRL of the filing document       | `filing.xbrl()`                      |
-| Get the filing document as markdown       | `filing.markdown()`                  |
-| Get the full submission text of a filing  | `filing.text()`                      |
-| Get and parse the data object of a filing | `filing.obj()`                       |
-| Get the filing attachments                | `filing.attachments`                 |
-| Get a single attachment                   | `attachment = filing.attachments[0]` |
-| Open an attachment in the browser         | `attachment.open()`                  |
-| Download an attachment                    | `content = attachment.download()`    |
+| Task                                      | Code                                                      |
+|-------------------------------------------|-----------------------------------------------------------|
+| Get a single filing                       | `filing = filings[3]`                                     |
+| Get a filing by accession number          | `filing = get_by_accession_number("0000320193-20-34576")` |
+| Get the filing homepage                   | `filing.homepage`                                         |
+| Open a filing in the browser              | `filing.open()`                                           |
+| Open the filing homepage in the browser   | `filing.homepage.open()`                                  |
+| View the filing in the terminal           | `filing.view()`                                           |
+| Get the html of the filing document       | `filing.html()`                                           |
+| Get the XBRL of the filing document       | `filing.xbrl()`                                           |
+| Get the filing document as markdown       | `filing.markdown()`                                       |
+| Get the full submission text of a filing  | `filing.text()`                                           |
+| Get and parse the data object of a filing | `filing.obj()`                                            |
+| Get the filing attachments                | `filing.attachments`                                      |
+| Get a single attachment                   | `attachment = filing.attachments[0]`                      |
+| Open an attachment in the browser         | `attachment.open()`                                       |
+| Download an attachment                    | `content = attachment.download()`                         |
 
 ### Working with a company
 
@@ -124,6 +126,7 @@ latest_ten_k_filings[0]
 | Get a company by ticker                  | `company = Company("AAPL")`                                   |
 | Get a company by CIK                     | `company = Company("0000320193")`                             |
 | Get company facts                        | `company.get_facts()`                                         |
+| Get company facts as a pandas dataframe  | `company.get_facts().to_pandas()`                             |
 | Get company filings                      | `company.get_filings()`                                       |
 | Get company filings by form              | `company.get_filings(form="10-K")`                            |
 | Get a company filing by accession_number | `company.get_filing(accession_number="0000320193-21-000139")` |
