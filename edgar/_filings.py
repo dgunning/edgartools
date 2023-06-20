@@ -758,6 +758,44 @@ class SubjectCompany:
     mailing_address: Address
     former_company_names: Optional[List[FormerCompany]] = None
 
+    def __rich__(self):
+        company_information_table = Table("Company", "CIK", "SIC", "Fiscal Year End",
+                                          box=box.SIMPLE)
+        company_information_table.add_row(self.company_information.name,
+                                          self.company_information.cik,
+                                          self.company_information.sic,
+                                          self.company_information.fiscal_year_end)
+
+        subject_company_renderables = [company_information_table]
+
+        # Fiing Information
+        if self.filing_information:
+            filing_values_table = Table("File Number", "SEC Act", "Film Number", box=box.SIMPLE)
+            filing_values_table.add_row(self.filing_information.file_number,
+                                        self.filing_information.sec_act,
+                                        self.filing_information.film_number)
+            subject_company_renderables.append(filing_values_table)
+
+        # Addresses
+        if self.business_address or self.mailing_address:
+            subject_company_renderables.append(_create_address_table(self.business_address, self.mailing_address))
+
+        # Former Company Names
+        if self.former_company_names:
+            former_company_table = Table("Former Company Name", "Date of Change", box=box.SIMPLE)
+            for company in self.former_company_names:
+                former_company_table.add_row(company.name, company.date_of_change)
+            subject_company_renderables.append(former_company_table)
+
+        return Panel(
+            Group(
+                *subject_company_renderables
+            ),
+            title="SUBJECT COMPANY"
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 @dataclass(frozen=True)
 class Issuer:
@@ -780,7 +818,6 @@ class Issuer:
         if self.business_address or self.mailing_address:
             issuer_renderables.append(_create_address_table(self.business_address, self.mailing_address))
 
-
         return Panel(
             Group(
                 *issuer_renderables
@@ -800,11 +837,12 @@ reporting_owner_title = "\U0001F468 REPORTING OWNER"
 issuer_title = "\U0001F4B5 ISSUER"
 filing_title = "\U0001F4D1 FILING"
 
+
 def _create_address_table(business_address: Address, mailing_address: Address):
-    address_table = Table("Address Type", "Street1", "Street2", "City", "State", "Zipcode",
+    address_table = Table("Type", "Street1", "Street2", "City", "State", "Zipcode",
                           title="\U0001F4EC Addresses", box=box.SIMPLE)
     if business_address:
-        address_table.add_row("\U0001F3E2 Business",
+        address_table.add_row("\U0001F3E2 Business Address",
                               business_address.street1,
                               business_address.street2,
                               business_address.city,
@@ -812,7 +850,7 @@ def _create_address_table(business_address: Address, mailing_address: Address):
                               business_address.zipcode)
 
     if mailing_address:
-        address_table.add_row("\U0001F4ED Mailing",
+        address_table.add_row("\U0001F4ED Mailing Address",
                               mailing_address.street1,
                               mailing_address.street2,
                               mailing_address.city,
@@ -920,7 +958,7 @@ class SECHeader:
 
         # The filer
         filers = []
-        for filer_values in data.get('FILER', []):
+        for filer_values in data.get('FILER', data.get('FILED BY', [])):
             filer_company_values = filer_values.get('COMPANY DATA')
             company_obj = None
             if filer_company_values:
@@ -1118,11 +1156,15 @@ class SECHeader:
             metadata_table.add_row(f"{key}:", value)
 
         metadata_panel = Panel(
-            metadata_table, title=filing_title
+            metadata_table, title=f"Form {self.form} {unicode_for_form(self.form)} FILING"
         )
 
         # Keep a list of renderables for rich
         renderables = [metadata_panel]
+
+        # SUBJECT COMPANY
+        for subject_company in self.subject_companies:
+            renderables.append(subject_company.__rich__())
 
         # FILER
         for filer in self.filers:
@@ -1663,7 +1705,6 @@ class FilingHomepage:
                   ) if self.datafiles is not None else Text(""),
 
         ), title=f"{self.filing.form} filing            Accession Number: {self.filing.accession_no}")
-
 
 
 def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
