@@ -827,3 +827,4 @@ class CompanySearchIndex(SimilaritySearchIndex):
                 .assign(company_idx=lambda df: np.vectorize(preprocess_company)(df.company))
                 )
         super().__init__(data, 'company_idx')
+

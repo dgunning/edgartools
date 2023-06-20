@@ -30,7 +30,8 @@ from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._party import Address
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
-                        filter_by_date, sec_dot_gov, InvalidDateException, IntString, DataPager, text_extensions)
+                        filter_by_date, sec_dot_gov, InvalidDateException, IntString, DataPager, text_extensions,
+                        datefmt)
 from edgar.fundreports import FUND_FORMS
 from edgar.search import BM25Search, RegexSearch
 
@@ -333,6 +334,19 @@ class Filings:
                date: str = None):
         """
         Filter the filings
+
+        On a date
+        >>> filings.filter(date="2020-01-01")
+
+        Up to a date
+        >>> filings.filter(date=":2020-03-01")
+
+        From a date
+        >>> filings.filter(date="2020-01-01:")
+
+        # Between dates
+        >>> filings.filter(date="2020-01-01:2020-03-01")
+
         :param form: The form or list of forms to filter by
         :param amendments: Whether to include amendments to the forms e.g include "10-K/A" if filtering for "10-K"
         :param filing_date: The filing date
@@ -598,6 +612,7 @@ get_restricted_stock_filings = partial(get_filings, form=[144])
 # Insider transaction filings
 get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
+
 @lru_cache(maxsize=8)
 def _get_cached_filings(year: Years = None,
                         quarter: Quarters = None,
@@ -606,7 +621,9 @@ def _get_cached_filings(year: Years = None,
                         filing_date: str = None,
                         index="form") -> Filings:
     # Get the filings but cache the result
-    return get_filings(year=year,quarter=quarter,form=form,amendments=amendments,filing_date=filing_date,index=index)
+    return get_filings(year=year, quarter=quarter, form=form, amendments=amendments, filing_date=filing_date,
+                       index=index)
+
 
 def parse_filing_header(content):
     data = {}
@@ -656,6 +673,36 @@ class Filer:
     mailing_address: Address
     former_company_names: Optional[List[FormerCompany]] = None
 
+    def __rich__(self):
+        filer_table = Table("Company", "CIK", "SIC", "Incorp.", "Fiscal Year End",
+                            title=company_title,
+                            box=box.SIMPLE)
+        filer_table.add_row(self.company_information.name,
+                            self.company_information.cik,
+                            self.company_information.sic,
+                            self.company_information.state_of_incorporation,
+                            self.company_information.fiscal_year_end)
+
+        filer_renderables = [filer_table]
+        # Addresses
+        if self.business_address or self.mailing_address:
+            filer_renderables.append(_create_address_table(self.business_address, self.mailing_address))
+
+        # Former Company Names
+        if self.former_company_names:
+            former_company_table = Table("Former Company Name", "Date of Change", box=box.SIMPLE)
+            for company in self.former_company_names:
+                former_company_table.add_row(company.name, company.date_of_change)
+            filer_renderables.append(former_company_table)
+
+        return Panel(
+            Group(*filer_renderables),
+            title="FILER"
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
 
 @dataclass(frozen=True)
 class Owner:
@@ -670,6 +717,38 @@ class ReportingOwner:
     filing_information: FilingInformation
     business_address: Address
     mailing_address: Address
+
+    def __rich__(self):
+        reporting_owner_renderables = []
+
+        # Owner Table
+        if self.owner:
+            reporting_owner_table = Table("Owner", "CIK", box=box.SIMPLE)
+            reporting_owner_table.add_row(self.owner.name, self.owner.cik)
+
+            reporting_owner_renderables = [reporting_owner_table]
+        # Reporting Owner Filing Values
+        if self.filing_information:
+            filing_values_table = Table("File Number", "SEC Act", "Film Number", box=box.SIMPLE)
+            filing_values_table.add_row(self.filing_information.file_number,
+                                        self.filing_information.sec_act,
+                                        self.filing_information.film_number)
+            reporting_owner_renderables.append(filing_values_table)
+
+        # Addresses
+        if self.business_address or self.mailing_address:
+            reporting_owner_renderables.append(_create_address_table(self.business_address, self.mailing_address))
+
+        return Panel(
+            Group(
+                *reporting_owner_renderables
+            ),
+            title=reporting_owner_title
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
 
 @dataclass(frozen=True)
 class SubjectCompany:
@@ -686,25 +765,61 @@ class Issuer:
     business_address: Address
     mailing_address: Address
 
+    def __rich__(self):
+        issuer_table = Table("Company", "CIK", "SIC", "Fiscal Year End",
+                             box=box.SIMPLE)
+        issuer_table.add_row(self.company_information.name,
+                             self.company_information.cik,
+                             self.company_information.sic,
+                             self.company_information.fiscal_year_end)
+
+        # The list of renderables for the issuer panel
+        issuer_renderables = [issuer_table]
+
+        # Addresses
+        if self.business_address or self.mailing_address:
+            issuer_renderables.append(_create_address_table(self.business_address, self.mailing_address))
+
+
+        return Panel(
+            Group(
+                *issuer_renderables
+            ),
+            title=issuer_title
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
 
 # Title text
 mailing_address_title = "\U0001F4EC Mailing Address"
 business_address_title = "\U0001F4EC Business Address"
-company_title = "\U0001F3E2 Company"
+company_title = "\U0001F3E2 Company Information"
 reporting_owner_title = "\U0001F468 REPORTING OWNER"
 issuer_title = "\U0001F4B5 ISSUER"
 filing_title = "\U0001F4D1 FILING"
 
+def _create_address_table(business_address: Address, mailing_address: Address):
+    address_table = Table("Address Type", "Street1", "Street2", "City", "State", "Zipcode",
+                          title="\U0001F4EC Addresses", box=box.SIMPLE)
+    if business_address:
+        address_table.add_row("\U0001F3E2 Business",
+                              business_address.street1,
+                              business_address.street2,
+                              business_address.city,
+                              business_address.state_or_country,
+                              business_address.zipcode)
 
-def _create_address_table(address: Address, title: str):
-    address_table = Table("Street1", "Street2", "City", "State", "Zipcode",
-                          title=title, box=box.SIMPLE)
-    address_table.add_row(address.street1,
-                          address.street2,
-                          address.city,
-                          address.state_or_country,
-                          address.zipcode)
+    if mailing_address:
+        address_table.add_row("\U0001F4ED Mailing",
+                              mailing_address.street1,
+                              mailing_address.street2,
+                              mailing_address.city,
+                              mailing_address.state_or_country,
+                              mailing_address.zipcode)
     return address_table
+
 
 class SECHeader:
     """
@@ -721,7 +836,7 @@ class SECHeader:
                  reporting_owners: List[ReportingOwner] = None,
                  issuers: List[Issuer] = None,
                  subject_companies: List[SubjectCompany] = None):
-        self.header_text:str = header_text
+        self.header_text: str = header_text
         self.filing_metadata: Dict[str, str] = filing_metadata
         self.filers: List[Filer] = filers
         self.reporting_owners: List[ReportingOwner] = reporting_owners
@@ -755,7 +870,7 @@ class SECHeader:
             return datetime.strptime(acceptance, "%Y%m%d%H%M%S")
 
     @classmethod
-    def parse(cls, header_text:str):
+    def parse(cls, header_text: str):
         data = {}
         current_header = None
         current_subheader = None
@@ -809,49 +924,49 @@ class SECHeader:
             filer_company_values = filer_values.get('COMPANY DATA')
             company_obj = None
             if filer_company_values:
-                    company_obj = CompanyInformation(
-                        name=filer_company_values.get('COMPANY CONFORMED NAME'),
-                        cik=filer_company_values.get('CENTRAL INDEX KEY'),
-                        sic=filer_company_values.get('STANDARD INDUSTRIAL CLASSIFICATION'),
-                        irs_number=filer_company_values.get('IRS NUMBER'),
-                        state_of_incorporation=filer_company_values.get('STATE OF INCORPORATION'),
-                        fiscal_year_end=filer_company_values.get('FISCAL YEAR END')
+                company_obj = CompanyInformation(
+                    name=filer_company_values.get('COMPANY CONFORMED NAME'),
+                    cik=filer_company_values.get('CENTRAL INDEX KEY'),
+                    sic=filer_company_values.get('STANDARD INDUSTRIAL CLASSIFICATION'),
+                    irs_number=filer_company_values.get('IRS NUMBER'),
+                    state_of_incorporation=filer_company_values.get('STATE OF INCORPORATION'),
+                    fiscal_year_end=filer_company_values.get('FISCAL YEAR END')
                 )
             # Filing Values
             filing_values_text_section = filer_values.get('FILING VALUES')
             filing_values_obj = None
             if filing_values_text_section:
-                    filing_values_obj = FilingInformation(
-                        form=filing_values_text_section.get('FORM TYPE'),
-                        sec_act=filing_values_text_section.get('SEC ACT'),
-                        file_number=filing_values_text_section.get('SEC FILE NUMBER'),
-                        film_number=filing_values_text_section.get('FILM NUMBER')
-                    )
-             # Now create the filer
+                filing_values_obj = FilingInformation(
+                    form=filing_values_text_section.get('FORM TYPE'),
+                    sec_act=filing_values_text_section.get('SEC ACT'),
+                    file_number=filing_values_text_section.get('SEC FILE NUMBER'),
+                    film_number=filing_values_text_section.get('FILM NUMBER')
+                )
+            # Now create the filer
             filer = Filer(
-                    company_information=company_obj,
-                    filing_information=filing_values_obj,
-                    business_address=Address(
-                        street1=filer_values['BUSINESS ADDRESS'].get('STREET 1'),
-                        street2=filer_values['BUSINESS ADDRESS'].get('STREET 2'),
-                        city=filer_values['BUSINESS ADDRESS'].get('CITY'),
-                        state_or_country=filer_values['BUSINESS ADDRESS'].get('STATE'),
-                        zipcode=filer_values['BUSINESS ADDRESS'].get('ZIP'),
+                company_information=company_obj,
+                filing_information=filing_values_obj,
+                business_address=Address(
+                    street1=filer_values['BUSINESS ADDRESS'].get('STREET 1'),
+                    street2=filer_values['BUSINESS ADDRESS'].get('STREET 2'),
+                    city=filer_values['BUSINESS ADDRESS'].get('CITY'),
+                    state_or_country=filer_values['BUSINESS ADDRESS'].get('STATE'),
+                    zipcode=filer_values['BUSINESS ADDRESS'].get('ZIP'),
 
-                    ) if 'BUSINESS ADDRESS' in filer_values else None,
-                    mailing_address=Address(
-                        street1=filer_values['MAIL ADDRESS'].get('STREET 1'),
-                        street2=filer_values['MAIL ADDRESS'].get('STREET 2'),
-                        city=filer_values['MAIL ADDRESS'].get('CITY'),
-                        state_or_country=filer_values['MAIL ADDRESS'].get('STATE'),
-                        zipcode=filer_values['MAIL ADDRESS'].get('ZIP'),
+                ) if 'BUSINESS ADDRESS' in filer_values else None,
+                mailing_address=Address(
+                    street1=filer_values['MAIL ADDRESS'].get('STREET 1'),
+                    street2=filer_values['MAIL ADDRESS'].get('STREET 2'),
+                    city=filer_values['MAIL ADDRESS'].get('CITY'),
+                    state_or_country=filer_values['MAIL ADDRESS'].get('STATE'),
+                    zipcode=filer_values['MAIL ADDRESS'].get('ZIP'),
 
-                    ) if 'MAIL ADDRESS' in filer_values else None,
-                    former_company_names=[FormerCompany(date_of_change=record.get('DATE OF NAME CHANGE'),
-                                                        name=record.get('FORMER CONFORMED NAME'))
-                                          for record in filer_values['FORMER COMPANY']
-                                          ]
-                    if 'FORMER COMPANY' in filer_values else None
+                ) if 'MAIL ADDRESS' in filer_values else None,
+                former_company_names=[FormerCompany(date_of_change=record.get('DATE OF NAME CHANGE'),
+                                                    name=record.get('FORMER CONFORMED NAME'))
+                                      for record in filer_values['FORMER COMPANY']
+                                      ]
+                if 'FORMER COMPANY' in filer_values else None
             )
             filers.append(filer)
 
@@ -902,29 +1017,29 @@ class SECHeader:
         issuers = []
         for issuer_values in data.get('ISSUER', []):
             issuer = Issuer(
-                    company_information=CompanyInformation(
-                        name=issuer_values.get('COMPANY DATA').get('COMPANY CONFORMED NAME'),
-                        cik=issuer_values.get('COMPANY DATA').get('CENTRAL INDEX KEY'),
-                        sic=issuer_values.get('COMPANY DATA').get('STANDARD INDUSTRIAL CLASSIFICATION'),
-                        irs_number=issuer_values.get('COMPANY DATA').get('IRS NUMBER'),
-                        state_of_incorporation=issuer_values.get('COMPANY DATA').get('STATE OF INCORPORATION'),
-                        fiscal_year_end=issuer_values.get('COMPANY DATA').get('FISCAL YEAR END')
-                    ) if 'COMPANY DATA' in issuer_values else None,
-                    business_address=Address(
-                        street1=issuer_values.get('BUSINESS ADDRESS').get('STREET 1'),
-                        street2=issuer_values.get('BUSINESS ADDRESS').get('STREET 2'),
-                        city=issuer_values.get('BUSINESS ADDRESS').get('CITY'),
-                        state_or_country=issuer_values.get('BUSINESS ADDRESS').get('STATE'),
-                        zipcode=issuer_values.get('BUSINESS ADDRESS').get('ZIP'),
-                    ) if 'BUSINESS ADDRESS' in issuer_values else None,
-                    mailing_address=Address(
-                        street1=issuer_values.get('MAIL ADDRESS').get('STREET 1'),
-                        street2=issuer_values.get('MAIL ADDRESS').get('STREET 2'),
-                        city=issuer_values.get('MAIL ADDRESS').get('CITY'),
-                        state_or_country=issuer_values.get('MAIL ADDRESS').get('STATE'),
-                        zipcode=issuer_values.get('MAIL ADDRESS').get('ZIP'),
-                    ) if 'MAIL ADDRESS' in issuer_values else None
-                )
+                company_information=CompanyInformation(
+                    name=issuer_values.get('COMPANY DATA').get('COMPANY CONFORMED NAME'),
+                    cik=issuer_values.get('COMPANY DATA').get('CENTRAL INDEX KEY'),
+                    sic=issuer_values.get('COMPANY DATA').get('STANDARD INDUSTRIAL CLASSIFICATION'),
+                    irs_number=issuer_values.get('COMPANY DATA').get('IRS NUMBER'),
+                    state_of_incorporation=issuer_values.get('COMPANY DATA').get('STATE OF INCORPORATION'),
+                    fiscal_year_end=issuer_values.get('COMPANY DATA').get('FISCAL YEAR END')
+                ) if 'COMPANY DATA' in issuer_values else None,
+                business_address=Address(
+                    street1=issuer_values.get('BUSINESS ADDRESS').get('STREET 1'),
+                    street2=issuer_values.get('BUSINESS ADDRESS').get('STREET 2'),
+                    city=issuer_values.get('BUSINESS ADDRESS').get('CITY'),
+                    state_or_country=issuer_values.get('BUSINESS ADDRESS').get('STATE'),
+                    zipcode=issuer_values.get('BUSINESS ADDRESS').get('ZIP'),
+                ) if 'BUSINESS ADDRESS' in issuer_values else None,
+                mailing_address=Address(
+                    street1=issuer_values.get('MAIL ADDRESS').get('STREET 1'),
+                    street2=issuer_values.get('MAIL ADDRESS').get('STREET 2'),
+                    city=issuer_values.get('MAIL ADDRESS').get('CITY'),
+                    state_or_country=issuer_values.get('MAIL ADDRESS').get('STATE'),
+                    zipcode=issuer_values.get('MAIL ADDRESS').get('ZIP'),
+                ) if 'MAIL ADDRESS' in issuer_values else None
+            )
             issuers.append(issuer)
 
         subject_companies = []
@@ -972,7 +1087,7 @@ class SECHeader:
 
         # The header text contains <ACCEPTANCE-DATETIME>20230612172243. Replace with the formatted date
         header_text = re.sub(r'<ACCEPTANCE-DATETIME>(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})',
-               r'ACCEPTANCE-DATETIME:            \1-\2-\3 \4:\5:\6', header_text)
+                             r'ACCEPTANCE-DATETIME:            \1-\2-\3 \4:\5:\6', header_text)
 
         # Remove empty lines from header_text
         header_text = '\n'.join([line for line in header_text.split('\n') if line.strip()])
@@ -988,7 +1103,43 @@ class SECHeader:
         )
 
     def __rich__(self):
-        return Panel(Text(self.header_text))
+
+        # Filing Metadata
+        metadata_table = Table(row_styles=["bold", ""], box=box.ROUNDED)
+        metadata_table.add_column("")
+        metadata_table.add_column("Value", style="bold")
+        for key, value in self.filing_metadata.items():
+            # Format as dates
+            if re.match(r"^(20|19)\d{12}$", value):
+                value = datefmt(value, "%Y-%m-%d %H:%M:%S")
+            elif re.match(r"^(20|19)\d{6}$", value):
+                value = datefmt(value, "%Y-%m-%d")
+
+            metadata_table.add_row(f"{key}:", value)
+
+        metadata_panel = Panel(
+            metadata_table, title=filing_title
+        )
+
+        # Keep a list of renderables for rich
+        renderables = [metadata_panel]
+
+        # FILER
+        for filer in self.filers:
+            renderables.append(filer.__rich__())
+
+        # REPORTING OWNER
+        for reporting_owner in self.reporting_owners:
+            renderables.append(reporting_owner.__rich__())
+
+        # ISSUER
+        for issuer in self.issuers:
+            renderables.append(issuer.__rich__())
+        return Panel(
+            Group(
+                *renderables
+            )
+        )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -1172,10 +1323,10 @@ class Filing:
 
     def summary(self) -> pd.DataFrame:
         """Return a summary of this filing as a dataframe"""
-        return pd.DataFrame([{"accession_no": self.accession_no,
-                              "Filed on": self.filing_date,
+        return pd.DataFrame([{"Accession Number": self.accession_no,
+                              "Filing Date": self.filing_date,
                               "Company": self.company,
-                              "CIK": self.cik}]).set_index("accession_no")
+                              "CIK": self.cik}]).set_index("Accession Number")
 
     def __str__(self):
         """
@@ -1453,6 +1604,7 @@ class FilingHomepage:
         # Keep track of the tables as dataframes so we can append later
         dfs = []
 
+        # The table containin the attachments
         tables = soup.find_all("table", class_="tableFile")
         for table in tables:
             summary = table.attrs.get("summary")
@@ -1477,6 +1629,17 @@ class FilingHomepage:
         # Now concat into a single dataframe
         files = pd.concat(dfs, ignore_index=True)
 
+        # The table containing the contract series
+
+        """
+        table_series = soup.find("table", class_="tableSeries")
+        TODO: Implement Table Series
+        if table_series:
+            for row in table_series.find_all("tr"):
+                cells = row.find_all("td")
+                print(cells)
+         """
+
         return cls(files,
                    url=url,
                    filing=filing)
@@ -1488,9 +1651,9 @@ class FilingHomepage:
         return repr_rich(self.__rich__())
 
     def __rich__(self):
-        return Group(
+        return Panel(Group(
             Text(f"{self.filing.form} filing", style="bold"),
-            df_to_rich_table(self.filing.summary(), index_name="accession_no"),
+            df_to_rich_table(self.filing.summary(), index_name="Accession Number"),
             Group(Text("Documents", style="bold"),
                   df_to_rich_table(summarize_files(self.documents), index_name="Seq")
                   ),
@@ -1499,7 +1662,8 @@ class FilingHomepage:
                       summarize_files(self.datafiles), index_name="Seq"),
                   ) if self.datafiles is not None else Text(""),
 
-        )
+        ), title=f"{self.filing.form} filing            Accession Number: {self.filing.accession_no}")
+
 
 
 def summarize_files(data: pd.DataFrame) -> pd.DataFrame:

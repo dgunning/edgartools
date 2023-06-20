@@ -214,6 +214,13 @@ def test_filing_homepage_for_filing():
     assert 'Description'
     assert filing_homepage.url == carbo_10K.url
 
+def test_filing_homepage_for_filing_multiple_instruments():
+    filing = Filing(form='DEF 14A', filing_date='2023-06-16', company='T. Rowe Price All-Cap Opportunities Fund, Inc.',
+                    cik=773485, accession_no='0001741773-23-002051')
+    homepage:FilingHomepage = filing.homepage
+    print(homepage)
+    assert homepage
+
 
 def test_filing_homepage_documents_and_datafiles():
     filing_homepage: FilingHomepage = carbo_10K.homepage
@@ -1009,3 +1016,58 @@ FILER:
     assert filer1.filing_information.file_number == '000-50139'
     assert filer1.filing_information.film_number == '231004916'
     assert not filer1.business_address
+
+
+def test_parse_header_filing_with_multiple_former_companies():
+    sec_header = SECHeader.parse(
+    """
+<ACCEPTANCE-DATETIME>20230609124624
+ACCESSION NUMBER:		0001472375-23-000090
+CONFORMED SUBMISSION TYPE:	10-K
+PUBLIC DOCUMENT COUNT:		54
+CONFORMED PERIOD OF REPORT:	20230331
+FILED AS OF DATE:		20230609
+DATE AS OF CHANGE:		20230609
+
+FILER:
+
+	COMPANY DATA:	
+		COMPANY CONFORMED NAME:			REGENEREX PHARMA, INC.
+		CENTRAL INDEX KEY:			0001357878
+		STANDARD INDUSTRIAL CLASSIFICATION:	PHARMACEUTICAL PREPARATIONS [2834]
+		IRS NUMBER:				980479983
+		STATE OF INCORPORATION:			NV
+		FISCAL YEAR END:			0331
+
+	FILING VALUES:
+		FORM TYPE:		10-K
+		SEC ACT:		1934 Act
+		SEC FILE NUMBER:	000-53230
+		FILM NUMBER:		231004569
+
+	BUSINESS ADDRESS:	
+		STREET 1:		5348 VEGAS DRIVE, SUITE 177
+		CITY:			LAS VEGAS
+		STATE:			NV
+		ZIP:			89108
+		BUSINESS PHONE:		305-927-5191
+
+	MAIL ADDRESS:	
+		STREET 1:		5348 VEGAS DRIVE, SUITE 177
+		CITY:			LAS VEGAS
+		STATE:			NV
+		ZIP:			89108
+
+	FORMER COMPANY:	
+		FORMER CONFORMED NAME:	PEPTIDE TECHNOLOGIES, INC.
+		DATE OF NAME CHANGE:	20180309
+
+	FORMER COMPANY:	
+		FORMER CONFORMED NAME:	Eternelle Skincare Products Inc.
+		DATE OF NAME CHANGE:	20170621
+
+	FORMER COMPANY:	
+		FORMER CONFORMED NAME:	PEPTIDE TECHNOLOGIES, INC.
+		DATE OF NAME CHANGE:	20111007        
+    """)
+    print(sec_header)
