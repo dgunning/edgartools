@@ -12,7 +12,8 @@ from typing import List
 from edgar import get_filings, Filings, Filing, get_company, get_by_accession_number
 from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, SECHeader, read_fixed_width_index, form_specs, company_specs, Attachments, \
-    Attachment
+    Attachment, Filer
+
 from edgar.forms import TenK
 from rich import print
 
@@ -228,6 +229,14 @@ def test_filing_homepage_documents_and_datafiles():
     assert len(filing_homepage.documents) > 8
     assert len(filing_homepage.datafiles) >= 6
     assert filing_homepage.url == carbo_10K.url
+
+def test_parse_filing_homepage_with_multiple_instruments():
+    filing = Filing(form='DEF 14A', filing_date='2023-06-16', company='T. Rowe Price All-Cap Opportunities Fund, Inc.',
+                    cik=773485, accession_no='0001741773-23-002051')
+    homepage_html = Path('data/troweprice.DEF14A.html').read_text()
+    filing_homepage = FilingHomepage.from_html(homepage_html, url=filing.homepage_url, filing=filing)
+    #print(filing_homepage)
+
 
 
 def test_get_matching_files():
@@ -756,6 +765,7 @@ def test_filing_sec_header():
 
 
 def test_parse_sec_header_with_filer():
+
     header_content = Path('data/secheader.424B5.abeona.txt').read_text()
     sec_header = SECHeader.parse(header_content)
     print()
@@ -796,6 +806,18 @@ def test_parse_sec_header_with_filer():
 
     assert not sec_header.reporting_owners
     assert not sec_header.issuers
+
+
+    # Goldman Sachs
+    # This Goldman Sachs filing has an extra : in the Street2 field
+    # 		STREET 2:		ATT: PRIVATE CREDIT GROUP
+    header_content = Path('data/secheader.N2A.goldman.txt').read_text()
+    print(header_content)
+    sec_header = SECHeader.parse(header_content)
+    assert sec_header.filers[0].business_address.street1 == '200 WEST STREET'
+    assert sec_header.filers[0].business_address.street2 == 'ATT: PRIVATE CREDIT GROUP'
+
+
 
 
 def test_parse_sec_header_with_reporting_owner():
@@ -1071,3 +1093,12 @@ FILER:
 		DATE OF NAME CHANGE:	20111007        
     """)
     print(sec_header)
+    assert len(sec_header.filers) == 1
+    filer:Filer = sec_header.filers[0]
+    assert len(filer.former_company_names) == 3
+    assert filer.former_company_names[0].name == 'PEPTIDE TECHNOLOGIES, INC.'
+    assert filer.former_company_names[1].name == 'Eternelle Skincare Products Inc.'
+    assert filer.former_company_names[2].name == 'PEPTIDE TECHNOLOGIES, INC.'
+    assert filer.former_company_names[0].date_of_change == '20180309'
+    assert filer.former_company_names[1].date_of_change == '20170621'
+    assert filer.former_company_names[2].date_of_change == '20111007'

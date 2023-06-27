@@ -944,7 +944,11 @@ class SECHeader:
                     # Strip the leading '<' from the key
                     data[key[1:]] = value
                 elif ':' in line:
-                    key, value = line.strip().split(':')
+                    parts = line.strip().split(':')
+                    if len(parts) == 2:
+                        key, value = line.strip().split(':')
+                    else:
+                        key, value = parts[0], ":".join(parts[1:])
                     value = value.strip()
                     if not current_header:
                         data[key] = value
@@ -1539,6 +1543,20 @@ class Attachment:
 filing_file_cols = ['Seq', 'Description', 'Document', 'Type', 'Size', 'Url']
 
 
+@dataclass(frozen=True)
+class ClassContractSeries:
+
+    cik: str
+
+@dataclass(frozen=True)
+class ClassContract:
+
+    cik: str
+    name: str
+    ticker: str
+    status:str
+
+
 class FilingHomepage:
     """
     A class that represents the homepage for the filing allowing us to get the documents and datafiles
@@ -1641,7 +1659,7 @@ class FilingHomepage:
         """Parse the HTML and create the Homepage from it"""
 
         # It is html so use "html.parser" (instead of "xml", or "lxml")
-        soup = BeautifulSoup(homepage_html, features="html.parser")
+        soup = BeautifulSoup(homepage_html, "html.parser")
 
         # Keep track of the tables as dataframes so we can append later
         dfs = []
@@ -1672,16 +1690,30 @@ class FilingHomepage:
         files = pd.concat(dfs, ignore_index=True)
 
         # The table containing the contract series
-
+        # TODO: Implement Table Series
         """
         table_series = soup.find("table", class_="tableSeries")
-        TODO: Implement Table Series
+        
         if table_series:
-            for row in table_series.find_all("tr"):
+            rows = table_series.find_all("tr")
+            for row in rows:
                 cells = row.find_all("td")
-                print(cells)
-         """
-
+                if len(cells) > 0:
+                    # print the class of the first cell
+                    cell_class = cells[0].attrs.get("class")[0]
+                    class_series:Optional[ClassContractSeries] = None
+                    if cell_class == "seriesName":
+                        class_series = ClassContractSeries(cik=cells[0].text.replace("Series ", ""))
+                    
+                    print(cell_class, cells[0].text)
+                    
+                    if cell_class == 'seriesName':
+                        series_name = cells[0].text
+                        print(series_name)
+                    elif cell_class == 'classContract':
+                        class_contract = cells[0].text
+                        print(class_contract)
+        """
         return cls(files,
                    url=url,
                    filing=filing)
