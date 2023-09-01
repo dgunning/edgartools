@@ -338,12 +338,11 @@ def get_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.
                     continue  # Skip the current line as it's the opening tag
 
                 # If line matches header_end, stop capturing
-                if line.startswith(tag_end):
-                    is_header = False
+                elif line.startswith(tag_end):
                     break
 
                 # If within header lines, add to header_content
-                if is_header:
+                elif is_header:
                     content += line + '\n'  # Add a newline to preserve original line breaks
     return content
 
