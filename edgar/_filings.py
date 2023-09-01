@@ -18,17 +18,18 @@ import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
+from rich import box
+from rich.columns import Columns
 from rich.console import Group, Console
 from rich.panel import Panel
-from rich.text import Text
 from rich.table import Table
-from rich import box
+from rich.text import Text
 
 from edgar._markdown import MarkdownContent
 from edgar._markdown import html_to_markdown
+from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
-from edgar._party import Address
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, sec_dot_gov, InvalidDateException, IntString, DataPager, text_extensions,
                         datefmt)
@@ -1547,6 +1548,8 @@ filing_file_cols = ['Seq', 'Description', 'Document', 'Type', 'Size', 'Url']
 class ClassContractSeries:
 
     cik: str
+    url: str
+
 
 @dataclass(frozen=True)
 class ClassContract:
@@ -1557,6 +1560,22 @@ class ClassContract:
     status:str
 
 
+@dataclass(frozen=True)
+class FilerInfo:
+
+    company_name:str
+    identification:str
+    addresses:List[str]
+
+    def __rich__(self):
+        return Panel(
+            Columns([self.identification, Text("   "), self.addresses[0], self.addresses[1]]),
+            title=self.company_name
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
 class FilingHomepage:
     """
     A class that represents the homepage for the filing allowing us to get the documents and datafiles
@@ -1565,10 +1584,12 @@ class FilingHomepage:
     def __init__(self,
                  files: pd.DataFrame,
                  url: str,
-                 filing: Filing):
+                 filing: Filing,
+                 filer_infos:List[FilerInfo]):
         self._files: pd.DataFrame = files
         self.url: str = url
         self.filing: Filing = filing
+        self.filer_infos:List[FilerInfo] = filer_infos
 
     def get_file(self,
                  *,
@@ -1689,34 +1710,44 @@ class FilingHomepage:
         # Now concat into a single dataframe
         files = pd.concat(dfs, ignore_index=True)
 
-        # The table containing the contract series
-        # TODO: Implement Table Series
-        """
-        table_series = soup.find("table", class_="tableSeries")
-        
-        if table_series:
-            rows = table_series.find_all("tr")
-            for row in rows:
-                cells = row.find_all("td")
-                if len(cells) > 0:
-                    # print the class of the first cell
-                    cell_class = cells[0].attrs.get("class")[0]
-                    class_series:Optional[ClassContractSeries] = None
-                    if cell_class == "seriesName":
-                        class_series = ClassContractSeries(cik=cells[0].text.replace("Series ", ""))
-                    
-                    print(cell_class, cells[0].text)
-                    
-                    if cell_class == 'seriesName':
-                        series_name = cells[0].text
-                        print(series_name)
-                    elif cell_class == 'classContract':
-                        class_contract = cells[0].text
-                        print(class_contract)
-        """
+
+        filer_divs = soup.find_all("div", id="filerDiv")
+        filer_infos = []
+        for filer_div in filer_divs:
+
+            # Get the company name
+            company_info_div = filer_div.find("div", class_="companyInfo")
+
+            company_name_span = company_info_div.find("span", class_="companyName")
+            company_name = (re.sub("\n", "", company_name_span.text.strip())
+                            .replace("(see all company filings)", "").rstrip()
+                            if company_name_span else "")
+
+            # Get the identification information
+            ident_info_div = company_info_div.find("p", class_="identInfo")
+
+            # Relace <br> with newlines
+            for br in ident_info_div.find_all("br"):
+                br.replace_with("\n")
+
+            identification = ident_info_div.text
+
+            # Get the mailing information
+            mailer_divs = filer_div.find_all("div", class_="mailer")
+            # For each mailed_div.text remove mutiple spaces after a newline
+
+            addresses = [re.sub('\n\s+', '\n', mailer_div.text.strip() )
+                         for mailer_div in mailer_divs]
+
+            # Create the filer info
+            filer_info = FilerInfo(company_name=company_name, identification=identification, addresses=addresses)
+
+            filer_infos.append(filer_info)
+
         return cls(files,
                    url=url,
-                   filing=filing)
+                   filing=filing,
+                   filer_infos=filer_infos)
 
     def __str__(self):
         return f"Homepage for {self.description}"
@@ -1725,18 +1756,21 @@ class FilingHomepage:
         return repr_rich(self.__rich__())
 
     def __rich__(self):
-        return Panel(Group(
-            Text(f"{self.filing.form} filing", style="bold"),
-            df_to_rich_table(self.filing.summary(), index_name="Accession Number"),
-            Group(Text("Documents", style="bold"),
+
+        return Panel(
+            Group(
+                df_to_rich_table(self.filing.summary(), index_name="Accession Number"),
+                Group(Text("Documents", style="bold"),
                   df_to_rich_table(summarize_files(self.documents), index_name="Seq")
                   ),
-            Group(Text("Datafiles", style="bold"),
-                  df_to_rich_table(
-                      summarize_files(self.datafiles), index_name="Seq"),
+                Group(Text("Datafiles", style="bold"),
+                  df_to_rich_table(summarize_files(self.datafiles), index_name="Seq"),
                   ) if self.datafiles is not None else Text(""),
+                Group(
+                    *[filer_info.__rich__() for filer_info in self.filer_infos]
+                )
 
-        ), title=f"{self.filing.form} filing            Accession Number: {self.filing.accession_no}")
+        ), title=f"Form {self.filing.form}")
 
 
 def summarize_files(data: pd.DataFrame) -> pd.DataFrame:

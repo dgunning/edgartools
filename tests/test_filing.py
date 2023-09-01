@@ -233,9 +233,25 @@ def test_filing_homepage_documents_and_datafiles():
 def test_parse_filing_homepage_with_multiple_instruments():
     filing = Filing(form='DEF 14A', filing_date='2023-06-16', company='T. Rowe Price All-Cap Opportunities Fund, Inc.',
                     cik=773485, accession_no='0001741773-23-002051')
+
     homepage_html = Path('data/troweprice.DEF14A.html').read_text()
     filing_homepage = FilingHomepage.from_html(homepage_html, url=filing.homepage_url, filing=filing)
-    #print(filing_homepage)
+    print()
+
+    assert len(filing_homepage.filer_infos) >60
+    filer_info = filing_homepage.filer_infos[0]
+    assert filer_info.company_name == "T. Rowe Price Small-Cap Stock Fund, Inc. (Filer) CIK: 0000075170"
+    assert "100 EAST PRATT STRET" in filer_info.addresses[0]
+    print(filing_homepage)
+
+
+def test_get_filer_info_from_homepage():
+    # This is a form 4 filing so there is an Issuer "LiveRamp Holdings" and a Reporter "Scott E Rowe"
+    filing = Filing(form='4', filing_date='2023-08-23', company='Howe Scott E', cik=1369558,
+                    accession_no='0001903601-23-000091')
+    print()
+    print(filing.homepage)
+    print(filing.homepage.filer_infos)
 
 
 
