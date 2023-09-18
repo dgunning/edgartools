@@ -12,7 +12,7 @@ from typing import List
 from edgar import get_filings, Filings, Filing, get_company, get_by_accession_number
 from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, SECHeader, read_fixed_width_index, form_specs, company_specs, Attachments, \
-    Attachment, Filer
+    Attachment, Filer, get_current_filings
 
 from edgar.forms import TenK
 from rich import print
@@ -1118,3 +1118,20 @@ FILER:
     assert filer.former_company_names[0].date_of_change == '20180309'
     assert filer.former_company_names[1].date_of_change == '20170621'
     assert filer.former_company_names[2].date_of_change == '20111007'
+
+def test_get_current_filings():
+    filings = get_current_filings()
+    print()
+    print(filings)
+    assert not filings.empty
+
+    filing = filings[0]
+    print(str(filing))
+
+
+
+def test_get_current_filings_by_form():
+    filings = get_current_filings(form="3")
+    print()
+    print(filings)
+    assert not filings.empty

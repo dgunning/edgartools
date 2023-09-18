@@ -24,6 +24,7 @@ from edgar._filings import (Filing,
                             get_filings,
                             get_by_accession_number,
                             get_funds,
+                            get_current_filings,
                             get_fund_filings,
                             FilingHomepage)
 from edgar._xbrl import FilingXbrl

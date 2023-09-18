@@ -30,6 +30,7 @@ from edgar._markdown import html_to_markdown
 from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
+from edgar._xml import child_text
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, sec_dot_gov, InvalidDateException, IntString, DataPager, text_extensions,
                         datefmt)
@@ -55,8 +56,10 @@ __all__ = [
     'Attachment',
     'Attachments',
     'FilingHomepage',
+    'CurrentFilings',
     'get_fund_filings',
     'available_quarters',
+    'get_current_filings',
     'get_by_accession_number',
     'get_restricted_stock_filings',
     'get_insider_transaction_filings'
@@ -613,6 +616,154 @@ get_restricted_stock_filings = partial(get_filings, form=[144])
 # Insider transaction filings
 get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
+"""
+Get the current filings from the SEC. Use this to get the filings filed after the 5:30 deadline
+"""
+GET_CURRENT_URL = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&output=atom&owner=only&count=100"
+title_regex = re.compile(r"(.*) - (.*) \((\d+)\) \((.*)\)")
+summary_regex = re.compile(r'<b>([^<]+):</b>\s+([^<\s]+)')
+
+
+def parse_title(title: str):
+    """
+    Given the title in this example
+
+    "144 - monday.com Ltd. (0001845338) (Subject)"
+    which contains the form type, company name, CIK, and status
+    parse into a tuple of form type, company name, CIK, and status using regex
+    """
+    match = title_regex.match(title)
+    assert match, f"Could not parse title: {title} using regex: {title_regex}"
+    return match.groups()
+
+
+def parse_summary(summary: str):
+    """
+    Given the summary in this example
+
+    "Filed: 2021-09-30 AccNo: 0001845338-21-000002 Size: 1 MB"
+
+    parse into a tuple of filing date, accession number, and size
+    """
+    # Remove <b> and </b> tags from summary
+
+    matches = re.findall(summary_regex, summary)
+
+    # Convert matches into a dictionary
+    fields = {k.strip(): (int(v) if v.isdigit() else v) for k, v in matches}
+    return fields.get('Filed'), fields.get('AccNo')
+
+
+def get_current_url(atom: True,
+                    count: int = 100,
+                    start: int = 0,
+                    form: str = '',
+                    owner: str = 'include'):
+    url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
+
+    count = count if count in [10, 20, 40, 80, 100] else 40
+    owner = owner if owner in ['include', 'exclude', 'only'] else 'include'
+
+    url = url + f"&count={count}&start={start}&type={form}&owner={owner}"
+    if atom:
+        url += "&output=atom"
+    return url
+
+
+@lru_cache(maxsize=32)
+def get_current_entries_on_page(count: int, start: int, form: str = None, owner: str = 'include'):
+    client = http_client()
+    url = get_current_url(count=count, start=start, form=form, owner=owner, atom=True)
+    result = client.get(url)
+    soup = BeautifulSoup(result.text, features="xml")
+    entries = []
+    for entry in soup.find_all("entry"):
+        # The title contains the form type, company name, CIK, and status e.g 4 - WILKS LEWIS (0001076463) (Reporting)
+        title = child_text(entry, "title")
+        form_type, company_name, cik, status = parse_title(title)
+        # The summary contains the filing date and link to the filing
+        summary = child_text(entry, "summary")
+        filing_date, accession_number = parse_summary(summary)
+
+        entries.append({'form': form_type,
+                        'company': company_name,
+                        'cik': cik,
+                        'filing_date': filing_date,
+                        'accession_number': accession_number})
+    return entries
+
+
+def get_current_filings(form: str = '',
+                        owner: str = None,
+                        page_size: int = 40):
+    """
+    Get the current filings from the SEC
+    :return: The current filings from the SEC
+    """
+    owner = owner if owner in ['include', 'exclude', 'only'] else 'include'
+    page_size = page_size if page_size in [10, 20, 40, 80, 100] else 40
+    start = 0
+
+    entries = get_current_entries_on_page(count=page_size, start=start, form=form, owner=owner)
+    return CurrentFilings(filing_index=pa.Table.from_pylist(entries), owner=owner, form=form, page_size=page_size)
+
+
+class CurrentFilings(Filings):
+    """
+    This version of the Filings class is used to get the current filings from the SEC
+    page by page
+    """
+
+    def __init__(self,
+                 filing_index: pa.Table,
+                 form: str = '',
+                 start: int = 1,
+                 page_size: int = 40,
+                 owner: str = 'exclude'):
+        super().__init__(filing_index, original_state=None)
+        self.filing_index: pa.Table = filing_index
+        self._start = start
+        self._page_size = page_size
+        self.owner = owner
+        self.form = form
+
+    def next(self):
+        # If the number of entries is less than the page size then we are at the end of the data
+        if len(self.data) < self._page_size:
+            return None
+        start = self._start + len(self.data)
+        next_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form)
+        if next_entries:
+            # Copy the values to this Filings object and return it
+            self.filing_index = pa.Table.from_pylist(next_entries)
+            self._start = start
+            return self
+
+    def previous(self):
+        # If start = 1 then there are no previous entries
+        if self._start == 1:
+            return None
+        start = max(1, self._start - self._page_size)
+        previous_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form)
+        if previous_entries:
+            # Copy the values to this Filings object and return it
+            self.filing_index = pa.Table.from_pylist(previous_entries)
+            self._start = start
+            return self
+
+    def __rich__(self):
+        page: pd.DataFrame = self.filing_index.to_pandas()
+        # compute the index from the start and page_size and set it as the index of the page
+        page.index = range(self._start - 1, self._start - 1 + len(page))
+
+        return Panel(
+            Group(
+                df_to_rich_table(page),
+                Text(f"Filings {page.index.min()} to {page.index.max()}")
+            ), title=f"Current Filings on {self.start_date}"
+        )
+
+
 
 @lru_cache(maxsize=8)
 def _get_cached_filings(year: Years = None,
@@ -797,6 +948,7 @@ class SubjectCompany:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
 
 @dataclass(frozen=True)
 class Issuer:
@@ -1546,26 +1698,23 @@ filing_file_cols = ['Seq', 'Description', 'Document', 'Type', 'Size', 'Url']
 
 @dataclass(frozen=True)
 class ClassContractSeries:
-
     cik: str
     url: str
 
 
 @dataclass(frozen=True)
 class ClassContract:
-
     cik: str
     name: str
     ticker: str
-    status:str
+    status: str
 
 
 @dataclass(frozen=True)
 class FilerInfo:
-
-    company_name:str
-    identification:str
-    addresses:List[str]
+    company_name: str
+    identification: str
+    addresses: List[str]
 
     def __rich__(self):
         return Panel(
@@ -1576,6 +1725,7 @@ class FilerInfo:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
+
 class FilingHomepage:
     """
     A class that represents the homepage for the filing allowing us to get the documents and datafiles
@@ -1585,11 +1735,11 @@ class FilingHomepage:
                  files: pd.DataFrame,
                  url: str,
                  filing: Filing,
-                 filer_infos:List[FilerInfo]):
+                 filer_infos: List[FilerInfo]):
         self._files: pd.DataFrame = files
         self.url: str = url
         self.filing: Filing = filing
-        self.filer_infos:List[FilerInfo] = filer_infos
+        self.filer_infos: List[FilerInfo] = filer_infos
 
     def get_file(self,
                  *,
@@ -1710,7 +1860,6 @@ class FilingHomepage:
         # Now concat into a single dataframe
         files = pd.concat(dfs, ignore_index=True)
 
-
         filer_divs = soup.find_all("div", id="filerDiv")
         filer_infos = []
         for filer_div in filer_divs:
@@ -1736,7 +1885,7 @@ class FilingHomepage:
             mailer_divs = filer_div.find_all("div", class_="mailer")
             # For each mailed_div.text remove mutiple spaces after a newline
 
-            addresses = [re.sub('\n\s+', '\n', mailer_div.text.strip() )
+            addresses = [re.sub('\n\s+', '\n', mailer_div.text.strip())
                          for mailer_div in mailer_divs]
 
             # Create the filer info
@@ -1761,16 +1910,16 @@ class FilingHomepage:
             Group(
                 df_to_rich_table(self.filing.summary(), index_name="Accession Number"),
                 Group(Text("Documents", style="bold"),
-                  df_to_rich_table(summarize_files(self.documents), index_name="Seq")
-                  ),
+                      df_to_rich_table(summarize_files(self.documents), index_name="Seq")
+                      ),
                 Group(Text("Datafiles", style="bold"),
-                  df_to_rich_table(summarize_files(self.datafiles), index_name="Seq"),
-                  ) if self.datafiles is not None else Text(""),
+                      df_to_rich_table(summarize_files(self.datafiles), index_name="Seq"),
+                      ) if self.datafiles is not None else Text(""),
                 Group(
                     *[filer_info.__rich__() for filer_info in self.filer_infos]
                 )
 
-        ), title=f"Form {self.filing.form}")
+            ), title=f"Form {self.filing.form}")
 
 
 def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
