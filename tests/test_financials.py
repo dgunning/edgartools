@@ -72,6 +72,8 @@ def test_apple_financials():
     assert income_statement.net_income == "$99,803,000,000"
     assert income_statement.depreciation_and_amortization == "$11,104,000,000"
     assert income_statement.earnings_per_share == "6.15"
+    assert income_statement.interest_expense == "$2,931,000,000"
+    assert income_statement.interest_and_dividend_incoms == "$2,825,000,000"
 
     # Balance Sheet
     balance_sheet = tenk.balance_sheet

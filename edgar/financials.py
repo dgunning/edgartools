@@ -38,6 +38,7 @@ gaap_facts = {'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEq
               'DepreciationDepletionAndAmortization': 'Depreciation & Amortization',
               'OperatingIncomeLoss': 'Operating Income or Loss',
               'NetIncomeLoss': 'Net Income',
+              'InvestmentIncomeInterestAndDividend': 'Investment Income Interest and Dividend',
               'RepaymentsOfLongTermDebt': 'Repayments of Long Term Debt',
               'InventoryNet': 'Inventories',
               'DeferredIncomeTaxExpenseBenefit': 'Deferred Income Tax Expense (Benefit)',
@@ -48,6 +49,7 @@ gaap_facts = {'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEq
               'MarketableSecuritiesCurrent': 'Short Term Investments',
               'OtherAssetsCurrent': 'Other Current Assets',
               'PaymentsOfDividends': 'Dividends Paid',
+              'InterestExpense': 'Interest Expense',
               'NetCashProvidedByUsedInInvestingActivities': 'Net Cash used in Investing Activities',
               'NetCashProvidedByUsedInFinancingActivities': 'Net Cash used in Financing Activities',
               'PaymentsForProceedsFromOtherInvestingActivities': 'Other Investing Activities',
@@ -309,8 +311,10 @@ class IncomeStatement(FinancialTable):
         'GrossProfit',
         'OperatingExpenses',
         'OperatingIncomeLoss',
+        'InvestmentIncomeInterestAndDividend',
         'NetIncomeLoss',
-        'InterestExpenseIncomeNet'
+        'InterestExpense',
+
     ]
 
     def __init__(self,
@@ -359,12 +363,20 @@ class IncomeStatement(FinancialTable):
         return self.get_value('NetIncomeLoss')
 
     @property
+    def interest_and_dividend_incoms(self):
+        return self.get_value('InvestmentIncomeInterestAndDividend')
+
+    @property
     def depreciation_and_amortization(self):
         return self.get_value('DepreciationDepletionAndAmortization')
 
     @property
     def earnings_per_share(self):
         return self.get_value('EarningsPerShareBasic', currency=False)
+
+    @property
+    def interest_expense(self):
+        return self.get_value('InterestExpense')
 
     @property
     def income_statement_dataframe(self):
