@@ -3,6 +3,8 @@ from pathlib import Path
 from edgar.search import numeric_shape, preprocess, convert_items_to_tokens, RegexSearch, BM25Search
 from rich import print
 from markdownify import markdownify
+from edgar import Filing
+from edgar.search import SearchResults
 
 blackrock_8k = Path('data/form8K.Blackrock.html').read_text()
 document_sections = re.split(r"\n\s*\n", markdownify(blackrock_8k))
@@ -71,3 +73,22 @@ def test_convert_items_to_tokens():
     text = "item 0 and Item 1 and item 2 and item 4.01 and Item 1A"
     item_text = convert_items_to_tokens(text)
     print(item_text)
+
+
+def test_search_sections():
+    print()
+    filing = Filing(company='NVIDIA CORP', cik=1045810, form='10-K', filing_date='2023-02-24',
+                    accession_no='0001045810-23-000017')
+
+    results:SearchResults = filing.search("GPU")
+    assert len(results) > 0
+
+    print(results)
+
+    assert 'GPU' in results[0]
+
+    # search for a term that's not there
+    results: SearchResults = filing.search("NOTTHERE")
+    assert len(results) == 0
+    print(results)
+

@@ -47,10 +47,10 @@ class SimilaritySearchIndex:
         return df[cols]
 
     def __repr__(self):
-        return f"SimilaritySearchIndex(search_column='{self.search_column}')"
+        return f"SimilaritySearchIndex(search_column='{self._search_column}')"
 
 
-Corpus = List[str]
+Corpus = List[List[str]]
 
 
 def tokenize(text):
@@ -65,9 +65,8 @@ def punctuation_filter(tokens):
     return [PUNCTUATION.sub('', token) for token in tokens]
 
 
-STOPWORDS = set(['the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have',
-                 'i', 'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you',
-                 'do', 'at', 'this', 'but', 'his', 'by', 'from'])
+STOPWORDS = {'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he',
+             'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from'}
 
 
 def stopword_filter(tokens):
@@ -133,18 +132,30 @@ class SearchResults:
     def __len__(self):
         return len(self.sections)
 
+    @property
+    def empty(self):
+        return len(self) == 0
+
+    def __getitem__(self, item):
+        # return none instead of error
+        if 0 > item >= len(self.sections):
+            return None
+        return self.sections[item][1]
+
     def __rich__(self):
         _md = ""
         renderables = []
-        title = f"Search results for '{self.query}'"
+        title = f"Searching for '{self.query}'"
+        subtitle = f"{len(self)} result(s)" if not self.empty else "No results"
         for loc, doc in self.sections:
             if doc.startswith("|  |") and self._show_tables:
                 table = convert_table(doc)
-                renderables.append(table)
+                section = table
             else:
-                renderables.append(Markdown(doc + "\n\n---"))
+                section = Markdown(doc + "\n\n---")
+            renderables.append(Panel(section, box=box.ROUNDED, title=f"{loc}"))
         return Panel(
-            Group(*renderables), title=title, subtitle=title, box=box.ROUNDED
+            Group(*renderables), title=title, subtitle=subtitle, box=box.SIMPLE
         )
 
     def __repr__(self):
@@ -154,7 +165,7 @@ class SearchResults:
 class BM25Search:
 
     def __init__(self,
-                 document_objs: List[object],
+                 document_objs: List[str],
                  text_fn: Callable = None):
         if text_fn:
             self.corpus: Corpus = [BM25Search.preprocess(text_fn(doc)) for doc in document_objs]
@@ -195,7 +206,7 @@ class BM25Search:
 class RegexSearch:
 
     def __init__(self,
-                 documents: List[object]):
+                 documents: List[str]):
         self.document_objs = [RegexSearch.preprocess(document) for document in documents]
 
     def __len__(self):
