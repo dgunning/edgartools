@@ -83,9 +83,16 @@ def test_search_sections():
     results:SearchResults = filing.search("GPU")
     assert len(results) > 0
 
+    # Get the original locations in the document
+    locations = [section.loc for section in results.sections]
+    # assert that locations are non contiguous
+    assert locations != list(range(min(locations), max(locations) + 1))
+    # assert that locations are sorted
+    assert locations == sorted(locations)
+
     print(results)
 
-    assert 'GPU' in results[0]
+    assert 'GPU' in results[0].doc
 
     # search for a term that's not there
     results: SearchResults = filing.search("NOTTHERE")

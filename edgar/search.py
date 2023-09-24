@@ -115,18 +115,40 @@ def preprocess_documents(documents: List[str]) -> Corpus:
     return [preprocess(document) for document in documents]
 
 
-LocAndDoc = Tuple[str, int]
+LocAndDoc = Tuple[int, str]
+
+class DocSection:
+
+    def __init__(self,
+                 loc: int,
+                 doc:str,
+                 score: float = 0.0
+                 ):
+        self.loc:int = loc
+        self.doc:str = doc
+        self.score:float = score
+
+
+    # Make this class sortable by loc
+    def __lt__(self, other):
+        return self.loc < other.loc
+
+    def __hash__(self):
+        return hash(self.doc)
+
+    def __repr__(self):
+        return f"{self.loc}\n{self.doc}"
 
 
 class SearchResults:
 
     def __init__(self,
                  query: str,
-                 sections: LocAndDoc,
+                 sections: List[DocSection],
                  tables: bool = True
                  ):
         self.query: str = query
-        self.sections: LocAndDoc = sections
+        self.sections: List[DocSection] = sections
         self._show_tables = tables
 
     def __len__(self):
@@ -140,20 +162,21 @@ class SearchResults:
         # return none instead of error
         if 0 > item >= len(self.sections):
             return None
-        return self.sections[item][1]
+        return self.sections[item]
 
     def __rich__(self):
         _md = ""
         renderables = []
         title = f"Searching for '{self.query}'"
         subtitle = f"{len(self)} result(s)" if not self.empty else "No results"
-        for loc, doc in self.sections:
-            if doc.startswith("|  |") and self._show_tables:
-                table = convert_table(doc)
+        sorted_sections = sorted(self.sections, key=lambda s: s.score, reverse=True)
+        for i, doc_section in enumerate(sorted_sections):
+            if doc_section.doc.startswith("|  |") and self._show_tables:
+                table = convert_table(doc_section.doc)
                 section = table
             else:
-                section = Markdown(doc + "\n\n---")
-            renderables.append(Panel(section, box=box.ROUNDED, title=f"{loc}"))
+                section = Markdown(doc_section.doc + "\n\n---")
+            renderables.append(Panel(section, box=box.ROUNDED, title=f"{i}"))
         return Panel(
             Group(*renderables), title=title, subtitle=subtitle, box=box.SIMPLE
         )
@@ -194,12 +217,12 @@ class BM25Search:
         preprocessed_query = preprocess(query)
         scores = self.bm25.get_scores(preprocessed_query)
         doc_scores = zip(self.document_objs, scores)
-        doc_scores_sorted = sorted([doc for doc in doc_scores if doc[1] > 0], key=lambda t: t[1])[::-1]
+        #doc_scores_sorted = sorted([doc for doc in doc_scores if doc[1] > 0], key=lambda t: t[1])[::-1]
         # Return the list of location and document
         return SearchResults(query=query,
-                             sections=[(loc, doc_score[0])
-                                       for loc, doc_score in enumerate(doc_scores_sorted)
-                                       if doc_score[1] > 0],
+                             sections=[DocSection(loc=loc, doc=doc_and_score[0], score=doc_and_score[1])
+                                       for loc, doc_and_score in enumerate(doc_scores)
+                                       if doc_and_score[1] > 0],
                              tables=tables)
 
 
@@ -222,7 +245,7 @@ class RegexSearch:
                tables: bool = True):
         return SearchResults(
             query=query,
-            sections=[(loc, doc)
+            sections=[DocSection(loc=loc, doc=doc)
                       for loc, doc in enumerate(self.document_objs)
                       if re.search(query, doc, flags=re.IGNORECASE)],
             tables=tables
