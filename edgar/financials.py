@@ -314,7 +314,6 @@ class IncomeStatement(FinancialTable):
         'InvestmentIncomeInterestAndDividend',
         'NetIncomeLoss',
         'InterestExpense',
-
     ]
 
     def __init__(self,
