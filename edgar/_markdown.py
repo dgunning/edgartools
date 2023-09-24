@@ -75,11 +75,17 @@ def fix_markdown(md: str):
     # Clean up issues with not spaces between sentences like "Condition.On"
     md = re.sub(r"([a-z]\.)([A-Z])", r"\1 \2", md)
 
+    # Remove asterisks inside Items
+    md = re.sub(r"\*\*(Item)\*\*\xa0\*\*(\d)", r"\1 \2", md, flags=re.IGNORECASE)
+
     # And fix split Item numbers e.g. "Item\n5.02"
-    md = re.sub(r"(Item)\n\s?(\d.\d{,2})", r"\1 \2", md)
+    md = re.sub(r"(Item)[\n\xa0]\s?(\d)", r"\1 \2", md, flags=re.IGNORECASE)
 
     # Fix items not on newlines e.g. ". Item 5.02"
-    md = re.sub(r"\. (Item)\s?(\d.\d{,2})", r".\n \1 \2", md)
+    md = re.sub(r"\. (Item)\s?(\d.\d{,2})", r".\n \1 \2", md, flags=re.IGNORECASE)
+
+    # Fix items with no space before Item e.g. "ReservedItem 7"
+    md = re.sub(r"(\S)(Item)\s?(\d.\d{,2})", r"\1\n\n \2 \3", md, flags=re.IGNORECASE)
     return md
 
 
