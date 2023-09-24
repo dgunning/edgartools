@@ -22,9 +22,10 @@ def test_get_current_filings_by_form():
     filings:CurrentFilings = get_current_filings(form=form)
     for i in range(4):
         filings = filings.next()
-        assert all(f.startswith(form) for f in set(filings.filing_index['form'].to_pylist()))
         if not filings:
             break
+        assert all(f.startswith(form) for f in set(filings.filing_index['form'].to_pylist()))
+
 
 
 def test_parse_summary():
