@@ -400,3 +400,22 @@ def test_company_financials():
     assert financials
     assert financials.balance_sheet
 
+
+def test_iterate_company_filings():
+    company = Company('AAPL')
+    filings:CompanyFilings = company.get_filings(form='10-K')
+    assert isinstance(filings, CompanyFilings)
+
+    # Works even when we call head
+    filings = filings.head(4)
+    assert isinstance(filings, CompanyFilings)
+
+    # Works even when we call sample
+    filings = filings.sample(4)
+    assert isinstance(filings, CompanyFilings)
+
+    for filing in filings:
+        assert filing
+
+
+

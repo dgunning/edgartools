@@ -198,6 +198,7 @@ class CompanyFilings(Filings):
             is_inline_xbrl=self.data['isInlineXBRL'][item].as_py()
         )
 
+
     def filter(self,
                form: Union[str, List[str]] = None,
                amendments: bool = None,
@@ -219,6 +220,21 @@ class CompanyFilings(Filings):
         if len(filings) == 1:
             return filings[0]
         return filings
+
+    def head(self, n: int):
+        """Get the first n filings"""
+        selection = self._head(n)
+        return CompanyFilings(data=selection, cik=self.cik, company_name=self.company_name)
+
+    def tail(self, n: int):
+        """Get the last n filings"""
+        selection = self._tail(n)
+        return CompanyFilings(data=selection, cik=self.cik, company_name=self.company_name)
+
+    def sample(self, n: int):
+        """Get a random sample of n filings"""
+        selection = self._sample(n)
+        return CompanyFilings(data=selection, cik=self.cik, company_name=self.company_name)
 
     def __str__(self):
         return f"{self.company_name} {self.cik} {super().__repr__()}"
