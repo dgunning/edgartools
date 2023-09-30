@@ -378,26 +378,27 @@ class Filings:
 
         return Filings(filing_index)
 
-    def __head(self, n):
+    def _head(self, n):
         assert n > 0, "The number of filings to select - `n`, should be greater than 0"
         return self.data.slice(0, min(n, len(self.data)))
 
     def head(self, n: int):
         """Get the first n filings"""
-        selection = self.__head(n)
+        selection = self._head(n)
         return Filings(selection)
 
-    def __tail(self, n):
+    def _tail(self, n):
         assert n > 0, "The number of filings to select - `n`, should be greater than 0"
         return self.data.slice(max(0, len(self.data) - n), len(self.data))
 
     def tail(self, n: int):
         """Get the last n filings"""
-        selection = self.__tail(n)
+        selection = self._tail(n)
         return Filings(selection)
 
     def _sample(self, n: int):
-        assert len(self) > n > 0, "The number of filings to select - `n`, should be greater than 0"
+        assert len(self) >= n > 0, \
+            "The number of filings to select - `n`, should be greater than 0 and less than the number of filings"
         return self.data.take(np.random.choice(len(self), n, replace=False)).sort_by([("filing_date", "descending")])
 
     def sample(self, n: int):

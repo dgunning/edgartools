@@ -122,6 +122,9 @@ def test_filing_sample():
     assert len(sample_filings) == 10
     print(sample_filings)
 
+    # Try sampling equal to number of filings
+    assert len(filings.sample(5).sample(5)) == 5
+
 
 def test_filter_filings_by_form():
     filings: Filings = cached_filings(2021, 1, index="xbrl")
