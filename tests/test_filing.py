@@ -600,8 +600,10 @@ def test_get_filings_for_future_period(capsys):
 
 
 def test_get_filings_default():
+
     filings = get_filings()
     assert not filings.empty
+
     filings = get_filings(form="8-K")
     assert not filings.empty
     print()

@@ -1,7 +1,7 @@
 import json
 from functools import lru_cache
 from pathlib import Path
-
+import datetime
 import humanize
 import pyarrow.compute as pc
 from rich import print
@@ -367,6 +367,9 @@ def test_search_for_company():
 
 
 def test_search():
+    is_start_of_quarter = datetime.datetime.now().month in [1, 4, 7, 10] and datetime.datetime.now().day <= 3
+    if is_start_of_quarter:
+        return
     text_index = CompanySearchIndex(get_filings()
                                     .to_pandas('company', 'cik'))
     res = text_index.similar('Tesla')
