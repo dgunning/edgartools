@@ -218,10 +218,11 @@ def test_filing_homepage_for_filing():
     assert 'Description'
     assert filing_homepage.url == carbo_10K.url
 
+
 def test_filing_homepage_for_filing_multiple_instruments():
     filing = Filing(form='DEF 14A', filing_date='2023-06-16', company='T. Rowe Price All-Cap Opportunities Fund, Inc.',
                     cik=773485, accession_no='0001741773-23-002051')
-    homepage:FilingHomepage = filing.homepage
+    homepage: FilingHomepage = filing.homepage
     print(homepage)
     assert homepage
 
@@ -233,6 +234,7 @@ def test_filing_homepage_documents_and_datafiles():
     assert len(filing_homepage.datafiles) >= 6
     assert filing_homepage.url == carbo_10K.url
 
+
 def test_parse_filing_homepage_with_multiple_instruments():
     filing = Filing(form='DEF 14A', filing_date='2023-06-16', company='T. Rowe Price All-Cap Opportunities Fund, Inc.',
                     cik=773485, accession_no='0001741773-23-002051')
@@ -241,7 +243,7 @@ def test_parse_filing_homepage_with_multiple_instruments():
     filing_homepage = FilingHomepage.from_html(homepage_html, url=filing.homepage_url, filing=filing)
     print()
 
-    assert len(filing_homepage.filer_infos) >60
+    assert len(filing_homepage.filer_infos) > 60
     filer_info = filing_homepage.filer_infos[0]
     assert filer_info.company_name == "T. Rowe Price Small-Cap Stock Fund, Inc. (Filer) CIK: 0000075170"
     assert "100 EAST PRATT STRET" in filer_info.addresses[0]
@@ -255,7 +257,6 @@ def test_get_filer_info_from_homepage():
     print()
     print(filing.homepage)
     print(filing.homepage.filer_infos)
-
 
 
 def test_get_matching_files():
@@ -600,7 +601,6 @@ def test_get_filings_for_future_period(capsys):
 
 
 def test_get_filings_default():
-
     filings = get_filings()
     assert not filings.empty
 
@@ -786,14 +786,13 @@ def test_filing_sec_header():
 
 
 def test_parse_sec_header_with_filer():
-
     header_content = Path('data/secheader.424B5.abeona.txt').read_text()
     sec_header = SECHeader.parse(header_content)
     print()
     print(sec_header)
     # Metadata
     assert sec_header.filing_metadata
-    assert sec_header.filing_metadata['FILED AS OF DATE'] =='20230607'
+    assert sec_header.filing_metadata['FILED AS OF DATE'] == '20230607'
     assert sec_header.filing_date == '20230607'
     assert sec_header.accession_number == '0001493152-23-020412'
     assert sec_header.acceptance_datetime == datetime.datetime(2023, 6, 7, 16, 10, 23)
@@ -828,7 +827,6 @@ def test_parse_sec_header_with_filer():
     assert not sec_header.reporting_owners
     assert not sec_header.issuers
 
-
     # Goldman Sachs
     # This Goldman Sachs filing has an extra : in the Street2 field
     # 		STREET 2:		ATT: PRIVATE CREDIT GROUP
@@ -837,8 +835,6 @@ def test_parse_sec_header_with_filer():
     sec_header = SECHeader.parse(header_content)
     assert sec_header.filers[0].business_address.street1 == '200 WEST STREET'
     assert sec_header.filers[0].business_address.street2 == 'ATT: PRIVATE CREDIT GROUP'
-
-
 
 
 def test_parse_sec_header_with_reporting_owner():
@@ -870,8 +866,15 @@ def test_parse_sec_header_with_reporting_owner():
     assert issuer.business_address.state_or_country == 'CO'
     assert issuer.business_address.zipcode == '80205'
 
-def test_parse_header_with_subject_company():
 
+def test_periof_of_report_from_sec_header():
+    filing = Filing(form='13F-HR', filing_date='2023-09-21', company='Halpern Financial, Inc.', cik=1994335,
+                    accession_no='0001994335-23-000001')
+    sec_header = filing.header
+    assert sec_header.period_of_report == '20191231'
+
+
+def test_parse_header_with_subject_company():
     sec_header = SECHeader.parse("""
 <ACCEPTANCE-DATETIME>20230612150550
 ACCESSION NUMBER:		0001971857-23-000246
@@ -954,7 +957,6 @@ REPORTING-OWNER:
     assert reporting_owner.company_information.name == 'Hendrian Catherine A'
     assert reporting_owner.company_information.cik == '0001701746'
 
-
     assert len(subject_company.former_company_names) == 1
 
 
@@ -964,68 +966,68 @@ def test_parse_header_filing_with_multiple_filers():
                     accession_no='0001104659-23-069855')
                         :return:
     """
-    sec_header=SECHeader.parse(
-"""<ACCEPTANCE-DATETIME>20230609145616
-ACCESSION NUMBER:		0001104659-23-069855
-CONFORMED SUBMISSION TYPE:	10-D
-PUBLIC DOCUMENT COUNT:		2
-CONFORMED PERIOD OF REPORT:	20230531
-<DEPOSITOR-CIK>0001171040
-<SPONSOR-CIK>0000036644
-FILED AS OF DATE:		20230609
-DATE AS OF CHANGE:		20230609
-ABS ASSET CLASS:             	Credit card
-
-FILER:
-
-	COMPANY DATA:	
-		COMPANY CONFORMED NAME:			First National Master Note Trust
-		CENTRAL INDEX KEY:			0001396730
-		STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
-		IRS NUMBER:				000000000
-		STATE OF INCORPORATION:			DE
-		FISCAL YEAR END:			1231
-
-	FILING VALUES:
-		FORM TYPE:		10-D
-		SEC ACT:		1934 Act
-		SEC FILE NUMBER:	333-140273-01
-		FILM NUMBER:		231004915
-
-	BUSINESS ADDRESS:	
-		STREET 1:		1620 DODGE STREET STOP CODE 3395
-		CITY:			OMAHA
-		STATE:			NE
-		ZIP:			68197
-		BUSINESS PHONE:		402-341-0500
-
-	MAIL ADDRESS:	
-		STREET 1:		1620 DODGE STREET STOP CODE 3395
-		CITY:			OMAHA
-		STATE:			NE
-		ZIP:			68197
-
-FILER:
-
-	COMPANY DATA:	
-		COMPANY CONFORMED NAME:			FIRST NATIONAL FUNDING LLC
-		CENTRAL INDEX KEY:			0001171040
-		STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
-		IRS NUMBER:				000000000
-		STATE OF INCORPORATION:			NE
-
-	FILING VALUES:
-		FORM TYPE:		10-D
-		SEC ACT:		1934 Act
-		SEC FILE NUMBER:	000-50139
-		FILM NUMBER:		231004916
-
-	MAIL ADDRESS:	
-		STREET 1:		1620 DODGE STREET
-		CITY:			OHAHA
-		STATE:			NE
-		ZIP:			68102
-    """)
+    sec_header = SECHeader.parse(
+        """<ACCEPTANCE-DATETIME>20230609145616
+        ACCESSION NUMBER:		0001104659-23-069855
+        CONFORMED SUBMISSION TYPE:	10-D
+        PUBLIC DOCUMENT COUNT:		2
+        CONFORMED PERIOD OF REPORT:	20230531
+        <DEPOSITOR-CIK>0001171040
+        <SPONSOR-CIK>0000036644
+        FILED AS OF DATE:		20230609
+        DATE AS OF CHANGE:		20230609
+        ABS ASSET CLASS:             	Credit card
+        
+        FILER:
+        
+            COMPANY DATA:	
+                COMPANY CONFORMED NAME:			First National Master Note Trust
+                CENTRAL INDEX KEY:			0001396730
+                STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
+                IRS NUMBER:				000000000
+                STATE OF INCORPORATION:			DE
+                FISCAL YEAR END:			1231
+        
+            FILING VALUES:
+                FORM TYPE:		10-D
+                SEC ACT:		1934 Act
+                SEC FILE NUMBER:	333-140273-01
+                FILM NUMBER:		231004915
+        
+            BUSINESS ADDRESS:	
+                STREET 1:		1620 DODGE STREET STOP CODE 3395
+                CITY:			OMAHA
+                STATE:			NE
+                ZIP:			68197
+                BUSINESS PHONE:		402-341-0500
+        
+            MAIL ADDRESS:	
+                STREET 1:		1620 DODGE STREET STOP CODE 3395
+                CITY:			OMAHA
+                STATE:			NE
+                ZIP:			68197
+        
+        FILER:
+        
+            COMPANY DATA:	
+                COMPANY CONFORMED NAME:			FIRST NATIONAL FUNDING LLC
+                CENTRAL INDEX KEY:			0001171040
+                STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
+                IRS NUMBER:				000000000
+                STATE OF INCORPORATION:			NE
+        
+            FILING VALUES:
+                FORM TYPE:		10-D
+                SEC ACT:		1934 Act
+                SEC FILE NUMBER:	000-50139
+                FILM NUMBER:		231004916
+        
+            MAIL ADDRESS:	
+                STREET 1:		1620 DODGE STREET
+                CITY:			OHAHA
+                STATE:			NE
+                ZIP:			68102
+            """)
     print(sec_header)
     assert len(sec_header.filers) == 2
 
@@ -1047,8 +1049,6 @@ FILER:
     assert filer0.mailing_address.state_or_country == 'NE'
     assert filer0.mailing_address.zipcode == '68197'
 
-
-
     filer1 = sec_header.filers[1]
     assert filer1.company_information.name == 'FIRST NATIONAL FUNDING LLC'
     assert filer1.company_information.cik == '0001171040'
@@ -1063,59 +1063,59 @@ FILER:
 
 def test_parse_header_filing_with_multiple_former_companies():
     sec_header = SECHeader.parse(
-    """
-<ACCEPTANCE-DATETIME>20230609124624
-ACCESSION NUMBER:		0001472375-23-000090
-CONFORMED SUBMISSION TYPE:	10-K
-PUBLIC DOCUMENT COUNT:		54
-CONFORMED PERIOD OF REPORT:	20230331
-FILED AS OF DATE:		20230609
-DATE AS OF CHANGE:		20230609
-
-FILER:
-
-	COMPANY DATA:	
-		COMPANY CONFORMED NAME:			REGENEREX PHARMA, INC.
-		CENTRAL INDEX KEY:			0001357878
-		STANDARD INDUSTRIAL CLASSIFICATION:	PHARMACEUTICAL PREPARATIONS [2834]
-		IRS NUMBER:				980479983
-		STATE OF INCORPORATION:			NV
-		FISCAL YEAR END:			0331
-
-	FILING VALUES:
-		FORM TYPE:		10-K
-		SEC ACT:		1934 Act
-		SEC FILE NUMBER:	000-53230
-		FILM NUMBER:		231004569
-
-	BUSINESS ADDRESS:	
-		STREET 1:		5348 VEGAS DRIVE, SUITE 177
-		CITY:			LAS VEGAS
-		STATE:			NV
-		ZIP:			89108
-		BUSINESS PHONE:		305-927-5191
-
-	MAIL ADDRESS:	
-		STREET 1:		5348 VEGAS DRIVE, SUITE 177
-		CITY:			LAS VEGAS
-		STATE:			NV
-		ZIP:			89108
-
-	FORMER COMPANY:	
-		FORMER CONFORMED NAME:	PEPTIDE TECHNOLOGIES, INC.
-		DATE OF NAME CHANGE:	20180309
-
-	FORMER COMPANY:	
-		FORMER CONFORMED NAME:	Eternelle Skincare Products Inc.
-		DATE OF NAME CHANGE:	20170621
-
-	FORMER COMPANY:	
-		FORMER CONFORMED NAME:	PEPTIDE TECHNOLOGIES, INC.
-		DATE OF NAME CHANGE:	20111007        
-    """)
+        """
+    <ACCEPTANCE-DATETIME>20230609124624
+    ACCESSION NUMBER:		0001472375-23-000090
+    CONFORMED SUBMISSION TYPE:	10-K
+    PUBLIC DOCUMENT COUNT:		54
+    CONFORMED PERIOD OF REPORT:	20230331
+    FILED AS OF DATE:		20230609
+    DATE AS OF CHANGE:		20230609
+    
+    FILER:
+    
+        COMPANY DATA:	
+            COMPANY CONFORMED NAME:			REGENEREX PHARMA, INC.
+            CENTRAL INDEX KEY:			0001357878
+            STANDARD INDUSTRIAL CLASSIFICATION:	PHARMACEUTICAL PREPARATIONS [2834]
+            IRS NUMBER:				980479983
+            STATE OF INCORPORATION:			NV
+            FISCAL YEAR END:			0331
+    
+        FILING VALUES:
+            FORM TYPE:		10-K
+            SEC ACT:		1934 Act
+            SEC FILE NUMBER:	000-53230
+            FILM NUMBER:		231004569
+    
+        BUSINESS ADDRESS:	
+            STREET 1:		5348 VEGAS DRIVE, SUITE 177
+            CITY:			LAS VEGAS
+            STATE:			NV
+            ZIP:			89108
+            BUSINESS PHONE:		305-927-5191
+    
+        MAIL ADDRESS:	
+            STREET 1:		5348 VEGAS DRIVE, SUITE 177
+            CITY:			LAS VEGAS
+            STATE:			NV
+            ZIP:			89108
+    
+        FORMER COMPANY:	
+            FORMER CONFORMED NAME:	PEPTIDE TECHNOLOGIES, INC.
+            DATE OF NAME CHANGE:	20180309
+    
+        FORMER COMPANY:	
+            FORMER CONFORMED NAME:	Eternelle Skincare Products Inc.
+            DATE OF NAME CHANGE:	20170621
+    
+        FORMER COMPANY:	
+            FORMER CONFORMED NAME:	PEPTIDE TECHNOLOGIES, INC.
+            DATE OF NAME CHANGE:	20111007        
+        """)
     print(sec_header)
     assert len(sec_header.filers) == 1
-    filer:Filer = sec_header.filers[0]
+    filer: Filer = sec_header.filers[0]
     assert len(filer.former_company_names) == 3
     assert filer.former_company_names[0].name == 'PEPTIDE TECHNOLOGIES, INC.'
     assert filer.former_company_names[1].name == 'Eternelle Skincare Products Inc.'
@@ -1123,6 +1123,7 @@ FILER:
     assert filer.former_company_names[0].date_of_change == '20180309'
     assert filer.former_company_names[1].date_of_change == '20170621'
     assert filer.former_company_names[2].date_of_change == '20111007'
+
 
 def test_get_current_filings():
     filings = get_current_filings()
@@ -1132,7 +1133,6 @@ def test_get_current_filings():
 
     filing = filings[0]
     print(str(filing))
-
 
 
 def test_get_current_filings_by_form():

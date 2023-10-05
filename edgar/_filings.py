@@ -765,7 +765,6 @@ class CurrentFilings(Filings):
         )
 
 
-
 @lru_cache(maxsize=8)
 def _get_cached_filings(year: Years = None,
                         quarter: Quarters = None,
@@ -1042,6 +1041,10 @@ class SECHeader:
     @property
     def form(self):
         return self.filing_metadata.get("CONFORMED SUBMISSION TYPE")
+
+    @property
+    def period_of_report(self):
+        return self.filing_metadata.get("CONFORMED PERIOD OF REPORT")
 
     @property
     def filing_date(self):
