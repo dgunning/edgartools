@@ -15,7 +15,7 @@ from edgar.core import moneyfmt
 from rich.panel import Panel
 from edgar._xml import find_element, child_text, optional_decimal
 from edgar._party import Address
-
+import pyarrow.compute as pc
 __all__ = [
     "FundReport",
     "CurrentMetric",
@@ -118,6 +118,12 @@ def decimal_or_na(value: str):
 
 def datetime_or_na(value: str):
     return value if value == "N/A" else datetime.strptime(value, "%Y-%m-%d")
+
+
+def format_date(date: Union[str, datetime]) -> str:
+    if isinstance(date, str):
+        return date
+    return date.strftime("%Y-%m-%d")
 
 
 @dataclass(frozen=True)
@@ -675,16 +681,32 @@ class Signature:
 class PrimaryDocument13F:
     report_period: datetime
     cover_page: CoverPage
-    summary_page:SummaryPage
+    summary_page: SummaryPage
     signature: Signature
     additional_information: str
 
 
 class ThirteenF:
+    """
+    A 13F-HR is a quarterly report filed by institutional investment managers that have over $100 million in qualifying
+    assets under management. The report is filed with the Securities & Exchange Commission (SEC) and discloses all
+    the firm's equity holdings that it held at the end of the quarter. The report is due within 45 days of the end
+    of the quarter. The 13F-HR is a public document that is available on the SEC's website.
+    """
 
-    def __init__(self, filing):
+    def __init__(self, filing, use_latest_period_of_report=True):
         assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"
-        self.filing = filing
+        # The filing might not be the filing for the current period. We need to use the related filing filed on the same
+        # date as the current filing that has the latest period of report
+        self._related_filings = filing.related_filings().filter(filing_date=filing.filing_date)
+        self._actual_filing = filing  # The filing passed in
+        if use_latest_period_of_report:
+            # Use the last related filing.
+            # It should also be the one that has the CONFORMED_PERIOD_OF_REPORT closest to filing_date
+            self.filing = self._related_filings[-1]
+        else:
+            # Use the exact filing that was passed in
+            self.filing = self._actual_filing
         self.primary_form_information = ThirteenF.parse_primary_document_xml(self.filing.xml())
 
     def has_infotable(self):
@@ -719,6 +741,10 @@ class ThirteenF:
             return ThirteenF.parse_infotable_xml(self.infotable_xml)
 
     @property
+    def accession_number(self):
+        return self.filing.accession_no
+
+    @property
     def total_value(self):
         return self.primary_form_information.summary_page.total_value
 
@@ -728,11 +754,27 @@ class ThirteenF:
 
     @property
     def report_period(self):
-        return self.primary_form_information.report_period
+        return format_date(self.primary_form_information.report_period)
+
+    @property
+    def filing_date(self):
+        return format_date(self.filing.filing_date)
 
     @property
     def filing_manager(self):
         return self.primary_form_information.cover_page.filing_manager
+
+    @lru_cache(maxsize=8)
+    def previous_holding_report(self):
+        if len(self.report_period) == 1:
+            return None
+        # Look in the related filings data for the row with this accession number
+        idx = pc.equal(self._related_filings.data['accession_number'], self.accession_number).index(True).as_py()
+        if idx == 0:
+            return None
+        previous_filing = self._related_filings[idx - 1]
+        return ThirteenF(previous_filing, use_latest_period_of_report=False)
+
 
     @staticmethod
     def parse_primary_document_xml(primary_document_xml: str):
@@ -816,6 +858,7 @@ class ThirteenF:
     def parse_infotable_xml(infotable_xml: str):
         root = find_element(infotable_xml, "informationTable")
         rows = []
+        shares_or_principal = {"SH": "Shares", "PRN": "Principal"}
         for info_tag in root.find_all("infoTable"):
             info_table = dict()
 
@@ -824,19 +867,22 @@ class ThirteenF:
             info_table['Cusip'] = child_text(info_tag, "cusip")
             info_table['Value'] = int(child_text(info_tag, "value"))
 
-            # Shares of payment amount
+            # Shares or principal
             shares_tag = info_tag.find("shrsOrPrnAmt")
             info_table['SharesPrnAmount'] = child_text(shares_tag, "sshPrnamt")
-            info_table['SharesPrnType'] = child_text(shares_tag, "sshPrnamtType")
+
+            # Shares or principal
+            ssh_prnamt_type = child_text(shares_tag, "sshPrnamtType")
+            info_table['Type'] = shares_or_principal.get(ssh_prnamt_type)
 
             info_table["PutCall"] = child_text(shares_tag, "putCall")
             info_table['InvestmentDiscretion'] = child_text(info_tag, "investmentDiscretion")
 
             # Voting authority
             voting_auth_tag = info_tag.find("votingAuthority")
-            info_table['VotingAuthSole'] = int(child_text(voting_auth_tag, "Sole"))
-            info_table['VotingAuthShared'] = int(child_text(voting_auth_tag, "Shared"))
-            info_table['VotingAuthNone'] = int(child_text(voting_auth_tag, "None"))
+            info_table['SoleVoting'] = int(child_text(voting_auth_tag, "Sole"))
+            info_table['SharedVoting'] = int(child_text(voting_auth_tag, "Shared"))
+            info_table['NonVoting'] = int(child_text(voting_auth_tag, "None"))
             rows.append(info_table)
 
         table = pd.DataFrame(rows)
@@ -845,45 +891,48 @@ class ThirteenF:
     def _infotable_summary(self):
         if self.has_infotable():
             return (self.infotable
-                    .filter(['Issuer', 'Value', 'SharesPrnAmount', 'SharesPrnType',
-                             'VotingAuthSole', 'VotingAuthShared', 'VotingAuthNone'])
+                    .filter(['Issuer', 'Value', 'SharesPrnAmount', 'Type',
+                             'SoleVoting', 'SharedVoting', 'NonVoting'])
                     .rename(columns={'SharesPrnAmount': 'Shares'})
-                    .assign(Value=lambda df: df.Value)
+                    .assign(Value=lambda df: df.Value,
+                            Type=lambda df: df.Type.fillna('-'))
                     .sort_values(['Value'], ascending=False)
                     )
 
     def __rich__(self):
-        title = f"{self.form} for {self.filing.company} filed {self.filing.filing_date}"
+        title = f"{self.form} Holding Report for {self.filing.company} for period {self.report_period}"
         summary = Table(
-            Column("Period", style="bold deep_sky_blue1"),
+            Column("Filing Manager", style="bold deep_sky_blue1"),
             "Holdings",
             "Value",
-            "Filing Manager",
+            "Accession Number",
+            "Filing Date",
             box=box.SIMPLE)
 
         summary.add_row(
-            datetime.strftime(self.report_period, "%Y-%m-%d"),
+            self.filing_manager.name,
             str(self.total_holdings or "-"),
             f"${self.total_value:,.0f}" if self.total_value else "-",
-            self.filing_manager.name
+            self.filing.accession_no,
+            self.filing_date
         )
 
         content = [summary]
 
         # info table
         if self.has_infotable():
-            table = Table("", "Issuer", "Amount", "Value", "SharesPrnType", "VotingSole", "VotingShared", "VotingNone",
+            table = Table("", "Issuer", "Value", "Type", "Shares", "Voting", "Shared Voting", "Non Voting",
                           row_styles=["bold", ""],
                           box=box.SIMPLE)
             for index, row in enumerate(self._infotable_summary().itertuples()):
                 table.add_row(str(index),
                               row.Issuer,
-                              f"{int(row.Shares):,.0f}",
                               f"${row.Value:,.0f}",
-                              row.SharesPrnType,
-                              f"{int(row.VotingAuthSole):,.0f}",
-                              f"{int(row.VotingAuthShared):,.0f}",
-                              f"{int(row.VotingAuthNone):,.0f}"
+                              row.Type,
+                              f"{int(row.Shares):,.0f}",
+                              f"{int(row.SoleVoting):,.0f}",
+                              f"{int(row.SharedVoting):,.0f}",
+                              f"{int(row.NonVoting):,.0f}"
                               )
             content.append(table)
 
