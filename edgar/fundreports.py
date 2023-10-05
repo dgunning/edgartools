@@ -902,14 +902,16 @@ class ThirteenF:
     def __rich__(self):
         title = f"{self.form} Holding Report for {self.filing.company} for period {self.report_period}"
         summary = Table(
+            "Report Period",
             Column("Filing Manager", style="bold deep_sky_blue1"),
             "Holdings",
             "Value",
             "Accession Number",
-            "Filing Date",
+            "Filed",
             box=box.SIMPLE)
 
         summary.add_row(
+            self.report_period,
             self.filing_manager.name,
             str(self.total_holdings or "-"),
             f"${self.total_value:,.0f}" if self.total_value else "-",
