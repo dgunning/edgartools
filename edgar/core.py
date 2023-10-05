@@ -23,6 +23,7 @@ from retry.api import retry_call
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 
+# Rich logging
 logging.basicConfig(
     level="INFO",
     format="%(message)s",
@@ -31,6 +32,9 @@ logging.basicConfig(
 )
 
 log = logging.getLogger("rich")
+
+# Turn down httpx logging
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 __all__ = [
     'log',
