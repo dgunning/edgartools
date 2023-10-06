@@ -46,4 +46,7 @@ if __name__ == '__main__':
     thirteenF = thirteenF_filings[10].obj()
     print(thirteenF)
 
+    # Get the text from a filing
+    filing.text()
+
 
