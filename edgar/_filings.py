@@ -34,7 +34,7 @@ from edgar._xml import child_text
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, sec_dot_gov, InvalidDateException, IntString, DataPager, text_extensions,
                         datefmt)
-from edgar.fundreports import FUND_FORMS
+
 from edgar.search import BM25Search, RegexSearch
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -606,16 +606,6 @@ def get_filings(year: Years = None,
     filings = Filings(filings.data.sort_by([("filing_date", "descending")]))
     return filings
 
-
-# Fund filings
-get_fund_filings = partial(get_filings, form=FUND_FORMS)
-get_funds = get_fund_filings
-
-# Restricted stock sales
-get_restricted_stock_filings = partial(get_filings, form=[144])
-
-# Insider transaction filings
-get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
 """
 Get the current filings from the SEC. Use this to get the filings filed after the 5:30 deadline
@@ -1395,7 +1385,12 @@ class Filing:
         if xml_document:
             return xml_document.download(text=True)
 
+    @lru_cache(maxsize=4)
     def text(self) -> str:
+        from edgar.core import html2text
+        return html2text(self.html())
+
+    def full_text_submission(self) -> str:
         """Return the complete text submission file"""
         return download_file(self.text_url)
 

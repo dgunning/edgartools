@@ -383,7 +383,7 @@ def test_filing_text():
     assert text_document.document == "0001193125-20-052640.txt"
     assert text_document
     # Get the text
-    text = filing.text()
+    text = filing.full_text_submission()
     assert text
     assert "ACCESSION NUMBER:		0001193125-20-052640" in text
 

@@ -4,6 +4,7 @@
 from typing import Optional, Union, List
 
 from fastcore.basics import listify
+from functools import partial
 
 from edgar._companies import (Company,
                               CompanyData,
@@ -23,9 +24,6 @@ from edgar._filings import (Filing,
                             Attachments,
                             get_filings,
                             get_by_accession_number,
-                            get_funds,
-                            get_current_filings,
-                            get_fund_filings,
                             FilingHomepage)
 from edgar._xbrl import FilingXbrl
 from edgar.core import (edgar_mode,
@@ -42,7 +40,20 @@ from edgar.forms import EightK, TenK, TenQ
 from edgar.form144 import Form144
 from edgar.muniadvisors import MunicipalAdvisorForm
 from edgar.fundreports import ThirteenF, THIRTEENF_FORMS
+from edgar.fundreports import FUND_FORMS
 
+# Fund filings
+get_fund_filings = partial(get_filings, form=FUND_FORMS)
+get_funds = get_fund_filings
+
+# Restricted stock sales
+get_restricted_stock_filings = partial(get_filings, form=[144])
+
+# Insider transaction filings
+get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
+
+# 13F filings - portfolio holdings
+get_portfolio_filings = partial(get_filings, form=THIRTEENF_FORMS)
 
 def matches_form(sec_filing: Filing,
                  form: Union[str, List[str]]) -> bool:
