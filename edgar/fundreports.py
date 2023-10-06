@@ -776,6 +776,7 @@ class ThirteenF:
         return ThirteenF(previous_filing, use_latest_period_of_report=False)
 
 
+    @lru_cache(maxsize=8)
     @staticmethod
     def parse_primary_document_xml(primary_document_xml: str):
         root = find_element(primary_document_xml, "edgarSubmission")
