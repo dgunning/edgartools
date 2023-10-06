@@ -1,5 +1,5 @@
 import datetime
-
+from pathlib import Path
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -14,6 +14,7 @@ from edgar.core import (decode_content,
                         Result,
                         filter_by_date,
                         http_client,
+                        html2text,
                         InvalidDateException,
                         client_headers,
                         CRAWL, CAUTION, NORMAL,
@@ -226,6 +227,12 @@ def test_settings():
 def test_get_text_between_tags():
     text = get_text_between_tags(
         'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt',
-    'SEC-HEADER')
+        'SEC-HEADER')
     print(text)
     assert 'ACCESSION NUMBER:		0001564590-18-004771' in text
+
+
+def test_html2text():
+    html = Path('data/form.6k.Athena.html').read_text()
+    text = html2text(html)
+    print(text)
