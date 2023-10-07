@@ -371,7 +371,7 @@ def repr_df(df, hide_index: bool = True):
     return disp._repr_html_()
 
 
-def get_bool(value: str = None) -> bool:
+def get_bool(value: str = None) -> Optional[bool]:
     """Convert the value to a boolean"""
     if value is None:
         return None

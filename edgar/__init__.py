@@ -33,14 +33,13 @@ from edgar.core import (edgar_mode,
                         get_identity,
                         set_identity)
 from edgar.effect import Effect
-from edgar.fundreports import FundReport
+from edgar.fundreports import FundReport, FUND_FORMS
 from edgar.offerings import Offering
 from edgar.ownership import Ownership
 from edgar.forms import EightK, TenK, TenQ
 from edgar.form144 import Form144
 from edgar.muniadvisors import MunicipalAdvisorForm
-from edgar.fundreports import ThirteenF, THIRTEENF_FORMS
-from edgar.fundreports import FUND_FORMS
+from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 
 # Fund filings
 get_fund_filings = partial(get_filings, form=FUND_FORMS)
@@ -53,7 +52,7 @@ get_restricted_stock_filings = partial(get_filings, form=[144])
 get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
 # 13F filings - portfolio holdings
-get_portfolio_filings = partial(get_filings, form=THIRTEENF_FORMS)
+get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 
 def matches_form(sec_filing: Filing,
                  form: Union[str, List[str]]) -> bool:
@@ -68,7 +67,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     """
     Depending on the filing return the data object that contains the data for the filing
 
-    This usually coms from the xml associated with the filing but it can also come from the extracted xbrl
+    This usually coms from the xml associated with the filing, but it can also come from the extracted xbrl
     :param sec_filing: The filing
     :return:
     """

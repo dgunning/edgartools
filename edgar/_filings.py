@@ -4,7 +4,7 @@ import re
 import webbrowser
 from dataclasses import dataclass
 from datetime import datetime
-from functools import lru_cache, partial
+from functools import lru_cache
 from io import BytesIO
 from typing import Tuple, List, Dict, Union, Optional
 
@@ -49,7 +49,6 @@ __all__ = [
     'Filing',
     'Filings',
     'get_filings',
-    'get_funds',
     'FilingXbrl',
     'SECHeader',
     'FilingsState',
@@ -57,12 +56,9 @@ __all__ = [
     'Attachments',
     'FilingHomepage',
     'CurrentFilings',
-    'get_fund_filings',
     'available_quarters',
     'get_current_filings',
-    'get_by_accession_number',
-    'get_restricted_stock_filings',
-    'get_insider_transaction_filings'
+    'get_by_accession_number'
 ]
 
 full_index_url = "https://www.sec.gov/Archives/edgar/full-index/{}/QTR{}/{}.{}"
