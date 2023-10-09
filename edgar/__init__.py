@@ -23,6 +23,7 @@ from edgar._filings import (Filing,
                             Attachment,
                             Attachments,
                             get_filings,
+                            get_current_filings,
                             get_by_accession_number,
                             FilingHomepage)
 from edgar._xbrl import FilingXbrl
@@ -53,6 +54,7 @@ get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
 # 13F filings - portfolio holdings
 get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
+
 
 def matches_form(sec_filing: Filing,
                  form: Union[str, List[str]]) -> bool:
