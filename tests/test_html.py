@@ -28,19 +28,6 @@ def test_html2df():
     assert len(df) == 2
     print(df)
 
-def test_extract_tables():
-    sample_html_path = Path("data/table-sample.html")
-    html_str = sample_html_path.read_text()
-    html_path = Path("C:/Users/dwight/Downloads/tesla_2021_10k.htm")
-
-
-    print()
-    elements = extract_elements(html_path.read_text())
-    table_elements = [e for e in elements if e.type == "table"]
-    assert len(table_elements) > 0
-    for table_element in table_elements[:4]:
-        print(table_element.table)
-
 
 def test_extract_elements():
     elements = extract_elements(Nvidia_2021_10k)
