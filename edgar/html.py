@@ -133,7 +133,7 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
 
 
 def filter_small_table(table: pd.DataFrame, min_rows: int = 2, min_cols: int = 2):
-    return len(table) < min_rows or len(table.columns) < min_cols
+    return len(table) >= min_rows and len(table.columns) >= min_cols
 
 
 @lru_cache(maxsize=4)

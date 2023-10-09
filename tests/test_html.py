@@ -2,6 +2,8 @@ from edgar.html import extract_elements, table_html_to_dataframe, html_to_text, 
 from pathlib import Path
 from rich import print
 import pandas as pd
+from edgar import Filing
+
 pd.options.display.max_columns = 12
 
 Nvidia_2021_10k = Path("data/Nvidia.10-K.html").read_text()
@@ -49,3 +51,11 @@ def test_html2text():
     assert len(tenk_text_with_tables) > len(tenk_text)
     print(tenk_text_with_tables)
 
+
+def test_get_table_elements():
+    filing = Filing(company='Tesla, Inc.', cik=1318605, form='10-K',
+                           filing_date='2023-01-31', accession_no='0000950170-23-001409')
+    elements = extract_elements(filing.html())
+    table_elements = get_table_elements(elements)
+    assert len(table_elements) > 50
+    print(len(table_elements))
