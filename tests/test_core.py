@@ -14,7 +14,6 @@ from edgar.core import (decode_content,
                         Result,
                         filter_by_date,
                         http_client,
-                        html2text,
                         InvalidDateException,
                         client_headers,
                         CRAWL, CAUTION, NORMAL,
@@ -232,7 +231,3 @@ def test_get_text_between_tags():
     assert 'ACCESSION NUMBER:		0001564590-18-004771' in text
 
 
-def test_html2text():
-    html = Path('data/form.6k.Athena.html').read_text()
-    text = html2text(html)
-    print(text)

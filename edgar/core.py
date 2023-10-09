@@ -352,11 +352,6 @@ def get_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.
     return content
 
 
-def html2text(html: str, sep:str='\n') -> str:
-    """Convert the html to text using the unstructured library"""
-    from unstructured.partition.html import partition_html
-    segments = partition_html(text=html)
-    return sep.join([str(segment) for segment in segments])
 
 def repr_df(df, hide_index: bool = True):
     disp = df.style

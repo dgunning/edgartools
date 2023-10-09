@@ -24,7 +24,7 @@ from rich.console import Group, Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-
+from edgar.html import html_to_text
 from edgar._markdown import MarkdownContent
 from edgar._markdown import html_to_markdown
 from edgar._party import Address
@@ -1382,9 +1382,9 @@ class Filing:
             return xml_document.download(text=True)
 
     @lru_cache(maxsize=4)
-    def text(self) -> str:
-        from edgar.core import html2text
-        return html2text(self.html())
+    def text(self, ignore_tables=False, sep="\n") -> str:
+        """Convert the html of the main filing document to text"""
+        return html_to_text(self.html(), ignore_tables=ignore_tables, sep=sep)
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""

@@ -36,7 +36,7 @@ dependencies = [
   "retry>=0.9.2",
   "textdistance>=4.5.0",
   "rank_bm25==0.2.1",
-  "unstructured==0.5.7"
+  "unstructured>=0.10.19"
 ]
 dynamic = ["version"]
 
