@@ -24,7 +24,7 @@ from rich.console import Group, Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from edgar.html import html_to_text
+from edgar.htmltools import html_to_text, html_sections
 from edgar._markdown import MarkdownContent
 from edgar._markdown import html_to_markdown
 from edgar._party import Address
@@ -1434,7 +1434,7 @@ class Filing:
 
     @lru_cache(maxsize=1)
     def sections(self) -> List[str]:
-        return re.split(r"\n\s*\n", self.markdown())
+        return html_sections(self.html())
 
     @lru_cache(maxsize=1)
     def __get_bm25_search_index(self):

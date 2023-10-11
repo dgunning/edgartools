@@ -115,7 +115,7 @@ class SecForms:
 
 def find_section(pattern, sections):
     for index, section in enumerate(sections):
-        if re.search(pattern, section):
+        if re.search(pattern, section, re.IGNORECASE):
             return index, section
 
 

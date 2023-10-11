@@ -2,7 +2,7 @@ from lxml import html as lxml_html
 import pandas as pd
 from unstructured.partition.html import partition_html
 from dataclasses import dataclass
-from typing import Any, Optional, List
+from typing import Any, Optional, Set, List
 from lxml.etree import HTMLParser
 from io import StringIO
 from functools import lru_cache
@@ -13,6 +13,7 @@ __all__ = [
     "get_tables",
     "clean_dataframe",
     "html_to_text",
+    'html_sections',
     "table_html_to_dataframe",
     "dataframe_to_text",
     "get_table_elements",
@@ -48,21 +49,27 @@ def get_tables(html_str: str,
     ]
 
 
+def html_sections(html_str: str,
+             ignore_tables: bool = False) -> List[str]:
+    """split the html into sections"""
+    elements = extract_elements(html_str)
+    if ignore_tables:
+        return [str(element.element)
+                for element in elements
+                if not element.type == 'table']
+    else:
+        return [dataframe_to_text(element.table)
+                if element.type == 'table' else str(element.element)
+                for element in elements]
+
+
 def html_to_text(html_str: str,
                  ignore_tables: bool = True,
                  sep: str = '\n'
                  ) -> str:
     """Convert the html to text using the unstructured library"""
-    elements = extract_elements(html_str)
-    if ignore_tables:
-        return sep.join([str(element.element)
-                         for element in elements
-                         if not element.type == 'table'])
-    else:
-        return sep.join([dataframe_to_text(element.table)
-                         if element.type == 'table' else str(element.element)
-                         for element in elements]
-                        )
+    return sep.join(html_sections(html_str, ignore_tables=ignore_tables))
+
 
 
 def table_html_to_dataframe(html_str):
@@ -77,7 +84,7 @@ def table_html_to_dataframe(html_str):
         cols = [c.text.strip() if c.text is not None else "" for c in cols]
         data.append(cols)
 
-    df = clean_dataframe(pd.DataFrame(data[1:], columns=data[0]))
+    df = clean_dataframe(pd.DataFrame(data, columns=data[0]))
     return df
 
 
@@ -137,29 +144,30 @@ def filter_small_table(table: pd.DataFrame, min_rows: int = 2, min_cols: int = 2
 
 
 @lru_cache(maxsize=4)
-def extract_elements(html_str: str, table_filters: List = None):
-    table_filters = table_filters or [filter_small_table]
+def extract_elements(html_str: str):
     elements = partition_html(text=html_str, parser=HTMLParser())
     output_els = []
     for idx, element in enumerate(elements):
         element_type = str(type(element))
         if "HTMLTable" in element_type:
             table_df = table_html_to_dataframe(str(element.metadata.text_as_html))
-            should_keep = all([tf(table_df) for tf in table_filters])
-            if should_keep:
-                output_els.append(
+            output_els.append(
                     Element(id=f"id_{idx}", type="table", element=element, table=table_df)
                 )
-            else:
-                pass
         else:
             output_els.append(Element(id=f"id_{idx}", type="text", element=element))
     return output_els
 
 
-def get_table_elements(elements):
-    return [e for e in elements if e.type == "table"]
+def get_table_elements(elements:List[Element],
+                       min_table_rows:int=None,
+                       min_table_cols:int=None):
+    # Get the table elements
+    return [e for e in elements
+            if e.type == "table"
+            and (min_table_rows is None or len(e.table) >= min_table_rows)
+            and (min_table_cols is None or len(e.table.columns) >= min_table_cols)]
 
 
-def get_text_elements(elements):
+def get_text_elements(elements:List[Element]):
     return [e for e in elements if e.type == "text"]
