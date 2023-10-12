@@ -1434,7 +1434,14 @@ class Filing:
 
     @lru_cache(maxsize=1)
     def sections(self) -> List[str]:
-        return html_sections(self.html())
+        # Handle exceptions that can happen in unstructuredio parsing
+        # including this odd etree exception AttributeError: 'NoneType' object has no attribute 'findall'
+        try:
+            return html_sections(self.html())
+        except Exception as e:
+            log.warning('Got exception with html_sections(self.html()) .. falling back to backup method')
+            return re.split(r"\n\s*\n", self.markdown())
+
 
     @lru_cache(maxsize=1)
     def __get_bm25_search_index(self):

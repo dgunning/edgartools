@@ -145,7 +145,7 @@ def filter_small_table(table: pd.DataFrame, min_rows: int = 2, min_cols: int = 2
 
 @lru_cache(maxsize=4)
 def extract_elements(html_str: str):
-    elements = partition_html(text=html_str, parser=HTMLParser())
+    elements = partition_html(text=html_str)
     output_els = []
     for idx, element in enumerate(elements):
         element_type = str(type(element))

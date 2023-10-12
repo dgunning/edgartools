@@ -76,3 +76,10 @@ def test_html_sections_includes_all_tables():
     for section in sections:
         if "Item" in section:
             print(section)
+
+
+def test_html_sections_from_difficult_html():
+    filing = Filing(form='3', filing_date='2023-10-10', company='BAM Partners Trust', cik=1861643,
+           accession_no='0001104659-23-108367')
+    sections = filing.sections()
+    assert sections
