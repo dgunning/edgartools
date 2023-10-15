@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 from typing import Optional, Union, List
 
-from fastcore.basics import listify
 from functools import partial
 
 from edgar._companies import (Company,
@@ -26,21 +25,15 @@ from edgar._filings import (Filing,
                             get_current_filings,
                             get_by_accession_number,
                             FilingHomepage)
-from edgar._xbrl import FilingXbrl
+
 from edgar.core import (edgar_mode,
                         CRAWL,
                         CAUTION,
                         NORMAL,
                         get_identity,
                         set_identity)
-from edgar.effect import Effect
-from edgar.fundreports import FundReport, FUND_FORMS
-from edgar.offerings import Offering
-from edgar.ownership import Ownership
-from edgar.forms import EightK, TenK, TenQ
-from edgar.form144 import Form144
-from edgar.muniadvisors import MunicipalAdvisorForm
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
+from edgar.fundreports import FundReport, FUND_FORMS
 
 # Fund filings
 get_fund_filings = partial(get_filings, form=FUND_FORMS)
@@ -59,6 +52,7 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 def matches_form(sec_filing: Filing,
                  form: Union[str, List[str]]) -> bool:
     """Check if the filing matches the forms"""
+    from fastcore.basics import listify
     form_list = listify(form)
     if sec_filing.form in form_list + [f"{f}/A" for f in form_list]:
         return True
@@ -73,6 +67,13 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :param sec_filing: The filing
     :return:
     """
+    from edgar.forms import EightK, TenK, TenQ
+    from edgar.effect import Effect
+    from edgar.offerings import Offering
+    from edgar.ownership import Ownership
+    from edgar.form144 import Form144
+    from edgar.muniadvisors import MunicipalAdvisorForm
+
     if matches_form(sec_filing, "8-K"):
         return EightK(sec_filing)
     elif matches_form(sec_filing, "10-Q"):

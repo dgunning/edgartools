@@ -2,8 +2,8 @@ import re
 from typing import List, Callable, Tuple
 
 import pandas as pd
-import textdistance
-from rank_bm25 import BM25Okapi
+
+
 from rich import box
 from rich.console import Group
 from rich.markdown import Markdown
@@ -35,6 +35,7 @@ class SimilaritySearchIndex:
                 query: str,
                 threshold=0.6,
                 topn=20):
+        import textdistance
         query = query.lower()
         df = (self
               .data.assign(match=self.data[self._search_column].apply(textdistance.jaro, s2=query).round(2))
@@ -190,6 +191,7 @@ class BM25Search:
     def __init__(self,
                  document_objs: List[str],
                  text_fn: Callable = None):
+        from rank_bm25 import BM25Okapi
         if text_fn:
             self.corpus: Corpus = [BM25Search.preprocess(text_fn(doc)) for doc in document_objs]
         else:

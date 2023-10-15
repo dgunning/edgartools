@@ -1,6 +1,5 @@
 import re
 
-from markdownify import markdownify
 from rich import box
 from rich.console import Group
 from rich.markdown import Markdown
@@ -90,6 +89,7 @@ def fix_markdown(md: str):
 
 
 def html_to_markdown(html: str) -> str:
+    from markdownify import markdownify
     return fix_markdown(markdownify(html))
 
 
@@ -98,6 +98,7 @@ class MarkdownContent:
     def __init__(self,
                  html: str,
                  title: str = ""):
+        from markdownify import markdownify
         if "<DOCUMENT>" in html[:500]:
             html = "\n".join(line for line in html.split("\n")
                              if not any(line.startswith(tag) for tag in skip_tags))

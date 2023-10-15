@@ -1,11 +1,10 @@
-from lxml import html as lxml_html
-import pandas as pd
-from unstructured.partition.html import partition_html
 from dataclasses import dataclass
-from typing import Any, Optional, Set, List
-from lxml.etree import HTMLParser
-from io import StringIO
 from functools import lru_cache
+from io import StringIO
+from typing import Any, Optional, List
+
+import pandas as pd
+from lxml import html as lxml_html
 
 __all__ = [
     "Element",
@@ -50,7 +49,7 @@ def get_tables(html_str: str,
 
 
 def html_sections(html_str: str,
-             ignore_tables: bool = False) -> List[str]:
+                  ignore_tables: bool = False) -> List[str]:
     """split the html into sections"""
     elements = extract_elements(html_str)
     if ignore_tables:
@@ -69,7 +68,6 @@ def html_to_text(html_str: str,
                  ) -> str:
     """Convert the html to text using the unstructured library"""
     return sep.join(html_sections(html_str, ignore_tables=ignore_tables))
-
 
 
 def table_html_to_dataframe(html_str):
@@ -145,6 +143,7 @@ def filter_small_table(table: pd.DataFrame, min_rows: int = 2, min_cols: int = 2
 
 @lru_cache(maxsize=4)
 def extract_elements(html_str: str):
+    from unstructured.partition.html import partition_html
     elements = partition_html(text=html_str)
     output_els = []
     for idx, element in enumerate(elements):
@@ -152,16 +151,16 @@ def extract_elements(html_str: str):
         if "HTMLTable" in element_type:
             table_df = table_html_to_dataframe(str(element.metadata.text_as_html))
             output_els.append(
-                    Element(id=f"id_{idx}", type="table", element=element, table=table_df)
-                )
+                Element(id=f"id_{idx}", type="table", element=element, table=table_df)
+            )
         else:
             output_els.append(Element(id=f"id_{idx}", type="text", element=element))
     return output_els
 
 
-def get_table_elements(elements:List[Element],
-                       min_table_rows:int=None,
-                       min_table_cols:int=None):
+def get_table_elements(elements: List[Element],
+                       min_table_rows: int = None,
+                       min_table_cols: int = None):
     # Get the table elements
     return [e for e in elements
             if e.type == "table"
@@ -169,5 +168,5 @@ def get_table_elements(elements:List[Element],
             and (min_table_cols is None or len(e.table.columns) >= min_table_cols)]
 
 
-def get_text_elements(elements:List[Element]):
+def get_text_elements(elements: List[Element]):
     return [e for e in elements if e.type == "text"]
