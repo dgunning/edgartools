@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Any
 
 import pandas as pd
 from bs4 import Tag
@@ -13,14 +13,15 @@ from rich.table import Table
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import find_element, child_text, optional_decimal
 from edgar.core import moneyfmt, get_bool
+from edgar.funds import get_fund_information
 
 __all__ = [
     "FundReport",
     "CurrentMetric",
-    "FUND_FORMS"
+    "NPORT_FORMS"
 ]
 
-FUND_FORMS = ["NPORT-P", "NPORT-EX"]
+NPORT_FORMS = ["NPORT-P", "NPORT-EX"]
 
 
 @dataclass(frozen=True)
@@ -305,7 +306,6 @@ class InvestmentOrSecurity:
 
 
 class FundReport:
-
     """
     Form N-PORT-P is a form filed with the SEC by mutual funds to report their monthly portfolio holdings to the SEC.
     """
@@ -314,11 +314,13 @@ class FundReport:
                  header: Header,
                  general_info: GeneralInfo,
                  fund_info: FundInfo,
-                 investments: List[InvestmentOrSecurity]):
+                 investments: List[InvestmentOrSecurity],
+                 series_and_contracts:pd.DataFrame=None):
         self.header = header
         self.general_info: GeneralInfo = general_info
         self.fund_info: FundInfo = fund_info
         self.investments = investments
+        self.series_and_contracts = series_and_contracts
 
     def __str__(self):
         return (f"{self.name} {self.general_info.reg_period_date} - {self.general_info.reg_period_end}"
@@ -371,8 +373,16 @@ class FundReport:
         ).sort_values(['value_usd', 'name', 'title'], ascending=[False, True, True]).reset_index(drop=True)
 
     @classmethod
-    def from_xml(cls,
-                 xml: Union[str, Tag]):
+    def from_filing(cls, filing):
+        xml = filing.xml()
+        fund_report_dict = FundReport.parse_fund_xml(xml)
+        # Parse ticker, fund, series information from the filing header
+        fund_report_dict['series_and_contracts'] = get_fund_information(filing.header)
+        return cls(**fund_report_dict)
+
+    @classmethod
+    def parse_fund_xml(cls,
+                       xml: Union[str, Tag]) -> Dict[str, Any]:
         root = find_element(xml, "edgarSubmission")
 
         # Get the header
@@ -531,12 +541,13 @@ class FundReport:
 
                 investments_or_securities.append(investments_or_security)
 
-        fund_report = FundReport(header=header,
-                                 general_info=general_info,
-                                 fund_info=fund_info,
-                                 investments=investments_or_securities)
+        # Get the fund Information from the filing header
 
-        return fund_report
+        return {'header': header,
+                'general_info': general_info,
+                'fund_info': fund_info,
+                'investments': investments_or_securities}
+
 
     @property
     def fund_summary_table(self) -> Table:

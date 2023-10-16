@@ -33,11 +33,10 @@ from edgar.core import (edgar_mode,
                         get_identity,
                         set_identity)
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
-from edgar.fundreports import FundReport, FUND_FORMS
+from edgar.fundreports import FundReport, NPORT_FORMS
 
-# Fund filings
-get_fund_filings = partial(get_filings, form=FUND_FORMS)
-get_funds = get_fund_filings
+# Fund portfolio report filings
+get_fund_portfolio_filings = partial(get_filings, form=NPORT_FORMS)
 
 # Restricted stock sales
 get_restricted_stock_filings = partial(get_filings, form=[144])
@@ -99,9 +98,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
         if xml:
             return Offering.from_xml(xml)
     elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
-        xml = sec_filing.xml()
-        if xml:
-            return FundReport.from_xml(xml)
+        return FundReport.from_filing(sec_filing)
 
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:

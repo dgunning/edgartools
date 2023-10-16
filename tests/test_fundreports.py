@@ -6,17 +6,16 @@ import pytest
 from rich import print
 
 import pyarrow.compute as pc
-from edgar import get_fund_filings, Filings, Filing
+from edgar import get_fund_portfolio_filings, Filings, Filing
 from edgar.fundreports import FundReport, CurrentMetric
+from edgar.funds import get_fund_information
 
 fund_xml = Path('data/NPORT.Dupree.xml').read_text()
 
 
 def test_fund_from_xml():
     print()
-    fund_report = FundReport.from_xml(fund_xml)
-
-    #
+    fund_report = FundReport(**FundReport.parse_fund_xml(fund_xml))
 
     # Current Metrics
     current_metric: CurrentMetric = fund_report.fund_info.current_metrics['USD']
@@ -55,25 +54,25 @@ def test_fund_from_xml():
 
 def test_fund_investment_data_as_pandas():
     print()
-    fund_report = FundReport.from_xml(fund_xml)
+    fund_report = FundReport(**FundReport.parse_fund_xml(fund_xml))
     investment_data = fund_report.investment_data()
     assert all(column in investment_data for column in ["name", "title", "balance", "investment_country"])
 
 
 def test_parse_sample_1():
-    fund_report = FundReport.from_xml(Path('data/nport/samples/N-PORT Sample 1.xml').read_text())
+    fund_report = FundReport(**FundReport.parse_fund_xml(Path('data/nport/samples/N-PORT Sample 1.xml').read_text()))
     print()
     print(fund_report)
 
 
 def test_parse_sample_2():
-    fund_report = FundReport.from_xml(Path('data/nport/samples/N-PORT Sample 2.xml').read_text())
+    fund_report = FundReport(**FundReport.parse_fund_xml(Path('data/nport/samples/N-PORT Sample 2.xml').read_text()))
     print()
     print(fund_report)
 
 
 def test_parse_sample_3():
-    fund_report = FundReport.from_xml(Path('data/nport/samples/N-PORT Sample 3.xml').read_text())
+    fund_report = FundReport(**FundReport.parse_fund_xml(Path('data/nport/samples/N-PORT Sample 3.xml').read_text()))
     print()
     print(fund_report)
 
@@ -103,17 +102,17 @@ def test_parse_sample_3():
 
 
 def test_parse_sample_4():
-    fund_report = FundReport.from_xml(Path('data/nport/samples/N-PORT Sample 4.xml').read_text())
+    fund_report = FundReport(**FundReport.parse_fund_xml(Path('data/nport/samples/N-PORT Sample 4.xml').read_text()))
     assert fund_report.name == "Phase V Han Oh Test 6 - Series Name #1"
 
 
 def test_parse_sample_5():
-    fund_report = FundReport.from_xml(Path('data/nport/samples/N-PORT Sample 5.xml').read_text())
+    fund_report = FundReport(**FundReport.parse_fund_xml(Path('data/nport/samples/N-PORT Sample 5.xml').read_text()))
     assert fund_report.name == "Phase V Han Oh Test 6 - Series Name #1"
 
 
 def test_get_fund_filings():
-    fund_filings: Filings = get_fund_filings(year=2021, quarter=1)
+    fund_filings: Filings = get_fund_portfolio_filings(year=2021, quarter=1)
     print()
     print(fund_filings)
     assert pc.unique(fund_filings.data['form']).to_pylist() == ['NPORT-P', 'NPORT-P/A']
@@ -125,7 +124,24 @@ def test_get_fund_filings():
 
 
 def test_fund_no_investment_sec_tag():
-    fund_report = FundReport.from_xml(Path('data/NPORT.AdvancedSeries.xml').read_text())
+    fund_report = FundReport(**FundReport.parse_fund_xml(Path('data/NPORT.AdvancedSeries.xml').read_text()))
     assert fund_report.fund_info.return_info.monthly_total_returns
     assert fund_report.general_info.is_final_filing is True
 
+
+jacob_funds = Filing(form='NPORT-P', filing_date='2023-10-13', company='Jacob Funds Inc.', cik=1090372,
+                    accession_no='0001145549-23-062230')
+def test_parse_fund_header_sgml():
+    fund_data = get_fund_information(jacob_funds.header)
+    print()
+    print(fund_data)
+
+
+def test_fund_from_filing():
+    fund_report = FundReport.from_filing(jacob_funds)
+    assert fund_report
+    assert fund_report.series_and_contracts is not None
+
+    # Test .obj()
+    fund_report = jacob_funds.obj()
+    assert fund_report

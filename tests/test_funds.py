@@ -1,0 +1,150 @@
+from edgar.funds import get_fund, Fund, parse_fund_data
+import pandas as pd
+pd.options.display.max_columns = None
+
+def test_getfund():
+    fund:Fund = Fund('DXFTX')
+    print()
+    print(fund)
+    assert fund.company_cik == '0001040587'
+    assert fund.company_name == 'DIREXION FUNDS'
+    assert fund.series == 'S000024976'
+    assert fund.name == 'Direxion Currency Trends Strategy Plus Fund'
+    assert fund.class_contract == 'Class A'
+    assert fund.ticker == 'DXFTX'
+
+    fund = Fund('DXESX')
+    print(fund)
+    assert fund.company_cik == '0001040587'
+    assert fund.company_name == 'DIREXION FUNDS'
+    assert fund.series == 'S000007038'
+    assert fund.name == 'Direxion Monthly Emerging Markets Bear 2X Fund'
+    assert fund.class_contract == 'Investor Class'
+    assert fund.ticker == 'DXESX'
+
+    company = fund.get_fund_company()
+    print(company)
+
+    filings = company.get_filings(form="485BPOS")
+    assert filings is not None
+    print(filings[0].header.text)
+
+def test_get_fund_not_found():
+    fund = get_fund('SASSY')
+    assert fund is None
+
+def test_parse_series_and_classes_contracts_data():
+    sgml_data = """
+<SERIES-AND-CLASSES-CONTRACTS-DATA>
+<EXISTING-SERIES-AND-CLASSES-CONTRACTS>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000007025
+<SERIES-NAME>Direxion Monthly 7-10 Year Treasury Bull 1.75X Fund
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000019202
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXKLX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000007044
+<SERIES-NAME>Direxion Monthly Small Cap Bull 1.75X Fund
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000019221
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXRLX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000007045
+<SERIES-NAME>Direxion Monthly Small Cap Bear 1.75X Fund
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000019222
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXRSX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000007050
+<SERIES-NAME>Direxion Monthly 7-10 Year Treasury Bear 1.75X Fund
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000019229
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXKSX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000011950
+<SERIES-NAME>Direxion Monthly S&P 500(R) Bull 1.75X Fund
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000032626
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXSLX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000011960
+<SERIES-NAME>Direxion Monthly NASDAQ-100(R) Bull 1.75X Fund
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000032646
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXQLX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000011964
+<SERIES-NAME>Direxion Monthly S&P 500(R) Bear 1.75X Fund
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000032654
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXSSX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000046967
+<SERIES-NAME>HILTON TACTICAL INCOME FUND
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000146784
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>HCYAX
+</CLASS-CONTRACT>
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000146785
+<CLASS-CONTRACT-NAME>Institutional Class
+<CLASS-CONTRACT-TICKER-SYMBOL>HCYIX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000052787
+<SERIES-NAME>DIREXION MONTHLY HIGH YIELD BULL 1.2X FUND
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000165828
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXHYX
+</CLASS-CONTRACT>
+</SERIES>
+<SERIES>
+<OWNER-CIK>0001040587
+<SERIES-ID>S000053315
+<SERIES-NAME>Direxion Monthly NASDAQ-100(R) Bull 1.25X Fund
+<CLASS-CONTRACT>
+<CLASS-CONTRACT-ID>C000167765
+<CLASS-CONTRACT-NAME>Investor Class
+<CLASS-CONTRACT-TICKER-SYMBOL>DXNLX
+</CLASS-CONTRACT>
+</SERIES>
+</EXISTING-SERIES-AND-CLASSES-CONTRACTS>
+</SERIES-AND-CLASSES-CONTRACTS-DATA>
+ """
+    series_contracts = parse_fund_data(sgml_data)
+    print()
+    print(series_contracts)
