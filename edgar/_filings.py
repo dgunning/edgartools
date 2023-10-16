@@ -1007,13 +1007,13 @@ class SECHeader:
     """
 
     def __init__(self,
-                 header_text: str,
+                 text: str,
                  filing_metadata: Dict[str, str],
                  filers: List[Filer] = None,
                  reporting_owners: List[ReportingOwner] = None,
                  issuers: List[Issuer] = None,
                  subject_companies: List[SubjectCompany] = None):
-        self.header_text: str = header_text
+        self.text: str = text
         self.filing_metadata: Dict[str, str] = filing_metadata
         self.filers: List[Filer] = filers
         self.reporting_owners: List[ReportingOwner] = reporting_owners
@@ -1277,9 +1277,9 @@ class SECHeader:
         # Remove empty lines from header_text
         header_text = '\n'.join([line for line in header_text.split('\n') if line.strip()])
 
-        # Create the Filing object
+        # Create the Header object
         return cls(
-            header_text=header_text,
+            text=header_text,
             filing_metadata=filing_metadata,
             filers=filers,
             reporting_owners=reporting_owners,
@@ -1438,7 +1438,7 @@ class Filing:
         # including this odd etree exception AttributeError: 'NoneType' object has no attribute 'findall'
         try:
             return html_sections(self.html())
-        except Exception as e:
+        except Exception:
             log.warning('Got exception with html_sections(self.html()) .. falling back to backup method')
             return re.split(r"\n\s*\n", self.markdown())
 
