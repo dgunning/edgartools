@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
 from typing import Tuple, List, Dict, Union, Optional
-
+from retry.api import retry_call
 import httpx
 import numpy as np
 import pandas as pd
@@ -661,8 +661,9 @@ def get_current_url(atom: True,
 def get_current_entries_on_page(count: int, start: int, form: str = None, owner: str = 'include'):
     client = http_client()
     url = get_current_url(count=count, start=start, form=form, owner=owner, atom=True)
-    result = client.get(url)
-    soup = BeautifulSoup(result.text, features="xml")
+    response = retry_call(client.get, fargs=[url], tries=5, delay=3)
+
+    soup = BeautifulSoup(response.text, features="xml")
     entries = []
     for entry in soup.find_all("entry"):
         # The title contains the form type, company name, CIK, and status e.g 4 - WILKS LEWIS (0001076463) (Reporting)
@@ -1648,7 +1649,10 @@ class Attachment:
         :return: The full sec url
         """
         # Never use the ixbrl viewer
-        return f"{sec_dot_gov}{self.path}".replace("ix?doc=/", "")
+        # ix.xhtml?doc=/
+        filing_url = f"{sec_dot_gov}{self.path}"
+        # Remove "ix?doc=/" or "ix.xhtml?doc=/" from the filing url
+        return re.sub("ix(\.xhtml)?\?doc=/", "", filing_url)
 
     def open(self):
         """Open the filing document"""
