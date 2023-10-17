@@ -360,10 +360,25 @@ def test_filing_markdown():
     assert "10x Genomics, Inc." in markdown
 
 
+ONE_800_FLOWERS_10Q = Filing(form='10-Q', company='1 800 FLOWERS COM INC',
+                             cik=1084869, filing_date='2023-02-10',
+                             accession_no='0001437749-23-002992')
+
+
+def test_filing_url_for_ixbrl_filing():
+    # ixbrl url
+    'https://www.sec.gov/ix.xhtml?doc=/Archives/edgar/data/1084869/000143774923002992/flws20230101_10q.htm'
+
+    # actual url
+    actual_url = 'https://www.sec.gov/Archives/edgar/data/1084869/000143774923002992/flws20230101_10q.htm'
+
+    assert ONE_800_FLOWERS_10Q.document.url == actual_url
+
+
+
+
 def test_filing_html_for_ixbrl_filing():
-    filing = Filing(form='10-Q', company='1 800 FLOWERS COM INC',
-                    cik=1084869, filing_date='2023-02-10',
-                    accession_no='0001437749-23-002992')
+    filing = ONE_800_FLOWERS_10Q
     html = filing.html()
     assert html
     assert "1-800-FLOWERS.COM" in html
@@ -962,69 +977,8 @@ REPORTING-OWNER:
 
 def test_parse_header_filing_with_multiple_filers():
     # Formatting this file screws up the test. The text should be tight to the left margin
-
-    sec_header=SECHeader.parse(
-"""<ACCEPTANCE-DATETIME>20230609145616
-ACCESSION NUMBER:		0001104659-23-069855
-CONFORMED SUBMISSION TYPE:	10-D
-PUBLIC DOCUMENT COUNT:		2
-CONFORMED PERIOD OF REPORT:	20230531
-<DEPOSITOR-CIK>0001171040
-<SPONSOR-CIK>0000036644
-FILED AS OF DATE:		20230609
-DATE AS OF CHANGE:		20230609
-ABS ASSET CLASS:             	Credit card
-
-FILER:
-
-	COMPANY DATA:	
-		COMPANY CONFORMED NAME:			First National Master Note Trust
-		CENTRAL INDEX KEY:			0001396730
-		STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
-		IRS NUMBER:				000000000
-		STATE OF INCORPORATION:			DE
-		FISCAL YEAR END:			1231
-
-	FILING VALUES:
-		FORM TYPE:		10-D
-		SEC ACT:		1934 Act
-		SEC FILE NUMBER:	333-140273-01
-		FILM NUMBER:		231004915
-
-	BUSINESS ADDRESS:	
-		STREET 1:		1620 DODGE STREET STOP CODE 3395
-		CITY:			OMAHA
-		STATE:			NE
-		ZIP:			68197
-		BUSINESS PHONE:		402-341-0500
-
-	MAIL ADDRESS:	
-		STREET 1:		1620 DODGE STREET STOP CODE 3395
-		CITY:			OMAHA
-		STATE:			NE
-		ZIP:			68197
-
-FILER:
-
-	COMPANY DATA:	
-		COMPANY CONFORMED NAME:			FIRST NATIONAL FUNDING LLC
-		CENTRAL INDEX KEY:			0001171040
-		STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
-		IRS NUMBER:				000000000
-		STATE OF INCORPORATION:			NE
-
-	FILING VALUES:
-		FORM TYPE:		10-D
-		SEC ACT:		1934 Act
-		SEC FILE NUMBER:	000-50139
-		FILM NUMBER:		231004916
-
-	MAIL ADDRESS:	
-		STREET 1:		1620 DODGE STREET
-		CITY:			OHAHA
-		STATE:			NE
-		ZIP:			68102
-    """)
+    header_text = Path('data/MultipleFilersHeader.txt').read_text()
+    sec_header=SECHeader.parse(header_text)
     print(sec_header)
     assert len(sec_header.filers) == 2
 
@@ -1059,57 +1013,8 @@ FILER:
 
 
 def test_parse_header_filing_with_multiple_former_companies():
-    sec_header = SECHeader.parse(
-    """
-<ACCEPTANCE-DATETIME>20230609124624
-ACCESSION NUMBER:		0001472375-23-000090
-CONFORMED SUBMISSION TYPE:	10-K
-PUBLIC DOCUMENT COUNT:		54
-CONFORMED PERIOD OF REPORT:	20230331
-FILED AS OF DATE:		20230609
-DATE AS OF CHANGE:		20230609
-
-FILER:
-
-	COMPANY DATA:	
-		COMPANY CONFORMED NAME:			REGENEREX PHARMA, INC.
-		CENTRAL INDEX KEY:			0001357878
-		STANDARD INDUSTRIAL CLASSIFICATION:	PHARMACEUTICAL PREPARATIONS [2834]
-		IRS NUMBER:				980479983
-		STATE OF INCORPORATION:			NV
-		FISCAL YEAR END:			0331
-
-	FILING VALUES:
-		FORM TYPE:		10-K
-		SEC ACT:		1934 Act
-		SEC FILE NUMBER:	000-53230
-		FILM NUMBER:		231004569
-
-	BUSINESS ADDRESS:	
-		STREET 1:		5348 VEGAS DRIVE, SUITE 177
-		CITY:			LAS VEGAS
-		STATE:			NV
-		ZIP:			89108
-		BUSINESS PHONE:		305-927-5191
-
-	MAIL ADDRESS:	
-		STREET 1:		5348 VEGAS DRIVE, SUITE 177
-		CITY:			LAS VEGAS
-		STATE:			NV
-		ZIP:			89108
-
-	FORMER COMPANY:	
-		FORMER CONFORMED NAME:	PEPTIDE TECHNOLOGIES, INC.
-		DATE OF NAME CHANGE:	20180309
-
-	FORMER COMPANY:	
-		FORMER CONFORMED NAME:	Eternelle Skincare Products Inc.
-		DATE OF NAME CHANGE:	20170621
-
-	FORMER COMPANY:	
-		FORMER CONFORMED NAME:	PEPTIDE TECHNOLOGIES, INC.
-		DATE OF NAME CHANGE:	20111007        
-    """)
+    header_text = Path('data/MultipleFormerCompaniesHeader.txt').read_text()
+    sec_header = SECHeader.parse(header_text)
     print(sec_header)
     assert len(sec_header.filers) == 1
     filer: Filer = sec_header.filers[0]
