@@ -13,7 +13,7 @@ from rich.table import Table
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import find_element, child_text, optional_decimal
 from edgar.core import moneyfmt, get_bool
-from edgar.funds import get_fund_information
+from edgar.funds import get_fund_information, FundSeriesAndContracts
 
 __all__ = [
     "FundReport",
@@ -315,12 +315,12 @@ class FundReport:
                  general_info: GeneralInfo,
                  fund_info: FundInfo,
                  investments: List[InvestmentOrSecurity],
-                 series_and_contracts:pd.DataFrame=None):
+                 series_and_contracts:FundSeriesAndContracts=None):
         self.header = header
         self.general_info: GeneralInfo = general_info
         self.fund_info: FundInfo = fund_info
-        self.investments = investments
-        self.series_and_contracts = series_and_contracts
+        self.investments:List[InvestmentOrSecurity] = investments
+        self.series_and_contracts:FundSeriesAndContracts = series_and_contracts
 
     def __str__(self):
         return (f"{self.name} {self.general_info.reg_period_date} - {self.general_info.reg_period_end}"

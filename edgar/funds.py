@@ -7,13 +7,14 @@ from bs4 import BeautifulSoup
 from edgar._companies import Company
 from edgar._filings import SECHeader
 from edgar.core import http_client
-from edgar._rich import repr_rich
+from edgar._rich import repr_rich, df_to_rich_table
 from rich.table import Table, Column
 from rich import box
 
 __all__ = [
     'get_fund',
     'get_fund_information',
+    'FundSeriesAndContracts',
     'Fund'
 ]
 
@@ -103,16 +104,27 @@ def get_fund(ticker: str):
 
 Fund = get_fund
 
+class FundSeriesAndContracts:
+
+    def __init__(self, data:pd.DataFrame):
+        self.data = data
+
+    def __rich__(self):
+        return df_to_rich_table(self.data.set_index("Fund"), index_name="Fund", title="Fund Series and Contracts")
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 def get_fund_information(sec_header: SECHeader):
     header_text = sec_header.text
     series_and_classes_contracts_text = re.search(
         r'<SERIES-AND-CLASSES-CONTRACTS-DATA>(.*?)</SERIES-AND-CLASSES-CONTRACTS-DATA>', header_text, re.DOTALL)
     if series_and_classes_contracts_text:
-        return parse_fund_data(series_and_classes_contracts_text.group(1))
+        df = parse_fund_data(series_and_classes_contracts_text.group(1))
+        return FundSeriesAndContracts(df)
 
 
-def parse_fund_data(series_sgml_data: str):
+def parse_fund_data(series_sgml_data: str) -> pd.DataFrame:
     """
     Parse the SGML text that looks like this:
     <SERIES-AND-CLASSES-CONTRACTS-DATA>
@@ -162,6 +174,8 @@ def parse_fund_data(series_sgml_data: str):
         rows.append(row_data)
     df = pd.DataFrame(rows, columns=columns).iloc[:, :6]
 
-    return df.rename(columns={"OWNER-CIK": "CIK", "SERIES-ID": "SeriesID", "SERIES-NAME": "Fund",
+    return (df.rename(columns={"OWNER-CIK": "CIK", "SERIES-ID": "SeriesID", "SERIES-NAME": "Fund",
                               "CLASS-CONTRACT-ID": "ContractID", "CLASS-CONTRACT-NAME": "Class",
                               "CLASS-CONTRACT-TICKER-SYMBOL": "Ticker"})
+                    .filter(["Fund","Ticker",  "SeriesID",  "ContractID", "Class", "CIK"])
+            )
