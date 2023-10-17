@@ -10,6 +10,7 @@ from edgar.core import http_client
 from edgar._rich import repr_rich, df_to_rich_table
 from rich.table import Table, Column
 from rich import box
+from edgar.core import download_text
 
 __all__ = [
     'get_fund',
@@ -55,8 +56,9 @@ def get_fund(ticker: str):
     ticker_search_url = fund_ticker_search_url.format(ticker)
 
     with http_client() as client:
-        resp = client.get(ticker_search_url)
-    soup = BeautifulSoup(resp.text, "html.parser")
+        fund_text = download_text(ticker_search_url)
+
+    soup = BeautifulSoup(fund_text, "html.parser")
     if 'To retrieve filings, click on the CIK' not in soup.text:
         return None
 
