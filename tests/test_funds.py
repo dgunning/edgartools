@@ -3,7 +3,7 @@ import pandas as pd
 pd.options.display.max_columns = None
 
 def test_getfund():
-    fund:Fund = Fund('DXFTX')
+    fund:Fund = get_fund('DXFTX')
     print()
     print(fund)
     assert fund.company_cik == '0001040587'
@@ -13,7 +13,7 @@ def test_getfund():
     assert fund.class_contract == 'Class A'
     assert fund.ticker == 'DXFTX'
 
-    fund = Fund('DXESX')
+    fund = Fund('DXESX') # alias for get_fund
     print(fund)
     assert fund.company_cik == '0001040587'
     assert fund.company_name == 'DIREXION FUNDS'

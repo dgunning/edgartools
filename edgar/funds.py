@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 
 from edgar._companies import Company
 from edgar._filings import SECHeader
-from edgar.core import http_client
 from edgar._rich import repr_rich, df_to_rich_table
 from rich.table import Table, Column
 from rich import box
@@ -55,8 +54,7 @@ def get_fund(ticker: str):
     """Get the fund information from the ticker"""
     ticker_search_url = fund_ticker_search_url.format(ticker)
 
-    with http_client() as client:
-        fund_text = download_text(ticker_search_url)
+    fund_text = download_text(ticker_search_url)
 
     soup = BeautifulSoup(fund_text, "html.parser")
     if 'To retrieve filings, click on the CIK' not in soup.text:

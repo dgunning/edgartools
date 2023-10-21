@@ -34,6 +34,10 @@ from edgar.core import (edgar_mode,
                         set_identity)
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 from edgar.fundreports import FundReport, NPORT_FORMS
+from edgar.funds import Fund, get_fund
+
+# Another name for get_current_filings
+get_recent_filings = get_current_filings
 
 # Fund portfolio report filings
 get_fund_portfolio_filings = partial(get_filings, form=NPORT_FORMS)

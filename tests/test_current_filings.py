@@ -18,8 +18,11 @@ def test_get_current_entries():
 
 
 def test_get_current_filings_by_form():
-    form='3'
+    form='4'
     filings:CurrentFilings = get_current_filings(form=form)
+
+    # Check that all filings are start with 4. This matches the behavior of the SEC website
+
     for i in range(4):
         filings = filings.next()
         if not filings:
