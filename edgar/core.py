@@ -11,7 +11,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 from functools import lru_cache
 from io import BytesIO
-from typing import Union, Optional, Tuple
+from typing import Union, Optional, Tuple, List
+from fastcore.basics import listify
 
 import httpx
 import humanize
@@ -62,6 +63,7 @@ __all__ = [
     'download_file',
     'decode_content',
     'filter_by_date',
+    'filter_by_form',
     'text_extensions',
     'ask_for_identity',
     'default_page_size',
@@ -242,7 +244,7 @@ def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
 
 def filter_by_date(data: pa.Table,
                    date: Union[str, datetime.datetime],
-                   date_col: str):
+                   date_col: str) -> pa.Table:
     # If datetime convert to string
     if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
         date = date.strftime('%Y-%m-%d')
@@ -261,6 +263,18 @@ def filter_by_date(data: pa.Table,
         filtered_data = data.filter(pc.field(date_col) == pc.scalar(start_date))
     return filtered_data
 
+
+def filter_by_form(data: pa.Table,
+                   form: Union[str, List[str]],
+                   amendments:bool=True) -> pa.Table:
+    """Return the data filtered by form"""
+    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
+    forms = [str(el) for el in listify(form)]
+    # If amendments then add amendments
+    if amendments:
+        forms = list(set(forms + [f"{val}/A" for val in forms]))
+    data = data.filter(pc.is_in(data['form'], pa.array(forms)))
+    return data
 
 def autodetect(content):
     return detect(content).get("encoding")

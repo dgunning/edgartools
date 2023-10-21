@@ -32,8 +32,8 @@ from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
-                        filter_by_date, sec_dot_gov, InvalidDateException, IntString, DataPager, text_extensions,
-                        datefmt)
+                        filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
+                        text_extensions, datefmt)
 
 from edgar.search import BM25Search, RegexSearch
 
@@ -355,13 +355,10 @@ class Filings:
         """
         filing_index = self.data
         forms = form
+
+        # Filter by form
         if forms:
-            # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
-            forms = [str(el) for el in listify(forms)]
-            # If amendments then add amendments
-            if amendments:
-                forms = list(set(forms + [f"{val}/A" for val in forms]))
-            filing_index = filing_index.filter(pc.is_in(filing_index['form'], pa.array(forms)))
+            filing_index = filter_by_form(filing_index, forms, amendments=amendments)
 
         # filing_date and date are aliases
         filing_date = filing_date or date

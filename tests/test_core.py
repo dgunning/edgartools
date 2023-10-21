@@ -13,6 +13,7 @@ from edgar.core import (decode_content,
                         display_size,
                         Result,
                         filter_by_date,
+                        filter_by_form,
                         http_client,
                         InvalidDateException,
                         client_headers,
@@ -183,6 +184,20 @@ def test_filter_by_date():
     assert len(filter_by_date(table, datetime.strptime('2013-04-24', '%Y-%m-%d'), 'date')) == 1
 
 
+def test_filter_by_form():
+    arrays = [pa.array(['a', 'b', 'c', 'd']),
+              pa.array([3, 2, 1, 4]),
+              pa.array(['10-K', '10-Q', '10-K', '10-K/A'])]
+
+    table = pa.Table.from_arrays(arrays, names=['item', 'value', 'form'])
+
+    assert len(filter_by_form(table, '10-K', )) == 3
+    assert len(filter_by_form(table, ['10-K', '10-Q'], )) == 4
+
+    # Amendments false
+    assert len(filter_by_form(table, form='10-K',  amendments=False)) == 2
+
+
 def test_dataframe_pager():
     from edgar.core import DataPager
     import numpy as np
@@ -229,5 +244,3 @@ def test_get_text_between_tags():
         'SEC-HEADER')
     print(text)
     assert 'ACCESSION NUMBER:		0001564590-18-004771' in text
-
-
