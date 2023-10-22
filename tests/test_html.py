@@ -78,7 +78,7 @@ def test_html_sections_includes_all_tables():
             print(section)
 
 
-def test_html_sections_from_difficult_html():
+def test_html_sections_from_html_with_table_with_no_tbody():
     filing = Filing(form='3', filing_date='2023-10-10', company='BAM Partners Trust', cik=1861643,
            accession_no='0001104659-23-108367')
     sections = filing.sections()

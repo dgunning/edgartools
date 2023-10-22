@@ -149,7 +149,9 @@ def extract_elements(html_str: str):
     for idx, element in enumerate(elements):
         element_type = str(type(element))
         if "HTMLTable" in element_type:
-            table_df = table_html_to_dataframe(str(element.metadata.text_as_html))
+            # Make sure the table is not empty
+            table_html = str(element.metadata.text_as_html)
+            table_df = table_html_to_dataframe(table_html) if table_html else pd.DataFrame()
             output_els.append(
                 Element(id=f"id_{idx}", type="table", element=element, table=table_df)
             )
