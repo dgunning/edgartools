@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: MIT
 from typing import Optional, Union, List
 
+from concurrent.futures import ThreadPoolExecutor
+import importlib
+import sys
+
 from functools import partial
 
 from edgar._companies import (Company,
@@ -107,3 +111,20 @@ def obj(sec_filing: Filing) -> Optional[object]:
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:
         return filing_xbrl
+
+# Import some libraries on the background
+background_modules = ['unstructured']
+
+def do_import(module_name):
+    thismodule = sys.modules[__name__]
+
+    module = importlib.import_module(module_name)
+    setattr(thismodule, module_name, module)
+
+def long_running_import():
+    from unstructured.partition.html import partition_html
+    str(partition_html.__name__) #
+
+
+executor = ThreadPoolExecutor()
+executor.submit(long_running_import)
