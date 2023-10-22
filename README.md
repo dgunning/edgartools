@@ -602,6 +602,6 @@ Report a bug by [opening a new issue](https://github.com/dgunning/edgartools/iss
 
 
 
-### Supporters
+## Supporters
 [![Stargazers repo roster for @dgunning/edgartools](https://reporoster.com/stars/dgunning/edgartools)](https://github.com/dgunning/edgartools/stargazers)
 [![Forkers repo roster for @dgunning/edgartools](https://reporoster.com/forks/dgunning/edgartools)](https://github.com/dgunning/edgartools/network/members)
