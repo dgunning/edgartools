@@ -43,7 +43,40 @@ set_identity("Michael Mccallum mike.mccalum@indigo.com")
 filings = get_filings()
 ```
 
-## Features
+# Concepts
+
+## How do I find a filing?
+Depends on what you know
+
+### A. I know the accession number
+
+```python
+filing = get_by_accession_number("0001065280-23-000273")
+```
+
+### B. I know the company ticker or cik
+
+```python
+filings = Company("NFLX").get_filings(form="10-Q").latest(1)
+```
+
+### C. Show me a list of filings
+
+```python
+filings = get_filings(form="10-Q")
+filing = filings[0]
+```
+
+## What can I do with a filing
+
+You can **view** it in the terminal or **open** it in the browser, get the filing as **html**, **xml** or **text**, 
+and download **attachments**. You can extract data from the filing into a data object.
+
+## What can I do with a company
+
+You can get the company's **filings**, **facts** and **financials**.
+
+# How to use edgartools
 
 | Task                                 | Code                                                  |
 |--------------------------------------|-------------------------------------------------------|
