@@ -4,6 +4,7 @@
     <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-logo.png" alt="edgar-tools-logo" height="80">
 </a>
 </p>
+<p align="center">The world's easiest, most powerful edgar library</p>
 
 [![PyPI - Version](https://img.shields.io/pypi/v/edgartools.svg)](https://pypi.org/project/edgartools)
 ![GitHub last commit](https://img.shields.io/github/last-commit/dgunning/edgartools)
