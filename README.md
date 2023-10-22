@@ -26,8 +26,6 @@
 You can query, filter and select any filing since 1994 and view the filing's html, text, xml or structured data.
 
 
-
-
 ## Getting started
 
 Install using pip
@@ -601,3 +599,10 @@ Report a bug by [opening a new issue](https://github.com/dgunning/edgartools/iss
 ## Contact
 
 [LinkedIn](https://www.linkedin.com/in/dwight-gunning-860124/)
+
+
+
+### Supporters
+
+[![Stargazers repo roster for @dgunning/edgartools](https://reporoster.com/stars/notext/dgunning/edgartools)](https://github.com/dgunning/edgartools/stargazers)
+[![Forkers repo roster for @dgunning/edgartools](https://reporoster.com/forks/notext/dgunning/edgartools)](https://github.com/dgunning/edgartools/network/members)
