@@ -20,34 +20,6 @@
 </a>
 </p>
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#demo">Demo</a></li>
-        <li><a href="#features">Features</a></li>
-      </ul>
-    </li>
-    <li>
-        <a href="#installation">Installation</a>
-    </li>
-    <li>
-        <a href="#usage">Usage</a>
-        <ul>
-            <li><a href="#set-your-edgar-user-identity">Set your Edgar user identity</a></li>
-            <li><a href="#getting-filings">Getting Filings</a></li>
-            <li><a href="#using-the-company-api">Using the Company API</a></li>
-      </ul>
-    </li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
-
 # About the project
 
 **`edgartools`** is one of the nicest looking EDGAR libraries out there. It is also powerful and easy to use.
