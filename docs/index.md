@@ -57,13 +57,13 @@ Once you have retrieved Filings you can access individual filings using the brac
 filings = get_filings(2021)
 filing = filings[0]
 ```
-![Filings in 2021](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filings_2021.jpg)
+![Filings in 2021](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filings_2021.jpg)
 Pay attention to the index value displayed for the filings. This is the value you 
 will use to get the individual filing.
 ```python
 filing = filings[0]
 ```
-![A single filing](https://raw.githubusercontent.com/dgunning/edgartools/main/images/single_filing.png)
+![A single filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/single_filing.png)
 
 ## Open a filing
 

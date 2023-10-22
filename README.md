@@ -1,6 +1,6 @@
 
 
-![edgar-tools-logo](https://raw.githubusercontent.com/dgunning/edgartools/main/images/edgar-tools.png)
+![edgar-tools-logo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgar-tools.png)
 
 [![PyPI - Version](https://img.shields.io/pypi/v/edgartools.svg)](https://pypi.org/project/edgartools)
 ![GitHub last commit](https://img.shields.io/github/last-commit/dgunning/edgartools)
@@ -60,7 +60,7 @@ latest_ten_k_filings = filings.latest(20)
 # Show the first filing 
 latest_ten_k_filings[0]
 ```
-![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_10K_filing.png)
+![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_10K_filing.png)
 
 
 ## Features
@@ -199,7 +199,7 @@ filings = get_filings([2020, 2021, 2022])   # OR filings = get_filings(year=rang
 # Get filings for 2020 quarters 1 and 2
 filings = get_filings(2020, quarter=[1,2])
 ```
-![Get filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/get_filings.jpg)
+![Get filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/get_filings.jpg)
 
 
 
@@ -261,7 +261,7 @@ filings.prev()
 filings.current()
 ```
 
-![Get next filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filings_next.jpg)
+![Get next filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filings_next.jpg)
 
 ## Getting the latest filings
 
@@ -273,7 +273,7 @@ If you provide the parameter `n` it will return the latest `n` filings.
 filing = filings.latest(n=5)
 filing
 ```
-![Latest filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_filings.jpg)
+![Latest filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_filings.jpg)
 
 
 If you omit this parameter, or set `n=1` it will return a single `Filings object.
@@ -282,7 +282,7 @@ If you omit this parameter, or set `n=1` it will return a single `Filings object
 filing = filings.latest()
 filing
 ```
-![Latest filing](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_filing.jpg)
+![Latest filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_filing.jpg)
 
 
 ## Filtering filings
@@ -327,7 +327,7 @@ To filter by form e.g. **10-K** and include form amendments use `amendments = Tr
 ```python
 filings.filter(form="10-K", amendments=True) 
 ```
-![Filter with amendments](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filter_amendments.jpg)
+![Filter with amendments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filter_amendments.jpg)
 
 ## Working with a single filing
 
@@ -340,7 +340,7 @@ use `filings[3]`
 filing = filings[3]
 ```
 
-![Costco 10Q filing](https://raw.githubusercontent.com/dgunning/edgartools/main/images/costco_10Q.jpg)
+![Costco 10Q filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/costco_10Q.jpg)
 
 ### View the filing homepage
 You can view the filing homepage in the terminal using `filing.homepage`
@@ -351,7 +351,7 @@ and datafiles on the filing.
 ```python
 filing.homepage
 ```
-![Filing homepage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_homepage.jpg)
+![Filing homepage](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filing_homepage.jpg)
 
 ### Open a filing
 
@@ -394,7 +394,7 @@ Every filing has a list of attachments. You can view the attachments using `fili
 # View the attachments
 filing.attachments
 ```
-![Filing attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_attachments.png)
+![Filing attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filing_attachments.png)
 
 You can access each attachment using the bracket operator `[]` and the index of the attachment.
     
@@ -403,7 +403,7 @@ You can access each attachment using the bracket operator `[]` and the index of 
 attachment = filing.attachments[0]
 ```
 
-![Filing attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_attachment.png)
+![Filing attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filing_attachment.png)
 
 You can download the attachment using `attachment.download()`. This will download the attachment to string or bytes in memory. 
 
@@ -437,7 +437,7 @@ filing = filings[0]
 thirteenf = filing.obj()
 ```
 
-![Filing attachments](images/thirteenF.png)
+![Filing attachments](docs/images/thirteenF.png)
 
 If you call `obj()` on a filing that does not have a data file, then it will return `None`.
 
@@ -461,7 +461,7 @@ ways of working with the xbrl data.
 filing_xbrl = filing.xbrl()
 ```
 
-![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/10Q_xbrl.jpg)
+![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/10Q_xbrl.jpg)
 
 
 ## Using the Company API
@@ -480,7 +480,7 @@ For the edgar client API, just use the numbers and omit the leading zeroes.
 ```python
 company = Company(1324424)
 ```
-![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/images/expe.png)
+![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/expe.png)
 
 
 
@@ -498,7 +498,7 @@ or `Company("SNOW")`
 snow = Company("snow")
 ```
 
-![snow](https://raw.githubusercontent.com/dgunning/edgartools/main/images/snow.jpg)
+![snow](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/snow.jpg)
 ### 
 
 

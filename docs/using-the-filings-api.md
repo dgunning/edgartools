@@ -9,7 +9,7 @@ filings = get_filings()
 
 This gets the list of filings for the current year and quarter into a `Filings` object. 
 
-![Get Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/get_filings.jpg)
+![Get Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/get_filings.jpg)
 
 If you need a different date range you can specify a year or years and a quarter or quarters.
 These are valid ways to specify the date range or filter by form or by filing date.
@@ -61,7 +61,7 @@ filings.prev()
 filings.current()
 ```
 
-![Get next filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filings_next.jpg)
+![Get next filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filings_next.jpg)
 
 ## Getting the latest filings
 
@@ -73,7 +73,7 @@ If you provide the parameter `n` it will return the latest `n` filings.
 filing = filings.latest(n=5)
 filing
 ```
-![Latest filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_filings.jpg)
+![Latest filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_filings.jpg)
 
 
 If you omit this parameter, or set `n=1` it will return a single `Filings object.
@@ -82,7 +82,7 @@ If you omit this parameter, or set `n=1` it will return a single `Filings object
 filing = filings.latest()
 filing
 ```
-![Latest filing](https://raw.githubusercontent.com/dgunning/edgartools/main/images/latest_filing.jpg)
+![Latest filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_filing.jpg)
 
 
 ## Filtering filings
@@ -127,7 +127,7 @@ To filter by form e.g. **10-K** and include form amendments use `amendments = Tr
 ```python
 filings.filter(form="10-K", amendments=True) 
 ```
-![Filter with amendments](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filter_amendments.jpg)
+![Filter with amendments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filter_amendments.jpg)
 
 ## Getting a single filing
 
@@ -140,7 +140,7 @@ use `filings[3]`
 filing = filings[3]
 ```
 
-![Costco 10Q filing](https://raw.githubusercontent.com/dgunning/edgartools/main/images/costco_10Q.jpg)
+![Costco 10Q filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/costco_10Q.jpg)
 
 ### View the filing homepage
 You can view the filing homepage in the terminal using `filing.homepage`
@@ -151,7 +151,7 @@ and datafiles on the filing.
 ```python
 filing.homepage
 ```
-![Filing homepage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/filing_homepage.jpg)
+![Filing homepage](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filing_homepage.jpg)
 
 ### Open a filing
 
@@ -205,7 +205,7 @@ ways of working with the xbrl data.
 filing_xbrl = filing.xbrl()
 ```
 
-![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/images/10Q_xbrl.jpg)
+![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/10Q_xbrl.jpg)
 
 
 

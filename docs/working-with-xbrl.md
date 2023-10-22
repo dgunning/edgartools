@@ -11,7 +11,7 @@ You can get the dataset of filings submitted with XBRL by passing `index="xbrl"`
 ```python
 filings = get_filings(2022,4, index="xbrl")
 ```
-![XBL Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/xbrl-filings.jpg)
+![XBL Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/xbrl-filings.jpg)
 
 
 ## Extracted XBRL Documents
@@ -41,7 +41,7 @@ To get this, call `filing.xbrl()`
 ```python
 filing_xbrl = filing.xbrl()
 ```
-![XBRL Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/images/extracted_xbrl.png)
+![XBRL Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/extracted_xbrl.png)
 
 
 ## Getting the XBRL facts

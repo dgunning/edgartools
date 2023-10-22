@@ -55,7 +55,7 @@ You can access individual transaction using the `[]` notation.
 ownership.derivatives.transactions[0]
 ```
 
-![Derivative Transaction](https://raw.githubusercontent.com/dgunning/edgartools/main/images/derivative_transaction.png)
+![Derivative Transaction](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/derivative_transaction.png)
 
 ## Non Derivative Table
 This contains data on non-derivative holdings and transactions. To access it call
@@ -71,7 +71,7 @@ You can access individual holdings using the `[]` notation.
 holding = ownership.non_derivatives.holdings[0]
 holding
 ```
-![Non Derivative Holding](https://raw.githubusercontent.com/dgunning/edgartools/main/images/non_derivative_holding.png)
+![Non Derivative Holding](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/non_derivative_holding.png)
 
 
 ### Non Derivative Transactions

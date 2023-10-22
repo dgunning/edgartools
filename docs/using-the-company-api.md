@@ -14,7 +14,7 @@ For the edgar client API, just use the numbers and omit the leading zeroes.
 ```python
 company = Company(1318605)
 ```
-![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/images/expe.png)
+![expe](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/expe.png)
 
 
 
@@ -32,7 +32,7 @@ or `Company("SNOW")`
 snow = Company("snow")
 ```
 
-![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/images/snow.jpg)
+![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/snow.jpg)
 
 
 
