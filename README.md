@@ -1,6 +1,9 @@
-
-
-![edgar-tools-logo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgar-tools.png)
+<!-- align a paragraph to the center -->
+<p style="text-align:center">
+<a href="https://github.com/dgunning/edgartools">
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-logo.png" alt="edgar-tools-logo" height="80">
+</a>
+</p>
 
 [![PyPI - Version](https://img.shields.io/pypi/v/edgartools.svg)](https://pypi.org/project/edgartools)
 ![GitHub last commit](https://img.shields.io/github/last-commit/dgunning/edgartools)
