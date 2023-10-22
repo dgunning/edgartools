@@ -26,28 +26,26 @@
 You can query, filter and select any filing since 1994 and view the filing's html, text, xml or structured data.
 
 
-## Demo
 
-#### Show 20 10-K filings for the 2nd quarter of 2023 and open the first in the browser
 
+## Getting started
+
+Install using pip
+```bash
+pip install edgartools
+```
+
+Import and start using
 ```python
 from edgar import *
 
-# Get 10-K filings for the second quarter of 2023 
-ten_k_filings = get_filings(2023, 2, form="10-K")
+# Tell the SEC who you are
+set_identity("Michael Mccallum mike.mccalum@indigo.com")
 
-# Get the latest 20 filings by date 
-latest_ten_k_filings = filings.latest(20)
-
-# Show the first filing 
-latest_ten_k_filings[0]
+filings = get_filings()
 ```
-![10 K Filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_10K_filing.png)
-
 
 ## Features
-
-### Getting started
 
 | Task                                 | Code                                                  |
 |--------------------------------------|-------------------------------------------------------|
