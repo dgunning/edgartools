@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from typing import List
 
-from edgar import get_filings, Filings, Filing, get_company, get_by_accession_number
+from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, SECHeader, read_fixed_width_index, form_specs, company_specs, Attachments, \
     Attachment, Filer, get_current_filings
@@ -206,7 +206,7 @@ def test_filing_primary_document():
     assert homepage
     primary_document = homepage.primary_document
     assert primary_document
-    company = get_company(1805559)
+    company = get_entity(1805559)
     filings = company.get_filings()
     print(filings.to_pandas("form", "filing_date", "primaryDocument"))
     filing = filings[0]

@@ -15,11 +15,12 @@ from edgar._companies import (Company,
                               CompanySearchResults,
                               CompanyFilings,
                               CompanyFiling,
+                              Entity,
                               find_company,
-                              get_company,
+                              get_entity,
                               get_company_facts,
                               get_company_tickers,
-                              get_company_submissions,
+                              get_entity_submissions,
                               get_ticker_to_cik_lookup)
 from edgar._filings import (Filing,
                             Filings,
@@ -112,8 +113,10 @@ def obj(sec_filing: Filing) -> Optional[object]:
     if filing_xbrl:
         return filing_xbrl
 
+
 # Import some libraries on the background
 background_modules = ['unstructured']
+
 
 def do_import(module_name):
     thismodule = sys.modules[__name__]
@@ -121,9 +124,10 @@ def do_import(module_name):
     module = importlib.import_module(module_name)
     setattr(thismodule, module_name, module)
 
+
 def long_running_import():
     from unstructured.partition.html import partition_html
-    str(partition_html.__name__) #
+    str(partition_html.__name__)  #
 
 
 executor = ThreadPoolExecutor()

@@ -24,7 +24,6 @@ from retry.api import retry_call
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 
-
 # Rich logging
 logging.basicConfig(
     level="INFO",
@@ -52,9 +51,11 @@ __all__ = [
     'sec_edgar',
     'IntString',
     'DataPager',
+    'yes_no',
     'http_client',
     'sec_dot_gov',
     'display_size',
+    'reverse_name',
     'extract_dates',
     'get_resource',
     'get_identity',
@@ -266,7 +267,7 @@ def filter_by_date(data: pa.Table,
 
 def filter_by_form(data: pa.Table,
                    form: Union[str, List[str]],
-                   amendments:bool=True) -> pa.Table:
+                   amendments: bool = True) -> pa.Table:
     """Return the data filtered by form"""
     # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
     forms = [str(el) for el in listify(form)]
@@ -275,6 +276,7 @@ def filter_by_form(data: pa.Table,
         forms = list(set(forms + [f"{val}/A" for val in forms]))
     data = data.filter(pc.is_in(data['form'], pa.array(forms)))
     return data
+
 
 def autodetect(content):
     return detect(content).get("encoding")
@@ -290,6 +292,14 @@ def http_client():
                         timeout=edgar_mode.http_timeout,
                         limits=edgar_mode.limits,
                         default_encoding=autodetect)
+
+
+def get_json(data_url: str):
+    with http_client() as client:
+        r = client.get(data_url)
+        if r.status_code == 200:
+            return r.json()
+        r.raise_for_status()
 
 
 def decode_content(content: bytes):
@@ -364,7 +374,6 @@ def get_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.
                 elif is_header:
                     content += line + '\n'  # Add a newline to preserve original line breaks
     return content
-
 
 
 def repr_df(df, hide_index: bool = True):
@@ -558,6 +567,7 @@ def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
     else:
         return value.strftime(fmt)
 
+
 def sample_table(table, n=None, frac=None, replace=False, random_state=None):
     """Take a sample from a pyarrow Table"""
     if random_state:
@@ -576,3 +586,27 @@ def sample_table(table, n=None, frac=None, replace=False, random_state=None):
 
     return table.take(indices)
 
+
+def reverse_name(name):
+    # Split the name into parts
+    parts = name.split()
+
+    # Handle the cases where there's a 'Jr', 'Sr', 'II', 'III', etc.
+    special_parts = ['Jr', 'Sr', 'II', 'III']
+    last_part = parts[-1] if len(parts) > 1 else None
+
+    # Check if the last part of the name is a special part
+    if last_part in special_parts:
+        # Remove the special part from the name parts
+        parts = parts[:-1]
+        # Reverse the parts and add the special part after the last name
+        reversed_name = " ".join(parts[1:]) + f" {parts[0]} {last_part}"
+
+    else:
+        # Just reverse the name
+        reversed_name = " ".join(parts[1:]) + f" {parts[0]}"
+
+    return reversed_name.title()
+
+def yes_no(value: bool) -> str:
+    return "Yes" if value else "No"

@@ -20,6 +20,7 @@ from edgar.core import (decode_content,
                         CRAWL, CAUTION, NORMAL,
                         download_file,
                         extract_dates,
+                        reverse_name,
                         get_text_between_tags)
 import re
 from rich.table import Table
@@ -195,7 +196,7 @@ def test_filter_by_form():
     assert len(filter_by_form(table, ['10-K', '10-Q'], )) == 4
 
     # Amendments false
-    assert len(filter_by_form(table, form='10-K',  amendments=False)) == 2
+    assert len(filter_by_form(table, form='10-K', amendments=False)) == 2
 
 
 def test_dataframe_pager():
@@ -244,3 +245,11 @@ def test_get_text_between_tags():
         'SEC-HEADER')
     print(text)
     assert 'ACCESSION NUMBER:		0001564590-18-004771' in text
+
+
+def test_reverse_name():
+    assert reverse_name('WALKER KYLE') == 'Kyle Walker'
+    assert reverse_name('KONDO CHRIS') == 'Chris Kondo'
+    assert reverse_name('KONDO CHRIS Jr') == 'Chris Kondo Jr'
+    assert reverse_name('JAMES HAMILTON E') == 'Hamilton E James'
+    assert reverse_name('BURNS BENJAMIN MICHAEL') == 'Benjamin Michael Burns'

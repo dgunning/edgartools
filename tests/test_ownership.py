@@ -43,7 +43,7 @@ def test_ownership_repr():
     ownership = Ownership.from_xml(form3_content)
     print(ownership)
 
-    #print(ownership.footnotes)
+    # print(ownership.footnotes)
 
 
 def test_parse_form3_with_derivatives():
@@ -63,7 +63,7 @@ def test_parse_form3_with_derivatives():
     assert ownership.issuer.cik == "0001640147"
     assert ownership.reporting_period == "2020-09-15"
 
-    assert ownership.reporting_owner.name == "GARRETT MARK"
+    assert ownership.reporting_owner.name == "Mark Garrett"
     assert ownership.reporting_owner.cik == "0001246215"
 
     assert ownership.remarks == "Exhibit 24 - Power of Attorney"
@@ -97,6 +97,8 @@ def test_parse_form3_with_derivatives():
 def test_parse_form3_with_non_derivatives():
     form3_content = Path('data/form3.snow.nonderiv.xml').read_text()
     ownership = Ownership.from_xml(form3_content)
+    print()
+    print(ownership)
     assert ownership.form == "3"
     assert ownership.issuer.name == "Snowflake Inc."
     assert ownership.issuer.cik == "0001640147"
@@ -153,8 +155,9 @@ def test_non_derivative_holding_get_item():
     print()
     holding = snow_form3_nonderiv.non_derivatives.holdings[0]
     assert holding.security == 'Class A Common Stock'
-    assert not holding.direct
-    assert holding.ownership_nature == 'See footnote [F1]'
+    assert holding.shares == '6125376'
+    assert holding.direct == "No"
+    assert holding.nature_of_ownership == 'See footnote [F1]'
     print(holding)
 
 
@@ -194,10 +197,10 @@ def test_parse_form5():
 
     assert not ownership.reporting_relationship.is_ten_pct_owner
 
-    holding = ownership.non_derivatives.holdings[0]
+    holding:NonDerivativeHolding = ownership.non_derivatives.holdings[0]
     assert holding.security == 'Class A Common Stock'
-    assert not holding.direct
-    assert holding.ownership_nature == 'Trust [F3]'
+    assert holding.direct == "No"
+    assert holding.nature_of_ownership == 'Trust [F3]'
 
 
 def test_ownership_from_filing_xml_document():
@@ -219,3 +222,48 @@ def test_no_securities_owned():
     assert form3_nosecurities.no_securities
     print()
     print(form3_nosecurities)
+
+
+def test_aapl_form4():
+    filing = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-17',
+                    accession_no='0000320193-23-000099')
+    ownership = filing.obj()
+    assert len(ownership.derivatives.transactions) == 4
+    print()
+    print(ownership)
+
+
+def test_correct_number_of_transactions_for_form4(capsys):
+    filing = Filing(company='Day One Biopharmaceuticals, Inc.', cik=1845337, form='4', filing_date='2023-10-20',
+                    accession_no='0001209191-23-053235')
+    ownership = filing.obj()
+    assert len(ownership.non_derivatives.transactions) == 3
+    print()
+    print(ownership)
+    out, err = capsys.readouterr()
+    with capsys.disabled():
+        assert "Day One Biopharmaceuticals, Inc." in out
+
+
+def test_form3_shows_holdings(capsys):
+    filing = Filing(form='3', filing_date='2023-10-23', company='22NW Fund GP, LLC', cik=1770575,
+                    accession_no='0000921895-23-002362')
+    ownership = filing.obj()
+    # print the ownership and test that it contains "By: 22NW Fund LP"
+    print()
+    print(ownership)
+    out, err = capsys.readouterr()
+    with capsys.disabled():
+        assert "By: 22NW Fund, LP" in out
+
+def test_form5_shows_transactions(capsys):
+    filing = Filing(form='5', filing_date='2023-10-18', company='COSTCO WHOLESALE CORP /NEW', cik=909832, accession_no='0001209191-23-053139')
+    ownership = filing.obj()
+
+    print()
+    print(ownership)
+    out, err = capsys.readouterr()
+    with capsys.disabled():
+        assert "COSTCO WHOLESALE CORP /NEW" in out
+        assert "+461" in out
+

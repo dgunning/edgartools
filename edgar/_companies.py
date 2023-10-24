@@ -22,10 +22,13 @@ from edgar.search import SimilaritySearchIndex
 
 __all__ = [
     'Address',
+    'Entity',
+    'EntityFacts',
+    'EntityData',
     'Company',
     'CompanyData',
     'get_concept',
-    'get_company',
+    'get_entity',
     'CompanyFacts',
     'CompanyFiling',
     'find_company',
@@ -35,8 +38,8 @@ __all__ = [
     'CompanySearchIndex',
     'get_company_facts',
     'get_company_tickers',
-    'get_company_submissions',
-    'parse_company_submissions',
+    'get_entity_submissions',
+    'parse_entity_submissions',
     'get_ticker_to_cik_lookup'
 ]
 
@@ -92,7 +95,7 @@ class Fact:
                 )
 
 
-class CompanyFiling(Filing):
+class EntityFiling(Filing):
 
     def __init__(self,
                  cik: int,
@@ -128,7 +131,8 @@ class CompanyFiling(Filing):
                 )
 
 
-class CompanyFacts:
+
+class EntityFacts:
     """
     Contains company facts data
     """
@@ -163,7 +167,7 @@ class CompanyFacts:
         return repr_rich(self.__rich__())
 
 
-class CompanyFilings(Filings):
+class EntityFilings(Filings):
 
     def __init__(self,
                  data: pa.Table,
@@ -295,7 +299,8 @@ class CompanyFilings(Filings):
         )
 
 
-class CompanyData:
+
+class EntityData:
     """
     A company populated from a call to the company submissions endpoint
     """
@@ -314,7 +319,7 @@ class CompanyData:
                  flags: str,
                  business_address: Address,
                  mailing_address: Address,
-                 filings: CompanyFilings,
+                 filings: EntityFilings,
                  ):
         self.cik: int = cik
         self.name: str = name
@@ -339,12 +344,17 @@ class CompanyData:
            return latest_10k.obj().financials
 
     @property
+    def is_company(self) ->bool:
+        # Companies have a sic code populated, individuals do not
+        return self.sic != ''
+
+    @property
     def industry(self):
         return self.sic_description
 
     @classmethod
     def for_cik(cls, cik: int):
-        return get_company_submissions(cik)
+        return get_entity_submissions(cik)
 
     @classmethod
     def for_ticker(cls, ticker: str):
@@ -352,7 +362,7 @@ class CompanyData:
         if cik:
             return CompanyData.for_cik(cik)
 
-    def get_facts(self) -> Optional[CompanyFacts]:
+    def get_facts(self) -> Optional[EntityFacts]:
         """
         Get the company facts
         :return: CompanyFacts
@@ -442,7 +452,7 @@ class CompanyData:
     def __str__(self):
         return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         ticker_str = f"[{self.tickers[0]}]" if len(self.tickers) == 1 else ""
         company_text = f"{self.name} {ticker_str}"
         return Panel(
@@ -457,6 +467,11 @@ class CompanyData:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
+# Aliases for Companies
+CompanyFiling = EntityFiling
+CompanyFilings = EntityFilings
+CompanyFacts = EntityFacts
+CompanyData = EntityData
 
 def parse_filings(filings_json: Dict[str, object],
                   cik: int,
@@ -498,7 +513,7 @@ def parse_filings(filings_json: Dict[str, object],
                           company_name=company_name)
 
 
-def parse_company_submissions(cjson: Dict[str, object]):
+def parse_entity_submissions(cjson: Dict[str, object]):
     mailing_addr = cjson['addresses']['mailing']
     business_addr = cjson['addresses']['business']
     cik = cjson['cik']
@@ -535,35 +550,35 @@ def parse_company_submissions(cjson: Dict[str, object]):
 
 
 @lru_cache(maxsize=64)
-def get_company(company_identifier: IntString) -> CompanyData:
+def get_entity(entity_identifier: IntString) -> EntityData:
     """
         Get a company by cik or ticker
 
         Get company by ticker e.g.
 
-        >>> get_company("SNOW") or get_company("tsla")
+        >>> get_entity("SNOW") or get_entity("tsla")
 
         Get company by cik e.g.
 
-        >>> get_company(1090990)
+        >>> get_entity(1090990)
 
-    :param company_identifier: The company identifier. Can be a cik or a ticker
+    :param entity_identifier: The company identifier. Can be a cik or a ticker
     :return:
     """
-    is_int_cik = isinstance(company_identifier, int)
+    is_int_cik = isinstance(entity_identifier, int)
     # Sometimes the cik is left zero padded e.g. 000198706
-    is_string_cik = isinstance(company_identifier, str) and company_identifier.isdigit()
+    is_string_cik = isinstance(entity_identifier, str) and entity_identifier.isdigit()
     is_cik = is_int_cik or is_string_cik
 
     if is_cik:
         # Cast to int to handle zero-padding
-        return CompanyData.for_cik(int(company_identifier))
+        return EntityData.for_cik(int(entity_identifier))
 
     # Get by ticker
-    is_ticker = isinstance(company_identifier, str) and re.match("[A-Za-z]{1,6}", company_identifier, re.IGNORECASE)
+    is_ticker = isinstance(entity_identifier, str) and re.match("[A-Za-z]{1,6}", entity_identifier, re.IGNORECASE)
 
     if is_ticker:
-        return CompanyData.for_ticker(company_identifier)
+        return EntityData.for_ticker(entity_identifier)
 
     log.warn("""
     To use get_company() provide a valid cik or ticker.
@@ -578,7 +593,9 @@ def get_company(company_identifier: IntString) -> CompanyData:
 
 
 # This is an alias for get_company allowing for this -> Company("SNOW")
-Company = get_company
+get_company = get_entity
+Company = get_entity
+Entity = get_entity
 
 
 def get_json(data_url: str):
@@ -590,8 +607,8 @@ def get_json(data_url: str):
 
 
 @lru_cache(maxsize=32)
-def get_company_submissions(cik: int,
-                            include_old_filings: bool = True) -> CompanyData:
+def get_entity_submissions(cik: int,
+                           include_old_filings: bool = True) -> EntityData:
     """Get the company filings for a given cik"""
     try:
         submission_json = get_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
@@ -608,7 +625,7 @@ def get_company_submissions(cik: int,
             old_sub = get_json("https://data.sec.gov/submissions/" + old_file['name'])
             for column in old_sub:
                 submission_json['filings']['recent'][column] += old_sub[column]
-    return parse_company_submissions(submission_json)
+    return parse_entity_submissions(submission_json)
 
 
 def parse_company_facts(fjson: Dict[str, object]):

@@ -7,7 +7,7 @@ import pyarrow.compute as pc
 from rich import print
 
 from edgar._companies import *
-from edgar._companies import (parse_company_submissions, CompanyConcept, CompanyFiling, find_company,
+from edgar._companies import (parse_entity_submissions, CompanyConcept, CompanyFiling, find_company,
                               CompanySearchIndex, preprocess_company)
 from edgar._filings import Filing, get_filings
 from edgar.core import default_page_size
@@ -15,7 +15,7 @@ from edgar.core import default_page_size
 
 @lru_cache(maxsize=16)
 def get_test_company(company_identifier):
-    return get_company(company_identifier)
+    return get_entity(company_identifier)
 
 
 def test_company_repr():
@@ -39,13 +39,13 @@ def test_company_repr():
 def test_parse_company_submission_json():
     with Path('data/company_submission.json').open("r") as f:
         cjson = json.load(f)
-    company = parse_company_submissions(cjson)
+    company = parse_entity_submissions(cjson)
     print()
     print(company)
 
 
 def test_get_company_submissions():
-    company: CompanyData = get_company_submissions(1318605)
+    company: CompanyData = get_entity_submissions(1318605)
     assert company
     assert company.cik == 1318605
     filings = company.get_filings()
@@ -242,7 +242,7 @@ def test_company_filing_get_related_filings():
 
 
 def test_get_company_by_cik():
-    company = get_company(1554646)
+    company = get_entity(1554646)
     assert company.name == 'NEXPOINT SECURITIES, INC.'
 
     company = Company(1554646)
@@ -250,7 +250,7 @@ def test_get_company_by_cik():
 
 
 def test_get_company_by_ticker():
-    company = get_company("SNOW")
+    company = get_entity("SNOW")
     assert company.cik == 1640147
 
 

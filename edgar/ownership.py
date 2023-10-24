@@ -19,8 +19,8 @@ from rich.panel import Panel
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import (child_text, child_value)
-from edgar.core import IntString
-from edgar.core import get_bool
+from edgar.core import IntString, get_bool, reverse_name, yes_no
+from edgar._companies import Company
 
 __all__ = [
     'Owner',
@@ -252,8 +252,9 @@ class DerivativeHolding:
 @dataclass(frozen=True)
 class NonDerivativeHolding:
     security: str
+    shares:str
     direct: bool
-    ownership_nature: str
+    nature_of_ownership: str
 
 
 @dataclass(frozen=True)
@@ -300,22 +301,31 @@ class DerivativeHoldings(DataHolder):
     def __getitem__(self, item):
         if not self.empty:
             rec = self.data.iloc[item]
-            return DerivativeHolding(**rec)
+            return DerivativeHolding(
+                security=rec.Security,
+                underlying=rec.Underlying,
+                underlying_shares=rec.UnderlyingShares,
+                exercise_price=rec.ExercisePrice,
+                exercise_date=rec.ExerciseDate,
+                expiration_date=rec.ExpirationDate,
+                direct_indirect=rec.DirectIndirect,
+                nature_of_ownership=rec['Nature Of Ownership']
+            )
 
     def summary(self) -> pd.DataFrame:
-        cols = ['security', 'underlying', 'underlying_shares', 'exercise_price', 'exercise_date']
+        cols = ['Security', 'Underlying', 'UnderlyingShares', 'ExercisePrice', 'ExerciseDate']
         if self.empty:
             return pd.DataFrame(columns=cols)
         return (self
         .data
         .filter(cols)
         .rename(
-            columns={'underlying_shares': 'shares', 'exercise_price': 'ex price', 'exercise_date': 'ex date'})
+            columns={'UnderlyingShares': 'Shares', 'ExercisePrice': 'Ex price', 'ExerciseDate': 'Ex date'})
         )
 
     def __rich__(self):
         return Group(Text("Holdings", style="bold"),
-                     df_to_rich_table(self.summary().set_index('security'), index_name='security')
+                     df_to_rich_table(self.summary().set_index('Security'), index_name='Security')
                      )
 
     def __repr__(self):
@@ -331,17 +341,22 @@ class NonDerivativeHoldings(DataHolder):
     def __getitem__(self, item):
         if not self.empty:
             rec = self.data.iloc[item]
-            return NonDerivativeHolding(**rec)
+            return NonDerivativeHolding(
+                security=rec.Security,
+                shares=rec.Shares,
+                direct=rec.Direct,
+                nature_of_ownership=rec['Nature Of Ownership']
+            )
 
     def summary(self):
-        cols = ['security', 'direct', 'ownership_nature']
+        cols = ['Security', 'Shares', 'Direct', 'Nature Of Ownership']
         if self.empty:
             return pd.DataFrame(columns=cols)
         return self.data
 
     def __rich__(self):
         return Group(Text("Holdings", style="bold"),
-                     df_to_rich_table(self.summary().set_index('security'), index_name='security')
+                     df_to_rich_table(self.summary().set_index('Security'), index_name='Security')
                      )
 
     def __repr__(self):
@@ -357,26 +372,43 @@ class DerivativeTransactions(DataHolder):
     def __getitem__(self, item):
         if not self.empty:
             rec = self.data.iloc[item]
-            return DerivativeTransaction(**rec)
+            return DerivativeTransaction(
+                security=rec.Security,
+                underlying=rec.Underlying,
+                underlying_shares=rec.UnderlyingShares,
+                exercise_price=rec.ExercisePrice,
+                exercise_date=rec.ExerciseDate,
+                expiration_date=rec.ExpirationDate,
+                shares=rec.Shares,
+                direct_indirect=rec.DirectIndirect,
+                price=rec.Price,
+                acquired_disposed=rec.AcquiredDisposed,
+                date=rec.Date,
+                remaining=rec.Remaining,
+                form=rec.form,
+                transaction_code=rec.transaction_code,
+                equity_swap=rec.equity_swap,
+                footnotes=rec.footnotes
+            )
 
     def __str__(self):
         return f"DerivativeTransaction - {len(self)} transactions"
 
     def summary(self):
-        cols = ['date', 'security', 'underlying', 'shares', 'remaining', 'price']
+        cols = ['Date', 'Security', 'Shares', 'Remaining', 'Price', 'Underlying', ]
         if self.empty:
             return pd.DataFrame(columns=cols[1:])
         return (self.data
-                .assign(buy_sell=lambda df: df.acquired_disposed.replace({'A': '+', 'D': '-'}))
-                .assign(shares=lambda df: df.buy_sell + df.shares)
-                .filter(['date', 'security', 'underlying', 'shares', 'remaining', 'price'])
-                .set_index('date')
+                .assign(BuySell=lambda df: df.AcquiredDisposed.replace({'A': '+', 'D': '-'}))
+                .assign(Shares=lambda df: df.BuySell + df.Shares)
+                .filter(cols)
+                .set_index('Date')
                 )
 
     def __rich__(self):
-        return Group(Text("Transactions", style="bold"),
-                     df_to_rich_table(self.summary(), index_name='date')
-                     )
+        return Group(
+            df_to_rich_table(self.summary(), index_name='date')
+        )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -391,23 +423,36 @@ class NonDerivativeTransactions(DataHolder):
     def __getitem__(self, item):
         if not self.empty:
             rec = self.data.iloc[item]
-            return NonDerivativeTransaction(**rec)
+            return NonDerivativeTransaction(
+                security=rec.Security,
+                date=rec.Date,
+                shares=rec.Shares,
+                remaining=rec.Remaining,
+                price=rec.Price,
+                acquired_disposed=rec.AcquiredDisposed,
+                direct_indirect=rec.DirectIndirect,
+                form=rec.form,
+                transaction_code=rec.transaction_code,
+                equity_swap=rec.equity_swap,
+                footnotes=rec.footnotes
+            )
+
 
     def summary(self) -> pd.DataFrame:
-        cols = ['date', 'security', 'shares', 'remaining', 'price']
+        cols = ['Date', 'Security', 'Shares', 'Remaining', 'Price']
         if self.empty:
             return pd.DataFrame(columns=cols)
         return (self
                 .data
-                .assign(buy_sell=lambda df: df.acquired_disposed.replace({'A': '+', 'D': '-'}))
-                .assign(shares=lambda df: df.buy_sell + df.shares)
+                .assign(BuySell=lambda df: df.AcquiredDisposed.replace({'A': '+', 'D': '-'}))
+                .assign(Shares=lambda df: df.BuySell + df.Shares)
                 .filter(cols)
                 )
 
     def __rich__(self):
-        return Group(Text("Transactions", style="bold"),
-                     df_to_rich_table(self.summary().set_index('date'), index_name='date')
-                     )
+        return Group(
+            df_to_rich_table(self.summary().set_index('Date'), index_name='Date')
+        )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -420,9 +465,11 @@ class NonDerivativeTable:
 
     def __init__(self,
                  holdings: NonDerivativeHoldings,
-                 transactions: NonDerivativeTransactions):
+                 transactions: NonDerivativeTransactions,
+                 form:str):
         self.holdings: NonDerivativeHoldings = holdings
         self.transactions: NonDerivativeTransactions = transactions
+        self.form=form
 
     @property
     def has_holdings(self):
@@ -438,12 +485,13 @@ class NonDerivativeTable:
 
     @classmethod
     def extract(cls,
-                table: Tag = None):
+                table: Tag,
+                form:str):
         if not table:
-            return cls(holdings=NonDerivativeHoldings(), transactions=NonDerivativeTransactions())
+            return cls(holdings=NonDerivativeHoldings(), transactions=NonDerivativeTransactions(), form=form)
         transactions = NonDerivativeTable.extract_transactions(table)
         holdings = NonDerivativeTable.extract_holdings(table)
-        return cls(transactions=transactions, holdings=holdings)
+        return cls(transactions=transactions, holdings=holdings, form=form)
 
     @staticmethod
     def extract_holdings(table: Tag) -> NonDerivativeHoldings:
@@ -456,9 +504,10 @@ class NonDerivativeTable:
             ownership_nature_tag = holding_tag.find("ownershipNature")
             holding = dict(
                 [
-                    ('security', child_value(holding_tag, 'securityTitle')),
-                    ('direct', child_value(ownership_nature_tag, 'directOrIndirectOwnership') == "D"),
-                    ('ownership_nature', child_value(ownership_nature_tag, 'natureOfOwnership')),
+                    ('Security', child_value(holding_tag, 'securityTitle')),
+                    ('Shares', child_value(holding_tag, 'sharesOwnedFollowingTransaction')),
+                    ('Direct', yes_no(child_value(ownership_nature_tag, 'directOrIndirectOwnership') == "D")),
+                    ('Nature Of Ownership', child_value(ownership_nature_tag, 'natureOfOwnership') or ""),
                 ]
             )
 
@@ -486,13 +535,13 @@ class NonDerivativeTable:
 
             transaction = dict(
                 [
-                    ('security', child_value(transaction_tag, 'securityTitle')),
-                    ('date', child_value(transaction_tag, 'transactionDate')),
-                    ('shares', child_text(transaction_amt_tag, 'transactionShares')),
-                    ('remaining', child_text(post_transaction_tag, 'sharesOwnedFollowingTransaction')),
-                    ('price', child_text(transaction_amt_tag, 'transactionPricePerShare')),
-                    ('acquired_disposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
-                    ('direct_indirect', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
+                    ('Security', child_value(transaction_tag, 'securityTitle')),
+                    ('Date', child_value(transaction_tag, 'transactionDate')),
+                    ('Shares', child_text(transaction_amt_tag, 'transactionShares')),
+                    ('Remaining', child_text(post_transaction_tag, 'sharesOwnedFollowingTransaction')),
+                    ('Price', child_text(transaction_amt_tag, 'transactionPricePerShare')),
+                    ('AcquiredDisposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
+                    ('DirectIndirect', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
                 ]
             )
             transaction_coding_tag = transaction_tag.find("transactionCoding")
@@ -511,11 +560,13 @@ class NonDerivativeTable:
         return NonDerivativeTransactions(pd.DataFrame(transactions))
 
     def __rich__(self):
-        return Panel(Group(
-            Text("0 non derivative holdings") if self.holdings.empty else self.holdings.__rich__(),
-            Text("0 non derivative transactions") if self.transactions.empty else self.transactions.__rich__()
-        ), title="Non Derivatives"
-        )
+        if self.form == "3":
+            holding_or_transaction = self.holdings.__rich__()
+        else:
+            holding_or_transaction = self.transactions.__rich__()
+        if not holding_or_transaction:
+            holding_or_transaction = Text("")
+        return Panel(holding_or_transaction, title="Non Derivative securities acquired, displosed or benefially owned")
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -528,9 +579,11 @@ class DerivativeTable:
 
     def __init__(self,
                  holdings: DerivativeHoldings,
-                 transactions: DerivativeTransactions):
+                 transactions: DerivativeTransactions,
+                 form:str):
         self.holdings: DerivativeHoldings = holdings
         self.transactions: DerivativeTransactions = transactions
+        self.form=form
 
     @property
     def has_holdings(self):
@@ -546,12 +599,13 @@ class DerivativeTable:
 
     @classmethod
     def extract(cls,
-                table: Tag = None):
+                table: Tag,
+                form:str):
         if not table:
-            return cls(holdings=DerivativeHoldings(), transactions=DerivativeTransactions())
+            return cls(holdings=DerivativeHoldings(), transactions=DerivativeTransactions(), form=form)
         transactions = cls.extract_transactions(table)
         holdings = cls.extract_holdings(table)
-        return cls(transactions=transactions, holdings=holdings)
+        return cls(transactions=transactions, holdings=holdings, form=form)
 
     @staticmethod
     def extract_transactions(table: Tag) -> DerivativeTransactions:
@@ -568,18 +622,18 @@ class DerivativeTable:
 
             transaction = dict(
                 [
-                    ('security', child_value(transaction_tag, 'securityTitle')),
-                    ('underlying', child_value(underlying_tag, 'underlyingSecurityTitle')),
-                    ('underlying_shares', child_value(underlying_tag, 'underlyingSecurityShares')),
-                    ('exercise_price', child_value(transaction_tag, 'conversionOrExercisePrice')),
-                    ('exercise_date', child_value(transaction_tag, 'exerciseDate')),
-                    ('expiration_date', child_value(transaction_tag, 'expirationDate')),
-                    ('shares', child_text(transaction_tag, 'transactionShares')),
-                    ('direct_indirect', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
-                    ('price', child_text(transaction_amt_tag, 'transactionPricePerShare')),
-                    ('acquired_disposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
-                    ('date', child_value(transaction_tag, 'transactionDate')),
-                    ('remaining', child_text(post_transaction_tag, 'sharesOwnedFollowingTransaction')),
+                    ('Security', child_value(transaction_tag, 'securityTitle')),
+                    ('Underlying', child_value(underlying_tag, 'underlyingSecurityTitle')),
+                    ('UnderlyingShares', child_value(underlying_tag, 'underlyingSecurityShares')),
+                    ('ExercisePrice', child_value(transaction_tag, 'conversionOrExercisePrice')),
+                    ('ExerciseDate', child_value(transaction_tag, 'exerciseDate')),
+                    ('ExpirationDate', child_value(transaction_tag, 'expirationDate')),
+                    ('Shares', child_text(transaction_tag, 'transactionShares')),
+                    ('DirectIndirect', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
+                    ('Price', child_text(transaction_amt_tag, 'transactionPricePerShare')),
+                    ('AcquiredDisposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
+                    ('Date', child_value(transaction_tag, 'transactionDate')),
+                    ('Remaining', child_text(post_transaction_tag, 'sharesOwnedFollowingTransaction')),
                 ]
             )
 
@@ -610,25 +664,27 @@ class DerivativeTable:
 
             holding = dict(
                 [
-                    ('security', child_value(holding_tag, 'securityTitle')),
-                    ('underlying', child_value(underlying_security_tag, 'underlyingSecurityTitle')),
-                    ('underlying_shares', child_value(underlying_security_tag, 'underlyingSecurityShares')),
-                    ('exercise_price', child_value(holding_tag, 'conversionOrExercisePrice')),
-                    ('exercise_date', child_value(holding_tag, 'exerciseDate')),
-                    ('expiration_date', child_value(holding_tag, 'expirationDate')),
-                    ('direct_indirect', child_text(ownership_nature, 'directOrIndirectOwnership')),
-                    ('nature_of_ownership', child_value(ownership_nature, 'natureOfOwnership')),
+                    ('Security', child_value(holding_tag, 'securityTitle')),
+                    ('Underlying', child_value(underlying_security_tag, 'underlyingSecurityTitle')),
+                    ('UnderlyingShares', child_value(underlying_security_tag, 'underlyingSecurityShares')),
+                    ('ExercisePrice', child_value(holding_tag, 'conversionOrExercisePrice')),
+                    ('ExerciseDate', child_value(holding_tag, 'exerciseDate')),
+                    ('ExpirationDate', child_value(holding_tag, 'expirationDate')),
+                    ('DirectIndirect', child_text(ownership_nature, 'directOrIndirectOwnership')),
+                    ('Nature Of Ownership', child_value(ownership_nature, 'natureOfOwnership')),
                 ]
             )
             holdings.append(holding)
         return DerivativeHoldings(pd.DataFrame(holdings))
 
     def __rich__(self):
-        return Panel(Group(
-            Text("0 derivative holdings") if self.holdings.empty else self.holdings.__rich__(),
-            Text("0 derivative transactions") if self.transactions.empty else self.transactions.__rich__()
-        ), title="Derivatives"
-        )
+        if self.form == "3":
+            holding_or_transaction = self.holdings.__rich__()
+        else:
+            holding_or_transaction = self.transactions.__rich__()
+        if not holding_or_transaction:
+            holding_or_transaction = Text("")
+        return Panel(holding_or_transaction, title="Derivative securities acquired, displosed or benefially owned")
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -668,11 +724,11 @@ class Ownership:
 
     def summary(self):
         return pd.DataFrame(
-            [{'issuer': self.issuer.name,
-              'ticker': self.issuer.ticker,
-              'reporting owner': self.reporting_owner.name,
-              'period': self.reporting_period}]
-        ).set_index('ticker')
+            [{'Reporting Owner': self.reporting_owner.name,
+              'Issuer': self.issuer.name,
+              'Ticker': self.issuer.ticker,
+              'Period': self.reporting_period}]
+        ).set_index('Reporting Owner')
 
     @classmethod
     def from_xml(cls,
@@ -702,9 +758,17 @@ class Ownership:
         # Reporting Owner
         reporting_owner_tag = root.find("reportingOwner")
         reporting_owner_id_tag = reporting_owner_tag.find("reportingOwnerId")
+
+        reporting_owner_cik = child_text(reporting_owner_id_tag, "rptOwnerCik")
+        reporting_owner_name = child_text(reporting_owner_id_tag, "rptOwnerName")
+
+        # Check if it is a company. If not, reverse the name
+        if not Company(reporting_owner_cik).is_company:
+            reporting_owner_name = reverse_name(reporting_owner_name)
+
         reporting_owner = Owner(
-            cik=child_text(reporting_owner_id_tag, "rptOwnerCik"),
-            name=child_text(reporting_owner_id_tag, "rptOwnerName")
+            cik=reporting_owner_cik,
+            name=reporting_owner_name
         )
 
         # Signature
@@ -732,16 +796,17 @@ class Ownership:
             officer_title=child_text(reporting_owner_rel_tag, "officerTitle")
         )
 
+        form = child_text(root, "documentType")
         # Non derivatives
         non_derivative_table_tag = root.find("nonDerivativeTable")
-        non_derivative_table = NonDerivativeTable.extract(non_derivative_table_tag)
+        non_derivative_table = NonDerivativeTable.extract(non_derivative_table_tag, form=form)
 
         # Derivatives
         derivative_table_tag = root.find("derivativeTable")
-        derivative_table = DerivativeTable.extract(derivative_table_tag)
+        derivative_table = DerivativeTable.extract(derivative_table_tag, form=form)
 
         ownership_document = Ownership(
-            form=child_text(root, "documentType"),
+            form=form,
             footnotes=footnotes,
             issuer=issuer,
             reporting_owner=reporting_owner,
@@ -757,14 +822,18 @@ class Ownership:
         return ownership_document
 
     def __rich__(self):
-        return Group(Panel(
+        header_panel = Panel(
             Group(
                 Text(f"Form {self.form} {FORM_DESCRIPTIONS.get(self.form, '')}", style="bold dark_sea_green4"),
-                df_to_rich_table(self.summary(), index_name='ticker'))),
-            self.non_derivatives.__rich__(),
-            self.derivatives.__rich__(),
-            self.footnotes.__rich__()
+                df_to_rich_table(self.summary(), index_name='Reporting Owner'))
         )
+        renderables = [header_panel, self.non_derivatives.__rich__()]
+        # Add derivatives if they exist
+        if not self.derivatives.empty:
+            renderables.append(self.derivatives.__rich__())
+
+        renderables.append(self.footnotes.__rich__())
+        return Group(*renderables)
 
     def __repr__(self):
         return repr_rich(self.__rich__())
