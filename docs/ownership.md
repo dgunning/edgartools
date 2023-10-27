@@ -51,8 +51,9 @@ To access derivative transactions use `ownership.derivatives.holdings`
 To access derivative transactions use `ownership.derivatives.transactions`
 
 You can access individual transaction using the `[]` notation.
+
 ```python
-ownership.derivatives.transactions[0]
+ownership.derivative_table.transactions[0]
 ```
 
 ![Derivative Transaction](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/derivative_transaction.png)
@@ -68,7 +69,7 @@ To access derivative holdings use `ownership.non_derivatives.holdings`
 You can access individual holdings using the `[]` notation.
 
 ```python
-holding = ownership.non_derivatives.holdings[0]
+holding = ownership.non_derivative_table.holdings[0]
 holding
 ```
 ![Non Derivative Holding](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/non_derivative_holding.png)
@@ -80,6 +81,6 @@ To access derivative transactions use `ownership.non_derivatives.transactions`
 You can access individual transactions using the `[]` notation.
 
 ```python
-transaction = ownership.non_derivatives.transactions[0]
+transaction = ownership.non_derivative_table.transactions[0]
 transaction
 ```
