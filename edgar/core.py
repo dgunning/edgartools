@@ -391,11 +391,8 @@ def repr_df(df, hide_index: bool = True):
 
 def get_bool(value: str = None) -> Optional[bool]:
     """Convert the value to a boolean"""
-    if value is None:
-        return None
-    if value == '1' or value == 1 or value == "Y":
-        return True
-    return False
+    return value in [1, "1", "Y", "true", "True", "TRUE"]
+
 
 
 class Result:
