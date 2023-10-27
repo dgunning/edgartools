@@ -21,6 +21,7 @@ from edgar.core import (decode_content,
                         download_file,
                         extract_dates,
                         reverse_name,
+                        get_bool,
                         get_text_between_tags)
 import re
 from rich.table import Table
@@ -253,3 +254,12 @@ def test_reverse_name():
     assert reverse_name('KONDO CHRIS Jr') == 'Chris Kondo Jr'
     assert reverse_name('JAMES HAMILTON E') == 'Hamilton E James'
     assert reverse_name('BURNS BENJAMIN MICHAEL') == 'Benjamin Michael Burns'
+
+
+def test_get_bool():
+    assert get_bool(1)
+    assert get_bool("1")
+    assert get_bool("Y")
+    assert get_bool("true")
+    assert get_bool("TRUE")
+    assert get_bool("True")
