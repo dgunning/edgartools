@@ -8,13 +8,15 @@ The top level object is Ownership
 
 """
 from dataclasses import dataclass
-from typing import List, Dict, Tuple
-
+from typing import List, Dict, Tuple, Optional
+from functools import lru_cache
 import pandas as pd
+import numpy as np
 from bs4 import BeautifulSoup
 from bs4 import Tag
 from rich.console import Group, Text
 from rich.panel import Panel
+from decimal import Decimal
 
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
@@ -30,6 +32,9 @@ __all__ = [
     'OwnerSignature',
     'TransactionCode',
     'Ownership',
+    'Form3',
+    'Form4',
+    'Form5',
     'DerivativeHolding',
     'DerivativeHoldings',
     'translate_ownership',
@@ -46,6 +51,36 @@ __all__ = [
 
 def translate(value: str, translations: Dict[str, str]) -> str:
     return translations.get(value, value)
+
+def is_numeric(series:pd.Series) -> bool:
+    return np.issubdtype(series.dtype, np.number) or series.str.replace(".", "").str.isnumeric().all()
+
+def compute_average_price(shares:pd.Series, price:pd.Series) -> Decimal:
+    """
+    Compute the average price of the trades
+    :param shares: The number of shares as a series
+    :param price: The price per share as a series
+    :return:
+    """
+    if is_numeric(shares) and is_numeric(price):
+        shares = pd.to_numeric(shares)
+        price = pd.to_numeric(price)
+        value = (shares * price).sum() / shares.sum()
+        return Decimal(str(value)).quantize(Decimal('0.01'))
+
+def compute_total_value(shares:pd.Series, price:pd.Series) -> Decimal:
+    """
+    Compute the total value of the trades
+    :param shares: The number of shares as a series
+    :param price: The price per share as a series
+    :return:
+    """
+    if is_numeric(shares) and is_numeric(price):
+        shares = pd.to_numeric(shares)
+        price = pd.to_numeric(price)
+        value = (shares * price).sum()
+        return Decimal(str(value)).quantize(Decimal('0.01'))
+
 
 
 DIRECT_OR_INDIRECT_OWNERSHIP = {'D': 'Direct', 'I': 'Indirect'}
@@ -121,6 +156,47 @@ class TransactionCode:
         self.equity_swap: bool = equity_swap_involved
         self.footnote: str = footnote
 
+    @property
+    def description(self):
+        return TransactionCode.DESCRIPTIONS.get(self.code, self.code)
+
+    DESCRIPTIONS = {'A': 'Grant or award',
+                    'C': 'Conversion of derivative',
+                    'D': 'Disposition to the issuer',
+                    'E': 'Expiration of short position',
+                    'F': 'Payment of exercise price or tax',
+                    'G': 'Gift',
+                    'H': 'Expiration of long position',
+                    'I': 'Disposition otherwise than to the issuer',
+                    'M': 'Exercise or conversion of exempt derivative',
+                    'O': 'Exercise of out-of-the-money derivative',
+                    'P': 'Open market or private purchase',
+                    'S': 'Open market or private sale',
+                    'U': 'Disposition pursuant to a tender of shares',
+                    'X': 'Exercise of in-the-money or at-the-money derivative',
+                    'Z': 'Deposit or withdrawal from voting trust'}
+
+    TRANSACTION_TYPES = {'A': 'Award',
+                         'C': 'Conversion',
+                         'D': 'Disposition',
+                         'E': 'Expiration',
+                         'F': 'Tax Withholding',
+                         'G': 'Gift',
+                         'H': 'Expiration',
+                         'I': 'Discretionary',
+                         'J': 'Other',
+                         'M': 'Exercise',
+                         'O': 'Exercise',
+                         'P': 'Purchase',
+                         'S': 'Sale',
+                         'U': 'Disposition',
+                         'W': 'Willed',
+                         'X': 'Exercise',
+                         'Z': 'Trust'
+                         }
+
+    TRADES = ['P', 'S']
+
     def __repr__(self):
         return (f"ReportingRelationship(form={self.form}, code={self.code}, "
                 f"equity_swap={self.equity_swap}, footnote={self.footnote})")
@@ -175,7 +251,7 @@ class DataHolder:
     def empty(self):
         return self.data is None or len(self.data) == 0
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         return Group(Text(f"{self.name}"),
                      df_to_rich_table(self.data) if not self.empty else Text("No data")
                      )
@@ -208,7 +284,7 @@ class Footnotes:
     def __str__(self):
         return str(self._footnotes)
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         return Group(Text("Footnotes", style="bold"),
                      df_to_rich_table(self.summary(), index_name="id"),
                      )
@@ -252,7 +328,7 @@ class DerivativeHolding:
 @dataclass(frozen=True)
 class NonDerivativeHolding:
     security: str
-    shares:str
+    shares: str
     direct: bool
     nature_of_ownership: str
 
@@ -386,8 +462,8 @@ class DerivativeTransactions(DataHolder):
                 date=rec.Date,
                 remaining=rec.Remaining,
                 form=rec.form,
-                transaction_code=rec.transaction_code,
-                equity_swap=rec.equity_swap,
+                transaction_code=rec.Code,
+                equity_swap=rec.EquitySwap,
                 footnotes=rec.footnotes
             )
 
@@ -407,7 +483,7 @@ class DerivativeTransactions(DataHolder):
 
     def __rich__(self):
         return Group(
-            df_to_rich_table(self.summary(), index_name='date')
+            df_to_rich_table(self.summary(), index_name='Date')
         )
 
     def __repr__(self):
@@ -419,6 +495,11 @@ class NonDerivativeTransactions(DataHolder):
     def __init__(self,
                  data: pd.DataFrame = None):
         super().__init__(data, "NonDerivativeTransactions")
+
+    def trades(self):
+        # If all trades are buys (AcquiredDisplosed=='A') or sells 'D' return all data
+        if self.data.AcquiredDisposed.unique() in ['A', 'D']:
+            return self.data
 
     def __getitem__(self, item):
         if not self.empty:
@@ -432,11 +513,10 @@ class NonDerivativeTransactions(DataHolder):
                 acquired_disposed=rec.AcquiredDisposed,
                 direct_indirect=rec.DirectIndirect,
                 form=rec.form,
-                transaction_code=rec.transaction_code,
-                equity_swap=rec.equity_swap,
+                transaction_code=rec.Code,
+                equity_swap=rec.EquitySwap,
                 footnotes=rec.footnotes
             )
-
 
     def summary(self) -> pd.DataFrame:
         cols = ['Date', 'Security', 'Shares', 'Remaining', 'Price']
@@ -445,7 +525,7 @@ class NonDerivativeTransactions(DataHolder):
         return (self
                 .data
                 .assign(BuySell=lambda df: df.AcquiredDisposed.replace({'A': '+', 'D': '-'}))
-                .assign(Shares=lambda df: df.BuySell + df.Shares)
+                .assign(Shares=lambda df: df.BuySell + df.Shares.astype(str))
                 .filter(cols)
                 )
 
@@ -466,10 +546,21 @@ class NonDerivativeTable:
     def __init__(self,
                  holdings: NonDerivativeHoldings,
                  transactions: NonDerivativeTransactions,
-                 form:str):
+                 form: str):
         self.holdings: NonDerivativeHoldings = holdings
         self.transactions: NonDerivativeTransactions = transactions
-        self.form=form
+        self.form = form
+
+    @property
+    def common_trades(self):
+        if self.has_transactions:
+            return DataHolder(self.transactions.data[self.transactions.data.Code.isin(TransactionCode.TRADES)])
+
+    @property
+    def exercised_trades(self):
+        # The trades that have the purpose Exercise
+        if self.has_transactions:
+            return self.transactions.data[self.transactions.data.TransactionType == 'Exercise']
 
     @property
     def has_holdings(self):
@@ -486,7 +577,7 @@ class NonDerivativeTable:
     @classmethod
     def extract(cls,
                 table: Tag,
-                form:str):
+                form: str):
         if not table:
             return cls(holdings=NonDerivativeHoldings(), transactions=NonDerivativeTransactions(), form=form)
         transactions = NonDerivativeTable.extract_transactions(table)
@@ -514,6 +605,10 @@ class NonDerivativeTable:
             holdings.append(holding)
         # Create the holdings dataframe
         holdings_df = pd.DataFrame(holdings)
+
+        # Convert to numeric if we can.
+        if holdings_df['Shares'].str.isnumeric().all():
+            holdings_df['Shares'] = pd.to_numeric(holdings_df['Shares'], errors="ignore")
 
         return NonDerivativeHoldings(holdings_df)
 
@@ -549,15 +644,23 @@ class NonDerivativeTable:
                 transaction_coding = dict(
                     [
                         ('form', child_text(transaction_coding_tag, 'transactionFormType')),
-                        ('transaction_code', child_text(transaction_coding_tag, 'transactionCode')),
-                        ('equity_swap', get_bool(child_text(transaction_coding_tag, 'equitySwapInvolved'))),
+                        ('Code', child_text(transaction_coding_tag, 'transactionCode')),
+                        ('EquitySwap', get_bool(child_text(transaction_coding_tag, 'equitySwapInvolved'))),
                         ('footnotes', get_footnotes(transaction_coding_tag))
                     ]
                 )
                 transaction.update(transaction_coding)
 
             transactions.append(transaction)
-        return NonDerivativeTransactions(pd.DataFrame(transactions))
+        transaction_df = (pd.DataFrame(transactions)
+        .assign(
+            TransactionType=lambda df: df.Code.apply(lambda x: TransactionCode.TRANSACTION_TYPES.get(x, x)))
+        )
+        # Convert to numeric if we can.
+        for column in ['Shares', 'Remaining', 'Price']:
+            if transaction_df[column].str.isnumeric().all():
+                transaction_df[column] = pd.to_numeric(transaction_df[column], errors="ignore")
+        return NonDerivativeTransactions(transaction_df)
 
     def __rich__(self):
         if self.form == "3":
@@ -580,10 +683,19 @@ class DerivativeTable:
     def __init__(self,
                  holdings: DerivativeHoldings,
                  transactions: DerivativeTransactions,
-                 form:str):
+                 form: str):
         self.holdings: DerivativeHoldings = holdings
         self.transactions: DerivativeTransactions = transactions
-        self.form=form
+        self.form = form
+
+    @staticmethod
+    def _empty_trades() -> pd.DataFrame:
+        return pd.DataFrame(columns=['Date', 'Security', 'Shares', 'Remaining', 'Price', 'Underlying', ])
+
+    @property
+    def derivative_trades(self):
+        if self.has_transactions:
+            return self.transactions.data
 
     @property
     def has_holdings(self):
@@ -600,7 +712,7 @@ class DerivativeTable:
     @classmethod
     def extract(cls,
                 table: Tag,
-                form:str):
+                form: str):
         if not table:
             return cls(holdings=DerivativeHoldings(), transactions=DerivativeTransactions(), form=form)
         transactions = cls.extract_transactions(table)
@@ -643,14 +755,20 @@ class DerivativeTable:
                 transaction_coding = dict(
                     [
                         ('form', child_text(transaction_coding_tag, 'transactionFormType')),
-                        ('transaction_code', child_text(transaction_coding_tag, 'transactionCode')),
-                        ('equity_swap', get_bool(child_text(transaction_coding_tag, 'equitySwapInvolved'))),
+                        ('Code', child_text(transaction_coding_tag, 'transactionCode')),
+                        ('EquitySwap', get_bool(child_text(transaction_coding_tag, 'equitySwapInvolved'))),
                         ('footnotes', get_footnotes(transaction_coding_tag))
                     ]
                 )
                 transaction.update(transaction_coding)
             transactions.append(transaction)
-        return DerivativeTransactions(pd.DataFrame(transactions))
+
+        # Now create the transaction dataframe
+        transaction_df = (pd.DataFrame(transactions)
+        .assign(
+            TransactionType=lambda df: df.Code.apply(lambda x: TransactionCode.TRANSACTION_TYPES.get(x, x)))
+        )
+        return DerivativeTransactions(transaction_df)
 
     @staticmethod
     def extract_holdings(table: Tag) -> DerivativeHoldings:
@@ -702,8 +820,8 @@ class Ownership:
                  reporting_owner: Owner,
                  reporting_owner_address: Address,
                  reporting_relationship: ReportingRelationship,
-                 non_derivatives: NonDerivativeTable,
-                 derivatives: DerivativeTable,
+                 non_derivative_table: NonDerivativeTable,
+                 derivative_table: DerivativeTable,
                  signatures: List[OwnerSignature],
                  reporting_period: str,
                  remarks: str,
@@ -715,12 +833,64 @@ class Ownership:
         self.reporting_owner: Owner = reporting_owner
         self.reporting_owner_address: Address = reporting_owner_address
         self.reporting_relationship: ReportingRelationship = reporting_relationship
-        self.non_derivatives: NonDerivativeTable = non_derivatives
-        self.derivatives: DerivativeTable = derivatives
+        self.non_derivative_table: NonDerivativeTable = non_derivative_table
+        self.derivative_table: DerivativeTable = derivative_table
         self.signatures: List[OwnerSignature] = signatures
         self.reporting_period: str = reporting_period
         self.remarks: str = remarks
         self.no_securities = no_securities
+
+    @property
+    @lru_cache(maxsize=8)
+    def common_trades(self):
+        return self.non_derivative_table.common_trades
+
+    @property
+    @lru_cache(maxsize=8)
+    def derivative_trades(self):
+        # First get the derivative trades from the derivative table
+       return self.derivative_table.derivative_trades
+
+
+    @property
+    @lru_cache(maxsize=8)
+    def shares_owned(self):
+        shares_owned_value = Decimal(0.0).quantize(Decimal('0.01'))
+        trades = self.common_trades.data
+
+        if trades is not None and not trades.empty:
+            # Get the last trade
+            last_trade = trades.iloc[-1]
+            shares_owned_value += int(last_trade.Remaining)
+
+        derivatives = self.derivative_trades
+        if derivatives is not None and not derivatives.empty:
+            # Get the last trade
+            last_trade = derivatives.iloc[-1]
+            shares_owned_value += Decimal(last_trade.Remaining).quantize(Decimal('0.01'))
+
+        return shares_owned_value
+
+    @property
+    @lru_cache(maxsize=8)
+    def insider_stock_summary(self):
+        if self.common_trades.empty:
+            return None
+        return StockSummary(
+            insider=self.reporting_owner.name,
+            shares_traded=self.common_trades.data.Shares.sum() if is_numeric(self.common_trades.data.Shares) else None,
+            average_price = compute_average_price(shares=self.common_trades.data.Shares, price=self.common_trades.data.Price),
+            total_value=compute_total_value(shares=self.common_trades.data.Shares, price=self.common_trades.data.Price),
+            shares_owned=self.shares_owned,
+            reporting_period=self.reporting_period
+        )
+
+    @property
+    @lru_cache(maxsize=8)
+    def shares_traded(self):
+        # Sum the Shares if Shares is all numeric
+        if np.issubdtype(self.common_trades.data.Shares.dtype, np.number):
+            return self.common_trades.data.Shares.sum()
 
     def summary(self):
         return pd.DataFrame(
@@ -733,6 +903,11 @@ class Ownership:
     @classmethod
     def from_xml(cls,
                  content: str):
+        return cls(**cls.parse_xml(content))
+
+    @classmethod
+    def parse_xml(cls,
+                  content: str):
         soup = BeautifulSoup(content, "xml")
 
         root = soup.find("ownershipDocument")
@@ -805,20 +980,20 @@ class Ownership:
         derivative_table_tag = root.find("derivativeTable")
         derivative_table = DerivativeTable.extract(derivative_table_tag, form=form)
 
-        ownership_document = Ownership(
-            form=form,
-            footnotes=footnotes,
-            issuer=issuer,
-            reporting_owner=reporting_owner,
-            reporting_owner_address=reporting_owner_address,
-            reporting_relationship=reporting_relationship,
-            signatures=ownership_signatures,
-            non_derivatives=non_derivative_table,
-            derivatives=derivative_table,
-            reporting_period=report_period,
-            remarks=remarks,
-            no_securities=no_securities
-        )
+        ownership_document = {
+            'form': form,
+            'footnotes': footnotes,
+            'issuer': issuer,
+            'reporting_owner': reporting_owner,
+            'reporting_owner_address': reporting_owner_address,
+            'reporting_relationship': reporting_relationship,
+            'signatures': ownership_signatures,
+            'non_derivative_table': non_derivative_table,
+            'derivative_table': derivative_table,
+            'reporting_period': report_period,
+            'remarks': remarks,
+            'no_securities': no_securities
+        }
         return ownership_document
 
     def __rich__(self):
@@ -827,13 +1002,53 @@ class Ownership:
                 Text(f"Form {self.form} {FORM_DESCRIPTIONS.get(self.form, '')}", style="bold dark_sea_green4"),
                 df_to_rich_table(self.summary(), index_name='Reporting Owner'))
         )
-        renderables = [header_panel, self.non_derivatives.__rich__()]
+        renderables = [header_panel, self.non_derivative_table.__rich__()]
         # Add derivatives if they exist
-        if not self.derivatives.empty:
-            renderables.append(self.derivatives.__rich__())
+        if not self.derivative_table.empty:
+            renderables.append(self.derivative_table.__rich__())
 
-        renderables.append(self.footnotes.__rich__())
         return Group(*renderables)
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+
+@dataclass
+class StockSummary:
+    """
+    Used to summarize the stock transactions of the insider
+    """
+    insider: str
+    reporting_period: str
+    shares_traded: Optional[Decimal] = None
+    average_price: Optional[Decimal] = None
+    total_value: Optional[Decimal] = None
+    shares_owned: Optional[Decimal] = None
+
+
+    def to_dict(self):
+        return {
+            'Reporting Owner': self.insider,
+            'Shares Traded': self.shares_traded,
+            'Average Price': self.average_price,
+            'Total Value': self.total_value,
+            'Shares Owned': self.shares_owned,
+            'Reporting Period': self.reporting_period
+        }
+
+
+class Form3(Ownership):
+
+    def __init__(self, **fields):
+        super().__init__(**fields)
+
+
+class Form4(Ownership):
+
+    def __init__(self, **fields):
+        super().__init__(**fields)
+
+class Form5(Ownership):
+
+    def __init__(self, **fields):
+        super().__init__(**fields)
