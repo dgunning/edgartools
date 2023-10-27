@@ -12,17 +12,18 @@ from typing import List, Dict, Tuple, Optional
 from functools import lru_cache
 import pandas as pd
 import numpy as np
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, ResultSet
 from bs4 import Tag
 from rich.console import Group, Text
 from rich.panel import Panel
+from rich.columns import Columns
 from decimal import Decimal
 
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import (child_text, child_value)
 from edgar.core import IntString, get_bool, reverse_name, yes_no
-from edgar._companies import Company
+from edgar._companies import Entity
 
 __all__ = [
     'Owner',
@@ -42,6 +43,7 @@ __all__ = [
     'NonDerivativeHoldings',
     'DerivativeTransaction',
     'DerivativeTransactions',
+    'ReportingOwners',
     'ReportingRelationship',
     'PostTransactionAmounts',
     'NonDerivativeTransaction',
@@ -52,10 +54,12 @@ __all__ = [
 def translate(value: str, translations: Dict[str, str]) -> str:
     return translations.get(value, value)
 
-def is_numeric(series:pd.Series) -> bool:
+
+def is_numeric(series: pd.Series) -> bool:
     return np.issubdtype(series.dtype, np.number) or series.str.replace(".", "").str.isnumeric().all()
 
-def compute_average_price(shares:pd.Series, price:pd.Series) -> Decimal:
+
+def compute_average_price(shares: pd.Series, price: pd.Series) -> Decimal:
     """
     Compute the average price of the trades
     :param shares: The number of shares as a series
@@ -68,7 +72,8 @@ def compute_average_price(shares:pd.Series, price:pd.Series) -> Decimal:
         value = (shares * price).sum() / shares.sum()
         return Decimal(str(value)).quantize(Decimal('0.01'))
 
-def compute_total_value(shares:pd.Series, price:pd.Series) -> Decimal:
+
+def compute_total_value(shares: pd.Series, price: pd.Series) -> Decimal:
     """
     Compute the total value of the trades
     :param shares: The number of shares as a series
@@ -82,7 +87,6 @@ def compute_total_value(shares:pd.Series, price:pd.Series) -> Decimal:
         return Decimal(str(value)).quantize(Decimal('0.01'))
 
 
-
 DIRECT_OR_INDIRECT_OWNERSHIP = {'D': 'Direct', 'I': 'Indirect'}
 
 FORM_DESCRIPTIONS = {'3': 'Initial beneficial ownership',
@@ -93,18 +97,6 @@ FORM_DESCRIPTIONS = {'3': 'Initial beneficial ownership',
 
 def translate_ownership(value: str) -> str:
     return translate(value, DIRECT_OR_INDIRECT_OWNERSHIP)
-
-
-class Owner:
-
-    def __init__(self,
-                 cik: IntString,
-                 name: str):
-        self.cik: IntString = cik
-        self.name: str = name
-
-    def __repr__(self):
-        return f"Owner(cik='{self.cik or ''}', name={self.name or ''})"
 
 
 class Issuer:
@@ -246,6 +238,9 @@ class DataHolder:
 
     def __len__(self):
         return 0 if self.data is None else len(self.data)
+
+    def __getitem__(self, item):
+        return self.data[item]
 
     @property
     def empty(self):
@@ -669,7 +664,7 @@ class NonDerivativeTable:
             holding_or_transaction = self.transactions.__rich__()
         if not holding_or_transaction:
             holding_or_transaction = Text("")
-        return Panel(holding_or_transaction, title="Non Derivative securities acquired, displosed or benefially owned")
+        return Panel(holding_or_transaction, title="Common stock acquired, displosed or benefially owned")
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -802,10 +797,106 @@ class DerivativeTable:
             holding_or_transaction = self.transactions.__rich__()
         if not holding_or_transaction:
             holding_or_transaction = Text("")
-        return Panel(holding_or_transaction, title="Derivative securities acquired, displosed or benefially owned")
+        return Panel(holding_or_transaction, title="Options acquired, displosed or benefially owned")
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+
+@dataclass(frozen=True)
+class Owner:
+    cik: str
+    name: str
+    address: Address
+    is_director: bool
+    is_officer: bool
+    is_other: bool
+    is_ten_pct_owner: bool
+    officer_title: str = None
+
+    def __repr__(self):
+        return f"Owner(cik='{self.cik or ''}', name={self.name or ''})"
+
+
+class ReportingOwners(DataHolder):
+
+    def __init__(self, data):
+        super().__init__(data, "ReportingOwners")
+
+    def __getitem__(self, item):
+        rec = self.data.iloc[item]
+        return Owner(
+            cik=rec.Cik,
+            name=rec.Owner,
+            address=Address(
+                street1=rec.Street1,
+                street2=rec.Street2,
+                city=rec.City,
+                state_or_country=rec.StateCountry,
+                state_or_country_description=rec.StateCountryDesc,
+                zipcode=rec.ZipCode
+            ),
+            is_director=rec.IsDirector,
+            is_officer=rec.IsOfficer,
+            is_other=rec.IsOther,
+            is_ten_pct_owner=rec.IsTenPctOwner,
+            officer_title=rec.OfficerTitle
+        )
+
+    def __rich__(self):
+        return Group(
+            df_to_rich_table(self.data
+                             .assign(Director=lambda df: df.IsDirector.apply(yes_no),
+                                     Officer=lambda df: df.IsOfficer.apply(yes_no),
+                                     TenPctOwner=lambda df: df.IsTenPctOwner.apply(yes_no),
+                                     )
+                             .filter(['Owner', 'Director', 'Officer', 'TenPctOwner'])
+                             .rename(columns={'Owner': 'Reporting Owner', 'TenPctOwner': '10% Owner'})
+                             .set_index(['Reporting Owner']),
+                             index_name='Reporting Owner')
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    @classmethod
+    def from_reporting_owner_tags(cls, reporting_owners: ResultSet):
+        # Reporting Owner
+        records = []
+
+        for reporting_owner_tag in reporting_owners:
+            record = {}
+            reporting_owner_id_tag = reporting_owner_tag.find("reportingOwnerId")
+
+            record["Cik"] = child_text(reporting_owner_id_tag, "rptOwnerCik")
+            record["Owner"] = child_text(reporting_owner_id_tag, "rptOwnerName")
+
+            # Check if it is a company. If not, reverse the name
+            entity = Entity(record["Cik"])
+
+            if not entity.is_company:
+                record["Owner"] = reverse_name(record["Owner"])
+
+            reporting_owner_address_tag = reporting_owner_tag.find("reportingOwnerAddress")
+
+            record['Street1'] = child_text(reporting_owner_address_tag, "rptOwnerStreet1")
+            record['Street2'] = child_text(reporting_owner_address_tag, "rptOwnerStreet2")
+            record['City'] = child_text(reporting_owner_address_tag, "rptOwnerCity")
+            record['StateCountry'] = child_text(reporting_owner_address_tag, "rptOwnerState")
+            record['StateCountryDesc'] = child_text(reporting_owner_address_tag, "rptOwnerStateDescription")
+            record['ZipCode'] = child_text(reporting_owner_address_tag, "rptOwnerZipCode")
+
+            reporting_owner_rel_tag = reporting_owner_tag.find("reportingOwnerRelationship")
+
+            record['IsDirector'] = get_bool(child_text(reporting_owner_rel_tag, "isDirector"))
+            record['IsOfficer'] = get_bool(child_text(reporting_owner_rel_tag, "isOfficer"))
+            record['IsTenPctOwner'] = get_bool(child_text(reporting_owner_rel_tag, "isTenPercentOwner"))
+            record['IsOther'] = get_bool(child_text(reporting_owner_rel_tag, "isOther"))
+            record['OfficerTitle'] = child_text(reporting_owner_rel_tag, "officerTitle")
+            records.append(record)
+
+        data = pd.DataFrame(records)
+        return cls(data)
 
 
 class Ownership:
@@ -817,9 +908,7 @@ class Ownership:
                  form: str,
                  footnotes: Footnotes,
                  issuer: Issuer,
-                 reporting_owner: Owner,
-                 reporting_owner_address: Address,
-                 reporting_relationship: ReportingRelationship,
+                 reporting_owners: ReportingOwners,
                  non_derivative_table: NonDerivativeTable,
                  derivative_table: DerivativeTable,
                  signatures: List[OwnerSignature],
@@ -830,9 +919,7 @@ class Ownership:
         self.form: str = form
         self.footnotes: Footnotes = footnotes
         self.issuer: Issuer = issuer
-        self.reporting_owner: Owner = reporting_owner
-        self.reporting_owner_address: Address = reporting_owner_address
-        self.reporting_relationship: ReportingRelationship = reporting_relationship
+        self.reporting_owners: ReportingOwners = reporting_owners
         self.non_derivative_table: NonDerivativeTable = non_derivative_table
         self.derivative_table: DerivativeTable = derivative_table
         self.signatures: List[OwnerSignature] = signatures
@@ -849,8 +936,7 @@ class Ownership:
     @lru_cache(maxsize=8)
     def derivative_trades(self):
         # First get the derivative trades from the derivative table
-       return self.derivative_table.derivative_trades
-
+        return self.derivative_table.derivative_trades
 
     @property
     @lru_cache(maxsize=8)
@@ -877,10 +963,13 @@ class Ownership:
         if self.common_trades.empty:
             return None
         return StockSummary(
-            insider=self.reporting_owner.name,
-            shares_traded=self.common_trades.data.Shares.sum() if is_numeric(self.common_trades.data.Shares) else None,
-            average_price = compute_average_price(shares=self.common_trades.data.Shares, price=self.common_trades.data.Price),
-            total_value=compute_total_value(shares=self.common_trades.data.Shares, price=self.common_trades.data.Price),
+            insider=self.reporting_owners[0].name,  # Change to get a summary of the owners
+            shares_traded=self.common_trades.data.Shares.sum() if is_numeric(
+                self.common_trades.data.Shares) else None,
+            average_price=compute_average_price(shares=self.common_trades.data.Shares,
+                                                price=self.common_trades.data.Price),
+            total_value=compute_total_value(shares=self.common_trades.data.Shares,
+                                            price=self.common_trades.data.Price),
             shares_owned=self.shares_owned,
             reporting_period=self.reporting_period
         )
@@ -894,11 +983,11 @@ class Ownership:
 
     def summary(self):
         return pd.DataFrame(
-            [{'Reporting Owner': self.reporting_owner.name,
+            [{'Period': self.reporting_period,
               'Issuer': self.issuer.name,
-              'Ticker': self.issuer.ticker,
-              'Period': self.reporting_period}]
-        ).set_index('Reporting Owner')
+              'Ticker': self.issuer.ticker}
+             ]
+        ).set_index('Period')
 
     @classmethod
     def from_xml(cls,
@@ -930,46 +1019,14 @@ class Ownership:
             ticker=child_text(issuer_tag, "issuerTradingSymbol")
         )
 
-        # Reporting Owner
-        reporting_owner_tag = root.find("reportingOwner")
-        reporting_owner_id_tag = reporting_owner_tag.find("reportingOwnerId")
-
-        reporting_owner_cik = child_text(reporting_owner_id_tag, "rptOwnerCik")
-        reporting_owner_name = child_text(reporting_owner_id_tag, "rptOwnerName")
-
-        # Check if it is a company. If not, reverse the name
-        if not Company(reporting_owner_cik).is_company:
-            reporting_owner_name = reverse_name(reporting_owner_name)
-
-        reporting_owner = Owner(
-            cik=reporting_owner_cik,
-            name=reporting_owner_name
-        )
-
         # Signature
         ownership_signatures = [OwnerSignature(
             signature=child_text(el, "signatureName"),
             date=child_text(el, "signatureDate")
         ) for el in root.find_all("ownerSignature")]
 
-        reporting_owner_address_tag = reporting_owner_tag.find("reportingOwnerAddress")
-        reporting_owner_address = Address(
-            street1=child_text(reporting_owner_address_tag, "rptOwnerStreet1"),
-            street2=child_text(reporting_owner_address_tag, "rptOwnerStreet2"),
-            city=child_text(reporting_owner_address_tag, "rptOwnerCity"),
-            state_or_country=child_text(reporting_owner_address_tag, "rptOwnerState"),
-            zipcode=child_text(reporting_owner_address_tag, "rptOwnerZipCode"),
-            state_or_country_description=child_text(reporting_owner_address_tag, "rptOwnerStateDescription")
-        )
-
-        reporting_owner_rel_tag = reporting_owner_tag.find("reportingOwnerRelationship")
-        reporting_relationship = ReportingRelationship(
-            is_director=get_bool(child_text(reporting_owner_rel_tag, "isDirector")),
-            is_officer=get_bool(child_text(reporting_owner_rel_tag, "isOfficer")),
-            is_ten_pct_owner=get_bool(child_text(reporting_owner_rel_tag, "isTenPercentOwner")),
-            is_other=get_bool(child_text(reporting_owner_rel_tag, "isOther")),
-            officer_title=child_text(reporting_owner_rel_tag, "officerTitle")
-        )
+        # Reporting Owner
+        reporting_owner = ReportingOwners.from_reporting_owner_tags(root.find_all("reportingOwner"))
 
         form = child_text(root, "documentType")
         # Non derivatives
@@ -984,9 +1041,7 @@ class Ownership:
             'form': form,
             'footnotes': footnotes,
             'issuer': issuer,
-            'reporting_owner': reporting_owner,
-            'reporting_owner_address': reporting_owner_address,
-            'reporting_relationship': reporting_relationship,
+            'reporting_owners': reporting_owner,
             'signatures': ownership_signatures,
             'non_derivative_table': non_derivative_table,
             'derivative_table': derivative_table,
@@ -1000,7 +1055,9 @@ class Ownership:
         header_panel = Panel(
             Group(
                 Text(f"Form {self.form} {FORM_DESCRIPTIONS.get(self.form, '')}", style="bold dark_sea_green4"),
-                df_to_rich_table(self.summary(), index_name='Reporting Owner'))
+                Columns([df_to_rich_table(self.summary(), index_name='Period'),
+                self.reporting_owners.__rich__()])
+            )
         )
         renderables = [header_panel, self.non_derivative_table.__rich__()]
         # Add derivatives if they exist
@@ -1025,7 +1082,6 @@ class StockSummary:
     total_value: Optional[Decimal] = None
     shares_owned: Optional[Decimal] = None
 
-
     def to_dict(self):
         return {
             'Reporting Owner': self.insider,
@@ -1047,6 +1103,7 @@ class Form4(Ownership):
 
     def __init__(self, **fields):
         super().__init__(**fields)
+
 
 class Form5(Ownership):
 

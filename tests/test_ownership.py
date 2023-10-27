@@ -5,6 +5,8 @@ from decimal import Decimal
 from edgar.ownership import *
 from edgar.ownership import compute_average_price, compute_total_value
 from edgar._filings import Filing
+from bs4 import BeautifulSoup
+
 
 pd.options.display.max_columns = None
 
@@ -68,8 +70,8 @@ def test_parse_form3_with_derivatives():
     assert ownership.issuer.cik == "0001640147"
     assert ownership.reporting_period == "2020-09-15"
 
-    assert ownership.reporting_owner.name == "Mark Garrett"
-    assert ownership.reporting_owner.cik == "0001246215"
+    assert ownership.reporting_owners[0].name == "Mark Garrett"
+    assert ownership.reporting_owners[0].cik == "0001246215"
 
     assert ownership.remarks == "Exhibit 24 - Power of Attorney"
 
@@ -109,8 +111,8 @@ def test_parse_form3_with_non_derivatives():
     assert ownership.issuer.cik == "0001640147"
     assert ownership.reporting_period == "2020-09-18"
 
-    assert ownership.reporting_owner.name == "BERKSHIRE HATHAWAY INC"
-    assert ownership.reporting_owner.cik == "0001067983"
+    assert ownership.reporting_owners[0].name == "BERKSHIRE HATHAWAY INC"
+    assert ownership.reporting_owners[0].cik == "0001067983"
 
     assert ownership.remarks == ""
 
@@ -132,12 +134,12 @@ def test_parse_form3_with_non_derivatives():
 def test_reporting_relationship():
     filing = Filing(form='4', filing_date='2023-10-18', company='ANDERSON SCOTT LLOYD', cik=1868662, accession_no='0001415889-23-014419')
 
-    reporting_relationship = filing.obj().reporting_relationship
+    owner = filing.obj().reporting_owners[0]
 
-    assert reporting_relationship.is_director
-    assert not reporting_relationship.is_ten_pct_owner
-    assert not reporting_relationship.is_officer
-    assert not reporting_relationship.is_other
+    assert owner.is_director
+    assert not owner.is_ten_pct_owner
+    assert not owner.is_officer
+    assert not owner.is_other
 
 def test_post_transaction_values():
     transaction: NonDerivativeTransaction = snow_form4.non_derivative_table.transactions[0]
@@ -189,10 +191,34 @@ def test_derivative_transaction_get_item():
     assert transaction.underlying == 'Class A Common Stock'
 
 
-def test_reporting_relationship_for_snow():
-    ownership = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
-    print(ownership.reporting_relationship)
-    assert ownership.reporting_relationship.is_ten_pct_owner
+def test_parse_reporting_owners_from_xml():
+    soup = BeautifulSoup(Path('data/form3.snow.nonderiv.xml').read_text(), 'xml')
+    reporting_owner_tags = soup.find_all("reportingOwner")
+    reporting_owners:ReportingOwners = ReportingOwners.from_reporting_owner_tags(reporting_owner_tags)
+    assert reporting_owners
+    assert len(reporting_owners) == 2
+
+    owner:Owner = reporting_owners[0]
+    assert owner.name == 'BERKSHIRE HATHAWAY INC'
+    assert owner.cik == '0001067983'
+    assert not owner.is_director
+    assert owner.is_ten_pct_owner
+    assert not owner.is_officer
+    assert not owner.is_other
+    assert owner.address.street1 == '3555 FARNAM STREET'
+    assert owner.address.street2 == ''
+    assert owner.address.city == 'OMAHA'
+    assert owner.address.state_or_country == 'NE'
+    assert owner.address.zipcode == '68131'
+
+    warren = reporting_owners[1]
+    assert warren.name == 'Warren E Buffett'
+    assert warren.cik == '0000315090'
+    assert not warren.is_director
+    assert warren.is_ten_pct_owner
+    assert not warren.is_officer
+
+    print(reporting_owners)
 
 
 def test_parse_form5():
@@ -209,7 +235,7 @@ def test_parse_form5():
     assert len(ownership.non_derivative_table.transactions) == 1
     assert len(ownership.non_derivative_table.holdings) == 2
 
-    assert not ownership.reporting_relationship.is_ten_pct_owner
+    assert not ownership.reporting_owners[0].is_ten_pct_owner
 
     holding: NonDerivativeHolding = ownership.non_derivative_table.holdings[0]
     assert holding.security == 'Class A Common Stock'
@@ -302,13 +328,11 @@ def test_form4_common_trades():
     # Shares trades
     assert form4.shares_traded == 1475454.0
 
-
-def test_form4_common_trades():
     # Common stock transactions
     common_trades = aapl_form4.common_trades
     assert len(common_trades) == 3
     print()
-    print(common_trades.data[['Date', 'Security', 'Shares', 'Remaining', 'Price', 'Code', 'TransactionType']])
+    print(common_trades[['Date', 'Security', 'Shares', 'Remaining', 'Price', 'Code', 'TransactionType']])
 
     # This filing has lots of common and derivative tradeds and some missing prices
     filing = Filing(form='4', filing_date='2023-10-25', company='210 Capital, LLC', cik=1694780,
@@ -316,6 +340,7 @@ def test_form4_common_trades():
     form4 = filing.obj()
     # The common trades should be empty because there are no Sales (S) or Purchases (P)
     assert form4.common_trades.empty
+
 
 def test_form4_derivative_trades():
     # Get exercised trades from the non derivative table
