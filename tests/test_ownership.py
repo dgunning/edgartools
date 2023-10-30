@@ -359,8 +359,8 @@ def test_form4_derivative_trades():
     derivative_trades = aapl_form4.derivative_trades
     print(derivative_trades)
     assert len(derivative_trades) == 3
-    assert derivative_trades.iloc[0].Security == 'Restricted Stock Unit'
-    assert derivative_trades.iloc[0].Shares == '511000'
+    assert derivative_trades.data.iloc[0].Security == 'Restricted Stock Unit'
+    assert derivative_trades.data.iloc[0].Shares == '511000'
 
 """
 def test_form4_derivative_trades_include_exercised():

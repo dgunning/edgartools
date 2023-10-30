@@ -690,7 +690,7 @@ class DerivativeTable:
     @property
     def derivative_trades(self):
         if self.has_transactions:
-            return self.transactions.data
+            return DataHolder(self.transactions.data)
 
     @property
     def has_holdings(self):
@@ -952,7 +952,7 @@ class Ownership:
         derivatives = self.derivative_trades
         if derivatives is not None and not derivatives.empty:
             # Get the last trade
-            last_trade = derivatives.iloc[-1]
+            last_trade = derivatives.data.iloc[-1]
             shares_owned_value += Decimal(last_trade.Remaining).quantize(Decimal('0.01'))
 
         return shares_owned_value

@@ -83,7 +83,7 @@ YearAndQuarters = List[YearAndQuarter]
 Years = Union[int, List[int], range]
 Quarters = Union[int, List[int], range]
 
-accession_number_re = re.compile(r"\d{10}\-\d{2}\-\d{6}$")
+accession_number_re = re.compile(r"\d{10}-\d{2}-\d{6}$")
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
 
@@ -317,7 +317,7 @@ class Filings:
         """Return the end date for the filings"""
         return str(self.date_range[1])
 
-    def latest(self, n: int = 1) -> int:
+    def latest(self, n: int = 1):
         """Get the latest n filings"""
         sort_indices = pc.sort_indices(self.data, sort_keys=[("filing_date", "descending")])
         sort_indices_top = sort_indices[:min(n, len(sort_indices))]
@@ -348,7 +348,7 @@ class Filings:
         >>> filings.filter(date="2020-01-01:2020-03-01")
 
         :param form: The form or list of forms to filter by
-        :param amendments: Whether to include amendments to the forms e.g include "10-K/A" if filtering for "10-K"
+        :param amendments: Whether to include amendments to the forms e.g. include "10-K/A" if filtering for "10-K"
         :param filing_date: The filing date
         :param date: An alias for the filing date
         :return: The filtered filings
@@ -404,7 +404,7 @@ class Filings:
         return len(self.data) == 0
 
     def current(self):
-        """Display the current page .. which is the default for this filings object"""
+        """Display the current page ... which is the default for this filings object"""
         return self
 
     def next(self) -> Optional[pa.Table]:
@@ -544,23 +544,23 @@ def get_filings(year: Years = None,
 
     >>> from edgar import get_filings
 
-    >>> filings = get_filings(2021) # Get filings for 2021
+    >>> filings_ = get_filings(2021) # Get filings for 2021
 
-    >>> filings = get_filings(2021, 4) # Get filings for 2021 Q4
+    >>> filings_ = get_filings(2021, 4) # Get filings for 2021 Q4
 
-    >>> filings = get_filings(2021, [3,4]) # Get filings for 2021 Q3 and Q4
+    >>> filings_ = get_filings(2021, [3,4]) # Get filings for 2021 Q3 and Q4
 
-    >>> filings = get_filings([2020, 2021]) # Get filings for 2020 and 2021
+    >>> filings_ = get_filings([2020, 2021]) # Get filings for 2020 and 2021
 
-    >>> filings = get_filings([2020, 2021], 4) # Get filings for Q4 of 2020 and 2021
+    >>> filings_ = get_filings([2020, 2021], 4) # Get filings for Q4 of 2020 and 2021
 
-    >>> filings = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021
+    >>> filings_ = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021
 
-    >>> filings = get_filings(2021, 4, form="D") # Get filings for 2021 Q4 for form D
+    >>> filings_ = get_filings(2021, 4, form="D") # Get filings for 2021 Q4 for form D
 
-    >>> filings = get_filings(2021, 4, filing_date="2021-10-01") # Get filings for 2021 Q4 on "2021-10-01"
+    >>> filings_ = get_filings(2021, 4, filing_date="2021-10-01") # Get filings for 2021 Q4 on "2021-10-01"
 
-    >>> filings = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") # Get filings for 2021 Q4 between
+    >>> filings_ = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") # Get filings for 2021 Q4 between
                                                                             # "2021-10-01" and "2021-10-10"
 
 
@@ -1371,13 +1371,13 @@ class Filing:
 
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
-        return self.document.download(text=True)
+        return self.document.download()
 
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
         xml_document: Attachment = self.homepage.primary_xml_document
         if xml_document:
-            return xml_document.download(text=True)
+            return xml_document.download()
 
     @lru_cache(maxsize=4)
     def text(self, ignore_tables=False, sep="\n") -> str:
@@ -1404,7 +1404,7 @@ class Filing:
         """
         xbrl_document = self.homepage.xbrl_document
         if xbrl_document:
-            xbrl_text = xbrl_document.download(text=True)
+            xbrl_text = xbrl_document.download()
             return FilingXbrl.parse(xbrl_text)
 
     @property
@@ -1629,8 +1629,6 @@ class Attachment:
         """This is the extension displayed in the html e.g. "es220296680_4-davis.html"
         The actual extension would be "es220296680_4-davis.xml", that displays as html in the browser
 
-        >>> .html
-
         """
         return os.path.splitext(self.document)[1]
 
@@ -1671,8 +1669,7 @@ class Attachment:
         """Is this a text document"""
         return self.extension in text_extensions
 
-    def download(self,
-                 text: bool = None):
+    def download(self):
         return download_file(self.url, as_text=self.is_text())
 
     def summary(self) -> pd.DataFrame:
@@ -1776,7 +1773,7 @@ class FilingHomepage:
 
     @property
     def text_document(self) -> Attachment:
-        "Get the full text submission file"
+        """Get the full text submission file"""
         res = self._files[self._files.Description == "Complete submission text file"]
         return Attachment.from_dataframe_row(res.iloc[0])
 
@@ -1829,7 +1826,7 @@ class FilingHomepage:
         # It is html so use "html.parser" (instead of "xml", or "lxml")
         soup = BeautifulSoup(homepage_html, "html.parser")
 
-        # Keep track of the tables as dataframes so we can append later
+        # Keep track of the tables as dataframes, so we can append later
         dfs = []
 
         # The table containin the attachments

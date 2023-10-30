@@ -1042,3 +1042,6 @@ def test_get_current_filings_by_form():
     print()
     print(filings)
     assert not filings.empty
+
+def test_filings_get_by_invalid_accession_number(capsys):
+    assert cached_filings(2022, 1).get('INVALID-ACCESS-NUMBER') is None
