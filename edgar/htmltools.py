@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from io import StringIO
 from typing import Any, Optional, List
-
+import sys
 import pandas as pd
 from lxml import html as lxml_html
 
@@ -101,7 +101,10 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
     """
 
     # Getting the maximum width for each column
-    column_widths = df.astype(str).applymap(len).max()
+    if tuple(map(int, sys.version.split()[0].split('.'))) >= (3, 11):
+        column_widths = df.astype(str).map(len).max()
+    else:
+        column_widths = df.astype(str).applymap(len).max()
 
     # If including indexes, get the maximum width of the index
     index_label = ''

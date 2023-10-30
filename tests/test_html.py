@@ -1,4 +1,7 @@
-from edgar.htmltools import extract_elements, table_html_to_dataframe, html_to_text, get_table_elements, get_text_elements,html_sections
+from edgar.htmltools import (extract_elements,
+                             table_html_to_dataframe,
+                             html_to_text, get_table_elements,
+                             get_text_elements, html_sections, dataframe_to_text)
 from pathlib import Path
 from rich import print
 import pandas as pd
@@ -48,6 +51,10 @@ def test_extract_elements():
 
     assert len(table_elements) + len(text_elements) == len(elements)
 
+def test_dataframe_to_text():
+    df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+    text = dataframe_to_text(df)
+    assert "1" in text
 
 def test_html2text():
     tenk_text = html_to_text(Nvidia_2021_10k)
