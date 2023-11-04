@@ -255,7 +255,7 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
                                             )
             quarter_and_indexes_sorted = sorted(quarters_and_indexes, key=lambda d: d[0])
             index_tables = [fd[1] for fd in quarter_and_indexes_sorted]
-            final_index_table: pa.Table = pa.concat_tables(index_tables, promote=False)
+            final_index_table: pa.Table = pa.concat_tables(index_tables, mode="default")
     return final_index_table
 
 
@@ -534,7 +534,7 @@ def get_filings(year: Years = None,
                 form: Union[str, List[IntString]] = None,
                 amendments: bool = True,
                 filing_date: str = None,
-                index="form") -> Filings:
+                index="form") -> Optional[Filings]:
     """
     Downloads the filing index for a given year or list of years, and a quarter or list of quarters.
 
@@ -1641,7 +1641,7 @@ class Attachment:
         # ix.xhtml?doc=/
         filing_url = f"{sec_dot_gov}{self.path}"
         # Remove "ix?doc=/" or "ix.xhtml?doc=/" from the filing url
-        return re.sub("ix(\.xhtml)?\?doc=/", "", filing_url)
+        return re.sub(r"ix(\.xhtml)?\?doc=/", "", filing_url)
 
     def open(self):
         """Open the filing document"""
@@ -1879,7 +1879,7 @@ class FilingHomepage:
             mailer_divs = filer_div.find_all("div", class_="mailer")
             # For each mailed_div.text remove mutiple spaces after a newline
 
-            addresses = [re.sub('\n\s+', '\n', mailer_div.text.strip())
+            addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
                          for mailer_div in mailer_divs]
 
             # Create the filer info

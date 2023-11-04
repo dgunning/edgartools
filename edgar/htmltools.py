@@ -77,6 +77,7 @@ def table_html_to_dataframe(html_str):
     rows = table_element.xpath(".//tr")
 
     data = []
+
     for row in rows:
         cols = row.xpath(".//td")
         cols = [c.text.strip() if c.text is not None else "" for c in cols]
@@ -101,12 +102,13 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
     """
 
     # Getting the maximum width for each column
-    if tuple(map(int, sys.version.split()[0].split('.'))) >= (3, 11):
-        column_widths = df.astype(str).map(len).max()
-    else:
+    if hasattr(df, 'applymap'):
         column_widths = df.astype(str).applymap(len).max()
+    else:
+        column_widths = df.astype(str).map(len).max()
 
     # If including indexes, get the maximum width of the index
+
     index_label = ''
     if include_index:
         index_label = "Index"

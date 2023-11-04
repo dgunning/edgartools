@@ -56,7 +56,7 @@ def translate(value: str, translations: Dict[str, str]) -> str:
 
 
 def is_numeric(series: pd.Series) -> bool:
-    return np.issubdtype(series.dtype, np.number) or series.str.replace(".", "").str.isnumeric().all()
+    return np.issubdtype(series.dtype, np.number) or series.str.replace(".", "", regex=False).str.isnumeric().all()
 
 
 def compute_average_price(shares: pd.Series, price: pd.Series) -> Decimal:
