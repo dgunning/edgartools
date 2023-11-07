@@ -51,7 +51,7 @@ Depends on what you know
 ### A. I know the accession number
 
 ```python
-filing = get_by_accession_number("0001065280-23-000273")
+filing = find("0001065280-23-000273")
 ```
 
 ### B. I know the company ticker or cik
