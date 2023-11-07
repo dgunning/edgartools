@@ -1,13 +1,13 @@
 # SPDX-FileCopyrightText: 2022-present Dwight Gunning <dgunning@gmail.com>
 #
 # SPDX-License-Identifier: MIT
-from typing import Optional, Union, List
-
-from concurrent.futures import ThreadPoolExecutor
 import importlib
+import re
 import sys
-
+from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 from functools import partial
+from typing import Optional, Union, List
 
 from edgar._companies import (Company,
                               CompanyData,
@@ -16,6 +16,7 @@ from edgar._companies import (Company,
                               CompanyFilings,
                               CompanyFiling,
                               Entity,
+                              EntityData,
                               find_company,
                               get_entity,
                               get_company_facts,
@@ -30,16 +31,15 @@ from edgar._filings import (Filing,
                             get_current_filings,
                             get_by_accession_number,
                             FilingHomepage)
-
 from edgar.core import (edgar_mode,
                         CRAWL,
                         CAUTION,
                         NORMAL,
                         get_identity,
                         set_identity)
-from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 from edgar.fundreports import FundReport, NPORT_FORMS
 from edgar.funds import Fund, get_fund
+from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 
 # Another name for get_current_filings
 get_recent_filings = get_current_filings
@@ -55,6 +55,21 @@ get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 
 # 13F filings - portfolio holdings
 get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
+
+
+@lru_cache(maxsize=16)
+def find(search_id: Union[str, int]) -> Union[Filing, EntityData, CompanySearchResults]:
+    """Find a filing by accession number
+    :rtype: object
+    """
+    if isinstance(search_id, int):
+        return Entity(search_id)
+    elif re.match(r"\d{10}-\d{2}-\d{6}", search_id):
+        return get_by_accession_number(search_id)
+    elif re.match(r"\d{4,10}", search_id):
+        return Entity(search_id)
+    else:
+        return find_company(search_id)
 
 
 def matches_form(sec_filing: Filing,
