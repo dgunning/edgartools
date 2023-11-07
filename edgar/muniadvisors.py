@@ -1,20 +1,20 @@
 from dataclasses import dataclass
+from typing import List
 from typing import Optional
 
 import pandas as pd
 from bs4 import BeautifulSoup
 from rich import box
+from rich.columns import Columns
+from rich.console import Group
+from rich.panel import Panel
 from rich.table import Table
+from rich.text import Text
 
 from edgar import Filing
 from edgar._party import Name, Address
 from edgar._rich import repr_rich
 from edgar._xml import child_text, child_texts, child_value
-from typing import List
-from rich.console import Group
-from rich.panel import Panel
-from rich.text import Text
-from rich.columns import Columns
 
 __all__ = [
     'MunicipalAdvisorForm'

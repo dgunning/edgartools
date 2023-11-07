@@ -104,8 +104,9 @@ def child_value(parent: Tag,
         return value_with_footnotes(el)
     return default_value
 
-def child_texts(parent:Tag,
-                child:str) -> List[str]:
+
+def child_texts(parent: Tag,
+                child: str) -> List[str]:
     """
     Get the text of the value tag within the child tag if it exists or None
 

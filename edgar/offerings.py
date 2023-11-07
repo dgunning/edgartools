@@ -1,15 +1,17 @@
+import re
+from dataclasses import dataclass
+from typing import List
+
 from bs4 import BeautifulSoup, Tag
-from edgar._xml import child_text, child_value
+from rich import box
+from rich.columns import Columns
+from rich.console import Group, Text, RenderableType
+from rich.panel import Panel
+from rich.table import Table
+
 from edgar._party import Issuer, Person, Address
 from edgar._rich import repr_rich
-from rich.table import Table
-from rich.console import Group, Text, RenderableType
-from typing import List
-from rich.panel import Panel
-from rich.columns import Columns
-from rich import box
-from dataclasses import dataclass
-import re
+from edgar._xml import child_text, child_value
 
 
 @dataclass(frozen=True)

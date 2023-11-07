@@ -1,11 +1,13 @@
-from bs4 import BeautifulSoup
-import pandas as pd
-from edgar._rich import repr_rich, df_to_rich_table
-from edgar._party import Filer
-from rich.console import Group, Text
 from functools import lru_cache
-from edgar._xml import child_text
 from typing import Optional
+
+import pandas as pd
+from bs4 import BeautifulSoup
+from rich.console import Group, Text
+
+from edgar._party import Filer
+from edgar._rich import repr_rich, df_to_rich_table
+from edgar._xml import child_text
 
 __all__ = [
     'EffectiveData',

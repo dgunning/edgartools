@@ -1,11 +1,13 @@
-import pandas as pd
-from rich.table import Table
-from rich.panel import Panel
-from rich.console import Group
-from rich import box
-from typing import Union, List, Tuple
-from edgar._rich import repr_rich
 import re
+from typing import Union, List, Tuple
+
+import pandas as pd
+from rich import box
+from rich.console import Group
+from rich.panel import Panel
+from rich.table import Table
+
+from edgar._rich import repr_rich
 
 __all__ = [
     'Financials',

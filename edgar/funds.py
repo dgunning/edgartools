@@ -104,9 +104,10 @@ def get_fund(ticker: str):
 
 Fund = get_fund
 
+
 class FundSeriesAndContracts:
 
-    def __init__(self, data:pd.DataFrame):
+    def __init__(self, data: pd.DataFrame):
         self.data = data
 
     def __rich__(self):
@@ -114,6 +115,7 @@ class FundSeriesAndContracts:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
 
 def get_fund_information(sec_header: SECHeader):
     header_text = sec_header.text
@@ -175,7 +177,7 @@ def parse_fund_data(series_sgml_data: str) -> pd.DataFrame:
     df = pd.DataFrame(rows, columns=columns).iloc[:, :6]
 
     return (df.rename(columns={"OWNER-CIK": "CIK", "SERIES-ID": "SeriesID", "SERIES-NAME": "Fund",
-                              "CLASS-CONTRACT-ID": "ContractID", "CLASS-CONTRACT-NAME": "Class",
-                              "CLASS-CONTRACT-TICKER-SYMBOL": "Ticker"})
-                    .filter(["Fund","Ticker",  "SeriesID",  "ContractID", "Class", "CIK"])
+                               "CLASS-CONTRACT-ID": "ContractID", "CLASS-CONTRACT-NAME": "Class",
+                               "CLASS-CONTRACT-TICKER-SYMBOL": "Ticker"})
+            .filter(["Fund", "Ticker", "SeriesID", "ContractID", "Class", "CIK"])
             )

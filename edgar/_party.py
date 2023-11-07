@@ -187,12 +187,12 @@ class Filer:
 
     def __str__(self):
         return f"{self.entity_name} ({self.cik})"
+
     def __repr__(self):
         return f"{self.entity_name} ({self.cik})"
 
 
 class Contact:
-
 
     def __init__(self,
                  name: str,
@@ -207,6 +207,3 @@ class Contact:
 
     def __repr__(self):
         return f"{self.name} ({self.phone_number}) {self.email}"
-
-
-

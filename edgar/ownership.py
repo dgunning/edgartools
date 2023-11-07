@@ -8,22 +8,23 @@ The top level object is Ownership
 
 """
 from dataclasses import dataclass
-from typing import List, Dict, Tuple, Optional
+from decimal import Decimal
 from functools import lru_cache
-import pandas as pd
+from typing import List, Dict, Tuple, Optional
+
 import numpy as np
+import pandas as pd
 from bs4 import BeautifulSoup, ResultSet
 from bs4 import Tag
+from rich.columns import Columns
 from rich.console import Group, Text
 from rich.panel import Panel
-from rich.columns import Columns
-from decimal import Decimal
 
+from edgar._companies import Entity
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import (child_text, child_value)
 from edgar.core import IntString, get_bool, reverse_name, yes_no
-from edgar._companies import Entity
 
 __all__ = [
     'Owner',

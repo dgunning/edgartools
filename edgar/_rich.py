@@ -1,8 +1,9 @@
-from rich.table import Table
-from rich import box
 from typing import Union, Optional
+
 import pandas as pd
 import pyarrow as pa
+from rich import box
+from rich.table import Table
 
 __all__ = [
     'repr_rich',

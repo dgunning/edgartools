@@ -11,8 +11,8 @@ import pyarrow as pa
 import pyarrow.compute as pc
 from fastcore.basics import listify
 from rich.console import Group
-from rich.text import Text
 from rich.panel import Panel
+from rich.text import Text
 
 from edgar._filings import Filing, Filings, FilingsState
 from edgar._rich import df_to_rich_table, repr_rich
@@ -131,7 +131,6 @@ class EntityFiling(Filing):
                 )
 
 
-
 class EntityFacts:
     """
     Contains company facts data
@@ -201,7 +200,6 @@ class EntityFilings(Filings):
             is_xbrl=self.data['isXBRL'][item].as_py(),
             is_inline_xbrl=self.data['isInlineXBRL'][item].as_py()
         )
-
 
     def filter(self,
                form: Union[str, List[str]] = None,
@@ -299,7 +297,6 @@ class EntityFilings(Filings):
         )
 
 
-
 class EntityData:
     """
     A company populated from a call to the company submissions endpoint
@@ -341,10 +338,10 @@ class EntityData:
         # Get the latest 10-K
         latest_10k = self.filings.filter(form="10-K").latest()
         if latest_10k is not None:
-           return latest_10k.obj().financials
+            return latest_10k.obj().financials
 
     @property
-    def is_company(self) ->bool:
+    def is_company(self) -> bool:
         # Companies have a sic code populated, individuals do not
         return self.sic != ''
 
@@ -467,11 +464,13 @@ class EntityData:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
+
 # Aliases for Companies
 CompanyFiling = EntityFiling
 CompanyFilings = EntityFilings
 CompanyFacts = EntityFacts
 CompanyData = EntityData
+
 
 def parse_filings(filings_json: Dict[str, object],
                   cik: int,
@@ -860,4 +859,3 @@ class CompanySearchIndex(SimilaritySearchIndex):
                 .assign(company_idx=lambda df: np.vectorize(preprocess_company)(df.company))
                 )
         super().__init__(data, 'company_idx')
-

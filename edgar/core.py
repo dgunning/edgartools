@@ -12,7 +12,6 @@ from decimal import Decimal
 from functools import lru_cache
 from io import BytesIO
 from typing import Union, Optional, Tuple, List
-from fastcore.basics import listify
 
 import httpx
 import humanize
@@ -20,6 +19,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 from charset_normalizer import detect
+from fastcore.basics import listify
 from retry.api import retry_call
 from rich.logging import RichHandler
 from rich.prompt import Prompt

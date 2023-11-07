@@ -2,8 +2,6 @@ import re
 from typing import List, Callable, Tuple
 
 import pandas as pd
-
-
 from rich import box
 from rich.console import Group
 from rich.markdown import Markdown

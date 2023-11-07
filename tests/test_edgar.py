@@ -1,4 +1,5 @@
-from edgar import obj, matches_form, Filing, FundReport
+from edgar import obj, matches_form, Filing, FundReport, find, CompanySearchResults
+from edgar._companies import EntityData
 from edgar.ownership import Ownership
 from edgar.offerings import Offering
 from edgar.forms import TenK
@@ -67,3 +68,10 @@ def test_obj():
     filing = Filing(form='1-A/A', filing_date='2023-03-21', company='CancerVAX, Inc.', cik=1905495,
                     accession_no='0001493152-23-008348')
     assert filing.obj() is None
+
+
+def test_find():
+    assert find("0001493152-23-008348").accession_no == "0001493152-23-008348"
+    assert isinstance(find(1905495), EntityData)
+    assert find("1905495").name == 'CancerVAX, Inc.'
+    assert isinstance(find("CancerVAX, Inc."), CompanySearchResults)

@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Dict, Union, Tuple, Optional
 
 import pandas as pd
@@ -7,7 +8,6 @@ from rich.console import Group, Text
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import child_text
 from edgar.core import log
-from functools import lru_cache
 
 """
 This module parses XBRL documents into objects that contain the structured data

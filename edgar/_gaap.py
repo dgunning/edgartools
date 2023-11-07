@@ -51,5 +51,3 @@ def exists_in_gaap(prefix: str, name: str) -> bool:
 @lru_cache(maxsize=2)
 def get_gaap():
     return Gaap.load()
-
-

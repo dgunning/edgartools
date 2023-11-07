@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from io import StringIO
 from typing import Any, Optional, List
-import sys
+
 import pandas as pd
 from lxml import html as lxml_html
 

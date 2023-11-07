@@ -70,7 +70,6 @@ def markdown_to_rich(md: str, title: str = "") -> Markdown:
 
 
 def fix_markdown(md: str):
-
     # Clean up issues with not spaces between sentences like "Condition.On"
     md = re.sub(r"([a-z]\.)([A-Z])", r"\1 \2", md)
 
