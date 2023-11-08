@@ -10,12 +10,12 @@ from edgar import get_fund_portfolio_filings, Filings, Filing
 from edgar.fundreports import FundReport, CurrentMetric
 from edgar.funds import get_fund_information
 
-fund_xml = Path('data/NPORT.Dupree.xml').read_text()
+dupree_fund_xml = Path('data/NPORT.Dupree.xml').read_text()
 
 
 def test_fund_from_xml():
     print()
-    fund_report = FundReport(**FundReport.parse_fund_xml(fund_xml))
+    fund_report = FundReport(**FundReport.parse_fund_xml(dupree_fund_xml))
 
     # Current Metrics
     current_metric: CurrentMetric = fund_report.fund_info.current_metrics['USD']
@@ -49,12 +49,18 @@ def test_fund_from_xml():
     assert fund_report.investments[0].asset_category == "DBT"
     assert fund_report.investments[0].issuer_category == "MUN"
 
+    assert fund_report.investments[0].isin == "US49151FGH73"
+    assert fund_report.investments[0].ticker == "KYSFAC"
+
+    assert fund_report.investments[1].isin == "US49151FHF09"
+    assert fund_report.investments[1].ticker == "KYSFAC"
+
     print(fund_report)
 
 
 def test_fund_investment_data_as_pandas():
     print()
-    fund_report = FundReport(**FundReport.parse_fund_xml(fund_xml))
+    fund_report = FundReport(**FundReport.parse_fund_xml(dupree_fund_xml))
     investment_data = fund_report.investment_data()
     assert all(column in investment_data for column in ["name", "title", "balance", "investment_country"])
 
@@ -130,7 +136,9 @@ def test_fund_no_investment_sec_tag():
 
 
 jacob_funds = Filing(form='NPORT-P', filing_date='2023-10-13', company='Jacob Funds Inc.', cik=1090372,
-                    accession_no='0001145549-23-062230')
+                     accession_no='0001145549-23-062230')
+
+
 def test_parse_fund_header_sgml():
     fund_data = get_fund_information(jacob_funds.header)
     print()
@@ -145,3 +153,11 @@ def test_fund_from_filing():
     # Test .obj()
     fund_report = jacob_funds.obj()
     assert fund_report
+
+
+def test_fund_report_has_correct_isin():
+    filing = Filing(company='SPDR S&P MIDCAP 400 ETF TRUST', cik=936958, form='NPORT-P', filing_date='2023-08-24',
+                    accession_no='0001752724-23-188317')
+    fund_report = filing.obj()
+    investment_data = fund_report.investment_data()
+    assert not investment_data['isin'].duplicated().any()

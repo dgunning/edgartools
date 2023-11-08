@@ -72,7 +72,6 @@ class GeneralInfo:
     series_name: str
     series_lei: str
     series_id: str
-    class_ids: List[str]
     reg_period_end: str
     reg_period_date: str
     is_final_filing: bool
@@ -315,12 +314,12 @@ class FundReport:
                  general_info: GeneralInfo,
                  fund_info: FundInfo,
                  investments: List[InvestmentOrSecurity],
-                 series_and_contracts:FundSeriesAndContracts=None):
+                 series_and_contracts: FundSeriesAndContracts = None):
         self.header = header
         self.general_info: GeneralInfo = general_info
         self.fund_info: FundInfo = fund_info
-        self.investments:List[InvestmentOrSecurity] = investments
-        self.series_and_contracts:FundSeriesAndContracts = series_and_contracts
+        self.investments: List[InvestmentOrSecurity] = investments
+        self.series_and_contracts: FundSeriesAndContracts = series_and_contracts
 
     def __str__(self):
         return (f"{self.name} {self.general_info.reg_period_date} - {self.general_info.reg_period_end}"
@@ -432,7 +431,6 @@ class FundReport:
             country=country,
             series_name=child_text(general_info_tag, "seriesName"),
             series_id=child_text(general_info_tag, "seriesId"),
-            class_ids=[child_text(tag) for tag in general_info_tag.find_all("class_id")],
             series_lei=child_text(general_info_tag, "seriesLei"),
             reg_period_end=child_text(general_info_tag, "repPdEnd"),
             reg_period_date=child_text(general_info_tag, "repPdDate"),
@@ -502,41 +500,41 @@ class FundReport:
         investment_or_secs_tag = form_data_tag.find("invstOrSecs")
         if investment_or_secs_tag:
             investments_or_securities = []
-            for investment_or_sec_tag in investment_or_secs_tag.find_all("invstOrSec"):
+            for investment_tag in investment_or_secs_tag.find_all("invstOrSec"):
                 # issuer conditional
-                asset_conditional_tag = investment_or_sec_tag.find("assetConditional")
+                asset_conditional_tag = investment_tag.find("assetConditional")
                 if asset_conditional_tag:
                     asset_category = asset_conditional_tag.attrs.get("assetCat")
                 else:
-                    asset_category = child_text(investment_or_sec_tag, "assetCat")
+                    asset_category = child_text(investment_tag, "assetCat")
 
                 # issuer conditional
-                issuer_conditional_tag = investment_or_sec_tag.find("issuerConditional")
+                issuer_conditional_tag = investment_tag.find("issuerConditional")
                 if issuer_conditional_tag:
                     issuer_category = issuer_conditional_tag.attrs.get("issuerCat")
                 else:
-                    issuer_category = child_text(investment_or_sec_tag, "issuerCat")
+                    issuer_category = child_text(investment_tag, "issuerCat")
 
                 investments_or_security = InvestmentOrSecurity(
-                    name=child_text(investment_or_sec_tag, "name"),
-                    lei=child_text(investment_or_sec_tag, "lei"),
-                    title=child_text(investment_or_sec_tag, "title"),
-                    cusip=child_text(investment_or_sec_tag, "cusip"),
-                    identifiers=Identifiers.from_xml(investment_or_secs_tag.find("identifiers")),
-                    balance=optional_decimal(investment_or_sec_tag, "balance"),
-                    units=child_text(investment_or_sec_tag, "units"),
-                    desc_other_units=child_text(investment_or_sec_tag, "descOthUnits"),
-                    currency_code=child_text(investment_or_sec_tag, "curCd"),
-                    value_usd=optional_decimal(investment_or_sec_tag, "valUSD"),
-                    pct_value=optional_decimal(investment_or_sec_tag, "pctVal"),
-                    payoff_profile=child_text(investment_or_sec_tag, "payoffProfile"),
+                    name=child_text(investment_tag, "name"),
+                    lei=child_text(investment_tag, "lei"),
+                    title=child_text(investment_tag, "title"),
+                    cusip=child_text(investment_tag, "cusip"),
+                    identifiers=Identifiers.from_xml(investment_tag.find("identifiers")),
+                    balance=optional_decimal(investment_tag, "balance"),
+                    units=child_text(investment_tag, "units"),
+                    desc_other_units=child_text(investment_tag, "descOthUnits"),
+                    currency_code=child_text(investment_tag, "curCd"),
+                    value_usd=optional_decimal(investment_tag, "valUSD"),
+                    pct_value=optional_decimal(investment_tag, "pctVal"),
+                    payoff_profile=child_text(investment_tag, "payoffProfile"),
                     asset_category=asset_category,
                     issuer_category=issuer_category,
-                    investment_country=child_text(investment_or_sec_tag, "invCountry"),
-                    is_restricted_security=child_text(investment_or_sec_tag, "isRestrictedSec") == "Y",
-                    fair_value_level=child_text(investment_or_sec_tag, "fairValLevel"),
-                    debt_security=DebtSecurity.from_xml(investment_or_sec_tag.find("debtSec")),
-                    security_lending=SecurityLending.from_xml(investment_or_sec_tag.find("securityLending"))
+                    investment_country=child_text(investment_tag, "invCountry"),
+                    is_restricted_security=child_text(investment_tag, "isRestrictedSec") == "Y",
+                    fair_value_level=child_text(investment_tag, "fairValLevel"),
+                    debt_security=DebtSecurity.from_xml(investment_tag.find("debtSec")),
+                    security_lending=SecurityLending.from_xml(investment_tag.find("securityLending"))
                 )
 
                 investments_or_securities.append(investments_or_security)
@@ -547,7 +545,6 @@ class FundReport:
                 'general_info': general_info,
                 'fund_info': fund_info,
                 'investments': investments_or_securities}
-
 
     @property
     def fund_summary_table(self) -> Table:
