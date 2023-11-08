@@ -1,8 +1,8 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 from typing import Optional
 
-import pandas as pd
 from bs4 import BeautifulSoup
 from rich import box
 from rich.columns import Columns
@@ -39,8 +39,8 @@ class Employer:
     name: str
     start_date: str
     end_date: Optional[str]
-    is_related_to_municipal_advisor: bool
-    is_related_to_investment: bool
+    ma_related: bool
+    investment_related: bool
     position: str
     address: Address
 
@@ -185,36 +185,50 @@ class InvestigationDisclosure:
     is_investigated: bool
 
 
+def employment_date(date: str = None) -> str:
+    # Convert date from this format 06-2015 to Jun 2015
+    if not date:
+        return ""
+    date_object = datetime.strptime(date, '%m-%Y')
+    return date_object.strftime('%b %Y')
+
+
 class EmploymentHistory:
 
     def __init__(self,
                  current_employer: Employer,
-                 previous_employers: pd.DataFrame
+                 previous_employers: List[Employer]
                  ):
         self.current_employer: Employer = current_employer
-        if previous_employers is None:
-            self.previous_employers = pd.DataFrame(
-                columns=['name', 'start_date', 'end_date', 'is_related_to_municipal_advisor',
-                         'is_related_to_investment', 'position'])
-        else:
-            self.previous_employers: pd.DataFrame = previous_employers
+        self.previous_employers: List[Employer] = previous_employers
 
     def __rich__(self):
-        employment_history_table = Table("name", "position", "start_date", "end_date", "related_to_muni_adv",
-                                         "related_to_invmnt", "city", "state",
-                                         box=box.SIMPLE, title="Employment History")
+        employment_history_table = Table("From",
+                                         "To",
+                                         "Employer",
+                                         "Position",
+                                         "Muni",
+                                         "Investment",
+                                         "Location",
+                                         box=box.SIMPLE)
+        employer = self.current_employer
+        employment_history_table.add_row(employer.start_date,
+                                         "",
+                                         employer.name,
+                                         employer.position,
+                                         "Yes" if employer.ma_related else "No",
+                                         "Yes" if employer.investment_related else "No",
+                                         f"{employer.address.city or ''} {employer.address.state_or_country or ''}")
 
-        employment_history_table.add_row(self.current_employer.name, self.current_employer.position,
-                                         self.current_employer.start_date, "",
-                                         "Yes" if self.current_employer.is_related_to_municipal_advisor else "No",
-                                         "Yes" if self.current_employer.is_related_to_investment else "No",
-                                         self.current_employer.address.city, self.current_employer.address.state)
+        for employer in self.previous_employers:
+            employment_history_table.add_row(employer.start_date,
+                                             employer.end_date,
+                                             employer.name,
+                                             employer.position,
 
-        for row in self.previous_employers.itertuples():
-            employment_history_table.add_row(row.name, row.position, row.start_date, row.end_date,
-                                             "Yes" if row.is_related_to_municipal_advisor else "No",
-                                             "Yes" if row.is_related_to_investment else "No",
-                                             row.city, row.state)
+                                             "Yes" if employer.ma_related else "No",
+                                             "Yes" if employer.investment_related else "No",
+                                             f"{employer.address.city or ''} {employer.address.state_or_country or ''}")
         return employment_history_table
 
     def __repr__(self):
@@ -399,40 +413,50 @@ class MunicipalAdvisorForm:
 
         # Employment History
         employment_history_el = form_data_el.find('employmentHistory')
+        # Current Employer
         current_employer_el = employment_history_el.find('currentEmployer')
         address_el = current_employer_el.find('addressInfo')
         state_or_country_el = address_el.find('stateOrCountry')
         current_employer = Employer(
             name=child_text(current_employer_el, 'name'),
-            start_date=child_text(current_employer_el, 'startDate'),
+            start_date=employment_date(child_text(current_employer_el, 'startDate')),
             end_date=None,
             address=Address(
-                city=child_text(current_employer_el, 'city'),
-                zipcode=child_text(current_employer_el, 'zipCode'),
+                city=child_text(address_el, 'city'),
+                zipcode=child_text(address_el, 'zipCode'),
                 state_or_country=child_text(state_or_country_el, 'stateOrCountry'),
             ),
-            is_related_to_municipal_advisor=child_value(current_employer_el, 'isRelatedToMunicipalAdvisor') == "Y",
-            is_related_to_investment=child_value(current_employer_el, 'isRelatedToInvestment') == "Y",
+            ma_related=child_text(current_employer_el, 'isRelatedToMunicipalAdvisor') == "Y",
+            investment_related=child_text(current_employer_el, 'isRelatedToInvestment') == "Y",
             position=child_text(current_employer_el, 'positionDescription'),
         )
+
+        # Previous employers
         prior_employers_el = employment_history_el.find('priorEmployers')
-        prior_employees_df = None
+        prior_employers = []
         if prior_employers_el:
-            prior_employer_records = []
+
             for prior_employer_el in prior_employers_el.find_all('priorEmployer'):
-                prior_employer_records.append({
-                    'name': child_text(prior_employer_el, 'name'),
-                    'start_date': child_text(prior_employer_el, 'startDate'),
-                    'end_date': child_text(prior_employer_el, 'endDate'),
-                    'is_related_to_municipal_advisor': child_text(prior_employer_el,
-                                                                  'isRelatedToMunicipalAdvisor') == "Y",
-                    'is_related_to_investment': child_text(prior_employer_el, 'isRelatedToInvestment') == "Y",
-                    'position': child_text(prior_employer_el, 'positionDescription'),
-                })
-            prior_employees_df = pd.DataFrame(prior_employer_records)
+                address_el = prior_employer_el.find('addressInfo')
+                state_or_country_el = address_el.find('stateOrCountry')
+                prior_employer = Employer(
+                    name=child_text(prior_employer_el, 'name'),
+                    start_date=employment_date(child_text(prior_employer_el, 'startDate')),
+                    end_date=employment_date(child_text(prior_employer_el, 'endDate')),
+                    address=Address(
+                        city=child_text(address_el, 'city'),
+                        zipcode=child_text(address_el, 'zipCode'),
+                        state_or_country=child_text(state_or_country_el, 'stateOrCountry'),
+                    ),
+                    ma_related=child_text(prior_employer_el, 'isRelatedToMunicipalAdvisor') == "Y",
+                    investment_related=child_text(prior_employer_el, 'isRelatedToInvestment') == "Y",
+                    position=child_text(prior_employer_el, 'positionDescription'),
+                )
+                prior_employers.append(prior_employer)
+
         ma_info['employment_history'] = EmploymentHistory(
             current_employer=current_employer,
-            previous_employers=prior_employees_df
+            previous_employers=prior_employers
         )
 
         # Disclosure Questions
@@ -630,6 +654,9 @@ class MunicipalAdvisorForm:
                 ), title="Municipal Advisory Firms Where The Individual is Employed",
             ),
             Panel(
+                self.employment_history.__rich__(), title="Employment History"
+            ),
+            Panel(
                 Group(
                     text("Edgar CIK Number", self.municipal_advisor_offices[0].cik),
 
@@ -787,7 +814,7 @@ class MunicipalAdvisorForm:
                     yes_no("Is still pending", self.disclosures.complaint_disclosure.is_complaint_pending),
                     yes_no("Is settled", self.disclosures.complaint_disclosure.is_complaint_settled),
                     Text("\n"
-                        "Has the individual ever been the subject of a muni-advisor related fraud proceeding which\n"),
+                         "Has the individual ever been the subject of a muni-advisor related fraud proceeding which\n"),
                     yes_no("Is still pending", self.disclosures.complaint_disclosure.is_fraud_case_pending),
                     yes_no("Resulted in an award", self.disclosures.complaint_disclosure.is_fraud_case_resulting_award),
                     yes_no("Is settled", self.disclosures.complaint_disclosure.is_fraud_case_settled),

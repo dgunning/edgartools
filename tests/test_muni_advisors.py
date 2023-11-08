@@ -34,21 +34,21 @@ def test_muni_advisors_from_filing():
 
     # Employment History
     assert ma.employment_history.current_employer.name == "RBC CAPITAL MARKETS, LLC"
-    assert ma.employment_history.current_employer.start_date == "06-2016"
+    assert ma.employment_history.current_employer.start_date == "Jun 2016"
     assert ma.employment_history.current_employer.address.city == "LANCASTER"
     assert ma.employment_history.current_employer.address.state_or_country == "PA"
-    assert ma.employment_history.current_employer.is_related_to_municipal_advisor == False
-    assert ma.employment_history.current_employer.is_related_to_investment == False
+    assert ma.employment_history.current_employer.ma_related
+    assert ma.employment_history.current_employer.investment_related
     assert ma.employment_history.current_employer.position == "MUNI FINANCE INVESTMENT BANKER"
     assert ma.is_amendment == False
     assert ma.is_individual == True
 
     assert len(ma.employment_history.previous_employers) == 2
-    assert ma.employment_history.previous_employers.iloc[0]['name'] == "JANNY MONTGOMERY SCOTT LLC"
-    assert ma.employment_history.previous_employers.iloc[0]['start_date'] == "08-2012"
-    assert ma.employment_history.previous_employers.iloc[0]['end_date'] == "05-2016"
-    assert ma.employment_history.previous_employers.iloc[0]['is_related_to_municipal_advisor'] == True
-    assert ma.employment_history.previous_employers.iloc[0]['is_related_to_investment'] == False
+    assert ma.employment_history.previous_employers[0].name == "JANNY MONTGOMERY SCOTT LLC"
+    assert ma.employment_history.previous_employers[0].start_date == "Aug 2012"
+    assert ma.employment_history.previous_employers[0].end_date == "May 2016"
+    assert ma.employment_history.previous_employers[0].ma_related == True
+    assert ma.employment_history.previous_employers[0].investment_related == False
 
     # Disclosures
 
@@ -124,3 +124,16 @@ def test_municipal_advisors_obj():
     ma: MunicipalAdvisorForm = filing.obj()
     assert ma.filing.form == 'MA-I'
     assert ma.filing.filing_date == '2023-05-05'
+
+
+def test_municipal_advisor_employment_history():
+    filing = Filing(form='MA-I/A', filing_date='2023-11-01', company='RBC Capital Markets, LLC', cik=50916,
+                    accession_no='0000050916-23-000028')
+    ma: MunicipalAdvisorForm = filing.obj()
+    repr_ = repr(ma)
+    assert repr_
+    print(repr_)
+
+    employment_repr = repr(ma.employment_history)
+    assert employment_repr
+    print(employment_repr)
