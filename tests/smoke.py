@@ -49,5 +49,10 @@ if __name__ == '__main__':
     # Get the text from a filing
     filing.text()
 
+    # Munisipal advisors
+    muni_filing = get_filings(form="MA-I").latest(1)
+    ma = muni_filing.obj()
+    print(ma)
+    assert ma.employment_history
 
 
