@@ -232,6 +232,25 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
     return (year, quarter), index_table
 
 
+def _empty_filing_index():
+    schema = pa.schema([
+        ('form', pa.string()),
+        ('company', pa.string()),
+        ('cik', pa.int32()),
+        ('filing_date', pa.date32()),
+        ('accession_number', pa.string()),
+    ])
+
+    # Create an empty table with the defined schema
+    return pa.Table.from_arrays([
+        pa.array([], type=pa.string()),
+        pa.array([], type=pa.string()),
+        pa.array([], type=pa.int32()),
+        pa.array([], type=pa.date32()),
+        pa.array([], type=pa.string()),
+    ], schema=schema)
+
+
 def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
                              index="form") -> pa.Table:
     """
@@ -308,14 +327,15 @@ class Filings:
         return min_max_dates['min'], min_max_dates['max']
 
     @property
-    def start_date(self) -> str:
+    def start_date(self) -> Optional[str]:
         """Return the start date for the filings"""
-        return str(self.date_range[0])
+        return str(self.date_range[0]) if self.date_range[0] else self.date_range[0]
+
 
     @property
     def end_date(self) -> str:
         """Return the end date for the filings"""
-        return str(self.date_range[1])
+        return str(self.date_range[1]) if self.date_range[1] else self.date_range[1]
 
     def latest(self, n: int = 1):
         """Get the latest n filings"""
@@ -690,6 +710,8 @@ def get_current_filings(form: str = '',
     start = 0
 
     entries = get_current_entries_on_page(count=page_size, start=start, form=form, owner=owner)
+    if not entries:
+        return CurrentFilings(filing_index=_empty_filing_index(), owner=owner, form=form, page_size=page_size)
     return CurrentFilings(filing_index=pa.Table.from_pylist(entries), owner=owner, form=form, page_size=page_size)
 
 
@@ -1434,7 +1456,6 @@ class Filing:
     def sections(self) -> List[str]:
         return html_sections(self.html())
 
-
     @lru_cache(maxsize=1)
     def __get_bm25_search_index(self):
         return BM25Search(self.sections())
@@ -1936,9 +1957,6 @@ def get_by_accession_number(accession_number: str):
             filing = filings.get(accession_number)
             if filing:
                 return filing
-
-
-
 
 
 def form_with_amendments(*forms: str):

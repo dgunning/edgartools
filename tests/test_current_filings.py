@@ -1,5 +1,5 @@
 
-from edgar._filings import get_current_filings, parse_summary, CurrentFilings
+from edgar._filings import get_current_filings, parse_summary, CurrentFilings, get_filings
 
 
 def test_get_current_entries():
@@ -39,3 +39,11 @@ def test_parse_summary():
 
     summary2 = '<b>Film#:</b> 23003229  <b>Filed:</b> 2023-08-17 <b>AccNo:</b> 9999999997-23-004141 <b>Size:</b> 1 KB'
     assert parse_summary(summary2) == ('2023-08-17', '9999999997-23-004141')
+
+def test_current_filings_with_no_results():
+
+    filings = get_current_filings(form='4000')
+    assert filings.empty
+    assert isinstance(filings, CurrentFilings)
+    assert filings.start_date is None
+    assert filings.end_date is None
