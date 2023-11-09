@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-import pytest
+
 
 from rich import print
 
@@ -161,3 +161,6 @@ def test_fund_report_has_correct_isin():
     fund_report = filing.obj()
     investment_data = fund_report.investment_data()
     assert not investment_data['isin'].duplicated().any()
+
+
+
