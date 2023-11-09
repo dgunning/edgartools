@@ -38,7 +38,7 @@ from edgar.core import (edgar_mode,
                         get_identity,
                         set_identity)
 from edgar.fundreports import FundReport, NPORT_FORMS
-from edgar.funds import Fund, get_fund
+from edgar.funds import Fund, get_fund_by_ticker
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 
 # Another name for get_current_filings
