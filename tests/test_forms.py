@@ -105,7 +105,8 @@ def test_eightk_difficult_parsing():
     print()
     print(eightk)
 
-    filing = Filing(form='8-K', filing_date='2023-03-20', company='CATO CORP', cik=18255,accession_no='0001562762-23-000124')
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='CATO CORP', cik=18255,
+                    accession_no='0001562762-23-000124')
     eightk = filing.obj()
     print()
     print(eightk)
@@ -135,5 +136,3 @@ def test_find_section():
 
     assert find_section(r"If\D+an\D+emerging\D+growth\D+company,\D+indicate",
                         ['ABC', '  If an emerging growth company, indicate if the Exchange Act.', '|  |\n| --'])
-
-

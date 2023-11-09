@@ -1026,6 +1026,12 @@ def test_parse_header_filing_with_multiple_former_companies():
     assert filer.former_company_names[1].date_of_change == '20170621'
     assert filer.former_company_names[2].date_of_change == '20111007'
 
+def test_sech_header_for_fund():
+    filing = Filing(form='497K', filing_date='2022-11-01', company='JAMES ADVANTAGE FUNDS', cik=1045487, accession_no='0001398344-22-021082')
+    header = filing.header
+    # We don't have partially parsed keys like "/SERIES"
+    assert header.filing_metadata.get("/SERIES", None) is None
+
 
 def test_get_current_filings():
     filings = get_current_filings()
