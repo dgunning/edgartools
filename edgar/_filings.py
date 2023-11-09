@@ -1288,7 +1288,9 @@ class SECHeader:
             subject_companies.append(subject_company)
 
         # Create a dict of the values in data that are not nested dicts
-        filing_metadata = {key: value for key, value in data.items() if isinstance(value, str)}
+        filing_metadata = {key: value
+                           for key, value in data.items()
+                           if isinstance(value, str) and value}
 
         # The header text contains <ACCEPTANCE-DATETIME>20230612172243. Replace with the formatted date
         header_text = re.sub(r'<ACCEPTANCE-DATETIME>(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})',
