@@ -1,11 +1,15 @@
-from edgar.funds import get_fund_by_ticker, Fund, parse_fund_data, get_class_or_series, CompanyInfo
+from edgar.funds import (get_fund_by_ticker, Fund, FundData, FundSeries, FundClass, parse_fund_data,
+                         get_class_or_series,
+                         FundCompanyInfo)
 from pathlib import Path
 from rich import print
 import pandas as pd
+
 pd.options.display.max_columns = None
 
+
 def test_getfund_by_ticker():
-    fund:Fund = get_fund_by_ticker('DXFTX')
+    fund: Fund = get_fund_by_ticker('DXFTX')
     print()
     print(fund)
     assert fund.company_cik == '0001040587'
@@ -15,7 +19,7 @@ def test_getfund_by_ticker():
     assert fund.class_contract == 'Class A'
     assert fund.ticker == 'DXFTX'
 
-    fund = Fund('DXESX') # alias for get_fund
+    fund = Fund('DXESX')  # alias for get_fund
     print(fund)
     assert fund.company_cik == '0001040587'
     assert fund.company_name == 'DIREXION FUNDS'
@@ -32,10 +36,10 @@ def test_getfund_by_ticker():
     print(filings[0].header.text)
 
 
-
 def test_get_fund_by_ticker_not_found():
     fund = get_fund_by_ticker('SASSY')
     assert fund is None
+
 
 def test_parse_series_and_classes_contracts_data():
     sgml_data = """
@@ -157,8 +161,8 @@ def test_parse_series_and_classes_contracts_data():
 def test_parse_company_info_for_fund_class():
     company_info_html = Path('data/fundclass.html').read_text()
 
-    company_infos = CompanyInfo.from_html(company_info_html)
-    company_info = company_infos[0]
+    company_info = FundCompanyInfo.from_html(company_info_html)
+
     assert company_info.cik == '0001040587'
     assert company_info.name == 'DIREXION FUNDS'
     assert company_info.state == "NY"
@@ -168,11 +172,10 @@ def test_parse_company_info_for_fund_class():
     print(str(company_info))
     print(company_info.ident_info)
 
+
 def test_parse_company_info_for_fund_series():
     company_info_html = Path('data/fundseries.html').read_text()
-
-    company_infos = CompanyInfo.from_html(company_info_html)
-    company_info = company_infos[0]
+    company_info = FundCompanyInfo.from_html(company_info_html)
     assert company_info.cik == '0001040587'
     assert company_info.name == 'DIREXION FUNDS'
     assert company_info.state == "NY"
@@ -202,6 +205,7 @@ def test_get_fund_class():
     assert class_contract.ticker == "DXHSX"
     print(class_contract)
 
+
 def test_get_fund_series():
     series = get_class_or_series('S000011951')
     assert series.id == 'S000011951'
@@ -215,3 +219,14 @@ def test_get_fund_series():
     assert get_class_or_series("S000011964").name == "Direxion Monthly S&P 500(R) Bear 1.75X Fund"
     assert get_class_or_series("S000011943").id == "S000011943"
     assert get_class_or_series("S000019285").fund_cik == "0001040587"
+
+
+def test_get_class_or_series_not_found():
+    assert get_class_or_series('C100011111') is None
+    assert get_class_or_series('NONO') is None
+
+
+def test_fund_function_gets_by_ticker_class_or_series():
+    assert isinstance(Fund("DXHSX"), FundData)
+    assert isinstance(Fund("C000011111"), FundClass)
+    assert isinstance(Fund("S000019285"), FundSeries)

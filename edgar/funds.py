@@ -1,27 +1,33 @@
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from functools import lru_cache
 from typing import Union, Dict, List, Tuple, Optional
 
 import pandas as pd
+import pyarrow as pa
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from rich import box
+from rich.console import Group
+from rich.panel import Panel
 from rich.table import Table, Column
 
 from edgar._companies import Company
-from edgar._filings import SECHeader
-from edgar._party import Address
+from edgar._filings import SECHeader, Filings
 from edgar._rich import repr_rich, df_to_rich_table
-from edgar.core import download_text
+from edgar.core import download_text, log
 
 __all__ = [
     'get_fund_by_ticker',
-    'get_fund_information',
-    'FundSeriesAndContracts',
-    'Fund',
     'get_class_contract',
     'get_series',
+    'get_fund_information',
+    'FundData',
+    'FundSeries',
+    'FundClass',
+    'Fund',
+
 ]
 
 # The URL to search for a fund by company name
@@ -35,7 +41,7 @@ fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK=
 
 
 @dataclass(frozen=True)
-class FundObject:
+class FundData:
     company_cik: str
     company_name: str
     name: str
@@ -98,7 +104,7 @@ def get_fund_by_ticker(ticker: str):
     df = pd.DataFrame(data)
 
     # Now create the fund
-    fund = FundObject(
+    fund = FundData(
         company_cik=df.iloc[0, 0],
         company_name=df.iloc[0, 1],
         name=df.iloc[1, 2],
@@ -111,9 +117,6 @@ def get_fund_by_ticker(ticker: str):
     return fund
 
 
-Fund = get_fund_by_ticker
-
-
 def get_class_contract(class_contract_id: str):
     return get_class_or_series(class_contract_id)
 
@@ -122,15 +125,35 @@ def get_series(series_id: str):
     return get_class_or_series(series_id)
 
 
-class CompanyInfo:
+def get_fund(identifier: str):
+    # if it matches a ticker symbol
+    if re.match(r'[A-Z]{3,}$', identifier):
+        return get_fund_by_ticker(identifier)
+    elif re.match(r'^[CS]\d+$', identifier):
+        return get_class_or_series(identifier)
 
-    def __init__(self, name: str,
+
+Fund = get_fund
+
+
+class FundCompanyInfo:
+    """
+    Represents the fund company
+    This is parsed from the resuls page when we get the fund class or series
+
+    """
+
+    def __init__(self,
+                 name: str,
                  cik: str,
-                 ident_info: Dict[str, str], addresses: List[Address]):
+                 ident_info: Dict[str, str],
+                 addresses: List[str],
+                 filings: Filings):
         self.name: str = name
         self.cik: str = cik
         self.ident_info: Dict[str, str] = ident_info
-        self.addresses: List[Address] = addresses
+        self.addresses: List[str] = addresses
+        self.filings = filings
 
     @property
     def state(self):
@@ -144,7 +167,17 @@ class CompanyInfo:
         return f"{self.name} ({self.cik})"
 
     @classmethod
-    def from_tag(cls, content_div: Tag):
+    def from_html(cls, company_info_html: Union[str, Tag]):
+        soup = BeautifulSoup(company_info_html, features="html.parser")
+
+        # Parse the fund company info
+        content_div = soup.find("div", {"id": "contentDiv"})
+        content_div = soup.find("div", {"id": "contentDiv"})
+
+        if content_div is None:
+            # Should not reach here, but this is precautionary
+            log.warning("Did not find div with id 'contentDiv'")
+            return None
 
         ident_info_dict = {}
         company_info_div = content_div.find("div", class_="companyInfo")
@@ -168,32 +201,67 @@ class CompanyInfo:
         addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
                      for mailer_div in mailer_divs]
 
-        return cls(name=company_name, cik=cik, ident_info=ident_info_dict, addresses=addresses)
+        filings_table = soup.find("table", class_="tableFile2")
+        rows = filings_table.find_all("tr")[1:]
 
-    @classmethod
-    def from_html(cls, company_info_html: Union[str, Tag]):
-        soup = BeautifulSoup(company_info_html, features="html.parser")
-        content_div = soup.find_all("div", {"id": "contentDiv"})
-        return [CompanyInfo.from_tag(tag) for tag in content_div]
+        forms, accession_nos, filing_dates = [], [], []
+        for row in rows:
+            cells = row.find_all("td")
+            form = cells[0].text
+            forms.append(form)
+
+            # Get the link href from cell[1]
+            link = cells[1].find("a")
+            href = link.attrs["href"]
+            accession_no = href.split("/")[-1].replace("-index.htm", "")
+            accession_nos.append(accession_no)
+
+            # Get the filing_date
+            filing_date = datetime.strptime(cells[3].text, '%Y-%m-%d')
+            filing_dates.append(filing_date)
+
+        schema = pa.schema([
+            ('form', pa.string()),
+            ('company', pa.string()),
+            ('cik', pa.int32()),
+            ('filing_date', pa.date32()),
+            ('accession_number', pa.string()),
+        ])
+
+        # Create an empty table with the defined schema
+        filing_index = pa.Table.from_arrays(arrays=[
+            pa.array(forms, type=pa.string()),
+            pa.array([company_name] * len(forms), type=pa.string()),
+            pa.array([int(cik)] * len(forms), type=pa.int32()),
+            pa.array(filing_dates, type=pa.date32()),
+            pa.array(accession_nos, type=pa.string()),
+        ], schema=schema)
+        filings = Filings(filing_index=filing_index)
+
+        return cls(name=company_name,
+                   cik=cik,
+                   filings=filings,
+                   ident_info=ident_info_dict,
+                   addresses=addresses)
 
 
-class ClassContractOrSeries:
+class FundClassOrSeries:
 
-    def __init__(self, company_info: CompanyInfo, contract_or_series: str):
-        self.company_info = company_info
+    def __init__(self, company_info: FundCompanyInfo, contract_or_series: str):
+        self.fund = company_info
         self._contract_or_series = contract_or_series
 
     @property
     def fund_cik(self):
-        return self.company_info.cik
+        return self.fund.cik
 
     @property
     def fund_name(self):
-        return self.company_info.name
+        return self.fund.name
 
     @lru_cache(maxsize=1)
     def _id_and_name(self) -> Optional[Tuple[str, str]]:
-        class_contract_str = self.company_info.ident_info.get(self._contract_or_series, None)
+        class_contract_str = self.fund.ident_info.get(self._contract_or_series, None)
         if not class_contract_str:
             return None
         match = re.match(r'([CS]\d+)(?:\s(.*))?', class_contract_str)
@@ -215,26 +283,38 @@ class ClassContractOrSeries:
         if id_and_name:
             return id_and_name[1]
 
+    @property
+    def description(self):
+        return f"{self.fund_name} {self.id} {self.name}"
+
+    @property
+    def filings(self):
+        return self.fund.filings
+
     def __rich__(self):
         table = Table(Column("Fund", style="bold"),
                       Column("Id", style="bold"),
                       Column("Name", style="bold"),
                       box=box.ROUNDED)
         table.add_row(self.fund_name, self.id, self.name)
-        return table
+        return Panel(Group(table, self.filings.__rich__()), title=self.description, subtitle=self.description)
 
     def __repr__(self):
         return repr_rich(self.__rich__())
 
 
-class ClassContract(ClassContractOrSeries):
+class FundClass(FundClassOrSeries):
 
-    def __init__(self, company_info: CompanyInfo):
+    def __init__(self, company_info: FundCompanyInfo):
         super().__init__(company_info, "Class/Contract")
 
     @property
     def ticker(self):
-        return self.company_info.ident_info.get("Ticker Symbol", None)
+        return self.fund.ident_info.get("Ticker Symbol", None)
+
+    @property
+    def description(self):
+        return f"{self.fund_name} {self.id} {self.name} {self.ticker or ''}"
 
     def __rich__(self):
         table = Table(Column("Fund", style="bold"),
@@ -242,12 +322,12 @@ class ClassContract(ClassContractOrSeries):
                       Column("Ticker", style="bold"),
                       box=box.ROUNDED)
         table.add_row(self.fund_name, f"{self.id} {self.name}", self.ticker or "")
-        return table
+        return Panel(Group(table, self.filings.__rich__()), title=self.description, subtitle=self.description)
 
 
-class FundSeries(ClassContractOrSeries):
+class FundSeries(FundClassOrSeries):
 
-    def __init__(self, company_info: CompanyInfo):
+    def __init__(self, company_info: FundCompanyInfo):
         super().__init__(company_info, "Series")
 
     def __rich__(self):
@@ -255,22 +335,25 @@ class FundSeries(ClassContractOrSeries):
                       Column("Series", style="bold"),
                       box=box.ROUNDED)
         table.add_row(self.fund_name, f"{self.id} {self.name}")
-        return table
+        return Panel(Group(table, self.filings.__rich__()), title=self.description, subtitle=self.description)
 
 
 def get_class_or_series(contract_or_series_id: str):
     """Get the fund using the class id"""
+    if not re.match("[CS]\d+", contract_or_series_id):
+        return None
     search_url = fund_class_or_series_search_url.format(contract_or_series_id)
 
     fund_text = download_text(search_url)
-    soup = BeautifulSoup(fund_text, features="html.parser")
-    content_div = soup.find("div", {"id": "contentDiv"})
+
+    if "No matching" in fund_text:
+        return None
 
     # Company Info
-    company_info = CompanyInfo.from_tag(content_div)
+    company_info = FundCompanyInfo.from_html(fund_text)
 
     if contract_or_series_id.startswith('C'):
-        return ClassContract(company_info)
+        return FundClass(company_info)
     else:
         return FundSeries(company_info)
 

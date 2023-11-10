@@ -38,7 +38,7 @@ from edgar.core import (edgar_mode,
                         get_identity,
                         set_identity)
 from edgar.fundreports import FundReport, NPORT_FORMS
-from edgar.funds import Fund, get_fund_by_ticker
+from edgar.funds import Fund, FundSeries, FundData, FundClass
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 
 # Another name for get_current_filings
@@ -58,7 +58,7 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 
 
 @lru_cache(maxsize=16)
-def find(search_id: Union[str, int]) -> Union[Filing, EntityData, CompanySearchResults]:
+def find(search_id: Union[str, int]) -> Union[Filing, EntityData, CompanySearchResults, FundData, FundClass, FundSeries]:
     """Find a filing by accession number
     :rtype: object
     """
@@ -68,6 +68,12 @@ def find(search_id: Union[str, int]) -> Union[Filing, EntityData, CompanySearchR
         return get_by_accession_number(search_id)
     elif re.match(r"\d{4,10}", search_id):
         return Entity(search_id)
+    elif re.match(r"^[A-Z]{1,4}$", search_id):
+        return Entity(search_id)
+    elif re.match("^[A-Z]{5}$", search_id):
+        return Fund(search_id)
+    elif re.match("^[CS]\d+$", search_id):
+        return Fund(search_id)
     else:
         return find_company(search_id)
 
