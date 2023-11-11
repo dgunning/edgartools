@@ -43,6 +43,19 @@ def test_tenk_filing_with_no_gaap():
     assert tenk
     assert tenk.financials is not None
 
+def test_tenk_item_and_parts():
+    filing = Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', cik=1450722,
+                    accession_no='0001213900-23-028058')
+    tenk: TenK = filing.obj()
+    # Get item 1
+    item1 = tenk['Item 1']
+    assert 'Item 1.' in item1
+    # Show Item 1
+    tenk.view_item('Item 1')
+
+    partII = tenk['Part II']
+    print(partII)
+
 
 def test_tenq_filing():
     filing = Filing(form='10-Q', filing_date='2023-04-06', company='NIKE, Inc.', cik=320187,

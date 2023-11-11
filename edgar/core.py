@@ -12,7 +12,7 @@ from decimal import Decimal
 from functools import lru_cache
 from io import BytesIO
 from typing import Union, Optional, Tuple, List
-
+import sys
 import httpx
 import humanize
 import pandas as pd
@@ -33,6 +33,12 @@ logging.basicConfig(
 )
 
 log = logging.getLogger("rich")
+
+# Pandas version
+pandas_version = tuple(map(int, pd.__version__.split('.')))
+
+# sys version
+python_version = tuple(map(int, sys.version.split()[0].split('.')))
 
 # Turn down httpx logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -59,6 +65,8 @@ __all__ = [
     'extract_dates',
     'get_resource',
     'get_identity',
+    'pandas_version',
+    'python_version',
     'set_identity',
     'download_text',
     'download_file',

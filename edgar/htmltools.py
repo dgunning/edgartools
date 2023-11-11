@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 from io import StringIO
@@ -5,18 +6,24 @@ from typing import Any, Optional, List
 
 import pandas as pd
 from lxml import html as lxml_html
+from rich import box
+from rich.panel import Panel
+from rich.table import Table
+
+from edgar._rich import repr_rich
 
 __all__ = [
     "Element",
-    "extract_elements",
     "get_tables",
-    "clean_dataframe",
     "html_to_text",
     'html_sections',
-    "table_html_to_dataframe",
+    "ChunkedDocument",
+    "extract_elements",
+    "clean_dataframe",
     "dataframe_to_text",
+    "get_text_elements",
     "get_table_elements",
-    "get_text_elements"
+    "table_html_to_dataframe",
 ]
 
 
@@ -100,12 +107,8 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
     Returns:
     str: The dataframe converted to a text string.
     """
-
     # Getting the maximum width for each column
-    if hasattr(df, 'applymap'):
-        column_widths = df.astype(str).applymap(len).max()
-    else:
-        column_widths = df.astype(str).map(len).max()
+    column_widths = df.apply(lambda col: col.astype(str).str.len().max())
 
     # If including indexes, get the maximum width of the index
 
@@ -177,3 +180,146 @@ def get_table_elements(elements: List[Element],
 
 def get_text_elements(elements: List[Element]):
     return [e for e in elements if e.type == "text"]
+
+
+def chunk(html, chunk_size: int = 1000, buffer=500):
+    """
+    Break html into chunks
+    """
+    # Use function import to avoid the startup time imposed by unstructured
+    from unstructured.partition.html import partition_html
+    from unstructured.chunking.title import chunk_by_title
+
+    elements = partition_html(text=html)
+    chunks = chunk_by_title(elements,
+                            combine_text_under_n_chars=0,
+                            new_after_n_chars=chunk_size,
+                            max_characters=chunk_size + max(0, buffer))
+    return chunks
+
+
+def chunks2df(chunks):
+    """Convert the chunks to a dataframe"""
+
+
+    chunk_df = pd.DataFrame([
+        {'text': el.text.strip(),
+         'table': 'Table' in chunk.__class__.__name__}
+        for el in chunks]
+    ).assign(chars=lambda df: df.text.apply(len),
+             item=lambda df: df.text.str.extract('^(Item \d+\.\d+|Item \d+[A-Z]?)', expand=False, flags=re.IGNORECASE),
+             part=lambda df: df.text.str.extract('^(PART [IV]+)', flags=re.IGNORECASE),
+             signature=lambda df: df.text.str.match('^SIGNATURE', re.IGNORECASE),
+             toc=lambda df: df.text.str.match('^Table of Contents$', re.IGNORECASE),
+             is_empty=lambda df: df.text.str.contains('^$', na=True)
+             )
+    # Foward fill item and parts
+    # Handle deprecation warning in fillna(method='ffill')
+    pandas_version = tuple(map(int, pd.__version__.split('.')))
+    if pandas_version >= (2, 1, 0):
+        chunk_df.loc[:, 'item'] = chunk_df.item.ffill().fillna("")
+        chunk_df.loc[:, 'part'] = chunk_df.part.ffill().fillna("")
+    else:
+        chunk_df.loc[:, 'item'] = chunk_df.item.fillna(method='ffill').fillna("")
+        chunk_df.loc[:, 'part'] = chunk_df.part.fillna(method='ffill').fillna("")
+
+
+    signature_loc = chunk_df[chunk_df.signature].index[0]
+    chunk_df.loc[signature_loc:, 'item'] = ""
+    chunk_df.loc[signature_loc:, 'part'] = ""
+    return chunk_df
+
+
+def render_table(chunk):
+    table_html = str(chunk.metadata.text_as_html)
+    table_df = table_html_to_dataframe(table_html) if table_html else pd.DataFrame()
+    return dataframe_to_text(table_df)
+
+
+def render_chunks(chunks):
+    return '\n'.join([render_table(chunk)
+                      if "HTMLTable" in str(type(chunk))
+                      else chunk.text
+                      for chunk in chunks]
+                     )
+
+
+class ChunkedDocument:
+    """
+    Contains the html as broken into chunks
+    """
+
+    def __init__(self,
+                 html: str,
+                 chunk_size: int = 1000,
+                 chunk_buffer: int = 500):
+        """
+        :param html: The filing html
+        :param chunk_size: How large should the chunk be
+        """
+        self.chunks = chunk(html, chunk_size, chunk_buffer)
+        self.chunk_size = chunk_size
+        self.chunk_buffer = chunk_buffer
+
+    @lru_cache(maxsize=4)
+    def as_dataframe(self):
+        return chunks2df(self.chunks)
+
+    def list_items(self):
+        df = self.as_dataframe()
+        return [item for item in df.item.drop_duplicates().tolist() if item]
+
+    def _chunks_for(self, item_or_part: str, col: str = 'item'):
+        chunk_df = self.as_dataframe()
+
+        # Handle cases where the item has the decimal point e.g. 5.02
+        item_or_part = item_or_part.replace('.', '\.')
+        pattern = re.compile(rf'^{item_or_part}$', flags=re.IGNORECASE)
+
+        col_mask = chunk_df[col].str.match(pattern)
+        toc_mask = ~chunk_df.toc
+        empty_mask = ~chunk_df.is_empty
+
+        mask = col_mask & toc_mask & empty_mask
+
+        for i in mask[mask].index:
+            yield self.chunks[i]
+
+    def chunks_for_item(self, item: str):
+        return self._chunks_for(item, col='item')
+
+    def chunks_for_part(self, part: str):
+        return self._chunks_for(part, col='part')
+
+    def average_chunk_size(self):
+        return int(self.as_dataframe().chars.mean())
+
+    def __len__(self):
+        return len(self.chunks)
+
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return self.chunks[item]
+        elif isinstance(item, str):
+            if item.startswith("Item"):
+                return render_chunks(self.chunks_for_item(item))
+            elif item.startswith("Part"):
+                return render_chunks(self.chunks_for_part(item))
+
+    def __iter__(self):
+        return iter(self.chunks)
+
+    def __rich__(self):
+        table = Table("Chunks",
+                      "Items",
+                      "Chunk Size/Buffer",
+                      "Avg Size", box=box.SIMPLE)
+        table.add_row(str(len(self.chunks)),
+                      ",".join(self.list_items()),
+                      f"{str(self.chunk_size)}/{str(self.chunk_buffer)}",
+                      str(self.average_chunk_size()),
+                      )
+        return Panel(table, box=box.ROUNDED, title="HTML Document")
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())

@@ -7,11 +7,13 @@ from bs4 import BeautifulSoup
 from rich.console import Group, Text
 from rich.markdown import Markdown
 from rich.panel import Panel
+from rich import print
 
 from edgar._markdown import markdown_to_rich
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import download_text, http_client, sec_dot_gov
 from edgar.financials import Financials
+from edgar.htmltools import ChunkedDocument
 
 __all__ = [
     'SecForms',
@@ -166,6 +168,21 @@ class CompanyReport:
         if xbrl:
             return Financials.from_gaap(xbrl.gaap)
 
+    @lru_cache(maxsize=1)
+    def chunked_document(self):
+        return ChunkedDocument(self._filing.html())
+
+    def view_item(self, item_or_part:str):
+        """Get the Item or Part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q"""
+        item_text = self[item_or_part]
+        if item_text:
+            print(item_text)
+
+    def __getitem__(self, item_or_part:str):
+        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+        item_text = self.chunked_document()[item_or_part]
+        return item_text
+
     def __rich__(self):
         return Panel(
             Group(
@@ -196,6 +213,16 @@ class TenQ(CompanyReport):
     def __str__(self):
         return f"""TenQ('{self.company}')"""
 
+
+class TwentyF(CompanyReport):
+
+
+    def __init__(self, filing):
+        assert filing.form in ['20-F', '20-F/A'], f"This form should be a 20-F but was {filing.form}"
+        super().__init__(filing)
+
+    def __str__(self):
+        return f"""TwentyF('{self.company}')"""
 
 
 class EightK:
