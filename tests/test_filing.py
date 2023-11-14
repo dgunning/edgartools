@@ -14,7 +14,7 @@ from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, SECHeader, read_fixed_width_index, form_specs, company_specs, Attachments, \
     Attachment, Filer, get_current_filings
 
-from edgar.forms import TenK
+from edgar.company_reports import TenK
 from rich import print
 
 pd.options.display.max_colwidth = 200

@@ -9,14 +9,14 @@ pd.options.display.max_columns = None
 
 
 def test_getfund_by_ticker():
-    fund: Fund = get_fund_by_ticker('DXFTX')
+    fund: FundData = get_fund_by_ticker('DXFTX')
     print()
     print(fund)
     assert fund.company_cik == '0001040587'
     assert fund.company_name == 'DIREXION FUNDS'
     assert fund.series == 'S000024976'
     assert fund.name == 'Direxion Currency Trends Strategy Plus Fund'
-    assert fund.class_contract == 'Class A'
+    assert fund.class_contract_name == 'Class A'
     assert fund.ticker == 'DXFTX'
 
     fund = Fund('DXESX')  # alias for get_fund
@@ -25,7 +25,7 @@ def test_getfund_by_ticker():
     assert fund.company_name == 'DIREXION FUNDS'
     assert fund.series == 'S000007038'
     assert fund.name == 'Direxion Monthly Emerging Markets Bear 2X Fund'
-    assert fund.class_contract == 'Investor Class'
+    assert fund.class_contract_name == 'Investor Class'
     assert fund.ticker == 'DXESX'
 
     company = fund.get_fund_company()
@@ -35,6 +35,11 @@ def test_getfund_by_ticker():
     assert filings is not None
     print(filings[0].header.text)
 
+
+def test_get_fund_filings():
+    fund = Fund('AGTHX')
+    print()
+    print(fund.filings)
 
 def test_get_fund_by_ticker_not_found():
     fund = get_fund_by_ticker('SASSY')

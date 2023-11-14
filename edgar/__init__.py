@@ -60,7 +60,14 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 @lru_cache(maxsize=16)
 def find(search_id: Union[str, int]) -> (
         Union)[Filing, EntityData, CompanySearchResults, FundData, FundClass, FundSeries]:
-    """Find a filing by accession number
+    """Find a filing by
+        - accession number -> returns a Filing
+        - CIK -> returns an Entity
+        - Class/Contract ID -> returns a FundClass
+        - Series ID -> returns a FundSeries
+        - Ticker -> returns a Company or a Fund if the ticker is a fund ticker
+        - Company name -> returns CompanySearchResults
+
     :rtype: object
     """
     if isinstance(search_id, int):
@@ -97,7 +104,8 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :param sec_filing: The filing
     :return:
     """
-    from edgar.forms import EightK, TenK, TenQ, TwentyF
+    from edgar.forms import EightK
+    from edgar.company_reports import TenK, TenQ, TwentyF
     from edgar.effect import Effect
     from edgar.offerings import Offering
     from edgar.ownership import Ownership, Form3, Form4, Form5

@@ -4,24 +4,22 @@ from functools import lru_cache
 
 import pandas as pd
 from bs4 import BeautifulSoup
+from rich import print
 from rich.console import Group, Text
 from rich.markdown import Markdown
 from rich.panel import Panel
-from rich import print
 
-from edgar._markdown import markdown_to_rich
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import download_text, http_client, sec_dot_gov
 from edgar.financials import Financials
 from edgar.htmltools import ChunkedDocument
+from edgar._markdown import markdown_to_rich
 
 __all__ = [
     'SecForms',
     'list_forms',
     'FUND_FORMS',
     'EightK',
-    'TenK',
-    'TenQ'
 ]
 
 FUND_FORMS = ["NPORT-P", "NPORT-EX"]
@@ -136,93 +134,6 @@ class FilingItem:
         return Markdown(str(self))
 
 
-class CompanyReport:
-
-    def __init__(self, filing):
-        self._filing = filing
-
-    @property
-    def form(self):
-        return self._filing.form
-
-    @property
-    def company(self):
-        return self._filing.company
-
-    @property
-    def income_statement(self):
-        return self.financials.income_statement if self.financials else None
-
-    @property
-    def balance_sheet(self):
-        return self.financials.balance_sheet if self.financials else None
-
-    @property
-    def cash_flow_statement(self):
-        return self.financials.cash_flow_statement if self.financials else None
-
-    @property
-    @lru_cache(1)
-    def financials(self):
-        xbrl = self._filing.xbrl()
-        if xbrl:
-            return Financials.from_gaap(xbrl.gaap)
-
-    @lru_cache(maxsize=1)
-    def chunked_document(self):
-        return ChunkedDocument(self._filing.html())
-
-    def view_item(self, item_or_part:str):
-        """Get the Item or Part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q"""
-        item_text = self[item_or_part]
-        if item_text:
-            print(item_text)
-
-    def __getitem__(self, item_or_part:str):
-        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
-        item_text = self.chunked_document()[item_or_part]
-        return item_text
-
-    def __rich__(self):
-        return Panel(
-            Group(
-            self._filing.__rich__(),
-            self.financials or Text("No financial data available")
-            )
-        )
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
-
-
-class TenK(CompanyReport):
-
-    def __init__(self, filing):
-        assert filing.form in ['10-K', '10-K/A'], f"This form should be a 10-K but was {filing.form}"
-        super().__init__(filing)
-
-    def __str__(self):
-        return f"""TenK('{self.company}')"""
-
-class TenQ(CompanyReport):
-
-    def __init__(self, filing):
-        assert filing.form in ['10-Q', '10-Q/A'], f"This form should be a 10-Q but was {filing.form}"
-        super().__init__(filing)
-
-    def __str__(self):
-        return f"""TenQ('{self.company}')"""
-
-
-class TwentyF(CompanyReport):
-
-
-    def __init__(self, filing):
-        assert filing.form in ['20-F', '20-F/A'], f"This form should be a 20-F but was {filing.form}"
-        super().__init__(filing)
-
-    def __str__(self):
-        return f"""TwentyF('{self.company}')"""
 
 
 class EightK:
@@ -289,4 +200,3 @@ class EightK:
                     if current_item_num is not None:
                         current_item += line + "\n"
         yield current_item_num, current_item.strip()
-

@@ -3,7 +3,7 @@ from rich import print
 
 from edgar import *
 from edgar.financials import Financials, format_currency
-from edgar.forms import TenK
+from edgar.company_reports import TenK
 
 
 def test_format_currency():

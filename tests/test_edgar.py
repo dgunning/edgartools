@@ -2,7 +2,7 @@ from edgar import obj, matches_form, Filing, FundReport, find, CompanySearchResu
 from edgar._companies import EntityData
 from edgar.ownership import Ownership
 from edgar.offerings import Offering
-from edgar.forms import TenK
+from edgar.company_reports import TenK
 from edgar.effect import Effect
 
 def test_matches_form():

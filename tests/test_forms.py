@@ -1,7 +1,7 @@
 from rich import print
 
 from edgar import Filing
-from edgar.forms import list_forms, EightK, TenK, TenQ, find_section
+from edgar.forms import list_forms, EightK, find_section
 from pathlib import Path
 
 
@@ -34,38 +34,6 @@ adobe_8K = Filing(form='8-K',
                   cik=796343,
                   accession_no='0000796343-23-000044')
 
-
-def test_tenk_filing_with_no_gaap():
-    # This filing has no GAAP data
-    filing = Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', cik=1450722,
-                    accession_no='0001213900-23-028058')
-    tenk: TenK = filing.obj()
-    assert tenk
-    assert tenk.financials is not None
-
-def test_tenk_item_and_parts():
-    filing = Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', cik=1450722,
-                    accession_no='0001213900-23-028058')
-    tenk: TenK = filing.obj()
-    # Get item 1
-    item1 = tenk['Item 1']
-    assert 'Item 1.' in item1
-    # Show Item 1
-    tenk.view_item('Item 1')
-
-    partII = tenk['Part II']
-    print(partII)
-
-
-def test_tenq_filing():
-    filing = Filing(form='10-Q', filing_date='2023-04-06', company='NIKE, Inc.', cik=320187,
-                    accession_no='0000320187-23-000013')
-    tenq: TenQ = filing.obj()
-    assert tenq
-    assert tenq.financials is not None
-    assert tenq.financials.balance_sheet.asset_dataframe is not None
-    print()
-    print(tenq)
 
 
 def test_eightk_items():

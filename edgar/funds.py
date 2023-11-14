@@ -42,23 +42,34 @@ fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK=
 
 @dataclass(frozen=True)
 class FundData:
+    """A Mutual Fund or ETF"""
     company_cik: str
     company_name: str
     name: str
     series: str
     ticker: str
-    class_contract: str
+    class_contract_id: str
+    class_contract_name:str
 
     def get_fund_company(self):
         return Company(self.company_cik)
 
+    @property
+    @lru_cache(maxsize=1)
+    def filings(self):
+        fund_class:FundClass = get_class_or_series(self.class_contract_id)
+        return fund_class.filings
+
     def __rich__(self):
         table = Table(Column("Fund", style="bold"),
-                      Column("Series", style="bold"),
-                      Column("Ticker", style="bold"),
                       Column("Class", style="bold"),
+                      Column("Series Id", style="bold"),
+                      Column("Ticker", style="bold"),
                       box=box.ROUNDED)
-        table.add_row(self.name, self.series, self.ticker, self.class_contract)
+        table.add_row(self.name,
+                      f"{self.class_contract_name} {self.class_contract_id}",
+                      self.series,
+                      self.ticker)
         return table
 
     def __repr__(self):
@@ -110,7 +121,8 @@ def get_fund_by_ticker(ticker: str):
         name=df.iloc[1, 2],
         series=df.iloc[1, 1],
         ticker=df.iloc[-1, -1],
-        class_contract=df.iloc[-1, -2]
+        class_contract_id=df.iloc[-1, -3],
+        class_contract_name=df.iloc[-1, -2]
     )
 
     # Display the structured data
@@ -171,7 +183,6 @@ class FundCompanyInfo:
         soup = BeautifulSoup(company_info_html, features="html.parser")
 
         # Parse the fund company info
-        content_div = soup.find("div", {"id": "contentDiv"})
         content_div = soup.find("div", {"id": "contentDiv"})
 
         if content_div is None:
@@ -243,6 +254,17 @@ class FundCompanyInfo:
                    filings=filings,
                    ident_info=ident_info_dict,
                    addresses=addresses)
+
+    def __rich__(self):
+        table = Table("CIK", Column("Fund Company", style="bold"), box=box.SIMPLE)
+        table.add_row(self.cik, self.name)
+        return Panel(
+            table,
+            title=f"{self.name}", box=box.ROUNDED
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 
 class FundClassOrSeries:
@@ -400,7 +422,7 @@ def parse_fund_data(series_sgml_data: str) -> pd.DataFrame:
     :return:
     """
     # Regular expressions to match each relevant tag
-    series_re = re.compile(r'<SERIES>(.*?)<\/SERIES>', re.DOTALL)
+    series_re = re.compile(r'<SERIES>(.*?)</SERIES>', re.DOTALL)
     data_re = re.compile(r'<([^>]+)>([^<]*)')
 
     # Extract SERIES blocks
