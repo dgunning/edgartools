@@ -94,3 +94,41 @@ def test_html_sections_from_html_with_table_with_no_tbody():
            accession_no='0001104659-23-108367')
     sections = filing.sections()
     assert sections
+
+
+def test_that_items_are_ordered_in_chunked_document_for_filing():
+    nvidia_10k_html = Path("data/Nvidia.10-K.html").read_text()
+    chunked_documents = ChunkedDocument(nvidia_10k_html)
+
+    # Test the repr
+    repr_ = repr(chunked_documents)
+    print()
+    print(repr_)
+
+    items = chunked_documents.list_items()
+    print(items)
+    assert items[-1] != 'Item 9A'
+    assert chunked_documents['ITEM 1']
+    assert chunked_documents['Item 1'] == chunked_documents['ITEM 1']
+    assert chunked_documents['ITEM 1']
+
+    print(chunked_documents['ITEM 1'])
+""" 
+def test_document_chunks_for_item():
+    nordstrom_8k = Path("data/form8k.Nordstrom.html").read_text()
+    document_chunks = ChunkedDocument(nordstrom_8k, chunk_size=500, chunk_buffer=100)
+    assert document_chunks
+
+    item_chunks = document_chunks.chunks_for_item("Item 5.02")
+    assert len(list(item_chunks)) > 4
+    item_502 = document_chunks["Item 5.02"]
+    print(item_502)
+    assert "ITEM 5.02" in item_502
+    
+def test_document_chunk_list_items():
+    nordstrom_8k = Path("data/form8k.Nordstrom.html").read_text()
+    document_chunks = ChunkedDocument(nordstrom_8k, chunk_size=500, chunk_buffer=100)
+
+    items = document_chunks.list_items()
+    assert len(items) == 2
+"""

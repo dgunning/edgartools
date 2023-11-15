@@ -62,12 +62,7 @@ def test_is_valid_item_for_filing():
 
 
 def test_chunk_items_for_company_reports():
-    #filing = Filing(form='10-K', filing_date='2023-11-08', company='CHS INC', cik=823277, accession_no='0000823277-23-000053')
-    #filing = Filing(form='10-K', filing_date='2023-11-09', company='TransDigm Group INC', cik=1260221, accession_no='0001260221-23-000081')
-    #filing = Filing(form='10-K', filing_date='2023-10-16', company='IDT CORP', cik=1005731, accession_no='0001493152-23-037384')
-    #filing = Filing(form='10-K/A', filing_date='2023-10-17', company='Mycotopia Therapies, Inc.', cik=1763329, accession_no='0001096906-23-002003')
     filing = find("0001193125-23-086073")
-    #filing.open()
     html = filing.html()
     chunked_document = ChunkedDocument(html)
     print()
@@ -91,4 +86,5 @@ def test_item_for_10K_filing():
     item_15 = tenk['Item 15']
     assert item_15
     assert 'FINANCIAL STATEMENTS' in item_15
+    assert tenk['ITEM 15'] == item_15
     print(item_15)

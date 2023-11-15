@@ -218,6 +218,12 @@ def chunks2df(chunks: List) -> pd.DataFrame:
             return re.sub(r"[^0-9A-Za-z ]", "", item)  # Remove all but numbers and letters
         return item
 
+    def extract_numeric_alpha_parts(item):
+        """Extract numeric and alphabetic parts from an item."""
+        numeric_part = int(re.search(r"[0-9]+", item).group()) if item else 0
+        alpha_part = re.search(r"[A-Z]$", item)
+        alpha_part = alpha_part.group() if alpha_part else ''
+        return numeric_part, alpha_part
     def find_next_item(index, normalized_items):
         """Find the next available item in the DataFrame starting from a given index."""
         for i in range(index + 1, len(normalized_items)):
@@ -225,33 +231,51 @@ def chunks2df(chunks: List) -> pd.DataFrame:
                 return normalized_items[i]
         return None
 
-    def is_valid_sequence(current_item, next_available_item):
+    def is_valid_sequence(current_item, last_valid_item, next_available_item):
         """
-        Determine if the current item is valid considering the next available item.
+        Determine if the current item is valid considering the last and next available items.
         """
         if not current_item or pd.isna(current_item) or not next_available_item or pd.isna(next_available_item):
             return False
 
-        # Extract numeric and alphabetic parts
-        current_item_num = int(re.search(r"[0-9]+", current_item).group())
-        next_item_num = int(re.search(r"[0-9]+", next_available_item).group())
+        current_item_num, current_item_alpha = extract_numeric_alpha_parts(current_item)
+        last_item_num, last_item_alpha = extract_numeric_alpha_parts(last_valid_item)
+        next_item_num, next_item_alpha = extract_numeric_alpha_parts(next_available_item)
 
-        return current_item_num <= next_item_num
+        # Check if the current item is greater than the last valid item and less than or equal to the next available item
+        if current_item_num == last_item_num:
+            return current_item_alpha > last_item_alpha
+        elif current_item_num == next_item_num:
+            return current_item_alpha < next_item_alpha or next_item_alpha == ''
+        else:
+            return last_item_num < current_item_num <= next_item_num
 
-    def filter_out_of_sequence_items(chunk_df):
+    def filter_out_of_sequence_items(chunk_df:pd.DataFrame):
+        """
+        Ensure that the items are in sequence and filter out any out of sequence items.
+        """
         chunk_df['NormalizedItem'] = chunk_df['DetectedItem'].apply(normalize_item)
         normalized_items = chunk_df['NormalizedItem'].replace([np.nan], [None]).tolist()
 
         last_valid_item = ""
         valid_items = pd.Series(index=chunk_df.index, dtype=object)  # Create a series to store valid items
 
-        # Iterate only through rows with non-null 'Item'
+        # First find the index of the table of contents toc.
+        toc_index_rows = chunk_df[chunk_df.Toc.notnull() & chunk_df.Toc]
+        # If not found set to 0
+        toc_index = toc_index_rows.index[0] if len(toc_index_rows) > 0 else 0
+
+        # Iterate only through rows with non-null 'Item' starting at toc_index + 1
+
         for index, row in chunk_df.iterrows():
+            if index < toc_index+1:
+                continue
             current_item = row['NormalizedItem']
             next_available_item = find_next_item(index, normalized_items)
 
-            if is_valid_sequence(current_item, next_available_item):
+            if is_valid_sequence(current_item, last_valid_item, next_available_item):
                 valid_items[index] = current_item
+                last_valid_item = current_item  # Update the last valid item
             else:
                 valid_items[index] = pd.NA  # Mark as invalid/out of sequence
 
@@ -344,7 +368,7 @@ class ChunkedDocument:
         return result
 
     def list_items(self):
-        return [item for item in self._chunked_data.item.drop_duplicates().tolist() if item]
+        return [item for item in self._chunked_data.Item.drop_duplicates().tolist() if item]
 
     def _chunks_for(self, item_or_part: str, col: str = 'Item'):
         chunk_df = self._chunked_data
@@ -369,7 +393,7 @@ class ChunkedDocument:
         return self._chunks_for(part, col='Part')
 
     def average_chunk_size(self):
-        return int(self._chunked_data.chars.mean())
+        return int(self._chunked_data.Chars.mean())
 
     def __len__(self):
         return len(self.chunks)
@@ -378,10 +402,7 @@ class ChunkedDocument:
         if isinstance(item, int):
             return self.chunks[item]
         elif isinstance(item, str):
-            if item.startswith("Item"):
-                return render_chunks(self.chunks_for_item(item))
-            elif item.startswith("Part"):
-                return render_chunks(self.chunks_for_part(item))
+            return render_chunks(self.chunks_for_item(item))
 
     def __iter__(self):
         return iter(self.chunks)
