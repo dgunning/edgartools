@@ -235,3 +235,21 @@ def test_fund_function_gets_by_ticker_class_or_series():
     assert isinstance(Fund("DXHSX"), FundData)
     assert isinstance(Fund("C000011111"), FundClass)
     assert isinstance(Fund("S000019285"), FundSeries)
+
+def test_get_fund_by_mutual_fund_ticker():
+    ticker = "FCNTX"
+    fund = Fund(ticker)
+    print()
+    print(fund)
+    assert fund.ticker == "FCNTX"
+    assert fund.series == "S000006037"
+    assert fund.name == "Fidelity Contrafund"
+
+    # Get the fund filings
+    latest_nport = fund.filings.filter(form="NPORT-P").latest(1)
+
+    # Get the fund company. This nport should be the same as the fund company's nport
+    fund_company = fund.get_fund_company()
+    company_nport = fund_company.get_filings(accession_number=latest_nport.accession_no).latest()
+    assert company_nport.accession_no == latest_nport.accession_no
+
