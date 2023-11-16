@@ -3,6 +3,7 @@ from pathlib import Path
 from edgar import Filing
 from decimal import Decimal
 import pytest
+from edgar import *
 
 def test_parse_infotable():
     infotable = ThirteenF.parse_infotable_xml(Path("data/13F-HR.infotable.xml").read_text())
@@ -110,3 +111,12 @@ def test_previous_holding_report():
 def test_parse_thirteenf_primary_xml():
     res = ThirteenF.parse_primary_document_xml(Path("data/metlife.13F-HR.primarydoc.xml").read_text())
     print(res)
+
+def test_thirteenf_with_issues():
+    thirteenF_filings = get_filings(form="13F-HR")
+    #filing = thirteenF_filings[10]
+    filing = Filing(form='13F-HR', filing_date='2023-11-15', company='American Trust', cik=1905128, accession_no='0001905128-23-000004')
+    #filing.homepage.open()
+    print(str(filing))
+    thirteenF = filing.obj()
+    print(thirteenF)

@@ -113,7 +113,7 @@ class ThirteenF:
         from edgar._filings import Attachment
         if self.has_infotable():
             matching_files = self.filing.homepage.get_matching_files(
-                "Type=='INFORMATION TABLE' & Document.str.endswith('xml')")
+                "Type=='INFORMATION TABLE' & Document.str.contains('.xml', case=False)")
             return Attachment.from_dataframe_row(matching_files.iloc[0]).download()
 
     @property
