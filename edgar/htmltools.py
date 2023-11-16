@@ -2,15 +2,16 @@ import re
 from dataclasses import dataclass
 from functools import lru_cache
 from io import StringIO
-from typing import Any, Optional, List, Callable
+from typing import Any, Optional, Dict, List, Callable
 
 import pandas as pd
 import numpy as np
 from lxml import html as lxml_html
 from rich import box
 from rich.panel import Panel
-from rich.status import Status
 from rich.table import Table
+from functools import partial
+
 
 from edgar._rich import repr_rich
 
@@ -19,6 +20,7 @@ __all__ = [
     "get_tables",
     "html_to_text",
     'html_sections',
+    'decimal_chunk_fn',
     "ChunkedDocument",
     "extract_elements",
     "clean_dataframe",
@@ -205,99 +207,141 @@ def chunk(html, chunk_size: int = 1000, buffer=500):
                             max_characters=chunk_size + max(0, buffer))
     return chunks
 
+int_item_pattern = "(Item [0-9]{1,2}[A-Z]?\.)"
+decimal_item_pattern = "(Item [0-9]{1,2}\.[0-9]{2})"
 
-def chunks2df(chunks: List) -> pd.DataFrame:
-    """Convert the chunks to a dataframe"""
+def detect_int_items(text: pd.Series):
+    return text.str.extract(int_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
 
-    def detect_table_of_contents(text: str):
-        return text.lower().count('item') > 10
+def detect_decimal_items(text: pd.Series):
+    return text.str.extract(decimal_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
 
-    def normalize_item(item):
-        """Normalize item string to a comparable format."""
-        if not pd.isna(item):
-            return re.sub(r"[^0-9A-Za-z ]", "", item)  # Remove all but numbers and letters
-        return item
+def find_next_item(index, normalized_items):
+    """Find the next available item in the DataFrame starting from a given index."""
+    for i in range(index + 1, len(normalized_items)):
+        if normalized_items[i]:
+            return normalized_items[i]
+    return None
 
-    def extract_numeric_alpha_parts(item):
-        """Extract numeric and alphabetic parts from an item."""
-        numeric_part = int(re.search(r"[0-9]+", item).group()) if item else 0
-        alpha_part = re.search(r"[A-Z]$", item)
-        alpha_part = alpha_part.group() if alpha_part else ''
-        return numeric_part, alpha_part
-    def find_next_item(index, normalized_items):
-        """Find the next available item in the DataFrame starting from a given index."""
-        for i in range(index + 1, len(normalized_items)):
-            if normalized_items[i]:
-                return normalized_items[i]
-        return None
 
-    def is_valid_sequence(current_item, last_valid_item, next_available_item):
-        """
-        Determine if the current item is valid considering the last and next available items.
-        """
-        if not current_item or pd.isna(current_item) or not next_available_item or pd.isna(next_available_item):
-            return False
 
-        current_item_num, current_item_alpha = extract_numeric_alpha_parts(current_item)
-        last_item_num, last_item_alpha = extract_numeric_alpha_parts(last_valid_item)
-        next_item_num, next_item_alpha = extract_numeric_alpha_parts(next_available_item)
+def detect_table_of_contents(text: str):
+    return text.lower().count('item') > 10
 
-        # Check if the current item is greater than the last valid item and less than or equal to the next available item
-        if current_item_num == last_item_num:
-            return current_item_alpha > last_item_alpha
-        elif current_item_num == next_item_num:
-            return current_item_alpha < next_item_alpha or next_item_alpha == ''
+def normalize_item(item):
+    """Normalize item string to a comparable format."""
+    if not pd.isna(item):
+        return re.sub(r"[^0-9A-Za-z ]", "", item)  # Remove all but numbers and letters
+    return item
+
+def extract_numeric_alpha_parts(item):
+    """Extract numeric and alphabetic parts from an item."""
+    numeric_part = int(re.search(r"[0-9]+", item).group()) if item else 0
+    alpha_part = re.search(r"[A-Z]$", item)
+    alpha_part = alpha_part.group() if alpha_part else ''
+    return numeric_part, alpha_part
+
+def is_valid_sequence(current_item, last_valid_item, next_available_item):
+    """
+    Determine if the current item is valid considering the last and next available items.
+    """
+    if not current_item or pd.isna(current_item) or not next_available_item or pd.isna(next_available_item):
+        return False
+
+    current_item_num, current_item_alpha = extract_numeric_alpha_parts(current_item)
+    last_item_num, last_item_alpha = extract_numeric_alpha_parts(last_valid_item)
+    next_item_num, next_item_alpha = extract_numeric_alpha_parts(next_available_item)
+
+    # Check if the current item is greater than the last valid item and less than or equal to the next available item
+    if current_item_num == last_item_num:
+        return current_item_alpha > last_item_alpha
+    elif current_item_num == next_item_num:
+        return current_item_alpha < next_item_alpha or next_item_alpha == ''
+    else:
+        return last_item_num < current_item_num <= next_item_num
+
+def adjust_detected_items(chunk_df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+    """
+    Ensure that the items are in sequence and filter out any out of sequence items.
+    """
+    chunk_df['NormalizedItem'] = chunk_df['DetectedItem'].apply(normalize_item)
+    normalized_items = chunk_df['NormalizedItem'].replace([np.nan], [None]).tolist()
+
+    last_valid_item = ""
+    valid_items = pd.Series(index=chunk_df.index, dtype=object)  # Create a series to store valid items
+
+    # First find the index of the table of contents toc.
+    toc_index_rows = chunk_df[chunk_df.Toc.notnull() & chunk_df.Toc]
+    # If not found set to 0
+    toc_index = toc_index_rows.index[0] if len(toc_index_rows) > 0 else 0
+
+    # Iterate only through rows with non-null 'Item' starting at toc_index + 1
+
+    for index, row in chunk_df.iterrows():
+        if index < toc_index + 1:
+            continue
+        current_item = row['NormalizedItem']
+        next_available_item = find_next_item(index, normalized_items)
+
+        if is_valid_sequence(current_item, last_valid_item, next_available_item):
+            valid_items[index] = current_item
+            last_valid_item = current_item  # Update the last valid item
         else:
-            return last_item_num < current_item_num <= next_item_num
+            valid_items[index] = pd.NA  # Mark as invalid/out of sequence
 
-    def filter_out_of_sequence_items(chunk_df:pd.DataFrame):
-        """
-        Ensure that the items are in sequence and filter out any out of sequence items.
-        """
-        chunk_df['NormalizedItem'] = chunk_df['DetectedItem'].apply(normalize_item)
-        normalized_items = chunk_df['NormalizedItem'].replace([np.nan], [None]).tolist()
+    chunk_df['Item'] = valid_items
+    return chunk_df
 
-        last_valid_item = ""
-        valid_items = pd.Series(index=chunk_df.index, dtype=object)  # Create a series to store valid items
+def adjust_for_empty_items(chunk_df: pd.DataFrame,
+                           **kwargs) -> pd.DataFrame:
+    chunk_df['Item'] = chunk_df.DetectedItem
+    for index, row in chunk_df[chunk_df.DetectedItem.notnull()].iterrows():
+        item = row.Item
+        # Get item_structure from kwargs
+        item_structure = kwargs.get('item_structure')
+        structure = item_structure.get(item)
+        if not structure:
+            break
+        title = structure.get('Title')
+        text = row.Text
+        # Look for Item NUM Description Item in the text
+        pattern = rf"^({item}.? {title}\W+)"
+        match = re.search(pattern + "Item [1-9]", text, flags=re.IGNORECASE | re.MULTILINE)
+        if match:
+            text = re.sub(pattern, "", text, flags=re.IGNORECASE | re.MULTILINE)
 
-        # First find the index of the table of contents toc.
-        toc_index_rows = chunk_df[chunk_df.Toc.notnull() & chunk_df.Toc]
-        # If not found set to 0
-        toc_index = toc_index_rows.index[0] if len(toc_index_rows) > 0 else 0
+        #extract the item from text using decimal_item_pattern
+        match = re.search(decimal_item_pattern, text, flags=re.IGNORECASE | re.MULTILINE)
+        if match:
+            new_item = match.group(1)
+            chunk_df.loc[index, 'Item'] = new_item
 
-        # Iterate only through rows with non-null 'Item' starting at toc_index + 1
+    return chunk_df
 
-        for index, row in chunk_df.iterrows():
-            if index < toc_index+1:
-                continue
-            current_item = row['NormalizedItem']
-            next_available_item = find_next_item(index, normalized_items)
-
-            if is_valid_sequence(current_item, last_valid_item, next_available_item):
-                valid_items[index] = current_item
-                last_valid_item = current_item  # Update the last valid item
-            else:
-                valid_items[index] = pd.NA  # Mark as invalid/out of sequence
-
-        chunk_df['Item'] = valid_items
-        return chunk_df
-
-    chunk_df = pd.DataFrame([
-        {'Text': el.text.strip(),
-         'Table': 'Table' in el.__class__.__name__}
-        for el in chunks]
-    ).assign(Chars=lambda df: df.Text.apply(len),
-             Signature=lambda df: df.Text.str.match('^SIGNATURE', flags=re.IGNORECASE | re.MULTILINE),
-             TocLink=lambda df: df.Text.str.match('^Table of Contents$', flags=re.IGNORECASE | re.MULTILINE),
-             Toc=lambda df: df.Text.head(100).apply(detect_table_of_contents),
-             Empty=lambda df: df.Text.str.contains('^$', na=True),
-             DetectedItem=lambda df: df.Text.str.extract("(Item [0-9]{1,2}[A-Z]?\.)", expand=False,
-                                                 flags=re.IGNORECASE | re.MULTILINE)
-
-             )
+def chunks2df(chunks: List,
+              item_detector:Callable[[pd.Series], pd.Series]=detect_int_items,
+              item_adjuster:Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame]=adjust_detected_items,
+              item_structure:Dict[str, Any]=None,
+              ) -> pd.DataFrame:
+    """Convert the chunks to a dataframe
+        : chunks A list of unstructuredio chunked elements
+        : filter_out_of_sequence: Filter out of sequence items. This works for 10-K, 10-Q but not so much for 8-K
+    """
+    chunk_df = pd.DataFrame([{'Text': el.text.strip(), 'Table': 'Table' in el.__class__.__name__}
+                             for el in chunks]
+                            ).assign(Chars=lambda df: df.Text.apply(len),
+                                     Signature=lambda df: df.Text.str.match('^SIGNATURE',
+                                                                            flags=re.IGNORECASE | re.MULTILINE),
+                                     TocLink=lambda df: df.Text.str.match('^Table of Contents$',
+                                                                          flags=re.IGNORECASE | re.MULTILINE),
+                                     Toc=lambda df: df.Text.head(100).apply(detect_table_of_contents),
+                                     Empty=lambda df: df.Text.str.contains('^$', na=True),
+                                     DetectedItem=lambda df: item_detector(df.Text)
+                                     )
     # If the row is 'toc' then set the item and part to empty
     chunk_df.loc[chunk_df.Toc.notnull() & chunk_df.Toc, 'DetectedItem'] = ""
-    chunk_df = filter_out_of_sequence_items(chunk_df)
+    if item_adjuster:
+        chunk_df = item_adjuster(chunk_df, **{'item_structure':item_structure, 'item_detector':item_detector})
 
     # Foward fill item and parts
     # Handle deprecation warning in fillna(method='ffill')
@@ -321,6 +365,10 @@ def chunks2df(chunks: List) -> pd.DataFrame:
     chunk_df = chunk_df[['Text', 'Table', 'Chars', 'Signature', 'TocLink', 'Toc', 'Empty', 'Item']]
     return chunk_df
 
+# This function is used by 8-K and other filings that have the item form 1.02 for example
+decimal_chunk_fn = partial(chunks2df,
+                           item_detector=detect_decimal_items,
+                           item_adjuster=adjust_for_empty_items)
 
 def render_table(table_chunk):
     table_html = str(table_chunk.metadata.text_as_html)
@@ -354,10 +402,11 @@ class ChunkedDocument:
         self.chunk_size = chunk_size
         self.chunk_buffer = chunk_buffer
         self._chunked_data = chunk_fn(self.chunks)
+        self.chunk_fn = chunk_fn
 
     @lru_cache(maxsize=4)
     def as_dataframe(self):
-        return chunks2df(self.chunks)
+        return self.chunk_fn(self.chunks)
 
     def show_items(self, df_query: str, *columns):
         result = self._chunked_data.query(df_query)

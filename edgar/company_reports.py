@@ -1,14 +1,13 @@
-from functools import lru_cache
-from typing import Dict, List
-import re
-import pandas as pd
+from functools import lru_cache, partial
+from typing import Dict
+
 from rich import print
 from rich.console import Group, Text
 from rich.panel import Panel
 
 from edgar._rich import repr_rich
 from edgar.financials import Financials
-from edgar.htmltools import ChunkedDocument
+from edgar.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
 
 __all__ = [
     'TenK',
@@ -193,6 +192,99 @@ class TwentyF(CompanyReport):
 
     def __str__(self):
         return f"""TwentyF('{self.company}')"""
+
+
+class EightK(CompanyReport):
+    structure = {
+        "Item 1.01": {
+            "Title": "Entry into a Material Definitive Agreement",
+            "Description": "Reports any material agreement not made in the ordinary course of business."
+        },
+        "Item 1.02": {
+            "Title": "Termination of a Material Definitive Agreement",
+            "Description": "Reports the termination of any material agreement."
+        },
+        "Item 1.03": {
+            "Title": "Bankruptcy or Receivership",
+            "Description": "Reports any bankruptcy or receivership."
+        },
+        "Item 2.01": {"Title": "Completion of Acquisition or Disposition of Assets",
+                      "Description": "Reports the completion of an acquisition or disposition of a significant amount of assets."},
+        "Item 2.02": {"Title": "Results of Operations and Financial Condition",
+                      "Description": "Reports on the company's results of operations and financial condition."},
+        "Item 2.03": {
+            "Title": "Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+            "Description": "Reports the creation of a direct financial obligation."},
+        "Item 2.04": {
+            "Title": "Triggering Events That Accelerate or Increase a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement",
+            "Description": "Reports any triggering events."},
+        "Item 2.05": {"Title": "Costs Associated with Exit or Disposal Activities",
+                      "Description": "Reports costs related to exit or disposal activities."},
+        "Item 2.06": {"Title": "Material Impairments", "Description": "Reports on any material impairments."},
+        "Item 3.01": {
+            "Title": "Notice of Delisting or Failure to Satisfy a Continued Listing Rule or Standard; Transfer of Listing",
+            "Description": "Reports on delisting or failure to satisfy listing rules."},
+        "Item 3.02": {"Title": "Unregistered Sales of Equity Securities",
+                      "Description": "Reports on the sale of unregistered equity securities."},
+        "Item 3.03": {"Title": "Material Modification to Rights of Security Holders",
+                      "Description": "Reports on any modifications to the rights of security holders."},
+        "Item 4.01": {"Title": "Changes in Registrant's Certifying Accountant",
+                      "Description": "Reports any change in the company's accountant."},
+        "Item 4.02": {
+            "Title": "Non-Reliance on Previously Issued Financial Statements or a Related Audit Report or Completed Interim Review",
+            "Description": "Reports on non-reliance on previously issued financial statements."},
+        "Item 5.01": {"Title": "Changes in Control of Registrant",
+                      "Description": "Reports changes in control of the company."},
+        "Item 5.02": {
+            "Title": "Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers",
+            "Description": "Compensatory Arrangements of Certain Officers: Reports any changes in the company's directors or certain officers."},
+        "Item 5.03": {"Title": "Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year",
+                      "Description": "Reports on amendments to articles of incorporation or bylaws."},
+        "Item 5.04": {
+            "Title": "Temporary Suspension of Trading Under Registrant’s Employee Benefit Plans",
+            "Description": "Reports on the temporary suspension of trading under the company’s employee benefit plans."},
+        "Item 5.05": {
+            "Title": "Amendment to the Registrant’s Code of Ethics, or Waiver of a Provision of the Code of Ethics",
+            "Description": "Reports on amendments or waivers to the code of ethics."},
+        "Item 5.06": {"Title": "Change in Shell Company Status",
+                      "Description": "Reports a change in the company's shell company status."},
+        "Item 5.07": {"Title": "Submission of Matters to a Vote of Security Holders",
+                      "Description": "Reports on matters submitted to a vote of security holders."},
+        "Item 5.08": {"Title": "Shareholder Director Nominations",
+                      "Description": "Reports on shareholder director nominations."},
+        "Item 6.01": {"Title": "ABS Informational and Computational Material",
+                      "Description": "Reports ABS informational and computational material."},
+        "Item 6.02": {"Title": "Change of Servicer or Trustee",
+                      "Description": "Reports on the change of servicer or trustee."},
+        "Item 6.03": {"Title": "Change in Credit Enhancement or Other External Support",
+                      "Description": "Reports on changes in credit enhancement or external support."},
+        "Item 6.04": {"Title": "Failure to Make a Required Distribution",
+                      "Description": "Reports on the failure to make a required distribution."},
+        "Item 6.05": {"Title": "Securities Act Updating Disclosure",
+                      "Description": "Reports on Securities Act updating disclosure."},
+        "Item 9.01": {
+            "Title": "Financial Statements and Exhibits",
+            "Description": "Reports financial statements and other exhibits related to the events reported in the 8-K."
+        }
+    }
+
+    def __init__(self, filing):
+        assert filing.form in ['8-K', '8-K/A'], f"This form should be an 8-K but was {filing.form}"
+        super().__init__(filing)
+
+    @property
+    @lru_cache(maxsize=1)
+    def chunked_document(self):
+        decimal_chunk_fn = partial(chunks2df,
+                                   item_detector=detect_decimal_items,
+                                   item_adjuster=adjust_for_empty_items,
+                                   item_structure=self.structure)
+        return ChunkedDocument(self._filing.html(),
+                               chunk_size=400,
+                               chunk_fn=decimal_chunk_fn)
+
+    def __str__(self):
+        return f"""EightK('{self.company}')"""
 
 
 def is_valid_item_for_filing(filing_structure: Dict, item: str, part: str = None):

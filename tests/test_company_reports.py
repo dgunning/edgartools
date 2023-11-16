@@ -3,7 +3,7 @@ from rich import print
 
 from edgar import Filing
 from edgar import find
-from edgar.company_reports import TenK, TenQ, TwentyF, is_valid_item_for_filing
+from edgar.company_reports import TenK, TenQ, TwentyF, EightK, is_valid_item_for_filing
 from edgar.htmltools import ChunkedDocument
 
 pd.options.display.max_colwidth = 40
@@ -88,3 +88,20 @@ def test_item_for_10K_filing():
     assert 'FINANCIAL STATEMENTS' in item_15
     assert tenk['ITEM 15'] == item_15
     print(item_15)
+
+def test_items__for_8K_filing():
+    filing = Filing(form='8-K', filing_date='2023-11-14',
+                    company='ALPINE 4 HOLDINGS, INC.',
+                    cik=1606698,
+                    accession_no='0001628280-23-039016')
+    eightk = EightK(filing)
+    doc = eightk.doc
+    items = doc.list_items()
+    assert items == ['Item 2.03', 'Item 9.01']
+    print()
+    print(doc)
+    print(doc.show_items("Text.notnull()", "Item"))
+
+    item_101 = doc['Item 9.01']
+    print(item_101)
+
