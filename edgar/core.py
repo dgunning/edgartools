@@ -318,7 +318,7 @@ def decode_content(content: bytes):
         return content.decode('latin-1')
 
 
-text_extensions = [".txt", ".htm", ".html", ".xsd", ".xml", ".json", ".idx"]
+text_extensions = [".txt", ".htm", ".html", ".xsd", ".xml", "XML",  ".json", ".idx"]
 
 
 def download_file(url: str,
