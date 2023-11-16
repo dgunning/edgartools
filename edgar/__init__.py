@@ -104,8 +104,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :param sec_filing: The filing
     :return:
     """
-    from edgar.forms import EightK
-    from edgar.company_reports import TenK, TenQ, TwentyF
+    from edgar.company_reports import TenK, TenQ, TwentyF, EightK
     from edgar.effect import Effect
     from edgar.offerings import Offering
     from edgar.ownership import Ownership, Form3, Form4, Form5

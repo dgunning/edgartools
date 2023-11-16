@@ -1,17 +1,16 @@
 import re
 from dataclasses import dataclass
 from functools import lru_cache
+from functools import partial
 from io import StringIO
 from typing import Any, Optional, Dict, List, Callable
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from lxml import html as lxml_html
 from rich import box
 from rich.panel import Panel
 from rich.table import Table
-from functools import partial
-
 
 from edgar._rich import repr_rich
 
@@ -207,14 +206,18 @@ def chunk(html, chunk_size: int = 1000, buffer=500):
                             max_characters=chunk_size + max(0, buffer))
     return chunks
 
+
 int_item_pattern = "(Item [0-9]{1,2}[A-Z]?\.)"
 decimal_item_pattern = "(Item [0-9]{1,2}\.[0-9]{2})"
+
 
 def detect_int_items(text: pd.Series):
     return text.str.extract(int_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
 
+
 def detect_decimal_items(text: pd.Series):
     return text.str.extract(decimal_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
+
 
 def find_next_item(index, normalized_items):
     """Find the next available item in the DataFrame starting from a given index."""
@@ -224,9 +227,9 @@ def find_next_item(index, normalized_items):
     return None
 
 
-
 def detect_table_of_contents(text: str):
     return text.lower().count('item') > 10
+
 
 def normalize_item(item):
     """Normalize item string to a comparable format."""
@@ -234,12 +237,14 @@ def normalize_item(item):
         return re.sub(r"[^0-9A-Za-z ]", "", item)  # Remove all but numbers and letters
     return item
 
+
 def extract_numeric_alpha_parts(item):
     """Extract numeric and alphabetic parts from an item."""
     numeric_part = int(re.search(r"[0-9]+", item).group()) if item else 0
     alpha_part = re.search(r"[A-Z]$", item)
     alpha_part = alpha_part.group() if alpha_part else ''
     return numeric_part, alpha_part
+
 
 def is_valid_sequence(current_item, last_valid_item, next_available_item):
     """
@@ -259,6 +264,7 @@ def is_valid_sequence(current_item, last_valid_item, next_available_item):
         return current_item_alpha < next_item_alpha or next_item_alpha == ''
     else:
         return last_item_num < current_item_num <= next_item_num
+
 
 def adjust_detected_items(chunk_df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     """
@@ -292,6 +298,7 @@ def adjust_detected_items(chunk_df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     chunk_df['Item'] = valid_items
     return chunk_df
 
+
 def adjust_for_empty_items(chunk_df: pd.DataFrame,
                            **kwargs) -> pd.DataFrame:
     chunk_df['Item'] = chunk_df.DetectedItem
@@ -310,7 +317,7 @@ def adjust_for_empty_items(chunk_df: pd.DataFrame,
         if match:
             text = re.sub(pattern, "", text, flags=re.IGNORECASE | re.MULTILINE)
 
-        #extract the item from text using decimal_item_pattern
+        # extract the item from text using decimal_item_pattern
         match = re.search(decimal_item_pattern, text, flags=re.IGNORECASE | re.MULTILINE)
         if match:
             new_item = match.group(1)
@@ -318,10 +325,11 @@ def adjust_for_empty_items(chunk_df: pd.DataFrame,
 
     return chunk_df
 
+
 def chunks2df(chunks: List,
-              item_detector:Callable[[pd.Series], pd.Series]=detect_int_items,
-              item_adjuster:Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame]=adjust_detected_items,
-              item_structure:Dict[str, Any]=None,
+              item_detector: Callable[[pd.Series], pd.Series] = detect_int_items,
+              item_adjuster: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame] = adjust_detected_items,
+              item_structure: Dict[str, Any] = None,
               ) -> pd.DataFrame:
     """Convert the chunks to a dataframe
         : chunks A list of unstructuredio chunked elements
@@ -341,7 +349,7 @@ def chunks2df(chunks: List,
     # If the row is 'toc' then set the item and part to empty
     chunk_df.loc[chunk_df.Toc.notnull() & chunk_df.Toc, 'DetectedItem'] = ""
     if item_adjuster:
-        chunk_df = item_adjuster(chunk_df, **{'item_structure':item_structure, 'item_detector':item_detector})
+        chunk_df = item_adjuster(chunk_df, **{'item_structure': item_structure, 'item_detector': item_detector})
 
     # Foward fill item and parts
     # Handle deprecation warning in fillna(method='ffill')
@@ -365,10 +373,12 @@ def chunks2df(chunks: List,
     chunk_df = chunk_df[['Text', 'Table', 'Chars', 'Signature', 'TocLink', 'Toc', 'Empty', 'Item']]
     return chunk_df
 
+
 # This function is used by 8-K and other filings that have the item form 1.02 for example
 decimal_chunk_fn = partial(chunks2df,
                            item_detector=detect_decimal_items,
                            item_adjuster=adjust_for_empty_items)
+
 
 def render_table(table_chunk):
     table_html = str(table_chunk.metadata.text_as_html)

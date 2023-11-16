@@ -4,16 +4,13 @@ from functools import lru_cache
 
 import pandas as pd
 from bs4 import BeautifulSoup
-from rich import print
 from rich.console import Group, Text
 from rich.markdown import Markdown
 from rich.panel import Panel
 
+from edgar._markdown import markdown_to_rich
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import download_text, http_client, sec_dot_gov
-from edgar.financials import Financials
-from edgar.htmltools import ChunkedDocument
-from edgar._markdown import markdown_to_rich
 
 __all__ = [
     'SecForms',

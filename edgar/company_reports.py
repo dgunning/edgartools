@@ -82,36 +82,104 @@ class CompanyReport:
 
 
 class TenK(CompanyReport):
-    structure = {
-        "PART I": {
-            "ITEM 1": "Business: Overview of the company's business operations, products, services, and market environment.",
-            "ITEM 1A": "Risk Factors: Discussion of risks and uncertainties that could materially affect the company's financial condition or results of operations.",
-            "ITEM 1B": "Unresolved Staff Comments: Any comments from the SEC staff on the company’s previous filings that remain unresolved.",
-            "ITEM 2": "Properties: Information about the physical properties owned or leased by the company.",
-            "ITEM 3": "Legal Proceedings: Details of significant ongoing legal proceedings.",
-            "ITEM 4": "Mine Safety Disclosures: Relevant for mining companies, disclosures about mine safety and regulatory compliance."
+    structure = structure = {
+    "Part I": {
+        "Item 1": {
+            "Title": "Business",
+            "Description": "Overview of the company's business operations, products, services, and market environment."
         },
-        "PART II": {
-            "ITEM 5": "Market for Registrant’s Common Equity: Information on the company’s equity, including stock performance and shareholder matters.",
-            "ITEM 6": "Selected Financial Data: Financial data summary for the last five fiscal years.",
-            "ITEM 7": "Management’s Discussion and Analysis (MD&A): Management’s perspective on the financial condition, changes in financial condition, and results of operations.",
-            "ITEM 7A": "Quantitative and Qualitative Disclosures About Market Risk: Information on the company's exposure to market risk.",
-            "ITEM 8": "Financial Statements: Complete audited financial statements.",
-            "ITEM 9": "Controls and Procedures: Evaluation of the effectiveness of the company’s disclosure controls and procedures.",
-            "ITEM 9A": "Controls and Procedures: Evaluation of internal controls over financial reporting.",
-            "ITEM 9B": "Other Information: Any other relevant information not covered in other sections."
+        "Item 1A": {
+            "Title": "Risk Factors",
+            "Description": "Discussion of risks and uncertainties that could materially affect the company's " +
+                           "financial condition or results of operations."
         },
-        "PART III": {
-            "ITEM 10": "Directors, Executive Officers, and Corporate Governance: Information about the company's directors, executive officers, and governance policies.",
-            "ITEM 11": "Executive Compensation: Details of compensation paid to key executives.",
-            "ITEM 12": "Security Ownership of Certain Beneficial Owners and Management: Information about stock ownership.",
-            "ITEM 13": "Certain Relationships and Related Transactions, and Director Independence: Information on transactions between the company and its directors, officers, and significant shareholders.",
-            "ITEM 14": "Principal Accounting Fees and Services: Fees paid to the principal accountant and services rendered."
+        "Item 1B": {
+            "Title": "Unresolved Staff Comments",
+            "Description": "Any comments from the SEC staff on the company’s previous filings that remain unresolved."
         },
-        "PART IV": {
-            "ITEM 15": "Exhibits, Financial Statement Schedules: Legal documents and financial schedules that support the financial statements and disclosures."
+        "Item 2": {
+            "Title": "Properties",
+            "Description": "Information about the physical properties owned or leased by the company."
+        },
+        "Item 3": {
+            "Title": "Legal Proceedings",
+            "Description": "Details of significant ongoing legal proceedings."
+        },
+        "Item 4": {
+            "Title": "Mine Safety Disclosures",
+            "Description": "Relevant for mining companies, disclosures about mine safety and regulatory compliance."
+        }
+    },
+    "Part II": {
+        "Item 5": {
+            "Title": "Market for Registrant’s Common Equity",
+            "Description": "Information on the company’s equity, including stock performance and shareholder matters."
+        },
+        "Item 6": {
+            "Title": "Selected Financial Data",
+            "Description": "Financial data summary for the last five fiscal years."
+        },
+        "Item 7": {
+            "Title": "Management’s Discussion and Analysis (MD&A)",
+            "Description": "Management’s perspective on the financial condition, changes in financial condition, " +
+                           "and results of operations."
+        },
+        "Item 7A": {
+            "Title": "Quantitative and Qualitative Disclosures About Market Risk",
+            "Description": "Information on the company's exposure to market risk, such as interest rate risk, " +
+                           "foreign currency exchange risk, commodity price risk, etc."
+        },
+        "Item 8": {
+            "Title": "Financial Statements",
+            "Description": "Complete audited financial statements, including balance sheet, income statement, " +
+                           "cash flow statement, and notes to the financial statements."
+        },
+        "Item 9": {
+            "Title": "Controls and Procedures",
+            "Description": "Evaluation of the effectiveness of the design and operation of the company’s disclosure" +
+                           "controls and procedures."
+        },
+        "Item 9A": {
+            "Title": "Controls and Procedures",
+            "Description": "Evaluation of internal controls over financial reporting."
+        },
+        "Item 9B": {
+            "Title": "Other Information",
+            "Description": "Any other relevant information not covered in other sections."
+        }
+    },
+    "Part III": {
+        "Item 10": {
+            "Title": "Directors, Executive Officers, and Corporate Governance",
+            "Description": "Information about the company's directors, executive officers, and governance policies."
+        },
+        "Item 11": {
+            "Title": "Executive Compensation",
+            "Description": "Details of compensation paid to key executives."
+        },
+        "Item 12": {
+            "Title": "Security Ownership of Certain Beneficial Owners and Management",
+            "Description": "Information about stock ownership of major shareholders, directors, and management."
+        },
+        "Item 13": {
+            "Title": "Certain Relationships and Related Transactions, and Director Independence",
+            "Description": "Information on transactions between the company and its directors, officers, " +
+                           "and significant shareholders."
+        },
+        "Item 14": {
+            "Title": "Principal Accounting Fees and Services",
+            "Description": "Fees paid to the principal accountant and services rendered."
+        }
+    },
+    "Part IV": {
+        "Item 15": {
+            "Title": "Exhibits, Financial Statement Schedules",
+            "Description": "Legal documents and financial schedules that support the financial statements " +
+                           "and disclosures."
         }
     }
+}
+
 
     def __init__(self, filing):
         assert filing.form in ['10-K', '10-K/A'], f"This form should be a 10-K but was {filing.form}"
@@ -123,22 +191,56 @@ class TenK(CompanyReport):
 
 class TenQ(CompanyReport):
     structure = {
-        "PART I": {  # Financial Information
-            "ITEM 1": "Financial Statements: Unaudited financial statements including balance sheets, income statements, and cash flow statements.",
-            "ITEM 2": "Management’s Discussion and Analysis of Financial Condition and Results of Operations (MD&A): Management’s perspective on the financial condition and results of operations.",
-            "ITEM 3": "Quantitative and Qualitative Disclosures About Market Risk: Information on the company's exposure to market risk.",
-            "ITEM 4": "Controls and Procedures: Evaluation of the effectiveness of disclosure controls and procedures."
+    "Part I - Financial Information": {
+        "Item 1": {
+            "Title": "Financial Statements",
+            "Description": "Unaudited financial statements including balance sheets, income statements, " +
+                           "and cash flow statements."
         },
-        "PART II": {  # Other Information
-            "ITEM 1": "Legal Proceedings: Brief description of any significant pending legal proceedings.",
-            "ITEM 1A": "Risk Factors: An update on risk factors that may affect future results.",
-            "ITEM 2": "Unregistered Sales of Equity Securities and Use of Proceeds: Details of unregistered sales of equity securities.",
-            "ITEM 3": "Defaults Upon Senior Securities: Information regarding any defaults on senior securities.",
-            "ITEM 4": "Mine Safety Disclosures: Required for companies with mining operations.",
-            "ITEM 5": "Other Information: Any other information that should be disclosed to investors.",
-            "ITEM 6": "Exhibits: List of exhibits required by ITEM 601 of Regulation S-K."
+        "Item 2": {
+            "Title": "Management’s Discussion and Analysis of Financial Condition and Results of Operations (MD&A)",
+            "Description": "Management’s perspective on the financial condition and results of operations."
+        },
+        "Item 3": {
+            "Title": "Quantitative and Qualitative Disclosures About Market Risk",
+            "Description": "Information on the company's exposure to market risk."
+        },
+        "Item 4": {
+            "Title": "Controls and Procedures",
+            "Description": "Evaluation of the effectiveness of disclosure controls and procedures."
+        }
+    },
+    "Part II - Other Information": {
+        "Item 1": {
+            "Title": "Legal Proceedings",
+            "Description": "Brief description of any significant pending legal proceedings."
+        },
+        "Item 1A": {
+            "Title": "Risk Factors",
+            "Description": "An update on risk factors that may affect future results."
+        },
+        "Item 2": {
+            "Title": "Unregistered Sales of Equity Securities and Use of Proceeds",
+            "Description": "Details of unregistered sales of equity securities."
+        },
+        "Item 3": {
+            "Title": "Defaults Upon Senior Securities",
+            "Description": "Information regarding any defaults on senior securities."
+        },
+        "Item 4": {
+            "Title": "Mine Safety Disclosures",
+            "Description": "Required for companies with mining operations."
+        },
+        "Item 5": {
+            "Title": "Other Information",
+            "Description": "Any other information that should be disclosed to investors."
+        },
+        "Item 6": {
+            "Title": "Exhibits",
+            "Description": "List of exhibits required by Item 601 of Regulation S-K."
         }
     }
+}
 
     def __init__(self, filing):
         assert filing.form in ['10-Q', '10-Q/A'], f"This form should be a 10-Q but was {filing.form}"
@@ -150,39 +252,100 @@ class TenQ(CompanyReport):
 
 class TwentyF(CompanyReport):
     structure = {
-        "PART I": {
-            "ITEM 1": "Identity of Directors, Senior Management, and Advisers: Information about the company's directors, senior management, and advisers.",
-            "ITEM 2": "Offer Statistics and Expected Timetable: Details on recent and expected offers of securities.",
-            "ITEM 3": "Key Information: Financial and other key information about the company, including risk factors and ratios.",
-            "ITEM 4": "Information on the Company: Detailed information about the company's operations and properties.",
-            "ITEM 4A": "Unresolved Staff Comments: Any comments from the SEC staff on the company’s previous filings that remain unresolved."
+        "Part I": {
+            "Item 1": {
+                "Title": "Identity of Directors, Senior Management, and Advisers",
+                "Description": "Information about the company's directors, senior management, and advisers."
+            },
+            "Item 2": {
+                "Title": "Offer Statistics and Expected Timetable",
+                "Description": "Details on recent and expected offers of securities."
+            },
+            "Item 3": {
+                "Title": "Key Information",
+                "Description": "Financial and other key information about the company, including risk factors " +
+                               "and ratios."
+            },
+            "Item 4": {
+                "Title": "Information on the Company",
+                "Description": "Detailed information about the company's operations and properties."
+            },
+            "Item 4A": {
+                "Title": "Unresolved Staff Comments",
+                "Description": "Any comments from the SEC staff on the company’s previous filings that " +
+                               "remain unresolved."
+            }
         },
-        "PART II": {
-            "ITEM 5": "Operating and Financial Review and Prospects: Management’s discussion and analysis of financial condition and results of operations.",
-            "ITEM 6": "Directors, Senior Management, and Employees: Information about the company's directors, senior management, and employees.",
-            "ITEM 7": "Major Shareholders and Related PARTy Transactions: Information about major shareholders and transactions with related parties.",
-            "ITEM 8": "Financial Information: Audited financial statements and supplementary financial information.",
-            "ITEM 9": "The Offer and Listing: Details on the company's securities and markets where they are traded."
+        "Part II": {
+            "Item 5": {
+                "Title": "Operating and Financial Review and Prospects",
+                "Description": "Management’s discussion and analysis of financial condition and results of operations."
+            },
+            "Item 6": {
+                "Title": "Directors, Senior Management, and Employees",
+                "Description": "Information about the company's directors, senior management, and employees."
+            },
+            "Item 7": {
+                "Title": "Major Shareholders and Related Party Transactions",
+                "Description": "Information about major shareholders and transactions with related parties."
+            },
+            "Item 8": {
+                "Title": "Financial Information",
+                "Description": "Audited financial statements and supplementary financial information."
+            },
+            "Item 9": {
+                "Title": "The Offer and Listing",
+                "Description": "Details on the company's securities and markets where they are traded."
+            }
         },
-        "PART III": {
-            "ITEM 10": "Additional Information: Additional information such as share capital, memoranda, and articles of association.",
-            "ITEM 11": "Quantitative and Qualitative Disclosures About Market Risk: Information on the company's exposure to market risk.",
-            "ITEM 12": "Description of Securities Other Than Equity Securities: Detailed information on securities other than equity."
+        "Part III": {
+            "Item 10": {
+                "Title": "Additional Information",
+                "Description": "Additional information such as share capital, memoranda, and articles of association."
+            },
+            "Item 11": {
+                "Title": "Quantitative and Qualitative Disclosures About Market Risk",
+                "Description": "Information on the company's exposure to market risk."
+            },
+            "Item 12": {
+                "Title": "Description of Securities Other Than Equity Securities",
+                "Description": "Detailed information on securities other than equity."
+            }
         },
-        "PART IV": {
-            "ITEM 13": "Defaults, Dividend Arrearages, and Delinquencies: Information about defaults on payments and arrearages.",
-            "ITEM 14": "Material Modifications to the Rights of Security Holders and Use of Proceeds: Details on any modifications to the rights of security holders.",
-            "ITEM 15": "Controls and Procedures: Assessment of the effectiveness of disclosure controls and internal controls over financial reporting.",
-            "ITEM 16": ["16A. Audit Committee Financial Expert", "16B. Code of Ethics",
-                        "16C. Principal Accountant Fees and Services",
-                        "16D. Exemptions from the Listing Standards for Audit Committees",
-                        "16E. Purchases of Equity Securities by the Issuer and Affiliated Purchasers",
-                        "16F. Change in Registrant’s Certifying Accountant", "16G. Corporate Governance"]
+        "Part IV": {
+            "Item 13": {
+                "Title": "Defaults, Dividend Arrearages, and Delinquencies",
+                "Description": "Information about defaults on payments and arrearages."
+            },
+            "Item 14": {
+                "Title": "Material Modifications to the Rights of Security Holders and Use of Proceeds",
+                "Description": "Details on any modifications to the rights of security holders."
+            },
+            "Item 15": {
+                "Title": "Controls and Procedures",
+                "Description": "Assessment of the effectiveness of disclosure controls and internal controls " +
+                               "over financial reporting."
+            },
+            "Item 16": {
+                "Title": "Various Disclosures",
+                "Description": "Includes disclosures related to audit committee financial experts, code of ethics, " +
+                               "principal accountant fees and services, and other corporate governance matters."
+            }
         },
-        "PART V": {
-            "ITEM 17": "Financial Statements: Financial statements prepared in accordance with or reconciled to U.S. GAAP or IFRS.",
-            "ITEM 18": "Financial Statements: If different from ITEM 17, financial statements prepared in accordance with home country standards.",
-            "ITEM 19": "Exhibits: Legal and financial documents supporting the information in the report."
+        "Part V": {
+            "Item 17": {
+                "Title": "Financial Statements",
+                "Description": "Financial statements prepared in accordance with or reconciled to U.S. GAAP or IFRS."
+            },
+            "Item 18": {
+                "Title": "Financial Statements",
+                "Description": "If different from Item 17, financial statements prepared in accordance with " +
+                               "home country standards."
+            },
+            "Item 19": {
+                "Title": "Exhibits",
+                "Description": "Legal and financial documents supporting the information in the report."
+            }
         }
     }
 
@@ -209,20 +372,24 @@ class EightK(CompanyReport):
             "Description": "Reports any bankruptcy or receivership."
         },
         "Item 2.01": {"Title": "Completion of Acquisition or Disposition of Assets",
-                      "Description": "Reports the completion of an acquisition or disposition of a significant amount of assets."},
+                      "Description": "Reports the completion of an acquisition or disposition of a significant " +
+                                     "amount of assets."},
         "Item 2.02": {"Title": "Results of Operations and Financial Condition",
                       "Description": "Reports on the company's results of operations and financial condition."},
         "Item 2.03": {
-            "Title": "Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+            "Title": "Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet " +
+                     "Arrangement of a Registrant",
             "Description": "Reports the creation of a direct financial obligation."},
         "Item 2.04": {
-            "Title": "Triggering Events That Accelerate or Increase a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement",
+            "Title": "Triggering Events That Accelerate or Increase a Direct Financial Obligation or an Obligation "
+                     + "under an Off-Balance Sheet Arrangement",
             "Description": "Reports any triggering events."},
         "Item 2.05": {"Title": "Costs Associated with Exit or Disposal Activities",
                       "Description": "Reports costs related to exit or disposal activities."},
         "Item 2.06": {"Title": "Material Impairments", "Description": "Reports on any material impairments."},
         "Item 3.01": {
-            "Title": "Notice of Delisting or Failure to Satisfy a Continued Listing Rule or Standard; Transfer of Listing",
+            "Title": "Notice of Delisting or Failure to Satisfy a Continued Listing Rule or Standard; " +
+                     "Transfer of Listing",
             "Description": "Reports on delisting or failure to satisfy listing rules."},
         "Item 3.02": {"Title": "Unregistered Sales of Equity Securities",
                       "Description": "Reports on the sale of unregistered equity securities."},
@@ -231,18 +398,22 @@ class EightK(CompanyReport):
         "Item 4.01": {"Title": "Changes in Registrant's Certifying Accountant",
                       "Description": "Reports any change in the company's accountant."},
         "Item 4.02": {
-            "Title": "Non-Reliance on Previously Issued Financial Statements or a Related Audit Report or Completed Interim Review",
+            "Title": "Non-Reliance on Previously Issued Financial Statements or a Related Audit Report or " +
+                     "Completed Interim Review",
             "Description": "Reports on non-reliance on previously issued financial statements."},
         "Item 5.01": {"Title": "Changes in Control of Registrant",
                       "Description": "Reports changes in control of the company."},
         "Item 5.02": {
-            "Title": "Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers",
-            "Description": "Compensatory Arrangements of Certain Officers: Reports any changes in the company's directors or certain officers."},
+            "Title": "Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain " +
+                     "Officers",
+            "Description": "Compensatory Arrangements of Certain Officers: Reports any changes in the company's " +
+                           "directors or certain officers."},
         "Item 5.03": {"Title": "Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year",
                       "Description": "Reports on amendments to articles of incorporation or bylaws."},
         "Item 5.04": {
             "Title": "Temporary Suspension of Trading Under Registrant’s Employee Benefit Plans",
-            "Description": "Reports on the temporary suspension of trading under the company’s employee benefit plans."},
+            "Description": "Reports on the temporary suspension of trading under the company’s employee benefit plans."
+        },
         "Item 5.05": {
             "Title": "Amendment to the Registrant’s Code of Ethics, or Waiver of a Provision of the Code of Ethics",
             "Description": "Reports on amendments or waivers to the code of ethics."},
