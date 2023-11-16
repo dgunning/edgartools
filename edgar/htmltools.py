@@ -17,12 +17,15 @@ from edgar._rich import repr_rich
 __all__ = [
     "Element",
     "get_tables",
+    'chunks2df',
     "html_to_text",
     'html_sections',
     'decimal_chunk_fn',
     "ChunkedDocument",
     "extract_elements",
     "clean_dataframe",
+    'detect_decimal_items',
+    'adjust_for_empty_items',
     "dataframe_to_text",
     "get_text_elements",
     "get_table_elements",
@@ -211,6 +214,19 @@ int_item_pattern = "(Item [0-9]{1,2}[A-Z]?\.)"
 decimal_item_pattern = "(Item [0-9]{1,2}\.[0-9]{2})"
 
 
+def detect_table_of_contents(text: str):
+    """Find the table of contents in the text"""
+    return text.lower().count('item') > 10
+
+def detect_signature(text: str) -> bool:
+    """Find the signature block in the text"""
+    matched = re.match(pattern='^SIGNATURE', string=text, flags=re.IGNORECASE | re.MULTILINE) is not None
+    # If no results are true in the series try anothr pattern
+    if not matched:
+        matched = 'to be signed on its behalf by the undersigned' in text
+    return matched
+
+
 def detect_int_items(text: pd.Series):
     return text.str.extract(int_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
 
@@ -225,10 +241,6 @@ def find_next_item(index, normalized_items):
         if normalized_items[i]:
             return normalized_items[i]
     return None
-
-
-def detect_table_of_contents(text: str):
-    return text.lower().count('item') > 10
 
 
 def normalize_item(item):
@@ -329,7 +341,7 @@ def adjust_for_empty_items(chunk_df: pd.DataFrame,
 def chunks2df(chunks: List,
               item_detector: Callable[[pd.Series], pd.Series] = detect_int_items,
               item_adjuster: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame] = adjust_detected_items,
-              item_structure = None,
+              item_structure=None,
               ) -> pd.DataFrame:
     """Convert the chunks to a dataframe
         : chunks A list of unstructuredio chunked elements
@@ -341,8 +353,7 @@ def chunks2df(chunks: List,
     chunk_df = pd.DataFrame([{'Text': el.text.strip(), 'Table': 'Table' in el.__class__.__name__}
                              for el in chunks]
                             ).assign(Chars=lambda df: df.Text.apply(len),
-                                     Signature=lambda df: df.Text.str.match('^SIGNATURE',
-                                                                            flags=re.IGNORECASE | re.MULTILINE),
+                                     Signature=lambda df: df.Text.apply(detect_signature).fillna(""),
                                      TocLink=lambda df: df.Text.str.match('^Table of Contents$',
                                                                           flags=re.IGNORECASE | re.MULTILINE),
                                      Toc=lambda df: df.Text.head(100).apply(detect_table_of_contents),

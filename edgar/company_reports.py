@@ -13,6 +13,7 @@ __all__ = [
     'TenK',
     'TenQ',
     'TwentyF',
+    'EightK',
     'is_valid_item_for_filing'
 ]
 
