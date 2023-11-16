@@ -306,7 +306,7 @@ def adjust_for_empty_items(chunk_df: pd.DataFrame,
         item = row.Item
         # Get item_structure from kwargs
         item_structure = kwargs.get('item_structure')
-        structure = item_structure.get(item)
+        structure = item_structure.get_item(item)
         if not structure:
             break
         title = structure.get('Title')
@@ -329,12 +329,15 @@ def adjust_for_empty_items(chunk_df: pd.DataFrame,
 def chunks2df(chunks: List,
               item_detector: Callable[[pd.Series], pd.Series] = detect_int_items,
               item_adjuster: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame] = adjust_detected_items,
-              item_structure: Dict[str, Any] = None,
+              item_structure = None,
               ) -> pd.DataFrame:
     """Convert the chunks to a dataframe
         : chunks A list of unstructuredio chunked elements
-        : filter_out_of_sequence: Filter out of sequence items. This works for 10-K, 10-Q but not so much for 8-K
+        : item_detector: A function that detects the item in the text column
+        : item_adjuster: A function that finds issues like out of sequence items and adjusts the item column
+        : item_structure: A dictionary of items specific to each filing e.g. 8-K, 10-K, 10-Q
     """
+    # Create a dataframe from the chunks. Add columns as necessary
     chunk_df = pd.DataFrame([{'Text': el.text.strip(), 'Table': 'Table' in el.__class__.__name__}
                              for el in chunks]
                             ).assign(Chars=lambda df: df.Text.apply(len),

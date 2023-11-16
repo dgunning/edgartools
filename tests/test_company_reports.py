@@ -45,20 +45,24 @@ def test_tenq_filing():
 
 
 def test_is_valid_item_for_filing():
-    assert is_valid_item_for_filing(TenK.structure, 'Item 1')
-    assert is_valid_item_for_filing(TenK.structure, 'Item 9A')
-    assert is_valid_item_for_filing(TenK.structure, 'Item 9A', part='Part II')
-    assert is_valid_item_for_filing(TenK.structure, 'ITEM 9A', part='Part II')
-    assert is_valid_item_for_filing(TenK.structure, 'ITEM 9A', part='PART II')
-    assert not is_valid_item_for_filing(TenK.structure, 'Item 9A', part='Part III')
+    assert TenK.structure.is_valid_item('Item 1')
+    assert TenK.structure.is_valid_item( 'Item 9A')
+    assert TenK.structure.is_valid_item( 'Item 9A', part='Part II')
+    assert TenK.structure.is_valid_item( 'ITEM 9A', part='Part II')
+    assert TenK.structure.is_valid_item( 'ITEM 9A', part='PART II')
+    assert not TenK.structure.is_valid_item( 'Item 9A', part='Part III')
 
-    assert is_valid_item_for_filing(TenQ.structure, 'Item 4')
-    assert not is_valid_item_for_filing(TenQ.structure, 'Item 40')
-    assert is_valid_item_for_filing(TenQ.structure, 'Item 4', "PART I")
-    assert is_valid_item_for_filing(TenQ.structure, 'Item 4', "PART II")
+    assert TenQ.structure.is_valid_item( 'Item 4')
+    assert not TenQ.structure.is_valid_item( 'Item 40')
+    assert TenQ.structure.is_valid_item( 'Item 4', "PART I")
+    assert TenQ.structure.is_valid_item( 'Item 4', "PART II")
 
-    assert is_valid_item_for_filing(TwentyF.structure, 'ITEM 10')
-    assert not is_valid_item_for_filing(TwentyF.structure, 'ITEM 10', "PART IV")
+    assert TwentyF.structure.is_valid_item( 'ITEM 10')
+    assert not TwentyF.structure.is_valid_item( 'ITEM 10', "PART IV")
+
+    assert EightK.structure.is_valid_item( 'Item 1.01')
+    # Part is ignored for 8-K
+    assert EightK.structure.is_valid_item( 'Item 1.01', "PART IV")
 
 
 def test_chunk_items_for_company_reports():
@@ -70,7 +74,8 @@ def test_chunk_items_for_company_reports():
     assert not items.empty
     print(items)
 
-def test_item_for_10K_filing():
+
+def test_items_for_10k_filing():
     filing = Filing(form='10-K', filing_date='2023-11-08', company='CHS INC', cik=823277,
                     accession_no='0000823277-23-000053')
     tenk = filing.obj()
@@ -89,19 +94,103 @@ def test_item_for_10K_filing():
     assert tenk['ITEM 15'] == item_15
     print(item_15)
 
-def test_items__for_8K_filing():
+
+def test_items_for_8k_filing():
     filing = Filing(form='8-K', filing_date='2023-11-14',
                     company='ALPINE 4 HOLDINGS, INC.',
                     cik=1606698,
                     accession_no='0001628280-23-039016')
     eightk = EightK(filing)
     doc = eightk.doc
-    items = doc.list_items()
-    assert items == ['Item 2.03', 'Item 9.01']
+
+    assert eightk.items == ['Item 2.03', 'Item 9.01']
     print()
     print(doc)
     print(doc.show_items("Text.notnull()", "Item"))
 
     item_101 = doc['Item 9.01']
     print(item_101)
+
+def test_eightk_with_spaces_in_items():
+    # This filing has space characters .&#160;&#160; in the item numbers
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='AAR CORP', cik=1750,
+                    accession_no='0001104659-23-034265')
+    eightk = filing.obj()
+    print()
+    print(eightk)
+    assert eightk.items == ['Item 7.01', 'Item 8.01', 'Item 9.01']
+    assert 'Company acquired Trax for a purchase price of $120 million in cash' in eightk['Item 8.01']
+
+def test_eightk_with_no_signature_header():
+    # This filing has no SIGNATURE header, which means the signature is being detected in Item 9.01
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='AMERISERV FINANCIAL INC /PA/', cik=707605,
+                    accession_no='0001104659-23-034205')
+    eightk = filing.obj()
+    assert eightk.items == ['Item 8.01', 'Item 9.01']
+    print(eightk['Item 9.01'])
+
+
+
+def test_eightk_difficult_parsing():
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='4Front Ventures Corp.', cik=1783875,
+                    accession_no='0001279569-23-000330')
+    eightk = filing.obj()
+    print()
+    print(eightk)
+
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='ALBEMARLE CORP', cik=915913,
+                    accession_no='0000915913-23-000088')
+    eightk = filing.obj()
+    print()
+    print(eightk)
+
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='AFC Gamma, Inc.', cik=1822523,
+                    accession_no='0001829126-23-002149')
+    eightk = filing.obj()
+    # md = filing.markdown()
+    print()
+    print(eightk)
+
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='Artificial Intelligence Technology Solutions Inc.',
+                    cik=1498148, accession_no='0001493152-23-008256')
+    eightk = filing.obj()
+    print()
+    print(eightk)
+
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='CATO CORP', cik=18255,
+                    accession_no='0001562762-23-000124')
+    eightk = filing.obj()
+    print()
+    print(eightk)
+
+adobe_8K = Filing(form='8-K',
+                  filing_date='2023-03-15',
+                  company='ADOBE INC.',
+                  cik=796343,
+                  accession_no='0000796343-23-000044')
+
+
+def test_eightk_items():
+    eightk = EightK(adobe_8K)
+    assert eightk.items == ['Item 2.02', 'Item 9.01']
+    assert "Item 2.02. Results of Operations and Financial Condition" in eightk['Item 2.02']
+
+    filing = Filing(form='8-K/A', filing_date='2023-04-03', company='HIMALAYA TECHNOLOGIES, INC', cik=1409624,
+                    accession_no='0001493152-23-010558')
+    eightk = EightK(filing)
+    assert eightk.filing_date == '2023-04-03'
+    assert eightk.form == '8-K/A'
+    assert eightk.company == 'HIMALAYA TECHNOLOGIES, INC'
+    print(eightk)
+
+
+def test_eightk_obj():
+    eightk = adobe_8K.obj()
+    assert isinstance(eightk, EightK)
+    assert len(eightk.doc.list_items()) == 2
+    print()
+    item_202 = eightk['Item 2.02']
+    print(item_202)
+    assert "Item 2.02" in item_202
+    assert "Results of Operations and Financial Condition" in item_202
 
