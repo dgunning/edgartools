@@ -76,9 +76,9 @@ def find(search_id: Union[str, int]) -> (
         return get_by_accession_number(search_id)
     elif re.match(r"\d{4,10}", search_id):
         return Entity(search_id)
-    elif re.match(r"^[A-Z]{1,4}$", search_id):
+    elif re.match(r"^[A-WYZ]{1,5}$", search_id): # Ticker
         return Entity(search_id)
-    elif re.match("^[A-Z]{5}$", search_id):
+    elif re.match("^[A-Z]{4}X$", search_id): # Mutual Fund Ticker
         return Fund(search_id)
     elif re.match("^[CS]\d+$", search_id):
         return Fund(search_id)
