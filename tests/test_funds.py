@@ -5,6 +5,7 @@ from pathlib import Path
 from rich import print
 import pandas as pd
 import pytest
+from edgar import find, CompanySearchResults
 
 pd.options.display.max_columns = None
 
@@ -24,6 +25,10 @@ def test_get_fund_by_ticker(ticker, expected_name, expected_class_name, expected
     assert fund.class_contract_name == expected_class_name
     assert fund.ticker == ticker
     assert fund.class_contract_id == expected_class_id
+
+def test_matching_of_mutual_fund_ticker():
+    assert isinstance(find("DXFTX"), FundData)
+    assert isinstance(find("DXFTV"), CompanySearchResults)
 
 def test_filings_from_fund_class_are_not_duplicated():
     # When we get a fund we can get the filings
