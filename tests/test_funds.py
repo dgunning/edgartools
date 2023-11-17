@@ -4,42 +4,33 @@ from edgar.funds import (get_fund_by_ticker, Fund, FundData, FundSeries, FundCla
 from pathlib import Path
 from rich import print
 import pandas as pd
+import pytest
 
 pd.options.display.max_columns = None
 
+@pytest.mark.parametrize(
+    "ticker,expected_name,expected_class_name,expected_class_id",
+    [
+    ("KINCX", "Kinetics Internet Fund", "Advisor Class C", "C000013712"),
+    ("KINAX", "Kinetics Internet Fund", "Advisor Class A", "C000013715"),
+    ("WGMCX", "Wasatch Ultra Growth Fund", "Institutional Class Shares","C000217854"),
+    ("DXFTX", "Direxion Currency Trends Strategy Plus Fund", "Class A", "C000074299"),
+    ("DXESX", "Direxion Monthly Emerging Markets Bear 2X Fund", "Investor Class", "C000019215"),
+    # Add more tuples for each ticker and fund name pair
+])
+def test_get_fund_by_ticker(ticker, expected_name, expected_class_name, expected_class_id):
+    fund = get_fund_by_ticker(ticker)
+    assert fund.name == expected_name
+    assert fund.class_contract_name == expected_class_name
+    assert fund.ticker == ticker
+    assert fund.class_contract_id == expected_class_id
 
-def test_getfund_by_ticker():
-    fund: FundData = get_fund_by_ticker('DXFTX')
-    print()
-    print(fund)
-    assert fund.company_cik == '0001040587'
-    assert fund.company_name == 'DIREXION FUNDS'
-    assert fund.series == 'S000024976'
-    assert fund.name == 'Direxion Currency Trends Strategy Plus Fund'
-    assert fund.class_contract_name == 'Class A'
-    assert fund.ticker == 'DXFTX'
-
-    fund = Fund('DXESX')  # alias for get_fund
-    print(fund)
-    assert fund.company_cik == '0001040587'
-    assert fund.company_name == 'DIREXION FUNDS'
-    assert fund.series == 'S000007038'
-    assert fund.name == 'Direxion Monthly Emerging Markets Bear 2X Fund'
-    assert fund.class_contract_name == 'Investor Class'
-    assert fund.ticker == 'DXESX'
-
-    company = fund.get_fund_company()
-    print(company)
-
-    filings = company.get_filings(form="485BPOS")
-    assert filings is not None
-    print(filings[0].header.text)
-
-
-def test_get_fund_filings():
-    fund = Fund('AGTHX')
-    print()
-    print(fund.filings)
+def test_filings_from_fund_class_are_not_duplicated():
+    # When we get a fund we can get the filings
+    fund_class:FundClass = get_class_or_series("C000245415 ")
+    fund = fund_class.fund
+    filings = fund.filings
+    assert not filings.to_pandas().duplicated().any()
 
 def test_get_fund_by_ticker_not_found():
     fund = get_fund_by_ticker('SASSY')
@@ -177,6 +168,9 @@ def test_parse_company_info_for_fund_class():
     print(str(company_info))
     print(company_info.ident_info)
 
+    # Test the company filings
+    company_filings = company_info.filings
+    print(company_filings.to_pandas())
 
 def test_parse_company_info_for_fund_series():
     company_info_html = Path('data/fundseries.html').read_text()

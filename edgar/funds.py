@@ -19,14 +19,16 @@ from edgar._rich import repr_rich, df_to_rich_table
 from edgar.core import download_text, log
 
 __all__ = [
-    'get_fund_by_ticker',
-    'get_class_contract',
+    'Fund',
+    'get_fund',
     'get_series',
-    'get_fund_information',
     'FundData',
     'FundSeries',
     'FundClass',
-    'Fund',
+    'get_fund_by_ticker',
+    'get_class_or_series',
+    'get_class_contract',
+    'get_fund_information',
 
 ]
 
@@ -34,10 +36,10 @@ __all__ = [
 fund_company_search = "https://www.sec.gov/cgi-bin/browse-edgar?company={}&owner=exclude&action=getcompany"
 
 # The URL to search for a fund by ticker
-fund_ticker_search_url = "https://www.sec.gov/cgi-bin/series?CIK=&sc=companyseries&ticker={}&Find=Search"
+fund_ticker_search_url = "https://www.sec.gov/cgi-bin/series?ticker={}"
 
 # Search for a fund by class
-fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}&action=getcompany"
+fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}"
 
 
 @dataclass(frozen=True)
@@ -77,7 +79,9 @@ class FundData:
 
 
 def get_fund_by_ticker(ticker: str):
-    """Get the fund information from the ticker"""
+    """Get the fund information from the ticker
+    Uses this url "https://www.sec.gov/cgi-bin/series?CIK=&sc=companyseries&ticker={}&Find=Search"
+    """
     ticker_search_url = fund_ticker_search_url.format(ticker)
 
     fund_text = download_text(ticker_search_url)
@@ -247,6 +251,10 @@ class FundCompanyInfo:
             pa.array(filing_dates, type=pa.date32()),
             pa.array(accession_nos, type=pa.string()),
         ], schema=schema)
+        # Drop duplicate filings by accession number
+        # There are duplicates on the results page because each duplicate row actually point to another file number
+        filing_index = pa.Table.from_pandas(filing_index.to_pandas().drop_duplicates(subset=["accession_number"]))
+
         filings = Filings(filing_index=filing_index)
 
         return cls(name=company_name,

@@ -4,6 +4,8 @@ from edgar.ownership import Ownership
 from edgar.offerings import Offering
 from edgar.company_reports import TenK
 from edgar.effect import Effect
+import pytest
+
 
 def test_matches_form():
     form3_filing = Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
@@ -75,3 +77,20 @@ def test_find():
     assert isinstance(find(1905495), EntityData)
     assert find("1905495").name == 'CancerVAX, Inc.'
     assert isinstance(find("CancerVAX, Inc."), CompanySearchResults)
+
+
+# Parameterized tests with ticker and fund name
+# def test_find_ticker():
+#     assert find("AAPL").name == "Apple Inc."
+@pytest.mark.parametrize("ticker, expected_fund_name, expected_class", [
+    ("KINCX", "Kinetics Internet Fund", "Advisor Class C"),
+    ("KINAX", "Kinetics Internet Fund", "Advisor Class A"),
+    ("WGMCX", "Wasatch Ultra Growth Fund", "Institutional Class Shares"),
+    # Add more tuples for each ticker and fund name pair
+])
+def test_ticker_name_correspondence(ticker, expected_fund_name, expected_class):
+    # Here you would typically fetch the fund name based on the ticker
+    # For demonstration, let's assume a function `get_fund_name(ticker)` that does this
+    fund = find(ticker)
+    assert fund.name == expected_fund_name
+    assert fund.class_contract_name == expected_class
