@@ -10,6 +10,7 @@ import pandas as pd
 from lxml import html as lxml_html
 from rich import box
 from rich.panel import Panel
+from rich.status import Status
 from rich.table import Table
 
 from edgar._rich import repr_rich
@@ -193,20 +194,20 @@ def chunk(html, chunk_size: int = 1000, buffer=500):
     """
     Break html into chunks
     """
-    # with Status("[bold dark_magenta]Chunking html document...", spinner="dots2"): # as status
-    # Use function import to avoid the startup time imposed by unstructured
-    from unstructured.partition.html import partition_html
-    from unstructured.chunking.title import chunk_by_title
-    from unstructured.cleaners.core import clean
+    with Status("[bold dark_magenta]Chunking html document...", spinner="dots2") as status:
+        # Use function import to avoid the startup time imposed by unstructured
+        from unstructured.partition.html import partition_html
+        from unstructured.chunking.title import chunk_by_title
+        from unstructured.cleaners.core import clean
 
-    elements = partition_html(text=html)
-    # Clean elements
-    for element in elements:
-        element.text = clean(element.text, extra_whitespace=True)
-    chunks = chunk_by_title(elements,
-                            combine_text_under_n_chars=0,
-                            new_after_n_chars=chunk_size,
-                            max_characters=chunk_size + max(0, buffer))
+        elements = partition_html(text=html)
+        # Clean elements
+        for element in elements:
+            element.text = clean(element.text, extra_whitespace=True)
+        chunks = chunk_by_title(elements,
+                                combine_text_under_n_chars=0,
+                                new_after_n_chars=chunk_size,
+                                max_characters=chunk_size + max(0, buffer))
     return chunks
 
 
@@ -377,7 +378,8 @@ def chunks2df(chunks: List,
     signature_rows = chunk_df[chunk_df.Signature]
     if len(signature_rows) > 0:
         signature_loc = signature_rows.index[0]
-        chunk_df.loc[signature_loc:, 'Item'] = ""
+        chunk_df.loc[signature_loc:, 'Item'] = pd.NA
+        chunk_df.Signature = chunk_df.Signature.fillna("")
 
     # Now fillna
     for col in ['Item']:
@@ -400,12 +402,37 @@ def render_table(table_chunk):
     return dataframe_to_text(table_df)
 
 
+class RenderedHtml:
+
+    def __init__(self, text:str):
+        self.text = text
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.text == other
+        return self.text == other.text
+
+    def __contains__(self, text:str):
+        return text in self.text
+
+    def __hash__(self):
+        return hash(self.text)
+
+    def __rich__(self):
+        return Panel(self.text, box=box.SIMPLE)
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
 def render_chunks(chunks):
-    return '\n'.join([render_table(el)
+    text = '\n'.join([render_table(el)
                       if "HTMLTable" in str(type(el))
                       else el.text
-                      for el in chunks]
-                     )
+                      for el in chunks])
+    # if the text is empty return None
+    if not text:
+        return None
+    return RenderedHtml(text.strip())
 
 
 class ChunkedDocument:
@@ -473,7 +500,7 @@ class ChunkedDocument:
 
     def __getitem__(self, item):
         if isinstance(item, int):
-            return self.chunks[item]
+            return render_chunks([self.chunks[item]])
         elif isinstance(item, str):
             return render_chunks(self.chunks_for_item(item))
 

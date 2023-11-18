@@ -113,22 +113,16 @@ def test_that_items_are_ordered_in_chunked_document_for_filing():
     assert chunked_documents['ITEM 1']
 
     print(chunked_documents['ITEM 1'])
-""" 
-def test_document_chunks_for_item():
-    nordstrom_8k = Path("data/form8k.Nordstrom.html").read_text()
-    document_chunks = ChunkedDocument(nordstrom_8k, chunk_size=500, chunk_buffer=100)
-    assert document_chunks
 
-    item_chunks = document_chunks.chunks_for_item("Item 5.02")
-    assert len(list(item_chunks)) > 4
-    item_502 = document_chunks["Item 5.02"]
-    print(item_502)
-    assert "ITEM 5.02" in item_502
-    
-def test_document_chunk_list_items():
-    nordstrom_8k = Path("data/form8k.Nordstrom.html").read_text()
-    document_chunks = ChunkedDocument(nordstrom_8k, chunk_size=500, chunk_buffer=100)
+def test_chunk_document_for_10k_amendment():
+    filing = Filing(form='10-K/A', filing_date='2023-11-16', company='America Great Health',
+                    cik=1098009, accession_no='0001185185-23-001212')
+    tenk = filing.obj()
+    chunked_document:ChunkedDocument = tenk.doc
+    assert chunked_document.list_items() == ['Item 15']
+    assert 'EXPLANATORY NOTE' in chunked_document['Item 15']
+    assert 'Investment in Purecell Group' in chunked_document['Item 15']
 
-    items = document_chunks.list_items()
-    assert len(items) == 2
-"""
+    assert chunked_document['Item 1'] is None
+    assert chunked_document['Item 2'] is None
+    assert chunked_document['Item 3'] is None
