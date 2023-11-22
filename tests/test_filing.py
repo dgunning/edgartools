@@ -217,6 +217,7 @@ def test_filing_homepage_for_filing():
     filing_homepage: FilingHomepage = carbo_10K.homepage
     assert 'Description'
     assert filing_homepage.url == carbo_10K.url
+    assert carbo_10K.home == carbo_10K.homepage
 
 
 def test_filing_homepage_for_filing_multiple_instruments():
