@@ -97,7 +97,7 @@ def table_html_to_dataframe(html_str):
         cols = [c.text.strip() if c.text is not None else "" for c in cols]
         data.append(cols)
 
-    df = clean_dataframe(pd.DataFrame(data, columns=data[0]))
+    df = clean_dataframe(pd.DataFrame(data))
     return df
 
 
