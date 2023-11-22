@@ -4,6 +4,8 @@ from typing import Dict, Union, Tuple, Optional
 import pandas as pd
 from bs4 import BeautifulSoup
 from rich.console import Group, Text
+from rich.panel import Panel
+from rich import box
 
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import child_text
@@ -263,11 +265,12 @@ class FilingXbrl:
         return repr_rich(self.__rich__())
 
     def __rich__(self):
-        return Group(
+        return Panel(Group(
             Text(f"Form {self.form_type} Extracted XBRL"),
             df_to_rich_table(self.summary().set_index("company")),
             Text("Facts"),
             df_to_rich_table(self.facts.data[['namespace', 'fact', 'value', 'units', 'end_date']], max_rows=10),
             Text("Taxonomies"),
             df_to_rich_table(self.namespace_info.summary())
+        ), box=box.ROUNDED
         )
