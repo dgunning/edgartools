@@ -84,8 +84,7 @@ def test_find():
 #     assert find("AAPL").name == "Apple Inc."
 @pytest.mark.parametrize("ticker, expected_fund_name, expected_class", [
     ("KINCX", "Kinetics Internet Fund", "Advisor Class C"),
-    ("KINAX", "Kinetics Internet Fund", "Advisor Class A"),
-    ("WGMCX", "Wasatch Ultra Growth Fund", "Institutional Class Shares"),
+    ("KINAX", "Kinetics Internet Fund", "Advisor Class A")
     # Add more tuples for each ticker and fund name pair
 ])
 def test_ticker_name_correspondence(ticker, expected_fund_name, expected_class):

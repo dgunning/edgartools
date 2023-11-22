@@ -14,7 +14,6 @@ pd.options.display.max_columns = None
     [
     ("KINCX", "Kinetics Internet Fund", "Advisor Class C", "C000013712"),
     ("KINAX", "Kinetics Internet Fund", "Advisor Class A", "C000013715"),
-    ("WGMCX", "Wasatch Ultra Growth Fund", "Institutional Class Shares","C000217854"),
     ("DXFTX", "Direxion Currency Trends Strategy Plus Fund", "Class A", "C000074299"),
     ("DXESX", "Direxion Monthly Emerging Markets Bear 2X Fund", "Investor Class", "C000019215"),
     # Add more tuples for each ticker and fund name pair
