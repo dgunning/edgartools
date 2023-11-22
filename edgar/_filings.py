@@ -1499,6 +1499,11 @@ class Filing:
                                                              filing=self)
         return self._filing_homepage
 
+    @property
+    def home(self):
+        """Alias for homepage"""
+        return self.homepage
+
     @lru_cache(maxsize=1)
     def get_entity(self):
         """Get the company to which this filing belongs"""
