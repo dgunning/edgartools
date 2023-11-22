@@ -211,8 +211,8 @@ def chunk(html, chunk_size: int = 1000, buffer=500):
     return chunks
 
 
-int_item_pattern = "(Item [0-9]{1,2}[A-Z]?\.)"
-decimal_item_pattern = "(Item [0-9]{1,2}\.[0-9]{2})"
+int_item_pattern = r"(Item [0-9]{1,2}[A-Z]?\.)"
+decimal_item_pattern = r"(Item [0-9]{1,2}\.[0-9]{2})"
 
 
 def detect_table_of_contents(text: str):
