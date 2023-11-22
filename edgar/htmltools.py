@@ -194,7 +194,7 @@ def chunk(html, chunk_size: int = 1000, buffer=500):
     """
     Break html into chunks
     """
-    with Status("[bold dark_magenta]Chunking html document...", spinner="dots2") as status:
+    with Status("[bold dark_magenta]Chunking html document...", spinner="dots2"):
         # Use function import to avoid the startup time imposed by unstructured
         from unstructured.partition.html import partition_html
         from unstructured.chunking.title import chunk_by_title
