@@ -78,9 +78,9 @@ def find(search_id: Union[str, int]) -> (
         return Entity(search_id)
     elif re.match(r"^[A-WYZ]{1,5}$", search_id): # Ticker
         return Entity(search_id)
-    elif re.match("^[A-Z]{4}X$", search_id): # Mutual Fund Ticker
+    elif re.match(r"^[A-Z]{4}X$", search_id): # Mutual Fund Ticker
         return Fund(search_id)
-    elif re.match("^[CS]\d+$", search_id):
+    elif re.match(r"^[CS]\d+$", search_id):
         return Fund(search_id)
     else:
         return find_company(search_id)
@@ -95,6 +95,11 @@ def matches_form(sec_filing: Filing,
         return True
     return False
 
+class DataObjectException(Exception):
+
+    def __init__(self, filing:Filing):
+        self.message = f"Could not create a data object for Form {filing.form} filing: {filing.accession_no}"
+        super().__init__(self.message)
 
 def obj(sec_filing: Filing) -> Optional[object]:
     """
@@ -111,40 +116,43 @@ def obj(sec_filing: Filing) -> Optional[object]:
     from edgar.form144 import Form144
     from edgar.muniadvisors import MunicipalAdvisorForm
 
-    if matches_form(sec_filing, "8-K"):
-        return EightK(sec_filing)
-    elif matches_form(sec_filing, "10-Q"):
-        return TenQ(sec_filing)
-    elif matches_form(sec_filing, "10-K"):
-        return TenK(sec_filing)
-    elif matches_form(sec_filing, "20-F"):
-        return TwentyF(sec_filing)
-    elif matches_form(sec_filing, THIRTEENF_FORMS):
-        return ThirteenF(sec_filing)
-    elif matches_form(sec_filing, "144"):
-        return Form144.from_filing(sec_filing)
-    elif matches_form(sec_filing, "MA-I"):
-        return MunicipalAdvisorForm.from_filing(sec_filing)
-    elif matches_form(sec_filing, "3"):
-        return Form3(**Ownership.parse_xml(sec_filing.xml()))
-    elif matches_form(sec_filing, "4"):
-        return Form4(**Ownership.parse_xml(sec_filing.xml()))
-    elif matches_form(sec_filing, "5"):
-        return Form5(**Ownership.parse_xml(sec_filing.xml()))
-    elif matches_form(sec_filing, "EFFECT"):
-        xml = sec_filing.xml()
-        if xml:
-            return Effect.from_xml(xml)
-    elif matches_form(sec_filing, "D"):
-        xml = sec_filing.xml()
-        if xml:
-            return Offering.from_xml(xml)
-    elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
-        return FundReport.from_filing(sec_filing)
+    try:
+        if matches_form(sec_filing, "8-K"):
+            return EightK(sec_filing)
+        elif matches_form(sec_filing, "10-Q"):
+            return TenQ(sec_filing)
+        elif matches_form(sec_filing, "10-K"):
+            return TenK(sec_filing)
+        elif matches_form(sec_filing, "20-F"):
+            return TwentyF(sec_filing)
+        elif matches_form(sec_filing, THIRTEENF_FORMS):
+            return ThirteenF(sec_filing)
+        elif matches_form(sec_filing, "144"):
+            return Form144.from_filing(sec_filing)
+        elif matches_form(sec_filing, "MA-I"):
+            return MunicipalAdvisorForm.from_filing(sec_filing)
+        elif matches_form(sec_filing, "3"):
+            return Form3(**Ownership.parse_xml(sec_filing.xml()))
+        elif matches_form(sec_filing, "4"):
+            return Form4(**Ownership.parse_xml(sec_filing.xml()))
+        elif matches_form(sec_filing, "5"):
+            return Form5(**Ownership.parse_xml(sec_filing.xml()))
+        elif matches_form(sec_filing, "EFFECT"):
+            xml = sec_filing.xml()
+            if xml:
+                return Effect.from_xml(xml)
+        elif matches_form(sec_filing, "D"):
+            xml = sec_filing.xml()
+            if xml:
+                return Offering.from_xml(xml)
+        elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
+            return FundReport.from_filing(sec_filing)
 
-    filing_xbrl = sec_filing.xbrl()
-    if filing_xbrl:
-        return filing_xbrl
+        filing_xbrl = sec_filing.xbrl()
+        if filing_xbrl:
+            return filing_xbrl
+    except:
+        raise DataObjectException(sec_filing)
 
 
 # Import some libraries on the background
