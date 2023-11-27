@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from decimal import Decimal
 import pytest
@@ -11,15 +10,15 @@ def test_parse_infotable():
 
 
 MetLife13F: Filing = Filing(form='13F-HR',
-                               filing_date='2023-03-23',
-                               company='METLIFE INC', cik=1099219,
-                               accession_no='0001140361-23-013281')
+                            filing_date='2023-03-23',
+                            company='METLIFE INC', cik=1099219,
+                            accession_no='0001140361-23-013281')
 
 
 def test_thirteenf_from_filing_with_multiple_related_filing_on_same_day():
-    filing:Filing = MetLife13F
+    filing: Filing = MetLife13F
 
-    thirteenF:ThirteenF = ThirteenF(filing)
+    thirteenF: ThirteenF = ThirteenF(filing)
     assert thirteenF
 
     # We expect that the holding report will be on the filing with the latest period of report
@@ -80,7 +79,7 @@ def test_thirteenf_multiple_related_filings_dont_use_latest_period_of_report():
     first_period = related_filings[0].header.period_of_report
     last_period = related_filings[-1].header.period_of_report
     assert first_period == '20171231'
-    assert last_period =='20230930'
+    assert last_period == '20230930'
 
 
 def test_thirteenf_holdings():
@@ -134,12 +133,13 @@ def test_parse_thirteenf_primary_xml():
     print(res)
 
 
-def test_thirteenf_with_issues():
-    thirteenF_filings = get_filings(form="13F-HR")
-    # filing = thirteenF_filings[10]
-    filing = Filing(form='13F-HR', filing_date='2023-11-15', company='American Trust', cik=1905128,
-                    accession_no='0001905128-23-000004')
-    # filing.homepage.open()
-    print(str(filing))
-    thirteenF = filing.obj()
-    print(thirteenF)
+def test_get_thirteenf_infotable():
+    filing = Filing(form='13F-HR',
+                    filing_date='2023-11-06',
+                    company='Financial Freedom, LLC',
+                    cik=1965484,
+                    accession_no='0001965484-23-000006')
+    hr:ThirteenF = filing.obj()
+    print()
+    assert "informationTable" in hr.infotable_xml
+    print(hr)
