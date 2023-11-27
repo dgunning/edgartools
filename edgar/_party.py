@@ -153,8 +153,8 @@ class Person:
     def __str__(self):
         return f"{self.first_name} {self.first_name}"
 
-    def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
-        yield f"{self.first_name} {self.last_name}"
+    def __repr__(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Name:
@@ -162,16 +162,22 @@ class Name:
     def __init__(self,
                  first_name: str,
                  middle_name: str,
-                 last_name: str):
+                 last_name: str,
+                 suffix:str=None):
         self.first_name = first_name
         self.middle_name = middle_name
         self.last_name = last_name
+        self.suffix = suffix
+
+    @property
+    def full_name(self):
+        return f"{self.first_name}{' ' + self.middle_name or ''} {self.last_name} {self.suffix or ''}".rstrip()
 
     def __str__(self):
-        return f"{self.first_name} {self.middle_name or ''} {self.last_name}"
+        return self.full_name
 
-    def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
-        yield str(self)
+    def __repr__(self):
+        return self.full_name
 
 
 class Filer:
