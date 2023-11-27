@@ -246,6 +246,10 @@ class Applicant:
         self.crd = crd
         self.number_of_advisory_firms: int = number_of_advisory_firms
 
+    @property
+    def full_name(self):
+        return self.name.full_name
+
     def __repr__(self):
         return f"{self.name} (CRD {self.crd})"
 
@@ -260,6 +264,18 @@ class Disclosures:
     financial_disclosure: FinancialDisclosure
     judgement_lien_disclosure: JudgementLienDisclosure
     investigation_disclosure: InvestigationDisclosure
+
+    def any(self):
+        return (self.criminal_disclosure.any()
+                or self.regulatory_disclosure.any()
+                or self.civil_disclosure.any()
+                or self.civil_disclosure.any()
+                or self.complaint_disclosure.any()
+                or self.termination_disclosure.any()
+                or self.financial_disclosure.any()
+                or self.judgement_lien_disclosure.any()
+                or self.investigation_disclosure.is_investigated
+                )
 
 
 @dataclass(frozen=True)
@@ -352,7 +368,8 @@ class MunicipalAdvisorForm:
             name=Name(
                 first_name=child_text(applicant_el, 'firstName'),
                 last_name=child_text(applicant_el, 'lastName'),
-                middle_name=child_text(applicant_el, 'middleName')
+                middle_name=child_text(applicant_el, 'middleName'),
+                suffix=child_text(applicant_el, 'suffix')
             ),
             other_names=[],
             crd=child_text(form_data_el, 'applicantCrdNum'),
@@ -366,7 +383,8 @@ class MunicipalAdvisorForm:
                     Name(
                         first_name=child_text(el, 'firstName'),
                         last_name=child_text(el, 'lastName'),
-                        middle_name=child_text(el, 'middleName')
+                        middle_name=child_text(el, 'middleName'),
+                        suffix=child_text(applicant_el, 'suffix')
                     )
                 )
 
@@ -585,6 +603,8 @@ class MunicipalAdvisorForm:
         )
 
         return ma_info
+
+
 
     def __rich__(self):
 

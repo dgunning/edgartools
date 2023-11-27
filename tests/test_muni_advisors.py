@@ -137,3 +137,15 @@ def test_municipal_advisor_employment_history():
     employment_repr = repr(ma.employment_history)
     assert employment_repr
     print(employment_repr)
+
+def test_muniadvisor_applicant_name():
+    filing = Filing(form='MA-I/A', filing_date='2023-11-17', company='Kaufman, Hall & Associates, LLC', cik=1623387,
+           accession_no='0001623387-23-000091')
+
+    ma:MunicipalAdvisorForm = filing.obj()
+    assert ma.applicant.name.first_name == "Michael"
+    assert ma.applicant.name.last_name == "Tym"
+    assert ma.applicant.name.full_name == "Michael NMN Tym Jr."
+    assert ma.applicant.full_name == "Michael NMN Tym Jr."
+    print()
+
