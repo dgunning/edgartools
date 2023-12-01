@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
 from rich import box
+from rich.status import Status
 from rich.columns import Columns
 from rich.console import Group, Console
 from rich.panel import Panel
@@ -1958,12 +1959,13 @@ def get_by_accession_number(accession_number: str):
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
         f"{accession_number} is not a valid accession number .. should be 10digits-2digits-6digits"
     year = int("19" + accession_number[11:13]) if accession_number[11] == 9 else int("20" + accession_number[11:13])
-    for quarter in range(1, 5):
-        filings = _get_cached_filings(year=year, quarter=quarter)
-        if filings:
-            filing = filings.get(accession_number)
-            if filing:
-                return filing
+    with Status(f"[bold deep_sky_blue1]Searching for filing {accession_number}...", spinner="dots2"):
+        for quarter in range(1, 5):
+            filings = _get_cached_filings(year=year, quarter=quarter)
+            if filings:
+                filing = filings.get(accession_number)
+                if filing:
+                    return filing
 
 
 def form_with_amendments(*forms: str):
