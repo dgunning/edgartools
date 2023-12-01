@@ -134,12 +134,42 @@ def test_parse_thirteenf_primary_xml():
 
 
 def test_get_thirteenf_infotable():
+    # This filing had an issue due to the name of the infotable attachment has XML in the name
     filing = Filing(form='13F-HR',
                     filing_date='2023-11-06',
                     company='Financial Freedom, LLC',
                     cik=1965484,
                     accession_no='0001965484-23-000006')
-    hr:ThirteenF = filing.obj()
+    hr: ThirteenF = filing.obj()
     print()
     assert "informationTable" in hr.infotable_xml
-    print(hr)
+    information_table = hr.infotable
+    print(information_table)
+    assert len(information_table) == 375
+
+
+
+
+def test_thirteenf_with_broken_infotable_xml():
+    """
+    This filing has an infotable with broken XML. We test that we can still get the information table
+
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <directory>
+    <name>/Archives/edgar/data</name>
+    <item>
+    <name type="text.gif">0001894188-23-000007-index-headers.html</name>
+    <size></size>
+    <href>/Archives/edgar/data/1894188/000189418823000007/0001894188-23-000007-index-headers.html</href>
+    <last-modified>2023-11-14 09:38:54</last-modified>
+    </item>
+    :return:
+    """
+    filing = Filing(form='13F-HR', filing_date='2023-11-14', company='LTS One Management LP', cik=1894188,
+                    accession_no='0001894188-23-000007')
+    hr: ThirteenF = filing.obj()
+    information_table = hr.infotable
+    print()
+    print(information_table)
+    assert len(information_table) == 14
+    assert information_table.iloc[0].Issuer == "AMAZON COM INC"

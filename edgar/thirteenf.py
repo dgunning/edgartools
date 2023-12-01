@@ -13,6 +13,8 @@ from rich.table import Table, Column
 
 from edgar._party import Address
 from edgar._rich import repr_rich
+from edgar.sgml import stream_documents
+from edgar.core import log
 from edgar._xml import find_element, child_text
 
 __all__ = [
@@ -110,6 +112,25 @@ class ThirteenF:
     @property
     @lru_cache(maxsize=1)
     def infotable_xml(self):
+        if self.has_infotable():
+            infotable_content = self._get_infotable_from_attachment()
+            if "informationTable" in infotable_content:
+                return infotable_content
+            log.warning("Could not find infotable in attachment. Trying to get it from SGML")
+            return self._get_infotable_from_sgml()
+
+    def _get_infotable_from_sgml(self):
+        """
+        Use the SGML parser to get the infotable file
+        """
+        if self.has_infotable():
+            for document in stream_documents(self.filing.text_url):
+                if document.type == "INFORMATION TABLE":
+                    return document.text_content
+    def _get_infotable_from_attachment(self):
+        """
+        Use the filing homepage to get the infotable file
+        """
         from edgar._filings import Attachment
         if self.has_infotable():
             matching_files = self.filing.homepage.get_matching_files(
