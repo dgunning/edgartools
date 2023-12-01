@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from bs4 import Tag
-from rich.console import Console, ConsoleOptions, RenderResult, Group
+from rich.console import Group
 from rich.table import Table
 
 from edgar._rich import repr_rich

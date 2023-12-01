@@ -40,7 +40,7 @@ def convert_table(table_markdown: str):
 skip_tags = ["<DOCUMENT>", "<TYPE>", "<SEQUENCE>", "<FILENAME>", "<DESCRIPTION>", "<TEXT>"]
 
 
-def markdown_to_rich(md: str, title: str = "") -> Markdown:
+def markdown_to_rich(md: str, title: str = "") -> Panel:
     """Convert the markdown to rich .. handling tables better than rich"""
     content = []
     buf = ""
