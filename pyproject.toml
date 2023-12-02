@@ -69,7 +69,7 @@ dependencies = [
   "mkdocs-material"
 ]
 [tool.hatch.envs.default.scripts]
-cov = "pytest -n 6 --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 lint = "ruff edgar"
 
