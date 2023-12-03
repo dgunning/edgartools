@@ -148,8 +148,6 @@ def test_get_thirteenf_infotable():
     assert len(information_table) == 375
 
 
-
-
 def test_thirteenf_with_broken_infotable_xml():
     """
     This filing has an infotable with broken XML. We test that we can still get the information table
@@ -173,3 +171,22 @@ def test_thirteenf_with_broken_infotable_xml():
     print(information_table)
     assert len(information_table) == 14
     assert information_table.iloc[0].Issuer == "AMAZON COM INC"
+
+
+def test_thriteenf_actual_filing_is_not_notice_report():
+    """"""
+    filing = Filing(form='13F-HR', filing_date='2023-11-07', company='BARCLAYS PLC', cik=312069, accession_no='0000312070-23-000017')
+    assert filing.form == '13F-HR'
+    hr: ThirteenF = filing.obj()
+
+    # Check the holding report's filing
+    hr_filing = hr.filing
+    assert hr_filing.accession_no == filing.accession_no
+
+    # The holding report's filing is not a notice report
+    assert hr_filing.form == '13F-HR'
+    assert hr.has_infotable()
+    xml = hr.infotable_xml
+    assert xml
+    information_table = hr.infotable
+    print(information_table)

@@ -91,7 +91,7 @@ class ThirteenF:
         assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"
         # The filing might not be the filing for the current period. We need to use the related filing filed on the same
         # date as the current filing that has the latest period of report
-        self._related_filings = filing.related_filings().filter(filing_date=filing.filing_date)
+        self._related_filings = filing.related_filings().filter(filing_date=filing.filing_date, form=filing.form)
         self._actual_filing = filing  # The filing passed in
         if use_latest_period_of_report:
             # Use the last related filing.
