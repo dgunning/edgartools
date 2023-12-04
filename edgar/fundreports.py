@@ -1,11 +1,11 @@
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
-from typing import Union, List, Dict, Any
+from typing import Union, List, Dict, Any, Optional
 
 import pandas as pd
 from bs4 import Tag
+from pydantic import BaseModel
 from rich import box
 from rich.console import Group, Text
 from rich.table import Table
@@ -24,14 +24,12 @@ __all__ = [
 NPORT_FORMS = ["NPORT-P", "NPORT-EX"]
 
 
-@dataclass(frozen=True)
-class IssuerCredentials:
+class IssuerCredentials(BaseModel):
     cik: str
     ccc: str  # cik confirmation code
 
 
-@dataclass(frozen=True)
-class SeriesClassInfo:
+class SeriesClassInfo(BaseModel):
     series_id: str
     class_id: str
 
@@ -43,42 +41,38 @@ class SeriesClassInfo:
                        class_id=child_text(tag, "classId"))
 
 
-@dataclass(frozen=True)
-class FilerInfo:
+class FilerInfo(BaseModel):
     issuer_credentials: IssuerCredentials
-    series_class_info: SeriesClassInfo
+    series_class_info: Optional[SeriesClassInfo]
 
 
-@dataclass(frozen=True)
-class Header:
+class Header(BaseModel):
     submission_type: str
     is_confidential: bool
     filer_info: FilerInfo
 
 
-@dataclass(frozen=True)
-class GeneralInfo:
+class GeneralInfo(BaseModel):
     name: str
     cik: str
     file_number: str
-    lei: str
+    lei: Optional[str]
     street1: str
-    street2: str
-    city: str
-    state: str
-    country: str
-    zip_or_postal_code: str
-    phone: str
-    series_name: str
-    series_lei: str
-    series_id: str
-    reg_period_end: str
-    reg_period_date: str
-    is_final_filing: bool
+    street2: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    country: Optional[str]
+    zip_or_postal_code: Optional[str]
+    phone: Optional[str]
+    series_name: Optional[str]
+    series_lei: Optional[str]
+    series_id: Optional[str]
+    reg_period_end: Optional[str]
+    reg_period_date: Optional[str]
+    is_final_filing: Optional[bool]
 
 
-@dataclass(frozen=True)
-class PeriodType:
+class PeriodType(BaseModel):
     # These elements are part of B.3.c. Credit Spread Risk (SDV01, CR01 or CS01).
     # e.g. <intrstRtRiskdv01 period3Mon="0" period1Yr="0" period5Yr="0" period10Yr="0" period30Yr="0"/>
     period3Mon: Decimal
@@ -99,8 +93,7 @@ class PeriodType:
                        )
 
 
-@dataclass(frozen=True)
-class CurrentMetric:
+class CurrentMetric(BaseModel):
     currency: str
     intrstRtRiskdv01: PeriodType
     intrstRtRiskdv100: PeriodType
@@ -122,12 +115,11 @@ def format_date(date: Union[str, datetime]) -> str:
     return date.strftime("%Y-%m-%d")
 
 
-@dataclass(frozen=True)
-class MonthlyTotalReturn:
-    class_id: str
-    return1: Decimal
-    return2: Decimal
-    return3: Decimal
+class MonthlyTotalReturn(BaseModel):
+    class_id: Optional[str]
+    return1: Optional[Union[Decimal, str]]
+    return2: Optional[Union[Decimal, str]]
+    return3: Optional[Union[Decimal, str]]
 
     @classmethod
     def from_xml(cls, tag: Tag):
@@ -139,10 +131,9 @@ class MonthlyTotalReturn:
         )
 
 
-@dataclass(frozen=True)
-class RealizedChange:
-    net_realized_gain: Decimal
-    net_unrealized_appreciation: Decimal
+class RealizedChange(BaseModel):
+    net_realized_gain: Optional[Union[Decimal, str]]
+    net_unrealized_appreciation: Optional[Union[Decimal, str]]
 
     @classmethod
     def from_xml(cls,
@@ -154,11 +145,10 @@ class RealizedChange:
             )
 
 
-@dataclass(frozen=True)
-class MonthlyFlow:
-    redemption: Decimal
-    reinvestment: Decimal
-    sales: Decimal
+class MonthlyFlow(BaseModel):
+    redemption: Optional[Union[Decimal, str]]
+    reinvestment: Optional[Union[Decimal, str]]
+    sales: Optional[Union[Decimal, str]]
 
     @classmethod
     def from_xml(cls,
@@ -171,45 +161,42 @@ class MonthlyFlow:
             )
 
 
-@dataclass(frozen=True)
-class ReturnInfo:
+class ReturnInfo(BaseModel):
     monthly_total_returns: List[MonthlyTotalReturn]
     other_mon1: RealizedChange
     other_mon2: RealizedChange
     other_mon3: RealizedChange
 
 
-@dataclass(frozen=True)
-class FundInfo:
+class FundInfo(BaseModel):
     total_assets: Decimal
     total_liabilities: Decimal
-    net_assets: Decimal
-    assets_attr_misc_sec: Decimal
-    assets_invested: Decimal
-    amt_pay_one_yr_banks_borr: Decimal
-    amt_pay_one_yr_ctrld_comp: Decimal
-    amt_pay_one_yr_oth_affil: Decimal
-    amt_pay_one_yr_other: Decimal
-    amt_pay_aft_one_yr_banks_borr: Decimal
-    amt_pay_aft_one_yr_ctrld_comp: Decimal
-    amt_pay_aft_one_yr_oth_affil: Decimal
-    amt_pay_aft_one_yr_other: Decimal
-    delay_deliv: Decimal
-    stand_by_commit: Decimal
-    liquidity_pref: Decimal
-    cash_not_report_in_cor_d: Decimal
+    net_assets: Optional[Decimal]
+    assets_attr_misc_sec: Optional[Decimal]
+    assets_invested: Optional[Decimal]
+    amt_pay_one_yr_banks_borr: Optional[Decimal]
+    amt_pay_one_yr_ctrld_comp: Optional[Decimal]
+    amt_pay_one_yr_oth_affil: Optional[Decimal]
+    amt_pay_one_yr_other: Optional[Decimal]
+    amt_pay_aft_one_yr_banks_borr: Optional[Decimal]
+    amt_pay_aft_one_yr_ctrld_comp: Optional[Decimal]
+    amt_pay_aft_one_yr_oth_affil: Optional[Decimal]
+    amt_pay_aft_one_yr_other: Optional[Decimal]
+    delay_deliv: Optional[Decimal]
+    stand_by_commit: Optional[Decimal]
+    liquidity_pref: Optional[Decimal]
+    cash_not_report_in_cor_d: Optional[Decimal]
     current_metrics: Dict[str, CurrentMetric]
-    credit_spread_risk_investment_grade: PeriodType
-    credit_spread_risk_non_investment_grade: PeriodType
-    is_non_cash_collateral: bool
-    return_info: ReturnInfo
-    monthly_flow1: MonthlyFlow
-    monthly_flow2: MonthlyFlow
-    monthly_flow3: MonthlyFlow
+    credit_spread_risk_investment_grade: Optional[PeriodType]
+    credit_spread_risk_non_investment_grade: Optional[PeriodType]
+    is_non_cash_collateral: Optional[bool]
+    return_info: Optional[ReturnInfo]
+    monthly_flow1: Optional[MonthlyFlow]
+    monthly_flow2: Optional[MonthlyFlow]
+    monthly_flow3: Optional[MonthlyFlow]
 
 
-@dataclass(frozen=True)
-class DebtSecurity:
+class DebtSecurity(BaseModel):
     maturity_date: datetime
     coupon_kind: str
     annualized_rate: Decimal
@@ -235,11 +222,10 @@ class DebtSecurity:
             )
 
 
-@dataclass(frozen=True)
-class SecurityLending:
-    is_cash_collateral: str
-    is_non_cash_collateral: str
-    is_loan_by_fund: str
+class SecurityLending(BaseModel):
+    is_cash_collateral:Optional[str]
+    is_non_cash_collateral: Optional[str]
+    is_loan_by_fund: Optional[str]
 
     @classmethod
     def from_xml(cls, tag):
@@ -251,10 +237,9 @@ class SecurityLending:
             )
 
 
-@dataclass(frozen=True)
-class Identifiers:
-    ticker: str
-    isin: str
+class Identifiers(BaseModel):
+    ticker: Optional[str]
+    isin: Optional[str]
     other: Dict
 
     @classmethod
@@ -273,27 +258,26 @@ class Identifiers:
             return cls(ticker=ticker, isin=isin, other=other)
 
 
-@dataclass(frozen=True)
-class InvestmentOrSecurity:
+class InvestmentOrSecurity(BaseModel):
     name: str
     lei: str
     title: str
     cusip: str
     identifiers: Identifiers
-    balance: Decimal
-    units: str
-    desc_other_units: str
-    currency_code: str
+    balance: Optional[Decimal]
+    units: Optional[str]
+    desc_other_units: Optional[str]
+    currency_code: Optional[str]
     value_usd: Decimal
     pct_value: Decimal
-    payoff_profile: str
-    asset_category: str
-    issuer_category: str
-    investment_country: str
+    payoff_profile: Optional[str]
+    asset_category: Optional[str]
+    issuer_category: Optional[str]
+    investment_country: Optional[str]
     is_restricted_security: bool
-    fair_value_level: str
-    debt_security: DebtSecurity
-    security_lending: SecurityLending
+    fair_value_level: Optional[str]
+    debt_security: Optional[DebtSecurity]
+    security_lending: Optional[SecurityLending]
 
     @property
     def ticker(self):

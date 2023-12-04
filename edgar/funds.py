@@ -24,6 +24,7 @@ __all__ = [
     'get_series',
     'FundData',
     'FundSeries',
+    'FundSeriesAndContracts',
     'FundClass',
     'get_fund_by_ticker',
     'get_class_or_series',
