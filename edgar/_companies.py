@@ -474,39 +474,73 @@ CompanyData = EntityData
 
 def parse_filings(filings_json: Dict[str, object],
                   cik: int,
-                  company_name: str):
-    rjson: Dict[str, List[object]] = filings_json['recent']
+                  company_name: str) -> CompanyFilings:
+    # Handle case of no data
+    if filings_json['recent']['accessionNumber'] == []:
+        # Create an empty table
+        filings_table = pa.Table.from_arrays(
+            [pa.array([], type=pa.string()),
+             pa.array([], type=pa.date32()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             pa.array([], type=pa.string()),
+             ],
+            names=['accession_number',
+                   'filing_date',
+                   'reportDate',
+                   'acceptanceDateTime',
+                   'act',
+                   'form',
+                   'fileNumber',
+                   'items',
+                   'size',
+                   'isXBRL',
+                   'isInlineXBRL',
+                   'primaryDocument',
+                   'primaryDocDescription'
+                   ]
+        )
+    else:
+        rjson: Dict[str, List[object]] = filings_json['recent']
 
-    filings_table = pa.Table.from_arrays(
-        [pa.array(rjson['accessionNumber']),
-         pc.cast(pc.strptime(pa.array(rjson['filingDate']), '%Y-%m-%d', 'us'), pa.date32()),
-         pa.array(rjson['reportDate']),
-         pa.array(rjson['acceptanceDateTime']),
-         pa.array(rjson['act']),
-         pa.array(rjson['form']),
-         pa.array(rjson['fileNumber']),
-         pa.array(rjson['items']),
-         pa.array(rjson['size']),
-         pa.array(rjson['isXBRL']),
-         pa.array(rjson['isInlineXBRL']),
-         pa.array(rjson['primaryDocument']),
-         pa.array(rjson['primaryDocDescription'])
-         ],
-        names=['accession_number',
-               'filing_date',
-               'reportDate',
-               'acceptanceDateTime',
-               'act',
-               'form',
-               'fileNumber',
-               'items',
-               'size',
-               'isXBRL',
-               'isInlineXBRL',
-               'primaryDocument',
-               'primaryDocDescription'
-               ]
-    )
+        filings_table = pa.Table.from_arrays(
+            [pa.array(rjson['accessionNumber']),
+             pc.cast(pc.strptime(pa.array(rjson['filingDate']), '%Y-%m-%d', 'us'), pa.date32()),
+             pa.array(rjson['reportDate']),
+             pa.array(rjson['acceptanceDateTime']),
+             pa.array(rjson['act']),
+             pa.array(rjson['form']),
+             pa.array(rjson['fileNumber']),
+             pa.array(rjson['items']),
+             pa.array(rjson['size']),
+             pa.array(rjson['isXBRL']),
+             pa.array(rjson['isInlineXBRL']),
+             pa.array(rjson['primaryDocument']),
+             pa.array(rjson['primaryDocDescription'])
+             ],
+            names=['accession_number',
+                   'filing_date',
+                   'reportDate',
+                   'acceptanceDateTime',
+                   'act',
+                   'form',
+                   'fileNumber',
+                   'items',
+                   'size',
+                   'isXBRL',
+                   'isInlineXBRL',
+                   'primaryDocument',
+                   'primaryDocDescription'
+                   ]
+        )
     return CompanyFilings(filings_table,
                           cik=cik,
                           company_name=company_name)
