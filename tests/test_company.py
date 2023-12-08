@@ -40,6 +40,7 @@ def test_parse_company_submission_json():
     with Path('data/company_submission.json').open("r") as f:
         cjson = json.load(f)
     company = parse_entity_submissions(cjson)
+    assert company.cik == 1318605
     print()
     print(company)
 
@@ -59,6 +60,14 @@ def test_get_company_submissions():
 def test_no_company_for_cik():
     company = Company(-1)
     assert company is None
+
+def test_get_company_with_no_filings():
+    company = Company("0000350001")
+    print()
+    print(company)
+    assert company.name == "Company Name Three `!#$(),:;=.-;\\|@/{}&'\\WA\\"
+    assert company.filings is not None
+    assert len(company.filings) == 0
 
 
 def test_get_company_facts():
