@@ -25,7 +25,7 @@ def test_fund_from_xml():
     assert general_info.series_lei == '5493006TF05454RBY690'
     assert general_info.series_name == 'Kentucky Tax-Free Short-to-Medium Series'
     assert general_info.series_id == 'S000012000'
-    assert general_info.rep_period_end == '2023-06-30'
+    assert general_info.fiscal_year_end == '2023-06-30'
     assert general_info.rep_period_date == '2022-12-31'
     assert general_info.is_final_filing is False
     assert general_info.city == 'Lexington'
@@ -99,6 +99,11 @@ def test_parse_sample_1():
 
 def test_parse_sample_2():
     fund_report = FundReport(**FundReport.parse_fund_xml(Path('data/nport/samples/N-PORT Sample 2.xml').read_text()))
+    assert fund_report.name == "ST Testing Co Number 15 - token"
+
+    # Investment of Securities
+    assert fund_report.investments[0].asset_category == "EC"
+
     print()
     print(fund_report)
 

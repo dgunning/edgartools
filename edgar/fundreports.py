@@ -7,6 +7,7 @@ import pandas as pd
 from bs4 import Tag
 from pydantic import BaseModel
 from rich import box
+from rich.panel import Panel
 from rich.console import Group, Text
 from rich.table import Table
 
@@ -45,6 +46,14 @@ class FilerInfo(BaseModel):
     issuer_credentials: IssuerCredentials
     series_class_info: Optional[SeriesClassInfo]
 
+    @property
+    def series_id(self):
+        return self.series_class_info.series_id if self.series_class_info else ""
+
+    @property
+    def class_id(self):
+        return self.series_class_info.class_id if self.series_class_info else ""
+
 
 class Header(BaseModel):
     submission_type: str
@@ -67,7 +76,7 @@ class GeneralInfo(BaseModel):
     series_name: Optional[str]
     series_lei: Optional[str]
     series_id: Optional[str]
-    rep_period_end: Optional[str]
+    fiscal_year_end: Optional[str]
     rep_period_date: Optional[str]
     is_final_filing: Optional[bool]
 
@@ -223,7 +232,7 @@ class DebtSecurity(BaseModel):
 
 
 class SecurityLending(BaseModel):
-    is_cash_collateral:Optional[str]
+    is_cash_collateral: Optional[str]
     is_non_cash_collateral: Optional[str]
     is_loan_by_fund: Optional[str]
 
@@ -306,7 +315,7 @@ class FundReport:
         self.series_and_contracts: FundSeriesAndContracts = series_and_contracts
 
     def __str__(self):
-        return (f"{self.name} {self.general_info.rep_period_date} - {self.general_info.rep_period_end}"
+        return (f"{self.name} {self.general_info.rep_period_date} - {self.general_info.foscal_year_end}"
                 )
 
     @property
@@ -314,6 +323,7 @@ class FundReport:
         return f"{self.general_info.name} - {self.general_info.series_name}"
 
     @property
+    @lru_cache(maxsize=2)
     def fund(self) -> Fund:
         return get_fund(self.general_info.series_id)
 
@@ -420,7 +430,7 @@ class FundReport:
             series_name=child_text(general_info_tag, "seriesName"),
             series_id=child_text(general_info_tag, "seriesId"),
             series_lei=child_text(general_info_tag, "seriesLei"),
-            rep_period_end=child_text(general_info_tag, "repPdEnd"),
+            fiscal_year_end=child_text(general_info_tag, "repPdEnd"),
             rep_period_date=child_text(general_info_tag, "repPdDate"),
             is_final_filing=get_bool(child_text(general_info_tag, "isFinalFiling"))
         )
@@ -534,19 +544,26 @@ class FundReport:
                 'investments': investments_or_securities}
 
     @property
+    def fund_info_table(self) -> Table:
+        fund_info_table = Table("Fund", "Series", "As Of Date", "Fiscal Year", box=box.SIMPLE)
+        fund_info_table.add_row(self.general_info.name,
+                                f"{self.general_info.series_name} {self.general_info.series_id or ''}",
+                                self.general_info.rep_period_date,
+                                self.general_info.fiscal_year_end)
+        return fund_info_table
+
+    @property
     def fund_summary_table(self) -> Table:
         # Financials
         financials_table = Table("Assets",
                                  "Liabilities",
                                  "Net Assets",
                                  "Investments",
-                                 "Period",
-                                 title="Fund Summary", title_style="bold deep_sky_blue1", box=box.SIMPLE)
+                                 title="Financials", title_style="bold deep_sky_blue1", box=box.SIMPLE)
         financials_table.add_row(moneyfmt(self.fund_info.total_assets, curr="$", places=0),
                                  moneyfmt(self.fund_info.total_liabilities, curr="$", places=0),
                                  moneyfmt(self.fund_info.net_assets, curr="$", places=0),
-                                 f"{len(self.investments)}",
-                                 f"{self.general_info.rep_period_date} - {self.general_info.rep_period_end}"
+                                 f"{len(self.investments)}"
                                  )
         return financials_table
 
@@ -608,18 +625,19 @@ class FundReport:
                                    Title=lambda df: df.title,
                                    Cusip=lambda df: df.cusip,
                                    Value=lambda df: df.value_usd.apply(moneyfmt, curr='$', places=0),
-                                   Percent=lambda df: df.pct_value.apply(moneyfmt, curr='', places=1),
+                                   Pct=lambda df: df.pct_value.apply(moneyfmt, curr='', places=1),
                                    Category=lambda df: df.issuer_category + " " + df.asset_category)
-                           ).filter(['Name', 'Title', 'Cusip', 'Category', 'Value', 'Percent'])
+                           ).filter(['Name', 'Title', 'Cusip', 'Category', 'Value', 'Pct'])
         return df_to_rich_table(investments, title="Investments", title_style="bold deep_sky_blue1", max_rows=2000)
 
     def __rich__(self):
-        return Group(
-            Text(self.name, style="bold dark_sea_green4"),
+        title = f"{self.general_info.name} - {self.general_info.series_name} {self.general_info.rep_period_date}"
+        return Panel(Group(
             self.fund_summary_table,
             self.metrics_table,
             self.credit_spread_table,
             self.investments_table
+        ), title=title, subtitle=title
         )
 
     def __repr__(self):
