@@ -13,7 +13,7 @@ from rich.table import Table
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import find_element, child_text, optional_decimal
 from edgar.core import moneyfmt, get_bool
-from edgar.funds import get_fund_information, FundSeriesAndContracts
+from edgar.funds import get_fund_information, FundSeriesAndContracts, Fund, get_fund
 
 __all__ = [
     "FundReport",
@@ -56,7 +56,7 @@ class GeneralInfo(BaseModel):
     name: str
     cik: str
     file_number: str
-    lei: Optional[str]
+    reg_lei: Optional[str]
     street1: str
     street2: Optional[str]
     city: Optional[str]
@@ -67,8 +67,8 @@ class GeneralInfo(BaseModel):
     series_name: Optional[str]
     series_lei: Optional[str]
     series_id: Optional[str]
-    reg_period_end: Optional[str]
-    reg_period_date: Optional[str]
+    rep_period_end: Optional[str]
+    rep_period_date: Optional[str]
     is_final_filing: Optional[bool]
 
 
@@ -306,12 +306,16 @@ class FundReport:
         self.series_and_contracts: FundSeriesAndContracts = series_and_contracts
 
     def __str__(self):
-        return (f"{self.name} {self.general_info.reg_period_date} - {self.general_info.reg_period_end}"
+        return (f"{self.name} {self.general_info.rep_period_date} - {self.general_info.rep_period_end}"
                 )
 
     @property
     def name(self):
         return f"{self.general_info.name} - {self.general_info.series_name}"
+
+    @property
+    def fund(self) -> Fund:
+        return get_fund(self.general_info.series_id)
 
     @property
     def has_investments(self):
@@ -405,7 +409,7 @@ class FundReport:
             name=child_text(general_info_tag, "regName"),
             cik=child_text(general_info_tag, "regCik"),
             file_number=child_text(general_info_tag, "regFileNumber"),
-            lei=child_text(general_info_tag, "regLei"),
+            reg_lei=child_text(general_info_tag, "regLei"),
             street1=child_text(general_info_tag, "regStreet1"),
             street2=child_text(general_info_tag, "regStreet2"),
             city=child_text(general_info_tag, "regCity"),
@@ -416,10 +420,9 @@ class FundReport:
             series_name=child_text(general_info_tag, "seriesName"),
             series_id=child_text(general_info_tag, "seriesId"),
             series_lei=child_text(general_info_tag, "seriesLei"),
-            reg_period_end=child_text(general_info_tag, "repPdEnd"),
-            reg_period_date=child_text(general_info_tag, "repPdDate"),
+            rep_period_end=child_text(general_info_tag, "repPdEnd"),
+            rep_period_date=child_text(general_info_tag, "repPdDate"),
             is_final_filing=get_bool(child_text(general_info_tag, "isFinalFiling"))
-
         )
 
         # Fund info
@@ -543,7 +546,7 @@ class FundReport:
                                  moneyfmt(self.fund_info.total_liabilities, curr="$", places=0),
                                  moneyfmt(self.fund_info.net_assets, curr="$", places=0),
                                  f"{len(self.investments)}",
-                                 f"{self.general_info.reg_period_date} - {self.general_info.reg_period_end}"
+                                 f"{self.general_info.rep_period_date} - {self.general_info.rep_period_end}"
                                  )
         return financials_table
 

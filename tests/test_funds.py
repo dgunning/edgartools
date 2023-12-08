@@ -1,5 +1,5 @@
-from edgar.funds import (get_fund_by_ticker, Fund, FundData, FundSeries, FundClass, parse_fund_data,
-                         get_class_or_series,
+from edgar.funds import (get_fund, Fund, Fund, FundSeries, FundClass, parse_fund_data,
+                         get_fund_with_filings,
                          FundCompanyInfo)
 from pathlib import Path
 from rich import print
@@ -19,25 +19,39 @@ pd.options.display.max_columns = None
     # Add more tuples for each ticker and fund name pair
 ])
 def test_get_fund_by_ticker(ticker, expected_name, expected_class_name, expected_class_id):
-    fund = get_fund_by_ticker(ticker)
+    fund = get_fund(ticker)
     assert fund.name == expected_name
     assert fund.class_contract_name == expected_class_name
     assert fund.ticker == ticker
     assert fund.class_contract_id == expected_class_id
 
+def test_get_fund_by_class_contract_id():
+    fund = get_fund("C000032628")
+    assert fund.name == 'Biotech Bear 2X Fund'
+    assert fund.class_contract_name == 'Investor Class'
+    assert fund.ticker == ''
+    assert fund.class_contract_id == 'C000032628'
+
+def test_get_fund_by_series_id():
+    fund = get_fund('S000007025')
+    assert fund.company_cik == '0001040587'
+    assert fund
+    assert fund.class_contract_id == 'C000032659'
+
+
 def test_matching_of_mutual_fund_ticker():
-    assert isinstance(find("DXFTX"), FundData)
+    assert isinstance(find("DXFTX"), Fund)
     assert isinstance(find("DXFTV"), CompanySearchResults)
 
 def test_filings_from_fund_class_are_not_duplicated():
     # When we get a fund we can get the filings
-    fund_class:FundClass = get_class_or_series("C000245415 ")
+    fund_class:FundClass = get_fund_with_filings("C000245415 ")
     fund = fund_class.fund
     filings = fund.filings
     assert not filings.to_pandas().duplicated().any()
 
 def test_get_fund_by_ticker_not_found():
-    fund = get_fund_by_ticker('SASSY')
+    fund = get_fund('SASSY')
     assert fund is None
 
 
@@ -191,7 +205,7 @@ def test_parse_company_info_for_fund_series():
 
 
 def test_get_fund_class():
-    class_contract = get_class_or_series('C000032628')
+    class_contract = get_fund_with_filings('C000032628')
     assert class_contract.id == 'C000032628'
     assert class_contract.name == 'Investor Class'
     assert class_contract.fund_cik == '0001040587'
@@ -199,18 +213,18 @@ def test_get_fund_class():
     assert not class_contract.ticker
     print()
     print(class_contract)
-    assert get_class_or_series("C000032628").name == "Investor Class"
-    assert get_class_or_series("C000032627").name == "Service Class"
-    assert get_class_or_series("C000032621").id == "C000032621"
+    assert get_fund_with_filings("C000032628").name == "Investor Class"
+    assert get_fund_with_filings("C000032627").name == "Service Class"
+    assert get_fund_with_filings("C000032621").id == "C000032621"
 
     # Find one with a ticker
-    class_contract = get_class_or_series("C000053174")
+    class_contract = get_fund_with_filings("C000053174")
     assert class_contract.ticker == "DXHSX"
     print(class_contract)
 
 
 def test_get_fund_series():
-    series = get_class_or_series('S000011951')
+    series = get_fund_with_filings('S000011951')
     assert series.id == 'S000011951'
     assert series.name == 'Biotech Bear 2X Fund'
     assert series.fund_cik == '0001040587'
@@ -218,25 +232,25 @@ def test_get_fund_series():
     print()
     print(series)
 
-    assert get_class_or_series("S000053319").name == "Direxion Monthly MSCI EAFE Bear 1.25X Fund"
-    assert get_class_or_series("S000011964").name == "Direxion Monthly S&P 500(R) Bear 1.75X Fund"
-    assert get_class_or_series("S000011943").id == "S000011943"
-    assert get_class_or_series("S000019285").fund_cik == "0001040587"
+    assert get_fund_with_filings("S000053319").name == "Direxion Monthly MSCI EAFE Bear 1.25X Fund"
+    assert get_fund_with_filings("S000011964").name == "Direxion Monthly S&P 500(R) Bear 1.75X Fund"
+    assert get_fund_with_filings("S000011943").id == "S000011943"
+    assert get_fund_with_filings("S000019285").fund_cik == "0001040587"
 
 
 def test_get_class_or_series_not_found():
-    assert get_class_or_series('C100011111') is None
-    assert get_class_or_series('NONO') is None
+    assert get_fund_with_filings('C100011111') is None
+    assert get_fund_with_filings('NONO') is None
 
 
 def test_fund_function_gets_by_ticker_class_or_series():
-    assert isinstance(Fund("DXHSX"), FundData)
-    assert isinstance(Fund("C000011111"), FundClass)
-    assert isinstance(Fund("S000019285"), FundSeries)
+    assert isinstance(get_fund("DXHSX"), Fund)
+    assert isinstance(get_fund("C000011111"), Fund)
+    assert isinstance(get_fund("S000019285"), Fund)
 
 def test_get_fund_by_mutual_fund_ticker():
     ticker = "FCNTX"
-    fund = Fund(ticker)
+    fund = get_fund(ticker)
     print()
     print(fund)
     assert fund.ticker == "FCNTX"

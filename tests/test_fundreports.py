@@ -2,13 +2,12 @@ from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 
-
+import pyarrow.compute as pc
 from rich import print
 
-import pyarrow.compute as pc
 from edgar import get_fund_portfolio_filings, Filings, Filing
 from edgar.fundreports import FundReport, CurrentMetric
-from edgar.funds import get_fund_information
+from edgar.funds import get_fund_information, Fund
 
 dupree_fund_xml = Path('data/NPORT.Dupree.xml').read_text()
 
@@ -16,6 +15,20 @@ dupree_fund_xml = Path('data/NPORT.Dupree.xml').read_text()
 def test_fund_from_xml():
     print()
     fund_report = FundReport(**FundReport.parse_fund_xml(dupree_fund_xml))
+
+    # General Information
+    general_info = fund_report.general_info
+    assert general_info.name == "Dupree Mutual Funds"
+    assert general_info.cik == '0000311101'
+    assert general_info.reg_lei == '549300S8YVGTJ1NMTW57'
+    assert general_info.file_number == '811-02918'
+    assert general_info.series_lei == '5493006TF05454RBY690'
+    assert general_info.series_name == 'Kentucky Tax-Free Short-to-Medium Series'
+    assert general_info.series_id == 'S000012000'
+    assert general_info.rep_period_end == '2023-06-30'
+    assert general_info.rep_period_date == '2022-12-31'
+    assert general_info.is_final_filing is False
+    assert general_info.city == 'Lexington'
 
     # Current Metrics
     current_metric: CurrentMetric = fund_report.fund_info.current_metrics['USD']
@@ -47,7 +60,20 @@ def test_fund_from_xml():
 
     # Investments
     assert fund_report.investments[0].asset_category == "DBT"
+    assert fund_report.investments[0].balance == Decimal('755000')
+    assert fund_report.investments[0].value_usd == Decimal('794207.15')
+    assert fund_report.investments[0].currency_code == "USD"
     assert fund_report.investments[0].issuer_category == "MUN"
+    assert fund_report.investments[0].pct_value == Decimal('1.9206978745')
+    assert fund_report.investments[0].payoff_profile == "Long"
+
+    # Debt security
+    assert fund_report.investments[0].debt_security.maturity_date == datetime.strptime("2028-08-01", "%Y-%m-%d")
+    assert fund_report.investments[0].debt_security.coupon_kind == "Fixed"
+    assert fund_report.investments[0].debt_security.annualized_rate == Decimal("5.00")
+    assert fund_report.investments[0].debt_security.is_default is False
+    assert fund_report.investments[0].debt_security.are_instrument_payents_in_arrears is False
+    assert fund_report.investments[0].debt_security.is_paid_kind is False
 
     assert fund_report.investments[0].isin == "US49151FGH73"
     assert fund_report.investments[0].ticker == "KYSFAC"
@@ -161,6 +187,24 @@ def test_fund_report_has_correct_isin():
     fund_report = filing.obj()
     investment_data = fund_report.investment_data()
     assert not investment_data['isin'].duplicated().any()
+
+
+def test_display_of_fund_report():
+    filing = Filing(form='NPORT-P',
+                    filing_date='2023-10-26',
+                    company='PRUDENTIAL SECTOR FUNDS, INC.',
+                    cik=352665,
+                    accession_no='0001752724-23-238209')
+    fund_report = filing.obj()
+
+    # What is the fund?
+    fund:Fund = fund_report.fund
+    assert fund.name == 'PGIM Jennison Health Sciences Fund'
+    assert fund.ticker == "PHSZX"
+    assert fund.class_contract_id == "C000012124"
+    assert fund.series == 'S000004380'
+    #assert fund_report.name == 'PRUDENTIAL SECTOR FUNDS, INC.'
+
 
 
 

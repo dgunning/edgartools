@@ -1,5 +1,4 @@
 import re
-from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
 from typing import Union, Dict, List, Tuple, Optional
@@ -8,6 +7,7 @@ import pandas as pd
 import pyarrow as pa
 from bs4 import BeautifulSoup
 from bs4.element import Tag
+from pydantic import BaseModel
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -21,14 +21,11 @@ from edgar.core import download_text, log
 __all__ = [
     'Fund',
     'get_fund',
-    'get_series',
-    'FundData',
     'FundSeries',
     'FundSeriesAndContracts',
     'FundClass',
-    'get_fund_by_ticker',
-    'get_class_or_series',
-    'get_class_contract',
+    'get_fund',
+    'get_fund_with_filings',
     'get_fund_information',
 
 ]
@@ -37,22 +34,22 @@ __all__ = [
 fund_company_search = "https://www.sec.gov/cgi-bin/browse-edgar?company={}&owner=exclude&action=getcompany"
 
 # The URL to search for a fund by ticker
-fund_ticker_search_url = "https://www.sec.gov/cgi-bin/series?ticker={}"
+fund_series_search_url = "https://www.sec.gov/cgi-bin/series?company="
 
 # Search for a fund by class
 fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}"
 
 
-@dataclass(frozen=True)
-class FundData:
-    """A Mutual Fund or ETF"""
+
+class Fund(BaseModel):
+    """This actually represents a fund contract"""
     company_cik: str
     company_name: str
     name: str
     series: str
     ticker: str
     class_contract_id: str
-    class_contract_name:str
+    class_contract_name: str
 
     def get_fund_company(self):
         return Company(self.company_cik)
@@ -60,8 +57,11 @@ class FundData:
     @property
     @lru_cache(maxsize=1)
     def filings(self):
-        fund_class:FundClass = get_class_or_series(self.class_contract_id)
+        fund_class:FundClass = get_fund_with_filings(self.class_contract_id)
         return fund_class.filings
+
+    def __hash__(self):
+        return hash(self.class_contract_id)
 
     def __rich__(self):
         table = Table(Column("Fund", style="bold"),
@@ -79,13 +79,22 @@ class FundData:
         return repr_rich(self.__rich__())
 
 
-def get_fund_by_ticker(ticker: str):
+
+@lru_cache(maxsize=16)
+def get_fund(identifier: str):
     """Get the fund information from the ticker
     Uses this url "https://www.sec.gov/cgi-bin/series?CIK=&sc=companyseries&ticker={}&Find=Search"
     """
-    ticker_search_url = fund_ticker_search_url.format(ticker)
+    if re.match(r'^[CS]\d+$', identifier):
+        fund_search_url = fund_series_search_url + f"&CIK={identifier}"
+    elif re.match(r"^[A-Z]{4}X$", identifier):
+        fund_search_url = fund_series_search_url + f"&ticker={identifier}"
+    else:
+        log.warning(f"Invalid fund identifier {identifier}")
+        return None
 
-    fund_text = download_text(ticker_search_url)
+    # Download the fund page
+    fund_text = download_text(fund_search_url)
 
     soup = BeautifulSoup(fund_text, "html.parser")
     if 'To retrieve filings, click on the CIK' not in soup.text:
@@ -120,7 +129,7 @@ def get_fund_by_ticker(ticker: str):
     df = pd.DataFrame(data)
 
     # Now create the fund
-    fund = FundData(
+    fund = Fund(
         company_cik=df.iloc[0, 0],
         company_name=df.iloc[0, 1],
         name=df.iloc[1, 2],
@@ -132,25 +141,6 @@ def get_fund_by_ticker(ticker: str):
 
     # Display the structured data
     return fund
-
-
-def get_class_contract(class_contract_id: str):
-    return get_class_or_series(class_contract_id)
-
-
-def get_series(series_id: str):
-    return get_class_or_series(series_id)
-
-
-def get_fund(identifier: str):
-    # if it matches a ticker symbol
-    if re.match(r'[A-Z]{3,}$', identifier):
-        return get_fund_by_ticker(identifier)
-    elif re.match(r'^[CS]\d+$', identifier):
-        return get_class_or_series(identifier)
-
-
-Fund = get_fund
 
 
 class FundCompanyInfo:
@@ -179,6 +169,18 @@ class FundCompanyInfo:
     @property
     def state_of_incorporation(self):
         return self.ident_info.get("State of Inc.", None)
+
+    @lru_cache(maxsize=1)
+    def id_and_name(self, contract_or_series:str) -> Optional[Tuple[str, str]]:
+        class_contract_str = self.ident_info.get(contract_or_series, None)
+        if not class_contract_str:
+            return None
+        match = re.match(r'([CS]\d+)(?:\s(.*))?', class_contract_str)
+
+        # Storing the results in variables if matched, with a default for description if not present
+        cik = match.group(1) if match else ""
+        cik_description = match.group(2) if match and match.group(2) else ""
+        return cik, cik_description
 
     def __str__(self):
         return f"{self.name} ({self.cik})"
@@ -369,8 +371,11 @@ class FundSeries(FundClassOrSeries):
         return Panel(Group(table, self.filings.__rich__()), title=self.description, subtitle=self.description)
 
 
-def get_class_or_series(contract_or_series_id: str):
-    """Get the fund using the class id"""
+def get_fund_with_filings(contract_or_series_id: str):
+    """Uses this url https://www.sec.gov/cgi-bin/browse-edgar?CIK={}
+       to get the fund class or series including the filings
+
+    """
     if not re.match("[CS]\d+", contract_or_series_id):
         return None
     search_url = fund_class_or_series_search_url.format(contract_or_series_id)
