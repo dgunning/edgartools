@@ -1578,25 +1578,23 @@ class Filing:
         summary_table.add_column("CIK")
         summary_table.add_row(self.accession_no, str(self.filing_date), self.company, str(self.cik))
 
-        links_table = Table(box=box.SIMPLE)
-        links_table.add_column("Link", style="bold", header_style="bold")
-        links_table.add_column("URL")
-        links_table.add_row("\U0001F3E0 Homepage", self.homepage_url)
-        links_table.add_row("\U0001F4C4 Primary Document", self.document.url)
-        links_table.add_row("\U0001F4D2 Full Submission Text", self.text_url)
+        homepage_table = Table(box=box.SIMPLE)
+        homepage_table.add_column("\U0001F3E0Homepage", style="bold", header_style="bold deep_sky_blue1", justify="center")
+        homepage_table.add_row(self.homepage_url)
+
+        document_table = Table(box=box.SIMPLE)
+        document_table.add_column("\U0001F4C4 Primary Document", style="bold", header_style="bold deep_sky_blue1", justify="center")
+        document_table.add_row(self.document.url)
+
+        submission_text_table = Table(box=box.SIMPLE)
+        submission_text_table.add_column("\U0001F4DC Submission Text Url", style="bold", header_style="bold deep_sky_blue1", justify="center")
+        submission_text_table.add_row(self.text_url)
 
         return Panel(
-            Group(summary_table, links_table),
+            Group(summary_table, homepage_table, document_table, submission_text_table),
             title=f"{self.form} {unicode_for_form(self.form)} filing for {self.company}",
             box=box.ROUNDED
         )
-
-    def __rich__repr__(self):
-        yield "accession_no", self.accession_no
-        yield "form", self.form
-        yield "filing_date", self.filing_date
-        yield "company", self.company
-        yield "cik", self.cik
 
     def __repr__(self):
         return repr_rich(self.__rich__())
