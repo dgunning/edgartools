@@ -1,6 +1,7 @@
 import itertools
 import os.path
 import re
+import pytz
 import webbrowser
 from dataclasses import dataclass
 from datetime import datetime
@@ -90,8 +91,15 @@ xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTE
 
 
 def current_year_and_quarter() -> Tuple[int, int]:
-    now = datetime.now()
-    current_year, current_quarter = now.year, (now.month - 1) // 3 + 1
+    # Define the Eastern timezone
+    eastern = pytz.timezone('America/New_York')
+
+    # Get the current time in Eastern timezone
+    now_eastern = datetime.now(eastern)
+
+    # Calculate the current year and quarter
+    current_year, current_quarter = now_eastern.year, (now_eastern.month - 1) // 3 + 1
+
     return current_year, current_quarter
 
 
