@@ -8,10 +8,12 @@ from typing import Any, Optional, Dict, List, Callable
 import numpy as np
 import pandas as pd
 from lxml import html as lxml_html
+from lxml import etree
 from rich import box
 from rich.panel import Panel
 from rich.status import Status
 from rich.table import Table
+
 
 from edgar._rich import repr_rich
 
@@ -25,6 +27,7 @@ __all__ = [
     "ChunkedDocument",
     "extract_elements",
     "clean_dataframe",
+    'remove_bold_tags',
     'detect_decimal_items',
     'adjust_for_empty_items',
     "dataframe_to_text",
@@ -156,6 +159,13 @@ def filter_small_table(table: pd.DataFrame, min_rows: int = 2, min_cols: int = 2
     return len(table) >= min_rows and len(table.columns) >= min_cols
 
 
+def remove_bold_tags(html_content):
+    # Replace <b>...</b> and <strong>...</strong> tags with their content
+    html_content = re.sub(r'<b>(.*?)</b>', r'\1', html_content)
+    html_content = re.sub(r'<strong>(.*?)</strong>', r'\1', html_content)
+    return html_content
+
+
 @lru_cache(maxsize=4)
 def extract_elements(html_str: str):
     from unstructured.partition.html import partition_html
@@ -199,6 +209,9 @@ def chunk(html, chunk_size: int = 1000, buffer=500):
         from unstructured.partition.html import partition_html
         from unstructured.chunking.title import chunk_by_title
         from unstructured.cleaners.core import clean
+
+        # Remove bold tags
+        html = remove_bold_tags(html)
 
         elements = partition_html(text=html)
         # Clean elements
