@@ -103,6 +103,14 @@ def current_year_and_quarter() -> Tuple[int, int]:
     return current_year, current_quarter
 
 
+def get_previous_quarter(year, quarter) -> Tuple[int, int]:
+    # Given a year and quarter return the previous quarter
+   if quarter == 1:
+       return year - 1, 4
+   else:
+       return year, quarter - 1
+
+
 @lru_cache(maxsize=1)
 def available_quarters() -> YearAndQuarters:
     """
@@ -603,8 +611,10 @@ def get_filings(year: Years = None,
     :return:
     """
     # Get the year or default to the current year
+    using_default_year = False
     if not year:
         year, quarter = current_year_and_quarter()
+        using_default_year = True
 
     year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
     if len(year_and_quarters) == 0:
@@ -617,7 +627,14 @@ def get_filings(year: Years = None,
     (You specified the year {year} and quarter {quarter})   
         """)
         return None
-    filing_index = get_filings_for_quarters(year_and_quarters, index=index)
+    try:
+        filing_index = get_filings_for_quarters(year_and_quarters, index=index)
+    except httpx.HTTPStatusError as e:
+        if using_default_year and 'AccessDenied' in e.response.text:
+            previous_quarter = [get_previous_quarter(year,quarter)]
+            filing_index = get_filings_for_quarters(previous_quarter, index=index)
+        else:
+            raise
 
     filings = Filings(filing_index)
 
