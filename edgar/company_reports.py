@@ -1,9 +1,12 @@
 from functools import lru_cache, partial
 from typing import Dict, List
 
-from rich import print
+from rich import print, box
 from rich.console import Group, Text
 from rich.panel import Panel
+from rich.table import Table
+import re
+from datetime import datetime
 
 from edgar._rich import repr_rich
 from edgar.financials import Financials
@@ -112,6 +115,7 @@ class FilingStructure:
 
     def is_valid_item(self, item: str, part: str = None):
         return self.get_item(item, part) is not None
+
 
 class ItemOnlyFilingStructure(FilingStructure):
 
@@ -396,7 +400,7 @@ class TwentyF(CompanyReport):
         return f"""TwentyF('{self.company}')"""
 
 
-class EightK(CompanyReport):
+class EightK():
     structure = ItemOnlyFilingStructure({
         "ITEM 1.01": {
             "Title": "Entry into a Material Definitive Agreement",
@@ -480,7 +484,19 @@ class EightK(CompanyReport):
 
     def __init__(self, filing):
         assert filing.form in ['8-K', '8-K/A'], f"This form should be an 8-K but was {filing.form}"
-        super().__init__(filing)
+        self._filing = filing
+
+    @property
+    def filing_date(self):
+        return self._filing.filing_date
+
+    @property
+    def form(self):
+        return self._filing.form
+
+    @property
+    def company(self):
+        return self._filing.company
 
     @property
     @lru_cache(maxsize=1)
@@ -493,9 +509,43 @@ class EightK(CompanyReport):
                                chunk_size=400,
                                chunk_fn=decimal_chunk_fn)
 
-    def __str__(self):
-        return f"""EightK('{self.company}')"""
+    @property
+    def doc(self):
+        return self.chunked_document
 
+    @property
+    def items(self) -> List[str]:
+        return self.chunked_document.list_items()
+
+    def __getitem__(self, item_or_part: str):
+        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+        item_text = self.chunked_document[item_or_part]
+        return item_text
+
+    def view(self, item_or_part: str):
+        """Get the Item or Part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q"""
+        item_text = self[item_or_part]
+        if item_text:
+            print(item_text)
+
+    @property
+    def date_of_report(self):
+        """Return the period of report for this filing"""
+        period_of_report = datetime.strptime(self._filing.header.period_of_report, "%Y%m%d")
+        return period_of_report.strftime("%B %d, %Y")
+
+    def __rich__(self):
+        item_renderables = []
+        for item in self.items:
+            item_renderables.append(Text(self[item].text))
+
+        return Panel(
+            Group(*item_renderables),
+            title=f"{self._filing.company} 8-K {self.date_of_report}"
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 def is_valid_item_for_filing(filing_structure: Dict, item: str, part: str = None):
     """Return true if the item is valid"""
