@@ -4,7 +4,10 @@
 .idea/
 # Ignore dynaconf secret files
 .secrets.*
-/.coverage
+/.coverage*
 /notebooks/
 /site/
 **/__pycache__/
+dist/
+.vscode/
+data/.DS_Store
