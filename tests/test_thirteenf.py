@@ -22,7 +22,7 @@ def test_thirteenf_from_filing_with_multiple_related_filing_on_same_day():
     assert thirteenF
 
     # We expect that the holding report will be on the filing with the latest period of report
-    assert thirteenF.filing.accession_no == '0001140361-23-013285'
+    assert thirteenF.filing.accession_no == '0001140361-23-013281'
     assert thirteenF.has_infotable()
     assert len(thirteenF.infotable) == 6
 
@@ -31,7 +31,7 @@ def test_thirteenf_from_filing_with_multiple_related_filing_on_same_day():
     print()
     print(thirteenF)
     assert thirteenF.total_holdings == 6
-    assert thirteenF.total_value == Decimal('9229022')
+    assert thirteenF.total_value == Decimal('11019796')
 
     assert thirteenF.primary_form_information.signature.name == 'Steven Goulart'
     assert thirteenF.signer == 'Steven Goulart'
@@ -86,7 +86,7 @@ def test_thirteenf_holdings():
     print()
     thirteenF = ThirteenF(MetLife13F)
     assert thirteenF.total_holdings == 6
-    assert thirteenF.total_value == Decimal('9229022')
+    assert thirteenF.total_value == Decimal('11019796')
     assert thirteenF.primary_form_information.signature.name == 'Steven Goulart'
 
 
@@ -114,11 +114,11 @@ def test_previous_holding_report():
     print()
     print(thirteenF)
     print(thirteenF._related_filings)
-    assert thirteenF.accession_number == '0001140361-23-013285'
+    assert thirteenF.accession_number == '0001140361-23-013281'
     previous_holding_report = thirteenF.previous_holding_report()
-    assert previous_holding_report.accession_number == '0001140361-23-013284'
+    assert previous_holding_report.accession_number == '0001140361-23-013280'
     # Get the previous to the previous
-    assert previous_holding_report.previous_holding_report().accession_number == '0001140361-23-013283'
+    assert previous_holding_report.previous_holding_report().accession_number == '0001140361-23-013279'
 
     # This filing has no previous holding report on the same filing day
     filing = Filing(form='13F-HR', filing_date='2022-12-01', company='Garde Capital, Inc.', cik=1616328,

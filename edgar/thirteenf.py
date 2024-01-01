@@ -87,7 +87,7 @@ class ThirteenF:
     of the quarter. The 13F-HR is a public document that is available on the SEC's website.
     """
 
-    def __init__(self, filing, use_latest_period_of_report=True):
+    def __init__(self, filing, use_latest_period_of_report=False):
         assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"
         # The filing might not be the filing for the current period. We need to use the related filing filed on the same
         # date as the current filing that has the latest period of report
