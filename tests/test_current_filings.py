@@ -1,6 +1,6 @@
 
 from edgar._filings import get_current_filings, parse_summary, CurrentFilings, get_filings
-
+from edgar import get_by_accession_number
 
 def test_get_current_entries():
     print()
@@ -27,8 +27,50 @@ def test_get_current_filings_by_form():
         filings = filings.next()
         if not filings:
             break
-        assert all(f.startswith(form) for f in set(filings.filing_index['form'].to_pylist()))
+        assert all(f.startswith(form) for f in set(filings.data['form'].to_pylist()))
 
+
+def test_current_filings_to_pandas():
+    filings:CurrentFilings = get_current_filings()
+    filing_pandas = filings.to_pandas()
+    assert filings[0].accession_no == filing_pandas['accession_number'][0]
+    accession_number_on_page0 = filings[0].accession_no
+
+    # Get the next page
+    filings_page2 = filings.next()
+    filing_page2_pandas = filings_page2.to_pandas()
+    assert filings_page2[0].accession_no == filing_page2_pandas['accession_number'][0]
+    accession_number_on_page1 = filings_page2[0].accession_no
+    assert accession_number_on_page0 != accession_number_on_page1
+
+
+def test_current_filings_get_by_index():
+    filings: CurrentFilings = get_current_filings()
+    filing = filings.get(20)
+    assert filing
+    assert filings[20]
+
+    filing = filings.get(50)
+    assert filing
+    assert filings[50]
+    assert not filings[4000]
+
+
+def test_current_filings_get_accession_number():
+    filings:CurrentFilings = get_current_filings().next()
+    accession_number = filings.data['accession_number'].to_pylist()[0]
+    print(accession_number)
+    filings = filings.prev()
+    filing = filings.get(accession_number)
+    assert filing
+    assert filing.accession_no == accession_number
+
+def test_current_filings_get_accession_number_not_found():
+    filings:CurrentFilings = get_current_filings().next()
+    accession_number = '0000000900-24-000000'
+    filings = filings.prev()
+    filing = filings.get(accession_number)
+    assert not filing
 
 
 def test_parse_summary():

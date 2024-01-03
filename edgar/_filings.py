@@ -105,10 +105,10 @@ def current_year_and_quarter() -> Tuple[int, int]:
 
 def get_previous_quarter(year, quarter) -> Tuple[int, int]:
     # Given a year and quarter return the previous quarter
-   if quarter == 1:
-       return year - 1, 4
-   else:
-       return year, quarter - 1
+    if quarter == 1:
+        return year - 1, 4
+    else:
+        return year, quarter - 1
 
 
 @lru_cache(maxsize=1)
@@ -348,7 +348,6 @@ class Filings:
         """Return the start date for the filings"""
         return str(self.date_range[0]) if self.date_range[0] else self.date_range[0]
 
-
     @property
     def end_date(self) -> str:
         """Return the end date for the filings"""
@@ -470,6 +469,12 @@ class Filings:
     def prev(self):
         """Alias for self.previous()"""
         return self.previous()
+
+    def _get_by_accession_number(self, accession_number: str):
+        mask = pc.equal(self.data['accession_number'], accession_number)
+        idx = mask.index(True).as_py()
+        if idx > -1:
+            return self.get_filing_at(idx)
 
     def get(self, index_or_accession_number: IntString):
         """
@@ -631,7 +636,7 @@ def get_filings(year: Years = None,
         filing_index = get_filings_for_quarters(year_and_quarters, index=index)
     except httpx.HTTPStatusError as e:
         if using_default_year and 'AccessDenied' in e.response.text:
-            previous_quarter = [get_previous_quarter(year,quarter)]
+            previous_quarter = [get_previous_quarter(year, quarter)]
             filing_index = get_filings_for_quarters(previous_quarter, index=index)
         else:
             raise
@@ -754,7 +759,6 @@ class CurrentFilings(Filings):
                  page_size: int = 40,
                  owner: str = 'exclude'):
         super().__init__(filing_index, original_state=None)
-        self.filing_index: pa.Table = filing_index
         self._start = start
         self._page_size = page_size
         self.owner = owner
@@ -768,7 +772,7 @@ class CurrentFilings(Filings):
         next_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form)
         if next_entries:
             # Copy the values to this Filings object and return it
-            self.filing_index = pa.Table.from_pylist(next_entries)
+            self.data = pa.Table.from_pylist(next_entries)
             self._start = start
             return self
 
@@ -780,12 +784,74 @@ class CurrentFilings(Filings):
         previous_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form)
         if previous_entries:
             # Copy the values to this Filings object and return it
-            self.filing_index = pa.Table.from_pylist(previous_entries)
+            self.data = pa.Table.from_pylist(previous_entries)
             self._start = start
             return self
 
+    def __getitem__(self, item):
+        return self.get(item)
+
+    def get(self, index_or_accession_number: IntString):
+
+        if isinstance(index_or_accession_number, int) or index_or_accession_number.isdigit():
+            if index_or_accession_number < len(self.data):
+                # See if the filing is in this page
+                return super().get_filing_at(int(index_or_accession_number))
+            return self._get_filing_at(int(index_or_accession_number))
+        else:
+            # See if the filing is in this page
+            filing = super().get(index_or_accession_number)
+            if filing:
+                return filing
+
+            accession_number = index_or_accession_number.strip()
+            current_filings = get_current_filings(self.form, self.owner, page_size=100)
+            filing = CurrentFilings._get_current_filing_by_accession_number(current_filings.data, accession_number)
+            if filing:
+                return filing
+            with Status(f"[bold deep_sky_blue1]Searching through the most recent filings for {accession_number}...",
+                        spinner="dots2"):
+                while True:
+                    current_filings = current_filings.next()
+                    if current_filings is None:
+                        return None
+                    filing = CurrentFilings._get_current_filing_by_accession_number(current_filings.data,
+                                                                                             accession_number)
+                    if filing:
+                        return filing
+
+    @staticmethod
+    def _get_current_filing_by_accession_number(data: pa.Table, accession_number: str):
+        mask = pc.equal(data['accession_number'], accession_number)
+        idx = mask.index(True).as_py()
+        if idx > -1:
+            return Filing(
+                cik=data['cik'][idx].as_py(),
+                company=data['company'][idx].as_py(),
+                form=data['form'][idx].as_py(),
+                filing_date=data['filing_date'][idx].as_py(),
+                accession_no=data['accession_number'][idx].as_py(),
+            )
+        return None
+
+    def _get_filing_at(self, item: int):
+        # Calculate the page number (zero-based)
+        page_number = (item - 1) // self._page_size
+
+        # Calculate the start value
+        start = page_number * self._page_size + 1
+
+        # Call the function to get current entries
+        entries = get_current_entries_on_page(count=self._page_size, start=start, form=self.form, owner=self.owner)
+        current_filings = CurrentFilings(filing_index=pa.Table.from_pylist(entries), owner=self.owner, form=self.form,
+                                         start=start, page_size=self._page_size)
+        if not current_filings:
+            return None
+        page_index = item - start
+        return current_filings.get_filing_at(page_index)
+
     def __rich__(self):
-        page: pd.DataFrame = self.filing_index.to_pandas()
+        page: pd.DataFrame = self.to_pandas()
         # compute the index from the start and page_size and set it as the index of the page
         page.index = range(self._start - 1, self._start - 1 + len(page))
 
@@ -1604,15 +1670,18 @@ class Filing:
         summary_table.add_row(self.accession_no, str(self.filing_date), self.company, str(self.cik))
 
         homepage_table = Table(box=box.SIMPLE)
-        homepage_table.add_column("\U0001F3E0Homepage", style="bold", header_style="bold deep_sky_blue1", justify="center")
+        homepage_table.add_column("\U0001F3E0Homepage", style="bold", header_style="bold deep_sky_blue1",
+                                  justify="center")
         homepage_table.add_row(self.homepage_url)
 
         document_table = Table(box=box.SIMPLE)
-        document_table.add_column("\U0001F4C4 Primary Document", style="bold", header_style="bold deep_sky_blue1", justify="center")
+        document_table.add_column("\U0001F4C4 Primary Document", style="bold", header_style="bold deep_sky_blue1",
+                                  justify="center")
         document_table.add_row(self.document.url)
 
         submission_text_table = Table(box=box.SIMPLE)
-        submission_text_table.add_column("\U0001F4DC Submission Text Url", style="bold", header_style="bold deep_sky_blue1", justify="center")
+        submission_text_table.add_column("\U0001F4DC Submission Text Url", style="bold",
+                                         header_style="bold deep_sky_blue1", justify="center")
         submission_text_table.add_row(self.text_url)
 
         return Panel(
@@ -1989,6 +2058,12 @@ def get_by_accession_number(accession_number: str):
                 filing = filings.get(accession_number)
                 if filing:
                     return filing
+        # We haven't found the filing normally so check the most recent SEC filings
+        # Check if the year is the current year
+        if year == datetime.now().year:
+            # Get the most recent filings
+            filings = get_current_filings()
+            return filings.get(accession_number)
 
 
 def form_with_amendments(*forms: str):

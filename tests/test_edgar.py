@@ -1,4 +1,4 @@
-from edgar import obj, matches_form, Filing, FundReport, find, CompanySearchResults
+from edgar import obj, matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
 from edgar._companies import EntityData
 from edgar.ownership import Ownership
 from edgar.offerings import Offering
@@ -77,6 +77,19 @@ def test_find():
     assert isinstance(find(1905495), EntityData)
     assert find("1905495").name == 'CancerVAX, Inc.'
     assert isinstance(find("CancerVAX, Inc."), CompanySearchResults)
+
+
+def test_find_a_current_filing():
+    filings:CurrentFilings = get_current_filings().next()
+    accession_number = filings.data['accession_number'].to_pylist()[0]
+    filing = find(accession_number)
+    assert filing
+    assert filing.accession_no == accession_number
+
+    accession_number = filings.next().data['accession_number'].to_pylist()[0]
+    filing = find(accession_number)
+    assert filing
+    assert filing.accession_no == accession_number
 
 
 # Parameterized tests with ticker and fund name

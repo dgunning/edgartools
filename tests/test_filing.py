@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from typing import List
 
-from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
+from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number, find
 from edgar.core import default_page_size
 from edgar._filings import FilingHomepage, SECHeader, read_fixed_width_index, form_specs, company_specs, Attachments, \
     Attachment, Filer, get_current_filings
@@ -693,7 +693,7 @@ def test_search_for_text_with_regex():
     print(results)
 
 
-def test_get_by_acession_number():
+def test_get_by_accession_number():
     filing = get_by_accession_number("0000072333-23-000015")
     assert filing.company == "NORDSTROM INC"
     assert filing.cik == 72333
@@ -703,6 +703,22 @@ def test_get_by_acession_number():
 
     assert get_by_accession_number("9990072333-45-000015") is None
     assert get_by_accession_number("9990072333-22-000015") is None
+
+
+def test_get_current_filing_by_accession_number():
+    current_filings = get_current_filings()
+    print()
+    print(current_filings)
+    filing = current_filings[0]
+    # Now find the filing
+    filing = get_by_accession_number(filing.accession_no)
+    assert filing
+    assert filing.accession_no == current_filings[0].accession_no
+
+    # Now find a filing that is on the next page
+    current_filings = current_filings.next()
+    filing_on_next_page = current_filings[40]
+    print(filing_on_next_page)
 
 
 def test_attachments():
