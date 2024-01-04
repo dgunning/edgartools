@@ -792,19 +792,19 @@ class CurrentFilings(Filings):
         return self.get(item)
 
     def get(self, index_or_accession_number: IntString):
-
         if isinstance(index_or_accession_number, int) or index_or_accession_number.isdigit():
-            if index_or_accession_number < len(self.data):
-                # See if the filing is in this page
-                return super().get_filing_at(int(index_or_accession_number))
-            return self._get_filing_at(int(index_or_accession_number))
+            idx = int(index_or_accession_number)
+            if self._start -1 <= idx < self._start -1 + len(self.data):
+                # Where on this page is the index
+                idx_on_page = idx - (self._start - 1)
+                return super().get_filing_at(idx_on_page)
         else:
+            accession_number = index_or_accession_number.strip()
             # See if the filing is in this page
-            filing = super().get(index_or_accession_number)
+            filing = super().get(accession_number)
             if filing:
                 return filing
 
-            accession_number = index_or_accession_number.strip()
             current_filings = get_current_filings(self.form, self.owner, page_size=100)
             filing = CurrentFilings._get_current_filing_by_accession_number(current_filings.data, accession_number)
             if filing:
@@ -833,22 +833,6 @@ class CurrentFilings(Filings):
                 accession_no=data['accession_number'][idx].as_py(),
             )
         return None
-
-    def _get_filing_at(self, item: int):
-        # Calculate the page number (zero-based)
-        page_number = (item - 1) // self._page_size
-
-        # Calculate the start value
-        start = page_number * self._page_size + 1
-
-        # Call the function to get current entries
-        entries = get_current_entries_on_page(count=self._page_size, start=start, form=self.form, owner=self.owner)
-        current_filings = CurrentFilings(filing_index=pa.Table.from_pylist(entries), owner=self.owner, form=self.form,
-                                         start=start, page_size=self._page_size)
-        if not current_filings:
-            return None
-        page_index = item - start
-        return current_filings.get_filing_at(page_index)
 
     def __rich__(self):
         page: pd.DataFrame = self.to_pandas()
