@@ -24,6 +24,7 @@ from rich.status import Status
 from rich.columns import Columns
 from rich.console import Group, Console
 from rich.panel import Panel
+from rich.markdown import Markdown
 from rich.table import Table
 from rich.text import Text
 from edgar.htmltools import html_to_text, html_sections
@@ -1653,23 +1654,19 @@ class Filing:
         summary_table.add_column("CIK")
         summary_table.add_row(self.accession_no, str(self.filing_date), self.company, str(self.cik))
 
-        homepage_table = Table(box=box.SIMPLE)
-        homepage_table.add_column("\U0001F3E0Homepage", style="bold", header_style="bold deep_sky_blue1",
-                                  justify="center")
-        homepage_table.add_row(self.homepage_url)
+        homepage_url = Text(f"\U0001F3E0 {self.homepage_url.replace('//www.', '//')}")
+        primary_doc_url = Text(f"\U0001F4C4 {self.document.url.replace('//www.', '//')}")
+        submission_text_url = Text(f"\U0001F4DC {self.text_url.replace('//www.', '//')}")
 
-        document_table = Table(box=box.SIMPLE)
-        document_table.add_column("\U0001F4C4 Primary Document", style="bold", header_style="bold deep_sky_blue1",
-                                  justify="center")
-        document_table.add_row(self.document.url)
-
-        submission_text_table = Table(box=box.SIMPLE)
-        submission_text_table.add_column("\U0001F4DC Submission Text Url", style="bold",
-                                         header_style="bold deep_sky_blue1", justify="center")
-        submission_text_table.add_row(self.text_url)
+        links_table = Table(
+            "[b]Links[/b]: \U0001F3E0 Homepage \U0001F4C4 Primary Document \U0001F4DC Full Submission Text",
+                            box=box.SIMPLE)
+        links_table.add_row(homepage_url)
+        links_table.add_row(primary_doc_url)
+        links_table.add_row(submission_text_url)
 
         return Panel(
-            Group(summary_table, homepage_table, document_table, submission_text_table),
+            Group(summary_table, links_table),
             title=f"{self.form} {unicode_for_form(self.form)} filing for {self.company}",
             box=box.ROUNDED
         )
@@ -2035,19 +2032,28 @@ def get_by_accession_number(accession_number: str):
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
         f"{accession_number} is not a valid accession number .. should be 10digits-2digits-6digits"
     year = int("19" + accession_number[11:13]) if accession_number[11] == 9 else int("20" + accession_number[11:13])
+
+    if year == datetime.now().year:
+        # For the current year create a range of quarters to search from 1 up to the current quarter of the year
+        current_quarter = (datetime.now().month - 1) // 3 + 1
+        quarters = range(1, current_quarter + 1)
+    else:
+        # Search all quarters
+        quarters = range(1, 5)
+
     with Status(f"[bold deep_sky_blue1]Searching for filing {accession_number}...", spinner="dots2"):
-        for quarter in range(1, 5):
+        for quarter in quarters:
             filings = _get_cached_filings(year=year, quarter=quarter)
             if filings:
                 filing = filings.get(accession_number)
                 if filing:
                     return filing
-        # We haven't found the filing normally so check the most recent SEC filings
-        # Check if the year is the current year
-        if year == datetime.now().year:
-            # Get the most recent filings
-            filings = get_current_filings()
-            return filings.get(accession_number)
+    # We haven't found the filing normally so check the most recent SEC filings
+    # Check if the year is the current year
+    if year == datetime.now().year:
+        # Get the most recent filings
+        filings = get_current_filings()
+        return filings.get(accession_number)
 
 
 def form_with_amendments(*forms: str):
