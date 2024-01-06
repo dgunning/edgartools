@@ -8,12 +8,10 @@ from typing import Any, Optional, Dict, List, Callable
 import numpy as np
 import pandas as pd
 from lxml import html as lxml_html
-from lxml import etree
 from rich import box
 from rich.panel import Panel
 from rich.status import Status
 from rich.table import Table
-
 
 from edgar._rich import repr_rich
 
