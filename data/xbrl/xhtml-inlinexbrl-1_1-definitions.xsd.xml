@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+
+  targetNamespace ="http://www.xbrl.org/2013/inlineXBRL" 
+  xmlns           ="http://www.xbrl.org/2013/inlineXBRL"
+  xmlns:ix        ="http://www.xbrl.org/2013/inlineXBRL"
+
+  xmlns:link      ="http://www.xbrl.org/2003/linkbase"
+  xmlns:xbrli     ="http://www.xbrl.org/2003/instance" 
+  xmlns:xl        ="http://www.xbrl.org/2003/XLink"
+
+  xmlns:xhtml     ="http://www.w3.org/1999/xhtml" 
+  xmlns:xlink     ="http://www.w3.org/1999/xlink" 
+  xmlns:xs        ="http://www.w3.org/2001/XMLSchema"
+
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd"
+
+  elementFormDefault="qualified">
+
+  <xs:import namespace="http://www.w3.org/1999/xlink"/>
+  <xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="xhtml-inlinexbrl-1_1.xsd"/>
+
+  <xs:import namespace="http://www.xbrl.org/2003/XLink" schemaLocation="xbrl/xl-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="xbrl/xbrl-instance-2003-12-31-ixmod.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="xbrl/xbrl-linkbase-2003-12-31-ixmod.xsd"/>
+
+  <xs:group name='xbrl.ix.inline.class'>
+    <xs:choice>
+      <xs:group ref='xbrl.ix.base.class' />
+      <xs:group ref='xbrl.ix.special.class' />
+    </xs:choice>
+  </xs:group>
+
+  <xs:group name='xbrl.ix.base.class'>
+    <xs:choice>
+      <xs:element name='footnote' type='xbrl.ix.footnote.type' />
+      <xs:element name='fraction' type='xbrl.ix.fraction.type' nillable='true' />
+      <xs:element name='nonFraction' type='xbrl.ix.nonfraction.type' nillable='true' />
+      <xs:element name='nonNumeric' type='xbrl.ix.nonnumeric.type' nillable='true' />
+      <xs:element name='tuple' type='xbrl.ix.tuple.type' nillable='true' />
+    </xs:choice>
+  </xs:group>
+
+  <xs:group name='xbrl.ix.special.class'>
+    <xs:choice>
+      <xs:element name='continuation' type='xbrl.ix.continuation.type' />
+      <xs:element name='denominator' type='xbrl.ix.numeratordenominator.type' />
+      <xs:element name='exclude' type='xbrl.ix.exclude.type' />
+      <xs:element name='header' type='xbrl.ix.header.type' />
+      <xs:element name='numerator' type='xbrl.ix.numeratordenominator.type' />
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='xbrl.ix.header.type'>
+    <xs:group ref='xbrl.ix.header.content' />
+  </xs:complexType>
+
+  <xs:group name='xbrl.ix.header.content'>
+    <xs:sequence>
+      <xs:element name='hidden' type='xbrl.ix.hidden.type' minOccurs='0' />
+      <xs:element name='references' type='xbrl.ix.references.type' minOccurs='0' maxOccurs='unbounded' />
+      <xs:element name='resources' type='xbrl.ix.resources.type' minOccurs='0' />
+    </xs:sequence>
+  </xs:group>
+
+  <xs:complexType name='xbrl.ix.hidden.type'>
+    <xs:choice>
+      <xs:group minOccurs='1' maxOccurs='unbounded' ref='xbrl.ix.hidden.content' />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:group name='xbrl.ix.hidden.content'>
+    <xs:choice>
+      <xs:group ref='xbrl.ix.base.class' />
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='xbrl.ix.references.type'>
+    <xs:group minOccurs='1' maxOccurs='unbounded' ref='xbrl.ix.references.content' />
+    <xs:attribute name='id' type='xs:NCName' use='optional' />
+    <xs:attribute name='target' type='xbrl.ix.idref.type' use='optional' />
+    <xs:anyAttribute processContents='lax' namespace='##other' />
+  </xs:complexType>
+
+  <xs:group name='xbrl.ix.references.content'>
+    <xs:choice>
+      <xs:element ref='link:schemaRef' />
+      <xs:element ref='link:linkbaseRef' />
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='xbrl.ix.resources.type'>
+    <xs:group minOccurs='0' maxOccurs='unbounded' ref='xbrl.ix.resources.class' />
+  </xs:complexType>
+
+  <xs:group name='xbrl.ix.resources.class'>
+    <xs:choice>
+      <xs:element name='relationship' type='xbrl.ix.relationship.type' minOccurs='0' />
+      <xs:element ref='link:roleRef' />
+      <xs:element ref='link:arcroleRef' />
+      <xs:element ref='xbrli:context' />
+      <xs:element ref='xbrli:unit' />
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='xbrl.ix.relationship.type'>
+    <xs:attribute name='arcrole' type='xs:anyURI' default='http://www.xbrl.org/2003/arcrole/fact-footnote' use='optional' />
+    <xs:attribute name='fromRefs' type='xbrl.ix.idrefs.type' use='required' />
+    <xs:attribute name='linkRole' type='xs:anyURI' default='http://www.xbrl.org/2003/role/link' use='optional' />
+    <xs:attribute name='order'    type='xs:decimal' use='optional' />
+    <xs:attribute name='toRefs'   type='xbrl.ix.idrefs.type' use='required' />
+    <xs:anyAttribute processContents='lax' namespace='http://www.w3.org/XML/1998/namespace' />
+  </xs:complexType>
+
+  <xs:complexType name='xbrl.ix.footnote.type' mixed='true'>
+    <xs:choice minOccurs='0' maxOccurs='unbounded'>
+      <xs:group ref='xbrl.ix.nested.content' />
+    </xs:choice>
+    <xs:attribute name='continuedAt' type='xs:NCName' use='optional' />
+    <xs:attribute name='footnoteRole' type='xs:anyURI' default='http://www.xbrl.org/2003/role/footnote' use='optional' />
+    <xs:attribute name='id' type='xs:NCName' use='required' />
+    <xs:attribute name='title' type='xs:string' use='optional' />
+    <xs:anyAttribute processContents='lax' namespace='http://www.w3.org/XML/1998/namespace' />
+  </xs:complexType>
+
+  <xs:complexType name='xbrl.ix.fraction.type' mixed='true'>
+    <xs:choice minOccurs='0' maxOccurs='unbounded'>
+      <xs:group ref='xhtml:xhtml.Flow.mix' />
+    </xs:choice>
+    <xs:attributeGroup ref='xbrl.ix.tuplecontent.attlist' />
+    <xs:attribute name='unitRef' type='xbrl.ix.idref.type' use='required' />
+    <xs:anyAttribute processContents='lax' namespace='##other' />
+  </xs:complexType>
+
+  <xs:simpleType name='xbrl.ix.idref.type'>
+    <xs:restriction base='xs:NCName' />
+  </xs:simpleType>
+
+  <xs:simpleType name='xbrl.ix.idrefs.type'>
+    <xs:restriction>
+      <xs:simpleType>
+        <xs:list itemType='ix:xbrl.ix.idref.type' />
+      </xs:simpleType>
+      <xs:minLength value='1' />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:attributeGroup name='xbrl.ix.tupleshared.attlist'>
+    <xs:attribute name='id' type='xs:NCName' use='optional' />
+    <xs:attribute name='name' type='xs:QName' use='required' />
+    <xs:attribute name='order' type='xs:decimal' use='optional' />
+    <xs:attribute name='target' type='xbrl.ix.idref.type' use='optional' />
+    <xs:attribute name='tupleRef' type='xbrl.ix.idref.type' use='optional' />
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name='xbrl.ix.tuple.attlist'>
+    <xs:attribute name='tupleID' type='xs:NCName' use='optional' />
+    <xs:attributeGroup ref='xbrl.ix.tupleshared.attlist' />
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name='xbrl.ix.tuplecontent.attlist'>
+    <xs:attribute name='contextRef' type='xbrl.ix.idref.type' use='required' />
+    <xs:attributeGroup ref='xbrl.ix.tupleshared.attlist' />
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name='xbrl.ix.format.attlist'>
+    <xs:attribute name='format' type='xs:QName' use='optional' />
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name='xbrl.ix.numericcontent.attlist'>
+    <xs:attributeGroup ref='xbrl.ix.format.attlist' />
+    <xs:attribute name='scale' type='xs:integer' use='optional' />
+    <xs:attribute name='sign' type='xbrl.ix.sign.type' use='optional' />
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name='xbrl.ix.continuation.attlist'>
+    <xs:attribute name='continuedAt' type='xs:NCName' use='optional' />
+    <xs:attribute name='id' type='xs:NCName' use='required' />
+  </xs:attributeGroup>
+
+  <xs:simpleType name='xbrl.ix.nonEmptyString.type'>
+    <xs:restriction base='xs:string'>
+      <xs:minLength value='1' />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name='xbrl.ix.numeratordenominator.type' mixed='true'>
+    <xs:simpleContent>
+      <xs:extension base='xbrl.ix.nonEmptyString.type'>
+        <xs:attributeGroup ref='xbrl.ix.numericcontent.attlist' />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='xbrl.ix.nonfraction.type' mixed='true'>
+    <xs:choice minOccurs='0' maxOccurs='1'>
+      <xs:element name='nonFraction' type='xbrl.ix.nonfraction.type' nillable='true' />
+    </xs:choice>
+    <xs:attributeGroup ref='xbrl.ix.numericcontent.attlist' />
+    <xs:attribute name='unitRef' type='xbrl.ix.idref.type' use='required' />
+    <xs:attribute name='decimals' type='xbrli:decimalsType' use='optional' />
+    <xs:attribute name='precision' type='xbrli:precisionType' use='optional' />
+    <xs:attributeGroup ref='xbrl.ix.tuplecontent.attlist' />
+    <xs:anyAttribute processContents='lax' namespace='##other' />
+  </xs:complexType>
+
+  <xs:complexType name='xbrl.ix.nonnumeric.type' mixed='true'>
+    <xs:choice minOccurs='0' maxOccurs='unbounded'>
+      <xs:group ref='xbrl.ix.nested.content' />
+    </xs:choice>
+    <xs:attribute name='continuedAt' type='xs:NCName' use='optional' />
+    <xs:attribute name='escape' type='xs:boolean' use='optional' />
+    <xs:attributeGroup ref='xbrl.ix.format.attlist' />
+    <xs:attributeGroup ref='xbrl.ix.tuplecontent.attlist' />
+    <xs:anyAttribute processContents='lax' namespace='##other' />
+  </xs:complexType>
+
+  <xs:complexType name='xbrl.ix.continuation.type' mixed='true'>
+    <xs:choice minOccurs='0' maxOccurs='unbounded'>
+      <xs:group ref='xbrl.ix.nested.content' />
+    </xs:choice>
+    <xs:attributeGroup ref='xbrl.ix.continuation.attlist' />
+  </xs:complexType>
+
+  <xs:group name='xbrl.ix.nested.content'>
+    <xs:choice>
+      <xs:group ref='xhtml:xhtml.Flow.mix' />
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='xbrl.ix.exclude.type' mixed='true'>
+    <xs:choice minOccurs='0' maxOccurs='unbounded'>
+      <xs:group ref='xhtml:xhtml.Flow.mix' />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name='xbrl.ix.tuple.type' mixed='true'>
+    <xs:choice minOccurs='0' maxOccurs='unbounded'>
+      <xs:group ref='xhtml:xhtml.Flow.mix' />
+    </xs:choice>
+    <xs:attributeGroup ref='xbrl.ix.tuple.attlist' />
+    <xs:anyAttribute processContents='lax' namespace='##other' />
+  </xs:complexType>
+
+  <xs:simpleType name='xbrl.ix.sign.type'>
+    <xs:restriction base='xs:string'>
+      <xs:pattern value='-' />
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>

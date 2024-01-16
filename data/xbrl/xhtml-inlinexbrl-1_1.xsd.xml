@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    targetNamespace="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:ix="http://www.xbrl.org/2013/inlineXBRL"
+    blockDefault="#all">
+    <xs:annotation>
+        <xs:documentation>
+      This is the XML Schema driver for XHTML v1.1 + Inline XBRL v1.1
+    </xs:documentation>
+    </xs:annotation>
+    <xs:import
+        namespace="http://www.w3.org/XML/1998/namespace"
+        schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+ 
+    <xs:include
+        schemaLocation="xhtml-inlinexbrl-1_1-modules.xsd">
+        <xs:annotation>
+            <xs:documentation>
+        Schema that includes all modules (and redefinitions)
+        for XHTML1.1 and Inline XBRL Document Type.                
+           </xs:documentation>
+        </xs:annotation>
+    </xs:include>
+
+   
+    <xs:include
+        schemaLocation="xhtml-inlinexbrl-1_1-model.xsd">
+        <xs:annotation>
+            <xs:documentation>
+        Document Model module for the XHTML1.1 + Inline XBRL Document Type.
+        This schema file defines all named models used by Inline XBRL
+        Modularization Framework for Inline XBRL Document Type
+      </xs:documentation>
+        </xs:annotation>
+    </xs:include>
+        
+</xs:schema>
