@@ -1,14 +1,13 @@
 import itertools
 import os.path
 import re
-import pytz
 import webbrowser
 from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
 from typing import Tuple, List, Dict, Union, Optional
-from retry.api import retry_call
+
 import httpx
 import numpy as np
 import pandas as pd
@@ -16,18 +15,19 @@ import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as pa_csv
 import pyarrow.parquet as pq
+import pytz
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
+from retry.api import retry_call
 from rich import box
-from rich.status import Status
 from rich.columns import Columns
 from rich.console import Group, Console
 from rich.panel import Panel
-from rich.markdown import Markdown
+from rich.status import Status
 from rich.table import Table
 from rich.text import Text
-from edgar.htmltools import html_to_text, html_sections
+
 from edgar._markdown import MarkdownContent
 from edgar._markdown import html_to_markdown
 from edgar._party import Address
@@ -37,7 +37,7 @@ from edgar._xml import child_text
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
                         text_extensions, datefmt)
-
+from edgar.htmltools import html_to_text, html_sections
 from edgar.search import BM25Search, RegexSearch
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -1202,7 +1202,7 @@ class SECHeader:
 
         # The filer
         filers = []
-        for filer_values in data.get('FILER', data.get('FILED BY', [])):
+        for filer_values in data.get('FILER', data.get('FILED BY', {})):
             filer_company_values = filer_values.get('COMPANY DATA')
             company_obj = None
             if filer_company_values:
