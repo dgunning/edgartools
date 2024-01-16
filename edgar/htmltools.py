@@ -7,7 +7,7 @@ from typing import Any, Optional, Dict, List, Callable
 
 import numpy as np
 import pandas as pd
-from lxml import html as lxml_html
+from lxml import html as lxml_html, etree as ET
 from rich import box
 from rich.panel import Panel
 from rich.status import Status
@@ -81,6 +81,8 @@ def html_to_text(html_str: str,
                  ignore_tables: bool = True,
                  sep: str = '\n'
                  ) -> str:
+    if is_inline_xbrl(html_str):
+        html_str = strip_ixbrl_tags(html_str)
     """Convert the html to text using the unstructured library"""
     return sep.join(html_sections(html_str, ignore_tables=ignore_tables))
 
@@ -152,6 +154,8 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
 
     return text_output
 
+def is_inline_xbrl(html:str) -> bool:
+    return "xmlns:ix=" in html[:2000]
 
 def filter_small_table(table: pd.DataFrame, min_rows: int = 2, min_cols: int = 2):
     return len(table) >= min_rows and len(table.columns) >= min_cols
@@ -162,6 +166,30 @@ def remove_bold_tags(html_content):
     html_content = re.sub(r'<b>(.*?)</b>', r'\1', html_content)
     html_content = re.sub(r'<strong>(.*?)</strong>', r'\1', html_content)
     return html_content
+
+
+def strip_ixbrl_tags(html_content:str):
+    html = bytes(html_content, encoding='utf-8')
+    root = ET.fromstring(html)
+    # XPath expression to find all <ix:*> tags
+    ix_tags = root.xpath("//*[starts-with(name(), 'ix:')]")
+
+    # Remove each ix tag from the tree
+    for tag in ix_tags:
+        parent = tag.getparent()
+        # Check if the parent is a div with style 'display:inline;'
+        if parent.tag == '{http://www.w3.org/1999/xhtml}div' and 'display:inline' in parent.get('style'):
+            if tag.text:
+                parent.text = (parent.text or '') + tag.text
+            parent.remove(tag)
+        elif tag.text:
+            new_text = ET.fromstring(f"<span>{tag.text}</span>")
+            parent.replace(tag, new_text)
+        else:
+            parent.remove(tag)
+
+    # Convert the modified tree back to a string
+    return ET.tostring(root, encoding='unicode')
 
 
 @lru_cache(maxsize=4)

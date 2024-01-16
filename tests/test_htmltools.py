@@ -1,6 +1,8 @@
 import re
+from bs4 import BeautifulSoup
 
 from edgar.htmltools import (extract_elements,
+                             strip_ixbrl_tags,
                              table_html_to_dataframe,
                              html_to_text, get_table_elements,
                              get_text_elements, html_sections, dataframe_to_text, ChunkedDocument)
@@ -9,6 +11,7 @@ from rich import print
 import pandas as pd
 from edgar import Filing
 from edgar.company_reports import EightK
+from unstructured.partition.html import partition_html
 
 pd.options.display.max_columns = 12
 pd.options.display.max_colwidth = 100
@@ -140,3 +143,29 @@ def test_detect_iems_for_eightk_with_bold_tags():
     eightk: EightK = filing.obj()
     assert len(eightk.items) == 1
     assert '1-800-FLOWERS.COM, Inc. (the “Company”) held its Annual Meeting of' in eightk['Item 5.07']
+
+
+def test_strip_xbrl_tags_from_html():
+    html = Path('data/NextPoint.8k.html').read_text()
+
+    # Get all the xbrl tags
+    assert '<ix:' in html
+
+    clean_html = strip_ixbrl_tags(html)
+    assert not '<ix:' in clean_html
+    print(clean_html)
+
+    # Make sure the html is still valid
+    assert '<html' in clean_html
+    assert '</html>' in clean_html
+    soup = BeautifulSoup(clean_html, 'html.parser')
+    assert soup
+    assert '5.22' in clean_html
+    print(soup)
+
+
+def test_strip_xbrl_tags_from_filing_text():
+    filing = Filing(company='NexPoint Capital, Inc.', cik=1588272, form='8-K', filing_date='2023-12-20',
+                    accession_no='0001193125-23-300021')
+    text = filing.text()
+    print(text)
