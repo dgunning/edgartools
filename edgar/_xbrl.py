@@ -1,6 +1,6 @@
 from functools import lru_cache
 from typing import Dict, Union, Tuple, Optional
-
+from datetime import datetime
 import pandas as pd
 from bs4 import BeautifulSoup
 from rich.console import Group, Text
@@ -27,6 +27,37 @@ __all__ = [
     'FilingXbrl',
     'NamespaceInfo'
 ]
+
+
+def get_period(start_date, end_date):
+    start = datetime.strptime(start_date, '%Y-%m-%d')
+    end = datetime.strptime(end_date, '%Y-%m-%d')
+
+    # Same day
+    if start == end:
+        return start_date
+
+    # Full year
+    if start == datetime(start.year, 1, 1) and end == datetime(end.year, 12, 31):
+        return str(start.year)
+
+        # Check for each quarter
+    quarters = {
+        1: ('-01-01', '-03-31'),
+        2: ('-04-01', '-06-30'),
+        3: ('-07-01', '-09-30'),
+        4: ('-10-01', '-12-31'),
+    }
+    for quarter, (start_suffix, end_suffix) in quarters.items():
+        if (start_date == f"{start.year}{start_suffix}") and (end_date == f"{end.year}{end_suffix}"):
+            return f"Q{quarter} {start.year}"
+
+    # Month
+    if start.day == 1 and end == (start + pd.offsets.MonthEnd(1)):
+        return start.strftime('%b %Y')
+
+    # Default to range
+    return f"{start_date} to {end_date}"
 
 
 class NamespaceInfo:
@@ -60,6 +91,77 @@ class XbrlFacts:
 
     def __init__(self, data: pd.DataFrame):
         self.data = data
+
+    def _default_gaap_dimension(self,
+                                include_null_dimensions: bool = False
+                                ):
+        # The default dimension is the dimension that has the largest mean value for a set of facts
+        fact_names = ['Assets',
+                      'Liabilities',
+                      'LiabilitiesAndStockholdersEquity',
+                      'Revenues',
+                      'CashAndCashEquivalentsAtCarryingValue',
+                      'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents']
+        # Filter the facts data to these facts
+        res = self.data.query(f"namespace=='us-gaap' and fact in {fact_names}")
+        # now find the single dimension that has the largest mean numeric value
+        res = (res
+               .query("value.str.isnumeric()")
+               .assign(value=lambda df: df.value.astype(float))
+               .groupby('dimensions')
+               .sum(numeric_only=True)
+               .sort_values(['value'], ascending=False)
+               .reset_index()
+               )
+        if not res.empty:
+            return res.iloc[0].dimensions
+
+    def get_dei(self, fact: str):
+        res = self.data.query(f"namespace=='dei' & fact=='{fact}' & dimensions.isnull()")
+        if not res.empty:
+            return res.value.item()
+
+    @property
+    def period_end_date(self):
+        return self.get_dei('DocumentPeriodEndDate')
+
+    @lru_cache(maxsize=1)
+    def get_facts_for_namespace(self, namespace: str, end_date: str=None):
+        """Get the facts for the namespace and period"""
+        end_date = end_date or self.period_end_date
+        criteria = f"namespace=='{namespace}' and end_date=='{end_date}' and dimensions.isnull()"
+        res = self.data.query(criteria)
+        if res.empty:
+            # Look for the default gaap dimension
+            default_dimension = self._default_gaap_dimension()
+            log.warning(f"No default dimension detected .. using {default_dimension} as the default dimension")
+            res = self.data.query(
+                f'namespace=="{namespace}" and end_date=="{end_date}" and dimensions=="{default_dimension}"')
+        return (res
+                .filter(["fact", "value", "units", "start_date", "end_date",  "period"])
+                .drop_duplicates()
+                .reset_index(drop=True)
+                )
+
+    def get_fact(self, fact: str, namespace: str, end_date:str=None):
+        # Get the fact value for the namespace and period
+        end_date = end_date or self.period_end_date
+        facts = self.get_facts_for_namespace(namespace=namespace, end_date=end_date)
+        if not facts.empty:
+            res = facts[facts.fact == fact]
+            if not res.empty:
+                return res.iloc[0].value
+
+    @property
+    def years(self):
+        # Find the periods that are years
+        res = self.data.query("period.str.len() == 4")
+        return sorted(res.period.unique().tolist())
+
+    @property
+    def periods(self):
+        # Find the periods that are years
+        return self.data.period.unique().tolist()
 
     def __len__(self):
         return len(self.data)
@@ -98,23 +200,18 @@ class FilingXbrl:
         self.facts: XbrlFacts = XbrlFacts(facts)
         self.namespace_info: NamespaceInfo = namespace_info
 
-    def _dei_value(self, fact: str):
-        res = self.facts.data.query(f"namespace=='dei' & fact=='{fact}' ")
-        if not res.empty:
-            return res.value.item()
-
     @property
     def company_name(self):
-        return self._dei_value('EntityRegistrantName')
+        return self.facts.get_dei('EntityRegistrantName')
 
     @property
     def cik(self):
-        val = self._dei_value('EntityCentralIndexKey')
+        val = self.facts.get_dei('EntityCentralIndexKey')
         return int(val) if val else None
 
     @property
     def form_type(self):
-        return self._dei_value('DocumentType')
+        return self.facts.get_dei('DocumentType')
 
     @property
     def fiscal_year_end_date(self):
@@ -123,56 +220,37 @@ class FilingXbrl:
             return res.iloc[0].end_date
 
     @property
-    def period_end_date(self):
-        res = self.facts.data.query("namespace=='dei' and fact=='DocumentPeriodEndDate'")
-        if not res.empty:
-            return res.iloc[0].end_date
-
-    def _default_gaap_dimension(self,
-                                include_null_dimensions: bool = False
-                                ):
-        # The default dimension is the dimension that has the largest mean value for a set of facts
-        fact_names = ['Assets',
-                      'Liabilities',
-                      'LiabilitiesAndStockholdersEquity',
-                      'Revenues',
-                      'CashAndCashEquivalentsAtCarryingValue',
-                      'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents']
-        # Filter the facts data to these facts
-        res = self.facts.data.query(f"namespace=='us-gaap' and fact in {fact_names}")
-        # now find the single dimension that has the largest mean numeric value
-        res = (res
-               .query("value.str.isnumeric()")
-               .assign(value=lambda df: df.value.astype(float))
-               .groupby('dimensions')
-               .sum(numeric_only=True)
-               .sort_values(['value'], ascending=False)
-               .reset_index()
-               )
-        if not res.empty:
-            return res.iloc[0].dimensions
+    def fiscal_year_focus(self):
+        return self.facts.get_dei('DocumentFiscalYearFocus')
 
     @property
-    @lru_cache(maxsize=1)
+    def fiscal_period_focus(self):
+        return self.facts.get_dei('DocumentFiscalPeriodFocus')
+
+    @property
+    def period(self):
+        if self.fiscal_year_focus:
+            if self.fiscal_period_focus:
+                if self.fiscal_period_focus.startswith('Q'):
+                    return f"{self.fiscal_period_focus} {self.fiscal_year_focus}"
+                else:
+                    return self.fiscal_year_focus
+            else:
+                return self.fiscal_year_focus
+        else:
+            return self.period_end_date
+
+    @property
+    def period_end_date(self):
+        return self.facts.period_end_date
+
+    @property
+    def years(self):
+        return self.facts.years
+
+    @property
     def gaap(self) -> Optional[pd.DataFrame]:
-        """Get the GAAP facts for the fiscal year-end date"""
-        period_end_date = self.period_end_date
-        if period_end_date:
-            res = self.facts.data.query(
-                f"namespace=='us-gaap' and end_date=='{period_end_date}' and dimensions.isnull()")
-            if res.empty:
-                # Look for the default gaap dimension
-                default_dimension = self._default_gaap_dimension()
-                log.warning(
-                    f"No default dimension detected in {self.form_type} XBRL for {self.company_name} [{self.cik}] "
-                    f"Using {default_dimension} as the default dimension")
-                res = self.facts.data.query(
-                    f'namespace=="us-gaap" and end_date=="{period_end_date}" and dimensions=="{default_dimension}"')
-            return (res
-                    .filter(["fact", "value", "units"])
-                    .drop_duplicates()
-                    .reset_index(drop=True)
-                    )
+        return self.facts.get_facts_for_namespace(namespace='us-gaap', end_date=self.period_end_date)
 
     @classmethod
     def parse(cls, xbrl_text: str):
@@ -188,15 +266,13 @@ class FilingXbrl:
         def get_unit(unit_ref: str):
             return unit_map.get(unit_ref)
 
-        def get_context(context_ref: str) -> Tuple[str, str, Union[str, None]]:
+        def get_context(context_ref: str) -> Optional[Tuple[str, str, Union[str, None]]]:
             """Get the value of the context for that context id"""
             context = context_map.get(context_ref)
             if context:
                 start_date, end_date = context.get('period', (None, None))
                 dims: Union[str, None] = context.get('dimensions')
                 return start_date, end_date, dims
-            else:
-                return None, None, None
 
         for ctx in xbrl_tag.find_all('context', recursive=False):
             context_id = ctx.attrs['id']
@@ -243,7 +319,11 @@ class FilingXbrl:
                               'end_date': end,
                               'dimensions': dimensions})
         facts_dataframe = (pd.DataFrame(facts)
-                           .assign(value=lambda df: df.value.replace({'true': True, 'false': False}))
+                           .assign(value=lambda df: df.value.replace({'true': True, 'false': False}),
+                                   period=lambda df: df.apply(lambda x: get_period(x['start_date'], x['end_date']),
+                                                              axis=1)
+                                   )
+
                            )
         return cls(facts=facts_dataframe,
                    namespace_info=NamespaceInfo(xmlns=xmlns, namespace2tag=namespace2tag))

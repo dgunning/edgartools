@@ -1,407 +1,272 @@
 import re
-from typing import Union, List, Tuple
+from functools import lru_cache
+from typing import Optional
+from typing import Union, List
 
 import pandas as pd
+from pydantic import BaseModel
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table
+from rich.table import Table, Column
 
 from edgar._rich import repr_rich
+from edgar._xbrl import XbrlFacts, FilingXbrl
 
 __all__ = [
     'Financials',
     'BalanceSheet',
-    'CashflowStatement',
+    'CashFlowStatement',
     'IncomeStatement',
     'format_currency'
 ]
 
-gaap_facts = {'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment': 'Accumulated Depreciation',
-              'AllowanceForDoubtfulAccountsReceivableCurrent': 'Allowance for Doubtful Accounts',
-              'Assets': 'Total Assets',
-              'AssetsCurrent': 'Current Assets',
-              'AccountsReceivableNetCurrent': 'Accounts Receivable',
-              'AvailableForSaleSecuritiesDebtSecuritiesCurrent': 'Short Term Investments',
-              'CashAndCashEquivalentsAtCarryingValue': 'Cash and Cash Equivalents',
-              'CostOfGoodsAndServicesSold': 'Cost of Revenue',
-              'Goodwill': 'Goodwill',
-              'GrossProfit': 'Gross Profit',
-              'Liabilities': 'Total Liabilities',
-              'LiabilitiesCurrent': 'Current Liabilities',
-              'RetainedEarningsAccumulatedDeficit': 'AccumulatedDeficit',
-              'StockholdersEquity': 'Stockholders Equity',
-              'StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest': 'Stockholders Equity',
-              'LiabilitiesAndStockholdersEquity': 'Liabilities & Equity',
-              'RevenueFromContractWithCustomerExcludingAssessedTax': 'Total Revenue',
-              'PropertyPlantAndEquipmentNet': 'Property, Plant & Equipment',
-              'OperatingLeaseRightOfUseAsset': 'Operating Lease Right of Use Asset',
-              'OperatingExpenses': 'Operating Expenses',
-              'DepreciationDepletionAndAmortization': 'Depreciation & Amortization',
-              'OperatingIncomeLoss': 'Operating Income or Loss',
-              'NetIncomeLoss': 'Net Income',
-              'InvestmentIncomeInterestAndDividend': 'Investment Income Interest and Dividend',
-              'RepaymentsOfLongTermDebt': 'Repayments of Long Term Debt',
-              'InventoryNet': 'Inventories',
-              'DeferredIncomeTaxExpenseBenefit': 'Deferred Income Tax Expense (Benefit)',
-              'OtherNoncashIncomeExpense': 'Other Noncash Income (Expense)',
-              'FiniteLivedIntangibleAssetsNet': 'Finite Lived Intangible Assets',
-              'IntangibleAssetsNetExcludingGoodwill': 'Intangible Assets',
-              'CapitalizedContractCostNetNoncurrent': 'Contract Assets',
-              'MarketableSecuritiesCurrent': 'Short Term Investments',
-              'OtherAssetsCurrent': 'Other Current Assets',
-              'PaymentsOfDividends': 'Dividends Paid',
-              'InterestExpense': 'Interest Expense',
-              'NetCashProvidedByUsedInInvestingActivities': 'Net Cash used in Investing Activities',
-              'NetCashProvidedByUsedInFinancingActivities': 'Net Cash used in Financing Activities',
-              'PaymentsForProceedsFromOtherInvestingActivities': 'Other Investing Activities',
-              'PaymentsToAcquireBusinessesNetOfCashAcquired': 'Acquisitions',
-              'PaymentsToAcquirePropertyPlantAndEquipment': 'Investents in Property, Plant & Equipment',
-              'NetCashProvidedByUsedInOperatingActivities': 'Net Cash from Operating Activities'}
 
-
-def format_currency(value: Union[str, float]):
+def format_currency(value: Union[str, float], format_str: str = '{:,.0f}') -> str:
     if isinstance(value, str):
         if value.isdigit() or re.match(r"-?\d+\.?\d*", value):
             value = float(value)
         else:
             return value
-    # return the value as a currency string right justified
 
-    return f"${value:,.0f}".rjust(20)
-
-
-def get_gaap(gaap,
-             fact: str):
-    res = gaap[gaap.fact == fact]
-    if not res.empty:
-        row = res.iloc[0]
-        return gaap_facts.get(row.fact, row.fact), format_currency(row.value)
-
-    return fact, ""
+    # format the value using the format
+    return format_str.format(value)
 
 
-class FinancialTable:
-    """Base class for financial tables like Balance Sheet, Income Statement, Cashflow Statement"""
+class FactRow(BaseModel):
+    name: Union[str, List[str]]
+    label: str
+    format: str = "{:,.0f}"
+    total: bool = False
 
-    def __init__(self,
-                 gaap: pd.DataFrame):
-        self.gaap = gaap
-        self.fields = []
+    def get_value(self, facts: XbrlFacts, end_date: str, apply_format: bool = True):
+        fact_names = [self.name] if isinstance(self.name, str) else self.name
+        value: Optional[str] = None
+        for name in fact_names:
+            value = facts.get_fact(fact=name, namespace='us-gaap', end_date=end_date)
+            if value:
+                break
+        if apply_format:
+            display_value = format_currency(value, format_str=self.format) if value else ""
+        else:
+            display_value = value
+        return display_value
 
-    def get_fact(self, fact: str, currency: bool = True):
-        res = self.gaap[self.gaap.fact == fact]
+
+class HeaderRow(BaseModel):
+    label: str
+
+
+class FactTable:
+    mapping = []
+    title = ""
+
+    def __init__(self, facts: XbrlFacts, end_date: str = None):
+        self.facts: XbrlFacts = facts
+        self.end_date: str = end_date or self.facts.period_end_date
+
+    def to_dict(self):
+        return {row.label: self.facts.get_fact(fact=row.name, namespace='us-gaap', end_date=self.end_date)
+                for row in self.mapping}
+
+    def select_row_with_value(self, rows: List[FactRow]):
+        for row in rows:
+            value = row.get_value(self.facts, self.end_date)
+            if value:
+                return row
+
+    def get_fact_value(self, fact: str):
+        df = self.to_dataframe()
+        res = df[df.fact == fact]
         if not res.empty:
-            if len(res) > 1:
-                #  Get the row in res that has the largest value, numerically
-                # Also handle exception if value is not a number
-                try:
-                    res = res[res.index == res.value.astype(float).idxmax()]
-                except ValueError:
-                    res = res.iloc[0]
-            return gaap_facts.get(fact, fact), format_currency(res.iloc[0].value) if currency else res.iloc[0].value
+            return res.value.item()
 
-    def get_value(self, fact: str, currency: bool = True):
-        fact = self.get_fact(fact, currency=currency)
-        if fact:
-            return fact[1].lstrip()
-
-    def _add_row(self, table: Table, fact: str, currency: bool = True):
-        fact_row = self.get_fact(fact, currency=currency)
-        if fact_row:
-            table.add_row(*fact_row)
-
-    def _get_facts(self, facts: List[str]) -> List[Tuple[str, object]]:
-        for fact in facts:
-            fact_row = self.get_fact(fact)
-            if fact_row:
-                yield fact_row
-
-    def _get_facts_dataframe(self, facts: List[str]):
-        return pd.DataFrame(list(self._get_facts(facts)),
-                            columns=['Fact', 'Value']).dropna().reset_index(drop=True)
-
-
-class BalanceSheet(FinancialTable):
-    """A company's balance sheet"""
-
-    ASSET_FACTS = [
-        'CashAndCashEquivalentsAtCarryingValue',
-        'MarketableSecuritiesCurrent',
-        'AccountsReceivableNetCurrent',
-        'InventoryNet',
-        'OtherAssetsCurrent',
-        'AssetsCurrent',
-        'AvailableForSaleSecuritiesDebtSecuritiesCurrent',
-        'Goodwill',
-        'Assets'
-    ]
-    LIABILITY_EQUITY_FACTS = [
-        "LiabilitiesCurrent",
-        "LiabilitiesNoncurrent",
-        "Liabilities",
-        "StockholdersEquity",
-        "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
-        "LiabilitiesAndStockholdersEquity"
-    ]
-
-    def __init__(self,
-                 gaap: pd.DataFrame):
-        super().__init__(gaap)
-
-    @property
-    def cash_and_cash_equivalents(self):
-        return self.get_value('CashAndCashEquivalentsAtCarryingValue')
-
-    @property
-    def short_term_investments(self):
-        return self.get_value('MarketableSecuritiesCurrent')
-
-    @property
-    def long_term_investments(self):
-        return self.get_value('MarketableSecuritiesNoncurrent')
-
-    @property
-    def property_plant_and_equipment(self):
-        return self.get_value('PropertyPlantAndEquipmentNet')
-
-    @property
-    def goodwill(self):
-        return self.get_value('Goodwill')
-
-    @property
-    def inventories(self):
-        return self.get_value('InventoryNet')
-
-    @property
-    def total_assets(self):
-        return self.get_value('Assets')
-
-    @property
-    def total_liabilities(self):
-        return self.get_value('Liabilities')
-
-    @property
-    def total_current_assets(self):
-        return self.get_value('AssetsCurrent')
-
-    @property
-    def other_current_assets(self):
-        return self.get_value('OtherAssetsCurrent')
-
-    @property
-    def total_non_current_assets(self):
-        return self.get_value('AssetsNoncurrent')
-
-    @property
-    def other_non_current_assets(self):
-        return self.get_value('OtherAssetsNoncurrent')
-
-    @property
-    def share_holders_equity(self):
-        return self.get_value('StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest')
-
-    @property
-    def asset_dataframe(self):
-        return self._get_facts_dataframe(BalanceSheet.ASSET_FACTS)
-
-    @property
-    def liability_equity_dataframe(self):
-        return self._get_facts_dataframe(BalanceSheet.LIABILITY_EQUITY_FACTS)
+    @lru_cache(maxsize=2)
+    def to_dataframe(self):
+        rows = []
+        for row in self.mapping:
+            if isinstance(row, list):
+                row = self.select_row_with_value(row)
+                if not row:
+                    continue
+            if isinstance(row, FactRow):
+                value = row.get_value(self.facts, self.end_date, apply_format=False)
+                rows.append((row.name, row.label, value))
+        df = pd.DataFrame(rows, columns=['fact', 'label', 'value'])
+        return df
 
     def __rich__(self):
-        assets_table = Table("", "", box=box.ROUNDED, title='Assets', title_style='bold deep_sky_blue1')
-        for row in self.asset_dataframe.itertuples():
-            assets_table.add_row(row.Fact, row.Value)
+        table = Table("",
+                      Column(self.end_date, justify="right"),
+                      box=box.SIMPLE_HEAVY,
+                      title=self.title,
+                      )
+        for index, row in enumerate(self.mapping):
+            if isinstance(row, list):
+                row = self.select_row_with_value(row)
+                if not row:
+                    continue
+            label = row.label.replace("\t", "  ")
+            if isinstance(row, HeaderRow):
+                table.add_row(f"{label.upper()}:", "")
+            elif isinstance(row, FactRow):
+                value = row.get_value(self.facts, self.end_date)
+                if value:
+                    style = "bold deep_sky_blue1" if row.total else None
+                    table.add_row(label, value, style=style)
+                    if row.total:
+                        table.add_section()
 
-        liab_equity_table = Table("", "", box=box.ROUNDED, title='Liabilities and Shareholders Equity',
-                                  title_style='bold deep_sky_blue1')
-        for row in self.liability_equity_dataframe.itertuples():
-            liab_equity_table.add_row(row.Fact, row.Value)
-
-        return Panel(
-            Group(
-                assets_table,
-                liab_equity_table
-            ), title="Balance Sheet"
-        )
+        return table
 
     def __repr__(self):
+
         return repr_rich(self.__rich__())
 
-    def __str__(self):
-        return "Balance Sheet()"
 
-    @classmethod
-    def from_gaap(cls, gaap: pd.DataFrame):
-        return cls(gaap)
+class BalanceSheet(FactTable):
+    title = "Balance Sheet"
 
+    mapping = [
+        HeaderRow(label='Assets'),
+        HeaderRow(label='Current Assets'),
+        FactRow(name="CashAndCashEquivalentsAtCarryingValue", label="\tCash and Cash Equivalents"),
+        FactRow(name="ShortTermInvestments", label="\tShort-term Investments"),
+        FactRow(name="OtherAssetsCurrent", label="\tOther Current Assets"),
+        FactRow(name="AssetsCurrent", label="\tCurrent Assets", total=True),
+        HeaderRow(label='Noncurrent Assets'),
+        FactRow(name="MarketableSecuritiesNoncurrent", label="\tMarketable Securities"),
+        FactRow(name="PropertyPlantAndEquipmentNet", label="\tProperty, Plant and Equipment"),
+        FactRow(name="OtherAssetsNoncurrent", label="\tOther Noncurrent Assets"),
+        FactRow(name="AssetsNoncurrent", label="\tTotal Noncurrent Assets", total=True),
+        FactRow(name="Assets", label="Total Assets", total=True),
 
-class CashflowStatement(FinancialTable):
-    CASHFLOW_FACTS = [
-        'NetIncomeLoss',
-        'DepreciationDepletionAndAmortization',
-        'DeferredIncomeTaxExpenseBenefit',
-        'OtherNoncashIncomeExpense',
-        'NetCashProvidedByUsedInOperatingActivities',
-        'PaymentsToAcquirePropertyPlantAndEquipment',
-        'PaymentsToAcquireBusinessesNetOfCashAcquired',
-        'PaymentsForProceedsFromOtherInvestingActivities',
-        'NetCashProvidedByUsedInInvestingActivities',
-        'RepaymentsOfLongTermDebt',
-        'NetCashProvidedByUsedInFinancingActivities',
-        'PaymentsOfDividends'
+        HeaderRow(label='Liabilities and Stockholders\' Equity'),
+        HeaderRow(label='Current Liabilities'),
+        FactRow(name="AccountsPayableCurrent", label="\tAccounts Payable"),
+        FactRow(name="OtherLiabilitiesCurrent", label="\tOther Current Liabilities"),
+        [FactRow(name="DeferredRevenueCurrent", label="\tDeferred Revenue"),
+         FactRow(name="ContractWithCustomerLiabilityCurrent", label="\tDeferred Revenue"),
+         ],
+        FactRow(name="CommercialPaper", label="\tCommercial Paper"),
+        FactRow(name="LongTermDebtCurrent", label="\tTerm Debt"),
+        FactRow(name="AccruedLiabilitiesCurrent", label="\tAccrued Liabilities"),
+
+        FactRow(name="LiabilitiesCurrent", label="\tTotal Current Liabilities", total=True),
+
+        HeaderRow(label='Noncurrent Liabilities'),
+        FactRow(name="LongTermDebtNoncurrent", label="\tNon-current Long Term Debt"),
+        FactRow(name="OtherLiabilitiesNoncurrent", label="\tOther Noncurrent Liabilities"),
+        FactRow(name="LiabilitiesNoncurrent", label="\tTotal Noncurrent Liabilities", total=True),
+        FactRow(name="Liabilities", label="Total Liabilities", total=True),
+        HeaderRow(label='Stockholders\' Equity'),
+        [
+            FactRow(name="CommonStocksIncludingAdditionalPaidInCapital", label="\tCommon Stock and paid-in Capital"),
+            FactRow(name="CommonStockValue", label="\tCommon Stock"),
+        ],
+        FactRow(name="RetainedEarningsAccumulatedDeficit", label="\tRetained Earnings"),
+        FactRow(name="AccumulatedOtherComprehensiveIncomeLossNetOfTax", label="\tAccumulated Other Comprehensive Income"),
+        FactRow(name="StockholdersEquity", label="\tTotal Stockholders' Equity", total=True),
+        FactRow(name="LiabilitiesAndStockholdersEquity", label="Total Liabilities and Stockholders' Equity", total=True),
     ]
 
-    def __init__(self,
-                 gaap: pd.DataFrame):
-        super().__init__(gaap)
-
-    @property
-    def net_income(self):
-        return self.get_value('NetIncomeLoss')
-
-    @property
-    def depreciation_and_amortization(self):
-        return self.get_value('DepreciationDepletionAndAmortization')
-
-    @property
-    def deffered_income_tax(self):
-        return self.get_value('DeferredIncomeTax')
-
-    @property
-    def stock_based_compensation(self):
-        return self.get_value('StockBasedCompensation')
-
-    @property
-    def other_non_cash_items(self):
-        return self.get_value('OtherNoncashIncomeExpense')
-
-    @property
-    def net_cash_provided_by_operating_activities(self):
-        return self.get_value('NetCashProvidedByUsedInOperatingActivities')
-
-    @property
-    def cashflow_dataframe(self):
-        return self._get_facts_dataframe(CashflowStatement.CASHFLOW_FACTS)
-
-    def __rich__(self):
-        cashflow_table = Table("", "", box=box.ROUNDED)
-        for row in self.cashflow_dataframe.itertuples():
-            cashflow_table.add_row(row.Fact, row.Value)
-        return Panel(
-            Group(
-                cashflow_table
-            ), title="Cash Flow Statement"
-        )
-
-    def __str__(self):
-        return "Cash Flow Statement()"
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
-
-    @classmethod
-    def from_gaap(cls, gaap: pd.DataFrame):
-        return cls(gaap)
+    def __init__(self, facts: XbrlFacts, end_date: str = None):
+        super().__init__(facts, end_date)
 
 
-class IncomeStatement(FinancialTable):
-    INCOME_STATEMENT_FACTS = [
-        'RevenueFromContractWithCustomerExcludingAssessedTax',
-        'CostOfGoodsAndServicesSold',
-        'GrossProfit',
-        'OperatingExpenses',
-        'OperatingIncomeLoss',
-        'InvestmentIncomeInterestAndDividend',
-        'NetIncomeLoss',
-        'InterestExpense',
+class CashFlowStatement(FactTable):
+    title = "Cashflow Statement"
+    mapping = [
+        HeaderRow(label='Operating Activities'),
+        FactRow(name="NetIncomeLoss", label="\tNet Income"),
+        FactRow(name="DepreciationDepletionAndAmortization", label="\tDepreciation and Amortization"),
+        FactRow(name="ShareBasedCompensation", label="\tShare-based Compensation"),
+        FactRow(name="OtherNoncashIncomeExpense", label="\tOther Noncash Income/Expense"),
+        FactRow(name="IncreaseDecreaseInOtherCurrentAssets", label="\tChanges in Other Current Assets"),
+        FactRow(name="IncreaseDecreaseInAccountsPayable", label="\tChanges in Accounts Payable"),
+        FactRow(name="IncreaseDecreaseInInventories", label="\tChanges in Inventories"),
+        FactRow(name="IncreaseDecreaseInContractWithCustomerLiability", label="\tChanges in Deferred Revenue"),
+        FactRow(name="NetCashProvidedByUsedInOperatingActivities", label="\tNet Cash Provided by Operating Activities",
+                total=True),
+
+        HeaderRow(label='Investing Activities'),
+        FactRow(name="PaymentsToAcquireAvailableForSaleSecuritiesDebt", label="\tPurchases of Marketable Securities"),
+        FactRow(name="ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities",
+                label="\tProceeds from Maturities of Marketable Securities"),
+        FactRow(name="ProceedsFromSaleOfAvailableForSaleSecuritiesDebt",
+                label="\tProceeds from Sale of Marketable Securities"),
+        FactRow(name="PaymentsToAcquirePropertyPlantAndEquipment",
+                label="\tPurchases of Property, Plant and Equipment"),
+        FactRow(name="PaymentsToAcquireInvestments", label="\tPayments to Acquire Investments"),
+
+        FactRow(name="PaymentsToAcquireBusinessesNetOfCashAcquired", label="\tPayments to Acquire Businesses"),
+        FactRow(name="IncreaseDecreaseInContractWithCustomerLiability", label="\tDeferred Revenue"),
+        FactRow(name="PaymentsForProceedsFromOtherInvestingActivities", label="\tOther Investing Activities"),
+        FactRow(name="NetCashProvidedByUsedInInvestingActivities", label="\tNet Cash Provided by Investing Activities",
+                total=True),
+
+        HeaderRow(label='Financing Activities'),
+        FactRow(name="PaymentsRelatedToTaxWithholdingForShareBasedCompensation",
+                label="\tPayments of Tax for Share-based Compensation"),
+        FactRow(name="PaymentsOfDividends", label="\tDividends Paid"),
+        FactRow(name="PaymentsForRepurchaseOfCommonStock", label="\tRepurchases of Common Stock"),
+        FactRow(name="ProceedsFromIssuanceOfCommonStock", label="\tProceeds from Issuance of Common Stock"),
+        FactRow(name="RepaymentsOfLongTermDebt", label="\tRepayments of Long-term Debt"),
+        FactRow(name="NetCashProvidedByUsedInFinancingActivities", label="\tNet Cash Provided by Financing Activities",
+                total=True),
+
+        FactRow(
+            name="CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+            label="Changes in Cash, cash equivalents and restricted cash"),
+        FactRow(name="CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+                label="Cash, cash equivalents and restricted cash", total=True),
     ]
 
-    def __init__(self,
-                 gaap: pd.DataFrame):
-        super().__init__(gaap)
+    def __init__(self, facts: XbrlFacts, end_date: str = None):
+        super().__init__(facts, end_date)
 
-    @property
-    def revenue(self):
-        return self.get_value('RevenueFromContractWithCustomerExcludingAssessedTax')
 
-    @property
-    def cost_of_revenue(self):
-        return self.get_value('CostOfGoodsAndServicesSold')
+class IncomeStatement(FactTable):
+    title = "Consolidated Statement of Operations"
+    mapping = [
+        [
+            FactRow(name="Revenues", label="Revenue", total=True),
+            FactRow(name="RevenueFromContractWithCustomerExcludingAssessedTax", label="Total Net Sales", total=True),
+        ],
+        HeaderRow(label='Cost of Sales'),
+        [
+            FactRow(name="CostOfRevenue", label="\tCost of Revenue"),
+            FactRow(name="CostOfGoodsAndServicesSold", label="Cost Goods and Services Sold", total=True)
+        ],
+        FactRow(name="GrossProfit", label="Gross Profit", total=True),
+        HeaderRow(label="Operating Expenses"),
+        FactRow(name='MarketingExpense', label='\tMarketing Expense'),
+        FactRow(name='ResearchAndDevelopmentExpense', label='\tResearch and Development Expenses'),
+        [
+            FactRow(name='GeneralAndAdministrativeExpense', label='\tGeneral and Administrative Expenses'),
+            FactRow(name='SellingGeneralAndAdministrativeExpense',
+                    label='\tSelling General and Administrative Expenses'),
+        ],
+        FactRow(name='OperatingExpenses', label='Total Operating Expenses', total=True),
+        FactRow(name='OperatingIncomeLoss', label='Operating Income'),
+        HeaderRow(label='Other Income/Expense'),
+        FactRow(name='InterestExpense', label='\tInterest Expense'),
+        FactRow(name='NonoperatingIncomeExpense', label='\tNonoperating Income'),
+        FactRow(name='IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest',
+                label='Income Before Taxes', total=True),
+        FactRow(name='IncomeTaxExpenseBenefit', label='Income Tax Expense'),
 
-    @property
-    def research_and_development_expenses(self):
-        return self.get_value('ResearchAndDevelopmentExpense')
+        FactRow(name='NetIncomeLoss', label='Net Income', total=True),
+        HeaderRow(label='Earnings Per Share'),
+        FactRow(name='EarningsPerShareBasic', label='\tBasic', format="{:,.2f}"),
+        FactRow(name='EarningsPerShareDiluted', label='\tDiluted', format="{:,.2f}"),
+        HeaderRow(label='Weighted Average Shares Outstanding'),
+        FactRow(name='WeightedAverageNumberOfSharesOutstandingBasic', label='\tBasic'),
+        FactRow(name='WeightedAverageNumberOfDilutedSharesOutstanding', label='\tDiluted')
+    ]
 
-    @property
-    def selling_general_and_administrative_expenses(self):
-        return self.get_value('SellingGeneralAndAdministrativeExpense')
-
-    @property
-    def income_before_tax(self):
-        return self.get_value(
-            'IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest')
-
-    @property
-    def income_tax_expense(self):
-        return self.get_value('IncomeTaxExpenseBenefit')
-
-    @property
-    def gross_profit(self):
-        return self.get_value('GrossProfit')
-
-    @property
-    def operating_income(self):
-        return self.get_value('OperatingIncomeLoss')
-
-    @property
-    def operating_expenses(self):
-        return self.get_value('OperatingExpenses')
-
-    @property
-    def net_income(self):
-        return self.get_value('NetIncomeLoss')
-
-    @property
-    def interest_and_dividend_incoms(self):
-        return self.get_value('InvestmentIncomeInterestAndDividend')
-
-    @property
-    def depreciation_and_amortization(self):
-        return self.get_value('DepreciationDepletionAndAmortization')
-
-    @property
-    def earnings_per_share(self):
-        return self.get_value('EarningsPerShareBasic', currency=False)
-
-    @property
-    def interest_expense(self):
-        return self.get_value('InterestExpense')
-
-    @property
-    def income_statement_dataframe(self):
-        return self._get_facts_dataframe(IncomeStatement.INCOME_STATEMENT_FACTS)
-
-    def __rich__(self):
-        income_table = Table("", "", box=box.ROUNDED)
-        for row in self.income_statement_dataframe.itertuples():
-            income_table.add_row(row.Fact, row.Value)
-
-        return Panel(
-            income_table,
-            title="Income Statement"
-        )
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
-
-    def __str__(self):
-        return "Income Statement()"
-
-    @classmethod
-    def from_gaap(cls, gaap: pd.DataFrame):
-        return cls(gaap)
+    def __init__(self, facts: XbrlFacts, end_date: str = None):
+        super().__init__(facts, end_date)
 
 
 class Financials:
@@ -409,10 +274,10 @@ class Financials:
     # Financials is a base class for IncomeStatement, BalanceSheet, CashFlowStatement
     def __init__(self,
                  balance_sheet: BalanceSheet,
-                 cash_flow_statement: CashflowStatement,
+                 cash_flow_statement: CashFlowStatement,
                  income_statement: IncomeStatement):
         self.balance_sheet: BalanceSheet = balance_sheet
-        self.cash_flow_statement: CashflowStatement = cash_flow_statement
+        self.cash_flow_statement: CashFlowStatement = cash_flow_statement
         self.income_statement: IncomeStatement = income_statement
 
     def __rich__(self):
@@ -430,9 +295,9 @@ class Financials:
         return "Company Financials()"
 
     @classmethod
-    def from_gaap(cls,
-                  gaap: pd.DataFrame):
-        balance_sheet = BalanceSheet.from_gaap(gaap)
-        income_statement = IncomeStatement.from_gaap(gaap)
-        cash_flow_statement = CashflowStatement.from_gaap(gaap)
+    def from_xbrl(cls,
+                  xbrl: FilingXbrl):
+        balance_sheet = BalanceSheet(xbrl.facts)
+        income_statement = IncomeStatement(xbrl.facts)
+        cash_flow_statement = CashFlowStatement(xbrl.facts)
         return cls(balance_sheet, cash_flow_statement, income_statement)

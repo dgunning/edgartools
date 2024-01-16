@@ -40,7 +40,9 @@ def test_tenq_filing():
     tenq: TenQ = filing.obj()
     assert tenq
     assert tenq.financials is not None
-    assert tenq.financials.balance_sheet.asset_dataframe is not None
+    assert tenq.financials.balance_sheet
+    assert tenq.financials.income_statement
+    assert tenq.financials.cash_flow_statement
     print()
     print(tenq)
 

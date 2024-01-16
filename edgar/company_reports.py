@@ -1,12 +1,10 @@
+from datetime import datetime
 from functools import lru_cache, partial
 from typing import Dict, List
 
-from rich import print, box
+from rich import print
 from rich.console import Group, Text
 from rich.panel import Panel
-from rich.table import Table
-import re
-from datetime import datetime
 
 from edgar._rich import repr_rich
 from edgar.financials import Financials
@@ -55,7 +53,7 @@ class CompanyReport:
     def financials(self):
         xbrl = self._filing.xbrl()
         if xbrl:
-            return Financials.from_gaap(xbrl.gaap)
+            return Financials.from_xbrl(xbrl)
 
     @property
     @lru_cache(maxsize=1)
