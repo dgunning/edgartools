@@ -114,9 +114,10 @@ It is a JSON endpoint and `edgartools` parses the JSON into a structured dataset
 
 ### Getting facts for a company
 To get company facts, first get the company, then call `company.get_facts()`
+
 ```python
 company = Company("SNOW")
-company_facts = company.get_facts()
+company_facts = company.get_facts_for_namespace()
 ```
 The result is a `CompanyFacts` object which wraps the underlying facts and provides convenient ways of working
 with the facts data. To get access to the underyling data use the `facts` property.
