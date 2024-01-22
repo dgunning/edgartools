@@ -67,6 +67,12 @@ def test_xbrl_facts_get_dei():
     assert xbrl_facts.get_dei("EntityFilerCategory") == 'Accelerated Filer'
     assert xbrl_facts.period_end_date == '2017-12-31'
 
+def test_xbrl_get_dei():
+    filing = Filing(company='ADVANCED MICRO DEVICES INC', cik=2488, form='10-K', filing_date='2023-02-27', accession_no='0000002488-23-000047')
+    xbrl = filing.xbrl()
+    assert xbrl.facts.get_dei('DocumentPeriodEndDate') == '2022-12-31'
+    assert xbrl.period_end_date == '2022-12-31'
+
 
 
 

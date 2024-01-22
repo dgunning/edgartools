@@ -119,7 +119,8 @@ class XbrlFacts:
     def get_dei(self, fact: str):
         res = self.data.query(f"namespace=='dei' & fact=='{fact}' & dimensions.isnull()")
         if not res.empty:
-            return res.value.item()
+            # Get the first row
+            return res.iloc[0].value
 
     @property
     def period_end_date(self):

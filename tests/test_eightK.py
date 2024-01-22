@@ -17,7 +17,7 @@ def test_eightk_item_parsing_after_dollar_sign():
     filing = Filing(company='NexPoint Capital, Inc.', cik=1588272, form='8-K', filing_date='2023-12-20',
                     accession_no='0001193125-23-300021')
 
-    with Path('data/Nextpoint.8k.html').open('w') as f:
+    with Path('data/NextPoint.8k.html').open('w') as f:
         f.write(filing.html())
     # partition the html and test if the text is in one of the elements
     elements = partition_html(text=filing.html())
