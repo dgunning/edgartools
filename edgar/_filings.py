@@ -1003,7 +1003,7 @@ class SubjectCompany:
 
         subject_company_renderables = [company_information_table]
 
-        # Fiing Information
+        # Filing Information
         if self.filing_information:
             filing_values_table = Table("File Number", "SEC Act", "Film Number", box=box.SIMPLE)
             filing_values_table.add_row(self.filing_information.file_number,
@@ -1115,7 +1115,7 @@ class SECHeader:
         self.filers: List[Filer] = filers
         self.reporting_owners: List[ReportingOwner] = reporting_owners
         self.issuers: List[Issuer] = issuers
-        self.subject_companies = subject_companies
+        self.subject_companies: List[SubjectCompany] = subject_companies
 
     @property
     def accession_number(self):
@@ -1147,6 +1147,18 @@ class SECHeader:
         if acceptance:
             return datetime.strptime(acceptance, "%Y%m%d%H%M%S")
 
+    @property
+    def file_numbers(self):
+        """Return the file numbers associated with this filing"""
+        numbers = []
+        if self.filers:
+            numbers.extend([filer.filing_information.file_number for filer in self.filers])
+        if self.reporting_owners:
+            numbers.extend([reporting_owner.filing_information.file_number for reporting_owner in self.reporting_owners])
+        if self.subject_companies:
+            numbers.extend([subject_company.filing_information.file_number for subject_company in self.subject_companies])
+        return list(set(numbers))
+
     @classmethod
     def parse(cls, header_text: str):
         data = {}
@@ -1154,13 +1166,22 @@ class SECHeader:
         current_subheader = None
 
         # Read the lines in the content. This starts with <ACCEPTANCE-DATETIME>20230606213204
-        for line in header_text.split('\n'):
+        lines = header_text.split('\n')
+        for index, line in enumerate(header_text.split('\n')):
             if not line:
                 continue
 
-            # The line ends with a ':' meaning nested content follows e.g. "REPORTING-OWNER:"
-            if line.rstrip('\t').endswith(':'):
+            # Keep track of the nesting level
+            nesting_level = len(line) - len(line.lstrip('\t'))
 
+            # Nested increases
+            nesting_will_increase = index < len(lines) -1 and nesting_level < len(lines[index+1]) - len(lines[index+1].lstrip('\t'))
+
+            # The line ends with a ':' meaning nested content follows e.g. "REPORTING-OWNER:"
+            line_ends_with_colon = line.rstrip('\t').endswith(':')
+
+            is_header = (nesting_level == 0 and line_ends_with_colon) or nesting_will_increase
+            if is_header:
                 # Nested line means a subheader e.g. "OWNER DATA:"
                 if line.startswith('\t'):
                     current_subheader = line.strip().split(':')[0]

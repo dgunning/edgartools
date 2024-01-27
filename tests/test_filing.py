@@ -2,20 +2,19 @@ import datetime
 import re
 from functools import lru_cache
 from pathlib import Path
+from typing import List
 
 import httpx
 import humanize
 import pandas as pd
 import pytest
-from typing import List
-
-from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number, find
-from edgar.core import default_page_size
-from edgar._filings import FilingHomepage, SECHeader, read_fixed_width_index, form_specs, company_specs, Attachments, \
-    Attachment, Filer, get_current_filings
-
-from edgar.company_reports import TenK
 from rich import print
+
+from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
+from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachments, \
+    Attachment, get_current_filings
+from edgar.company_reports import TenK
+from edgar.core import default_page_size
 
 pd.options.display.max_colwidth = 200
 
@@ -374,8 +373,6 @@ def test_filing_url_for_ixbrl_filing():
     actual_url = 'https://www.sec.gov/Archives/edgar/data/1084869/000143774923002992/flws20230101_10q.htm'
 
     assert ONE_800_FLOWERS_10Q.document.url == actual_url
-
-
 
 
 def test_filing_html_for_ixbrl_filing():
@@ -791,265 +788,6 @@ def test_text_url_for_filing():
            == 'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt'
 
 
-def test_filing_sec_header():
-    sec_header: SECHeader = carbo_10K.header
-    print()
-    print(sec_header)
-    assert len(sec_header.filers) == 1
-    filer = sec_header.filers[0]
-    assert filer
-    assert filer.company_information.name == 'CARBO CERAMICS INC'
-    assert filer.company_information.cik == '0001009672'
-    assert filer.company_information.irs_number == '721100013'
-    assert filer.company_information.state_of_incorporation == 'DE'
-    assert filer.company_information.fiscal_year_end == '1231'
-    assert filer.company_information.sic == 'ABRASIVE ASBESTOS & MISC NONMETALLIC MINERAL PRODUCTS [3290]'
-
-    assert filer.filing_information.form == '10-K'
-    assert filer.filing_information.file_number == '001-15903'
-    assert filer.filing_information.film_number == '18674418'
-    assert filer.filing_information.sec_act == '1934 Act'
-
-    assert filer.business_address.street1 == '575 NORTH DAIRY ASHFORD'
-    assert filer.business_address.street2 == 'SUITE 300'
-    assert filer.business_address.city == 'HOUSTON'
-    assert filer.business_address.state_or_country == 'TX'
-    assert filer.business_address.zipcode == '77079'
-
-
-def test_parse_sec_header_with_filer():
-    header_content = Path('data/secheader.424B5.abeona.txt').read_text()
-    sec_header = SECHeader.parse(header_content)
-    print()
-    print(sec_header)
-    # Metadata
-    assert sec_header.filing_metadata
-    assert sec_header.filing_metadata['FILED AS OF DATE'] == '20230607'
-    assert sec_header.filing_date == '20230607'
-    assert sec_header.accession_number == '0001493152-23-020412'
-    assert sec_header.acceptance_datetime == datetime.datetime(2023, 6, 7, 16, 10, 23)
-
-    # FILERS
-    assert sec_header.filers
-    filer = sec_header.filers[0]
-
-    # Company Information
-    assert filer.company_information.name == 'ABEONA THERAPEUTICS INC.'
-    assert filer.company_information.cik == '0000318306'
-    assert filer.company_information.irs_number == '830221517'
-    assert filer.company_information.state_of_incorporation == 'DE'
-    assert filer.company_information.fiscal_year_end == '1231'
-    assert filer.company_information.sic == 'PHARMACEUTICAL PREPARATIONS [2834]'
-
-    # Business Address
-    assert filer.business_address.street1 == '6555 CARNEGIE AVE, 4TH FLOOR'
-    assert filer.business_address.city == 'CLEVELAND'
-    assert filer.business_address.state_or_country == 'OH'
-    assert filer.business_address.zipcode == '44103'
-
-    # Mailing Address
-    assert filer.mailing_address.street1 == '6555 CARNEGIE AVE, 4TH FLOOR'
-    assert filer.mailing_address.city == 'CLEVELAND'
-    assert filer.mailing_address.state_or_country == 'OH'
-    assert filer.mailing_address.zipcode == '44103'
-
-    assert len(filer.former_company_names) == 3
-    assert filer.former_company_names[0].name == 'PLASMATECH BIOPHARMACEUTICALS INC'
-
-    assert not sec_header.reporting_owners
-    assert not sec_header.issuers
-
-    # Goldman Sachs
-    # This Goldman Sachs filing has an extra : in the Street2 field
-    # 		STREET 2:		ATT: PRIVATE CREDIT GROUP
-    header_content = Path('data/secheader.N2A.goldman.txt').read_text()
-    print(header_content)
-    sec_header = SECHeader.parse(header_content)
-    assert sec_header.filers[0].business_address.street1 == '200 WEST STREET'
-    assert sec_header.filers[0].business_address.street2 == 'ATT: PRIVATE CREDIT GROUP'
-
-
-def test_parse_sec_header_with_reporting_owner():
-    header_content = Path('data/secheader.4.evercommerce.txt').read_text()
-    print(header_content)
-    sec_header = SECHeader.parse(header_content)
-    print(sec_header)
-
-    assert sec_header.filers == []
-    reporting_owner = sec_header.reporting_owners[0]
-    assert reporting_owner
-    assert reporting_owner.owner.name == 'Driggers Shane'
-    assert reporting_owner.owner.cik == '0001927858'
-    assert reporting_owner.filing_information.form == '4'
-    assert reporting_owner.filing_information.file_number == '001-40575'
-    assert reporting_owner.filing_information.film_number == '23997535'
-
-    assert sec_header.issuers
-    issuer = sec_header.issuers[0]
-    assert issuer.company_information.name == 'EverCommerce Inc.'
-    assert issuer.company_information.cik == '0001853145'
-    assert issuer.company_information.sic == 'SERVICES-PREPACKAGED SOFTWARE [7372]'
-    assert issuer.company_information.irs_number == '814063428'
-    assert issuer.company_information.state_of_incorporation == 'DE'
-
-    assert issuer.business_address.street1 == '3601 WALNUT STREET'
-    assert issuer.business_address.street2 == 'SUITE 400'
-    assert issuer.business_address.city == 'DENVER'
-    assert issuer.business_address.state_or_country == 'CO'
-    assert issuer.business_address.zipcode == '80205'
-
-
-def test_periof_of_report_from_sec_header():
-    filing = Filing(form='13F-HR', filing_date='2023-09-21', company='Halpern Financial, Inc.', cik=1994335,
-                    accession_no='0001994335-23-000001')
-    sec_header = filing.header
-    assert sec_header.period_of_report == '20191231'
-
-
-def test_parse_header_with_subject_company():
-    sec_header = SECHeader.parse("""
-<ACCEPTANCE-DATETIME>20230612150550
-ACCESSION NUMBER:		0001971857-23-000246
-CONFORMED SUBMISSION TYPE:	144
-PUBLIC DOCUMENT COUNT:		1
-FILED AS OF DATE:		20230612
-DATE AS OF CHANGE:		20230612
-
-SUBJECT COMPANY:	
-
-	COMPANY DATA:	
-		COMPANY CONFORMED NAME:			CONSUMERS ENERGY CO
-		CENTRAL INDEX KEY:			0000201533
-		STANDARD INDUSTRIAL CLASSIFICATION:	ELECTRIC & OTHER SERVICES COMBINED [4931]
-		IRS NUMBER:				380442310
-		STATE OF INCORPORATION:			MI
-		FISCAL YEAR END:			1231
-
-	FILING VALUES:
-		FORM TYPE:		144
-		SEC ACT:		1933 Act
-		SEC FILE NUMBER:	001-05611
-		FILM NUMBER:		231007818
-
-	BUSINESS ADDRESS:	
-		STREET 1:		ONE ENERGY PLAZA
-		CITY:			JACKSON
-		STATE:			MI
-		ZIP:			49201
-		BUSINESS PHONE:		5177880550
-
-	MAIL ADDRESS:	
-		STREET 1:		ONE ENERGY PLAZA
-		CITY:			JACKSON
-		STATE:			MI
-		ZIP:			49201
-
-	FORMER COMPANY:	
-		FORMER CONFORMED NAME:	CONSUMERS POWER CO
-		DATE OF NAME CHANGE:	19920703
-
-REPORTING-OWNER:	
-
-	COMPANY DATA:	
-		COMPANY CONFORMED NAME:			Hendrian Catherine A
-		CENTRAL INDEX KEY:			0001701746
-
-	FILING VALUES:
-		FORM TYPE:		144
-
-	MAIL ADDRESS:	
-		STREET 1:		ONE ENERGY PLAZA
-		CITY:			JACKSON
-		STATE:			MI
-		ZIP:			49201
-		""")
-    print(sec_header)
-    assert sec_header.subject_companies
-    subject_company = sec_header.subject_companies[0]
-    assert subject_company.company_information.name == 'CONSUMERS ENERGY CO'
-    assert subject_company.company_information.cik == '0000201533'
-    assert subject_company.company_information.sic == 'ELECTRIC & OTHER SERVICES COMBINED [4931]'
-    assert subject_company.company_information.irs_number == '380442310'
-    assert subject_company.company_information.state_of_incorporation == 'MI'
-    assert subject_company.company_information.fiscal_year_end == '1231'
-
-    assert subject_company.business_address.street1 == 'ONE ENERGY PLAZA'
-    assert subject_company.business_address.city == 'JACKSON'
-    assert subject_company.business_address.state_or_country == 'MI'
-    assert subject_company.business_address.zipcode == '49201'
-
-    assert subject_company.mailing_address.street1 == 'ONE ENERGY PLAZA'
-    assert subject_company.mailing_address.city == 'JACKSON'
-    assert subject_company.mailing_address.state_or_country == 'MI'
-    assert subject_company.mailing_address.zipcode == '49201'
-
-    # Reporting owner
-    assert sec_header.reporting_owners
-    reporting_owner = sec_header.reporting_owners[0]
-    assert reporting_owner.company_information.name == 'Hendrian Catherine A'
-    assert reporting_owner.company_information.cik == '0001701746'
-
-    assert len(subject_company.former_company_names) == 1
-
-
-def test_parse_header_filing_with_multiple_filers():
-    # Formatting this file screws up the test. The text should be tight to the left margin
-    header_text = Path('data/MultipleFilersHeader.txt').read_text()
-    sec_header=SECHeader.parse(header_text)
-    print(sec_header)
-    assert len(sec_header.filers) == 2
-
-    filer0 = sec_header.filers[0]
-    assert filer0.company_information.name == 'First National Master Note Trust'
-    assert filer0.company_information.cik == '0001396730'
-    assert filer0.company_information.irs_number == '000000000'
-    assert filer0.company_information.state_of_incorporation == 'DE'
-    assert filer0.filing_information.form == '10-D'
-    assert filer0.filing_information.sec_act == '1934 Act'
-    assert filer0.filing_information.file_number == '333-140273-01'
-    assert filer0.filing_information.film_number == '231004915'
-    assert filer0.business_address.street1 == '1620 DODGE STREET STOP CODE 3395'
-    assert filer0.business_address.city == 'OMAHA'
-    assert filer0.business_address.state_or_country == 'NE'
-    assert filer0.business_address.zipcode == '68197'
-    assert filer0.mailing_address.street1 == '1620 DODGE STREET STOP CODE 3395'
-    assert filer0.mailing_address.city == 'OMAHA'
-    assert filer0.mailing_address.state_or_country == 'NE'
-    assert filer0.mailing_address.zipcode == '68197'
-
-    filer1 = sec_header.filers[1]
-    assert filer1.company_information.name == 'FIRST NATIONAL FUNDING LLC'
-    assert filer1.company_information.cik == '0001171040'
-    assert filer1.company_information.irs_number == '000000000'
-    assert filer1.company_information.state_of_incorporation == 'NE'
-    assert filer1.filing_information.form == '10-D'
-    assert filer1.filing_information.sec_act == '1934 Act'
-    assert filer1.filing_information.file_number == '000-50139'
-    assert filer1.filing_information.film_number == '231004916'
-    assert not filer1.business_address
-
-
-def test_parse_header_filing_with_multiple_former_companies():
-    header_text = Path('data/MultipleFormerCompaniesHeader.txt').read_text()
-    sec_header = SECHeader.parse(header_text)
-    print(sec_header)
-    assert len(sec_header.filers) == 1
-    filer: Filer = sec_header.filers[0]
-    assert len(filer.former_company_names) == 3
-    assert filer.former_company_names[0].name == 'PEPTIDE TECHNOLOGIES, INC.'
-    assert filer.former_company_names[1].name == 'Eternelle Skincare Products Inc.'
-    assert filer.former_company_names[2].name == 'PEPTIDE TECHNOLOGIES, INC.'
-    assert filer.former_company_names[0].date_of_change == '20180309'
-    assert filer.former_company_names[1].date_of_change == '20170621'
-    assert filer.former_company_names[2].date_of_change == '20111007'
-
-def test_sech_header_for_fund():
-    filing = Filing(form='497K', filing_date='2022-11-01', company='JAMES ADVANTAGE FUNDS', cik=1045487, accession_no='0001398344-22-021082')
-    header = filing.header
-    # We don't have partially parsed keys like "/SERIES"
-    assert header.filing_metadata.get("/SERIES", None) is None
-
-
 def test_get_current_filings():
     filings = get_current_filings()
     print()
@@ -1065,6 +803,7 @@ def test_get_current_filings_by_form():
     print()
     print(filings)
     assert not filings.empty
+
 
 def test_filings_get_by_invalid_accession_number(capsys):
     assert cached_filings(2022, 1).get('INVALID-ACCESS-NUMBER') is None
