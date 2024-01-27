@@ -7,14 +7,13 @@ from edgar.ownership import compute_average_price, compute_total_value
 from edgar._filings import Filing
 from bs4 import BeautifulSoup
 
-
 pd.options.display.max_columns = None
 
 snow_form3 = Ownership.from_xml(Path('data/form3.snow.xml').read_text())
 snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
 snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
 aapl_form4 = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
-                             accession_no='0000320193-23-000089').obj()
+                    accession_no='0000320193-23-000089').obj()
 
 
 def test_translate():
@@ -131,8 +130,10 @@ def test_parse_form3_with_non_derivatives():
     assert ownership.signatures[0].signature == ("/s/ Warren E. Buffett, on behalf of himself and each other "
                                                  "reporting person hereunder")
 
+
 def test_reporting_relationship():
-    filing = Filing(form='4', filing_date='2023-10-18', company='ANDERSON SCOTT LLOYD', cik=1868662, accession_no='0001415889-23-014419')
+    filing = Filing(form='4', filing_date='2023-10-18', company='ANDERSON SCOTT LLOYD', cik=1868662,
+                    accession_no='0001415889-23-014419')
 
     owner = filing.obj().reporting_owners[0]
 
@@ -140,6 +141,7 @@ def test_reporting_relationship():
     assert not owner.is_ten_pct_owner
     assert not owner.is_officer
     assert not owner.is_other
+
 
 def test_post_transaction_values():
     transaction: NonDerivativeTransaction = snow_form4.non_derivative_table.transactions[0]
@@ -194,11 +196,11 @@ def test_derivative_transaction_get_item():
 def test_parse_reporting_owners_from_xml():
     soup = BeautifulSoup(Path('data/form3.snow.nonderiv.xml').read_text(), 'xml')
     reporting_owner_tags = soup.find_all("reportingOwner")
-    reporting_owners:ReportingOwners = ReportingOwners.from_reporting_owner_tags(reporting_owner_tags)
+    reporting_owners: ReportingOwners = ReportingOwners.from_reporting_owner_tags(reporting_owner_tags, remarks='')
     assert reporting_owners
     assert len(reporting_owners) == 2
 
-    owner:Owner = reporting_owners[0]
+    owner: Owner = reporting_owners[0]
     assert owner.name == 'BERKSHIRE HATHAWAY INC'
     assert owner.cik == '0001067983'
     assert not owner.is_director
@@ -362,6 +364,7 @@ def test_form4_derivative_trades():
     assert derivative_trades.data.iloc[0].Security == 'Restricted Stock Unit'
     assert derivative_trades.data.iloc[0].Shares == '511000'
 
+
 """
 def test_form4_derivative_trades_include_exercised():
 
@@ -372,6 +375,7 @@ def test_form4_derivative_trades_include_exercised():
     assert derivatives.data.iloc[0].Security == 'Common Stock, par value $.004'
     assert derivatives.data.iloc[0].Shares == 321
 """
+
 
 def test_insider_stock_summary():
     common_trade_summary = aapl_form4.insider_stock_summary
@@ -395,14 +399,46 @@ def test_form4_fields_summary():
     print(form4)
     assert form4.shares_traded == 2700.0
 
+
 def test_compute_total_value():
     shares = pd.Series([100, 200, 300])
     price = pd.Series([10, 20, 30])
     total_value = compute_total_value(shares, price)
     assert total_value == 14000
 
+
 def test_compute_average_price():
     shares = pd.Series([100, 200, 300])
     price = pd.Series([10, 20, 30])
     average_price = compute_average_price(shares, price)
     assert average_price == Decimal('23.33')
+
+
+def test_compute_ownership_title():
+    assert Owner.display_title(officer_title="Chief Executive Officer", is_director=True,
+                               is_ten_pct_owner=False) == "Chief Executive Officer"
+    assert Owner.display_title(officer_title=None, is_director=True, is_ten_pct_owner=False) == "Director"
+    assert Owner.display_title(officer_title=None, is_director=False, is_officer=True,
+                               is_ten_pct_owner=False) == "Officer"
+    assert Owner.display_title(officer_title=None, is_director=False, is_officer=True,
+                               is_ten_pct_owner=True) == "Officer, 10% Owner"
+    assert Owner.display_title(officer_title=None, is_director=True, is_officer=False,
+                               is_ten_pct_owner=True) == "Director, 10% Owner"
+
+
+def test_ownership_with_multiple_owners():
+    filing = Filing(form='4', filing_date='2024-01-26', company='OrbiMed Genesis GP LLC', cik=1808744, accession_no = '0000950170-24-008053')
+    form4:Ownership = filing.obj()
+    print()
+    print(form4)
+    assert len(form4.reporting_owners) == 8
+    assert form4.reporting_owners[0].name == 'Advisors Llc Orbimed'
+    assert form4.reporting_owners[0].is_ten_pct_owner
+    assert form4.reporting_owners[0].position == 'Director, 10% Owner'
+    assert form4.reporting_owners[0].officer_title is None
+
+def test_ownership_with_remarks():
+    filing = Filing(form='4', filing_date='2021-09-17', company='Kerrest Jacques Frederic', cik=1700842, accession_no='0001209191-21-056678')
+    form4:Ownership = filing.obj()
+    assert form4.reporting_owners[0].officer_title == 'Executive Vice Chairperson of the Board and Chief Operating Officer'
+    assert form4.remarks == 'Executive Vice Chairperson of the Board and Chief Operating Officer'
