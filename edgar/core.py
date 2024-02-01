@@ -597,22 +597,25 @@ def reverse_name(name):
     # Split the name into parts
     parts = name.split()
 
-    # Handle the cases where there's a 'Jr', 'Sr', 'II', 'III', etc.
-    special_parts = ['Jr', 'Sr', 'II', 'III']
-    last_part = parts[-1] if len(parts) > 1 else None
+    # Handle the cases where there's a 'Jr', 'Sr', 'II', 'III', 'MD', etc., or 'ET AL'
+    special_parts = ['Jr', 'Sr', 'II', 'III', 'MD', 'ET', 'AL', 'et', 'al']
+    special_parts_with_period = [part + '.' for part in special_parts if part not in ['II', 'III']] + special_parts
+    special_part_indices = [i for i, part in enumerate(parts) if part in special_parts_with_period or (i > 0 and parts[i-1].rstrip('.') + ' ' + part.rstrip('.') == 'ET AL')]
 
-    # Check if the last part of the name is a special part
-    if last_part in special_parts:
-        # Remove the special part from the name parts
-        parts = parts[:-1]
-        # Reverse the parts and add the special part after the last name
-        reversed_name = " ".join(parts[1:]) + f" {parts[0]} {last_part}"
+    # Extract the special parts and the main name parts
+    special_parts_list = [parts[i] for i in special_part_indices]
+    main_name_parts = [part for i, part in enumerate(parts) if i not in special_part_indices]
 
-    else:
-        # Just reverse the name
-        reversed_name = " ".join(parts[1:]) + f" {parts[0]}"
+    # Reverse the main name parts
+    reversed_main_parts = [part.title() for part in main_name_parts[1:]] + [main_name_parts[0].title()]
+    reversed_name = " ".join(reversed_main_parts)
 
-    return reversed_name.title()
+    # Append the special parts to the reversed name, maintaining their original case
+    if special_parts_list:
+        reversed_name += " " + " ".join(special_parts_list)
+
+    return reversed_name
+
 
 def yes_no(value: bool) -> str:
     return "Yes" if value else "No"
