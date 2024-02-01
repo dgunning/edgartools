@@ -19,7 +19,6 @@ from bs4 import Tag
 from pydantic import BaseModel
 from rich import box
 from rich.console import Group, Text
-from rich.columns import Columns
 from rich.panel import Panel
 from rich.table import Table, Column
 
