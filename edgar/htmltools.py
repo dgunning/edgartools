@@ -81,8 +81,7 @@ def html_to_text(html_str: str,
                  ignore_tables: bool = True,
                  sep: str = '\n'
                  ) -> str:
-    if is_inline_xbrl(html_str):
-        html_str = strip_ixbrl_tags(html_str)
+
     """Convert the html to text using the unstructured library"""
     return sep.join(html_sections(html_str, ignore_tables=ignore_tables))
 

@@ -164,6 +164,13 @@ def test_strip_xbrl_tags_from_html():
     print(soup)
 
 
+def test_html_text_works_with_no_failures():
+    # This used to fail because of a bug in the html_to_text function
+    filing = Filing(form='10-K', filing_date='2024-01-31', company='ADVANCED MICRO DEVICES INC', cik=2488,
+                    accession_no='0000002488-24-000012')
+    assert filing.text()
+
+
 def test_strip_xbrl_tags_from_filing_text():
     filing = Filing(company='NexPoint Capital, Inc.', cik=1588272, form='8-K', filing_date='2023-12-20',
                     accession_no='0001193125-23-300021')
