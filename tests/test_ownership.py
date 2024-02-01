@@ -3,7 +3,7 @@ import pandas as pd
 from rich import print
 from decimal import Decimal
 from edgar.ownership import *
-from edgar.ownership import compute_average_price, compute_total_value
+from edgar.ownership import compute_average_price, compute_total_value, format_amount, is_numeric
 from edgar._filings import Filing
 from bs4 import BeautifulSoup
 
@@ -12,26 +12,35 @@ pd.options.display.max_columns = None
 snow_form3 = Ownership.from_xml(Path('data/form3.snow.xml').read_text())
 snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
 snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
-aapl_form4 = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
-                    accession_no='0000320193-23-000089').obj()
+aapl_form4: Ownership = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
+                               accession_no='0000320193-23-000089').obj()
 
+def test_is_numeric():
+    # Test that these pandas series are numeric
+    assert is_numeric(pd.Series([1, 2, 3]))
+    assert is_numeric(pd.Series([1.0, 2.0, 3.0]))
+    assert is_numeric(pd.Series([1.0, 2.0, 3.0, None]))
+    assert not is_numeric(pd.Series([1.0, 2.0, 3.0, '']))
+    assert not is_numeric(pd.Series([1.0, 2.0, 3.0, 'None']))
+    assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'nan']))
+    assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'NAN']))
 
 def test_translate():
     assert translate_ownership('I') == 'Indirect'
     assert translate_ownership('D') == 'Direct'
 
 
-holding_xml = Path("data/derivative_holding.xml").read_text()
-
 
 def test_derivative_table_repr():
     form3_content = Path('data/form3.snow.xml').read_text()
     ownership = Ownership.from_xml(form3_content)
     print()
-    print(snow_form4.derivative_table.transactions)
-    print(ownership.derivative_table.holdings)
-    print(ownership.derivative_table.transactions)
-    print(ownership.derivative_table)
+    print(ownership)
+    print()
+    #print(snow_form4.derivative_table.transactions)
+    #print(ownership.derivative_table.holdings)
+    #print(ownership.derivative_table.transactions)
+    #print(ownership.derivative_table)
 
 
 def test_non_derivatives_repr():
@@ -94,7 +103,7 @@ def test_parse_form3_with_derivatives():
     assert len(ownership.derivative_table.transactions) == 0
 
     assert len(ownership.signatures) == 1
-    assert ownership.signatures[0].signature == "/s/ Travis Shrout, Attorney-in-Fact"
+    assert ownership.signatures.signatures[0].signature == "/s/ Travis Shrout, Attorney-in-Fact"
 
     # Security
     print(ownership.derivative_table.holdings.data)
@@ -127,7 +136,7 @@ def test_parse_form3_with_non_derivatives():
 
     # Signatures
     assert len(ownership.signatures) == 1
-    assert ownership.signatures[0].signature == ("/s/ Warren E. Buffett, on behalf of himself and each other "
+    assert ownership.signatures.signatures[0].signature == ("/s/ Warren E. Buffett, on behalf of himself and each other "
                                                  "reporting person hereunder")
 
 
@@ -161,7 +170,7 @@ def test_derivative_holdings_get_item():
     holding = snow_form3.derivative_table.holdings[0]
     assert holding.security == 'Series E Preferred Stock'
     assert holding.underlying == 'Class B Common Stock [F2,F3]'
-    assert holding.underlying_shares == '134018.0'
+    assert holding.underlying_shares == 134018.0
     assert holding.exercise_price == "[F1]"
     assert holding.exercise_date == "[F1]"
     assert holding.expiration_date == "[F1]"
@@ -181,15 +190,15 @@ def test_non_derivative_holding_get_item():
 
 def test_derivative_transaction_get_item():
     transaction = snow_form4.derivative_table.transactions[0]
-    assert transaction.shares == '200000'
-    assert transaction.price == '0'
+    assert transaction.shares == 200000
+    assert transaction.price == 0
     assert transaction.form == '4'
     assert transaction.equity_swap == False
     assert transaction.transaction_code == 'M'
     assert transaction.acquired_disposed == 'A'
     assert transaction.exercise_date == '[F16]'
-    assert transaction.exercise_price == '8.88'
-    assert transaction.underlying_shares == '200000.0'
+    assert transaction.exercise_price == 8.88
+    assert transaction.underlying_shares == 200000.0
     assert transaction.underlying == 'Class A Common Stock'
 
 
@@ -227,8 +236,9 @@ def test_parse_form5():
     ownership = Ownership.from_xml(Path('data/form5.snow.xml').read_text())
     print()
     print(ownership)
-    print(ownership.derivative_table)
-    print(ownership.non_derivative_table)
+    # Test that there are no derivative transactions
+    assert ownership.derivative_table.empty
+
     assert ownership.form == "5"
     assert ownership.issuer.name == 'Snowflake Inc.'
     assert ownership.issuer.cik == '0001640147'
@@ -245,16 +255,52 @@ def test_parse_form5():
     assert holding.nature_of_ownership == 'Trust [F3]'
 
 
+def test_ownership_transaction_with_non_numeric_price():
+    filing = Filing(form='4', filing_date='2024-01-30', company='Adams Diane', cik=1475901, accession_no='0001209191-24-002430')
+    form4:Form4 = filing.obj()
+    print()
+    print(form4)
+
 def test_ownership_from_filing_xml_document():
     filing = Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
                     filing_date='2013-04-29', accession_no='0001477932-13-002021')
     xml = filing.xml()
-    ownership_document: Ownership = Ownership.from_xml(xml)
-    assert ownership_document.issuer.name == 'Olivia Inc.'
+    print()
+    form3: Form3 = Form3(**Ownership.parse_xml(xml))
+    assert form3.issuer.name == 'Olivia Inc.'
+    assert form3.form == '3'
 
-    print(ownership_document.derivative_table)
-    print(ownership_document.non_derivative_table)
-    holding = ownership_document.non_derivative_table.holdings[0]
+    assert len(form3.reporting_owners) == 1
+    assert form3.reporting_owners[0].name == 'Eliyahu Prager'
+    assert form3.reporting_owners[0].cik == '0001568141'
+    assert form3.reporting_owners[0].is_director
+    assert form3.reporting_owners[0].is_officer
+    assert form3.reporting_owners[0].is_ten_pct_owner
+    assert form3.reporting_owners[0].address.city == 'LOS ANGELES'
+
+    # Has no derivative transactions
+    assert form3.derivative_table.empty
+    assert not form3.non_derivative_table.empty
+
+    # Has holdings
+    assert not form3.non_derivative_table.holdings.empty
+    holdings = form3.non_derivative_table.holdings
+    assert len(holdings) == 1
+    holding = holdings[0]
+    assert holding.security == 'Common Stock'
+    assert holding.direct
+    assert holding.nature_of_ownership == ''
+
+    assert holding.shares == 250000
+
+    print(form3)
+
+    print()
+
+    #print(ownership_document.derivative_table)
+    #print(ownership_document.non_derivative_table)
+
+    holding = form3.non_derivative_table.holdings[0]
     assert holding.security == 'Common Stock'
     assert holding.direct
 
@@ -297,51 +343,61 @@ def test_form3_shows_holdings(capsys):
     print(ownership)
     out, err = capsys.readouterr()
     with capsys.disabled():
-        assert "By: 22NW Fund, LP" in out
+        assert "Aron R. English" in out
 
 
-def test_form5_shows_transactions(capsys):
+def test_form5_common_transactions():
     filing = Filing(form='5', filing_date='2023-10-18', company='COSTCO WHOLESALE CORP /NEW', cik=909832,
                     accession_no='0001209191-23-053139')
-    ownership = filing.obj()
+    ownership:Form5 = filing.obj()
+    assert ownership.form == '5'
 
     print()
+    # Common stock transactions
+
+    # Get common transactions
+    common_transactions = ownership.non_derivative_table.transactions
+    # Test individual transactions
+    transaction = common_transactions[0]
+    assert transaction.date == '2018-09-27'
+    assert transaction.security == 'Common Stock'
+    assert transaction.shares == 413
+    assert transaction.remaining == 413
+    assert transaction.price is None
+    assert transaction.transaction_type == 'Purchase'
+
     print(ownership)
-    out, err = capsys.readouterr()
-    with capsys.disabled():
-        print(ownership)
-        assert "COSTCO WHOLESALE CORP /NEW" in out
-        assert "+461" in out
 
 
 def test_form4_common_trades():
     filing = Filing(company='Day One Biopharmaceuticals, Inc.', cik=1845337, form='4', filing_date='2023-10-20',
                     accession_no='0001209191-23-053235')
     form4: Form4 = filing.obj()
+    print()
 
     # Common stock transactions
-    common_stock_trades = form4.common_trades
+    common_stock_trades = form4.market_trades
     assert not common_stock_trades.empty
     assert len(common_stock_trades) == 3
-    assert common_stock_trades.data.iloc[2].Shares == 111387
-    assert common_stock_trades.data.iloc[2].Code == 'P'
+    assert common_stock_trades.iloc[2].Shares == 111387
+    assert common_stock_trades.iloc[2].Code == 'P'
     print(form4)
 
     # Shares trades
     assert form4.shares_traded == 1475454.0
 
     # Common stock transactions
-    common_trades = aapl_form4.common_trades
+    common_trades = aapl_form4.market_trades
     assert len(common_trades) == 3
     print()
     print(common_trades[['Date', 'Security', 'Shares', 'Remaining', 'Price', 'Code', 'TransactionType']])
 
-    # This filing has lots of common and derivative tradeds and some missing prices
+    # This filing has lots of common and derivative trades and some missing prices
     filing = Filing(form='4', filing_date='2023-10-25', company='210 Capital, LLC', cik=1694780,
                     accession_no='0000899243-23-020039')
     form4 = filing.obj()
     # The common trades should be empty because there are no Sales (S) or Purchases (P)
-    assert form4.common_trades.empty
+    assert form4.market_trades.empty
 
 
 def test_form4_derivative_trades():
@@ -362,27 +418,36 @@ def test_form4_derivative_trades():
     print(derivative_trades)
     assert len(derivative_trades) == 3
     assert derivative_trades.data.iloc[0].Security == 'Restricted Stock Unit'
-    assert derivative_trades.data.iloc[0].Shares == '511000'
+    assert derivative_trades.data.iloc[0].Shares == 511000
+
+    print(type(aapl_form4.derivative_table.derivative_trades))
 
 
-"""
-def test_form4_derivative_trades_include_exercised():
-
-    filing = Filing(form='4', filing_date='2023-10-25', company='AAON, INC.', cik=824142, accession_no='0000824142-23-000163')
-    form4 = filing.obj()
-    derivatives = form4.derivative_trades
-    print(derivatives.data)
-    assert derivatives.data.iloc[0].Security == 'Common Stock, par value $.004'
-    assert derivatives.data.iloc[0].Shares == 321
-"""
-
-
-def test_insider_stock_summary():
-    common_trade_summary = aapl_form4.insider_stock_summary
+def test_derivative_disposed_and_acquired():
+    filing = Filing(form='4', filing_date='2023-05-22', company='BrightView Holdings, Inc.', cik=1734713,
+                    accession_no='0001209191-23-031406')
+    form4: Ownership = filing.obj()
+    non_derivative_table = form4.non_derivative_table
+    derivative_table = form4.derivative_table
     print()
-    print(common_trade_summary)
-    assert common_trade_summary.insider == 'Timothy D Cook'
-    assert common_trade_summary.shares_traded == 240569
+    print(non_derivative_table)
+    print(derivative_table)
+    disposals = derivative_table.transactions.disposals
+    assert len(disposals) == 1
+    assert disposals.iloc[0].Shares == 1500
+    print(form4.non_derivative_table.exercised_trades)
+
+
+def test_form4_derivative_trades_include_exercised():
+    filing = Filing(form='4', filing_date='2023-10-25', company='AAON, INC.', cik=824142,
+                    accession_no='0000824142-23-000163')
+    form4:Form4 = filing.obj()
+    print()
+    print(form4)
+    assert form4.issuer.name == 'AAON, INC.'
+    assert form4.reporting_period == '2023-10-23'
+    assert len(form4.reporting_owners) == 1
+    assert form4.reporting_owners[0].name == 'Gordon Douglas Wichman'
 
 
 def test_form4_fields_summary():
@@ -390,13 +455,11 @@ def test_form4_fields_summary():
                     accession_no='0001209191-23-053235')
     form4: Form4 = filing.obj()
     print()
-    print(form4)
     assert form4.shares_traded == 1475454.0
 
     filing = Filing(form='4', filing_date='2023-10-24', company='AMKOR TECHNOLOGY, INC.', cik=1047127,
                     accession_no='0001209191-23-053496')
     form4: Form4 = filing.obj()
-    print(form4)
     assert form4.shares_traded == 2700.0
 
 
@@ -427,8 +490,9 @@ def test_compute_ownership_title():
 
 
 def test_ownership_with_multiple_owners():
-    filing = Filing(form='4', filing_date='2024-01-26', company='OrbiMed Genesis GP LLC', cik=1808744, accession_no = '0000950170-24-008053')
-    form4:Ownership = filing.obj()
+    filing = Filing(form='4', filing_date='2024-01-26', company='OrbiMed Genesis GP LLC', cik=1808744,
+                    accession_no='0000950170-24-008053')
+    form4: Ownership = filing.obj()
     print()
     print(form4)
     assert len(form4.reporting_owners) == 8
@@ -437,8 +501,54 @@ def test_ownership_with_multiple_owners():
     assert form4.reporting_owners[0].position == 'Director, 10% Owner'
     assert form4.reporting_owners[0].officer_title is None
 
+
 def test_ownership_with_remarks():
-    filing = Filing(form='4', filing_date='2021-09-17', company='Kerrest Jacques Frederic', cik=1700842, accession_no='0001209191-21-056678')
-    form4:Ownership = filing.obj()
-    assert form4.reporting_owners[0].officer_title == 'Executive Vice Chairperson of the Board and Chief Operating Officer'
+    filing = Filing(form='4', filing_date='2021-09-17', company='Kerrest Jacques Frederic', cik=1700842,
+                    accession_no='0001209191-21-056678')
+    form4: Ownership = filing.obj()
+    assert form4.reporting_owners[
+               0].officer_title == 'Executive Vice Chairperson of the Board and Chief Operating Officer'
     assert form4.remarks == 'Executive Vice Chairperson of the Board and Chief Operating Officer'
+
+
+def test_insider_transaction_sell():
+    # Sell
+    filing = Filing(form='4', filing_date='2024-01-18', company='MAHON PAUL A', cik=1231589,
+                    accession_no='0001415889-24-001537')
+    form4: Ownership = filing.obj()
+
+    insider_transaction = form4.get_insider_market_trade_summary()
+    assert insider_transaction.owner == 'Paul A Mahon'
+    assert insider_transaction.position == 'EVP & GENERAL COUNSEL'
+    assert insider_transaction.buy_sell == 'Sell'
+    assert insider_transaction.shares == 6000.0
+    assert insider_transaction.price == 218.72
+    assert insider_transaction.remaining == 36599.0
+    print()
+    print(form4)
+
+
+def test_insider_transaction_buy():
+    # Buy
+    filing = Filing(form='4', filing_date='2024-01-18', company='FROST PHILLIP MD ET AL', cik=898860,
+                    accession_no='0000950170-24-005448')
+    form4: Ownership = filing.obj()
+    insider_transaction = form4.get_insider_market_trade_summary()
+    assert insider_transaction.owner == 'Phillip Frost MD ET AL and one other'
+    assert insider_transaction.position == 'CEO & Chairman'
+    assert insider_transaction.buy_sell == 'Buy'
+    assert insider_transaction.shares == 400000.0
+    assert insider_transaction.price == 0.97
+    assert insider_transaction.remaining == 205368225.0
+    print()
+    print(form4)
+
+
+def test_format_amount():
+    assert format_amount(100000) == '100,000'
+    assert format_amount(100000.0) == '100,000'
+    assert format_amount(100000.11) == '100,000.11'
+    assert format_amount(100000.1) == '100,000.10'
+    assert format_amount(1100000.013) == '1,100,000.01'
+    assert format_amount(1100000.019) == '1,100,000.02'
+    assert format_amount(1100000.91) == '1,100,000.91'
