@@ -42,6 +42,6 @@ def show_cashflow_statement():
 
 
 if __name__ == '__main__':
-    show_balance_sheet()
+    #show_balance_sheet()
     #show_income_statement()
-    #show_cashflow_statement()
+    show_cashflow_statement()
