@@ -210,6 +210,14 @@ def test_display_of_fund_report():
     assert fund.series == 'S000004380'
     #assert fund_report.name == 'PRUDENTIAL SECTOR FUNDS, INC.'
 
+def test_print_fund_report():
+    filing = Filing(form='NPORT-P', filing_date='2024-01-29', company='SATURNA INVESTMENT TRUST', cik=811860,
+           accession_no='0001145549-24-004741')
+    fund_report:FundReport = filing.obj()
+    assert 'SATURNA' in repr(fund_report)
+    assert 'SATURNA' in str(fund_report)
+
+
 
 
 

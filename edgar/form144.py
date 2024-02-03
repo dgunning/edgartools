@@ -408,7 +408,8 @@ class Form144:
 
     def __rich__(self):
         # Filer Information Table
-        filer_table = Table("Form", "Person Selling", "Relationship", "Company", "Issuer", box=box.SIMPLE)
+        filer_table = Table("Form", "Person Selling", "Relationship", "Company", "Issuer", box=box.SIMPLE,
+                            row_styles=["", "dim"])
         filer_table.add_row(f"Form {self._filing.form}", self.person_selling, ', '.join(self.relationships),
                             self._filing.company, self.issuer_name)
 
@@ -420,7 +421,7 @@ class Form144:
                                              "Shares outstanding",
                                              "Exchange",
                                              "Broker",
-                                             box=box.SIMPLE)
+                                             box=box.SIMPLE, row_styles=["", "dim"])
         for row in self.securities_information.itertuples():
             securities_information_table.add_row(row.security_class,
                                                  row.approx_sale_date,
@@ -439,7 +440,8 @@ class Form144:
                                             "Gift",
                                             "Payment Date",
                                             "Nature of Payment",
-                                            box=box.SIMPLE)
+                                            box=box.SIMPLE,
+                                            row_styles=["", "dim"])
         for row in self.securities_to_be_sold.itertuples():
             securities_to_be_sold_table.add_row(row.security_class,
                                                 row.acquired_date,
@@ -453,7 +455,8 @@ class Form144:
         # Securities sold in past 3 months
         securities_sold_past_3_months_table = Table("Security Class", "Sale Date",
                                                     Column(header="Amount Sold", style="red1"),
-                                                    "Proceeds", "Seller Name", box=box.SIMPLE)
+                                                    "Proceeds", "Seller Name", box=box.SIMPLE,
+                                                    row_styles=["", "dim"])
         for row in self.securities_sold_past_3_months.itertuples():
             securities_sold_past_3_months_table.add_row(row.security_class,
                                                         row.sale_date,
@@ -463,7 +466,7 @@ class Form144:
                                                         )
 
         # Notice signature
-        notice_signature_table = Table("Signature", "Date", box=box.SIMPLE)
+        notice_signature_table = Table("Signature", "Date", box=box.SIMPLE, )
         notice_signature_table.add_row(self.notice_signature.signature, self.notice_signature.notice_date)
 
         # Plan adoption dates

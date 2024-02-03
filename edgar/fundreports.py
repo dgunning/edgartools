@@ -315,7 +315,7 @@ class FundReport:
         self.series_and_contracts: FundSeriesAndContracts = series_and_contracts
 
     def __str__(self):
-        return (f"{self.name} {self.general_info.rep_period_date} - {self.general_info.foscal_year_end}"
+        return (f"{self.name} {self.general_info.rep_period_date} - {self.general_info.fiscal_year_end}"
                 )
 
     @property
