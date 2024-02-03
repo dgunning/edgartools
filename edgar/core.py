@@ -319,6 +319,7 @@ def decode_content(content: bytes):
 
 
 text_extensions = [".txt", ".htm", ".html", ".xsd", ".xml", "XML",  ".json", ".idx"]
+binary_extensions = [".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif", ".apng"]
 
 
 def download_file(url: str,
@@ -606,8 +607,14 @@ def reverse_name(name):
     special_parts_list = [parts[i] for i in special_part_indices]
     main_name_parts = [part for i, part in enumerate(parts) if i not in special_part_indices]
 
+    # Handle initials in the name (e.g., 'K. Michelle')
+    if '.' in main_name_parts[-2] or len(main_name_parts[-2]) == 1:
+        main_name_parts = [' '.join(main_name_parts[:-2]).title()] + [f"{main_name_parts[-1].title()} {main_name_parts[-2]}" ]
+    else:
+        main_name_parts = [part.title() if len(part) > 2 else part for part in main_name_parts]
+
     # Reverse the main name parts
-    reversed_main_parts = [part.title() for part in main_name_parts[1:]] + [main_name_parts[0].title()]
+    reversed_main_parts = [part for part in main_name_parts[1:]] + [main_name_parts[0]]
     reversed_name = " ".join(reversed_main_parts)
 
     # Append the special parts to the reversed name, maintaining their original case
@@ -615,7 +622,6 @@ def reverse_name(name):
         reversed_name += " " + " ".join(special_parts_list)
 
     return reversed_name
-
 
 def yes_no(value: bool) -> str:
     return "Yes" if value else "No"
