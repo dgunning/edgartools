@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 
 from edgar.htmltools import (extract_elements,
                              strip_ixbrl_tags,
+                             is_inline_xbrl,
                              table_html_to_dataframe,
                              html_to_text, get_table_elements,
                              get_text_elements, html_sections, dataframe_to_text, ChunkedDocument)
@@ -164,10 +165,21 @@ def test_strip_xbrl_tags_from_html():
     print(soup)
 
 
+def test_filing_with_pdf_primary_document():
+    filing = Filing(form='APP NTC',
+                    filing_date='2024-01-29',
+                    company='AMG Pantheon Credit Solutions Fund',
+                    cik=1995940,
+                    accession_no='9999999997-24-000210')
+    # This filing has a PDF filing document, so the fix is that html returns None
+    html = filing.html()
+    assert html is None
+
+
+
 def test_html_text_works_with_no_failures():
     # This used to fail because of a bug in the html_to_text function
-    filing = Filing(form='10-K', filing_date='2024-01-31', company='ADVANCED MICRO DEVICES INC', cik=2488,
-                    accession_no='0000002488-24-000012')
+    filing = Filing(form='10-K', filing_date='2024-01-31', company='ADVANCED MICRO DEVICES INC', cik=2488, accession_no='0000002488-24-000012')
     assert filing.text()
 
 

@@ -1,3 +1,4 @@
+import logging
 import re
 from dataclasses import dataclass
 from functools import lru_cache
@@ -8,6 +9,7 @@ from typing import Any, Optional, Dict, List, Callable
 import numpy as np
 import pandas as pd
 from lxml import html as lxml_html, etree as ET
+from lxml.etree import XMLSyntaxError
 from rich import box
 from rich.panel import Panel
 from rich.status import Status
@@ -81,6 +83,8 @@ def html_to_text(html_str: str,
                  ignore_tables: bool = True,
                  sep: str = '\n'
                  ) -> str:
+    if is_inline_xbrl(html_str):
+        html_str = try_to_strip_ixbrl_tags(html_str)
 
     """Convert the html to text using the unstructured library"""
     return sep.join(html_sections(html_str, ignore_tables=ignore_tables))
@@ -166,6 +170,13 @@ def remove_bold_tags(html_content):
     html_content = re.sub(r'<strong>(.*?)</strong>', r'\1', html_content)
     return html_content
 
+
+def try_to_strip_ixbrl_tags(html_content:str):
+    try:
+        return strip_ixbrl_tags(html_content)
+    except XMLSyntaxError:
+        logging.warning("Failed to strip ixbrl tags")
+        return html_content
 
 def strip_ixbrl_tags(html_content:str):
     html = bytes(html_content, encoding='utf-8')

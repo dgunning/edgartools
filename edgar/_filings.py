@@ -36,7 +36,7 @@ from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
-                        text_extensions, datefmt)
+                        text_extensions, binary_extensions, datefmt)
 from edgar.htmltools import html_to_text, html_sections
 from edgar.search import BM25Search, RegexSearch
 
@@ -1493,7 +1493,10 @@ class Filing:
 
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
-        return self.document.download()
+        if self.document.is_binary():
+            log.info(f"Primary document {self.document.url} is a binary file")
+        else:
+            return self.document.download()
 
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
@@ -1504,7 +1507,9 @@ class Filing:
     @lru_cache(maxsize=4)
     def text(self, ignore_tables=False, sep="\n") -> str:
         """Convert the html of the main filing document to text"""
-        return html_to_text(self.html(), ignore_tables=ignore_tables, sep=sep)
+        html_content = self.html()
+        if html_content:
+            return html_to_text(html_content, ignore_tables=ignore_tables, sep=sep)
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
@@ -1791,6 +1796,10 @@ class Attachment:
     def is_text(self):
         """Is this a text document"""
         return self.extension in text_extensions
+
+    def is_binary(self):
+        """Is this a binary document"""
+        return self.extension in binary_extensions
 
     def download(self):
         return download_file(self.url, as_text=self.is_text())
