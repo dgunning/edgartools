@@ -236,10 +236,24 @@ class ThirteenF:
 
         # Summary Page
         summary_page_el = form_data.find("summaryPage")
-        other_included_managers_count = int(child_text(summary_page_el,
-                                                       "otherIncludedManagersCount")) if summary_page_el else None
-        total_holdings = int(child_text(summary_page_el, "tableEntryTotal")) if summary_page_el else None
-        total_value = Decimal(child_text(summary_page_el, "tableValueTotal")) if summary_page_el else None
+        if summary_page_el:
+            other_included_managers_count = child_text(summary_page_el,
+                                                       "otherIncludedManagersCount")
+            if other_included_managers_count:
+                other_included_managers_count = int(other_included_managers_count)
+
+            total_holdings = child_text(summary_page_el, "tableEntryTotal")
+            if total_holdings:
+                total_holdings = int(total_holdings)
+
+
+            total_value = child_text(summary_page_el, "tableValueTotal")
+            if total_value:
+                total_value = Decimal(total_value)
+        else:
+            other_included_managers_count = 0
+            total_holdings = 0
+            total_value = 0
 
         # Signature Block
         signature_block_el = form_data.find("signatureBlock")
@@ -263,10 +277,9 @@ class ThirteenF:
             ),
             signature=signature,
             summary_page=SummaryPage(
-
-                other_included_managers_count=other_included_managers_count,
-                total_holdings=total_holdings,
-                total_value=total_value
+                other_included_managers_count=other_included_managers_count or 0,
+                total_holdings=total_holdings or 0,
+                total_value=total_value or 0
             ),
             additional_information=child_text(cover_page_el, "additionalInformation")
         )

@@ -190,3 +190,10 @@ def test_thriteenf_actual_filing_is_not_notice_report():
     assert xml
     information_table = hr.infotable
     print(information_table)
+
+def test_13FNT_other_included_managers():
+    filing = Filing(form='13F-NT', filing_date='2024-02-02', company='AEW CAPITAL MANAGEMENT INC', cik=1042008, accession_no='0001104659-24-010142')
+    thirteenf:ThirteenF = ThirteenF(filing)
+    assert thirteenf.primary_form_information.summary_page.other_included_managers_count == 0
+    assert thirteenf.primary_form_information.summary_page.total_holdings == 0
+    assert thirteenf.primary_form_information.summary_page.total_value == 0
