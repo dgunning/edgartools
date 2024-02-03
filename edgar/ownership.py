@@ -986,7 +986,7 @@ class ReportingOwners():
         return len(self.owners)
 
     def __rich__(self):
-        table = Table(Column("Owner", style="bold deep_sky_blue1"), "Position", "Location", box=box.SIMPLE, row_styles=["", "dim"])
+        table = Table(Column("Owner", style="bold deep_sky_blue1"), "Position", "Location", box=box.SIMPLE, row_styles=["", "bold"])
         for owner in self.owners:
             table.add_row(owner.name, owner.position, f"{owner.address.city}")
 
@@ -1259,9 +1259,14 @@ class Ownership:
         else:
             insider_trade_summary = self.get_insider_market_trade_summary()
             if insider_trade_summary:
-                table = Table(Column("Date", style="bold"), "Action", "Shares", "Price", "Ownership", "Remaining",
-                              box=box.SIMPLE,
-                              row_styles=["", "dim"])
+                action_color = "green" if insider_trade_summary.buy_sell == "Buy" else "red1"
+                table = Table(Column("Date", style="bold"),
+                              Column("Action",style=action_color),
+                              Column("Shares", style=action_color),
+                              "Price",
+                              "Ownership",
+                              "Remaining",
+                              box=box.SIMPLE)
                 table.add_row(insider_trade_summary.period,
                               insider_trade_summary.buy_sell,
                               format_amount(insider_trade_summary.shares),
