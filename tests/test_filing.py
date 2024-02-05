@@ -12,19 +12,32 @@ from rich import print
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachments, \
-    Attachment, get_current_filings
+    Attachment, get_current_filings, fetch_daily_filing_index, fetch_filing_index
 from edgar.company_reports import TenK
-from edgar.core import default_page_size
+from edgar.core import default_page_size, http_client
 
 pd.options.display.max_colwidth = 200
 
 
-def test_read_fixed_width_index():
+def test_read_fixed_width_index_for_daily_file():
     index_text = Path('data/form.20200318.idx').read_text()
     index_data = read_fixed_width_index(index_text, form_specs)
     index_df = index_data.to_pandas()
     invalid_accession = index_df.query("~accession_number.str.match(r'[0-9]{10}\\-[0-9]{2}\\-[0-9]{6}')")
     assert len(invalid_accession) == 0
+    # The first record is there
+    assert index_df.iloc[0]['accession_number'] == '0001140361-20-006155'
+    # The last record is there
+    assert index_df.iloc[-1]['accession_number'] == '0001105608-20-000004'
+
+def test_read_fixed_width_index_for_quarterly_file():
+    index_text = Path('data/form.idx').read_text()
+    index_data = read_fixed_width_index(index_text, form_specs)
+    index_df = index_data.to_pandas()
+    # The first record is there
+    assert index_df.iloc[0]['accession_number'] == '0001683168-24-000531'
+    # The last record is there
+    assert index_df.iloc[-1]['accession_number'] == '0001085910-24-000002'
 
 
 def test_read_form_filing_index_year_and_quarter():
@@ -639,6 +652,10 @@ def test_filings_get_by_index_or_accession_number():
     assert filing_100.accession_no == filing_one_hundred.accession_no
 
 
+def test_read_fixed_width_index():
+    ...
+
+
 def test_find_company():
     # TODO: Looks like the search results ordering is broken for some reason
     filings = cached_filings(2022, 1)
@@ -807,3 +824,11 @@ def test_get_current_filings_by_form():
 
 def test_filings_get_by_invalid_accession_number(capsys):
     assert cached_filings(2022, 1).get('INVALID-ACCESS-NUMBER') is None
+
+def test_get_daily_filing_index():
+    with http_client() as client:
+        #_, filings = fetch_filing_index((2024,1), client, 'form')
+        filings = fetch_daily_filing_index('2024-01-26', client=client, index="form")
+        print(filings)
+
+

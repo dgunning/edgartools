@@ -65,6 +65,7 @@ __all__ = [
 ]
 
 full_index_url = "https://www.sec.gov/Archives/edgar/full-index/{}/QTR{}/{}.{}"
+daily_index_url = "https://www.sec.gov/Archives/edgar/daily-index/{}/QTR{}/{}.{}.idx"
 
 filing_homepage_url_re = re.compile(f"{sec_edgar}/data/[0-9]{1,}/[0-9]{10}-[0-9]{2}-[0-9]{4}-index.html")
 
@@ -147,6 +148,7 @@ class FileSpecs:
     """
 
     def __init__(self, specs: List[Tuple[str, Tuple[int, int], pa.lib.DataType]]):
+        self._spec_type = specs[0][0].title()
         self.splits = list(zip(*specs))[1]
         self.schema = pa.schema(
             [
@@ -154,6 +156,9 @@ class FileSpecs:
                 for name, _, datatype in specs
             ]
         )
+
+    def __str__(self):
+        return f"{self._spec_type} File Specs"
 
 
 form_specs = FileSpecs(
@@ -183,7 +188,15 @@ def read_fixed_width_index(index_text: str,
     :return:
     """
     # Treat as a single array
-    array = pa.array(index_text.rstrip('\n').split('\n')[10:])
+    lines = index_text.rstrip('\n').split('\n')
+    # Find where the data starts
+    data_start = 0
+    for index, line in enumerate(lines):
+        if line.startswith("-----"):
+            data_start = index+1
+            break
+    data_lines = lines[data_start:]
+    array = pa.array(data_lines)
 
     # Then split into separate arrays by file specs
     arrays = [
@@ -239,15 +252,32 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
                        ):
     year, quarter = year_and_quarter
     url = full_index_url.format(year, quarter, index, "gz")
+    index_table = fetch_filing_index_at_url(url, client, index)
+    return (year, quarter), index_table
+
+def fetch_daily_filing_index(date:str,
+                             client: Union[httpx.Client, httpx.AsyncClient],
+                             index: str):
+    year, month, day = date.split("-")
+    quarter = (int(month) - 1) // 3 + 1
+    url = daily_index_url.format(year, quarter, index, date.replace("-", ""))
+    index_table = fetch_filing_index_at_url(url, client, index)
+    return index_table
+
+
+def fetch_filing_index_at_url(url: str,
+                              client: Union[httpx.Client, httpx.AsyncClient],
+                              index: str):
     index_text = download_text(url=url, client=client)
     if index == "xbrl":
         index_table: pa.Table = read_pipe_delimited_index(index_text)
     else:
         # Read as a fixed width index file
-        file_specs = form_specs if index == "form" else company_specs
+        file_specs:FileSpecs = form_specs if index == "form" else company_specs
         index_table: pa.Table = read_fixed_width_index(index_text,
                                                        file_specs=file_specs)
-    return (year, quarter), index_table
+    return index_table
+
 
 
 def _empty_filing_index():
