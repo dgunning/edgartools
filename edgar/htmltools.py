@@ -188,7 +188,9 @@ def strip_ixbrl_tags(html_content:str):
     for tag in ix_tags:
         parent = tag.getparent()
         # Check if the parent is a div with style 'display:inline;'
-        if parent.tag == '{http://www.w3.org/1999/xhtml}div' and 'display:inline' in parent.get('style'):
+        if (parent.tag == '{http://www.w3.org/1999/xhtml}div'
+                and parent.get('style')
+                and 'display:inline' in parent.get('style')):
             if tag.text:
                 parent.text = (parent.text or '') + tag.text
             parent.remove(tag)
