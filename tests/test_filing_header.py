@@ -4,11 +4,10 @@ from pathlib import Path
 from rich import print
 
 from edgar import Filing
-from edgar._filings import SECHeader, Filer
+from edgar._filings import SECHeader, Filer, CompanyInformation
 
 carbo_10K = Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, filing_date='2018-03-08',
                    accession_no='0001564590-18-004771')
-
 
 def test_filing_sec_header():
     sec_header: SECHeader = carbo_10K.header
@@ -97,7 +96,7 @@ def test_parse_sec_header_with_reporting_owner():
     assert sec_header.filers == []
     reporting_owner = sec_header.reporting_owners[0]
     assert reporting_owner
-    assert reporting_owner.owner.name == 'Driggers Shane'
+    assert reporting_owner.owner.name == 'Shane Driggers'
     assert reporting_owner.owner.cik == '0001927858'
     assert reporting_owner.filing_information.form == '4'
     assert reporting_owner.filing_information.file_number == '001-40575'
@@ -118,7 +117,7 @@ def test_parse_sec_header_with_reporting_owner():
     assert issuer.business_address.zipcode == '80205'
 
 
-def test_periof_of_report_from_sec_header():
+def test_period_of_report_from_sec_header():
     filing = Filing(form='13F-HR', filing_date='2023-09-21', company='Halpern Financial, Inc.', cik=1994335,
                     accession_no='0001994335-23-000001')
     sec_header = filing.header
