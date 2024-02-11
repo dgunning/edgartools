@@ -317,6 +317,15 @@ class EntityData:
                  business_address: Address,
                  mailing_address: Address,
                  filings: EntityFilings,
+                 insider_transaction_for_owner_exists: int,
+                 insider_transaction_for_issuer_exists: int,
+                 ein: str,
+                 description: str,
+                 website: str,
+                 investor_website: str,
+                 state_of_incorporation: str,
+                 state_of_incorporation_description: str,
+                 former_names: List[str],
                  ):
         self.cik: int = cik
         self.name: str = name
@@ -332,6 +341,15 @@ class EntityData:
         self.business_address: Address = business_address
         self.mailing_address: Address = mailing_address
         self.filings: CompanyFilings = filings
+        self.insider_transaction_for_owner_exists: int = insider_transaction_for_owner_exists
+        self.insider_transaction_for_issuer_exists: int = insider_transaction_for_issuer_exists
+        self.ein: str = ein
+        self.description: str = description
+        self.website: str = website
+        self.investor_website: str = investor_website
+        self.state_of_incorporation: str = state_of_incorporation
+        self.state_of_incorporation_description: str = state_of_incorporation_description
+        self.former_names: List[str] = former_names
 
     @property
     def financials(self):
@@ -578,7 +596,16 @@ def parse_entity_submissions(cjson: Dict[str, object]):
                            state_or_country=business_addr['stateOrCountry'],
                            zipcode=business_addr['zipCode'],
                        ),
-                       filings=parse_filings(cjson['filings'], cik=cik, company_name=company_name)
+                       filings=parse_filings(cjson['filings'], cik=cik, company_name=company_name),
+                       insider_transaction_for_owner_exists=cjson['insiderTransactionForOwnerExists'],
+                       insider_transaction_for_issuer_exists=cjson['insiderTransactionForIssuerExists'],
+                       ein=cjson['ein'],
+                       description=cjson['description'],
+                       website=cjson['website'],
+                       investor_website=cjson['investorWebsite'],
+                       state_of_incorporation=cjson['stateOfIncorporation'],
+                       state_of_incorporation_description=cjson['stateOfIncorporationDescription'],
+                       former_names=cjson['formerNames'],
                        )
 
 
