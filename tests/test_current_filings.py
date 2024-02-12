@@ -1,6 +1,7 @@
 
 from edgar._filings import get_current_filings, parse_summary, CurrentFilings, get_filings
 from edgar import get_by_accession_number
+import datetime
 
 def test_get_current_entries():
     print()
@@ -94,10 +95,10 @@ def test_parse_summary():
     summary1 = '<b>Filed:</b> 2023-09-13 <b>AccNo:</b> 0001714174-23-000114 <b>Size:</b> 668 KB'
 
     filing_date, accession_number = parse_summary(summary1)
-    assert (filing_date, accession_number) == ('2023-09-13', '0001714174-23-000114')
+    assert (filing_date, accession_number) == (datetime.date(2023, 9, 13), '0001714174-23-000114')
 
     summary2 = '<b>Film#:</b> 23003229  <b>Filed:</b> 2023-08-17 <b>AccNo:</b> 9999999997-23-004141 <b>Size:</b> 1 KB'
-    assert parse_summary(summary2) == ('2023-08-17', '9999999997-23-004141')
+    assert parse_summary(summary2) == (datetime.date(2023, 8, 17), '9999999997-23-004141')
 
 def test_current_filings_with_no_results():
 

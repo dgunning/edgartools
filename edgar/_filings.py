@@ -718,7 +718,8 @@ def parse_summary(summary: str):
 
     # Convert matches into a dictionary
     fields = {k.strip(): (int(v) if v.isdigit() else v) for k, v in matches}
-    return fields.get('Filed'), fields.get('AccNo')
+
+    return datetime.strptime(fields.get('Filed'), '%Y-%m-%d').date(), fields.get('AccNo')
 
 
 def get_current_url(atom: True,
@@ -868,6 +869,7 @@ class CurrentFilings(Filings):
 
     def __rich__(self):
         page: pd.DataFrame = self.to_pandas()
+
         # compute the index from the start and page_size and set it as the index of the page
         page.index = range(self._start - 1, self._start - 1 + len(page))
 
