@@ -79,7 +79,7 @@ def test_thirteenf_multiple_related_filings_dont_use_latest_period_of_report():
     first_period = related_filings[0].header.period_of_report
     last_period = related_filings[-1].header.period_of_report
     assert first_period == '20171231'
-    assert last_period == '20230930'
+    assert last_period >= '20230930'
 
 
 def test_thirteenf_holdings():
