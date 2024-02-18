@@ -40,7 +40,8 @@ __all__ = [
     'get_company_tickers',
     'get_entity_submissions',
     'parse_entity_submissions',
-    'get_ticker_to_cik_lookup'
+    'get_ticker_to_cik_lookup',
+    'get_cik_lookup_data'
 ]
 
 
@@ -664,6 +665,23 @@ def get_json(data_url: str):
         if r.status_code == 200:
             return r.json()
         r.raise_for_status()
+        
+
+def get(data_url: str):
+    with http_client() as client:
+        r = client.get(data_url)
+        if r.status_code == 200:
+            return r.content.decode('utf-8', 'ignore')
+        r.raise_for_status()
+
+
+def parse_cik_lookup_data(content):
+    return [
+        {
+            # for companies with : in the name
+            'name': ":".join(l.split(':')[:-2]),
+            'cik': int(l.split(':')[-2])
+        } for l in content.split("\n") if l != '']
 
 
 @lru_cache(maxsize=32)
@@ -859,7 +877,12 @@ def get_ticker_to_cik_lookup():
     return {value['ticker']: value['cik_str']
             for value in tickers_json.values()
             }
-
+    
+@lru_cache(maxsize=1)
+def get_cik_lookup_data():
+    content = get("https://www.sec.gov/Archives/edgar/cik-lookup-data.txt")
+    cik_lookup_df = pd.DataFrame(parse_cik_lookup_data(content))
+    return cik_lookup_df
 
 class CompanySearchResults:
 
