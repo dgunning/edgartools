@@ -763,7 +763,7 @@ def get_current_entries_on_page(count: int, start: int, form: str = None, owner:
 
 
 def get_current_filings(form: str = '',
-                        owner: str = None,
+                        owner: str = 'include',
                         page_size: int = 40):
     """
     Get the current filings from the SEC
@@ -790,7 +790,7 @@ class CurrentFilings(Filings):
                  form: str = '',
                  start: int = 1,
                  page_size: int = 40,
-                 owner: str = 'exclude'):
+                 owner: str = 'include'):
         super().__init__(filing_index, original_state=None)
         self._start = start
         self._page_size = page_size

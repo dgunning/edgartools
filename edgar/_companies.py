@@ -353,10 +353,11 @@ class EntityData:
 
     @property
     def financials(self):
-        # Get the latest 10-K
-        latest_10k = self.filings.filter(form="10-K").latest()
-        if latest_10k is not None:
-            return latest_10k.obj().financials
+        if self.is_company:
+            # Get the latest 10-K
+            latest_10k = self.filings.filter(form="10-K").latest()
+            if latest_10k is not None:
+                return latest_10k.obj().financials
 
     @property
     def is_company(self) -> bool:
