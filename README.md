@@ -635,7 +635,12 @@ Report a bug by [opening a new issue](https://github.com/dgunning/edgartools/iss
 [LinkedIn](https://www.linkedin.com/in/dwight-gunning-860124/)
 
 
-
 ## Supporters
 [![Stargazers repo roster for @dgunning/edgartools](https://reporoster.com/stars/dgunning/edgartools)](https://github.com/dgunning/edgartools/stargazers)
 [![Forkers repo roster for @dgunning/edgartools](https://reporoster.com/forks/dgunning/edgartools)](https://github.com/dgunning/edgartools/network/members)
+
+## Subscribe to Polar
+<picture>
+2  <source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=polarsource&label=Subscribe&darkmode">
+3  <img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=polarsource&label=Subscribe">
+4</picture>
