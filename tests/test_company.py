@@ -8,7 +8,7 @@ from rich import print
 
 from edgar._companies import *
 from edgar._companies import (parse_entity_submissions, CompanyConcept, CompanyFiling, find_company,
-                              CompanySearchIndex, preprocess_company, parse_cik_lookup_data)
+                              CompanySearchIndex, preprocess_company, _parse_cik_lookup_data)
 from edgar._filings import Filing, get_filings
 from edgar.core import default_page_size
 
@@ -116,6 +116,10 @@ def test_get_company_tickers():
     print()
     print(company_tickers)
 
+def test_get_cik_lookup_data():
+    cik_lookup = get_cik_lookup_data()
+    assert cik_lookup[cik_lookup.cik==1448632].name.item() == 'ZZIF 2008 INVESTMENT LLC'
+
 
 def test_parse_cik_lookup_data():
     with Path('data/cik_lookup_data.txt').open(
@@ -124,7 +128,7 @@ def test_parse_cik_lookup_data():
         errors="surrogateescape"
     ) as f:
         content = f.read()
-    cik_lookups = parse_cik_lookup_data(content)
+    cik_lookups = _parse_cik_lookup_data(content)
     company = cik_lookups[1000]
     print(company)
     assert company

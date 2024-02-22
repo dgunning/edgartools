@@ -16,7 +16,7 @@ from rich.text import Text
 
 from edgar._filings import Filing, Filings, FilingsState
 from edgar._rich import df_to_rich_table, repr_rich
-from edgar.core import (http_client, log, Result, display_size,
+from edgar.core import (download_json, log, Result, display_size, download_text,
                         filter_by_date, IntString, InvalidDateException)
 from edgar.search import SimilaritySearchIndex
 
@@ -362,8 +362,9 @@ class EntityData:
 
     @property
     def is_company(self) -> bool:
-        # Companies have a sic code populated, individuals do not
-        return self.sic != ''
+        # Companies have a ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
+        # There may be other edge cases
+        return not(self.ein is None or self.state_of_incorporation == '')
 
     @property
     def industry(self):
@@ -660,37 +661,13 @@ Company = get_entity
 Entity = get_entity
 
 
-def get_json(data_url: str):
-    with http_client() as client:
-        r = client.get(data_url)
-        if r.status_code == 200:
-            return r.json()
-        r.raise_for_status()
-        
-
-def get(data_url: str):
-    with http_client() as client:
-        r = client.get(data_url)
-        if r.status_code == 200:
-            return r.content.decode('utf-8', 'ignore')
-        r.raise_for_status()
-
-
-def parse_cik_lookup_data(content):
-    return [
-        {
-            # for companies with : in the name
-            'name': ":".join(l.split(':')[:-2]),
-            'cik': int(l.split(':')[-2])
-        } for l in content.split("\n") if l != '']
-
 
 @lru_cache(maxsize=32)
 def get_entity_submissions(cik: int,
                            include_old_filings: bool = True) -> EntityData:
     """Get the company filings for a given cik"""
     try:
-        submission_json = get_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
+        submission_json = download_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
     except httpx.HTTPStatusError as e:
         # Handle the case where the cik is invalid and not found on Edgar
         if e.response.status_code == 404:
@@ -701,7 +678,7 @@ def get_entity_submissions(cik: int,
             # check for older submission files
     if include_old_filings:
         for old_file in submission_json['filings']['files']:
-            old_sub = get_json("https://data.sec.gov/submissions/" + old_file['name'])
+            old_sub = download_json("https://data.sec.gov/submissions/" + old_file['name'])
             for column in old_sub:
                 submission_json['filings']['recent'][column] += old_sub[column]
     return parse_entity_submissions(submission_json)
@@ -746,7 +723,7 @@ class NoCompanyFactsFound(Exception):
 def get_company_facts(cik: int):
     company_facts_url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010}.json"
     try:
-        company_facts_json = get_json(company_facts_url)
+        company_facts_json = download_json(company_facts_url)
         return parse_company_facts(company_facts_json)
     except httpx.HTTPStatusError as err:
         if err.response.status_code == 404:
@@ -842,7 +819,7 @@ def get_concept(cik: int,
     :return: a CompanyConcept
     """
     try:
-        company_concept_json = get_json(
+        company_concept_json = download_json(
             f"https://data.sec.gov/api/xbrl/companyconcept/CIK{cik:010}/{taxonomy}/{concept}.json")
         company_concept: CompanyConcept = CompanyConcept.from_json(company_concept_json)
         return company_concept
@@ -861,7 +838,7 @@ def get_concept(cik: int,
 
 @lru_cache(maxsize=1)
 def get_company_tickers():
-    tickers_json = get_json(
+    tickers_json = download_json(
         "https://www.sec.gov/files/company_tickers.json"
     )
     ticker_df = (pd.DataFrame(list(tickers_json.values()))
@@ -871,19 +848,37 @@ def get_company_tickers():
     return ticker_df
 
 
+@lru_cache(maxsize=1)
 def get_ticker_to_cik_lookup():
-    tickers_json = get_json(
+    tickers_json = download_json(
         "https://www.sec.gov/files/company_tickers.json"
     )
     return {value['ticker']: value['cik_str']
             for value in tickers_json.values()
             }
-    
+
+
+def _parse_cik_lookup_data(content):
+    return [
+        {
+            # for companies with : in the name
+            'name': ":".join(line.split(':')[:-2]),
+            'cik': int(line.split(':')[-2])
+        } for line in content.split("\n") if line != '']
+
+
 @lru_cache(maxsize=1)
-def get_cik_lookup_data():
-    content = get("https://www.sec.gov/Archives/edgar/cik-lookup-data.txt")
-    cik_lookup_df = pd.DataFrame(parse_cik_lookup_data(content))
+def get_cik_lookup_data() -> pd.DataFrame:
+    """
+    Get a dataframe of company/entity names and their cik
+    or a Dict of int(cik) to str(name)
+    DECADE CAPITAL MANAGEMENT LLC:0001426822:
+    DECADE COMPANIES INCOME PROPERTIES:0000775840:
+    """
+    content = download_text("https://www.sec.gov/Archives/edgar/cik-lookup-data.txt")
+    cik_lookup_df = pd.DataFrame(_parse_cik_lookup_data(content))
     return cik_lookup_df
+
 
 class CompanySearchResults:
 

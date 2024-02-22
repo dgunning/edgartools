@@ -4,6 +4,7 @@ import logging.config
 import os
 import random
 import re
+import sys
 import threading
 import warnings
 from _thread import interrupt_main
@@ -12,7 +13,7 @@ from decimal import Decimal
 from functools import lru_cache
 from io import BytesIO
 from typing import Union, Optional, Tuple, List
-import sys
+
 import httpx
 import humanize
 import pandas as pd
@@ -70,6 +71,7 @@ __all__ = [
     'python_version',
     'set_identity',
     'download_text',
+    'download_json',
     'download_file',
     'decode_content',
     'filter_by_date',
@@ -303,6 +305,13 @@ def http_client():
                         default_encoding=autodetect)
 
 
+def async_http_client():
+    return httpx.AsyncClient(headers=client_headers(),
+                             timeout=edgar_mode.http_timeout,
+                             limits=edgar_mode.limits,
+                             default_encoding=autodetect)
+
+
 def get_json(data_url: str):
     with http_client() as client:
         r = client.get(data_url)
@@ -318,8 +327,9 @@ def decode_content(content: bytes):
         return content.decode('latin-1')
 
 
-text_extensions = [".txt", ".htm", ".html", ".xsd", ".xml", "XML",  ".json", ".idx"]
-binary_extensions = [".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif", ".apng"]
+text_extensions = [".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx"]
+binary_extensions = [".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
+                     ".apng"]
 
 
 def download_file(url: str,
@@ -357,6 +367,14 @@ def download_file(url: str,
 
 def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
     return download_file(url, client, as_text=True)
+
+
+def download_json(data_url: str):
+    with http_client() as client:
+        r = client.get(data_url)
+        if r.status_code == 200:
+            return r.json()
+        r.raise_for_status()
 
 
 def get_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
@@ -402,7 +420,6 @@ def repr_df(df, hide_index: bool = True):
 def get_bool(value: str = None) -> Optional[bool]:
     """Convert the value to a boolean"""
     return value in [1, "1", "Y", "true", "True", "TRUE"]
-
 
 
 class Result:
@@ -601,7 +618,8 @@ def reverse_name(name):
     # Handle the cases where there's a 'Jr', 'Sr', 'II', 'III', 'MD', etc., or 'ET AL'
     special_parts = ['Jr', 'Sr', 'II', 'III', 'MD', 'ET', 'AL', 'et', 'al']
     special_parts_with_period = [part + '.' for part in special_parts if part not in ['II', 'III']] + special_parts
-    special_part_indices = [i for i, part in enumerate(parts) if part in special_parts_with_period or (i > 0 and parts[i-1].rstrip('.') + ' ' + part.rstrip('.') == 'ET AL')]
+    special_part_indices = [i for i, part in enumerate(parts) if part in special_parts_with_period or (
+                i > 0 and parts[i - 1].rstrip('.') + ' ' + part.rstrip('.') == 'ET AL')]
 
     # Extract the special parts and the main name parts
     special_parts_list = [parts[i] for i in special_part_indices]
@@ -609,7 +627,8 @@ def reverse_name(name):
 
     # Handle initials in the name (e.g., 'K. Michelle')
     if '.' in main_name_parts[-2] or len(main_name_parts[-2]) == 1:
-        main_name_parts = [' '.join(main_name_parts[:-2]).title()] + [f"{main_name_parts[-1].title()} {main_name_parts[-2]}" ]
+        main_name_parts = [' '.join(main_name_parts[:-2]).title()] + [
+            f"{main_name_parts[-1].title()} {main_name_parts[-2]}"]
     else:
         main_name_parts = [part.title() if len(part) > 2 else part for part in main_name_parts]
 
@@ -622,6 +641,7 @@ def reverse_name(name):
         reversed_name += " " + " ".join(special_parts_list)
 
     return reversed_name
+
 
 def yes_no(value: bool) -> str:
     return "Yes" if value else "No"

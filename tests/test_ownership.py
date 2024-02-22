@@ -496,7 +496,7 @@ def test_ownership_with_multiple_owners():
     print()
     print(form4)
     assert len(form4.reporting_owners) == 8
-    assert form4.reporting_owners[0].name == 'Advisors Llc Orbimed'
+    assert form4.reporting_owners[0].name == 'ORBIMED ADVISORS LLC'
     assert form4.reporting_owners[0].is_ten_pct_owner
     assert form4.reporting_owners[0].position == 'Director, 10% Owner'
     assert form4.reporting_owners[0].officer_title is None

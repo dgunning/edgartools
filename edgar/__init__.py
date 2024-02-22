@@ -22,7 +22,8 @@ from edgar._companies import (Company,
                               get_company_facts,
                               get_company_tickers,
                               get_entity_submissions,
-                              get_ticker_to_cik_lookup)
+                              get_ticker_to_cik_lookup,
+                              get_cik_lookup_data)
 from edgar._filings import (Filing,
                             Filings,
                             CurrentFilings,
