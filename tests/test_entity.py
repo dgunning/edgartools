@@ -1,7 +1,7 @@
-from edgar._companies import EntityData, get_entity_submissions
+from edgar._companies import get_entity_submissions, Entity
+
 
 def test_entity_is_company():
-
     # TSLA
     assert get_entity_submissions(1318605).is_company
 
@@ -20,7 +20,23 @@ def test_entity_is_company():
     # SIEVERT STEPHANIE A
     assert not get_entity_submissions(1718179).is_company
 
-    assert get_entity_submissions(1911716).is_company
+    assert Entity(1911716).is_company
 
     # Warren Buffett
-    assert not get_entity_submissions(315090).is_company
+    assert not Entity(315090).is_company
+
+    # NVC Holdings, LLC
+    assert Entity(1940261).is_company
+
+
+def test_insider_transaction_for_entity():
+    entity: Entity = Entity(1940261)
+    assert entity.name == "NVC Holdings, LLC"
+    assert not entity.insider_transaction_for_issuer_exists
+    assert entity.insider_transaction_for_owner_exists
+
+    entity = Entity(1599916)
+    assert not entity.is_company
+    assert not entity.insider_transaction_for_issuer_exists
+    assert entity.insider_transaction_for_owner_exists
+    assert entity.name == "DeNunzio Jeffrey"

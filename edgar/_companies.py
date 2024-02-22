@@ -2,7 +2,7 @@ import logging
 import re
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import List, Dict, Optional, Union, Tuple
+from typing import List, Dict, Optional, Union, Tuple, Any
 
 import httpx
 import numpy as np
@@ -318,8 +318,8 @@ class EntityData:
                  business_address: Address,
                  mailing_address: Address,
                  filings: EntityFilings,
-                 insider_transaction_for_owner_exists: int,
-                 insider_transaction_for_issuer_exists: int,
+                 insider_transaction_for_owner_exists: bool,
+                 insider_transaction_for_issuer_exists: bool,
                  ein: str,
                  description: str,
                  website: str,
@@ -342,8 +342,8 @@ class EntityData:
         self.business_address: Address = business_address
         self.mailing_address: Address = mailing_address
         self.filings: CompanyFilings = filings
-        self.insider_transaction_for_owner_exists: int = insider_transaction_for_owner_exists
-        self.insider_transaction_for_issuer_exists: int = insider_transaction_for_issuer_exists
+        self.insider_transaction_for_owner_exists: bool = insider_transaction_for_owner_exists
+        self.insider_transaction_for_issuer_exists: bool = insider_transaction_for_issuer_exists
         self.ein: str = ein
         self.description: str = description
         self.website: str = website
@@ -364,7 +364,7 @@ class EntityData:
     def is_company(self) -> bool:
         # Companies have a ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
         # There may be other edge cases
-        return not(self.ein is None or self.state_of_incorporation == '')
+        return not (self.ein is None or self.state_of_incorporation == '')
 
     @property
     def industry(self):
@@ -499,36 +499,36 @@ def parse_filings(filings_json: Dict[str, object],
     # Handle case of no data
     if filings_json['recent']['accessionNumber'] == []:
         # Create an empty table
-        filings_table = pa.Table.from_arrays(
-            [pa.array([], type=pa.string()),
-             pa.array([], type=pa.date32()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             pa.array([], type=pa.string()),
-             ],
-            names=['accession_number',
-                   'filing_date',
-                   'reportDate',
-                   'acceptanceDateTime',
-                   'act',
-                   'form',
-                   'fileNumber',
-                   'items',
-                   'size',
-                   'isXBRL',
-                   'isInlineXBRL',
-                   'primaryDocument',
-                   'primaryDocDescription'
-                   ]
-        )
+        filings_table = pa.Table.from_arrays(arrays=
+                                             [pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.date32()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              pa.array([], type=pa.string()),
+                                              ],
+                                             names=['accession_number',
+                                                    'filing_date',
+                                                    'reportDate',
+                                                    'acceptanceDateTime',
+                                                    'act',
+                                                    'form',
+                                                    'fileNumber',
+                                                    'items',
+                                                    'size',
+                                                    'isXBRL',
+                                                    'isInlineXBRL',
+                                                    'primaryDocument',
+                                                    'primaryDocDescription'
+                                                    ]
+                                             )
     else:
         rjson: Dict[str, List[object]] = filings_json['recent']
 
@@ -567,7 +567,7 @@ def parse_filings(filings_json: Dict[str, object],
                           company_name=company_name)
 
 
-def parse_entity_submissions(cjson: Dict[str, object]):
+def parse_entity_submissions(cjson: Dict[str, Any]):
     mailing_addr = cjson['addresses']['mailing']
     business_addr = cjson['addresses']['business']
     cik = cjson['cik']
@@ -600,8 +600,8 @@ def parse_entity_submissions(cjson: Dict[str, object]):
                            zipcode=business_addr['zipCode'],
                        ),
                        filings=parse_filings(cjson['filings'], cik=cik, company_name=company_name),
-                       insider_transaction_for_owner_exists=cjson['insiderTransactionForOwnerExists'],
-                       insider_transaction_for_issuer_exists=cjson['insiderTransactionForIssuerExists'],
+                       insider_transaction_for_owner_exists=bool(cjson['insiderTransactionForOwnerExists']),
+                       insider_transaction_for_issuer_exists=bool(cjson['insiderTransactionForIssuerExists']),
                        ein=cjson['ein'],
                        description=cjson['description'],
                        website=cjson['website'],
@@ -659,7 +659,6 @@ def get_entity(entity_identifier: IntString) -> EntityData:
 get_company = get_entity
 Company = get_entity
 Entity = get_entity
-
 
 
 @lru_cache(maxsize=32)
@@ -780,7 +779,7 @@ class CompanyConcept:
 
     @classmethod
     def from_json(cls,
-                  cjson: Dict[str, object]):
+                  cjson: Dict[str, Any]):
         data = pd.concat([
             (pd.DataFrame(unit_data)
              .assign(unit=unit, frame=lambda df: df.frame.replace(np.nan, None))
