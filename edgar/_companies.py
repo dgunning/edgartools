@@ -17,7 +17,7 @@ from rich.text import Text
 from edgar._filings import Filing, Filings, FilingsState
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar.core import (download_json, log, Result, display_size, download_text,
-                        filter_by_date, IntString, InvalidDateException)
+                        filter_by_date, IntString, InvalidDateException, reverse_name)
 from edgar.search import SimilaritySearchIndex
 
 __all__ = [
@@ -366,8 +366,18 @@ class EntityData:
         # There may be other edge cases
         return not (self.ein is None or self.state_of_incorporation == '')
 
+
+
     @property
-    def industry(self):
+    @lru_cache(maxsize=1)
+    def display_name(self) -> str:
+        """Reverse the name if it is a company"""
+        if self.is_company:
+            return self.name
+        return reverse_name(self.name)
+
+    @property
+    def industry(self) -> str:
         return self.sic_description
 
     @classmethod

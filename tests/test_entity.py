@@ -29,6 +29,16 @@ def test_entity_is_company():
     assert Entity(1940261).is_company
 
 
+def test_display_name():
+    assert Entity(1318605).display_name == "Tesla, Inc."
+
+    assert Entity(1830610).name == 'Michaels Lisa Anne'
+    assert Entity(1830610).display_name == "Lisa Anne Michaels"
+
+    assert Entity(1718179).name == "Sievert Stephanie A"
+    assert Entity(1718179).display_name == "Stephanie A Sievert"
+
+
 def test_insider_transaction_for_entity():
     entity: Entity = Entity(1940261)
     assert entity.name == "NVC Holdings, LLC"
