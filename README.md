@@ -594,7 +594,7 @@ To get company facts, first get the company, then call `company.get_facts()`
 
 ```python
 company = Company("SNOW")
-company_facts = company.get_facts_for_namespace()
+company_facts = company.get_facts()
 ```
 The result is a `CompanyFacts` object which wraps the underlying facts and provides convenient ways of working
 with the facts data. To get access to the underyling data use the `facts` property.
