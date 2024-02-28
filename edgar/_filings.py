@@ -37,7 +37,8 @@ from edgar._xml import child_text
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
                         text_extensions, binary_extensions, datefmt, reverse_name)
-from edgar.htmltools import html_to_text, html_sections
+from edgar.documents import HtmlDocument
+from edgar.htmltools import html_sections
 from edgar.search import BM25Search, RegexSearch
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -1574,11 +1575,11 @@ class Filing:
             return xml_document.download()
 
     @lru_cache(maxsize=4)
-    def text(self, ignore_tables=False, sep="\n") -> str:
+    def text(self) -> str:
         """Convert the html of the main filing document to text"""
         html_content = self.html()
         if html_content:
-            return html_to_text(html_content, ignore_tables=ignore_tables, sep=sep)
+            return HtmlDocument.from_html(html_content).text
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
