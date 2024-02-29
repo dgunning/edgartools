@@ -11,7 +11,7 @@ def test_html_document_does_not_drop_content():
     document = HtmlDocument.from_html(html_str)
 
     # All the non-space text is the same
-    expected_text = re.sub(r'\s+', '', BeautifulSoup(html_str, 'html5lib').text)
+    expected_text = re.sub(r'\s+', '', BeautifulSoup(html_str, 'lxml').text)
     expected_text = expected_text.replace("DEF14Afalse000001604000000160402022-10-012023-09-30iso4217:USD", "")
     actual_text = re.sub(r'\s+', '', document.text)
     assert actual_text == expected_text
