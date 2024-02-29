@@ -125,7 +125,7 @@ def test_find_facts_by_value():
 
 def test_read_inline_xbrl():
     import lxml.etree as ET
-    html = Path('data/NextPoint.8k.html').read_text()
+    html = Path('data/NextPoint.8K.html').read_text()
     html = bytes(html, encoding='utf-8')
     root = ET.fromstring(html)
     # XPath expression to find all <ix:*> tags

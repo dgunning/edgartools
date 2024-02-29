@@ -1,4 +1,4 @@
-import re
+
 from pathlib import Path
 from rich import print
 
@@ -32,7 +32,7 @@ def test_html_document_data():
 
 
 def test_parse_simple_htmldocument():
-    html_str = Path("data/NextPoint.8k.html").read_text()
+    html_str = Path("data/NextPoint.8K.html").read_text()
     html_document = HtmlDocument.from_html(html_str)
     assert "Item 8.01" in html_document.text
 

@@ -147,7 +147,7 @@ def test_detect_iems_for_eightk_with_bold_tags():
 
 
 def test_strip_xbrl_tags_from_html():
-    html = Path('data/NextPoint.8k.html').read_text()
+    html = Path('data/NextPoint.8K.html').read_text()
 
     # Get all the xbrl tags
     assert '<ix:' in html
