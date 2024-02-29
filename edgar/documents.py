@@ -84,8 +84,6 @@ class DocumentData:
         hidden_props, schema_refs, context_map, unit_map = None, None, None, None
 
         # Read the document information
-        def get_unit(unit_ref: str):
-            return unit_map.get(unit_ref)
 
         def get_context(context_ref: str) -> Optional[Tuple[str, str, Union[str, None]]]:
             """Get the value of the context for that context id"""

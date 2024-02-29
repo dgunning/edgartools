@@ -32,7 +32,7 @@ def test_html_document_data():
 
 
 def test_parse_simple_htmldocument():
-    html_str = Path("data/Nextpoint.8k.html").read_text()
+    html_str = Path("data/NextPoint.8k.html").read_text()
     html_document = HtmlDocument.from_html(html_str)
     assert "Item 8.01" in html_document.text
 
@@ -58,7 +58,7 @@ def test_htmldocument_from_filing_with_document_tag():
 
 
 def test_parse_ixbrldocument_with_nested_div_tags():
-    text = Path("data/Nextpoint.8K.html").read_text()
+    text = Path("data/NextPoint.8K.html").read_text()
     document: HtmlDocument = HtmlDocument.from_html(text)
     # The html
     assert "5.22" in document.text
