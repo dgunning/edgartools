@@ -34,13 +34,13 @@ def test_html_document_data():
 def test_parse_simple_htmldocument():
     html_str = Path("data/Nextpoint.8k.html").read_text()
     html_document = HtmlDocument.from_html(html_str)
-    print(html_document.text)
+    assert "Item 8.01" in html_document.text
 
 
 def test_parse_complicated_htmldocument():
     html_str = Path("data/Nvidia.10-K.html").read_text()
     html_document = HtmlDocument.from_html(html_str)
-    print(html_document.text)
+    assert "NVIDIA has a platform strategy" in html_document.text
 
 
 def test_htmldocument_from_filing_with_document_tag():
