@@ -245,18 +245,6 @@ class TextBlock(Block):
         super().__init__(text)
         self.inline: bool = inline
 
-    def get_text(self,
-                 previous_block,
-                 next_block):
-        if self.inline:
-            return self.text
-        else:
-            _text = ""
-            if previous_block and not previous_block.inline:
-                _text = "\n"
-            _text += self.text
-            return _text
-
     def __str__(self):
         return "TextBlock"
 
