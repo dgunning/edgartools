@@ -2,7 +2,7 @@ import re
 from typing import Optional, Tuple, Union, Dict, List
 
 import pandas as pd
-from bs4 import BeautifulSoup, Tag, XMLParsedAsHTMLWarning
+from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning
 
 import warnings
 from rich import box
@@ -221,10 +221,41 @@ class DocumentData:
 INLINE_IXBRL_TAGS = ['ix:nonfraction', 'ix:nonnumeric', 'ix:fraction']
 
 
-class TextBlock:
+class Block:
 
     def __init__(self, text: str):
         self.text: str = text
+        self.inline: bool = False
+
+    def get_text(self,
+                 previous_block,
+                 next_block):
+        return self.text
+
+    def __str__(self):
+        return "Block"
+
+    def __repr__(self):
+        return self.text
+
+
+class TextBlock(Block):
+
+    def __init__(self, text: str, inline: bool = False):
+        super().__init__(text)
+        self.inline: bool = inline
+
+    def get_text(self,
+                 previous_block,
+                 next_block):
+        if self.inline:
+            return self.text
+        else:
+            _text = ""
+            if previous_block and not previous_block.inline:
+                _text = "\n"
+            _text += self.text
+            return _text
 
     def __str__(self):
         return "TextBlock"
@@ -233,10 +264,16 @@ class TextBlock:
         return self.text
 
 
-class TableBlock(TextBlock):
+class TableBlock(Block):
 
     def __init__(self, text: str):
         super().__init__(text)
+
+    def get_text(self,
+                 previous_block,
+                 next_block):
+        _text = "\n" + self.text + "\n"
+        return _text
 
     def __str__(self):
         return "TableBlock"
@@ -244,13 +281,24 @@ class TableBlock(TextBlock):
 
 class HtmlDocument:
 
-    def __init__(self, blocks: List[TextBlock], data: Optional[DocumentData] = None):
-        self.blocks: List[TextBlock] = blocks
+    def __init__(self, blocks: List[Block], data: Optional[DocumentData] = None):
+        self.blocks: List[Block] = blocks
         self.data: Optional[DocumentData] = data
 
     @property
     def text(self):
-        return "\n".join([b.text for b in self.blocks])
+        _text = ""
+        blocks_len = len(self.blocks)  # Get the total number of blocks
+
+        for i, block in enumerate(self.blocks):
+            previous_block = self.blocks[i - 1] if i > 0 else None
+            next_block = self.blocks[i + 1] if i < blocks_len - 1 else None
+            _text += block.get_text(previous_block, next_block)
+
+        # Fix unnecessary line breaks between sections
+        _text = re.sub(r'(?<=[^.?!])\s*\n{3,}\s*', ' ', _text)
+
+        return _text
 
     @classmethod
     def extract_text(cls, start_element: Tag):
@@ -260,7 +308,7 @@ class HtmlDocument:
         decompose_page_numbers(start_element)
 
         # Now find the full text
-        blocks: List[TextBlock] = extract_and_format_content(start_element)
+        blocks: List[Block] = extract_and_format_content(start_element)
 
         return blocks
 
@@ -280,31 +328,40 @@ class HtmlDocument:
         # First check if the html is inside a <DOCUMENT><TEXT> block
         if "<TEXT>" in html[:500]:
             html = get_text_between_tags(html, 'TEXT')
+
         soup = BeautifulSoup(html, features='lxml')
+        # Cleanup the soup before extracting text (including removing comments)
+        fixup_soup(soup)
+
         root: Tag = soup.find('html')
+
         data = cls.extract_data(root)
-        blocks: List[TextBlock] = cls.extract_text(root)
+        blocks: List[Block] = cls.extract_text(root)
         return cls(blocks=blocks, data=data)
 
 
-def extract_and_format_content(element) -> List[TextBlock]:
+def extract_and_format_content(element) -> List[Block]:
     """
     Recursively extract and format content from an element,
     applying special formatting to tables and concatenating text for other elements.
     """
+
     if element.name == 'table':
         return [TableBlock(text=table_to_text(element))]
     else:
-        blocks: List[TextBlock] = []
-        for child in element.children:
+        inline = is_inline(element)
+        blocks: List[Block] = []
+        len_children = len(element.contents)
+        for index, child in enumerate(element.children):
             if child.name:
                 blocks.extend(extract_and_format_content(child))
-            elif child.string:
-                stripped_string = child.string.strip()
-                if stripped_string:
-                    # Fix unnecessary line breaks between sections
-                    stripped_string = re.sub(r'(?<=[^.?!])\s*\n{2,}\s*', ' ', stripped_string)
-                    blocks.append(TextBlock(stripped_string))
+                if not inline and len(blocks) > 0 and not isinstance(blocks[-1], TableBlock):
+                    # are we at the end of the children?
+                    if not blocks[-1].inline or index == len_children - 1:
+                        blocks[-1].text += '\n'
+            else:
+                stripped_string = fixup(child.string)
+                blocks.append(TextBlock(stripped_string, inline=inline))
         return blocks
 
 
@@ -409,3 +466,41 @@ def get_text_between_tags(html: str, tag: str, ):
             elif is_header:
                 content += line + '\n'  # Add a newline to preserve original line breaks
     return content
+
+
+def is_inline(tag):
+    # is is navigable string return False
+    if not tag.name:
+        return False
+    # Common inline elements
+    inline_elements = {'a', 'span', 'strong', 'em', 'b', 'i', 'u', 'small', 'big', 'sub', 'sup', 'img', 'label',
+                       'input', 'button'}
+
+    # Check if the tag's name is in the list of inline elements
+    if tag.name in inline_elements:
+        return True
+
+    # Check for inline styling
+    if tag.has_attr('style'):
+        styles = tag['style'].split(';')
+        for style in styles:
+            if style.strip().lower().startswith('display'):
+                property_value = style.split(':')
+                if len(property_value) > 1 and property_value[1].strip().lower() == 'inline':
+                    return True
+
+    return False
+
+
+def fixup(text: str):
+    """Cleanup the string"""
+    text = text.replace('\xa0', ' ')
+    text = text.replace('\n', ' ')
+    return text
+
+
+def fixup_soup(soup):
+    # Find and remove all comments
+    comments = soup.find_all(string=lambda text: isinstance(text, Comment))
+    for comment in comments:
+        comment.extract()
