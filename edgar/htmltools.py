@@ -26,14 +26,12 @@ __all__ = [
     'html_sections',
     'decimal_chunk_fn',
     "ChunkedDocument",
-    "extract_elements",
     "clean_dataframe",
     'remove_bold_tags',
     'detect_decimal_items',
     'adjust_for_empty_items',
     "dataframe_to_text",
     "get_text_elements",
-    "get_table_elements",
     "table_html_to_dataframe",
 ]
 
@@ -166,69 +164,6 @@ def remove_bold_tags(html_content):
     return html_content
 
 
-def try_to_strip_ixbrl_tags(html_content: str):
-    try:
-        return strip_ixbrl_tags(html_content)
-    except XMLSyntaxError:
-        logging.warning("Failed to strip ixbrl tags")
-        return html_content
-
-
-def strip_ixbrl_tags(html_content: str):
-    html = bytes(html_content, encoding='utf-8')
-    root = ET.fromstring(html)
-    # XPath expression to find all <ix:*> tags
-    ix_tags = root.xpath("//*[starts-with(name(), 'ix:')]")
-
-    # Remove each ix tag from the tree
-    for tag in ix_tags:
-        parent = tag.getparent()
-        # Check if the parent is a div with style 'display:inline;'
-        if (parent.tag == '{http://www.w3.org/1999/xhtml}div'
-                and parent.get('style')
-                and 'display:inline' in parent.get('style')):
-            if tag.text:
-                parent.text = (parent.text or '') + tag.text
-            parent.remove(tag)
-        elif tag.text:
-            new_text = ET.fromstring(f"<span>{tag.text}</span>")
-            parent.replace(tag, new_text)
-        else:
-            parent.remove(tag)
-
-    # Convert the modified tree back to a string
-    return ET.tostring(root, encoding='unicode')
-
-
-@lru_cache(maxsize=4)
-def extract_elements(html_str: str):
-    from unstructured.partition.html import partition_html
-    elements = partition_html(text=html_str)
-    output_els = []
-    for idx, element in enumerate(elements):
-        element_type = str(type(element))
-        if "HTMLTable" in element_type:
-            # Make sure the table is not empty
-            table_html = str(element.metadata.text_as_html)
-            table_df = table_html_to_dataframe(table_html) if table_html else pd.DataFrame()
-            output_els.append(
-                Element(id=f"id_{idx}", type="table", element=element, table=table_df)
-            )
-        else:
-            output_els.append(Element(id=f"id_{idx}", type="text", element=element))
-    return output_els
-
-
-def get_table_elements(elements: List[Element],
-                       min_table_rows: int = None,
-                       min_table_cols: int = None):
-    # Get the table elements
-    return [e for e in elements
-            if e.type == "table"
-            and (min_table_rows is None or len(e.table) >= min_table_rows)
-            and (min_table_cols is None or len(e.table.columns) >= min_table_cols)]
-
-
 def get_text_elements(elements: List[Element]):
     return [e for e in elements if e.type == "text"]
 
@@ -237,31 +172,6 @@ def get_text_elements(elements: List[Element]):
 def chunk(html: str):
     document = HtmlDocument.from_html(html)
     return list(document.generate_chunks())
-
-
-@lru_cache(maxsize=8)
-def chunk_orig(html, chunk_size: int = 1000, buffer=500):
-    """
-    Break html into chunks
-    """
-    with Status("[bold deep_sky_blue1]Chunking html document...", spinner="dots2"):
-        # Use function import to avoid the startup time imposed by unstructured
-        from unstructured.partition.html import partition_html
-        from unstructured.chunking.title import chunk_by_title
-        from unstructured.cleaners.core import clean
-
-        # Remove bold tags
-        html = remove_bold_tags(html)
-
-        elements = partition_html(text=html)
-        # Clean elements
-        for element in elements:
-            element.text = clean(element.text, extra_whitespace=True)
-        chunks = chunk_by_title(elements,
-                                combine_text_under_n_chars=0,
-                                new_after_n_chars=chunk_size,
-                                max_characters=chunk_size + max(0, buffer))
-    return chunks
 
 
 int_item_pattern = r"(Item [0-9]{1,2}[A-Z]?\.)"
@@ -399,7 +309,6 @@ def chunks2df(chunks: List[List[Block]],
               item_structure=None,
               ) -> pd.DataFrame:
     """Convert the chunks to a dataframe
-        : chunks A list of unstructuredio chunked elements
         : item_detector: A function that detects the item in the text column
         : item_adjuster: A function that finds issues like out of sequence items and adjusts the item column
         : item_structure: A dictionary of items specific to each filing e.g. 8-K, 10-K, 10-Q
@@ -497,16 +406,12 @@ class ChunkedDocument:
 
     def __init__(self,
                  html: str,
-                 chunk_size: int = 1000,
-                 chunk_buffer: int = 500,
                  chunk_fn: Callable[[List], pd.DataFrame] = chunks2df):
         """
         :param html: The filing html
-        :param chunk_size: How large should the chunk be
+        :param chunk_fn: A function that converts the chunks to a dataframe
         """
         self.chunks = chunk(html)
-        self.chunk_size = chunk_size
-        self.chunk_buffer = chunk_buffer
         self._chunked_data = chunk_fn(self.chunks)
         self.chunk_fn = chunk_fn
 
@@ -573,11 +478,9 @@ class ChunkedDocument:
     def __rich__(self):
         table = Table("Chunks",
                       "Items",
-                      "Chunk Size/Buffer",
                       "Avg Size", box=box.SIMPLE)
         table.add_row(str(len(self.chunks)),
                       ",".join(self.list_items()),
-                      f"{str(self.chunk_size)}/{str(self.chunk_buffer)}",
                       str(self.average_chunk_size()),
                       )
         return Panel(table, box=box.ROUNDED, title="HTML Document")

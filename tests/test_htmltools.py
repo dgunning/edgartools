@@ -1,18 +1,14 @@
-import re
-from bs4 import BeautifulSoup
-
-from edgar.htmltools import (extract_elements,
-                             strip_ixbrl_tags,
-                             is_inline_xbrl,
-                             table_html_to_dataframe,
-                             html_to_text, get_table_elements,
-                             get_text_elements, html_sections, dataframe_to_text, ChunkedDocument)
 from pathlib import Path
-from rich import print
+
 import pandas as pd
+from bs4 import BeautifulSoup
+from rich import print
+
 from edgar import Filing
 from edgar.company_reports import EightK
-from unstructured.partition.html import partition_html
+from edgar.htmltools import (
+    table_html_to_dataframe,
+    html_to_text, html_sections, dataframe_to_text, ChunkedDocument)
 
 pd.options.display.max_columns = 12
 pd.options.display.max_colwidth = 100
@@ -50,18 +46,6 @@ def test_tricky_table_html2_dataframe():
     print(df)
 
 
-def test_extract_elements():
-    elements = extract_elements(Nvidia_2021_10k)
-
-    table_elements = get_table_elements(elements)
-    assert all([e.table is not None for e in table_elements])
-
-    text_elements = get_text_elements(elements)
-    assert all([e.type == "text" for e in text_elements])
-
-    assert len(table_elements) + len(text_elements) == len(elements)
-
-
 def test_dataframe_to_text():
     df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
     text = dataframe_to_text(df)
@@ -76,15 +60,6 @@ def test_html2text():
 
     assert len(tenk_text_with_tables) > len(tenk_text)
     print(tenk_text_with_tables)
-
-
-def test_get_table_elements():
-    filing = Filing(company='Tesla, Inc.', cik=1318605, form='10-K',
-                    filing_date='2023-01-31', accession_no='0000950170-23-001409')
-    elements = extract_elements(filing.html())
-    table_elements = get_table_elements(elements)
-    assert len(table_elements) > 50
-    print(len(table_elements))
 
 
 def test_html_sections_includes_all_tables():
@@ -144,25 +119,6 @@ def test_detect_iems_for_eightk_with_bold_tags():
     eightk: EightK = filing.obj()
     assert len(eightk.items) == 1
     assert '1-800-FLOWERS.COM, Inc. (the “Company”) held its Annual Meeting of' in eightk['Item 5.07']
-
-
-def test_strip_xbrl_tags_from_html():
-    html = Path('data/NextPoint.8K.html').read_text()
-
-    # Get all the xbrl tags
-    assert '<ix:' in html
-
-    clean_html = strip_ixbrl_tags(html)
-    assert not '<ix:' in clean_html
-    print(clean_html)
-
-    # Make sure the html is still valid
-    assert '<html' in clean_html
-    assert '</html>' in clean_html
-    soup = BeautifulSoup(clean_html, 'html.parser')
-    assert soup
-    assert '5.22' in clean_html
-    print(soup)
 
 
 def test_filing_with_pdf_primary_document():

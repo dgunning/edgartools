@@ -504,7 +504,6 @@ class EightK():
                                    item_adjuster=adjust_for_empty_items,
                                    item_structure=self.structure)
         return ChunkedDocument(self._filing.html(),
-                               chunk_size=400,
                                chunk_fn=decimal_chunk_fn)
 
     @property
@@ -544,6 +543,7 @@ class EightK():
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
 
 def is_valid_item_for_filing(filing_structure: Dict, item: str, part: str = None):
     """Return true if the item is valid"""

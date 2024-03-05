@@ -4,7 +4,8 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 from edgar.documents import *
-from copy import copy, deepcopy
+from copy import copy
+from edgar import Filing
 
 pd.options.display.max_columns = 10
 
@@ -38,6 +39,7 @@ def test_parse_simple_htmldocument():
     html_str = Path("data/NextPoint.8K.html").read_text()
     html_document = HtmlDocument.from_html(html_str)
     assert "Item 8.01" in html_document.text
+
 
 def test_items_headers_are_separate_chunks():
     html = """
@@ -118,6 +120,15 @@ def test_parse_ixbrldocument_with_nested_div_tags():
     assert "5.22" in document.text
     assert "at $5.22 per share" in document.text
     assert not "<ix:nonNumeric" in document.text
+
+
+def test_eightk_item_parsing_after_dollar_sign():
+    # This issue was reported ib https://github.com/dgunning/edgartools/issues/21
+    # The issue was that the text in item 8.01 was cutoff after the dollar sign
+    filing = Filing(company='NexPoint Capital, Inc.', cik=1588272, form='8-K', filing_date='2023-12-20',
+                    accession_no='0001193125-23-300021')
+    document: HtmlDocument = HtmlDocument.from_html(filing.html())
+    assert "(the “DRP”) at $5.22 per share" in document.text
 
 
 def test_parse_inline_divs_with_ixbrl_tags():
@@ -229,11 +240,11 @@ def test_clean_document_text():
        </body>
        </html>
        """
-    #assert "Item&#160;3." in html
-    #assert "Item 3." in html
-    #document = HtmlDocument.from_html(html)
-    #print(document.text)
-    #assert "Item 3." in document.text
+    # assert "Item&#160;3." in html
+    # assert "Item 3." in html
+    # document = HtmlDocument.from_html(html)
+    # print(document.text)
+    # assert "Item 3." in document.text
 
 
 def test_span_with_nonbreaking_spaces():
@@ -330,7 +341,7 @@ def test_compress_blocks():
     blocks = copy(document.blocks)
 
     uncompressed_blocks = (blocks[:2]
-                           + [TextBlock(word) for word in ['Age', ' ', 'is', ' ', 'just', ' ','a', ' ', 'number']]
+                           + [TextBlock(word) for word in ['Age', ' ', 'is', ' ', 'just', ' ', 'a', ' ', 'number']]
                            + blocks[2:])
     compressed_blocks = HtmlDocument._compress_blocks(uncompressed_blocks)
     assert "Age is just a number" == compressed_blocks[2].text
@@ -355,7 +366,8 @@ def test_detect_header():
     assert SECLine("Forward-Looking Statements").is_header
     assert not SECLine("© 2023 NVIDIA Corporation. All rights reserved.").is_header
     assert SECLine("Professional Visualization").is_header
-    assert SECLine("Item 2.03    Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant.").is_header
+    assert SECLine(
+        "Item 2.03    Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant.").is_header
 
 
 def test_textanalysis():
@@ -415,7 +427,7 @@ def test_generate_chunks_from_8k():
     document = HtmlDocument.from_html(html_str)
     print()
     blocks = document.blocks
-    #print(document.text)
+    # print(document.text)
 
     for chunk in document.generate_chunks():
         print(chunk)

@@ -1,10 +1,7 @@
 # SPDX-FileCopyrightText: 2022-present Dwight Gunning <dgunning@gmail.com>
 #
 # SPDX-License-Identifier: MIT
-import importlib
 import re
-import sys
-from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from functools import partial
 from typing import Optional, Union, List
@@ -155,22 +152,3 @@ def obj(sec_filing: Filing) -> Optional[object]:
         return filing_xbrl
 
 
-
-# Import some libraries on the background
-background_modules = ['unstructured']
-
-
-def do_import(module_name):
-    thismodule = sys.modules[__name__]
-
-    module = importlib.import_module(module_name)
-    setattr(thismodule, module_name, module)
-
-
-def long_running_import():
-    from unstructured.partition.html import partition_html
-    str(partition_html.__name__)  #
-
-
-executor = ThreadPoolExecutor()
-executor.submit(long_running_import)
