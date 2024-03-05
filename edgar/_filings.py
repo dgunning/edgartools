@@ -37,7 +37,7 @@ from edgar._xml import child_text
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
                         text_extensions, binary_extensions, datefmt, reverse_name)
-from edgar.documents import HtmlDocument
+from edgar.documents import HtmlDocument, get_clean_html
 from edgar.htmltools import html_sections
 from edgar.search import BM25Search, RegexSearch
 
@@ -1587,12 +1587,12 @@ class Filing:
 
     def markdown(self) -> str:
         """return the markdown version of this filing html"""
-        return html_to_markdown(self.html())
+        return html_to_markdown(get_clean_html(self.html()))
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""
         console = Console()
-        console.print(MarkdownContent(self.html(), title=f"Form {self.form} for {self.company}"))
+        console.print(MarkdownContent(get_clean_html(self.html()), title=f"Form {self.form} for {self.company}"))
 
     def xbrl(self) -> Optional[FilingXbrl]:
         """
