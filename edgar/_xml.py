@@ -121,6 +121,8 @@ def optional_decimal(parent: Tag,
                      child: str) -> Optional[Decimal]:
     text = child_text(parent, child)
     if text:
+        if text == "N/A":
+            return None
         return Decimal(text)
 
 
