@@ -206,9 +206,9 @@ class FundInfo(BaseModel):
 
 
 class DebtSecurity(BaseModel):
-    maturity_date: datetime
+    maturity_date: Union[datetime, str]
     coupon_kind: str
-    annualized_rate: Decimal
+    annualized_rate: Optional[Decimal]
     is_default: bool
     are_instrument_payents_in_arrears: bool
     is_paid_kind: bool

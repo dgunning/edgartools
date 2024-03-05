@@ -203,21 +203,40 @@ def test_display_of_fund_report():
     fund_report = filing.obj()
 
     # What is the fund?
-    fund:Fund = fund_report.fund
+    fund: Fund = fund_report.fund
     assert fund.name == 'PGIM Jennison Health Sciences Fund'
     assert fund.ticker == "PHSZX"
     assert fund.class_contract_id == "C000012124"
     assert fund.series == 'S000004380'
-    #assert fund_report.name == 'PRUDENTIAL SECTOR FUNDS, INC.'
+    # assert fund_report.name == 'PRUDENTIAL SECTOR FUNDS, INC.'
+
 
 def test_print_fund_report():
     filing = Filing(form='NPORT-P', filing_date='2024-01-29', company='SATURNA INVESTMENT TRUST', cik=811860,
-           accession_no='0001145549-24-004741')
-    fund_report:FundReport = filing.obj()
+                    accession_no='0001145549-24-004741')
+    fund_report: FundReport = filing.obj()
     assert 'SATURNA' in repr(fund_report)
     assert 'SATURNA' in str(fund_report)
 
 
+def test_fundreport_parses_date_withna():
+    filing = Filing(form='NPORT-P', filing_date='2024-02-28', company='TOUCHSTONE FUNDS GROUP TRUST', cik=914243,
+                    accession_no='0001145549-24-012735')
+    fund_report: FundReport = filing.obj()
+    assert fund_report
+    edison = fund_report.investment_data().iloc[48]
+    assert edison.maturity_date == 'N/A'
 
 
+def test_decimal_conversion():
+    filing = Filing(form='NPORT-P', filing_date='2024-02-26', company='USQ Core Real Estate Fund', cik=1691570,
+                    accession_no='0001145549-24-008699')
+    fund_report: FundReport = filing.obj()
+    assert fund_report
 
+
+def test_annualized_rate():
+    filing = Filing(form='NPORT-P', filing_date='2024-02-26', company='NORTHERN FUNDS', cik=916620,
+                    accession_no='0001145549-24-008079')
+    fund_report: FundReport = filing.obj()
+    assert fund_report
