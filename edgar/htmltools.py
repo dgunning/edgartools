@@ -16,6 +16,7 @@ from rich.status import Status
 from rich.table import Table
 
 from edgar._rich import repr_rich
+from edgar.documents import HtmlDocument, Block, TableBlock
 
 __all__ = [
     "Element",
@@ -68,26 +69,18 @@ def get_tables(html_str: str,
 def html_sections(html_str: str,
                   ignore_tables: bool = False) -> List[str]:
     """split the html into sections"""
-    elements = extract_elements(html_str)
-    if ignore_tables:
-        return [str(element.element)
-                for element in elements
-                if not element.type == 'table']
-    else:
-        return [dataframe_to_text(element.table)
-                if element.type == 'table' else str(element.element)
-                for element in elements]
+    document = HtmlDocument.from_html(html_str)
+    return list(document.generate_chunks_as_text(ignore_tables=ignore_tables))
 
 
 def html_to_text(html_str: str,
                  ignore_tables: bool = True,
                  sep: str = '\n'
                  ) -> str:
-    if is_inline_xbrl(html_str):
-        html_str = try_to_strip_ixbrl_tags(html_str)
-
-    """Convert the html to text using the unstructured library"""
-    return sep.join(html_sections(html_str, ignore_tables=ignore_tables))
+    document = HtmlDocument.from_html(html_str)
+    if not ignore_tables:
+        return document.text
+    return sep.join([chunk for chunk in document.generate_chunks_as_text(ignore_tables=True)])
 
 
 def table_html_to_dataframe(html_str):
@@ -157,8 +150,10 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
 
     return text_output
 
-def is_inline_xbrl(html:str) -> bool:
+
+def is_inline_xbrl(html: str) -> bool:
     return "xmlns:ix=" in html[:2000]
+
 
 def filter_small_table(table: pd.DataFrame, min_rows: int = 2, min_cols: int = 2):
     return len(table) >= min_rows and len(table.columns) >= min_cols
@@ -171,14 +166,15 @@ def remove_bold_tags(html_content):
     return html_content
 
 
-def try_to_strip_ixbrl_tags(html_content:str):
+def try_to_strip_ixbrl_tags(html_content: str):
     try:
         return strip_ixbrl_tags(html_content)
     except XMLSyntaxError:
         logging.warning("Failed to strip ixbrl tags")
         return html_content
 
-def strip_ixbrl_tags(html_content:str):
+
+def strip_ixbrl_tags(html_content: str):
     html = bytes(html_content, encoding='utf-8')
     root = ET.fromstring(html)
     # XPath expression to find all <ix:*> tags
@@ -238,7 +234,13 @@ def get_text_elements(elements: List[Element]):
 
 
 @lru_cache(maxsize=8)
-def chunk(html, chunk_size: int = 1000, buffer=500):
+def chunk(html: str):
+    document = HtmlDocument.from_html(html)
+    return list(document.generate_chunks())
+
+
+@lru_cache(maxsize=8)
+def chunk_orig(html, chunk_size: int = 1000, buffer=500):
     """
     Break html into chunks
     """
@@ -269,6 +271,7 @@ decimal_item_pattern = r"(Item [0-9]{1,2}\.[0-9]{2})"
 def detect_table_of_contents(text: str):
     """Find the table of contents in the text"""
     return text.lower().count('item') > 10
+
 
 def detect_signature(text: str) -> bool:
     """Find the signature block in the text"""
@@ -390,7 +393,7 @@ def adjust_for_empty_items(chunk_df: pd.DataFrame,
     return chunk_df
 
 
-def chunks2df(chunks: List,
+def chunks2df(chunks: List[List[Block]],
               item_detector: Callable[[pd.Series], pd.Series] = detect_int_items,
               item_adjuster: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame] = adjust_detected_items,
               item_structure=None,
@@ -402,8 +405,8 @@ def chunks2df(chunks: List,
         : item_structure: A dictionary of items specific to each filing e.g. 8-K, 10-K, 10-Q
     """
     # Create a dataframe from the chunks. Add columns as necessary
-    chunk_df = pd.DataFrame([{'Text': el.text.strip(), 'Table': 'Table' in el.__class__.__name__}
-                             for el in chunks]
+    chunk_df = pd.DataFrame([{'Text': HtmlDocument._render_blocks(blocks), 'Table': isinstance(blocks, TableBlock)}
+                             for blocks in chunks]
                             ).assign(Chars=lambda df: df.Text.apply(len),
                                      Signature=lambda df: df.Text.apply(detect_signature).fillna(""),
                                      TocLink=lambda df: df.Text.str.match('^Table of Contents$',
@@ -455,7 +458,7 @@ def render_table(table_chunk):
 
 class RenderedHtml:
 
-    def __init__(self, text:str):
+    def __init__(self, text: str):
         self.text = text
 
     def __eq__(self, other):
@@ -463,7 +466,7 @@ class RenderedHtml:
             return self.text == other
         return self.text == other.text
 
-    def __contains__(self, text:str):
+    def __contains__(self, text: str):
         return text in self.text
 
     def __hash__(self):
@@ -474,6 +477,7 @@ class RenderedHtml:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
 
 def render_chunks(chunks):
     text = '\n'.join([render_table(el)
@@ -500,7 +504,7 @@ class ChunkedDocument:
         :param html: The filing html
         :param chunk_size: How large should the chunk be
         """
-        self.chunks = chunk(html, chunk_size, chunk_buffer)
+        self.chunks = chunk(html)
         self.chunk_size = chunk_size
         self.chunk_buffer = chunk_buffer
         self._chunked_data = chunk_fn(self.chunks)
@@ -551,9 +555,17 @@ class ChunkedDocument:
 
     def __getitem__(self, item):
         if isinstance(item, int):
-            return render_chunks([self.chunks[item]])
+            chunks = [self.chunks[item]]
         elif isinstance(item, str):
-            return render_chunks(self.chunks_for_item(item))
+            chunks = list(self.chunks_for_item(item))
+        else:
+            return None
+        if len(chunks) == 0:
+            return None
+        # render the nested List of List [str]
+        return "".join(["".join(block.text
+                                for block in chunk)
+                        for chunk in chunks])
 
     def __iter__(self):
         return iter(self.chunks)

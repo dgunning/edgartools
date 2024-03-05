@@ -1,10 +1,10 @@
 import re
-from typing import Optional, Tuple, Union, Dict, List
+import warnings
+from functools import lru_cache
+from typing import Optional, Tuple, Union, Dict, List, Any
 
 import pandas as pd
 from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning
-
-import warnings
 from rich import box
 from rich.table import Table
 
@@ -12,6 +12,14 @@ from edgar._rich import repr_rich
 from edgar._xml import child_text
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+__all__ = ['DocumentData',
+           'HtmlDocument',
+           'Block',
+           'TextBlock',
+           'TableBlock',
+           'TextAnalysis',
+           'SECLine']
 
 
 class DocumentData:
@@ -49,7 +57,7 @@ class DocumentData:
         table = Table("", "name", "value",
                       title="Inline Xbrl Document",
                       box=box.SIMPLE)
-        for row in self.properties.itertuples():
+        for row in self.data.itertuples():
             table.add_row(row.namespace, row.name, row.value)
         return table
 
@@ -223,14 +231,23 @@ INLINE_IXBRL_TAGS = ['ix:nonfraction', 'ix:nonnumeric', 'ix:fraction']
 
 class Block:
 
-    def __init__(self, text: str):
+    def __init__(self, text: str, **tags):
         self.text: str = text
         self.inline: bool = False
+        self.metadata: Dict[str, Any] = tags
 
-    def get_text(self,
-                 previous_block,
-                 next_block):
+    def __contains__(self, item):
+        return item in self.text
+
+    def get_text(self):
         return self.text
+
+    def is_empty(self):
+        return not self.is_linebreak() and not self.text.strip()
+
+    def is_linebreak(self):
+        # This block is a line break if it only has '\n'
+        return all(c == '\n' for c in self.text)
 
     def __str__(self):
         return "Block"
@@ -241,9 +258,26 @@ class Block:
 
 class TextBlock(Block):
 
-    def __init__(self, text: str, inline: bool = False):
-        super().__init__(text)
+    def __init__(self, text: str, inline: bool = False, **tags):
+        super().__init__(text, **tags)
         self.inline: bool = inline
+
+    @property
+    @lru_cache(maxsize=1)
+    def num_words(self):
+        "return the number of words in this text block"
+        if self.is_linebreak() or self.is_empty():
+            return 0
+        return len(self.text.split(" "))
+
+    @property
+    @lru_cache(maxsize=1)
+    def is_header(self):
+        return is_header(self.text)
+
+    @lru_cache(maxsize=1)
+    def analyze(self):
+        return TextAnalysis(self.text)
 
     def __str__(self):
         return "TextBlock"
@@ -254,12 +288,10 @@ class TextBlock(Block):
 
 class TableBlock(Block):
 
-    def __init__(self, text: str):
-        super().__init__(text)
+    def __init__(self, text: str, **tag):
+        super().__init__(text, **tag)
 
-    def get_text(self,
-                 previous_block,
-                 next_block):
+    def get_text(self):
         _text = "\n" + self.text + "\n"
         return _text
 
@@ -276,17 +308,55 @@ class HtmlDocument:
     @property
     def text(self):
         _text = ""
-        blocks_len = len(self.blocks)  # Get the total number of blocks
 
         for i, block in enumerate(self.blocks):
-            previous_block = self.blocks[i - 1] if i > 0 else None
-            next_block = self.blocks[i + 1] if i < blocks_len - 1 else None
-            _text += block.get_text(previous_block, next_block)
+            _text += block.text
 
         # Fix unnecessary line breaks between sections
         _text = re.sub(r'(?<=[^.?!])\s*\n{3,}\s*', ' ', _text)
 
         return _text
+
+    @staticmethod
+    def _compress_blocks(blocks: List[Block]):
+        """
+        Create a new block structure with blocks that are only whitespace appended to previous blocks
+        For example ... if there are consecutive blocks like so
+        'THIS is a block'
+        ' '
+
+        the result should be
+        'THIS is a block '
+        Copy to a new block structure
+        """
+        compressed_blocks = []
+        current_block = None
+        for block in blocks:
+            if isinstance(block, TableBlock) or block.text.endswith("\n"):
+                if current_block:
+                    compressed_blocks.append(current_block)
+                    current_block = None
+                compressed_blocks.append(block)
+            else:
+                if block.is_empty():
+                    if not current_block:
+                        current_block = block
+                    else:
+                        current_block.text += block.text
+                else:
+                    if current_block:
+                        current_block.text += block.text
+                    else:
+                        current_block = block
+        # Remember to add the last block
+        if current_block and not current_block.is_empty():
+            compressed_blocks.append(current_block)
+
+        # Strip the first block
+        if compressed_blocks:
+            compressed_blocks[0].text = compressed_blocks[0].text.lstrip()
+
+        return compressed_blocks
 
     @classmethod
     def extract_text(cls, start_element: Tag):
@@ -297,6 +367,8 @@ class HtmlDocument:
 
         # Now find the full text
         blocks: List[Block] = extract_and_format_content(start_element)
+        # Compress the blocks
+        blocks: List[Block] = HtmlDocument._compress_blocks(blocks)
 
         return blocks
 
@@ -327,6 +399,77 @@ class HtmlDocument:
         blocks: List[Block] = cls.extract_text(root)
         return cls(blocks=blocks, data=data)
 
+    @staticmethod
+    def _render_blocks(blocks: List[Block]) -> str:
+        text_ = "".join([block.text for block in blocks])
+        return text_.strip()
+
+    def generate_chunks_as_text(self, ignore_tables: bool = False) -> List[str]:
+        for chunk in self.generate_chunks(ignore_tables=ignore_tables):
+            yield HtmlDocument._render_blocks(chunk)
+
+    def generate_chunks(self, ignore_tables: bool = False) -> List[List[Block]]:
+        current_chunk = []
+        accumulating_regular_text = False
+        header_detected = False
+        item_header_detected = False
+
+        for i, block in enumerate(self.blocks):
+            if isinstance(block, TableBlock) or block.metadata.get('element') in ['ol', 'ul']:
+                if isinstance(block, TableBlock) and ignore_tables:
+                    continue
+                if current_chunk:
+                    if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
+                        yield current_chunk
+                    current_chunk = []
+                yield [block]  # Yield TableBlock as its own chunk
+                accumulating_regular_text = False
+                header_detected = False
+                item_header_detected = False
+            elif isinstance(block, TextBlock):
+                analysis = block.analyze()
+                is_regular_text = analysis.is_regular_text
+
+                # Check if the block is an "Item" header
+                is_item_header = bool(re.match(r"Item\s+\d+(\.\d+)?\s*[:.]?", block.text))
+
+                if is_item_header:
+                    # If encountering an "Item" header, decide whether to yield the current chunk
+                    if current_chunk and not accumulating_regular_text:
+                        if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
+                            yield current_chunk
+                        current_chunk = []
+                    item_header_detected = True
+                    header_detected = True  # "Item" headers are also considered regular headers
+                    current_chunk.append(block)
+                elif analysis.is_header:
+                    if current_chunk and not accumulating_regular_text and not item_header_detected:
+                        if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
+                            yield current_chunk
+                        current_chunk = []
+                    header_detected = True
+                    accumulating_regular_text = False  # Reset this flag since we found a new header
+                    current_chunk.append(block)  # Start accumulating from this header
+                    item_header_detected = False  # Reset this as we found a different type of header
+                elif is_regular_text and (header_detected or accumulating_regular_text):
+                    current_chunk.append(block)
+                    accumulating_regular_text = True
+                    item_header_detected = False  # Regular text resets the "Item" header detection
+                else:
+                    if accumulating_regular_text or item_header_detected:
+                        if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
+                            yield current_chunk
+                        current_chunk = []
+                        accumulating_regular_text = False
+                        header_detected = False
+                        item_header_detected = False
+                    current_chunk.append(block)
+
+            # Check to yield the remaining chunk if it's the last block
+            if i == len(self.blocks) - 1 and current_chunk:
+                if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
+                    yield current_chunk
+
 
 def extract_and_format_content(element) -> List[Block]:
     """
@@ -335,7 +478,9 @@ def extract_and_format_content(element) -> List[Block]:
     """
 
     if element.name == 'table':
-        return [TableBlock(text=table_to_text(element))]
+        return [TableBlock(text=fixup(table_to_text(element)), rows=len(element.find_all("tr")))]
+    elif element.name in ['ul', 'ol']:
+        return [TextBlock(text=fixup(element.text), element=element.name, text_type='list')]
     else:
         inline = is_inline(element)
         blocks: List[Block] = []
@@ -346,10 +491,19 @@ def extract_and_format_content(element) -> List[Block]:
                 if not inline and len(blocks) > 0 and not isinstance(blocks[-1], TableBlock):
                     # are we at the end of the children?
                     if not blocks[-1].inline or index == len_children - 1:
-                        blocks[-1].text += '\n'
+                        if blocks[-1].text.strip():
+                            blocks[-1].text += '\n'
+                        else:
+                            blocks[-1].text = '\n'
             else:
-                stripped_string = fixup(child.string)
-                blocks.append(TextBlock(stripped_string, inline=inline))
+                stripped_string = replace_inline_newlines(child.string)
+                stripped_string = fixup(stripped_string)
+                if not stripped_string.strip() and len(blocks) > 0 and not blocks[-1].text.strip():
+                    if not blocks[-1].text.endswith('\n'):  # Don't add a space after a new line
+                        blocks[-1].text += stripped_string
+                else:
+                    blocks.append(TextBlock(stripped_string, inline=inline, element=element.name, text_type='string'))
+
         return blocks
 
 
@@ -395,7 +549,7 @@ def table_to_text(table_tag):
     return formatted_table
 
 
-def decompose_toc_links(start_element: Tag) -> List[Tag]:
+def decompose_toc_links(start_element: Tag):
     regex = re.compile('Table [Oo]f [cC]ontents')
     toc_tags = start_element.find_all('a', string=regex)
     for toc_tag in toc_tags:
@@ -403,7 +557,7 @@ def decompose_toc_links(start_element: Tag) -> List[Tag]:
 
 
 def decompose_page_numbers(start_element: Tag):
-    span_tags_with_numbers = start_element.find_all('span', string=re.compile('^\d{1,2}$'))
+    span_tags_with_numbers = start_element.find_all('span', string=re.compile('^\d{1,3}$'))
     sequences = []  # To store the sequences of tags for potential review
     current_sequence = []
     previous_number = None
@@ -468,6 +622,10 @@ def is_inline(tag):
     if tag.name in inline_elements:
         return True
 
+    # #ixbrl tags are inline
+    if tag.name.startswith("ix:"):
+        return True
+
     # Check for inline styling
     if tag.has_attr('style'):
         styles = tag['style'].split(';')
@@ -481,8 +639,14 @@ def is_inline(tag):
 
 
 def fixup(text: str):
-    """Cleanup the string"""
-    text = text.replace('\xa0', ' ')
+    # This pattern matches one or more non-breaking space (\xa0) or one or more whitespace characters (\s+)
+    text = re.sub(r'\xa0|\s+', ' ', text)
+
+    return text
+
+
+def replace_inline_newlines(text: str):
+    """Replace newlines inside the text container"""
     text = text.replace('\n', ' ')
     return text
 
@@ -492,3 +656,102 @@ def fixup_soup(soup):
     comments = soup.find_all(string=lambda text: isinstance(text, Comment))
     for comment in comments:
         comment.extract()
+
+
+# List of words that are commonly not capitalized in titles
+common_words = {'and', 'or', 'but', 'the', 'a', 'an', 'in', 'with', 'for', 'on', 'at', 'to', 'of', 'by', 'as'}
+
+
+class SECLine:
+
+    def __init__(self, text):
+        self.text = text.strip()  # Remove leading and trailing whitespace
+        self.is_header = False
+        self.is_empty = False
+        self.features = {}
+        self.analyze()
+
+    def analyze(self):
+        self.set_empty()
+        self.set_header()
+        self.set_features()
+
+    def set_empty(self):
+        if not self.text:
+            self.is_empty = True
+
+    def set_header(self):
+        if self.is_empty:  # Skip empty lines for header detection
+            return
+        self.is_header = is_header(self.text)
+
+    def set_features(self):
+        # Additional features can be added here
+        self.features['word_count'] = len(self.text.split())
+        self.features['upper_case'] = self.text.isupper()
+        self.features['title_case'] = self.text.istitle()
+
+
+def is_header(text: str):
+    # Remove numerical prefix for enumeration, e.g., "1. ", "I. ", "(1) "
+    trimmed_text = re.sub(r'^(\d+\.|\w\.\s|\(\d+\)\s)', '', text)
+    if not trimmed_text:
+        return False
+
+    # Split the line into words, considering special cases for common words
+    words = [word for word in trimmed_text.split() if word.isalpha()]
+
+    # Check if the line is mostly title case, ignoring common words and numerical prefixes
+    if words:
+        title_case_words = [word for word in words if (word.istitle() or word.lower() in common_words)]
+        upper_case_words = [word for word in words if word.isupper()]
+        mostly_title_case = len(title_case_words) / len(words) > 0.6  # Threshold for mostly title case
+        mostly_upper_case = len(upper_case_words) / len(words) > 0.6
+
+        if mostly_title_case or mostly_upper_case:
+            return True
+    return False
+
+
+class TextAnalysis:
+    def __init__(self, text):
+        # Pre-compute and store these properties to avoid recalculating them for each method call
+        words = TextAnalysis._get_alpha_words(text)
+        self.num_words = len(words)
+        self.num_upper_case_words = len([word for word in words if word.isupper()])
+        self.num_title_case_words = len([word for word in words if word.istitle()])
+
+        # Show a preview of the text i.e. first 6 characters followed by ... if longer
+        self._text = text[:6] + "..." if len(text) > 6 else text
+
+    @staticmethod
+    def _get_alpha_words(text):
+        """Removes numerical prefixes and splits the text into alphabetic words."""
+        trimmed_text = re.sub(r'[^a-zA-Z0-9\s]+', '', text)
+        return [word for word in trimmed_text.split() if word.isalpha()]
+
+    @property
+    def is_header(self):
+        """Determines if the text is a header based on title or upper case predominance."""
+        mostly_title_case = (self.num_title_case_words / self.num_words > 0.6) if self.num_words > 0 else False
+        mostly_upper_case = (self.num_upper_case_words / self.num_words > 0.6) if self.num_words > 0 else False
+        return mostly_title_case or mostly_upper_case
+
+    @property
+    def is_mostly_upper(self):
+        """Checks if the majority of the words in the text are in uppercase."""
+        return self.num_upper_case_words / self.num_words > 0.6
+
+    @property
+    def is_mostly_title_case(self):
+        """Checks if the majority of the words in the text are in title case."""
+        return self.num_title_case_words / self.num_words > 0.6
+
+    @property
+    @lru_cache(maxsize=1)
+    def is_regular_text(self):
+        return self.num_words > 25
+
+    def __str__(self):
+        # Show the first 8 characters of the text
+        return f"Text Analysis: {self._text}"

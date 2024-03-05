@@ -535,7 +535,7 @@ class EightK():
     def __rich__(self):
         item_renderables = []
         for item in self.items:
-            item_renderables.append(Text(self[item].text))
+            item_renderables.append(Text(self[item]))
 
         return Panel(
             Group(*item_renderables),

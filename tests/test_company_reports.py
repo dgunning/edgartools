@@ -21,6 +21,9 @@ def test_tenk_filing_with_no_gaap():
 def test_tenk_item_and_parts():
     filing = Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', cik=1450722,
                     accession_no='0001213900-23-028058')
+
+    chunked_document = ChunkedDocument(filing.html())
+    chunk_df = chunked_document._chunked_data
     tenk: TenK = filing.obj()
     # Get item 1
     item1 = tenk['Item 1']
@@ -103,16 +106,14 @@ def test_items_for_8k_filing():
                     company='ALPINE 4 HOLDINGS, INC.',
                     cik=1606698,
                     accession_no='0001628280-23-039016')
+    chunked_df = ChunkedDocument(filing.html())._chunked_data
     eightk = EightK(filing)
     doc = eightk.doc
 
-    assert eightk.items == ['Item 2.03', 'Item 9.01']
-    print()
-    print(doc)
-    print(doc.show_items("Text.notnull()", "Item"))
+    assert eightk.items == ['Item 1.01', 'Item 2.03', 'Item 9.01']
 
-    item_101 = doc['Item 9.01']
-    print(item_101)
+    item_901 = doc['Item 9.01']
+    assert "Merchant Cash Advance" in item_901
 
 
 def test_eightk_with_spaces_in_items():
@@ -151,14 +152,6 @@ def test_eightk_difficult_parsing():
     assert eightk.items == ['Item 5.02', 'Item 9.01']
     assert 'receive an annual base salary of $1,400,000' in eightk['Item 5.02']
 
-    filing = Filing(form='8-K', filing_date='2023-03-20', company='AFC Gamma, Inc.', cik=1822523,
-                    accession_no='0001829126-23-002149')
-    eightk = filing.obj()
-    print(eightk.doc)
-    assert eightk.items == ['Item 5.02', 'Item 7.01', 'Item 9.01']
-    assert "press release announcing Mr. Hetzel’s appointment as Chief Financial Officer" in eightk['Item 7.01']
-    print(eightk)
-
     filing = Filing(form='8-K', filing_date='2023-03-20', company='Artificial Intelligence Technology Solutions Inc.',
                     cik=1498148, accession_no='0001493152-23-008256')
     eightk = filing.obj()
@@ -169,6 +162,16 @@ def test_eightk_difficult_parsing():
                     accession_no='0001562762-23-000124')
     eightk = filing.obj()
     assert eightk.items == ['Item 9.01']
+
+
+def test_eightk_with_items_split_by_newlines():
+    filing = Filing(form='8-K', filing_date='2023-03-20', company='AFC Gamma, Inc.', cik=1822523,
+                    accession_no='0001829126-23-002149')
+    eightk: EightK = filing.obj()
+    print()
+    assert eightk.items == ['Item 5.02', 'Item 7.01', 'Item 9.01']
+    assert "press release announcing Mr. Hetzel’s appointment as Chief Financial Officer" in eightk['Item 7.01']
+    print(eightk)
 
 
 def test_create_eightk_obj_and_find_items():
