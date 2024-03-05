@@ -299,7 +299,7 @@ class TableBlock(Block):
     def __str__(self):
         return "TableBlock"
 
-
+item_pattern = r"(?:ITEM|Item)\s+(?:[0-9]{1,2}[A-Z]?\.?|[0-9]{1,2}\.[0-9]{2})"
 class HtmlDocument:
 
     def __init__(self,
@@ -399,7 +399,6 @@ class HtmlDocument:
         return soup.find('html')
 
 
-
     @classmethod
     def from_html(cls, html: str):
         root: Tag = cls.get_root(html)
@@ -440,17 +439,21 @@ class HtmlDocument:
                 is_regular_text = analysis.is_regular_text
 
                 # Check if the block is an "Item" header
-                is_item_header = bool(re.match(r"Item\s+\d+(\.\d+)?\s*[:.]?", block.text))
+                is_item_header = bool(re.match(item_pattern, block.text))
 
                 if is_item_header:
-                    # If encountering an "Item" header, decide whether to yield the current chunk
-                    if current_chunk and not accumulating_regular_text:
+                    # Yield the current chunk before starting a new one with the "Item" header
+                    if current_chunk:
                         if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
                             yield current_chunk
-                        current_chunk = []
+
+                    # Initialize the new chunk with the "Item" header
+                    current_chunk = [block]
+
+                    # Update flags accordingly
                     item_header_detected = True
-                    header_detected = True  # "Item" headers are also considered regular headers
-                    current_chunk.append(block)
+                    header_detected = True  # "Item" headers are considered regular headers for flag purposes
+                    accumulating_regular_text = False  # Reset since we're starting a new section
                 elif analysis.is_header:
                     if current_chunk and not accumulating_regular_text and not item_header_detected:
                         if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks

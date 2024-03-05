@@ -81,8 +81,8 @@ def test_html_sections_from_html_with_table_with_no_tbody():
 
 def test_that_items_are_ordered_in_chunked_document_for_filing():
     nvidia_10k_html = Path("data/Nvidia.10-K.html").read_text()
-    chunked_documents = ChunkedDocument(nvidia_10k_html)
-
+    chunked_documents:ChunkedDocument = ChunkedDocument(nvidia_10k_html)
+    chunked_data=chunked_documents._chunked_data
     # Test the repr
     repr_ = repr(chunked_documents)
     print()
@@ -95,17 +95,23 @@ def test_that_items_are_ordered_in_chunked_document_for_filing():
     assert chunked_documents['Item 1'] == chunked_documents['ITEM 1']
     assert chunked_documents['ITEM 1']
 
+    item1 = chunked_documents['Item 1']
+
     print(chunked_documents['ITEM 1'])
 
 
 def test_chunk_document_for_10k_amendment():
     filing = Filing(form='10-K/A', filing_date='2023-11-16', company='America Great Health',
                     cik=1098009, accession_no='0001185185-23-001212')
+
     tenk = filing.obj()
+    from edgar.documents import HtmlDocument
     chunked_document: ChunkedDocument = tenk.doc
+    item15 = chunked_document['Item 15']
     assert chunked_document.list_items() == ['Item 15']
-    assert 'EXPLANATORY NOTE' in chunked_document['Item 15']
-    assert 'Investment in Purecell Group' in chunked_document['Item 15']
+
+    assert 'Report of Independent Registered Public Accountant Firm' in chunked_document['Item 15']
+    assert 'Investment in Purecell Group' in item15
 
     assert chunked_document['Item 1'] is None
     assert chunked_document['Item 2'] is None

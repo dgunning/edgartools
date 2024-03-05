@@ -155,7 +155,7 @@ def test_eightk_difficult_parsing():
     filing = Filing(form='8-K', filing_date='2023-03-20', company='Artificial Intelligence Technology Solutions Inc.',
                     cik=1498148, accession_no='0001493152-23-008256')
     eightk = filing.obj()
-    assert eightk.items == ['Item 8.01', 'ITEM 9.01']
+    assert eightk.items == ['Item 8.01', 'Item 9.01']
     assert "we will be issuing a Shareholder Letter to our shareholders," in eightk['Item 8.01']
 
     filing = Filing(form='8-K', filing_date='2023-03-20', company='CATO CORP', cik=18255,

@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from edgar.documents import *
 from copy import copy
 from edgar import Filing
+from edgar.htmltools import ChunkedDocument
 
 pd.options.display.max_columns = 10
 
@@ -95,9 +96,23 @@ of Directors or Certain Officers; Election of Directors;</b></span>
 def test_parse_complicated_htmldocument():
     html_str = Path("data/Nvidia.10-K.html").read_text()
     html_document = HtmlDocument.from_html(html_str)
-    print(html_document.text)
+
     assert "NVIDIA has a platform strategy" in html_document.text
 
+    doc:ChunkedDocument = ChunkedDocument(html_str)
+    assert "are not a part of this Annual Report on Form 10-K" in doc['Item 1']
+    assert "evaluating NVIDIA, the following risk factors should be considered" in doc['Item 1A']
+    assert "Microsoft may have first and last rights of refusal to purchase the stock" in doc['Item 1A']
+    assert "Item 15 of this Annual Report on Form 10-K for a discussion" in doc['Item 3']
+    assert "Not applicable." in doc['Item 4']
+    assert "stock is traded on the Nasdaq Global Select Market under the symbol NVDA" in doc['Item 5']
+    assert "The following discussion and analysis of our financial condition and results of operations" in doc["Item 7"]
+    assert "Climate Change" in doc["Item 7"]
+    assert "The information required by this Item is set forth in our Consolidated Financial Statements" in doc['Item 8']
+    assert "None" in doc['Item 9']
+    assert "Based on their evaluation as of January 29, 2023, our management" in doc['Item 9A']
+    assert "all control issues and instances of fraud, if any, within NVIDIA have been detected" in doc['Item 9A']
+    assert "Equity Compensation Plan Information" in doc["Item 12"]
 
 def test_htmldocument_from_filing_with_document_tag():
     """

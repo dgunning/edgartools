@@ -171,8 +171,8 @@ def chunk(html: str):
     return list(document.generate_chunks())
 
 
-int_item_pattern = r"(Item [0-9]{1,2}[A-Z]?\.)"
-decimal_item_pattern = r"(Item [0-9]{1,2}\.[0-9]{2})"
+int_item_pattern = r"^(Item [0-9]{1,2}[A-Z]?)\.?"
+decimal_item_pattern = r"^(Item [0-9]{1,2}\.[0-9]{2})\.?"
 
 
 def detect_table_of_contents(text: str):
@@ -319,12 +319,12 @@ def chunks2df(chunks: List[List[Block]],
                                                                           flags=re.IGNORECASE | re.MULTILINE),
                                      Toc=lambda df: df.Text.head(100).apply(detect_table_of_contents),
                                      Empty=lambda df: df.Text.str.contains('^$', na=True),
-                                     DetectedItem=lambda df: item_detector(df.Text)
+                                     Item=lambda df: item_detector(df.Text)
                                      )
     # If the row is 'toc' then set the item and part to empty
-    chunk_df.loc[chunk_df.Toc.notnull() & chunk_df.Toc, 'DetectedItem'] = ""
-    if item_adjuster:
-        chunk_df = item_adjuster(chunk_df, **{'item_structure': item_structure, 'item_detector': item_detector})
+    chunk_df.loc[chunk_df.Toc.notnull() & chunk_df.Toc, 'Item'] = ""
+    #if item_adjuster:
+        #chunk_df = item_adjuster(chunk_df, **{'item_structure': item_structure, 'item_detector': item_detector})
 
     # Foward fill item and parts
     # Handle deprecation warning in fillna(method='ffill')
@@ -341,9 +341,8 @@ def chunks2df(chunks: List[List[Block]],
         chunk_df.loc[signature_loc:, 'Item'] = pd.NA
         chunk_df.Signature = chunk_df.Signature.fillna("")
 
-    # Now fillna
-    for col in ['Item']:
-        chunk_df.loc[:, col] = chunk_df[col].fillna("")
+    # Fill the Item column with "" then set to title case
+    chunk_df.Item = chunk_df.Item.fillna("").str.title()
 
     # Finalize the colums
     chunk_df = chunk_df[['Text', 'Table', 'Chars', 'Signature', 'TocLink', 'Toc', 'Empty', 'Item']]
