@@ -397,7 +397,7 @@ Our success depends on our ability to:
 </p>
 <ul>
 <li>timely identify industry changes, adapt our strategies, and develop new or enhance existing products and technologies that meet the evolving needs of these markets</li>
-<li>•develop new products and technologies through investments in research and development;</li>
+<li>develop new products and technologies through investments in research and development;</li>
 <li>launch new offerings with new business models including standalone software, cloud solutions, and software-, infrastructure-, or platform-as-a-service solutions;</li>
 <li>expand the ecosystem for our products and technologies;</li>
 <li>meet evolving and prevailing customer and industry safety and compliance standards;</li>
@@ -422,13 +422,17 @@ We will offer enterprise customers NVIDIA AI cloud services directly and through
         print('-' * 80)
 
 
-def test_generate_chunks_from_8k():
-    html_str = Path("data/NextPoint.8K.html").read_text()
-    document = HtmlDocument.from_html(html_str)
-    print()
-    blocks = document.blocks
-    # print(document.text)
-
-    for chunk in document.generate_chunks():
-        print(chunk)
-        print('*' * 80)
+def test_get_clean_html():
+    html = """
+    <html>
+    <body>
+    <h1>Header</h1>
+        <!-- This is a header -->
+        <ix:header>Header</ix:header>
+        <a href="#toc">Table of Contents</a>
+    </body>
+    </html>
+    """
+    html = get_clean_html(html)
+    assert not "<ix:header>" in html
+    assert not '<!-- This is a header -->' in html

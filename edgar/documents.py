@@ -19,7 +19,8 @@ __all__ = ['DocumentData',
            'TextBlock',
            'TableBlock',
            'TextAnalysis',
-           'SECLine']
+           'SECLine',
+           'get_clean_html']
 
 
 class DocumentData:
@@ -301,9 +302,12 @@ class TableBlock(Block):
 
 class HtmlDocument:
 
-    def __init__(self, blocks: List[Block], data: Optional[DocumentData] = None):
-        self.blocks: List[Block] = blocks
-        self.data: Optional[DocumentData] = data
+    def __init__(self,
+                 blocks: List[Block],
+                 data: Optional[DocumentData] = None,
+                 ):
+        self.blocks: List[Block] = blocks  # The text blocks
+        self.data: Optional[DocumentData] = data  # Any data in the document
 
     @property
     def text(self):
@@ -384,7 +388,7 @@ class HtmlDocument:
         return ixbrl_document
 
     @classmethod
-    def from_html(cls, html: str):
+    def get_root(cls, html: str) -> Tag:
         # First check if the html is inside a <DOCUMENT><TEXT> block
         if "<TEXT>" in html[:500]:
             html = get_text_between_tags(html, 'TEXT')
@@ -392,11 +396,16 @@ class HtmlDocument:
         soup = BeautifulSoup(html, features='lxml')
         # Cleanup the soup before extracting text (including removing comments)
         fixup_soup(soup)
+        return soup.find('html')
 
-        root: Tag = soup.find('html')
 
+
+    @classmethod
+    def from_html(cls, html: str):
+        root: Tag = cls.get_root(html)
         data = cls.extract_data(root)
         blocks: List[Block] = cls.extract_text(root)
+
         return cls(blocks=blocks, data=data)
 
     @staticmethod
@@ -644,6 +653,27 @@ def fixup(text: str):
 
     return text
 
+
+def get_clean_html(html: str) -> str:
+    """Get a clean version of the html without the header tags, script and style tags, and table of content links.
+    """
+    root = HtmlDocument.get_root(html)
+    # Remove the header tags
+    for tag in root.find_all('ix:header'):
+        tag.decompose()
+
+    # Remove table of content links
+    decompose_toc_links(root)
+
+    # Remove script and style tags
+    for tag in root.find_all(['script', 'style']):
+        tag.decompose()
+
+    # Remove comments
+    for comment in root.find_all(string=lambda text: isinstance(text, Comment)):
+        comment.extract()
+
+    return str(root)
 
 def replace_inline_newlines(text: str):
     """Replace newlines inside the text container"""
