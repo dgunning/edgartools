@@ -43,7 +43,6 @@ python_version = tuple(map(int, sys.version.split()[0].split('.')))
 
 # Turn down 3rd party logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("unstructured").setLevel(logging.WARNING)
 
 __all__ = [
     'log',
