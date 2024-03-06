@@ -127,7 +127,7 @@ class EntityFiling(Filing):
         return self.get_entity().get_filings(file_number=self.file_number, sort_by="filing_date")
 
     def __str__(self):
-        return (f"CompanyFiling(company='{self.company}', cik={self.cik}, form='{self.form}', "
+        return (f"Filing(company='{self.company}', cik={self.cik}, form='{self.form}', "
                 f"filing_date='{self.filing_date}', accession_no='{self.accession_no}')"
                 )
 
