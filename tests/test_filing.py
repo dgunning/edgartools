@@ -30,6 +30,7 @@ def test_read_fixed_width_index_for_daily_file():
     # The last record is there
     assert index_df.iloc[-1]['accession_number'] == '0001105608-20-000004'
 
+
 def test_read_fixed_width_index_for_quarterly_file():
     index_text = Path('data/form.idx').read_text()
     index_data = read_fixed_width_index(index_text, form_specs)
@@ -432,6 +433,12 @@ def test_filing_html_is_xhtml_for_xml_filing():
     assert "-//W3C//DTD XHTML 1.0 Strict//EN" in html
 
 
+def test_filing_html_for_pdf_only_filing():
+    filing = Filing(form='40-17G', filing_date='2024-02-27', company='FIDELITY CAPITAL TRUST', cik=275309,
+                    accession_no='0000880195-24-000030')
+    assert not filing.html()
+
+
 def test_filing_homepage_get_minimum_seq():
     filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
                     cik=1609804, filing_date='2022-11-04',
@@ -825,10 +832,9 @@ def test_get_current_filings_by_form():
 def test_filings_get_by_invalid_accession_number(capsys):
     assert cached_filings(2022, 1).get('INVALID-ACCESS-NUMBER') is None
 
+
 def test_get_daily_filing_index():
     with http_client() as client:
-        #_, filings = fetch_filing_index((2024,1), client, 'form')
+        # _, filings = fetch_filing_index((2024,1), client, 'form')
         filings = fetch_daily_filing_index('2024-01-26', client=client, index="form")
         print(filings)
-
-

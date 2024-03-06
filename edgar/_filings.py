@@ -1587,12 +1587,16 @@ class Filing:
 
     def markdown(self) -> str:
         """return the markdown version of this filing html"""
-        return html_to_markdown(get_clean_html(self.html()))
+        html = self.html()
+        if html:
+            return html_to_markdown(get_clean_html(self.html()))
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""
-        console = Console()
-        console.print(MarkdownContent(get_clean_html(self.html()), title=f"Form {self.form} for {self.company}"))
+        html = self.html()
+        if html:
+            console = Console()
+            console.print(MarkdownContent(get_clean_html(self.html()), title=f"Form {self.form} for {self.company}"))
 
     def xbrl(self) -> Optional[FilingXbrl]:
         """
