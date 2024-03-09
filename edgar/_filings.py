@@ -1543,6 +1543,10 @@ class Filing:
         self._filing_homepage = None
 
     @property
+    def accession_number(self):
+        return self.accession_no
+
+    @property
     def document(self):
         """
         :return: The primary display document on the filing, generally HTML but can be XHTML
