@@ -21,19 +21,17 @@ def get_test_company(company_identifier):
 def test_company_repr():
     company = get_test_company("NVDA")
     print()
-    print(company)
-    assert 'NVDA' in company.__repr__()
-    assert 'Large accelerated filer' in company.__repr__()
+    repr_ = repr(company)
+    assert 'NVDA' in repr_
+    assert 'Large accelerated' in company.__repr__()
     assert '1045810' in company.__repr__()
-    assert 'Semiconductors & Related Devices' in company.__repr__()
+    assert 'Semiconductors' in company.__repr__()
 
-    company_with_2_tickers = get_test_company(4904)
-    print(company_with_2_tickers)
-    #assert all(ticker in company_with_2_tickers.__repr__() for ticker in ["AEP", "AEPPZ"])
 
-    company_with_more_tickers = get_test_company(310522)
-    print(company_with_more_tickers.__repr__())
-    assert all(ticker in company_with_more_tickers.__repr__() for ticker in ["FNMA"])
+def test_ticker_display_for_company_with_multiple_tickers():
+    company = get_test_company(310522)
+    assert "FNMA" in company.tickers
+    assert "FNMA" in repr(company)
 
 
 def test_parse_company_submission_json():
@@ -41,8 +39,6 @@ def test_parse_company_submission_json():
         cjson = json.load(f)
     company = parse_entity_submissions(cjson)
     assert company.cik == 1318605
-    print()
-    print(company)
 
 
 def test_get_company_submissions():
@@ -61,10 +57,9 @@ def test_no_company_for_cik():
     company = Company(-1)
     assert company is None
 
+
 def test_get_company_with_no_filings():
     company = Company("0000350001")
-    print()
-    print(company)
     assert company.name == "Company Name Three `!#$(),:;=.-;\\|@/{}&'\\WA\\"
     assert company.filings is not None
     assert len(company.filings) == 0
@@ -91,12 +86,6 @@ def test_company_get_facts_repr():
     assert 'Tesla' in facts_repr
 
 
-def test_company_filing_repr():
-    company = get_test_company(1318605)
-    filing = company.get_filings()[0]
-    print(filing)
-
-
 def test_company_for_cik():
     company: CompanyData = CompanyData.for_cik(1318605)
     assert company
@@ -105,7 +94,6 @@ def test_company_for_cik():
 
 def test_company_for_ticker():
     company: CompanyData = CompanyData.for_ticker("EXPE")
-    print(company)
     assert company
     assert company.cik == 1324424
     assert company.tickers == ['EXPE']
@@ -113,19 +101,19 @@ def test_company_for_ticker():
 
 def test_get_company_tickers():
     company_tickers = get_company_tickers()
-    print()
-    print(company_tickers)
+    assert company_tickers is not None
+
 
 def test_get_cik_lookup_data():
     cik_lookup = get_cik_lookup_data()
-    assert cik_lookup[cik_lookup.cik==1448632].name.item() == 'ZZIF 2008 INVESTMENT LLC'
+    assert cik_lookup[cik_lookup.cik == 1448632].name.item() == 'ZZIF 2008 INVESTMENT LLC'
 
 
 def test_parse_cik_lookup_data():
     with Path('data/cik_lookup_data.txt').open(
-        "r", 
-        encoding="utf-8", 
-        errors="surrogateescape"
+            "r",
+            encoding="utf-8",
+            errors="surrogateescape"
     ) as f:
         content = f.read()
     cik_lookups = _parse_cik_lookup_data(content)
@@ -146,7 +134,6 @@ def test_company_filings_filter_by_date():
     expe = get_test_company("EXPE")
     filings = expe.filings
     filtered_filings = filings.filter(filing_date="2023-01-04:")
-    print(filtered_filings)
     assert not filtered_filings.empty
     assert len(filtered_filings) < len(expe.filings)
 
@@ -167,7 +154,6 @@ def test_company_get_form_by_date():
     filings = company.get_filings(filing_date="2022-11-01:2023-01-20")
     assert not filings.empty
     assert len(filings) < len(company.get_filings())
-    print(filings)
 
     filings_10k = company.get_filings(filing_date="2022-11-01:2023-01-20", form="10-Q")
     assert len(filings_10k) == 1
@@ -425,6 +411,7 @@ def test_preprocess_company():
     assert preprocess_company('UBS AG') == 'ubs'
     assert preprocess_company('GRABAG') == 'grabag'
 
+
 def test_company_financials():
     company = Company('AAPL')
     financials = company.financials
@@ -434,7 +421,7 @@ def test_company_financials():
 
 def test_iterate_company_filings():
     company = Company('AAPL')
-    filings:CompanyFilings = company.get_filings(form='10-K')
+    filings: CompanyFilings = company.get_filings(form='10-K')
     assert isinstance(filings, CompanyFilings)
 
     # Works even when we call head
@@ -447,6 +434,3 @@ def test_iterate_company_filings():
 
     for filing in filings:
         assert filing
-
-
-

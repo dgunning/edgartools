@@ -28,6 +28,12 @@ def test_entity_is_company():
     # NVC Holdings, LLC
     assert Entity(1940261).is_company
 
+    # FANNIE MAE
+    assert Entity(310522).is_company
+
+    # Berkshire Hathaway
+    assert Entity(1067983).is_company
+
 
 def test_display_name():
     assert Entity(1318605).display_name == "Tesla, Inc."

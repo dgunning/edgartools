@@ -16,6 +16,9 @@ from rich.text import Text
 
 from edgar._filings import Filing, Filings, FilingsState
 from edgar._rich import df_to_rich_table, repr_rich
+from rich import box
+from rich.columns import Columns
+from rich.table import Table, Column
 from edgar.core import (download_json, log, Result, display_size, download_text,
                         filter_by_date, IntString, InvalidDateException, reverse_name)
 from edgar.search import SimilaritySearchIndex
@@ -60,6 +63,27 @@ class Address:
         self.state_or_country: str = state_or_country
         self.zipcode: str = zipcode
         self.state_or_country_desc: str = state_or_country_desc
+
+
+    @property
+    def empty(self):
+        return not self.street1 and not self.street2 and not self.city and not self.state_or_country and not self.zipcode
+
+    def __str__(self):
+        if not self.street1:
+            return ""
+        address_format = "{street1}\n"
+        if self.street2:
+            address_format += "{street2}\n"
+        address_format += "{city}, {state_or_country} {zipcode}"
+
+        return address_format.format(
+            street1=self.street1,
+            street2=self.street2,
+            city=self.city,
+            state_or_country=self.state_or_country_desc,
+            zipcode=self.zipcode
+        )
 
     def __repr__(self):
         return (f'Address(street1="{self.street1 or ""}", street2="{self.street2 or ""}", city="{self.city or ""}",'
@@ -362,11 +386,27 @@ class EntityData:
 
     @property
     def is_company(self) -> bool:
-        # Companies have a ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
-        # There may be other edge cases
-        return not (self.ein is None or self.state_of_incorporation == '')
+        return not self.is_individual
 
+    @property
+    # Companies have a ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
+    # There may be other edge cases
+    def is_individual(self) -> bool:
+        # If you have a ticker or exchange you are a company
+        if len(self.tickers) > 0 or len(self.exchanges) > 0:
+            return False
+        if self.ein is None:
+            return True
+        if self.state_of_incorporation == '' and self.sic is None:
+            return True
+        return False
 
+    @property
+    def _unicode_symbol(self):
+        if self.is_company:
+            return "\U0001F3EC" # Building
+        else:
+            return "\U0001F464" # Person
 
     @property
     @lru_cache(maxsize=1)
@@ -477,20 +517,50 @@ class EntityData:
     def ticker_info(self) -> pd.DataFrame:
         return pd.DataFrame({"exchange": self.exchanges, "ticker": self.tickers}).set_index("ticker")
 
+    @property
+    def ticker_display(self) -> str:
+        """Show a simplified version of the tickers"""
+        len_tickers = len(self.tickers)
+        if len_tickers == 0:
+            return ""
+        elif len_tickers == 1:
+            return self.tickers[0]
+        else:
+            return f"{self.tickers[0]} + {len_tickers - 1} other{'s' if len_tickers > 2 else ''}"
+
     def __str__(self):
         return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
 
     def __rich__(self):
-        ticker_str = f"[{self.tickers[0]}]" if len(self.tickers) == 1 else ""
-        company_text = f"{self.name} {ticker_str}"
-        return Panel(
-            Group(
-                df_to_rich_table(self.summary()
-                                 .filter(['category', 'industry']),
-                                 index_name="cik"),
-                df_to_rich_table(self.ticker_info(), index_name="ticker") if len(self.tickers) > 1 else Text("")
-            ), title=company_text
-        )
+        info_table = Table(Column("CIK", style="bold magenta"), box=box.SIMPLE)
+        row = [str(self.cik)]
+        if self.category:
+            info_table.add_column("Category")
+            row.append(self.category)
+        if self.sic:
+            info_table.add_column("Industry")
+            row.append(self.industry)
+        if self.state_of_incorporation:
+            info_table.add_column("Incorporated")
+            row.append(self.state_of_incorporation_description)
+        info_table.add_row(*row)
+
+        # The addresses
+        addresses = []
+        if not self.mailing_address.empty:
+            addresses.append(Panel(Text(str(self.mailing_address)), title='\U00002709 Mailing Address', width=40))
+        if not self.business_address.empty:
+            addresses.append(Panel((Text(str(self.business_address))), title='\U0001F3E2 Business Address', width=40))
+        address_columns = Columns(addresses, equal=True, expand=True)
+
+        if self.is_company:
+            display_name = f"{self.display_name} ({self.ticker_display})" if self.ticker_display else self.display_name
+        else:
+            display_name =f"{self._unicode_symbol} {self.display_name}"
+
+        title_style = "bold dark_sea_green4" if self.is_company else "bold dodger_blue1"
+        return Panel(Group(info_table, address_columns),
+                     title=Text(f"{display_name}", style=title_style))
 
     def __repr__(self):
         return repr_rich(self.__rich__())
