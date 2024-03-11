@@ -838,3 +838,22 @@ def test_get_daily_filing_index():
         # _, filings = fetch_filing_index((2024,1), client, 'form')
         filings = fetch_daily_filing_index('2024-01-26', client=client, index="form")
         print(filings)
+
+
+def test_get_attachment_by_type():
+    filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                    accession_no='0000066740-24-000023')
+    attachments = filing.attachments
+
+    print(attachments)
+    # Get a single attachment
+    attachment = attachments.query("Type=='EX-99.1'")
+    assert isinstance(attachment, Attachment)
+
+    # Get multiple attachments
+    attachments = attachments.query("Document.str.match('mmm-*')")
+    assert len(attachments) == 6
+
+    # No results
+    attachments = attachments.query("Document.str.match('DORM-*')")
+    assert attachments is None

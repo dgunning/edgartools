@@ -3,8 +3,9 @@ from rich import print
 
 from edgar import Filing
 from edgar import find
-from edgar.company_reports import TenK, TenQ, TwentyF, EightK
+from edgar.company_reports import TenK, TenQ, TwentyF, EightK, PressRelease
 from edgar.htmltools import ChunkedDocument
+from edgar._filings import Attachment
 
 pd.options.display.max_colwidth = 40
 
@@ -193,3 +194,24 @@ def test_create_eightk_obj_and_find_items():
     assert "Item 2.02" in item_202
     assert "Results of Operations and Financial Condition" in item_202
     print(eightk['Item 9.01'])
+
+
+def test_get_press_release():
+    filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                    accession_no='0000066740-24-000023')
+    eightk = filing.obj()
+    assert eightk.has_press_release
+    press_release: PressRelease = eightk.press_release
+    assert press_release.document == 'pressrelease3-8x24.htm'
+    assert isinstance(press_release, PressRelease)
+    assert "Board of Directors has approved the planned spin-off" in press_release.text()
+    print()
+    press_release.view()
+
+def test_get_press_release_for_8k_multiple_EX99_files():
+    filing = Filing(form='8-K', filing_date='2024-02-06', company='UDR, Inc.', cik=74208,
+                    accession_no='0000074208-24-000005')
+    eightK: EightK = filing.obj()
+    assert eightK.has_press_release
+    press_release: PressRelease = eightK.press_release
+    assert press_release

@@ -7,7 +7,10 @@ from rich.console import Group, Text
 from rich.panel import Panel
 
 from edgar._rich import repr_rich
+from edgar._markdown import MarkdownContent
+from edgar._filings import Attachments, Attachment
 from edgar.financials import Financials
+from edgar.documents import HtmlDocument
 from edgar.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
 
 __all__ = [
@@ -15,6 +18,7 @@ __all__ = [
     'TenQ',
     'TwentyF',
     'EightK',
+    'PressRelease',
     'is_valid_item_for_filing'
 ]
 
@@ -485,6 +489,26 @@ class EightK():
         self._filing = filing
 
     @property
+    def has_press_release(self):
+        attachments: Attachments = self._filing.attachments
+        # press release is Type EX-99.1
+        return attachments.query("Type=='EX-99.1'") is not None
+
+    @property
+    def press_release(self):
+        attachments: Attachments = self._filing.attachments
+        # press release is Type EX-99.1
+        press_release_results = attachments.query("Type=='EX-99.1' & Document.str.contains('htm')")
+        if press_release_results:
+            if isinstance(press_release_results, Attachment):
+                return PressRelease(press_release_results)
+            elif isinstance(press_release_results, Attachments):
+                for i in range(0, len(press_release_results)):
+                    attachment = press_release_results[i]
+                    if attachment.document.endswith('.htm') or attachment.document.endswith('.html'):
+                        return PressRelease(attachment)
+
+    @property
     def filing_date(self):
         return self._filing.filing_date
 
@@ -540,6 +564,46 @@ class EightK():
             Group(*item_renderables),
             title=f"{self._filing.company} 8-K {self.date_of_report}"
         )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
+class PressRelease:
+    """
+    Represents a press release attachment from an 8-K filing
+    With the Type EX-99.1
+    """
+
+    def __init__(self, attachment: Attachment):
+        self.attachment: Attachment = attachment
+
+    @property
+    def document(self) -> str:
+        return self.attachment.document
+
+    @lru_cache(maxsize=1)
+    def html(self) -> str:
+        return self.attachment.download()
+
+    def text(self) -> str:
+        html = self.html()
+        if html:
+            return HtmlDocument.from_html(html).text
+
+    def open(self):
+        self.attachment.open()
+
+    def view(self):
+        return self.to_markdown().view()
+
+    def to_markdown(self):
+        html = self.html()
+        markdown_content = MarkdownContent(html, title="8-K Press Release")
+        return markdown_content
+
+    def __rich__(self):
+        return self.to_markdown()
 
     def __repr__(self):
         return repr_rich(self.__rich__())

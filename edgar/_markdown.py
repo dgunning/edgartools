@@ -1,11 +1,11 @@
 import re
 
 from rich import box
-from rich.console import Group
+from rich.console import Group, Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
-
+from edgar.documents import get_clean_html
 from edgar._rich import repr_rich
 
 __all__ = [
@@ -97,13 +97,13 @@ class MarkdownContent:
     def __init__(self,
                  html: str,
                  title: str = ""):
-        from markdownify import markdownify
-        if "<DOCUMENT>" in html[:500]:
-            html = "\n".join(line for line in html.split("\n")
-                             if not any(line.startswith(tag) for tag in skip_tags))
-
-        self.md = re.sub(r'(\n\s*)+\n', '\n\n', markdownify(html))
+        html = get_clean_html(html)
+        self.md = html_to_markdown(html)
         self.title = title
+
+    def view(self):
+        console = Console()
+        console.print(self.__rich__())
 
     def __rich__(self):
         return markdown_to_rich(self.md, title=self.title)

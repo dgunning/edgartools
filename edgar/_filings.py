@@ -22,7 +22,7 @@ from fastcore.parallel import parallel
 from retry.api import retry_call
 from rich import box
 from rich.columns import Columns
-from rich.console import Group, Console
+from rich.console import Group
 from rich.panel import Panel
 from rich.status import Status
 from rich.table import Table
@@ -1599,8 +1599,8 @@ class Filing:
         """Preview this filing's primary document as markdown. This should display in the console"""
         html = self.html()
         if html:
-            console = Console()
-            console.print(MarkdownContent(get_clean_html(self.html()), title=f"Form {self.form} for {self.company}"))
+            markdown_content = MarkdownContent(self.html())
+            markdown_content.view()
 
     def xbrl(self) -> Optional[FilingXbrl]:
         """
@@ -1797,6 +1797,14 @@ class Attachments:
 
     def get(self, item):
         return self.__getitem__(item)
+
+    def query(self, query: str):
+        # Get the attachments by type
+        results = self.files.query(query)
+        if len(results) > 1:
+            return Attachments(results)
+        elif len(results) == 1:
+            return Attachment.from_dataframe_row(results.iloc[0])
 
     def __len__(self):
         return len(self.files)
