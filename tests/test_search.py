@@ -99,3 +99,10 @@ def test_search_sections():
     assert len(results) == 0
     print(results)
 
+
+def test_search_works_in_fwp_prospectus():
+    filing = Filing(form='FWP', filing_date='2023-03-30', company='CITIGROUP INC', cik=831001, accession_no='0000950103-23-004912')
+    results = filing.search("Pricing Supplement", regex=True)
+    assert len(results) > 0
+
+
