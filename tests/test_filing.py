@@ -3,12 +3,13 @@ import re
 from functools import lru_cache
 from pathlib import Path
 from typing import List
-
+import tempfile
 import httpx
 import humanize
 import pandas as pd
 import pytest
 from rich import print
+import json
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachments, \
@@ -857,3 +858,52 @@ def test_get_attachment_by_type():
     # No results
     attachments = attachments.query("Document.str.match('DORM-*')")
     assert attachments is None
+
+
+def test_filing_to_dict():
+    filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                    accession_no='0000066740-24-000023')
+    filing_dict = filing.to_dict()
+    assert filing_dict['form'] == '8-K'
+    assert filing_dict['filing_date'] == '2024-03-08'
+    assert filing_dict['company'] == '3M CO'
+    assert filing_dict['cik'] == 66740
+    assert filing_dict['accession_no'] == '0000066740-24-000023'
+
+    filing = Filing.from_dict(filing_dict)
+    assert filing.form == '8-K'
+    assert filing.filing_date == '2024-03-08'
+    assert filing.company == '3M CO'
+    assert filing.cik == 66740
+    assert filing.accession_no == '0000066740-24-000023'
+
+
+def test_save_filing_to_file():
+    filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                    accession_no='0000066740-24-000023')
+    filing_path = tempfile.NamedTemporaryFile()
+    print(filing_path.name)
+    assert Path(filing_path.name).is_file()
+    filing.save(Path(filing_path.name))
+    # Now load it
+    filing = Filing.load(Path(filing_path.name))
+    assert filing.filing_date == '2024-03-08'
+
+
+def test_save_filing_to_directory():
+    filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                    accession_no='0000066740-24-000023')
+
+    directory = tempfile.TemporaryDirectory()
+    filing_dir = Path(directory.name)
+    print(filing_dir)
+    filing.save(filing_dir)
+    # Now load the filing
+    filing_path = filing_dir / f"{filing.accession_no}.pkl"
+    assert filing_path.exists()
+    filing = Filing.load(filing_path)
+    assert filing.filing_date == '2024-03-08'
+
+
+
+

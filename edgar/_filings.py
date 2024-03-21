@@ -6,8 +6,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
-from typing import Tuple, List, Dict, Union, Optional
-
+from typing import Tuple, List, Dict, Union, Optional, Any
+from pathlib import Path
+from os import PathLike
+import pickle
 import httpx
 import numpy as np
 import pandas as pd
@@ -27,6 +29,7 @@ from rich.panel import Panel
 from rich.status import Status
 from rich.table import Table
 from rich.text import Text
+import json
 
 from edgar._markdown import MarkdownContent
 from edgar._markdown import html_to_markdown
@@ -215,7 +218,7 @@ def read_fixed_width_index(index_text: str,
     date_format = '%Y-%m-%d' if len(arrays[3][0].as_py()) == 10 else '%Y%m%d'
     arrays[3] = pc.cast(pc.strptime(arrays[3], date_format, 'us'), pa.date32())
 
-    # Get the accession number from the file path
+    # Get the accession number from the file directory_or_file
     arrays[4] = pa.compute.utf8_slice_codeunits(
         pa.compute.utf8_rtrim(arrays[4], characters=".txt"), start=-20)
 
@@ -402,6 +405,10 @@ class Filings:
                filing_date: str = None,
                date: str = None):
         """
+        Get some filings
+
+        >>> filings = get_filings()
+
         Filter the filings
 
         On a date
@@ -476,7 +483,7 @@ class Filings:
         """Display the current page ... which is the default for this filings object"""
         return self
 
-    def next(self) -> Optional[pa.Table]:
+    def next(self):
         """Show the next page"""
         data_page = self.data_pager.next()
         if data_page is None:
@@ -486,7 +493,7 @@ class Filings:
         filings_state = FilingsState(page_start=start_index, num_filings=len(self))
         return Filings(data_page, original_state=filings_state)
 
-    def previous(self) -> Optional[pa.Table]:
+    def previous(self):
         """
         Show the previous page of the data
         :return:
@@ -511,6 +518,9 @@ class Filings:
 
     def get(self, index_or_accession_number: IntString):
         """
+        First, get some filings
+        >>> filings = get_filings()
+
         Get the Filing at that index location or that has the accession number
         >>> filings.get(100)
 
@@ -1052,7 +1062,7 @@ class SubjectCompany:
         subject_company_renderables.append(self.company_information)
 
         # Addresses
-        if self.business_address or self.mailing_address:
+        if self.business_address is not None or self.mailing_address is not None:
             subject_company_renderables.append(_create_address_table(self.business_address, self.mailing_address))
 
         # Former Company Names
@@ -1204,7 +1214,7 @@ class SECHeader:
 
     @classmethod
     def parse(cls, header_text: str):
-        data = {}
+        data:Dict[str, Any] = {}
         current_header = None
         current_subheader = None
 
@@ -1611,6 +1621,56 @@ class Filing:
         if xbrl_document:
             xbrl_text = xbrl_document.download()
             return FilingXbrl.parse(xbrl_text)
+
+    def save(self, directory_or_file: PathLike):
+        """Save the filing to a directory path or a file using pickle.dump
+
+            If directory_or_file is a directory then the final file will be
+
+            '<directory>/<accession_number>.pkl'
+
+            Otherwise, save to the file passed in
+        """
+        filing_path = Path(directory_or_file)
+        if filing_path.is_dir():
+            filing_path = directory_or_file / f"{self.accession_no}.pkl"
+        with filing_path.open("wb") as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load(cls, path: PathLike):
+        """Load a filing from a json file"""
+        path = Path(path)
+        with path.open("rb") as file:
+            return pickle.load(file)
+
+    def to_dict(self) -> Dict[str, Union[str, int]]:
+        """Return the filing as a Dict string"""
+        return {'accession_no': self.accession_no,
+                'cik': self.cik,
+                'company': self.company,
+                'form': self.form,
+                'filing_date': self.filing_date}
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Union[str, int]]):
+        """Create a Filing from a dictionary.
+        Thw dict must have the keys cik, company, form, filing_date, accession_no
+        """
+        assert all(key in data for key in ['cik', 'company', 'form', 'filing_date', 'accession_no']), \
+            "The dict must have the keys cik, company, form, filing_date, accession_no"
+        return cls(cik=data['cik'],
+                   company=data['company'],
+                   form=data['form'],
+                   filing_date=data['filing_date'],
+                   accession_no=data['accession_no'])
+
+    @classmethod
+    def from_json(cls, path: str):
+        """Create a Filing from a JSON file"""
+        with open(path, 'r') as file:
+            data = json.load(file)
+            return cls.from_dict(data)
 
     @property
     @lru_cache(maxsize=1)
