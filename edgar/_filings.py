@@ -1633,7 +1633,7 @@ class Filing:
         """
         filing_path = Path(directory_or_file)
         if filing_path.is_dir():
-            filing_path = directory_or_file / f"{self.accession_no}.pkl"
+            filing_path = filing_path / f"{self.accession_no}.pkl"
         with filing_path.open("wb") as f:
             pickle.dump(self, f)
 
