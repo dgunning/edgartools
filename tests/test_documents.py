@@ -99,7 +99,7 @@ def test_parse_complicated_htmldocument():
 
     assert "NVIDIA has a platform strategy" in html_document.text
 
-    doc:ChunkedDocument = ChunkedDocument(html_str)
+    doc: ChunkedDocument = ChunkedDocument(html_str)
     assert "are not a part of this Annual Report on Form 10-K" in doc['Item 1']
     assert "evaluating NVIDIA, the following risk factors should be considered" in doc['Item 1A']
     assert "Microsoft may have first and last rights of refusal to purchase the stock" in doc['Item 1A']
@@ -108,11 +108,13 @@ def test_parse_complicated_htmldocument():
     assert "stock is traded on the Nasdaq Global Select Market under the symbol NVDA" in doc['Item 5']
     assert "The following discussion and analysis of our financial condition and results of operations" in doc["Item 7"]
     assert "Climate Change" in doc["Item 7"]
-    assert "The information required by this Item is set forth in our Consolidated Financial Statements" in doc['Item 8']
+    assert "The information required by this Item is set forth in our Consolidated Financial Statements" in doc[
+        'Item 8']
     assert "None" in doc['Item 9']
     assert "Based on their evaluation as of January 29, 2023, our management" in doc['Item 9A']
     assert "all control issues and instances of fraud, if any, within NVIDIA have been detected" in doc['Item 9A']
     assert "Equity Compensation Plan Information" in doc["Item 12"]
+
 
 def test_htmldocument_from_filing_with_document_tag():
     """
@@ -451,3 +453,11 @@ def test_get_clean_html():
     html = get_clean_html(html)
     assert not "<ix:header>" in html
     assert not '<!-- This is a header -->' in html
+
+
+def test_get_text_for_paper_filing():
+    filing = Filing(form='FOCUSN', filing_date='2024-02-28', company='JACKSON NATIONAL LIFE DISTRIBUTORS LLC',
+                    cik=1006323, accession_no='9999999997-24-001009')
+
+    text = filing.text()
+    assert text
