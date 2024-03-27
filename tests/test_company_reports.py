@@ -197,6 +197,16 @@ def test_create_eightk_obj_and_find_items():
 
 
 def test_get_press_release():
+    # With EX-99
+    filing = Filing(form="8-K", filing_date="2024-03-21", company="Accenture plc", cik=1467373, accession_no="0001467373-24-000106")
+    eightk = filing.obj()
+    assert eightk.has_press_release
+    press_release: PressRelease = eightk.press_release
+    assert press_release.document == "fy24q2earnings8-kexhibit.htm"
+    assert isinstance(press_release, PressRelease)
+    assert "Accenture Reports Second-Quarter Fiscal 2024 Results" in press_release.text()
+
+    # With EX-99.1
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
     eightk = filing.obj()

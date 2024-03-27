@@ -491,14 +491,14 @@ class EightK():
     @property
     def has_press_release(self):
         attachments: Attachments = self._filing.attachments
-        # press release is Type EX-99.1
-        return attachments.query("Type=='EX-99.1'") is not None
+        # press release is Type EX-99 or EX-99.1
+        return attachments.query("Type=='EX-99' | Type=='EX-99.1'") is not None
 
     @property
     def press_release(self):
         attachments: Attachments = self._filing.attachments
-        # press release is Type EX-99.1
-        press_release_results = attachments.query("Type=='EX-99.1' & Document.str.contains('htm')")
+        # press release is Type EX-99 or EX-99.1
+        press_release_results = attachments.query("(Type=='EX-99' | Type=='EX-99.1') & Document.str.contains('htm')")
         if press_release_results:
             if isinstance(press_release_results, Attachment):
                 return PressRelease(press_release_results)
@@ -572,7 +572,7 @@ class EightK():
 class PressRelease:
     """
     Represents a press release attachment from an 8-K filing
-    With the Type EX-99.1
+    With the Type EX-99 or EX-99.1
     """
 
     def __init__(self, attachment: Attachment):
