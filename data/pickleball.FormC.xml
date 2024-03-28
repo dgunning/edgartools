@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/formc" xmlns:com="http://www.sec.gov/edgar/common">
+  <headerData>
+    <submissionType>C</submissionType>
+    <filerInfo>
+      <filer>
+        <filerCredentials>
+          <filerCik>0002011047</filerCik>
+          <filerCcc>XXXXXXXX</filerCcc>
+        </filerCredentials>
+      </filer>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <returnCopyFlag>false</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <issuerInformation>
+      <issuerInfo>
+        <nameOfIssuer>Pickleball Etc. LLC</nameOfIssuer>
+        <legalStatus>
+          <legalStatusForm>Limited Liability Company</legalStatusForm>
+          <jurisdictionOrganization>CA</jurisdictionOrganization>
+          <dateIncorporation>12-11-2023</dateIncorporation>
+        </legalStatus>
+        <issuerAddress>
+          <com:street1>19401 SOUTH MAIN STREET</com:street1>
+          <com:city>CARSON</com:city>
+          <com:stateOrCountry>CA</com:stateOrCountry>
+          <com:zipCode>90248</com:zipCode>
+        </issuerAddress>
+        <issuerWebsite>www.powerplaypb.com</issuerWebsite>
+      </issuerInfo>
+      <isCoIssuer>N</isCoIssuer>
+      <companyName>ANDES CAPITAL GROUP, LLC</companyName>
+      <commissionCik>0001348811</commissionCik>
+      <commissionFileNumber>008-67202</commissionFileNumber>
+      <crdNumber>000139212</crdNumber>
+    </issuerInformation>
+    <offeringInformation>
+      <compensationAmount>A fee equal of 3% in cash of the aggregate amount raised by the Company, payable at each closing of the Offering.</compensationAmount>
+      <financialInterest>No</financialInterest>
+      <securityOfferedType>Other</securityOfferedType>
+      <securityOfferedOtherDesc>Membership Interests</securityOfferedOtherDesc>
+      <noOfSecurityOffered>41666</noOfSecurityOffered>
+      <price>1.20000</price>
+      <priceDeterminationMethod>Determined arbitrarily by the issuer</priceDeterminationMethod>
+      <offeringAmount>50000.00</offeringAmount>
+      <overSubscriptionAccepted>Y</overSubscriptionAccepted>
+      <overSubscriptionAllocationType>First-come, first-served basis</overSubscriptionAllocationType>
+      <maximumOfferingAmount>950000.00</maximumOfferingAmount>
+      <deadlineDate>12-31-2024</deadlineDate>
+    </offeringInformation>
+    <annualReportDisclosureRequirements>
+      <currentEmployees>0.00</currentEmployees>
+      <totalAssetMostRecentFiscalYear>0.00</totalAssetMostRecentFiscalYear>
+      <totalAssetPriorFiscalYear>0.00</totalAssetPriorFiscalYear>
+      <cashEquiMostRecentFiscalYear>0.00</cashEquiMostRecentFiscalYear>
+      <cashEquiPriorFiscalYear>0.00</cashEquiPriorFiscalYear>
+      <actReceivedMostRecentFiscalYear>0.00</actReceivedMostRecentFiscalYear>
+      <actReceivedPriorFiscalYear>0.00</actReceivedPriorFiscalYear>
+      <shortTermDebtMostRecentFiscalYear>0.00</shortTermDebtMostRecentFiscalYear>
+      <shortTermDebtPriorFiscalYear>0.00</shortTermDebtPriorFiscalYear>
+      <longTermDebtMostRecentFiscalYear>0.00</longTermDebtMostRecentFiscalYear>
+      <longTermDebtPriorFiscalYear>0.00</longTermDebtPriorFiscalYear>
+      <revenueMostRecentFiscalYear>0.00</revenueMostRecentFiscalYear>
+      <revenuePriorFiscalYear>0.00</revenuePriorFiscalYear>
+      <costGoodsSoldMostRecentFiscalYear>0.00</costGoodsSoldMostRecentFiscalYear>
+      <costGoodsSoldPriorFiscalYear>0.00</costGoodsSoldPriorFiscalYear>
+      <taxPaidMostRecentFiscalYear>0.00</taxPaidMostRecentFiscalYear>
+      <taxPaidPriorFiscalYear>0.00</taxPaidPriorFiscalYear>
+      <netIncomeMostRecentFiscalYear>0.00</netIncomeMostRecentFiscalYear>
+      <netIncomePriorFiscalYear>0.00</netIncomePriorFiscalYear>
+      <issueJurisdictionSecuritiesOffering>AL</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>AK</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>AZ</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>AR</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>CA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>CO</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>CT</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>DE</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>FL</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>GA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>HI</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>ID</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>IL</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>IN</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>IA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>KS</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>KY</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>LA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>ME</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MD</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MI</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MN</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MS</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MO</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MT</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NE</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NV</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NH</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NJ</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NM</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NY</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NC</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>ND</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>OH</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>OK</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>OR</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>PA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>RI</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>SC</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>SD</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>TN</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>TX</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>UT</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>VT</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>VA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>WA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>WV</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>WI</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>WY</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>DC</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>B5</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>GU</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>PR</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>1V</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>VI</issueJurisdictionSecuritiesOffering>
+    </annualReportDisclosureRequirements>
+    <signatureInfo>
+      <issuerSignature>
+        <issuer>Pickleball Etc. LLC</issuer>
+        <issuerSignature>Steven Raack</issuerSignature>
+        <issuerTitle>Managing Member</issuerTitle>
+      </issuerSignature>
+      <signaturePersons>
+        <signaturePerson>
+          <personSignature>/s/ Steven Raack</personSignature>
+          <personTitle>Managing Member</personTitle>
+          <signatureDate>03-22-2024</signatureDate>
+        </signaturePerson>
+      </signaturePersons>
+    </signatureInfo>
+  </formData>
+</edgarSubmission>
