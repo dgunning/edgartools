@@ -75,9 +75,9 @@ def find(search_id: Union[str, int]) -> (
         return get_by_accession_number(search_id)
     elif re.match(r"\d{4,10}", search_id):
         return Entity(search_id)
-    elif re.match(r"^[A-WYZ]{1,5}$", search_id): # Ticker
+    elif re.match(r"^[A-WYZ]{1,5}$", search_id):  # Ticker
         return Entity(search_id)
-    elif re.match(r"^[A-Z]{4}X$", search_id): # Mutual Fund Ticker
+    elif re.match(r"^[A-Z]{4}X$", search_id):  # Mutual Fund Ticker
         return get_fund(search_id)
     elif re.match(r"^[CS]\d+$", search_id):
         return get_fund(search_id)
@@ -94,11 +94,13 @@ def matches_form(sec_filing: Filing,
         return True
     return False
 
+
 class DataObjectException(Exception):
 
-    def __init__(self, filing:Filing):
+    def __init__(self, filing: Filing):
         self.message = f"Could not create a data object for Form {filing.form} filing: {filing.accession_no}"
         super().__init__(self.message)
+
 
 def obj(sec_filing: Filing) -> Optional[object]:
     """
@@ -115,7 +117,6 @@ def obj(sec_filing: Filing) -> Optional[object]:
     from edgar.form144 import Form144
     from edgar.muniadvisors import MunicipalAdvisorForm
 
-
     if matches_form(sec_filing, "8-K"):
         return EightK(sec_filing)
     elif matches_form(sec_filing, "10-Q"):
@@ -131,7 +132,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     elif matches_form(sec_filing, "MA-I"):
         return MunicipalAdvisorForm.from_filing(sec_filing)
     elif matches_form(sec_filing, "3"):
-            return Form3(**Ownership.parse_xml(sec_filing.xml()))
+        return Form3(**Ownership.parse_xml(sec_filing.xml()))
     elif matches_form(sec_filing, "4"):
         return Form4(**Ownership.parse_xml(sec_filing.xml()))
     elif matches_form(sec_filing, "5"):
@@ -150,5 +151,3 @@ def obj(sec_filing: Filing) -> Optional[object]:
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:
         return filing_xbrl
-
-
