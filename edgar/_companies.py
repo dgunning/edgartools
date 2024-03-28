@@ -395,9 +395,9 @@ class EntityData:
         # If you have a ticker or exchange you are a company
         if len(self.tickers) > 0 or len(self.exchanges) > 0:
             return False
+        if self.state_of_incorporation is not None and self.state_of_incorporation != '':
+            return False
         if self.ein is None:
-            return True
-        if self.state_of_incorporation == '' and self.sic is None:
             return True
         return False
 

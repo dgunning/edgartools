@@ -34,6 +34,9 @@ def test_entity_is_company():
     # Berkshire Hathaway
     assert Entity(1067983).is_company
 
+    # ORBIMED Advisors LLC
+    assert Entity(1055951).is_company
+
 
 def test_display_name():
     assert Entity(1318605).display_name == "Tesla, Inc."
