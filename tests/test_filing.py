@@ -849,7 +849,7 @@ def test_get_attachment_by_type():
     print(attachments)
     # Get a single attachment
     attachment = attachments.query("Type=='EX-99.1'")
-    assert isinstance(attachment, Attachment)
+    assert isinstance(attachment, Attachments)
 
     # Get multiple attachments
     attachments = attachments.query("Document.str.match('mmm-*')")

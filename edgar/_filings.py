@@ -1844,7 +1844,7 @@ class Attachments:
     def __init__(self, files: pd.DataFrame):
         self.files = files
         # Replace \xa0 with '-' in the Seq
-        self.files['Seq'] = self.files['Seq'].str.replace('\xa0', '-')
+        self.files.loc[:, 'Seq'] = self.files['Seq'].str.replace('\xa0', '-')
 
     def __getitem__(self, item):
         if isinstance(item, str):
@@ -1861,10 +1861,8 @@ class Attachments:
     def query(self, query: str):
         # Get the attachments by type
         results = self.files.query(query)
-        if len(results) > 1:
+        if len(results) > 0:
             return Attachments(results)
-        elif len(results) == 1:
-            return Attachment.from_dataframe_row(results.iloc[0])
 
     def __len__(self):
         return len(self.files)

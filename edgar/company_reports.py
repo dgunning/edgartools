@@ -19,6 +19,7 @@ __all__ = [
     'TwentyF',
     'EightK',
     'PressRelease',
+    'PressReleases',
     'is_valid_item_for_filing'
 ]
 
@@ -490,23 +491,20 @@ class EightK():
 
     @property
     def has_press_release(self):
-        attachments: Attachments = self._filing.attachments
-        # press release is Type EX-99.1
-        return attachments.query("Type=='EX-99.1'") is not None
+        return self.press_releases is not None
 
     @property
-    def press_release(self):
+    def press_releases(self):
         attachments: Attachments = self._filing.attachments
-        # press release is Type EX-99.1
-        press_release_results = attachments.query("Type=='EX-99.1' & Document.str.contains('htm')")
+        # This query for press release currently includes EX-99, EX-99.1, EX-99.01 but not EX-99.2
+        # Here is what we think so far
+        html_document = "Document.str.endswith('.htm')"
+        named_release = "Description.str.match('.*RELEASE')"
+        type_ex_99 = "Type.isin(['EX-99.1', 'EX-99', 'EX-99.01'])"
+        press_release_query = f"{html_document} and ({named_release} or {type_ex_99})"
+        press_release_results = attachments.query(press_release_query)
         if press_release_results:
-            if isinstance(press_release_results, Attachment):
-                return PressRelease(press_release_results)
-            elif isinstance(press_release_results, Attachments):
-                for i in range(0, len(press_release_results)):
-                    attachment = press_release_results[i]
-                    if attachment.document.endswith('.htm') or attachment.document.endswith('.html'):
-                        return PressRelease(attachment)
+            return PressReleases(press_release_results)
 
     @property
     def filing_date(self):
@@ -569,6 +567,30 @@ class EightK():
         return repr_rich(self.__rich__())
 
 
+class PressReleases:
+
+    """
+    Represent the attachment on an 8-K filing that could be press releases
+    """
+
+    def __init__(self, attachments: Attachments):
+        self.attachments: Attachments = attachments
+
+    def __len__(self):
+        return len(self.attachments)
+
+    def __getitem__(self, item):
+        attachment = self.attachments[item]
+        if attachment:
+            return PressRelease(attachment)
+
+    def __rich__(self):
+        return self.attachments.__rich__()
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
 class PressRelease:
     """
     Represents a press release attachment from an 8-K filing
@@ -581,6 +603,10 @@ class PressRelease:
     @property
     def document(self) -> str:
         return self.attachment.document
+
+    @property
+    def description(self) -> str:
+        return self.attachment.description
 
     @lru_cache(maxsize=1)
     def html(self) -> str:
