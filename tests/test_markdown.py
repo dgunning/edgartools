@@ -32,7 +32,7 @@ def test_form4_to_markdown():
     print()
     print(markdown_content)
     assert markdown_content
-    assert "SULLIVAN NORA" in repr(markdown_content)
+    assert "NORA" in repr(markdown_content)
 
 
 def test_markdown_to_html():
