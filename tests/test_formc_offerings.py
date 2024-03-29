@@ -13,7 +13,7 @@ def test_parse_formc_offering():
     assert formC.issuer_information.company_name == "ANDES CAPITAL GROUP, LLC"
     assert formC.issuer_information.legal_status == "Limited Liability Company"
     assert formC.issuer_information.jurisdiction == "CA"
-    assert formC.issuer_information.date_of_incorporation == "12-11-2023"
+    assert formC.issuer_information.date_of_incorporation == datetime(2023, 12, 11).date()
 
     # Offering Information
     assert formC.offering_information.compensation_amount.startswith("A fee equal of 3%")
@@ -24,7 +24,7 @@ def test_parse_formc_offering():
     assert formC.offering_information.price == "1.20000"
 
     # Annual Report
-    assert formC.annual_report_disclosure.total_asset_most_recent_fiscal_year == "0.00"
+    assert formC.annual_report_disclosure.total_asset_most_recent_fiscal_year == 0.00
 
     assert "NJ" in formC.annual_report_disclosure.offering_jurisdictions
 
