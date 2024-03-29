@@ -64,7 +64,6 @@ class Address:
         self.zipcode: str = zipcode
         self.state_or_country_desc: str = state_or_country_desc
 
-
     @property
     def empty(self):
         return not self.street1 and not self.street2 and not self.city and not self.state_or_country and not self.zipcode
