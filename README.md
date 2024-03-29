@@ -433,12 +433,13 @@ into a data object, for several different form types. Currently, the following f
 | 8-K                        | `EightK`               | Current report                        |
 | MA-I                       | `MunicipalAdvisorForm` | Municipal advisor initial filing      |
 | Form 144                   | `Form144`              | Notice of proposed sale of securities |
-| D                          | `Offering`             | Offerings                             |
+| C, C-U, C-AR, C-TR         | `FormC`                | Form C Crowdfunding Offering          |
+| D                          | `FormD`                | Form D Offering                       |
 | 3,4,5                      | `Ownership`            | Ownership reports                     |
-| 13F-HR                     | `ThirteenF`             | 13F Holdings Report                   |
+| 13F-HR                     | `ThirteenF`            | 13F Holdings Report                   |
 | NPORT-P                    | `FundReport`           | Fund Report                           |
 | EFFECT                     | `Effect`               | Notice of Effectiveness               |
-| And other filing with XBRL | `FilingXbrl`            ||
+| And other filing with XBRL | `FilingXbrl`           |                                       |
 
 For example, to get the data object for a **13F-HR** filing you can do the following:
 
