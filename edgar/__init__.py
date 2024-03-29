@@ -112,7 +112,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     """
     from edgar.company_reports import TenK, TenQ, TwentyF, EightK
     from edgar.effect import Effect
-    from edgar.offerings import Offering
+    from edgar.offerings import Offering, FormC
     from edgar.ownership import Ownership, Form3, Form4, Form5
     from edgar.form144 import Form144
     from edgar.muniadvisors import MunicipalAdvisorForm
@@ -145,6 +145,11 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return Offering.from_xml(xml)
+    elif matches_form(sec_filing, ["C", "C-U", "C-AR"]):
+        xml = sec_filing.xml()
+        if xml:
+            return FormC.from_xml(xml, form=sec_filing.form)
+
     elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
         return FundReport.from_filing(sec_filing)
 

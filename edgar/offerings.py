@@ -1,18 +1,27 @@
 import re
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from bs4 import BeautifulSoup, Tag
 from rich import box
 from rich.columns import Columns
 from rich.console import Group, Text, RenderableType
 from rich.panel import Panel
-from rich.table import Table
+from rich.table import Table, Column
+from datetime import date, datetime
 
 from edgar.core import get_bool
 from edgar._party import Issuer, Person, Address
+from edgar._companies import Company
 from edgar._rich import repr_rich
 from edgar._xml import child_text, child_value
+from functools import lru_cache
+from edgar.reference import states
+
+__all__ = [
+    'Offering',
+    'FormC',
+]
 
 
 @dataclass(frozen=True)
@@ -118,7 +127,7 @@ class SalesCompensationRecipient:
         self.crd: str = crd
         self.associated_bd_name: associated_bd_name
         self.associated_bd_crd: str = associated_bd_crd
-        self.address: str = address
+        self.address: Address = address
         self.states_of_solicitation: List[str] = states_of_solicitation
 
     @classmethod
@@ -488,6 +497,12 @@ class FilerInformation:
     return_copy_flag: bool
     override_internet_flag: bool
     live_or_test: bool
+    period: Optional[date] = None
+
+    @property
+    @lru_cache(maxsize=1)
+    def company(self):
+        return Company(self.cik)
 
 
 @dataclass(frozen=True)
@@ -502,7 +517,7 @@ class IssuerInformation:
     crd_number: str
     legal_status: str
     jurisdiction: str
-    date_of_incorporation: str
+    date_of_incorporation: date
 
     @property
     def incorporated(self):
@@ -534,11 +549,11 @@ class OfferingInformation:
     no_of_security_offered: str
     price: str
     price_determination_method: str
-    offering_amount: str
+    offering_amount: float
     over_subscription_accepted: str
     over_subscription_allocation_type: str
-    maximum_offering_amount: str
-    deadline_date: str
+    maximum_offering_amount: float
+    deadline_date: Optional[date]
 
 
 @dataclass(frozen=True)
@@ -566,25 +581,25 @@ class AnnualReportDisclosure:
       <netIncomePriorFiscalYear>0.00</netIncomePriorFiscalYear>
       </annualReportDisclosureRequirements>
     """
-    current_employees: str
-    total_asset_most_recent_fiscal_year: str
-    total_asset_prior_fiscal_year: str
-    cash_equi_most_recent_fiscal_year: str
-    cash_equi_prior_fiscal_year: str
-    act_received_most_recent_fiscal_year: str
-    act_received_prior_fiscal_year: str
-    short_term_debt_most_recent_fiscal_year: str
-    short_term_debt_prior_fiscal_year: str
-    long_term_debt_most_recent_fiscal_year: str
-    long_term_debt_prior_fiscal_year: str
-    revenue_most_recent_fiscal_year: str
-    revenue_prior_fiscal_year: str
-    cost_goods_sold_most_recent_fiscal_year: str
-    cost_goods_sold_prior_fiscal_year: str
-    tax_paid_most_recent_fiscal_year: str
-    tax_paid_prior_fiscal_year: str
-    net_income_most_recent_fiscal_year: str
-    net_income_prior_fiscal_year: str
+    current_employees: int
+    total_asset_most_recent_fiscal_year: float
+    total_asset_prior_fiscal_year: float
+    cash_equi_most_recent_fiscal_year: float
+    cash_equi_prior_fiscal_year: float
+    act_received_most_recent_fiscal_year: float
+    act_received_prior_fiscal_year: float
+    short_term_debt_most_recent_fiscal_year: float
+    short_term_debt_prior_fiscal_year: float
+    long_term_debt_most_recent_fiscal_year: float
+    long_term_debt_prior_fiscal_year: float
+    revenue_most_recent_fiscal_year: float
+    revenue_prior_fiscal_year: float
+    cost_goods_sold_most_recent_fiscal_year: float
+    cost_goods_sold_prior_fiscal_year: float
+    tax_paid_most_recent_fiscal_year: float
+    tax_paid_prior_fiscal_year: float
+    net_income_most_recent_fiscal_year: float
+    net_income_prior_fiscal_year: float
 
     offering_jurisdictions: List[str]
 
@@ -593,7 +608,7 @@ class AnnualReportDisclosure:
 class PersonSignature:
     signature: str
     title: str
-    date: str
+    date: date
 
 
 @dataclass(frozen=True)
@@ -609,22 +624,78 @@ class SignatureInfo:
     signatures: List[PersonSignature]
 
 
-class FormCOffering:
+def split_list(states, chunk_size=10):
+    # Split a list into sublist of size chunk_size
+    return [states[i:i + chunk_size] for i in range(0, len(states), chunk_size)]
+
+
+def maybe_float(value):
+    if not value:
+        return 0.00
+    try:
+        return float(value)
+    except ValueError:
+        return 0.00
+
+
+def maybe_date(value):
+    if not value:
+        return None
+    try:
+        return FormC.parse_date(value)
+    except ValueError:
+        return None
+
+
+class FormC:
 
     def __init__(self,
                  filer_information: FilerInformation,
                  issuer_information: IssuerInformation,
-                 offering_information: OfferingInformation,
-                 annual_report_disclosure: AnnualReportDisclosure,
-                 signature_info: SignatureInfo):
+                 offering_information: Optional[OfferingInformation],
+                 annual_report_disclosure: Optional[AnnualReportDisclosure],
+                 signature_info: SignatureInfo,
+                 form: str):
         self.filer_information: FilerInformation = filer_information
         self.issuer_information: IssuerInformation = issuer_information
         self.offering_information: OfferingInformation = offering_information
-        self.annual_report_disclosure: AnnualReportDisclosure = annual_report_disclosure
+        self.annual_report_disclosure: Optional[AnnualReportDisclosure] = annual_report_disclosure
         self.signature_info: SignatureInfo = signature_info
+        self.form = form
+
+    @property
+    def description(self):
+        desc = ""
+        if self.form == "C":
+            desc = "Form C - Offering"
+        elif self.form == "C/A":
+            desc = "Form C/A - Offering Amendment"
+        elif self.form == "C-U":
+            desc = "Form C-U - Offering Progress Update"
+        elif self.form == "C-U/A":
+            desc = "Form C-U/A - Offering Progress Update Amendment"
+        elif self.form == "C-AR":
+            desc = "Form C-AR - Offering Annual Report"
+        elif self.form == "C-AR/A":
+            desc = "Form C-AR/A - Offering Annual Report Amendment"
+        return desc
+
+    @staticmethod
+    def parse_date(date_str) -> date:
+        """
+        The date is in the format MM-DD-YYYY
+        """
+        return datetime.strptime(date_str, "%m-%d-%Y").date()
+
+    @staticmethod
+    def format_date(date_value: date):
+        """
+        Format as April 1, 2021
+        """
+        return date_value.strftime("%B %d, %Y")
 
     @classmethod
-    def from_xml(cls, offering_xml: str):
+    def from_xml(cls, offering_xml: str, form: str):
         soup = BeautifulSoup(offering_xml, "xml")
         root = soup.find('edgarSubmission')
 
@@ -640,13 +711,15 @@ class FormCOffering:
         return_copy_flag = child_text(flags_tag, 'returnCopyFlag') == 'true'
         override_internet_flag = child_text(flags_tag, 'overrideInternetFlag') == 'true'
 
+        period = child_text(header_data, 'period')
         filer_information = FilerInformation(
             cik=filer_el.find('filerCik').text,
             ccc=filer_el.find('filerCik').text,
             confirming_copy_flag=confirming_copy_flag,
             return_copy_flag=return_copy_flag,
             override_internet_flag=override_internet_flag,
-            live_or_test=child_text(filer_el, 'testOrLive') == 'LIVE'
+            live_or_test=child_text(filer_el, 'testOrLive') == 'LIVE',
+            period=FormC.parse_date(period) if period else None
         )
 
         # Form
@@ -679,57 +752,76 @@ class FormCOffering:
             crd_number=child_text(issuer_information_tag, 'crdNumber'),
             legal_status=legal_status,
             jurisdiction=jurisdiction,
-            date_of_incorporation=date_of_incorporation,
+            date_of_incorporation=FormC.parse_date(date_of_incorporation)
         )
 
         # Offering Information
         offering_info_tag = form_data_tag.find('offeringInformation')
-        offering_information = OfferingInformation(
-            compensation_amount=child_text(offering_info_tag, 'compensationAmount'),
-            financial_interest=child_text(offering_info_tag, 'financialInterest'),
-            security_offered_type=child_text(offering_info_tag, 'securityOfferedType'),
-            security_offered_other_desc=child_text(offering_info_tag, 'securityOfferedOtherDesc'),
-            no_of_security_offered=child_text(offering_info_tag, 'noOfSecurityOffered'),
-            price=child_text(offering_info_tag, 'price'),
-            price_determination_method=child_text(offering_info_tag, 'priceDeterminationMethod'),
-            offering_amount=child_text(offering_info_tag, 'offeringAmount'),
-            over_subscription_accepted=child_text(offering_info_tag, 'overSubscriptionAccepted'),
-            over_subscription_allocation_type=child_text(offering_info_tag, 'overSubscriptionAllocationType'),
-            maximum_offering_amount=child_text(offering_info_tag, 'maximumOfferingAmount'),
-            deadline_date=child_text(offering_info_tag, 'deadlineDate')
-        )
+        if offering_info_tag is not None:
+
+            offering_information = OfferingInformation(
+                compensation_amount=child_text(offering_info_tag, 'compensationAmount'),
+                financial_interest=child_text(offering_info_tag, 'financialInterest'),
+                security_offered_type=child_text(offering_info_tag, 'securityOfferedType'),
+                security_offered_other_desc=child_text(offering_info_tag, 'securityOfferedOtherDesc'),
+                no_of_security_offered=child_text(offering_info_tag, 'noOfSecurityOffered'),
+                price=child_text(offering_info_tag, 'price'),
+                price_determination_method=child_text(offering_info_tag, 'priceDeterminationMethod'),
+                offering_amount=maybe_float(child_text(offering_info_tag, 'offeringAmount')),
+                over_subscription_accepted=child_text(offering_info_tag, 'overSubscriptionAccepted'),
+                over_subscription_allocation_type=child_text(offering_info_tag, 'overSubscriptionAllocationType'),
+                maximum_offering_amount=maybe_float(child_text(offering_info_tag, 'maximumOfferingAmount')),
+                deadline_date=maybe_date(child_text(offering_info_tag, 'deadlineDate'))
+            )
+        else:
+            offering_information = None
 
         # Annual Report Disclosure
         annual_report_disclosure_tag = form_data_tag.find('annualReportDisclosureRequirements')
-        annual_report_disclosure = AnnualReportDisclosure(
-            current_employees=child_text(annual_report_disclosure_tag, 'currentEmployees'),
-            total_asset_most_recent_fiscal_year=child_text(annual_report_disclosure_tag,
-                                                           'totalAssetMostRecentFiscalYear'),
-            total_asset_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'totalAssetPriorFiscalYear'),
-            cash_equi_most_recent_fiscal_year=child_text(annual_report_disclosure_tag, 'cashEquiMostRecentFiscalYear'),
-            cash_equi_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'cashEquiPriorFiscalYear'),
-            act_received_most_recent_fiscal_year=child_text(annual_report_disclosure_tag,
-                                                            'actReceivedMostRecentFiscalYear'),
-            act_received_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'actReceivedPriorFiscalYear'),
-            short_term_debt_most_recent_fiscal_year=child_text(annual_report_disclosure_tag,
-                                                               'shortTermDebtMostRecentFiscalYear'),
-            short_term_debt_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'shortTermDebtPriorFiscalYear'),
-            long_term_debt_most_recent_fiscal_year=child_text(annual_report_disclosure_tag,
-                                                              'longTermDebtMostRecentFiscalYear'),
-            long_term_debt_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'longTermDebtPriorFiscalYear'),
-            revenue_most_recent_fiscal_year=child_text(annual_report_disclosure_tag, 'revenueMostRecentFiscalYear'),
-            revenue_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'revenuePriorFiscalYear'),
-            cost_goods_sold_most_recent_fiscal_year=child_text(annual_report_disclosure_tag,
-                                                               'costGoodsSoldMostRecentFiscalYear'),
-            cost_goods_sold_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'costGoodsSoldPriorFiscalYear'),
-            tax_paid_most_recent_fiscal_year=child_text(annual_report_disclosure_tag, 'taxPaidMostRecentFiscalYear'),
-            tax_paid_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'taxPaidPriorFiscalYear'),
-            net_income_most_recent_fiscal_year=child_text(annual_report_disclosure_tag,
-                                                          'netIncomeMostRecentFiscalYear'),
-            net_income_prior_fiscal_year=child_text(annual_report_disclosure_tag, 'netIncomePriorFiscalYear'),
-            offering_jurisdictions=[el.text for el in
-                                    annual_report_disclosure_tag.find_all('issueJurisdictionSecuritiesOffering')]
-        )
+        if annual_report_disclosure_tag:
+            annual_report_disclosure = AnnualReportDisclosure(
+                current_employees=int(float(child_text(annual_report_disclosure_tag, 'currentEmployees'))),
+                total_asset_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                                                                           'totalAssetMostRecentFiscalYear')),
+                total_asset_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'totalAssetPriorFiscalYear')),
+                cash_equi_most_recent_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'cashEquiMostRecentFiscalYear')),
+                cash_equi_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'cashEquiPriorFiscalYear')),
+                act_received_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                                                                            'actReceivedMostRecentFiscalYear')),
+                act_received_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'actReceivedPriorFiscalYear')),
+                short_term_debt_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                                                                               'shortTermDebtMostRecentFiscalYear')),
+                short_term_debt_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'shortTermDebtPriorFiscalYear')),
+                long_term_debt_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                                                                              'longTermDebtMostRecentFiscalYear')),
+                long_term_debt_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'longTermDebtPriorFiscalYear')),
+                revenue_most_recent_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'revenueMostRecentFiscalYear')),
+                revenue_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'revenuePriorFiscalYear')),
+                cost_goods_sold_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                                                                               'costGoodsSoldMostRecentFiscalYear')),
+                cost_goods_sold_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'costGoodsSoldPriorFiscalYear')),
+                tax_paid_most_recent_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'taxPaidMostRecentFiscalYear')),
+                tax_paid_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'taxPaidPriorFiscalYear')),
+                net_income_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                                                                          'netIncomeMostRecentFiscalYear')),
+                net_income_prior_fiscal_year=maybe_float(
+                    child_text(annual_report_disclosure_tag, 'netIncomePriorFiscalYear')),
+                offering_jurisdictions=[el.text for el in
+                                        annual_report_disclosure_tag.find_all('issueJurisdictionSecuritiesOffering')]
+            )
+        else:
+            annual_report_disclosure = None
 
         # Signature Block
         signature_block_tag = root.find("signatureInfo")
@@ -746,7 +838,7 @@ class FormCOffering:
                 PersonSignature(
                     child_text(person_signature_tag, "personSignature"),
                     child_text(person_signature_tag, "personTitle"),
-                    child_text(person_signature_tag, "signatureDate")
+                    FormC.parse_date(child_text(person_signature_tag, "signatureDate"))
                 ) for person_signature_tag in signature_block_tag.find_all('signaturePerson')
             ]
         )
@@ -755,35 +847,177 @@ class FormCOffering:
                    issuer_information=issuer_information,
                    offering_information=offering_information,
                    annual_report_disclosure=annual_report_disclosure,
-                   signature_info=signature_info)
+                   signature_info=signature_info,
+                   form=form)
 
     def __rich__(self):
-        filer_table = Table("CIK",  box=box.SIMPLE )
-        filer_table.add_row(self.filer_information.cik)
-        filer_panel = Panel(filer_table, title="Filer", box=box.ROUNDED)
+
+        # Filer Panel
+        filer_table = Table("Company", "CIK", box=box.SIMPLE)
+        if self.filer_information.period:
+            filer_table.add_column("Period")
+            filer_table.add_row(self.filer_information.company.name, self.filer_information.cik,
+                                FormC.format_date(self.filer_information.period))
+        else:
+            filer_table.add_row(self.filer_information.company.name, self.filer_information.cik, )
+        filer_panel = Panel(filer_table, title=Text("Filer", style="bold deep_sky_blue1"), box=box.ROUNDED)
 
         # Issuers
-        issuer_table = Table("Issuer", "Legal Status", "Incorporated", box=box.SIMPLE)
+        issuer_table = Table(Column("Issuer", style="bold"), "Legal Status", "Incorporated", "Jurisdiction",
+                             box=box.SIMPLE)
         issuer_table.add_row(self.issuer_information.name,
                              self.issuer_information.legal_status,
-                             self.issuer_information.incorporated)
+                             FormC.format_date(self.issuer_information.date_of_incorporation),
+                             states.get(self.issuer_information.jurisdiction, self.issuer_information.jurisdiction))
+
+        # Address Panel
+        address_panel = Panel(
+            Text(str(self.issuer_information.address)),
+            title='\U0001F3E2 Business Address', width=40)
+
+        # Address and website
+        contact_columns = Columns([address_panel, Panel(Text(self.issuer_information.website), title="Website")])
+
+        issuer_renderables = [issuer_table, contact_columns]
+        if self.issuer_information.commission_cik:
+            # Intermediary Panel
+            intermediary_table = Table(Column("Name", style="bold"), "CIK", "CRD Number", "File Number", box=box.SIMPLE)
+            intermediary_table.add_row(
+                self.issuer_information.company_name,
+                self.issuer_information.commission_cik,
+                self.issuer_information.crd_number,
+                self.issuer_information.commission_file_number)
+
+            intermediary_panel = Panel(
+                intermediary_table,
+                title="Intermediary conducting the offering",
+                box=box.ROUNDED
+            )
+            issuer_renderables.append(intermediary_panel)
+
         issuer_panel = Panel(
-            issuer_table,
-            title="Issuer Information",
+            Group(*issuer_renderables),
+            title=Text("Issuer", style="bold deep_sky_blue1"),
             box=box.ROUNDED
         )
-        panel = Panel(
+
+        offering_panel = None
+
+        if self.offering_information:
+            # Offering Information
+            offering_table = Table(Column("", style='bold'), "", box=box.SIMPLE, row_styles=["", "bold"])
+            offering_table.add_row("Compensation Amount:", self.offering_information.compensation_amount)
+            offering_table.add_row("Financial Interest:", self.offering_information.financial_interest)
+            offering_table.add_row("Type of Security:", self.offering_information.security_offered_type)
+            offering_table.add_row("Price:", self.offering_information.price)
+            offering_table.add_row("Price (or Method for Determining Price):",
+                                   self.offering_information.price_determination_method)
+            offering_table.add_row("Target Offering Amount:", f"${self.offering_information.offering_amount:,.2f}")
+            offering_table.add_row("Maximum Offering Amount:",
+                                   f"${self.offering_information.maximum_offering_amount:,.2f}")
+            offering_table.add_row("Over-Subscription Accepted:", self.offering_information.over_subscription_accepted)
+            offering_table.add_row("How will over-subscriptions be allocated:",
+                                   self.offering_information.over_subscription_allocation_type)
+            offering_table.add_row("Deadline Date:", FormC.format_date(self.offering_information.deadline_date) if self.offering_information.deadline_date else "")
+
+            offering_panel = Panel(
+                offering_table,
+                title=Text("Offering Information", style="bold deep_sky_blue1"),
+                box=box.ROUNDED
+            )
+
+        # Annual Report Disclosure
+        if self.annual_report_disclosure:
+            annual_report_table = Table(Column("", style='bold'), "", box=box.SIMPLE, row_styles=["", "bold"])
+            annual_report_table.add_row("Current Employees:", str(self.annual_report_disclosure.current_employees))
+            annual_report_table.add_row("Total Asset Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.total_asset_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Total Asset Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.total_asset_prior_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Cash Equivalent Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.cash_equi_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Cash Equivalent Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.cash_equi_prior_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Act Received Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.act_received_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Act Received Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.act_received_prior_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Short Term Debt Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.short_term_debt_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Short Term Debt Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.short_term_debt_prior_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Long Term Debt Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.long_term_debt_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Long Term Debt Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.long_term_debt_prior_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Revenue Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.revenue_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Revenue Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.revenue_prior_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Cost of Goods Sold Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.cost_goods_sold_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Cost of Goods Sold Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.cost_goods_sold_prior_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Tax Paid Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.tax_paid_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Tax Paid Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.tax_paid_prior_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Net Income Most Recent Fiscal Year:",
+                                        f"${self.annual_report_disclosure.net_income_most_recent_fiscal_year:,.2f}"),
+            annual_report_table.add_row("Net Income Prior Fiscal Year:",
+                                        f"${self.annual_report_disclosure.net_income_prior_fiscal_year:,.2f}"),
+
+            jurisdiction_lists = split_list(self.annual_report_disclosure.offering_jurisdictions, chunk_size=20)
+            for index, jurisdictions in enumerate(jurisdiction_lists):
+                label = "Offered In:" if index == 0 else ""
+                annual_report_table.add_row(label, ", ".join(jurisdictions))
+
+            annual_report_panel = Panel(
+                annual_report_table,
+                title=Text("Annual Report Disclosures", style="bold deep_sky_blue1"),
+                box=box.ROUNDED
+            )
+        else:
+            annual_report_panel = None
+
+        # Signature Info
+        # The signature of the issuer
+        issuer_signature_table = Table(Column("Signature", style="bold"), "Title", "Issuer", box=box.SIMPLE)
+        issuer_signature_table.add_row(self.signature_info.issuer_signature.signature,
+                                       self.signature_info.issuer_signature.issuer_title,
+                                       self.signature_info.issuer_signature.issuer)
+
+        # Person Signatures
+        person_signature_table = Table(Column("Signature", style="bold"), "Title", "Date", box=box.SIMPLE,
+                                       row_styles=["", "bold"])
+        for signature in self.signature_info.signatures:
+            person_signature_table.add_row(signature.signature, signature.title,
+                                           FormC.format_date(signature.date))
+
+        signature_panel = Panel(
             Group(
-                filer_panel,
-                issuer_panel
+                Panel(issuer_signature_table, box=box.ROUNDED, title="Issuer"),
+                Panel(person_signature_table, box=box.ROUNDED, title="Persons")
             ),
-            title="Form C Offering",
+            title=Text("Signatures", style="bold deep_sky_blue1"),
+            box=box.ROUNDED
+        )
+
+        renderables = [
+            filer_panel,
+            issuer_panel,
+        ]
+        if self.offering_information is not None:
+            renderables.append(offering_panel)
+        if self.annual_report_disclosure is not None:
+            renderables.append(annual_report_panel)
+        renderables.append(signature_panel)
+
+        panel = Panel(
+            Group(*renderables),
+            title=Text(self.description, style="bold dark_sea_green4"),
         )
         return panel
 
     def __repr__(self):
         return repr_rich(self.__rich__())
-
-
-
-
