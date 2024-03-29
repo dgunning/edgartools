@@ -1,7 +1,7 @@
 from edgar import obj, matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
 from edgar._companies import EntityData
 from edgar.ownership import Ownership
-from edgar.offerings import Offering
+from edgar.offerings import FormD
 from edgar.company_reports import TenK
 from edgar.effect import Effect
 import pytest
@@ -51,7 +51,7 @@ def test_obj():
                     cik=1965493,
                     accession_no='0001965493-23-000001')
     offering = obj(filing)
-    assert isinstance(offering, Offering)
+    assert isinstance(offering, FormD)
 
     # 10-K filing
     filing_10k = Filing(form='10-K',

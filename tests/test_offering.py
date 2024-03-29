@@ -1,5 +1,5 @@
 from pathlib import Path
-from edgar.offerings import Offering
+from edgar.offerings import FormD
 from edgar._party import Person
 from rich import print
 
@@ -9,7 +9,7 @@ formD_xml3 = Path("data/D.Shepards.xml").read_text()
 
 
 def test_parse_offering_xml():
-    offering: Offering = Offering.from_xml(formD_xml1)
+    offering: FormD = FormD.from_xml(formD_xml1)
     print()
     # print(formD_xml1)
     print(offering)
@@ -70,7 +70,7 @@ def test_parse_offering_xml():
 
 
 def test_parse_offering_with_multiple_signatures():
-    offering: Offering = Offering.from_xml(formD_xml2)
+    offering: FormD = FormD.from_xml(formD_xml2)
     print()
     assert offering.offering_data.industry_group.industry_group_type == "Pooled Investment Fund"
     assert offering.offering_data.industry_group.investment_fund_info
@@ -82,7 +82,7 @@ def test_parse_offering_with_multiple_signatures():
 
 
 def test_parse_offering_with_all_states_sales_compensation():
-    offering: Offering = Offering.from_xml(formD_xml3)
+    offering: FormD = FormD.from_xml(formD_xml3)
     print()
     print(offering)
     assert len(offering.offering_data.sales_compensation_recipients) == 1

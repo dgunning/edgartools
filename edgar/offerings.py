@@ -20,7 +20,7 @@ from edgar.reference import states
 from collections import defaultdict
 
 __all__ = [
-    'Offering',
+    'FormD',
     'FormC',
 ]
 
@@ -321,7 +321,7 @@ class OfferingData:
         return repr_rich(self.__rich__())
 
 
-class Offering:
+class FormD:
     """
     Represents a Form D Offering. Might require a name change to FormD
     """
