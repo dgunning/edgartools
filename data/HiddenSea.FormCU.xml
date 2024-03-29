@@ -1,0 +1,159 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/formc" xmlns:com="http://www.sec.gov/edgar/common">
+  <headerData>
+    <submissionType>C-U</submissionType>
+    <filerInfo>
+      <filer>
+        <filerCredentials>
+          <filerCik>0002000727</filerCik>
+          <filerCcc>XXXXXXXX</filerCcc>
+        </filerCredentials>
+        <fileNumber>020-33261</fileNumber>
+      </filer>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <returnCopyFlag>false</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <issuerInformation>
+      <progressUpdate>50% and 100% of Target Reached</progressUpdate>
+      <issuerInfo>
+        <nameOfIssuer>Hidden Sea USA Inc</nameOfIssuer>
+        <legalStatus>
+          <legalStatusForm>Corporation</legalStatusForm>
+          <jurisdictionOrganization>DE</jurisdictionOrganization>
+          <dateIncorporation>10-07-2015</dateIncorporation>
+        </legalStatus>
+        <issuerAddress>
+          <com:street1>832 HERMOSA AVENUE</com:street1>
+          <com:city>HERMOSA BEACH</com:city>
+          <com:stateOrCountry>CA</com:stateOrCountry>
+          <com:zipCode>90254</com:zipCode>
+        </issuerAddress>
+        <issuerWebsite>www.thehiddensea.com</issuerWebsite>
+      </issuerInfo>
+      <isCoIssuer>N</isCoIssuer>
+      <companyName>CULTIVATE CAPITAL GROUP, LLC</companyName>
+      <commissionCik>0001768367</commissionCik>
+      <commissionFileNumber>008-70293</commissionFileNumber>
+      <crdNumber>000300634</crdNumber>
+    </issuerInformation>
+    <offeringInformation>
+      <compensationAmount>The issuer shall pay to the Intermediary at the conclusion of the Offering a fee of five percent (5%) of the amount raised in the Offering</compensationAmount>
+      <financialInterest>The Intermediary will also receive compensation in the form of securities equal to one percent (1%) of the total number of Securities sold in the Offering.</financialInterest>
+      <securityOfferedType>Common Stock</securityOfferedType>
+      <noOfSecurityOffered>1250000</noOfSecurityOffered>
+      <price>2.00000</price>
+      <offeringAmount>10000.00</offeringAmount>
+      <overSubscriptionAccepted>Y</overSubscriptionAccepted>
+      <overSubscriptionAllocationType>Other</overSubscriptionAllocationType>
+      <descOverSubscription>IN Company discretion</descOverSubscription>
+      <maximumOfferingAmount>2500000.00</maximumOfferingAmount>
+      <deadlineDate>11-14-2024</deadlineDate>
+    </offeringInformation>
+    <annualReportDisclosureRequirements>
+      <currentEmployees>2.00</currentEmployees>
+      <totalAssetMostRecentFiscalYear>75182.00</totalAssetMostRecentFiscalYear>
+      <totalAssetPriorFiscalYear>47.00</totalAssetPriorFiscalYear>
+      <cashEquiMostRecentFiscalYear>24182.00</cashEquiMostRecentFiscalYear>
+      <cashEquiPriorFiscalYear>47.00</cashEquiPriorFiscalYear>
+      <actReceivedMostRecentFiscalYear>0.00</actReceivedMostRecentFiscalYear>
+      <actReceivedPriorFiscalYear>0.00</actReceivedPriorFiscalYear>
+      <shortTermDebtMostRecentFiscalYear>0.00</shortTermDebtMostRecentFiscalYear>
+      <shortTermDebtPriorFiscalYear>0.00</shortTermDebtPriorFiscalYear>
+      <longTermDebtMostRecentFiscalYear>0.00</longTermDebtMostRecentFiscalYear>
+      <longTermDebtPriorFiscalYear>0.00</longTermDebtPriorFiscalYear>
+      <revenueMostRecentFiscalYear>0.00</revenueMostRecentFiscalYear>
+      <revenuePriorFiscalYear>0.00</revenuePriorFiscalYear>
+      <costGoodsSoldMostRecentFiscalYear>0.00</costGoodsSoldMostRecentFiscalYear>
+      <costGoodsSoldPriorFiscalYear>0.00</costGoodsSoldPriorFiscalYear>
+      <taxPaidMostRecentFiscalYear>0.00</taxPaidMostRecentFiscalYear>
+      <taxPaidPriorFiscalYear>0.00</taxPaidPriorFiscalYear>
+      <netIncomeMostRecentFiscalYear>-16620.00</netIncomeMostRecentFiscalYear>
+      <netIncomePriorFiscalYear>-28094.00</netIncomePriorFiscalYear>
+      <issueJurisdictionSecuritiesOffering>AL</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>AK</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>AZ</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>AR</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>CA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>CO</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>CT</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>DE</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>DC</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>FL</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>GA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>HI</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>ID</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>IL</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>IN</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>IA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>KS</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>KY</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>LA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>ME</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MD</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MI</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MN</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MS</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MO</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>MT</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NE</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NV</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NH</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NJ</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NM</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NY</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>NC</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>ND</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>OH</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>OK</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>OR</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>PA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>PR</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>RI</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>SC</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>SD</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>TN</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>TX</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>UT</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>VT</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>VA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>WA</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>WV</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>WI</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>WY</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A0</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A1</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A2</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A3</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A4</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A5</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A6</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A7</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A8</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>A9</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>B0</issueJurisdictionSecuritiesOffering>
+      <issueJurisdictionSecuritiesOffering>Z4</issueJurisdictionSecuritiesOffering>
+    </annualReportDisclosureRequirements>
+    <signatureInfo>
+      <issuerSignature>
+        <issuer>Hidden Sea USA Inc</issuer>
+        <issuerSignature>Richard Vandenberg</issuerSignature>
+        <issuerTitle>Co-Founder</issuerTitle>
+      </issuerSignature>
+      <signaturePersons>
+        <signaturePerson>
+          <personSignature>Richard Vandenberg</personSignature>
+          <personTitle>Principal Executive Officer, Principal Financial Officer, Principal Accounting Officer and Co-Founder</personTitle>
+          <signatureDate>03-26-2024</signatureDate>
+        </signaturePerson>
+      </signaturePersons>
+    </signatureInfo>
+  </formData>
+</edgarSubmission>
