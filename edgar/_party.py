@@ -34,9 +34,26 @@ class Address:
         self.state_or_country_description: Optional[str] = state_or_country_description
         self.zipcode: Optional[str] = zipcode
 
+    def __str__(self):
+        if not self.street1:
+            return ""
+        address_format = "{street1}\n"
+        if self.street2:
+            address_format += "{street2}\n"
+        address_format += "{city}, {state_or_country} {zipcode}"
+
+        return address_format.format(
+            street1=self.street1,
+            street2=self.street2,
+            city=self.city,
+            state_or_country=self.state_or_country_description or self.state_or_country,
+            zipcode=self.zipcode
+        )
+
     def __repr__(self):
-        return (f"Address(street1='{self.street1}', street2={self.street2}, city={self.city}, "
-                f"zipcode={self.zipcode}, state={self.state_or_country})")
+        return (f'Address(street1="{self.street1 or ""}", street2="{self.street2 or ""}", city="{self.city or ""}",'
+                f'zipcode="{self.zipcode or ""}", state_or_country="{self.state_or_country}")'
+                )
 
 
 class Issuer:
