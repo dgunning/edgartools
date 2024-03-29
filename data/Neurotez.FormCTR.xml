@@ -1,0 +1,56 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/formc" xmlns:com="http://www.sec.gov/edgar/common">
+  <headerData>
+    <submissionType>C-TR</submissionType>
+    <filerInfo>
+      <filer>
+        <filerCredentials>
+          <filerCik>0001725567</filerCik>
+          <filerCcc>XXXXXXXX</filerCcc>
+        </filerCredentials>
+      </filer>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <returnCopyFlag>false</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <issuerInformation>
+      <issuerInfo>
+        <nameOfIssuer>Neurotez Inc.</nameOfIssuer>
+        <legalStatus>
+          <legalStatusForm>Corporation</legalStatusForm>
+          <jurisdictionOrganization>DE</jurisdictionOrganization>
+          <dateIncorporation>10-14-2005</dateIncorporation>
+        </legalStatus>
+        <issuerAddress>
+          <com:street1>991 HIGHWAY 22</com:street1>
+          <com:street2>SUITE 200A</com:street2>
+          <com:city>BRIDGEWATER</com:city>
+          <com:stateOrCountry>NJ</com:stateOrCountry>
+          <com:zipCode>08807</com:zipCode>
+        </issuerAddress>
+        <issuerWebsite>https://neurotez.com</issuerWebsite>
+      </issuerInfo>
+      <isCoIssuer>N</isCoIssuer>
+    </issuerInformation>
+    <signatureInfo>
+      <issuerSignature>
+        <issuer>Neurotez Inc.</issuer>
+        <issuerSignature>Nikolaos Tezapsidis</issuerSignature>
+        <issuerTitle>Principal Executive Officer</issuerTitle>
+      </issuerSignature>
+      <signaturePersons>
+        <signaturePerson>
+          <personSignature>Nikolaos Tezapsidis</personSignature>
+          <personTitle>Principal Executive Officer</personTitle>
+          <signatureDate>03-28-2024</signatureDate>
+        </signaturePerson>
+      </signaturePersons>
+    </signatureInfo>
+  </formData>
+</edgarSubmission>

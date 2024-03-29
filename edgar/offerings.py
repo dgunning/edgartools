@@ -17,6 +17,7 @@ from edgar._rich import repr_rich
 from edgar._xml import child_text, child_value
 from functools import lru_cache
 from edgar.reference import states
+from collections import defaultdict
 
 __all__ = [
     'Offering',
@@ -614,7 +615,7 @@ class PersonSignature:
 @dataclass(frozen=True)
 class IssuerSignature:
     issuer: str
-    issuer_title: str
+    title: str
     signature: str
 
 
@@ -622,6 +623,15 @@ class IssuerSignature:
 class SignatureInfo:
     issuer_signature: IssuerSignature
     signatures: List[PersonSignature]
+
+    @property
+    def signers(self):
+        signer_dict = defaultdict(list)
+        for signature in self.signatures:
+            signer_dict[signature.signature].append(signature.title)
+        signer_dict[self.issuer_signature.signature].append(self.issuer_signature.title)
+        # Convert to a list of tuple
+        return [(signer, set(titles)) for signer, titles in signer_dict.items()]
 
 
 def split_list(states, chunk_size=10):
@@ -678,6 +688,8 @@ class FormC:
             desc = "Form C-AR - Offering Annual Report"
         elif self.form == "C-AR/A":
             desc = "Form C-AR/A - Offering Annual Report Amendment"
+        elif self.form == "C-TR":
+            desc = "Form C-TR - Offering Termination Report"
         return desc
 
     @staticmethod
@@ -832,7 +844,7 @@ class FormC:
             issuer_signature=IssuerSignature(
                 issuer=child_text(issuer_signature_tag, "issuer"),
                 signature=child_text(issuer_signature_tag, "issuerSignature"),
-                issuer_title=child_text(issuer_signature_tag, "issuerTitle")
+                title=child_text(issuer_signature_tag, "issuerTitle")
             ),
             signatures=[
                 PersonSignature(
@@ -918,7 +930,8 @@ class FormC:
             offering_table.add_row("Over-Subscription Accepted:", self.offering_information.over_subscription_accepted)
             offering_table.add_row("How will over-subscriptions be allocated:",
                                    self.offering_information.over_subscription_allocation_type)
-            offering_table.add_row("Deadline Date:", FormC.format_date(self.offering_information.deadline_date) if self.offering_information.deadline_date else "")
+            offering_table.add_row("Deadline Date:", FormC.format_date(
+                self.offering_information.deadline_date) if self.offering_information.deadline_date else "")
 
             offering_panel = Panel(
                 offering_table,
@@ -938,9 +951,9 @@ class FormC:
                                         f"${self.annual_report_disclosure.cash_equi_most_recent_fiscal_year:,.2f}"),
             annual_report_table.add_row("Cash Equivalent Prior Fiscal Year:",
                                         f"${self.annual_report_disclosure.cash_equi_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Act Received Most Recent Fiscal Year:",
+            annual_report_table.add_row("Accounts Receivable Most Recent Fiscal Year:",
                                         f"${self.annual_report_disclosure.act_received_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Act Received Prior Fiscal Year:",
+            annual_report_table.add_row("Accounts Receivable Prior Fiscal Year:",
                                         f"${self.annual_report_disclosure.act_received_prior_fiscal_year:,.2f}"),
             annual_report_table.add_row("Short Term Debt Most Recent Fiscal Year:",
                                         f"${self.annual_report_disclosure.short_term_debt_most_recent_fiscal_year:,.2f}"),
@@ -969,7 +982,7 @@ class FormC:
 
             jurisdiction_lists = split_list(self.annual_report_disclosure.offering_jurisdictions, chunk_size=20)
             for index, jurisdictions in enumerate(jurisdiction_lists):
-                label = "Offered In:" if index == 0 else ""
+                label = "Jurisdictions Offered In:" if index == 0 else ""
                 annual_report_table.add_row(label, ", ".join(jurisdictions))
 
             annual_report_panel = Panel(
@@ -984,7 +997,7 @@ class FormC:
         # The signature of the issuer
         issuer_signature_table = Table(Column("Signature", style="bold"), "Title", "Issuer", box=box.SIMPLE)
         issuer_signature_table.add_row(self.signature_info.issuer_signature.signature,
-                                       self.signature_info.issuer_signature.issuer_title,
+                                       self.signature_info.issuer_signature.title,
                                        self.signature_info.issuer_signature.issuer)
 
         # Person Signatures

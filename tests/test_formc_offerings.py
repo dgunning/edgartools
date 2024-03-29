@@ -6,7 +6,6 @@ from edgar import *
 
 def test_parse_formc_offering():
     offering_xml = Path("data/pickleball.FormC.xml").read_text()
-    print(offering_xml)
     formC: FormC = FormC.from_xml(offering_xml, form="C")
     assert formC.issuer_information.commission_cik == "0001348811"
     assert formC.issuer_information.commission_file_number == "008-67202"
@@ -32,7 +31,7 @@ def test_parse_formc_offering():
     signature_info = formC.signature_info
     assert signature_info.issuer_signature.issuer == "Pickleball Etc. LLC"
     assert signature_info.issuer_signature.signature == "Steven Raack"
-    assert signature_info.issuer_signature.issuer_title == "Managing Member"
+    assert signature_info.issuer_signature.title == "Managing Member"
 
 
 def test_formc_offering_with_annual_report_disclosures():
@@ -40,15 +39,19 @@ def test_formc_offering_with_annual_report_disclosures():
     formC: FormC = FormC.from_xml(offering_xml, form="C")
     assert formC.filer_information.cik == "0002017182"
     assert formC.issuer_information.commission_cik == "0001707214"
-
-    print(formC)
+    print()
+    # Annual Report
+    assert formC.annual_report_disclosure.current_employees == 12
+    assert formC.annual_report_disclosure.total_asset_most_recent_fiscal_year == 47586.0
+    assert formC.annual_report_disclosure.total_asset_prior_fiscal_year == 152589.00
+    assert formC.annual_report_disclosure.tax_paid_prior_fiscal_year == 0.0
+    assert formC.annual_report_disclosure.net_income_most_recent_fiscal_year == 58409.0
+    assert formC.signature_info.signers == [("Douglas D'Orio", {'Managing Member'})]
 
 
 def test_form_CU_offering():
     offering_xml = Path("data/HiddenSea.FormCU.xml").read_text()
     formC: FormC = FormC.from_xml(offering_xml, form="C-U")
-    # assert formC.filer_information.cik == "0002017182"
-    # assert formC.issuer_information.commission_cik == "0001707214"
     # Issuer Information
     assert formC.issuer_information.name == "Hidden Sea USA Inc"
     assert formC.issuer_information.legal_status == "Corporation"
@@ -56,7 +59,8 @@ def test_form_CU_offering():
     assert formC.issuer_information.date_of_incorporation == datetime(2015, 10, 7).date()
 
     # Offering Information
-    assert formC.offering_information.compensation_amount.startswith("The issuer shall pay to the Intermediary at the conclusion")
+    assert formC.offering_information.compensation_amount.startswith(
+        "The issuer shall pay to the Intermediary at the conclusion")
     assert formC.offering_information.financial_interest.startswith("The Intermediary will also receive")
 
     # Annual Report
@@ -67,8 +71,9 @@ def test_form_CU_offering():
     assert formC.annual_report_disclosure.long_term_debt_prior_fiscal_year == 0.0
     assert formC.annual_report_disclosure.short_term_debt_prior_fiscal_year == 0.0
 
-    print()
-    print(formC)
+    # Signatures
+    signers = formC.signature_info.signers
+    assert len(signers) == 1
 
 
 def test_form_C_offering_annual_report():
@@ -91,8 +96,6 @@ def test_form_C_offering_annual_report():
     assert formC.annual_report_disclosure.net_income_most_recent_fiscal_year == -145529.0
     assert formC.annual_report_disclosure.short_term_debt_prior_fiscal_year == 0.0
     assert formC.annual_report_disclosure.long_term_debt_prior_fiscal_year == 0.0
-    print()
-    print(formC)
 
 
 def test_form_c_obj():
@@ -100,3 +103,25 @@ def test_form_c_obj():
                     accession_no='0001669191-24-000002')
     formC: FormC = filing.obj()
     assert isinstance(formC, FormC)
+
+
+def test_formc_with_multiple_signers():
+    filing = Filing(form='C', filing_date='2024-03-28', company='Deverra Therapeutics, Inc.', cik=1822782,
+                    accession_no='0001665160-24-000283')
+    formc = filing.obj()
+
+    assert formc.signature_info.signers == [('Michael Yurkowsky', {'CEO, Director and Chairman'}),
+                                            ('Andrew Albert Kucharchuk', {'Interim CFO'}),
+                                            ('Colleen Delaney', {
+                                                'Scientific Founder and Chief Scientific Officer, EVP of RandD, Director'})]
+
+
+def test_parse_form_tr():
+    """
+    This is a C-TR termination of offering so lots of missing data
+    """
+    offering_xml = Path("data/Neurotez.FormCTR.xml").read_text()
+    formC: FormC = FormC.from_xml(offering_xml, form="C-TR")
+    assert formC.offering_information is None
+    assert formC.filer_information.period is None
+    assert formC.filer_information.cik == "0001725567"
