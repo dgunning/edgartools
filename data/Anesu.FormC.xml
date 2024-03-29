@@ -1,0 +1,94 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/formc" xmlns:com="http://www.sec.gov/edgar/common">
+  <headerData>
+    <submissionType>C</submissionType>
+    <filerInfo>
+      <filer>
+        <filerCredentials>
+          <filerCik>0002017182</filerCik>
+          <filerCcc>XXXXXXXX</filerCcc>
+        </filerCredentials>
+      </filer>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <returnCopyFlag>false</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <issuerInformation>
+      <issuerInfo>
+        <nameOfIssuer>Anesu Restorative Care, LLC</nameOfIssuer>
+        <legalStatus>
+          <legalStatusForm>Limited Liability Company</legalStatusForm>
+          <jurisdictionOrganization>NJ</jurisdictionOrganization>
+          <dateIncorporation>08-20-2021</dateIncorporation>
+        </legalStatus>
+        <issuerAddress>
+          <com:street1>1225 WHITEHORSE MERCERVILLE RD</com:street1>
+          <com:street2>SUITE 202</com:street2>
+          <com:city>HAMILTON</com:city>
+          <com:stateOrCountry>NJ</com:stateOrCountry>
+          <com:zipCode>08619</com:zipCode>
+        </issuerAddress>
+        <issuerWebsite>https://www.anesucares.com</issuerWebsite>
+      </issuerInfo>
+      <isCoIssuer>N</isCoIssuer>
+      <companyName>SMBX, Inc.</companyName>
+      <commissionCik>0001707214</commissionCik>
+      <commissionFileNumber>007-00129</commissionFileNumber>
+      <crdNumber>290186</crdNumber>
+    </issuerInformation>
+    <offeringInformation>
+      <compensationAmount>SMBX will not be charging a capital raise fee as these bonds are part of the Mercer County Small Business Investment Program.</compensationAmount>
+      <financialInterest>N/A</financialInterest>
+      <securityOfferedType>Debt</securityOfferedType>
+      <price>10.00000</price>
+      <priceDeterminationMethod>This is a debt security and the yield at which the bonds pay interest is determined by the market rate yield range for similar SBA loans in the market as of October 2023. The yield is fixed and determined upfront at 10.75%.</priceDeterminationMethod>
+      <offeringAmount>20000.00</offeringAmount>
+      <overSubscriptionAccepted>Y</overSubscriptionAccepted>
+      <overSubscriptionAllocationType>First-come, first-served basis</overSubscriptionAllocationType>
+      <maximumOfferingAmount>100000.00</maximumOfferingAmount>
+      <deadlineDate>05-02-2024</deadlineDate>
+    </offeringInformation>
+    <annualReportDisclosureRequirements>
+      <currentEmployees>12.00</currentEmployees>
+      <totalAssetMostRecentFiscalYear>47586.00</totalAssetMostRecentFiscalYear>
+      <totalAssetPriorFiscalYear>152589.00</totalAssetPriorFiscalYear>
+      <cashEquiMostRecentFiscalYear>47586.00</cashEquiMostRecentFiscalYear>
+      <cashEquiPriorFiscalYear>51545.00</cashEquiPriorFiscalYear>
+      <actReceivedMostRecentFiscalYear>0.00</actReceivedMostRecentFiscalYear>
+      <actReceivedPriorFiscalYear>0.00</actReceivedPriorFiscalYear>
+      <shortTermDebtMostRecentFiscalYear>40346.00</shortTermDebtMostRecentFiscalYear>
+      <shortTermDebtPriorFiscalYear>66306.00</shortTermDebtPriorFiscalYear>
+      <longTermDebtMostRecentFiscalYear>33947.00</longTermDebtMostRecentFiscalYear>
+      <longTermDebtPriorFiscalYear>0.00</longTermDebtPriorFiscalYear>
+      <revenueMostRecentFiscalYear>1442805.00</revenueMostRecentFiscalYear>
+      <revenuePriorFiscalYear>555710.00</revenuePriorFiscalYear>
+      <costGoodsSoldMostRecentFiscalYear>10460.00</costGoodsSoldMostRecentFiscalYear>
+      <costGoodsSoldPriorFiscalYear>11317.00</costGoodsSoldPriorFiscalYear>
+      <taxPaidMostRecentFiscalYear>0.00</taxPaidMostRecentFiscalYear>
+      <taxPaidPriorFiscalYear>0.00</taxPaidPriorFiscalYear>
+      <netIncomeMostRecentFiscalYear>58409.00</netIncomeMostRecentFiscalYear>
+      <netIncomePriorFiscalYear>67049.00</netIncomePriorFiscalYear>
+      <issueJurisdictionSecuritiesOffering>CA</issueJurisdictionSecuritiesOffering>
+    </annualReportDisclosureRequirements>
+    <signatureInfo>
+      <issuerSignature>
+        <issuer>Anesu Restorative Care, LLC</issuer>
+        <issuerSignature>Douglas D'Orio</issuerSignature>
+        <issuerTitle>Managing Member</issuerTitle>
+      </issuerSignature>
+      <signaturePersons>
+        <signaturePerson>
+          <personSignature>Douglas D'Orio</personSignature>
+          <personTitle>Managing Member</personTitle>
+          <signatureDate>03-27-2024</signatureDate>
+        </signaturePerson>
+      </signaturePersons>
+    </signatureInfo>
+  </formData>
+</edgarSubmission>
