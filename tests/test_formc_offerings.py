@@ -21,6 +21,10 @@ def test_parse_formc_offering():
     assert formC.offering_information.security_offered_other_desc == "Membership Interests"
     assert formC.offering_information.no_of_security_offered == "41666"
     assert formC.offering_information.price == "1.20000"
+    assert formC.offering_information.over_subscription_accepted == "Y"
+    assert formC.offering_information.maximum_offering_amount == 950000.0
+    assert formC.offering_information.over_subscription_allocation_type == "First-come, first-served basis"
+    assert formC.offering_information.deadline_date == datetime(2024, 12, 31).date()
 
     # Annual Report
     assert formC.annual_report_disclosure.total_asset_most_recent_fiscal_year == 0.00
@@ -32,6 +36,7 @@ def test_parse_formc_offering():
     assert signature_info.issuer_signature.issuer == "Pickleball Etc. LLC"
     assert signature_info.issuer_signature.signature == "Steven Raack"
     assert signature_info.issuer_signature.title == "Managing Member"
+    print(formC)
 
 
 def test_formc_offering_with_annual_report_disclosures():
@@ -101,6 +106,10 @@ def test_form_C_offering_annual_report():
 def test_form_c_obj():
     filing = Filing(form='C/A', filing_date='2024-01-02', company='U.S. Hemp Co Inc', cik=2001951,
                     accession_no='0001669191-24-000002')
+    formC: FormC = filing.obj()
+    assert isinstance(formC, FormC)
+
+    filing =Filing(form='C-TR', filing_date='2024-03-22', company='ORTEK THERAPEUTICS INC', cik=1070105, accession_no='0001665160-24-000252')
     formC: FormC = filing.obj()
     assert isinstance(formC, FormC)
 

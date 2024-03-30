@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple, Set
 
 from bs4 import BeautifulSoup, Tag
 from rich import box
@@ -10,7 +10,7 @@ from rich.panel import Panel
 from rich.table import Table, Column
 from datetime import date, datetime
 
-from edgar.core import get_bool
+from edgar.core import get_bool, yes_no
 from edgar._party import Issuer, Person, Address
 from edgar._companies import Company
 from edgar._rich import repr_rich
@@ -539,6 +539,7 @@ class OfferingInformation:
       <offeringAmount>50000.00</offeringAmount>
       <overSubscriptionAccepted>Y</overSubscriptionAccepted>
       <overSubscriptionAllocationType>First-come, first-served basis</overSubscriptionAllocationType>
+      <descOverSubscription>At issuer's discretion, with priority given to StartEngine Owners</descOverSubscription>
       <maximumOfferingAmount>950000.00</maximumOfferingAmount>
       <deadlineDate>12-31-2024</deadlineDate>
     </offeringInformation>
@@ -553,6 +554,7 @@ class OfferingInformation:
     offering_amount: float
     over_subscription_accepted: str
     over_subscription_allocation_type: str
+    desc_over_subscription: str
     maximum_offering_amount: float
     deadline_date: Optional[date]
 
@@ -625,7 +627,7 @@ class SignatureInfo:
     signatures: List[PersonSignature]
 
     @property
-    def signers(self):
+    def signers(self) -> List[Tuple[str, Set[str]]]:
         signer_dict = defaultdict(list)
         for signature in self.signatures:
             signer_dict[signature.signature].append(signature.title)
@@ -782,6 +784,7 @@ class FormC:
                 offering_amount=maybe_float(child_text(offering_info_tag, 'offeringAmount')),
                 over_subscription_accepted=child_text(offering_info_tag, 'overSubscriptionAccepted'),
                 over_subscription_allocation_type=child_text(offering_info_tag, 'overSubscriptionAllocationType'),
+                desc_over_subscription=child_text(offering_info_tag, 'descOverSubscription'),
                 maximum_offering_amount=maybe_float(child_text(offering_info_tag, 'maximumOfferingAmount')),
                 deadline_date=maybe_date(child_text(offering_info_tag, 'deadlineDate'))
             )
@@ -927,9 +930,11 @@ class FormC:
             offering_table.add_row("Target Offering Amount:", f"${self.offering_information.offering_amount:,.2f}")
             offering_table.add_row("Maximum Offering Amount:",
                                    f"${self.offering_information.maximum_offering_amount:,.2f}")
-            offering_table.add_row("Over-Subscription Accepted:", self.offering_information.over_subscription_accepted)
+            offering_table.add_row("Over-Subscription Accepted:", yes_no(self.offering_information.over_subscription_accepted == "Y")),
             offering_table.add_row("How will over-subscriptions be allocated:",
                                    self.offering_information.over_subscription_allocation_type)
+            offering_table.add_row("Describe over-subscription plan:",
+                                      self.offering_information.desc_over_subscription)
             offering_table.add_row("Deadline Date:", FormC.format_date(
                 self.offering_information.deadline_date) if self.offering_information.deadline_date else "")
 

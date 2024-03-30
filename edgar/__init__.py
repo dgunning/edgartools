@@ -145,7 +145,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return FormD.from_xml(xml)
-    elif matches_form(sec_filing, ["C", "C-U", "C-AR"]):
+    elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         xml = sec_filing.xml()
         if xml:
             return FormC.from_xml(xml, form=sec_filing.form)
