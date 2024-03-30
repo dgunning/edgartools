@@ -134,3 +134,9 @@ def test_parse_form_tr():
     assert formC.offering_information is None
     assert formC.filer_information.period is None
     assert formC.filer_information.cik == "0001725567"
+
+def test_form_c_tr_with_no_employees():
+    filing = Filing(form='C-TR', filing_date='2023-12-29', company='H2 Energy Group Inc', cik=1901902, accession_no='0001079973-23-001832')
+    formC = filing.obj()
+    print(formC)
+    #assert formC.annual_report_disclosure is None

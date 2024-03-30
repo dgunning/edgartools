@@ -793,9 +793,10 @@ class FormC:
 
         # Annual Report Disclosure
         annual_report_disclosure_tag = form_data_tag.find('annualReportDisclosureRequirements')
-        if annual_report_disclosure_tag:
+        # If the tag is not None and not Empty e.g. <annualReportDisclosureRequirements/>
+        if annual_report_disclosure_tag and annual_report_disclosure_tag.contents:
             annual_report_disclosure = AnnualReportDisclosure(
-                current_employees=int(float(child_text(annual_report_disclosure_tag, 'currentEmployees'))),
+                current_employees=int(float(child_text(annual_report_disclosure_tag, 'currentEmployees') or "0.00")),
                 total_asset_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
                                                                            'totalAssetMostRecentFiscalYear')),
                 total_asset_prior_fiscal_year=maybe_float(
