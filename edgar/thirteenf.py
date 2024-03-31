@@ -16,6 +16,7 @@ from edgar._rich import repr_rich
 from edgar.sgml import stream_documents
 from edgar.core import log
 from edgar._xml import find_element, child_text
+from edgar.reference import cusip_ticker_mapping
 
 __all__ = [
     'ThirteenF',
@@ -287,7 +288,10 @@ class ThirteenF:
         return parsed_primary_doc
 
     @staticmethod
-    def parse_infotable_xml(infotable_xml: str):
+    def parse_infotable_xml(infotable_xml: str) -> pd.DataFrame:
+        """
+        Parse the infotable xml and return a pandas DataFrame
+        """
         root = find_element(infotable_xml, "informationTable")
         rows = []
         shares_or_principal = {"SH": "Shares", "PRN": "Principal"}
@@ -318,16 +322,22 @@ class ThirteenF:
             rows.append(info_table)
 
         table = pd.DataFrame(rows)
+
+        # Add the ticker symbol
+        cusip_mapping = cusip_ticker_mapping(allow_duplicate_cusips=False)
+        table['Ticker'] = table.Cusip.map(cusip_mapping.SYMBOL)
+
         return table
 
     def _infotable_summary(self):
         if self.has_infotable():
             return (self.infotable
-                    .filter(['Issuer', 'Class', 'Value', 'SharesPrnAmount', 'Type',
+                    .filter(['Issuer', 'Class', 'Cusip', 'Ticker', 'Value', 'SharesPrnAmount', 'Type',
                              'SoleVoting', 'SharedVoting', 'NonVoting'])
                     .rename(columns={'SharesPrnAmount': 'Shares'})
                     .assign(Value=lambda df: df.Value,
-                            Type=lambda df: df.Type.fillna('-'))
+                            Type=lambda df: df.Type.fillna('-'),
+                            Ticker=lambda df: df.Ticker.fillna(''))
                     .sort_values(['Value'], ascending=False)
                     )
 
@@ -357,19 +367,19 @@ class ThirteenF:
 
         # info table
         if self.has_infotable():
-            table = Table("", "Issuer", "Class", "Value", "Type", "Shares", "Voting", "Non Voting", "Shared Voting",
+            table = Table("", "Issuer", "Class", "Cusip", "Ticker",  "Value", "Type", "Shares", "Voting",
                           row_styles=["bold", ""],
                           box=box.SIMPLE)
             for index, row in enumerate(self._infotable_summary().itertuples()):
                 table.add_row(str(index),
                               row.Issuer,
                               row.Class,
+                              row.Cusip,
+                              row.Ticker,
                               f"${row.Value:,.0f}",
                               row.Type,
                               f"{int(row.Shares):,.0f}",
                               f"{int(row.SoleVoting):,.0f}",
-                              f"{int(row.NonVoting):,.0f}",
-                              f"{int(row.SharedVoting):,.0f}"
                               )
             content.append(table)
 
