@@ -606,6 +606,48 @@ class AnnualReportDisclosure:
 
     offering_jurisdictions: List[str]
 
+    @property
+    def is_offered_in_all_states(self):
+        return set(self.offering_jurisdictions).issuperset(states.keys())
+
+    def __rich__(self):
+        annual_report_table = Table(Column("", style='bold'), Column("Current Fiscal Year", style="bold"),
+                                    Column("Previous Fiscal Year"),
+                                    box=box.SIMPLE, row_styles=["", "bold"])
+        annual_report_table.add_row("Current Employees", f"{self.current_employees:,.0f}", "")
+        annual_report_table.add_row("Total Asset", f"${self.total_asset_most_recent_fiscal_year:,.2f}",
+                                    f"${self.total_asset_prior_fiscal_year:,.2f}")
+        annual_report_table.add_row("Cash Equivalent", f"${self.cash_equi_most_recent_fiscal_year:,.2f}",
+                                    f"${self.cash_equi_prior_fiscal_year:,.2f}")
+        annual_report_table.add_row("Accounts Receivable", f"${self.act_received_most_recent_fiscal_year:,.2f}",
+                                    f"${self.act_received_prior_fiscal_year:,.2f}")
+        annual_report_table.add_row("Short Term Debt", f"${self.short_term_debt_most_recent_fiscal_year:,.2f}",
+                                    f"${self.short_term_debt_prior_fiscal_year:,.2f}")
+        annual_report_table.add_row("Long Term Debt", f"${self.long_term_debt_most_recent_fiscal_year:,.2f}",
+                                    f"${self.long_term_debt_prior_fiscal_year:,.2f}")
+        annual_report_table.add_row("Revenue", f"${self.revenue_most_recent_fiscal_year:,.2f}",
+                                    f"${self.revenue_prior_fiscal_year:,.2f}")
+        annual_report_table.add_row("Cost of Goods Sold", f"${self.cost_goods_sold_most_recent_fiscal_year:,.2f}",
+                                    f"${self.cost_goods_sold_prior_fiscal_year:,.2f}")
+        annual_report_table.add_row("Tax Paid", f"${self.tax_paid_most_recent_fiscal_year:,.2f}",
+                                    f"${self.tax_paid_prior_fiscal_year:,.2f}")
+        annual_report_table.add_row("Net Income", f"${self.net_income_most_recent_fiscal_year:,.2f}",
+                                    f"${self.net_income_prior_fiscal_year:,.2f}")
+
+        # Jurisdictions
+        jurisdiction_table = Table(Column("Offered In", style="bold"), box=box.SIMPLE, row_styles=["", "bold"])
+        if self.is_offered_in_all_states:
+            juris_description = "All 50 States"
+            jurisdiction_table.add_row(juris_description)
+        else:
+            jurisdiction_lists = split_list(self.offering_jurisdictions, chunk_size=25)
+            for index, jurisdictions in enumerate(jurisdiction_lists):
+                jurisdiction_table.add_row(", ".join(jurisdictions))
+        return Group(annual_report_table, jurisdiction_table)
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
 
 @dataclass(frozen=True)
 class PersonSignature:
@@ -922,21 +964,22 @@ class FormC:
         if self.offering_information:
             # Offering Information
             offering_table = Table(Column("", style='bold'), "", box=box.SIMPLE, row_styles=["", "bold"])
-            offering_table.add_row("Compensation Amount:", self.offering_information.compensation_amount)
-            offering_table.add_row("Financial Interest:", self.offering_information.financial_interest)
-            offering_table.add_row("Type of Security:", self.offering_information.security_offered_type)
-            offering_table.add_row("Price:", self.offering_information.price)
-            offering_table.add_row("Price (or Method for Determining Price):",
+            offering_table.add_row("Compensation Amount", self.offering_information.compensation_amount)
+            offering_table.add_row("Financial Interest", self.offering_information.financial_interest)
+            offering_table.add_row("Type of Security", self.offering_information.security_offered_type)
+            offering_table.add_row("Price", self.offering_information.price)
+            offering_table.add_row("Price (or Method for Determining Price)",
                                    self.offering_information.price_determination_method)
-            offering_table.add_row("Target Offering Amount:", f"${self.offering_information.offering_amount:,.2f}")
-            offering_table.add_row("Maximum Offering Amount:",
+            offering_table.add_row("Target Offering Amount", f"${self.offering_information.offering_amount:,.2f}")
+            offering_table.add_row("Maximum Offering Amount",
                                    f"${self.offering_information.maximum_offering_amount:,.2f}")
-            offering_table.add_row("Over-Subscription Accepted:", yes_no(self.offering_information.over_subscription_accepted == "Y")),
-            offering_table.add_row("How will over-subscriptions be allocated:",
+            offering_table.add_row("Over-Subscription Accepted",
+                                   yes_no(self.offering_information.over_subscription_accepted == "Y")),
+            offering_table.add_row("How will over-subscriptions be allocated",
                                    self.offering_information.over_subscription_allocation_type)
-            offering_table.add_row("Describe over-subscription plan:",
-                                      self.offering_information.desc_over_subscription)
-            offering_table.add_row("Deadline Date:", FormC.format_date(
+            offering_table.add_row("Describe over-subscription plan",
+                                   self.offering_information.desc_over_subscription)
+            offering_table.add_row("Deadline Date", FormC.format_date(
                 self.offering_information.deadline_date) if self.offering_information.deadline_date else "")
 
             offering_panel = Panel(
@@ -947,52 +990,8 @@ class FormC:
 
         # Annual Report Disclosure
         if self.annual_report_disclosure:
-            annual_report_table = Table(Column("", style='bold'), "", box=box.SIMPLE, row_styles=["", "bold"])
-            annual_report_table.add_row("Current Employees:", str(self.annual_report_disclosure.current_employees))
-            annual_report_table.add_row("Total Asset Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.total_asset_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Total Asset Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.total_asset_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Cash Equivalent Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.cash_equi_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Cash Equivalent Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.cash_equi_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Accounts Receivable Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.act_received_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Accounts Receivable Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.act_received_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Short Term Debt Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.short_term_debt_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Short Term Debt Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.short_term_debt_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Long Term Debt Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.long_term_debt_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Long Term Debt Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.long_term_debt_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Revenue Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.revenue_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Revenue Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.revenue_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Cost of Goods Sold Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.cost_goods_sold_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Cost of Goods Sold Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.cost_goods_sold_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Tax Paid Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.tax_paid_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Tax Paid Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.tax_paid_prior_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Net Income Most Recent Fiscal Year:",
-                                        f"${self.annual_report_disclosure.net_income_most_recent_fiscal_year:,.2f}"),
-            annual_report_table.add_row("Net Income Prior Fiscal Year:",
-                                        f"${self.annual_report_disclosure.net_income_prior_fiscal_year:,.2f}"),
-
-            jurisdiction_lists = split_list(self.annual_report_disclosure.offering_jurisdictions, chunk_size=20)
-            for index, jurisdictions in enumerate(jurisdiction_lists):
-                label = "Jurisdictions Offered In:" if index == 0 else ""
-                annual_report_table.add_row(label, ", ".join(jurisdictions))
-
             annual_report_panel = Panel(
-                annual_report_table,
+                self.annual_report_disclosure.__rich__(),
                 title=Text("Annual Report Disclosures", style="bold deep_sky_blue1"),
                 box=box.ROUNDED
             )
