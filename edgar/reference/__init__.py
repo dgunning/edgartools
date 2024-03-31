@@ -1,3 +1,13 @@
+import sys
+import pandas as pd
+# Dynamic import based on Python version
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
+from functools import lru_cache
+
 
 __all__ = ['states']
 
@@ -55,3 +65,21 @@ states = {
     "WI": "Wisconsin",
     "WY": "Wyoming",
 }
+
+
+def read_parquet_from_package(parquet_filename:str):
+    package_name = 'edgar.reference'
+
+    with resources.path(package_name, parquet_filename) as parquet_path:
+        df = pd.read_parquet(parquet_path)
+
+    return df
+
+
+@lru_cache(maxsize=1)
+def cusip_ticker_mapping():
+    """
+    Download the CUSIP to Ticker mapping data from the SEC website.
+    """
+    df = read_parquet_from_package('ct.pq')
+    return df
