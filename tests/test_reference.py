@@ -1,9 +1,10 @@
 from edgar.reference import cusip_ticker_mapping, get_ticker_from_cusip
 from edgar import *
 
+
 def test_cusip_ticker_mapping():
     data = cusip_ticker_mapping()
-    assert data[data.CUSIP == '15101T102'].SYMBOL.item() == 'CLXX'
+    assert data.loc['15101T102'].SYMBOL == 'CLXX'
 
 
 def test_get_ticker_from_cusip():
