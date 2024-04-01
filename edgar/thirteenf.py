@@ -325,7 +325,7 @@ class ThirteenF:
 
         # Add the ticker symbol
         cusip_mapping = cusip_ticker_mapping(allow_duplicate_cusips=False)
-        table['Ticker'] = table.Cusip.map(cusip_mapping.SYMBOL)
+        table['Ticker'] = table.Cusip.map(cusip_mapping.Ticker)
 
         return table
 
