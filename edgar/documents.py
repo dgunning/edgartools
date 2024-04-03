@@ -678,6 +678,7 @@ def get_clean_html(html: str) -> str:
 
     return str(root)
 
+
 def replace_inline_newlines(text: str):
     """Replace newlines inside the text container"""
     text = text.replace('\n', ' ')
