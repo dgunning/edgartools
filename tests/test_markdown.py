@@ -71,7 +71,6 @@ def test_fix_markdown():
     md = "ITEM\n1 - BUSINESS"
     assert "ITEM 1 - BUSINESS" in fix_markdown(md)
 
-
     # Cleanup Item\xa01
     md = fix_markdown("Item\xa01")
     assert "Item 1" in md
@@ -90,7 +89,7 @@ def test_fix_markdown():
     """
     assert ". Item 9.01" in md
     md_fixed = fix_markdown(md)
-    assert ".\n Item 9.01" in md_fixed
+    assert any(line.startswith(" Item 9.01") for line in md_fixed.splitlines())
 
     # Fix no spaces before Item
     md = """
@@ -99,22 +98,9 @@ def test_fix_markdown():
     Discussion and Analysis of Financial Condition and Results of 
     """
     md_fixed = fix_markdown(md)
-    assert " Item 7" in md_fixed
+    assert any(line.startswith(" Item 7") for line in md_fixed.splitlines())
 
 
-def test_that_markdown_has_proper_line_breaks():
-    from edgar import Filing
-    from markdownify import markdownify
-    import re
-    filing = Filing(form='10-K', filing_date='2023-09-21', company='CAMPBELL SOUP CO', cik=16732,
-           accession_no='0000016732-23-000109')
-    print()
-    print(filing.markdown())
-    #print(markdownify(filing.html()))
-    md = """
-    Repurchases under the September 2021 program may be made in open-market or 
-privately negotiated transactions.Item 6. ReservedItem 7. Management's 
-Discussion and Analysis of Financial Condition and Results of 
-"""
-    #md = re.sub(r"(\S)(Item)\s?(\d.\d{,2})", r"\1\n \2 \3", md)
-    #print(md)
+
+
+
