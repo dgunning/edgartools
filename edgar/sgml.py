@@ -10,6 +10,7 @@ from pathlib import Path
 
 __all__ = ['SgmlDocument', 'stream_documents']
 
+
 class SgmlDocument(BaseModel):
     type: str
     sequence: str
@@ -23,11 +24,11 @@ class SgmlDocument(BaseModel):
     def __repr__(self):
         return f"Document(type={self.type}, sequence={self.sequence}, filename={self.filename}, description={self.description})"
 
+
 def strip_tags(text: str, start_tag: str, end_tag: str) -> str:
     if text.startswith(start_tag) and text.endswith(end_tag):
         return text[len(start_tag):-len(end_tag)].strip()
     return text
-
 
 
 def parse_document(document_str: str) -> SgmlDocument:
@@ -71,6 +72,7 @@ def stream_documents(source):
     else:
         raise ValueError("Source must be a URL or a file path")
 
+
 def process_stream(line_iterable):
     document_str = ""
     in_document = False
@@ -87,4 +89,3 @@ def process_stream(line_iterable):
             document_str = ""
         elif in_document:
             document_str += line
-
