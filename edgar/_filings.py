@@ -1214,7 +1214,7 @@ class SECHeader:
 
     @classmethod
     def parse(cls, header_text: str):
-        data:Dict[str, Any] = {}
+        data: Dict[str, Any] = {}
         current_header = None
         current_subheader = None
 
@@ -1577,9 +1577,7 @@ class Filing:
 
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
-        if self.document.is_binary():
-            log.info(f"Primary document {self.document.url} is a binary file")
-        else:
+        if not self.document.is_binary():
             return self.document.download()
 
     def xml(self) -> Optional[str]:
@@ -1594,6 +1592,13 @@ class Filing:
         html_content = self.html()
         if html_content:
             return HtmlDocument.from_html(html_content).text
+        else:
+            # Some Form types like UPLOAD don't have a primary document. Look for a TEXT EXTRACT attachment
+            # Look for an attachment that is TEXT EXTRACT
+            text_extract_attachments = self.attachments.query("Type == 'TEXT-EXTRACT'")
+            if len(text_extract_attachments) > 0:
+                text_extract_attachment = text_extract_attachments[0]
+                return get_text_between_tags(text_extract_attachment.url, "TEXT")
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
@@ -1603,14 +1608,22 @@ class Filing:
         """return the markdown version of this filing html"""
         html = self.html()
         if html:
-            return html_to_markdown(get_clean_html(self.html()))
+            return html_to_markdown(get_clean_html(html))
+        else:
+            text_content = self.text()
+            if text_content:
+                return "<pre>" + text_content + "</pre>"
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""
         html = self.html()
         if html:
-            markdown_content = MarkdownContent(self.html())
+            markdown_content = MarkdownContent(html)
             markdown_content.view()
+        else:
+            text_content = self.text()
+            if text_content:
+                MarkdownContent("<pre>" + text_content + "</pre>").view()
 
     def xbrl(self) -> Optional[FilingXbrl]:
         """
@@ -1861,8 +1874,7 @@ class Attachments:
     def query(self, query: str):
         # Get the attachments by type
         results = self.files.query(query)
-        if len(results) > 0:
-            return Attachments(results)
+        return Attachments(results)
 
     def __len__(self):
         return len(self.files)
@@ -2153,7 +2165,7 @@ class FilingHomepage:
 
             # Get the mailing information
             mailer_divs = filer_div.find_all("div", class_="mailer")
-            # For each mailed_div.text remove mutiple spaces after a newline
+            # For each mailed_div.text remove multiple spaces after a newline
 
             addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
                          for mailer_div in mailer_divs]
