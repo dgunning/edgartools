@@ -3,7 +3,7 @@ from typing import List, Optional
 from bs4 import Tag
 from rich.console import Group
 from rich.table import Table
-
+from pydantic import BaseModel
 from edgar._rich import repr_rich
 from edgar._xml import child_text, child_value
 from edgar.core import IntString
@@ -17,22 +17,14 @@ __all__ = [
 ]
 
 
-class Address:
+class Address(BaseModel):
 
-    def __init__(self,
-                 street1: Optional[str] = None,
-                 street2: Optional[str] = None,
-                 city: Optional[str] = None,
-                 state_or_country: Optional[str] = None,
-                 state_or_country_description: Optional[str] = None,
-                 zipcode: Optional[str] = None
-                 ):
-        self.street1: str = street1
-        self.street2: Optional[str] = street2
-        self.city: Optional[str] = city
-        self.state_or_country: Optional[str] = state_or_country
-        self.state_or_country_description: Optional[str] = state_or_country_description
-        self.zipcode: Optional[str] = zipcode
+    street1: Optional[str] = None
+    street2: Optional[str] = None
+    city: Optional[str] = None
+    state_or_country: Optional[str] = None
+    state_or_country_description: Optional[str] = None
+    zipcode: Optional[str] = None
 
     def __str__(self):
         if not self.street1:
