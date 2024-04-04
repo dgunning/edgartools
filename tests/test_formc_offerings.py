@@ -1,5 +1,5 @@
 from pathlib import Path
-from edgar.offerings import FormC
+from edgar.offerings import FormC, Signer
 from datetime import datetime
 from edgar import *
 
@@ -7,9 +7,9 @@ from edgar import *
 def test_parse_formc_offering():
     offering_xml = Path("data/pickleball.FormC.xml").read_text()
     formC: FormC = FormC.from_xml(offering_xml, form="C")
-    assert formC.issuer_information.commission_cik == "0001348811"
-    assert formC.issuer_information.commission_file_number == "008-67202"
-    assert formC.issuer_information.company_name == "ANDES CAPITAL GROUP, LLC"
+    assert formC.issuer_information.funding_portal.cik == "0001348811"
+    assert formC.issuer_information.funding_portal.file_number == "008-67202"
+    assert formC.issuer_information.funding_portal.name == "ANDES CAPITAL GROUP, LLC"
     assert formC.issuer_information.legal_status == "Limited Liability Company"
     assert formC.issuer_information.jurisdiction == "CA"
     assert formC.issuer_information.date_of_incorporation == datetime(2023, 12, 11).date()
@@ -43,7 +43,7 @@ def test_formc_offering_with_annual_report_disclosures():
     offering_xml = Path("data/Anesu.FormC.xml").read_text()
     formC: FormC = FormC.from_xml(offering_xml, form="C")
     assert formC.filer_information.cik == "0002017182"
-    assert formC.issuer_information.commission_cik == "0001707214"
+    assert formC.issuer_information.funding_portal.cik == "0001707214"
     print()
     # Annual Report
     assert formC.annual_report_disclosure.current_employees == 12
@@ -51,7 +51,7 @@ def test_formc_offering_with_annual_report_disclosures():
     assert formC.annual_report_disclosure.total_asset_prior_fiscal_year == 152589.00
     assert formC.annual_report_disclosure.tax_paid_prior_fiscal_year == 0.0
     assert formC.annual_report_disclosure.net_income_most_recent_fiscal_year == 58409.0
-    assert formC.signature_info.signers == [("Douglas D'Orio", {'Managing Member'})]
+    assert formC.signature_info.signers == [Signer(name="Douglas D'Orio", titles=['Managing Member'])]
 
 
 def test_form_CU_offering():
@@ -94,7 +94,7 @@ def test_form_C_offering_annual_report():
     assert formC.issuer_information.legal_status == "Limited Liability Company"
     assert formC.issuer_information.jurisdiction == "TX"
 
-    assert formC.issuer_information.commission_cik is None
+    assert formC.issuer_information.funding_portal is None
     # Annual Report
     assert formC.annual_report_disclosure.total_asset_most_recent_fiscal_year == 145529.0
     assert formC.annual_report_disclosure.tax_paid_prior_fiscal_year == 0.0
@@ -109,7 +109,8 @@ def test_form_c_obj():
     formC: FormC = filing.obj()
     assert isinstance(formC, FormC)
 
-    filing =Filing(form='C-TR', filing_date='2024-03-22', company='ORTEK THERAPEUTICS INC', cik=1070105, accession_no='0001665160-24-000252')
+    filing = Filing(form='C-TR', filing_date='2024-03-22', company='ORTEK THERAPEUTICS INC', cik=1070105,
+                    accession_no='0001665160-24-000252')
     formC: FormC = filing.obj()
     assert isinstance(formC, FormC)
 
@@ -119,10 +120,11 @@ def test_formc_with_multiple_signers():
                     accession_no='0001665160-24-000283')
     formc = filing.obj()
 
-    assert formc.signature_info.signers == [('Michael Yurkowsky', {'CEO, Director and Chairman'}),
-                                            ('Andrew Albert Kucharchuk', {'Interim CFO'}),
-                                            ('Colleen Delaney', {
-                                                'Scientific Founder and Chief Scientific Officer, EVP of RandD, Director'})]
+    assert formc.signature_info.signers == [Signer(name='Michael Yurkowsky', titles=['CEO, Director and Chairman']),
+                                            Signer(name='Andrew Albert Kucharchuk', titles=['Interim CFO']),
+                                            Signer(name='Colleen Delaney', titles=
+                                            [
+                                                'Scientific Founder and Chief Scientific Officer, EVP of RandD, Director'])]
 
 
 def test_parse_form_tr():
@@ -135,8 +137,20 @@ def test_parse_form_tr():
     assert formC.filer_information.period is None
     assert formC.filer_information.cik == "0001725567"
 
-def test_form_c_tr_with_no_employees():
-    filing = Filing(form='C-TR', filing_date='2023-12-29', company='H2 Energy Group Inc', cik=1901902, accession_no='0001079973-23-001832')
+
+def test_form_c_termination_report():
+    filing = Filing(form='C-TR', filing_date='2023-12-29', company='H2 Energy Group Inc', cik=1901902,
+                    accession_no='0001079973-23-001832')
+    formC:FormC = filing.obj()
+    assert formC.annual_report_disclosure is None
+    assert formC.offering_information is None
+
+
+def test_formc_with_fundingportal_with_no_crd():
+    filing = Filing(form='C/A', filing_date='2023-12-29', company='Origo Brands Inc.', cik=1981723, accession_no='0001665160-23-002050')
     formC = filing.obj()
-    print(formC)
-    #assert formC.annual_report_disclosure is None
+    funding_portal = formC.issuer_information.funding_portal
+    assert funding_portal.cik == "0001665160"
+    assert funding_portal.name == "StartEngine Capital, LLC"
+    assert funding_portal.file_number == "007-00007"
+    assert funding_portal.crd is None

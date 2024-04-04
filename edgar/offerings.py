@@ -1,23 +1,23 @@
 import re
-from dataclasses import dataclass
-from typing import List, Optional, Tuple, Set
+from collections import defaultdict
+from datetime import date, datetime
+from functools import lru_cache
+from typing import List, Optional
 
 from bs4 import BeautifulSoup, Tag
+from pydantic import BaseModel, ConfigDict
 from rich import box
 from rich.columns import Columns
 from rich.console import Group, Text, RenderableType
 from rich.panel import Panel
 from rich.table import Table, Column
-from datetime import date, datetime
 
-from edgar.core import get_bool, yes_no
-from edgar._party import Issuer, Person, Address
 from edgar._companies import Company
+from edgar._party import Issuer, Person, Address
 from edgar._rich import repr_rich
 from edgar._xml import child_text, child_value
-from functools import lru_cache
+from edgar.core import get_bool, yes_no
 from edgar.reference import states
-from collections import defaultdict
 
 __all__ = [
     'FormD',
@@ -25,59 +25,50 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True)
-class Filer:
+class Filer(BaseModel):
     cik: str
     ccc: str
 
 
-@dataclass(frozen=True)
-class BusinessCombinationTransaction:
+class BusinessCombinationTransaction(BaseModel):
     is_business_combination: bool
-    clarification_of_response: str
+    clarification_of_response: Optional[str]
 
 
-@dataclass(frozen=True)
-class OfferingSalesAmounts:
+class OfferingSalesAmounts(BaseModel):
     total_offering_amount: object
     total_amount_sold: object
     total_remaining: object
-    clarification_of_response: str
+    clarification_of_response: Optional[str]
 
 
-@dataclass(frozen=True)
-class Investors:
+class Investors(BaseModel):
     has_non_accredited_investors: bool
     total_already_invested: object
 
 
-@dataclass(frozen=True)
-class SalesCommissionFindersFees:
+class SalesCommissionFindersFees(BaseModel):
     sales_commission: object
     finders_fees: object
-    clarification_of_response: str
+    clarification_of_response: Optional[str]
 
 
-@dataclass(frozen=True)
-class InvestmentFundInfo:
+class InvestmentFundInfo(BaseModel):
     investment_fund_type: str
     is_40_act: bool
 
 
-@dataclass(frozen=True)
-class IndustryGroup:
+class IndustryGroup(BaseModel):
     industry_group_type: str
-    investment_fund_info: InvestmentFundInfo = None
+    investment_fund_info: Optional[InvestmentFundInfo] = None
 
 
-@dataclass(frozen=True)
-class UseOfProceeds:
+class UseOfProceeds(BaseModel):
     gross_proceeds_used: object
-    clarification_of_response: str
+    clarification_of_response: Optional[str]
 
 
-@dataclass(frozen=True)
-class Signature:
+class Signature(BaseModel):
     issuer_name: str
     signature_name: str
     name_of_signer: str
@@ -85,8 +76,7 @@ class Signature:
     date: str
 
 
-@dataclass(frozen=True)
-class SignatureBlock:
+class SignatureBlock(BaseModel):
     authorized_representative: bool
     signatures: List[Signature]
 
@@ -490,8 +480,9 @@ class FormD:
         return repr_rich(self.__rich__())
 
 
-@dataclass(frozen=True)
-class FilerInformation:
+class FilerInformation(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     cik: str
     ccc: str
     confirming_copy_flag: bool
@@ -506,16 +497,21 @@ class FilerInformation:
         return Company(self.cik)
 
 
-@dataclass(frozen=True)
-class IssuerInformation:
+class FundingPortal(BaseModel):
+    """The intermediary the company is using to raise funds"""
+
+    name: str
+    cik: str
+    crd: Optional[str]
+    file_number: str
+
+
+class IssuerInformation(BaseModel):
     name: str
     address: Address
     website: str
     co_issuer: bool
-    company_name: str
-    commission_cik: str
-    commission_file_number: str
-    crd_number: str
+    funding_portal: Optional[FundingPortal]
     legal_status: str
     jurisdiction: str
     date_of_incorporation: date
@@ -525,8 +521,7 @@ class IssuerInformation:
         return f"{self.date_of_incorporation or ''} {self.jurisdiction or ''}"
 
 
-@dataclass(frozen=True)
-class OfferingInformation:
+class OfferingInformation(BaseModel):
     """
        <offeringInformation>
       <compensationAmount>A fee equal of 3% in cash of the aggregate amount raised by the Company, payable at each closing of the Offering.</compensationAmount>
@@ -545,22 +540,21 @@ class OfferingInformation:
     </offeringInformation>
     """
     compensation_amount: str
-    financial_interest: str
-    security_offered_type: str
-    security_offered_other_desc: str
-    no_of_security_offered: str
-    price: str
-    price_determination_method: str
-    offering_amount: float
-    over_subscription_accepted: str
-    over_subscription_allocation_type: str
-    desc_over_subscription: str
-    maximum_offering_amount: float
+    financial_interest: Optional[str]
+    security_offered_type: Optional[str]
+    security_offered_other_desc: Optional[str]
+    no_of_security_offered: Optional[str]
+    price: Optional[str]
+    price_determination_method: Optional[str]
+    offering_amount: Optional[float]
+    over_subscription_accepted: Optional[str]
+    over_subscription_allocation_type: Optional[str]
+    desc_over_subscription: Optional[str]
+    maximum_offering_amount: Optional[float]
     deadline_date: Optional[date]
 
 
-@dataclass(frozen=True)
-class AnnualReportDisclosure:
+class AnnualReportDisclosure(BaseModel):
     """
     <annualReportDisclosureRequirements>
       <currentEmployees>0.00</currentEmployees>
@@ -649,33 +643,34 @@ class AnnualReportDisclosure:
         return repr_rich(self.__rich__())
 
 
-@dataclass(frozen=True)
-class PersonSignature:
+class PersonSignature(BaseModel):
     signature: str
     title: str
     date: date
 
 
-@dataclass(frozen=True)
-class IssuerSignature:
+class IssuerSignature(BaseModel):
     issuer: str
     title: str
     signature: str
 
 
-@dataclass(frozen=True)
-class SignatureInfo:
+class Signer(BaseModel):
+    name: str
+    titles: List[str]
+
+
+class SignatureInfo(BaseModel):
     issuer_signature: IssuerSignature
     signatures: List[PersonSignature]
 
     @property
-    def signers(self) -> List[Tuple[str, Set[str]]]:
+    def signers(self) -> List[Signer]:
         signer_dict = defaultdict(list)
         for signature in self.signatures:
             signer_dict[signature.signature].append(signature.title)
         signer_dict[self.issuer_signature.signature].append(self.issuer_signature.title)
-        # Convert to a list of tuple
-        return [(signer, set(titles)) for signer, titles in signer_dict.items()]
+        return [Signer(name=name, titles=list(set(titles))) for name, titles in signer_dict.items()]
 
 
 def split_list(states, chunk_size=10):
@@ -797,15 +792,21 @@ class FormC:
         jurisdiction = child_text(issuer_info_tag, 'jurisdictionOrganization')
         date_of_incorporation = child_text(issuer_info_tag, 'dateIncorporation')
 
+        # Funding Portal data
+        funding_portal_cik = child_text(issuer_information_tag, 'commissionCik')
+        funding_portal = FundingPortal(
+            name=child_text(issuer_information_tag, 'companyName'),
+            cik=funding_portal_cik,
+            file_number=child_text(issuer_information_tag, 'commissionFileNumber'),
+            crd=child_text(issuer_information_tag, 'crdNumber')
+        ) if funding_portal_cik else None
+
         issuer_information = IssuerInformation(
             name=child_text(issuer_info_tag, 'nameOfIssuer'),
             address=address,
             website=child_text(issuer_info_tag, 'issuerWebsite'),
             co_issuer=get_bool(child_text(issuer_information_tag, 'isCoIssuer')),
-            company_name=child_text(issuer_information_tag, 'companyName'),
-            commission_cik=child_text(issuer_information_tag, 'commissionCik'),
-            commission_file_number=child_text(issuer_information_tag, 'commissionFileNumber'),
-            crd_number=child_text(issuer_information_tag, 'crdNumber'),
+            funding_portal=funding_portal,
             legal_status=legal_status,
             jurisdiction=jurisdiction,
             date_of_incorporation=FormC.parse_date(date_of_incorporation)
@@ -813,7 +814,7 @@ class FormC:
 
         # Offering Information
         offering_info_tag = form_data_tag.find('offeringInformation')
-        if offering_info_tag is not None:
+        if offering_info_tag is not None and offering_info_tag.contents:
 
             offering_information = OfferingInformation(
                 compensation_amount=child_text(offering_info_tag, 'compensationAmount'),
@@ -894,9 +895,9 @@ class FormC:
             ),
             signatures=[
                 PersonSignature(
-                    child_text(person_signature_tag, "personSignature"),
-                    child_text(person_signature_tag, "personTitle"),
-                    FormC.parse_date(child_text(person_signature_tag, "signatureDate"))
+                    signature=child_text(person_signature_tag, "personSignature"),
+                    title=child_text(person_signature_tag, "personTitle"),
+                    date=FormC.parse_date(child_text(person_signature_tag, "signatureDate"))
                 ) for person_signature_tag in signature_block_tag.find_all('signaturePerson')
             ]
         )
@@ -917,7 +918,7 @@ class FormC:
             filer_table.add_row(self.filer_information.company.name, self.filer_information.cik,
                                 FormC.format_date(self.filer_information.period))
         else:
-            filer_table.add_row(self.filer_information.company.name, self.filer_information.cik, )
+            filer_table.add_row(self.filer_information.company.name, self.filer_information.cik)
         filer_panel = Panel(filer_table, title=Text("Filer", style="bold deep_sky_blue1"), box=box.ROUNDED)
 
         # Issuers
@@ -936,28 +937,26 @@ class FormC:
         # Address and website
         contact_columns = Columns([address_panel, Panel(Text(self.issuer_information.website), title="Website")])
 
-        issuer_renderables = [issuer_table, contact_columns]
-        if self.issuer_information.commission_cik:
-            # Intermediary Panel
-            intermediary_table = Table(Column("Name", style="bold"), "CIK", "CRD Number", "File Number", box=box.SIMPLE)
-            intermediary_table.add_row(
-                self.issuer_information.company_name,
-                self.issuer_information.commission_cik,
-                self.issuer_information.crd_number,
-                self.issuer_information.commission_file_number)
-
-            intermediary_panel = Panel(
-                intermediary_table,
-                title="Intermediary conducting the offering",
-                box=box.ROUNDED
-            )
-            issuer_renderables.append(intermediary_panel)
-
         issuer_panel = Panel(
-            Group(*issuer_renderables),
+            Group(*[issuer_table, contact_columns]),
             title=Text("Issuer", style="bold deep_sky_blue1"),
             box=box.ROUNDED
         )
+
+        # Funding Portal
+        funding_portal_panel = None
+        if self.issuer_information.funding_portal is not None:
+            intermediary_table = Table(Column("Name", style="bold"), "CIK", "CRD Number", "File Number", box=box.SIMPLE)
+            intermediary_table.add_row(
+                self.issuer_information.funding_portal.name,
+                self.issuer_information.funding_portal.cik,
+                self.issuer_information.funding_portal.crd or "",
+                self.issuer_information.funding_portal.file_number)
+            funding_portal_panel = Panel(
+                intermediary_table,
+                title=Text("CrowdFunding Portal", style="bold deep_sky_blue1"),
+                box=box.ROUNDED
+            )
 
         offering_panel = None
 
@@ -967,6 +966,7 @@ class FormC:
             offering_table.add_row("Compensation Amount", self.offering_information.compensation_amount)
             offering_table.add_row("Financial Interest", self.offering_information.financial_interest)
             offering_table.add_row("Type of Security", self.offering_information.security_offered_type)
+            offering_table.add_row("Number of Securities", self.offering_information.no_of_security_offered)
             offering_table.add_row("Price", self.offering_information.price)
             offering_table.add_row("Price (or Method for Determining Price)",
                                    self.offering_information.price_determination_method)
@@ -1025,6 +1025,8 @@ class FormC:
             filer_panel,
             issuer_panel,
         ]
+        if funding_portal_panel is not None:
+            renderables.append(funding_portal_panel)
         if self.offering_information is not None:
             renderables.append(offering_panel)
         if self.annual_report_disclosure is not None:

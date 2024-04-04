@@ -1,4 +1,5 @@
 from pathlib import Path
+from edgar import Filing
 from edgar.offerings import FormD
 from edgar._party import Person
 from rich import print
@@ -89,6 +90,19 @@ def test_parse_offering_with_all_states_sales_compensation():
     assert offering.offering_data.sales_compensation_recipients[0].name == ""
     assert offering.offering_data.sales_compensation_recipients[0].crd == ""
     assert offering.offering_data.sales_compensation_recipients[0].states_of_solicitation == ["All States"]
+
+
+def test_formd_industry_group_none():
+    filing = Filing(form='D', filing_date='2024-04-03', company='Avise Financial Cooperative, Inc.', cik=2013342, accession_no='0002013342-24-000001')
+    formd:FormD = filing.obj()
+    assert formd.offering_data.industry_group.investment_fund_info is None
+
+def test_formd_business_combination():
+    filing = Filing(form='D/A', filing_date='2024-04-03', company='REMY CAPITAL PARTNERS II L P', cik=920660,
+           accession_no='0000935836-24-000336')
+    formd: FormD = filing.obj()
+    assert formd.offering_data.business_combination_transaction.is_business_combination == False
+    assert formd.offering_data.business_combination_transaction.clarification_of_response is None
 
 
 
