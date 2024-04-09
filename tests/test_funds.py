@@ -9,15 +9,16 @@ from edgar import find, CompanySearchResults
 
 pd.options.display.max_columns = None
 
+
 @pytest.mark.parametrize(
     "ticker,expected_name,expected_class_name,expected_class_id",
     [
-    ("KINCX", "Kinetics Internet Fund", "Advisor Class C", "C000013712"),
-    ("KINAX", "Kinetics Internet Fund", "Advisor Class A", "C000013715"),
-    ("DXFTX", "Direxion Currency Trends Strategy Plus Fund", "Class A", "C000074299"),
-    ("DXESX", "Direxion Monthly Emerging Markets Bear 2X Fund", "Investor Class", "C000019215"),
-    # Add more tuples for each ticker and fund name pair
-])
+        ("KINCX", "Kinetics Internet Fund", "Advisor Class C", "C000013712"),
+        ("KINAX", "Kinetics Internet Fund", "Advisor Class A", "C000013715"),
+        ("DXFTX", "Direxion Currency Trends Strategy Plus Fund", "Class A", "C000074299"),
+        ("DXESX", "Direxion Monthly Emerging Markets Bear 2X Fund", "Investor Class", "C000019215"),
+        # Add more tuples for each ticker and fund name pair
+    ])
 def test_get_fund_by_ticker(ticker, expected_name, expected_class_name, expected_class_id):
     fund = get_fund(ticker)
     assert fund.name == expected_name
@@ -25,12 +26,14 @@ def test_get_fund_by_ticker(ticker, expected_name, expected_class_name, expected
     assert fund.ticker == ticker
     assert fund.class_contract_id == expected_class_id
 
+
 def test_get_fund_by_class_contract_id():
     fund = get_fund("C000032628")
     assert fund.name == 'Biotech Bear 2X Fund'
     assert fund.class_contract_name == 'Investor Class'
     assert fund.ticker == ''
     assert fund.class_contract_id == 'C000032628'
+
 
 def test_get_fund_by_series_id():
     fund = get_fund('S000007025')
@@ -43,12 +46,14 @@ def test_matching_of_mutual_fund_ticker():
     assert isinstance(find("DXFTX"), Fund)
     assert isinstance(find("DXFTV"), CompanySearchResults)
 
+
 def test_filings_from_fund_class_are_not_duplicated():
     # When we get a fund we can get the filings
-    fund_class:FundClass = get_fund_with_filings("C000245415 ")
+    fund_class: FundClass = get_fund_with_filings("C000245415 ")
     fund = fund_class.fund
     filings = fund.filings
     assert not filings.to_pandas().duplicated().any()
+
 
 def test_get_fund_by_ticker_not_found():
     fund = get_fund('SASSY')
@@ -190,6 +195,7 @@ def test_parse_company_info_for_fund_class():
     company_filings = company_info.filings
     print(company_filings.to_pandas())
 
+
 def test_parse_company_info_for_fund_series():
     company_info_html = Path('data/fundseries.html').read_text()
     company_info = FundCompanyInfo.from_html(company_info_html)
@@ -248,6 +254,7 @@ def test_fund_function_gets_by_ticker_class_or_series():
     assert isinstance(get_fund("C000011111"), Fund)
     assert isinstance(get_fund("S000019285"), Fund)
 
+
 def test_get_fund_by_mutual_fund_ticker():
     ticker = "FCNTX"
     fund = get_fund(ticker)
@@ -264,4 +271,3 @@ def test_get_fund_by_mutual_fund_ticker():
     fund_company = fund.get_fund_company()
     company_nport = fund_company.get_filings(accession_number=latest_nport.accession_no).latest()
     assert company_nport.accession_no == latest_nport.accession_no
-

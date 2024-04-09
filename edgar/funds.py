@@ -40,7 +40,6 @@ fund_series_search_url = "https://www.sec.gov/cgi-bin/series?company="
 fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}"
 
 
-
 class Fund(BaseModel):
     """This actually represents a fund contract"""
     company_cik: str
@@ -57,7 +56,7 @@ class Fund(BaseModel):
     @property
     @lru_cache(maxsize=1)
     def filings(self):
-        fund_class:FundClass = get_fund_with_filings(self.class_contract_id)
+        fund_class: FundClass = get_fund_with_filings(self.class_contract_id)
         return fund_class.filings
 
     def __hash__(self):
@@ -77,7 +76,6 @@ class Fund(BaseModel):
 
     def __repr__(self):
         return repr_rich(self.__rich__())
-
 
 
 @lru_cache(maxsize=16)
@@ -171,7 +169,7 @@ class FundCompanyInfo:
         return self.ident_info.get("State of Inc.", None)
 
     @lru_cache(maxsize=1)
-    def id_and_name(self, contract_or_series:str) -> Optional[Tuple[str, str]]:
+    def id_and_name(self, contract_or_series: str) -> Optional[Tuple[str, str]]:
         class_contract_str = self.ident_info.get(contract_or_series, None)
         if not class_contract_str:
             return None
