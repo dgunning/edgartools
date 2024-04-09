@@ -1,5 +1,5 @@
 from edgar import *
-
+from edgar._markdown import MarkdownContent
 
 def test_get_text_of_upload_form():
     filing = Filing(form='UPLOAD', filing_date='2024-03-01', company='Antelope Enterprise Holdings Ltd', cik=1470683,
@@ -11,12 +11,15 @@ def test_get_text_of_upload_form():
 def test_view_text_of_upload_form(capsys):
     filing = Filing(form='UPLOAD', filing_date='2024-03-01', company='Antelope Enterprise Holdings Ltd', cik=1470683,
                     accession_no='0000000000-24-002373')
+    print()
     filing.view()
     captured = capsys.readouterr()
-    assert 'Antelope Enterprise' in captured.out
+    text = captured.out
+    assert 'Antelope Enterprise' in text
 
 
-def test_form_uploar_markdown():
+def test_form_upload_markdown():
     filing = Filing(form='UPLOAD', filing_date='2024-03-01', company='Antelope Enterprise Holdings Ltd', cik=1470683,
                     accession_no='0000000000-24-002373')
-    assert 'Antelope Enterprise' in filing.markdown()
+    md = filing.markdown()
+    assert 'Antelope Enterprise' in md
