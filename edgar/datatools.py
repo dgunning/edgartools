@@ -1,6 +1,5 @@
 import pandas as pd
 from lxml import html as lxml_html
-from bs4 import NavigableString, Tag
 
 __all__ = ["compress_dataframe",
            "table_html_to_dataframe",
@@ -64,8 +63,6 @@ def table_tag_to_dataframe(table_tag):
 
     df = pd.DataFrame(data)
     return df
-
-
 
 
 def markdown_to_dataframe(markdown_table):
