@@ -6,11 +6,11 @@ from rich import print
 from rich.console import Group, Text
 from rich.panel import Panel
 
-from edgar._rich import repr_rich
-from edgar._markdown import MarkdownContent
 from edgar._filings import Attachments, Attachment
-from edgar.financials import Financials
+from edgar._markdown import MarkdownContent
+from edgar._rich import repr_rich
 from edgar.documents import HtmlDocument
+from edgar.financials import Financials
 from edgar.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
 
 __all__ = [
@@ -568,7 +568,6 @@ class EightK():
 
 
 class PressReleases:
-
     """
     Represent the attachment on an 8-K filing that could be press releases
     """
@@ -625,7 +624,7 @@ class PressRelease:
 
     def to_markdown(self):
         html = self.html()
-        markdown_content = MarkdownContent(html, title="8-K Press Release")
+        markdown_content = MarkdownContent.from_html(html, title="8-K Press Release")
         return markdown_content
 
     def __rich__(self):
