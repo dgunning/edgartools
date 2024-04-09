@@ -272,3 +272,5 @@ def test_get_bool():
     assert get_bool("true")
     assert get_bool("TRUE")
     assert get_bool("True")
+
+

@@ -7,8 +7,8 @@ from rich import print
 from edgar import Filing
 from edgar.company_reports import EightK
 from edgar.htmltools import (
-    table_html_to_dataframe,
-    html_to_text, html_sections, dataframe_to_text, ChunkedDocument)
+    html_to_text, html_sections, ChunkedDocument)
+from edgar.datatools import dataframe_to_text, table_html_to_dataframe
 
 pd.options.display.max_columns = 12
 pd.options.display.max_colwidth = 100
@@ -46,10 +46,7 @@ def test_tricky_table_html2_dataframe():
     print(df)
 
 
-def test_dataframe_to_text():
-    df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
-    text = dataframe_to_text(df)
-    assert "1" in text
+
 
 
 def test_html2text():

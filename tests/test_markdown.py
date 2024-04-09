@@ -1,8 +1,10 @@
 from pathlib import Path
 
 from rich import print
+from rich.panel import Panel
 
-from edgar._markdown import convert_table, MarkdownContent, fix_markdown
+from edgar._markdown import convert_table, MarkdownContent, fix_markdown, markdown_to_rich
+from edgar.datatools import markdown_to_dataframe
 
 
 def test_convert_markdown_table():
@@ -26,9 +28,19 @@ def test_convert_empty_table():
     print(convert_table(markdown_str))
 
 
+def test_markdown_to_rich_for_plain_text():
+    md = """
+    <pre>This is a test of the markdown to rich conversion</pre>
+    """
+    print()
+    renderable = markdown_to_rich(md)
+    assert isinstance(renderable, Panel)
+    print(renderable)
+
+
 def test_form4_to_markdown():
     html = Path('data/form4.Evans.html').read_text()
-    markdown_content = MarkdownContent(html)
+    markdown_content = MarkdownContent.from_html(html)
     print()
     print(markdown_content)
     assert markdown_content
@@ -37,7 +49,7 @@ def test_form4_to_markdown():
 
 def test_markdown_to_html():
     html = Path('data/form.6k.Athena.html').read_text()
-    markdown_content = MarkdownContent(html)
+    markdown_content = MarkdownContent.from_html(html)
     print()
     text = repr(markdown_content)
     print(text)
@@ -46,7 +58,7 @@ def test_markdown_to_html():
 
 def test_markdown_content_html_with_no_tables():
     html = Path('data/form6k.RoyalPhilips.html').read_text()
-    markdown_content = MarkdownContent(html)
+    markdown_content = MarkdownContent.from_html(html)
     print()
     text = repr(markdown_content)
     assert text
@@ -101,6 +113,41 @@ def test_fix_markdown():
     assert any(line.startswith(" Item 7") for line in md_fixed.splitlines())
 
 
+def test_markdown_to_dataframe():
+    "Create a markdown table so we can test converting to a dataframe"
+    markdown_table = """
+    | Title of each class | Trading Symbol(s) | Exchange | 
+    | --- | --- | --- | 
+    | Common Shares       | EFSH              | NYSE American LLC |
+    """.strip()
+    df = markdown_to_dataframe(markdown_table)
+    assert df.shape == (1, 3)
 
 
+def test_dataframe_from_markdown_is_compressed():
+    markdown_table = """
+    | Name |     |City     | Exchange | 
+    | ---- | --- | ------- | -------- | 
+    | Mike |     |Boston   | X        | 
+    |      |     |         |         | 
+    | Kyra |     |New York | X        | 
+    """.strip()
+    df = markdown_to_dataframe(markdown_table)
+    assert df.shape == (2, 3)
 
+
+def test_dataframe_from_markdown_for_header_only_table():
+    markdown_table = """
+    | Name |     |City     | Exchange | 
+    | ---- | --- | ------- | -------- | 
+    """.strip()
+    df = markdown_to_dataframe(markdown_table)
+    assert df.shape == (1, 3)
+
+def test_markdown_to_dataframe_for_header_only_table():
+    md = """
+    | SVB Leerink | Cantor |
+    |-------------|--------|
+    """.strip()
+    df = markdown_to_dataframe(md)
+    assert df.shape == (1, 2)

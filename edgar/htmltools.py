@@ -7,29 +7,27 @@ from typing import Any, Optional, Dict, List, Callable
 
 import numpy as np
 import pandas as pd
-from lxml import html as lxml_html
 from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
 from edgar._rich import repr_rich
+from edgar.datatools import compress_dataframe
+from edgar.datatools import table_html_to_dataframe, dataframe_to_text
 from edgar.documents import HtmlDocument, Block, TableBlock
 
 __all__ = [
     "Element",
-    "get_tables",
+    "extract_tables",
     'chunks2df',
     "html_to_text",
     'html_sections',
     'decimal_chunk_fn',
     "ChunkedDocument",
-    "clean_dataframe",
     'remove_bold_tags',
     'detect_decimal_items',
     'adjust_for_empty_items',
-    "dataframe_to_text",
     "get_text_elements",
-    "table_html_to_dataframe",
 ]
 
 
@@ -42,23 +40,19 @@ class Element:
     table: Optional[pd.DataFrame] = None
 
 
-def clean_dataframe(df: pd.DataFrame):
-    # Remove empty rows and columns
-    df = (df.dropna(axis=1, how="all")
-          .dropna(axis=0, how="all"))
-    # Fill na
-    df = df.fillna('')
-    return df
-
-
-def get_tables(html_str: str,
-               table_filters: List = None) -> List[pd.DataFrame]:
-    table_filters = table_filters or [filter_small_table]
+def extract_tables(html_str: str,
+                   table_filters: List = None) -> List[pd.DataFrame]:
+    table_filters = table_filters or [filter_tiny_table]
     tables = pd.read_html(StringIO(html_str))
-    return [
-        table for table in tables
-        if not all([tf(table) for tf in table_filters])
+    # Compress and filter the tables
+    tables = [
+        compress_dataframe(table)
+        for table in tables
+        # if not all([tf(table) for tf in table_filters])
     ]
+    # Filter out empty tables
+    tables = [table for table in tables if len(table) > 0]
+    return tables
 
 
 def html_sections(html_str: str,
@@ -78,79 +72,11 @@ def html_to_text(html_str: str,
     return sep.join([chunk for chunk in document.generate_chunks_as_text(ignore_tables=True)])
 
 
-def table_html_to_dataframe(html_str):
-    """Convert the table html to a dataframe """
-    tree = lxml_html.fromstring(html_str)
-    table_element = tree.xpath("//table")[0]
-    rows = table_element.xpath(".//tr")
-
-    data = []
-
-    for row in rows:
-        cols = row.xpath(".//td")
-        cols = [c.text.strip() if c.text is not None else "" for c in cols]
-        data.append(cols)
-
-    df = clean_dataframe(pd.DataFrame(data))
-    return df
-
-
-def dataframe_to_text(df, include_index=False, include_headers=False):
-    """
-    Convert a Pandas DataFrame to a plain text string, with formatting options for including
-    the index and column headers.
-
-    Parameters:
-    - df (pd.DataFrame): The dataframe to convert
-    - include_index (bool): Whether to include the index in the text output. Defaults to True.
-    - include_headers (bool): Whether to include column headers in the text output. Defaults to True.
-
-    Returns:
-    str: The dataframe converted to a text string.
-    """
-    # Getting the maximum width for each column
-    column_widths = df.apply(lambda col: col.astype(str).str.len().max())
-
-    # If including indexes, get the maximum width of the index
-
-    index_label = ''
-    if include_index:
-        index_label = "Index"
-        index_width = max(df.index.astype(str).map(len).max(), len(index_label))
-    else:
-        index_width = 0
-
-    # Initialize an empty string to store the text
-    text_output = ""
-
-    # Include column headers if specified
-    if include_headers:
-        # Add index label if specified
-        if include_index:
-            text_output += f"{index_label:<{index_width}}\t"
-
-        # Create and add the header row
-        headers = [f"{col:<{width}}" for col, width in zip(df.columns, column_widths)]
-        text_output += '\t'.join(headers) + '\n'
-
-    # Loop through each row of the dataframe
-    for index, row in df.iterrows():
-        # Include index if specified
-        if include_index:
-            text_output += f"{index:<{index_width}}\t"
-
-        # Format each value according to the column width and concatenate
-        row_values = [f"{val:<{width}}" for val, width in zip(row.astype(str), column_widths)]
-        text_output += '\t'.join(row_values) + '\n'
-
-    return text_output
-
-
 def is_inline_xbrl(html: str) -> bool:
     return "xmlns:ix=" in html[:2000]
 
 
-def filter_small_table(table: pd.DataFrame, min_rows: int = 2, min_cols: int = 2):
+def filter_tiny_table(table: pd.DataFrame, min_rows: int = 1, min_cols: int = 1):
     return len(table) >= min_rows and len(table.columns) >= min_cols
 
 
@@ -323,8 +249,8 @@ def chunks2df(chunks: List[List[Block]],
                                      )
     # If the row is 'toc' then set the item and part to empty
     chunk_df.loc[chunk_df.Toc.notnull() & chunk_df.Toc, 'Item'] = ""
-    #if item_adjuster:
-        #chunk_df = item_adjuster(chunk_df, **{'item_structure': item_structure, 'item_detector': item_detector})
+    # if item_adjuster:
+    # chunk_df = item_adjuster(chunk_df, **{'item_structure': item_structure, 'item_detector': item_detector})
 
     # Foward fill item and parts
     # Handle deprecation warning in fillna(method='ffill')
@@ -464,7 +390,7 @@ class ChunkedDocument:
         if len(chunks) == 0:
             return None
         # render the nested List of List [str]
-        return "".join(["".join(block.text
+        return "".join(["".join(block.get_text()
                                 for block in chunk)
                         for chunk in chunks])
 
@@ -483,3 +409,5 @@ class ChunkedDocument:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+

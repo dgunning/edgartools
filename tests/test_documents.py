@@ -4,9 +4,11 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 from edgar.documents import *
+from edgar.documents import fixup
 from copy import copy
 from edgar import Filing
 from edgar.htmltools import ChunkedDocument
+from edgar.datatools import dataframe_to_text
 
 pd.options.display.max_columns = 10
 
@@ -461,3 +463,85 @@ def test_get_text_for_paper_filing():
 
     text = filing.text()
     assert text
+
+
+def test_get_table_blocks():
+        html = """
+        <html>
+        
+        <body>
+        <table>
+        <thead>
+            <tr><th>#</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+            <tr>1<td></td><td>400</td></tr>
+            <tr>2<td></td><td>900</td></tr>
+        </tbody>
+        </table>
+        </body>
+        </html>
+        """
+        document = HtmlDocument.from_html(html)
+        tables = document.get_table_blocks()
+        assert len(tables) == 1
+
+
+def test_table_to_text():
+    html = """
+    <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%; font: 10pt Times New Roman, Times, Serif">
+<tr style="vertical-align: bottom; background-color: White">
+<td style="padding-bottom: 1.5pt"> </td><td style="font-weight: bold; padding-bottom: 1.5pt"> </td>
+<td style="border-bottom: Black 1.5pt solid; font-weight: bold; text-align: left"> </td><td style="border-bottom: Black 1.5pt solid; font-weight: bold; text-align: center"><font style="font-family: Times New Roman, Times, Serif; font-size: 10pt"><b>Per
+                                         Share</b></font></td><td style="padding-bottom: 1.5pt; font-weight: bold; text-align: left"> </td><td style="font-weight: bold; padding-bottom: 1.5pt"> </td>
+<td style="border-bottom: Black 1.5pt solid; font-weight: bold; text-align: left"> </td><td style="border-bottom: Black 1.5pt solid; font-weight: bold; text-align: center"><font style="font-family: Times New Roman, Times, Serif; font-size: 10pt"><b>Total</b></font></td><td style="padding-bottom: 1.5pt; font-weight: bold; text-align: left"> </td></tr>
+<tr>
+<td> </td>
+<td>$</td><td style="width: 12%; text-align: right">14.50</td><td style="width: 1%; text-align: left"> </td><td style="width: 2%"> </td>
+<td>$</td><td style="width: 12%; text-align: right">95,700,000</td><td style="width: 1%; text-align: left"> </td></tr>
+<tr>
+<td>Underwriting discounts and commissions (1)</td><td> </td>
+<td>$</td><td style="text-align: right">0.87</td><td style="text-align: left"> </td><td> </td>
+<td>$</td><td style="text-align: right">5,742,000</td><td style="text-align: left"> </td></tr>
+<tr>
+<td>Proceeds to us, before expenses</td><td> </td>
+<td>$</td><td style="text-align: right">13.63</td><td style="text-align: left"> </td><td> </td>
+<td>$</td><td style="text-align: right">89,958,000</td><td style="text-align: left"> </td></tr>
+</table>
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+    table = soup.find('table')
+    text = table_to_text(table)
+    print(text)
+    assert text.count('\n') == 5
+    fixed = fixup(text)
+    assert fixed.count('\n') == 5
+    print(fixed)
+
+
+def test_table_block_to_dataframe():
+    html = """
+    <table>
+<tr>
+<td><b>SVB
+    Leerink</b></font></td>
+<td><font><b>Cantor</b></font></td></tr>
+</table>
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+    table = soup.find('table')
+    table_block = TableBlock(table)
+    df = table_block.to_dataframe()
+    assert df.shape == (1, 2)
+
+
+def test_get_table_containing_text():
+    filing = Filing(form='424B5', filing_date='2020-06-18', company='Provention Bio, Inc.', cik=1695357, accession_no='0001493152-20-011383')
+    document:HtmlDocument = HtmlDocument.from_html(filing.html())
+    blocks = document.get_table_blocks()
+    print()
+    table_blocks = [block for block in blocks if 'Number of' in block.get_text()]
+    for block in table_blocks:
+        table = block.to_dataframe()
+        if not table.empty:
+            print(dataframe_to_text(table))

@@ -10,6 +10,7 @@ from rich.table import Table
 
 from edgar._rich import repr_rich
 from edgar._xml import child_text
+from edgar.datatools import table_tag_to_dataframe, clean_column_text
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
@@ -20,6 +21,7 @@ __all__ = ['DocumentData',
            'TableBlock',
            'TextAnalysis',
            'SECLine',
+           'table_to_text',
            'get_clean_html']
 
 
@@ -232,8 +234,8 @@ INLINE_IXBRL_TAGS = ['ix:nonfraction', 'ix:nonnumeric', 'ix:fraction']
 
 class Block:
 
-    def __init__(self, text: str, **tags):
-        self.text: str = text
+    def __init__(self, text: Optional[str], **tags):
+        self.text: Optional[str] = text
         self.inline: bool = False
         self.metadata: Dict[str, Any] = tags
 
@@ -288,18 +290,31 @@ class TextBlock(Block):
 
 
 class TableBlock(Block):
+    """
+    Represents an HTML table in the document
+    """
 
-    def __init__(self, text: str, **tag):
-        super().__init__(text, **tag)
+    def __init__(self, table_element: Tag, **tag):
+        super().__init__(text=None, **tag)
+        self.table_element = table_element
 
+    @lru_cache()
     def get_text(self):
-        _text = "\n" + self.text + "\n"
+        _text = fixup(table_to_text(self.table_element))
+        _text = "\n" + _text + "\n"
         return _text
+
+    def to_dataframe(self):
+        table_df = table_tag_to_dataframe(self.table_element)
+        return table_df
 
     def __str__(self):
         return "TableBlock"
 
+
 item_pattern = r"(?:ITEM|Item)\s+(?:[0-9]{1,2}[A-Z]?\.?|[0-9]{1,2}\.[0-9]{2})"
+
+
 class HtmlDocument:
 
     def __init__(self,
@@ -314,12 +329,16 @@ class HtmlDocument:
         _text = ""
 
         for i, block in enumerate(self.blocks):
-            _text += block.text
+            _text += block.get_text()
 
         # Fix unnecessary line breaks between sections
         _text = re.sub(r'(?<=[^.?!])\s*\n{3,}\s*', ' ', _text)
 
         return _text
+
+    def get_table_blocks(self) -> List[TableBlock]:
+        """Get a list of all the table blocks in the document"""
+        return [block for block in self.blocks if isinstance(block, TableBlock)]
 
     @staticmethod
     def _compress_blocks(blocks: List[Block]):
@@ -398,7 +417,6 @@ class HtmlDocument:
         fixup_soup(soup)
         return soup.find('html')
 
-
     @classmethod
     def from_html(cls, html: str):
         root: Tag = cls.get_root(html)
@@ -409,7 +427,7 @@ class HtmlDocument:
 
     @staticmethod
     def _render_blocks(blocks: List[Block]) -> str:
-        text_ = "".join([block.text for block in blocks])
+        text_ = "".join([block.get_text() for block in blocks])
         return text_.strip()
 
     def generate_chunks_as_text(self, ignore_tables: bool = False) -> List[str]:
@@ -490,7 +508,8 @@ def extract_and_format_content(element) -> List[Block]:
     """
 
     if element.name == 'table':
-        return [TableBlock(text=fixup(table_to_text(element)), rows=len(element.find_all("tr")))]
+        table_block = TableBlock(table_element=element, rows=len(element.find_all("tr")))
+        return [table_block]
     elif element.name in ['ul', 'ol']:
         return [TextBlock(text=fixup(element.text), element=element.name, text_type='list')]
     else:
@@ -510,8 +529,8 @@ def extract_and_format_content(element) -> List[Block]:
             else:
                 stripped_string = replace_inline_newlines(child.string)
                 stripped_string = fixup(stripped_string)
-                if not stripped_string.strip() and len(blocks) > 0 and not blocks[-1].text.strip():
-                    if not blocks[-1].text.endswith('\n'):  # Don't add a space after a new line
+                if not stripped_string.strip() and len(blocks) > 0 and not blocks[-1].get_text().strip():
+                    if not blocks[-1].get_text().endswith('\n'):  # Don't add a space after a new line
                         blocks[-1].text += stripped_string
                 else:
                     blocks.append(TextBlock(stripped_string, inline=inline, element=element.name, text_type='string'))
@@ -551,12 +570,13 @@ def table_to_text(table_tag):
         for i, col in enumerate(cols):
             if i in content_col_indices:  # Check if column should be included
                 new_index = content_col_indices.index(i)  # Get new index for col_widths
-                row_text.append(col.get_text().strip().ljust(col_widths[new_index]))
+                row_text.append(clean_column_text(col.get_text()).ljust(col_widths[new_index]))
 
         if any([text.strip() for text in row_text]):  # Skip entirely empty rows
             formatted_row = ' | '.join(row_text)
             formatted_table += formatted_row + '\n'
-            formatted_table += '-+-'.join(['-' * len(text) for text in row_text]) + '\n'
+            if index == 0:
+                formatted_table += '-+-'.join(['-' * len(text) for text in row_text]) + '\n'
 
     return formatted_table
 
@@ -652,7 +672,7 @@ def is_inline(tag):
 
 def fixup(text: str):
     # This pattern matches one or more non-breaking space (\xa0) or one or more whitespace characters (\s+)
-    text = re.sub(r'\xa0|\s+', ' ', text)
+    text = re.sub(r'\xa0|[^\S\n]+', ' ', text)
 
     return text
 

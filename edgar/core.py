@@ -618,7 +618,7 @@ def reverse_name(name):
     special_parts = ['Jr', 'Sr', 'II', 'III', 'MD', 'ET', 'AL', 'et', 'al']
     special_parts_with_period = [part + '.' for part in special_parts if part not in ['II', 'III']] + special_parts
     special_part_indices = [i for i, part in enumerate(parts) if part in special_parts_with_period or (
-                i > 0 and parts[i - 1].rstrip('.') + ' ' + part.rstrip('.') == 'ET AL')]
+            i > 0 and parts[i - 1].rstrip('.') + ' ' + part.rstrip('.') == 'ET AL')]
 
     # Extract the special parts and the main name parts
     special_parts_list = [parts[i] for i in special_part_indices]
@@ -644,3 +644,4 @@ def reverse_name(name):
 
 def yes_no(value: bool) -> str:
     return "Yes" if value else "No"
+

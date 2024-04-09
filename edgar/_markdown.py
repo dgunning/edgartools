@@ -8,12 +8,14 @@ from rich.table import Table
 from edgar.documents import get_clean_html
 from edgar._rich import repr_rich
 
+
 __all__ = [
     'convert_table',
     'MarkdownContent',
     'markdown_to_rich',
     'html_to_markdown',
-    "fix_markdown"
+    "fix_markdown",
+    "text_to_markdown",
 ]
 
 
@@ -88,25 +90,39 @@ def fix_markdown(md: str):
 
 
 def html_to_markdown(html: str) -> str:
+    """Convert the html to markdown"""
     from markdownify import markdownify
     return fix_markdown(markdownify(html))
+
+
+def text_to_markdown(text: str) -> str:
+    """Convert the text to markdown"""
+    return f"""
+    <pre>{text}</pre>
+    """
 
 
 class MarkdownContent:
 
     def __init__(self,
-                 html: str,
+                 markdown: str,
                  title: str = ""):
-        html = get_clean_html(html)
-        self.md = html_to_markdown(html)
+        self.md = markdown
         self.title = title
+
+    @classmethod
+    def from_html(cls, html: str, title: str = ""):
+        html = get_clean_html(html)
+        md = html_to_markdown(html)
+        return cls(markdown=md, title=title)
 
     def view(self):
         console = Console()
         console.print(self.__rich__())
 
     def __rich__(self):
-        return markdown_to_rich(self.md, title=self.title)
+        _renderable = markdown_to_rich(self.md, title=self.title)
+        return _renderable
 
     def __repr__(self):
         return repr_rich(self.__rich__())
