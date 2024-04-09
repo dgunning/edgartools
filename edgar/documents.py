@@ -10,7 +10,7 @@ from rich.table import Table
 
 from edgar._rich import repr_rich
 from edgar._xml import child_text
-from edgar.datatools import table_tag_to_dataframe, clean_column_text
+from edgar.datatools import table_html_to_dataframe, clean_column_text
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
@@ -305,7 +305,7 @@ class TableBlock(Block):
         return _text
 
     def to_dataframe(self):
-        table_df = table_tag_to_dataframe(self.table_element)
+        table_df = table_html_to_dataframe(str(self.table_element))
         return table_df
 
     def __str__(self):
