@@ -22,7 +22,7 @@ def test_get_ticker_from_cusip_with_multiple_tickers():
     assert get_ticker_from_cusip('000307108') == 'AACH'
 
 
-def test_cusip_tickerr_mapping_not_allowing_duplicates():
+def test_cusip_ticker_mapping_not_allowing_duplicates():
     data = cusip_ticker_mapping(allow_duplicate_cusips=False)
     tickers = data.loc['000307108']
     assert len(tickers) == 1
