@@ -31,8 +31,9 @@ from rich.table import Table
 from rich.text import Text
 import json
 
+from datetime import date
 from edgar._markdown import MarkdownContent
-from edgar._markdown import html_to_markdown
+from edgar._markdown import html_to_markdown, text_to_markdown
 from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
@@ -65,7 +66,8 @@ __all__ = [
     'CurrentFilings',
     'available_quarters',
     'get_current_filings',
-    'get_by_accession_number'
+    'get_by_accession_number',
+    'filing_date_to_year_quarters'
 ]
 
 full_index_url = "https://www.sec.gov/Archives/edgar/full-index/{}/QTR{}/{}.{}"
@@ -109,6 +111,37 @@ def current_year_and_quarter() -> Tuple[int, int]:
     return current_year, current_quarter
 
 
+def is_valid_filing_date(filing_date: str) -> bool:
+    if ":" in filing_date:
+        # Check for only one colon
+        if filing_date.count(":") > 1:
+            return False
+        start_date, end_date = filing_date.split(":")
+        if start_date:
+            if not is_valid_date(start_date):
+                return False
+        if end_date:
+            if not is_valid_date(end_date):
+                return False
+    else:
+        if not is_valid_date(filing_date):
+            return False
+
+    return True
+
+
+def is_valid_date(date_str: str, date_format: str = "%Y-%m-%d") -> bool:
+    pattern = r"^\d{4}-\d{2}-\d{2}$"
+    if not re.match(pattern, date_str):
+        return False
+
+    try:
+        datetime.strptime(date_str, date_format)
+        return True
+    except ValueError:
+        return False
+
+
 def get_previous_quarter(year, quarter) -> Tuple[int, int]:
     # Given a year and quarter return the previous quarter
     if quarter == 1:
@@ -144,6 +177,43 @@ def expand_quarters(year: Years,
             for yq in itertools.product(years, quarters)
             if yq in available_quarters()
             ]
+
+
+def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
+    if ":" in filing_date:
+        start_date, end_date = filing_date.split(":")
+
+        if not start_date:
+            start_date = "1994-06-01"
+
+        if not end_date:
+            end_date = date.today().strftime("%Y-%m-%d")
+
+        start_year, start_month, _ = map(int, start_date.split("-"))
+        end_year, end_month, _ = map(int, end_date.split("-"))
+
+        start_quarter = (start_month - 1) // 3 + 1
+        end_quarter = (end_month - 1) // 3 + 1
+
+        result = []
+        for year in range(start_year, end_year + 1):
+            if year == start_year and year == end_year:
+                quarters = range(start_quarter, end_quarter + 1)
+            elif year == start_year:
+                quarters = range(start_quarter, 5)
+            elif year == end_year:
+                quarters = range(1, end_quarter + 1)
+            else:
+                quarters = range(1, 5)
+
+            for quarter in quarters:
+                result.append((year, quarter))
+
+        return result
+    else:
+        year, month, _ = map(int, filing_date.split("-"))
+        quarter = (month - 1) // 3 + 1
+        return [(year, quarter)]
 
 
 class FileSpecs:
@@ -660,11 +730,18 @@ def get_filings(year: Years = None,
     """
     # Get the year or default to the current year
     using_default_year = False
-    if not year:
+    if filing_date:
+        if not is_valid_filing_date(filing_date):
+            log.warning("""Provide a valid filing date in the format YYYY-MM-DD or YYYY-MM-DD:YYYY-MM-DD""")
+            return None
+        year_and_quarters = filing_date_to_year_quarters(filing_date)
+    elif not year:
         year, quarter = current_year_and_quarter()
+        year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
         using_default_year = True
+    else:
+        year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
 
-    year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
     if len(year_and_quarters) == 0:
         log.warning(f"""
     Provide a year between 1994 and {datetime.now().year} and optionally a quarter (1-4) for which the SEC has filings. 
@@ -1612,18 +1689,18 @@ class Filing:
         else:
             text_content = self.text()
             if text_content:
-                return "<pre>" + text_content + "</pre>"
+                return text_to_markdown(text_content)
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""
         html = self.html()
         if html:
-            markdown_content = MarkdownContent(html)
+            markdown_content = MarkdownContent.from_html(html)
             markdown_content.view()
         else:
             text_content = self.text()
             if text_content:
-                MarkdownContent("<pre>" + text_content + "</pre>").view()
+                MarkdownContent(text_to_markdown(text_content)).view()
 
     def xbrl(self) -> Optional[FilingXbrl]:
         """

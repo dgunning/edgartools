@@ -10,10 +10,11 @@ import pandas as pd
 import pytest
 from rich import print
 import json
+from datetime import date
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachments, \
-    Attachment, get_current_filings, fetch_daily_filing_index, fetch_filing_index
+    Attachment, get_current_filings, fetch_daily_filing_index, filing_date_to_year_quarters
 from edgar.company_reports import TenK
 from edgar.core import default_page_size, http_client
 
@@ -884,6 +885,59 @@ def test_save_filing_to_directory():
     assert filing_path.exists()
     filing = Filing.load(filing_path)
     assert filing.filing_date == '2024-03-08'
+
+
+def test_filing_date_to_year_quarter():
+    # Test case 1: Single date
+    assert filing_date_to_year_quarters("2024-03-01") == [(2024, 1)]
+    assert filing_date_to_year_quarters("2024-04-10") == [(2024, 2)]
+
+    # Test case 2: Date range within the same year
+    assert filing_date_to_year_quarters("2024-01-01:2024-04-14") == [(2024, 1), (2024, 2)]
+    assert filing_date_to_year_quarters("2024-01-01:2024-12-31") == [(2024, 1), (2024, 2), (2024, 3), (2024, 4)]
+
+    # Test case 3: Date range across multiple years
+    assert filing_date_to_year_quarters("2022-04-02:2023-01-23") == [(2022, 2), (2022, 3), (2022, 4), (2023, 1)]
+    assert filing_date_to_year_quarters("2022-01-01:2024-04-14") == [
+        (2022, 1), (2022, 2), (2022, 3), (2022, 4),
+        (2023, 1), (2023, 2), (2023, 3), (2023, 4),
+        (2024, 1), (2024, 2)
+    ]
+
+    # Test case 4: Open-ended date range (start date only)
+    current_year = date.today().year
+    current_quarter = (date.today().month - 1) // 3 + 1
+    assert filing_date_to_year_quarters("2022-01-01:") == [
+        (year, quarter)
+        for year in range(2022, current_year + 1)
+        for quarter in (range(1, 5) if year < current_year else range(1, current_quarter + 1))
+    ]
+
+    # Test case 5: Open-ended date range (end date only)
+    assert filing_date_to_year_quarters(":2022-01-01") == [
+        (year, quarter)
+        for year in range(1994, 2023)
+        for quarter in (range(2, 5) if year == 1994 else range(1, 2) if year == 2022 else range(1, 5))
+    ]
+
+
+def test_get_filings_by_filing_date():
+    filings = get_filings(filing_date='2023-02-01')
+    assert filings.date_range == (datetime.date(2023, 2, 1), datetime.date(2023, 2, 1))
+
+    filings = get_filings(filing_date='2023-02-01:2023-02-28')
+    assert filings.date_range == (datetime.date(2023, 2, 1), datetime.date(2023, 2, 28))
+
+    filings = get_filings(filing_date='2023-02-01:2024-01-02')
+    assert filings.date_range == (datetime.date(2023, 2, 1), datetime.date(2024, 1, 2))
+
+    # Ignore the year if filing date os present
+    filings = get_filings(filing_date='2023-02-01', year=2020)
+    assert filings.date_range == (datetime.date(2023, 2, 1), datetime.date(2023, 2, 1))
+
+    # Invalid filing date
+    assert get_filings(filing_date='2023-02-01:2024-01-02:2025-01-02') is None
+    assert get_filings(filing_date="01-02-2023") is None
 
 
 
