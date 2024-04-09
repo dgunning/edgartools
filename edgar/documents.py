@@ -377,7 +377,7 @@ class HtmlDocument:
 
         # Strip the first block
         if compressed_blocks:
-            compressed_blocks[0].text = compressed_blocks[0].text.lstrip()
+            compressed_blocks[0].text = compressed_blocks[0].get_text().lstrip()
 
         return compressed_blocks
 
