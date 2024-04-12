@@ -9,7 +9,7 @@ from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
 
-from edgar._companies import Company
+from edgar.entities import Company
 from edgar._party import Address
 from edgar._party import Filer, Contact
 from edgar._rich import repr_rich

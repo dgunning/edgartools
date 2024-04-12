@@ -1,4 +1,4 @@
-from edgar._companies import get_entity_submissions, Entity
+from edgar.entities import get_entity_submissions, Entity
 
 
 def test_entity_is_company():

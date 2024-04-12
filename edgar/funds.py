@@ -13,7 +13,7 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 
-from edgar._companies import Company
+from edgar.entities import Company
 from edgar._filings import SECHeader, Filings
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar.core import download_text, log

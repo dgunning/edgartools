@@ -255,14 +255,17 @@ def test_reverse_name():
     assert reverse_name('KONDO CHRIS Jr ET AL') == 'Chris Kondo Jr ET AL'
     assert reverse_name('KONDO CHRIS Jr et al') == 'Chris Kondo Jr et al'
     assert reverse_name('KONDO CHRIS Jr et al.') == 'Chris Kondo Jr et al.'
-    #assert reverse_name('JAMES HAMILTON E') == 'Hamilton E James'
+    assert reverse_name('JAMES HAMILTON E') == 'Hamilton E James'
     assert reverse_name('BURNS BENJAMIN MICHAEL') == 'Benjamin Michael Burns'
     assert reverse_name('FROST PHILLIP MD') == 'Phillip Frost MD'
     assert reverse_name('FROST PHILLIP MD ET AL') == 'Phillip Frost MD ET AL'
     assert reverse_name("Borninkhof K. Michelle") == "Michelle K. Borninkhof"
     assert reverse_name("Bennett C Frank") == "Frank C Bennett"
     assert reverse_name("Frank Thomas AJ") == "Thomas AJ Frank"
-    #assert reverse_name("FOSTER WATT R JR") == "Watt R Foster Jr"
+
+    assert reverse_name("FOSTER WATT R JR") == "Watt R Foster JR"
+    # Single word name
+    assert reverse_name("WATT") == "Watt"
 
 
 def test_get_bool():

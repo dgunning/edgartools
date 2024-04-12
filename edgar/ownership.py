@@ -22,7 +22,7 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table, Column
 
-from edgar._companies import Entity
+from edgar.entities import Entity
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import (child_text, child_value)

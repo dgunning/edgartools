@@ -615,7 +615,7 @@ class Filings:
 
     def find(self,
              company_search_str: str):
-        from edgar._companies import find_company
+        from edgar.entities import find_company
 
         # Search for the company
         search_results = find_company(company_search_str)
@@ -1420,7 +1420,7 @@ class SECHeader:
                     name = reporting_owner_values['COMPANY DATA'].get('COMPANY CONFORMED NAME')
                     cik = reporting_owner_values['COMPANY DATA'].get('CENTRAL INDEX KEY')
                 if cik:
-                    from edgar._companies import Entity
+                    from edgar.entities import Entity
                     entity: Entity = Entity(cik)
                     if not entity.is_company:
                         name = reverse_name(name)
@@ -1839,7 +1839,7 @@ class Filing:
     def get_entity(self):
         """Get the company to which this filing belongs"""
         "Get the company for cik. Cache for performance"
-        from edgar._companies import CompanyData
+        from edgar.entities import CompanyData
         return CompanyData.for_cik(self.cik)
 
     @lru_cache(maxsize=1)

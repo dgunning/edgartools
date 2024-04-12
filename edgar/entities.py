@@ -657,7 +657,7 @@ def parse_entity_submissions(cjson: Dict[str, Any]):
                        exchanges=cjson['exchanges'],
                        sic=cjson['sic'],
                        sic_description=cjson['sicDescription'],
-                       category=cjson['category'],
+                       category=cjson['category'].replace("<br>", " | ") if cjson['category'] else None,
                        fiscal_year_end=cjson['fiscalYearEnd'],
                        entity_type=cjson['entityType'],
                        phone=cjson['phone'],

@@ -12,7 +12,7 @@ from rich.console import Group, Text, RenderableType
 from rich.panel import Panel
 from rich.table import Table, Column
 
-from edgar._companies import Company
+from edgar.entities import Company
 from edgar._party import Issuer, Person, Address
 from edgar._rich import repr_rich
 from edgar._xml import child_text, child_value

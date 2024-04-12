@@ -3,8 +3,9 @@ from tqdm import tqdm
 from rich import print
 import time
 
+
 def view_entities():
-    entities = get_cik_lookup_data().sample(100)
+    entities = get_cik_lookup_data().sample(200)
     for entity in tqdm(entities.itertuples(), total=len(entities)):
         try:
             entity = Entity(entity.cik)

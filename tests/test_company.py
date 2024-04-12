@@ -6,9 +6,9 @@ import humanize
 import pyarrow.compute as pc
 from rich import print
 
-from edgar._companies import *
-from edgar._companies import (parse_entity_submissions, CompanyConcept, CompanyFiling, find_company,
-                              CompanySearchIndex, preprocess_company, _parse_cik_lookup_data)
+from edgar.entities import *
+from edgar.entities import (parse_entity_submissions, CompanyConcept, CompanyFiling, find_company,
+                            CompanySearchIndex, preprocess_company, _parse_cik_lookup_data)
 from edgar._filings import Filing, get_filings
 from edgar.core import default_page_size
 
@@ -434,3 +434,13 @@ def test_iterate_company_filings():
 
     for filing in filings:
         assert filing
+
+
+def test_company_category_removes_br():
+    company = Company('1841925')
+    assert company.category == 'Large accelerated filer | Smaller reporting company'
+
+
+def test_company_name():
+    company = Company(1012605)
+    print(company)

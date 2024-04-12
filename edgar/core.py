@@ -614,8 +614,12 @@ def reverse_name(name):
     # Split the name into parts
     parts = name.split()
 
+    # Return immediately if there's only one name part
+    if len(parts) == 1:
+        return parts[0].title()
+
     # Handle the cases where there's a 'Jr', 'Sr', 'II', 'III', 'MD', etc., or 'ET AL'
-    special_parts = ['Jr', 'Sr', 'II', 'III', 'MD', 'ET', 'AL', 'et', 'al']
+    special_parts = ['Jr', 'JR', 'Sr', 'SR', 'II', 'III', 'MD', 'ET', 'AL', 'et', 'al']
     special_parts_with_period = [part + '.' for part in special_parts if part not in ['II', 'III']] + special_parts
     special_part_indices = [i for i, part in enumerate(parts) if part in special_parts_with_period or (
             i > 0 and parts[i - 1].rstrip('.') + ' ' + part.rstrip('.') == 'ET AL')]
@@ -624,8 +628,8 @@ def reverse_name(name):
     special_parts_list = [parts[i] for i in special_part_indices]
     main_name_parts = [part for i, part in enumerate(parts) if i not in special_part_indices]
 
-    # Handle initials in the name (e.g., 'K. Michelle')
-    if '.' in main_name_parts[-2] or len(main_name_parts[-2]) == 1:
+    # Handle initials in the name
+    if len(main_name_parts) > 2 and (('.' in main_name_parts[-2] or len(main_name_parts[-2]) == 1)):
         main_name_parts = [' '.join(main_name_parts[:-2]).title()] + [
             f"{main_name_parts[-1].title()} {main_name_parts[-2]}"]
     else:
