@@ -6,21 +6,21 @@ from functools import lru_cache
 from functools import partial
 from typing import Optional, Union, List
 
-from edgar._companies import (Company,
-                              CompanyData,
-                              CompanyFacts,
-                              CompanySearchResults,
-                              CompanyFilings,
-                              CompanyFiling,
-                              Entity,
-                              EntityData,
-                              find_company,
-                              get_entity,
-                              get_company_facts,
-                              get_company_tickers,
-                              get_entity_submissions,
-                              get_ticker_to_cik_lookup,
-                              get_cik_lookup_data)
+from edgar.entities import (Company,
+                            CompanyData,
+                            CompanyFacts,
+                            CompanySearchResults,
+                            CompanyFilings,
+                            CompanyFiling,
+                            Entity,
+                            EntityData,
+                            find_company,
+                            get_entity,
+                            get_company_facts,
+                            get_company_tickers,
+                            get_entity_submissions,
+                            get_ticker_to_cik_lookup,
+                            get_cik_lookup_data)
 from edgar._filings import (Filing,
                             Filings,
                             CurrentFilings,
@@ -41,7 +41,7 @@ from edgar.funds import Fund, FundSeries, get_fund, FundClass
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 
 # Another name for get_current_filings
-get_recent_filings = get_current_filings
+get_latest_filings = get_current_filings
 
 # Fund portfolio report filings
 get_fund_portfolio_filings = partial(get_filings, form=NPORT_FORMS)
