@@ -27,7 +27,7 @@ from rich.columns import Columns
 from rich.console import Group
 from rich.panel import Panel
 from rich.status import Status
-from rich.table import Table
+from rich.table import Table, Column
 from rich.text import Text
 import json
 
@@ -38,7 +38,7 @@ from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
-from edgar.reference import describe_form
+from edgar.reference import describe_form, states
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
                         text_extensions, binary_extensions, datefmt, reverse_name)
@@ -1008,12 +1008,12 @@ class CompanyInformation:
     fiscal_year_end: str
 
     def __rich__(self):
-        table = Table("Company", "SIC", "Incorp.", "Year End",
+        table = Table("Company", "Industry", "Incorporated", "Year End",
                       title=company_title,
                       box=box.SIMPLE)
         table.add_row(f"{self.name} [{self.cik}]",
                       self.sic,
-                      self.state_of_incorporation,
+                      states.get(self.state_of_incorporation, self.state_of_incorporation),
                       self.fiscal_year_end)
         return table
 
@@ -1568,9 +1568,7 @@ class SECHeader:
     def __rich__(self):
 
         # Filing Metadata
-        metadata_table = Table(row_styles=["bold", ""], box=box.ROUNDED)
-        metadata_table.add_column("")
-        metadata_table.add_column("Value", style="bold")
+        metadata_table = Table("", "", row_styles=["bold", ""], box=box.ROUNDED, show_header=False)
         for key, value in self.filing_metadata.items():
             # Format as dates
             if re.match(r"^(20|19)\d{12}$", value):
@@ -1580,12 +1578,8 @@ class SECHeader:
 
             metadata_table.add_row(f"{key}:", value)
 
-        metadata_panel = Panel(
-            metadata_table, title=f"Form {self.form} {unicode_for_form(self.form)} FILING"
-        )
-
         # Keep a list of renderables for rich
-        renderables = [metadata_panel]
+        renderables = [metadata_table]
 
         # SUBJECT COMPANY
         for subject_company in self.subject_companies:
@@ -1605,7 +1599,9 @@ class SECHeader:
         return Panel(
             Group(
                 *renderables
-            )
+            ),
+            title=Text(f"Form {self.form}", style="bold deep_sky_blue1"),
+            subtitle=describe_form(self.form)
         )
 
     def __repr__(self):
@@ -1930,6 +1926,9 @@ class Filing:
 
 
 class Attachments:
+    """
+    A collection of Attachments on a filing
+    """
 
     def __init__(self, files: pd.DataFrame):
         self.files = files
@@ -1957,9 +1956,14 @@ class Attachments:
         return len(self.files)
 
     def __rich__(self):
-        return df_to_rich_table(self.files
-                                .assign(Size=lambda df: df.Size.apply(display_size))
-                                .filter(['Description', 'Document', 'Type', 'Size']), max_rows=100)
+        table = Table(Column('Document', style="bold"), 'Type', 'Description', 'Size',
+                      box=box.ROUNDED,
+                      title="Attachments",
+                      title_style="bold",
+                      row_styles=["", "bold"])
+        for index, row in self.files.iterrows():
+            table.add_row(row.Document, row["Type"], row.Description, display_size(row.Size))
+        return table
 
     def __repr__(self):
         return repr_rich(self.__rich__())
