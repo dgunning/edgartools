@@ -1,14 +1,16 @@
 from tqdm import tqdm
-from edgar import get_filings
+from edgar import get_filings, Filing
 
 
-def view_filing_text():
+def inspect_filings():
     for filing in tqdm(get_filings(year=2024).sample(200)):
         try:
+            filing.attachments
             filing.text()
             filing.view()
             filing.markdown()
             filing.obj()
+            print(filing.header)
         except Exception as e:
             print(f"Failed to get text for {filing}")
             filing.open()
@@ -17,4 +19,4 @@ def view_filing_text():
 
 
 if __name__ == '__main__':
-    view_filing_text()
+    inspect_filings()
