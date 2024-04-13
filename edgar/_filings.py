@@ -38,6 +38,7 @@ from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
+from edgar.reference import describe_form
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
                         text_extensions, binary_extensions, datefmt, reverse_name)
@@ -1901,12 +1902,10 @@ class Filing:
         └──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
         :return: a rich table version of this filing
         """
-        summary_table = Table(box=box.SIMPLE)
-        summary_table.add_column("Accession Number", style="bold", header_style="bold")
-        summary_table.add_column("Filing Date")
-        summary_table.add_column("Company")
-        summary_table.add_column("CIK")
-        summary_table.add_row(self.accession_no, str(self.filing_date), self.company, str(self.cik))
+        summary_table = Table(box=box.ROUNDED, show_header=False)
+        summary_table.add_column("Accession#", style="bold deep_sky_blue1", header_style="bold")
+        summary_table.add_column("Filed")
+        summary_table.add_row(self.accession_no, str(self.filing_date))
 
         homepage_url = Text(f"\U0001F3E0 {self.homepage_url.replace('//www.', '//')}")
         primary_doc_url = Text(f"\U0001F4C4 {self.document.url.replace('//www.', '//')}")
@@ -1914,14 +1913,15 @@ class Filing:
 
         links_table = Table(
             "[b]Links[/b]: \U0001F3E0 Homepage \U0001F4C4 Primary Document \U0001F4DC Full Submission Text",
-            box=box.SIMPLE)
+            box=box.ROUNDED)
         links_table.add_row(homepage_url)
         links_table.add_row(primary_doc_url)
         links_table.add_row(submission_text_url)
 
         return Panel(
             Group(summary_table, links_table),
-            title=f"{self.form} {unicode_for_form(self.form)} filing for {self.company}",
+            title=Text(f"{self.company} [{self.cik}] {self.form} {unicode_for_form(self.form)}", style="bold"),
+            subtitle=describe_form(self.form),
             box=box.ROUNDED
         )
 
