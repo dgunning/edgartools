@@ -9,7 +9,7 @@ else:
 
 from functools import lru_cache
 
-__all__ = ['states']
+__all__ = ['states', 'describe_form', 'get_ticker_from_cusip']
 
 # A dict of state abbreviations and their full names
 states = {
@@ -67,6 +67,7 @@ states = {
 }
 
 
+@lru_cache(maxsize=1)
 def read_parquet_from_package(parquet_filename: str):
     package_name = 'edgar.reference'
 
@@ -74,6 +75,35 @@ def read_parquet_from_package(parquet_filename: str):
         df = pd.read_parquet(parquet_path)
 
     return df
+
+
+@lru_cache(maxsize=1)
+def read_csv_from_package(csv_filename: str):
+    package_name = 'edgar.reference'
+
+    with resources.path(package_name, csv_filename) as csv_path:
+        df = pd.read_csv(csv_path)
+
+    return df
+
+
+@lru_cache(maxsize=64)
+def describe_form(form: str) -> str:
+    """
+    Get the description of a form from the form descriptions file.
+    """
+    data = read_csv_from_package('secforms.csv')
+    is_amendment = False
+    if form.endswith("/A"):
+        form = form[:-2]
+        is_amendment = True
+    form = form.upper()
+    description = data.loc[data.Form == form]
+    if len(description) == 0:
+        return f"Form {form}"
+    else:
+        description = description.Description.iloc[0]
+        return f"Form {form}{' Amendment' if is_amendment else ''}: {description}"
 
 
 @lru_cache(maxsize=1)
