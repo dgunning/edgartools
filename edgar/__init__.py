@@ -126,17 +126,24 @@ def obj(sec_filing: Filing) -> Optional[object]:
     elif matches_form(sec_filing, "20-F"):
         return TwentyF(sec_filing)
     elif matches_form(sec_filing, THIRTEENF_FORMS):
-        return ThirteenF(sec_filing)
+        if sec_filing.xml():
+            return ThirteenF(sec_filing)
     elif matches_form(sec_filing, "144"):
         return Form144.from_filing(sec_filing)
     elif matches_form(sec_filing, "MA-I"):
         return MunicipalAdvisorForm.from_filing(sec_filing)
     elif matches_form(sec_filing, "3"):
-        return Form3(**Ownership.parse_xml(sec_filing.xml()))
+        xml = sec_filing.xml()
+        if xml:
+            return Form3(**Ownership.parse_xml(xml))
     elif matches_form(sec_filing, "4"):
-        return Form4(**Ownership.parse_xml(sec_filing.xml()))
+        xml = sec_filing.xml()
+        if xml:
+            return Form4(**Ownership.parse_xml(xml))
     elif matches_form(sec_filing, "5"):
-        return Form5(**Ownership.parse_xml(sec_filing.xml()))
+        xml = sec_filing.xml()
+        if xml:
+            return Form5(**Ownership.parse_xml(xml))
     elif matches_form(sec_filing, "EFFECT"):
         xml = sec_filing.xml()
         if xml:
