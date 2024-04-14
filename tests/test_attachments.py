@@ -1,4 +1,4 @@
-from edgar import Filing, Attachments
+from edgar import Filing, Attachment, Attachments
 
 
 def test_attachments_query():
@@ -31,3 +31,13 @@ def test_get_attachment_by_type():
     # No results
     attachments = attachments.query("Document.str.match('DORM-*')")
     assert len(attachments) == 0
+
+
+def test_attachment_is_empty():
+    filing = Filing(form='10-Q', filing_date='2000-05-11', company='APPLE COMPUTER INC', cik=320193,
+                   accession_no='0000912057-00-023442')
+    attachments = filing.attachments
+    print(attachments)
+    attachment:Attachment = attachments[0]
+    assert attachment.document == ''
+    assert attachment.empty

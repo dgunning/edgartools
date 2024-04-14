@@ -940,5 +940,12 @@ def test_get_filings_by_filing_date():
     assert get_filings(filing_date="01-02-2023") is None
 
 
+def test_get_text_from_old_filing():
+    filing = Filing(form='10-Q', filing_date='2000-05-11', company='APPLE COMPUTER INC', cik=320193, accession_no='0000912057-00-023442')
+    assert filing.document.empty
+    html = filing.html()
+    assert html is None
+    text = filing.text()
+    assert text
 
 

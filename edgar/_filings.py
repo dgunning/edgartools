@@ -1684,8 +1684,10 @@ class Filing:
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
         if not self.document.is_binary():
-            return self.document.download()
+            if not self.document.empty:
+                return self.document.download()
 
+    @lru_cache(maxsize=4)
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
         xml_document: Attachment = self.homepage.primary_xml_document
@@ -1705,6 +1707,10 @@ class Filing:
             if len(text_extract_attachments) > 0:
                 text_extract_attachment = text_extract_attachments[0]
                 return get_text_between_tags(text_extract_attachment.url, "TEXT")
+            else:
+                # Use the full text submission
+                text = get_text_between_tags(self.text_url, "TEXT")
+                return text
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
@@ -1988,13 +1994,13 @@ class Attachments:
         return len(self.files)
 
     def __rich__(self):
-        table = Table(Column('Document', style="bold"), 'Type', 'Description', 'Size',
+        table = Table('', Column('Document', style="bold"), 'Type', 'Description', 'Size',
                       box=box.ROUNDED,
                       title="Attachments",
                       title_style="bold",
                       row_styles=["", "bold"])
         for index, row in self.files.iterrows():
-            table.add_row(row.Document, row["Type"], row.Description, display_size(row.Size))
+            table.add_row(str(index), row.Document, row["Type"], row.Description, display_size(row.Size))
         return table
 
     def __repr__(self):
@@ -2042,7 +2048,13 @@ class Attachment:
 
     def open(self):
         """Open the filing document"""
-        webbrowser.open(self.url)
+        if not self.empty:
+            webbrowser.open(self.url)
+
+    @property
+    def empty(self):
+        """Some older filings have no document url. So effectively this attachment is empty"""
+        return self.document is None or self.document.strip() == ''
 
     @property
     def name(self) -> str:
