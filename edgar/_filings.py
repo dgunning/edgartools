@@ -1,15 +1,18 @@
 import itertools
+import json
 import os.path
+import pickle
 import re
 import webbrowser
 from dataclasses import dataclass
+from datetime import date
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
-from typing import Tuple, List, Dict, Union, Optional, Any
-from pathlib import Path
 from os import PathLike
-import pickle
+from pathlib import Path
+from typing import Tuple, List, Dict, Union, Optional, Any
+
 import httpx
 import numpy as np
 import pandas as pd
@@ -29,21 +32,19 @@ from rich.panel import Panel
 from rich.status import Status
 from rich.table import Table, Column
 from rich.text import Text
-import json
 
-from datetime import date
 from edgar._markdown import MarkdownContent
 from edgar._markdown import html_to_markdown, text_to_markdown
-from edgar._party import Address
+from edgar._party import Address, get_addresses_as_columns
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
-from edgar.reference import describe_form, states
 from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar, get_text_between_tags,
                         filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
                         text_extensions, binary_extensions, datefmt, reverse_name)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.htmltools import html_sections
+from edgar.reference import describe_form, states
 from edgar.search import BM25Search, RegexSearch
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -59,7 +60,7 @@ __all__ = [
     'Filings',
     'get_filings',
     'FilingXbrl',
-    'SECHeader',
+    'FilingHeader',
     'FilingsState',
     'Attachment',
     'Attachments',
@@ -1009,8 +1010,7 @@ class CompanyInformation:
 
     def __rich__(self):
         table = Table("Company", "Industry", "Incorporated", "Year End",
-                      title=company_title,
-                      box=box.SIMPLE)
+                      box=box.ROUNDED)
         table.add_row(f"{self.name} [{self.cik}]",
                       self.sic,
                       states.get(self.state_of_incorporation, self.state_of_incorporation),
@@ -1029,7 +1029,7 @@ class FilingInformation:
     film_number: str
 
     def __rich__(self):
-        table = Table("File Number", "SEC Act", "Film #", "Form", title=filing_information_title, box=box.SIMPLE)
+        table = Table("File Number", "SEC Act", "Film #", "Form", box=box.ROUNDED)
         table.add_row(self.file_number, self.sec_act, self.film_number, self.form)
         return table
 
@@ -1053,15 +1053,16 @@ class Filer:
 
     def __rich__(self):
         filer_renderables = [self.company_information]
+
         # Addresses
         if self.business_address or self.mailing_address:
-            filer_renderables.append(_create_address_table(self.business_address, self.mailing_address))
+            filer_renderables.append(get_addresses_as_columns(self.business_address, self.mailing_address))
 
         # Former Company Names
         if self.former_company_names:
-            former_company_table = Table("Former Name", "Date Changed", box=box.SIMPLE)
-            for company in self.former_company_names:
-                former_company_table.add_row(company.name, company.date_of_change)
+            former_company_table = Table("Former Name", "Changed", box=box.ROUNDED)
+            for company_name in self.former_company_names:
+                former_company_table.add_row(company_name.name, datefmt(company_name.date_of_change, '%b %d, %Y'))
             filer_renderables.append(former_company_table)
 
         return Panel(
@@ -1089,17 +1090,16 @@ class ReportingOwner:
 
     def __rich__(self):
         top_renderables = []
-        reporting_owner_renderables = []
 
         # Owner Table
         if self.owner:
-            reporting_owner_table = Table("Owner", "CIK", box=box.SIMPLE)
+            reporting_owner_table = Table("Owner", "CIK", box=box.ROUNDED)
             reporting_owner_table.add_row(self.owner.name, self.owner.cik)
 
             top_renderables = [reporting_owner_table]
         # Reporting Owner Filing Values
         if self.filing_information:
-            filing_values_table = Table("File Number", "SEC Act", "Film #", box=box.SIMPLE)
+            filing_values_table = Table("File Number", "SEC Act", "Film #", box=box.ROUNDED)
             filing_values_table.add_row(self.filing_information.file_number,
                                         self.filing_information.sec_act,
                                         self.filing_information.film_number)
@@ -1109,7 +1109,7 @@ class ReportingOwner:
 
         # Addresses
         if self.business_address or self.mailing_address:
-            reporting_owner_renderables.append(_create_address_table(self.business_address, self.mailing_address))
+            reporting_owner_renderables.append(get_addresses_as_columns(self.business_address, self.mailing_address))
 
         return Panel(
             Group(
@@ -1131,24 +1131,26 @@ class SubjectCompany:
     former_company_names: Optional[List[FormerCompany]] = None
 
     def __rich__(self):
-        subject_company_renderables = []
-
-        # Filing Information
-        if self.filing_information:
-            subject_company_renderables.append(self.filing_information)
-
-        subject_company_renderables.append(self.company_information)
+        subject_company_renderables = [self.company_information]
 
         # Addresses
         if self.business_address is not None or self.mailing_address is not None:
-            subject_company_renderables.append(_create_address_table(self.business_address, self.mailing_address))
+            subject_company_renderables.append(get_addresses_as_columns(self.business_address, self.mailing_address))
 
-        # Former Company Names
-        if self.former_company_names:
-            former_company_table = Table("Former Name", "Date Changed", box=box.SIMPLE)
-            for company in self.former_company_names:
-                former_company_table.add_row(company.name, company.date_of_change)
-            subject_company_renderables.append(former_company_table)
+        if self.former_company_names or self.filing_information:
+            name_and_filing_columns = []
+            # Former Company Names
+            if self.former_company_names:
+                former_company_table = Table("Former Name", "Changed", box=box.ROUNDED)
+                for company_name in self.former_company_names:
+                    former_company_table.add_row(company_name.name, datefmt(company_name.date_of_change, '%b %d, %Y'))
+                name_and_filing_columns.append(former_company_table)
+
+            # Filing Information
+            if self.filing_information:
+                name_and_filing_columns.append(self.filing_information)
+
+            subject_company_renderables.append(Columns(name_and_filing_columns))
 
         return Panel(
             Group(
@@ -1169,7 +1171,7 @@ class Issuer:
 
     def __rich__(self):
         issuer_table = Table("Company", "CIK", "SIC", "Fiscal Year End",
-                             box=box.SIMPLE)
+                             box=box.ROUNDED)
         issuer_table.add_row(self.company_information.name,
                              self.company_information.cik,
                              self.company_information.sic,
@@ -1180,7 +1182,7 @@ class Issuer:
 
         # Addresses
         if self.business_address or self.mailing_address:
-            issuer_renderables.append(_create_address_table(self.business_address, self.mailing_address))
+            issuer_renderables.append(get_addresses_as_columns(self.business_address, self.mailing_address))
 
         return Panel(
             Group(
@@ -1224,7 +1226,45 @@ def _create_address_table(business_address: Address, mailing_address: Address):
     return address_table
 
 
-class SECHeader:
+class FilingMetadata:
+    def __init__(self, metadata: Dict[str, Any]):
+        self.metadata = metadata
+
+    def get(self, key: str):
+        value = self.metadata.get(key)
+        if value:
+            # Adjusted regular expressions to match correct date formats
+            if re.match(r"^(20|19)\d{12}$", value):  # YYYY-MM-DD HH:MM:SS
+                value = datefmt(value, "%Y-%m-%d %H:%M:%S")
+            elif re.match(r"^(20|19)\d{6}$", value):  # YYYY-MM-DD
+                value = datefmt(value, "%Y-%m-%d")
+        return value
+
+    def __getitem__(self, key: str):
+        return self.get(key)
+
+    def __rich__(self):
+        # Ordered keys to be displayed first
+        ordered_keys = ["ACCESSION NUMBER", "FILED AS OF DATE", "ACCEPTANCE-DATETIME", "CONFORMED SUBMISSION TYPE"]
+        table = Table("", "", row_styles=["bold", ""], show_header=False, box=box.ROUNDED)
+
+        # Add rows for ordered keys first if present
+        for key in ordered_keys:
+            value = self.get(key)
+            if value is not None:
+                table.add_row(f"{key}:", value)
+
+        # Add the rest of the keys
+        for key in self.metadata:
+            if key not in ordered_keys:
+                value = self.get(key)
+                if value is not None:
+                    table.add_row(f"{key}:", value)
+
+        return table
+
+
+class FilingHeader:
     """
     Contains the parsed representation of the SEC-HEADER text at the top of the full submission text
     <SEC-HEADER>
@@ -1240,7 +1280,7 @@ class SECHeader:
                  issuers: List[Issuer] = None,
                  subject_companies: List[SubjectCompany] = None):
         self.text: str = text
-        self.filing_metadata: Dict[str, str] = filing_metadata
+        self.filing_metadata: FilingMetadata = FilingMetadata(filing_metadata)
         self.filers: List[Filer] = filers
         self.reporting_owners: List[ReportingOwner] = reporting_owners
         self.issuers: List[Issuer] = issuers
@@ -1274,7 +1314,7 @@ class SECHeader:
     def acceptance_datetime(self):
         acceptance = self.filing_metadata.get("ACCEPTANCE-DATETIME")
         if acceptance:
-            return datetime.strptime(acceptance, "%Y%m%d%H%M%S")
+            return datetime.strptime(acceptance, "%Y-%m-%d %H:%M:%S")
 
     @property
     def file_numbers(self):
@@ -1568,15 +1608,7 @@ class SECHeader:
     def __rich__(self):
 
         # Filing Metadata
-        metadata_table = Table("", "", row_styles=["bold", ""], box=box.ROUNDED, show_header=False)
-        for key, value in self.filing_metadata.items():
-            # Format as dates
-            if re.match(r"^(20|19)\d{12}$", value):
-                value = datefmt(value, "%Y-%m-%d %H:%M:%S")
-            elif re.match(r"^(20|19)\d{6}$", value):
-                value = datefmt(value, "%Y-%m-%d")
-
-            metadata_table.add_row(f"{key}:", value)
+        metadata_table = self.filing_metadata.__rich__()
 
         # Keep a list of renderables for rich
         renderables = [metadata_table]
@@ -1600,8 +1632,8 @@ class SECHeader:
             Group(
                 *renderables
             ),
-            title=Text(f"Form {self.form}", style="bold deep_sky_blue1"),
-            subtitle=describe_form(self.form)
+            title=Text(describe_form(self.form), style="bold"),
+            subtitle=Text(f"Form {self.form}")
         )
 
     def __repr__(self):
@@ -1763,7 +1795,7 @@ class Filing:
     @lru_cache(maxsize=1)
     def header(self):
         sec_header_content = get_text_between_tags(self.text_url, "SEC-HEADER")
-        return SECHeader.parse(sec_header_content)
+        return FilingHeader.parse(sec_header_content)
 
     def data_object(self):
         """ Get this filing as the data object that it might be"""

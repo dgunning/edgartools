@@ -550,7 +550,7 @@ class EightK():
     @property
     def date_of_report(self):
         """Return the period of report for this filing"""
-        period_of_report = datetime.strptime(self._filing.header.period_of_report, "%Y%m%d")
+        period_of_report = datetime.strptime(self._filing.header.period_of_report, "%Y-%m-%d")
         return period_of_report.strftime("%B %d, %Y")
 
     def __rich__(self):

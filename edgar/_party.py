@@ -3,6 +3,9 @@ from typing import List, Optional
 from bs4 import Tag
 from rich.console import Group
 from rich.table import Table
+from rich.panel import Panel
+from rich.text import Text
+from rich.columns import Columns
 from pydantic import BaseModel
 from edgar._rich import repr_rich
 from edgar._xml import child_text, child_value
@@ -14,6 +17,7 @@ __all__ = [
     'Person',
     'Name',
     'Filer',
+    'get_addresses_as_columns'
 ]
 
 
@@ -25,6 +29,10 @@ class Address(BaseModel):
     state_or_country: Optional[str] = None
     state_or_country_description: Optional[str] = None
     zipcode: Optional[str] = None
+
+    @property
+    def empty(self):
+        return not self.street1 and not self.street2 and not self.city and not self.state_or_country and not self.zipcode
 
     def __str__(self):
         if not self.street1:
@@ -46,6 +54,18 @@ class Address(BaseModel):
         return (f'Address(street1="{self.street1 or ""}", street2="{self.street2 or ""}", city="{self.city or ""}",'
                 f'zipcode="{self.zipcode or ""}", state_or_country="{self.state_or_country}")'
                 )
+
+
+def get_addresses_as_columns(mailing_address: Optional[Address], business_address: Optional[Address]) -> Columns:
+    """
+    Returns a rich Columns object with mailing and business addresses
+    """
+    addresses = []
+    if mailing_address and not mailing_address.empty:
+        addresses.append(Panel(Text(str(mailing_address)), title='\U00002709 Mailing Address', width=40))
+    if business_address and not business_address.empty:
+        addresses.append(Panel((Text(str(business_address))), title='\U0001F3E2 Business Address', width=40))
+    return Columns(addresses, equal=True, expand=True)
 
 
 class Issuer:
