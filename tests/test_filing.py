@@ -724,8 +724,17 @@ def test_get_by_accession_number():
     assert filing.filing_date == datetime.date(2023, 3, 6)
     assert filing.accession_no == "0000072333-23-000015"
 
+    # filings from the 90's
+    assert get_by_accession_number("0000320193-96-000018")
+
+    # Not found
     assert get_by_accession_number("9990072333-45-000015") is None
     assert get_by_accession_number("9990072333-22-000015") is None
+
+
+def test_find_old_filing():
+    filing = get_by_accession_number("0000320193-96-000018")
+    assert filing
 
 
 def test_get_current_filing_by_accession_number():
@@ -941,11 +950,10 @@ def test_get_filings_by_filing_date():
 
 
 def test_get_text_from_old_filing():
-    filing = Filing(form='10-Q', filing_date='2000-05-11', company='APPLE COMPUTER INC', cik=320193, accession_no='0000912057-00-023442')
+    filing = Filing(form='10-Q', filing_date='2000-05-11', company='APPLE COMPUTER INC', cik=320193,
+                    accession_no='0000912057-00-023442')
     assert filing.document.empty
     html = filing.html()
     assert html is None
     text = filing.text()
     assert text
-
-

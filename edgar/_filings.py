@@ -2342,7 +2342,7 @@ def get_by_accession_number(accession_number: str):
     """Find the filing using the accession number"""
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
         f"{accession_number} is not a valid accession number .. should be 10digits-2digits-6digits"
-    year = int("19" + accession_number[11:13]) if accession_number[11] == 9 else int("20" + accession_number[11:13])
+    year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
 
     if year == datetime.now().year:
         # For the current year create a range of quarters to search from 1 up to the current quarter of the year
