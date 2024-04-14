@@ -545,3 +545,12 @@ def test_get_table_containing_text():
         table = block.to_dataframe()
         if not table.empty:
             print(dataframe_to_text(table))
+
+
+def test_html_to_text():
+    html = Path('data/NextPoint.8K.html').read_text()
+    text = html_to_text(html)
+    assert text
+    assert 'NEXPOINT CAPITAL' in text
+    print(text)
+

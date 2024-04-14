@@ -22,7 +22,8 @@ __all__ = ['DocumentData',
            'TextAnalysis',
            'SECLine',
            'table_to_text',
-           'get_clean_html']
+           'html_to_text',
+           'get_clean_html', ]
 
 
 class DocumentData:
@@ -579,6 +580,11 @@ def table_to_text(table_tag):
                 formatted_table += '-+-'.join(['-' * len(text) for text in row_text]) + '\n'
 
     return formatted_table
+
+
+def html_to_text(html: str) -> str:
+    """Converts HTML to plain text"""
+    return HtmlDocument.from_html(html).text
 
 
 def decompose_toc_links(start_element: Tag):
