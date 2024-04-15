@@ -105,4 +105,3 @@ def test_search_works_in_fwp_prospectus():
     results = filing.search("Pricing Supplement", regex=True)
     assert len(results) > 0
 
-

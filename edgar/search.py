@@ -116,17 +116,17 @@ def preprocess_documents(documents: List[str]) -> Corpus:
 
 LocAndDoc = Tuple[int, str]
 
+
 class DocSection:
 
     def __init__(self,
                  loc: int,
-                 doc:str,
+                 doc: str,
                  score: float = 0.0
                  ):
-        self.loc:int = loc
-        self.doc:str = doc
-        self.score:float = score
-
+        self.loc: int = loc
+        self.doc: str = doc
+        self.score: float = score
 
     # Make this class sortable by loc
     def __lt__(self, other):
@@ -217,7 +217,7 @@ class BM25Search:
         preprocessed_query = preprocess(query)
         scores = self.bm25.get_scores(preprocessed_query)
         doc_scores = zip(self.document_objs, scores)
-        #doc_scores_sorted = sorted([doc for doc in doc_scores if doc[1] > 0], key=lambda t: t[1])[::-1]
+        # doc_scores_sorted = sorted([doc for doc in doc_scores if doc[1] > 0], key=lambda t: t[1])[::-1]
         # Return the list of location and document
         return SearchResults(query=query,
                              sections=[DocSection(loc=loc, doc=doc_and_score[0], score=doc_and_score[1])
