@@ -1,15 +1,8 @@
 import sys
-import pandas as pd
 
-# Dynamic import based on Python version
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
+from edgar.reference.forms import describe_form
+from edgar.reference.cusip_tickers import get_ticker_from_cusip, cusip_ticker_mapping
 
-from functools import lru_cache
-
-__all__ = ['states', 'describe_form', 'get_ticker_from_cusip']
 
 # A dict of state abbreviations and their full names
 states = {
@@ -67,69 +60,6 @@ states = {
 }
 
 
-@lru_cache(maxsize=1)
-def read_parquet_from_package(parquet_filename: str):
-    package_name = 'edgar.reference'
-
-    with resources.path(package_name, parquet_filename) as parquet_path:
-        df = pd.read_parquet(parquet_path)
-
-    return df
 
 
-@lru_cache(maxsize=1)
-def read_csv_from_package(csv_filename: str):
-    package_name = 'edgar.reference'
 
-    with resources.path(package_name, csv_filename) as csv_path:
-        df = pd.read_csv(csv_path)
-
-    return df
-
-
-@lru_cache(maxsize=64)
-def describe_form(form: str) -> str:
-    """
-    Get the description of a form from the form descriptions file.
-    """
-    data = read_csv_from_package('secforms.csv')
-    is_amendment = False
-    if form.endswith("/A"):
-        form = form[:-2]
-        is_amendment = True
-    form = form.upper()
-    description = data.loc[data.Form == form]
-    if len(description) == 0:
-        return f"Form {form}"
-    else:
-        description = description.Description.iloc[0]
-        return f"Form {form}{' Amendment' if is_amendment else ''}: {description}"
-
-
-@lru_cache(maxsize=1)
-def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
-    """
-    Download the Cusip to Ticker mapping data from the SEC website.
-    This provides a Dataframe with Cusip as the index and Ticker as the column.
-
-    CUSIP can be duplicate to get non duplicate Cusips set allow_duplicate_cusips to False.
-    This will return only the first occurrence of the Cusip.
-    The first occurrence of the Cusip will also be most likely to be mapped to a Ticker that is linked to a cik
-    """
-    df = read_parquet_from_package('ct.pq').set_index('Cusip')
-    if not allow_duplicate_cusips:
-        df = df[~df.index.duplicated(keep='first')]
-    return df
-
-
-@lru_cache(maxsize=128)
-def get_ticker_from_cusip(cusip: str):
-    """
-    Get the ticker symbol for a given Cusip.
-    """
-    data = cusip_ticker_mapping()
-    results = data.loc[cusip]
-    if len(results) == 1:
-        return results.iloc[0]
-    elif len(results) > 1:
-        return results.iloc[0].Ticker
