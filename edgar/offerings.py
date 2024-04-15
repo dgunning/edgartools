@@ -12,11 +12,11 @@ from rich.console import Group, Text, RenderableType
 from rich.panel import Panel
 from rich.table import Table, Column
 
-from edgar.entities import Company
 from edgar._party import Issuer, Person, Address
 from edgar._rich import repr_rich
 from edgar._xml import child_text, child_value
 from edgar.core import get_bool, yes_no
+from edgar.entities import Company
 from edgar.reference import states
 
 __all__ = [
