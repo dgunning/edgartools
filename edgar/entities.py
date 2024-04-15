@@ -742,14 +742,13 @@ Entity = get_entity
 
 @lru_cache(maxsize=32)
 def get_entity_submissions(cik: int,
-                           include_old_filings: bool = True) -> EntityData:
+                           include_old_filings: bool = True) -> Optional[EntityData]:
     """Get the company filings for a given cik"""
     try:
         submission_json = download_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
     except httpx.HTTPStatusError as e:
         # Handle the case where the cik is invalid and not found on Edgar
         if e.response.status_code == 404:
-            log.error(f"No company found for CIK {cik}")
             return None
         else:
             raise
@@ -825,11 +824,11 @@ class CompanyConcept:
                  cik: str,
                  entity_name: str,
                  concept: Concept,
-                 data: pa.Table):
+                 data: pd.DataFrame):
         self.cik: str = cik
         self.entity_name: str = entity_name
         self.concept: Concept = concept
-        self.data: pa.Table = data
+        self.data: pd.DataFrame = data
 
     @staticmethod
     def create_fact(row) -> Fact:
@@ -973,7 +972,7 @@ class CompanySearchResults:
         return len(self.data)
 
     def empty(self):
-        return self.data.empty()
+        return self.data.empty
 
     def __getitem__(self, item):
         record = self.data.iloc[item]
