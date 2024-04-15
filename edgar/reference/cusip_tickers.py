@@ -1,4 +1,4 @@
-from edgar.reference.common import read_parquet_from_package
+from edgar.reference.data.common import read_parquet_from_package
 from functools import lru_cache
 import pandas as pd
 
