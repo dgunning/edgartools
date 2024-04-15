@@ -51,7 +51,7 @@ path = "edgar/__about__.py"
 [tool.hatch.build]
 include = [
   "edgar/*.py",
-  "edgar/reference/*",
+  "edgar/reference/data/*",
 ]
 
 [tool.hatch.envs.default]
