@@ -105,3 +105,12 @@ def test_search_works_in_fwp_prospectus():
     results = filing.search("Pricing Supplement", regex=True)
     assert len(results) > 0
 
+
+def test_search_results_as_json():
+    filing = Filing(company='NVIDIA CORP', cik=1045810, form='10-K', filing_date='2023-02-24',
+                    accession_no='0001045810-23-000017')
+    results:SearchResults = filing.search("GPU")
+    json_results = results.json()
+    assert isinstance(json_results, dict)
+    assert len(json_results['sections']) > 0
+    assert json_results['query'] == "GPU"

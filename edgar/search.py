@@ -135,6 +135,13 @@ class DocSection:
     def __hash__(self):
         return hash(self.doc)
 
+    def json(self):
+        return {
+            'loc': self.loc,
+            'doc': self.doc,
+            'score': self.score
+        }
+
     def __repr__(self):
         return f"{self.loc}\n{self.doc}"
 
@@ -162,6 +169,13 @@ class SearchResults:
         if 0 > item >= len(self.sections):
             return None
         return self.sections[item]
+
+    def json(self):
+        return {
+            'query': self.query,
+            'sections': [section.json() for section in self.sections],
+            'tables': self._show_tables
+        }
 
     def __rich__(self):
         _md = ""

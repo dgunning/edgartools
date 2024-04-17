@@ -530,6 +530,37 @@ class EntityData:
     def __str__(self):
         return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
 
+    def to_dict(self, include_filings: bool = False):
+        company_dict =  {
+            'cik': self.cik,
+            'name': self.name,
+            'display_name': self.display_name,
+            'is_company': self.is_company,
+            'tickers': self.tickers,
+            'exchanges': self.exchanges,
+            'sic': self.sic,
+            'industry': self.sic_description,
+            'category': self.category,
+            'fiscal_year_end': self.fiscal_year_end,
+            'entity_type': self.entity_type,
+            'phone': self.phone,
+            'flags': self.flags,
+            'mailing_address': self.mailing_address.__dict__,
+            'business_address': self.business_address.__dict__,
+            'insider_transaction_for_owner_exists': self.insider_transaction_for_owner_exists,
+            'insider_transaction_for_issuer_exists': self.insider_transaction_for_issuer_exists,
+            'ein': self.ein,
+            'description': self.description,
+            'website': self.website,
+            'investor_website': self.investor_website,
+            'state_of_incorporation': self.state_of_incorporation,
+            'state_of_incorporation_description': self.state_of_incorporation_description,
+            'former_names': self.former_names
+        }
+        if include_filings:
+            company_dict['filings'] = self.filings.to_dict()
+        return company_dict
+
     def __rich__(self):
         info_table = Table(Column("CIK", style="bold magenta"), box=box.SIMPLE)
         row = [str(self.cik)]

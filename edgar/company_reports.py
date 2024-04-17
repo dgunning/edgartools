@@ -599,6 +599,9 @@ class PressRelease:
     def __init__(self, attachment: Attachment):
         self.attachment: Attachment = attachment
 
+    def url(self):
+        return self.attachment.url
+
     @property
     def document(self) -> str:
         return self.attachment.document

@@ -16,6 +16,7 @@ from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_num
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachments, \
     Attachment, get_current_filings, fetch_daily_filing_index, filing_date_to_year_quarters
 from edgar.company_reports import TenK
+from edgar.entities import Company
 from edgar.core import default_page_size, http_client
 
 pd.options.display.max_colwidth = 200
@@ -957,3 +958,20 @@ def test_get_text_from_old_filing():
     assert html is None
     text = filing.text()
     assert text
+
+
+def test_filings_to_dict():
+    filings: Filings = get_filings(filing_date='2023-02-01')
+    filings_json = filings.to_dict()
+    assert len(filings_json) == 1000
+    assert len(filings.to_dict(50)) == 50
+    assert len(filings.head(10).to_dict()) == 10
+
+
+def test_company_filing_to_dict():
+    company = Company(320193)
+    filing = company.get_filings(form="4").latest(1)
+    filing_dict = filing.to_dict()
+    assert filing_dict['form'] == '4'
+    assert filing_dict['company'] == 'Apple Inc.'
+    assert filing_dict['cik'] == 320193

@@ -441,6 +441,13 @@ def test_company_category_removes_br():
     assert company.category == 'Large accelerated filer | Smaller reporting company'
 
 
-def test_company_name():
+def test_company_to_dict():
     company = Company(1012605)
-    print(company)
+    company_dict = company.to_dict()
+    assert company_dict['cik'] == 1012605
+    assert company_dict['name'] == 'INTEGRINAUTICS'
+    assert company_dict['display_name'] == 'Integrinautics'
+    assert 'filings' not in company_dict
+    print(company_dict)
+
+    assert 'filings' in company.to_dict(include_filings=True)

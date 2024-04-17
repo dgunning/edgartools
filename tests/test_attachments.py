@@ -33,6 +33,14 @@ def test_get_attachment_by_type():
     assert len(attachments) == 0
 
 
+def test_loop_through_attachments():
+    filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                    accession_no='0000066740-24-000023')
+    for attachment in filing.attachments:
+        assert attachment
+        assert isinstance(attachment, Attachment)
+
+
 def test_attachment_is_empty():
     filing = Filing(form='10-Q', filing_date='2000-05-11', company='APPLE COMPUTER INC', cik=320193,
                    accession_no='0000912057-00-023442')

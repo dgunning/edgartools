@@ -635,6 +635,10 @@ class Filings:
         # Need to sort by
         return Filings(filing_index)
 
+    def to_dict(self, max_rows: int = 1000) -> Dict[str, Any]:
+        """Return the filings as a json string but only the first max_rows records"""
+        return self.to_pandas().head(max_rows).to_dict(orient="records")
+
     def __getitem__(self, item):
         return self.get_filing_at(item)
 
@@ -1982,6 +1986,18 @@ class Attachments:
             if 0 <= item < len(self.files):
                 return Attachment.from_dataframe_row(self.files.iloc[item])
 
+    def __iter__(self):
+        self.n = 0
+        return self
+
+    def __next__(self):
+        if self.n < len(self.files):
+            attachment: Attachment = self[self.n]
+            self.n += 1
+            return attachment
+        else:
+            raise StopIteration
+
     def get(self, item):
         return self.__getitem__(item)
 
@@ -2016,7 +2032,7 @@ class Attachment:
     seq: int
     description: str
     document: str
-    form: str
+    attachment_type: str
     size: int
     path: str
 
@@ -2070,7 +2086,7 @@ class Attachment:
         return cls(seq=dataframe_row.Seq,
                    description=dataframe_row.Description,
                    document=dataframe_row.Document,
-                   form=dataframe_row.Type,
+                   attachment_type=dataframe_row.Type,
                    size=size,
                    path=dataframe_row.Url)
 
@@ -2088,12 +2104,14 @@ class Attachment:
     def summary(self) -> pd.DataFrame:
         """Return a summary of this filing as a dataframe"""
         return pd.DataFrame([{'seq': self.seq,
-                              'form': self.form,
+                              'form': self.attachment_type,
                               'document': self.document,
                               'description': self.description}]).set_index("seq")
 
     def __rich__(self):
-        return df_to_rich_table(self.summary(), index_name="seq")
+        table = Table("", "Document", "Type", "Description", "Size", box=box.ROUNDED)
+        table.add_row(str(self.seq), self.document, self.attachment_type, self.description, display_size(self.size))
+        return table
 
     def __repr__(self):
         return repr_rich(self.__rich__())
