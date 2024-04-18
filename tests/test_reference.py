@@ -5,6 +5,9 @@ from edgar import *
 def test_cusip_ticker_mapping():
     data = cusip_ticker_mapping()
     assert data.loc['15101T102'].Ticker == 'CLXX'
+    #assert data.loc['000000000'].Ticker is None
+    print()
+    print(data.head(4))
 
 
 def test_get_ticker_from_cusip():

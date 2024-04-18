@@ -11,6 +11,7 @@ from rich.panel import Panel
 from rich.console import Group, Text
 from rich.table import Table
 
+from edgar.reference import cusip_ticker_mapping
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import find_element, child_text, optional_decimal
 from edgar.core import moneyfmt, get_bool
@@ -338,7 +339,11 @@ class FundReport:
         """
         if len(self.investments) == 0:
             return pd.DataFrame(columns=['name', 'title', 'cusip', 'ticker', 'balance', 'units'])
-        return pd.DataFrame(
+
+        # This is for adding Ticker to the investments in case it is None
+        cusip_mapping = cusip_ticker_mapping(allow_duplicate_cusips=False)
+
+        investment_df = pd.DataFrame(
             [{
                 "name": investment.name,
                 "title": investment.title,
@@ -368,6 +373,8 @@ class FundReport:
                 for investment in self.investments
             ]
         ).sort_values(['value_usd', 'name', 'title'], ascending=[False, True, True]).reset_index(drop=True)
+        investment_df.ticker = investment_df.ticker.fillna(investment_df.cusip.map(cusip_mapping.Ticker)).fillna("")
+        return investment_df
 
     @classmethod
     def from_filing(cls, filing):
@@ -624,10 +631,11 @@ class FundReport:
                            .assign(Name=lambda df: df.name,
                                    Title=lambda df: df.title,
                                    Cusip=lambda df: df.cusip,
+                                   Ticker=lambda df: df.ticker,
                                    Value=lambda df: df.value_usd.apply(moneyfmt, curr='$', places=0),
                                    Pct=lambda df: df.pct_value.apply(moneyfmt, curr='', places=1),
                                    Category=lambda df: df.issuer_category + " " + df.asset_category)
-                           ).filter(['Name', 'Title', 'Cusip', 'Category', 'Value', 'Pct'])
+                           ).filter(['Name', 'Title', 'Cusip', 'Ticker', 'Category', 'Value', 'Pct'])
         return df_to_rich_table(investments, title="Investments", title_style="bold deep_sky_blue1", max_rows=2000)
 
     def __rich__(self):
