@@ -510,7 +510,7 @@ or `Company("SNOW")`
 snow = Company("snow")
 ```
 
-![snow](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/snow.jpg)
+![snow](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/snow.png)
 ### 
 
 
