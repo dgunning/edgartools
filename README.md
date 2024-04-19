@@ -476,6 +476,9 @@ filing_xbrl = filing.xbrl()
 ![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/10Q_xbrl.jpg)
 
 
+## [Using the Company API](COMPANY_API.md)
+
+
 ## Using the Company API
 
 With the company API you find a company using the **cik** or **ticker**. 
