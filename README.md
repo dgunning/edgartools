@@ -46,7 +46,7 @@
 - 📈 **Fund Reports**: Search for and get 13F-HR fund reports
 - 👤 **Insider Transactions**: Search for and get insider transactions
 
-## Getting started
+# Getting started
 
 Install using pip
 ```bash
