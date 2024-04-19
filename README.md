@@ -478,7 +478,6 @@ filing_xbrl = filing.xbrl()
 
 ## [Using the Company API](COMPANY_API.md)
 
----
 With the Company API you can find a company by ticker or CIK, and get the company's filings, facts and financials.
 
 ```python
