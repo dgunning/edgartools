@@ -22,7 +22,7 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table, Column
 
-from edgar.entities import Entity
+from edgar.entities import Entity, get_entity_submissions
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import (child_text, child_value)
@@ -768,7 +768,7 @@ class NonDerivativeTable:
         for column in ['Shares', 'Remaining', 'Price']:
             transaction_df[column] = pd.to_numeric(transaction_df[column], errors="ignore")
         # Change Nan to None
-        transaction_df = transaction_df.fillna(np.nan).replace([np.nan], [None])
+        transaction_df = transaction_df.replace({np.nan: None}).infer_objects()
 
         return NonDerivativeTransactions(transaction_df)
 
@@ -880,7 +880,12 @@ class DerivativeTable:
         )
         # convert to numeric if we can
         for col in ['Shares', 'UnderlyingShares', 'ExercisePrice', 'Price', 'Remaining']:
-            transaction_df[col] = pd.to_numeric(transaction_df[col], errors="ignore")
+            try:
+                transaction_df[col] = pd.to_numeric(transaction_df[col])
+            except ValueError:
+                # Handle the case where conversion fails
+                pass
+                #print(f"Warning: Conversion failed for column {col}")
 
         return DerivativeTransactions(transaction_df)
 
@@ -1010,7 +1015,7 @@ class ReportingOwners():
             owner_name = child_text(reporting_owner_id_tag, "rptOwnerName")
 
             # Check if it is a company. If not, reverse the name
-            entity = Entity(cik)
+            entity = get_entity_submissions(int(cik), include_old_filings=False)
 
             is_company = entity.is_company
             if not is_company:
