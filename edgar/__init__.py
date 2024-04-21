@@ -67,7 +67,7 @@ def find(search_id: Union[str, int]) -> (
         - Ticker -> returns a Company or a Fund if the ticker is a fund ticker
         - Company name -> returns CompanySearchResults
 
-    :rtype: object
+    :type: object
     """
     if isinstance(search_id, int):
         return Entity(search_id)
