@@ -22,7 +22,7 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table, Column
 
-from edgar.entities import Entity, get_entity_submissions
+from edgar.entities import Entity
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import (child_text, child_value)
@@ -1015,7 +1015,7 @@ class ReportingOwners():
             owner_name = child_text(reporting_owner_id_tag, "rptOwnerName")
 
             # Check if it is a company. If not, reverse the name
-            entity = get_entity_submissions(int(cik), include_old_filings=False)
+            entity = Entity(int(cik), include_old_filings=False)
 
             is_company = entity.is_company
             if not is_company:

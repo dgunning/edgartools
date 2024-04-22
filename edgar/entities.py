@@ -403,9 +403,9 @@ class EntityData:
     @property
     def _unicode_symbol(self):
         if self.is_company:
-            return "\U0001F3EC" # Building
+            return "\U0001F3EC"  # Building
         else:
-            return "\U0001F464" # Person
+            return "\U0001F464"  # Person
 
     @property
     @lru_cache(maxsize=1)
@@ -420,8 +420,8 @@ class EntityData:
         return self.sic_description
 
     @classmethod
-    def for_cik(cls, cik: int):
-        return get_entity_submissions(cik)
+    def for_cik(cls, cik: int, include_old_filings: bool = True):
+        return get_entity_submissions(cik, include_old_filings=include_old_filings)
 
     @classmethod
     def for_ticker(cls, ticker: str):
@@ -531,7 +531,7 @@ class EntityData:
         return f"""Company({self.name} [{self.cik}] {','.join(self.tickers)}, {self.sic_description})"""
 
     def to_dict(self, include_filings: bool = False):
-        company_dict =  {
+        company_dict = {
             'cik': self.cik,
             'name': self.name,
             'display_name': self.display_name,
@@ -586,7 +586,7 @@ class EntityData:
         if self.is_company:
             display_name = f"{self.display_name} ({self.ticker_display})" if self.ticker_display else self.display_name
         else:
-            display_name =f"{self._unicode_symbol} {self.display_name}"
+            display_name = f"{self._unicode_symbol} {self.display_name}"
 
         title_style = "bold dark_sea_green4" if self.is_company else "bold dodger_blue1"
         return Panel(Group(info_table, address_columns),
@@ -723,7 +723,7 @@ def parse_entity_submissions(cjson: Dict[str, Any]):
 
 
 @lru_cache(maxsize=64)
-def get_entity(entity_identifier: IntString) -> EntityData:
+def get_entity(entity_identifier: IntString, include_old_filings: bool = True) -> EntityData:
     """
         Get a company by cik or ticker
 
@@ -736,6 +736,7 @@ def get_entity(entity_identifier: IntString) -> EntityData:
         >>> get_entity(1090990)
 
     :param entity_identifier: The company identifier. Can be a cik or a ticker
+    :param include_old_filings: Include older filings
     :return:
     """
     is_int_cik = isinstance(entity_identifier, int)
@@ -745,7 +746,7 @@ def get_entity(entity_identifier: IntString) -> EntityData:
 
     if is_cik:
         # Cast to int to handle zero-padding
-        return EntityData.for_cik(int(entity_identifier))
+        return EntityData.for_cik(int(entity_identifier), include_old_filings=include_old_filings)
 
     # Get by ticker
     is_ticker = isinstance(entity_identifier, str) and re.match("[A-Za-z]{1,6}", entity_identifier, re.IGNORECASE)

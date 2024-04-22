@@ -1465,8 +1465,8 @@ class FilingHeader:
                     name = reporting_owner_values['COMPANY DATA'].get('COMPANY CONFORMED NAME')
                     cik = reporting_owner_values['COMPANY DATA'].get('CENTRAL INDEX KEY')
                 if cik:
-                    from edgar.entities import get_entity_submissions, EntityData
-                    entity: EntityData = get_entity_submissions(cik, include_old_filings=False)
+                    from edgar.entities import Entity, EntityData
+                    entity: EntityData = Entity(cik, include_old_filings=False)
                     if not entity.is_company:
                         name = reverse_name(name)
                     owner = Owner(name=name, cik=cik)
