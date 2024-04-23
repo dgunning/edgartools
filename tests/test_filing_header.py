@@ -1,13 +1,15 @@
 import datetime
 from pathlib import Path
-
+import re
 from rich import print
-
+from edgar.core import extract_text_between_tags
 from edgar import Filing
-from edgar._filings import FilingHeader, Filer
+from edgar.filingheader import preprocess_old_headers, FilingHeader, Filer
+import pytest
 
 carbo_10K = Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, filing_date='2018-03-08',
                    accession_no='0001564590-18-004771')
+
 
 def test_filing_sec_header():
     filing_header: FilingHeader = carbo_10K.header
@@ -37,7 +39,7 @@ def test_filing_sec_header():
 
 def test_parse_filing_header_with_filer():
     header_content = Path('data/secheader.424B5.abeona.txt').read_text()
-    filing_header = FilingHeader.parse(header_content)
+    filing_header = FilingHeader.parse_from_sgml_text(header_content)
     print()
     print(filing_header)
     # Metadata
@@ -82,7 +84,7 @@ def test_parse_filing_header_with_filer():
     # 		STREET 2:		ATT: PRIVATE CREDIT GROUP
     header_content = Path('data/secheader.N2A.goldman.txt').read_text()
     print(header_content)
-    filing_header = FilingHeader.parse(header_content)
+    filing_header = FilingHeader.parse_from_sgml_text(header_content)
     assert filing_header.filers[0].business_address.street1 == '200 WEST STREET'
     assert filing_header.filers[0].business_address.street2 == 'ATT: PRIVATE CREDIT GROUP'
 
@@ -90,7 +92,7 @@ def test_parse_filing_header_with_filer():
 def test_parse_filing_header_with_reporting_owner():
     header_content = Path('data/secheader.4.evercommerce.txt').read_text()
     print(header_content)
-    filing_header = FilingHeader.parse(header_content)
+    filing_header = FilingHeader.parse_from_sgml_text(header_content)
     print(filing_header)
 
     assert filing_header.filers == []
@@ -125,7 +127,7 @@ def test_period_of_report_from_filing_header():
 
 
 def test_parse_header_with_subject_company():
-    filing_header = FilingHeader.parse("""
+    filing_header = FilingHeader.parse_from_sgml_text("""
 <ACCEPTANCE-DATETIME>20230612150550
 ACCESSION NUMBER:		0001971857-23-000246
 CONFORMED SUBMISSION TYPE:	144
@@ -213,7 +215,7 @@ REPORTING-OWNER:
 def test_parse_header_filing_with_multiple_filers():
     # Formatting this file screws up the test. The text should be tight to the left margin
     header_text = Path('data/MultipleFilersHeader.txt').read_text()
-    filing_header = FilingHeader.parse(header_text)
+    filing_header = FilingHeader.parse_from_sgml_text(header_text)
     print(filing_header)
     assert len(filing_header.filers) == 2
 
@@ -249,7 +251,7 @@ def test_parse_header_filing_with_multiple_filers():
 
 def test_parse_header_filing_with_multiple_former_companies():
     header_text = Path('data/MultipleFormerCompaniesHeader.txt').read_text()
-    filing_header = FilingHeader.parse(header_text)
+    filing_header = FilingHeader.parse_from_sgml_text(header_text)
     print(filing_header)
     assert len(filing_header.filers) == 1
     filer: Filer = filing_header.filers[0]
@@ -291,3 +293,67 @@ def test_filing_number_from_subject_company():
     filing = Filing(form='SC 13G/A', filing_date='2024-01-23', company='BERKSHIRE HILLS BANCORP INC', cik=1108134,
                     accession_no='0001086364-24-001430')
     assert '005-60595' in filing.header.file_numbers
+
+
+def test_parse_header_from_the_1990s():
+    header_text = Path('data/1990sheader.txt').read_text()
+    header_text = extract_text_between_tags(header_text, 'SEC-HEADER')
+    cleaned_header_text = re.sub(r'^(?!<ACCEPTANCE-DATETIME>).*<[^>]+>.*$', '', header_text, flags=re.MULTILINE)
+    print(cleaned_header_text)
+    # header:FilingHeader = FilingHeader.parse(header_text)
+
+
+old_text = """
+<REPORTING-OWNER>
+COMPANY DATA:
+    COMPANY CONFORMED NAME:         CANTALUPO JAMES R
+    CENTRAL INDEX KEY:              0001012325
+    STANDARD INDUSTRIAL CLASSIFICATION:     []
+<RELATIONSHIP>DIRECTOR
+FILING VALUES:
+    FORM TYPE:      4
+BUSINESS ADDRESS:
+    STREET 1:       100 NORTH RIVERSIDE PLAZA
+    CITY:           CHICAGO
+    STATE:          IL
+    ZIP:            60606
+MAIL ADDRESS:
+    STREET 1:       100 NORTH RIVERSIDE PLAZA
+    CITY:           CHICAGO
+    STATE:          IL
+    ZIP:            60606
+</REPORTING-OWNER>
+"""
+
+
+def test_preprocess_old_headers():
+    new_text = preprocess_old_headers(old_text)
+    print(new_text)
+    assert not "RELATIONSHIP" in new_text
+    assert not "REPORTING-OWNER" in new_text
+    assert not "DIRECTOR" in new_text
+
+
+def test_preprocess_actual_old_header():
+    header_text = Path('data/1990sheader.txt').read_text()
+    new_text = preprocess_old_headers(header_text)
+
+    header: FilingHeader = FilingHeader.parse_from_sgml_text(new_text)
+    assert header.accession_number == '0001012325-98-000004'
+    assert len(header.subject_companies) == 1
+
+    # Preprocess before parsing
+    header: FilingHeader = FilingHeader.parse_from_sgml_text(header_text, preprocess=True)
+    assert header.accession_number == '0001012325-98-000004'
+    assert len(header.subject_companies) == 1
+
+    # Don't preprocess before parsing
+    with pytest.raises(KeyError):
+        header: FilingHeader = FilingHeader.parse_from_sgml_text(header_text, preprocess=False)
+
+
+def test_get_header_from_old_filing():
+    filing = Filing(form='4', filing_date='1998-11-20', company='CANTALUPO JAMES R', cik=1012325,
+                    accession_no='0001012325-98-000004')
+    header = filing.header
+    assert header.accession_number == '0001012325-98-000004'

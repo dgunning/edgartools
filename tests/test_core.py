@@ -21,7 +21,7 @@ from edgar.core import (decode_content,
                         extract_dates,
                         reverse_name,
                         get_bool,
-                        get_text_between_tags)
+                        download_text_between_tags)
 import re
 from rich.table import Table
 import pytest
@@ -243,7 +243,7 @@ def test_settings():
 
 
 def test_get_text_between_tags():
-    text = get_text_between_tags(
+    text = download_text_between_tags(
         'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt',
         'SEC-HEADER')
     print(text)

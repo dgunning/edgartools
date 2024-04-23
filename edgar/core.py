@@ -13,7 +13,7 @@ from decimal import Decimal
 from functools import lru_cache
 from io import BytesIO
 from typing import Union, Optional, Tuple, List
-
+import json
 import httpx
 import humanize
 import pandas as pd
@@ -79,7 +79,7 @@ __all__ = [
     'ask_for_identity',
     'default_page_size',
     'InvalidDateException',
-    'get_text_between_tags'
+    'download_text_between_tags'
 ]
 
 IntString = Union[str, int]
@@ -355,7 +355,7 @@ def download_file(url: str,
                     return decode_content(file_content)
                 return file_content
         else:
-            # If we explicitely asked for text or there is an encoding, try to return text
+            # If we explicitly asked for text or there is an encoding, try to return text
             if as_text:
                 return r.text
             # Should get here for jpg and PDFs
@@ -369,14 +369,19 @@ def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = Non
 
 
 def download_json(data_url: str):
-    with http_client() as client:
-        r = client.get(data_url)
-        if r.status_code == 200:
-            return r.json()
-        r.raise_for_status()
+    return json.loads(download_text(data_url))
 
 
-def get_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
+def download_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
+    """
+    Download the content of a URL and extract the text between the tags
+    This is mainly for reading the header of a filing
+
+    :param url: The URL to download
+    :param tag: The tag to extract the content from
+    :param client: The httpx client to use
+
+    """
     if not client:
         client = http_client()
     tag_start = f'<{tag}>'
@@ -401,6 +406,31 @@ def get_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.
                 elif is_header:
                     content += line + '\n'  # Add a newline to preserve original line breaks
     return content
+
+
+def extract_text_between_tags(content: str, tag: str) -> str:
+    """
+    Extracts text from provided content between the specified HTML/XML tags.
+
+    :param content: The text content to search through
+    :param tag: The tag to extract the content from
+    :return: The extracted text between the tags
+    """
+    tag_start = f'<{tag}>'
+    tag_end = f'</{tag}>'
+    is_tag = False
+    extracted_content = ""
+
+    for line in content.splitlines():
+        if line.startswith(tag_start):
+            is_tag = True
+            continue  # Skip the start tag line
+        elif line.startswith(tag_end):
+            break  # Stop reading if end tag is found
+        elif is_tag:
+            extracted_content += line + '\n'  # Add line to result
+
+    return extracted_content.strip()
 
 
 def repr_df(df, hide_index: bool = True):
