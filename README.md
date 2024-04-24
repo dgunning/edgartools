@@ -27,7 +27,7 @@
 - 📁 **Access any SEC filing**: You can access any SEC filing since 1994.
 - 📅 **List filings for any date range**: You can list filings for any **year, quarter** e.g. or date range `2024-02-29:2024-03-15`
 - 🌟 **Best looking edgar library**: Uses **[rich](https://rich.readthedocs.io/en/stable/introduction.html)** library to display SEC Edgar data in a beautiful way.
-- 🔄 **Page through filings in the cli**: Use `filings.next()` and `filings.previous()` to page through filings in the terminal.
+- 🔄 **Page through filings**: Use `filings.next()` and `filings.previous()` to page through filings
 - 🏗️ **Build Data Pipelines**: Build data pipelines by finding, filtering, transforming and saving filings
 - ✅ **Select a filing**: You can select a filing from the list of filings.
 - 📄 **View the filing as HTML or text**: Find a filing then get the content as HTML or text.
