@@ -35,7 +35,7 @@
 - 🔍 **Preview the filing**: You can preview the filing in the terminal or a notebook.
 - 🔎 **Search through a filing**: You can search through a filing for a keyword.
 - 📊 **Parse XBRL**: If a filing has XBRL, you can parse it to a dataframe.
-- 💾 **Data Objects**: edgartools automatically downloads and parses the filing into a data object for many form types.
+- 💾 **Data Objects**: Automatically downloads and parses filings into data objects.
 - 📥 **Download any attachment**: You can download any attachment from the filing.
 - 🔢 **Get company by Ticker or Cik**: You can get a company using a ticker `Company("SNOW")` or a cik `Company(1640147)`
 - 📚 **Get company filings**: You can get all the company's historical filings using `company.get_filings()`
