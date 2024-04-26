@@ -476,7 +476,7 @@ class Filings:
 
     def filter(self,
                form: Optional[Union[str, List[IntString]]] = None,
-               amendments: bool = True,
+               amendments: bool = False,
                filing_date: Optional[str] = None,
                date: Optional[str] = None):
         """
@@ -1079,18 +1079,15 @@ class Filing:
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
         if self.document and not self.document.is_binary() and not self.document.empty:
-            return self.document.download()
-        else:
-            return None
+            return str(self.document.download())
 
     @lru_cache(maxsize=4)
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
         xml_document = self.homepage.primary_xml_document
-        assert xml_document is not None
         if xml_document:
-            return xml_document.download()
-
+            return str(xml_document.download())
+        
     @lru_cache(maxsize=4)
     def text(self) -> str:
         """Convert the html of the main filing document to text"""
@@ -1510,10 +1507,10 @@ class Attachment:
         """Is this a binary document"""
         return self.extension in binary_extensions
 
-    def download(self):
+    def download(self) -> str | bytes:
         downloaded = download_file(self.url, as_text=self.is_text())
         assert downloaded is not None
-        return str(downloaded)
+        return downloaded
 
     def summary(self) -> pd.DataFrame:
         """Return a summary of this filing as a dataframe"""
