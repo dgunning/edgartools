@@ -1,11 +1,13 @@
-from functools import lru_cache
-from typing import Dict, Union, Tuple, Optional
 from datetime import datetime
+from functools import lru_cache
+from typing import Dict, List, Union, Tuple, Optional
+
 import pandas as pd
 from bs4 import BeautifulSoup
+from pydantic import BaseModel
+from rich import box
 from rich.console import Group, Text
 from rich.panel import Panel
-from rich import box
 
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import child_text
@@ -127,7 +129,7 @@ class XbrlFacts:
         return self.get_dei('DocumentPeriodEndDate')
 
     @lru_cache(maxsize=1)
-    def get_facts_for_namespace(self, namespace: str, end_date: str=None):
+    def get_facts_for_namespace(self, namespace: str, end_date: str = None):
         """Get the facts for the namespace and period"""
         end_date = end_date or self.period_end_date
         criteria = f"namespace=='{namespace}' and end_date=='{end_date}' and dimensions.isnull()"
@@ -139,12 +141,12 @@ class XbrlFacts:
             res = self.data.query(
                 f'namespace=="{namespace}" and end_date=="{end_date}" and dimensions=="{default_dimension}"')
         return (res
-                .filter(["fact", "value", "units", "start_date", "end_date",  "period"])
+                .filter(["fact", "value", "units", "start_date", "end_date", "period"])
                 .drop_duplicates()
                 .reset_index(drop=True)
                 )
 
-    def get_fact(self, fact: str, namespace: str, end_date:str=None):
+    def get_fact(self, fact: str, namespace: str, end_date: str = None):
         # Get the fact value for the namespace and period
         end_date = end_date or self.period_end_date
         facts = self.get_facts_for_namespace(namespace=namespace, end_date=end_date)
@@ -188,6 +190,12 @@ class XbrlFacts:
         )
 
 
+class ReportingPeriod(BaseModel):
+    start_date: datetime
+    end_date: datetime
+    period_type: str
+
+
 class FilingXbrl:
     """
     Represents the XBRL data for a single filing.
@@ -225,6 +233,7 @@ class FilingXbrl:
         return self.facts.get_dei('DocumentFiscalYearFocus')
 
     @property
+    @lru_cache(maxsize=1)
     def fiscal_period_focus(self):
         return self.facts.get_dei('DocumentFiscalPeriodFocus')
 
@@ -244,6 +253,118 @@ class FilingXbrl:
     @property
     def period_end_date(self):
         return self.facts.period_end_date
+
+    def get_periods(self,
+                    period_type: str = None,
+                    min_count=8) -> Optional[List[Tuple[str, str]]]:
+        """
+        Get the periods in the filing. For Fiscal years,
+        it returns a Tuple of the years
+        For quarters, it returns a List of Tuple of the quarters
+            e.g [('2017-02-01', '2017-04-30'), ('2016-02-01', '2016-04-30')]
+        """
+        # Ensure 'data' is a DataFrame to avoid in-place modifications on slices
+        data = self.facts.data.copy()
+        data['start_date'] = pd.to_datetime(data['start_date']).dt.normalize()
+        data['end_date'] = pd.to_datetime(data['end_date']).dt.normalize()
+        data = data.copy()
+
+        # Filter for valid entries using .loc with a condition
+        condition = data['dimensions'].isna()
+        filtered_data = data.loc[condition].copy()
+
+        if filtered_data.empty:
+            return []
+
+        filtered_data.loc[:, 'duration_days'] = (
+                filtered_data.loc[:, 'end_date'] - filtered_data.loc[:, 'start_date']).dt.days
+
+        # Define the period type based on the duration in days
+
+        def determine_period_type(days):
+            if days == 0:
+                return 'instant'
+            elif 75 <= days <= 105:
+                return 'quarter'
+            elif 335 <= days <= 395:
+                return 'year'
+            else:
+                return 'other'
+
+        filtered_data.loc[:, 'period_type'] = filtered_data['duration_days'].apply(determine_period_type)
+
+        # Filter by period type
+        if period_type:
+            filtered_data = filtered_data[filtered_data['period_type'] == period_type]
+
+        # Count occurrences of each unique period
+        period_counts = filtered_data.filter(
+            ['start_date', 'end_date', 'period_type']).value_counts().to_frame().reset_index()
+
+        # Optionally filter periods by occurrence count
+        period_counts = period_counts[period_counts['count'] > min_count]
+
+        # Convert start_date and end_date back to str 'YYYY-MM-DD' format
+        period_counts['start_date'] = period_counts['start_date'].dt.strftime('%Y-%m-%d')
+        period_counts['end_date'] = period_counts['end_date'].dt.strftime('%Y-%m-%d')
+
+        # Sort by start date descending
+        period_counts = period_counts.sort_values('start_date', ascending=False)
+
+        # Return a list of tuples containing start and end dates
+        return [tuple(r) for r in
+                period_counts.filter(['start_date', 'end_date']).to_numpy()] if not period_counts.empty else None
+
+    def get_facts_by_periods(self):
+        """
+        Get the facts for the specified periods.
+        This method filters the facts data for the specified periods and
+        returns a DataFrame with the facts for the specified periods.
+
+        |    | fact                                  | 2017-12-31   | 2016-12-31   |   2015-12-31 |
+        |---:|:--------------------------------------|:-------------|:-------------|-------------:|
+        |  0 | AdjustedGainLossOnSaleOfBusiness      | -25101000    | 0            |            0 |
+        |  1 | AdjustmentToCapitalIncomeTax          |              |              |     -1768000 |
+        """
+        # What is the period type?
+        if self.fiscal_period_focus == 'FY':
+            period_type = 'year'
+        elif self.fiscal_period_focus.startswith('Q'):
+            period_type = 'quarter'
+        else:
+            period_type = 'None'
+        periods = self.get_periods(period_type=period_type)
+
+        # Adding a tuple column for start and end date in the DataFrame for easier filtering
+        data = self.facts.data.copy()
+        # Adding a tuple column for start and end date in the DataFrame for easier filtering
+        data['period_tuple'] = list(zip(data['start_date'], data['end_date']))
+
+        # Filter the data for the specified periods and where dimensions are null
+        df_filtered = data[
+            (data['period_tuple'].isin(periods)) &
+            data['dimensions'].isnull()
+            ]
+
+        # Pivot the filtered data
+        # Using 'end_date' as columns to display data based on the period's end date
+        facts_by_period = df_filtered.pivot_table(
+            index='fact',
+            columns='end_date',
+            values='value',
+            aggfunc='first'
+            # Using 'first' to handle duplicates, other options could be 'sum' or 'mean' based on context
+        )
+
+        # Replace NaN with pd.NA for better compatibility across different data types
+        facts_by_period = facts_by_period.fillna(pd.NA)
+
+        # Sort the columns in descending order to have the latest period first
+        facts_by_period = facts_by_period[sorted(facts_by_period.columns, reverse=True)].reset_index()
+
+        # Remove the index name
+        facts_by_period.columns.name = None
+        return facts_by_period
 
     @property
     def years(self):

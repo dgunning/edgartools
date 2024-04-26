@@ -1,9 +1,10 @@
-from edgar._xbrl import FilingXbrl, XbrlFacts, get_period
-from edgar import Filing
 from pathlib import Path
+
 import pandas as pd
 from rich import print
 
+from edgar import Filing
+from edgar._xbrl import FilingXbrl, XbrlFacts, get_period
 
 pd.options.display.max_columns = 10
 
@@ -43,16 +44,20 @@ def test_filing_get_facts():
                                                              'EntityWellKnownSeasonedIssuer',
                                                              'DocumentPeriodEndDate']])
 
+
 def test_xbrl_gaap_facts():
     gaap_facts = CARBO_CERAMICS_FILING_XBRL.gaap
     assert all([fact in gaap_facts.fact.tolist() for fact in ['CostOfGoodsAndServicesSold',
                                                               'IncomeTaxesPaid']])
+
+
 def test_get_fact():
     xbrl_facts = CARBO_CERAMICS_FILING_XBRL.facts
     assert xbrl_facts.get_fact(fact='GrossProfit', namespace='us-gaap', end_date='2017-12-31') == '-53325000'
     assert xbrl_facts.get_fact(fact='GrossProfit', namespace='us-gaap', end_date='2016-12-31') == '-85014000'
     assert xbrl_facts.get_fact(fact='GrossProfit', namespace='dei', end_date='2017-12-31') is None
-    assert xbrl_facts.get_fact(fact='EntityRegistrantName', namespace='dei', end_date='2017-12-31') == 'CARBO CERAMICS INC'
+    assert xbrl_facts.get_fact(fact='EntityRegistrantName', namespace='dei',
+                               end_date='2017-12-31') == 'CARBO CERAMICS INC'
 
 
 def test_xbrl_facts_get_dei():
@@ -67,15 +72,13 @@ def test_xbrl_facts_get_dei():
     assert xbrl_facts.get_dei("EntityFilerCategory") == 'Accelerated Filer'
     assert xbrl_facts.period_end_date == '2017-12-31'
 
+
 def test_xbrl_get_dei():
-    filing = Filing(company='ADVANCED MICRO DEVICES INC', cik=2488, form='10-K', filing_date='2023-02-27', accession_no='0000002488-23-000047')
+    filing = Filing(company='ADVANCED MICRO DEVICES INC', cik=2488, form='10-K', filing_date='2023-02-27',
+                    accession_no='0000002488-23-000047')
     xbrl = filing.xbrl()
     assert xbrl.facts.get_dei('DocumentPeriodEndDate') == '2022-12-31'
     assert xbrl.period_end_date == '2022-12-31'
-
-
-
-
 
 
 def test_default_gaap_dimension():
@@ -92,6 +95,7 @@ def test_get_period_for_start_and_end_dates():
     assert get_period("2024-01-01", "2024-01-30") == '2024-01-01 to 2024-01-30'
     assert get_period("2023-02-01", "2023-02-28") == 'Feb 2023'
     assert get_period("2024-02-01", "2024-02-29") == 'Feb 2024'
+
 
 def test_period_column_set_for_filing():
     data = (CARBO_CERAMICS_FILING_XBRL
@@ -110,16 +114,17 @@ def test_filing_xbrl_years_quarters():
     assert CARBO_CERAMICS_FILING_XBRL.facts.years == ['2011', '2014', '2015', '2016', '2017', '2018', '2019', '2020']
 
 
-
 def test_find_facts_by_value():
-    filing = Filing(company='Tesla, Inc.', cik=1318605, form='10-K', filing_date='2023-01-31', accession_no='0000950170-23-001409')
+    filing = Filing(company='Tesla, Inc.', cik=1318605, form='10-K', filing_date='2023-01-31',
+                    accession_no='0000950170-23-001409')
     xbrl = filing.xbrl()
-    facts:XbrlFacts = xbrl.facts.get_facts_for_namespace('us-gaap', end_date='2022-12-31')
+    facts: XbrlFacts = xbrl.facts.get_facts_for_namespace('us-gaap', end_date='2022-12-31')
     print(facts.query("value.str.contains('60609')"))
 
-    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2023-11-03', accession_no='0000320193-23-000106')
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2023-11-03',
+                    accession_no='0000320193-23-000106')
     xbrl = filing.xbrl()
-    facts:XbrlFacts = xbrl.facts.get_facts_for_namespace('us-gaap', end_date='2023-09-30')
+    facts: XbrlFacts = xbrl.facts.get_facts_for_namespace('us-gaap', end_date='2023-09-30')
     print(facts.query("value.str.contains('214')"))
 
 
@@ -143,3 +148,35 @@ def test_read_inline_xbrl():
     # Convert the modified tree back to a string
     cleaned_html = ET.tostring(root, encoding='unicode')
     print(cleaned_html)
+
+
+def test_get_get_periods_for_xbrl_facts():
+    print()
+    periods = CARBO_CERAMICS_FILING_XBRL.get_periods()
+    assert len(periods) == 5
+    # assert periods[0].period_type == 'instant'
+    # assert periods[0].start_date == Timestamp('2017-12-31 00:00:00')
+
+    periods = CARBO_CERAMICS_FILING_XBRL.get_periods(period_type='year')
+    print(periods)
+    assert len(periods) == 3
+    print(CARBO_CERAMICS_FILING_XBRL.fiscal_period_focus)
+
+
+def test_get_periods():
+    periods = CARBO_CERAMICS_FILING_XBRL.get_periods(period_type='year')
+    assert periods == [('2017-01-01', '2017-12-31'),('2016-01-01', '2016-12-31'),('2015-01-01', '2015-12-31')]
+
+    periods = CARBO_CERAMICS_FILING_XBRL.get_periods(period_type='instant')
+    assert periods == [('2017-12-31', '2017-12-31'), ('2016-12-31', '2016-12-31')]
+
+
+def test_get_fact_by_periods():
+    # 10-K filing
+    data = CARBO_CERAMICS_FILING_XBRL.get_facts_by_periods()
+    assert data.columns.tolist() == ['fact', '2017-12-31', '2016-12-31', '2015-12-31']
+
+    # 10-Q filing
+    filing = Filing(form='10-Q', filing_date='2024-04-25', company='1ST SOURCE CORP', cik=34782, accession_no='0000034782-24-000054')
+    data = filing.xbrl().get_facts_by_periods()
+    assert data.columns.tolist() == ['fact', '2024-03-31', '2023-03-31']
