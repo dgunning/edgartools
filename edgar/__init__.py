@@ -23,6 +23,7 @@ from edgar.entities import (Company,
                             get_cik_lookup_data)
 from edgar._filings import (Filing,
                             Filings,
+                            FilingHeader,
                             CurrentFilings,
                             Attachment,
                             Attachments,

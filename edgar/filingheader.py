@@ -1,7 +1,7 @@
 import re
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
-from rich.table import Table
+from rich.table import Table, Column
 from rich.panel import Panel
 from rich.columns import Columns
 from rich.text import Text
@@ -18,9 +18,9 @@ mailing_address_title = "\U0001F4EC Mailing Address"
 business_address_title = "\U0001F4EC Business Address"
 company_title = "\U0001F3E2 Company Information"
 filing_information_title = "\U0001F4D1 Filing Information"
-reporting_owner_title = "\U0001F468 REPORTING OWNER"
-issuer_title = "\U0001F4B5 ISSUER"
-filing_title = "\U0001F4D1 FILING"
+reporting_owner_title = "\U0001F468 Reporting Owner"
+issuer_title = "\U0001F4B5 Issuer"
+filing_title = "\U0001F4D1 Filing"
 
 __all__ = ['FilingMetadata', 'CompanyInformation', 'FilingInformation', 'FormerCompany', 'Filer', 'Owner',
            'ReportingOwner', 'SubjectCompany', 'Issuer', 'FilingHeader']
@@ -101,7 +101,7 @@ class CompanyInformation:
     fiscal_year_end: str
 
     def __rich__(self):
-        table = Table("Company", "Industry", "Incorporated", "Year End",
+        table = Table(Column("Company", style="bold deep_sky_blue1"), "Industry", "Incorporated", "Year End",
                       box=box.ROUNDED)
         table.add_row(f"{self.name} [{self.cik}]",
                       self.sic,
@@ -159,7 +159,7 @@ class Filer:
 
         return Panel(
             Group(*filer_renderables),
-            title="FILER"
+            title="Filer"
         )
 
     def __repr__(self):
@@ -185,7 +185,7 @@ class ReportingOwner:
 
         # Owner Table
         if self.owner:
-            reporting_owner_table = Table("Owner", "CIK", box=box.ROUNDED)
+            reporting_owner_table = Table(Column("Owner", style="bold deep_sky_blue1"), "CIK", box=box.ROUNDED)
             reporting_owner_table.add_row(self.owner.name, self.owner.cik)
 
             top_renderables = [reporting_owner_table]
@@ -248,7 +248,7 @@ class SubjectCompany:
             Group(
                 *subject_company_renderables
             ),
-            title="SUBJECT COMPANY"
+            title="Subject Company"
         )
 
     def __repr__(self):
@@ -262,7 +262,7 @@ class Issuer:
     mailing_address: Address
 
     def __rich__(self):
-        issuer_table = Table("Company", "CIK", "SIC", "Fiscal Year End",
+        issuer_table = Table(Column("Company", style="bold deep_sky_blue1"), "CIK", "SIC", "Fiscal Year End",
                              box=box.ROUNDED)
         issuer_table.add_row(self.company_information.name,
                              self.company_information.cik,
