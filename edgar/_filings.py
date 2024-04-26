@@ -643,7 +643,7 @@ class Filings:
 
     def to_dict(self, max_rows: int = 1000) -> Dict[str, Any]:
         """Return the filings as a json string but only the first max_rows records"""
-        return cast(dict[str, Any], self.to_pandas().head(max_rows).to_dict(orient="records"))
+        return cast(Dict[str, Any], self.to_pandas().head(max_rows).to_dict(orient="records"))
 
     def __getitem__(self, item):
         return self.get_filing_at(item)
