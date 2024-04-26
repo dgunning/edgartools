@@ -1,0 +1,11 @@
+{
+  "include": ["edgar"],
+  "defineConstant": {
+    "DEBUG": true
+  },
+  "venv": ".venv",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportAttributeAccessIssue": false,
+  "pythonVersion": "3.11"
+}
