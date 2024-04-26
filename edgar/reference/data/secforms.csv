@@ -56,19 +56,19 @@ Form,Description
 40FR12B,Securities registration by certain Canadian issuers under Section 12(b)
 40FR12G,Securities registration by certain Canadian issuers under Section 12(g)
 40-OIP,Applications under Investment Company/Advisers Acts reviewed by insurance office
-424A,Prospectus filed under Rule 424(a)
-424B1,Prospectus filed under Rule 424(b)(1)
-424B2,Prospectus filed under Rule 424(b)(2)
-424B3,Prospectus with substantive changes filed under Rule 424(b)(3)
-424B4,Prospectus after pricing filed under Rule 424(b)(4)
-424B5,Prospectus with term sheet filed under Rule 424(b)(5)
-424B7,Prospectus with additional securities filed under Rule 424(b)(7)
-424B8,Final prospectus for small offerings under Rule 424(b)(8)
+424A,Prospectus outlining the details of securities offered by a company
+424B1,Detailed prospectus provided at the start of a public offering
+424B2,Updated prospectus with final terms of the securities offered
+424B3,Revised prospectus with significant changes to previously shared information
+424B4,Final prospectus issued after the securities have been priced
+424B5,Prospectus that includes a term sheet summarizing key security terms
+424B7,Prospectus for offering additional securities not included initially
+424B8,"Final prospectus for smaller, straightforward offerings"
 424H,Preliminary prospectus filed under Rule 424(h)
 425,Prospectus in business combination transactions under Rule 425
 424I,Prospectus filed under Rule 424(i)(1)
-485APOS,Post-effective amendment under Rule 485(a)
-485BPOS,Post-effective amendment under Rule 485(b)
+485APOS,"Amendment filed after the effectiveness of a fund's registration, under Rule 485(a)"
+485BPOS,"Amendment filed after the effectiveness of a fund's registration, detailing final changes, under Rule 485(b)"
 485BXT,Amendment to designate new effective date under Rules 485(a)/(b)
 486APOS,Post-effective amendment under Rule 486(a)
 486BPOS,Post-effective amendment under Rule 486(b)
