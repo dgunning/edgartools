@@ -993,7 +993,7 @@ def _get_cached_filings(year: Optional[Years] = None,
                         form: Optional[Union[str, List[IntString]]] = None,
                         amendments: bool = True,
                         filing_date: Optional[str] = None,
-                        index="form") -> Filings | None:
+                        index="form") -> Union[Filings, None]:
     # Get the filings but cache the result
     return get_filings(year=year, quarter=quarter, form=form, amendments=amendments, filing_date=filing_date,
                        index=index)
@@ -1507,7 +1507,7 @@ class Attachment:
         """Is this a binary document"""
         return self.extension in binary_extensions
 
-    def download(self) -> str | bytes:
+    def download(self) -> Optional[bytes]:
         downloaded = download_file(self.url, as_text=self.is_text())
         assert downloaded is not None
         return downloaded
