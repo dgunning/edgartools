@@ -1117,7 +1117,6 @@ class Filing:
     def markdown(self) -> str:
         """return the markdown version of this filing html"""
         html = self.html()
-        assert html is not None
         if html:
             return html_to_markdown(get_clean_html(html))
         else:
