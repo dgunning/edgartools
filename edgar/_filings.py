@@ -11,7 +11,7 @@ from functools import lru_cache
 from io import BytesIO
 from os import PathLike
 from pathlib import Path
-from typing import Tuple, List, Dict, Union, Optional, Any
+from typing import Tuple, List, Dict, Union, Optional, Any, cast
 
 import httpx
 import numpy as np
@@ -168,7 +168,7 @@ def available_quarters() -> YearAndQuarters:
 
 
 def expand_quarters(year: Years,
-                    quarter: int = None) -> YearAndQuarters:
+                    quarter: Optional[Quarters] = None) -> YearAndQuarters:
     """
     Expand the list of years and a list of quarters to a full list of tuples covering the full range
     :param year: The year or years
@@ -335,7 +335,7 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
 
 
 def fetch_daily_filing_index(date: str,
-                             client: Union[httpx.Client, httpx.AsyncClient] = None,
+                             client: Optional[Union[httpx.Client, httpx.AsyncClient]] = None,
                              index: str = 'form'):
     year, month, day = date.split("-")
     quarter = (int(month) - 1) // 3 + 1
@@ -349,8 +349,9 @@ def fetch_filing_index_at_url(url: str,
                               client: Union[httpx.Client, httpx.AsyncClient],
                               index: str):
     index_text = download_text(url=url, client=client)
+    assert index_text is not None
     if index == "xbrl":
-        index_table: pa.Table = read_pipe_delimited_index(index_text)
+        index_table: pa.Table = read_pipe_delimited_index(str(index_text))
     else:
         # Read as a fixed width index file
         file_specs: FileSpecs = form_specs if index == "form" else company_specs
@@ -418,7 +419,7 @@ class Filings:
 
     def __init__(self,
                  filing_index: pa.Table,
-                 original_state: FilingsState = None):
+                 original_state: Optional[FilingsState] = None):
         self.data: pa.Table = filing_index
         self.data_pager = DataPager(self.data)
         # This keeps track of where the index should start in case this is just a page in the Filings
@@ -448,9 +449,9 @@ class Filings:
         )
 
     @property
-    def date_range(self) -> Tuple[datetime]:
+    def date_range(self) -> Tuple[datetime, datetime]:
         """Return a tuple of the start and end dates in the filing index"""
-        min_max_dates = pc.min_max(self.data['filing_date']).as_py()
+        min_max_dates: dict[str, datetime] = pc.min_max(self.data['filing_date']).as_py()
         return min_max_dates['min'], min_max_dates['max']
 
     @property
@@ -474,10 +475,10 @@ class Filings:
         return filings
 
     def filter(self,
-               form: Union[str, List[IntString]] = None,
-               amendments: bool = None,
-               filing_date: str = None,
-               date: str = None):
+               form: Optional[Union[str, List[IntString]]] = None,
+               amendments: bool = False,
+               filing_date: Optional[str] = None,
+               date: Optional[str] = None):
         """
         Get some filings
 
@@ -506,9 +507,12 @@ class Filings:
         filing_index = self.data
         forms = form
 
+        if isinstance(forms, list):
+            forms = [str(f) for f in forms]
+
         # Filter by form
         if forms:
-            filing_index = filter_by_form(filing_index, forms, amendments=amendments)
+            filing_index = filter_by_form(filing_index, form=forms, amendments=amendments)
 
         # filing_date and date are aliases
         filing_date = filing_date or date
@@ -639,7 +643,7 @@ class Filings:
 
     def to_dict(self, max_rows: int = 1000) -> Dict[str, Any]:
         """Return the filings as a json string but only the first max_rows records"""
-        return self.to_pandas().head(max_rows).to_dict(orient="records")
+        return cast(dict[str, Any], self.to_pandas().head(max_rows).to_dict(orient="records"))
 
     def __getitem__(self, item):
         return self.get_filing_at(item)
@@ -692,11 +696,11 @@ class Filings:
         return repr_rich(self.__rich__())
 
 
-def get_filings(year: Years = None,
-                quarter: Quarters = None,
-                form: Union[str, List[IntString]] = None,
+def get_filings(year: Optional[Years] = None,
+                quarter: Optional[Quarters] = None,
+                form: Optional[Union[str, List[IntString]]] = None,
                 amendments: bool = True,
-                filing_date: str = None,
+                filing_date: Optional[str] = None,
                 index="form") -> Optional[Filings]:
     """
     Downloads the filing index for a given year or list of years, and a quarter or list of quarters.
@@ -774,6 +778,9 @@ def get_filings(year: Years = None,
     if form or filing_date:
         filings = filings.filter(form=form, amendments=amendments, filing_date=filing_date)
 
+    if not filings:
+        return None
+
     # Finally sort by filing date
     filings = Filings(filings.data.sort_by([("filing_date", "descending")]))
     return filings
@@ -815,10 +822,10 @@ def parse_summary(summary: str):
     # Convert matches into a dictionary
     fields = {k.strip(): (int(v) if v.isdigit() else v) for k, v in matches}
 
-    return datetime.strptime(fields.get('Filed'), '%Y-%m-%d').date(), fields.get('AccNo')
+    return datetime.strptime(str(fields.get('Filed', '')), '%Y-%m-%d').date(), fields.get('AccNo')
 
 
-def get_current_url(atom: True,
+def get_current_url(atom: bool = True,
                     count: int = 100,
                     start: int = 0,
                     form: str = '',
@@ -835,9 +842,9 @@ def get_current_url(atom: True,
 
 
 @lru_cache(maxsize=32)
-def get_current_entries_on_page(count: int, start: int, form: str = None, owner: str = 'include'):
+def get_current_entries_on_page(count: int, start: int, form: Optional[str] = None, owner: str = 'include'):
     client = http_client()
-    url = get_current_url(count=count, start=start, form=form, owner=owner, atom=True)
+    url = get_current_url(count=count, start=start, form=form if form else '', owner=owner, atom=True)
     response = retry_call(client.get, fargs=[url], tries=5, delay=3)
 
     soup = BeautifulSoup(response.text, features="xml")
@@ -917,8 +924,11 @@ class CurrentFilings(Filings):
             self._start = start
             return self
 
-    def __getitem__(self, item):
-        return self.get(item)
+    def __getitem__(self, item):  # type: ignore
+        item = self.get(item)
+        assert item is not None
+        return item
+
 
     def get(self, index_or_accession_number: IntString):
         if isinstance(index_or_accession_number, int) or index_or_accession_number.isdigit():
@@ -978,12 +988,12 @@ class CurrentFilings(Filings):
 
 
 @lru_cache(maxsize=8)
-def _get_cached_filings(year: Years = None,
-                        quarter: Quarters = None,
-                        form: Union[str, List[IntString]] = None,
+def _get_cached_filings(year: Optional[Years] = None,
+                        quarter: Optional[Quarters] = None,
+                        form: Optional[Union[str, List[IntString]]] = None,
                         amendments: bool = True,
-                        filing_date: str = None,
-                        index="form") -> Filings:
+                        filing_date: Optional[str] = None,
+                        index="form") -> Filings | None:
     # Get the filings but cache the result
     return get_filings(year=year, quarter=quarter, form=form, amendments=amendments, filing_date=filing_date,
                        index=index)
@@ -1069,17 +1079,16 @@ class Filing:
 
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
-        if not self.document.is_binary():
-            if not self.document.empty:
-                return self.document.download()
+        if self.document and not self.document.is_binary() and not self.document.empty:
+            return str(self.document.download())
 
     @lru_cache(maxsize=4)
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
-        xml_document: Attachment = self.homepage.primary_xml_document
+        xml_document = self.homepage.primary_xml_document
         if xml_document:
-            return xml_document.download()
-
+            return str(xml_document.download())
+        
     @lru_cache(maxsize=4)
     def text(self) -> str:
         """Convert the html of the main filing document to text"""
@@ -1090,8 +1099,9 @@ class Filing:
             # Some Form types like UPLOAD don't have a primary document. Look for a TEXT EXTRACT attachment
             # Look for an attachment that is TEXT EXTRACT
             text_extract_attachments = self.attachments.query("Type == 'TEXT-EXTRACT'")
-            if len(text_extract_attachments) > 0:
+            if len(text_extract_attachments) > 0 and text_extract_attachments[0] is not None:
                 text_extract_attachment = text_extract_attachments[0]
+                assert text_extract_attachment is not None
                 return download_text_between_tags(text_extract_attachment.url, "TEXT")
             else:
                 # Use the full text submission
@@ -1100,7 +1110,9 @@ class Filing:
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
-        return download_file(self.text_url)
+        downloaded = download_file(self.text_url, as_text=True)
+        assert downloaded is not None
+        return str(downloaded)
 
     def markdown(self) -> str:
         """return the markdown version of this filing html"""
@@ -1109,8 +1121,7 @@ class Filing:
             return html_to_markdown(get_clean_html(html))
         else:
             text_content = self.text()
-            if text_content:
-                return text_to_markdown(text_content)
+            return text_to_markdown(text_content)
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""
@@ -1131,7 +1142,7 @@ class Filing:
         xbrl_document = self.homepage.xbrl_document
         if xbrl_document:
             xbrl_text = xbrl_document.download()
-            return FilingXbrl.parse(xbrl_text)
+            return FilingXbrl.parse(str(xbrl_text))
 
     def save(self, directory_or_file: PathLike):
         """Save the filing to a directory path or a file using pickle.dump
@@ -1170,11 +1181,11 @@ class Filing:
         """
         assert all(key in data for key in ['cik', 'company', 'form', 'filing_date', 'accession_no']), \
             "The dict must have the keys cik, company, form, filing_date, accession_no"
-        return cls(cik=data['cik'],
-                   company=data['company'],
-                   form=data['form'],
-                   filing_date=data['filing_date'],
-                   accession_no=data['accession_no'])
+        return cls(cik=int(data['cik']),
+                   company=str(data['company']),
+                   form=str(data['form']),
+                   filing_date=str(data['filing_date']),
+                   accession_no=str(data['accession_no']))
 
     @classmethod
     def from_json(cls, path: str):
@@ -1208,11 +1219,14 @@ class Filing:
 
     def open(self):
         """Open the main filing document"""
+        assert self.document is not None
         webbrowser.open(self.document.url)
 
     @lru_cache(maxsize=1)
     def sections(self) -> List[str]:
-        return html_sections(self.html())
+        html = self.html()
+        assert html is not None
+        return html_sections(html)
 
     @lru_cache(maxsize=1)
     def __get_bm25_search_index(self):
@@ -1250,7 +1264,8 @@ class Filing:
         """
         if not self._filing_homepage:
             homepage_html = download_text(self.homepage_url)
-            self._filing_homepage = FilingHomepage.from_html(homepage_html,
+            assert homepage_html is not None            
+            self._filing_homepage = FilingHomepage.from_html(str(homepage_html),
                                                              url=self.homepage_url,
                                                              filing=self)
         return self._filing_homepage
@@ -1271,8 +1286,11 @@ class Filing:
     def as_company_filing(self):
         """Get this filing as a company filing. Company Filings have more information"""
         company = self.get_entity()
+        if not company:
+            return None
+
         filings = company.get_filings(accession_number=self.accession_no)
-        if not filings.empty:
+        if filings and not filings.empty:
             return filings[0]
 
     @lru_cache(maxsize=1)
@@ -1283,8 +1301,11 @@ class Filing:
         then this filing then get the related filings
         """
         company = self.get_entity()
+        if not company:
+            return
+
         filings = company.get_filings(accession_number=self.accession_no)
-        if not filings.empty:
+        if filings and not filings.empty:
             file_number = filings[0].file_number
             return company.get_filings(file_number=file_number,
                                        sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")])
@@ -1332,7 +1353,7 @@ class Filing:
         summary_table.add_row(self.accession_no, str(self.filing_date))
 
         homepage_url = Text(f"\U0001F3E0 {self.homepage_url.replace('//www.', '//')}")
-        primary_doc_url = Text(f"\U0001F4C4 {self.document.url.replace('//www.', '//')}")
+        primary_doc_url = Text(f"\U0001F4C4 {self.document.url.replace('//www.', '//') if self.document else ''}")
         submission_text_url = Text(f"\U0001F4DC {self.text_url.replace('//www.', '//')}")
 
         links_table = Table(
@@ -1378,7 +1399,9 @@ class Attachments:
 
     def __next__(self):
         if self.n < len(self.files):
-            attachment: Attachment = self[self.n]
+            attachment = self[self.n]
+            assert attachment is not None
+
             self.n += 1
             return attachment
         else:
@@ -1402,7 +1425,7 @@ class Attachments:
                       title_style="bold",
                       row_styles=["", "bold"])
         for index, row in self.files.iterrows():
-            table.add_row(str(index), row.Document, row["Type"], row.Description, display_size(row.Size))
+            table.add_row(str(index), str(row.Document), str(row["Type"]), str(row.Description), display_size(row.Size))
         return table
 
     def __repr__(self):
@@ -1484,8 +1507,10 @@ class Attachment:
         """Is this a binary document"""
         return self.extension in binary_extensions
 
-    def download(self):
-        return download_file(self.url, as_text=self.is_text())
+    def download(self) -> str | bytes:
+        downloaded = download_file(self.url, as_text=self.is_text())
+        assert downloaded is not None
+        return downloaded
 
     def summary(self) -> pd.DataFrame:
         """Return a summary of this filing as a dataframe"""
@@ -1557,8 +1582,10 @@ class FilingHomepage:
                  seq: int) -> Attachment:
         """ get the filing document that matches the seq"""
         res = self._files.query(f"Seq=='{seq}'")
-        if not res.empty:
-            return Attachment.from_dataframe_row(res.iloc[0])
+        if res.empty:
+            raise ValueError(f"unable to retreive filing doc for seq {seq}")
+        
+        return Attachment.from_dataframe_row(res.iloc[0])
 
     def open(self):
         webbrowser.open(self.url)
@@ -1651,7 +1678,7 @@ class FilingHomepage:
         for table in tables:
             summary = table.attrs.get("summary")
             rows = table.find_all("tr")
-            column_names = [th.text for th in rows[0].find_all("th")] + ["Url"]
+            column_names: Any = [th.text for th in rows[0].find_all("th")] + ["Url"]
             records = []
 
             # Add the rows from the table

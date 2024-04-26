@@ -1,5 +1,4 @@
-from edgar import *
-from edgar._markdown import MarkdownContent
+from edgar import Filing
 
 def test_get_text_of_upload_form():
     filing = Filing(form='UPLOAD', filing_date='2024-03-01', company='Antelope Enterprise Holdings Ltd', cik=1470683,

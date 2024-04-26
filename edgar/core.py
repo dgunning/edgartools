@@ -364,7 +364,7 @@ def download_file(url: str,
         r.raise_for_status()
 
 
-def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
+def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = None) -> str | None:
     return download_file(url, client, as_text=True)
 
 

@@ -1,7 +1,7 @@
 
-from edgar._filings import get_current_filings, parse_summary, CurrentFilings, get_filings
-from edgar import get_by_accession_number
+from edgar._filings import get_current_filings, parse_summary, CurrentFilings
 import datetime
+import pytest
 
 def test_get_current_entries():
     print()
@@ -69,8 +69,10 @@ def test_current_filings_get_by_index_on_page2():
     assert filing
     assert filing.accession_no == accession_number
     assert filing_page2[79]
-    # The boundary is 80
-    assert filing_page2[80] is None
+
+    with pytest.raises(AssertionError):
+        # The boundary is 80
+        filing_page2[80]
 
 
 def test_current_filings_get_accession_number():
