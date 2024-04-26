@@ -924,10 +924,11 @@ class CurrentFilings(Filings):
             self._start = start
             return self
 
-    def __getitem__(self, item):
+    def __getitem__(self, item):  # type: ignore
         item = self.get(item)
         assert item is not None
         return item
+
 
     def get(self, index_or_accession_number: IntString):
         if isinstance(index_or_accession_number, int) or index_or_accession_number.isdigit():
