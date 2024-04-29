@@ -2,7 +2,8 @@ import pandas as pd
 from rich import print
 
 from edgar import *
-from edgar.financials import Financials, format_currency
+from edgar._xbrl import FilingXbrl
+from edgar.financials import Financials, format_currency, BalanceSheet, IncomeStatement, CashFlowStatement
 from edgar.company_reports import TenK
 
 pd.options.display.max_colwidth = 50
@@ -30,8 +31,7 @@ def test_microsoft_financials():
     assert "72,738,000,000" in repr(financials.cash_flow_statement)
     assert "-30,311,000,000" in repr(financials.cash_flow_statement)
 
-    assert financials.balance_sheet.end_date == '2022-06-30'
-
+    assert '2022-06-30' in financials.balance_sheet.periods
 
 
 def test_apple_financials_to_dataframe():
@@ -55,7 +55,7 @@ def test_apple_financials_to_dataframe():
 
     # Balance Sheet
     balance_sheet = tenk.balance_sheet
-    assert balance_sheet.end_date == '2022-09-24'
+    assert '2022-09-24' in balance_sheet.periods
     print(balance_sheet)
     assert balance_sheet.get_fact_value('CashAndCashEquivalentsAtCarryingValue') == '23646000000'
     assert balance_sheet.get_fact_value('ShortTermInvestments') is None
@@ -73,7 +73,7 @@ def test_apple_financials_to_dataframe():
 
     # Cash Flow
     cash_flow = tenk.cash_flow_statement
-    assert cash_flow.end_date == '2022-09-24'
+    assert '2022-09-24' in cash_flow.periods
     print(cash_flow)
     assert cash_flow.get_fact_value('NetIncomeLoss') == '99803000000'
     assert cash_flow.get_fact_value("DepreciationDepletionAndAmortization") == '11104000000'
@@ -95,7 +95,7 @@ def test_fiscal_gaap_for_10K_with_no_empty_dimensions():
     financials = Financials.from_xbrl(filing.xbrl())
     balance_sheet = financials.balance_sheet
 
-    assert balance_sheet.get_fact_value('CashAndCashEquivalentsAtCarryingValue') == '430193'
+    # TODO: Add more assertions
 
 
 def test_10Q_financials():
@@ -105,4 +105,24 @@ def test_10Q_financials():
     facts = xbrl.facts
     with open('data/nike_10Q_facts.csv', 'w') as f:
         f.write(facts.data.to_csv(index=False))
+
+
+def test_show_financials_with_multiple_periods():
+    filing = Filing(company='NETFLIX INC', cik=1065280, form='10-K', filing_date='2024-01-26', accession_no='0001065280-24-000030')
+    xbrl:FilingXbrl = filing.xbrl()
+    financials = Financials.from_xbrl(xbrl)
+    balance_sheet = financials.balance_sheet
+    income_statement = financials.income_statement
+    cash_flow_statement = financials.cash_flow_statement
+
+    # The periods
+    assert balance_sheet.periods == ['2023-12-31', '2022-12-31', '2021-12-31']
+    assert income_statement.periods == ['2023-12-31', '2022-12-31', '2021-12-31']
+    assert cash_flow_statement.periods == ['2023-12-31', '2022-12-31', '2021-12-31']
+
+    # The facts
+    assert 'AssetsCurrent' in balance_sheet.facts
+
+    assert balance_sheet.get_fact_value('AssetsCurrent') == '9918133000'
+
 

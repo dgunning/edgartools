@@ -1,7 +1,6 @@
 import re
 from functools import lru_cache
-from typing import Optional
-from typing import Union, List
+from typing import Optional, Union, List, Any, Tuple
 
 import pandas as pd
 from pydantic import BaseModel
@@ -9,9 +8,10 @@ from rich import box
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
+from rich.text import Text
 
 from edgar._rich import repr_rich
-from edgar._xbrl import XbrlFacts, FilingXbrl
+from edgar._xbrl import FilingXbrl
 
 __all__ = [
     'Financials',
@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-def format_currency(value: Union[str, float], format_str: str = '{:,.0f}') -> str:
+def format_currency(value: Union[str, float], format_str: str = '{:>15,.0f}') -> str:
     if isinstance(value, str):
         if value.isdigit() or re.match(r"-?\d+\.?\d*", value):
             value = float(value)
@@ -36,21 +36,22 @@ def format_currency(value: Union[str, float], format_str: str = '{:,.0f}') -> st
 class FactRow(BaseModel):
     name: Union[str, List[str]]
     label: str
-    format: str = "{:,.0f}"
+    format: str = "{:>16,.0f}"
     total: bool = False
 
-    def get_value(self, facts: XbrlFacts, end_date: str, apply_format: bool = True):
+    def get_values(self, period_facts: pd.DataFrame, apply_format: bool = True) -> Optional[List[Any]]:
+        """
+        Get the values from facts for the periods
+        """
         fact_names = [self.name] if isinstance(self.name, str) else self.name
-        value: Optional[str] = None
         for name in fact_names:
-            value = facts.get_fact(fact=name, namespace='us-gaap', end_date=end_date)
-            if value:
-                break
-        if apply_format:
-            display_value = format_currency(value, format_str=self.format) if value else ""
-        else:
-            display_value = value
-        return display_value
+            if name in period_facts.index:
+                values = period_facts.loc[name].tolist()
+                if apply_format:
+                    return [format_currency(value, format_str=self.format) if not pd.isna(value) else "" for value in
+                            values]
+                else:
+                    return [value if not pd.isna(value) else "" for value in values]
 
 
 class HeaderRow(BaseModel):
@@ -58,69 +59,92 @@ class HeaderRow(BaseModel):
 
 
 class FactTable:
+    """
+    FactTable is a base class for Financial Tables like BalanceSheet, CashFlowStatement, IncomeStatement
+    """
     mapping = []
     title = ""
 
-    def __init__(self, facts: XbrlFacts, end_date: str = None):
-        self.facts: XbrlFacts = facts
-        self.end_date: str = end_date or self.facts.period_end_date
+    def __init__(self, filing_xbrl: FilingXbrl):
+        self.period_facts = filing_xbrl.get_fiscal_period_facts()
 
-    def to_dict(self):
-        return {row.label: self.facts.get_fact(fact=row.name, namespace='us-gaap', end_date=self.end_date)
-                for row in self.mapping}
+    @property
+    @lru_cache(maxsize=1)
+    def facts(self) -> List[str]:
+        """:return the list of facts in the table"""
+        return [row.name for row in self.mapping if isinstance(row, FactRow)]
 
-    def select_row_with_value(self, rows: List[FactRow]):
-        for row in rows:
-            value = row.get_value(self.facts, self.end_date)
-            if value:
-                return row
+    @property
+    def periods(self):
+        return self.period_facts.columns.tolist()
 
-    def get_fact_value(self, fact: str):
-        df = self.to_dataframe()
-        res = df[df.fact == fact]
-        if not res.empty:
-            return res.value.item()
+    def get_fact_value(self, fact: str) -> Optional[Any]:
+        """Get the latest value for a fact in the table"""
+        if fact not in self.period_facts.index:
+            return None
+        value = self.period_facts.loc[fact][0]
+        if value:
+            return value
 
-    @lru_cache(maxsize=2)
-    def to_dataframe(self):
-        rows = []
-        for row in self.mapping:
-            if isinstance(row, list):
-                row = self.select_row_with_value(row)
-                if not row:
-                    continue
-            if isinstance(row, FactRow):
-                value = row.get_value(self.facts, self.end_date, apply_format=False)
-                rows.append((row.name, row.label, value))
-        df = pd.DataFrame(rows, columns=['fact', 'label', 'value'])
-        return df
+    @lru_cache(maxsize=1)
+    def to_dataframe(self) -> pd.DataFrame:
+        """Create a dataframe containing the facts in the table"""
+        fact_table_df: pd.DataFrame = pd.DataFrame({'Fact': self.facts})
+        fact_table_df.to_dict()
+        # merge with self.period_facts
+        return (fact_table_df.merge(self.period_facts, how='left', left_on='Fact', right_index=True)
+                .set_index('Fact').fillna(pd.NA).dropna(axis=0, how='all')
+                )
+
+    @staticmethod
+    def find_label_and_values_for_row(fact_row: Union[FactRow, List[FactRow]],
+                                      period_facts: pd.DataFrame) -> Tuple[str, bool, List[str]]:
+        """
+        There can be multiple rows mapped to the final table. Select one row for the output.
+        If the row is empty return the label, and empty values
+        return the label and the values for the row
+        """
+        if isinstance(fact_row, FactRow):
+            values = fact_row.get_values(period_facts)
+            if values:
+                return fact_row.label, fact_row.total, fact_row.get_values(period_facts)
+            return fact_row.label, fact_row.total, [""] * (len(period_facts.columns) - 1)
+        else:
+            for row in fact_row:
+                if row.name in period_facts.index:
+                    return row.label, row.total, row.get_values(period_facts)
+            # No match. Return the label of the first row and empty values
+            return fact_row[0].label, fact_row[0].total, [""] * (len(period_facts.columns) - 1)
 
     def __rich__(self):
-        table = Table("",
-                      Column(self.end_date, justify="right"),
-                      box=box.SIMPLE_HEAVY,
-                      title=self.title,
-                      )
-        for index, row in enumerate(self.mapping):
-            if isinstance(row, list):
-                row = self.select_row_with_value(row)
-                if not row:
-                    continue
-            label = row.label.replace("\t", "  ")
-            if isinstance(row, HeaderRow):
-                table.add_row(f"{label.upper()}:", "")
-            elif isinstance(row, FactRow):
-                value = row.get_value(self.facts, self.end_date)
-                if value:
-                    style = "bold deep_sky_blue1" if row.total else None
-                    table.add_row(label, value, style=style)
-                    if row.total:
-                        table.add_section()
+        periods = self.period_facts.columns.tolist()
+        columns = [""] + [Column(period) for period in periods]
+
+        def format_label(raw_label: str, is_total: bool = False, is_header: bool = False):
+            formatted_label = raw_label.replace("\t", "  ")
+            if is_header:
+                formatted_label = f"{formatted_label.upper()}:"
+                return Text(formatted_label, style="bold deep_sky_blue3")
+            return Text(formatted_label, style="bold deep_sky_blue1") if is_total else Text(formatted_label)
+
+        table = Table(*columns, box=box.SIMPLE_HEAVY, title=self.title, title_style="bold deep_sky_blue3")
+        for index, header_or_fact in enumerate(self.mapping):
+            # Get the row label
+            if isinstance(header_or_fact, HeaderRow):
+                label = format_label(header_or_fact.label, is_header=True)
+                header_values = [label] + [""] * (len(periods))
+                table.add_row(*header_values)
+            else:
+                label, total, fact_values = FactTable.find_label_and_values_for_row(header_or_fact, self.period_facts)
+                label = format_label(label, total)
+                row_values = [label] + fact_values
+                table.add_row(*row_values)
+                if total:
+                    table.add_section()
 
         return table
 
     def __repr__(self):
-
         return repr_rich(self.__rich__())
 
 
@@ -133,7 +157,7 @@ class BalanceSheet(FactTable):
         FactRow(name="CashAndCashEquivalentsAtCarryingValue", label="\tCash and Cash Equivalents"),
         FactRow(name="ShortTermInvestments", label="\tShort-term Investments"),
         FactRow(name="OtherAssetsCurrent", label="\tOther Current Assets"),
-        FactRow(name="AssetsCurrent", label="\tCurrent Assets", total=True),
+        FactRow(name="AssetsCurrent", label="\tTotal Current Assets", total=True),
         HeaderRow(label='Noncurrent Assets'),
         FactRow(name="MarketableSecuritiesNoncurrent", label="\tMarketable Securities"),
         FactRow(name="PropertyPlantAndEquipmentNet", label="\tProperty, Plant and Equipment"),
@@ -165,13 +189,15 @@ class BalanceSheet(FactTable):
             FactRow(name="CommonStockValue", label="\tCommon Stock"),
         ],
         FactRow(name="RetainedEarningsAccumulatedDeficit", label="\tRetained Earnings"),
-        FactRow(name="AccumulatedOtherComprehensiveIncomeLossNetOfTax", label="\tAccumulated Other Comprehensive Income"),
+        FactRow(name="AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+                label="\tAccumulated Other Comprehensive Income"),
         FactRow(name="StockholdersEquity", label="\tTotal Stockholders' Equity", total=True),
-        FactRow(name="LiabilitiesAndStockholdersEquity", label="Total Liabilities and Stockholders' Equity", total=True),
+        FactRow(name="LiabilitiesAndStockholdersEquity", label="Total Liabilities and Stockholders' Equity",
+                total=True),
     ]
 
-    def __init__(self, facts: XbrlFacts, end_date: str = None):
-        super().__init__(facts, end_date)
+    def __init__(self, filing_xbrl: FilingXbrl):
+        super().__init__(filing_xbrl)
 
 
 class CashFlowStatement(FactTable):
@@ -223,8 +249,8 @@ class CashFlowStatement(FactTable):
                 label="Cash, cash equivalents and restricted cash", total=True),
     ]
 
-    def __init__(self, facts: XbrlFacts, end_date: str = None):
-        super().__init__(facts, end_date)
+    def __init__(self, filing_xbrl: FilingXbrl):
+        super().__init__(filing_xbrl)
 
 
 class IncomeStatement(FactTable):
@@ -266,8 +292,8 @@ class IncomeStatement(FactTable):
         FactRow(name='WeightedAverageNumberOfDilutedSharesOutstanding', label='\tDiluted')
     ]
 
-    def __init__(self, facts: XbrlFacts, end_date: str = None):
-        super().__init__(facts, end_date)
+    def __init__(self, filing_xbrl: FilingXbrl):
+        super().__init__(filing_xbrl)
 
 
 class Financials:
@@ -298,7 +324,7 @@ class Financials:
     @classmethod
     def from_xbrl(cls,
                   xbrl: FilingXbrl):
-        balance_sheet = BalanceSheet(xbrl.facts)
-        income_statement = IncomeStatement(xbrl.facts)
-        cash_flow_statement = CashFlowStatement(xbrl.facts)
+        balance_sheet = BalanceSheet(xbrl)
+        income_statement = IncomeStatement(xbrl)
+        cash_flow_statement = CashFlowStatement(xbrl)
         return cls(balance_sheet, cash_flow_statement, income_statement)

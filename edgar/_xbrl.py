@@ -315,40 +315,35 @@ class FilingXbrl:
         return [tuple(r) for r in
                 period_counts.filter(['start_date', 'end_date']).to_numpy()] if not period_counts.empty else None
 
-    def get_facts_by_periods(self):
+    def get_fiscal_periods(self) -> List[Tuple[str, str]]:
+        """
+        Get only the periods that match this fiscal period focus
+
+        """
+        if self.fiscal_period_focus == 'FY':
+            return self.get_periods(period_type="year")
+        elif self.fiscal_period_focus.startswith('Q'):
+            return self.get_periods(period_type="quarter")
+
+    @lru_cache(maxsize=1)
+    def get_facts_by_periods(self, fiscal_periods: bool = True) -> pd.DataFrame:
         """
         Get the facts for the specified periods.
         This method filters the facts data for the specified periods and
         returns a DataFrame with the facts for the specified periods.
 
-        |    | fact                                  | 2017-12-31   | 2016-12-31   |   2015-12-31 |
-        |---:|:--------------------------------------|:-------------|:-------------|-------------:|
-        |  0 | AdjustedGainLossOnSaleOfBusiness      | -25101000    | 0            |            0 |
-        |  1 | AdjustmentToCapitalIncomeTax          |              |              |     -1768000 |
+        |                                       | 2017-12-31   | 2016-12-31   |   2015-12-31 |
+        |:--------------------------------------|:-------------|:-------------|-------------:|
+        | AdjustedGainLossOnSaleOfBusiness      | -25101000    | 0            |            0 |
+        | AdjustmentToCapitalIncomeTax          |              |              |     -1768000 |
+
+        :param fiscal_periods: If True, filter to only fiscal periods
         """
-        # What is the period type?
-        if self.fiscal_period_focus == 'FY':
-            period_type = 'year'
-        elif self.fiscal_period_focus.startswith('Q'):
-            period_type = 'quarter'
-        else:
-            period_type = 'None'
-        periods = self.get_periods(period_type=period_type)
 
-        # Adding a tuple column for start and end date in the DataFrame for easier filtering
-        data = self.facts.data.copy()
-        # Adding a tuple column for start and end date in the DataFrame for easier filtering
-        data['period_tuple'] = list(zip(data['start_date'], data['end_date']))
-
-        # Filter the data for the specified periods and where dimensions are null
-        df_filtered = data[
-            (data['period_tuple'].isin(periods)) &
-            data['dimensions'].isnull()
-            ]
-
-        # Pivot the filtered data
+        # Pivot the data
+        facts = self.facts.data.sort_values(by='dimensions', na_position='first')
         # Using 'end_date' as columns to display data based on the period's end date
-        facts_by_period = df_filtered.pivot_table(
+        facts_by_period = facts.pivot_table(
             index='fact',
             columns='end_date',
             values='value',
@@ -364,7 +359,16 @@ class FilingXbrl:
 
         # Remove the index name
         facts_by_period.columns.name = None
-        return facts_by_period
+        df = facts_by_period.set_index('fact')
+        if fiscal_periods:
+            fiscal_end_dates = [p[1] for p in self.get_fiscal_periods()]
+            return df[fiscal_end_dates]
+
+        return df
+
+    def get_fiscal_period_facts(self):
+        """Get the facts for the fiscal periods"""
+        return self.get_facts_by_periods(fiscal_periods=True)
 
     @property
     def years(self):

@@ -174,9 +174,22 @@ def test_get_periods():
 def test_get_fact_by_periods():
     # 10-K filing
     data = CARBO_CERAMICS_FILING_XBRL.get_facts_by_periods()
-    assert data.columns.tolist() == ['fact', '2017-12-31', '2016-12-31', '2015-12-31']
+    print(data.columns.tolist())
+    assert data.columns.tolist() == ['2017-12-31', '2016-12-31', '2015-12-31']
 
     # 10-Q filing
     filing = Filing(form='10-Q', filing_date='2024-04-25', company='1ST SOURCE CORP', cik=34782, accession_no='0000034782-24-000054')
-    data = filing.xbrl().get_facts_by_periods()
-    assert data.columns.tolist() == ['fact', '2024-03-31', '2023-03-31']
+    xbrl = filing.xbrl()
+    data = xbrl.get_facts_by_periods()
+    assert data.columns.tolist() == ['2024-03-31', '2023-03-31']
+    print(data)
+
+def test_get_facts_by_periods_nflx():
+    filing = Filing(company='NETFLIX INC', cik=1065280, form='10-K', filing_date='2024-01-26',
+                    accession_no='0001065280-24-000030')
+    xbrl = filing.xbrl()
+    assert 'CashAndCashEquivalentsAtCarryingValue' in xbrl.facts.data.fact.tolist()
+    period_facts = xbrl.get_facts_by_periods()
+    assert 'CashAndCashEquivalentsAtCarryingValue' in period_facts.index
+
+

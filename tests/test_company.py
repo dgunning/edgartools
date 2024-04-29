@@ -444,9 +444,10 @@ def test_company_category_removes_br():
 def test_company_to_dict():
     company = Company(1012605)
     company_dict = company.to_dict()
-    assert company_dict['cik'] == 1012605
-    assert company_dict['name'] == 'INTEGRINAUTICS'
-    assert company_dict['display_name'] == 'Integrinautics'
+    print(type(company_dict))
+    assert company_dict.get('cik') == 1012605
+    assert company_dict.get('name') == 'INTEGRINAUTICS'
+    assert company_dict.get('display_name') == 'Integrinautics'
     assert 'filings' not in company_dict
     print(company_dict)
 
