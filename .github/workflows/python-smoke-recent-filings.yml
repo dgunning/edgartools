@@ -32,4 +32,4 @@ jobs:
         # Setting PYTHONPATH to include the directory containing 'edgar' package
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         # Smoke test recent filings
-        hatch run smoke-filings -y 2024 -s 100"
+        hatch run smoke-filings -y 2024 -s 100
