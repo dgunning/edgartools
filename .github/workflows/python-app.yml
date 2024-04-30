@@ -29,5 +29,7 @@ jobs:
         python -m pip install tqdm
     - name: Batch test sample of recent filings
       run: |
-        # stop the build if there are Python syntax errors or undefined names
+        # Setting PYTHONPATH to include the directory containing 'edgar' package
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        # Run the batch filings tests
         python tests/batch/batch_filings.py
