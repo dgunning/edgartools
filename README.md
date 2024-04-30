@@ -334,7 +334,13 @@ financials.balance_sheet
 ```
 ![Balance Sheet](docs/images/balance_sheet.png)
 
+### Get the financial data as a pandas dataframe
 
+Each of the financial statements - `BalanceSheet`, `IncomeStatement` and `CashFlowStatement` - have a `to_dataframe()` method that will return the data as a pandas dataframe.
+
+```python
+balance_sheet_df = financials.balance_sheet.to_dataframe()
+```
 
 
 # Contributing
