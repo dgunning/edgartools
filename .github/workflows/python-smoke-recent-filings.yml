@@ -27,9 +27,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install tqdm hatch
+        hatch shell
+        python -m pip install tqdm
     - name: Batch test sample of recent filings
       run: |
         # Setting PYTHONPATH to include the directory containing 'edgar' package
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         # Smoke test recent filings
-        hatch shell -c "pip install tqdm && hatch run smoke-filings -y 2024 -s 100"
+        hatch run smoke-filings -y 2024 -s 100"
