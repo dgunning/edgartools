@@ -72,6 +72,7 @@ dependencies = [
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 lint = "ruff edgar"
+smoke-filings = "python tests/batch/batch_filings.py {args}"
 
 [tool.hatch.envs.test]
 dependencies = [
