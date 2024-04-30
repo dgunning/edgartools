@@ -163,6 +163,7 @@ You can get the company's **filings**, **facts** and **financials**.
 | Get a company filing by accession_number | `company.get_filing(accession_number="0000320193-21-000139")` |
 | Get the company's financials             | `company.financials`                                          |
 | Get the company's balance sheet          | `company.financials.balance_sheet`                            |
+| Get the company's income statement       | `company.financials.income_statement`                         |
 | Get the company's cash flow statement    | `company.financials.cash_flow_statement`                      |
 
 # Installation
@@ -212,210 +213,25 @@ For more detail see https://www.sec.gov/os/accessing-edgar-data
 from edgar import *
 ```
 
-### Getting filings
-```python
+## [Using the Filing API](FILING_API.md)
+Use the Filing API when you are not working with a specific company, but want to get a list of filings.
 
-# Get filings for the current year and quarter
-filings = get_filings() 
+For details on how to use the Filing API see **[Using the Filing API](FILING_API.md)**
 
-# Get filings for 2022
-filings = get_filings(2022)                 # OR filings = get_filings(year=2022)
+## [Using the Company API](COMPANY_API.md)
 
-# Get filings for 2022 quarter 4
-filings = get_filings(2022, 4)              # OR filings = get_filings(year=2022, quarter=4)
-
-# Get filings for 2020, 2021 and 2022
-filings = get_filings([2020, 2021, 2022])   # OR filings = get_filings(year=range(2020, 2023))
-
-# Get filings for 2020 quarters 1 and 2
-filings = get_filings(2020, quarter=[1,2])
-```
-![Get filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/get_filings.jpg)
-
-
-
-### Filtering filings
+With the Company API you can find a company by ticker or CIK, and get the company's filings, facts and financials.
 
 ```python
-# Filter for form D
-filings.filter(form="D")
-
-# Filter for form 10-K and 10-Q 
-filings.filter(form=["10-K", "10-Q"])
-
-# When you filter by form e.g. "D" it includes amendments e.g. "D\A". You can omit amendments
-filings.filter(form="D", amendments=False)
-
-# Filter by filing_date. date and filing_date mean the same thing
-# Get all filings on 2023-02-23
-filings.filter(date="2023-02-23")                      
-# OR
-filings.filter(filing_date="2023-02-23")
-
-# Filter to get all filings between 2023-01-23 and 2023-02-23     
-filings.filter(date="2023-01-23:2023-02-23")
-
-# Filter to get all filings since 2023-01-23   
-filings.filter(date="2023-01-23")
-
-# Filter to get all filings before 2023-02-23     
-filings.filter(date=":2023-02-23")
+Company("AAPL")
+        .get_filings(form="10-Q")
+        .latest(1)
+        .obj()
 ```
 
-### Combining getting and filtering
-```python
-get_filings(2022, form="D")
-```
+![expe](docs/images/aapl-10Q.png)
 
-### Convert the filings to a pandas dataframe
-
-The filings data is stored in the `Filings` class as a `pyarrow.Table`. You can get the data as a pandas dataframe using
-`to_pandas`
-```python
-df = filings.to_pandas()
-```
-
-
-## Navigating filings
-
-The Filings object allows you to navigate through filings using `filings.next()` and `filings.prev()`. 
-This shows you pages of the data - the page size is about 50. 
-
-```python
-# To see the next page of data
-filings.next()
-
-# To see the previous page
-filings.prev()
-
-# To see the current page
-filings.current()
-```
-
-![Get next filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filings_next.jpg)
-
-## Getting the latest filings
-
-You can get the latest **n** filings by filing_date from a filings using `filings.latest()`.
-
-If you provide the parameter `n` it will return the latest `n` filings.
-
-```python
-filing = filings.latest(n=5)
-filing
-```
-![Latest filings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_filings.jpg)
-
-
-If you omit this parameter, or set `n=1` it will return a single `Filings object.
-
-```python
-filing = filings.latest()
-filing
-```
-![Latest filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_filing.jpg)
-
-
-## Filtering filings
-
-You can filter the filings object using te `filter()` function. This allows you to filter
-by filing date, or by form.
-
-### Filtering filings by date
-
-To filter by filing date specify the filing date in **YYYY-MM-DD** format e.g. **2022-01-24**
-(Note the parameters `date` and `filing_date` are equivalent aliases for each other)
-```python
-filings.filter(date="2021-01-24") # or filings.filter(filing_date="2021-01-24")
-```
-You can specify a filing date range using the colon
-
-```python
-filings.filter(date="2021-01-12:2021-02-28") 
-```
-To filter by dates before a specified date use `:YYYY-MM-DD'
-
-```python
-filings.filter(date=":2021-02-28") 
-```
-
-To filter by dates after a specified date use `YYYY-MM-DD:'
-
-```python
-filings.filter(date="2021-02-28:") 
-```
-
-### Filtering filings by form
-
-You can filter filings by form using the `form` parameter. 
-
-```python
-filings.filter(form="10-K") 
-```
-
-To filter by form e.g. **10-K** and include form amendments use `amendments = True`. 
-
-```python
-filings.filter(form="10-K", amendments=True) 
-```
-![Filter with amendments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filter_amendments.jpg)
-
-## Working with a single filing
-
-You can get a single filing from the filings using the bracket operator `[]`, 
-specifying the index of the filing. The index is the value displayed in the leftmost
-position in the filings table. For example, to get the **10-Q** for **Costco** in the table above
-use `filings[3]`
-
-```python
-filing = filings[3]
-```
-
-![Costco 10Q filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/costco_10Q.jpg)
-
-### View the filing homepage
-You can view the filing homepage in the terminal using `filing.homepage`
-
-This gives you access to the `FilingHomepage` class that you can use to list all the documents
-and datafiles on the filing.
-
-```python
-filing.homepage
-```
-![Filing homepage](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filing_homepage.jpg)
-
-### Open a filing
-
-You can open the filing in your browser using `filing.open()`. This will work on environments with access to the browser, 
-will probably not work on a remote server.
-```python
-filing.open()
-```
-
-### Open the Filing Homepage
-You can open the filing homepage in the browser using `filing.homepage.open()`.
-```python
-filing.homepage.open()
-```
-
-### View the filing as Markdown
-You can view the filing's HTML content as markdown in the console using `view()`. It works for all filing types
-but can be a little slow for filings with large HTML files
-```python
-filing.view()
-```
-
-### Get the filing's html
-You can get the html content of the filing using`.html()`
-```python
-filing.html()
-```
-
-### Get the filing's html as Markdown
-You can get the html content as markdown using`.markdown()`
-```python
-filing.markdown()
-```
+See **[Using the Company API](COMPANY_API.md)**
 
 ## Viewing and downloading attachments
 
@@ -495,21 +311,31 @@ filing_xbrl = filing.xbrl()
 
 ![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/10Q_xbrl.jpg)
 
+## Financials
 
-## [Using the Company API](COMPANY_API.md)
-
-With the Company API you can find a company by ticker or CIK, and get the company's filings, facts and financials.
+Some filings, notably **10-K** and **10-Q** filings contain financial statements in XBRL format. 
+You can get the financials from the XBRL data using the `Financials` class.
 
 ```python
-Company("AAPL")
-        .get_filings(form="10-Q")
-        .latest(1)
-        .obj()
+from edgar.financials import Financials
+financials = Financials.from_xbrl(filing.xbrl())
+financials.balance_sheet
+financials.income_statement
+financials.cash_flow_statement
 ```
+Or automatically through the `Tenk` and `TenQ` data objects.
 
-![expe](docs/images/aapl-10Q.png)
+Here is an example that gets the latest Apple financials
 
-See **[Using the Company API](COMPANY_API.md)**
+```python
+tenk = Company("AAPL").get_filings(form="10-K").latest(1).obj()
+financials = tenk.financials
+financials.balance_sheet
+```
+![Balance Sheet](docs/images/balance_sheet.png)
+
+
+
 
 # Contributing
 
