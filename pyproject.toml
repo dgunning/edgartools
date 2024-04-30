@@ -63,6 +63,7 @@ dependencies = [
   "pyinstrument",
   "pyright",
   "ruff",
+  "tqdm",
   "jupyter",
   "mkdocs",
   "mkdocstrings[python]",
