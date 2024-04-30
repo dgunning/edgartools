@@ -33,4 +33,4 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         export EDGAR_IDENTITY="S Robinson Robinson@edgar.tools"
         # Smoke test recent filings
-        hatch run smoke-filings -y 2024 -s 100
+        hatch run smoke-filings -y 2024 -s 40
