@@ -2,19 +2,19 @@ import re
 from pathlib import Path
 from edgar.search import numeric_shape, preprocess, convert_items_to_tokens, RegexSearch, BM25Search
 from rich import print
-from markdownify import markdownify
 from edgar import Filing
 from edgar.search import SearchResults
+from edgar.documents import html_to_markdown
 
 blackrock_8k = Path('data/form8K.Blackrock.html').read_text()
-document_sections = re.split(r"\n\s*\n", markdownify(blackrock_8k))
+document_sections = re.split(r"\n\s*\n", html_to_markdown(blackrock_8k))
 
 
 def test_create_bm25_search_index():
     bm25: BM25Search = BM25Search(document_sections)
     assert bm25
     search_results = bm25.search("financial")
-    assert len(search_results) == 2
+    assert len(search_results) == 3
 
     # Search for item
     print()
