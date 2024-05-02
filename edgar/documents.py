@@ -243,6 +243,9 @@ class Block:
     def __contains__(self, item):
         return item in self.text
 
+    def to_markdown(self) -> str:
+        return self.text
+
     def get_text(self):
         return self.text
 
@@ -305,15 +308,23 @@ class TableBlock(Block):
         _text = "\n" + _text + "\n"
         return _text
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> pd.DataFrame:
         table_df = table_html_to_dataframe(str(self.table_element))
         return table_df
+
+    def to_markdown(self) -> str:
+        return self.to_dataframe().to_markdown() + "\n"
 
     def __str__(self):
         return "TableBlock"
 
 
 item_pattern = r"(?:ITEM|Item)\s+(?:[0-9]{1,2}[A-Z]?\.?|[0-9]{1,2}\.[0-9]{2})"
+header_regex = re.compile(r'^(?:(?:Item\s+\d+\.\d+)|(?:(?:[A-Z][a-z]*\s*)+))(?:\.|:)?\s*$')
+
+
+def is_header(text) -> bool:
+    return bool(header_regex.match(text))
 
 
 class HtmlDocument:
@@ -322,20 +333,31 @@ class HtmlDocument:
                  blocks: List[Block],
                  data: Optional[DocumentData] = None,
                  ):
+        assert isinstance(blocks, list), "blocks must be a list of Block objects"
         self.blocks: List[Block] = blocks  # The text blocks
         self.data: Optional[DocumentData] = data  # Any data in the document
 
     @property
-    def text(self):
+    def text(self) -> str:
         _text = ""
 
         for i, block in enumerate(self.blocks):
             _text += block.get_text()
 
-        # Fix unnecessary line breaks between sections
-        _text = re.sub(r'(?<=[^.?!])\s*\n{3,}\s*', ' ', _text)
-
         return _text
+
+    @property
+    def markdown(self) -> str:
+        """Convert the document to markdown"""
+        md = ""
+        for block in self.blocks:
+            line = block.to_markdown()
+            if is_header(line):
+                md += "\n" + line + "\n"
+            else:
+                md += line
+
+        return md
 
     def get_table_blocks(self) -> List[TableBlock]:
         """Get a list of all the table blocks in the document"""
@@ -420,8 +442,17 @@ class HtmlDocument:
 
     @classmethod
     def from_html(cls, html: str):
+        """Create from an html string"""
+        # Get the root element
         root: Tag = cls.get_root(html)
+
+        # Extract any inline data inside the html
         data = cls.extract_data(root)
+
+        # Clean the root element .. strip out the header tags, script and style tags, and table of content links
+        root = clean_html_root(root)
+
+        # Now extract the text into blocks
         blocks: List[Block] = cls.extract_text(root)
 
         return cls(blocks=blocks, data=data)
@@ -431,7 +462,7 @@ class HtmlDocument:
         text_ = "".join([block.get_text() for block in blocks])
         return text_.strip()
 
-    def generate_chunks_as_text(self, ignore_tables: bool = False) -> List[str]:
+    def generate_text_chunks(self, ignore_tables: bool = False) -> List[str]:
         for chunk in self.generate_chunks(ignore_tables=ignore_tables):
             yield HtmlDocument._render_blocks(chunk)
 
@@ -587,6 +618,11 @@ def html_to_text(html: str) -> str:
     return HtmlDocument.from_html(html).text
 
 
+def html_to_markdown(html: str) -> str:
+    """Converts HTML to markdown"""
+    return HtmlDocument.from_html(html).markdown
+
+
 def decompose_toc_links(start_element: Tag):
     regex = re.compile('Table [Oo]f [cC]ontents')
     toc_tags = start_element.find_all('a', string=regex)
@@ -653,7 +689,7 @@ def is_inline(tag):
     if not tag.name:
         return False
     # Common inline elements
-    inline_elements = {'a', 'span', 'strong', 'em', 'b', 'i', 'u', 'small', 'big', 'sub', 'sup', 'img', 'label',
+    inline_elements = {'a', 'span', 'strong', 'em', 'b', 'i', 'u', 'small', 'font', 'big', 'sub', 'sup', 'img', 'label',
                        'input', 'button'}
 
     # Check if the tag's name is in the list of inline elements
@@ -687,6 +723,13 @@ def get_clean_html(html: str) -> str:
     """Get a clean version of the html without the header tags, script and style tags, and table of content links.
     """
     root = HtmlDocument.get_root(html)
+    # Clean the root element
+    root = clean_html_root(root)
+    return str(root)
+
+
+def clean_html_root(root: Tag) -> Tag:
+    """Clean the root element by removing header tags, script and style tags, and table of content links."""
     # Remove the header tags
     for tag in root.find_all('ix:header'):
         tag.decompose()
@@ -702,7 +745,7 @@ def get_clean_html(html: str) -> str:
     for comment in root.find_all(string=lambda text: isinstance(text, Comment)):
         comment.extract()
 
-    return str(root)
+    return root
 
 
 def replace_inline_newlines(text: str):

@@ -9,6 +9,7 @@ from copy import copy
 from edgar import Filing
 from edgar.htmltools import ChunkedDocument
 from edgar.datatools import dataframe_to_text
+from typing import List
 
 pd.options.display.max_columns = 10
 
@@ -135,6 +136,7 @@ def test_htmldocument_from_filing_with_document_tag():
 def test_parse_ixbrldocument_with_nested_div_tags():
     text = Path("data/NextPoint.8K.html").read_text()
     document: HtmlDocument = HtmlDocument.from_html(text)
+    print(document.text)
     # The html
     assert "5.22" in document.text
     assert "at $5.22 per share" in document.text
@@ -148,6 +150,8 @@ def test_eightk_item_parsing_after_dollar_sign():
                     accession_no='0001193125-23-300021')
     document: HtmlDocument = HtmlDocument.from_html(filing.html())
     assert "(the “DRP”) at $5.22 per share" in document.text
+    assert "(the “DRP”) at $5.22 per share" in document.markdown
+    print(document.markdown)
 
 
 def test_parse_inline_divs_with_ixbrl_tags():
@@ -554,3 +558,24 @@ def test_html_to_text():
     assert 'NEXPOINT CAPITAL' in text
     print(text)
 
+
+def test_document_get_text():
+    """Render text from a document"""
+    filing = Filing(company='Paramount Global', cik=813828, form='8-K', filing_date='2024-04-29',
+                    accession_no='0000813828-24-000018')
+    document:HtmlDocument = HtmlDocument.from_html(filing.attachments[1].download())
+    text = document.text
+    assert "A Quiet Place, Mission Impossible, Scream, Teenage Mutant Ninja Turtles and PAW Patrol" in text
+    print(text)
+
+
+def test_document_get_markdown():
+    """Render mark from a document"""
+    filing = Filing(company='Paramount Global', cik=813828, form='8-K', filing_date='2024-04-29',
+                    accession_no='0000813828-24-000018')
+    """ """
+    document:HtmlDocument = HtmlDocument.from_html(filing.attachments[1].download())
+    md = document.markdown
+    assert md
+    assert "A Quiet Place, Mission Impossible, Scream, Teenage Mutant Ninja Turtles and PAW Patrol" in md
+    assert "Leading Paramount’s Business Units" in md

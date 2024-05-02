@@ -116,27 +116,28 @@ class FactTable:
             # No match. Return the label of the first row and empty values
             return fact_row[0].label, fact_row[0].total, [""] * (len(period_facts.columns) - 1)
 
+    @staticmethod
+    def format_label(raw_label: str, is_total: bool = False, is_header: bool = False):
+        formatted_label = raw_label.replace("\t", "  ")
+        if is_header:
+            formatted_label = f"{formatted_label.upper()}:"
+            return Text(formatted_label, style="bold deep_sky_blue1")
+        return Text(formatted_label, style="bold deep_sky_blue3") if is_total else Text(formatted_label)
+
     def __rich__(self):
         periods = self.period_facts.columns.tolist()
-        columns = [""] + [Column(period) for period in periods]
+        columns = [""] + [Column(period, justify='right') for period in periods]
 
-        def format_label(raw_label: str, is_total: bool = False, is_header: bool = False):
-            formatted_label = raw_label.replace("\t", "  ")
-            if is_header:
-                formatted_label = f"{formatted_label.upper()}:"
-                return Text(formatted_label, style="bold deep_sky_blue3")
-            return Text(formatted_label, style="bold deep_sky_blue1") if is_total else Text(formatted_label)
-
-        table = Table(*columns, box=box.SIMPLE_HEAVY, title=self.title, title_style="bold deep_sky_blue3")
+        table = Table(*columns, box=box.SIMPLE_HEAVY, title=self.title, title_style="bold deep_sky_blue1")
         for index, header_or_fact in enumerate(self.mapping):
             # Get the row label
             if isinstance(header_or_fact, HeaderRow):
-                label = format_label(header_or_fact.label, is_header=True)
+                label = FactTable.format_label(header_or_fact.label, is_header=True)
                 header_values = [label] + [""] * (len(periods))
                 table.add_row(*header_values)
             else:
                 label, total, fact_values = FactTable.find_label_and_values_for_row(header_or_fact, self.period_facts)
-                label = format_label(label, total)
+                label = FactTable.format_label(label, total)
                 row_values = [label] + fact_values
                 table.add_row(*row_values)
                 if total:
@@ -256,6 +257,7 @@ class CashFlowStatement(FactTable):
 class IncomeStatement(FactTable):
     title = "Consolidated Statement of Operations"
     mapping = [
+        HeaderRow(label='Sales'),
         [
             FactRow(name="Revenues", label="Revenue", total=True),
             FactRow(name="RevenueFromContractWithCustomerExcludingAssessedTax", label="Total Net Sales", total=True),

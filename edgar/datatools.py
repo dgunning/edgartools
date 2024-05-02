@@ -30,20 +30,49 @@ def compress_dataframe(df: pd.DataFrame):
     return df
 
 
-def table_html_to_dataframe(html_str):
-    """Convert the table html to a dataframe """
+def adjust_column_headers(df: pd.DataFrame):
+    """ Replace numeric column headers with blank strings. """
+    # Check if column names are integers (default index names in pandas DataFrames)
+    if all(isinstance(col, int) for col in df.columns):
+        # Replace them with blank strings
+        df.columns = ['' for _ in df.columns]
+    return df
+
+
+def should_promote_to_header(df: pd.DataFrame) -> bool:
+    if df.shape[0] > 1:
+        first_row = df.iloc[0]
+
+        # Check for uniformity and non-numeric nature
+        if all(isinstance(item, str) for item in first_row):
+            # Pattern matching for typical header keywords
+            header_keywords = {'title', 'name', 'number', 'description', 'date', 'total', 'id'}
+            if any(any(keyword in str(cell).lower() for keyword in header_keywords) for cell in first_row):
+                return True
+
+            # Check distinctiveness compared to the second row (simple heuristic)
+            second_row = df.iloc[1]
+            difference_count = sum(1 for f, s in zip(first_row, second_row) if f != s)
+            if difference_count > len(first_row) / 2:  # Arbitrary threshold: more than half are different
+                return True
+
+    return False
+
+
+def table_html_to_dataframe(html_str: str) -> pd.DataFrame:
     tree = lxml_html.fromstring(html_str)
     table_element = tree.xpath("//table")[0]
     rows = table_element.xpath(".//tr")
 
     data = []
-
     for row in rows:
-        cols = row.xpath(".//td")
+        cols = row.xpath(".//td | .//th")  # Handle both 'td' and 'th' if present
         cols = [clean_column_text(lxml_html.tostring(c, method='text', encoding='unicode').strip()) for c in cols]
         data.append(cols)
 
-    df = compress_dataframe(pd.DataFrame(data))
+    df = pd.DataFrame(data)
+    df = adjust_column_headers(df)  # Adjust headers if not promoted
+    df = compress_dataframe(df)
     return df
 
 

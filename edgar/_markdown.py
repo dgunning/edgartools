@@ -5,9 +5,9 @@ from rich.console import Group, Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
-from edgar.documents import get_clean_html
-from edgar._rich import repr_rich
 
+from edgar._rich import repr_rich
+from edgar.documents import HtmlDocument
 
 __all__ = [
     'convert_table',
@@ -91,8 +91,8 @@ def fix_markdown(md: str):
 
 def html_to_markdown(html: str) -> str:
     """Convert the html to markdown"""
-    from markdownify import markdownify
-    return fix_markdown(markdownify(html))
+    document: HtmlDocument = HtmlDocument.from_html(html)
+    return document.markdown
 
 
 def text_to_markdown(text: str) -> str:
@@ -112,7 +112,6 @@ class MarkdownContent:
 
     @classmethod
     def from_html(cls, html: str, title: str = ""):
-        html = get_clean_html(html)
         md = html_to_markdown(html)
         return cls(markdown=md, title=title)
 

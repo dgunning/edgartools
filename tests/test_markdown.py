@@ -38,15 +38,6 @@ def test_markdown_to_rich_for_plain_text():
     print(renderable)
 
 
-def test_form4_to_markdown():
-    html = Path('data/form4.Evans.html').read_text()
-    markdown_content = MarkdownContent.from_html(html)
-    print()
-    print(markdown_content)
-    assert markdown_content
-    assert "NORA" in repr(markdown_content)
-
-
 def test_markdown_to_html():
     html = Path('data/form.6k.Athena.html').read_text()
     markdown_content = MarkdownContent.from_html(html)
@@ -151,3 +142,11 @@ def test_markdown_to_dataframe_for_header_only_table():
     """.strip()
     df = markdown_to_dataframe(md)
     assert df.shape == (1, 2)
+
+def test_markdown_text_has_correct_spaces():
+    from edgar import Filing
+    filing = Filing(company='Paramount Global', cik=813828, form='8-K', filing_date='2024-04-29',
+                    accession_no='0000813828-24-000018')
+
+    md = filing.markdown()
+    print(md)

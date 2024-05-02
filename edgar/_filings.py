@@ -1118,21 +1118,15 @@ class Filing:
         """return the markdown version of this filing html"""
         html = self.html()
         if html:
-            return html_to_markdown(get_clean_html(html))
+            clean_html = get_clean_html(html)
+            return html_to_markdown(clean_html)
         else:
             text_content = self.text()
             return text_to_markdown(text_content)
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""
-        html = self.html()
-        if html:
-            markdown_content = MarkdownContent.from_html(html)
-            markdown_content.view()
-        else:
-            text_content = self.text()
-            if text_content:
-                MarkdownContent(text_to_markdown(text_content)).view()
+        print(self.text())
 
     def xbrl(self) -> Optional[FilingXbrl]:
         """
@@ -1507,7 +1501,7 @@ class Attachment:
         """Is this a binary document"""
         return self.extension in binary_extensions
 
-    def download(self) -> Optional[bytes]:
+    def download(self) -> Optional[Union[str,bytes]]:
         downloaded = download_file(self.url, as_text=self.is_text())
         assert downloaded is not None
         return downloaded

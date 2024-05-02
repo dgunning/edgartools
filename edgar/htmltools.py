@@ -59,7 +59,7 @@ def html_sections(html_str: str,
                   ignore_tables: bool = False) -> List[str]:
     """split the html into sections"""
     document = HtmlDocument.from_html(html_str)
-    return list(document.generate_chunks_as_text(ignore_tables=ignore_tables))
+    return list(document.generate_text_chunks(ignore_tables=ignore_tables))
 
 
 def html_to_text(html_str: str,
@@ -69,7 +69,7 @@ def html_to_text(html_str: str,
     document = HtmlDocument.from_html(html_str)
     if not ignore_tables:
         return document.text
-    return sep.join([chunk for chunk in document.generate_chunks_as_text(ignore_tables=True)])
+    return sep.join([chunk for chunk in document.generate_text_chunks(ignore_tables=True)])
 
 
 def is_inline_xbrl(html: str) -> bool:
