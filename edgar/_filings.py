@@ -33,7 +33,6 @@ from rich.status import Status
 from rich.table import Table, Column
 from rich.text import Text
 
-from edgar._markdown import MarkdownContent
 from edgar._markdown import html_to_markdown, text_to_markdown
 from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich

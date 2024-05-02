@@ -320,11 +320,6 @@ class TableBlock(Block):
 
 
 item_pattern = r"(?:ITEM|Item)\s+(?:[0-9]{1,2}[A-Z]?\.?|[0-9]{1,2}\.[0-9]{2})"
-header_regex = re.compile(r'^(?:(?:Item\s+\d+\.\d+)|(?:(?:[A-Z][a-z]*\s*)+))(?:\.|:)?\s*$')
-
-
-def is_header(text) -> bool:
-    return bool(header_regex.match(text))
 
 
 class HtmlDocument:
