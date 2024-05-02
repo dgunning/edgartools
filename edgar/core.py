@@ -76,6 +76,7 @@ __all__ = [
     'filter_by_date',
     'filter_by_form',
     'text_extensions',
+    'binary_extensions',
     'ask_for_identity',
     'default_page_size',
     'InvalidDateException',
