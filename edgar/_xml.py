@@ -76,7 +76,7 @@ def value_or_footnote(el: Tag) -> Optional[str]:
 
 
 def child_text(parent: Tag,
-               child: str) -> str:
+               child: str) -> Optional[str]:
     """
     Get the text of the child element if it exists or None
     :param parent: The parent tag
