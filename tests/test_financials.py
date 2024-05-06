@@ -3,10 +3,11 @@ from rich import print
 
 from edgar import *
 from edgar._xbrl import FilingXbrl
-from edgar.financials import Financials, format_currency, BalanceSheet, IncomeStatement, CashFlowStatement
 from edgar.company_reports import TenK
+from edgar.financials import Financials, format_currency, IncomeStatement
 
 pd.options.display.max_colwidth = 50
+pd.options.display.max_columns = 10
 
 
 def test_format_currency():
@@ -34,7 +35,7 @@ def test_microsoft_financials():
     assert '2022-06-30' in financials.balance_sheet.periods
 
 
-def test_apple_financials_to_dataframe():
+def test_apple_financials_to_get_facts():
     company = Company("AAPL")
     filing = company.get_filings(form="10-K", accession_number="0000320193-22-000108").latest()
     tenk = TenK(filing)
@@ -47,7 +48,8 @@ def test_apple_financials_to_dataframe():
     assert income_statement.get_fact_value('ResearchAndDevelopmentExpense') == '26251000000'
     assert income_statement.get_fact_value('SellingGeneralAndAdministrativeExpense') == '25094000000'
     assert income_statement.get_fact_value('OperatingIncomeLoss') == '119437000000'
-    assert income_statement.get_fact_value('IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest') == '119103000000'
+    assert income_statement.get_fact_value(
+        'IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest') == '119103000000'
     assert income_statement.get_fact_value('IncomeTaxExpenseBenefit') == '19300000000'
     assert income_statement.get_fact_value('NetIncomeLoss') == '99803000000'
     assert income_statement.get_fact_value('EarningsPerShareBasic') == '6.15'
@@ -80,8 +82,38 @@ def test_apple_financials_to_dataframe():
     assert cash_flow.get_fact_value("ShareBasedCompensation") == '9038000000'
 
 
+def test_dataframe_from_financial_table_contains_relevant_facts():
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2023-11-03',
+                    accession_no='0000320193-23-000106')
+    tenk = filing.obj()
+    financials = tenk.financials
+    income_statement: IncomeStatement = financials.income_statement
+    income_repr = repr(income_statement)
+    assert "383,285,000,000" in income_repr
+
+    income_dataframe = income_statement.to_dataframe()
+    # The dataframe contains the relevant facts
+    facts_in_dataframe = income_dataframe.index.tolist()
+    assert "RevenueFromContractWithCustomerExcludingAssessedTax" in facts_in_dataframe
+    assert "SellingGeneralAndAdministrativeExpense" in facts_in_dataframe
+    assert "CostOfGoodsAndServicesSold" in facts_in_dataframe
+
+
+def test_period_facts_drop_mostly_empty_columns():
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2023-11-03',
+                    accession_no='0000320193-23-000106')
+    tenk = filing.obj()
+    financials = tenk.financials
+    balance_sheet = financials.balance_sheet
+    period_facts = balance_sheet.period_facts
+    #print(balance_sheet)
+    print(period_facts.columns)
+
+
+
 def test_10K_with_empty_facts():
-    filing = Filing(form='10-K', filing_date='2023-04-19', company='Aurora Technology Acquisition Corp.', cik=1883788, accession_no='0001193125-23-105389')
+    filing = Filing(form='10-K', filing_date='2023-04-19', company='Aurora Technology Acquisition Corp.', cik=1883788,
+                    accession_no='0001193125-23-105389')
     tenk = filing.obj()
     assert tenk.financials
 
@@ -108,21 +140,17 @@ def test_10Q_financials():
 
 
 def test_show_financials_with_multiple_periods():
-    filing = Filing(company='NETFLIX INC', cik=1065280, form='10-K', filing_date='2024-01-26', accession_no='0001065280-24-000030')
-    xbrl:FilingXbrl = filing.xbrl()
+    filing = Filing(company='NETFLIX INC', cik=1065280, form='10-K', filing_date='2024-01-26',
+                    accession_no='0001065280-24-000030')
+    xbrl: FilingXbrl = filing.xbrl()
     financials = Financials.from_xbrl(xbrl)
     balance_sheet = financials.balance_sheet
     income_statement = financials.income_statement
     cash_flow_statement = financials.cash_flow_statement
 
     # The periods
-    assert balance_sheet.periods == ['2023-12-31', '2022-12-31', '2021-12-31']
+    assert balance_sheet.periods == ['2023-12-31', '2022-12-31']
     assert income_statement.periods == ['2023-12-31', '2022-12-31', '2021-12-31']
     assert cash_flow_statement.periods == ['2023-12-31', '2022-12-31', '2021-12-31']
 
-    # The facts
-    assert 'AssetsCurrent' in balance_sheet.facts
-
     assert balance_sheet.get_fact_value('AssetsCurrent') == '9918133000'
-
-

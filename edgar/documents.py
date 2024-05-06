@@ -252,9 +252,9 @@ class Block:
     def is_empty(self):
         return not self.is_linebreak() and not self.text.strip()
 
-    def is_linebreak(self):
+    def is_linebreak(self)-> bool:
         # This block is a line break if it only has '\n'
-        return all(c == '\n' for c in self.text)
+        return self.text != '' and self.text.strip('\n') == ''
 
     def __str__(self):
         return "Block"
@@ -372,20 +372,35 @@ class HtmlDocument:
         """
         compressed_blocks = []
         current_block = None
-        for block in blocks:
-            if isinstance(block, TableBlock) or block.text.endswith("\n"):
+        for i, block in enumerate(blocks):
+            if isinstance(block, TableBlock) :
                 if current_block:
                     compressed_blocks.append(current_block)
-                    current_block = None
+                    current_block = None # Reset the current block
                 compressed_blocks.append(block)
             else:
-                if block.is_empty():
+                if block.text.endswith("\n"):
+                    if current_block:
+                        if current_block.inline and block.inline:
+                            current_block.text += block.text
+                            compressed_blocks.append(current_block)
+                            current_block = None  # Reset the current block
+                        else:
+                            compressed_blocks.append(current_block)
+                            compressed_blocks.append(block)
+                            current_block = None  # Reset the current block
+                    else:
+                        compressed_blocks.append(block)
+                elif block.is_empty(): # Empty blocks get appended to the previous block
                     if not current_block:
                         current_block = block
                     else:
                         current_block.text += block.text
                 else:
                     if current_block:
+                        # If current is empty assume the inline status of the block
+                        if current_block.is_empty():
+                            current_block.inline = block.inline
                         current_block.text += block.text
                     else:
                         current_block = block
