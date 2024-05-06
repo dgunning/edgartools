@@ -46,10 +46,15 @@ class FactRow(BaseModel):
         fact_names = [self.name] if isinstance(self.name, str) else self.name
         for name in fact_names:
             if name in period_facts.index:
-                values = period_facts.loc[name].tolist()
+                res = period_facts.loc[name]
+                values = None
+                if isinstance(res, pd.Series):
+                    values = res.tolist()
+                elif isinstance(res, pd.DataFrame):
+                    values = res.iloc[0].tolist()
                 if apply_format:
-                    return [format_currency(value, format_str=self.format) if not pd.isna(value) else "" for value in
-                            values]
+                    return [format_currency(value, format_str=self.format) if not pd.isna(value) else ""
+                            for value in values]
                 else:
                     return [value if not pd.isna(value) else "" for value in values]
 
@@ -62,17 +67,28 @@ class FactTable:
     """
     FactTable is a base class for Financial Tables like BalanceSheet, CashFlowStatement, IncomeStatement
     """
-    mapping = []
-    title = ""
 
-    def __init__(self, filing_xbrl: FilingXbrl):
-        self.period_facts = filing_xbrl.get_fiscal_period_facts()
+    def __init__(self, filing_xbrl: FilingXbrl, title: str, mapping: List[Union[FactRow, List[FactRow], HeaderRow]]):
+        self.title = title
+        self.mapping = mapping
+        fact_names = self.get_mapped_facts()
+        self.period_facts = filing_xbrl.get_fiscal_period_facts(fact_names)
 
-    @property
-    @lru_cache(maxsize=1)
-    def facts(self) -> List[str]:
-        """:return the list of facts in the table"""
-        return [row.name for row in self.mapping if isinstance(row, FactRow)]
+
+    def get_mapped_facts_and_labels(self) -> List[Tuple[str, str]]:
+        """Get the list of all fact names and labels in the mapping even if they are alternates"""
+        facts = []
+        for row in self.mapping:
+            if isinstance(row, FactRow):
+                facts.append((row.name, row.label.replace("\t", "").strip()))
+            elif isinstance(row, List):
+                for fact_row in row:
+                    facts.append((fact_row.name, fact_row.label.replace("\t", "").strip()))
+        return facts
+
+    def get_mapped_facts(self) -> List[str]:
+        """Get the list of all fact names in the mapping even if they are alternates"""
+        return [fact for fact, _ in self.get_mapped_facts_and_labels()]
 
     @property
     def periods(self):
@@ -82,15 +98,15 @@ class FactTable:
         """Get the latest value for a fact in the table"""
         if fact not in self.period_facts.index:
             return None
-        value = self.period_facts.loc[fact][0]
+        # Using .iloc[0] to safely access the first element by position
+        value = self.period_facts.loc[fact].iloc[0]
         if value:
             return value
 
     @lru_cache(maxsize=1)
     def to_dataframe(self) -> pd.DataFrame:
         """Create a dataframe containing the facts in the table"""
-        fact_table_df: pd.DataFrame = pd.DataFrame({'Fact': self.facts})
-        fact_table_df.to_dict()
+        fact_table_df: pd.DataFrame = pd.DataFrame(data=self.get_mapped_facts_and_labels(), columns=['Fact', 'Label'])
         # merge with self.period_facts
         return (fact_table_df.merge(self.period_facts, how='left', left_on='Fact', right_index=True)
                 .set_index('Fact').fillna(pd.NA).dropna(axis=0, how='all')
@@ -106,15 +122,13 @@ class FactTable:
         """
         if isinstance(fact_row, FactRow):
             values = fact_row.get_values(period_facts)
-            if values:
-                return fact_row.label, fact_row.total, fact_row.get_values(period_facts)
-            return fact_row.label, fact_row.total, [""] * (len(period_facts.columns) - 1)
+            return fact_row.label, fact_row.total, values if values else ["" * len(period_facts.columns)]
         else:
             for row in fact_row:
-                if row.name in period_facts.index:
-                    return row.label, row.total, row.get_values(period_facts)
-            # No match. Return the label of the first row and empty values
-            return fact_row[0].label, fact_row[0].total, [""] * (len(period_facts.columns) - 1)
+                values = row.get_values(period_facts) if row.name in period_facts.index else None
+                if values:
+                    return row.label, row.total, values
+            return fact_row[0].label, fact_row[0].total, ["" * len(period_facts.columns)]
 
     @staticmethod
     def format_label(raw_label: str, is_total: bool = False, is_header: bool = False):
@@ -198,7 +212,7 @@ class BalanceSheet(FactTable):
     ]
 
     def __init__(self, filing_xbrl: FilingXbrl):
-        super().__init__(filing_xbrl)
+        super().__init__(filing_xbrl, title=self.title, mapping=self.mapping)
 
 
 class CashFlowStatement(FactTable):
@@ -251,7 +265,7 @@ class CashFlowStatement(FactTable):
     ]
 
     def __init__(self, filing_xbrl: FilingXbrl):
-        super().__init__(filing_xbrl)
+        super().__init__(filing_xbrl, title=self.title, mapping=self.mapping)
 
 
 class IncomeStatement(FactTable):
@@ -270,11 +284,11 @@ class IncomeStatement(FactTable):
         FactRow(name="GrossProfit", label="Gross Profit", total=True),
         HeaderRow(label="Operating Expenses"),
         FactRow(name='MarketingExpense', label='\tMarketing Expense'),
-        FactRow(name='ResearchAndDevelopmentExpense', label='\tResearch and Development Expenses'),
+        FactRow(name='ResearchAndDevelopmentExpense', label='\tResearch & Development Expenses'),
         [
-            FactRow(name='GeneralAndAdministrativeExpense', label='\tGeneral and Administrative Expenses'),
+            FactRow(name='GeneralAndAdministrativeExpense', label='\tGeneral & Administrative Expenses'),
             FactRow(name='SellingGeneralAndAdministrativeExpense',
-                    label='\tSelling General and Administrative Expenses'),
+                    label='\tSelling, General & Admin Expenses'),
         ],
         FactRow(name='OperatingExpenses', label='Total Operating Expenses', total=True),
         FactRow(name='OperatingIncomeLoss', label='Operating Income', total=True),
@@ -295,7 +309,7 @@ class IncomeStatement(FactTable):
     ]
 
     def __init__(self, filing_xbrl: FilingXbrl):
-        super().__init__(filing_xbrl)
+        super().__init__(filing_xbrl, title=self.title, mapping=self.mapping)
 
 
 class Financials:

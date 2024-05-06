@@ -366,9 +366,43 @@ class FilingXbrl:
 
         return df
 
-    def get_fiscal_period_facts(self):
-        """Get the facts for the fiscal periods"""
-        return self.get_facts_by_periods(fiscal_periods=True)
+    def get_fiscal_period_facts(self, fact_names: Optional[List[str]] = None,
+                                threshold_percentage: float = 0.4) -> pd.DataFrame:
+        """
+        Get the facts for the fiscal periods, dropping previous period columns that are mostly empty
+        relative to the current period based on a specified threshold percentage.
+
+        :param fact_names: Optional list of fact names to filter the DataFrame.
+        :param threshold_percentage: Threshold for the percentage of non-empty values in the current period
+                                     required to keep a previous period column.
+        :return: A DataFrame of fiscal period facts with irrelevant columns dropped.
+        """
+        # Retrieve the DataFrame for fiscal periods
+        fiscal_period_facts: pd.DataFrame = self.get_facts_by_periods(fiscal_periods=True)
+
+        # Filter by specified fact names if provided
+        if fact_names:
+            fact_names = [fact for fact in fact_names if fact in fiscal_period_facts.index]
+            fiscal_period_facts = fiscal_period_facts.loc[fact_names]
+
+        # Ensure the DataFrame is sorted with the most recent fiscal period first
+        fiscal_period_facts = fiscal_period_facts[sorted(fiscal_period_facts.columns, reverse=True)]
+
+        # Determine the number of non-empty values in the current fiscal period
+        current_period = fiscal_period_facts.columns[0]  # Assuming the first column is the most recent period
+        current_period_non_empty_count = fiscal_period_facts[current_period].notna().sum()
+
+        # Calculate the minimum number of non-empty values needed to retain a column
+        min_non_empty_count = current_period_non_empty_count * threshold_percentage
+
+        # Filter out columns where the number of non-empty values is less than the calculated minimum
+        columns_to_keep = [col for col in fiscal_period_facts.columns if
+                           fiscal_period_facts[col].notna().sum() >= min_non_empty_count]
+
+        # Adjust DataFrame to only include necessary columns
+        fiscal_period_facts = fiscal_period_facts[columns_to_keep]
+
+        return fiscal_period_facts
 
     @property
     def years(self):
