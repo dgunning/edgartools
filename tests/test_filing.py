@@ -211,7 +211,7 @@ four37_capital_staff_filing = Filing(form='SEC STAFF ACTION', company='437 CAPIT
 
 def test_filing_homepage_url():
     assert carbo_10K.homepage_url == "https://www.sec.gov/Archives/edgar/data/1009672/0001564590-18-004771-index.html"
-    r = httpx.get(carbo_10K.homepage_url, headers={'User-Agent': 'Dwight Gunning dgunning@gmail.com'})
+    r = httpx.get(carbo_10K.homepage_url)
     assert r.status_code == 200
 
 

@@ -78,8 +78,6 @@ daily_index_url = "https://www.sec.gov/Archives/edgar/daily-index/{}/QTR{}/{}.{}
 
 filing_homepage_url_re = re.compile(f"{sec_edgar}/data/[0-9]{1,}/[0-9]{10}-[0-9]{2}-[0-9]{4}-index.html")
 
-headers = {'User-Agent': 'Dwight Gunning dgunning@gmail.com'}
-
 full_or_daily = ['daily', 'full']
 index_types = ['form', 'company', 'xbrl']
 file_types = ['gz', 'idx']
