@@ -38,13 +38,14 @@ from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
-from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar,
-                        download_text_between_tags,
-                        filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
+from edgar.core import (http_client, log, display_size, sec_edgar,
+                        filter_by_date, filter_by_form, sec_dot_gov,
+                        InvalidDateException, IntString, DataPager,
                         text_extensions, binary_extensions)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
 from edgar.htmltools import html_sections
+from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
 
@@ -928,7 +929,6 @@ class CurrentFilings(Filings):
         assert item is not None
         return item
 
-
     def get(self, index_or_accession_number: IntString):
         if isinstance(index_or_accession_number, int) or index_or_accession_number.isdigit():
             idx = int(index_or_accession_number)
@@ -1087,7 +1087,7 @@ class Filing:
         xml_document = self.homepage.primary_xml_document
         if xml_document:
             return str(xml_document.download())
-        
+
     @lru_cache(maxsize=4)
     def text(self) -> str:
         """Convert the html of the main filing document to text"""
@@ -1257,7 +1257,7 @@ class Filing:
         """
         if not self._filing_homepage:
             homepage_html = download_text(self.homepage_url)
-            assert homepage_html is not None            
+            assert homepage_html is not None
             self._filing_homepage = FilingHomepage.from_html(str(homepage_html),
                                                              url=self.homepage_url,
                                                              filing=self)
@@ -1500,7 +1500,7 @@ class Attachment:
         """Is this a binary document"""
         return self.extension in binary_extensions
 
-    def download(self) -> Optional[Union[str,bytes]]:
+    def download(self) -> Optional[Union[str, bytes]]:
         downloaded = download_file(self.url, as_text=self.is_text())
         assert downloaded is not None
         return downloaded
@@ -1577,7 +1577,7 @@ class FilingHomepage:
         res = self._files.query(f"Seq=='{seq}'")
         if res.empty:
             raise ValueError(f"unable to retreive filing doc for seq {seq}")
-        
+
         return Attachment.from_dataframe_row(res.iloc[0])
 
     def open(self):

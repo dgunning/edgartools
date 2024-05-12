@@ -17,11 +17,10 @@ from edgar.core import (decode_content,
                         InvalidDateException,
                         client_headers,
                         CRAWL, CAUTION, NORMAL,
-                        download_file,
                         extract_dates,
                         reverse_name,
-                        get_bool,
-                        download_text_between_tags)
+                        get_bool)
+
 import re
 from rich.table import Table
 import pytest
@@ -84,15 +83,6 @@ def test_get_header():
     assert client_headers()['User-Agent'] == get_identity()
 
 
-def test_download_index_file():
-    xbrl_gz = download_file('https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.gz')
-    assert isinstance(xbrl_gz, bytes)
-    assert len(xbrl_gz) > 10000
-
-    xbrl_idx = download_file('https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.idx')
-    assert isinstance(xbrl_idx, str)
-
-
 def test_df_to_rich_table():
     df = pd.read_csv('data/cereal.csv')
     table: Table = df_to_rich_table(df)
@@ -142,13 +132,7 @@ def test_detect_charset():
     assert r.encoding == 'ascii'
 
 
-def test_download_image():
-    url = 'https://www.sec.gov/Archives/edgar/data/1640147/000164014722000023/snow-20220131_g1.jpg'
-    client = http_client()
-    r = client.get(url)
-    print(r.encoding)
-    print(r.content)
-    download_file(url)
+
 
 
 def test_extract_dates():
@@ -242,12 +226,7 @@ def test_settings():
     assert edgar.edgar_mode.max_connections == 2
 
 
-def test_get_text_between_tags():
-    text = download_text_between_tags(
-        'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt',
-        'SEC-HEADER')
-    print(text)
-    assert 'ACCESSION NUMBER:		0001564590-18-004771' in text
+
 
 
 def test_reverse_name():

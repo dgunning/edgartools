@@ -19,7 +19,8 @@ from edgar._rich import df_to_rich_table, repr_rich
 from rich import box
 from rich.columns import Columns
 from rich.table import Table, Column
-from edgar.core import (download_json, log, Result, display_size, download_text,
+from edgar.httprequests import download_json, download_text
+from edgar.core import (log, Result, display_size,
                         filter_by_date, IntString, InvalidDateException, reverse_name)
 from edgar.search import SimilaritySearchIndex
 

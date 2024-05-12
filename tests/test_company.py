@@ -436,11 +436,6 @@ def test_iterate_company_filings():
         assert filing
 
 
-def test_company_category_removes_br():
-    company = Company('1841925')
-    assert company.category == 'Large accelerated filer | Smaller reporting company'
-
-
 def test_company_to_dict():
     company = Company(1012605)
     company_dict = company.to_dict()
