@@ -24,7 +24,6 @@ import pytz
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
-from retry.api import retry_call
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
@@ -46,6 +45,7 @@ from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
 from edgar.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
+from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
 
@@ -843,9 +843,8 @@ def get_current_url(atom: bool = True,
 
 @lru_cache(maxsize=32)
 def get_current_entries_on_page(count: int, start: int, form: Optional[str] = None, owner: str = 'include'):
-    client = http_client()
     url = get_current_url(count=count, start=start, form=form if form else '', owner=owner, atom=True)
-    response = retry_call(client.get, fargs=[url], tries=5, delay=3)
+    response = get_with_retry(url)
 
     soup = BeautifulSoup(response.text, features="xml")
     entries = []
