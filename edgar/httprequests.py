@@ -235,10 +235,11 @@ def stream_with_retry(url, client: httpx.Client = None, identity=None, identity_
         if response.status_code == 429:
             raise TooManyRequestsError(url)
         elif is_redirect(response):
-            yield from stream_with_retry(response.headers["Location"], identity=identity,
-                                         identity_callable=identity_callable, **kwargs)
+            yield stream_with_retry(response.headers["Location"],
+                                    identity=identity,
+                                    identity_callable=identity_callable, **kwargs)
         else:
-            yield from response.iter_bytes()
+            yield response
 
 
 @retry(on=httpx.RequestError, attempts=attempts, timeout=timeout, wait_initial=wait_initial)
@@ -452,20 +453,19 @@ def download_text_between_tags(url: str, tag: str, client: Union[httpx.Client, h
     is_header = False
     content = ""
 
-    for chunk in stream_with_retry(url, client=client):
-        lines = chunk.decode().split('\n')
-        for line in lines:
+    for response in stream_with_retry(url, client=client):
+        for line in response.iter_lines():
             if line:
                 # If line matches header_start, start capturing
                 if line.startswith(tag_start):
                     is_header = True
                     continue  # Skip the current line as it's the opening tag
 
-                # If within header lines, add to header_content
-                if is_header:
-                    if line.startswith(tag_end):
-                        return content  # Return the captured content as soon as the closing tag is encountered
-                    else:
-                        content += line + '\n'  # Add a newline to preserve original line breaks
+                # If line matches header_end, stop capturing
+                elif line.startswith(tag_end):
+                    break
 
+                # If within header lines, add to header_content
+                elif is_header:
+                    content += line + '\n'  # Add a newline to preserve original line breaks
     return content

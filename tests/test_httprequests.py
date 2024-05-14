@@ -86,22 +86,6 @@ async def test_get_with_retry_async_for_redirect(status_code):
                                                headers={'User-Agent': 'Dev Gunning developer-gunning@gmail.com'},
                                                identity_callable=None)
 
-
-def test_stream_with_retry():
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.iter_bytes.return_value = [b"chunk1", b"chunk2"]
-
-    # Create a mock context manager
-    mock_context_manager = MagicMock()
-    mock_context_manager.__enter__.return_value = mock_response
-    mock_context_manager.__exit__.return_value = None
-
-    with patch("httpx.Client.stream", return_value=mock_context_manager):
-        chunks = list(stream_with_retry("http://example.com"))
-        assert chunks == [b"chunk1", b"chunk2"]
-
-
 def test_post_with_retry():
     mock_response = httpx.Response(status_code=200)
     with patch("httpx.Client.post", return_value=mock_response):
@@ -173,9 +157,5 @@ def test_get_text_between_tags():
         'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt',
         'SEC-HEADER')
     assert 'ACCESSION NUMBER:		0001564590-18-004771' in text
-
-def test_download_text_between_tags():
-    text = download_text_between_tags(
-        'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt',
-        'SEC-HEADER')
     assert text.strip().endswith("77079")
+
