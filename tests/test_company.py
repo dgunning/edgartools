@@ -1,4 +1,4 @@
-import json
+import orjson as json
 from functools import lru_cache
 from pathlib import Path
 import datetime
@@ -36,7 +36,7 @@ def test_ticker_display_for_company_with_multiple_tickers():
 
 def test_parse_company_submission_json():
     with Path('data/company_submission.json').open("r") as f:
-        cjson = json.load(f)
+        cjson = json.loads(f.read())
     company = parse_entity_submissions(cjson)
     assert company.cik == 1318605
 
