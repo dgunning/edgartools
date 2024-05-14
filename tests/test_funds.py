@@ -49,7 +49,7 @@ def test_matching_of_mutual_fund_ticker():
 
 def test_filings_from_fund_class_are_not_duplicated():
     # When we get a fund we can get the filings
-    fund_class: FundClass = get_fund_with_filings("C000245415 ")
+    fund_class: FundClass = get_fund_with_filings("C000245415")
     fund = fund_class.fund
     filings = fund.filings
     assert not filings.to_pandas().duplicated().any()

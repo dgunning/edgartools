@@ -16,7 +16,8 @@ from rich.table import Table, Column
 from edgar.entities import Company
 from edgar._filings import FilingHeader, Filings
 from edgar._rich import repr_rich, df_to_rich_table
-from edgar.core import download_text, log
+from edgar.core import log
+from edgar.httprequests import download_text
 
 __all__ = [
     'Fund',

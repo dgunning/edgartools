@@ -1,5 +1,4 @@
 import datetime
-import gzip
 import logging.config
 import os
 import random
@@ -11,9 +10,8 @@ from _thread import interrupt_main
 from dataclasses import dataclass
 from decimal import Decimal
 from functools import lru_cache
-from io import BytesIO
 from typing import Union, Optional, Tuple, List
-import json
+
 import httpx
 import humanize
 import pandas as pd
@@ -21,7 +19,6 @@ import pyarrow as pa
 import pyarrow.compute as pc
 from charset_normalizer import detect
 from fastcore.basics import listify
-from retry.api import retry_call
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 
@@ -69,9 +66,6 @@ __all__ = [
     'pandas_version',
     'python_version',
     'set_identity',
-    'download_text',
-    'download_json',
-    'download_file',
     'decode_content',
     'filter_by_date',
     'filter_by_form',
@@ -80,7 +74,6 @@ __all__ = [
     'ask_for_identity',
     'default_page_size',
     'InvalidDateException',
-    'download_text_between_tags'
 ]
 
 IntString = Union[str, int]
@@ -220,6 +213,12 @@ class InvalidDateException(Exception):
         super().__init__(message)
 
 
+class TooManyRequestsException(Exception):
+
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
     """
     Split a date or a date range into start_date and end_date
@@ -327,86 +326,9 @@ def decode_content(content: bytes):
         return content.decode('latin-1')
 
 
-text_extensions = [".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper"]
-binary_extensions = [".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng"]
-
-
-def download_file(url: str,
-                  client: Union[httpx.Client, httpx.AsyncClient] = None,
-                  as_text: bool = None):
-    # reason_phrase = 'Too Many Requests' status_code = 429
-    if not client:
-        client = http_client()
-
-    if not as_text:
-        # Set the default to true if the url ends with a text extension
-        as_text = any([url.endswith(ext) for ext in text_extensions])
-
-    r = retry_call(client.get, fargs=[url], tries=5, delay=3)
-    # If we get a 301 or 302, follow the redirect
-    if r.status_code in [301, 302]:
-        return download_file(r.headers['Location'], client, as_text)
-    if r.status_code == 200:
-        if url.endswith("gz"):
-            binary_file = BytesIO(r.content)
-            with gzip.open(binary_file, 'rb') as f:
-                file_content = f.read()
-                if as_text:
-                    return decode_content(file_content)
-                return file_content
-        else:
-            # If we explicitly asked for text or there is an encoding, try to return text
-            if as_text:
-                return r.text
-            # Should get here for jpg and PDFs
-            return r.content
-    else:
-        r.raise_for_status()
-
-
-def download_text(url: str, client: Union[httpx.Client, httpx.AsyncClient] = None) -> Optional[str]:
-    return download_file(url, client, as_text=True)
-
-
-def download_json(data_url: str):
-    return json.loads(download_text(data_url))
-
-
-def download_text_between_tags(url: str, tag: str, client: Union[httpx.Client, httpx.AsyncClient] = None):
-    """
-    Download the content of a URL and extract the text between the tags
-    This is mainly for reading the header of a filing
-
-    :param url: The URL to download
-    :param tag: The tag to extract the content from
-    :param client: The httpx client to use
-
-    """
-    if not client:
-        client = http_client()
-    tag_start = f'<{tag}>'
-    tag_end = f'</{tag}>'
-    is_header = False
-    content = ""
-
-    with retry_call(client.stream, fargs=['GET', url], tries=5, delay=3) as response:
-
-        for line in response.iter_lines():
-            if line:
-                # If line matches header_start, start capturing
-                if line.startswith(tag_start):
-                    is_header = True
-                    continue  # Skip the current line as it's the opening tag
-
-                # If line matches header_end, stop capturing
-                elif line.startswith(tag_end):
-                    break
-
-                # If within header lines, add to header_content
-                elif is_header:
-                    content += line + '\n'  # Add a newline to preserve original line breaks
-    return content
+text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
+binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
+                     ".apng")
 
 
 def extract_text_between_tags(content: str, tag: str) -> str:
@@ -679,4 +601,3 @@ def reverse_name(name):
 
 def yes_no(value: bool) -> str:
     return "Yes" if value else "No"
-

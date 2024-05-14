@@ -65,8 +65,8 @@ class Signature(BaseModel):
     issuer_name: str
     signature_name: str
     name_of_signer: str
-    title: str
-    date: str
+    title: Optional[str] = None
+    date: Optional[str] = None
 
 
 class SignatureBlock(BaseModel):
@@ -362,9 +362,9 @@ class FormD:
         # Get the signature
         signature_block_tag = root.find("signatureBlock")
         signatures = [Signature(
-            issuer_name=child_text(sig_el, "issuerName"),
-            signature_name=child_text(sig_el, "signatureName"),
-            name_of_signer=child_text(sig_el, "nameOfSigner"),
+            issuer_name=child_text(sig_el, "issuerName") or "",
+            signature_name=child_text(sig_el, "signatureName") or "",
+            name_of_signer=child_text(sig_el, "nameOfSigner") or "",
             title=child_text(sig_el, "signatureTitle"),
             date=child_text(sig_el, "signatureDate"))
             for sig_el in signature_block_tag.find_all("signature")
@@ -447,7 +447,7 @@ class FormD:
                                     signature.issuer_name
                                     )
 
-        def panel_fit(renderable: RenderableType, title: str = None):
+        def panel_fit(renderable: RenderableType, title: Optional[str] = None):
             if title:
                 return Panel.fit(renderable, title=title, title_align="left", box=box.SIMPLE,
                                  style="bold")

@@ -1,5 +1,4 @@
 import itertools
-import json
 import os.path
 import pickle
 import re
@@ -15,6 +14,7 @@ from typing import Tuple, List, Dict, Union, Optional, Any, cast
 
 import httpx
 import numpy as np
+import orjson as json
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -24,7 +24,6 @@ import pytz
 from bs4 import BeautifulSoup
 from fastcore.basics import listify
 from fastcore.parallel import parallel
-from retry.api import retry_call
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
@@ -38,13 +37,15 @@ from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
-from edgar.core import (http_client, download_text, download_file, log, display_size, sec_edgar,
-                        download_text_between_tags,
-                        filter_by_date, filter_by_form, sec_dot_gov, InvalidDateException, IntString, DataPager,
+from edgar.core import (http_client, log, display_size, sec_edgar,
+                        filter_by_date, filter_by_form, sec_dot_gov,
+                        InvalidDateException, IntString, DataPager,
                         text_extensions, binary_extensions)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
 from edgar.htmltools import html_sections
+from edgar.httprequests import download_file, download_text, download_text_between_tags
+from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
 
@@ -840,9 +841,8 @@ def get_current_url(atom: bool = True,
 
 @lru_cache(maxsize=32)
 def get_current_entries_on_page(count: int, start: int, form: Optional[str] = None, owner: str = 'include'):
-    client = http_client()
     url = get_current_url(count=count, start=start, form=form if form else '', owner=owner, atom=True)
-    response = retry_call(client.get, fargs=[url], tries=5, delay=3)
+    response = get_with_retry(url)
 
     soup = BeautifulSoup(response.text, features="xml")
     entries = []
@@ -925,7 +925,6 @@ class CurrentFilings(Filings):
         item = self.get(item)
         assert item is not None
         return item
-
 
     def get(self, index_or_accession_number: IntString):
         if isinstance(index_or_accession_number, int) or index_or_accession_number.isdigit():
@@ -1085,7 +1084,7 @@ class Filing:
         xml_document = self.homepage.primary_xml_document
         if xml_document:
             return str(xml_document.download())
-        
+
     @lru_cache(maxsize=4)
     def text(self) -> str:
         """Convert the html of the main filing document to text"""
@@ -1255,7 +1254,7 @@ class Filing:
         """
         if not self._filing_homepage:
             homepage_html = download_text(self.homepage_url)
-            assert homepage_html is not None            
+            assert homepage_html is not None
             self._filing_homepage = FilingHomepage.from_html(str(homepage_html),
                                                              url=self.homepage_url,
                                                              filing=self)
@@ -1498,7 +1497,7 @@ class Attachment:
         """Is this a binary document"""
         return self.extension in binary_extensions
 
-    def download(self) -> Optional[Union[str,bytes]]:
+    def download(self) -> Optional[Union[str, bytes]]:
         downloaded = download_file(self.url, as_text=self.is_text())
         assert downloaded is not None
         return downloaded
@@ -1575,7 +1574,7 @@ class FilingHomepage:
         res = self._files.query(f"Seq=='{seq}'")
         if res.empty:
             raise ValueError(f"unable to retreive filing doc for seq {seq}")
-        
+
         return Attachment.from_dataframe_row(res.iloc[0])
 
     def open(self):
