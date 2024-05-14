@@ -1,5 +1,4 @@
 import itertools
-import json
 import os.path
 import pickle
 import re
@@ -15,6 +14,7 @@ from typing import Tuple, List, Dict, Union, Optional, Any, cast
 
 import httpx
 import numpy as np
+import orjson as json
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
