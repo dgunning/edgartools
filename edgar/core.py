@@ -114,13 +114,13 @@ class EdgarSettings:
 # Modes of accessing edgar
 
 # The normal mode of accessing edgar
-NORMAL = EdgarSettings(http_timeout=12, max_connections=10)
+NORMAL = EdgarSettings(http_timeout=15, max_connections=10)
 
 # A bit more cautious mode of accessing edgar
-CAUTION = EdgarSettings(http_timeout=15, max_connections=5)
+CAUTION = EdgarSettings(http_timeout=20, max_connections=5)
 
 # Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
-CRAWL = EdgarSettings(http_timeout=20, max_connections=2, retries=2)
+CRAWL = EdgarSettings(http_timeout=25, max_connections=2, retries=2)
 
 # Use normal mode
 edgar_mode = NORMAL

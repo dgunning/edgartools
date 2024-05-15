@@ -846,10 +846,8 @@ def test_filings_get_by_invalid_accession_number(capsys):
 
 
 def test_get_daily_filing_index():
-    with http_client() as client:
-        # _, filings = fetch_filing_index((2024,1), client, 'form')
-        filings = fetch_daily_filing_index('2024-01-26', client=client, index="form")
-        print(filings)
+    filings = fetch_daily_filing_index('2024-01-26',  index="form")
+    print(filings)
 
 
 def test_filing_to_dict():

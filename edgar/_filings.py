@@ -37,7 +37,7 @@ from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
-from edgar.core import (http_client, log, display_size, sec_edgar,
+from edgar.core import (log, display_size, sec_edgar,
                         filter_by_date, filter_by_form, sec_dot_gov,
                         InvalidDateException, IntString, DataPager,
                         text_extensions, binary_extensions)
@@ -323,30 +323,26 @@ def read_pipe_delimited_index(index_text: str) -> pa.Table:
 
 
 def fetch_filing_index(year_and_quarter: YearAndQuarter,
-                       client: Union[httpx.Client, httpx.AsyncClient],
                        index: str
                        ):
     year, quarter = year_and_quarter
     url = full_index_url.format(year, quarter, index, "gz")
-    index_table = fetch_filing_index_at_url(url, client, index)
+    index_table = fetch_filing_index_at_url(url, index)
     return (year, quarter), index_table
 
 
 def fetch_daily_filing_index(date: str,
-                             client: Optional[Union[httpx.Client, httpx.AsyncClient]] = None,
                              index: str = 'form'):
     year, month, day = date.split("-")
     quarter = (int(month) - 1) // 3 + 1
     url = daily_index_url.format(year, quarter, index, date.replace("-", ""))
-    client = client or http_client()
-    index_table = fetch_filing_index_at_url(url, client, index)
+    index_table = fetch_filing_index_at_url(url, index)
     return index_table
 
 
 def fetch_filing_index_at_url(url: str,
-                              client: Union[httpx.Client, httpx.AsyncClient],
                               index: str):
-    index_text = download_text(url=url, client=client)
+    index_text = download_text(url=url)
     assert index_text is not None
     if index == "xbrl":
         index_table: pa.Table = read_pipe_delimited_index(str(index_text))
@@ -385,22 +381,20 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
     :param index: The index to use - "form", "company", or "xbrl"
     :return:
     """
-    with http_client() as client:
-        if len(year_and_quarters) == 1:
-            _, final_index_table = fetch_filing_index(year_and_quarter=year_and_quarters[0],
-                                                      client=client,
-                                                      index=index)
-        else:
-            quarters_and_indexes = parallel(fetch_filing_index,
-                                            items=year_and_quarters,
-                                            client=client,
-                                            index=index,
-                                            threadpool=True,
-                                            progress=True
-                                            )
-            quarter_and_indexes_sorted = sorted(quarters_and_indexes, key=lambda d: d[0])
-            index_tables = [fd[1] for fd in quarter_and_indexes_sorted]
-            final_index_table: pa.Table = pa.concat_tables(index_tables, mode="default")
+
+    if len(year_and_quarters) == 1:
+        _, final_index_table = fetch_filing_index(year_and_quarter=year_and_quarters[0],
+                                                  index=index)
+    else:
+        quarters_and_indexes = parallel(fetch_filing_index,
+                                        items=year_and_quarters,
+                                        index=index,
+                                        threadpool=True,
+                                        progress=True
+                                        )
+        quarter_and_indexes_sorted = sorted(quarters_and_indexes, key=lambda d: d[0])
+        index_tables = [fd[1] for fd in quarter_and_indexes_sorted]
+        final_index_table: pa.Table = pa.concat_tables(index_tables, mode="default")
     return final_index_table
 
 
