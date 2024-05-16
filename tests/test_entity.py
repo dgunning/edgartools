@@ -3,39 +3,42 @@ from edgar.entities import get_entity_submissions, Entity
 
 def test_entity_is_company():
     # TSLA
-    assert get_entity_submissions(1318605).is_company
+    assert get_entity_submissions(1318605, include_old_filings=False).is_company
 
     # Taneja Vaibhav at TSLA
-    assert not get_entity_submissions(1771340).is_company
+    assert not get_entity_submissions(1771340, include_old_filings=False).is_company
 
     # &VEST Domestic Fund II LP
-    assert get_entity_submissions(1800903).is_company
+    assert get_entity_submissions(1800903, include_old_filings=False).is_company
 
     # Siemens AG
-    assert get_entity_submissions(940418).is_company
+    assert get_entity_submissions(940418, include_old_filings=False).is_company
 
     # SIEMENS ENERGY AG/ADR
-    assert get_entity_submissions(1830056).is_company
+    assert get_entity_submissions(1830056, include_old_filings=False).is_company
 
     # SIEVERT STEPHANIE A
-    assert not get_entity_submissions(1718179).is_company
+    assert not get_entity_submissions(1718179, include_old_filings=False).is_company
 
-    assert Entity(1911716).is_company
-
-    # Warren Buffett
-    assert not Entity(315090).is_company
+    assert Entity(1911716, include_old_filings=False).is_company
 
     # NVC Holdings, LLC
-    assert Entity(1940261).is_company
+    assert Entity(1940261, include_old_filings=False).is_company
 
     # FANNIE MAE
-    assert Entity(310522).is_company
+    assert Entity(310522, include_old_filings=False).is_company
 
     # Berkshire Hathaway
-    assert Entity(1067983).is_company
+    assert Entity(1067983, include_old_filings=False).is_company
 
     # ORBIMED Advisors LLC
-    assert Entity(1055951).is_company
+    assert Entity(1055951, include_old_filings=False).is_company
+
+
+def test_warren_buffett():
+    # Warren Buffett
+    warren_buffet = Entity(315090, include_old_filings=False)
+    assert warren_buffet.is_individual
 
 
 def test_display_name():

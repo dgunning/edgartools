@@ -397,7 +397,7 @@ class EntityData:
             return False
         if self.state_of_incorporation is not None and self.state_of_incorporation != '':
             return False
-        if self.ein is None:
+        if self.ein is None or self.ein == "000000000": #The Warren Buffett case
             return True
         return False
 
