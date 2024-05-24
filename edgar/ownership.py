@@ -1067,7 +1067,7 @@ class InsiderMarketTradeSummary(BaseModel):
     buy_sell: str
     shares: Union[int, float]
     price: Union[int, float]
-    remaining: Union[int, float]
+    remaining: Optional[Union[int, float]] = None
 
     def __rich__(self):
         table = Table("Period", Column("Owner", style="bold deep_sky_blue1"),
