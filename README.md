@@ -369,6 +369,9 @@ Report a bug by [opening a new issue](https://github.com/dgunning/edgartools/iss
 
 [LinkedIn](https://www.linkedin.com/in/dwight-gunning-860124/)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=dgunning/edgartools&type=Timeline)](https://star-history.com/#dgunning/edgartools&Timeline)
 
 ## Supporters
 [![Stargazers repo roster for @dgunning/edgartools](https://reporoster.com/stars/dgunning/edgartools)](https://github.com/dgunning/edgartools/stargazers)
