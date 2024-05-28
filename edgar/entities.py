@@ -20,6 +20,7 @@ from rich import box
 from rich.columns import Columns
 from rich.table import Table, Column
 from edgar.httprequests import download_json, download_text
+from edgar.reference import states
 from edgar.core import (log, Result, display_size,
                         filter_by_date, IntString, InvalidDateException, reverse_name)
 from edgar.search import SimilaritySearchIndex
@@ -573,7 +574,7 @@ class EntityData:
             row.append(self.industry)
         if self.state_of_incorporation:
             info_table.add_column("Incorporated")
-            row.append(self.state_of_incorporation_description)
+            row.append(states.get(self.state_of_incorporation, self.state_of_incorporation_description))
         info_table.add_row(*row)
 
         # The addresses
