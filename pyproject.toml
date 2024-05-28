@@ -74,7 +74,7 @@ dependencies = [
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
-lint = "ruff edgar"
+lint = "ruff check edgar"
 smoke-filings = "python tests/batch/batch_filings.py {args}"
 
 [tool.hatch.envs.test]
@@ -82,6 +82,7 @@ dependencies = [
   "pytest",
   "pytest-cov",
   "pytest-env",
+  "pytest-asyncio"
 ]
 
 [[tool.hatch.envs.test.matrix]]
@@ -105,7 +106,7 @@ exclude_lines = [
 [tool.ruff]
 line-length = 150
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
 [tool.pytest.ini_options]
