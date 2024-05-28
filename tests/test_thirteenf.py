@@ -48,8 +48,6 @@ def test_thirteenf_from_filing_with_multiple_related_filing_on_same_day():
     assert not thirteenF.infotable_html
     assert not thirteenF.infotable
 
-    print(thirteenF)
-
     # Should throw an AssertionError if you try to parse a 10-K as a 13F
     filing = Filing(form='10-K', filing_date='2023-03-23', company='ADMA BIOLOGICS, INC.', cik=1368514,
                     accession_no='0001140361-23-013467')

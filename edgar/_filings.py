@@ -1,5 +1,4 @@
 import itertools
-import os.path
 import pickle
 import re
 import webbrowser
@@ -29,7 +28,7 @@ from rich.columns import Columns
 from rich.console import Group
 from rich.panel import Panel
 from rich.status import Status
-from rich.table import Table, Column
+from rich.table import Table
 from rich.text import Text
 
 from edgar._markdown import html_to_markdown, text_to_markdown
@@ -37,10 +36,9 @@ from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
+from edgar.attachments import FilingHomepage, Attachment, Attachments
 from edgar.core import (log, display_size, sec_edgar,
-                        filter_by_date, filter_by_form, sec_dot_gov,
-                        InvalidDateException, IntString, DataPager,
-                        text_extensions, binary_extensions)
+                        filter_by_date, filter_by_form, InvalidDateException, IntString, DataPager)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
 from edgar.htmltools import html_sections
@@ -1088,7 +1086,7 @@ class Filing:
         else:
             # Some Form types like UPLOAD don't have a primary document. Look for a TEXT EXTRACT attachment
             # Look for an attachment that is TEXT EXTRACT
-            text_extract_attachments = self.attachments.query("Type == 'TEXT-EXTRACT'")
+            text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
             if len(text_extract_attachments) > 0 and text_extract_attachments[0] is not None:
                 text_extract_attachment = text_extract_attachments[0]
                 assert text_extract_attachment is not None
@@ -1247,11 +1245,7 @@ class Filing:
         :return: the FilingHomepage
         """
         if not self._filing_homepage:
-            homepage_html = download_text(self.homepage_url)
-            assert homepage_html is not None
-            self._filing_homepage = FilingHomepage.from_html(str(homepage_html),
-                                                             url=self.homepage_url,
-                                                             filing=self)
+            self._filing_homepage = FilingHomepage.load(self.homepage_url)
         return self._filing_homepage
 
     @property
@@ -1358,160 +1352,6 @@ class Filing:
         return repr_rich(self.__rich__())
 
 
-class Attachments:
-    """
-    A collection of Attachments on a filing
-    """
-
-    def __init__(self, files: pd.DataFrame):
-        self.files = files
-        # Replace \xa0 with '-' in the Seq
-        self.files.loc[:, 'Seq'] = self.files['Seq'].str.replace('\xa0', '-')
-
-    def __getitem__(self, item):
-        if isinstance(item, str):
-            res = self.files[self.files['Document'] == item]
-            if not res.empty:
-                return Attachment.from_dataframe_row(res.iloc[0])
-        elif isinstance(item, int):
-            if 0 <= item < len(self.files):
-                return Attachment.from_dataframe_row(self.files.iloc[item])
-
-    def __iter__(self):
-        self.n = 0
-        return self
-
-    def __next__(self):
-        if self.n < len(self.files):
-            attachment = self[self.n]
-            assert attachment is not None
-
-            self.n += 1
-            return attachment
-        else:
-            raise StopIteration
-
-    def get(self, item):
-        return self.__getitem__(item)
-
-    def query(self, query: str):
-        # Get the attachments by type
-        results = self.files.query(query)
-        return Attachments(results)
-
-    def __len__(self):
-        return len(self.files)
-
-    def __rich__(self):
-        table = Table('', Column('Document', style="bold"), 'Type', 'Description', 'Size',
-                      box=box.ROUNDED,
-                      title="Attachments",
-                      title_style="bold",
-                      row_styles=["", "bold"])
-        for index, row in self.files.iterrows():
-            table.add_row(str(index), str(row.Document), str(row["Type"]), str(row.Description), display_size(row.Size))
-        return table
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
-
-
-@dataclass(frozen=True)
-class Attachment:
-    """
-    A document on the filing
-
-    """
-    seq: int
-    description: str
-    document: str
-    attachment_type: str
-    size: int
-    path: str
-
-    @property
-    def extension(self):
-        """The actual extension of the filing document
-         Usually one of .xml or .html or .pdf or .txt or .paper
-         """
-        return os.path.splitext(self.path)[1]
-
-    @property
-    def display_extension(self) -> str:
-        """This is the extension displayed in the html e.g. "es220296680_4-davis.html"
-        The actual extension would be "es220296680_4-davis.xml", that displays as html in the browser
-
-        """
-        return os.path.splitext(self.document)[1]
-
-    @property
-    def url(self) -> str:
-        """
-        :return: The full sec url
-        """
-        # Never use the ixbrl viewer
-        # ix.xhtml?doc=/
-        filing_url = f"{sec_dot_gov}{self.path}"
-        # Remove "ix?doc=/" or "ix.xhtml?doc=/" from the filing url
-        return re.sub(r"ix(\.xhtml)?\?doc=/", "", filing_url)
-
-    def open(self):
-        """Open the filing document"""
-        if not self.empty:
-            webbrowser.open(self.url)
-
-    @property
-    def empty(self):
-        """Some older filings have no document url. So effectively this attachment is empty"""
-        return self.document is None or self.document.strip() == ''
-
-    @property
-    def name(self) -> str:
-        return os.path.basename(self.path)
-
-    @classmethod
-    def from_dataframe_row(cls, dataframe_row: pd.Series):
-
-        try:
-            size = int(dataframe_row.Size)
-        except ValueError:
-            size = 0
-        return cls(seq=dataframe_row.Seq,
-                   description=dataframe_row.Description,
-                   document=dataframe_row.Document,
-                   attachment_type=dataframe_row.Type,
-                   size=size,
-                   path=dataframe_row.Url)
-
-    def is_text(self):
-        """Is this a text document"""
-        return self.extension in text_extensions
-
-    def is_binary(self):
-        """Is this a binary document"""
-        return self.extension in binary_extensions
-
-    def download(self) -> Optional[Union[str, bytes]]:
-        downloaded = download_file(self.url, as_text=self.is_text())
-        assert downloaded is not None
-        return downloaded
-
-    def summary(self) -> pd.DataFrame:
-        """Return a summary of this filing as a dataframe"""
-        return pd.DataFrame([{'seq': self.seq,
-                              'form': self.attachment_type,
-                              'document': self.document,
-                              'description': self.description}]).set_index("seq")
-
-    def __rich__(self):
-        table = Table("", "Document", "Type", "Description", "Size", box=box.ROUNDED)
-        table.add_row(str(self.seq), self.document, self.attachment_type, self.description, display_size(self.size))
-        return table
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
-
-
 # These are the columns on the table on the filing homepage
 filing_file_cols = ['Seq', 'Description', 'Document', 'Type', 'Size', 'Url']
 
@@ -1544,204 +1384,6 @@ class FilerInfo:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
-
-
-class FilingHomepage:
-    """
-    A class that represents the homepage for the filing allowing us to get the documents and datafiles
-    """
-
-    def __init__(self,
-                 files: pd.DataFrame,
-                 url: str,
-                 filing: Filing,
-                 filer_infos: List[FilerInfo]):
-        self._files: pd.DataFrame = files
-        self.url: str = url
-        self.filing: Filing = filing
-        self.filer_infos: List[FilerInfo] = filer_infos
-
-    def get_file(self,
-                 *,
-                 seq: int) -> Attachment:
-        """ get the filing document that matches the seq"""
-        res = self._files.query(f"Seq=='{seq}'")
-        if res.empty:
-            raise ValueError(f"unable to retreive filing doc for seq {seq}")
-
-        return Attachment.from_dataframe_row(res.iloc[0])
-
-    def open(self):
-        webbrowser.open(self.url)
-
-    def min_seq(self) -> str:
-        """Get the minimum document sequence from the Seq column"""
-        return str(min([int(seq) for seq in self.documents.Seq.tolist() if seq and seq.isdigit()]))
-
-    @property
-    @lru_cache(maxsize=2)
-    def primary_documents(self) -> List[Attachment]:
-        """
-        Get the documents listed as primary for the filing
-        :return:
-        """
-        min_seq = self.min_seq()
-        doc_results = self.documents.query(f"Seq=='{min_seq}'")
-        return [
-            Attachment.from_dataframe_row(self.documents.iloc[index])
-            for index in doc_results.index
-        ]
-
-    @property
-    def primary_xml_document(self) -> Optional[Attachment]:
-        """Get the primary xml document on the filing"""
-        for doc in self.primary_documents:
-            if doc.display_extension == ".xml":
-                return doc
-
-    @property
-    def text_document(self) -> Attachment:
-        """Get the full text submission file"""
-        res = self._files[self._files.Description == "Complete submission text file"]
-        return Attachment.from_dataframe_row(res.iloc[0])
-
-    @property
-    def primary_html_document(self) -> Optional[Attachment]:
-        """Get the primary xml document on the filing"""
-        for doc in self.primary_documents:
-            if doc.display_extension == ".html" or doc.display_extension == '.htm':
-                return doc
-        # Shouldn't get here but just open the first document
-        return self.primary_documents[0]
-
-    @property
-    def xbrl_document(self):
-        """Find and return the xbrl document."""
-
-        # Change from .query syntax due to differences in how pandas executes queries on online environmments
-        matching_files = self._files[self._files.Description.isin(xbrl_document_types)]
-        if not matching_files.empty:
-            rec = matching_files.iloc[0]
-            return Attachment.from_dataframe_row(rec)
-
-    def get_matching_files(self,
-                           query: str) -> pd.DataFrame:
-        """ return the files that match the query"""
-        return self._files.query(query, engine="python").reset_index(drop=True).filter(filing_file_cols)
-
-    @property
-    def documents(self) -> pd.DataFrame:
-        """ returns the files that are in the "Document Format Files" table of the homepage"""
-        return self.get_matching_files("table=='Document Format Files'")
-
-    @property
-    def datafiles(self):
-        """ returns the files that are in the "Data Files" table of the homepage"""
-        return self.get_matching_files("table=='Data Files'")
-
-    @property
-    @lru_cache(maxsize=2)
-    def attachments(self) -> Attachments:
-        return Attachments(self._files)
-
-    @classmethod
-    def from_html(cls,
-                  homepage_html: str,
-                  url: str,
-                  filing: Filing):
-        """Parse the HTML and create the Homepage from it"""
-
-        # It is html so use "html.parser" (instead of "xml", or "lxml")
-        soup = BeautifulSoup(homepage_html, "html.parser")
-
-        # Keep track of the tables as dataframes, so we can append later
-        dfs = []
-
-        # The table containin the attachments
-        tables = soup.find_all("table", class_="tableFile")
-        for table in tables:
-            summary = table.attrs.get("summary")
-            rows = table.find_all("tr")
-            column_names: Any = [th.text for th in rows[0].find_all("th")] + ["Url"]
-            records = []
-
-            # Add the rows from the table
-            for row in rows[1:]:
-                cells = row.find_all("td")
-                link = cells[2].a
-                cell_values = [cell.text for cell in cells] + [link["href"] if link else None]
-                records.append(cell_values)
-
-            # Now create the dataframe
-            table_as_df = (pd.DataFrame(records, columns=column_names)
-                           .filter(filing_file_cols)
-                           .assign(table=summary)
-                           )
-            dfs.append(table_as_df)
-
-        # Now concat into a single dataframe
-        files = pd.concat(dfs, ignore_index=True)
-
-        filer_divs = soup.find_all("div", id="filerDiv")
-        filer_infos = []
-        for filer_div in filer_divs:
-
-            # Get the company name
-            company_info_div = filer_div.find("div", class_="companyInfo")
-
-            company_name_span = company_info_div.find("span", class_="companyName")
-            company_name = (re.sub("\n", "", company_name_span.text.strip())
-                            .replace("(see all company filings)", "").rstrip()
-                            if company_name_span else "")
-
-            # Get the identification information
-            ident_info_div = company_info_div.find("p", class_="identInfo")
-
-            # Relace <br> with newlines
-            for br in ident_info_div.find_all("br"):
-                br.replace_with("\n")
-
-            identification = ident_info_div.text
-
-            # Get the mailing information
-            mailer_divs = filer_div.find_all("div", class_="mailer")
-            # For each mailed_div.text remove multiple spaces after a newline
-
-            addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
-                         for mailer_div in mailer_divs]
-
-            # Create the filer info
-            filer_info = FilerInfo(company_name=company_name, identification=identification, addresses=addresses)
-
-            filer_infos.append(filer_info)
-
-        return cls(files,
-                   url=url,
-                   filing=filing,
-                   filer_infos=filer_infos)
-
-    def __str__(self):
-        return f"Homepage for {self.description}"
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
-
-    def __rich__(self):
-
-        return Panel(
-            Group(
-                df_to_rich_table(self.filing.summary(), index_name="Accession Number"),
-                Group(Text("Documents", style="bold"),
-                      df_to_rich_table(summarize_files(self.documents), index_name="Seq")
-                      ),
-                Group(Text("Datafiles", style="bold"),
-                      df_to_rich_table(summarize_files(self.datafiles), index_name="Seq"),
-                      ) if self.datafiles is not None else Text(""),
-                Group(
-                    *[filer_info.__rich__() for filer_info in self.filer_infos]
-                )
-
-            ), title=f"Form {self.filing.form}")
 
 
 def summarize_files(data: pd.DataFrame) -> pd.DataFrame:

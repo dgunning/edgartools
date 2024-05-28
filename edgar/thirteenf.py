@@ -13,10 +13,10 @@ from rich.table import Table, Column
 
 from edgar._party import Address
 from edgar._rich import repr_rich
-from edgar.sgml import stream_documents
-from edgar.core import log
 from edgar._xml import find_element, child_text
+from edgar.core import log
 from edgar.reference import cusip_ticker_mapping
+from edgar.sgml import stream_documents
 
 __all__ = [
     'ThirteenF',
@@ -128,24 +128,23 @@ class ThirteenF:
             for document in stream_documents(self.filing.text_url):
                 if document.type == "INFORMATION TABLE":
                     return document.text_content
+
     def _get_infotable_from_attachment(self):
         """
         Use the filing homepage to get the infotable file
         """
-        from edgar._filings import Attachment
         if self.has_infotable():
-            matching_files = self.filing.homepage.get_matching_files(
-                "Type=='INFORMATION TABLE' & (Document.str.endswith('.xml') | Document.str.endswith('.XML'))")
-            return Attachment.from_dataframe_row(matching_files.iloc[0]).download()
+            query = "document_type=='INFORMATION TABLE' and document.lower().endswith('.xml')"
+            attachments = self.filing.attachments.query(query)
+            return attachments[0].download()
 
     @property
     @lru_cache(maxsize=1)
     def infotable_html(self):
-        from edgar._filings import Attachment
         if self.has_infotable():
-            matching_files = self.filing.homepage.get_matching_files(
-                "Type=='INFORMATION TABLE' & Document.str.endswith('html')")
-            return Attachment.from_dataframe_row(matching_files.iloc[0]).download()
+            query = "document_type=='INFORMATION TABLE' and document.lower().endswith('.html')"
+            attachments = self.filing.attachments.query(query)
+            return attachments[0].download()
 
     @property
     @lru_cache(maxsize=1)
@@ -246,7 +245,6 @@ class ThirteenF:
             total_holdings = child_text(summary_page_el, "tableEntryTotal")
             if total_holdings:
                 total_holdings = int(total_holdings)
-
 
             total_value = child_text(summary_page_el, "tableValueTotal")
             if total_value:
@@ -367,7 +365,7 @@ class ThirteenF:
 
         # info table
         if self.has_infotable():
-            table = Table("", "Issuer", "Class", "Cusip", "Ticker",  "Value", "Type", "Shares", "Voting",
+            table = Table("", "Issuer", "Class", "Cusip", "Ticker", "Value", "Type", "Shares", "Voting",
                           row_styles=["bold", ""],
                           box=box.SIMPLE)
             for index, row in enumerate(self._infotable_summary().itertuples()):

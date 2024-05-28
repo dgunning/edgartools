@@ -9,6 +9,7 @@ import humanize
 import pandas as pd
 import pytest
 from rich import print
+import asyncio
 import json
 from datetime import date
 
@@ -257,31 +258,13 @@ def test_parse_filing_homepage_with_multiple_instruments():
                     cik=773485, accession_no='0001741773-23-002051')
 
     homepage_html = Path('data/troweprice.DEF14A.html').read_text()
-    filing_homepage = FilingHomepage.from_html(homepage_html, url=filing.homepage_url, filing=filing)
-    print()
+    filing_homepage = filing.homepage
 
-    assert len(filing_homepage.filer_infos) > 60
-    filer_info = filing_homepage.filer_infos[0]
+    filers = filing_homepage.get_filers()
+    assert len(filing_homepage.get_filers()) > 60
+    filer_info = filers[0]
     assert filer_info.company_name == "T. Rowe Price Small-Cap Stock Fund, Inc. (Filer) CIK: 0000075170"
     assert "100 EAST PRATT STRET" in filer_info.addresses[0]
-    print(filing_homepage)
-
-
-def test_get_filer_info_from_homepage():
-    # This is a form 4 filing so there is an Issuer "LiveRamp Holdings" and a Reporter "Scott E Rowe"
-    filing = Filing(form='4', filing_date='2023-08-23', company='Howe Scott E', cik=1369558,
-                    accession_no='0001903601-23-000091')
-    print()
-    print(filing.homepage)
-    print(filing.homepage.filer_infos)
-
-
-def test_get_matching_files():
-    document_files = carbo_10K.homepage.get_matching_files("table=='Document Format Files'")
-    assert len(document_files) >= 12
-
-    data_files = carbo_10K.homepage.get_matching_files("table=='Data Files'")
-    assert len(data_files) >= 6
 
 
 def test_filing_document():
@@ -296,13 +279,13 @@ def test_xbrl_document():
 
 
 def test_filing_homepage_get_file():
-    filing_document = carbo_10K.homepage.get_file(seq=1)
+    filing_document = carbo_10K.homepage.attachments.get_by_sequence(1)
     assert filing_document
-    assert filing_document.seq == '1'
+    assert filing_document.sequence_number == '1'
     assert filing_document.path == '/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
     assert filing_document.url == 'https://www.sec.gov/Archives/edgar/data' + \
            '/1009672/000156459018004771/crr-10k_20171231.htm'
-    assert filing_document.name == 'crr-10k_20171231.htm'
+    assert filing_document.document == 'crr-10k_20171231.htm'
 
 
 def test_download_filing_document():
@@ -342,7 +325,7 @@ def test_filing_primary_document():
     assert primary_document.url == \
            'https://www.sec.gov/Archives/edgar/data/893739/000089373920000019/annualmeetingproxy2020-doc.htm'
     assert primary_document.extension == '.htm'
-    assert primary_document.seq == '1'
+    assert primary_document.sequence_number == '1'
 
 
 barclays_filing = Filing(form='ATS-N/MA', company='BARCLAYS CAPITAL INC.', cik=851376, filing_date='2020-02-21',
@@ -355,7 +338,7 @@ def test_filing_primary_document_seq_5():
     assert primary_document.url == \
            'https://www.sec.gov/Archives/edgar/data/851376/000085137620000003/xslATSN_COVER_X01/coverpage.xml'
     assert primary_document.extension == '.xml'
-    assert primary_document.seq == '5'
+    assert primary_document.sequence_number == '5'
 
 
 def test_filing_html():
@@ -442,15 +425,6 @@ def test_filing_html_for_pdf_only_filing():
     assert not filing.html()
 
 
-def test_filing_homepage_get_minimum_seq():
-    filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
-                    cik=1609804, filing_date='2022-11-04',
-                    accession_no='0000950142-22-003095')
-    min_seq = filing.homepage.min_seq()
-    assert min_seq == '1'
-    print(min_seq)
-
-
 def test_filing_homepage_primary_documents():
     filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
                     cik=1609804, filing_date='2022-11-04',
@@ -460,14 +434,14 @@ def test_filing_homepage_primary_documents():
     assert len(primary_documents) == 2
 
     primary_html = primary_documents[0]
-    assert primary_html.seq == '1'
+    assert primary_html.sequence_number == '1'
     assert primary_html.document == 'es220296680_4-davis.html'  # Displayed as html
     assert primary_html.description == 'OWNERSHIP DOCUMENT'
     assert primary_html.path.endswith('xslF345X03/es220296680_4-davis.xml')
     assert primary_html.display_extension == '.html'
 
     primary_xml = primary_documents[1]
-    assert primary_xml.seq == '1'
+    assert primary_xml.sequence_number == '1'
     assert primary_xml.document == 'es220296680_4-davis.xml'
     assert primary_xml.description == 'OWNERSHIP DOCUMENT'
     assert primary_xml.path.endswith('000095014222003095/es220296680_4-davis.xml')
@@ -757,13 +731,12 @@ def test_get_current_filing_by_accession_number():
 def test_attachments():
     filing = Filing(company="BLACKROCK INC", cik=1364742, form="8-K",
                     filing_date="2023-02-24", accession_no="0001193125-23-048785")
-    attachments = Attachments(filing.homepage._files)
-    assert len(attachments) == len(filing.homepage._files)
+    attachments = filing.attachments
+    assert len(attachments) == len(filing.homepage.attachments)
 
-    print(attachments)
     attachment = attachments[2]
     assert attachment
-    assert attachment.name == 'blk25-20230224.xsd'
+    assert attachment.document == 'blk25-20230224.xsd'
     assert attachment.url == 'https://www.sec.gov/Archives/edgar/data/1364742/000119312523048785/blk25-20230224.xsd'
 
     text = attachment.download()
@@ -781,7 +754,6 @@ def test_attachments():
 
     # Get the filing using the document name
     assert filing.attachments["blk25-20230224.xsd"].description == "XBRL TAXONOMY EXTENSION SCHEMA"
-    assert filing.attachments.get("blk25-20230224.xsd").description == "XBRL TAXONOMY EXTENSION SCHEMA"
 
 
 def test_download_filing_attachment():
@@ -791,14 +763,14 @@ def test_download_filing_attachment():
     print(attachments)
 
     # Get a text/htm attachment
-    attachment = attachments[0]
-    assert attachment.name == "cyber_10k.htm"
+    attachment = attachments.get_by_sequence(1)
+    assert attachment.document == "cyber_10k.htm"
     text = attachment.download()
     assert isinstance(text, str)
 
     # Get a jpg attachment
-    attachment = attachments[3]
-    assert attachment.name == "cyber_10kimg1.jpg"
+    attachment = attachments.get_by_sequence(9)
+    assert attachment.document == "cyber_10kimg1.jpg"
     b = attachment.download()
     assert isinstance(b, bytes)
 
