@@ -498,9 +498,9 @@ class EightK():
         attachments: Attachments = self._filing.attachments
         # This query for press release currently includes EX-99, EX-99.1, EX-99.01 but not EX-99.2
         # Here is what we think so far
-        html_document = "Document.str.endswith('.htm')"
-        named_release = "Description.str.match('.*RELEASE')"
-        type_ex_99 = "Type.isin(['EX-99.1', 'EX-99', 'EX-99.01'])"
+        html_document = "document.endswith('.htm')"
+        named_release = "re.match('.*RELEASE', description)"
+        type_ex_99 = "document_type in ['EX-99.1', 'EX-99', 'EX-99.01']"
         press_release_query = f"{html_document} and ({named_release} or {type_ex_99})"
         press_release_results = attachments.query(press_release_query)
         if press_release_results:
