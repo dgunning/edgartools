@@ -174,7 +174,7 @@ class Person:
     def __init__(self,
                  first_name: str,
                  last_name: str,
-                 address: Address = None):
+                 address: Optional[Address] = None):
         self.first_name = first_name
         self.last_name = last_name
         self.address: Address = address
@@ -192,7 +192,7 @@ class Name:
                  first_name: str,
                  middle_name: str,
                  last_name: str,
-                 suffix:str=None):
+                 suffix:Optional[str]=None):
         self.first_name = first_name
         self.middle_name = middle_name
         self.last_name = last_name

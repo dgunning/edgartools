@@ -23,7 +23,7 @@ __all__ = [
     "NPORT_FORMS"
 ]
 
-NPORT_FORMS = ["NPORT-P", "NPORT-EX"]
+NPORT_FORMS: List[str] = ["NPORT-P", "NPORT-EX"]
 
 
 class IssuerCredentials(BaseModel):

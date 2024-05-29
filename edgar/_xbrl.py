@@ -6,8 +6,9 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from rich import box
-from rich.console import Group, Text
+from rich.console import Group
 from rich.panel import Panel
+from rich.text import Text
 
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import child_text
@@ -78,7 +79,7 @@ class NamespaceInfo:
         return len(self.namespace2tag)
 
     def summary(self) -> pd.DataFrame:
-        return (pd.DataFrame(self.namespace2tag.items(),
+        return (pd.DataFrame(data=self.namespace2tag.items(),
                              columns=['namespace', 'taxonomy'])
                 .filter(['taxonomy', 'namespace'])
                 .sort_values('taxonomy')
@@ -129,7 +130,7 @@ class XbrlFacts:
         return self.get_dei('DocumentPeriodEndDate')
 
     @lru_cache(maxsize=1)
-    def get_facts_for_namespace(self, namespace: str, end_date: str = None):
+    def get_facts_for_namespace(self, namespace: str, end_date: Optional[str] = None):
         """Get the facts for the namespace and period"""
         end_date = end_date or self.period_end_date
         criteria = f"namespace=='{namespace}' and end_date=='{end_date}' and dimensions.isnull()"
@@ -146,7 +147,7 @@ class XbrlFacts:
                 .reset_index(drop=True)
                 )
 
-    def get_fact(self, fact: str, namespace: str, end_date: str = None):
+    def get_fact(self, fact: str, namespace: str, end_date: Optional[str] = None):
         # Get the fact value for the namespace and period
         end_date = end_date or self.period_end_date
         facts = self.get_facts_for_namespace(namespace=namespace, end_date=end_date)
@@ -255,7 +256,7 @@ class FilingXbrl:
         return self.facts.period_end_date
 
     def get_periods(self,
-                    period_type: str = None,
+                    period_type: Optional[str] = None,
                     min_count=8) -> Optional[List[Tuple[str, str]]]:
         """
         Get the periods in the filing. For Fiscal years,

@@ -244,7 +244,7 @@ class OfferingData:
         ] if sales_compensation_tag else []
 
         # Offering Sales Amount
-        offering_sales_amount_tag = offering_data_el.find("offeringSalesAmounts")
+        offering_sales_amount_tag: Optional[Tag] = offering_data_el.find("offeringSalesAmounts")
         offering_sales_amounts = OfferingSalesAmounts(
             total_offering_amount=child_text(offering_sales_amount_tag, "totalOfferingAmount"),
             total_amount_sold=child_text(offering_sales_amount_tag, "totalAmountSold"),
@@ -253,14 +253,14 @@ class OfferingData:
         ) if offering_sales_amount_tag else None
 
         # investors
-        investors_tag = offering_data_el.find("investors")
+        investors_tag: Optional[Tag] = offering_data_el.find("investors")
         investors = Investors(
             has_non_accredited_investors=child_text(investors_tag, "hasNonAccreditedInvestors") == "true",
             total_already_invested=child_text(investors_tag, "totalNumberAlreadyInvested")
         ) if investors_tag else None
 
         # salesCommissionsFindersFees
-        sales_commission_finders_tag = offering_data_el.find("salesCommissionsFindersFees")
+        sales_commission_finders_tag: Optional[Tag] = offering_data_el.find("salesCommissionsFindersFees")
         sales_commission_finders_fees = SalesCommissionFindersFees(
             sales_commission=child_text(sales_commission_finders_tag.find("salesCommissions"), "dollarAmount"),
             finders_fees=child_text(sales_commission_finders_tag.find("findersFees"), "dollarAmount"),
@@ -334,7 +334,7 @@ class FormD:
 
         # Parse the issuer
         primary_issuer_el = root.find("primaryIssuer")
-        primary_issuer = Issuer.from_xml(primary_issuer_el)
+        primary_issuer:Optional[Tag] = Issuer.from_xml(primary_issuer_el)
         is_live = child_text(root, 'testOrLive') == 'LIVE'
 
         # Parse the related party names
@@ -471,6 +471,3 @@ class FormD:
         :return:
         """
         return repr_rich(self.__rich__())
-
-
-

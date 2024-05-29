@@ -30,7 +30,7 @@ def df_to_rich_table(
         title: str = "",
         title_style: str = "",
         max_rows: int = 20,
-        table_box: box = box.SIMPLE) -> Table:
+        table_box:box.Box = box.SIMPLE) -> Table:
     """
     Convert a dataframe to a rich table
 
