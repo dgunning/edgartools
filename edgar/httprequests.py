@@ -4,6 +4,7 @@ import time
 from collections import deque
 from functools import wraps
 from io import BytesIO
+from pathlib import Path
 from threading import Lock
 from typing import Union, Optional
 
@@ -322,14 +323,48 @@ def decode_content(content: bytes) -> str:
         return content.decode('latin-1')
 
 
-def download_file(url: str,
-                  as_text: bool = None) -> Union[str, bytes]:
+def save_or_return_content(content: Union[str, bytes], path: Optional[Union[str, Path]]) -> Union[
+    str, bytes, None]:
+    """
+    Save the content to a specified path or return the content.
+
+    Args:
+        content (str or bytes): The content to save or return.
+        path (str or Path, optional): The path where the content should be saved. If None, return the content.
+        as_text (bool): Whether the content is text or binary.
+
+    Returns:
+        str or bytes or None: The content if not saved, or None if saved.
+    """
+    if path is not None:
+        path = Path(path)
+
+        # Determine if the path is a directory or a file
+        if path.is_dir():
+            file_name = "downloaded_file"  # Replace with logic to extract file name from URL if available
+            file_path = path / file_name
+        else:
+            file_path = path
+
+        # Save the file
+        if isinstance(content, bytes):
+            file_path.write_bytes(content)
+        else:
+            file_path.write_text(content)
+
+        return None
+
+    return content
+
+
+def download_file(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None) -> Union[str, bytes, None]:
     """
     Download a file from a URL.
 
     Args:
         url (str): The URL of the file to download.
         as_text (bool, optional): Whether to download the file as text or binary.
+        path (str or Path, optional): The path where the file should be saved.
         If None, the default is determined based on the file extension. Defaults to None.
 
     Returns:
@@ -352,23 +387,29 @@ def download_file(url: str,
         with gzip.open(binary_file, 'rb') as f:
             file_content = f.read()
             if as_text:
-                return decode_content(file_content)
-            return file_content
+                file_content = decode_content(file_content)
     else:
         # If we explicitly asked for text or there is an encoding, try to return text
         if as_text:
-            return response.text
+            file_content = response.text
             # Should get here for jpg and PDFs
-    return response.content
+        else:
+            file_content = response.content
+
+    if path and path.is_dir():
+        path = path / os.path.basename(url)
+    return save_or_return_content(file_content, path)
 
 
-async def download_file_async(url: str, as_text: bool = None) -> Union[str, bytes]:
+async def download_file_async(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None) -> Union[str, bytes, None]:
     """
     Download a file from a URL asynchronously.
 
     Args:
         url (str): The URL of the file to download.
-        as_text (bool, optional): Whether to download the file as text or binary. If None, the default is determined based on the file extension. Defaults to None.
+        as_text (bool, optional): Whether to download the file as text or binary.
+            If None, the default is determined based on the file extension. Defaults to None.
+        path (str or Path, optional): The path where the file should be saved.
 
     Returns:
         str or bytes: The content of the downloaded file, either as text or binary data.
@@ -391,7 +432,10 @@ async def download_file_async(url: str, as_text: bool = None) -> Union[str, byte
         if response.headers.get("Content-Encoding") == "gzip":
             content = gzip.decompress(content)
 
-        return content
+    if path and path.is_dir():
+        path = path / os.path.basename(url)
+
+    return save_or_return_content(content, path)
 
 
 def download_json(data_url: str) -> dict:
