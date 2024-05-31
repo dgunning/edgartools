@@ -399,9 +399,9 @@ class FormD:
         offering_detail_table.add_column("amount sold")
         offering_detail_table.add_column("investors")
         offering_detail_table.add_column("minimum investment")
-        offering_detail_table.add_row(self.offering_data.offering_sales_amounts.total_offering_amount,
-                                      self.offering_data.offering_sales_amounts.total_amount_sold,
-                                      self.offering_data.investors.total_already_invested,
+        offering_detail_table.add_row(str(self.offering_data.offering_sales_amounts.total_offering_amount),
+                                      str(self.offering_data.offering_sales_amounts.total_amount_sold),
+                                      str(self.offering_data.investors.total_already_invested),
                                       self.offering_data.minimum_investment or "")
 
         # related person table
