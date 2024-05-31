@@ -1232,7 +1232,11 @@ class Filing:
 
     @property
     def text_url(self) -> str:
-        return f"{sec_edgar}/data/{self.cik}/{self.accession_no.replace('-', '')}/{self.accession_no}.txt"
+        return f"{self.base_dir}/{self.accession_no}.txt"
+
+    @property
+    def base_dir(self) -> str:
+        return f"{sec_edgar}/data/{self.cik}/{self.accession_no.replace('-', '')}"
 
     @property
     def url(self) -> str:

@@ -1,10 +1,11 @@
 import tempfile
 from pathlib import Path
-
+from rich import print
 import pytest
 
 from edgar import Filing
-from edgar.attachments import Attachments, Attachment
+from edgar.attachments import Attachment, Attachments, FilingDirectory
+from edgar.httprequests import download_file
 
 
 def test_attachments_query():
@@ -112,3 +113,24 @@ def test_download_to_archive():
             for attachment in attachments.documents:
                 assert attachment.document in archive_names
 
+
+def test_attachment_list_url():
+    filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                    accession_no='0000066740-24-000023')
+    #assert filing.attachment_list_url == 'https://www.sec.gov/Archives/edgar/data/1983327/000095017024064537/index.json'
+    files = download_file(f"{filing.base_dir}/index.json")
+    print(files)
+    print(filing.attachments)
+    header_url = f"{filing.base_dir}/0000066740-24-000023-index-headers.html"
+    print(header_url)
+    index_headers = download_file(header_url)
+    print(index_headers)
+
+
+def test_filing_directory():
+    basedir = 'https://www.sec.gov/Archives/edgar/data/1648960/000121390024004875/'
+    filing_dir:FilingDirectory = FilingDirectory.load(basedir)
+    assert filing_dir.name == '/Archives/edgar/data/1648960/000121390024004875'
+    assert filing_dir.parent_dir == '/Archives/edgar/data/1648960'
+    print()
+    print(filing_dir)
