@@ -424,7 +424,7 @@ def get_resource(file: str):
     return importlib.resources.path(edgar, file)
 
 
-def display_size(size: Optional[int]) -> str:
+def display_size(size: Optional[Union[int, str]]) -> str:
     """
     :return the size in KB or MB as a string
     """
