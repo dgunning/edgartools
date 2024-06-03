@@ -134,3 +134,10 @@ def test_filing_directory():
     assert filing_dir.parent_dir == '/Archives/edgar/data/1648960'
     print()
     print(filing_dir)
+
+
+def test_filing_directory_index_headers():
+    basedir = 'https://www.sec.gov/Archives/edgar/data/1648960/000121390024004875/'
+    filing_dir: FilingDirectory = FilingDirectory.load(basedir)
+    index_headers = filing_dir.index_headers
+    print(index_headers)

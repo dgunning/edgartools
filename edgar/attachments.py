@@ -493,6 +493,16 @@ class FilingDirectory:
         self.parent_dir = parent_dir
         self.items = items
 
+    @property
+    def accession_number(self):
+        "Convert 000121390024004875 to 0001213900-24-004875"
+        accession_no = self.name.split("/")[-1]
+        return f"{accession_no[:10]}-{accession_no[10:12]}-{accession_no[12:]}"
+
+    @property
+    def index_headers(self):
+        return download_file(f"{sec_dot_gov}/{self.name}/{self.accession_number}-index-headers.html")
+
     @classmethod
     def load(cls, basedir: str):
         index_url = f"{basedir}/index.json"

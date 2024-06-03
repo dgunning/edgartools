@@ -1235,6 +1235,10 @@ class Filing:
         return f"{self.base_dir}/{self.accession_no}.txt"
 
     @property
+    def index_header_url(self) -> str:
+        return f"{self.base_dir}/index-headers.html"
+
+    @property
     def base_dir(self) -> str:
         return f"{sec_edgar}/data/{self.cik}/{self.accession_no.replace('-', '')}"
 
