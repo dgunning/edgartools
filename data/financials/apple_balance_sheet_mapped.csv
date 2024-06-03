@@ -1,0 +1,29 @@
+Category,Fact Name,"Sep. 30, 2023","Sep. 24, 2022"
+Cash and cash equivalents,CashAndCashEquivalentsAtCarryingValue,29965,23646
+Marketable securities (current),MarketableSecuritiesCurrent,31590,24658
+"Accounts receivable, net",AccountsReceivableNetCurrent,29508,28184
+Vendor non-trade receivables,VendorNonTradeReceivables,31477,32748
+Inventories,InventoryNet,6331,4946
+Other current assets,OtherAssetsCurrent,14695,21223
+Total current assets,AssetsCurrent,143566,135405
+Marketable securities (non-current),MarketableSecuritiesNoncurrent,100544,120805
+"Property, plant and equipment, net",PropertyPlantAndEquipmentNet,43715,42117
+Other non-current assets,OtherAssetsNoncurrent,64758,54428
+Total non-current assets,AssetsNoncurrent,209017,217350
+Total assets,Assets,352583,352755
+Accounts payable,AccountsPayableCurrent,62611,64115
+Other current liabilities,OtherLiabilitiesCurrent,58829,60845
+Deferred revenue,DeferredRevenue,8061,7912
+Commercial paper,CommercialPaper,5985,9982
+Term debt (current),TermDebtCurrent,9822,11128
+Total current liabilities,LiabilitiesCurrent,145308,153982
+Term debt (non-current),TermDebtNoncurrent,95281,98959
+Other non-current liabilities,OtherLiabilitiesNoncurrent,49848,49142
+Total non-current liabilities,LiabilitiesNoncurrent,145129,148101
+Total liabilities,Liabilities,290437,302083
+"Common stock, shares issued",CommonStockSharesIssued,15550061,15943425
+Common stock and additional paid-in capital,AdditionalPaidInCapital,73812,64849
+Accumulated deficit,AccumulatedDeficit,-214,-3068
+Accumulated other comprehensive loss,AccumulatedOtherComprehensiveIncomeLossNetOfTax,-11452,-11109
+Total shareholders' equity,StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,62146,50672
+Total liabilities and shareholders' equity,LiabilitiesAndStockholdersEquity,352583,352755
