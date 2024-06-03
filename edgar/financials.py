@@ -170,12 +170,16 @@ class BalanceSheet(FactTable):
         HeaderRow(label='Assets'),
         HeaderRow(label='Current Assets'),
         FactRow(name="CashAndCashEquivalentsAtCarryingValue", label="\tCash and Cash Equivalents"),
-        FactRow(name="ShortTermInvestments", label="\tShort-term Investments"),
+        FactRow(name="MarketableSecuritiesCurrent", label="\tMarketable Securities"),
+        FactRow(name="AccountsReceivableNetCurrent", label="\tAccounts Receivable, net"),
+        FactRow(name="VendorNonTradeReceivables", label="\tVendor non-trade Receivables"),
+        FactRow(name="InventoryNet", label="\tInventories"),
         FactRow(name="OtherAssetsCurrent", label="\tOther Current Assets"),
         FactRow(name="AssetsCurrent", label="\tTotal Current Assets", total=True),
+
         HeaderRow(label='Noncurrent Assets'),
-        FactRow(name="MarketableSecuritiesNoncurrent", label="\tMarketable Securities"),
-        FactRow(name="PropertyPlantAndEquipmentNet", label="\tProperty, Plant and Equipment"),
+        FactRow(name="MarketableSecuritiesNoncurrent", label="\tMarketable Securities (non-current)"),
+        FactRow(name="PropertyPlantAndEquipmentNet", label="\tProperty, Plant and Equipment, net"),
         FactRow(name="OtherAssetsNoncurrent", label="\tOther Noncurrent Assets"),
         FactRow(name="AssetsNoncurrent", label="\tTotal Noncurrent Assets", total=True),
         FactRow(name="Assets", label="Total Assets", total=True),
@@ -193,12 +197,17 @@ class BalanceSheet(FactTable):
 
         FactRow(name="LiabilitiesCurrent", label="\tTotal Current Liabilities", total=True),
 
+
+
         HeaderRow(label='Noncurrent Liabilities'),
         FactRow(name="LongTermDebtNoncurrent", label="\tNon-current Long Term Debt"),
         FactRow(name="OtherLiabilitiesNoncurrent", label="\tOther Noncurrent Liabilities"),
         FactRow(name="LiabilitiesNoncurrent", label="\tTotal Noncurrent Liabilities", total=True),
         FactRow(name="Liabilities", label="Total Liabilities", total=True),
+
+
         HeaderRow(label='Stockholders\' Equity'),
+        FactRow(name="CommonStockSharesIssued", label="\tCommon Stock, shares issued"),
         [
             FactRow(name="CommonStocksIncludingAdditionalPaidInCapital", label="\tCommon Stock and paid-in Capital"),
             FactRow(name="CommonStockValue", label="\tCommon Stock"),
@@ -207,7 +216,7 @@ class BalanceSheet(FactTable):
         FactRow(name="AccumulatedOtherComprehensiveIncomeLossNetOfTax",
                 label="\tAccumulated Other Comprehensive Income"),
         FactRow(name="StockholdersEquity", label="\tTotal Stockholders' Equity", total=True),
-        FactRow(name="LiabilitiesAndStockholdersEquity", label="Total Liabilities and Stockholders' Equity",
+        FactRow(name="LiabilitiesAndStockholdersEquity", label="Total Liabilities and Stockholders Equity",
                 total=True),
     ]
 
