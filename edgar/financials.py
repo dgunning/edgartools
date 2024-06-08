@@ -74,7 +74,6 @@ class FactTable:
         fact_names = self.get_mapped_facts()
         self.period_facts = filing_xbrl.get_fiscal_period_facts(fact_names)
 
-
     def get_mapped_facts_and_labels(self) -> List[Tuple[str, str]]:
         """Get the list of all fact names and labels in the mapping even if they are alternates"""
         facts = []
@@ -122,7 +121,7 @@ class FactTable:
         """
         if isinstance(fact_row, FactRow):
             values = fact_row.get_values(period_facts)
-            return fact_row.label, fact_row.total, values if values else ["" * len(period_facts.columns)]
+            return fact_row.label, fact_row.total, values
         else:
             for row in fact_row:
                 values = row.get_values(period_facts) if row.name in period_facts.index else None
@@ -135,14 +134,14 @@ class FactTable:
         formatted_label = raw_label.replace("\t", "  ")
         if is_header:
             formatted_label = f"{formatted_label.upper()}:"
-            return Text(formatted_label, style="bold deep_sky_blue1")
+            return Text(formatted_label, style="bold turquoise4")
         return Text(formatted_label, style="bold deep_sky_blue3") if is_total else Text(formatted_label)
 
     def __rich__(self):
         periods = self.period_facts.columns.tolist()
         columns = [""] + [Column(period, justify='right') for period in periods]
 
-        table = Table(*columns, box=box.SIMPLE_HEAVY, title=self.title, title_style="bold deep_sky_blue1")
+        table = Table(*columns, box=box.SIMPLE_HEAVY, title=self.title, title_style="bold turquoise4")
         for index, header_or_fact in enumerate(self.mapping):
             # Get the row label
             if isinstance(header_or_fact, HeaderRow):
@@ -150,7 +149,12 @@ class FactTable:
                 header_values = [label] + [""] * (len(periods))
                 table.add_row(*header_values)
             else:
+                # Get the label and values for the row
                 label, total, fact_values = FactTable.find_label_and_values_for_row(header_or_fact, self.period_facts)
+                if not fact_values:
+                    # Skip empty rows
+                    continue
+
                 label = FactTable.format_label(label, total)
                 row_values = [label] + fact_values
                 table.add_row(*row_values)
@@ -178,15 +182,19 @@ class BalanceSheet(FactTable):
         FactRow(name="AssetsCurrent", label="\tTotal Current Assets", total=True),
 
         HeaderRow(label='Noncurrent Assets'),
-        FactRow(name="MarketableSecuritiesNoncurrent", label="\tMarketable Securities (non-current)"),
-        FactRow(name="PropertyPlantAndEquipmentNet", label="\tProperty, Plant and Equipment, net"),
-        FactRow(name="OtherAssetsNoncurrent", label="\tOther Noncurrent Assets"),
+        FactRow(name="PropertyPlantAndEquipmentNet", label="\tProperty and Equipment, net"),
+        FactRow(name="IntangibleAssetsNet", label="\tIntangible Assets, net"),
+        FactRow(name="Goodwill", label="\tGoodwill"),
+        FactRow(name="MarketableSecuritiesNoncurrent", label="\tMarketable Securities"),
+        FactRow(name="OtherAssetsNoncurrent", label="\tOther Long-Term Assets"),
         FactRow(name="AssetsNoncurrent", label="\tTotal Noncurrent Assets", total=True),
         FactRow(name="Assets", label="Total Assets", total=True),
 
         HeaderRow(label='Liabilities and Stockholders\' Equity'),
         HeaderRow(label='Current Liabilities'),
         FactRow(name="AccountsPayableCurrent", label="\tAccounts Payable"),
+        FactRow(name="EmployeeRelatedAccruedExpenses", label="\tEmployee Related Accrued Expenses"),
+        FactRow(name="RelatedPartyPayable", label="\tRelated Party Payable"),
         FactRow(name="OtherLiabilitiesCurrent", label="\tOther Current Liabilities"),
         [FactRow(name="DeferredRevenueCurrent", label="\tDeferred Revenue"),
          FactRow(name="ContractWithCustomerLiabilityCurrent", label="\tDeferred Revenue"),
@@ -197,14 +205,13 @@ class BalanceSheet(FactTable):
 
         FactRow(name="LiabilitiesCurrent", label="\tTotal Current Liabilities", total=True),
 
-
-
         HeaderRow(label='Noncurrent Liabilities'),
+        FactRow(name="AccruedEmployeeBenefitsNoncurrent", label="\tLong-term Employee Benefits"),
+        FactRow(name="DeferredTaxLiabilities", label="\tDeferred Tax Liabilities"),
         FactRow(name="LongTermDebtNoncurrent", label="\tNon-current Long Term Debt"),
-        FactRow(name="OtherLiabilitiesNoncurrent", label="\tOther Noncurrent Liabilities"),
+        FactRow(name="OtherLiabilitiesNoncurrent", label="\tOther Long-Term Liabilities"),
         FactRow(name="LiabilitiesNoncurrent", label="\tTotal Noncurrent Liabilities", total=True),
         FactRow(name="Liabilities", label="Total Liabilities", total=True),
-
 
         HeaderRow(label='Stockholders\' Equity'),
         FactRow(name="CommonStockSharesIssued", label="\tCommon Stock, shares issued"),
@@ -212,6 +219,7 @@ class BalanceSheet(FactTable):
             FactRow(name="CommonStocksIncludingAdditionalPaidInCapital", label="\tCommon Stock and paid-in Capital"),
             FactRow(name="CommonStockValue", label="\tCommon Stock"),
         ],
+        FactRow(name="AdditionalPaidInCapital", label="\tAdditional Paid-in Capital"),
         FactRow(name="RetainedEarningsAccumulatedDeficit", label="\tRetained Earnings"),
         FactRow(name="AccumulatedOtherComprehensiveIncomeLossNetOfTax",
                 label="\tAccumulated Other Comprehensive Income"),
@@ -292,8 +300,11 @@ class IncomeStatement(FactTable):
         ],
         FactRow(name="GrossProfit", label="Gross Profit", total=True),
         HeaderRow(label="Operating Expenses"),
-        FactRow(name='MarketingExpense', label='\tMarketing Expense'),
         FactRow(name='ResearchAndDevelopmentExpense', label='\tResearch & Development Expenses'),
+        [
+            FactRow(name='MarketingExpense', label='\tMarketing Expense'),
+            FactRow(name='SellingAndMarketingExpense', label='\tSales and Marketing Expenses'),
+        ],
         [
             FactRow(name='GeneralAndAdministrativeExpense', label='\tGeneral & Administrative Expenses'),
             FactRow(name='SellingGeneralAndAdministrativeExpense',
@@ -301,9 +312,12 @@ class IncomeStatement(FactTable):
         ],
         FactRow(name='OperatingExpenses', label='Total Operating Expenses', total=True),
         FactRow(name='OperatingIncomeLoss', label='Operating Income', total=True),
+
         HeaderRow(label='Other Income/Expense'),
         FactRow(name='InterestExpense', label='\tInterest Expense'),
         FactRow(name='NonoperatingIncomeExpense', label='\tNonoperating Income'),
+        FactRow(name='InterestIncomeOperating', label='\tInterest Income'),
+        FactRow(name='OtherFinancialIncomeExpenseNet', label='\tOther Financial Income (expense)'),
         FactRow(name='IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest',
                 label='Income Before Taxes', total=True),
         FactRow(name='IncomeTaxExpenseBenefit', label='Income Tax Expense'),
@@ -312,9 +326,10 @@ class IncomeStatement(FactTable):
         HeaderRow(label='Earnings Per Share'),
         FactRow(name='EarningsPerShareBasic', label='\tBasic', format="{:,.2f}"),
         FactRow(name='EarningsPerShareDiluted', label='\tDiluted', format="{:,.2f}"),
+
         HeaderRow(label='Weighted Average Shares Outstanding'),
         FactRow(name='WeightedAverageNumberOfSharesOutstandingBasic', label='\tBasic'),
-        FactRow(name='WeightedAverageNumberOfDilutedSharesOutstanding', label='\tDiluted')
+        FactRow(name='WeightedAverageNumberOfDilutedSharesOutstanding', label='\tDiluted'),
     ]
 
     def __init__(self, filing_xbrl: FilingXbrl):

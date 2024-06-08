@@ -154,9 +154,9 @@ def test_thirteenf_with_broken_infotable_xml():
     <directory>
     <name>/Archives/edgar/data</name>
     <item>
-    <name type="text.gif">0001894188-23-000007-index-headers.html</name>
+    <name type="text.gif">0001894188-23-000007-23AndMe.index-headers.html</name>
     <size></size>
-    <href>/Archives/edgar/data/1894188/000189418823000007/0001894188-23-000007-index-headers.html</href>
+    <href>/Archives/edgar/data/1894188/000189418823000007/0001894188-23-000007-23AndMe.index-headers.html</href>
     <last-modified>2023-11-14 09:38:54</last-modified>
     </item>
     :return:

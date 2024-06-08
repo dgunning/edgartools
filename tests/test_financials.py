@@ -73,6 +73,8 @@ def test_apple_financials_to_get_facts():
     assert balance_sheet.get_fact_value('StockholdersEquity') == '50672000000'
     assert balance_sheet.get_fact_value('LiabilitiesAndStockholdersEquity') == '352755000000'
 
+    print(tenk.income_statement)
+
     # Cash Flow
     cash_flow = tenk.cash_flow_statement
     assert '2022-09-24' in cash_flow.periods

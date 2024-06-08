@@ -4,7 +4,7 @@ from rich import print
 import pytest
 
 from edgar import Filing
-from edgar.attachments import Attachment, Attachments, FilingDirectory
+from edgar.attachments import Attachment, Attachments
 from edgar.httprequests import download_file
 
 
@@ -127,17 +127,4 @@ def test_attachment_list_url():
     print(index_headers)
 
 
-def test_filing_directory():
-    basedir = 'https://www.sec.gov/Archives/edgar/data/1648960/000121390024004875/'
-    filing_dir:FilingDirectory = FilingDirectory.load(basedir)
-    assert filing_dir.name == '/Archives/edgar/data/1648960/000121390024004875'
-    assert filing_dir.parent_dir == '/Archives/edgar/data/1648960'
-    print()
-    print(filing_dir)
 
-
-def test_filing_directory_index_headers():
-    basedir = 'https://www.sec.gov/Archives/edgar/data/1648960/000121390024004875/'
-    filing_dir: FilingDirectory = FilingDirectory.load(basedir)
-    index_headers = filing_dir.index_headers
-    print(index_headers)
