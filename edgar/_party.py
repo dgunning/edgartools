@@ -47,12 +47,12 @@ class Address(BaseModel):
             street2=self.street2,
             city=self.city,
             state_or_country=self.state_or_country_description or self.state_or_country,
-            zipcode=self.zipcode
+            zipcode=self.zipcode or ""
         )
 
     def __repr__(self):
         return (f'Address(street1="{self.street1 or ""}", street2="{self.street2 or ""}", city="{self.city or ""}",'
-                f'zipcode="{self.zipcode or ""}", state_or_country="{self.state_or_country}")'
+                f'zipcode="{self.zipcode or ""}", state_or_country="{self.state_or_country} or "")'
                 )
 
 

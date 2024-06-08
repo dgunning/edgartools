@@ -3,10 +3,9 @@ import re
 import webbrowser
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional
+from typing import Union
 
-import orjson as json
-import pandas as pd
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, field_validator
 from rich import box
@@ -480,57 +479,3 @@ class FilingHomepage:
                     *[filer_info.__rich__() for filer_info in self.get_filers()]
                 )
             ))
-
-
-class FilingDirectory:
-    """
-    The location for the filing on SEC EDGAR and detailed locations and timestamps for the files in the filing
-    Sourced from the index.json file in the filing directory
-    """
-
-    def __init__(self, name: str, parent_dir: str, items: pd.DataFrame):
-        self.name = name
-        self.parent_dir = parent_dir
-        self.items = items
-
-    @property
-    def accession_number(self):
-        "Convert 000121390024004875 to 0001213900-24-004875"
-        accession_no = self.name.split("/")[-1]
-        return f"{accession_no[:10]}-{accession_no[10:12]}-{accession_no[12:]}"
-
-    @property
-    def index_headers(self):
-        return download_file(f"{sec_dot_gov}/{self.name}/{self.accession_number}-index-headers.html")
-
-    @classmethod
-    def load(cls, basedir: str):
-        index_url = f"{basedir}/index.json"
-        index = json.loads(download_file(index_url))
-        directory_json = index['directory']
-        items = (pd.DataFrame(data=directory_json['item'])
-                 .rename(columns={"name": "Name", "last-modified": "LastModified", "size": "Size"})
-                 .filter(["Name", "LastModified", "Size"])
-                 )
-        directory: FilingDirectory = FilingDirectory(
-            name=directory_json['name'],
-            parent_dir=directory_json['parent-dir'],
-            items=items
-        )
-        return directory
-
-    def __len__(self):
-        return len(self.items)
-
-    def __rich__(self):
-        table = Table(
-            "Name", "LastModified", "Size",
-            title=Text(f"Filing Directory {self.name}", style="bold"),
-            row_styles=["", "bold"],
-            box=box.SIMPLE)
-        for _, row in self.items.iterrows():
-            table.add_row(row['Name'], row['LastModified'], display_size(row['Size']))
-        return table
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
