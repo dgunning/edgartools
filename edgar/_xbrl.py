@@ -287,6 +287,7 @@ class FilingXbrl:
                 return 'instant'
             elif 75 <= days <= 105:
                 return 'quarter'
+            # The filing 0001193125-21-170978 has a period of 241 days. Should it be included
             elif 335 <= days <= 395:
                 return 'year'
             else:
@@ -362,8 +363,18 @@ class FilingXbrl:
         facts_by_period.columns.name = None
         df = facts_by_period.set_index('fact')
         if fiscal_periods:
-            fiscal_end_dates = [p[1] for p in self.get_fiscal_periods()]
-            return df[fiscal_end_dates]
+            xbrl_fiscal_periods = self.get_fiscal_periods()
+            if xbrl_fiscal_periods:
+                fiscal_end_dates = [p[1] for p in xbrl_fiscal_periods]
+                return df[fiscal_end_dates]
+            else:
+                """ 
+                If we are here, then we can't figure out the fiscal periods but there's a chance that the
+                downstream code will still display appropriate data. THis is an edge case for 
+                filing (form='10-K/A', company='Pershing Square Tontine Holdings, Ltd.', 
+                accession_no='0001193125-21-170978')
+                """
+                pass
 
         return df
 
