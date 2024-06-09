@@ -176,7 +176,7 @@ class BalanceSheet(FactTable):
         FactRow(name="CashAndCashEquivalentsAtCarryingValue", label="\tCash and Cash Equivalents"),
         FactRow(name="MarketableSecuritiesCurrent", label="\tMarketable Securities"),
         FactRow(name="AccountsReceivableNetCurrent", label="\tAccounts Receivable, net"),
-        FactRow(name="VendorNonTradeReceivables", label="\tVendor non-trade Receivables"),
+        FactRow(name="NontradeReceivablesCurrent", label="\tVendor non-trade Receivables"),
         FactRow(name="InventoryNet", label="\tInventories"),
         FactRow(name="OtherAssetsCurrent", label="\tOther Current Assets"),
         FactRow(name="AssetsCurrent", label="\tTotal Current Assets", total=True),
