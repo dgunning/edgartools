@@ -16,9 +16,9 @@ from edgar._party import Address, get_addresses_as_columns
 from edgar._rich import repr_rich
 from edgar.core import sec_dot_gov, display_size
 from edgar.httprequests import download_file
-from edgar.reference import states, describe_form
+from edgar.reference import describe_form
 
-__all__ = ['FilingDirectory', 'IndexHeader']
+__all__ = ['FilingDirectory', 'IndexHeaders']
 
 
 class FilingDirectory:
@@ -153,29 +153,41 @@ class SubjectCompany(BaseModel):
         return repr_rich(self.__rich__())
 
 
-class ReportingOwnerCompanyData(BaseModel):
+class OwnerData(BaseModel):
     conformed_name: str
     cik: str
+    organization_name: Optional[str] = None
+
+    @property
+    def name(self):
+        return self.conformed_name
 
     def __rich__(self):
         contents = []
-        table = Table(Column("", style="bold"), "",
+        table = Table(Column("", style="bold deep_sky_blue1"), "",
                       box=box.ROUNDED,
                       show_header=False,
                       )
         table.add_row(self.conformed_name, self.cik)
         return table
 
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
 
 class ReportingOwner(BaseModel):
-    company_data: ReportingOwnerCompanyData
+    company_data: Optional[CompanyData]
+    owner_data: Optional[OwnerData]
     filing_values: FilingValues
     mail_address: Address
 
     def __rich__(self):
-        contents = [self.company_data,
-                    Text(str(self.mail_address))
-                    ]
+        contents = []
+        if self.company_data:
+            contents.append(self.company_data)
+        if self.owner_data:
+            contents.append(self.owner_data)
+        contents.append(Text(str(self.mail_address)))
 
         return Panel(Group(*contents), title="Reporting Owner", style="bold", box=box.ROUNDED)
 
@@ -183,10 +195,18 @@ class ReportingOwner(BaseModel):
         return repr_rich(self.__rich__())
 
 
+class Issuer(BaseModel):
+    company_data: CompanyData
+    mail_address: Address
+    business_address: Address
+
+
 nested_tags = [
     'filer',
+    'issuer',
     'subject_company',
     'reporting_owner',
+    'owner_data',
     'company_data',
     'filing_values',
     'business_address',
@@ -194,20 +214,11 @@ nested_tags = [
     'former_company'
 ]
 
-class IndexHeader(BaseModel):
+
+class IndexHeaders(BaseModel):
     """
     Represent the SEC filing headers of a filing.
     This is parsed from the comment section of the HTML file `<accession-number>-index-headers.html`
-
-    <!--
-    <SEC-HEADER>0001193125-24-152391.hdr.sgml : 20240603
-    <ACCEPTANCE-DATETIME>20240603080602
-
-
-        </MAIL-ADDRESS>
-    </REPORTING-OWNER>
-    </SEC-HEADER>
-    -->
     """
     filing_date: str
     acceptance_datetime: datetime
@@ -221,6 +232,7 @@ class IndexHeader(BaseModel):
     filer: Optional[Filer] = None
     reporting_owner: Optional[ReportingOwner] = None
     subject_company: Optional[SubjectCompany] = None
+    issuer: Optional[Issuer] = None
 
     @property
     def company_name(self):
@@ -228,6 +240,8 @@ class IndexHeader(BaseModel):
             return self.filer.company_data.conformed_name
         elif self.subject_company:
             return self.subject_company.company_data.conformed_name
+        elif self.issuer:
+            return self.issuer.company_data.conformed_name
         return ""
 
     @property
@@ -237,11 +251,11 @@ class IndexHeader(BaseModel):
     @staticmethod
     def _prepare_address(data: Dict[str, Any], address_type: str) -> Address:
         """
-        Prepare an address object from the data dictionary. Rename some fields to fit as a Address object
+        Prepare an address object from the data dictionary.
         """
         address_dict = data.pop(address_type, {})
-        address_dict['state_or_country'] = states.get(address_dict.get('state', None))
-        address_dict['zipcode'] = address_dict.get('zip', None)
+        address_dict['zipcode'] = address_dict.pop('zip', '')
+        address_dict['state_or_country'] = address_dict.pop('state', '')
         return Address(**address_dict)
 
     @classmethod
@@ -261,7 +275,7 @@ class IndexHeader(BaseModel):
 
             # Handle closing tags by popping the context stack
             if line.startswith("</"):
-                if stack:
+                if len(stack) > 1:  # Ensure we don't pop the root context
                     stack.pop()
                 continue
 
@@ -302,8 +316,7 @@ class IndexHeader(BaseModel):
         filer = None
         if filer_data:
             # Extract and initialize nested CompanyData for Filer
-            company_data_dict = filer_data.pop("company_data", {})
-            company_data = CompanyData(**company_data_dict)
+            company_data = CompanyData(**filer_data.pop("company_data", {}))
             # Extract and initialize nested FilingValues for Filer
             filing_values = FilingValues(
                 form_type=filer_data["filing_values"].get("form_type", ""),
@@ -312,8 +325,8 @@ class IndexHeader(BaseModel):
                 film_number=filer_data["filing_values"].get("film_number", "")
             )
             # Extract and initialize nested Business and Mail Address for Filer
-            business_address = IndexHeader._prepare_address(filer_data, "business_address")
-            mail_address = IndexHeader._prepare_address(filer_data, "mail_address")
+            business_address = cls._prepare_address(filer_data, "business_address")
+            mail_address = cls._prepare_address(filer_data, "mail_address")
 
             # Handle FormerCompany elements
             former_company_raw = filer_data.pop("former_company", [])
@@ -349,8 +362,8 @@ class IndexHeader(BaseModel):
                 film_number=subject_company_data["filing_values"].get("film_number", "")
             )
             # Extract and initialize nested Business and Mail Address for SubjectCompany
-            business_address = IndexHeader._prepare_address(subject_company_data, "business_address")
-            mail_address = IndexHeader._prepare_address(subject_company_data, "mail_address")
+            business_address = cls._prepare_address(subject_company_data, "business_address")
+            mail_address = cls._prepare_address(subject_company_data, "mail_address")
 
             # Handle FormerCompany elements
             former_company_raw = subject_company_data.pop("former_company", [])
@@ -376,8 +389,12 @@ class IndexHeader(BaseModel):
         reporting_owner_data = data.pop("reporting_owner", None)
         reporting_owner = None
         if reporting_owner_data:
-            # Extract and initialize nested CompanyData for ReportingOwner
-            company_data = ReportingOwnerCompanyData(**reporting_owner_data.pop("company_data", {}))
+            # Extract and initialize nested OwnerData or CompanyData for ReportingOwner
+            owner_data = reporting_owner_data.pop("owner_data", None)
+            company_data = reporting_owner_data.pop("company_data", None)
+            owner_data_obj = OwnerData(**owner_data) if owner_data else None
+            company_data_obj = CompanyData(**company_data) if company_data else None
+
             # Extract and initialize nested FilingValues for ReportingOwner
             filing_values = FilingValues(
                 form_type=reporting_owner_data["filing_values"].get("form_type", ""),
@@ -386,15 +403,34 @@ class IndexHeader(BaseModel):
                 film_number=reporting_owner_data["filing_values"].get("film_number", "")
             )
             # Extract and initialize nested Mail Address for ReportingOwner
-            mail_address = IndexHeader._prepare_address(reporting_owner_data, "mail_address")
+            mail_address = cls._prepare_address(reporting_owner_data, "mail_address")
 
             # Initialize ReportingOwner with nested data
             reporting_owner = ReportingOwner(
-                company_data=company_data,
+                company_data=company_data_obj,
+                owner_data=owner_data_obj,
                 filing_values=filing_values,
                 mail_address=mail_address
             )
             data["reporting_owner"] = reporting_owner
+
+            # Process Issuer if present
+        issuer_data = data.pop("issuer", None)
+        issuer = None
+        if issuer_data:
+            # Extract and initialize nested CompanyData for Issuer
+            company_data = CompanyData(**issuer_data.pop("company_data", {}))
+            # Extract and initialize nested Business and Mail Address for Issuer
+            business_address = cls._prepare_address(issuer_data, "business_address")
+            mail_address = cls._prepare_address(issuer_data, "mail_address")
+
+            # Initialize Issuer with nested data
+            issuer = Issuer(
+                company_data=company_data,
+                business_address=business_address,
+                mail_address=mail_address
+            )
+            data["issuer"] = issuer
 
         # Ensure items is a list
         items = data.pop("items", [])
@@ -402,13 +438,17 @@ class IndexHeader(BaseModel):
             items = [items]
 
         # Convert acceptance_datetime to datetime object
-        acceptance_datetime_str = data.pop("acceptance_datetime")
+        acceptance_datetime_str = data.pop("acceptance_datetime", None)
         acceptance_datetime = datetime.strptime(acceptance_datetime_str,
                                                 '%Y%m%d%H%M%S') if acceptance_datetime_str else None
 
         # Convert filing_date to date object
-        filing_date_str = data.pop("filing_date")
-        filing_date = datetime.strptime(filing_date_str, '%Y%m%d').strftime('%Y-%m-%d')
+        filing_date_str = data.pop("filing_date", None)
+        filing_date = datetime.strptime(filing_date_str, '%Y%m%d').strftime('%Y-%m-%d') if filing_date_str else None
+
+        date_of_change_str = data.pop("date_of_filing_date_change", None)
+        if date_of_change_str:
+            data["date_of_filing_date_change"] = datetime.strptime(date_of_change_str, '%Y%m%d').strftime('%Y-%m-%d')
 
         # The type is really the form
         data["form"] = data.pop("type")
@@ -416,7 +456,7 @@ class IndexHeader(BaseModel):
         # The public document count is an integer
         data["public_document_count"] = int(data.pop("public_document_count", 0))
 
-        # Prepare the final dictionary for IndexHeader initialization
+        # Prepare the final dictionary for IndexHeaders initialization
         sec_header_data = {
             **data,
             "filing_date": filing_date,
@@ -424,10 +464,11 @@ class IndexHeader(BaseModel):
             "items": items,
             "filer": filer,
             "subject_company": subject_company,
-            "reporting_owner": reporting_owner
+            "reporting_owner": reporting_owner,
+            "issuer": issuer
         }
 
-        # Initialize IndexHeader with the parsed data
+        # Initialize IndexHeaders with the parsed data
         return cls(**sec_header_data)
 
     @staticmethod
@@ -478,4 +519,3 @@ class IndexHeader(BaseModel):
 
     def __repr__(self):
         return repr_rich(self.__rich__())
-

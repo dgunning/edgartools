@@ -37,7 +37,7 @@ from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
 from edgar.attachments import FilingHomepage, Attachment, Attachments
-from edgar.headers import FilingDirectory, IndexHeader
+from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.core import (log, display_size, sec_edgar,
                         filter_by_date, filter_by_form, InvalidDateException, IntString, DataPager)
 from edgar.documents import HtmlDocument, get_clean_html
@@ -1156,10 +1156,10 @@ class Filing:
 
     @property
     @lru_cache(maxsize=1)
-    def index_headers(self) -> IndexHeader:
+    def index_headers(self) -> IndexHeaders:
         index_headers_url = f"{self.base_dir}/{self.accession_no}-index-headers.html"
         index_header_text = download_text(index_headers_url)
-        return IndexHeader.load(index_header_text)
+        return IndexHeaders.load(index_header_text)
 
     def to_dict(self) -> Dict[str, Union[str, int]]:
         """Return the filing as a Dict string"""
