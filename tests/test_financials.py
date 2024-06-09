@@ -157,7 +157,7 @@ def test_show_financials_with_multiple_periods():
     assert balance_sheet.get_fact_value('AssetsCurrent') == '9918133000'
 
 
-def test_get_financials_for_filing_with_period_facts_issues():
+def test_get_financials_for_pershing_filing_period_facts_issues():
     filing = Filing(form='10-K/A', filing_date='2021-05-24', company='Pershing Square Tontine Holdings, Ltd.',
                     cik=1811882, accession_no='0001193125-21-170978')
     xbrl:FilingXbrl = filing.xbrl()
@@ -168,4 +168,13 @@ def test_get_financials_for_filing_with_period_facts_issues():
     tenk = filing.obj()
     financials = tenk.financials
     print(financials)
+
+
+def test_get_financials_for_filing_with_period_facts_issues():
+    filing = Filing(form='10-K', filing_date='2020-04-14', company='Cosmos Holdings Inc.', cik=1474167,
+           accession_no='0001477932-20-001964')
+    xbrl = filing.xbrl()
+    facts_by_periods = xbrl.get_facts_by_periods()
+    assert facts_by_periods.columns.tolist() == ['2019-12-31', '2018-12-31']
+
 

@@ -365,7 +365,7 @@ class FilingXbrl:
         if fiscal_periods:
             xbrl_fiscal_periods = self.get_fiscal_periods()
             if xbrl_fiscal_periods:
-                fiscal_end_dates = [p[1] for p in xbrl_fiscal_periods]
+                fiscal_end_dates = sorted(set([end for _, end in xbrl_fiscal_periods]), reverse=True)
                 return df[fiscal_end_dates]
             else:
                 """ 
@@ -412,9 +412,9 @@ class FilingXbrl:
                            fiscal_period_facts[col].notna().sum() >= min_non_empty_count]
 
         # Adjust DataFrame to only include necessary columns
-        fiscal_period_facts = fiscal_period_facts[columns_to_keep]
+        fiscal_period_facts_filtered = fiscal_period_facts[columns_to_keep]
 
-        return fiscal_period_facts
+        return fiscal_period_facts_filtered
 
     @property
     def years(self):
