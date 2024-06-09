@@ -96,7 +96,6 @@ class CompanyData(BaseModel):
         return self.conformed_name
 
     def __rich__(self):
-        contents = []
         table = Table(Column("", style="bold deep_sky_blue1"), "",
                       box=box.ROUNDED,
                       show_header=False,
@@ -163,7 +162,6 @@ class OwnerData(BaseModel):
         return self.conformed_name
 
     def __rich__(self):
-        contents = []
         table = Table(Column("", style="bold deep_sky_blue1"), "",
                       box=box.ROUNDED,
                       show_header=False,
