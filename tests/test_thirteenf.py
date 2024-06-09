@@ -195,3 +195,10 @@ def test_13FNT_other_included_managers():
     assert thirteenf.primary_form_information.summary_page.other_included_managers_count == 0
     assert thirteenf.primary_form_information.summary_page.total_holdings == 0
     assert thirteenf.primary_form_information.summary_page.total_value == 0
+
+
+def test_thirteenf_put_call():
+    filing = Filing(form='13F-HR/A', filing_date='2024-06-07', company='SG Capital Management LLC', cik=1510099, accession_no='0001172661-24-002551')
+    thirteenf:ThirteenF = ThirteenF(filing)
+    puts = thirteenf.infotable.query("PutCall == 'Put'")
+    assert len(puts) == 3

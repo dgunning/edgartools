@@ -309,7 +309,7 @@ class ThirteenF:
             ssh_prnamt_type = child_text(shares_tag, "sshPrnamtType")
             info_table['Type'] = shares_or_principal.get(ssh_prnamt_type)
 
-            info_table["PutCall"] = child_text(info_tag, "putCall")
+            info_table["PutCall"] = child_text(info_tag, "putCall") or ""
             info_table['InvestmentDiscretion'] = child_text(info_tag, "investmentDiscretion")
 
             # Voting authority
