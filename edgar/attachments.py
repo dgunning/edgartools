@@ -14,6 +14,7 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
+import zipfile
 
 from edgar._rich import repr_rich
 from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extensions
@@ -232,6 +233,8 @@ class Attachments:
         If the path is a directory, the file is saved with its original name in that directory.
         If the path is a file, the file is saved with the given path name.
         If archive is True, the attachments are saved in a zip file.
+        path: str or Path - The path to save the attachments
+        archive: bool (default False) - If True, save the attachments in a zip file
         """
 
         import asyncio
@@ -248,18 +251,17 @@ class Attachments:
                 if isinstance(downloaded, bytes):
                     file_path.write_bytes(downloaded)
                 else:
-                    file_path.write_text(downloaded)
+                    file_path.write_text(downloaded, encoding='utf-8')
 
         # If the path is an archive file, save the files in that file
         else:
             if archive:
-                import zipfile
                 with zipfile.ZipFile(path, 'w') as zipf:
                     for attachment, downloaded in zip(self._attachments, downloaded_files):
                         if isinstance(downloaded, bytes):
                             zipf.writestr(attachment.document, downloaded)
                         else:
-                            zipf.writestr(attachment.document, downloaded.encode())
+                            zipf.writestr(attachment.document, downloaded.encode('utf-8'))
             else:
                 raise ValueError("Path must be a directory or an archive file")
 
