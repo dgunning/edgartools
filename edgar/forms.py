@@ -8,7 +8,8 @@ from rich.console import Group, Text
 from rich.markdown import Markdown
 
 from edgar._rich import df_to_rich_table, repr_rich
-from edgar.core import download_text, http_client, sec_dot_gov
+from edgar.core import sec_dot_gov
+from edgar.httprequests import download_file
 
 __all__ = [
     'SecForms',
@@ -21,7 +22,7 @@ FUND_FORMS = ["NPORT-P", "NPORT-EX"]
 
 @lru_cache(maxsize=1)
 def list_forms():
-    forms_html = download_text('https://www.sec.gov/forms', http_client())
+    forms_html = download_file('https://www.sec.gov/forms')
     soup = BeautifulSoup(forms_html, features="lxml")
     data_table = soup.find("table")
     tbody = data_table.find("tbody")

@@ -17,7 +17,6 @@ import humanize
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
-from charset_normalizer import detect
 from fastcore.basics import listify
 from rich.logging import RichHandler
 from rich.prompt import Prompt
@@ -222,13 +221,13 @@ class TooManyRequestsException(Exception):
 def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
     """
     Split a date or a date range into start_date and end_date
-    >>> split_date("2022-03-04")
+        split_date("2022-03-04")
           2022-03-04, None, False
-    >>> split_date("2022-03-04:2022-04-05")
+       split_date("2022-03-04:2022-04-05")
         2022-03-04, 2022-04-05, True
-    >>> split_date("2022-03-04:")
+       split_date("2022-03-04:")
         2022-03-04, None, True
-    >>> split_date(":2022-03-04")
+       split_date(":2022-03-04")
         None, 2022-03-04, True
     :param date: The date to split
     :return:
@@ -288,10 +287,6 @@ def filter_by_form(data: pa.Table,
     return data
 
 
-def autodetect(content):
-    return detect(content).get("encoding")
-
-
 @lru_cache(maxsize=1)
 def client_headers():
     return {'User-Agent': get_identity()}
@@ -301,14 +296,14 @@ def http_client():
     return httpx.Client(headers=client_headers(),
                         timeout=edgar_mode.http_timeout,
                         limits=edgar_mode.limits,
-                        default_encoding=autodetect)
+                        default_encoding="utf-8")
 
 
 def async_http_client():
     return httpx.AsyncClient(headers=client_headers(),
                              timeout=edgar_mode.http_timeout,
                              limits=edgar_mode.limits,
-                             default_encoding=autodetect)
+                             default_encoding='utf-8')
 
 
 def get_json(data_url: str):
@@ -382,8 +377,8 @@ class Result:
 
     def __init__(self,
                  success: bool,
-                 error: str,
-                 value: object):
+                 error: Optional[str]=None,
+                 value: Optional[object] = None):
         self.success = success
         self.error = error
         self.value = value

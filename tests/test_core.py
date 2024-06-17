@@ -124,16 +124,6 @@ def test_display_size():
     assert display_size("\x01") == ""
 
 
-def test_detect_charset():
-    url = 'https://www.sec.gov/Archives/edgar/data/1089113/000165495420002467/a7664f.htm'
-    client = http_client()
-    r = client.get(url)
-    print(r.encoding)
-    assert r.encoding == 'ascii'
-
-
-
-
 
 def test_extract_dates():
     assert extract_dates("2022-03-04") == (datetime.strptime("2022-03-04", "%Y-%m-%d"), None, False)

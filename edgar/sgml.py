@@ -5,7 +5,7 @@ import re
 
 from pydantic import BaseModel
 
-from edgar.core import http_client
+from edgar.httprequests import stream_with_retry
 from pathlib import Path
 
 __all__ = ['SgmlDocument', 'stream_documents']
@@ -61,8 +61,7 @@ def parse_document(document_str: str) -> SgmlDocument:
 def stream_documents(source):
     if isinstance(source, str) and source.startswith('http'):
         # Handle URL
-        client = http_client()
-        with client.stream('GET', source) as response:
+        for response in stream_with_retry(source):
             yield from process_stream(response.iter_lines())
     elif isinstance(source, (str, Path)):
         # Handle file path
