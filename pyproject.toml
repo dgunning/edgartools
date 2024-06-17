@@ -33,6 +33,7 @@ dependencies = [
   "fastcore>=1.5.29",
   "humanize>=4.0.0",
   "charset-normalizer>=2.1.1",
+  "tenacity<8.4.0",
   "stamina>=24.2.0",
   "orjson>=3.6.0",
   "textdistance>=4.5.0",
