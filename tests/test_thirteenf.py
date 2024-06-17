@@ -202,3 +202,4 @@ def test_thirteenf_put_call():
     thirteenf:ThirteenF = ThirteenF(filing)
     puts = thirteenf.infotable.query("PutCall == 'Put'")
     assert len(puts) == 3
+    print(thirteenf)

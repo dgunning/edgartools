@@ -330,7 +330,7 @@ class ThirteenF:
     def _infotable_summary(self):
         if self.has_infotable():
             return (self.infotable
-                    .filter(['Issuer', 'Class', 'Cusip', 'Ticker', 'Value', 'SharesPrnAmount', 'Type',
+                    .filter(['Issuer', 'Class', 'Cusip', 'Ticker', 'Value', 'SharesPrnAmount', 'Type', 'PutCall',
                              'SoleVoting', 'SharedVoting', 'NonVoting'])
                     .rename(columns={'SharesPrnAmount': 'Shares'})
                     .assign(Value=lambda df: df.Value,
@@ -365,7 +365,7 @@ class ThirteenF:
 
         # info table
         if self.has_infotable():
-            table = Table("", "Issuer", "Class", "Cusip", "Ticker", "Value", "Type", "Shares", "Voting",
+            table = Table("", "Issuer", "Class", "Cusip", "Ticker", "Value", "Type", "Shares", "Put/Call",
                           row_styles=["bold", ""],
                           box=box.SIMPLE)
             for index, row in enumerate(self._infotable_summary().itertuples()):
@@ -377,7 +377,7 @@ class ThirteenF:
                               f"${row.Value:,.0f}",
                               row.Type,
                               f"{int(row.Shares):,.0f}",
-                              f"{int(row.SoleVoting):,.0f}",
+                              row.PutCall
                               )
             content.append(table)
 
