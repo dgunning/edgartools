@@ -373,9 +373,6 @@ Report a bug by [opening a new issue](https://github.com/dgunning/edgartools/iss
 
 [![Star History Chart](https://api.star-history.com/svg?repos=dgunning/edgartools&type=Timeline)](https://star-history.com/#dgunning/edgartools&Timeline)
 
-## Supporters
-[![Stargazers repo roster for @dgunning/edgartools](https://reporoster.com/stars/dgunning/edgartools)](https://github.com/dgunning/edgartools/stargazers)
-[![Forkers repo roster for @dgunning/edgartools](https://reporoster.com/forks/dgunning/edgartools)](https://github.com/dgunning/edgartools/network/members)
 
 ## Subscribe to Polar
 <picture>
