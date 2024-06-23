@@ -188,7 +188,7 @@ class Attachments:
                 return doc
         return None
 
-    def query(self, query_str: str):
+    def query(self, query_str: str, include_data_files: bool = True):
         """
         Query attachments based on a simple query string.
         Supports conditions on 'document', 'description', and 'document_type'.
@@ -215,8 +215,11 @@ class Attachments:
 
         # Evaluate the query for documents and data files
         new_documents = [attachment for attachment in self.documents if safe_eval(attachment, query_str)]
-        new_data_files = [attachment for attachment in self.data_files if
-                          safe_eval(attachment, query_str)] if self.data_files else None
+        if include_data_files:
+            new_data_files = [attachment for attachment in self.data_files if
+                              safe_eval(attachment, query_str)] if self.data_files else None
+        else:
+            new_data_files = []
 
         return Attachments(document_files=new_documents, data_files=new_data_files,
                            primary_documents=self.primary_documents)
