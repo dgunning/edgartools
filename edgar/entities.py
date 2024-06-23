@@ -234,8 +234,7 @@ class EntityFilings(Filings):
                date: str = None):
         # The super filter returns Filings. We want CompanyFilings
         res = super().filter(form, amendments, filing_date, date)
-        if res:
-            return CompanyFilings(data=res.data, cik=self.cik, company_name=self.company_name)
+        return CompanyFilings(data=res.data, cik=self.cik, company_name=self.company_name)
 
     def latest(self, n: int = 1):
         """Get the latest n filings"""
@@ -245,9 +244,12 @@ class EntityFilings(Filings):
         filings = CompanyFilings(latest_filing_index,
                                  cik=self.cik,
                                  company_name=self.company_name)
+        if filings.empty:
+            return None
         if len(filings) == 1:
             return filings[0]
-        return filings
+        else:
+            return filings
 
     def head(self, n: int):
         """Get the first n filings"""

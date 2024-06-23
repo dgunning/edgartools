@@ -245,7 +245,7 @@ class CashFlowStatement(FactTable):
         FactRow(name="IncreaseDecreaseInAccountsPayable", label="\tChanges in Accounts Payable"),
         FactRow(name="IncreaseDecreaseInInventories", label="\tChanges in Inventories"),
         FactRow(name="IncreaseDecreaseInContractWithCustomerLiability", label="\tChanges in Deferred Revenue"),
-        FactRow(name="NetCashProvidedByUsedInOperatingActivities", label="\tNet Cash Provided by Operating Activities",
+        FactRow(name="NetCashProvidedByUsedInOperatingActivities", label="\tNet Cash From Operating Activities",
                 total=True),
 
         HeaderRow(label='Investing Activities'),
@@ -261,7 +261,7 @@ class CashFlowStatement(FactTable):
         FactRow(name="PaymentsToAcquireBusinessesNetOfCashAcquired", label="\tPayments to Acquire Businesses"),
         FactRow(name="IncreaseDecreaseInContractWithCustomerLiability", label="\tDeferred Revenue"),
         FactRow(name="PaymentsForProceedsFromOtherInvestingActivities", label="\tOther Investing Activities"),
-        FactRow(name="NetCashProvidedByUsedInInvestingActivities", label="\tNet Cash Provided by Investing Activities",
+        FactRow(name="NetCashProvidedByUsedInInvestingActivities", label="\tNet Cash From Investing Activities",
                 total=True),
 
         HeaderRow(label='Financing Activities'),
@@ -271,12 +271,12 @@ class CashFlowStatement(FactTable):
         FactRow(name="PaymentsForRepurchaseOfCommonStock", label="\tRepurchases of Common Stock"),
         FactRow(name="ProceedsFromIssuanceOfCommonStock", label="\tProceeds from Issuance of Common Stock"),
         FactRow(name="RepaymentsOfLongTermDebt", label="\tRepayments of Long-term Debt"),
-        FactRow(name="NetCashProvidedByUsedInFinancingActivities", label="\tNet Cash Provided by Financing Activities",
+        FactRow(name="NetCashProvidedByUsedInFinancingActivities", label="\tNet Cash From Financing Activities",
                 total=True),
 
         FactRow(
             name="CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
-            label="Changes in Cash, cash equivalents and restricted cash"),
+            label="Changes in Cash and Cash equivalents"),
         FactRow(name="CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
                 label="Cash, cash equivalents and restricted cash", total=True),
     ]

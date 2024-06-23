@@ -138,6 +138,15 @@ def test_company_filings_filter_by_date():
     assert len(filtered_filings) < len(expe.filings)
 
 
+def test_company_filter_with_no_results_returns_filings():
+    expe = get_test_company("EXPE")
+    filings = expe.filings.filter(form="NOTHING")
+    assert filings is not None
+    assert len(filings) == 0
+    latest = filings.latest()
+    assert not latest
+
+
 def test_company_get_filings_for_form():
     company: CompanyData = CompanyData.for_ticker("EXPE")
     tenk_filings: CompanyFilings = company.get_filings(form='10-K')
@@ -419,8 +428,14 @@ def test_company_financials():
     assert financials.balance_sheet
 
 
+def test_company_with_no_latest_10k_has_no_financials():
+    company = Company('TD', include_old_filings=False)
+    financials = company.financials
+    assert financials is None
+
+
 def test_iterate_company_filings():
-    company = Company('AAPL')
+    company = Company('AAPL', include_old_filings=False)
     filings: CompanyFilings = company.get_filings(form='10-K')
     assert isinstance(filings, CompanyFilings)
 
@@ -437,7 +452,7 @@ def test_iterate_company_filings():
 
 
 def test_company_to_dict():
-    company = Company(1012605)
+    company = Company(1012605, include_old_filings=False)
     company_dict = company.to_dict()
     print(type(company_dict))
     assert company_dict.get('cik') == 1012605
