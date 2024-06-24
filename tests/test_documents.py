@@ -1,15 +1,16 @@
-from pathlib import Path
-from rich import print
-import pandas as pd
 import re
+from copy import copy
+from pathlib import Path
+
+import pandas as pd
 from bs4 import BeautifulSoup
+from rich import print
+
+from edgar import Filing
+from edgar.datatools import dataframe_to_text
 from edgar.documents import *
 from edgar.documents import fixup
-from copy import copy
-from edgar import Filing
 from edgar.htmltools import ChunkedDocument
-from edgar.datatools import dataframe_to_text
-from typing import List
 
 pd.options.display.max_columns = 10
 
@@ -579,3 +580,15 @@ def test_document_get_markdown():
     assert md
     assert "A Quiet Place, Mission Impossible, Scream, Teenage Mutant Ninja Turtles and PAW Patrol" in md
     assert "Leading Paramount’s Business Units" in md
+
+
+def test_filing_text_for_file_with_fil_extension():
+    filing = Filing(form='NSAR-A', filing_date='2016-06-28',
+                    company='AMERICAN FUNDS GLOBAL BALANCED FUND', cik=1505612, accession_no='0000051931-16-002553')
+    assert "American Funds Global Balanced Fund" in  filing.html()
+    assert "American Funds Global Balanced Fund" in filing.text()
+
+    filing = Filing(form='NSAR-A', filing_date='2016-09-28', company='Investment Managers Series Trust', cik=1318342,
+                    accession_no='0000926877-16-000629')
+    assert "A000000 INVESTMENT MANAGERS SERIES TRUST" in filing.html()
+    assert "A000000 INVESTMENT MANAGERS SERIES TRUST" in filing.text()

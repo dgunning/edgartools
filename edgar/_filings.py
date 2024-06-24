@@ -1083,7 +1083,11 @@ class Filing:
         """Convert the html of the main filing document to text"""
         html_content = self.html()
         if html_content:
-            return HtmlDocument.from_html(html_content).text
+            html_document = HtmlDocument.from_html(html_content)
+            if html_document:
+                return html_document.text
+            else:
+                return download_text_between_tags(self.text_url, "TEXT")
         else:
             # Some Form types like UPLOAD don't have a primary document. Look for a TEXT EXTRACT attachment
             # Look for an attachment that is TEXT EXTRACT
@@ -1094,8 +1098,7 @@ class Filing:
                 return download_text_between_tags(text_extract_attachment.url, "TEXT")
             else:
                 # Use the full text submission
-                text = download_text_between_tags(self.text_url, "TEXT")
-                return text
+                return download_text_between_tags(self.text_url, "TEXT")
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""

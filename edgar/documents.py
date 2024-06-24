@@ -456,6 +456,10 @@ class HtmlDocument:
         # Get the root element
         root: Tag = cls.get_root(html)
 
+        # If the root cannot be located it's not valid HTML
+        if not root:
+            return None
+
         # Extract any inline data inside the html
         data = cls.extract_data(root)
 
