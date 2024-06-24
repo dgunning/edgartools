@@ -323,7 +323,7 @@ def decode_content(content: bytes):
 
 text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
 binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng")
+                     ".apng", ".fil")
 
 
 def extract_text_between_tags(content: str, tag: str) -> str:
