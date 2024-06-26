@@ -72,6 +72,7 @@ __all__ = [
     'text_extensions',
     'binary_extensions',
     'ask_for_identity',
+    'use_local_storage',
     'download_edgar_data',
     'default_page_size',
     'InvalidDateException',
@@ -218,6 +219,13 @@ def get_edgar_data_directory() -> Path:
     if not edgar_data_dir.exists():
         os.makedirs(edgar_data_dir)
     return edgar_data_dir
+
+
+def use_local_storage(use_local: bool = True):
+    """
+    Will use local data if set to True
+    """
+    os.environ['EDGAR_USE_LOCAL_DATA'] = "1" if use_local else "0"
 
 
 def download_edgar_data(submissions: bool = True, facts: bool = True):
