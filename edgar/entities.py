@@ -908,6 +908,7 @@ async def download_facts_async() -> Path:
     """
     Download company facts
     """
+    log.info(f"Downloading Company facts to {get_edgar_data_directory()}/companyfacts")
     return await download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
 
 
@@ -915,8 +916,7 @@ def download_facts() -> Path:
     """
     Download company facts
     """
-    log.info(f"Downloading Company facts to {get_edgar_data_directory()}/companyfacts")
-    return asyncio.run(download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip"))
+    return asyncio.run(download_facts_async())
 
 
 async def download_submissions_async() -> Path:
@@ -931,7 +931,7 @@ def download_submissions() -> Path:
     """
     Download company facts
     """
-    return asyncio.run(download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip"))
+    return asyncio.run(download_submissions_async())
 
 
 @dataclass(frozen=True)

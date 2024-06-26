@@ -10,8 +10,9 @@ from _thread import interrupt_main
 from dataclasses import dataclass
 from decimal import Decimal
 from functools import lru_cache
-from typing import Union, Optional, Tuple, List
 from pathlib import Path
+from typing import Union, Optional, Tuple, List
+
 import httpx
 import humanize
 import pandas as pd
@@ -71,6 +72,7 @@ __all__ = [
     'text_extensions',
     'binary_extensions',
     'ask_for_identity',
+    'download_edgar_data',
     'default_page_size',
     'InvalidDateException',
 ]
@@ -212,10 +214,24 @@ def get_identity() -> str:
 def get_edgar_data_directory() -> Path:
     """Get the edgar data directory"""
     default_local_data_dir = Path(os.path.join(os.path.expanduser("~"), ".edgar"))
-    edgar_data_dir = Path(os.getenv('EDGAR_LOCAL_DATA_DIR',default_local_data_dir))
+    edgar_data_dir = Path(os.getenv('EDGAR_LOCAL_DATA_DIR', default_local_data_dir))
     if not edgar_data_dir.exists():
         os.makedirs(edgar_data_dir)
     return edgar_data_dir
+
+
+def download_edgar_data(submissions: bool = True, facts: bool = True):
+    """
+    Download Edgar data to the local storage directory
+    :param submissions: Download submissions
+    :param facts: Download facts
+    """
+    if submissions:
+        from edgar.entities import download_submissions
+        download_submissions()
+    if facts:
+        from edgar.entities import download_facts
+        download_facts()
 
 
 class InvalidDateException(Exception):

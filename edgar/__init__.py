@@ -36,7 +36,8 @@ from edgar.core import (edgar_mode,
                         CAUTION,
                         NORMAL,
                         get_identity,
-                        set_identity)
+                        set_identity,
+                        download_edgar_data)
 from edgar.fundreports import FundReport, NPORT_FORMS
 from edgar.funds import Fund, FundSeries, get_fund, FundClass
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
