@@ -377,7 +377,7 @@ class Result:
 
     def __init__(self,
                  success: bool,
-                 error: Optional[str]=None,
+                 error: Optional[str] = None,
                  value: Optional[object] = None):
         self.success = success
         self.error = error
@@ -472,6 +472,14 @@ class DataPager:
             return self.data.slice(offset=start_index, length=self.page_size)
         else:
             return self.data.iloc[start_index:end_index]
+
+    @property
+    def start_index(self):
+        return (self.current_page - 1) * self.page_size
+
+    @property
+    def end_index(self):
+        return self.start_index + self.page_size
 
 
 def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
