@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from functools import lru_cache
 from typing import Union, Optional, Tuple, List
-
+from pathlib import Path
 import httpx
 import humanize
 import pandas as pd
@@ -130,6 +130,9 @@ edgar_identity = 'EDGAR_IDENTITY'
 sec_dot_gov = "https://www.sec.gov"
 sec_edgar = "https://www.sec.gov/Archives/edgar"
 
+# Local storage directory.
+edgar_data_dir = os.path.join(os.path.expanduser("~"), ".edgar")
+
 
 def set_identity(user_identity: str):
     """
@@ -204,6 +207,15 @@ def get_identity() -> str:
         identity = ask_for_identity()
         os.environ[edgar_identity] = identity
     return identity
+
+
+def get_edgar_data_directory() -> Path:
+    """Get the edgar data directory"""
+    default_local_data_dir = Path(os.path.join(os.path.expanduser("~"), ".edgar"))
+    edgar_data_dir = Path(os.getenv('EDGAR_LOCAL_DATA_DIR',default_local_data_dir))
+    if not edgar_data_dir.exists():
+        os.makedirs(edgar_data_dir)
+    return edgar_data_dir
 
 
 class InvalidDateException(Exception):

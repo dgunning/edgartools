@@ -1,28 +1,32 @@
+import asyncio
 import logging
+import os
 import re
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
 from typing import List, Dict, Optional, Union, Tuple, Any
 
 import httpx
 import numpy as np
+import orjson as json
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 from fastcore.basics import listify
+from rich import box
+from rich.columns import Columns
 from rich.console import Group
 from rich.panel import Panel
+from rich.table import Table, Column
 from rich.text import Text
 
 from edgar._filings import Filing, Filings, FilingsState
 from edgar._rich import df_to_rich_table, repr_rich
-from rich import box
-from rich.columns import Columns
-from rich.table import Table, Column
-from edgar.httprequests import download_json, download_text
-from edgar.reference import states
 from edgar.core import (log, Result, display_size,
-                        filter_by_date, IntString, InvalidDateException, reverse_name)
+                        filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory)
+from edgar.httprequests import download_json, download_text, download_bulk_data
+from edgar.reference import states
 from edgar.search import SimilaritySearchIndex
 
 __all__ = [
@@ -400,7 +404,7 @@ class EntityData:
             return False
         if self.state_of_incorporation is not None and self.state_of_incorporation != '':
             return False
-        if self.ein is None or self.ein == "000000000": #The Warren Buffett case
+        if self.ein is None or self.ein == "000000000":  # The Warren Buffett case
             return True
         return False
 
@@ -779,6 +783,21 @@ Entity = get_entity
 @lru_cache(maxsize=32)
 def get_entity_submissions(cik: int,
                            include_old_filings: bool = True) -> Optional[EntityData]:
+    # Check the environment var EDGAR_USE_LOCAL_DATA
+    submissions_json: Optional[Dict[str,Any]] = None
+    if os.getenv("EDGAR_USE_LOCAL_DATA"):
+        submissions_json = load_company_submissions_from_local(cik)
+        if not submissions_json:
+            submissions_json = download_entity_submissions_from_sec(cik, include_old_filings=include_old_filings)
+    else:
+        submissions_json = download_entity_submissions_from_sec(cik, include_old_filings=include_old_filings)
+    if submissions_json:
+        return parse_entity_submissions(submissions_json)
+
+
+@lru_cache(maxsize=32)
+def download_entity_submissions_from_sec(cik: int,
+                                         include_old_filings: bool = True) -> Dict[str, Any]:
     """Get the company filings for a given cik"""
     try:
         submission_json = download_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
@@ -794,7 +813,7 @@ def get_entity_submissions(cik: int,
             old_sub = download_json("https://data.sec.gov/submissions/" + old_file['name'])
             for column in old_sub:
                 submission_json['filings']['recent'][column] += old_sub[column]
-    return parse_entity_submissions(submission_json)
+    return submission_json
 
 
 def parse_company_facts(fjson: Dict[str, object]):
@@ -834,16 +853,85 @@ class NoCompanyFactsFound(Exception):
 
 @lru_cache(maxsize=32)
 def get_company_facts(cik: int):
+    # Check the environment var EDGAR_USE_LOCAL_DATA
+    if os.getenv("EDGAR_USE_LOCAL_DATA"):
+        company_facts_json = load_company_facts_from_local(cik)
+        if not company_facts_json:
+            company_facts_json = download_company_facts_from_sec(cik)
+    else:
+        company_facts_json = download_company_facts_from_sec(cik)
+    return parse_company_facts(company_facts_json)
+
+
+def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
+    """
+    Download company facts from the SEC
+    """
     company_facts_url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010}.json"
     try:
-        company_facts_json = download_json(company_facts_url)
-        return parse_company_facts(company_facts_json)
+        return download_json(company_facts_url)
     except httpx.HTTPStatusError as err:
         if err.response.status_code == 404:
             logging.warning(f"No company facts found on url {company_facts_url}")
             raise NoCompanyFactsFound(cik=cik)
         else:
             raise
+
+
+def load_company_facts_from_local(cik: int) -> Optional[Dict[str, Any]]:
+    """
+    Load company facts from local data
+    """
+    company_facts_dir = get_edgar_data_directory() / "companyfacts"
+    if not company_facts_dir.exists():
+        return None
+    company_facts_file = company_facts_dir / f"CIK{cik:010}.json"
+    if not company_facts_file.exists():
+        return None
+    return json.loads(company_facts_file.read_text())
+
+
+def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
+    """
+    Load company submissions from local data
+    """
+    submissions_dir = get_edgar_data_directory() / "submissions"
+    if not submissions_dir.exists():
+        return None
+    submissions_file = submissions_dir / f"CIK{cik:010}.json"
+    if not submissions_file.exists():
+        return None
+    return json.loads(submissions_file.read_text())
+
+
+async def download_facts_async() -> Path:
+    """
+    Download company facts
+    """
+    return await download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
+
+
+def download_facts() -> Path:
+    """
+    Download company facts
+    """
+    log.info(f"Downloading Company facts to {get_edgar_data_directory()}/companyfacts")
+    return asyncio.run(download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip"))
+
+
+async def download_submissions_async() -> Path:
+    """
+    Download company submissions
+    """
+    log.info(f"Downloading Company submissions to {get_edgar_data_directory()}/submissions")
+    return await download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip")
+
+
+def download_submissions() -> Path:
+    """
+    Download company facts
+    """
+    return asyncio.run(download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip"))
 
 
 @dataclass(frozen=True)

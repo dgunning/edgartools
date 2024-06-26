@@ -1,6 +1,7 @@
 import gzip
 import os
 import time
+import zipfile
 from collections import deque
 from functools import wraps
 from io import BytesIO
@@ -11,8 +12,13 @@ from typing import Union, Optional
 import httpx
 import orjson as json
 from stamina import retry
+from tqdm import tqdm
 
-from edgar.core import text_extensions, edgar_mode
+from edgar.core import text_extensions, edgar_mode, get_edgar_data_directory
+
+__all__ = ["get_with_retry", "get_with_retry_async", "stream_with_retry", "post_with_retry", "post_with_retry_async",
+           "download_file", "download_file_async", "download_json", "download_json_async", "stream_file",
+           "download_text", "download_text_between_tags", "download_bulk_data"]
 
 attempts = 6
 retry_timeout = 40
@@ -401,7 +407,8 @@ def download_file(url: str, as_text: bool = None, path: Optional[Union[str, Path
     return save_or_return_content(file_content, path)
 
 
-async def download_file_async(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None) -> Union[str, bytes, None]:
+async def download_file_async(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None) -> Union[
+    str, bytes, None]:
     """
     Download a file from a URL asynchronously.
 
@@ -436,6 +443,70 @@ async def download_file_async(url: str, as_text: bool = None, path: Optional[Uni
         path = path / os.path.basename(url)
 
     return save_or_return_content(content, path)
+
+
+CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
+
+
+@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@with_identity
+@throttle_requests(requests_per_second=max_requests_per_second)
+async def stream_file(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, **kwargs) -> Union[str, bytes, None]:
+    """
+    Download a file from a URL asynchronously with progress bar using httpx.
+
+    Args:
+        url (str): The URL of the file to download.
+        as_text (bool, optional): Whether to download the file as text or binary.
+            If None, the default is determined based on the file extension. Defaults to None.
+        path (str or Path, optional): The path where the file should be saved.
+
+    Returns:
+        str or bytes: The content of the downloaded file, either as text or binary data.
+    """
+    if as_text is None:
+        # Set the default based on the file extension
+        as_text = url.endswith(text_extensions)
+
+    async with httpx.AsyncClient(timeout=edgar_mode.http_timeout, headers=kwargs['headers']) as client:
+        async with client.stream('GET', url) as response:
+            inspect_response(response)
+            total_size = int(response.headers.get('Content-Length', 0))
+
+            if as_text:
+                # Download as text
+                content = await response.text()
+                return content
+            else:
+                # Download as binary
+                content = b''
+                progress_bar = tqdm(
+                    total=total_size / (1024 * 1024),  # Convert to MB
+                    unit='MB',
+                    unit_scale=True,
+                    unit_divisor=1024,
+                    bar_format='{l_bar}{bar}| {n:.2f}/{total:.2f}MB [{elapsed}<{remaining}, {rate_fmt}]',
+                    desc=f"Downloading {os.path.basename(url)}",
+                    ascii=False  # Use Unicode characters for a nicer looking bar
+                )
+                downloaded = 0
+                async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
+                    content += chunk
+                    downloaded += len(chunk)
+                    progress_bar.update(len(chunk) / (1024 * 1024))  # Update in MB
+                progress_bar.close()
+
+                # Check if the content is gzip-compressed
+                if response.headers.get("Content-Encoding") == "gzip":
+                    content = gzip.decompress(content)
+
+            if path:
+                if isinstance(path, str):
+                    path = Path(path)
+                if path.is_dir():
+                    path = path / os.path.basename(url)
+
+            return save_or_return_content(content, path)
 
 
 def download_json(data_url: str) -> dict:
@@ -500,3 +571,28 @@ def download_text_between_tags(url: str, tag: str):
                 elif is_header:
                     content += line + '\n'  # Add a newline to preserve original line breaks
     return content
+
+
+async def download_bulk_data(data_url:str) -> Path:
+    """
+    Download bulk data e.g. company facts, daily index, etc. from the SEC website
+    e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip"
+    """
+    filename = os.path.basename(data_url)
+    local_dir = filename.split('.')[0]
+    download_path = get_edgar_data_directory() / local_dir
+    download_filename = download_path / filename
+
+    # Create the directory if it doesn't exist
+    if not download_path.exists():
+        download_path.mkdir()
+
+    # Now stream the file to the data directory
+    await stream_file(data_url, as_text=False, path=download_path)
+    if filename.endswith(".zip"):
+        # Unzip the file to the data directory / file
+        with zipfile.ZipFile(download_filename, 'r') as z:
+            z.extractall(download_path)
+        # Delete the zip file
+        download_filename.unlink()
+    return download_path
