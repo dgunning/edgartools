@@ -37,7 +37,8 @@ dependencies = [
   "orjson>=3.6.0",
   "textdistance>=4.5.0",
   "rank_bm25==0.2.1",
-  "pydantic>=2.0.0"
+  "pydantic>=2.0.0",
+  "tqdm>=4.62.0"
 ]
 dynamic = ["version"]
 
