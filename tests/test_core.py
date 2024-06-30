@@ -238,6 +238,8 @@ def test_reverse_name():
     assert reverse_name("FOSTER WATT R JR") == "Watt R Foster JR"
     # Single word name
     assert reverse_name("WATT") == "Watt"
+    # O'Names
+    assert reverse_name("O'CONNELL BENJAMIN") == "Benjamin O'Connell"
 
 
 def test_get_bool():

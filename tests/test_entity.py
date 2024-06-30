@@ -34,6 +34,9 @@ def test_entity_is_company():
     # ORBIMED Advisors LLC
     assert Entity(1055951, include_old_filings=False).is_company
 
+    # 360 Funds
+    assert Entity(1319067, include_old_filings=False).is_company
+
 
 def test_warren_buffett():
     # Warren Buffett
