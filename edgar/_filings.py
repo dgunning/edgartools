@@ -1066,6 +1066,11 @@ class Filing:
         # Return all the attachments on the filing
         return self.homepage.attachments
 
+    @property
+    def exhibits(self):
+        # Return all the exhibits on the filing
+        return self.homepage.attachments.exhibits
+
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
         if self.document and not self.document.is_binary() and not self.document.empty:

@@ -1,7 +1,8 @@
 import tempfile
 from pathlib import Path
-from rich import print
+
 import pytest
+from rich import print
 
 from edgar import Filing
 from edgar.attachments import Attachment, Attachments
@@ -117,7 +118,7 @@ def test_download_to_archive():
 def test_attachment_list_url():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
-    #assert filing.attachment_list_url == 'https://www.sec.gov/Archives/edgar/data/1983327/000095017024064537/index.json'
+    # assert filing.attachment_list_url == 'https://www.sec.gov/Archives/edgar/data/1983327/000095017024064537/index.json'
     files = download_file(f"{filing.base_dir}/index.json")
     print(files)
     print(filing.attachments)
@@ -127,4 +128,21 @@ def test_attachment_list_url():
     print(index_headers)
 
 
+def test_list_exhibits():
+    filing: Filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                            accession_no='0000066740-24-000023')
+    attachments = filing.attachments
+    exhibits = attachments.exhibits
+    print(exhibits)
+    assert len(exhibits) == 2
+    assert exhibits[0].document_type == '8-K'
+    assert exhibits[1].document_type == 'EX-99.1'
 
+
+def test_list_graphics():
+    filing = Filing(company='Gitlab Inc.', cik=1653482, form='10-K', filing_date='2024-03-26',
+           accession_no='0001628280-24-012963')
+    graphics = filing.attachments.graphics
+    assert len(graphics) == 2
+    assert graphics[0].document_type == 'GRAPHIC'
+    assert graphics[1].document_type == 'GRAPHIC'

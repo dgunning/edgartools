@@ -188,6 +188,21 @@ class Attachments:
                 return doc
         return None
 
+    @property
+    def exhibits(self):
+        """
+        Get all the exhibits in the filing.
+        This is the primary document plus all the documents listed as EX-XX
+        """
+        primary_documents = [self.primary_html_document]
+        exhibits_documents = self.query("re.match('EX-', document_type)", False).documents
+        return Attachments(
+            document_files=primary_documents + exhibits_documents, data_files=[], primary_documents=primary_documents)
+
+    @property
+    def graphics(self):
+        return self.query("document_type=='GRAPHIC'")
+
     def query(self, query_str: str, include_data_files: bool = True):
         """
         Query attachments based on a simple query string.
