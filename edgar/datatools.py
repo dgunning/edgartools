@@ -6,7 +6,8 @@ __all__ = ["compress_dataframe",
            "table_tag_to_dataframe",
            "markdown_to_dataframe",
            "dataframe_to_text",
-           "clean_column_text"]
+           "clean_column_text",
+           'convert_to_numeric']
 
 
 def clean_column_text(text: str):
@@ -169,3 +170,11 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
         text_output += '\t'.join(row_values) + '\n'
 
     return text_output
+
+
+def convert_to_numeric(series):
+    """Convert a pandas Series to numeric if possible, otherwise return the original series."""
+    try:
+        return pd.to_numeric(series)
+    except ValueError:
+        return series

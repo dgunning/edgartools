@@ -22,6 +22,8 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table, Column
 
+from edgar.datatools import convert_to_numeric
+
 from edgar.entities import Entity
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
@@ -715,7 +717,7 @@ class NonDerivativeTable:
 
         # Convert to numeric if we can.
         if holdings_df['Shares'].str.isnumeric().all():
-            holdings_df['Shares'] = pd.to_numeric(holdings_df['Shares'], errors="ignore")
+            holdings_df['Shares'] = convert_to_numeric(holdings_df['Shares'])
 
         return NonDerivativeHoldings(holdings_df)
 
@@ -766,7 +768,7 @@ class NonDerivativeTable:
         )
         # Convert to numeric if we can.
         for column in ['Shares', 'Remaining', 'Price']:
-            transaction_df[column] = pd.to_numeric(transaction_df[column], errors="ignore")
+            transaction_df[column] = convert_to_numeric(transaction_df[column])
         # Change Nan to None
         transaction_df = transaction_df.replace({np.nan: None}).infer_objects()
 
@@ -913,7 +915,7 @@ class DerivativeTable:
             )
             holdings.append(holding)
         holdings_dataframe = (pd.DataFrame(holdings)
-                              .assign(UnderlyingShares=lambda df: pd.to_numeric(df.UnderlyingShares, errors='ignore'))
+                              .assign(UnderlyingShares=lambda df: convert_to_numeric(df.UnderlyingShares))
                               )
 
         return DerivativeHoldings(holdings_dataframe)
