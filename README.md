@@ -25,7 +25,7 @@
 - 🧠 **Intuitive and easy to use**: **edgartools** has a super simple API that is easy to use.
 - 🛠️ **Works as a library or a CLI**: You can use edgartools as a library in your code or as a CLI tool.
 - 📁 **Access any SEC filing**: You can access any SEC filing since 1994.
-- 📅 **List filings for any date range**: You can list filings for any **year, quarter** e.g. or date range `2024-02-29:2024-03-15`
+- 📅 **List filings for any date range**: List filings for **year, quarter** e.g. or date range `2024-02-29:2024-03-15`
 - 🌟 **Best looking edgar library**: Uses **[rich](https://rich.readthedocs.io/en/stable/introduction.html)** library to display SEC Edgar data in a beautiful way.
 - 🔄 **Page through filings**: Use `filings.next()` and `filings.previous()` to page through filings
 - 🏗️ **Build Data Pipelines**: Build data pipelines by finding, filtering, transforming and saving filings
@@ -39,7 +39,7 @@
 - 📥 **Download any attachment**: You can download any attachment from the filing.
 - 🕒 **Automatic throttling**: Automatically throttles requests to Edgar to avoid being blocked.
 - 📥 **Bulk downloads**: Faster batch processing through bulk downloads of filings and facts
-- 🔢 **Get company by Ticker or Cik**: You can get a company using a ticker `Company("SNOW")` or a cik `Company(1640147)`
+- 🔢 **Get company by Ticker or Cik**: Get a company by ticker `Company("SNOW")` or cik `Company(1640147)`
 - 📚 **Get company filings**: You can get all the company's historical filings using `company.get_filings()`
 - 📈 **Get company facts**: You can get company facts using `company.get_facts()`
 - 💰 **Company Financials**: You can get company financials using `company.financials`
