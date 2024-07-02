@@ -37,6 +37,8 @@
 - 📊 **Parse XBRL**: If a filing has XBRL, you can parse it to a dataframe.
 - 💾 **Data Objects**: Automatically downloads and parses filings into data objects.
 - 📥 **Download any attachment**: You can download any attachment from the filing.
+- 🕒 **Automatic throttling**: Automatically throttles requests to Edgar to avoid being blocked.
+- 📥 **Bulk downloads**: Faster batch processing through bulk downloads of filings and facts
 - 🔢 **Get company by Ticker or Cik**: You can get a company using a ticker `Company("SNOW")` or a cik `Company(1640147)`
 - 📚 **Get company filings**: You can get all the company's historical filings using `company.get_filings()`
 - 📈 **Get company facts**: You can get company facts using `company.get_facts()`
