@@ -592,3 +592,17 @@ def test_filing_text_for_file_with_fil_extension():
                     accession_no='0000926877-16-000629')
     assert "A000000 INVESTMENT MANAGERS SERIES TRUST" in filing.html()
     assert "A000000 INVESTMENT MANAGERS SERIES TRUST" in filing.text()
+
+
+def test_parse_html_with_funny_character():
+    # repr was not implemented on Table Block so there was an exception
+    filing = Filing(company='WideOpenWest, Inc.', cik=1701051, form='10-K', filing_date='2024-03-13', accession_no='0001558370-24-003047')
+    tenk = filing.obj()
+    chunked_document:ChunkedDocument = tenk.chunked_document
+
+    item_1a_chunks = list(chunked_document.chunks_for_item("Item 1A"))
+    #print(item_1a_chunks)
+    blocks = item_1a_chunks[6]
+    result = repr(blocks[0])
+    assert result
+

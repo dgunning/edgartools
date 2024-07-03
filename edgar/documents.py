@@ -318,6 +318,9 @@ class TableBlock(Block):
     def __str__(self):
         return "TableBlock"
 
+    def __repr__(self):
+        return str(self)
+
 
 item_pattern = r"(?:ITEM|Item)\s+(?:[0-9]{1,2}[A-Z]?\.?|[0-9]{1,2}\.[0-9]{2})"
 
