@@ -291,6 +291,7 @@ class IncomeStatement(FactTable):
         HeaderRow(label='Sales'),
         [
             FactRow(name="Revenues", label="Revenue", total=True),
+            FactRow(name="SalesRevenueNet", label="Total Net Sales", total=True),
             FactRow(name="RevenueFromContractWithCustomerExcludingAssessedTax", label="Total Net Sales", total=True),
         ],
         HeaderRow(label='Cost of Sales'),

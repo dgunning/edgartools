@@ -255,15 +255,24 @@ class FilingXbrl:
     def period_end_date(self):
         return self.facts.period_end_date
 
-    def get_periods(self,
-                    period_type: Optional[str] = None,
-                    min_count=8) -> Optional[List[Tuple[str, str]]]:
+    def get_fiscal_periods(self,
+                           period_type: Optional[str] = None,
+                           min_count=8,
+                           include_instant_periods: bool = True) -> pd.DataFrame:
         """
         Get the periods in the filing. For Fiscal years,
         it returns a Tuple of the years
         For quarters, it returns a List of Tuple of the quarters
             e.g [('2017-02-01', '2017-04-30'), ('2016-02-01', '2016-04-30')]
+
+        period_type: The type of period to filter by. If None, all periods are returned
+        min_count: The minimum number of occurrences of a period to be included in the result
+        include_instant_periods: If True, include instant periods in the result
         """
+        if period_type:
+            if period_type.startswith('Q'):
+                period_type = "Q"
+
         # Ensure 'data' is a DataFrame to avoid in-place modifications on slices
         data = self.facts.data.copy()
         data['start_date'] = pd.to_datetime(data['start_date']).dt.normalize()
@@ -275,7 +284,7 @@ class FilingXbrl:
         filtered_data = data.loc[condition].copy()
 
         if filtered_data.empty:
-            return []
+            return filtered_data[['start_date', 'end_date', 'period_type']]
 
         filtered_data.loc[:, 'duration_days'] = (
                 filtered_data.loc[:, 'end_date'] - filtered_data.loc[:, 'start_date']).dt.days
@@ -286,10 +295,10 @@ class FilingXbrl:
             if days == 0:
                 return 'instant'
             elif 75 <= days <= 105:
-                return 'quarter'
+                return 'Q'
             # The filing 0001193125-21-170978 has a period of 241 days. Should it be included
             elif 335 <= days <= 395:
-                return 'year'
+                return 'FY'
             else:
                 return 'other'
 
@@ -297,10 +306,13 @@ class FilingXbrl:
 
         # Filter by period type
         if period_type:
-            filtered_data = filtered_data[filtered_data['period_type'] == period_type]
+            allowed_period_types = [period_type]
+            if include_instant_periods:
+                allowed_period_types.append('instant')
+            filtered_data = filtered_data[filtered_data['period_type'].isin(allowed_period_types)]
 
         # Count occurrences of each unique period
-        period_counts = filtered_data.filter(
+        period_counts: pd.DataFrame = filtered_data.filter(
             ['start_date', 'end_date', 'period_type']).value_counts().to_frame().reset_index()
 
         # Optionally filter periods by occurrence count
@@ -313,24 +325,13 @@ class FilingXbrl:
         # Sort by start date descending
         period_counts = period_counts.sort_values('start_date', ascending=False)
 
-        # Return a list of tuples containing start and end dates
-        return [tuple(r) for r in
-                period_counts.filter(['start_date', 'end_date']).to_numpy()] if not period_counts.empty else None
-
-    def get_fiscal_periods(self) -> List[Tuple[str, str]]:
-        """
-        Get only the periods that match this fiscal period focus
-
-        """
-        if self.fiscal_period_focus == 'FY':
-            return self.get_periods(period_type="year")
-        elif self.fiscal_period_focus.startswith('Q'):
-            return self.get_periods(period_type="quarter")
+        # Return the DataFrame with the start_date, end_date, and period_type columns
+        return period_counts[['start_date', 'end_date', 'period_type']]
 
     @lru_cache(maxsize=1)
-    def get_facts_by_periods(self, fiscal_periods: bool = True) -> pd.DataFrame:
+    def get_facts_by_periods(self, fiscal_periods_only: bool = True) -> pd.DataFrame:
         """
-        Get the facts for the specified periods.
+        Get the facts for with the values listed per fiscal period end.
         This method filters the facts data for the specified periods and
         returns a DataFrame with the facts for the specified periods.
 
@@ -339,11 +340,19 @@ class FilingXbrl:
         | AdjustedGainLossOnSaleOfBusiness      | -25101000    | 0            |            0 |
         | AdjustmentToCapitalIncomeTax          |              |              |     -1768000 |
 
-        :param fiscal_periods: If True, filter to only fiscal periods
+        :param fiscal_periods_only: If True, filter to only fiscal periods
         """
 
-        # Pivot the data
         facts = self.facts.data.sort_values(by='dimensions', na_position='first')
+
+        fiscal_periods = None
+        fiscal_end_dates = None
+        if fiscal_periods_only:
+            # Filter the facts data to include only fiscal periods
+            fiscal_periods = self.get_fiscal_periods(self.fiscal_period_focus)[['start_date', 'end_date']]
+            fiscal_end_dates = sorted(set(fiscal_periods.end_date.to_list()), reverse=True)
+            facts = facts.merge(fiscal_periods, on=['start_date', 'end_date'], how='inner')
+
         # Using 'end_date' as columns to display data based on the period's end date
         facts_by_period = facts.pivot_table(
             index='fact',
@@ -361,12 +370,12 @@ class FilingXbrl:
 
         # Remove the index name
         facts_by_period.columns.name = None
-        df = facts_by_period.set_index('fact')
-        if fiscal_periods:
-            xbrl_fiscal_periods = self.get_fiscal_periods()
-            if xbrl_fiscal_periods:
-                fiscal_end_dates = sorted(set([end for _, end in xbrl_fiscal_periods]), reverse=True)
-                return df[fiscal_end_dates]
+        final_facts = facts_by_period.set_index('fact')
+
+        if fiscal_periods_only:
+            fact_columns = [col for col in final_facts.columns if col in fiscal_end_dates]
+            if len(fact_columns) > 0:
+                return final_facts[fact_columns]
             else:
                 """ 
                 If we are here, then we can't figure out the fiscal periods but there's a chance that the
@@ -376,9 +385,10 @@ class FilingXbrl:
                 """
                 pass
 
-        return df
+        return final_facts
 
-    def get_fiscal_period_facts(self, fact_names: Optional[List[str]] = None,
+    def get_fiscal_period_facts(self,
+                                fact_names: Optional[List[str]] = None,
                                 threshold_percentage: float = 0.4) -> pd.DataFrame:
         """
         Get the facts for the fiscal periods, dropping previous period columns that are mostly empty
@@ -390,7 +400,7 @@ class FilingXbrl:
         :return: A DataFrame of fiscal period facts with irrelevant columns dropped.
         """
         # Retrieve the DataFrame for fiscal periods
-        fiscal_period_facts: pd.DataFrame = self.get_facts_by_periods(fiscal_periods=True)
+        fiscal_period_facts: pd.DataFrame = self.get_facts_by_periods(fiscal_periods_only=True)
 
         # Filter by specified fact names if provided
         if fact_names:

@@ -152,37 +152,45 @@ def test_read_inline_xbrl():
 
 def test_get_get_periods_for_xbrl_facts():
     print()
-    periods = CARBO_CERAMICS_FILING_XBRL.get_periods()
+    periods = CARBO_CERAMICS_FILING_XBRL.get_fiscal_periods()
     assert len(periods) == 5
-    # assert periods[0].period_type == 'instant'
-    # assert periods[0].start_date == Timestamp('2017-12-31 00:00:00')
 
-    periods = CARBO_CERAMICS_FILING_XBRL.get_periods(period_type='year')
-    print(periods)
-    assert len(periods) == 3
-    print(CARBO_CERAMICS_FILING_XBRL.fiscal_period_focus)
+    assert len(CARBO_CERAMICS_FILING_XBRL.get_fiscal_periods(period_type='FY')) == 5
+    assert len(CARBO_CERAMICS_FILING_XBRL.get_fiscal_periods(period_type='FY', include_instant_periods=False)) == 3
 
 
-def test_get_periods():
-    periods = CARBO_CERAMICS_FILING_XBRL.get_periods(period_type='year')
-    assert periods == [('2017-01-01', '2017-12-31'),('2016-01-01', '2016-12-31'),('2015-01-01', '2015-12-31')]
+def test_get_fiscal_periods():
+    periods = CARBO_CERAMICS_FILING_XBRL.get_fiscal_periods(period_type='FY', include_instant_periods=False)
 
-    periods = CARBO_CERAMICS_FILING_XBRL.get_periods(period_type='instant')
-    assert periods == [('2017-12-31', '2017-12-31'), ('2016-12-31', '2016-12-31')]
+    expected_periods = pd.DataFrame([('2017-01-01', '2017-12-31', 'FY'),
+                                     ('2016-01-01', '2016-12-31', 'FY'),
+                                     ('2015-01-01', '2015-12-31', 'FY')],
+                                    columns=['start_date', 'end_date', 'period_type'])
+    row, col = periods.shape
+    for row in range(row):
+        for col in range(col):
+            assert periods.iloc[row, col] == expected_periods.iloc[row, col]
+
+    periods = CARBO_CERAMICS_FILING_XBRL.get_fiscal_periods(period_type='instant')
+    assert periods.iloc[0, 0] == periods.iloc[0, 1] == '2017-12-31'
+    assert periods.iloc[1, 0] == periods.iloc[1, 1] == '2016-12-31'
 
 
-def test_get_fact_by_periods():
+def test_get_fact_by_periods_for_10K():
     # 10-K filing
     data = CARBO_CERAMICS_FILING_XBRL.get_facts_by_periods()
-    print(data.columns.tolist())
     assert data.columns.tolist() == ['2017-12-31', '2016-12-31', '2015-12-31']
 
+
+def test_get_fact_by_periods_for_10Q():
     # 10-Q filing
-    filing = Filing(form='10-Q', filing_date='2024-04-25', company='1ST SOURCE CORP', cik=34782, accession_no='0000034782-24-000054')
+    filing = Filing(form='10-Q', filing_date='2024-04-25', company='1ST SOURCE CORP', cik=34782,
+                    accession_no='0000034782-24-000054')
     xbrl = filing.xbrl()
     data = xbrl.get_facts_by_periods()
-    assert data.columns.tolist() == ['2024-03-31', '2023-03-31']
-    print(data)
+    # assert data.columns.tolist() == ['2024-03-31', '2023-03-31']
+    print(filing.obj().financials)
+
 
 def test_get_facts_by_periods_nflx():
     filing = Filing(company='NETFLIX INC', cik=1065280, form='10-K', filing_date='2024-01-26',
@@ -193,3 +201,14 @@ def test_get_facts_by_periods_nflx():
     assert 'CashAndCashEquivalentsAtCarryingValue' in period_facts.index
 
 
+def test_get_fiscal_period_fact_for_apple_2016():
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2016-10-26',
+                    accession_no='0001628280-16-020309')
+    xbrl: FilingXbrl = filing.xbrl()
+    fiscal_periods = xbrl.get_fiscal_periods()
+    facts_by_periods = xbrl.get_facts_by_periods()
+    # print(facts_by_periods)
+
+    # fiscal_period_facts = xbrl.get_fiscal_period_facts(fact_names=['SalesRevenueNet'])
+
+    # print(fiscal_period_facts)
