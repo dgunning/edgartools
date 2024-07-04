@@ -63,13 +63,21 @@ class HeaderRow(BaseModel):
     label: str
 
 
+def get_sheet_title(xbrl: FilingXbrl, sheet_name):
+    title = Text.assemble((xbrl.company_name, "bold deep_sky_blue3"), " ",
+                          (sheet_name, "bold dark_sea_green4"), " ",
+                          (f"{xbrl.fiscal_period_focus} {xbrl.fiscal_year_focus}", "red1")
+                          )
+    return title
+
+
 class FactTable:
     """
     FactTable is a base class for Financial Tables like BalanceSheet, CashFlowStatement, IncomeStatement
     """
 
     def __init__(self, filing_xbrl: FilingXbrl, title: str, mapping: List[Union[FactRow, List[FactRow], HeaderRow]]):
-        self.title = title
+        self.title = get_sheet_title(xbrl=filing_xbrl, sheet_name=title)
         self.mapping = mapping
         fact_names = self.get_mapped_facts()
         self.period_facts = filing_xbrl.get_fiscal_period_facts(fact_names)
@@ -134,14 +142,14 @@ class FactTable:
         formatted_label = raw_label.replace("\t", "  ")
         if is_header:
             formatted_label = f"{formatted_label.upper()}:"
-            return Text(formatted_label, style="bold turquoise4")
+            return Text(formatted_label, style="bold dark_sea_green4")
         return Text(formatted_label, style="bold deep_sky_blue3") if is_total else Text(formatted_label)
 
     def __rich__(self):
         periods = self.period_facts.columns.tolist()
         columns = [""] + [Column(period, justify='right') for period in periods]
 
-        table = Table(*columns, box=box.SIMPLE_HEAVY, title=self.title, title_style="bold turquoise4")
+        table = Table(*columns, box=box.SIMPLE_HEAVY, title=self.title, title_style="bold dark_sea_green4")
         for index, header_or_fact in enumerate(self.mapping):
             # Get the row label
             if isinstance(header_or_fact, HeaderRow):
