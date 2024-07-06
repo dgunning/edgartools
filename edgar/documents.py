@@ -736,10 +736,15 @@ def fixup(text: str):
     return text
 
 
-def get_clean_html(html: str) -> str:
+def get_clean_html(html: str) -> Optional[str]:
     """Get a clean version of the html without the header tags, script and style tags, and table of content links.
     """
     root = HtmlDocument.get_root(html)
+
+    # If the root cannot be located it's not valid HTML
+    if not root:
+        return None
+
     # Clean the root element
     root = clean_html_root(root)
     return str(root)

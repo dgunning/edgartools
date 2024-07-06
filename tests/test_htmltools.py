@@ -7,7 +7,7 @@ from edgar import Filing
 from edgar.company_reports import EightK
 from edgar.datatools import table_html_to_dataframe
 from edgar.htmltools import (
-    html_to_text, html_sections, ChunkedDocument)
+    html_to_text, html_sections, ChunkedDocument,)
 
 pd.options.display.max_columns = 12
 pd.options.display.max_colwidth = 100
@@ -147,8 +147,5 @@ def test_html_text_works_with_no_failures():
     assert filing.text()
 
 
-def test_strip_xbrl_tags_from_filing_text():
-    filing = Filing(company='NexPoint Capital, Inc.', cik=1588272, form='8-K', filing_date='2023-12-20',
-                    accession_no='0001193125-23-300021')
-    text = filing.text()
-    print(text)
+
+

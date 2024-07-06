@@ -1116,10 +1116,10 @@ class Filing:
         html = self.html()
         if html:
             clean_html = get_clean_html(html)
-            return html_to_markdown(clean_html)
-        else:
-            text_content = self.text()
-            return text_to_markdown(text_content)
+            if clean_html:
+                return html_to_markdown(clean_html)
+        text_content = self.text()
+        return text_to_markdown(text_content)
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""

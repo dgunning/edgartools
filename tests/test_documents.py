@@ -601,8 +601,17 @@ def test_parse_html_with_funny_character():
     chunked_document:ChunkedDocument = tenk.chunked_document
 
     item_1a_chunks = list(chunked_document.chunks_for_item("Item 1A"))
-    #print(item_1a_chunks)
     blocks = item_1a_chunks[6]
     result = repr(blocks[0])
     assert result
+
+def test_get_clean_html_from_unusual_filing():
+    filing =  Filing(form='NSAR-B', filing_date='2016-12-29', company='Thrivent Cash Management Trust', cik=1300087,
+                     accession_no='0001193125-16-805810')
+    html = filing.html()
+    clean_html = get_clean_html(html)
+    assert not clean_html
+    markdown = filing.markdown()
+    assert markdown
+
 
