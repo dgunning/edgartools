@@ -329,7 +329,9 @@ class FilingXbrl:
         return period_counts[['start_date', 'end_date', 'period_type']]
 
     @lru_cache(maxsize=1)
-    def get_facts_by_periods(self, fiscal_periods_only: bool = True) -> pd.DataFrame:
+    def get_facts_by_periods(self,
+                             fiscal_periods_only: bool = True,
+                             dimensions:Optional[Dict[str,str]]=None) -> pd.DataFrame:
         """
         Get the facts for with the values listed per fiscal period end.
         This method filters the facts data for the specified periods and
@@ -352,6 +354,9 @@ class FilingXbrl:
             fiscal_periods = self.get_fiscal_periods(self.fiscal_period_focus)[['start_date', 'end_date']]
             fiscal_end_dates = sorted(set(fiscal_periods.end_date.to_list()), reverse=True)
             facts = facts.merge(fiscal_periods, on=['start_date', 'end_date'], how='inner')
+
+        if not dimensions:
+            facts = facts.query("dimensions.isnull()")
 
         # Using 'end_date' as columns to display data based on the period's end date
         facts_by_period = facts.pivot_table(

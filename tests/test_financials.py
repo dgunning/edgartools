@@ -186,3 +186,9 @@ def test_correct_parsing_of_apple_2016_financials():
     financials:Financials = tenk.financials
     income_statement:IncomeStatement = tenk.income_statement
     print(income_statement)
+
+def test_quarterly_financials_have_correct_numbers():
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-Q', filing_date='2020-07-31', accession_no='0000320193-20-000062')
+    tenq = filing.obj()
+    financials = tenq.financials
+    income_statement = financials.income_statement

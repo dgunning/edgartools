@@ -201,14 +201,14 @@ def test_get_facts_by_periods_nflx():
     assert 'CashAndCashEquivalentsAtCarryingValue' in period_facts.index
 
 
-def test_get_fiscal_period_fact_for_apple_2016():
-    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2016-10-26',
-                    accession_no='0001628280-16-020309')
-    xbrl: FilingXbrl = filing.xbrl()
-    fiscal_periods = xbrl.get_fiscal_periods()
-    facts_by_periods = xbrl.get_facts_by_periods()
-    # print(facts_by_periods)
+def test_get_facts_by_period_apple_quarterly_financials():
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-Q', filing_date='2020-07-31', accession_no='0000320193-20-000062')
+    xbrl = filing.xbrl()
 
-    # fiscal_period_facts = xbrl.get_fiscal_period_facts(fact_names=['SalesRevenueNet'])
+    period_facts = xbrl.get_facts_by_periods()
+    assert 'RevenueFromContractWithCustomerExcludingAssessedTax' in period_facts.index
+    assert not 'Revenues' in period_facts.index
 
-    # print(fiscal_period_facts)
+
+
+
