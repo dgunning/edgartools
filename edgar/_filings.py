@@ -36,7 +36,7 @@ from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
-from edgar.attachments import FilingHomepage, Attachment, Attachments
+from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.core import (log, display_size, sec_edgar,
                         filter_by_date, filter_by_form, InvalidDateException, IntString, DataPager)
@@ -1134,6 +1134,12 @@ class Filing:
         if xbrl_document:
             xbrl_text = xbrl_document.download()
             return FilingXbrl.parse(str(xbrl_text))
+
+    def serve(self, port: int = 8000) -> AttachmentServer:
+        """Serve the filings on a local server
+        port: The port to serve the filings on
+        """
+        return self.attachments.serve(port=port)
 
     def save(self, directory_or_file: PathLike):
         """Save the filing to a directory path or a file using pickle.dump

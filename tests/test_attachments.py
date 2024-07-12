@@ -1,11 +1,12 @@
 import tempfile
 from pathlib import Path
+import httpx
 
 import pytest
 from rich import print
 
 from edgar import Filing
-from edgar.attachments import Attachment, Attachments
+from edgar.attachments import Attachment, Attachments, AttachmentServer
 from edgar.httprequests import download_file
 
 
@@ -146,3 +147,4 @@ def test_list_graphics():
     assert len(graphics) == 2
     assert graphics[0].document_type == 'GRAPHIC'
     assert graphics[1].document_type == 'GRAPHIC'
+

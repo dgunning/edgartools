@@ -1,9 +1,16 @@
+import http.server
 import os
 import re
+import signal
+import socketserver
+import tempfile
+import time
 import webbrowser
+import zipfile
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional
+from threading import Thread
+from typing import List, Optional, Tuple
 from typing import Union
 
 from bs4 import BeautifulSoup
@@ -14,7 +21,6 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
-import zipfile
 
 from edgar._rich import repr_rich
 from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extensions
@@ -22,7 +28,7 @@ from edgar.httprequests import get_with_retry, download_file, download_file_asyn
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
 
-__all__ = ['Attachment', 'Attachments', 'FilingHomepage', 'FilerInfo', 'sec_document_url']
+__all__ = ['Attachment', 'Attachments', 'FilingHomepage', 'FilerInfo', 'AttachmentServer', 'sec_document_url']
 
 
 def sec_document_url(attachment_url: str) -> str:
@@ -283,6 +289,53 @@ class Attachments:
             else:
                 raise ValueError("Path must be a directory or an archive file")
 
+    def serve(self, port: int = 8000) -> Tuple[Thread, socketserver.TCPServer, str]:
+        """
+        Serve the attachment on a local server
+        The server can be stopped using CTRL-C
+        port: int (default 8000) - The port to serve the attachment
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            self.download(temp_path)
+
+            class Handler(http.server.SimpleHTTPRequestHandler):
+                def __init__(self, *args, **kwargs):
+                    super().__init__(*args, directory=temp_dir, **kwargs)
+
+            primary_html = os.path.basename(self.primary_html_document.path)
+
+            url = f'http://localhost:{port}/{primary_html}'
+
+            httpd = socketserver.TCPServer(("", port), Handler)
+
+            def serve_forever():
+                with httpd:
+                    httpd.serve_forever()
+
+            thread = Thread(target=serve_forever)
+            thread.daemon = True
+            thread.start()
+
+            print(f"Serving at port {port}")
+            # Wait for the server to start
+            time.sleep(1)
+
+            def signal_handler(sig, frame):
+                print("Stopping server...")
+                httpd.shutdown()
+                thread.join()
+                print("Server stopped.")
+
+            signal.signal(signal.SIGINT, signal_handler)
+            webbrowser.open(url)
+
+            # Keep the main thread alive to handle signals
+            while thread.is_alive():
+                time.sleep(0.1)
+
+            return thread, httpd, url
+
     def __len__(self):
         return len(self._attachments)
 
@@ -392,6 +445,60 @@ class Attachments:
             data_files = None
 
         return cls(document_files, data_files, primary_documents)
+
+
+class AttachmentServer:
+    def __init__(self, attachments: Attachments, port: int = 8000):
+        self.attachments = attachments
+        self.port = port
+        self.thread = None
+        self.httpd = None
+        self.url = None
+        self.setup()
+
+    def setup(self):
+        temp_dir = tempfile.TemporaryDirectory()
+        temp_path = Path(temp_dir.name)
+        self.attachments.download(temp_path)
+
+        class Handler(http.server.SimpleHTTPRequestHandler):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, directory=temp_dir.name, **kwargs)
+
+        primary_html = os.path.basename(self.primary_html_document.path)
+
+        self.url = f'http://localhost:{self.port}/{primary_html}'
+
+        self.httpd = socketserver.TCPServer(("", self.port), Handler)
+
+        def serve_forever():
+            with self.httpd:
+                self.httpd.serve_forever()
+
+        self.thread = Thread(target=serve_forever)
+        self.thread.daemon = True
+
+        signal.signal(signal.SIGINT, self.signal_handler)
+
+    def start(self):
+        self.thread.start()
+        print(f"Serving at port {self.port}")
+        webbrowser.open(self.url)
+
+        # Keep the main thread alive to handle signals
+        while self.thread.is_alive():
+            time.sleep(0.1)
+
+    def stop(self):
+        print("Stopping server...")
+        self.httpd.shutdown()
+        self.thread.join()
+        print("Server stopped.")
+
+    def signal_handler(self, sig, frame):
+        self.stop()
+        exit(0)  # Ensure the program exits
+
 
 
 class FilingHomepage:
