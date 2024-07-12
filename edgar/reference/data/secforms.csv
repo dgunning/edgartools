@@ -174,8 +174,8 @@ N-14,Initial registration statement by open-end funds for business combinations
 N-14MEF,Additional securities registered by closed-end funds
 N-18F1,Election of terms for future filings
 N-1A,Initial registration statement for open-end funds
-N-2,Closed-end funds registration
-N-2ASR,Closed-end funds automatic registration
+N-2,Closed-end fund registration
+N-2ASR,Closed-end fund automatic registration
 N-2 POSASR,Amendment to N-2ASR registration
 N-23C-2,Notice of closed-end fund's intention to call or redeem securities
 N-23C3A,Closed-end fund periodic repurchase offer notice
@@ -272,11 +272,11 @@ SBSE-C,Certifications for security-based swap dealer/major participant registrat
 SBSE-W,Request to withdraw registration as security-based swap dealer/major participant
 SBSE-DISPUTE NOTICE,Notice of valuation dispute by a security-based swap entity
 SBSE-CCO-RPT,Annual compliance report for security-based swap dealers and major participants
-SC 13D,Disclosure of beneficial ownership over 5% (HTML/ASCII)
+SC 13D,Ownership for control disclosure
 SCHEDULE 13D,Disclosure of beneficial ownership over 5% (XML)
 SC 13E1,Issuer statement for going private transactions
 SC 13E3,Schedule for going private transactions
-SC 13G,Disclosure of beneficial ownership by passive investors and institutions (HTML/ASCII)
+SC 13G,Beneficial ownership
 SCHEDULE 13G,Disclosure of beneficial ownership by passive investors and institutions (XML)
 SC 14D9,Solicitation/recommendation statement for third-party tender offers
 SC 14F1,Statement for changes to majority of directors
@@ -285,17 +285,17 @@ SC 14N-S,Solicitation relating to Rule 14a-11 nominating groups
 SC TO-C,Written communication relating to tender offers
 SC TO-I,Issuer tender offer statement
 SC TO-T,Third party tender offer statement
-SC13E4F,Foreign issuer tender offer statement under Rule 13(e)(4)
-SC14D1F,Third party tender offer statement by foreign issuers under
+SC13E4F,Foreign issuer tender
+SC14D1F,3rd party tender offer by foreign issuer
 SC14D9C,Subject company communication relating to third-party tender offer
 SC14D9F,Solicitation/recommendation statement by foreign issuers for third-party tender offers
 SD,Specialized disclosure report on conflict minerals or resource extraction payments
 SDR,Registration for security-based swap data repositories
 SDR-CCO,Compliance and financial reports for security-based swap data repositories
 SDR-W,Withdrawal from registration as security-based swap data repository
-SF-1,General registration statement for asset-backed securities offerings
+SF-1,Asset-backed securities registration
 SF-1MEF,Registration statement filed relating to prior Form SF-1
-SF-3,Shelf registration statement for asset-backed securities offerings
+SF-3,Asset-backed securities shelf offerings
 SF-3MEF,Registration statement filed relating to prior Form SF-3
 SH-ER,Weekly entries report by institutional investment managers
 SH-NT,Weekly notice report by institutional investment managers
