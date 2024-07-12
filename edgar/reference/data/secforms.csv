@@ -26,18 +26,18 @@ Form,Description
 15-12G,Securities registration termination
 15-15D,Suspension of reporting obligations
 15F-12B,Foreign private issuer equity securities termination
-15F-12G,Foreign private issuer securities registration termination
+15F-12G,Securities registration termination by foreign private issuer
 15F-15D,Foreign private issuer reporting suspension
 17HACON,Confidential annual broker-dealer report
 17HQCON,Confidential quarterly broker-dealer report
-18-12B,Registration of foreign governments
-18-12G,Registration of securities by foreign political subdivisions
-18-K,Annual report for foreign governments and political subdivisions
-20-F,Annual and transition report for foreign private issuers
+18-12B,Securities registration by foreign governments
+18-12G,Securities registration by foreign governments
+18-K,Annual report for foreign governments
+20-F,Annual report for foreign companies
 20FR12B,Foreign private issuer securities registration
 20FR12G,Foreign private issuer securities registration
 24F-2NT,Rule 24F-2 notice for investment companies
-25,Notice of securities delisting
+25,Securities delisting
 25-NSE,Notice of matured/redeemed/retired securities by exchanges
 3,Initial statement of beneficial ownership
 305B2,Application for new trustee
@@ -52,18 +52,18 @@ Form,Description
 40-8B25,Investment company report or document
 40-8F-2,Application for deregistration by investment companies
 40-APP,Applications under Investment Company/Advisers Acts
-40-F,Annual report for certain Canadian issuers
+40-F,Annual report (Canadian)
 40FR12B,Securities registration by certain Canadian issuers
 40FR12G,Securities registration by certain Canadian issuers
 40-OIP,Applications under Investment Company/Advisers Acts reviewed by insurance office
 424A,Prospectus outlining the details of securities offered by a company
-424B1,Detailed prospectus provided at the start of a public offering
-424B2,Updated prospectus with final terms of the securities offered
-424B3,Revised prospectus with significant changes to previously shared information
-424B4,Final prospectus issued after the securities have been priced
-424B5,Prospectus that includes a term sheet summarizing key security terms
-424B7,Prospectus for offering additional securities not included initially
-424B8,"Final prospectus for smaller, straightforward offerings"
+424B1,Initial primary offering
+424B2,Primary offering prospectus
+424B3,Prospectus supplement
+424B4,Prospectus supplement with pricing
+424B5,Supplement to primary offering
+424B7,Prospectus with material changes
+424B8,Final prospectus changes
 424H,Preliminary prospectus
 425,Prospectus in business combination transactions
 424I,Prospectus filed under Rule 424(i)(1)
@@ -74,12 +74,12 @@ Form,Description
 486BPOS,Post-effective amendment
 486BXT,Amendment to designate new effective date
 487,Pre-effective pricing amendment under Rule 487
-497,Definitive materials for fund prospectuses
+497,Fund prospectus
 497AD,Rule 482 ads filed under Rule 497
 497H2,Filings under Rule 497(h)(2)
-497J,Certification of no changes to prior prospectus
-497K,Summary prospectus for open-end funds
-497VPI,Initial summary prospectus for variable contracts
+497J,Certification of no changes to prospectus
+497K,Summary fund prospectus
+497VPI,Variable contracts summary prospectus
 497VPSUB,Substitution-related supplement for variable contracts
 497VPU,Updated summary prospectus for variable contracts
 5,Annual statement of beneficial ownership changes
@@ -119,7 +119,7 @@ CB,Notice for certain foreign issuer transactions
 CERT,Exchange certification of listing approval
 CFPORTAL,Funding portal registration application
 CFPORTAL-W,Withdrawal of funding portal registration
-CORRESP,General correspondence document
+CORRESP,Correspondence with the SEC
 D,Notice of exempt Regulation D offering
 DEF 14A,Definitive proxy statement
 DEF 14C,Definitive information statement
@@ -145,21 +145,21 @@ F-10,Securities registration by certain Canadian issuers
 F-10EF,Auto-effective registration by certain Canadian issuers
 F-10POS,Amendment to F-10EF registration
 F-1MEF,Additional securities registered to prior F-1
-F-3,Securities registration for specified transactions by foreign private issuers
-F-3ASR,Automatic shelf registration by well-known seasoned foreign issuers
-F-3D,Securities registration for dividend reinvestment plans by foreign private issuers
+F-3,Foreign private securities registration
+F-3ASR,Foreign private securities registration
+F-3D,Foreign private securities registration
 F-3DPOS,Amendment to F-3D registration
 F-3MEF,Additional securities registered to prior F-3
-F-4,Securities registration for business combinations by foreign private issuers
+F-4,Business combination for foreign issuers
 F-4MEF,Additional securities registered to prior F-4
 F-6 POS,Amendment to F-6EF registration
-F-6,Securities registration for depositary receipts by foreign private issuers
-F-6EF,Auto-effective registration for depositary receipts by foreign private issuers
-F-7 POS,Amendment to F-7 registration
-F-7,Securities registration for rights offerings by certain Canadian issuers
+F-6,Depositary receipts by foreign private issuers
+F-6EF,Depositary receipts by foreign private issuers
+F-7 POS,Amended F-7 registration
+F-7,Canadian rights offerings
 F-8 POS,Amendment to F-8 registration
-F-8,Securities registration for business combinations by certain Canadian issuers
-F-80,Securities registration for business combinations by certain Canadian issuers
+F-8,Canadian business combination
+F-80,Canadian business combination
 F-80POS,Amendment to F-80 registration
 F-N,Appointment of agent for service by foreign institutions
 FWP,Filing of free writing prospectuses
@@ -174,8 +174,8 @@ N-14,Initial registration statement by open-end funds for business combinations
 N-14MEF,Additional securities registered by closed-end funds
 N-18F1,Election of terms for future filings
 N-1A,Initial registration statement for open-end funds
-N-2,Initial registration statement for closed-end funds
-N-2ASR,Automatic shelf registration for well-known seasoned closed-end funds
+N-2,Closed-end funds registration
+N-2ASR,Closed-end funds automatic registration
 N-2 POSASR,Amendment to N-2ASR registration
 N-23C-2,Notice of closed-end fund's intention to call or redeem securities
 N-23C3A,Closed-end fund periodic repurchase offer notice
@@ -241,29 +241,29 @@ PREN14A,Preliminary proxy statement filed by non-management
 PRER14A,Preliminary revised proxy materials
 PRER14C,Preliminary revised information statements
 PRRN14A,Revised preliminary proxy statement filed by non-management
-PX14A6G,Notice of exempt solicitation
-PX14A6N,Notice of exempt solicitation relating to proposed roll-up transaction
-QRTLYRPT,Quarterly report by development banks
-RW,Request for withdrawal of registration statement
-RW WD,Withdrawal of request for withdrawal of registration statement
-S-1,Registration of Securities
-S-11,Registration of Securities for Real Estate
+PX14A6G,Exempt solicitation
+PX14A6N,Exempt solicitation for roll-up transaction
+QRTLYRPT,Development banks quarterly report
+RW,Registration withdrawal
+RW WD,Withdrawal of registration withdrawal
+S-1,Securities registration
+S-11,Real estate securities registration
 S-11MEF,Registration statement filed relating to prior Form S-11
 S-1MEF,Registration statement filed relating to prior Form S-1
-S-20,Registration statement for standardized options
-S-3,Simplified registration statement for securities offerings
-S-3ASR,Automatic shelf registration statement for well-known seasoned issuers
+S-20,Standardized options registration
+S-3,Simplified securities registration
+S-3ASR,Automatic shelf registration
 S-3D,Automatically securities registration for dividend reinvestment plans
 S-3DPOS,Post-effective amendment to Form S-3D
 S-3MEF,Registration statement filed relating to prior Form S-3
 S-4 POS,Post-effective amendment to Form S-4
-S-4,Registration statement for securities issued in business acquisitions
-S-4EF,Auto-effective registration statement for bank/savings & loan holding company formations
+S-4,Business acquisitions registration
+S-4EF,Bank/S&L loan registration
 S-4MEF,Registration statement filed relating to prior Form S-4
 S-6,Initial registration statement for unit investment trusts
-S-8,Registration statement for securities offered to employees
+S-8,Registration of securities for employees
 S-8 POS,Post-effective amendment to Form S-8
-S-B,Registration statement for securities of foreign governments
+S-B,Registration of securities for foreign governments
 S-BMEF,Registration statement filed relating to prior Form S-B
 SBSE,Application for registration as a security-based swap dealer or major participant
 SBSE-A,Abbreviated application for SEC-registered swap entities also registered with CFTC
@@ -307,6 +307,6 @@ T-6,Application for foreign entity to act as institutional trustee
 TA-1,Initial application for transfer agent registration
 TA-2,Annual report by registered transfer agents
 TA-W,Notice of withdrawal from transfer agent registration
-UPLOAD,Submission of documents in connection with a filing
+UPLOAD,Submission of documents
 UNDER,Initial undertaking to file reports
 X-17A-5,Reports required of brokers and dealers
