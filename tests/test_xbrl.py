@@ -4,7 +4,7 @@ import pandas as pd
 from rich import print
 
 from edgar import Filing
-from edgar._xbrl import FilingXbrl, XbrlFacts, get_period
+from edgar.xbrl import FilingXbrl, XbrlFacts, get_period
 
 pd.options.display.max_columns = 10
 

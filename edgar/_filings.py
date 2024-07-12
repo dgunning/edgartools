@@ -34,19 +34,19 @@ from rich.text import Text
 from edgar._markdown import html_to_markdown, text_to_markdown
 from edgar._party import Address
 from edgar._rich import df_to_rich_table, repr_rich
-from edgar._xbrl import FilingXbrl
 from edgar._xml import child_text
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
-from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.core import (log, display_size, sec_edgar,
                         filter_by_date, filter_by_form, InvalidDateException, IntString, DataPager)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
+from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
+from edgar.xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
 

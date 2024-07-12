@@ -2,9 +2,9 @@ import pandas as pd
 from rich import print
 
 from edgar import *
-from edgar._xbrl import FilingXbrl
 from edgar.company_reports import TenK
 from edgar.financials import Financials, format_currency, IncomeStatement
+from edgar.xbrl import FilingXbrl
 
 pd.options.display.max_colwidth = 50
 pd.options.display.max_columns = 10

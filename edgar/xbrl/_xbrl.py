@@ -28,7 +28,9 @@ See https://specifications.xbrl.org/presentation.html
 
 __all__ = [
     'FilingXbrl',
-    'NamespaceInfo'
+    'NamespaceInfo',
+    'XbrlFacts',
+    'get_period'
 ]
 
 
