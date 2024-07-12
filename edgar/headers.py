@@ -3,8 +3,7 @@ from typing import List, Optional, Dict, Any
 
 import orjson as json
 import pandas as pd
-from bs4 import BeautifulSoup
-from bs4 import Comment
+from bs4 import BeautifulSoup, Comment, Tag
 from pydantic import BaseModel
 from rich import box
 from rich.console import Group
@@ -258,8 +257,14 @@ class IndexHeaders(BaseModel):
 
     @classmethod
     def load(cls, header_text: str):
+        """
+        Load the IndexHeaders from the HTML file content.
+        """
         soup = BeautifulSoup(header_text, 'html.parser')
+
+        # The SEC-HEADER tag contains the filing header information
         header_text = soup.find_all(string=lambda text: isinstance(text, Comment))[0].strip()
+
 
         lines = header_text.strip().split("\n")
         data: Dict[str, Any] = {}
@@ -436,7 +441,7 @@ class IndexHeaders(BaseModel):
             items = [items]
 
         # Convert acceptance_datetime to datetime object
-        acceptance_datetime_str = data.pop("acceptance_datetime", None)
+        acceptance_datetime_str = data.pop("acceptance_datetime")
         acceptance_datetime = datetime.strptime(acceptance_datetime_str,
                                                 '%Y%m%d%H%M%S') if acceptance_datetime_str else None
 
@@ -466,8 +471,20 @@ class IndexHeaders(BaseModel):
             "issuer": issuer
         }
 
+        # The <PRE> block contains the HTML for the documents
+        #documents = IndexHeaders._extract_documents_from_pre(soup.find("pre"))
+
         # Initialize IndexHeaders with the parsed data
         return cls(**sec_header_data)
+
+    @staticmethod
+    def _extract_documents_from_pre(pre_tag:Tag):
+        soup = BeautifulSoup(pre_tag.text)
+        document_tags = soup.find_all("document")
+        for document_tag in document_tags:
+            type_tag = document_tag.find("type")
+            print(type_tag)
+
 
     @staticmethod
     def _extract_comment_text(soup):
