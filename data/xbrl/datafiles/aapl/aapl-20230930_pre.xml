@@ -3,7 +3,10 @@
 <!--XBRL Document Created with the Workiva Platform-->
 <!--Copyright 2023 Workiva-->
 <!--r:c68c2fd8-345e-4faa-8610-8b173d5da094,g:843081e3-ad04-4f75-a78c-e87ea3423788-->
-<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
+<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase"
+               xmlns:xlink="http://www.w3.org/1999/xlink"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
   <link:roleRef roleURI="http://www.apple.com/role/CoverPage" xlink:type="simple" xlink:href="aapl-20230930.xsd#CoverPage"/>
   <link:presentationLink xlink:role="http://www.apple.com/role/CoverPage" xlink:type="extended">
     <link:loc xlink:type="locator" xlink:label="loc_dei_CoverAbstract_5924fd51-9e81-4940-ae99-0391a9af9c03" xlink:href="https://xbrl.sec.gov/dei/2023/dei-2023.xsd#dei_CoverAbstract"/>
