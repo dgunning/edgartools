@@ -17,7 +17,7 @@ from edgar.core import sec_dot_gov, display_size
 from edgar.httprequests import download_file
 from edgar.reference import describe_form
 
-__all__ = ['FilingDirectory', 'IndexHeaders']
+__all__ = ['FilingDirectory', 'IndexHeaders', 'ReportingOwner', 'CompanyData', 'FilingValues', 'FormerCompany']
 
 
 class FilingDirectory:
