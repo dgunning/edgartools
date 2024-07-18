@@ -202,13 +202,10 @@ def test_get_facts_by_periods_nflx():
 
 
 def test_get_facts_by_period_apple_quarterly_financials():
-    filing = Filing(company='Apple Inc.', cik=320193, form='10-Q', filing_date='2020-07-31', accession_no='0000320193-20-000062')
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-Q', filing_date='2020-07-31',
+                    accession_no='0000320193-20-000062')
     xbrl = filing.xbrl()
 
     period_facts = xbrl.get_facts_by_periods()
     assert 'RevenueFromContractWithCustomerExcludingAssessedTax' in period_facts.index
     assert not 'Revenues' in period_facts.index
-
-
-
-
