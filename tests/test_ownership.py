@@ -1,11 +1,13 @@
-from pathlib import Path
-import pandas as pd
-from rich import print
 from decimal import Decimal
-from edgar.ownership import *
-from edgar.ownership import compute_average_price, compute_total_value, format_amount, is_numeric
-from edgar._filings import Filing
+from pathlib import Path
+
+import pandas as pd
 from bs4 import BeautifulSoup
+from rich import print
+
+from edgar._filings import Filing
+from edgar.ownership import *
+from edgar.ownership.form345 import compute_average_price, compute_total_value, format_amount, is_numeric
 
 pd.options.display.max_columns = None
 
@@ -14,6 +16,7 @@ snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').re
 snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
 aapl_form4: Ownership = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
                                accession_no='0000320193-23-000089').obj()
+
 
 def test_is_numeric():
     # Test that these pandas series are numeric
@@ -25,10 +28,10 @@ def test_is_numeric():
     assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'nan']))
     assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'NAN']))
 
+
 def test_translate():
     assert translate_ownership('I') == 'Indirect'
     assert translate_ownership('D') == 'Direct'
-
 
 
 def test_derivative_table_repr():
@@ -37,10 +40,10 @@ def test_derivative_table_repr():
     print()
     print(ownership)
     print()
-    #print(snow_form4.derivative_table.transactions)
-    #print(ownership.derivative_table.holdings)
-    #print(ownership.derivative_table.transactions)
-    #print(ownership.derivative_table)
+    # print(snow_form4.derivative_table.transactions)
+    # print(ownership.derivative_table.holdings)
+    # print(ownership.derivative_table.transactions)
+    # print(ownership.derivative_table)
 
 
 def test_non_derivatives_repr():
@@ -136,8 +139,9 @@ def test_parse_form3_with_non_derivatives():
 
     # Signatures
     assert len(ownership.signatures) == 1
-    assert ownership.signatures.signatures[0].signature == ("/s/ Warren E. Buffett, on behalf of himself and each other "
-                                                 "reporting person hereunder")
+    assert ownership.signatures.signatures[0].signature == (
+        "/s/ Warren E. Buffett, on behalf of himself and each other "
+        "reporting person hereunder")
 
 
 def test_reporting_relationship():
@@ -256,10 +260,12 @@ def test_parse_form5():
 
 
 def test_ownership_transaction_with_non_numeric_price():
-    filing = Filing(form='4', filing_date='2024-01-30', company='Adams Diane', cik=1475901, accession_no='0001209191-24-002430')
-    form4:Form4 = filing.obj()
+    filing = Filing(form='4', filing_date='2024-01-30', company='Adams Diane', cik=1475901,
+                    accession_no='0001209191-24-002430')
+    form4: Form4 = filing.obj()
     print()
     print(form4)
+
 
 def test_ownership_from_filing_xml_document():
     filing = Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
@@ -297,8 +303,8 @@ def test_ownership_from_filing_xml_document():
 
     print()
 
-    #print(ownership_document.derivative_table)
-    #print(ownership_document.non_derivative_table)
+    # print(ownership_document.derivative_table)
+    # print(ownership_document.non_derivative_table)
 
     holding = form3.non_derivative_table.holdings[0]
     assert holding.security == 'Common Stock'
@@ -349,7 +355,7 @@ def test_form3_shows_holdings(capsys):
 def test_form5_common_transactions():
     filing = Filing(form='5', filing_date='2023-10-18', company='COSTCO WHOLESALE CORP /NEW', cik=909832,
                     accession_no='0001209191-23-053139')
-    ownership:Form5 = filing.obj()
+    ownership: Form5 = filing.obj()
     assert ownership.form == '5'
 
     print()
@@ -441,7 +447,7 @@ def test_derivative_disposed_and_acquired():
 def test_form4_derivative_trades_include_exercised():
     filing = Filing(form='4', filing_date='2023-10-25', company='AAON, INC.', cik=824142,
                     accession_no='0000824142-23-000163')
-    form4:Form4 = filing.obj()
+    form4: Form4 = filing.obj()
     print()
     print(form4)
     assert form4.issuer.name == 'AAON, INC.'
