@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xbrl
+  xml:lang="en-US"
+  xmlns="http://www.xbrl.org/2003/instance"
+  xmlns:dei="http://xbrl.sec.gov/dei/2023"
+  xmlns:link="http://www.xbrl.org/2003/linkbase"
+  xmlns:t="http://att.com/20240506"
+  xmlns:us-gaap="http://fasb.org/us-gaap/2023"
+  xmlns:xbrldi="http://xbrl.org/2006/xbrldi"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+    <link:schemaRef xlink:href="t-20240506.xsd" xlink:type="simple"/>
+    <context id="c-1">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-2">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-3">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">us-gaap:SeriesAPreferredStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-4">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">us-gaap:SeriesCPreferredStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-5">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTIncFloatingRateGlobalNotesDueMarch62025Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-6">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc3550GlobalNotesDueNovember182025Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-7">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc3500GlobalNotesDueDecember172025Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-8">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc0250GlobalNotesDueMarch42026Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-9">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc1800GlobalNotesDueSeptember52026Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-10">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc2900GlobalNotesDueDecember42026Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-11">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc1600GlobalNotesDueMay192028Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-12">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc2350GlobalNotesDueSeptember52029Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-13">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc4375GlobalNotesDueSeptember142029Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-14">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc2600GlobalNotesDueDecember172029Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-15">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc0800GlobalNotesDueMarch42030Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-16">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc3950GlobalNotesDueApril302031Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-17">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc2050GlobalNotesDueMay192032Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-18">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc3550GlobalNotesDueDecember172032Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-19">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc5200GlobalNotesDueNovember182033Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-20">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc3375GlobalNotesDueMarch152034Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-21">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc4300GlobalNotesDueNovember182034Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-22">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc2450GlobalNotesDueMarch152035Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-23">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc3150GlobalNotesDueSeptember42036Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-24">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc2600GlobalNotesDueMay192038Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-25">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc1800GlobalNotesDueSeptember142039Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-26">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc7000GlobalNotesDueApril302040Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-27">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc4250GlobalNotesDueJune12043Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-28">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc4875GlobalNotesDueJune12044Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-29">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc4000GlobalNotesDueJune12049Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc4250GlobalNotesDueMarch12050Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc3750GlobalNotesDueSeptember12050Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-32">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc5350GlobalNotesDueNovember12066Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <context id="c-33">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000732717</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">t:ATTInc5625GlobalNotesDueAugust12067Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-05-06</startDate>
+            <endDate>2024-05-06</endDate>
+        </period>
+    </context>
+    <dei:EntityCentralIndexKey contextRef="c-1" id="f-114">0000732717</dei:EntityCentralIndexKey>
+    <dei:AmendmentFlag contextRef="c-1" id="f-115">false</dei:AmendmentFlag>
+    <dei:DocumentType contextRef="c-1" id="f-1">8-K</dei:DocumentType>
+    <dei:DocumentPeriodEndDate contextRef="c-1" id="f-2">2024-05-06</dei:DocumentPeriodEndDate>
+    <dei:EntityRegistrantName contextRef="c-1" id="f-3">AT&amp;T INC.</dei:EntityRegistrantName>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-1" id="f-4">DE</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityFileNumber contextRef="c-1" id="f-5">001-08610</dei:EntityFileNumber>
+    <dei:EntityTaxIdentificationNumber contextRef="c-1" id="f-6">43-1301883</dei:EntityTaxIdentificationNumber>
+    <dei:EntityAddressAddressLine1 contextRef="c-1" id="f-7">208 S. Akard St.</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-1" id="f-8">Dallas</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-1" id="f-9">TX</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-1" id="f-10">75202</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-1" id="f-11">210</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-1" id="f-12">821-4105</dei:LocalPhoneNumber>
+    <dei:WrittenCommunications contextRef="c-1" id="f-13">false</dei:WrittenCommunications>
+    <dei:SolicitingMaterial contextRef="c-1" id="f-14">false</dei:SolicitingMaterial>
+    <dei:PreCommencementTenderOffer contextRef="c-1" id="f-15">false</dei:PreCommencementTenderOffer>
+    <dei:PreCommencementIssuerTenderOffer contextRef="c-1" id="f-16">false</dei:PreCommencementIssuerTenderOffer>
+    <dei:Security12bTitle contextRef="c-2" id="f-17">Common Shares (Par Value $1.00 Per Share)</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-2" id="f-18">T</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-2" id="f-19">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-3" id="f-20">Depositary Shares, each representing a 1/1000th interest in a share of 5.000% Perpetual Preferred Stock, Series A</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-3" id="f-21">T PRA</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-3" id="f-22">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-4" id="f-23">Depositary Shares, each representing a 1/1000th interest in a share of 4.750% Perpetual Preferred Stock, Series C</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-4" id="f-24">T PRC</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-4" id="f-25">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-5" id="f-26">AT&amp;T Inc. Floating Rate Global Notes due March 6, 2025</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-5" id="f-27">T 25A</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-5" id="f-28">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-6" id="f-29">AT&amp;T Inc. 3.550% Global Notes due November 18, 2025</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-6" id="f-30">T 25B</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-6" id="f-31">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-7" id="f-32">AT&amp;T Inc. 3.500% Global Notes due December 17, 2025</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-7" id="f-33">T 25</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-7" id="f-34">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-8" id="f-35">AT&amp;T Inc. 0.250% Global Notes due March 4, 2026</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-8" id="f-36">T 26E</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-8" id="f-37">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-9" id="f-38">AT&amp;T Inc. 1.800% Global Notes due September 5, 2026</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-9" id="f-39">T 26D</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-9" id="f-40">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-10" id="f-41">AT&amp;T Inc. 2.900% Global Notes due December 4, 2026</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-10" id="f-42">T 26A</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-10" id="f-43">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-11" id="f-44">AT&amp;T Inc. 1.600% Global Notes due May 19, 2028</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-11" id="f-45">T 28C</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-11" id="f-46">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-12" id="f-47">AT&amp;T Inc. 2.350% Global Notes due September 5, 2029</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-12" id="f-48">T 29D</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-12" id="f-49">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-13" id="f-50">AT&amp;T Inc. 4.375% Global Notes due September 14, 2029</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-13" id="f-51">T 29B</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-13" id="f-52">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-14" id="f-53">AT&amp;T Inc. 2.600% Global Notes due December 17, 2029</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-14" id="f-54">T 29A</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-14" id="f-55">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-15" id="f-56">AT&amp;T Inc. 0.800% Global Notes due March 4, 2030</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-15" id="f-57">T 30B</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-15" id="f-58">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-16" id="f-59">AT&amp;T Inc. 3.950% Global Notes due April 30, 2031</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-16" id="f-60">T 31F</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-16" id="f-61">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-17" id="f-62">AT&amp;T Inc. 2.050% Global Notes due May 19, 2032</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-17" id="f-63">T 32A</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-17" id="f-64">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-18" id="f-65">AT&amp;T Inc. 3.550% Global Notes due December 17, 2032</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-18" id="f-66">T 32</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-18" id="f-67">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-19" id="f-68">AT&amp;T Inc. 5.200% Global Notes due November 18, 2033</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-19" id="f-69">T 33</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-19" id="f-70">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-20" id="f-71">AT&amp;T Inc. 3.375% Global Notes due March 15, 2034</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-20" id="f-72">T 34</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-20" id="f-73">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-21" id="f-74">AT&amp;T Inc. 4.300% Global Notes due November 18, 2034</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-21" id="f-75">T 34C</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-21" id="f-76">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-22" id="f-77">AT&amp;T Inc. 2.450% Global Notes due March 15, 2035</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-22" id="f-78">T 35</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-22" id="f-79">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-23" id="f-80">AT&amp;T Inc. 3.150% Global Notes due September 4, 2036</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-23" id="f-81">T 36A</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-23" id="f-82">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-24" id="f-83">AT&amp;T Inc. 2.600% Global Notes due May 19, 2038</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-24" id="f-84">T 38C</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-24" id="f-85">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-25" id="f-86">AT&amp;T Inc. 1.800% Global Notes due September 14, 2039</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-25" id="f-87">T 39B</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-25" id="f-88">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-26" id="f-89">AT&amp;T Inc. 7.000% Global Notes due April 30, 2040</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-26" id="f-90">T 40</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-26" id="f-91">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-27" id="f-92">AT&amp;T Inc. 4.250% Global Notes due June 1, 2043</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-27" id="f-93">T 43</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-27" id="f-94">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-28" id="f-95">AT&amp;T Inc. 4.875% Global Notes due June 1, 2044</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-28" id="f-96">T 44</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-28" id="f-97">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-29" id="f-98">AT&amp;T Inc. 4.000% Global Notes due June 1, 2049</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-29" id="f-99">T 49A</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-29" id="f-100">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-30" id="f-101">AT&amp;T Inc. 4.250% Global Notes due March 1, 2050</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-30" id="f-102">T 50</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-30" id="f-103">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-31" id="f-104">AT&amp;T Inc. 3.750% Global Notes due September 1, 2050</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-31" id="f-105">T 50A</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-31" id="f-106">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-32" id="f-107">AT&amp;T Inc. 5.350% Global Notes due November 1, 2066</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-32" id="f-108">TBB</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-32" id="f-109">NYSE</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="c-33" id="f-110">AT&amp;T Inc. 5.625% Global Notes due August 1, 2067</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c-33" id="f-111">TBC</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c-33" id="f-112">NYSE</dei:SecurityExchangeName>
+    <dei:EntityEmergingGrowthCompany contextRef="c-1" id="f-113">false</dei:EntityEmergingGrowthCompany>
+</xbrl>
