@@ -8,7 +8,6 @@ The top level object is Ownership
 
 """
 from dataclasses import dataclass
-from decimal import Decimal
 from functools import lru_cache
 from typing import List, Dict, Tuple, Optional, Union
 
@@ -22,13 +21,13 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table, Column
 
-from edgar.datatools import convert_to_numeric
-
-from edgar.entities import Entity
 from edgar._party import Address
 from edgar._rich import repr_rich, df_to_rich_table
 from edgar._xml import (child_text, child_value)
 from edgar.core import IntString, get_bool, reverse_name, yes_no
+from edgar.datatools import convert_to_numeric
+from edgar.entities import Entity
+from edgar.ownership.form345 import compute_average_price, format_amount, format_currency
 
 __all__ = [
     'Owner',
@@ -72,23 +71,7 @@ def describe_ownership(direct_indirect: str, nature_of_ownership: str) -> str:
     return ""
 
 
-def format_currency(amount: Union[int, float]) -> str:
-    if amount is None or np.isnan(amount):
-        return ""
-    if isinstance(amount, (int, float)):
-        return f"${amount:,.2f}"
-    return str(amount)
 
-
-def format_amount(amount: Union[int, float]) -> str:
-    if amount is None:
-        return ""
-    if isinstance(amount, (int, float)):
-        # Can it be formatted as an integer?
-        if amount == int(amount):
-            return f"{amount:,.0f}"
-        return f"{amount:,.2f}"
-    return str(amount)
 
 
 def translate(value: str, translations: Dict[str, str]) -> str:
@@ -103,42 +86,10 @@ def translate_transaction_types(code: str) -> str:
     return translate(code, TransactionCode.TRANSACTION_TYPES)
 
 
-def is_numeric(series: pd.Series) -> bool:
-    if np.issubdtype(series.dtype, np.number):
-        return True
-    try:
-        series.astype(float)
-        return True
-    except ValueError:
-        return False
 
 
-def compute_average_price(shares: pd.Series, price: pd.Series) -> Decimal:
-    """
-    Compute the average price of the trades
-    :param shares: The number of shares as a series
-    :param price: The price per share as a series
-    :return:
-    """
-    if is_numeric(shares) and is_numeric(price):
-        shares = pd.to_numeric(shares)
-        price = pd.to_numeric(price)
-        value = (shares * price).sum() / shares.sum()
-        return Decimal(str(value)).quantize(Decimal('0.01'))
 
 
-def compute_total_value(shares: pd.Series, price: pd.Series) -> Decimal:
-    """
-    Compute the total value of the trades
-    :param shares: The number of shares as a series
-    :param price: The price per share as a series
-    :return:
-    """
-    if is_numeric(shares) and is_numeric(price):
-        shares = pd.to_numeric(shares)
-        price = pd.to_numeric(price)
-        value = (shares * price).sum()
-        return Decimal(str(value)).quantize(Decimal('0.01'))
 
 
 BUY_SELL = {'A': 'Buy', 'D': 'Sell'}
