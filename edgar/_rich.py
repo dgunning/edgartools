@@ -4,10 +4,13 @@ import pandas as pd
 import pyarrow as pa
 from rich import box
 from rich.table import Table
+from rich.text import Text
+import itertools
 
 __all__ = [
     'repr_rich',
-    'df_to_rich_table'
+    'df_to_rich_table',
+    'colorize_words'
 ]
 
 table_styles = {
@@ -100,3 +103,17 @@ def repr_rich(renderable) -> str:
         console.print(renderable)
     str_output = capture.get()
     return str_output
+
+
+def colorize_words(words, colors=None) -> Text:
+    """ Colorize a list of words with a list of colors"
+    """
+    colors = colors or ["deep_sky_blue3", "red3", "dark_sea_green4"]
+    colored_words = []
+    color_cycle = itertools.cycle(colors)
+
+    for word in words:
+        color = next(color_cycle)
+        colored_words.append((word, color))
+
+    return Text.assemble(*colored_words)
