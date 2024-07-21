@@ -7,6 +7,7 @@ from rich import print
 from edgar import Filing
 from edgar.xbrl.parser import (parse_labels, parse_calculation, parse_definitions, XBRLData, XbrlDocuments,
                                XBRLInstance, XBRLPresentation, FinancialStatement, Statements, StatementData)
+from edgar.xbrl.financials import Financials
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -76,6 +77,12 @@ def apple_xbrl():
 def netflix_xbrl():
     filing: Filing = Filing(company='NETFLIX INC', cik=1065280, form='10-Q', filing_date='2024-04-22',
                             accession_no='0001065280-24-000128')
+    return asyncio.run(XBRLData.from_filing(filing))
+
+
+@pytest.fixture(scope='module')
+def crowdstrike_xbrl():
+    filing = Filing(company='CrowdStrike Holdings, Inc.', cik=1535527, form='10-K', filing_date='2024-03-07', accession_no='0001535527-24-000007')
     return asyncio.run(XBRLData.from_filing(filing))
 
 def test_xbrl_instance_parsing(sample_instance):
@@ -229,10 +236,11 @@ def test_statements_property(apple_xbrl):
     assert len(statements) == 78
     assert 'CoverPage' in statements
 
-
 def test_10Q_filings_have_quarterly_dates(netflix_xbrl):
     balance_sheet: StatementData = netflix_xbrl.get_balance_sheet()
     assert balance_sheet.periods == ['Q1 2024', 'Q4 2023']
+    for name in netflix_xbrl.list_statements():
+        print(name)
 
 @pytest.mark.asyncio
 async def test_parse_xbrl_document_for_filing_with_embedded_linkbase():
@@ -250,5 +258,33 @@ async def test_parse_xbrl_document_for_filing_with_embedded_linkbase():
     print(xbrl_data.list_statements())
     assert len(xbrl_data.statements) == 98
     statement:StatementData = xbrl_data.get_statement('CoverPage')
+
+
+@pytest.mark.asyncio
+async def test_xbrl_financials_using_non_standard_filing_like_crowdstrike(crowdstrike_xbrl):
+    financials:Financials = Financials(crowdstrike_xbrl)
+
+    balance_sheet = financials.get_balance_sheet()
+    assert balance_sheet
+
+    comprehensive_income_statement = financials.get_statement_of_comprehensive_income()
+    assert comprehensive_income_statement
+
+    cashflow_statement = financials.get_cash_flow_statement()
+    assert cashflow_statement
+
+    equity_statement = financials.get_statement_of_changes_in_equity()
+    assert equity_statement
+
+    cover_page =  financials.get_cover_page()
+    assert cover_page
+
+    income_statement = financials.get_income_statement()
+    assert income_statement
+
+    for statement in crowdstrike_xbrl.list_statements():
+        print(statement)
+
+
 
 

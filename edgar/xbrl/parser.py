@@ -1,5 +1,6 @@
 import asyncio
 import re
+import xml.etree.ElementTree as ET
 from collections import defaultdict, OrderedDict
 from functools import cached_property
 from typing import Any, Optional
@@ -14,7 +15,6 @@ from rich.table import Table, Column
 from rich.text import Text
 from rich.tree import Tree
 
-import xml.etree.ElementTree as ET
 from edgar import Filing
 from edgar._rich import repr_rich, colorize_words
 from edgar.attachments import Attachment
@@ -46,10 +46,100 @@ To use this code, you would need to integrate it with the previously created par
 """
 
 
+class FinancialStatementMapper:
+    STANDARD_STATEMENTS = {
+        'BALANCE_SHEET': [
+            'CONSOLIDATEDBALANCESHEETS',
+            'CONSOLIDATEDBALANCESHEET',
+            'COMPREHENSIVEBALANCESHEETS',
+            'COMPREHENSIVEBALANCESHEET',
+            'BALANCESHEET',
+            'BALANCESHEETS',
+            'STATEMENTOFFINANCIALPOSITION',
+            'STATEMENTSOFFINANCIALPOSITION',
+            'CONSOLIDATEDSTATEMENTOFFINANCIALPOSITION',
+            'CONSOLIDATEDSTATEMENTSOFFINANCIALPOSITION'
+        ],
+        'INCOME_STATEMENT': [
+            'CONSOLIDATEDSTATEMENTSOFOPERATIONS',
+            'CONSOLIDATEDSTATEMENTOFOPERATIONS',
+            'STATEMENTSOFOPERATIONS',
+            'STATEMENTOFOPERATIONS',
+            'INCOMESTATEMENT',
+            'INCOMESTATEMENTS',
+            'CONSOLIDATEDINCOMESTATEMENT',
+            'CONSOLIDATEDINCOMESTATEMENTS',
+            'STATEMENTSOFINCOME',
+            'STATEMENTOFINCOME',
+            'CONSOLIDATEDSTATEMENTSOFINCOME',
+            'CONSOLIDATEDSTATEMENTOFINCOME',
+            'CONSOLIDATEDSTATEMENTSOFINCOMELOSS',
+            'CONSOLIDATEDSTATEMENTOFINCOMELOSS',
+            'STATEMENTSOFEARNINGS',
+            'STATEMENTOFEARNINGS',
+            'CONSOLIDATEDSTATEMENTSOFEARNINGS',
+            'CONSOLIDATEDSTATEMENTOFEARNINGS'
+        ],
+        'CASH_FLOW': [
+            'CONSOLIDATEDSTATEMENTSOFCASHFLOWS',
+            'CONSOLIDATEDSTATEMENTOFCASHFLOWS',
+            'STATEMENTOFCASHFLOWS',
+            'STATEMENTSOFCASHFLOWS',
+            'CASHFLOWSTATEMENT',
+            'CASHFLOWSTATEMENTS'
+        ],
+        'EQUITY': [
+            'CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY',
+            'CONSOLIDATEDSTATEMENTOFSHAREHOLDERSEQUITY',
+            'CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSEQUITY',
+            'CONSOLIDATEDSTATEMENTOFSTOCKHOLDERSEQUITY',
+            'STATEMENTOFSHAREHOLDERSEQUITY',
+            'STATEMENTOFSTOCKHOLDERSEQUITY',
+            'STATEMENTSOFCHANGESINEQUITY',
+            'STATEMENTOFCHANGESINEQUITY',
+            'CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY',
+            'CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY',
+            'STATEMENTOFEQUITY',
+            'STATEMENTSOFEQUITY'
+        ],
+        'COMPREHENSIVE_INCOME': [
+            'CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME',
+            'CONSOLIDATEDSTATEMENTOFCOMPREHENSIVEINCOME',
+            'STATEMENTOFCOMPREHENSIVEINCOME',
+            'STATEMENTSOFCOMPREHENSIVEINCOME',
+            'COMPREHENSIVEINCOMESTATEMENT',
+            'COMPREHENSIVEINCOMESTATEMENTS'
+        ],
+        'COVER_PAGE': [
+            'COVERPAGE',
+            'COVER',
+            'DOCUMENTANDENTITYINFORMATION',
+            'ENTITYINFORMATION'
+        ]
+    }
+
+    @classmethod
+    def get_standard_name(cls, role_name: str) -> Optional[str]:
+        # Extract the last part of the URI and remove any file extensions
+        role_name = role_name.split('/')[-1].split('.')[0]
+
+        # Normalize the role name: remove non-alphanumeric characters and convert to uppercase
+        role_name_normalized = ''.join(char.upper() for char in role_name if char.isalnum())
+
+        for standard_name, variations in cls.STANDARD_STATEMENTS.items():
+            for variation in variations:
+                if variation == role_name_normalized:
+                    return standard_name
+
+        return None
+
+
 class XBRLPresentation(BaseModel):
     # Dictionary to store presentation roles and their corresponding elements
     roles: Dict[str, PresentationElement] = Field(default_factory=dict)
     skipped_roles: List[str] = Field(default_factory=list)
+    standard_statement_map: Dict[str, str] = Field(default_factory=dict)
+    concept_index: Dict[str, List[str]] = Field(default_factory=lambda: defaultdict(list))
 
     # Configuration to allow arbitrary types in the model
     model_config = {
@@ -123,7 +213,40 @@ class XBRLPresentation(BaseModel):
                                                                concept=normalize_concept(role))
                 presentation.roles[role].children = role_children
 
+        # Build the statement map and concept index
+        presentation._build_statement_map()
+        presentation._build_concept_index()
+
         return presentation
+
+    def _build_statement_map(self):
+        for role, element in self.roles.items():
+            standard_name = FinancialStatementMapper.get_standard_name(role)
+            if standard_name:
+                self.standard_statement_map[standard_name] = role
+
+    def _build_concept_index(self):
+        for role, element in self.roles.items():
+            self._index_concepts(element, role)
+
+    def _index_concepts(self, element: PresentationElement, role: str):
+        self.concept_index[element.concept].append(role)
+        for child in element.children:
+            self._index_concepts(child, role)
+
+    def get_role_by_standard_name(self, standard_name: str) -> Optional[str]:
+        return self.standard_statement_map.get(standard_name)
+
+    def get_roles_containing_concept(self, concept: str) -> List[str]:
+        if '_' not in concept:
+            namespaces = ['us-gaap', 'ifrs-full', 'dei']  # Add other common namespaces as needed
+            for ns in namespaces:
+                namespaced_concept = f"{ns}_{concept}"
+                if namespaced_concept in self.concept_index:
+                    return self.concept_index[namespaced_concept]
+
+            # If the concept is already namespaced or not found with common namespaces
+        return self.concept_index.get(concept, [])
 
     def list_roles(self) -> List[str]:
         """ List all available roles in the presentation linkbase. """
@@ -259,7 +382,6 @@ class XbrlDocuments:
             content = await download_file_async(attachment.url)
             return {doc_type: parser(content)}
         return {}
-
 
     def extract_embedded_linkbases(self, schema_content: str) -> Dict[str, Dict[str, str]]:
         """
@@ -963,11 +1085,24 @@ class XBRLData(BaseModel):
     def list_statements(self) -> List[str]:
         return list(self.statements_dict.keys())
 
+    def find_statement(self, statement_name: str) -> Optional[FinancialStatement]:
+        """Find the statement in the statements dictionary."""
+        statement = self.statements_dict.get(statement_name)
+        if statement:
+            return statement
+        for key, statement in self.statements_dict.items():
+            if statement_name.lower() == key.lower():
+                return statement
+
+    def has_statement(self, statement_name: str) -> bool:
+        """Check if the statement exists in the statements dictionary."""
+        return self.find_statement(statement_name) is not None
+
     def get_statement(self,
                       statement_name: str,
                       include_format: bool = True,
                       include_concept: bool = True,
-                      empty_threshold: float = 0.6) -> StatementData:
+                      empty_threshold: float = 0.6) -> Optional[StatementData]:
         """
         Get a financial statement as a pandas DataFrame, with formatting and filtering applied.
 
@@ -984,10 +1119,9 @@ class XBRLData(BaseModel):
             Optional[pd.DataFrame]: A formatted DataFrame representing the financial statement,
                                     or None if the statement is not found.
         """
-        statement = self.statements_dict.get(statement_name)
+        statement = self.find_statement(statement_name)
 
         if not statement:
-            print(f"Statement not found: {statement_name}")
             return None
 
             # Get fiscal period focus
@@ -1229,7 +1363,7 @@ def parse_definitions(xml_string: str) -> Dict[str, List[Tuple[str, str, int]]]:
             to_label = arc['xlink:to']
             # Convert order to float instead of int
             order = float(arc.get('order', '0'))
-            arcrole = arc['xlink:arcrole']
+            # arcrole = arc['xlink:arcrole']
 
             if from_label in locs and to_label in locs:
                 from_concept = locs[from_label]

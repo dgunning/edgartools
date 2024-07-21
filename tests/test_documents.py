@@ -585,8 +585,9 @@ def test_document_get_markdown():
 def test_filing_text_for_file_with_fil_extension():
     filing = Filing(form='NSAR-A', filing_date='2016-06-28',
                     company='AMERICAN FUNDS GLOBAL BALANCED FUND', cik=1505612, accession_no='0000051931-16-002553')
-    assert "American Funds Global Balanced Fund" in  filing.html()
+    assert "American Funds Global Balanced Fund" in filing.html()
     assert "American Funds Global Balanced Fund" in filing.text()
+    assert "American Funds Global Balanced Fund" in filing.markdown()
 
     filing = Filing(form='NSAR-A', filing_date='2016-09-28', company='Investment Managers Series Trust', cik=1318342,
                     accession_no='0000926877-16-000629')
