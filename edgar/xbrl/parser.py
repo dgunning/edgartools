@@ -1,26 +1,29 @@
 import asyncio
-from collections import defaultdict
-from datetime import datetime
+import re
+from collections import defaultdict, OrderedDict
+from functools import cached_property
 from typing import Any, Optional
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
-import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 from rich import box
 from rich import print as rprint
 from rich.table import Table, Column
+from rich.text import Text
 from rich.tree import Tree
 
+import xml.etree.ElementTree as ET
 from edgar import Filing
-from edgar._rich import repr_rich
+from edgar._rich import repr_rich, colorize_words
 from edgar.attachments import Attachment
 from edgar.attachments import Attachments
 from edgar.httprequests import download_file_async
-from edgar.xbrl.concepts import PresentationElement, DEI_CONCEPTS
+from edgar.xbrl.concepts import PresentationElement, Concept, DEI_CONCEPTS
 
-__all__ = ['XBRLPresentation', 'XbrlDocuments', 'XBRLInstance', 'LineItem', 'FinancialStatement', 'XBRLData']
+__all__ = ['XBRLPresentation', 'XbrlDocuments', 'XBRLInstance', 'LineItem', 'FinancialStatement', 'XBRLData',
+           'Statements', 'StatementData']
 
 """
 This implementation includes:
@@ -46,6 +49,7 @@ To use this code, you would need to integrate it with the previously created par
 class XBRLPresentation(BaseModel):
     # Dictionary to store presentation roles and their corresponding elements
     roles: Dict[str, PresentationElement] = Field(default_factory=dict)
+    skipped_roles: List[str] = Field(default_factory=list)
 
     # Configuration to allow arbitrary types in the model
     model_config = {
@@ -54,48 +58,79 @@ class XBRLPresentation(BaseModel):
 
     @classmethod
     def parse(cls, xml_string: str):
-        # Parse the XBRL presentation linkbase XML and create an XBRLPresentation object
         presentation = cls()
         soup = BeautifulSoup(xml_string, 'xml')
 
-        # Parse roleRefs
-        for role_ref in soup.find_all('roleRef'):
-            role_uri = role_ref.get('roleURI')
-            presentation.roles[role_uri] = PresentationElement(label=role_uri, href='', order=0)
+        def normalize_concept(concept):
+            return re.sub(r'_\d+$', '', concept)
 
-        # Parse presentationLinks
         for plink in soup.find_all('presentationLink'):
             role = plink.get('xlink:role')
 
             # Parse loc elements
-            locs = {}
+            locs = OrderedDict()
             for loc in plink.find_all('loc'):
                 label = loc.get('xlink:label')
                 href = loc.get('xlink:href')
-                locs[label] = PresentationElement(label=label, href=href, order=0)
+                concept = href.split('#')[-1] if href else label
+                normalized_concept = normalize_concept(concept)
+                locs[label] = PresentationElement(label=label, href=href, order=0, concept=normalized_concept)
 
-            # Parse presentationArc elements to build the hierarchy
+            # Parse presentationArc elements
+            arcs = []
             for arc in plink.find_all('presentationArc'):
                 parent_label = arc.get('xlink:from')
                 child_label = arc.get('xlink:to')
                 order = float(arc.get('order', '0'))
+                arcs.append((parent_label, child_label, order))
 
+            # If no loc elements were found, try to parse using the older format
+            if not locs:
+                for arc in arcs:
+                    parent_label, child_label, order = arc
+                    if parent_label not in locs:
+                        normalized_concept = normalize_concept(parent_label)
+                        locs[parent_label] = PresentationElement(label=parent_label, href='', order=0,
+                                                                 concept=normalized_concept)
+                    if child_label not in locs:
+                        normalized_concept = normalize_concept(child_label)
+                        locs[child_label] = PresentationElement(label=child_label, href='', order=0,
+                                                                concept=normalized_concept)
+
+            # Build the hierarchy
+            for parent_label, child_label, order in arcs:
                 if parent_label in locs and child_label in locs:
                     parent = locs[parent_label]
                     child = locs[child_label]
                     child.order = order
                     child.level = parent.level + 1
-                    parent.children.append(child)
 
-            # Add the top-level elements to the role
-            if role in presentation.roles:
-                presentation.roles[role].children = [loc for loc in locs.values() if loc.label.startswith('loc_')]
+                    existing_child = next((c for c in parent.children if
+                                           normalize_concept(c.concept) == normalize_concept(child.concept)), None)
+                    if existing_child:
+                        existing_child.children.extend(child.children)
+                        if len(child.label) > len(existing_child.label):
+                            existing_child.label = child.label
+                        if len(child.concept) < len(existing_child.concept):
+                            existing_child.concept = child.concept
+                    else:
+                        parent.children.append(child)
+
+            # Add the top-level elements to the role only if there are children
+            role_children = [loc for loc in locs.values() if not any(arc[1] == loc.label for arc in arcs)]
+            if role_children:
+                presentation.roles[role] = PresentationElement(label=role, href='', order=0,
+                                                               concept=normalize_concept(role))
+                presentation.roles[role].children = role_children
 
         return presentation
 
     def list_roles(self) -> List[str]:
         """ List all available roles in the presentation linkbase. """
         return list(self.roles.keys())
+
+    def get_skipped_roles(self):
+        return self.skipped_roles
 
     def get_structure(self, role: str, detailed: bool = False) -> Optional[Tree]:
         """
@@ -153,7 +188,7 @@ class XbrlDocuments:
     def __init__(self, attachments: Attachments):
         self._documents = dict()
         for attachment in attachments.data_files:
-            if attachment.document_type == 'XML':
+            if attachment.document_type in ['XML', 'EX-101.INS']:
                 self._documents['instance'] = attachment
             elif attachment.document_type == 'EX-101.SCH':
                 self._documents['schema'] = attachment
@@ -166,43 +201,127 @@ class XbrlDocuments:
             elif attachment.document_type == 'EX-101.PRE':
                 self._documents['presentation'] = attachment
 
+    def has_all_documents(self):
+        return all(doc in self._documents for doc in
+                   ['instance', 'schema', 'definition', 'label', 'calculation', 'presentation'])
+
     async def load(self) -> Tuple[str, str, Dict, Dict]:
         """
         Load the XBRL documents asynchronously and parse them.
         """
-        tasks = []
         parsers = {
             'definition': parse_definitions,
             'label': parse_labels,
             'calculation': parse_calculation,
             'presentation': lambda x: x,
-            'instance': lambda x: x
+            'instance': lambda x: x,
+            'schema': lambda x: x
         }
         parsed_files = {}
 
-        async def download_and_parse(doc_type, parser):
-            # Download the file
+        # First, download and parse the instance and schema files
+        for doc_type in ['instance', 'schema']:
             attachment = self.get(doc_type)
             if attachment:
                 content = await download_file_async(attachment.url)
-                parsed_files[doc_type] = parser(content)
+                parsed_files[doc_type] = parsers[doc_type](content)
 
-        # Create the tasks
-        for doc_type, parser in parsers.items():
-            attachment = self.get(doc_type)
-            if attachment:
-                tasks += [download_and_parse(doc_type, parser)]
+        # If we don't have all documents, extract from schema
+        if not self.has_all_documents() and 'schema' in parsed_files:
+            embedded_linkbases = self.extract_embedded_linkbases(parsed_files['schema'])
 
-        # Now we can parse the instance document
-        await asyncio.gather(*tasks)
-        return (parsed_files['instance'],
-                parsed_files['presentation'],
-                parsed_files['label'],
-                parsed_files['calculation'])
+            for linkbase_type, content in embedded_linkbases['linkbases'].items():
+                if linkbase_type not in parsed_files:
+                    parsed_files[linkbase_type] = parsers[linkbase_type](content)
 
-    async def _load_document(self, doc_type: str, attachment: Attachment, parse_func):
-        content: Optional[str] = await download_file_async(attachment.url)
-        setattr(self, doc_type, parse_func(content))
+        # Download and parse any remaining standalone linkbase files
+        tasks = []
+        for doc_type in ['definition', 'label', 'calculation', 'presentation']:
+            if doc_type not in parsed_files:
+                attachment = self.get(doc_type)
+                if attachment:
+                    tasks.append(self.download_and_parse(doc_type, parsers[doc_type]))
+
+        if tasks:
+            results = await asyncio.gather(*tasks)
+            for result in results:
+                parsed_files.update(result)
+
+        # Return the required files
+        return (parsed_files.get('instance', ''),
+                parsed_files.get('presentation', ''),
+                parsed_files.get('label', {}),
+                parsed_files.get('calculation', {}))
+
+    async def download_and_parse(self, doc_type: str, parser):
+        attachment = self.get(doc_type)
+        if attachment:
+            content = await download_file_async(attachment.url)
+            return {doc_type: parser(content)}
+        return {}
+
+
+    def extract_embedded_linkbases(self, schema_content: str) -> Dict[str, Dict[str, str]]:
+        """
+        Extract embedded linkbases and role types from the schema file using ElementTree.
+        """
+        embedded_data = {
+            'linkbases': {},
+            'role_types': {}
+        }
+
+        # Register namespaces
+        namespaces = {
+            'xsd': 'http://www.w3.org/2001/XMLSchema',
+            'link': 'http://www.xbrl.org/2003/linkbase',
+            'xlink': 'http://www.w3.org/1999/xlink'
+        }
+
+        for prefix, uri in namespaces.items():
+            ET.register_namespace(prefix, uri)
+
+        # Parse the schema content
+        root = ET.fromstring(schema_content)
+
+        # Find all appinfo elements
+        for appinfo in root.findall('.//xsd:appinfo', namespaces):
+            # Extract role types
+            for role_type in appinfo.findall('link:roleType', namespaces):
+                role_uri = role_type.get('roleURI')
+                role_id = role_type.get('id')
+                definition = role_type.find('link:definition', namespaces)
+                definition_text = definition.text if definition is not None else ""
+                used_on = [elem.text for elem in role_type.findall('link:usedOn', namespaces)]
+
+                embedded_data['role_types'][role_uri] = {
+                    'id': role_id,
+                    'definition': definition_text,
+                    'used_on': used_on
+                }
+
+            # Find the linkbase element
+            linkbase = appinfo.find('link:linkbase', namespaces)
+            if linkbase is not None:
+                # Extract the entire linkbase element as a string
+                linkbase_string = ET.tostring(linkbase, encoding='unicode', method='xml')
+
+                # Extract each type of linkbase
+                for linkbase_type in ['presentation', 'label', 'calculation', 'definition']:
+                    linkbase_elements = linkbase.findall(f'link:{linkbase_type}Link', namespaces)
+
+                    if linkbase_elements:
+                        # Convert all linkbase elements of this type to strings
+                        linkbase_strings = [ET.tostring(elem, encoding='unicode', method='xml') for elem in
+                                            linkbase_elements]
+
+                        # Join multiple linkbase elements if there are more than one, and wrap them in the linkbase tags
+                        embedded_data['linkbases'][linkbase_type] = f"{linkbase_string.split('>', 1)[0]}>\n" + \
+                                                                    '\n'.join(linkbase_strings) + \
+                                                                    "\n</link:linkbase>"
+                    else:
+                        print(f"Warning: {linkbase_type} linkbase not found in embedded linkbases")
+
+        return embedded_data
 
     def get(self, doc_type: str):
         return self._documents.get(doc_type)
@@ -319,15 +438,13 @@ class XBRLInstance(BaseModel):
             self.entity_id = entity_identifier.text
 
     def parse_facts(self, soup: BeautifulSoup):
-        # Parse fact elements from the XBRL instance
         facts_data = []
-        root = soup.find("xbrl")
-        for fact_id, tag in enumerate(root.find_all(lambda t: t.namespace != "http://www.xbrl.org/"), start=1):
+        for tag in soup.find_all(lambda t: t.namespace != "http://www.xbrl.org/"):
             if not ('contextRef' in tag.attrs or 'unitRef' in tag.attrs):
                 continue
             concept = f"{tag.prefix}:{tag.name}"
-            value = tag.text
-            units = self.units.get(tag.get('unitRef'))
+            value = tag.text.strip()
+            units = tag.get('unitRef')
             decimals = tag.get('decimals')
             context_id = tag.get('contextRef')
 
@@ -355,7 +472,7 @@ class XBRLInstance(BaseModel):
                 'dimensions': dimensions
             })
 
-        self.facts = pd.DataFrame(facts_data, index=pd.RangeIndex(start=1, stop=len(facts_data) + 1, name='fact_id'))
+        self.facts = pd.DataFrame(facts_data)
 
     def query_facts(self, **kwargs):
         # Query facts based on given criteria
@@ -403,6 +520,10 @@ class FinancialStatement(BaseModel):
     # A list of LineItem objects representing each line in the financial statement
     line_items: List[LineItem] = Field(default_factory=list)
 
+    @property
+    def empty(self):
+        return not self.line_items
+
     @classmethod
     def create(cls, name: str, presentation_element: PresentationElement, labels: Dict, calculations: Dict,
                instance: XBRLInstance) -> 'FinancialStatement':
@@ -414,61 +535,120 @@ class FinancialStatement(BaseModel):
 
     def build_line_items(self, presentation_element: PresentationElement, labels: Dict, calculations: Dict,
                          instance: XBRLInstance):
-        # Recursive function to process each element in the presentation hierarchy
-        def process_element(element: PresentationElement, level: int):
-            # Extract the concept name from the href attribute
+        seen_sections = defaultdict(int)
+        seen_concepts = set()
+        self.line_items = []
+
+        def process_element(element: PresentationElement, level: int, is_root: bool = False):
             concept = element.href.split('#')[-1]
-            # Get the label for this concept
             label = self.get_label(concept, labels)
-            # Get the fact values for this concept from the instance document
+
+            # Check if this is a section we've already seen
+            if seen_sections[label] > 0 and element.children:
+                # If it's a repeated section with children, skip this branch
+                return
+
+            # If it's at root level and we've seen this concept before, skip it
+            if is_root and concept in seen_concepts:
+                return
+
+            seen_sections[label] += 1
+            seen_concepts.add(concept)
+
             values = self.get_fact_values(concept, instance)
-            # Create a new LineItem and add it to the list
             self.line_items.append(LineItem(
                 concept=concept,
                 label=label,
                 values=values,
                 level=level
             ))
-            # Process all child elements, incrementing the level
+
             for child in sorted(element.children, key=lambda x: x.order):
                 process_element(child, level + 1)
 
-        # Start processing from the root element's children
+        # Process root level elements
         for child in sorted(presentation_element.children, key=lambda x: x.order):
-            process_element(child, 0)
+            process_element(child, 0, is_root=True)
+
+        # Optionally, remove single-occurrence items from seen_sections
+        seen_sections = {k: v for k, v in seen_sections.items() if v > 1}
+
+        # You might want to log or return seen_sections for debugging
+        return seen_sections
 
     @staticmethod
     def get_label(concept: str, labels: Dict) -> str:
         # Get the labels for this concept
         concept_labels = labels.get(concept, {})
         # Try to get the terseLabel first, then label, then fall back to the concept name
-        return concept_labels.get('terseLabel') or concept_labels.get('label') or concept
+        label = (concept_labels.get('totalLabel')
+                 or concept_labels.get('terseLabel')
+                 or concept_labels.get('label') or concept)
+        return label
 
     @staticmethod
     def get_fact_values(concept: str, instance: XBRLInstance) -> Dict[str, Any]:
-        # Query the instance document for facts related to this concept
         facts = instance.query_facts(concept=concept)
         values = {}
         for _, fact in facts.iterrows():
             if fact['period_type'] == 'instant':
-                # For instant facts, we only care about the end date
                 period = fact['end_date']
             else:
-                # For duration facts, we want to show the full period
-                start = fact['start_date'] if fact['start_date'] else 'Unknown'
-                end = fact['end_date'] if fact['end_date'] else 'Unknown'
-                period = f"{start} to {end}"
+                period = f"{fact['start_date']} to {fact['end_date']}"
 
-            # Convert the period to a datetime object for sorting
-            if isinstance(period, str) and 'to' in period:
-                sort_date = datetime.strptime(period.split(' to ')[1], '%Y-%m-%d')
+            # Create a unique key that includes the period and dimensions
+            key = (period, tuple(sorted(fact['dimensions'].items())))
+
+            # If this period doesn't exist in values, or if it does but the current fact has no dimensions (default)
+            if period not in values or not fact['dimensions']:
+                values[period] = {
+                    'value': fact['value'],
+                    'units': fact['units'],
+                    'decimals': fact['decimals'],
+                    'dimensions': fact['dimensions']
+                }
+
+            # Store all dimensional values in a separate dictionary
+            if 'dimensional_values' not in values[period]:
+                values[period]['dimensional_values'] = {}
+            values[period]['dimensional_values'][key] = {
+                'value': fact['value'],
+                'units': fact['units'],
+                'decimals': fact['decimals'],
+                'dimensions': fact['dimensions']
+            }
+
+        return values
+
+    def build_rich_tree(self, detailed: bool = False) -> Tree:
+        root = Tree(f"[bold green]{self.name}[/bold green]")
+        self._build_rich_tree_recursive(root, self.line_items, 0, detailed)
+        return root
+
+    def _build_rich_tree_recursive(self, tree: Tree, items: List[LineItem], current_level: int, detailed: bool):
+        for item in items:
+            if item.level > current_level:
+                continue
+            if item.level < current_level:
+                return
+
+            if detailed:
+                node_text = f"[yellow]{item.label}[/yellow] ([cyan]{item.concept}[/cyan])"
+                if item.values:
+                    values_text = ", ".join(f"{k}: {v}" for k, v in item.values.items())
+                    node_text += f"\n  [dim]{values_text}[/dim]"
             else:
-                sort_date = datetime.strptime(period, '%Y-%m-%d')
+                node_text = f"[cyan]{item.label}[/cyan]"
 
-            values[period] = {'value': fact['value'], 'sort_date': sort_date}
+            child_tree = tree.add(node_text)
+            self._build_rich_tree_recursive(child_tree, items[items.index(item) + 1:], item.level + 1, detailed)
 
-        # Sort the values by date in descending order
-        return dict(sorted(values.items(), key=lambda x: x[1]['sort_date'], reverse=True))
+    def __rich__(self):
+        return self.build_rich_tree()
+
+    def print_items(self, detailed: bool = False):
+        tree = self.build_rich_tree(detailed)
+        rprint(tree)
 
     def to_dict(self):
         # Convert the FinancialStatement object to a dictionary
@@ -476,6 +656,199 @@ class FinancialStatement(BaseModel):
             'name': self.name,
             'line_items': [item.dict() for item in self.line_items]
         }
+
+
+def is_integer(s):
+    if s:
+        if s[0] in ('-', '+'):
+            return s[1:].isdigit()
+        return s.isdigit()
+    return False
+
+
+def format_currency(value: Union[str, float], format_str: str = '{:>15,.0f}') -> str:
+    if is_integer(value):
+        value = float(value)
+        return format_str.format(value)
+    else:
+        return value
+
+
+def format_label(label, level):
+    return f"{' ' * level}{label}"
+
+
+def split_camel_case(item):
+    # Check if the string is all uppercase
+    if item.isupper():
+        return item
+    else:
+        # Split at the boundary between uppercase and camelCase
+        return ' '.join(re.findall(r'[A-Z]+(?=[A-Z][a-z])|[A-Z][a-z]*', item))
+
+
+class StatementData:
+    meta_columns = ['level', 'abstract', 'concept', 'units', 'decimals']
+
+    NAMES = {
+        "CONSOLIDATEDSTATEMENTSOFOPERATIONS": "CONSOLIDATED STATEMENTS OF OPERATIONS",
+        "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME": "CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME",
+        "CONSOLIDATEDBALANCESHEETSParenthetical": "CONSOLIDATED BALANCE SHEETS Parenthetical",
+        "CONSOLIDATEDBALANCESHEETS": "CONSOLIDATED BALANCE SHEETS",
+        "CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY": "CONSOLIDATED STATEMENTS OF SHAREHOLDERS EQUITY",
+        "CONSOLIDATEDSTATEMENTSOFCASHFLOWS": "CONSOLIDATED STATEMENTS OF CASH FLOWS"
+    }
+
+    def __init__(self,
+                 name: str,
+                 entity: str,
+                 df: pd.DataFrame):
+        self.name = name
+        self.entity = entity
+        self.data = df
+        self.include_format = 'level' in df.columns
+        self.include_concept = 'concept' in df.index.names
+
+    @property
+    def periods(self):
+        return [col for col in self.data.columns if col not in self.meta_columns]
+
+    @property
+    def labels(self):
+        return self.data.index.tolist()
+
+    @property
+    def concepts(self):
+        return self.data.concept.tolist()
+
+    def get_statement_name(self):
+        normalized_name = self.NAMES.get(self.name)
+        if not normalized_name:
+            normalized_name = split_camel_case(self.name)
+        return normalized_name
+
+    def get_concept(self,
+                    concept: str = None,
+                    *,
+                    label: str = None,
+                    namespace: str = None) -> Optional[Concept]:
+        assert label or concept, "Either label or concept must be provided"
+        if label:
+            results = self.data.query(f"index == '{label}'")
+        elif namespace:
+            results = self.data.query(f"concept == '{namespace}_{concept}'")
+        else:
+            # Look in "dei" and "us-gaap" namespaces
+            for concept_name in [concept, concept.replace(':', '_'), f'dei_{concept}', f'us-gaap_{concept}']:
+                results = self.data.query(f"concept == '{concept_name}'")
+                if len(results) > 0:
+                    break
+
+        if len(results) == 0:
+            return None
+        elif len(results) > 1:
+            # Get the first row
+            results = results.iloc[0]
+
+        # Now convert to a fact and return
+        fact = Concept(
+            name=results.concept.iloc[0],
+            unit=results.units.iloc[0] if 'units' in results else None,
+            label=results.index[0],
+            decimals=results.decimals.iloc[0] if 'decimals' in results else None,
+            value={col: results[col].iloc[0] for col in self.periods}
+        )
+        return fact
+
+    def __str__(self):
+        format_str = " with format" if self.include_format else ""
+        return f"{self.name}({len(self.data)} concepts{format_str})"
+
+    def __rich__(self):
+        cols = [col for col in self.data.columns if col not in self.meta_columns]
+        columns = [Column('')] + [Column(col) for col in cols]
+
+        table = Table(*columns,
+                      title=Text.assemble(*[(f"{self.entity}\n", "bold red3"),
+                                            (self.get_statement_name(), "bold")]),
+                      box=box.SIMPLE)
+        for index, row in enumerate(self.data.itertuples()):
+
+            # Detect the end of a section
+            end_section = (index == len(self.data) - 1  # End of data
+                           or  # Next line is abstract
+                           (index < len(self.data) - 1 and self.data.iloc[index + 1].abstract))
+            # Check if this is a total line
+            is_total = row.Index.startswith('Total') and end_section
+
+            row_style = "bold" if is_total else ""
+
+            # Set the label style
+            if row.abstract:
+                label_style = "bold deep_sky_blue3"
+            elif is_total:
+                label_style = "bold"
+            else:
+                label_style = ""
+            label = Text(format_label(row.Index, row.level), style=label_style)
+
+            values = [label] + [Text.assemble(*[(format_currency(row[index + 1]), row_style)])
+                                for index, col in enumerate(cols)]
+
+            table.add_row(*values, end_section=is_total)
+
+        return table
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
+class Statements():
+
+    def __init__(self, xbrl_data):
+        self.xbrl_data = xbrl_data
+        self.names = list(self.xbrl_data.statements_dict.keys())
+
+    def get(self,
+            statement_name: str,
+            include_format: bool = True,
+            include_concept: bool = True):
+        return self.xbrl_data.get_statement(statement_name, include_format, include_concept)
+
+    def __contains__(self, item):
+        return item in self.names
+
+    def __getitem__(self, item):
+        return self.get(item)
+
+    def __len__(self):
+        return len(self.names)
+
+    def __iter__(self):
+        self.n = 0
+        return self
+
+    def __next__(self):
+        if self.n < len(self.names):
+            statement_name: str = self.names[self.n]
+            self.n += 1
+            return self.get(statement_name)
+        else:
+            raise StopIteration
+
+    @staticmethod
+    def colorize_name(statement):
+        words = split_camel_case(statement).split(" ")
+        return colorize_words(words)
+
+    def __rich__(self):
+        table = Table("", "Statement", box=box.SIMPLE)
+        for index, statement_name in enumerate(self.xbrl_data.statements_dict.keys()):
+            table.add_row(str(index), Statements.colorize_name(statement_name))
+        return table
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 
 class XBRLData(BaseModel):
@@ -490,7 +863,7 @@ class XBRLData(BaseModel):
            presentation (XBRLPresentation): Parsed XBRL presentation linkbase.
            labels (Dict): Dictionary of labels for XBRL concepts.
            calculations (Dict): Dictionary of calculation relationships.
-           statements (Dict[str, FinancialStatement]): Dictionary of parsed financial statements.
+           statements_dict (Dict[str, FinancialStatement]): Dictionary of parsed financial statements.
 
        Class Methods:
            parse(instance_xml: str, presentation_xml: str, labels: Dict, calculations: Dict) -> 'XBRL':
@@ -522,7 +895,7 @@ class XBRLData(BaseModel):
     presentation: XBRLPresentation
     labels: Dict
     calculations: Dict
-    statements: Dict[str, FinancialStatement] = Field(default_factory=dict)
+    statements_dict: Dict[str, FinancialStatement] = Field(default_factory=dict)
 
     @classmethod
     def parse(cls, instance_xml: str, presentation_xml: str, labels: Dict, calculations: Dict) -> 'XBRLData':
@@ -561,8 +934,10 @@ class XBRLData(BaseModel):
             XBRLData: An instance of XBRLParser with parsed XBRL components.
         """
         xbrl_documents = XbrlDocuments(filing.attachments)
-        instance_xml, presentation_xml, labels, calculations = await xbrl_documents.load()
-        return cls.parse(instance_xml, presentation_xml, labels, calculations)
+        parsed_documents = await xbrl_documents.load()
+        if parsed_documents:
+            instance_xml, presentation_xml, labels, calculations = parsed_documents
+            return cls.parse(instance_xml, presentation_xml, labels, calculations)
 
     def parse_financial_statements(self):
         """
@@ -573,7 +948,7 @@ class XBRLData(BaseModel):
         """
         for role, root_element in self.presentation.roles.items():
             statement_name = role.split('/')[-1]
-            self.statements[statement_name] = FinancialStatement.create(
+            self.statements_dict[statement_name] = FinancialStatement.create(
                 statement_name,
                 root_element,
                 self.labels,
@@ -581,7 +956,18 @@ class XBRLData(BaseModel):
                 self.instance
             )
 
-    def get_statement(self, statement_name: str, include_format_info: bool = False) -> Optional[pd.DataFrame]:
+    @cached_property
+    def statements(self):
+        return Statements(self)
+
+    def list_statements(self) -> List[str]:
+        return list(self.statements_dict.keys())
+
+    def get_statement(self,
+                      statement_name: str,
+                      include_format: bool = True,
+                      include_concept: bool = True,
+                      empty_threshold: float = 0.6) -> StatementData:
         """
         Get a financial statement as a pandas DataFrame, with formatting and filtering applied.
 
@@ -590,108 +976,140 @@ class XBRLData(BaseModel):
 
         Args:
             statement_name (str): The name of the financial statement to retrieve.
-            include_format_info (bool): Whether to include additional formatting information in the DataFrame.
+            include_format (bool): Whether to include additional formatting information in the DataFrame.
+            include_concept (bool): Whether to include the concept name in the DataFrame.
+            empty_threshold (float): The threshold for dropping columns that are mostly empty.
 
         Returns:
             Optional[pd.DataFrame]: A formatted DataFrame representing the financial statement,
                                     or None if the statement is not found.
         """
-        statement = self.statements.get(statement_name)
+        statement = self.statements_dict.get(statement_name)
 
         if not statement:
             print(f"Statement not found: {statement_name}")
             return None
 
+            # Get fiscal period focus
+        fiscal_period_focus = self.instance.get_fiscal_period_focus()
+        is_quarterly = fiscal_period_focus in ['Q1', 'Q2', 'Q3', 'Q4']
+
         # Create format_info dictionary
-        format_info = {item.label: {'level': item.level, 'abstract': item.concept.endswith('Abstract')}
-                       for item in statement.line_items}
+        format_info = {
+            item.label: {'level': item.level, 'abstract': item.concept.endswith('Abstract'), 'concept': item.concept}
+            for item in statement.line_items}
 
         # Use the order of line_items as they appear in the statement
         ordered_items = [item.label for item in statement.line_items]
 
-        # Create DataFrame with preserved order
-        data = {year: {} for year in set(period.split(' to ')[-1].split('-')[0]
-                                         for item in statement.line_items
-                                         for period in item.values)}
+        # Create DataFrame with preserved order and abstract concepts
+        data = []
         for item in statement.line_items:
-            for period, value_info in item.values.items():
-                year = period.split(' to ')[-1].split('-')[0]
-                data[year][item.label] = value_info['value']
+            row = {'label': item.label}
+            if include_format:
+                row['level'] = format_info[item.label]['level']
+                row['abstract'] = format_info[item.label]['abstract']
+                row['units'] = None if row['abstract'] else ''
+                row['decimals'] = None if row['abstract'] else ''
+            if include_concept:
+                row['concept'] = format_info[item.label]['concept']
+            if not format_info[item.label]['abstract']:
+                for period, value_info in item.values.items():
+                    if ' to ' in period:
+                        end_date = period.split(' to ')[1]
+                    else:
+                        end_date = period
+                    year = end_date.split('-')[0]
+                    if is_quarterly:
+                        quarter = (pd.to_datetime(end_date).month - 1) // 3 + 1
+                        period_label = f"Q{quarter} {year}"
+                    else:
+                        period_label = year
+                    row[period_label] = value_info['value']
+                    if include_format:
+                        row['units'] = value_info.get('units', '')
+                        row['decimals'] = value_info.get('decimals', '')
+            data.append(row)
 
-        df = pd.DataFrame(data).T
-        df = df.reindex(columns=ordered_items)
+        df = pd.DataFrame(data)
 
-        # Sort rows by year (descending)
-        df = df.sort_index(ascending=False)
+        # Consolidate duplicate rows while preserving all information
+        df = df.groupby('label', as_index=False).agg(lambda x: x.dropna().iloc[0] if len(x.dropna()) > 0 else None)
 
-        # Replace empty strings with NaN for non-abstract items
-        for col in df.columns:
-            if not format_info[col]['abstract']:
-                df[col] = df[col].replace('', np.nan)
+        df = df.set_index('label')
 
-        # Remove rows that are entirely empty (excluding abstract items)
-        df = df.dropna(how='all')
+        # Sort columns by period (descending)
+        period_columns = [col for col in df.columns if col not in ['level', 'abstract', 'units', 'decimals', 'concept']]
+        period_columns = sorted(period_columns,
+                                key=lambda x: (x.split()[-1], x.split()[0] if len(x.split()) > 1 else ''), reverse=True)
 
-        # Drop rows with significantly less data
-        def row_data_ratio(row):
-            non_abstract = [not format_info[col]['abstract'] for col in df.columns]
-            return row[non_abstract].notna().sum() / sum(non_abstract) if sum(non_abstract) > 0 else 0
+        format_columns = []
+        if include_concept:
+            format_columns.append('concept')
+        if include_format:
+            format_columns.extend(['level', 'abstract', 'units', 'decimals'])
 
-        latest_row_ratio = row_data_ratio(df.iloc[0])
-        rows_to_keep = [df.index[0]]  # Always keep the most recent period
+        df = df[period_columns + format_columns]
 
-        for idx in df.index[1:]:
-            if row_data_ratio(df.loc[idx]) >= 0.4 * latest_row_ratio:  # Threshold at 40%
-                rows_to_keep.append(idx)
-            else:
-                break  # Stop checking once we find a row to drop
+        if include_format:
+            # Convert level to integer and replace NaN with empty string
+            df['level'] = pd.to_numeric(df['level'], errors='coerce').fillna(0).astype(int)
 
-        df = df.loc[rows_to_keep]
+            # Ensure format columns have empty strings instead of NaN
+            for col in ['abstract', 'units', 'decimals']:
+                df[col] = df[col].fillna('')
+
+        if include_concept:
+            df['concept'] = df['concept'].fillna('')
+
+        df = df.fillna('')
+
+        # Drop columns that are mostly empty
+        empty_counts = (df == '').sum() / len(df)
+        columns_to_keep = empty_counts[empty_counts < empty_threshold].index
+        df = df[columns_to_keep]
 
         # Fill NaN with empty string for display purposes
         df = df.fillna('')
 
-        # Transpose the DataFrame to get the final structure
-        df = df.T
+        # Ensure the original order is preserved
+        df = df.reindex(ordered_items)
 
-        # Add format info if requested
-        if include_format_info:
-            # Clean up format_info to only include rows that are in the DataFrame
-            format_info = {row: info for row, info in format_info.items() if row in df.index}
+        # Flatten the column index if it's multi-level
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = [f"{col[0]}_{col[1]}" if isinstance(col, tuple) else col for col in df.columns]
+        # Create and return Statements object
+        return StatementData(df=df, name=statement_name, entity=self.instance.get_entity_name())
 
-            # Add level and abstract information as new columns
-            df['abstract'] = pd.Series({row: format_info.get(row, {}).get('abstract', False) for row in df.index})
-            df['level'] = pd.Series({row: format_info.get(row, {}).get('level', 0) for row in df.index})
-            #df['level_name'] = df.index.str.extract(r'\s*\[(\w+)\]$', expand=False).fillna('')
-
-        # Extract concept type and clean labels
-        #df.index = df.index.str.replace(r'\s*\[(\w+)\]$', '', regex=True)
-
-        return df
-
-    def get_balance_sheet(self, include_format_info=False) -> Optional[pd.DataFrame]:
+    def get_balance_sheet(self) -> StatementData:
         """
         Get the balance sheet as a pandas DataFrame.
         """
-        return self.get_statement("CONSOLIDATEDBALANCESHEETS", include_format_info=include_format_info)
+        balance_sheet = self.get_statement("CONSOLIDATEDBALANCESHEETS")
+        if not balance_sheet:
+            balance_sheet = self.get_statement("StatementOfFinancialPositionClassified")
+        return balance_sheet
 
-    def get_statement_of_operations(self, include_format_info=False) -> Optional[pd.DataFrame]:
+    def get_statement_of_operations(self) -> StatementData:
         """
         Get the income statement as a pandas DataFrame.
         """
-        return self.get_statement("CONSOLIDATEDSTATEMENTSOFOPERATIONS", include_format_info=include_format_info)
+        return self.get_statement("CONSOLIDATEDSTATEMENTSOFOPERATIONS")
 
-    def get_cash_flow_statement(self, include_format_info=False) -> Optional[pd.DataFrame]:
+    def get_cash_flow_statement(self) -> StatementData:
         """
         Get the cash flow statement as a pandas DataFrame.
         """
-        return self.get_statement("CONSOLIDATEDSTATEMENTSOFCASHFLOWS", include_format_info=include_format_info)
+        return self.get_statement("CONSOLIDATEDSTATEMENTSOFCASHFLOWS")
 
-    def get_statement_of_shareholders_equity(self, include_format_info=False) -> Optional[pd.DataFrame]:
-        return self.get_statement("CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY", include_format_info=include_format_info)
+    def get_statement_of_shareholders_equity(self) -> StatementData:
+        return self.get_statement("CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY")
 
-    def get_statement_of_income(self, include_format_info=False) -> Optional[pd.DataFrame]:
-        return self.get_statement("CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME", include_format_info=include_format_info)
+    def get_statement_of_income(self) -> StatementData:
+        return self.get_statement("CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME")
+
+    def get_cover_page(self) -> StatementData:
+        return self.get_statement("CoverPage")
 
     def __rich__(self):
         return self.instance.__rich__()
@@ -809,13 +1227,15 @@ def parse_definitions(xml_string: str) -> Dict[str, List[Tuple[str, str, int]]]:
         for arc in definition_link.find_all('definitionArc'):
             from_label = arc['xlink:from']
             to_label = arc['xlink:to']
-            order = int(arc.get('order', '0'))
+            # Convert order to float instead of int
+            order = float(arc.get('order', '0'))
             arcrole = arc['xlink:arcrole']
 
             if from_label in locs and to_label in locs:
                 from_concept = locs[from_label]
                 to_concept = locs[to_label]
                 definitions[role].append((from_concept, to_concept, order))
+
     return definitions
 
 
@@ -861,7 +1281,8 @@ The resulting calculation_data dictionary will have a structure like this:
             from_label = arc['xlink:from']
             to_label = arc['xlink:to']
             weight = float(arc['weight'])
-            order = int(arc['order'])
+            # Convert order to float instead of int
+            order = float(arc['order'])
 
             if from_label in locs and to_label in locs:
                 from_concept = locs[from_label]

@@ -1,11 +1,12 @@
+import asyncio
 from pathlib import Path
 
 import pytest
 from rich import print
 
 from edgar import Filing
-from edgar.xbrl.parser import (parse_labels, parse_calculation, parse_definitions, XBRLData,
-                               XBRLInstance, XBRLPresentation, FinancialStatement)
+from edgar.xbrl.parser import (parse_labels, parse_calculation, parse_definitions, XBRLData, XbrlDocuments,
+                               XBRLInstance, XBRLPresentation, FinancialStatement, Statements, StatementData)
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -64,6 +65,19 @@ def sample_calculations():
     return {}
 
 
+@pytest.fixture(scope='module')
+def apple_xbrl():
+    filing: Filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2023-11-03',
+                            accession_no='0000320193-23-000106')
+    return asyncio.run(XBRLData.from_filing(filing))
+
+
+@pytest.fixture(scope='module')
+def netflix_xbrl():
+    filing: Filing = Filing(company='NETFLIX INC', cik=1065280, form='10-Q', filing_date='2024-04-22',
+                            accession_no='0001065280-24-000128')
+    return asyncio.run(XBRLData.from_filing(filing))
+
 def test_xbrl_instance_parsing(sample_instance):
     assert len(sample_instance.facts) == 3
     assert sample_instance.get_document_period() == '2023-12-31'
@@ -104,27 +118,11 @@ def test_xbrl_parser_get_financial_statement(sample_instance, sample_presentatio
     )
     parser.parse_financial_statements()
 
-    df = parser.get_statement("CONSOLIDATEDBALANCESHEETS")
-    assert df is not None
-    assert 'Assets' in df.index
-    assert 'Liabilities' in df.index
-    assert 'Q4 2023' in df.columns
-
-
-def test_xbrl_parser_get_balance_sheet(sample_instance, sample_presentation, sample_labels, sample_calculations):
-    xbrl = XBRLData(
-        instance=sample_instance,
-        presentation=sample_presentation,
-        labels=sample_labels,
-        calculations=sample_calculations
-    )
-    xbrl.parse_financial_statements()
-
-    df = xbrl.get_balance_sheet()
-    assert df is not None
-    assert 'Assets' in df.index
-    assert 'Liabilities' in df.index
-    assert 'Q4 2023' in df.columns
+    statement: StatementData = parser.get_statement("CONSOLIDATEDBALANCESHEETS")
+    assert statement is not None
+    assert 'Assets' in statement.labels
+    assert 'Liabilities' in statement.labels
+    assert '2023' in statement.periods
 
 
 @pytest.mark.asyncio
@@ -138,7 +136,7 @@ async def test_xbrl_parser_from_filing():
     assert isinstance(parser.presentation, XBRLPresentation)
 
 
-def test_parse_xbrl_presentation():
+def test_parse_xbrl_presentation(apple_xbrl):
     presentation = XBRLPresentation.parse(Path('data/xbrl/datafiles/aapl/aapl-20230930_pre.xml').read_text())
     _repr_ = repr(presentation)
     print(_repr_)
@@ -159,6 +157,11 @@ def test_xbrl_presentation_list_roles():
     assert 'http://www.apple.com/role/Leases' in roles
 
 
+def test_xbrl_presentation_role_with_almost_duplicate_name(apple_xbrl):
+    statement = apple_xbrl.statements.get('RevenueDeferredRevenueExpectedTimingofRealizationDetails_1')
+    assert statement is None
+
+
 def test_parse_labels():
     labels = parse_labels(Path('data/xbrl/datafiles/aapl/aapl-20230930_lab.xml').read_text())
     assert labels['us-gaap_ResearchAndDevelopmentExpense']['label'] == 'Research and Development Expense'
@@ -174,9 +177,78 @@ def test_parse_definitions():
     definitions = parse_definitions(Path('data/xbrl/datafiles/aapl/aapl-20230930_def.xml').read_text())
     assert definitions
 
+
 @pytest.mark.asyncio
-async def test_get_shareholder_equity_statement():
-    filing: Filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2023-11-03',
-                            accession_no='0000320193-23-000106')
-    xbrl_data = await XBRLData.from_filing(filing)
-    statement = xbrl_data.get_balance_sheet(include_format_info=True)
+async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
+    statement: StatementData = apple_xbrl.get_statement_of_shareholders_equity()
+    assert statement
+    assert len(statement.data) == 18
+
+
+@pytest.mark.asyncio
+def test_get_statement_name(apple_xbrl):
+    statement: StatementData = apple_xbrl.get_cash_flow_statement()
+    assert statement.get_statement_name() == 'CONSOLIDATED STATEMENTS OF CASH FLOWS'
+    assert apple_xbrl.get_statement_of_shareholders_equity().get_statement_name() == 'CONSOLIDATED STATEMENTS OF SHAREHOLDERS EQUITY'
+
+
+@pytest.mark.asyncio
+async def test_statement_get_concept_value(apple_xbrl):
+    statement: StatementData = apple_xbrl.get_statement_of_shareholders_equity()
+    concept = statement.get_concept('us-gaap_NetIncomeLoss')
+    assert concept.value.get('2023') == '96995000000'
+    assert concept.value.get('2022') == '99803000000'
+    assert concept.value.get('2021') == '94680000000'
+    assert concept.label == 'Net income'
+    # try with "NetIncomeLoss"
+    concept = statement.get_concept('NetIncomeLoss')
+    assert concept
+
+
+def test_get_balance_sheet(apple_xbrl):
+    balance_sheet: StatementData = apple_xbrl.get_balance_sheet()
+    assert balance_sheet.periods == ['2023', '2022']
+
+
+def test_cover_page_aapl(apple_xbrl):
+    cover_page = apple_xbrl.get_statement('CoverPage')
+    assert cover_page is not None
+    assert cover_page.get_concept(label='Entity Registrant Name').values == ['Apple Inc.']
+
+
+def test_get_concept_using_label(apple_xbrl):
+    cover_page: StatementData = apple_xbrl.get_statement('CoverPage', include_concept=True)
+    assert cover_page is not None
+    fact = cover_page.get_concept(label='Entity Registrant Name')
+    assert fact.value['2023'] == 'Apple Inc.'
+    assert fact.name == 'dei_EntityRegistrantName'
+
+
+def test_statements_property(apple_xbrl):
+    statements: Statements = apple_xbrl.statements
+    assert len(statements) == 78
+    assert 'CoverPage' in statements
+
+
+def test_10Q_filings_have_quarterly_dates(netflix_xbrl):
+    balance_sheet: StatementData = netflix_xbrl.get_balance_sheet()
+    assert balance_sheet.periods == ['Q1 2024', 'Q4 2023']
+
+@pytest.mark.asyncio
+async def test_parse_xbrl_document_for_filing_with_embedded_linkbase():
+    filing = Filing(company='HUBSPOT INC', cik=1404655, form='10-K', filing_date='2024-02-14',
+                    accession_no='0000950170-24-015277')
+    xbrl_documents = XbrlDocuments(filing.attachments)
+    instance_xml, presentation_xml, labels, calculations = await xbrl_documents.load()
+    assert presentation_xml
+    assert labels
+    assert calculations
+    assert instance_xml
+
+    xbrl_data:XBRLData = await XBRLData.from_filing(filing)
+    assert xbrl_data
+    print(xbrl_data.list_statements())
+    assert len(xbrl_data.statements) == 98
+    statement:StatementData = xbrl_data.get_statement('CoverPage')
+
+

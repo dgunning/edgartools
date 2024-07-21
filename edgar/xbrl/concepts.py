@@ -1,19 +1,27 @@
+from datetime import datetime
 from typing import List, Optional, Union, Any, Dict
 
 import pandas as pd
 from pydantic import BaseModel, Field
 from pydantic import field_validator
-from datetime import datetime
 
-__all__ = ['Fact', 'PresentationElement', 'ConceptTableItem', 'ConceptTable', 'Context', 'DEI_CONCEPTS']
+__all__ = ['Concept', 'PresentationElement', 'ConceptTableItem', 'ConceptTable', 'Context', 'DEI_CONCEPTS']
 
 
-class Fact(BaseModel):
-    concept: str
+class Concept(BaseModel):
+    name: str
+    label: str
     value: Any
-    context_id: Optional[str] = None
     unit: Optional[str] = None
     decimals: Optional[Union[int, str]] = None
+
+    @property
+    def periods(self):
+        return list(self.value.keys())
+
+    @property
+    def values(self):
+        return list(self.value.values())
 
     @field_validator('decimals')
     @classmethod
@@ -30,16 +38,14 @@ class Fact(BaseModel):
     }
 
 
-class PresentationElement(BaseModel):
-    label: str
-    href: str
-    order: int = 0
-    children: List['PresentationElement'] = Field(default_factory=list)
-    level: int = 0
-
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+class PresentationElement:
+    def __init__(self, label: str, href: str, order: float, concept: str = None):
+        self.label = label
+        self.href = href
+        self.order = order
+        self.concept = concept if concept else label  # Use label as fallback if concept is not provided
+        self.level = 0
+        self.children = []
 
 
 class ConceptTableItem(BaseModel):
@@ -132,4 +138,3 @@ DEI_CONCEPTS = [
     'dei:EntityVoluntaryFilers',
     'dei:EntityWellKnownSeasonedIssuer'
 ]
-
