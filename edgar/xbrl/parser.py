@@ -21,6 +21,7 @@ from edgar.attachments import Attachment
 from edgar.attachments import Attachments
 from edgar.httprequests import download_file_async
 from edgar.xbrl.concepts import PresentationElement, Concept, DEI_CONCEPTS
+from edgar.xbrl.labels import parse_labels
 
 __all__ = ['XBRLPresentation', 'XbrlDocuments', 'XBRLInstance', 'LineItem', 'FinancialStatement', 'XBRLData',
            'Statements', 'StatementData']
@@ -824,8 +825,10 @@ class StatementData:
     def __init__(self,
                  name: str,
                  entity: str,
-                 df: pd.DataFrame):
+                 df: pd.DataFrame,
+                 display_name:str = None):
         self.name = name
+        self.display_name = display_name or self.name
         self.entity = entity
         self.data = df
         self.include_format = 'level' in df.columns
@@ -891,8 +894,8 @@ class StatementData:
         columns = [Column('')] + [Column(col) for col in cols]
 
         table = Table(*columns,
-                      title=Text.assemble(*[(f"{self.entity}\n", "bold red3"),
-                                            (self.get_statement_name(), "bold")]),
+                      title=Text.assemble(*[(f"{self.entity}\n", "bold red1"),
+                                            (self.display_name, "bold")]),
                       box=box.SIMPLE)
         for index, row in enumerate(self.data.itertuples()):
 
@@ -1102,7 +1105,8 @@ class XBRLData(BaseModel):
                       statement_name: str,
                       include_format: bool = True,
                       include_concept: bool = True,
-                      empty_threshold: float = 0.6) -> Optional[StatementData]:
+                      empty_threshold: float = 0.6,
+                      display_name:str=None) -> Optional[StatementData]:
         """
         Get a financial statement as a pandas DataFrame, with formatting and filtering applied.
 
@@ -1213,7 +1217,7 @@ class XBRLData(BaseModel):
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = [f"{col[0]}_{col[1]}" if isinstance(col, tuple) else col for col in df.columns]
         # Create and return Statements object
-        return StatementData(df=df, name=statement_name, entity=self.instance.get_entity_name())
+        return StatementData(df=df, name=statement_name, display_name=display_name, entity=self.instance.get_entity_name())
 
     def get_balance_sheet(self) -> StatementData:
         """
@@ -1252,54 +1256,6 @@ class XBRLData(BaseModel):
         return repr_rich(self)
 
 
-def parse_labels(xml_string: str) -> Dict[str, Dict[str, str]]:
-    """
-        Parse an XBRL label linkbase XML string and extract label information.
-
-        This function takes an XML string representing an XBRL label linkbase and
-        processes it to extract label information for each concept. It organizes
-        the labels by concept and role.
-
-        Parameters:
-        xml_string (str): A string containing the XML content of the XBRL label linkbase.
-
-        Returns:
-        Dict[str, Dict[str, str]]: A nested dictionary where:
-            - The outer key is the concept name (without the 'lab_' prefix).
-            - The inner key is the role of the label (last part of the role URI).
-            - The value is the text content of the label.
-
-        Example:
-        {
-            'Assets': {
-                'label': 'Assets',
-                'terseLabel': 'Assets',
-                'totalLabel': 'Total Assets'
-            },
-            'Liabilities': {
-                'label': 'Liabilities',
-                'terseLabel': 'Liabilities'
-            }
-        }
-
-        Note:
-        - This function assumes the XML is well-formed and follows the XBRL label linkbase structure.
-        - It uses BeautifulSoup with the 'xml' parser to process the XML.
-        - The function removes the 'lab_' prefix from concept names and extracts only the last part of the role URI.
-        """
-    soup = BeautifulSoup(xml_string, 'xml')
-    labels = {}
-
-    for label in soup.find_all('label'):
-        concept = label.get('xlink:label').split('_', 1)[1]  # Remove the 'lab_' prefix
-        role = label.get('xlink:role').split('/')[-1]  # Get the last part of the role URI
-        text = label.text
-
-        if concept not in labels:
-            labels[concept] = {}
-        labels[concept][role] = text
-
-    return labels
 
 
 def parse_definitions(xml_string: str) -> Dict[str, List[Tuple[str, str, int]]]:

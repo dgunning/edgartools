@@ -1,13 +1,14 @@
 import asyncio
 from pathlib import Path
+from typing import Dict
 
 import pytest
 from rich import print
 
 from edgar import Filing
+from edgar.xbrl.financials import Financials
 from edgar.xbrl.parser import (parse_labels, parse_calculation, parse_definitions, XBRLData, XbrlDocuments,
                                XBRLInstance, XBRLPresentation, FinancialStatement, Statements, StatementData)
-from edgar.xbrl.financials import Financials
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -82,8 +83,24 @@ def netflix_xbrl():
 
 @pytest.fixture(scope='module')
 def crowdstrike_xbrl():
-    filing = Filing(company='CrowdStrike Holdings, Inc.', cik=1535527, form='10-K', filing_date='2024-03-07', accession_no='0001535527-24-000007')
+    filing = Filing(company='CrowdStrike Holdings, Inc.', cik=1535527, form='10-K', filing_date='2024-03-07',
+                    accession_no='0001535527-24-000007')
     return asyncio.run(XBRLData.from_filing(filing))
+
+
+@pytest.fixture(scope='module')
+def orcl_xbrl():
+    filing = Filing(company='ORACLE CORP', cik=1341439, form='10-K', filing_date='2024-06-20',
+                    accession_no='0000950170-24-075605')
+    return asyncio.run(XBRLData.from_filing(filing))
+
+
+@pytest.fixture(scope='module')
+def msft_xbrl():
+    filing = Filing(company='MICROSOFT CORP', cik=789019, form='10-K', filing_date='2023-07-27',
+                    accession_no='0000950170-23-035122')
+    return asyncio.run(XBRLData.from_filing(filing))
+
 
 def test_xbrl_instance_parsing(sample_instance):
     assert len(sample_instance.facts) == 3
@@ -236,11 +253,13 @@ def test_statements_property(apple_xbrl):
     assert len(statements) == 78
     assert 'CoverPage' in statements
 
+
 def test_10Q_filings_have_quarterly_dates(netflix_xbrl):
     balance_sheet: StatementData = netflix_xbrl.get_balance_sheet()
     assert balance_sheet.periods == ['Q1 2024', 'Q4 2023']
     for name in netflix_xbrl.list_statements():
         print(name)
+
 
 @pytest.mark.asyncio
 async def test_parse_xbrl_document_for_filing_with_embedded_linkbase():
@@ -253,16 +272,16 @@ async def test_parse_xbrl_document_for_filing_with_embedded_linkbase():
     assert calculations
     assert instance_xml
 
-    xbrl_data:XBRLData = await XBRLData.from_filing(filing)
+    xbrl_data: XBRLData = await XBRLData.from_filing(filing)
     assert xbrl_data
     print(xbrl_data.list_statements())
     assert len(xbrl_data.statements) == 98
-    statement:StatementData = xbrl_data.get_statement('CoverPage')
+    statement: StatementData = xbrl_data.get_statement('CoverPage')
 
 
 @pytest.mark.asyncio
 async def test_xbrl_financials_using_non_standard_filing_like_crowdstrike(crowdstrike_xbrl):
-    financials:Financials = Financials(crowdstrike_xbrl)
+    financials: Financials = Financials(crowdstrike_xbrl)
 
     balance_sheet = financials.get_balance_sheet()
     assert balance_sheet
@@ -276,7 +295,7 @@ async def test_xbrl_financials_using_non_standard_filing_like_crowdstrike(crowds
     equity_statement = financials.get_statement_of_changes_in_equity()
     assert equity_statement
 
-    cover_page =  financials.get_cover_page()
+    cover_page = financials.get_cover_page()
     assert cover_page
 
     income_statement = financials.get_income_statement()
@@ -286,5 +305,21 @@ async def test_xbrl_financials_using_non_standard_filing_like_crowdstrike(crowds
         print(statement)
 
 
+@pytest.mark.asyncio
+async def test_labels_for_orcl_10K(orcl_xbrl):
+    presentation: XBRLPresentation = orcl_xbrl.presentation
+    labels: Dict = orcl_xbrl.labels
+    cover_concept = 'dei_CoverAbstract'
+    financials: Financials = Financials(orcl_xbrl)
+    balance_sheet = financials.get_balance_sheet()
+    print(balance_sheet.labels)
+    assert not balance_sheet.labels[0].startswith('us-gaap_')
 
-
+@pytest.mark.asyncio
+async def test_labels_for_msft_10K(msft_xbrl):
+    financials: Financials = Financials(msft_xbrl)
+    balance_sheet = financials.get_balance_sheet()
+    print(balance_sheet.display_name)
+    first_label = balance_sheet.data.index[0]
+    assert first_label == 'Statement of Financial Position [Abstract]'
+    assert not '_' in balance_sheet.labels[0]

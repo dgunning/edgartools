@@ -39,7 +39,7 @@ class Financials:
 
         standard_name = role.split('/')[-1]
 
-        return self.xbrl_data.get_statement(standard_name) if standard_name else None
+        return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Balance Sheets") if standard_name else None
 
     def get_income_statement(self) -> StatementData:
         """
@@ -59,7 +59,7 @@ class Financials:
 
         standard_name = role.split('/')[-1]
 
-        return self.xbrl_data.get_statement(standard_name) if standard_name else None
+        return self.xbrl_data.get_statement(standard_name, display_name="Income Statements") if standard_name else None
 
     def get_cash_flow_statement(self) -> StatementData:
         """
@@ -81,7 +81,7 @@ class Financials:
 
         standard_name = role.split('/')[-1]
 
-        return self.xbrl_data.get_statement(standard_name) if standard_name else None
+        return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Statement of Cash Flows") if standard_name else None
 
     def get_statement_of_changes_in_equity(self) -> StatementData:
         """
@@ -104,7 +104,7 @@ class Financials:
 
         standard_name = role.split('/')[-1]
 
-        return self.xbrl_data.get_statement(standard_name) if standard_name else None
+        return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Statement of Shareholders Equity") if standard_name else None
 
     def get_statement_of_comprehensive_income(self) -> StatementData:
         """
@@ -127,7 +127,7 @@ class Financials:
 
         standard_name = role.split('/')[-1]
 
-        return self.xbrl_data.get_statement(standard_name) if standard_name else None
+        return self.xbrl_data.get_statement(standard_name, display_name="Comprehensive Income Statement") if standard_name else None
 
     def get_cover_page(self) -> StatementData:
         """
@@ -149,7 +149,7 @@ class Financials:
 
         standard_name = role.split('/')[-1]
 
-        return self.xbrl_data.get_statement(standard_name) if standard_name else None
+        return self.xbrl_data.get_statement(standard_name, display_name="Cover Page") if standard_name else None
 
     def _find_role_by_concepts(self, concepts: List[str]) -> Optional[str]:
         """
