@@ -1,6 +1,5 @@
 import asyncio
 from pathlib import Path
-from typing import Dict
 
 import pytest
 from rich import print
@@ -204,21 +203,22 @@ def test_parse_definitions():
 
 @pytest.mark.asyncio
 async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
-    statement: StatementData = apple_xbrl.get_statement_of_shareholders_equity()
+    statement: StatementData = Financials(apple_xbrl).get_statement_of_changes_in_equity()
     assert statement
     assert len(statement.data) == 18
 
 
 @pytest.mark.asyncio
 def test_get_statement_name(apple_xbrl):
-    statement: StatementData = apple_xbrl.get_cash_flow_statement()
+    financials = Financials(apple_xbrl)
+    statement: StatementData = financials.get_cash_flow_statement()
     assert statement.get_statement_name() == 'CONSOLIDATED STATEMENTS OF CASH FLOWS'
-    assert apple_xbrl.get_statement_of_shareholders_equity().get_statement_name() == 'CONSOLIDATED STATEMENTS OF SHAREHOLDERS EQUITY'
+    assert financials.get_statement_of_changes_in_equity().get_statement_name() == 'CONSOLIDATED STATEMENTS OF SHAREHOLDERS EQUITY'
 
 
 @pytest.mark.asyncio
 async def test_statement_get_concept_value(apple_xbrl):
-    statement: StatementData = apple_xbrl.get_statement_of_shareholders_equity()
+    statement: StatementData = Financials(apple_xbrl).get_statement_of_changes_in_equity()
     concept = statement.get_concept('us-gaap_NetIncomeLoss')
     assert concept.value.get('2023') == '96995000000'
     assert concept.value.get('2022') == '99803000000'
@@ -230,7 +230,7 @@ async def test_statement_get_concept_value(apple_xbrl):
 
 
 def test_get_balance_sheet(apple_xbrl):
-    balance_sheet: StatementData = apple_xbrl.get_balance_sheet()
+    balance_sheet: StatementData = Financials(apple_xbrl).get_balance_sheet()
     assert balance_sheet.periods == ['2023', '2022']
 
 
@@ -255,7 +255,7 @@ def test_statements_property(apple_xbrl):
 
 
 def test_10Q_filings_have_quarterly_dates(netflix_xbrl):
-    balance_sheet: StatementData = netflix_xbrl.get_balance_sheet()
+    balance_sheet: StatementData = Financials(netflix_xbrl).get_balance_sheet()
     assert balance_sheet.periods == ['Q1 2024', 'Q4 2023']
     for name in netflix_xbrl.list_statements():
         print(name)
@@ -307,13 +307,11 @@ async def test_xbrl_financials_using_non_standard_filing_like_crowdstrike(crowds
 
 @pytest.mark.asyncio
 async def test_labels_for_orcl_10K(orcl_xbrl):
-    presentation: XBRLPresentation = orcl_xbrl.presentation
-    labels: Dict = orcl_xbrl.labels
-    cover_concept = 'dei_CoverAbstract'
     financials: Financials = Financials(orcl_xbrl)
     balance_sheet = financials.get_balance_sheet()
     print(balance_sheet.labels)
     assert not balance_sheet.labels[0].startswith('us-gaap_')
+
 
 @pytest.mark.asyncio
 async def test_labels_for_msft_10K(msft_xbrl):
@@ -323,3 +321,76 @@ async def test_labels_for_msft_10K(msft_xbrl):
     first_label = balance_sheet.data.index[0]
     assert first_label == 'Statement of Financial Position [Abstract]'
     assert not '_' in balance_sheet.labels[0]
+
+
+def test_get_all_dimensions(apple_xbrl):
+    instance: XBRLInstance = apple_xbrl.instance
+    dimensions = instance.get_all_dimensions()
+    assert {
+               'us-gaap:AwardTypeAxis',
+               'us-gaap:ConcentrationRiskByTypeAxis',
+               'us-gaap:LongtermDebtTypeAxis',
+               'us-gaap:FairValueByFairValueHierarchyLevelAxis',
+               'us-gaap:AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareByAntidilutiveSecuritiesAxis',
+           } & dimensions
+
+
+def test_get_dimension_values(apple_xbrl):
+    instance: XBRLInstance = apple_xbrl.instance
+    values = instance.get_dimension_values('us-gaap:LongtermDebtTypeAxis')
+    assert values == ['aapl:FixedRateNotesMember']
+    assert not instance.get_dimension_values('us-gaap:NonExisting')
+
+
+def test_query_facts(apple_xbrl):
+    instance: XBRLInstance = apple_xbrl.instance
+    facts = instance.query_facts(dimensions={'ecd:IndividualAxis': 'aapl:DeirdreOBrienMember'})
+    print(facts)
+
+
+def test_get_facts_by_dimension(apple_xbrl):
+    instance: XBRLInstance = apple_xbrl.instance
+    assert instance.facts.dim.has_dimensions()
+    deidre_facts = instance.facts.dim.value('ecd:IndividualAxis', 'aapl:DeirdreOBrienMember')
+    print(deidre_facts)
+    assert len(deidre_facts) > 0
+
+
+def test_multi_dimension_facts(apple_xbrl):
+    facts = apple_xbrl.instance.facts
+    multi_dim_df = facts.dim.match({
+        'us-gaap:StatementScenarioAxis': 'us-gaap:ScenarioForecastMember',
+        'us-gaap:StatementClassOfStockAxis': 'us-gaap:CommonStockMember'
+    })
+    print(multi_dim_df)
+
+    # List all dimensions
+    all_dimensions = facts.dim.list_dimensions()
+    assert 'us-gaap:StatementBusinessSegmentsAxis' in all_dimensions
+
+    # Get all values for a specific dimension
+   # scenario_values = facts.dim.get_values('us-gaap:StatementScenarioAxis')
+
+
+def test_xbrl_instance_dimensions(apple_xbrl):
+    instance:XBRLInstance = apple_xbrl.instance
+    print(instance.dimensions)
+
+"""
+# For a single dimension
+df.dim.get('us-gaap:StatementScenarioAxis')
+df.dim.value('us-gaap:StatementScenarioAxis', 'us-gaap:ScenarioForecastMember')
+
+# For multiple dimensions
+multi_dim_df = df.dim.match({
+    'us-gaap:StatementScenarioAxis': 'us-gaap:ScenarioForecastMember',
+    'us-gaap:StatementClassOfStockAxis': 'us-gaap:CommonStockMember'
+})
+
+# List all dimensions
+all_dimensions = df.dim.list_dimensions()
+
+# Get all values for a specific dimension
+scenario_values = df.dim.get_values('us-gaap:StatementScenarioAxis')
+"""
+

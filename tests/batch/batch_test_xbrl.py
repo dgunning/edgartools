@@ -22,7 +22,8 @@ async def run_xbrl_tests(num_stocks:int=100):
                 balance_sheet = financials.get_balance_sheet()
                 assert financials.get_income_statement()
                 assert financials.get_cash_flow_statement()
-                assert financials.get_balance_sheet()
+                assert balance_sheet
+                assert not '_' in balance_sheet.labels[0]
                 print(balance_sheet)
 
         print("*"*80)

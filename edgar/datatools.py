@@ -7,7 +7,8 @@ __all__ = ["compress_dataframe",
            "markdown_to_dataframe",
            "dataframe_to_text",
            "clean_column_text",
-           'convert_to_numeric']
+           'convert_to_numeric',
+           'describe_dataframe']
 
 
 def clean_column_text(text: str):
@@ -178,3 +179,39 @@ def convert_to_numeric(series):
         return pd.to_numeric(series)
     except ValueError:
         return series
+
+
+def describe_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    # Get data types of columns
+    dtypes = df.dtypes
+
+    # Create a Series for the index dtype
+    index_dtype = pd.Series(df.index.dtype, index=['Index'])
+
+    # Concatenate the dtypes and index_dtype
+    all_dtypes = pd.concat([index_dtype, dtypes])
+
+    # Get memory usage of each column including the index, in kilobytes and round to 2 decimal places
+    memory_usage = df.memory_usage(deep=True) / 1024
+    memory_usage.index = memory_usage.index.astype(str)  # Ensure index labels are string type
+    memory_usage = memory_usage.round(2)  # Round memory usage to 2 decimal places
+
+    # Calculate total memory usage
+    total_memory_usage = memory_usage.sum()
+
+    # Create a DataFrame with the information
+    description_df = pd.DataFrame({
+        'Data type': all_dtypes.values,
+        'Memory Usage (KB)': memory_usage.values
+    }, index=all_dtypes.index)
+
+    # Append the total memory usage as the last row
+    total_row = pd.DataFrame({
+        'Data type': [''],
+        'Memory Usage (KB)': [total_memory_usage]
+    }, index=['Total'])
+
+    description_df = pd.concat([description_df, total_row])
+
+    return description_df
+

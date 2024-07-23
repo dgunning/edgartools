@@ -1,5 +1,6 @@
 from collections import defaultdict
-from typing import Optional, List
+from typing import Optional, List, Dict
+import pandas as pd
 
 from edgar.xbrl.parser import XBRLData, XBRLPresentation,  StatementData, FinancialStatementMapper
 
@@ -167,3 +168,14 @@ class Financials:
                 role_matches[role] += 1
 
         return max(role_matches, key=role_matches.get) if role_matches else None
+
+    def get_dimensioned_statement(self, statement_name: str, dimensions: Dict[str, str]) -> Optional[StatementData]:
+        return self.xbrl_data.generate_dimensioned_statement(statement_name, dimensions)
+
+    def pivot_statement(self, statement_name: str, dimension: str) -> pd.DataFrame:
+        return self.xbrl_data.pivot_on_dimension(statement_name, dimension)
+
+    def compare_statement_dimensions(self, statement_name: str, dimension: str, value1: str,
+                                     value2: str) -> pd.DataFrame:
+        return self.xbrl_data.compare_dimension_values(statement_name, dimension, value1, value2)
+

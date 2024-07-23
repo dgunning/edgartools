@@ -4,6 +4,7 @@ import pytest
 
 from edgar import Filing
 from edgar.xbrl.parser import StatementData, XBRLData, XbrlDocuments
+from edgar.xbrl.financials import Financials
 
 
 @pytest.fixture(scope='module')
@@ -47,7 +48,7 @@ def netflix_xbrl_2010():
                           ('us-gaap_RetainedEarningsAccumulatedDeficit', ['24,921,495,000', '22,589,286,000']),
                           ])
 def test_netflix_10Q_balance_sheet(netflix_xbrl, concept, values):
-    balance_sheet: StatementData = netflix_xbrl.get_balance_sheet()
+    balance_sheet: StatementData = Financials(netflix_xbrl).get_balance_sheet()
     values = [v.replace(',', '') for v in values]
     assert balance_sheet.get_concept(concept).values == values
 
