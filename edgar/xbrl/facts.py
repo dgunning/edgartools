@@ -150,7 +150,7 @@ class XBRLInstance(BaseModel):
                 'dimensions': dimensions
             })
 
-        self.facts = pd.DataFrame(facts_data).convert_dtypes(dtype_backend="pyarrow")
+        self.facts = pd.DataFrame(facts_data)
 
     def get_all_dimensions(self):
         return set().union(*self.facts['dimensions'].apply(lambda x: x.keys()))

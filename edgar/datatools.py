@@ -8,7 +8,8 @@ __all__ = ["compress_dataframe",
            "dataframe_to_text",
            "clean_column_text",
            'convert_to_numeric',
-           'describe_dataframe']
+           'describe_dataframe',
+           'convert_to_pyarrow_backend']
 
 
 def clean_column_text(text: str):
@@ -215,3 +216,16 @@ def describe_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     return description_df
 
+
+def convert_to_pyarrow_backend(data:pd.DataFrame):
+    # Convert dtypes carefully
+    for col in data.columns:
+        if data[col].dtype == 'object':
+            # For object columns, convert to string
+            data[col] = data[col].astype(str)
+        elif data[col].dtype == 'float64':
+            # For float columns, use float32 to match PyArrow's default
+            data[col] = data[col].astype('float32')
+
+    # Now convert to PyArrow
+    return data.convert_dtypes(dtype_backend="pyarrow")

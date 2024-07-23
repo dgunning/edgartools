@@ -552,7 +552,7 @@ class FinancialStatement(BaseModel):
                 period = f"{fact['start_date']} to {fact['end_date']}"
 
             # Create a unique key that includes the period and dimensions
-            key = (period, tuple(sorted(fact['dimensions'].items())))
+            key = (period, tuple(sorted(fact['dimensions'])))
 
             # If this period doesn't exist in values, or if it does but the current fact has no dimensions (default)
             if period not in values or not fact['dimensions']:
@@ -1001,7 +1001,7 @@ class XBRLData(BaseModel):
                         row['decimals'] = value_info.get('decimals', '')
             data.append(row)
 
-        df = pd.DataFrame(data).convert_dtypes(dtype_backend="pyarrow")
+        df = pd.DataFrame(data)
 
         # Consolidate duplicate rows while preserving all information
         df = df.groupby('label', as_index=False).agg(lambda x: x.dropna().iloc[0] if len(x.dropna()) > 0 else None)
