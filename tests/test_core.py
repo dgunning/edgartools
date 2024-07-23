@@ -1,8 +1,12 @@
 import datetime
+from datetime import datetime
+
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
-from datetime import datetime
+import pytest
+from rich.table import Table
+
 import edgar
 from edgar._rich import *
 from edgar.core import (decode_content,
@@ -13,17 +17,12 @@ from edgar.core import (decode_content,
                         Result,
                         filter_by_date,
                         filter_by_form,
-                        http_client,
+                        filter_by_cik,
                         InvalidDateException,
                         client_headers,
-                        CRAWL, CAUTION, NORMAL,
-                        extract_dates,
+                        CRAWL, CAUTION, extract_dates,
                         reverse_name,
                         get_bool)
-
-import re
-from rich.table import Table
-import pytest
 
 
 def test_decode_content():
@@ -124,7 +123,6 @@ def test_display_size():
     assert display_size("\x01") == ""
 
 
-
 def test_extract_dates():
     assert extract_dates("2022-03-04") == (datetime.strptime("2022-03-04", "%Y-%m-%d"), None, False)
     assert extract_dates("2022-03-04:") == (datetime.strptime("2022-03-04", "%Y-%m-%d"), None, True)
@@ -173,6 +171,23 @@ def test_filter_by_form():
     assert len(filter_by_form(table, form='10-K', amendments=False)) == 2
 
 
+def test_filter_by_cik():
+    arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
+              pa.array([3, 2, 1, 4, 4]),
+              pa.array(['10-K', '10-Q', '10-K', '10-K/A', '4-K']),
+              pa.array([3, 2, 1, 4, 4])
+              ]
+
+    table = pa.Table.from_arrays(arrays, names=['item', 'value', 'form', 'cik'])
+
+    assert len(filter_by_cik(table, 1)) == 1
+    assert len(filter_by_cik(table, [3, 4], )) == 3
+    assert len(filter_by_cik(table, ['3', 4], )) == 3
+    assert len(filter_by_cik(table, ['3'], )) == 1
+
+    # Amendments false
+
+
 def test_dataframe_pager():
     from edgar.core import DataPager
     import numpy as np
@@ -216,9 +231,6 @@ def test_settings():
     assert edgar.edgar_mode.max_connections == 2
 
 
-
-
-
 def test_reverse_name():
     assert reverse_name('WALKER KYLE') == 'Kyle Walker'
     assert reverse_name('KONDO CHRIS') == 'Chris Kondo'
@@ -249,5 +261,3 @@ def test_get_bool():
     assert get_bool("true")
     assert get_bool("TRUE")
     assert get_bool("True")
-
-

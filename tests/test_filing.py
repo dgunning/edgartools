@@ -1,26 +1,30 @@
 import datetime
 import re
+import tempfile
+from datetime import date
 from functools import lru_cache
 from pathlib import Path
 from typing import List
-import tempfile
+
 import httpx
 import humanize
 import pandas as pd
 import pytest
 from rich import print
-import asyncio
-import json
-from datetime import date
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
-from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachments, \
-    Attachment, get_current_filings, fetch_daily_filing_index, filing_date_to_year_quarters
+from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachment, \
+    get_current_filings, fetch_daily_filing_index, filing_date_to_year_quarters
 from edgar.company_reports import TenK
+from edgar.core import default_page_size
 from edgar.entities import Company
-from edgar.core import default_page_size, http_client
 
 pd.options.display.max_colwidth = 200
+
+
+@pytest.fixture(scope='module')
+def filings_2022_q3():
+    return get_filings(2022, 3)
 
 
 def test_read_fixed_width_index_for_daily_file():
@@ -541,6 +545,11 @@ def test_filing_filter_by_form():
     assert set(filings.data['form'].to_pylist()) == {'10-K', '10-K/A', '8-K', '8-K/A'}
 
 
+def test_filter_by_cik():
+    # Test non-xbrl filings
+    filings = get_filings(2022, 3).filter(cik=[1078799, 1877934])
+    assert len(filings) == 17
+
 def test_filter_by_date():
     # Test non-xbrl filings
     filings = get_filings(2022, 3)
@@ -818,7 +827,7 @@ def test_filings_get_by_invalid_accession_number(capsys):
 
 
 def test_get_daily_filing_index():
-    filings = fetch_daily_filing_index('2024-01-26',  index="form")
+    filings = fetch_daily_filing_index('2024-01-26', index="form")
     print(filings)
 
 
