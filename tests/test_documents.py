@@ -616,3 +616,13 @@ def test_get_clean_html_from_unusual_filing():
     assert markdown
 
 
+def ignore_for_now_test_get_text_from_prospectus():
+    # Expected xmlns:xbrli for the instance namespace
+    # but was xmlns:i="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi"
+    #filing = Filing(form='485BPOS', filing_date='2024-03-28', company='DELAWARE GROUP EQUITY FUNDS II', cik=27574, accession_no='0001145443-24-000056')
+    #text = filing.text()
+    #assert text
+    pass
+
+
+
