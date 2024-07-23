@@ -434,10 +434,10 @@ class EntityData:
         return get_entity_submissions(cik, include_old_filings=include_old_filings)
 
     @classmethod
-    def for_ticker(cls, ticker: str):
+    def for_ticker(cls, ticker: str, include_old_filings: bool = True):
         cik = get_ticker_to_cik_lookup().get(ticker.upper())
         if cik:
-            return CompanyData.for_cik(cik)
+            return CompanyData.for_cik(cik, include_old_filings=include_old_filings)
 
     def get_facts(self) -> Optional[EntityFacts]:
         """
@@ -762,7 +762,7 @@ def get_entity(entity_identifier: IntString, include_old_filings: bool = True) -
     is_ticker = isinstance(entity_identifier, str) and re.match("[A-Za-z]{1,6}", entity_identifier, re.IGNORECASE)
 
     if is_ticker:
-        return EntityData.for_ticker(entity_identifier)
+        return EntityData.for_ticker(entity_identifier, include_old_filings=include_old_filings)
 
     log.warn("""
     To use get_company() provide a valid cik or ticker.

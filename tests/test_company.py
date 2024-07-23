@@ -273,7 +273,7 @@ def test_get_company_by_cik():
 
 
 def test_get_company_by_ticker():
-    company = get_entity("SNOW")
+    company = Company("SNOW", include_old_filings=False)
     assert company.cik == 1640147
 
 
