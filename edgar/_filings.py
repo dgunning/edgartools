@@ -37,7 +37,7 @@ from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xml import child_text
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
 from edgar.core import (log, display_size, sec_edgar,
-                        filter_by_date, filter_by_form, InvalidDateException, IntString, DataPager)
+                        filter_by_date, filter_by_form, filter_by_cik, InvalidDateException, IntString, DataPager)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
 from edgar.headers import FilingDirectory, IndexHeaders
@@ -469,7 +469,8 @@ class Filings:
                form: Optional[Union[str, List[IntString]]] = None,
                amendments: bool = False,
                filing_date: Optional[str] = None,
-               date: Optional[str] = None):
+               date: Optional[str] = None,
+               cik: Union[IntString, List[IntString]] = None):
         """
         Get some filings
 
@@ -513,6 +514,10 @@ class Filings:
             except InvalidDateException as e:
                 log.error(e)
                 return None
+
+        # Filter by cik
+        if cik:
+            filing_index = filter_by_cik(filing_index, cik)
 
         return Filings(filing_index)
 

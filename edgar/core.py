@@ -323,6 +323,15 @@ def filter_by_form(data: pa.Table,
     return data
 
 
+def filter_by_cik(data: pa.Table,
+                  cik: Union[IntString, List[IntString]]) -> pa.Table:
+    """Return the data filtered by form"""
+    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
+    ciks = [int(el) for el in listify(cik)]
+    data = data.filter(pc.is_in(data['cik'], pa.array(ciks)))
+    return data
+
+
 @lru_cache(maxsize=1)
 def client_headers():
     return {'User-Agent': get_identity()}
