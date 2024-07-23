@@ -22,6 +22,7 @@ from edgar.httprequests import download_file_async
 from edgar.xbrl.concepts import PresentationElement, Concept
 from edgar.xbrl.facts import XBRLInstance
 from edgar.xbrl.labels import parse_labels
+import os
 
 __all__ = ['XBRLPresentation', 'XbrlDocuments', 'XBRLInstance', 'LineItem', 'FinancialStatement', 'XBRLData',
            'Statements', 'StatementData']
@@ -1002,6 +1003,9 @@ class XBRLData(BaseModel):
             data.append(row)
 
         df = pd.DataFrame(data)
+
+        if os.getenv('EDGAR_USE_PYARROW_BACKEND'):
+            df = pd.DataFrame(data).convert_dtypes(dtype_backend="pyarrow")
 
         # Consolidate duplicate rows while preserving all information
         df = df.groupby('label', as_index=False).agg(lambda x: x.dropna().iloc[0] if len(x.dropna()) > 0 else None)
