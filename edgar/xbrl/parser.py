@@ -1,4 +1,5 @@
 import asyncio
+import os
 import re
 import xml.etree.ElementTree as ET
 from collections import OrderedDict, defaultdict
@@ -22,7 +23,6 @@ from edgar.httprequests import download_file_async
 from edgar.xbrl.concepts import PresentationElement, Concept
 from edgar.xbrl.facts import XBRLInstance
 from edgar.xbrl.labels import parse_labels
-import os
 
 __all__ = ['XBRLPresentation', 'XbrlDocuments', 'XBRLInstance', 'LineItem', 'FinancialStatement', 'XBRLData',
            'Statements', 'StatementData']
