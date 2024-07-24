@@ -617,7 +617,7 @@ class PressRelease:
     def text(self) -> str:
         html = self.html()
         if html:
-            return HtmlDocument.from_html(html).text
+            return HtmlDocument.from_html(html, extract_data=False).text
 
     def open(self):
         self.attachment.open()

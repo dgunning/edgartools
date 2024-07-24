@@ -1,7 +1,7 @@
 import re
 import warnings
 from functools import lru_cache
-from typing import Optional, Tuple, Union, Dict, List, Any
+from typing import Optional, Union, Dict, List, Any
 
 import pandas as pd
 from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning
@@ -9,7 +9,6 @@ from rich import box
 from rich.table import Table
 
 from edgar._rich import repr_rich
-from edgar._xml import child_text
 from edgar.datatools import table_html_to_dataframe, clean_column_text
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
@@ -24,6 +23,32 @@ __all__ = ['DocumentData',
            'table_to_text',
            'html_to_text',
            'get_clean_html', ]
+
+NAMESPACES = {
+    "xbrli": 'http://www.xbrl.org/2003/instance',
+    "i": 'http://www.xbrl.org/2003/instance',
+    "ix": "http://www.xbrl.org/2013/inlineXBRL",
+    "xbrldi": 'http://xbrl.org/2006/xbrldi',
+    "xbrll": "http://www.xbrl.org/2003/linkbase",
+    "link": 'http://www.xbrl.org/2003/linkbase',
+    "xlink": "http://www.w3.org/1999/xlink",
+    "dei": "http://xbrl.sec.gov/dei/2023",
+    "country": "http://xbrl.sec.gov/country/2023",
+    "currency": "http://xbrl.sec.gov/currency/2023",
+    "exch": "http://xbrl.sec.gov/exch/2023",
+    "naics": "http://xbrl.sec.gov/naics/2023",
+    "sic": "http://xbrl.sec.gov/sic/2023",
+    "utr": "http://www.xbrl.org/2009/utr",
+    "cef": "http://xbrl.sec.gov/cef/2023",
+    "srt": "http://fasb.org/srt/2023",
+    "ixt": "http://www.xbrl.org/inlineXBRL/transformation/2022-02-16",
+    "ixt-sec": "http://www.sec.gov/inlineXBRL/transformation/2015-08-31"
+    # Add other namespaces as needed
+}
+
+
+def ns_tag(tag):
+    return re.compile(r'(?:' + '|'.join(NAMESPACES.keys()) + r'):' + tag)
 
 
 class DocumentData:
@@ -86,143 +111,97 @@ class DocumentData:
 
     @classmethod
     def parse_header(cls, ix_header_element: Tag):
-        """
-        Parse the Ixbrl Header
-        <ix:header>
+        hidden_props, schema_refs, context_map, unit_map = None, [], {}, {}
 
-        </ix:header>
-        """
-
-        hidden_props, schema_refs, context_map, unit_map = None, None, None, None
-
-        # Read the document information
-
-        def get_context(context_ref: str) -> Optional[Tuple[str, str, Union[str, None]]]:
-            """Get the value of the context for that context id"""
-            context = context_map.get(context_ref)
-            if context:
-                start_date = context.get('start')
-                end_date = context.get('end')
-                identifier: Optional[str] = context.get('identifier')
-                return start_date, end_date, identifier
-
-        # Read the context
-        resource_tag = ix_header_element.find('ix:resources')
+        resource_tag = ix_header_element.find(ns_tag('resources'))
         if resource_tag:
-            context_map = dict()
-            context_tags = resource_tag.find_all('xbrli:context')
+            # Parse contexts
+            context_tags = resource_tag.find_all(ns_tag('context'))
             for ctx in context_tags:
-                context_id = ctx.attrs['id']
-                # Entity identifier
-                entity_tag = ctx.find('xbrli:entity')
-                context_map[context_id] = {'identifier': child_text(entity_tag, 'xbrli:identifier')}
+                context_id = ctx.get('id')
+                entity_tag = ctx.find(ns_tag('entity'))
+                identifier = entity_tag.find(ns_tag('identifier')).text if entity_tag else None
 
-                # Period
-                period_tag = ctx.find('xbrli:period')
-
-                instant = child_text(period_tag, 'xbrli:instant')
+                period_tag = ctx.find(ns_tag('period'))
+                instant = period_tag.find(ns_tag('instant'))
                 if instant:
-                    context_map[context_id]['start'] = instant
-                    context_map[context_id]['end'] = instant
+                    start = end = instant.text
                 else:
-                    context_map[context_id]['start'] = child_text(period_tag, 'xbrli:startdate')
-                    context_map[context_id]['end'] = child_text(period_tag, 'xbrli:enddate')
-                # Parse segments
-                segment = ctx.find('segment')
-                if segment:
-                    context_map[context_id]['dimensions'] = str({m.attrs['dimension']: m.text
-                                                                 for m in
-                                                                 segment.find_all('xbrldi:explicitdember')})
-            # Read the units
-            unit_map = dict()
-            unit_tags = resource_tag.find_all('xbrli:unit')
-            for unit in unit_tags:
-                unit_id = unit.attrs['id']
-                divide = unit.find('xbrli:divide')
-                if divide:
-                    numerator = child_text(divide.find('xbrli:unitnumerator'), 'xbrli:measure') or ''
-                    denominator = child_text(divide.find('xbrli:unitdenominator'), 'xbrli:measure') or ''
-                    # Strip the prefix
-                    if ":" in numerator:
-                        numerator = numerator.partition(":")[-1]
-                    if ":" in denominator:
-                        denominator = denominator.partition(":")[-1]
-                    unit_map[unit_id] = f"{numerator} per {denominator}"
-                else:
-                    unit_map[unit_id] = child_text(unit, 'xbrli:measure') or ''
+                    start = period_tag.find(ns_tag('startdate')).text if period_tag.find(ns_tag('startdate')) else None
+                    end = period_tag.find(ns_tag('enddate')).text if period_tag.find(ns_tag('enddate')) else None
 
-            # Read the hidden elements inti properties
-            hidden_elements = ix_header_element.find('ix:hidden')
-            hidden_props = None
+                context_map[context_id] = {'identifier': identifier, 'start': start, 'end': end}
+
+                segment = ctx.find(ns_tag('segment'))
+                if segment:
+                    context_map[context_id]['dimensions'] = str({m.get('dimension'): m.text
+                                                                 for m in segment.find_all(ns_tag('explicitMember'))})
+
+            # Parse units
+            unit_tags = resource_tag.find_all(ns_tag('unit'))
+            for unit in unit_tags:
+                unit_id = unit.get('id')
+                divide = unit.find(ns_tag('divide'))
+                if divide:
+                    numerator = divide.find(ns_tag('unitnumerator')).find(ns_tag('measure')).text
+                    denominator = divide.find(ns_tag('unitdenominator')).find(ns_tag('measure')).text
+                    unit_map[unit_id] = f"{numerator.split(':')[-1]} per {denominator.split(':')[-1]}"
+                else:
+                    unit_map[unit_id] = unit.find(ns_tag('measure')).text.split(':')[-1]
+
+            # Parse hidden elements
+            hidden_elements = ix_header_element.find(ns_tag('hidden'))
             if hidden_elements:
                 props = []
-
-                els = hidden_elements.find_all()
-
-                for el in els:
-                    prop = dict()
-
-                    name_parts = el.get('name', '').partition(":")
-                    prop['name'] = name_parts[2]
-                    prop['namespace'] = name_parts[0]
-                    prop['value'] = el.text.strip()
-                    prop['tag'] = el.name
-                    if 'contextref' in el.attrs or 'unitref' in el.attrs:
-                        ctx_ref = el.attrs.get('contextref')
-                        start, end, identifier = get_context(ctx_ref)
-                        prop['start'] = start
-                        prop['end'] = end
-                        prop['identifier'] = identifier
-
+                for el in hidden_elements.find_all():
+                    name_parts = el.get('name', '').partition(':')
+                    prop = {
+                        'name': name_parts[2],
+                        'namespace': name_parts[0],
+                        'value': el.text.strip(),
+                        'tag': el.name
+                    }
+                    ctx_ref = el.get('contextref')
+                    if ctx_ref:
+                        ctx = context_map.get(ctx_ref, {})
+                        prop.update({
+                            'start': ctx.get('start'),
+                            'end': ctx.get('end'),
+                            'identifier': ctx.get('identifier')
+                        })
                     props.append(prop)
                 hidden_props = pd.DataFrame(props)
-        # Read the references
-        references = ix_header_element.find('ix:references')
-        if references:
-            schema_ref_tags = references.find_all()
-            schema_refs = [s.attrs.get('xlink:href')
-                           for s in schema_ref_tags
-                           if 'xlink:href' in s.attrs]
 
-        # Now decompose (remove) the header from the text
+        # Parse references
+        references = ix_header_element.find(ns_tag('references'))
+        if references:
+            schema_refs = [s.get('xlink:href') for s in references.find_all() if s.get('xlink:href')]
+
         ix_header_element.decompose()
-        # Create the header
-        return cls(data=hidden_props,
-                   schema_refs=schema_refs,
-                   context=context_map,
-                   units=unit_map)
+        return cls(data=hidden_props, schema_refs=schema_refs, context=context_map, units=unit_map)
 
     def parse_inline_data(self, start_element: Tag):
         records = []
-
-        for ix_tag in start_element.find_all(INLINE_IXBRL_TAGS):
-
-            # Weird case where the tag has no name
+        inline_tags = ns_tag('nonfraction|nonnumeric|fraction')
+        for ix_tag in start_element.find_all(inline_tags):
             if ix_tag.name is None:
                 continue
 
-            # Create a new record
             record = dict(ix_tag.attrs)
             record['tag'] = ix_tag.name
-            # Get the context
             context_ref = record.get('contextref')
-
             if context_ref:
-                record_context = self.context.get(context_ref, {})
-                record.update(record_context)
-                record.pop('contextref')
+                record.update(self.context.get(context_ref, {}))
+                record.pop('contextref', None)
 
             record['value'] = ix_tag.text.strip()
+            name_parts = record.get('name', '').partition(':')
+            record['namespace'], record['name'] = name_parts[0], name_parts[2]
 
-            name_parts = record.get('name', '').partition(":")
-            record['namespace'] = name_parts[0]
-            record['name'] = name_parts[2]
-
-            # Get the unit
             unit_ref = record.get('unitref')
             if unit_ref:
                 record['unit'] = self.units.get(unit_ref)
-                record.pop('unitref')
+                record.pop('unitref', None)
 
             records.append(record)
 
@@ -252,7 +231,7 @@ class Block:
     def is_empty(self):
         return not self.is_linebreak() and not self.text.strip()
 
-    def is_linebreak(self)-> bool:
+    def is_linebreak(self) -> bool:
         # This block is a line break if it only has '\n'
         return self.text != '' and self.text.strip('\n') == ''
 
@@ -376,10 +355,10 @@ class HtmlDocument:
         compressed_blocks = []
         current_block = None
         for i, block in enumerate(blocks):
-            if isinstance(block, TableBlock) :
+            if isinstance(block, TableBlock):
                 if current_block:
                     compressed_blocks.append(current_block)
-                    current_block = None # Reset the current block
+                    current_block = None  # Reset the current block
                 compressed_blocks.append(block)
             else:
                 if block.text.endswith("\n"):
@@ -394,7 +373,7 @@ class HtmlDocument:
                             current_block = None  # Reset the current block
                     else:
                         compressed_blocks.append(block)
-                elif block.is_empty(): # Empty blocks get appended to the previous block
+                elif block.is_empty():  # Empty blocks get appended to the previous block
                     if not current_block:
                         current_block = block
                     else:
@@ -419,8 +398,6 @@ class HtmlDocument:
 
     @classmethod
     def extract_text(cls, start_element: Tag):
-        # Remove table of contents
-        decompose_toc_links(start_element)
         # Remove page numbers
         decompose_page_numbers(start_element)
 
@@ -454,7 +431,7 @@ class HtmlDocument:
         return soup.find('html')
 
     @classmethod
-    def from_html(cls, html: str):
+    def from_html(cls, html: str, extract_data: bool = False):
         """Create from an html string"""
         # Get the root element
         root: Tag = cls.get_root(html)
@@ -464,7 +441,7 @@ class HtmlDocument:
             return None
 
         # Extract any inline data inside the html
-        data = cls.extract_data(root)
+        data = cls.extract_data(root) if extract_data else None
 
         # Clean the root element .. strip out the header tags, script and style tags, and table of content links
         root = clean_html_root(root)
@@ -632,12 +609,12 @@ def table_to_text(table_tag):
 
 def html_to_text(html: str) -> str:
     """Converts HTML to plain text"""
-    return HtmlDocument.from_html(html).text
+    return HtmlDocument.from_html(html, extract_data=False).text
 
 
 def html_to_markdown(html: str) -> str:
     """Converts HTML to markdown"""
-    return HtmlDocument.from_html(html).markdown
+    return HtmlDocument.from_html(html, extract_data=False).markdown
 
 
 def decompose_toc_links(start_element: Tag):
@@ -654,6 +631,8 @@ def decompose_page_numbers(start_element: Tag):
     previous_number = None
 
     for tag in span_tags_with_numbers:
+        if not tag.text:
+            continue
         number = int(tag.text)
         # Check if the number is sequentially next
         if previous_number is None or number == previous_number + 1:

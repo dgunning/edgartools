@@ -11,6 +11,7 @@ from edgar.datatools import dataframe_to_text
 from edgar.documents import *
 from edgar.documents import fixup
 from edgar.htmltools import ChunkedDocument
+from typing import List, Optional
 
 pd.options.display.max_columns = 10
 
@@ -27,7 +28,7 @@ def test_html_document_does_not_drop_content():
 
 
 def test_html_document_data():
-    document: HtmlDocument = HtmlDocument.from_html(Path("data/ixbrl.simple.html").read_text())
+    document: HtmlDocument = HtmlDocument.from_html(Path("data/ixbrl.simple.html").read_text(), extract_data=True)
     document_ixbrl: DocumentData = document.data
     assert "NamedExecutiveOfficersFnTextBlock" in document_ixbrl
     assert 'PeoName' in document_ixbrl
@@ -616,13 +617,19 @@ def test_get_clean_html_from_unusual_filing():
     assert markdown
 
 
-def ignore_for_now_test_get_text_from_prospectus():
-    # Expected xmlns:xbrli for the instance namespace
+def test_get_text_from_prospectus():
+    #Expected xmlns:xbrli for the instance namespace
     # but was xmlns:i="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi"
-    #filing = Filing(form='485BPOS', filing_date='2024-03-28', company='DELAWARE GROUP EQUITY FUNDS II', cik=27574, accession_no='0001145443-24-000056')
-    #text = filing.text()
-    #assert text
-    pass
+    filing = Filing(form='485BPOS', filing_date='2024-03-28', company='DELAWARE GROUP EQUITY FUNDS II', cik=27574, accession_no='0001145443-24-000056')
+    text = filing.text()
+    assert text
+    #print(text)
+    html_document:Optional[HtmlDocument] = HtmlDocument.from_html(filing.html(), extract_data=True)
+    assert html_document.data
 
 
+def test_parse_html_document_with_issue_decomposing_page_numbers():
+    filing = Filing(form='10-Q', filing_date='2024-07-16', company='Global Arena Holding, Inc.', cik=1138724,
+           accession_no='0001756125-24-001116')
+    text = filing.text()
 

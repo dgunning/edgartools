@@ -494,6 +494,7 @@ class Filings:
         :param amendments: Whether to include amendments to the forms e.g. include "10-K/A" if filtering for "10-K"
         :param filing_date: The filing date
         :param date: An alias for the filing date
+        :param cik: The CIK or list of CIKs to filter by
         :return: The filtered filings
         """
         filing_index = self.data
@@ -1093,7 +1094,7 @@ class Filing:
         """Convert the html of the main filing document to text"""
         html_content = self.html()
         if html_content:
-            html_document = HtmlDocument.from_html(html_content)
+            html_document = HtmlDocument.from_html(html_content, extract_data=False)
             if html_document:
                 return html_document.text
             else:
