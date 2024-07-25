@@ -1,7 +1,7 @@
 import sys
 
 from edgar.reference.forms import describe_form
-from edgar.reference.cusip_tickers import get_ticker_from_cusip, cusip_ticker_mapping
+from edgar.reference.tickers import get_ticker_from_cusip, cusip_ticker_mapping
 
 
 # A dict of state abbreviations and their full names
