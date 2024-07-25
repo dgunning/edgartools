@@ -331,7 +331,9 @@ class FilingHeader:
 
     @property
     def document_count(self):
-        return self.filing_metadata.get("PUBLIC DOCUMENT COUNT", 0)
+        count = self.filing_metadata.get("PUBLIC DOCUMENT COUNT")
+        if count and count.isdigit():
+            return int(count)
 
     @property
     def acceptance_datetime(self):

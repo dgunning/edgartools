@@ -1,20 +1,29 @@
 import datetime
-from pathlib import Path
 import re
-from rich import print
-from edgar.core import extract_text_between_tags
-from edgar import Filing
-from edgar.filingheader import preprocess_old_headers, FilingHeader, Filer
+from pathlib import Path
+
 import pytest
+from rich import print
 
-carbo_10K = Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, filing_date='2018-03-08',
-                   accession_no='0001564590-18-004771')
+from edgar import Filing
+from edgar.core import extract_text_between_tags
+from edgar.filingheader import preprocess_old_headers, FilingHeader, Filer
 
 
-def test_filing_sec_header():
-    filing_header: FilingHeader = carbo_10K.header
-    print()
-    print(filing_header)
+@pytest.fixture(scope='module')
+def carbo_ceramics_header():
+    return Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, filing_date='2018-03-08',
+                  accession_no='0001564590-18-004771').header
+
+
+@pytest.fixture(scope='module')
+def berkshire_hills_header():
+    return Filing(form='SC 13G/A', filing_date='2024-01-23', company='BERKSHIRE HILLS BANCORP INC', cik=1108134,
+                  accession_no='0001086364-24-001430').header
+
+
+def test_filing_sec_header(carbo_ceramics_header):
+    filing_header: FilingHeader = carbo_ceramics_header
     assert len(filing_header.filers) == 1
     filer = filing_header.filers[0]
     assert filer
@@ -289,10 +298,20 @@ def test_file_number_for_filing_with_many_filers():
     assert len(filing.header.file_numbers) == 239
 
 
-def test_filing_number_from_subject_company():
-    filing = Filing(form='SC 13G/A', filing_date='2024-01-23', company='BERKSHIRE HILLS BANCORP INC', cik=1108134,
-                    accession_no='0001086364-24-001430')
-    assert '005-60595' in filing.header.file_numbers
+def test_filing_number_from_subject_company(berkshire_hills_header):
+    assert '005-60595' in berkshire_hills_header.file_numbers
+
+
+def test_header_properties(berkshire_hills_header):
+    print()
+    print(berkshire_hills_header.filing_metadata)
+    assert berkshire_hills_header.document_count == 1
+    assert berkshire_hills_header.form == 'SC 13G/A'
+    assert berkshire_hills_header.date_as_of_change == '2024-01-23'
+    assert berkshire_hills_header.filing_date == '2024-01-23'
+    assert berkshire_hills_header.acceptance_datetime == datetime.datetime(2024, 1, 23, 11, 52, 32)
+    assert berkshire_hills_header.accession_number == '0001086364-24-001430'
+    assert berkshire_hills_header.period_of_report is None
 
 
 def test_parse_header_from_the_1990s():
