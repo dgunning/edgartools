@@ -40,6 +40,11 @@ def msft_xbrl():
                     accession_no='0000950170-23-035122')
     return asyncio.run(XBRLData.from_filing(filing))
 
+@pytest.fixture(scope='module')
+def gd_xbrl():
+    filing = Filing(company='GENERAL DYNAMICS CORP', cik=40533, form='10-Q', filing_date='2024-07-24',
+                    accession_no='0000040533-24-000035')
+    return asyncio.run(XBRLData.from_filing(filing))
 
 @pytest.mark.asyncio
 async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
@@ -96,7 +101,7 @@ def test_statements_property(apple_xbrl):
 
 def test_10Q_filings_have_quarterly_dates(netflix_xbrl):
     balance_sheet: StatementData = Financials(netflix_xbrl).get_balance_sheet()
-    assert balance_sheet.periods == ['Q1 2024', 'Q4 2023']
+    assert balance_sheet.periods == ['Mar 31, 2024', 'Dec 31, 2023']
     for name in netflix_xbrl.list_statements():
         print(name)
 
@@ -203,8 +208,39 @@ async def test_xbrl_financials_using_non_standard_filing_like_crowdstrike(crowds
     assert income_statement
 
 
-def test_extract_financials_from_filing():
-    filing = Filing(company='GENERAL DYNAMICS CORP', cik=40533, form='10-Q', filing_date='2024-07-24',
-                    accession_no='0000040533-24-000035')
-    financials: Financials = Financials.extract(filing)
+def test_extract_financials_from_filing(gd_xbrl):
+    financials: Financials = Financials(gd_xbrl)
     assert financials
+
+
+def test_quarterly_data_extracted_correctly(gd_xbrl):
+    assert gd_xbrl
+    financials: Financials = Financials(gd_xbrl)
+    income_statement:StatementData = financials.get_income_statement()
+    data = income_statement.data
+    concept = income_statement.get_concept('us-gaap:CostOfGoodsAndServicesSold')
+    assert list(concept.value.keys() )== ['Jun 30, 2024', 'Jul 02, 2023']
+    assert concept.value['Jun 30, 2024'] == '6127000000'
+    assert concept.value['Jul 02, 2023'] == '4915000000'
+
+
+def test_get_concepts_for_label(gd_xbrl):
+    concept = 'us-gaap_OperatingIncomeLoss'
+    assert gd_xbrl.get_concept_for_label("Operating Income (Loss)") == concept
+    assert gd_xbrl.get_concept_for_label("Operating Earnings") == concept
+    assert gd_xbrl.get_concept_for_label("Operating earnings") == concept
+
+    assert gd_xbrl.get_labels_for_concept(concept) == {"label": "Operating Income (Loss)",
+                                                         "terseLabel": "Operating Earnings",
+                                                         'totalLabel': "Operating earnings"}
+
+    roles = ['http://www.generaldynamics.com/role/ConsolidatedStatementofEarningsUnaudited',
+             'http://www.generaldynamics.com/role/RevenueImpactofAdjustmentsinContractEstimatesDetails',
+             'http://www.generaldynamics.com/role/SegmentInformationSummaryofFinancialInformationDetails']
+    # Roles for label
+    assert gd_xbrl.get_roles_for_label("Operating Income (Loss)") == roles
+    statements = gd_xbrl.list_statements_for_label("Operating Income (Loss)")
+    print(statements)
+
+    statement = gd_xbrl.get_statement(statements[0])
+    assert statement

@@ -77,4 +77,23 @@ def test_statement_files_exist_for_old_filings(netflix_filing_2010):
     assert sorted(list(documents._documents.keys())) == ['calculation', 'definition', 'instance', 'label', 'presentation', 'schema']
 
 
+def test_column_formating():
+    filing = Filing(form='10-Q', filing_date='2024-07-25', company='AMEDISYS INC', cik=896262, accession_no='0000896262-24-000042')
+    xbrl_data = XBRLData.extract(filing)
+    financials = Financials(xbrl_data)
+    income_statement = financials.get_income_statement()
+    assert income_statement
+    income_repr = repr(income_statement)
+    assert income_repr
+    print(income_repr)
+    assert not ",000.0" in income_repr
+
+def test_quarterly_filing_with_no_income_statement():
+    filing = Filing(form='10-Q', filing_date='2024-07-25', company='VISTEON CORP', cik=1111335, accession_no='0001111335-24-000121')
+    xbrl_data:XBRLData = XBRLData.extract(filing)
+    financials: Financials = Financials(xbrl_data)
+    assert not financials.get_income_statement()
+    assert financials.get_statement_of_comprehensive_income()
+
+
 

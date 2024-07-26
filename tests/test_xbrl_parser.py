@@ -5,7 +5,7 @@ from rich import print
 
 from edgar import Filing
 from edgar.xbrl.parser import (parse_labels, parse_calculation, parse_definitions, XBRLData, XbrlDocuments,
-                               XBRLInstance, XBRLPresentation, FinancialStatement, StatementData)
+                               XBRLInstance, XBRLPresentation, StatementDefinition, StatementData)
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -84,7 +84,7 @@ def test_xbrl_presentation_parsing(sample_presentation):
 
 def test_financial_statement_creation(sample_instance, sample_presentation, sample_labels, sample_calculations):
     role = "http://www.company.com/role/CONSOLIDATEDBALANCESHEETS"
-    statement = FinancialStatement.create(
+    statement = StatementDefinition.create(
         "Balance Sheet",
         sample_presentation.roles[role],
         sample_labels,
@@ -177,27 +177,8 @@ async def test_parse_xbrl_document_for_filing_with_embedded_linkbase():
     statement: StatementData = xbrl_data.get_statement('CoverPage')
 
 
-def test_extract_xbrl_data_from_filing():
-    filing = Filing(company='GENERAL DYNAMICS CORP', cik=40533, form='10-Q', filing_date='2024-07-24',
-                    accession_no='0000040533-24-000035')
-    xbrl_data:XBRLData = XBRLData.extract(filing)
-    assert xbrl_data
 
-
-"""
-# For a single dimension
-df.dim.get('us-gaap:StatementScenarioAxis')
-df.dim.value('us-gaap:StatementScenarioAxis', 'us-gaap:ScenarioForecastMember')
-
-# For multiple dimensions
-multi_dim_df = df.dim.match({
-    'us-gaap:StatementScenarioAxis': 'us-gaap:ScenarioForecastMember',
-    'us-gaap:StatementClassOfStockAxis': 'us-gaap:CommonStockMember'
-})
-
-# List all dimensions
-all_dimensions = df.dim.list_dimensions()
-
-# Get all values for a specific dimension
-scenario_values = df.dim.get_values('us-gaap:StatementScenarioAxis')
-"""
+def test_financial_filing_with_no_attachments():
+    filing = Filing(form='10-Q', filing_date='2024-07-15', company='Legacy Education Alliance, Inc.', cik=1561880, accession_no='0001493152-24-027895')
+    xbrl_data = XBRLData.extract(filing)
+    assert xbrl_data is None
