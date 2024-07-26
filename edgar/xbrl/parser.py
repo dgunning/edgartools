@@ -830,24 +830,6 @@ class XBRLData(BaseModel):
            from_filing(filing: Filing) -> 'XBRL':
                Asynchronously create an XBRL instance from a Filing object.
 
-       Instance Methods:
-           parse_financial_statements():
-               Parse financial statements based on the presentation structure.
-
-           get_statement(name: str) -> Optional[FinancialStatement]:
-               Retrieve a specific financial statement by name.
-
-           get_financial_statement(statement_name: str) -> Optional[pd.DataFrame]:
-               Get a financial statement as a pandas DataFrame, with formatting and filtering applied.
-
-           get_balance_sheet() -> Optional[pd.DataFrame]:
-               Get the balance sheet as a pandas DataFrame.
-
-           get_income_statement() -> Optional[pd.DataFrame]:
-               Get the income statement as a pandas DataFrame.
-
-           get_cash_flow_statement() -> Optional[pd.DataFrame]:
-               Get the cash flow statement as a pandas DataFrame.
        """
     instance: XBRLInstance
     presentation: XBRLPresentation
@@ -891,11 +873,19 @@ class XBRLData(BaseModel):
         Returns:
             XBRLData: An instance of XBRLParser with parsed XBRL components.
         """
+        assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A'], "Filing must be a 10-K or 10-Q"
         xbrl_documents = XbrlDocuments(filing.attachments)
         parsed_documents = await xbrl_documents.load()
         if parsed_documents:
             instance_xml, presentation_xml, labels, calculations = parsed_documents
             return cls.parse(instance_xml, presentation_xml, labels, calculations)
+
+    @classmethod
+    def extract(cls, filing:Filing):
+        """
+        Extract XBRL data from a filing object.
+        """
+        return asyncio.run(cls.from_filing(filing))
 
     def parse_financial_statements(self):
         """

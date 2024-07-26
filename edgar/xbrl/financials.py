@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Optional, List, Dict
 import pandas as pd
-
+import asyncio
 from edgar.xbrl.parser import XBRLData, XBRLPresentation,  StatementData, FinancialStatementMapper
 
 
@@ -18,6 +18,12 @@ class Financials:
     def __init__(self, xbrl_data: XBRLData):
         self.xbrl_data:XBRLData = xbrl_data
         self.presentation:XBRLPresentation = xbrl_data.presentation
+
+    @classmethod
+    def extract(cls, filing):
+        assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A'], "Filing must be a 10-K or 10-Q"
+        xbrl_data = XBRLData.extract(filing)
+        return cls(xbrl_data)
 
     def get_balance_sheet(self) -> StatementData:
         """
