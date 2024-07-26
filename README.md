@@ -65,7 +65,7 @@ set_identity("Michael Mccallum mike.mccalum@indigo.com")
 filings = get_filings()
 ```
 
-# Concepts
+# Key Concepts
 
 ## How do I find a filing?
 Depends on what you know
@@ -342,6 +342,57 @@ Each of the financial statements - `BalanceSheet`, `IncomeStatement` and `CashFl
 
 ```python
 balance_sheet_df = financials.balance_sheet.to_dataframe()
+```
+
+## Downloading Edgar Data
+
+The library is designed to make real time calls to EDGAR to get the latest data. However, you may want to download data for offline use or to build a dataset.
+
+### Download Bulk Company Data
+You can download all the company **filings** and **facts** from Edgar using the `download_edgar_data` function.
+Note that this will store json files for each company of their facts and submissions, but it will not include the actual HTML or other attachments.
+It will however dramatically speed up loading companies by cik or ticker.
+
+The submissions and facts bulk data files are each over 1.GB in size, and take around a few minutes each.
+The data is stored by default in the `~/.edgar` directory. You can change this by setting the `EDGAR_LOCAL_DATA_DIR` environment variable.
+
+```bash
+
+```python
+def download_edgar_data(submissions: bool = True, facts: bool = True):
+    """
+    Download all the company data from Edgar
+    :param submissions: Download all the company submissions
+    :param facts: Download all the company facts
+    """
+download_edgar_data()
+
+```
+### Using Bulk Data
+If you want edgartools to use the bulk data files you can call `use_local_storage()` before you start making calls using the library.
+Alternatively, set `EDGAR_USE_LOCAL_DATA` to `True` in your environment.
+
+### Downsides of using bulk data
+- The filings downloaded for each company is limited to the last 1000
+- You will need to download the latest data every so often to keep it up to date.
+
+## Downloading Attachments
+
+You can download attachments from a filing using the `download` method on the attachments. This will download all the attached files to a folder of your choice.
+
+```python
+
+    def download(self, path: Union[str, Path], archive: bool = False):
+        """
+        Download all the attachments to a specified path.
+        If the path is a directory, the file is saved with its original name in that directory.
+        If the path is a file, the file is saved with the given path name.
+        If archive is True, the attachments are saved in a zip file.
+        path: str or Path - The path to save the attachments
+        archive: bool (default False) - If True, save the attachments in a zip file
+        """ 
+        
+filing.attachments.download(path)
 ```
 
 
