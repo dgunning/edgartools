@@ -46,7 +46,7 @@ from edgar.httprequests import download_file, download_text, download_text_betwe
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
-from edgar.xbrl import FilingXbrl
+from edgar.legacy._xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
 

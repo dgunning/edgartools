@@ -11,7 +11,7 @@ from rich.table import Table, Column
 from rich.text import Text
 
 from edgar._rich import repr_rich
-from edgar.xbrl import FilingXbrl
+from edgar.legacy._xbrl import FilingXbrl
 
 __all__ = [
     'Financials',
