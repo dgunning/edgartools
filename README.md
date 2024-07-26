@@ -381,7 +381,10 @@ Alternatively, set `EDGAR_USE_LOCAL_DATA` to `True` in your environment.
 You can download attachments from a filing using the `download` method on the attachments. This will download all the attached files to a folder of your choice.
 
 ```python
-
+class Attachments:
+    
+    ...
+    
     def download(self, path: Union[str, Path], archive: bool = False):
         """
         Download all the attachments to a specified path.
@@ -391,7 +394,9 @@ You can download attachments from a filing using the `download` method on the at
         path: str or Path - The path to save the attachments
         archive: bool (default False) - If True, save the attachments in a zip file
         """ 
+        ...
         
+# Usage
 filing.attachments.download(path)
 ```
 
