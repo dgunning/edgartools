@@ -10,8 +10,40 @@ from rich.table import Table, Column
 from edgar._rich import repr_rich
 from edgar.xbrl.concepts import DEI_CONCEPTS
 from edgar.xbrl.dimensions import Dimensions
+import pandas as pd
+from dateutil.relativedelta import relativedelta
+
 
 __all__ = ['XBRLInstance']
+
+
+def get_duration_label(start_date, end_date):
+    if start_date is None or end_date is None:
+        return 'instant'
+
+    start = pd.to_datetime(start_date)
+    end = pd.to_datetime(end_date)
+    delta = relativedelta(end, start)
+
+    days = (end - start).days
+
+    if days <= 31:
+        return '1 month'
+    elif days <= 100:
+        return '3 months'
+    elif days <= 196:
+        return '6 months'
+    elif days <= 290:
+        return '9 months'
+    elif days <= 380:
+        return 'annual'
+    else:
+        years = delta.years
+        months = delta.months
+        if months > 0:
+            return f'{years} years {months} months'
+        else:
+            return f'{years} years'
 
 
 class XBRLInstance(BaseModel):
@@ -21,7 +53,7 @@ class XBRLInstance(BaseModel):
     # DataFrame to store all facts from the XBRL instance
     facts: pd.DataFrame = Field(default_factory=lambda: pd.DataFrame(columns=[
         'concept', 'value', 'units', 'decimals', 'start_date', 'end_date',
-        'period_type', 'context_id', 'entity_id', 'dimensions'
+        'period_type', 'duration', 'context_id', 'entity_id', 'dimensions'
     ]))
 
     # Dictionary to store unit information, keyed by unit ID
@@ -132,10 +164,11 @@ class XBRLInstance(BaseModel):
                 start_date = context['start_date']
                 end_date = context['end_date']
                 period_type = 'instant' if start_date == end_date else 'duration'
+                duration = get_duration_label(start_date, end_date)
                 entity_id = context['entity_id']
                 dimensions = context['dimensions']
             else:
-                start_date = end_date = period_type = entity_id = None
+                start_date = end_date = period_type = duration = entity_id = None
                 dimensions = {}
 
             facts_data.append({
@@ -146,6 +179,7 @@ class XBRLInstance(BaseModel):
                 'start_date': start_date,
                 'end_date': end_date,
                 'period_type': period_type,
+                'duration': duration,
                 'context_id': context_id,
                 'entity_id': entity_id,
                 'dimensions': dimensions

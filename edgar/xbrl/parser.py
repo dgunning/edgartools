@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from collections import OrderedDict, defaultdict
 from functools import cached_property
 from typing import Dict, List, Tuple, Union, Any, Optional
+from datetime import datetime
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -23,8 +24,8 @@ from edgar.httprequests import download_file_async
 from edgar.xbrl.concepts import PresentationElement, Concept
 from edgar.xbrl.facts import XBRLInstance
 from edgar.xbrl.labels import parse_labels
-
-__all__ = ['XBRLPresentation', 'XbrlDocuments', 'XBRLInstance', 'LineItem', 'FinancialStatement', 'XBRLData',
+from edgar.core import log
+__all__ = ['XBRLPresentation', 'XbrlDocuments', 'XBRLInstance', 'LineItem', 'StatementDefinition', 'XBRLData',
            'Statements', 'StatementData']
 
 """
@@ -32,7 +33,7 @@ This implementation includes:
 
 Context and Fact classes to represent XBRL contexts and facts.
 XBRLInstance class to parse the instance document, extracting contexts and facts.
-FinancialStatement class to represent a single financial statement, organizing facts according to the presentation linkbase.
+StatementDefinition class to represent a single financial statement, organizing facts according to the presentation linkbase.
 XBRL class to bring everything together, parsing the instance document and creating financial statements based on the presentation, label, and calculation linkbases.
 
 The main() function demonstrates how to use the parser to access a specific financial statement (in this case, the Balance Sheet) and print its contents.
@@ -250,6 +251,7 @@ class XBRLPresentation(BaseModel):
             # If the concept is already namespaced or not found with common namespaces
         return self.concept_index.get(concept, [])
 
+
     def list_roles(self) -> List[str]:
         """ List all available roles in the presentation linkbase. """
         return list(self.roles.keys())
@@ -312,19 +314,24 @@ class XbrlDocuments:
 
     def __init__(self, attachments: Attachments):
         self._documents = dict()
-        for attachment in attachments.data_files:
-            if attachment.document_type in ['XML', 'EX-101.INS']:
-                self._documents['instance'] = attachment
-            elif attachment.document_type == 'EX-101.SCH':
-                self._documents['schema'] = attachment
-            elif attachment.document_type == 'EX-101.DEF':
-                self._documents['definition'] = attachment
-            elif attachment.document_type == 'EX-101.CAL':
-                self._documents['calculation'] = attachment
-            elif attachment.document_type == 'EX-101.LAB':
-                self._documents['label'] = attachment
-            elif attachment.document_type == 'EX-101.PRE':
-                self._documents['presentation'] = attachment
+        if attachments.data_files:
+            for attachment in attachments.data_files:
+                if attachment.document_type in ['XML', 'EX-101.INS']:
+                    self._documents['instance'] = attachment
+                elif attachment.document_type == 'EX-101.SCH':
+                    self._documents['schema'] = attachment
+                elif attachment.document_type == 'EX-101.DEF':
+                    self._documents['definition'] = attachment
+                elif attachment.document_type == 'EX-101.CAL':
+                    self._documents['calculation'] = attachment
+                elif attachment.document_type == 'EX-101.LAB':
+                    self._documents['label'] = attachment
+                elif attachment.document_type == 'EX-101.PRE':
+                    self._documents['presentation'] = attachment
+
+    @property
+    def empty(self):
+        return not self._documents
 
     def has_all_documents(self):
         return all(doc in self._documents for doc in
@@ -470,11 +477,15 @@ class LineItem(BaseModel):
     level: int
 
 
-class FinancialStatement(BaseModel):
+class StatementDefinition(BaseModel):
     # The name of the financial statement (e.g., "Balance Sheet", "Income Statement")
     name: str
     # A list of LineItem objects representing each line in the financial statement
     line_items: List[LineItem] = Field(default_factory=list)
+
+    @property
+    def label(self):
+        return self.line_items[0].label.replace(' [Abstract]', '')
 
     @property
     def empty(self):
@@ -482,8 +493,8 @@ class FinancialStatement(BaseModel):
 
     @classmethod
     def create(cls, name: str, presentation_element: PresentationElement, labels: Dict, calculations: Dict,
-               instance: XBRLInstance) -> 'FinancialStatement':
-        # Factory method to create a FinancialStatement instance
+               instance: XBRLInstance) -> 'StatementDefinition':
+        # Factory method to create a StatementDefinition instance
         statement = cls(name=name)
         # Build the line items for the statement
         statement.build_line_items(presentation_element, labels, calculations, instance)
@@ -561,7 +572,8 @@ class FinancialStatement(BaseModel):
                     'value': fact['value'],
                     'units': fact['units'],
                     'decimals': fact['decimals'],
-                    'dimensions': fact['dimensions']
+                    'dimensions': fact['dimensions'],
+                    'duration': fact['duration']  # Add the duration here
                 }
 
             # Store all dimensional values in a separate dictionary
@@ -571,7 +583,8 @@ class FinancialStatement(BaseModel):
                 'value': fact['value'],
                 'units': fact['units'],
                 'decimals': fact['decimals'],
-                'dimensions': fact['dimensions']
+                'dimensions': fact['dimensions'],
+                'duration': fact['duration']  # Add the duration here as well
             }
 
         return values
@@ -607,7 +620,7 @@ class FinancialStatement(BaseModel):
         rprint(tree)
 
     def to_dict(self):
-        # Convert the FinancialStatement object to a dictionary
+        # Convert the StatementDefinition object to a dictionary
         return {
             'name': self.name,
             'line_items': [item.dict() for item in self.line_items]
@@ -615,11 +628,16 @@ class FinancialStatement(BaseModel):
 
 
 def is_integer(s):
-    if s:
-        if s[0] in ('-', '+'):
-            return s[1:].isdigit()
-        return s.isdigit()
-    return False
+    if not s:
+        return False
+    if s[0] in ('-', '+'):
+        s = s[1:]
+    if '.' in s:
+        if not s.replace('.', '').isdigit():
+            return False
+        integer_part, decimal_part = s.split('.')
+        return decimal_part == '' or decimal_part.strip('0') == ''
+    return s.isdigit()
 
 
 def format_currency(value: Union[str, float], format_str: str = '{:>15,.0f}') -> str:
@@ -627,7 +645,7 @@ def format_currency(value: Union[str, float], format_str: str = '{:>15,.0f}') ->
         value = float(value)
         return format_str.format(value)
     else:
-        return value
+        return f"{value:>15}"
 
 
 def format_label(label, level):
@@ -659,9 +677,11 @@ class StatementData:
                  name: str,
                  entity: str,
                  df: pd.DataFrame,
-                 display_name: str = None):
+                 display_name: str = None,
+                 label: str = None):
         self.name = name
-        self.display_name = display_name or self.name
+        self.label = label or name
+        self.display_name = display_name or self.label
         self.entity = entity
         self.data = df
         self.include_format = 'level' in df.columns
@@ -821,7 +841,7 @@ class XBRLData(BaseModel):
            presentation (XBRLPresentation): Parsed XBRL presentation linkbase.
            labels (Dict): Dictionary of labels for XBRL concepts.
            calculations (Dict): Dictionary of calculation relationships.
-           statements_dict (Dict[str, FinancialStatement]): Dictionary of parsed financial statements.
+           statements_dict (Dict[str, StatementDefinition]): Dictionary of parsed financial statements.
 
        Class Methods:
            parse(instance_xml: str, presentation_xml: str, labels: Dict, calculations: Dict) -> 'XBRL':
@@ -835,7 +855,13 @@ class XBRLData(BaseModel):
     presentation: XBRLPresentation
     labels: Dict
     calculations: Dict
-    statements_dict: Dict[str, FinancialStatement] = Field(default_factory=dict)
+    statements_dict: Dict[str, StatementDefinition] = Field(default_factory=dict)
+    label_to_concept_map: Dict[str, str] = Field(default_factory=dict)
+
+    def _build_label_to_concept_map(self):
+        for concept, label_dict in self.labels.items():
+            for label_type, label in label_dict.items():
+                self.label_to_concept_map[label.lower()] = concept
 
     @classmethod
     def parse(cls, instance_xml: str, presentation_xml: str, labels: Dict, calculations: Dict) -> 'XBRLData':
@@ -859,6 +885,7 @@ class XBRLData(BaseModel):
             labels=labels,
             calculations=calculations
         )
+        parser._build_label_to_concept_map()
         parser.parse_financial_statements()
         return parser
 
@@ -875,13 +902,17 @@ class XBRLData(BaseModel):
         """
         assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A'], "Filing must be a 10-K or 10-Q"
         xbrl_documents = XbrlDocuments(filing.attachments)
+        if xbrl_documents.empty:
+            log.warn(f"No XBRL documents found in the filing. {filing}")
+            return None
+
         parsed_documents = await xbrl_documents.load()
         if parsed_documents:
             instance_xml, presentation_xml, labels, calculations = parsed_documents
             return cls.parse(instance_xml, presentation_xml, labels, calculations)
 
     @classmethod
-    def extract(cls, filing:Filing):
+    def extract(cls, filing: Filing):
         """
         Extract XBRL data from a filing object.
         """
@@ -891,12 +922,12 @@ class XBRLData(BaseModel):
         """
         Parse financial statements based on the presentation structure.
 
-        This method creates FinancialStatement objects for each role in the presentation
+        This method creates StatementDefinition objects for each role in the presentation
         linkbase and stores them in the statements dictionary.
         """
         for role, root_element in self.presentation.roles.items():
             statement_name = role.split('/')[-1]
-            self.statements_dict[statement_name] = FinancialStatement.create(
+            self.statements_dict[statement_name] = StatementDefinition.create(
                 statement_name,
                 root_element,
                 self.labels,
@@ -911,7 +942,7 @@ class XBRLData(BaseModel):
     def list_statements(self) -> List[str]:
         return list(self.statements_dict.keys())
 
-    def find_statement(self, statement_name: str) -> Optional[FinancialStatement]:
+    def get_statement_definition(self, statement_name: str) -> Optional[StatementDefinition]:
         """Find the statement in the statements dictionary."""
         statement = self.statements_dict.get(statement_name)
         if statement:
@@ -922,14 +953,15 @@ class XBRLData(BaseModel):
 
     def has_statement(self, statement_name: str) -> bool:
         """Check if the statement exists in the statements dictionary."""
-        return self.find_statement(statement_name) is not None
+        return self.get_statement_definition(statement_name) is not None
 
     def get_statement(self,
                       statement_name: str,
                       include_format: bool = True,
                       include_concept: bool = True,
                       empty_threshold: float = 0.6,
-                      display_name: str = None) -> Optional[StatementData]:
+                      display_name: str = None,
+                      duration: str = None) -> Optional[StatementData]:
         """
         Get a financial statement as a pandas DataFrame, with formatting and filtering applied.
 
@@ -941,14 +973,16 @@ class XBRLData(BaseModel):
             include_format (bool): Whether to include additional formatting information in the DataFrame.
             include_concept (bool): Whether to include the concept name in the DataFrame.
             empty_threshold (float): The threshold for dropping columns that are mostly empty.
+            display_name (str): The display name for the financial statement.
+            duration (str): The duration of the financial statement (either '3 months' or '6 months').
 
         Returns:
             Optional[pd.DataFrame]: A formatted DataFrame representing the financial statement,
                                     or None if the statement is not found.
         """
-        statement = self.find_statement(statement_name)
+        statement_definition = self.get_statement_definition(statement_name)
 
-        if not statement:
+        if not statement_definition:
             return None
 
             # Get fiscal period focus
@@ -958,14 +992,14 @@ class XBRLData(BaseModel):
         # Create format_info dictionary
         format_info = {
             item.label: {'level': item.level, 'abstract': item.concept.endswith('Abstract'), 'concept': item.concept}
-            for item in statement.line_items}
+            for item in statement_definition.line_items}
 
         # Use the order of line_items as they appear in the statement
-        ordered_items = [item.label for item in statement.line_items]
+        ordered_items = [item.label for item in statement_definition.line_items]
 
         # Create DataFrame with preserved order and abstract concepts
         data = []
-        for item in statement.line_items:
+        for item in statement_definition.line_items:
             row = {'label': item.label}
             if include_format:
                 row['level'] = format_info[item.label]['level']
@@ -976,17 +1010,25 @@ class XBRLData(BaseModel):
                 row['concept'] = format_info[item.label]['concept']
             if not format_info[item.label]['abstract']:
                 for period, value_info in item.values.items():
-                    if ' to ' in period:
-                        end_date = period.split(' to ')[1]
-                    else:
-                        end_date = period
+                    end_date = period.split(' to ')[-1]
                     year = end_date.split('-')[0]
+                    end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+
                     if is_quarterly:
-                        quarter = (pd.to_datetime(end_date).month - 1) // 3 + 1
-                        period_label = f"Q{quarter} {year}"
+                        # Only include periods matching the specified duration for quarterly reports.
+                        # The default is 3 months
+                        if value_info['duration'] == '6 months':
+                            if value_info['duration'] == duration:
+                                period_label = end_date_obj.strftime("%b %d, %Y")
+                                row[period_label] = value_info['value']
+                        else:
+                            period_label = end_date_obj.strftime("%b %d, %Y")
+                            row[period_label] = value_info['value']
                     else:
+                        # For annual reports, include annual periods
                         period_label = year
-                    row[period_label] = value_info['value']
+                        row[period_label] = value_info['value']
+
                     if include_format:
                         row['units'] = value_info.get('units', '')
                         row['decimals'] = value_info.get('decimals', '')
@@ -1044,11 +1086,60 @@ class XBRLData(BaseModel):
             df.columns = [f"{col[0]}_{col[1]}" if isinstance(col, tuple) else col for col in df.columns]
 
         # Create and return Statements object
-        return StatementData(df=df, name=statement_name, display_name=display_name,
+        return StatementData(df=df,
+                             name=statement_name,
+                             display_name=display_name,
+                             label=statement_definition.label,
                              entity=self.instance.get_entity_name())
 
+    def get_concept_for_label(self, label: str) -> Optional[str]:
+        """
+        Search for a concept using its label.
+
+        Args:
+            label (str): The label to search for.
+
+        Returns:
+            Optional[str]: The corresponding concept if found, None otherwise.
+        """
+        return self.label_to_concept_map.get(label.lower())
+
+    def get_labels_for_concept(self, concept: str) -> Dict[str, str]:
+        """
+        Get all labels for a given concept.
+
+        Args:
+            concept (str): The concept to get labels for.
+
+        Returns:
+            Dict[str, str]: A dictionary of label types and their corresponding labels.
+        """
+        return self.labels.get(concept, {})
+
+    def get_roles_for_label(self, label: str) -> List[str]:
+        """
+        Get all roles containing a concept identified by its label.
+
+        Args:
+            label (str): The label to search for.
+
+        Returns:
+            List[str]: A list of roles containing the concept identified by the label.
+        """
+        concept = self.get_concept_for_label(label)
+        if concept:
+            return self.presentation.get_roles_containing_concept(concept)
+        return []
+
+    def list_statements_for_label(self, label: str) -> List[str]:
+        """
+        Get a list of statement names containing a concept identified by its label.
+        """
+        return [role.split('/')[-1]
+                for role in self.get_roles_for_label(label)]
+
     def pivot_on_dimension(self, statement_name: str, dimension: str, value_column: str = 'value') -> pd.DataFrame:
-        statement = self.find_statement(statement_name)
+        statement = self.get_statement_definition(statement_name)
         if not statement:
             return pd.DataFrame()
 
@@ -1059,7 +1150,7 @@ class XBRLData(BaseModel):
 
     def compare_dimension_values(self, statement_name: str, dimension: str, value1: str, value2: str,
                                  value_column: str = 'value') -> pd.DataFrame:
-        statement = self.find_statement(statement_name)
+        statement = self.get_statement_definition(statement_name)
         if not statement:
             return pd.DataFrame()
 

@@ -48,7 +48,7 @@ class Financials:
 
         return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Balance Sheets") if standard_name else None
 
-    def get_income_statement(self) -> StatementData:
+    def get_income_statement(self) -> Optional[StatementData]:
         """
         Retrieves the Income Statement (Statement of Operations).
 
@@ -63,6 +63,8 @@ class Financials:
             income_statement_concepts = ['us-gaap_IncomeStatementAbstract',
                                          'us-gaap_RevenuesAbstract', 'us-gaap_OperatingExpensesAbstract']
             role = self._find_role_by_concepts(income_statement_concepts)
+        if not role:
+            return None
 
         standard_name = role.split('/')[-1]
 
