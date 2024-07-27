@@ -1,8 +1,9 @@
 from collections import defaultdict
 from typing import Optional, List, Dict
+
 import pandas as pd
-import asyncio
-from edgar.xbrl.parser import XBRLData, XBRLPresentation,  StatementData, FinancialStatementMapper
+
+from edgar.xbrl.parser import XBRLData, XBRLPresentation, StatementData, FinancialStatementMapper
 
 
 class Financials:

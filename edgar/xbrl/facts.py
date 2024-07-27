@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional
 
 import pandas as pd
 from bs4 import BeautifulSoup
+from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field
 from rich import box
 from rich.table import Table, Column
@@ -10,9 +11,6 @@ from rich.table import Table, Column
 from edgar._rich import repr_rich
 from edgar.xbrl.concepts import DEI_CONCEPTS
 from edgar.xbrl.dimensions import Dimensions
-import pandas as pd
-from dateutil.relativedelta import relativedelta
-
 
 __all__ = ['XBRLInstance']
 
