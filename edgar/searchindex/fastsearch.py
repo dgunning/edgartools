@@ -140,7 +140,5 @@ if __name__ == '__main__':
                                 columns=['ticker', 'company'],
                                 preprocess_func=company_ticker_preprocess,
                                 score_func=company_ticker_score)
-    # get_company_tickers(as_dataframe=True, clean_name=True,clean_suffix=True).to_csv('data/company_ticker.csv', index=False)
     results = search(index, 'AM', top_n=10)
-    for res in results:
-        print(res)
+

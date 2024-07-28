@@ -1,0 +1,980 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--XBRL document created with Toppan Merrill Bridge  10.7.0.1 -->
+<!--Based on XBRL 2.1-->
+<!--Created on: 7/25/2024 3:28:49 PM-->
+<!--Modified on: 7/25/2024 3:28:49 PM-->
+<xsd:schema xmlns:ref="http://www.xbrl.org/2006/ref" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:attributeFormDefault="unqualified" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xl="http://www.xbrl.org/2003/XLink" targetNamespace="http://www.riteaid.com/20230304" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:us-gaap="http://fasb.org/us-gaap/2023" xmlns:us-types="http://fasb.org/us-types/2023" xmlns:us-roles="http://fasb.org/us-roles/2023" xmlns:negated="http://www.xbrl.org/2009/role/negated" xmlns:srt-types="http://fasb.org/srt-types/2023" xmlns:enum2="http://xbrl.org/2020/extensible-enumerations-2.0" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2022-03-31" xmlns:currency="http://xbrl.sec.gov/currency/2023" xmlns:sic="http://xbrl.sec.gov/sic/2023" xmlns:srt-roles="http://fasb.org/srt-roles/2023" xmlns:stpr="http://xbrl.sec.gov/stpr/2023" xmlns:utr="http://www.xbrl.org/2009/utr" xmlns:exch="http://xbrl.sec.gov/exch/2023" xmlns:naics="http://xbrl.sec.gov/naics/2023" xmlns:country="http://xbrl.sec.gov/country/2023" xmlns:srt="http://fasb.org/srt/2023" xmlns:deprecated="http://www.xbrl.org/2009/role/deprecated" xmlns:net="http://www.xbrl.org/2009/role/net" xmlns:dei="http://xbrl.sec.gov/dei/2023" xmlns:dtr="http://www.xbrl.org/2009/dtr" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:rad="http://www.riteaid.com/20230304">
+  <xsd:annotation>
+    <xsd:appinfo>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureStandardAndCustomAxisDomainDefaults" id="DisclosureStandardAndCustomAxisDomainDefaults">
+        <link:definition>99900 - Disclosure - Standard And Custom Axis Domain Defaults</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedBalanceSheets" id="StatementConsolidatedBalanceSheets">
+        <link:definition>00100 - Statement - CONSOLIDATED BALANCE SHEETS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedStatementsOfOperations" id="StatementConsolidatedStatementsOfOperations">
+        <link:definition>00200 - Statement - CONSOLIDATED STATEMENTS OF OPERATIONS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedStatementsOfComprehensiveLoss" id="StatementConsolidatedStatementsOfComprehensiveLoss">
+        <link:definition>00300 - Statement - CONSOLIDATED STATEMENTS OF COMPREHENSIVE LOSS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedStatementsOfCashFlows" id="StatementConsolidatedStatementsOfCashFlows">
+        <link:definition>00500 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedStatementsOfCashFlowsCal2" id="StatementConsolidatedStatementsOfCashFlowsCal2">
+        <link:definition>00500 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS - Cal 2</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAcquisitionPurchasePriceAllocationDetails" id="DisclosureAcquisitionPurchasePriceAllocationDetails">
+        <link:definition>40202 - Disclosure - Acquisition - Purchase price allocation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAssetSaleToWbaOperatingResultsOfDiscontinuedOperationsDetails" id="DisclosureAssetSaleToWbaOperatingResultsOfDiscontinuedOperationsDetails">
+        <link:definition>40402 - Disclosure - Asset Sale to WBA - Operating results of discontinued operations (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLossPerShareDetails" id="DisclosureLossPerShareDetails">
+        <link:definition>40501 - Disclosure - Loss Per Share (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFacilityExitAndImpairmentChargesFairValueDetails" id="DisclosureFacilityExitAndImpairmentChargesFairValueDetails">
+        <link:definition>40602 - Disclosure - Facility Exit and Impairment Charges - Fair value (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIncomeTaxesDetails" id="DisclosureIncomeTaxesDetails">
+        <link:definition>40801 - Disclosure - Income Taxes (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIncomeTaxesRateReconciliationDetails" id="DisclosureIncomeTaxesRateReconciliationDetails">
+        <link:definition>40802 - Disclosure - Income Taxes - Rate reconciliation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIncomeTaxesDeferredTaxAssetsAndLiabilitiesDetails" id="DisclosureIncomeTaxesDeferredTaxAssetsAndLiabilitiesDetails">
+        <link:definition>40803 - Disclosure - Income Taxes - Deferred Tax Assets and Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureGoodwillAndOtherIntangibleAssetsIntangiblesDetailsCalc2" id="DisclosureGoodwillAndOtherIntangibleAssetsIntangiblesDetailsCalc2">
+        <link:definition>40903 - Disclosure - Goodwill and Other Intangible Assets - Intangibles (Details) (Calc 2)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosurePropertyPlantAndEquipmentDetails" id="DisclosurePropertyPlantAndEquipmentDetails">
+        <link:definition>41301 - Disclosure - Property, Plant and Equipment (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureGoodwillAndOtherIntangibleAssetsIntangiblesDetails" id="DisclosureGoodwillAndOtherIntangibleAssetsIntangiblesDetails">
+        <link:definition>41403 - Disclosure - Goodwill and Other Intangible Assets - Intangibles (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAccruedSalariesWagesAndOtherCurrentLiabilitiesDetails" id="DisclosureAccruedSalariesWagesAndOtherCurrentLiabilitiesDetails">
+        <link:definition>41501 - Disclosure - Accrued Salaries, Wages and Other Current Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLeasesDetails" id="DisclosureLeasesDetails">
+        <link:definition>41701 - Disclosure - Leases (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLeasesSupplementalBsInformationDetails" id="DisclosureLeasesSupplementalBsInformationDetails">
+        <link:definition>41703 - Disclosure - Leases - Supplemental BS Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLeasesMaturityOfLeaseLiabilitiesUnderFinanceAndOperatingLeasesDetails" id="DisclosureLeasesMaturityOfLeaseLiabilitiesUnderFinanceAndOperatingLeasesDetails">
+        <link:definition>41704 - Disclosure - Leases - Maturity of lease liabilities under finance and operating leases (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansNetPeriodicCostDetails" id="DisclosureRetirementPlansNetPeriodicCostDetails">
+        <link:definition>41902 - Disclosure - Retirement Plans - Net periodic cost (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansBenefitObligationAndFundedStatusDetails" id="DisclosureRetirementPlansBenefitObligationAndFundedStatusDetails">
+        <link:definition>41903 - Disclosure - Retirement Plans - Benefit obligation and funded status (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansFutureBenefitPaymentsDetails" id="DisclosureRetirementPlansFutureBenefitPaymentsDetails">
+        <link:definition>41908 - Disclosure - Retirement Plans - Future Benefit Payments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSegmentReportingAdjustedEbitdaDetails" id="DisclosureSegmentReportingAdjustedEbitdaDetails">
+        <link:definition>42103 - Disclosure - Segment Reporting - Adjusted EBITDA (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DocumentDocumentAndEntityInformation" id="DocumentDocumentAndEntityInformation">
+        <link:definition>00090 - Document - Document and Entity Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedBalanceSheetsParenthetical" id="StatementConsolidatedBalanceSheetsParenthetical">
+        <link:definition>00105 - Statement - CONSOLIDATED BALANCE SHEETS (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedStatementsOfComprehensiveLossParenthetical" id="StatementConsolidatedStatementsOfComprehensiveLossParenthetical">
+        <link:definition>00305 - Statement - CONSOLIDATED STATEMENTS OF COMPREHENSIVE LOSS (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedStatementsOfStockholdersDeficitEquity" id="StatementConsolidatedStatementsOfStockholdersDeficitEquity">
+        <link:definition>00400 - Statement - CONSOLIDATED STATEMENTS OF STOCKHOLDERS' (DEFICIT) EQUITY</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/StatementConsolidatedStatementsOfStockholdersDeficitEquityParenthetical" id="StatementConsolidatedStatementsOfStockholdersDeficitEquityParenthetical">
+        <link:definition>00405 - Statement - CONSOLIDATED STATEMENTS OF STOCKHOLDERS' (DEFICIT) EQUITY (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSummaryOfSignificantAccountingPolicies" id="DisclosureSummaryOfSignificantAccountingPolicies">
+        <link:definition>10101 - Disclosure - Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAssetSaleToWba" id="DisclosureAssetSaleToWba">
+        <link:definition>10401 - Disclosure - Asset Sale to WBA</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLossPerShare" id="DisclosureLossPerShare">
+        <link:definition>10501 - Disclosure - Loss Per Share</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFacilityExitAndImpairmentCharges" id="DisclosureFacilityExitAndImpairmentCharges">
+        <link:definition>10601 - Disclosure - Facility Exit and Impairment Charges</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFairValueMeasurements" id="DisclosureFairValueMeasurements">
+        <link:definition>10701 - Disclosure - Fair Value Measurements</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIncomeTaxes" id="DisclosureIncomeTaxes">
+        <link:definition>10801 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAccountsReceivable" id="DisclosureAccountsReceivable">
+        <link:definition>10901 - Disclosure - Accounts Receivable</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureMedicarePartD" id="DisclosureMedicarePartD">
+        <link:definition>11001 - Disclosure - Medicare Part D</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureInventory" id="DisclosureInventory">
+        <link:definition>11201 - Disclosure - Inventory</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosurePropertyPlantAndEquipment" id="DisclosurePropertyPlantAndEquipment">
+        <link:definition>11301 - Disclosure - Property, Plant and Equipment</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureGoodwillAndOtherIntangibleAssets" id="DisclosureGoodwillAndOtherIntangibleAssets">
+        <link:definition>11401 - Disclosure - Goodwill and Other Intangible Assets</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAccruedSalariesWagesAndOtherCurrentLiabilities" id="DisclosureAccruedSalariesWagesAndOtherCurrentLiabilities">
+        <link:definition>11501 - Disclosure - Accrued Salaries, Wages and Other Current Liabilities</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIndebtednessAndCreditAgreement" id="DisclosureIndebtednessAndCreditAgreement">
+        <link:definition>11601 - Disclosure - Indebtedness and Credit Agreement</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLeases" id="DisclosureLeases">
+        <link:definition>11701 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureStockOptionAndStockAwardPlans" id="DisclosureStockOptionAndStockAwardPlans">
+        <link:definition>11801 - Disclosure - Stock Option and Stock Award Plans</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlans" id="DisclosureRetirementPlans">
+        <link:definition>11901 - Disclosure - Retirement Plans</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureMultiemployerPlansThatProvidePensionBenefits" id="DisclosureMultiemployerPlansThatProvidePensionBenefits">
+        <link:definition>12001 - Disclosure - Multiemployer Plans that Provide Pension Benefits</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSegmentReporting" id="DisclosureSegmentReporting">
+        <link:definition>12101 - Disclosure - Segment Reporting</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureCommitmentsContingenciesAndGuarantees" id="DisclosureCommitmentsContingenciesAndGuarantees">
+        <link:definition>12201 - Disclosure - Commitments, Contingencies and Guarantees</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSupplementaryCashFlowData" id="DisclosureSupplementaryCashFlowData">
+        <link:definition>12301 - Disclosure - Supplementary Cash Flow Data</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFinancialInstruments" id="DisclosureFinancialInstruments">
+        <link:definition>12401 - Disclosure - Financial Instruments</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureScheduleIiValuationAndQualifyingAccounts" id="DisclosureScheduleIiValuationAndQualifyingAccounts">
+        <link:definition>12601 - Disclosure - SCHEDULE II-VALUATION AND QUALIFYING ACCOUNTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSummaryOfSignificantAccountingPoliciesPolicies" id="DisclosureSummaryOfSignificantAccountingPoliciesPolicies">
+        <link:definition>20102 - Disclosure - Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSummaryOfSignificantAccountingPoliciesTables" id="DisclosureSummaryOfSignificantAccountingPoliciesTables">
+        <link:definition>30103 - Disclosure - Summary of Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAcquisitionTables" id="DisclosureAcquisitionTables">
+        <link:definition>30203 - Disclosure - Acquisition (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAssetSaleToWbaTables" id="DisclosureAssetSaleToWbaTables">
+        <link:definition>30403 - Disclosure - Asset Sale to WBA (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLossPerShareTables" id="DisclosureLossPerShareTables">
+        <link:definition>30503 - Disclosure - Loss Per Share (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFacilityExitAndImpairmentChargesTables" id="DisclosureFacilityExitAndImpairmentChargesTables">
+        <link:definition>30603 - Disclosure - Facility Exit and Impairment Charges (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIncomeTaxesTables" id="DisclosureIncomeTaxesTables">
+        <link:definition>30803 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosurePropertyPlantAndEquipmentTables" id="DisclosurePropertyPlantAndEquipmentTables">
+        <link:definition>31303 - Disclosure - Property, Plant and Equipment (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureGoodwillAndOtherIntangibleAssetsTables" id="DisclosureGoodwillAndOtherIntangibleAssetsTables">
+        <link:definition>31403 - Disclosure - Goodwill and Other Intangible Assets (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAccruedSalariesWagesAndOtherCurrentLiabilitiesTables" id="DisclosureAccruedSalariesWagesAndOtherCurrentLiabilitiesTables">
+        <link:definition>31503 - Disclosure - Accrued Salaries, Wages and Other Current Liabilities (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIndebtednessAndCreditAgreementTables" id="DisclosureIndebtednessAndCreditAgreementTables">
+        <link:definition>31603 - Disclosure - Indebtedness and Credit Agreement (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLeasesTables" id="DisclosureLeasesTables">
+        <link:definition>31703 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureStockOptionAndStockAwardPlansTables" id="DisclosureStockOptionAndStockAwardPlansTables">
+        <link:definition>31803 - Disclosure - Stock Option and Stock Award Plans (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansTables" id="DisclosureRetirementPlansTables">
+        <link:definition>31903 - Disclosure - Retirement Plans (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureMultiemployerPlansThatProvidePensionBenefitsTables" id="DisclosureMultiemployerPlansThatProvidePensionBenefitsTables">
+        <link:definition>32003 - Disclosure - Multiemployer Plans that Provide Pension Benefits (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSegmentReportingTables" id="DisclosureSegmentReportingTables">
+        <link:definition>32103 - Disclosure - Segment Reporting (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSupplementaryCashFlowDataTables" id="DisclosureSupplementaryCashFlowDataTables">
+        <link:definition>32303 - Disclosure - Supplementary Cash Flow Data (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFinancialInstrumentsTables" id="DisclosureFinancialInstrumentsTables">
+        <link:definition>32403 - Disclosure - Financial Instruments (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSummaryOfSignificantAccountingPoliciesDescriptionOfBusinessAssetSaleDetails" id="DisclosureSummaryOfSignificantAccountingPoliciesDescriptionOfBusinessAssetSaleDetails">
+        <link:definition>40101 - Disclosure - Summary of Significant Accounting Policies - Description of Business, Asset Sale (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSummaryOfSignificantAccountingPoliciesSalesDetails" id="DisclosureSummaryOfSignificantAccountingPoliciesSalesDetails">
+        <link:definition>40102 - Disclosure - Summary of Significant Accounting Policies - Sales (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSummaryOfSignificantAccountingPoliciesFyThruRevenuesDetails" id="DisclosureSummaryOfSignificantAccountingPoliciesFyThruRevenuesDetails">
+        <link:definition>40103 - Disclosure - Summary of Significant Accounting Policies - FY thru Revenues (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSummaryOfSignificantAccountingPoliciesCostOfRevenueThruEstimatesDetails" id="DisclosureSummaryOfSignificantAccountingPoliciesCostOfRevenueThruEstimatesDetails">
+        <link:definition>40104 - Disclosure - Summary of Significant Accounting Policies - Cost of Revenue thru Estimates (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSummaryOfSignificantAccountingPoliciesSignificantConcentrationsDetails" id="DisclosureSummaryOfSignificantAccountingPoliciesSignificantConcentrationsDetails">
+        <link:definition>40105 - Disclosure - Summary of Significant Accounting Policies - Significant Concentrations (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAcquisitionDetails" id="DisclosureAcquisitionDetails">
+        <link:definition>40201 - Disclosure - Acquisition (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAcquisitionIntangibleAssetsAcquiredDetails" id="DisclosureAcquisitionIntangibleAssetsAcquiredDetails">
+        <link:definition>40203 - Disclosure - Acquisition - Intangible assets acquired (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAcquisitionAcquisitionCostsDetails" id="DisclosureAcquisitionAcquisitionCostsDetails">
+        <link:definition>40204 - Disclosure - Acquisition - Acquisition costs (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAcquisitionProformaInformationDetails" id="DisclosureAcquisitionProformaInformationDetails">
+        <link:definition>40205 - Disclosure - Acquisition - Proforma information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRestructuringDetails" id="DisclosureRestructuringDetails">
+        <link:definition>40301 - Disclosure - Restructuring (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAssetSaleToWbaDetails" id="DisclosureAssetSaleToWbaDetails">
+        <link:definition>40401 - Disclosure - Asset Sale to WBA (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFacilityExitAndImpairmentChargesDetails" id="DisclosureFacilityExitAndImpairmentChargesDetails">
+        <link:definition>40601 - Disclosure - Facility Exit and Impairment Charges (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFacilityExitAndImpairmentChargesAccruedFacilityExitChargesRollForwardDetails" id="DisclosureFacilityExitAndImpairmentChargesAccruedFacilityExitChargesRollForwardDetails">
+        <link:definition>40603 - Disclosure - Facility Exit and Impairment Charges - accrued facility exit charges roll forward (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFacilityExitAndImpairmentChargesResultsFromClosedStoresDetails" id="DisclosureFacilityExitAndImpairmentChargesResultsFromClosedStoresDetails">
+        <link:definition>40604 - Disclosure - Facility Exit and Impairment Charges - Results from closed stores (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFairValueMeasurementsDetails" id="DisclosureFairValueMeasurementsDetails">
+        <link:definition>40701 - Disclosure - Fair Value Measurements (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIncomeTaxesUnrecognizedBenefitDetails" id="DisclosureIncomeTaxesUnrecognizedBenefitDetails">
+        <link:definition>40804 - Disclosure - Income Taxes - Unrecognized Benefit (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIncomeTaxesTaxContingenciesDetails" id="DisclosureIncomeTaxesTaxContingenciesDetails">
+        <link:definition>40805 - Disclosure - Income Taxes - Tax Contingencies (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIncomeTaxesNetOperatingLossesAndTaxCreditsDetails" id="DisclosureIncomeTaxesNetOperatingLossesAndTaxCreditsDetails">
+        <link:definition>40806 - Disclosure - Income Taxes - Net Operating Losses and Tax Credits (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAccountsReceivableDetails" id="DisclosureAccountsReceivableDetails">
+        <link:definition>40901 - Disclosure - Accounts Receivable (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureMedicarePartDDetails" id="DisclosureMedicarePartDDetails">
+        <link:definition>41001 - Disclosure - Medicare Part D (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIndebtednessDipTermLoanCreditAgreementDetails" id="DisclosureIndebtednessDipTermLoanCreditAgreementDetails">
+        <link:definition>41004 - Disclosure - Indebtedness - DIP Term Loan Credit Agreement (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureManufacturerRebatesReceivablesDetails" id="DisclosureManufacturerRebatesReceivablesDetails">
+        <link:definition>41101 - Disclosure - Manufacturer Rebates Receivables (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureInventoryDetails" id="DisclosureInventoryDetails">
+        <link:definition>41201 - Disclosure - Inventory (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureGoodwillAndOtherIntangibleAssetsNarrativeDetails" id="DisclosureGoodwillAndOtherIntangibleAssetsNarrativeDetails">
+        <link:definition>41401 - Disclosure - Goodwill and Other Intangible Assets - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureGoodwillAndOtherIntangibleAssetsGoodwillDetails" id="DisclosureGoodwillAndOtherIntangibleAssetsGoodwillDetails">
+        <link:definition>41402 - Disclosure - Goodwill and Other Intangible Assets - Goodwill (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureGoodwillAndOtherIntangibleAssetsUnfavorableLeaseIntangiblesAndAmortizationExpenseDetails" id="DisclosureGoodwillAndOtherIntangibleAssetsUnfavorableLeaseIntangiblesAndAmortizationExpenseDetails">
+        <link:definition>41404 - Disclosure - Goodwill and Other Intangible Assets - Unfavorable lease intangibles and amortization expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIndebtednessAndCreditAgreementIndebtednessAndLeaseFinancingObligationsDetails" id="DisclosureIndebtednessAndCreditAgreementIndebtednessAndLeaseFinancingObligationsDetails">
+        <link:definition>41601 - Disclosure - Indebtedness and Credit Agreement - Indebtedness and lease financing obligations (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIndebtednessAndCreditAgreementCreditFacilityDetails" id="DisclosureIndebtednessAndCreditAgreementCreditFacilityDetails">
+        <link:definition>41602 - Disclosure - Indebtedness and Credit Agreement - Credit Facility (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureIndebtednessAndCreditAgreementTransactionsAndMaturityDetails" id="DisclosureIndebtednessAndCreditAgreementTransactionsAndMaturityDetails">
+        <link:definition>41603 - Disclosure - Indebtedness and Credit Agreement - Transactions and Maturity (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLeasesSaleLeasebackDetails" id="DisclosureLeasesSaleLeasebackDetails">
+        <link:definition>41705 - Disclosure - Leases - Sale Leaseback (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureStockOptionAndStockAwardsPlansDetails" id="DisclosureStockOptionAndStockAwardsPlansDetails">
+        <link:definition>41801 - Disclosure - Stock Option and Stock Awards Plans (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureStockOptionAndStockAwardPlansOptionsDetails" id="DisclosureStockOptionAndStockAwardPlansOptionsDetails">
+        <link:definition>41802 - Disclosure - Stock Option and Stock Award Plans - Options (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureStockOptionAndStockAwardPlansRestrictedStockDetails" id="DisclosureStockOptionAndStockAwardPlansRestrictedStockDetails">
+        <link:definition>41803 - Disclosure - Stock Option and Stock Award Plans - Restricted Stock (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansDetails" id="DisclosureRetirementPlansDetails">
+        <link:definition>41901 - Disclosure - Retirement Plans (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansAccumulatedBenefitObligationAndFairValueOfPlanAssetsDetails" id="DisclosureRetirementPlansAccumulatedBenefitObligationAndFairValueOfPlanAssetsDetails">
+        <link:definition>41904 - Disclosure - Retirement Plans - Accumulated benefit obligation and fair value of plan assets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansProjectedBenefitObligationAndFairValueOfPlanAssetsDetails" id="DisclosureRetirementPlansProjectedBenefitObligationAndFairValueOfPlanAssetsDetails">
+        <link:definition>41905 - Disclosure - Retirement Plans - Projected benefit obligation and fair value of plan assets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansAssumptionsAndAssetsDetails" id="DisclosureRetirementPlansAssumptionsAndAssetsDetails">
+        <link:definition>41906 - Disclosure - Retirement Plans - Assumptions and assets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRetirementPlansFairValueDetails" id="DisclosureRetirementPlansFairValueDetails">
+        <link:definition>41907 - Disclosure - Retirement Plans - Fair Value (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureMultiemployerPlansThatProvidePensionBenefitsDetails" id="DisclosureMultiemployerPlansThatProvidePensionBenefitsDetails">
+        <link:definition>42001 - Disclosure - Multiemployer Plans that Provide Pension Benefits (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSegmentReportingBalanceSheetInformationDetails" id="DisclosureSegmentReportingBalanceSheetInformationDetails">
+        <link:definition>42101 - Disclosure - Segment Reporting - Balance Sheet information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSegmentReportingRevenuesDetails" id="DisclosureSegmentReportingRevenuesDetails">
+        <link:definition>42102 - Disclosure - Segment Reporting - Revenues (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureCommitmentsContingenciesAndGuaranteesDetails" id="DisclosureCommitmentsContingenciesAndGuaranteesDetails">
+        <link:definition>42201 - Disclosure - Commitments, Contingencies and Guarantees (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureSupplementaryCashFlowDataDetails" id="DisclosureSupplementaryCashFlowDataDetails">
+        <link:definition>42301 - Disclosure - Supplementary Cash Flow Data (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureFinancialInstrumentsDetails" id="DisclosureFinancialInstrumentsDetails">
+        <link:definition>42401 - Disclosure - Financial Instruments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRevisionOfPreviouslyIssuedConsolidatedFinancialStatementsDetails" id="DisclosureRevisionOfPreviouslyIssuedConsolidatedFinancialStatementsDetails">
+        <link:definition>42501 - Disclosure - Revision of Previously Issued Consolidated Financial Statements (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureScheduleIiValuationAndQualifyingAccountsDetails" id="DisclosureScheduleIiValuationAndQualifyingAccountsDetails">
+        <link:definition>42601 - Disclosure - SCHEDULE II-VALUATION AND QUALIFYING ACCOUNTS (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureAcquisition" id="DisclosureAcquisition">
+        <link:definition>10201 - Disclosure - Acquisition</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRestructuring" id="DisclosureRestructuring">
+        <link:definition>10301 - Disclosure - Restructuring</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureManufacturerRebatesReceivables" id="DisclosureManufacturerRebatesReceivables">
+        <link:definition>11101 - Disclosure - Manufacturer Rebates Receivables</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRevisionOfPreviouslyIssuedConsolidatedFinancialStatements" id="DisclosureRevisionOfPreviouslyIssuedConsolidatedFinancialStatements">
+        <link:definition>12501 - Disclosure - Revision of Previously Issued Consolidated Financial Statements</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRestructuringTables" id="DisclosureRestructuringTables">
+        <link:definition>30303 - Disclosure - Restructuring (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureRevisionOfPreviouslyIssuedConsolidatedFinancialStatementsTables" id="DisclosureRevisionOfPreviouslyIssuedConsolidatedFinancialStatementsTables">
+        <link:definition>32503 - Disclosure - Revision of Previously Issued Consolidated Financial Statements (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.riteaid.com/role/DisclosureLeasesSupplementalCashFlowInformationRelatedToLeasesDetails" id="DisclosureLeasesSupplementalCashFlowInformationRelatedToLeasesDetails">
+        <link:definition>41702 - Disclosure - Leases - Supplemental cash flow information related to leases (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:linkbaseRef xlink:type="simple" xlink:href="rad-20230304_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" />
+      <link:linkbaseRef xlink:type="simple" xlink:href="rad-20230304_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" />
+      <link:linkbaseRef xlink:type="simple" xlink:href="rad-20230304_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" />
+      <link:linkbaseRef xlink:type="simple" xlink:href="rad-20230304_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" />
+    </xsd:appinfo>
+  </xsd:annotation>
+  <xsd:import namespace="http://xbrl.sec.gov/dei/2023" schemaLocation="https://xbrl.sec.gov/dei/2023/dei-2023.xsd" />
+  <xsd:import namespace="http://www.xbrl.org/dtr/type/2022-03-31" schemaLocation="https://www.xbrl.org/dtr/type/2022-03-31/types.xsd" />
+  <xsd:import namespace="http://www.xbrl.org/2009/role/negated" schemaLocation="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd" />
+  <xsd:import namespace="http://fasb.org/us-roles/2023" schemaLocation="https://xbrl.fasb.org/us-gaap/2023/elts/us-roles-2023.xsd" />
+  <xsd:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd" />
+  <xsd:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd" />
+  <import namespace="http://www.xbrl.org/2009/role/net" schemaLocation="http://www.xbrl.org/lrr/role/net-2009-12-16.xsd" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <import namespace="http://fasb.org/us-gaap/2023" schemaLocation="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <import namespace="http://fasb.org/srt/2023" schemaLocation="https://xbrl.fasb.org/srt/2023/elts/srt-2023.xsd" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <import namespace="http://fasb.org/srt-types/2023" schemaLocation="https://xbrl.fasb.org/srt/2023/elts/srt-types-2023.xsd" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <xsd:element name="LongTermCreditBondIndexMember" id="rad_LongTermCreditBondIndexMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="DefinedBenefitPlanExpectedFutureBenefitPayments" id="rad_DefinedBenefitPlanExpectedFutureBenefitPayments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:balance="credit" xbrli:periodType="instant" />
+  <xsd:element name="MultiemployerPlansMinimumContributionRateForPharmacists" id="rad_MultiemployerPlansMinimumContributionRateForPharmacists" type="srt-types:perUnitItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="MultiemployerPlansMinimumContributionRateForNonPharmacists" id="rad_MultiemployerPlansMinimumContributionRateForNonPharmacists" type="srt-types:perUnitItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="MultiemployerPlansMinimumContributionRate" id="rad_MultiemployerPlansMinimumContributionRate" type="srt-types:perUnitItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="PeriodConsideredForRecordingImpairmentChargesOnOperatingLossBasis" id="rad_PeriodConsideredForRecordingImpairmentChargesOnOperatingLossBasis" type="xbrli:durationItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="PeriodConsideredForImpairmentOfNewStores" id="rad_PeriodConsideredForImpairmentOfNewStores" type="xbrli:durationItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="PeriodConsideredForImpairmentOfRelocatedStores" id="rad_PeriodConsideredForImpairmentOfRelocatedStores" type="xbrli:durationItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="FinancialInstrumentsAbstract" id="rad_FinancialInstrumentsAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="DefinedBenefitPlanBenefitsPaidIncludingExpensesPaidByPlan" id="rad_DefinedBenefitPlanBenefitsPaidIncludingExpensesPaidByPlan" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:balance="debit" xbrli:periodType="duration" />
+  <element id="rad_ProceedsFromRepaymentsOfZeroBalanceCashAccounts" name="ProceedsFromRepaymentsOfZeroBalanceCashAccounts" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_EmployeeRelatedLiabilitiesAndOtherLiabilitiesCurrent" name="EmployeeRelatedLiabilitiesAndOtherLiabilitiesCurrent" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <xsd:element name="AccruedSalariesWagesAndOtherCurrentLiabilitiesTextBlock" id="rad_AccruedSalariesWagesAndOtherCurrentLiabilitiesTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <element id="rad_ScheduleOfLeaseTerminationAndImpairmentChargesTableTextBlock" name="ScheduleOfLeaseTerminationAndImpairmentChargesTableTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <xsd:element name="PrescriptionFilesMember" id="rad_PrescriptionFilesMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="OmnibusEquityPlan2012Member" id="rad_OmnibusEquityPlan2012Member" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="SeniorSecuredCreditFacilityMember" id="rad_SeniorSecuredCreditFacilityMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="GuaranteedUnsecuredDebtMember" id="rad_GuaranteedUnsecuredDebtMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <element id="rad_UnsecuredUnguaranteedDebtMember" name="UnsecuredUnguaranteedDebtMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <xsd:element name="Notes7.7PercentDueFeb2027Member" id="rad_Notes7.7PercentDueFeb2027Member" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="FixedRate6.875PercentSeniorNotesDueDecember2028Member" id="rad_FixedRate6.875PercentSeniorNotesDueDecember2028Member" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="LineOfCreditFacilityThresholdAmountOfAvailabilityForFixedChargeCoverageRequirements" id="rad_LineOfCreditFacilityThresholdAmountOfAvailabilityForFixedChargeCoverageRequirements" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:balance="credit" xbrli:periodType="duration" />
+  <element id="rad_ScheduleOfClosedStoreAndDistributionCenterChargesTableTextBlock" name="ScheduleOfClosedStoreAndDistributionCenterChargesTableTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_ScheduleOfRevenueAndIncomeLossBeforeIncomeTaxesOfClosedStoresOrStoresApprovedForClosureTableTextBlock" name="ScheduleOfRevenueAndIncomeLossBeforeIncomeTaxesOfClosedStoresOrStoresApprovedForClosureTableTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <xsd:element name="FacilityAndEquipmentLeaseExitChargesMember" id="rad_FacilityAndEquipmentLeaseExitChargesMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <element id="rad_AssetsHeldForUseLongLivedFairValueDisclosure" name="AssetsHeldForUseLongLivedFairValueDisclosure" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_ScheduleOfMultiemployerPlansYearContributionsExceededMoreThan5PercentOfTotalContributionsTableTextBlock" name="ScheduleOfMultiemployerPlansYearContributionsExceededMoreThan5PercentOfTotalContributionsTableTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_MultiemployerPensionPlansTextBlock" name="MultiemployerPensionPlansTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <xsd:element name="AccruedStoreExpenseCurrent" id="rad_AccruedStoreExpenseCurrent" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:balance="credit" xbrli:periodType="instant" />
+  <xsd:element name="SEIUHealthCareEmployeesPensionFund1199Member" id="rad_SEIUHealthCareEmployeesPensionFund1199Member" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="SouthernCaliforniaUnitedFoodAndCommercialWorkersUnionsAndDrugEmployersPensionFundMember" id="rad_SouthernCaliforniaUnitedFoodAndCommercialWorkersUnionsAndDrugEmployersPensionFundMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="UnitedFoodAndCommercialWorkersUnionEmployerPensionFundMember" id="rad_UnitedFoodAndCommercialWorkersUnionEmployerPensionFundMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="MultiemployerPlansMinimumContributionPercentage" id="rad_MultiemployerPlansMinimumContributionPercentage" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="OmnibusEquityPlan2010Member" id="rad_OmnibusEquityPlan2010Member" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="SalesTaxCollectedPolicyTextBlock" id="rad_SalesTaxCollectedPolicyTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="DescriptionOfBusinessAbstract" id="rad_DescriptionOfBusinessAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="PrescriptionDrugsMember" id="rad_PrescriptionDrugsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="OverTheCounterMedicationsAndPersonalCareMember" id="rad_OverTheCounterMedicationsAndPersonalCareMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="HealthAndBeautyAidsMember" id="rad_HealthAndBeautyAidsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="GeneralMerchandiseAndOtherMember" id="rad_GeneralMerchandiseAndOtherMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="FiscalYearAbstract" id="rad_FiscalYearAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="TopFiveThirdPartyPayorsMember" id="rad_TopFiveThirdPartyPayorsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="LargestThirdPartyPayorsMember" id="rad_LargestThirdPartyPayorsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="MedicaidAgenciesAndRelatedManagedCareMedicaidPayorsMember" id="rad_MedicaidAgenciesAndRelatedManagedCareMedicaidPayorsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="LargestMedicaidAgenciesMember" id="rad_LargestMedicaidAgenciesMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="MedicarePartDMember" id="rad_MedicarePartDMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="McKessonCorporationMember" id="rad_McKessonCorporationMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="DefinedContributionPlanEmployerMatchLevelOne" id="rad_DefinedContributionPlanEmployerMatchLevelOne" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="DefinedContributionPlanEmployerMatchEmployeeContributionLevelOne" id="rad_DefinedContributionPlanEmployerMatchEmployeeContributionLevelOne" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="DefinedContributionPlanEmployerMatchLevelTwo" id="rad_DefinedContributionPlanEmployerMatchLevelTwo" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="DefinedContributionPlanEmployerMatchEmployeeContributionLevelTwo" id="rad_DefinedContributionPlanEmployerMatchEmployeeContributionLevelTwo" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="UnitedFoodAndCommercialWorkersUnionLocal880MercantileEmployersJointPensionFundMember" id="rad_UnitedFoodAndCommercialWorkersUnionLocal880MercantileEmployersJointPensionFundMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <xsd:element name="SmallMidCapMember" id="rad_SmallMidCapMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration" />
+  <element id="rad_FixedChargeCoverageRatio" name="FixedChargeCoverageRatio" nillable="true" type="xbrli:pureItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorSecuredRevolvingCreditFacilityDueJanuary2020Member" name="SeniorSecuredRevolvingCreditFacilityDueJanuary2020Member" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LineOfCreditFacilityThresholdAmountAllowedOutstanding" name="LineOfCreditFacilityThresholdAmountAllowedOutstanding" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LineOfCreditFacilityThresholdAmountOfDebt" name="LineOfCreditFacilityThresholdAmountOfDebt" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LineOfCreditFacilityNumberOfDaysThresholdRelatingToDebtThreshold" name="LineOfCreditFacilityNumberOfDaysThresholdRelatingToDebtThreshold" nillable="true" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LineOfCreditFacilityThresholdAmountOfAvailabilityForFixedChargeCoverageRequirementsOnThirdConsecutiveBusinessDay" name="LineOfCreditFacilityThresholdAmountOfAvailabilityForFixedChargeCoverageRequirementsOnThirdConsecutiveBusinessDay" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_UFCWPharmacistsClerksAndDrugEmployersPensionTrustMember" name="UFCWPharmacistsClerksAndDrugEmployersPensionTrustMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFiveAndThereafter" name="LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFiveAndThereafter" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorNotes6.125Percent2023DueMember" name="SeniorNotes6.125Percent2023DueMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_OmnibusEquityPlan2014Member" name="OmnibusEquityPlan2014Member" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DefinedBenefitPlanAssumptionsUsedCalculatingNetPeriodicBenefitObligationExpectedLongTermReturnOnAssets" name="DefinedBenefitPlanAssumptionsUsedCalculatingNetPeriodicBenefitObligationExpectedLongTermReturnOnAssets" nillable="true" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RetailPharmacyMember" name="RetailPharmacyMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_PharmacyServicesMember" name="PharmacyServicesMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_FiniteLivedAndIndefiniteLivedIntangibleAssetsByMajorClassTable" name="FiniteLivedAndIndefiniteLivedIntangibleAssetsByMajorClassTable" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_FiniteLivedAndIndefiniteLivedIntangibleAssetsByMajorClassLineItems" name="FiniteLivedAndIndefiniteLivedIntangibleAssetsByMajorClassLineItems" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_AdjustedEarningsBeforeInterestIncomeTaxesDepreciationAndAmortization" name="AdjustedEarningsBeforeInterestIncomeTaxesDepreciationAndAmortization" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_MedicarePrescriptionDrugPlanDisclosuresAbstract" name="MedicarePrescriptionDrugPlanDisclosuresAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_EnvisionInsuranceCompanyMember" name="EnvisionInsuranceCompanyMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_WalgreensMember" name="WalgreensMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_TwentyPlusYearTreasuryStripsMember" name="TwentyPlusYearTreasuryStripsMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DeferredTaxLiabilitiesDeferredExpenseCapitalizedOutsideBasisDifference" name="DeferredTaxLiabilitiesDeferredExpenseCapitalizedOutsideBasisDifference" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_CaremarkMember" name="CaremarkMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_IncomeTaxRateReconciliationAcquisitionCosts" name="IncomeTaxRateReconciliationAcquisitionCosts" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DisposalGroupIncludingDiscontinuedOperationCostAndExpensesAbstract" name="DisposalGroupIncludingDiscontinuedOperationCostAndExpensesAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LongTermUsGovernmentBondsMember" name="LongTermUsGovernmentBondsMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_EffectiveIncomeTaxRateReconciliationNondeductibleExpenseCompensationCostAmount" name="EffectiveIncomeTaxRateReconciliationNondeductibleExpenseCompensationCostAmount" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorNotes6.75PercentAnd6.125PercentMember" name="SeniorNotes6.75PercentAnd6.125PercentMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_PharmacySalesMember" name="PharmacySalesMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_FrontEndSalesMember" name="FrontEndSalesMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SignificantComponentsOfCashUsedByOtherLiabilitiesAbstract" name="SignificantComponentsOfCashUsedByOtherLiabilitiesAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_ManufacturerRebatesReceivablesAbstract" name="ManufacturerRebatesReceivablesAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RebateReceivables" name="RebateReceivables" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorSecuredRevolvingCreditFacilityDueDecember2023Member" name="SeniorSecuredRevolvingCreditFacilityDueDecember2023Member" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorSecuredTermLoanDueDecember2023Member" name="SeniorSecuredTermLoanDueDecember2023Member" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LineOfCreditFacilityMaximumAmountAllowedForAccumulatingCashOnHand" name="LineOfCreditFacilityMaximumAmountAllowedForAccumulatingCashOnHand" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_VendorRebatesAndAllowancesAndPurchaseDiscountsAbstract" name="VendorRebatesAndAllowancesAndPurchaseDiscountsAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RebatesDispensedToManufacturersPeriod" name="RebatesDispensedToManufacturersPeriod" nillable="true" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_ManufacturerRebatesReceivablesTextBlock" name="ManufacturerRebatesReceivablesTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_IncreaseDecreaseInOperatingLeaseRightOfUseAssetsAndOperatingLeaseLiabilities" name="IncreaseDecreaseInOperatingLeaseRightOfUseAssetsAndOperatingLeaseLiabilities" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_NumberOfFixedLeasePayment" name="NumberOfFixedLeasePayment" nillable="true" type="xbrli:integerItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DisclosureOfSupplementalCashFlowInformationRelatedToLeasesTableTextBlock" name="DisclosureOfSupplementalCashFlowInformationRelatedToLeasesTableTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DisclosureOfSupplementalBalanceSheetInformationRelatedToLeasesTableTextBlock" name="DisclosureOfSupplementalBalanceSheetInformationRelatedToLeasesTableTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_CashPaidForAmountsIncludedInMeasurementOfLeaseLiabilitiesAbstract" name="CashPaidForAmountsIncludedInMeasurementOfLeaseLiabilitiesAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_FinanceLeaseCost" name="FinanceLeaseCost" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RightOfUseAssetsObtainedInExchangeForLeaseObligationsAbstract" name="RightOfUseAssetsObtainedInExchangeForLeaseObligationsAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_OperatingLeasesAbstract" name="OperatingLeasesAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_FinanceLeasesAbstract" name="FinanceLeasesAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_WeightedAverageRemainingLeaseTermAbstract" name="WeightedAverageRemainingLeaseTermAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_WeightedAverageDiscountRateAbstract" name="WeightedAverageDiscountRateAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_OperatingAndFinanceLeaseLiabilitiesPaymentsDueAbstract" name="OperatingAndFinanceLeaseLiabilitiesPaymentsDueAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearTwo" name="LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearTwo" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearThree" name="LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearThree" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearFour" name="LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearFour" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearFive" name="LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearFive" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearAfterYearFive" name="LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueYearAfterYearFive" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LesseeOperatingAndFinanceLeaseLiabilityPaymentsDue" name="LesseeOperatingAndFinanceLeaseLiabilityPaymentsDue" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_OperatingAndFinanceLeaseLiabilityUndiscountedExcessAmount" name="OperatingAndFinanceLeaseLiabilityUndiscountedExcessAmount" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_OperatingAndFinanceLeaseLiability" name="OperatingAndFinanceLeaseLiability" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LeaseTerminationAndImpairmentChargesAbstract" name="LeaseTerminationAndImpairmentChargesAbstract" nillable="true" type="xbrli:stringItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RetentionMember" name="RetentionMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_FinanceLeasedAssetsMember" name="FinanceLeasedAssetsMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SaleOfAssetsToWalgreensBootsAllianceWbaAndBuyerMember" name="SaleOfAssetsToWalgreensBootsAllianceWbaAndBuyerMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_NumberOfDistributionCenters" name="NumberOfDistributionCenters" nillable="true" type="xbrli:integerItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DisposalGroupIncludingDiscontinuedOperationsGainLossOnSaleOfAssetsOtherThanStores" name="DisposalGroupIncludingDiscontinuedOperationsGainLossOnSaleOfAssetsOtherThanStores" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DisposalGroupIncludingDiscontinuedOperationCostsExpensesGainsAndLossesNet" name="DisposalGroupIncludingDiscontinuedOperationCostsExpensesGainsAndLossesNet" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LeaseTerminationAndLongLivedAssetImpairmentCharges" name="LeaseTerminationAndLongLivedAssetImpairmentCharges" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_PaymentsForRestructuringNetOfSubleaseIncome" name="PaymentsForRestructuringNetOfSubleaseIncome" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_WalgreensBootsAllianceWbaMember" name="WalgreensBootsAllianceWbaMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SelfInsuranceStopLossCoverageMinimumOccurrenceWorkersCompensation" name="SelfInsuranceStopLossCoverageMinimumOccurrenceWorkersCompensation" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SelfInsuranceStopLossCoverageMinimumOccurrenceGeneralLiability" name="SelfInsuranceStopLossCoverageMinimumOccurrenceGeneralLiability" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RetailSitesPreviouslyImpairedMember" name="RetailSitesPreviouslyImpairedMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RetailSitesNewRelocatedAndRemodeledMember" name="RetailSitesNewRelocatedAndRemodeledMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_OtherRetailSitesMember" name="OtherRetailSitesMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_NumberOfLocationsImpaired" name="NumberOfLocationsImpaired" nillable="true" type="xbrli:integerItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RetailSitesInActiveStatusMember" name="RetailSitesInActiveStatusMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RetailSitesInClosedStatusMember" name="RetailSitesInClosedStatusMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RetailSitesInClosedOrApprovedForClosureStatusMember" name="RetailSitesInClosedOrApprovedForClosureStatusMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RiteAidSubsidiariesMember" name="RiteAidSubsidiariesMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_IncomeTaxReconciliationNondeductibleExpenseOtherThanCompensationAndShareBasedCompensation" name="IncomeTaxReconciliationNondeductibleExpenseOtherThanCompensationAndShareBasedCompensation" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_TaxPeriodBetweenFiscal2029And2031Member" name="TaxPeriodBetweenFiscal2029And2031Member" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_TaxPeriodBetweenFiscal2032And2037Member" name="TaxPeriodBetweenFiscal2032And2037Member" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorNotes7.70PercentAnd6.875PercentMember" name="SeniorNotes7.70PercentAnd6.875PercentMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LesseeOperatingLeaseFutureMinimumSubleaseRentalsDue" name="LesseeOperatingLeaseFutureMinimumSubleaseRentalsDue" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_PerformanceObligationPeriodOfMeasurement" name="PerformanceObligationPeriodOfMeasurement" nillable="true" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_ReorganizationOfExecutiveManagementTeamOngoingWorkforceReductionAndConsolidationAndTransformationInitiativesMember" name="ReorganizationOfExecutiveManagementTeamOngoingWorkforceReductionAndConsolidationAndTransformationInitiativesMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_AccountsReceivableSoldSalePrice" name="AccountsReceivableSoldSalePrice" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorNotes7.5PercentMember" name="SeniorNotes7.5PercentMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueNextTwelveMonths" name="LesseeOperatingAndFinanceLeaseLiabilityPaymentsDueNextTwelveMonths" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SaleAndLeasebackNumberOfFacilities" name="SaleAndLeasebackNumberOfFacilities" nillable="true" type="xbrli:integerItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SaleLeasebackTransactionPrice" name="SaleLeasebackTransactionPrice" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SaleLeasebackTransactionLeasebackMinimumLeaseTerm" name="SaleLeasebackTransactionLeasebackMinimumLeaseTerm" nillable="true" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DeferredTaxAssetsLeasingArrangements" name="DeferredTaxAssetsLeasingArrangements" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LeaseDisclosureTextBlock" name="LeaseDisclosureTextBlock" nillable="true" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LeaseGuaranteeAssetsSoldNumberOfProperties" name="LeaseGuaranteeAssetsSoldNumberOfProperties" nillable="true" type="xbrli:integerItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_IncreaseDecreaseInAccruedStoreExpenses" name="IncreaseDecreaseInAccruedStoreExpenses" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_DebtInstrumentMinimumPrincipalAmountForWhichNonPaymentCausesDefault" name="DebtInstrumentMinimumPrincipalAmountForWhichNonPaymentCausesDefault" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_AgtHighYieldBondMember" name="AgtHighYieldBondMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_CreditFacilityCashSweepProvisionMinimumDepositsAndCapacityOverThreeDayPeriod" name="CreditFacilityCashSweepProvisionMinimumDepositsAndCapacityOverThreeDayPeriod" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_CreditFacilityCashSweepProvisionMinimumDepositsAndCapacityAnyOneDay" name="CreditFacilityCashSweepProvisionMinimumDepositsAndCapacityAnyOneDay" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_ContraCostOfGoodsSoldDisposalGroupIncludingDiscontinuedOperations" name="ContraCostOfGoodsSoldDisposalGroupIncludingDiscontinuedOperations" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_ProceedsFromSaleLeasebackTransactionsInvesting" name="ProceedsFromSaleLeasebackTransactionsInvesting" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_TopFiveCustomersMember" name="TopFiveCustomersMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LargestCustomerMember" name="LargestCustomerMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_CapitalAssetImpairment" name="CapitalAssetImpairment" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorSecuredDebtMember" name="SeniorSecuredDebtMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_LineOfCreditFacilityThresholdAmountOfAvailabilityForFixedChargeCoverageRequirementsThirtiethConsecutiveCalendarDay" name="LineOfCreditFacilityThresholdAmountOfAvailabilityForFixedChargeCoverageRequirementsThirtiethConsecutiveCalendarDay" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SkuOptimizationMember" name="SkuOptimizationMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_SeniorSecuredNotes8.0PercentMember" name="SeniorSecuredNotes8.0PercentMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_IndividuallyInsignificantMultiemployerPlanMember" name="IndividuallyInsignificantMultiemployerPlanMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_BartellDrugCompanyMember" name="BartellDrugCompanyMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_IncomeTaxReconciliationBargainPurchaseGain" name="IncomeTaxReconciliationBargainPurchaseGain" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_ManufacturersRebatesReceivablesMember" name="ManufacturersRebatesReceivablesMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_AonGlobalRealEstateMember" name="AonGlobalRealEstateMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_AonCoreRealEstateFunMember" name="AonCoreRealEstateFunMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_AonHighYieldPlusBondMember" name="AonHighYieldPlusBondMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_AonMultiAssetCreditMember" name="AonMultiAssetCreditMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOperatingLeaseRightOfUseAssets" name="BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOperatingLeaseRightOfUseAssets" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="debit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedAccruedSalariesWagesAndOtherCurrentLiabilities" name="BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedAccruedSalariesWagesAndOtherCurrentLiabilities" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOperatingLeaseLiabilityCurrent" name="BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOperatingLeaseLiabilityCurrent" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOperatingLeaseLiabilityNoncurrent" name="BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOperatingLeaseLiabilityNoncurrent" nillable="true" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" xbrli:balance="credit" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_RebatesDispensedToClientsPeriodInArrears" name="RebatesDispensedToClientsPeriodInArrears" nillable="true" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_CaliforniaEmploymentLitigationMember" name="CaliforniaEmploymentLitigationMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <element id="rad_BlueCrossBlueShieldLitigationMember" name="BlueCrossBlueShieldLitigationMember" nillable="true" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" abstract="true" xbrli:periodType="duration" xmlns="http://www.w3.org/2001/XMLSchema" />
+  <xsd:element name="DebtInstrumentPeriodBeforeMaturityDateWhenUnpaidAmountTriggersChangeInDueDate" id="rad_DebtInstrumentPeriodBeforeMaturityDateWhenUnpaidAmountTriggersChangeInDueDate" type="xbrli:durationItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" />
+  <xsd:element name="FiloTermLoanDueAugust2026Member" id="rad_FiloTermLoanDueAugust2026Member" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="SeniorSecuredRevolvingCreditFacilityDueAugust2026Member" id="rad_SeniorSecuredRevolvingCreditFacilityDueAugust2026Member" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="LossOnBartellAcquisition" id="rad_LossOnBartellAcquisition" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="credit" />
+  <xsd:element name="GainLossOnAcquisitionOfBusiness" id="rad_GainLossOnAcquisitionOfBusiness" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="credit" />
+  <xsd:element name="EffectiveIncomeTaxRateReconciliationDecreaseOfPreviouslyRecordedLiabilities" id="rad_EffectiveIncomeTaxRateReconciliationDecreaseOfPreviouslyRecordedLiabilities" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="debit" />
+  <xsd:element name="AdjustmentOfChangesInEstimatesToProfitAndLoss" id="rad_AdjustmentOfChangesInEstimatesToProfitAndLoss" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="debit" />
+  <xsd:element name="ValueOfEachRewardPoint" id="rad_ValueOfEachRewardPoint" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="instant" abstract="false" xbrli:balance="credit" />
+  <xsd:element name="MinimumPointsRequiredForConversion" id="rad_MinimumPointsRequiredForConversion" type="xbrli:integerItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="instant" abstract="false" />
+  <xsd:element name="ThresholdPeriodForExpiryOfUnconvertedPoints" id="rad_ThresholdPeriodForExpiryOfUnconvertedPoints" type="xbrli:durationItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" />
+  <xsd:element name="ThresholdPeriodForExpiryOfUnredeemedRewards" id="rad_ThresholdPeriodForExpiryOfUnredeemedRewards" type="xbrli:durationItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" />
+  <xsd:element name="PreviouslyDisclosedClientLossMember" id="rad_PreviouslyDisclosedClientLossMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="IncreaseDecreaseInAllowanceForAccountsReceivable" id="rad_IncreaseDecreaseInAllowanceForAccountsReceivable" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="debit" />
+  <xsd:element name="SeniorNotes7.70PercentMember" id="rad_SeniorNotes7.70PercentMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="SeniorNotes6.875PercentMember" id="rad_SeniorNotes6.875PercentMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="DebtInstrumentSunCapAmount" id="rad_DebtInstrumentSunCapAmount" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="credit" />
+  <xsd:element name="GainLossOnUnamortizedDebtExtinguishment" id="rad_GainLossOnUnamortizedDebtExtinguishment" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="credit" />
+  <xsd:element name="WellnessPlusProgramMember" id="rad_WellnessPlusProgramMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="RiteAidRewardsProgramMember" id="rad_RiteAidRewardsProgramMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="January2022ReceivablePurchaseAgreementMember" id="rad_January2022ReceivablePurchaseAgreementMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="August2021ReceivablePurchaseAgreementMember" id="rad_August2021ReceivablePurchaseAgreementMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="AdditionsToRestructuringExpense" id="rad_AdditionsToRestructuringExpense" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="debit" />
+  <xsd:element name="RetailStoreMember" id="rad_RetailStoreMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="DistributionCenterMember" id="rad_DistributionCenterMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="CaliforniaEmploymentLitigationClaimsRelatedToReimbursementForCellPhoneAndMileageExpensesMember" id="rad_CaliforniaEmploymentLitigationClaimsRelatedToReimbursementForCellPhoneAndMileageExpensesMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="CaliforniaEmploymentLitigationClaimsRelatedToWagesAndHourClassActionMember" id="rad_CaliforniaEmploymentLitigationClaimsRelatedToWagesAndHourClassActionMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="HumanaLitigationMember" id="rad_HumanaLitigationMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="NumberOfStoresSold" id="rad_NumberOfStoresSold" type="xbrli:integerItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="instant" abstract="false" />
+  <xsd:element name="ReceivablePurchaseAgreementsMember" id="rad_ReceivablePurchaseAgreementsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="October2022ReceivablePurchaseAgreementMember" id="rad_October2022ReceivablePurchaseAgreementMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="NewYorkEmploymentLitigationMember" id="rad_NewYorkEmploymentLitigationMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="NewYorkEmploymentLitigationClaimsRelatedToWagesAndHourClassActionMember" id="rad_NewYorkEmploymentLitigationClaimsRelatedToWagesAndHourClassActionMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="MostCurrentReceivablePurchaseAgreementMember" id="rad_MostCurrentReceivablePurchaseAgreementMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="NumberOfStoresAcquired" id="rad_NumberOfStoresAcquired" type="xbrli:integerItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="instant" abstract="false" />
+  <xsd:element name="February2021ReceivablePurchaseAgreementMember" id="rad_February2021ReceivablePurchaseAgreementMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="November2020ReceivablePurchaseAgreementMember" id="rad_November2020ReceivablePurchaseAgreementMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="MultiemployerPlansFundedPercentageBasedOnPensionProtectionActZoneStatusRed" id="rad_MultiemployerPlansFundedPercentageBasedOnPensionProtectionActZoneStatusRed" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" />
+  <xsd:element name="MultiemployerPlansFundedPercentageBasedOnPensionProtectionActZoneStatusYellow" id="rad_MultiemployerPlansFundedPercentageBasedOnPensionProtectionActZoneStatusYellow" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" />
+  <xsd:element name="MultiemployerPlansFundedPercentageBasedOnPensionProtectionActZoneStatusGreen" id="rad_MultiemployerPlansFundedPercentageBasedOnPensionProtectionActZoneStatusGreen" type="dtr-types:percentItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" />
+  <xsd:element name="AmendedAndRestated2020OmnibusEquityPlanMember" id="rad_AmendedAndRestated2020OmnibusEquityPlanMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="OmnibusEquityPlan2020Member" id="rad_OmnibusEquityPlan2020Member" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="February2023ReceivablePurchaseAgreementMember" id="rad_February2023ReceivablePurchaseAgreementMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="DefinedBenefitPlanOtherInvestmentMember" id="rad_DefinedBenefitPlanOtherInvestmentMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="IncomeTaxExaminationYear" id="rad_IncomeTaxExaminationYear" type="xbrli:durationItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" />
+  <xsd:element name="AccruedSalariesWagesAndOtherCurrentLiabilitiesMember" id="rad_AccruedSalariesWagesAndOtherCurrentLiabilitiesMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="LondonInterbankOfferedRateMember" id="rad_LondonInterbankOfferedRateMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="true" />
+  <xsd:element name="InventoryLiquidationCharges" id="rad_InventoryLiquidationCharges" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" nillable="true" xbrli:periodType="duration" abstract="false" xbrli:balance="debit" />
+</xsd:schema>

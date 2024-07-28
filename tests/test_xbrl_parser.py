@@ -4,7 +4,7 @@ import pytest
 from rich import print
 
 from edgar import Filing
-from edgar.xbrl.parser import (parse_labels, parse_calculation, parse_definitions, XBRLData, XbrlDocuments,
+from edgar.xbrl.parser import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase, XBRLData, XbrlDocuments,
                                XBRLInstance, XBRLPresentation, StatementDefinition, StatementData)
 
 # Sample XML strings for testing
@@ -144,18 +144,18 @@ def test_xbrl_presentation_list_roles():
 
 
 def test_parse_labels():
-    labels = parse_labels(Path('data/xbrl/datafiles/aapl/aapl-20230930_lab.xml').read_text())
+    labels = parse_label_linkbase(Path('data/xbrl/datafiles/aapl/aapl-20230930_lab.xml').read_text())
     assert labels['us-gaap_ResearchAndDevelopmentExpense']['label'] == 'Research and Development Expense'
 
 
 def test_parse_calculations():
-    calculations = parse_calculation(Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml').read_text())
+    calculations = parse_calculation_linkbase(Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml').read_text())
     assert calculations
     assert calculations['http://www.apple.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS']
 
 
 def test_parse_definitions():
-    definitions = parse_definitions(Path('data/xbrl/datafiles/aapl/aapl-20230930_def.xml').read_text())
+    definitions = parse_definition_linkbase(Path('data/xbrl/datafiles/aapl/aapl-20230930_def.xml').read_text())
     assert definitions
 
 
@@ -172,13 +172,22 @@ async def test_parse_xbrl_document_for_filing_with_embedded_linkbase():
 
     xbrl_data: XBRLData = await XBRLData.from_filing(filing)
     assert xbrl_data
-    print(xbrl_data.list_statements())
     assert len(xbrl_data.statements) == 98
-    statement: StatementData = xbrl_data.get_statement('CoverPage')
-
 
 
 def test_financial_filing_with_no_attachments():
-    filing = Filing(form='10-Q', filing_date='2024-07-15', company='Legacy Education Alliance, Inc.', cik=1561880, accession_no='0001493152-24-027895')
+    filing = Filing(form='10-Q', filing_date='2024-07-15', company='Legacy Education Alliance, Inc.', cik=1561880,
+                    accession_no='0001493152-24-027895')
     xbrl_data = XBRLData.extract(filing)
     assert xbrl_data is None
+
+
+def test_filing_with_no_namespace_labels():
+    filing = Filing(form='10-K/A', filing_date='2024-07-25', company='RITE AID CORP',
+                    cik=84129, accession_no='0001558370-24-010167')
+    xbrl_documents: XbrlDocuments = XbrlDocuments(filing.attachments)
+    assert xbrl_documents.get('label') is not None
+    print(xbrl_documents)
+    xbrl_data:XBRLData = XBRLData.extract(filing)
+    print(xbrl_data.labels)
+

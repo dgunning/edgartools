@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from typing import List, Optional, Union, Any, Dict
 
@@ -5,7 +6,25 @@ import pandas as pd
 from pydantic import BaseModel, Field
 from pydantic import field_validator
 
-__all__ = ['Concept', 'PresentationElement', 'ConceptTableItem', 'ConceptTable', 'Context', 'DEI_CONCEPTS']
+__all__ = ['Concept', 'ConceptTableItem', 'ConceptTable', 'Context', 'DEI_CONCEPTS', 'concept_to_label']
+
+
+def concept_to_label(concept: str) -> str:
+    # Remove namespace prefix if present
+    if '_' in concept:
+        concept = concept.split('_', 1)[1]
+
+    # Split camel case
+    words = re.findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', concept)
+
+    # Capitalize first letter of each word and join
+    label = ' '.join(word.capitalize() for word in words)
+
+    # Remove "Abstract"  or "Domain" suffix
+    label = re.sub(r' Abstract$', '', label)
+    label = re.sub(r' Domain$', '', label)
+
+    return label
 
 
 class Concept(BaseModel):
@@ -36,16 +55,6 @@ class Concept(BaseModel):
     model_config = {
         "arbitrary_types_allowed": True
     }
-
-
-class PresentationElement:
-    def __init__(self, label: str, href: str, order: float, concept: str = None):
-        self.label = label
-        self.href = href
-        self.order = order
-        self.concept = concept if concept else label  # Use label as fallback if concept is not provided
-        self.level = 0
-        self.children = []
 
 
 class ConceptTableItem(BaseModel):

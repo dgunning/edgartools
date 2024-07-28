@@ -3,8 +3,8 @@ from typing import Optional, List, Dict
 
 import pandas as pd
 
-from edgar.xbrl.parser import XBRLData, XBRLPresentation, StatementData, FinancialStatementMapper
-
+from edgar.xbrl.parser import XBRLData, StatementData
+from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
 
 class Financials:
 
@@ -17,8 +17,8 @@ class Financials:
         return None
 
     def __init__(self, xbrl_data: XBRLData):
-        self.xbrl_data:XBRLData = xbrl_data
-        self.presentation:XBRLPresentation = xbrl_data.presentation
+        self.xbrl_data: XBRLData = xbrl_data
+        self.presentation: XBRLPresentation = xbrl_data.presentation
 
     @classmethod
     def extract(cls, filing):
@@ -44,10 +44,10 @@ class Financials:
                                       'us-gaap_StockholdersEquity',
                                       'us-gaap_ShareholdersEquity']
             role = self._find_role_by_concepts(balance_sheet_concepts)
-
-        standard_name = role.split('/')[-1]
-
-        return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Balance Sheets") if standard_name else None
+        if role:
+            standard_name = role.split('/')[-1]
+            if standard_name:
+                return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Balance Sheets")
 
     def get_income_statement(self) -> Optional[StatementData]:
         """
@@ -88,10 +88,10 @@ class Financials:
                                   'us-gaap_NetCashProvidedByUsedInInvestingActivities',
                                   'us-gaap_NetCashProvidedByUsedInFinancingActivities']
             role = self._find_role_by_concepts(cash_flow_concepts)
-
-        standard_name = role.split('/')[-1]
-
-        return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Statement of Cash Flows") if standard_name else None
+        if role:
+            standard_name = role.split('/')[-1]
+            if standard_name:
+                return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Statement of Cash Flows")
 
     def get_statement_of_changes_in_equity(self) -> StatementData:
         """
@@ -111,10 +111,11 @@ class Financials:
                                'us-gaap_RetainedEarnings',
                                'us-gaap_AdditionalPaidInCapital']
             role = self._find_role_by_concepts(equity_concepts)
-
-        standard_name = role.split('/')[-1]
-
-        return self.xbrl_data.get_statement(standard_name, display_name="Consolidated Statement of Shareholders Equity") if standard_name else None
+        if role:
+            standard_name = role.split('/')[-1]
+            if standard_name:
+                return self.xbrl_data.get_statement(standard_name,
+                                                    display_name="Consolidated Statement of Shareholders Equity")
 
     def get_statement_of_comprehensive_income(self) -> StatementData:
         """
@@ -134,10 +135,11 @@ class Financials:
                                              'gaap_OtherComprehensiveIncomeLossNetOfTax',
                                              'us-gaap_ComprehensiveIncomeNetOfTax']
             role = self._find_role_by_concepts(comprehensive_income_concepts)
-
-        standard_name = role.split('/')[-1]
-
-        return self.xbrl_data.get_statement(standard_name, display_name="Comprehensive Income Statement") if standard_name else None
+        if role:
+            standard_name = role.split('/')[-1]
+            if standard_name:
+                return self.xbrl_data.get_statement(standard_name,
+                                                    display_name="Comprehensive Income Statement")
 
     def get_cover_page(self) -> StatementData:
         """
@@ -157,9 +159,10 @@ class Financials:
                                    'dei_DocumentPeriodEndDate']
             role = self._find_role_by_concepts(cover_page_concepts)
 
-        standard_name = role.split('/')[-1]
-
-        return self.xbrl_data.get_statement(standard_name, display_name="Cover Page") if standard_name else None
+        if role:
+            standard_name = role.split('/')[-1]
+            if standard_name:
+                return self.xbrl_data.get_statement(standard_name, display_name="Cover Page")
 
     def _find_role_by_concepts(self, concepts: List[str]) -> Optional[str]:
         """
@@ -187,4 +190,3 @@ class Financials:
     def compare_statement_dimensions(self, statement_name: str, dimension: str, value1: str,
                                      value2: str) -> pd.DataFrame:
         return self.xbrl_data.compare_dimension_values(statement_name, dimension, value1, value2)
-

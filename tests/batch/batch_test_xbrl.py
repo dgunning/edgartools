@@ -1,34 +1,56 @@
-from pathlib import Path
-from tqdm import tqdm
-import pandas as pd
 import asyncio
+import time
+from tqdm import tqdm
+from rich import print
 from edgar import *
-from edgar.xbrl.parser import *
 from edgar.xbrl.financials import *
+
 use_local_storage(True)
 popular_tickers = pd.read_csv('data/popular_us_stocks.csv')
 
 
-async def run_xbrl_tests(num_stocks:int=100):
+def get_financials_for_popular_stocks(num_stocks: int = 100, sleep_time: int = None):
     for ticker in tqdm(popular_tickers.tail(num_stocks).Ticker.tolist()):
-        company:Company = Company(ticker)
+        print()
+        company: Company = Company(ticker)
         if company:
-            print(company)
+            #print(company)
             tenk_filing = company.get_filings(form="10-K").latest(1)
-            print(tenk_filing)
+            print(str(tenk_filing))
             if tenk_filing:
-                xbrl_data:XBRLData = await XBRLData.from_filing(tenk_filing)
-                financials = Financials(xbrl_data)
-                balance_sheet = financials.get_balance_sheet()
-                assert financials.get_income_statement()
-                assert financials.get_cash_flow_statement()
-                assert balance_sheet
-                assert not '_' in balance_sheet.labels[0]
-                print(balance_sheet)
+                get_financials_for_filing(tenk_filing)
+        if sleep_time:
+            time.sleep(sleep_time)
 
-        print("*"*80)
+
+def get_financials_for_recent_filings(num_filings: int = 100, sleep_time: int = None):
+    filings = get_filings(form="10-K").head(num_filings)
+    for filing in tqdm(filings):
+        print()
+        print(str(filing))
+        get_financials_for_filing(filing)
+        if sleep_time:
+            time.sleep(sleep_time)
+
+
+
+def get_financials_for_filing(filing):
+    xbrl_data = XBRLData.extract(filing)
+    if not xbrl_data:
+        print("No XBRL data found for filing")
+        return
+    financials = Financials(xbrl_data)
+    balance_sheet = financials.get_balance_sheet()
+    financials.get_income_statement()
+    financials.get_cash_flow_statement()
+    if balance_sheet:
+        print(balance_sheet)
+        assert not '_' in balance_sheet.labels[0]
+    else:
+        print(xbrl_data.list_statement_definitions())
+    print("*" * 80)
+
 
 if __name__ == '__main__':
-    asyncio.run(run_xbrl_tests())
-
-
+    get_financials_for_popular_stocks(sleep_time=1)
+    #get_financials_for_recent_filings(sleep_time=1)

@@ -2,7 +2,7 @@ from typing import Dict
 from bs4 import BeautifulSoup
 
 __all__ = [
-    'parse_labels'
+    'parse_label_linkbase'
 ]
 
 
@@ -10,7 +10,7 @@ def remove_namespace(s: str) -> str:
     return s.split('_', 1)[-1] if '_' in s else s
 
 
-def parse_labels(xml_string: str) -> Dict[str, Dict[str, str]]:
+def parse_label_linkbase(xml_string: str) -> Dict[str, Dict[str, str]]:
     """
         Parse an XBRL label linkbase XML string and extract label information.
 
@@ -50,9 +50,11 @@ def parse_labels(xml_string: str) -> Dict[str, Dict[str, str]]:
     label_arcs = {}
 
     # First, parse all labels
-    for label in soup.find_all('link:label'):
+    for label in soup.find_all('label'):
         label_id = label.get('xlink:label')
-        role = label.get('xlink:role').split('/')[-1]
+        role = label.get('xlink:role')
+        if role:
+            role = role.split('/')[-1]
         text = label.text
         label_id_no_ns = remove_namespace(label_id)
         if label_id_no_ns not in labels:
@@ -60,7 +62,7 @@ def parse_labels(xml_string: str) -> Dict[str, Dict[str, str]]:
         labels[label_id_no_ns][role] = text
 
     # Then, parse label arcs
-    for arc in soup.find_all('link:labelArc'):
+    for arc in soup.find_all('labelArc'):
         from_concept = arc.get('xlink:from')
         to_label = arc.get('xlink:to')
         to_label_no_ns = remove_namespace(to_label)

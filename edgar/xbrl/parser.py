@@ -2,13 +2,12 @@ import asyncio
 import os
 import re
 import xml.etree.ElementTree as ET
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
+from datetime import datetime
 from functools import cached_property
 from typing import Dict, List, Tuple, Union, Any, Optional
-from datetime import datetime
 
 import pandas as pd
-from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 from rich import box
 from rich import print as rprint
@@ -20,12 +19,16 @@ from edgar import Filing
 from edgar._rich import repr_rich, colorize_words
 from edgar.attachments import Attachment
 from edgar.attachments import Attachments
-from edgar.httprequests import download_file_async
-from edgar.xbrl.concepts import PresentationElement, Concept
-from edgar.xbrl.facts import XBRLInstance
-from edgar.xbrl.labels import parse_labels
 from edgar.core import log
-__all__ = ['XBRLPresentation', 'XbrlDocuments', 'XBRLInstance', 'LineItem', 'StatementDefinition', 'XBRLData',
+from edgar.httprequests import download_file_async
+from edgar.xbrl.calculatons import parse_calculation_linkbase
+from edgar.xbrl.concepts import Concept, concept_to_label
+from edgar.xbrl.definitions import parse_definition_linkbase
+from edgar.xbrl.facts import XBRLInstance
+from edgar.xbrl.labels import parse_label_linkbase
+from edgar.xbrl.presentation import XBRLPresentation, PresentationElement
+
+__all__ = ['XbrlDocuments', 'XBRLInstance', 'LineItem', 'StatementDefinition', 'XBRLData',
            'Statements', 'StatementData']
 
 """
@@ -47,264 +50,6 @@ Hierarchical structure of financial statements (using the level from the present
 
 To use this code, you would need to integrate it with the previously created parsers for the presentation, label, and calculation linkbases. The XBRL class assumes these have already been parsed and are provided as dictionaries.
 """
-
-
-class FinancialStatementMapper:
-    STANDARD_STATEMENTS = {
-        'BALANCE_SHEET': [
-            'CONSOLIDATEDBALANCESHEETS',
-            'CONSOLIDATEDBALANCESHEET',
-            'COMPREHENSIVEBALANCESHEETS',
-            'COMPREHENSIVEBALANCESHEET',
-            'BALANCESHEET',
-            'BALANCESHEETS',
-            'STATEMENTOFFINANCIALPOSITION',
-            'STATEMENTSOFFINANCIALPOSITION',
-            'CONSOLIDATEDSTATEMENTOFFINANCIALPOSITION',
-            'CONSOLIDATEDSTATEMENTSOFFINANCIALPOSITION'
-        ],
-        'INCOME_STATEMENT': [
-            'CONSOLIDATEDSTATEMENTSOFOPERATIONS',
-            'CONSOLIDATEDSTATEMENTOFOPERATIONS',
-            'STATEMENTSOFOPERATIONS',
-            'STATEMENTOFOPERATIONS',
-            'INCOMESTATEMENT',
-            'INCOMESTATEMENTS',
-            'CONSOLIDATEDINCOMESTATEMENT',
-            'CONSOLIDATEDINCOMESTATEMENTS',
-            'STATEMENTSOFINCOME',
-            'STATEMENTOFINCOME',
-            'CONSOLIDATEDSTATEMENTSOFINCOME',
-            'CONSOLIDATEDSTATEMENTOFINCOME',
-            'CONSOLIDATEDSTATEMENTSOFINCOMELOSS',
-            'CONSOLIDATEDSTATEMENTOFINCOMELOSS',
-            'STATEMENTSOFEARNINGS',
-            'STATEMENTOFEARNINGS',
-            'CONSOLIDATEDSTATEMENTSOFEARNINGS',
-            'CONSOLIDATEDSTATEMENTOFEARNINGS'
-        ],
-        'CASH_FLOW': [
-            'CONSOLIDATEDSTATEMENTSOFCASHFLOWS',
-            'CONSOLIDATEDSTATEMENTOFCASHFLOWS',
-            'STATEMENTOFCASHFLOWS',
-            'STATEMENTSOFCASHFLOWS',
-            'CASHFLOWSTATEMENT',
-            'CASHFLOWSTATEMENTS'
-        ],
-        'EQUITY': [
-            'CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY',
-            'CONSOLIDATEDSTATEMENTOFSHAREHOLDERSEQUITY',
-            'CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSEQUITY',
-            'CONSOLIDATEDSTATEMENTOFSTOCKHOLDERSEQUITY',
-            'STATEMENTOFSHAREHOLDERSEQUITY',
-            'STATEMENTOFSTOCKHOLDERSEQUITY',
-            'STATEMENTSOFCHANGESINEQUITY',
-            'STATEMENTOFCHANGESINEQUITY',
-            'CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY',
-            'CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY',
-            'STATEMENTOFEQUITY',
-            'STATEMENTSOFEQUITY'
-        ],
-        'COMPREHENSIVE_INCOME': [
-            'CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME',
-            'CONSOLIDATEDSTATEMENTOFCOMPREHENSIVEINCOME',
-            'STATEMENTOFCOMPREHENSIVEINCOME',
-            'STATEMENTSOFCOMPREHENSIVEINCOME',
-            'COMPREHENSIVEINCOMESTATEMENT',
-            'COMPREHENSIVEINCOMESTATEMENTS'
-        ],
-        'COVER_PAGE': [
-            'COVERPAGE',
-            'COVER',
-            'DOCUMENTANDENTITYINFORMATION',
-            'ENTITYINFORMATION'
-        ]
-    }
-
-    @classmethod
-    def get_standard_name(cls, role_name: str) -> Optional[str]:
-        # Extract the last part of the URI and remove any file extensions
-        role_name = role_name.split('/')[-1].split('.')[0]
-
-        # Normalize the role name: remove non-alphanumeric characters and convert to uppercase
-        role_name_normalized = ''.join(char.upper() for char in role_name if char.isalnum())
-
-        for standard_name, variations in cls.STANDARD_STATEMENTS.items():
-            for variation in variations:
-                if variation == role_name_normalized:
-                    return standard_name
-
-        return None
-
-
-class XBRLPresentation(BaseModel):
-    # Dictionary to store presentation roles and their corresponding elements
-    roles: Dict[str, PresentationElement] = Field(default_factory=dict)
-    skipped_roles: List[str] = Field(default_factory=list)
-    standard_statement_map: Dict[str, str] = Field(default_factory=dict)
-    concept_index: Dict[str, List[str]] = Field(default_factory=lambda: defaultdict(list))
-
-    # Configuration to allow arbitrary types in the model
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
-
-    @classmethod
-    def parse(cls, xml_string: str):
-        presentation = cls()
-        soup = BeautifulSoup(xml_string, 'xml')
-
-        def normalize_concept(concept):
-            return re.sub(r'_\d+$', '', concept)
-
-        for plink in soup.find_all('presentationLink'):
-            role = plink.get('xlink:role')
-
-            # Parse loc elements
-            locs = OrderedDict()
-            for loc in plink.find_all('loc'):
-                label = loc.get('xlink:label')
-                href = loc.get('xlink:href')
-                concept = href.split('#')[-1] if href else label
-                normalized_concept = normalize_concept(concept)
-                locs[label] = PresentationElement(label=label, href=href, order=0, concept=normalized_concept)
-
-            # Parse presentationArc elements
-            arcs = []
-            for arc in plink.find_all('presentationArc'):
-                parent_label = arc.get('xlink:from')
-                child_label = arc.get('xlink:to')
-                order = float(arc.get('order', '0'))
-                arcs.append((parent_label, child_label, order))
-
-            # If no loc elements were found, try to parse using the older format
-            if not locs:
-                for arc in arcs:
-                    parent_label, child_label, order = arc
-                    if parent_label not in locs:
-                        normalized_concept = normalize_concept(parent_label)
-                        locs[parent_label] = PresentationElement(label=parent_label, href='', order=0,
-                                                                 concept=normalized_concept)
-                    if child_label not in locs:
-                        normalized_concept = normalize_concept(child_label)
-                        locs[child_label] = PresentationElement(label=child_label, href='', order=0,
-                                                                concept=normalized_concept)
-
-            # Build the hierarchy
-            for parent_label, child_label, order in arcs:
-                if parent_label in locs and child_label in locs:
-                    parent = locs[parent_label]
-                    child = locs[child_label]
-                    child.order = order
-                    child.level = parent.level + 1
-
-                    existing_child = next((c for c in parent.children if
-                                           normalize_concept(c.concept) == normalize_concept(child.concept)), None)
-                    if existing_child:
-                        existing_child.children.extend(child.children)
-                        if len(child.label) > len(existing_child.label):
-                            existing_child.label = child.label
-                        if len(child.concept) < len(existing_child.concept):
-                            existing_child.concept = child.concept
-                    else:
-                        parent.children.append(child)
-
-            # Add the top-level elements to the role only if there are children
-            role_children = [loc for loc in locs.values() if not any(arc[1] == loc.label for arc in arcs)]
-            if role_children:
-                presentation.roles[role] = PresentationElement(label=role, href='', order=0,
-                                                               concept=normalize_concept(role))
-                presentation.roles[role].children = role_children
-
-        # Build the statement map and concept index
-        presentation._build_statement_map()
-        presentation._build_concept_index()
-
-        return presentation
-
-    def _build_statement_map(self):
-        for role, element in self.roles.items():
-            standard_name = FinancialStatementMapper.get_standard_name(role)
-            if standard_name:
-                self.standard_statement_map[standard_name] = role
-
-    def _build_concept_index(self):
-        for role, element in self.roles.items():
-            self._index_concepts(element, role)
-
-    def _index_concepts(self, element: PresentationElement, role: str):
-        self.concept_index[element.concept].append(role)
-        for child in element.children:
-            self._index_concepts(child, role)
-
-    def get_role_by_standard_name(self, standard_name: str) -> Optional[str]:
-        return self.standard_statement_map.get(standard_name)
-
-    def get_roles_containing_concept(self, concept: str) -> List[str]:
-        if '_' not in concept:
-            namespaces = ['us-gaap', 'ifrs-full', 'dei']  # Add other common namespaces as needed
-            for ns in namespaces:
-                namespaced_concept = f"{ns}_{concept}"
-                if namespaced_concept in self.concept_index:
-                    return self.concept_index[namespaced_concept]
-
-            # If the concept is already namespaced or not found with common namespaces
-        return self.concept_index.get(concept, [])
-
-
-    def list_roles(self) -> List[str]:
-        """ List all available roles in the presentation linkbase. """
-        return list(self.roles.keys())
-
-    def get_skipped_roles(self):
-        return self.skipped_roles
-
-    def get_structure(self, role: str, detailed: bool = False) -> Optional[Tree]:
-        """
-        Get the presentation structure for a specific role.
-        """
-        if role:
-            if role in self.roles:
-                tree = Tree(f"[bold blue]{role}[/bold blue]")
-                self._build_rich_tree(self.roles[role], tree, detailed)
-                return tree
-
-    def __rich__(self):
-        main_tree = Tree("[bold green]XBRL Presentation Structure[/bold green]")
-        for role, element in self.roles.items():
-            role_tree = main_tree.add(f"[bold blue]{role}[/bold blue]")
-            self._build_rich_tree(element, role_tree, detailed=False)
-        return main_tree
-
-    def __repr__(self):
-        return repr_rich(self)
-
-    def print_structure(self, role: Optional[str] = None, detailed: bool = False):
-        # Print the presentation structure using Rich library's Tree
-        if role:
-            if role in self.roles:
-                tree = self.get_structure(role, detailed)
-                rprint(tree)
-            else:
-                print(f"Role '{role}' not found in the presentation linkbase.")
-        else:
-            rprint(self.__rich__())
-
-    def _build_rich_tree(self, element: PresentationElement, tree: Tree, detailed: bool):
-        # Recursively build the Rich Tree structure for visualization
-        for child in sorted(element.children, key=lambda x: x.order):
-            if detailed:
-                # Detailed view: show full label and concept
-                node_text = f"[yellow]{child.label}[/yellow] ([cyan]{child.href.split('#')[-1]}[/cyan])"
-            else:
-                # Simplified view: show only namespace and first part of the name
-                concept = child.href.split('#')[-1]
-                namespace, name = concept.split('_', 1)
-                simplified_name = f"{namespace} {name.split('_')[0]}"
-                node_text = f"[cyan]{simplified_name}[/cyan]"
-
-            child_tree = tree.add(node_text)
-            self._build_rich_tree(child, child_tree, detailed)
 
 
 class XbrlDocuments:
@@ -342,9 +87,9 @@ class XbrlDocuments:
         Load the XBRL documents asynchronously and parse them.
         """
         parsers = {
-            'definition': parse_definitions,
-            'label': parse_labels,
-            'calculation': parse_calculation,
+            'definition': parse_definition_linkbase,
+            'label': parse_label_linkbase,
+            'calculation': parse_calculation_linkbase,
             'presentation': lambda x: x,
             'instance': lambda x: x,
             'schema': lambda x: x
@@ -493,22 +238,22 @@ class StatementDefinition(BaseModel):
 
     @classmethod
     def create(cls, name: str, presentation_element: PresentationElement, labels: Dict, calculations: Dict,
-               instance: XBRLInstance) -> 'StatementDefinition':
+               instance: XBRLInstance, preferred_label: str = None) -> 'StatementDefinition':
         # Factory method to create a StatementDefinition instance
         statement = cls(name=name)
         # Build the line items for the statement
-        statement.build_line_items(presentation_element, labels, calculations, instance)
+        statement.build_line_items(presentation_element, labels, calculations, instance, preferred_label)
         return statement
 
     def build_line_items(self, presentation_element: PresentationElement, labels: Dict, calculations: Dict,
-                         instance: XBRLInstance):
+                         instance: XBRLInstance, preferred_label: str = None):
         seen_sections = defaultdict(int)
         seen_concepts = set()
         self.line_items = []
 
         def process_element(element: PresentationElement, level: int, is_root: bool = False):
             concept = element.href.split('#')[-1]
-            label = self.get_label(concept, labels)
+            label = self.get_label(concept, labels, element.preferred_label or preferred_label)
 
             # Check if this is a section we've already seen
             if seen_sections[label] > 0 and element.children:
@@ -544,14 +289,22 @@ class StatementDefinition(BaseModel):
         return seen_sections
 
     @staticmethod
-    def get_label(concept: str, labels: Dict) -> str:
-        # Get the labels for this concept
+    def concept_to_label(concept: str) -> str:
+        return concept_to_label(concept)
+
+    @staticmethod
+    def get_label(concept: str, labels: Dict, preferred_label: str = None) -> str:
         concept_labels = labels.get(concept, {})
-        # Try to get the terseLabel first, then label, then fall back to the concept name
-        label = (concept_labels.get('totalLabel')
-                 or concept_labels.get('terseLabel')
-                 or concept_labels.get('label') or concept)
-        return label
+        if preferred_label:
+            label = concept_labels.get(preferred_label.split('/')[-1])
+            if label:
+                return label
+
+        # Fall back to the previous priority if preferred label is not found
+        return (concept_labels.get('totalLabel')
+                or concept_labels.get('terseLabel')
+                or concept_labels.get('label')
+                or StatementDefinition.concept_to_label(concept))
 
     @staticmethod
     def get_fact_values(concept: str, instance: XBRLInstance) -> Dict[str, Any]:
@@ -932,14 +685,15 @@ class XBRLData(BaseModel):
                 root_element,
                 self.labels,
                 self.calculations.get(role, {}),
-                self.instance
+                self.instance,
+                preferred_label=root_element.preferred_label
             )
 
     @cached_property
     def statements(self):
         return Statements(self)
 
-    def list_statements(self) -> List[str]:
+    def list_statement_definitions(self) -> List[str]:
         return list(self.statements_dict.keys())
 
     def get_statement_definition(self, statement_name: str) -> Optional[StatementDefinition]:
@@ -1165,130 +919,6 @@ class XBRLData(BaseModel):
 
     def __repr__(self):
         return repr_rich(self)
-
-
-def parse_definitions(xml_string: str) -> Dict[str, List[Tuple[str, str, int]]]:
-    """
-       Parse an XBRL definition linkbase XML string and extract definition relationships.
-
-       This function takes an XML string representing an XBRL definition linkbase and
-       processes it to extract definition relationships between concepts. It organizes
-       the relationships by role.
-
-       Parameters:
-       xml_string (str): A string containing the XML content of the XBRL definition linkbase.
-
-       Returns:
-       Dict[str, List[Tuple[str, str, int]]]: A dictionary where:
-           - The key is the role URI of the definition link.
-           - The value is a list of tuples, each representing a relationship:
-             (from_concept, to_concept, order)
-             where:
-             - from_concept (str): The concept from which the relationship originates.
-             - to_concept (str): The concept to which the relationship points.
-             - order (int): The order of the relationship within its parent.
-
-       Example:
-       {
-           "http://www.company.com/role/BalanceSheet": [
-               ("Assets", "CurrentAssets", 1),
-               ("Assets", "NonCurrentAssets", 2),
-               ("Liabilities", "CurrentLiabilities", 1),
-               ("Liabilities", "NonCurrentLiabilities", 2)
-           ],
-           "http://www.company.com/role/IncomeStatement": [
-               ("Revenue", "OperatingRevenue", 1),
-               ("Revenue", "NonOperatingRevenue", 2)
-           ]
-       }
-
-       Note:
-       - This function assumes the XML is well-formed and follows the XBRL definition linkbase structure.
-       - It uses BeautifulSoup with the 'xml' parser to process the XML.
-       - The function extracts concepts from the 'xlink:href' attribute, taking the part after the '#' symbol.
-       - Relationships are only included if both the 'from' and 'to' concepts are found in the locator definitions.
-       - The 'order' attribute is converted to an integer, defaulting to 0 if not present.
-       """
-    soup = BeautifulSoup(xml_string, 'xml')
-    definitions = {}
-
-    for definition_link in soup.find_all('definitionLink'):
-        role = definition_link['xlink:role']
-        definitions[role] = []
-
-        locs = {}
-        for loc in definition_link.find_all('loc'):
-            label = loc['xlink:label']
-            href = loc['xlink:href']
-            concept = href.split('#')[-1]
-            locs[label] = concept
-
-        for arc in definition_link.find_all('definitionArc'):
-            from_label = arc['xlink:from']
-            to_label = arc['xlink:to']
-            # Convert order to float instead of int
-            order = float(arc.get('order', '0'))
-            # arcrole = arc['xlink:arcrole']
-
-            if from_label in locs and to_label in locs:
-                from_concept = locs[from_label]
-                to_concept = locs[to_label]
-                definitions[role].append((from_concept, to_concept, order))
-
-    return definitions
-
-
-def parse_calculation(xml_string: str) -> Dict[str, List[Tuple[str, str, float, int]]]:
-    """
-    This parser does the following:
-
-    It uses BeautifulSoup to parse the XML content.
-    It iterates through all calculationLink elements in the file.
-    For each calculationLink, it extracts the role and creates a list to store the calculation relationships for that role.
-    It first processes all loc elements to create a mapping from labels to concepts.
-    Then it processes all calculationArc elements, which define the calculation relationships between concepts.
-    For each arc, it extracts the from and to concepts, the weight, and the order, and stores this information in the list for the current role.
-    The result is a dictionary where keys are roles and values are lists of tuples. Each tuple contains (from_concept, to_concept, weight, order).
-
-The resulting calculation_data dictionary will have a structure like this:
-    {
-    "http://www.apple.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS": [
-        ("us-gaap_OperatingIncomeLoss", "us-gaap_GrossProfit", 1.0, 1),
-        ("us-gaap_OperatingIncomeLoss", "us-gaap_OperatingExpenses", -1.0, 2),
-        ("us-gaap_OperatingExpenses", "us-gaap_ResearchAndDevelopmentExpense", 1.0, 1),
-        ("us-gaap_OperatingExpenses", "us-gaap_SellingGeneralAndAdministrativeExpense", 1.0, 2),
-        # ... other relationships ...
-    ],
-    # ... other roles ...
-}
-    """
-    soup = BeautifulSoup(xml_string, 'xml')
-    calculations = {}
-
-    for calculation_link in soup.find_all('calculationLink'):
-        role = calculation_link['xlink:role']
-        calculations[role] = []
-
-        locs = {}
-        for loc in calculation_link.find_all('loc'):
-            label = loc['xlink:label']
-            href = loc['xlink:href']
-            concept = href.split('#')[-1]
-            locs[label] = concept
-
-        for arc in calculation_link.find_all('calculationArc'):
-            from_label = arc['xlink:from']
-            to_label = arc['xlink:to']
-            weight = float(arc['weight'])
-            # Convert order to float instead of int
-            order = float(arc['order'])
-
-            if from_label in locs and to_label in locs:
-                from_concept = locs[from_label]
-                to_concept = locs[to_label]
-                calculations[role].append((from_concept, to_concept, weight, order))
-
-    return calculations
 
 
 async def download_and_parse(attachment: Attachment, parse_func):

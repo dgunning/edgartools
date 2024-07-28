@@ -40,6 +40,7 @@ def msft_xbrl():
                     accession_no='0000950170-23-035122')
     return asyncio.run(XBRLData.from_filing(filing))
 
+
 @pytest.fixture(scope='module')
 def gd_xbrl():
     filing = Filing(company='GENERAL DYNAMICS CORP', cik=40533, form='10-Q', filing_date='2024-07-24',
@@ -102,7 +103,7 @@ def test_statements_property(apple_xbrl):
 def test_10Q_filings_have_quarterly_dates(netflix_xbrl):
     balance_sheet: StatementData = Financials(netflix_xbrl).get_balance_sheet()
     assert balance_sheet.periods == ['Mar 31, 2024', 'Dec 31, 2023']
-    for name in netflix_xbrl.list_statements():
+    for name in netflix_xbrl.list_statement_definitions():
         print(name)
 
 
@@ -244,3 +245,21 @@ def test_get_concepts_for_label(gd_xbrl):
 
     statement = gd_xbrl.get_statement(statements[0])
     assert statement
+
+
+def test_handle_financials_with_only_document_and_entity_definition():
+    # This filing only has 'DocumentAndEntityInformation'
+    filing = Filing(form='10-K/A', filing_date='2024-07-26', company='Swiftmerge Acquisition Corp.',
+                    cik=1845123, accession_no='0001013762-24-001580')
+    xbrl_data:XBRLData = XBRLData.extract(filing)
+    statement_definitions = xbrl_data.list_statement_definitions()
+    assert statement_definitions == ['DocumentAndEntityInformation']
+    financials = Financials(xbrl_data)
+    assert financials
+    assert financials.get_cover_page()
+    assert not financials.get_balance_sheet()
+    assert not financials.get_income_statement()
+    assert not financials.get_cash_flow_statement()
+    assert not financials.get_statement_of_changes_in_equity()
+    assert not financials.get_statement_of_comprehensive_income()
+    assert financials.get_cover_page()
