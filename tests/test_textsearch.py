@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from edgar.search import numeric_shape, preprocess, convert_items_to_tokens, RegexSearch, BM25Search
+from edgar.search.textsearch import numeric_shape, preprocess, convert_items_to_tokens, RegexSearch, BM25Search
 from rich import print
 from edgar import Filing
 from edgar.search import SearchResults

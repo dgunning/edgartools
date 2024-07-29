@@ -2,6 +2,7 @@ import re
 from functools import lru_cache
 from typing import List, Dict, Tuple, Callable, Union
 
+import pandas as pd
 import pyarrow as pa
 from rapidfuzz import fuzz
 from unidecode import unidecode
@@ -43,8 +44,7 @@ class FastSearch:
     def _default_calculate_score(query: str, value: str) -> float:
         return fuzz.ratio(query, value)
 
-    def search(self, query: str, top_n: int = 10, threshold: float = 60) -> List[
-        Tuple[Union[int, str], Dict[str, str], float]]:
+    def search(self, query: str, top_n: int = 10, threshold: float = 60) -> List[Dict[str, str]]:
         processed_query = self.preprocess(query)
         query_words = processed_query.split()
 
@@ -60,14 +60,15 @@ class FastSearch:
 
         scores = []
         for idx in candidate_indices:
-            record = {column: self.data[column][idx].as_py() for column in self.columns}
+            record = {column: self.data[column][idx].as_py() for column in self.data.schema.names}
             best_score = max(
                 self.calculate_score(processed_query, self.preprocess(str(record[column])), column) for column in
                 self.columns)
             if best_score >= threshold:
-                scores.append((self.data['cik'][idx].as_py(), record, best_score))
+                record['score'] = best_score
+                scores.append(record)
 
-        return sorted(scores, key=lambda x: x[2], reverse=True)[:top_n]
+        return sorted(scores, key=lambda x: x['score'], reverse=True)[:top_n]
 
     def _compute_data_hash(self) -> int:
         # Create a string representation of the data structure
@@ -93,7 +94,7 @@ def create_search_index(data: pa.Table, columns: List[str], preprocess_func: Cal
     return FastSearch(data, columns, preprocess_func, score_func)
 
 
-def search(index: FastSearch, query: str, top_n: int = 10) -> List[Tuple[Union[int, str], Dict[str, str], float]]:
+def search(index: FastSearch, query: str, top_n: int = 10) -> List[Dict[str, str]]:
     return index.search(query, top_n)
 
 
@@ -133,12 +134,21 @@ def preprocess_company_name(company_name: str) -> str:
     return company_name
 
 
-if __name__ == '__main__':
+class CompanySearchIndex(FastSearch):
+    def __init__(self):
+        data = get_company_tickers()
+        super().__init__(data, ['name', 'ticker'],
+                         preprocess_func=company_ticker_preprocess,
+                         score_func=company_ticker_score)
 
-    data = get_company_tickers(as_dataframe=False)
-    index = create_search_index(data,
-                                columns=['ticker', 'company'],
-                                preprocess_func=company_ticker_preprocess,
-                                score_func=company_ticker_score)
-    results = search(index, 'AM', top_n=10)
+    def search(self, query: str, top_n: int = 10, threshold: float = 60) -> List[
+        Tuple[Dict[str, str], float]]:
+        return super().search(query, top_n, threshold)
 
+
+class CompanySearchResults:
+
+    def __init__(self, search_results: List[Tuple[Dict[str, str], float]]):
+        self.results = pd.DataFrame(
+            row[1] for row in search_results
+        )

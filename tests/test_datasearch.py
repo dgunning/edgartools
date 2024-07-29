@@ -3,7 +3,7 @@ import pyarrow as pa
 
 
 # Assuming the FastSearch class and related functions are in a file named fast_search.py
-from edgar.searchindex.fastsearch import FastSearch, create_search_index, search
+from edgar.search.datasearch import FastSearch, create_search_index, search
 
 
 @pytest.fixture
@@ -57,21 +57,21 @@ def company_index(sample_data, company_ticker_preprocess, company_ticker_score):
 def test_exact_ticker_match(company_index):
     results = search(company_index, 'AAPL')
     assert len(results) > 0
-    assert results[0][1]['ticker'] == 'AAPL'
-    assert results[0][2] == 100  # Perfect score for exact match
+    assert results[0]['ticker'] == 'AAPL'
+    assert results[0]['score'] == 100  # Perfect score for exact match
 
 
 def test_partial_ticker_match(company_index):
     results = search(company_index, 'AMZ')
     assert len(results) > 0
-    assert results[0][1]['ticker'] == 'AMZN'
-    assert results[0][2] > 90  # High score for partial match
+    assert results[0]['ticker'] == 'AMZN'
+    assert results[0]['score'] > 90  # High score for partial match
 
 
 def test_company_name_match(company_index):
     results = search(company_index, 'Microsoft')
     assert len(results) > 0
-    assert results[0][1]['name'] == 'Microsoft Corporation'
+    assert results[0]['name'] == 'Microsoft Corporation'
 
 
 def test_no_match(company_index):
@@ -82,7 +82,7 @@ def test_no_match(company_index):
 def test_multiple_matches(company_index):
     results = search(company_index, 'A', top_n=3)
     assert len(results) == 2
-    tickers = [r[1]['ticker'] for r in results]
+    tickers = [r['ticker'] for r in results]
     assert 'AAPL' in tickers
     assert 'AMZN' in tickers
 
@@ -96,14 +96,14 @@ def test_case_insensitivity(company_index):
 def test_special_characters(company_index):
     results = search(company_index, 'Amazon.com')
     assert len(results) > 0
-    assert results[0][1]['name'] == 'Amazon.com, Inc.'
+    assert results[0]['name'] == 'Amazon.com, Inc.'
 
 
 def test_threshold(company_index):
     results = search(company_index, 'A')
-    assert all(r[2] >= 90 for r in results)
+    assert all(r['score'] >= 90 for r in results)
 
 
 def test_cik_returned(company_index):
     results = search(company_index, 'AAPL')
-    assert results[0][0] == 1  # CIK should be 1 for AAPL in our sample data
+    assert results[0]['cik'] == 1  # CIK should be 1 for AAPL in our sample data
