@@ -380,29 +380,6 @@ def test_filings_next_and_previous():
     print(eightk_filings.next())
 
 
-def test_search_for_company():
-    results = find_company('Robinsons')
-    print()
-    assert len(results) >= 10
-    print(results)
-    print(results[0])
-    assert results[0]
-
-
-def test_search():
-    is_start_of_quarter = datetime.datetime.now().month in [1, 4, 7, 10] and datetime.datetime.now().day <= 3
-    if is_start_of_quarter:
-        return
-    text_index = CompanySearchIndex(get_filings()
-                                    .to_pandas('company', 'cik'))
-    res = text_index.similar('Tesla')
-    assert not res.empty > 0
-    print()
-    print(res)
-    print(text_index.similar('Tensile'))
-    print(text_index.similar('Deniel Testa'))
-
-
 def test_preprocess_company():
     assert preprocess_company('Tesla Inc') == 'tesla'
     assert preprocess_company('Apple Hospitality REIT, Inc.') == 'apple hospitality reit'

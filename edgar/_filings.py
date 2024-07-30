@@ -624,19 +624,9 @@ class Filings:
 
         # Search for the company
         search_results = find_company(company_search_str)
-        cik_match_lookup = search_results.cik_match_lookup()
 
-        # Filter filings that are in the search results
-        ciks = search_results.data.cik.tolist()
-        filing_index = self.data.filter(pc.is_in(self.data['cik'], pa.array(ciks)))
+        return self.filter(cik=search_results.ciks)
 
-        # Sort by the match score
-        score_values = pa.array([cik_match_lookup.get(cik.as_py()) for cik in filing_index.column("cik")])
-        filing_index = filing_index.append_column("match", score_values)
-        filing_index = filing_index.sort_by([('match', 'descending'), ('company', 'ascending')]).drop(['match'])
-
-        # Need to sort by
-        return Filings(filing_index)
 
     def to_dict(self, max_rows: int = 1000) -> Dict[str, Any]:
         """Return the filings as a json string but only the first max_rows records"""

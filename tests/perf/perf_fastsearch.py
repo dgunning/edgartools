@@ -1,6 +1,6 @@
 from pyinstrument import Profiler
 
-from searchindex.fastsearch import create_search_index, company_ticker_preprocess, company_ticker_score, search
+from search.datasearch import create_search_index, company_ticker_preprocess, company_ticker_score, search
 from edgar.reference.tickers import get_company_tickers
 
 data = get_company_tickers(as_dataframe=False)

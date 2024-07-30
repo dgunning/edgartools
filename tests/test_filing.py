@@ -27,6 +27,16 @@ def filings_2022_q3():
     return get_filings(2022, 3)
 
 
+@pytest.fixture(scope='module')
+def filings_2021_q1():
+    return get_filings(2021, 1)
+
+
+@pytest.fixture(scope='module')
+def filings_2021_q1_xbrl():
+    return get_filings(2021, 1, index="xbrl")
+
+
 def test_read_fixed_width_index_for_daily_file():
     index_text = Path('data/form.20200318.idx').read_text()
     index_data = read_fixed_width_index(index_text, form_specs)
@@ -77,22 +87,20 @@ def test_read_form_filing_index_year():
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
 
 
-def test_read_form_filing_index_xbrl():
-    filings: Filings = get_filings(2021, 1, index="xbrl")
+def test_read_form_filing_index_xbrl(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     assert filings.data
     assert 40000 > len(filings) > 10000
 
     df = filings.to_pandas()
     assert len(df) == len(filings) == len(filings.data)
     assert filings.data.column_names == ['cik', 'company', 'form', 'filing_date', 'accession_number']
-    print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
     assert re.match(r'\d{10}\-\d{2}\-\d{6}', filings.data[4][-1].as_py())
 
 
-def test_get_filings_gets_correct_accession_number():
+def test_get_filings_gets_correct_accession_number(filings_2021_q1):
     # Get the filings and test that the accession number is correct for all rows e.g. 0001185185-20-000088
-    filings: Filings = cached_filings(2021, 1)
-    data = filings.data.to_pandas()
+    data = filings_2021_q1.data.to_pandas()
     misparsed_accessions = data.query("accession_number.str.endswith('.')")
     assert len(misparsed_accessions) == 0
 
@@ -102,23 +110,20 @@ def cached_filings(year: int, quarter: int, index: str = "form"):
     return get_filings(year, quarter, index=index)
 
 
-def test_filings_date_range():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
+def test_filings_date_range(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     start_date, end_date = filings.date_range
-    print(start_date, end_date)
     assert end_date > start_date
 
 
-def test_filings_repr():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
+def test_filings_repr(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     filings_repr = str(filings)
     assert filings_repr
-    print()
-    print(filings_repr)
 
 
-def test_filing_head():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
+def test_filing_head(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     assert len(filings) > 100
     top_10_filings = filings.head(10)
     assert len(top_10_filings) == 10
@@ -137,8 +142,8 @@ def test_filing_head():
     assert filings[0] == top_10_filings[0]
 
 
-def test_filing_sample():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
+def test_filing_sample(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     sample_filings = filings.sample(10)
     assert len(sample_filings) == 10
     print(sample_filings)
@@ -147,8 +152,8 @@ def test_filing_sample():
     assert len(filings.sample(5).sample(5)) == 5
 
 
-def test_filter_filings_by_form():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
+def test_filter_filings_by_form(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     forms = list(set(filings.data['form'].to_pylist()))
     assert len(forms) > 25
 
@@ -159,8 +164,8 @@ def test_filter_filings_by_form():
     assert set(tenk_filings.data['form'].to_pylist()) == {"10-Q", '10-Q/A'}
 
 
-def test_filter_filings_by_date():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
+def test_filter_filings_by_date(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     filtered_filings = filings.filter(filing_date='2021-03-04')
     assert len(set(filtered_filings.data['filing_date'].to_pylist())) == 1
     assert not filtered_filings.empty
@@ -172,8 +177,8 @@ def test_filter_filings_by_date():
     assert len(set(filings_by_date_and_form.data['filing_date'].to_pylist())) == 1
 
 
-def test_filing_tail():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
+def test_filing_tail(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     assert len(filings) > 100
     bottom_10_filings = filings.tail(10)
     assert len(bottom_10_filings) == 10
@@ -192,8 +197,8 @@ def test_filing_tail():
     assert filings[-1] == bottom_10_filings[-1]
 
 
-def test_filings_latest():
-    filings: Filings = cached_filings(2021, 1, index="xbrl")
+def test_filings_latest(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl
     latest_filings = filings.latest(20)
     assert len(latest_filings) == 20
     start_date, end_date = latest_filings.date_range
@@ -201,8 +206,8 @@ def test_filings_latest():
     assert (end_date.year, end_date.month, end_date.day) == (2021, 3, 31)
 
 
-def test_iterate_filings():
-    filings: Filings = cached_filings(2021, 1, index="xbrl").head(10)
+def test_iterate_filings(filings_2021_q1_xbrl):
+    filings: Filings = filings_2021_q1_xbrl.head(10)
     for index, filing in enumerate(filings):
         assert filing
 
@@ -550,6 +555,7 @@ def test_filter_by_cik():
     filings = get_filings(2022, 3).filter(cik=[1078799, 1877934])
     assert len(filings) == 17
 
+
 def test_filter_by_date():
     # Test non-xbrl filings
     filings = get_filings(2022, 3)
@@ -649,22 +655,23 @@ def test_read_fixed_width_index():
     ...
 
 
-def test_find_company():
+def test_find_company_in_lings():
     # TODO: Looks like the search results ordering is broken for some reason
     filings = cached_filings(2022, 1)
-    company_search_filings: Filings = filings.find('Tailwind')
-    print()
-    print(company_search_filings)
-    companies = company_search_filings.data['company'].to_pylist()
-    # Temporarily disabled until we can fix the search results ordering
-    # assert 'Tailwind International Acquisition Corp.' in companies
-    # print(filings.find('SCHWEITZER'))
+    oracle_filings: Filings = filings.find('Oracle')
+    assert len(oracle_filings) > 0
+
+    tesla_filings: Filings = filings.find('TSLA')
+    assert len(tesla_filings) > 0
+
+    filings = filings.find('Anheuser-Busch')
+    print(filings)
+    assert set(filings.data['cik'].to_pylist()) == {1668717}
 
 
 def test_filing_sections():
     sections = carbo_10K.sections()
     assert len(sections) > 20
-    print(sections[10])
 
 
 def test_filing_with_complex_sections():

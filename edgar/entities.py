@@ -27,7 +27,8 @@ from edgar.core import (log, Result, display_size,
                         filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory)
 from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference import states
-from edgar.search import SimilaritySearchIndex
+from edgar.reference.tickers import get_company_tickers
+from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
 
 __all__ = [
     'Address',
@@ -786,7 +787,7 @@ Entity = get_entity
 def get_entity_submissions(cik: int,
                            include_old_filings: bool = True) -> Optional[EntityData]:
     # Check the environment var EDGAR_USE_LOCAL_DATA
-    submissions_json: Optional[Dict[str,Any]] = None
+    submissions_json: Optional[Dict[str, Any]] = None
     if os.getenv("EDGAR_USE_LOCAL_DATA"):
         submissions_json = load_company_submissions_from_local(cik)
         if not submissions_json:
@@ -1040,18 +1041,6 @@ def get_concept(cik: int,
 
 
 @lru_cache(maxsize=1)
-def get_company_tickers():
-    tickers_json = download_json(
-        "https://www.sec.gov/files/company_tickers.json"
-    )
-    ticker_df = (pd.DataFrame(list(tickers_json.values()))
-                 .set_axis(['cik', 'ticker', 'company'], axis=1)
-                 .astype({'cik': pd.Int64Dtype()})
-                 )
-    return ticker_df
-
-
-@lru_cache(maxsize=1)
 def get_ticker_to_cik_lookup():
     tickers_json = download_json(
         "https://www.sec.gov/files/company_tickers.json"
@@ -1083,38 +1072,6 @@ def get_cik_lookup_data() -> pd.DataFrame:
     return cik_lookup_df
 
 
-class CompanySearchResults:
-
-    def __init__(self,
-                 data: pd.DataFrame,
-                 query: str):
-        self.data = data
-        self.query = query
-
-    def cik_match_lookup(self):
-        return self.data[['cik', 'match']].set_index('cik').to_dict()['match']
-
-    def __len__(self):
-        return len(self.data)
-
-    def empty(self):
-        return self.data.empty
-
-    def __getitem__(self, item):
-        record = self.data.iloc[item]
-        return CompanyData.for_cik(record.cik)
-
-    def __rich__(self):
-        return Panel(
-            Group(
-                df_to_rich_table(self.data)
-            ), title=f'Results for "{self.query}"'
-        )
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
-
-
 company_types_re = r"(L\.?L\.?C\.?|Inc\.?|Ltd\.?|L\.?P\.?|/[A-Za-z]{2,3}/?| CORP(ORATION)?|PLC| AG)$"
 
 
@@ -1125,20 +1082,80 @@ def preprocess_company(company: str) -> str:
     return comp.strip()
 
 
+class CompanySearchResults:
+
+    def __init__(self, query: str,
+                 search_results: List[Dict[str, Any]]):
+        self.query: str = query
+        self.results: pd.DataFrame = pd.DataFrame(search_results, columns=['cik', 'ticker', 'company', 'score'])
+
+    @property
+    def tickers(self):
+        return self.results.ticker.tolist()
+
+    @property
+    def ciks(self):
+        return self.results.cik.tolist()
+
+    @property
+    def empty(self):
+        return self.results.empty
+
+    def __len__(self):
+        return len(self.results)
+
+    def __getitem__(self, item):
+        if 0 <= item < len(self):
+            row = self.results.iloc[item]
+            cik: int = int(row.cik)
+            return Company(cik)
+
+    def __rich__(self):
+        table = Table(Column(""),
+                      Column("Ticker", justify="left"),
+                      Column("Name", justify="left"),
+                      Column("Score", justify="left"),
+                      title=f"Search results for '{self.query}'",
+                      box=box.SIMPLE)
+        for index, row in enumerate(self.results.itertuples()):
+            table.add_row(str(index), row.ticker.rjust(6), row.company, f"{int(row.score)}%")
+        return table
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
+class CompanySearchIndex(FastSearch):
+    def __init__(self):
+        data = get_company_tickers(as_dataframe=False)
+        super().__init__(data, ['company', 'ticker'],
+                         preprocess_func=company_ticker_preprocess,
+                         score_func=company_ticker_score)
+
+    def search(self, query: str, top_n: int = 10, threshold: float = 60) -> CompanySearchResults:
+        results = super().search(query, top_n, threshold)
+        return CompanySearchResults(query=query, search_results=results)
+
+    def __len__(self):
+        return len(self.data)
+
+    def __hash__(self):
+        # Combine column names and last 10 values in the 'company' column to create a hash
+        column_names = tuple(self.data[0].keys())
+        last_10_companies = tuple(entry['company'] for entry in self.data[-10:])
+        return hash((column_names, last_10_companies))
+
+    def __eq__(self, other):
+        if not isinstance(other, CompanySearchIndex):
+            return False
+        return (self.data[-10:], tuple(self.data[0].keys())) == (other.data[-10:], tuple(other.data[0].keys()))
+
+
+@lru_cache(maxsize=1)
+def _get_company_search_index():
+    return CompanySearchIndex()
+
+
 @lru_cache(maxsize=16)
-def find_company(company: str):
-    companies = get_company_tickers()
-    company_index = CompanySearchIndex(data=companies[['cik', 'company']])
-    results = company_index.similar(company)
-    return CompanySearchResults(data=results.reset_index(), query=company)
-
-
-class CompanySearchIndex(SimilaritySearchIndex):
-
-    def __init__(self,
-                 data: pd.DataFrame):
-        data = (data.drop_duplicates(subset='cik')
-                .set_index('cik')
-                .assign(company_idx=lambda df: np.vectorize(preprocess_company)(df.company))
-                )
-        super().__init__(data, 'company_idx')
+def find_company(company: str, top_n: int = 10):
+    return _get_company_search_index().search(company, top_n=top_n)

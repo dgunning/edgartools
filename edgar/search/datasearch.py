@@ -1,14 +1,17 @@
+import hashlib
 import re
 from functools import lru_cache
-from typing import List, Dict, Tuple, Callable, Union
+from typing import List, Dict, Callable, Any
 
 import pandas as pd
 import pyarrow as pa
 from rapidfuzz import fuzz
+from rich import box
+from rich.table import Table, Column
 from unidecode import unidecode
 
+from edgar._rich import repr_rich
 from edgar.reference.tickers import get_company_tickers
-import hashlib
 
 
 class FastSearch:
@@ -44,7 +47,7 @@ class FastSearch:
     def _default_calculate_score(query: str, value: str) -> float:
         return fuzz.ratio(query, value)
 
-    def search(self, query: str, top_n: int = 10, threshold: float = 60) -> List[Dict[str, str]]:
+    def search(self, query: str, top_n: int = 10, threshold: float = 60) -> List[Dict[str, Any]]:
         processed_query = self.preprocess(query)
         query_words = processed_query.split()
 
@@ -134,21 +137,4 @@ def preprocess_company_name(company_name: str) -> str:
     return company_name
 
 
-class CompanySearchIndex(FastSearch):
-    def __init__(self):
-        data = get_company_tickers()
-        super().__init__(data, ['name', 'ticker'],
-                         preprocess_func=company_ticker_preprocess,
-                         score_func=company_ticker_score)
 
-    def search(self, query: str, top_n: int = 10, threshold: float = 60) -> List[
-        Tuple[Dict[str, str], float]]:
-        return super().search(query, top_n, threshold)
-
-
-class CompanySearchResults:
-
-    def __init__(self, search_results: List[Tuple[Dict[str, str], float]]):
-        self.results = pd.DataFrame(
-            row[1] for row in search_results
-        )
