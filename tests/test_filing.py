@@ -580,8 +580,8 @@ def test_filter_by_date():
     assert start_date == datetime.datetime.strptime("2022-08-16", "%Y-%m-%d").date()
 
 
-def test_filter_invalid_date():
-    filings = cached_filings(2022, 3)
+def test_filter_invalid_date(filings_2022_q3):
+    filings = filings_2022_q3
     filtered = filings.filter(filing_date="2022-08:")
     assert not filtered
 
@@ -961,3 +961,19 @@ def test_company_filing_to_dict():
     assert filing_dict['form'] == '4'
     assert filing_dict['company'] == 'Apple Inc.'
     assert filing_dict['cik'] == 320193
+
+
+def test_filter_by_ticker(filings_2022_q3):
+    tesla_filings = filings_2022_q3.filter(ticker="TSLA")
+    assert len(tesla_filings) > 0
+    assert set(tesla_filings.data['company'].to_pylist()) == {'Tesla, Inc.'}
+
+    # Test with multiple tickers
+    tesla_and_apple_filings = filings_2022_q3.filter(ticker=["TSLA", "AAPL"])
+    assert len(tesla_and_apple_filings) > 0
+    assert set(tesla_and_apple_filings.data['company'].to_pylist()) == {'Tesla, Inc.', 'Apple Inc.'}
+
+    # Tesla 8-K
+    tesla_8k = filings_2022_q3.filter(ticker="TSLA", form="8-K")
+    assert len(tesla_8k) > 0
+    assert set(tesla_8k.data['form'].to_pylist()) == {'8-K'}

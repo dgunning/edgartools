@@ -69,6 +69,8 @@ __all__ = [
     'decode_content',
     'filter_by_date',
     'filter_by_form',
+    'filter_by_cik',
+    'filter_by_ticker',
     'text_extensions',
     'binary_extensions',
     'ask_for_identity',
@@ -330,6 +332,20 @@ def filter_by_cik(data: pa.Table,
     ciks = [int(el) for el in listify(cik)]
     data = data.filter(pc.is_in(data['cik'], pa.array(ciks)))
     return data
+
+
+def filter_by_ticker(data: pa.Table,
+                     ticker: Union[str, List[str]]) -> pa.Table:
+    """Return the data filtered by form"""
+    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
+    from edgar.entities import get_company_tickers
+    company_tickers = get_company_tickers()
+    tickers = [str(el) for el in listify(ticker)]
+    filtered_tickers = company_tickers[company_tickers.ticker.isin(tickers)]
+    ciks = filtered_tickers.cik.tolist()
+    return filter_by_cik(data, cik=ciks)
+
+    # return data
 
 
 @lru_cache(maxsize=1)

@@ -186,6 +186,7 @@ def test_filter_by_cik():
     assert len(filter_by_cik(table, ['3'], )) == 1
 
     # Amendments false
+    # Amendments false
 
 
 def test_dataframe_pager():

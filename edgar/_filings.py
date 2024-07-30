@@ -37,16 +37,20 @@ from edgar._rich import df_to_rich_table, repr_rich
 from edgar._xml import child_text
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
 from edgar.core import (log, display_size, sec_edgar,
-                        filter_by_date, filter_by_form, filter_by_cik, InvalidDateException, IntString, DataPager)
+                        filter_by_date,
+                        filter_by_form,
+                        filter_by_cik,
+                        filter_by_ticker,
+                        InvalidDateException, IntString, DataPager)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
+from edgar.legacy._xbrl import FilingXbrl
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
-from edgar.legacy._xbrl import FilingXbrl
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -470,7 +474,8 @@ class Filings:
                amendments: bool = False,
                filing_date: Optional[str] = None,
                date: Optional[str] = None,
-               cik: Union[IntString, List[IntString]] = None):
+               cik: Union[IntString, List[IntString]] = None,
+               ticker: Union[str, List[str]] = None):
         """
         Get some filings
 
@@ -495,6 +500,7 @@ class Filings:
         :param filing_date: The filing date
         :param date: An alias for the filing date
         :param cik: The CIK or list of CIKs to filter by
+        :param ticker: The ticker or list of tickers to filter by
         :return: The filtered filings
         """
         filing_index = self.data
@@ -519,6 +525,9 @@ class Filings:
         # Filter by cik
         if cik:
             filing_index = filter_by_cik(filing_index, cik)
+
+        if ticker:
+            filing_index = filter_by_ticker(filing_index, ticker)
 
         return Filings(filing_index)
 
@@ -626,7 +635,6 @@ class Filings:
         search_results = find_company(company_search_str)
 
         return self.filter(cik=search_results.ciks)
-
 
     def to_dict(self, max_rows: int = 1000) -> Dict[str, Any]:
         """Return the filings as a json string but only the first max_rows records"""
