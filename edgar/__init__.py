@@ -62,7 +62,7 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 @lru_cache(maxsize=16)
 def find(search_id: Union[str, int]) -> (
         Union)[Filing, EntityData, CompanySearchResults, Fund, FundClass, FundSeries]:
-    """Find a filing by
+    """This is an uber search function that can take a variety of search ids and return the appropriate object
         - accession number -> returns a Filing
         - CIK -> returns an Entity
         - Class/Contract ID -> returns a FundClass
