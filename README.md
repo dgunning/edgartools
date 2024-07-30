@@ -82,6 +82,8 @@ filing = find("0001065280-23-000273")
 filings = Company("NFLX").get_filings(form="10-Q").latest(1)
 ```
 
+For a deeper dive see **[Finding things with edgartools](https://github.com/dgunning/edgartools/wiki/FindingThings)**
+
 ### C. Show me a list of filings
 
 ```python
