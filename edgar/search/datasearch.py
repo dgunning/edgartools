@@ -3,15 +3,9 @@ import re
 from functools import lru_cache
 from typing import List, Dict, Callable, Any
 
-import pandas as pd
 import pyarrow as pa
 from rapidfuzz import fuzz
-from rich import box
-from rich.table import Table, Column
 from unidecode import unidecode
-
-from edgar._rich import repr_rich
-from edgar.reference.tickers import get_company_tickers
 
 
 class FastSearch:
