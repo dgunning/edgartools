@@ -27,7 +27,7 @@ from edgar.core import (log, Result, display_size,
                         filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory)
 from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference import states
-from edgar.reference.tickers import get_company_tickers
+from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
 
 __all__ = [
@@ -395,6 +395,14 @@ class EntityData:
     @property
     def is_company(self) -> bool:
         return not self.is_individual
+    
+    @property
+    def icon(self) -> bytes | None:
+        # If there are no tickers, we can't get an icon
+        if len(self.tickers) == 0:
+            return None
+        # Get the icon for the first ticker, if it exists.
+        return get_icon_from_ticker(self.tickers[0])
 
     @property
     # Companies have a ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation

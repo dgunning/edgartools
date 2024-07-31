@@ -65,3 +65,16 @@ def test_insider_transaction_for_entity():
     assert not entity.insider_transaction_for_issuer_exists
     assert entity.insider_transaction_for_owner_exists
     assert entity.name == "DeNunzio Jeffrey"
+
+def test_ticker_icon():
+    entity: Entity = Entity(320193)
+    assert entity.tickers[0] == "AAPL"
+    icon = entity.icon
+    assert icon is not None
+    assert isinstance(icon, bytes)
+    assert icon[:8] == b"\x89PNG\r\n\x1a\n"
+
+    entity: Entity = Entity(1465740)
+    assert entity.tickers[0] == "TWO"
+    icon = entity.icon
+    assert icon is None

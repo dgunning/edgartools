@@ -18,6 +18,7 @@ from edgar.entities import (Company,
                             get_entity,
                             get_company_facts,
                             get_company_tickers,
+                            get_icon_from_ticker,
                             get_entity_submissions,
                             get_ticker_to_cik_lookup,
                             get_cik_lookup_data)
