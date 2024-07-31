@@ -4,8 +4,10 @@ import pytest
 from rich import print
 
 from edgar import Filing
-from edgar.xbrl.parser import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase, XBRLData, XbrlDocuments,
+from edgar.xbrl.parser import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase, XBRLData,
+                               XbrlDocuments,
                                XBRLInstance, XBRLPresentation, StatementDefinition, StatementData)
+from edgar.xbrl.financials import Financials
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -188,6 +190,59 @@ def test_filing_with_no_namespace_labels():
     xbrl_documents: XbrlDocuments = XbrlDocuments(filing.attachments)
     assert xbrl_documents.get('label') is not None
     print(xbrl_documents)
-    xbrl_data:XBRLData = XBRLData.extract(filing)
+    xbrl_data: XBRLData = XBRLData.extract(filing)
     print(xbrl_data.labels)
+
+
+@pytest.fixture(scope='class')
+def rbc_424b2():
+    return Filing(form='424B2', filing_date='2024-07-30', company='ROYAL BANK OF CANADA', cik=1000275,
+                  accession_no='0000950103-24-011024')
+
+
+@pytest.fixture(scope='class')
+def wisdomtree_485bpos_filing():
+    return Filing(form='485BPOS', filing_date='2024-07-30', company='WisdomTree Trust', cik=1350487,
+                  accession_no='0001214659-24-013179')
+
+
+def test_get_xbrl_documents_for_offering_xbrl_filing(rbc_424b2):
+    xbrl_documents: XbrlDocuments = XbrlDocuments(rbc_424b2.attachments)
+    assert not xbrl_documents.empty
+    assert xbrl_documents.has_instance_document
+    assert xbrl_documents.instance_only
+
+    xbrl_instance: XBRLInstance = xbrl_documents.get_xbrl_instance()
+    assert xbrl_instance
+    assert len(xbrl_instance.facts) == 8
+    print(xbrl_instance)
+    print(xbrl_instance.facts)
+
+
+def test_get_xbrl_data_for_485bpos(wisdomtree_485bpos_filing):
+    xbrl_documents:XbrlDocuments = XbrlDocuments(wisdomtree_485bpos_filing.attachments)
+    assert not xbrl_documents.empty
+    assert xbrl_documents.has_instance_document
+    assert not xbrl_documents.instance_only
+    xbrl_data:XBRLData = XBRLData.extract(wisdomtree_485bpos_filing)
+    assert xbrl_data
+    print(xbrl_data)
+
+
+def test_xbrl_documents_get_xbrlinstance_or_xbrldata(wisdomtree_485bpos_filing, rbc_424b2):
+    xbrl_documents:XbrlDocuments = XbrlDocuments(wisdomtree_485bpos_filing.attachments)
+    xbrl_data = xbrl_documents.get_xbrl()
+    assert xbrl_data
+    assert isinstance(xbrl_data, XBRLData)
+
+    xbrl_documents_rbc: XbrlDocuments = XbrlDocuments(rbc_424b2.attachments)
+    xbrl_instance = xbrl_documents_rbc.get_xbrl()
+    assert xbrl_instance
+    assert isinstance(xbrl_instance, XBRLInstance)
+
+
+def test_xbrl_data_from_485bpos_xbrl(wisdomtree_485bpos_filing):
+    xbrl_data: XBRLData = XBRLData.extract(wisdomtree_485bpos_filing)
+    assert xbrl_data
+    print(xbrl_data.list_statement_definitions())
 

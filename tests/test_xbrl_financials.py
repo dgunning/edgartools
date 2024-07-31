@@ -47,6 +47,7 @@ def gd_xbrl():
                     accession_no='0000040533-24-000035')
     return asyncio.run(XBRLData.from_filing(filing))
 
+
 @pytest.mark.asyncio
 async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
     statement: StatementData = Financials(apple_xbrl).get_statement_of_changes_in_equity()
@@ -186,6 +187,16 @@ def test_xbrl_presentation_role_with_almost_duplicate_name(apple_xbrl):
     assert statement is None
 
 
+def test_list_standard_statements(apple_xbrl):
+    financials: Financials = Financials(apple_xbrl)
+    statements = financials.list_standard_statements()
+    assert statements == ['Cover Page', 'Consolidated Balance Sheets', 'Income Statements',
+                          'Consolidated Statement of Cash Flows', 'Consolidated Statement of Shareholders Equity',
+                          'Comprehensive Income Statement']
+    print()
+    print(financials)
+
+
 @pytest.mark.asyncio
 async def test_xbrl_financials_using_non_standard_filing_like_crowdstrike(crowdstrike_xbrl):
     financials: Financials = Financials(crowdstrike_xbrl)
@@ -217,10 +228,10 @@ def test_extract_financials_from_filing(gd_xbrl):
 def test_quarterly_data_extracted_correctly(gd_xbrl):
     assert gd_xbrl
     financials: Financials = Financials(gd_xbrl)
-    income_statement:StatementData = financials.get_income_statement()
+    income_statement: StatementData = financials.get_income_statement()
     data = income_statement.data
     concept = income_statement.get_concept('us-gaap:CostOfGoodsAndServicesSold')
-    assert list(concept.value.keys() )== ['Jun 30, 2024', 'Jul 02, 2023']
+    assert list(concept.value.keys()) == ['Jun 30, 2024', 'Jul 02, 2023']
     assert concept.value['Jun 30, 2024'] == '6127000000'
     assert concept.value['Jul 02, 2023'] == '4915000000'
 
@@ -232,8 +243,8 @@ def test_get_concepts_for_label(gd_xbrl):
     assert gd_xbrl.get_concept_for_label("Operating earnings") == concept
 
     assert gd_xbrl.get_labels_for_concept(concept) == {"label": "Operating Income (Loss)",
-                                                         "terseLabel": "Operating Earnings",
-                                                         'totalLabel': "Operating earnings"}
+                                                       "terseLabel": "Operating Earnings",
+                                                       'totalLabel': "Operating earnings"}
 
     roles = ['http://www.generaldynamics.com/role/ConsolidatedStatementofEarningsUnaudited',
              'http://www.generaldynamics.com/role/RevenueImpactofAdjustmentsinContractEstimatesDetails',
@@ -251,7 +262,7 @@ def test_handle_financials_with_only_document_and_entity_definition():
     # This filing only has 'DocumentAndEntityInformation'
     filing = Filing(form='10-K/A', filing_date='2024-07-26', company='Swiftmerge Acquisition Corp.',
                     cik=1845123, accession_no='0001013762-24-001580')
-    xbrl_data:XBRLData = XBRLData.extract(filing)
+    xbrl_data: XBRLData = XBRLData.extract(filing)
     statement_definitions = xbrl_data.list_statement_definitions()
     assert statement_definitions == ['DocumentAndEntityInformation']
     financials = Financials(xbrl_data)

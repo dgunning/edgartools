@@ -78,6 +78,27 @@ class XbrlDocuments:
     def empty(self):
         return not self._documents
 
+    @property
+    def has_instance_document(self):
+        return 'instance' in self._documents
+
+    @property
+    def instance_only(self):
+        return len(self._documents) == 1 and 'instance' in self._documents
+
+    def get_xbrl(self) -> Union[XBRLInstance, 'XBRLData']:
+        if self.instance_only:
+            return XBRLInstance.parse(self._documents['instance'].download())
+        else:
+            parsed_documents = asyncio.run(self.load())
+            if parsed_documents:
+                instance_xml, presentation_xml, labels, calculations = parsed_documents
+                return XBRLData.parse(instance_xml, presentation_xml, labels, calculations)
+
+    def get_xbrl_instance(self):
+        if self.has_instance_document:
+            return XBRLInstance.parse(self._documents['instance'].download())
+
     def has_all_documents(self):
         return all(doc in self._documents for doc in
                    ['instance', 'schema', 'definition', 'label', 'calculation', 'presentation'])
@@ -105,7 +126,7 @@ class XbrlDocuments:
 
         # If we don't have all documents, extract from schema
         if not self.has_all_documents() and 'schema' in parsed_files:
-            embedded_linkbases = self.extract_embedded_linkbases(parsed_files['schema'])
+            embedded_linkbases = XbrlDocuments.extract_embedded_linkbases(parsed_files['schema'])
 
             for linkbase_type, content in embedded_linkbases['linkbases'].items():
                 if linkbase_type not in parsed_files:
@@ -137,7 +158,8 @@ class XbrlDocuments:
             return {doc_type: parser(content)}
         return {}
 
-    def extract_embedded_linkbases(self, schema_content: str) -> Dict[str, Dict[str, str]]:
+    @staticmethod
+    def extract_embedded_linkbases(schema_content: str) -> Dict[str, Dict[str, str]]:
         """
         Extract embedded linkbases and role types from the schema file using ElementTree.
         """
@@ -653,11 +675,12 @@ class XBRLData(BaseModel):
         Returns:
             XBRLData: An instance of XBRLParser with parsed XBRL components.
         """
-        assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A'], "Filing must be a 10-K or 10-Q"
         xbrl_documents = XbrlDocuments(filing.attachments)
         if xbrl_documents.empty:
             log.warn(f"No XBRL documents found in the filing. {filing}")
             return None
+
+        assert not xbrl_documents.instance_only, "Instance document must be accompanied by other XBRL documents"
 
         parsed_documents = await xbrl_documents.load()
         if parsed_documents:
@@ -692,6 +715,14 @@ class XBRLData(BaseModel):
     @cached_property
     def statements(self):
         return Statements(self)
+
+    @property
+    def company(self):
+        return self.instance.get_entity_name()
+
+    @property
+    def period_end(self):
+        return self.instance.get_document_period()
 
     def list_statement_definitions(self) -> List[str]:
         return list(self.statements_dict.keys())
