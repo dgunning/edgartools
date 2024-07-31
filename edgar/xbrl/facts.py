@@ -209,15 +209,20 @@ class XBRLInstance(BaseModel):
         return result
 
     def __rich__(self):
+        document_period = self.get_document_period()
+
         table = Table(Column("Company"),
-                      Column("Facts"),
-                      Column("Fiscal period"),
-                      Column("Period end"),
-                      title="XBRL", box=box.SIMPLE)
-        table.add_row(self.get_entity_name(),
-                      f"{len(self.facts):,}",
-                      f"{self.get_fiscal_period_focus() or ''} {self.get_fiscal_year_focus() or ''}",
-                      self.get_document_period())
+                      Column("Number of Facts"),
+                      title="XBRL Instance Document", box=box.ROUNDED)
+        if document_period:
+            table.add_column("Document Period")
+            table.add_row(self.get_entity_name(),
+                          f"{len(self.facts):,}",
+                          self.get_document_period())
+        else:
+            table.add_row(self.get_entity_name(),
+                          f"{len(self.facts):,}")
+
         return table
 
     def __repr__(self):

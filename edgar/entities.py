@@ -29,6 +29,7 @@ from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference import states
 from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
+from edgar.xbrl.financials import Financials
 
 __all__ = [
     'Address',
@@ -390,7 +391,7 @@ class EntityData:
             # Get the latest 10-K
             latest_10k = self.filings.filter(form="10-K").latest()
             if latest_10k is not None:
-                return latest_10k.obj().financials
+                return Financials.extract(latest_10k)
 
     @property
     def is_company(self) -> bool:

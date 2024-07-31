@@ -65,7 +65,7 @@ def test_obj():
     tenk = filing_10k.data_object()
     assert isinstance(tenk, TenK)
 
-    assert '2022-12-31' in tenk.cash_flow_statement.periods
+    assert ['2022', '2021', '2020'] == tenk.cash_flow_statement.periods
 
     filing = Filing(form='1-A/A', filing_date='2023-03-21', company='CancerVAX, Inc.', cik=1905495,
                     accession_no='0001493152-23-008348')

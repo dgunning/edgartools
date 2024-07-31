@@ -402,7 +402,10 @@ def test_company_financials():
     company = Company('AAPL')
     financials = company.financials
     assert financials
-    assert financials.balance_sheet
+    assert financials.get_balance_sheet()
+    assert financials.get_income_statement()
+    assert financials.get_cash_flow_statement()
+    assert financials.get_statement_of_changes_in_equity()
 
 
 def test_company_with_no_latest_10k_has_no_financials():

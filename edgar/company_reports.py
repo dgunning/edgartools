@@ -10,7 +10,7 @@ from edgar._filings import Attachments, Attachment
 from edgar._markdown import MarkdownContent
 from edgar._rich import repr_rich
 from edgar.documents import HtmlDocument
-from edgar.financials import Financials
+from edgar.xbrl.financials import Financials
 from edgar.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
 
 __all__ = [
@@ -43,22 +43,20 @@ class CompanyReport:
 
     @property
     def income_statement(self):
-        return self.financials.income_statement if self.financials else None
+        return self.financials.get_income_statement() if self.financials else None
 
     @property
     def balance_sheet(self):
-        return self.financials.balance_sheet if self.financials else None
+        return self.financials.get_balance_sheet() if self.financials else None
 
     @property
     def cash_flow_statement(self):
-        return self.financials.cash_flow_statement if self.financials else None
+        return self.financials.get_cash_flow_statement() if self.financials else None
 
     @property
     @lru_cache(1)
     def financials(self):
-        xbrl = self._filing.xbrl()
-        if xbrl:
-            return Financials.from_xbrl(xbrl)
+        return Financials.extract(self._filing)
 
     @property
     @lru_cache(maxsize=1)

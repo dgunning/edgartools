@@ -48,7 +48,8 @@ from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
-from edgar.legacy._xbrl import FilingXbrl
+
+from edgar.xbrl.parser import XbrlDocuments, XBRLData, XBRLInstance
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
 
@@ -64,7 +65,6 @@ __all__ = [
     'Filing',
     'Filings',
     'get_filings',
-    'FilingXbrl',
     'FilingHeader',
     'FilingsState',
     'Attachment',
@@ -1129,15 +1129,13 @@ class Filing:
         """Preview this filing's primary document as markdown. This should display in the console"""
         print(self.text())
 
-    def xbrl(self) -> Optional[FilingXbrl]:
+    def xbrl(self) -> Optional[Union[XBRLData, XBRLInstance]]:
         """
         Get the XBRL document for the filing, parsed and as a FilingXbrl object
         :return: Get the XBRL document for the filing, parsed and as a FilingXbrl object, or None
         """
-        xbrl_document = self.homepage.xbrl_document
-        if xbrl_document:
-            xbrl_text = xbrl_document.download()
-            return FilingXbrl.parse(str(xbrl_text))
+        xbrl_documents:XbrlDocuments = XbrlDocuments(self.attachments)
+        return xbrl_documents.get_xbrl()
 
     def serve(self, port: int = 8000) -> AttachmentServer:
         """Serve the filings on a local server

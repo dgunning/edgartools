@@ -33,7 +33,6 @@ def get_financials_for_recent_filings(num_filings: int = 100, sleep_time: int = 
             time.sleep(sleep_time)
 
 
-
 def get_financials_for_filing(filing):
     xbrl_data = XBRLData.extract(filing)
     if not xbrl_data:
@@ -52,5 +51,5 @@ def get_financials_for_filing(filing):
 
 
 if __name__ == '__main__':
-    get_financials_for_popular_stocks(sleep_time=1)
-    #get_financials_for_recent_filings(sleep_time=1)
+    #get_financials_for_popular_stocks(sleep_time=1)
+    get_financials_for_recent_filings(sleep_time=1)

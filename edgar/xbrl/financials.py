@@ -55,9 +55,11 @@ class Financials:
         self.presentation: XBRLPresentation = xbrl_data.presentation
 
     @classmethod
-    def extract(cls, filing):
+    def extract(cls, filing) -> Optional['Financials']:
         assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A'], "Filing must be a 10-K or 10-Q"
         xbrl_data = XBRLData.extract(filing)
+        if not xbrl_data:
+            return None
         return cls(xbrl_data)
 
     def _get_statement_name_for_standard_name(self, standard_statement: StandardStatement) -> Optional[str]:

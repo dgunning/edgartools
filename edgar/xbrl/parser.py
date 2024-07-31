@@ -11,11 +11,12 @@ import pandas as pd
 from pydantic import BaseModel, Field
 from rich import box
 from rich import print as rprint
+from rich.console import Group
+from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
 from rich.tree import Tree
 
-from edgar import Filing
 from edgar._rich import repr_rich, colorize_words
 from edgar.attachments import Attachment
 from edgar.attachments import Attachments
@@ -86,8 +87,10 @@ class XbrlDocuments:
     def instance_only(self):
         return len(self._documents) == 1 and 'instance' in self._documents
 
-    def get_xbrl(self) -> Union[XBRLInstance, 'XBRLData']:
-        if self.instance_only:
+    def get_xbrl(self) -> Optional[Union[XBRLInstance, 'XBRLData']]:
+        if self.empty:
+            return None
+        elif self.instance_only:
             return XBRLInstance.parse(self._documents['instance'].download())
         else:
             parsed_documents = asyncio.run(self.load())
@@ -595,7 +598,7 @@ class Statements():
         return colorize_words(words)
 
     def __rich__(self):
-        table = Table("", "Statement", box=box.SIMPLE)
+        table = Table("", "Statements", box=box.ROUNDED, show_header=True)
         for index, statement_name in enumerate(self.xbrl_data.statements_dict.keys()):
             table.add_row(str(index), Statements.colorize_name(statement_name))
         return table
@@ -665,7 +668,7 @@ class XBRLData(BaseModel):
         return parser
 
     @classmethod
-    async def from_filing(cls, filing: Filing):
+    async def from_filing(cls, filing: 'Filing'):
         """
         Asynchronously create an XBRLParser instance from a Filing object.
 
@@ -688,7 +691,7 @@ class XBRLData(BaseModel):
             return cls.parse(instance_xml, presentation_xml, labels, calculations)
 
     @classmethod
-    def extract(cls, filing: Filing):
+    def extract(cls, filing: 'Filing'):
         """
         Extract XBRL data from a filing object.
         """
@@ -946,7 +949,12 @@ class XBRLData(BaseModel):
         return comparison[[f'{value_column}_{value1}', f'{value_column}_{value2}']]
 
     def __rich__(self):
-        return self.instance.__rich__()
+        group = Group(
+            self.instance,
+            self.statements,
+        )
+        panel = Panel(group, title=Text.assemble("XBRL Data for ", (f"{self.company}\n", "bold deep_sky_blue3")))
+        return panel
 
     def __repr__(self):
         return repr_rich(self)
