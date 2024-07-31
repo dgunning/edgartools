@@ -1,6 +1,6 @@
 import re
 from functools import lru_cache
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 import pyarrow as pa
@@ -94,7 +94,7 @@ def get_company_tickers(as_dataframe: bool = True,
 
 
 @lru_cache(maxsize=4)
-def get_icon_from_ticker(ticker: str) -> bytes | None:
+def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
     """
     Download an icon for a given ticker as a PNG image, if available.
 

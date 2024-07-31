@@ -397,7 +397,7 @@ class EntityData:
         return not self.is_individual
     
     @property
-    def icon(self) -> bytes | None:
+    def icon(self) -> Optional[bytes]:
         # If there are no tickers, we can't get an icon
         if len(self.tickers) == 0:
             return None
