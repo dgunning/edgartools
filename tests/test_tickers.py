@@ -1,7 +1,8 @@
 
-from edgar.reference.tickers import cusip_ticker_mapping, get_ticker_from_cusip, get_company_tickers, clean_company_suffix
+from edgar.reference.tickers import cusip_ticker_mapping, get_ticker_from_cusip, get_company_tickers, get_icon_from_ticker, clean_company_suffix
 import pandas as pd
 import pyarrow as pa
+import pytest
 
 
 def test_get_tickers():
@@ -22,3 +23,29 @@ def test_clean_company_suffix():
     assert clean_company_suffix('SOUTHERN COPPER CORP') == 'SOUTHERN COPPER'
     assert clean_company_suffix('ANZ GROUP HOLDINGS LIMITED') == 'ANZ GROUP HOLDINGS'
     #assert clean_company_suffix('ENTERPRISE PRODUCTS PARTNERS L.P.') == 'ENTERPRISE PRODUCTS PARTNERS'
+
+def test_get_icon_valid_ticker():
+    icon = get_icon_from_ticker("AAPL")
+    assert icon is not None
+    assert isinstance(icon, bytes)
+    assert icon[:8] == b"\x89PNG\r\n\x1a\n"
+
+def test_get_icon_invalid_ticker():
+    icon = get_icon_from_ticker("INVALID")
+    assert icon is None
+
+def test_get_icon_bad_ticker():
+    with pytest.raises(ValueError):
+        icon = get_icon_from_ticker("A.!@#$%^&*()")
+
+    with pytest.raises(ValueError):
+        icon = get_icon_from_ticker("AAPL 123")
+
+    with pytest.raises(ValueError):
+        icon = get_icon_from_ticker("")
+
+    with pytest.raises(ValueError):
+        icon = get_icon_from_ticker(None)
+
+    with pytest.raises(ValueError):
+        icon = get_icon_from_ticker(123)

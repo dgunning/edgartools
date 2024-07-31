@@ -1,11 +1,13 @@
 import re
 from functools import lru_cache
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 import pyarrow as pa
+from httpx import HTTPStatusError
 
-from edgar.httprequests import download_json
+
+from edgar.httprequests import download_file, download_json
 from edgar.reference.data.common import read_parquet_from_package
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers']
@@ -89,3 +91,29 @@ def get_company_tickers(as_dataframe: bool = True,
     table = pa.Table.from_pylist(data, schema=schema)
 
     return table
+
+
+@lru_cache(maxsize=4)
+def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
+    """
+    Download an icon for a given ticker as a PNG image, if available.
+
+    WARNING: This function uses the nvstly/icons repository on GitHub to fetch the icons.
+    The icons are not guaranteed to be available for all tickers.
+    """
+
+    if not isinstance(ticker, str):
+        raise ValueError("The ticker must be a valid string.")
+
+    if not ticker.isalpha():
+        raise ValueError("The ticker must only contain alphabetic characters.")
+
+    try:
+        downloaded = download_file(f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{ticker.upper()}.png", as_text=False)
+        return downloaded
+    except HTTPStatusError as e:
+        # If the status code is 404, the icon is not available
+        if e.response.status_code == 404:
+            return None
+        else:
+            raise
