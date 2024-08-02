@@ -4,9 +4,9 @@ import pytest
 from rich import print
 
 from edgar import Filing
-from edgar.xbrl.parser import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase, XBRLData,
-                               XbrlDocuments,
-                               XBRLInstance, XBRLPresentation, StatementDefinition, StatementData)
+from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase, XBRLData,
+                                 XbrlDocuments,
+                                 XBRLInstance, XBRLPresentation, StatementDefinition, StatementData)
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """

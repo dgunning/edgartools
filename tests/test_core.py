@@ -22,7 +22,8 @@ from edgar.core import (decode_content,
                         client_headers,
                         CRAWL, CAUTION, extract_dates,
                         reverse_name,
-                        get_bool)
+                        get_bool,
+                        split_camel_case)
 
 
 def test_decode_content():
@@ -262,3 +263,10 @@ def test_get_bool():
     assert get_bool("true")
     assert get_bool("TRUE")
     assert get_bool("True")
+
+def test_split_camel_case():
+    assert split_camel_case("CoverPage") == "Cover Page"
+    assert split_camel_case("CONSOLIDATEDBALANCESHEETS") == "CONSOLIDATEDBALANCESHEETS"
+    assert split_camel_case("consolidatedbalancesheets") == "consolidatedbalancesheets"
+    assert split_camel_case("SummaryofSignificantAccountingPolicies") == "Summaryof Significant Accounting Policies"
+    assert split_camel_case("RoleStatementINCOMESTATEMENTS") == "Role Statement INCOMESTATEMENTS"

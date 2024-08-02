@@ -3,7 +3,7 @@ import asyncio
 import pytest
 
 from edgar import Filing
-from edgar.xbrl.parser import StatementData, XBRLData, XbrlDocuments
+from edgar.xbrl.xbrldata import StatementData, XBRLData, XbrlDocuments
 from edgar.xbrl.financials import Financials
 
 

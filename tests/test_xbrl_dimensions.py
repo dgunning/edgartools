@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from edgar import Filing
-from edgar.xbrl.parser import XBRLData, XBRLInstance
+from edgar.xbrl.xbrldata import XBRLData, XBRLInstance
 from edgar.xbrl.dimensions import Dimensions, DimensionValue, Dimension
 
 

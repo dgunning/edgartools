@@ -49,7 +49,7 @@ from edgar.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 
-from edgar.xbrl.parser import XbrlDocuments, XBRLData, XBRLInstance
+from edgar.xbrl.xbrldata import XbrlDocuments, XBRLData, XBRLInstance
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
 

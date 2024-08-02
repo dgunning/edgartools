@@ -950,6 +950,3 @@ class XBRLData(BaseModel):
         return repr_rich(self)
 
 
-async def download_and_parse(attachment: Attachment, parse_func):
-    content: str = await download_file_async(attachment.url)
-    return parse_func(content)

@@ -10,7 +10,7 @@ from rich.console import Group
 from rich import box
 
 from edgar._rich import repr_rich
-from edgar.xbrl.parser import XBRLData, StatementData
+from edgar.xbrl.xbrldata import XBRLData, StatementData
 from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
 
 
