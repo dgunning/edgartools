@@ -71,6 +71,7 @@ __all__ = [
     'filter_by_form',
     'filter_by_cik',
     'filter_by_ticker',
+    'split_camel_case',
     'text_extensions',
     'binary_extensions',
     'ask_for_identity',
@@ -665,3 +666,20 @@ def reverse_name(name):
 
 def yes_no(value: bool) -> str:
     return "Yes" if value else "No"
+
+
+def split_camel_case(item):
+    # Check if the string is all uppercase or all lowercase
+    if item.isupper() or item.islower():
+        return item
+    else:
+        # Split at the boundary between uppercase and lowercase, and between lowercase and uppercase
+        words = re.findall(r'[A-Z]+(?=[A-Z][a-z]|\d|\W|$)|\d+|[A-Z]?[a-z]+|\W+', item)
+        # Join the words, preserving consecutive uppercase words
+        result = []
+        for i, word in enumerate(words):
+            if i > 0 and word.isupper() and words[i-1].isupper():
+                result[-1] += word
+            else:
+                result.append(word)
+        return ' '.join(result)

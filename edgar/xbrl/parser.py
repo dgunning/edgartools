@@ -1,6 +1,5 @@
 import asyncio
 import os
-import re
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import datetime
@@ -20,7 +19,7 @@ from rich.tree import Tree
 from edgar._rich import repr_rich, colorize_words
 from edgar.attachments import Attachment
 from edgar.attachments import Attachments
-from edgar.core import log
+from edgar.core import log, split_camel_case
 from edgar.httprequests import download_file_async
 from edgar.xbrl.calculatons import parse_calculation_linkbase
 from edgar.xbrl.concepts import Concept, concept_to_label
@@ -428,15 +427,6 @@ def format_currency(value: Union[str, float], format_str: str = '{:>15,.0f}') ->
 
 def format_label(label, level):
     return f"{' ' * level}{label}"
-
-
-def split_camel_case(item):
-    # Check if the string is all uppercase
-    if item.isupper():
-        return item
-    else:
-        # Split at the boundary between uppercase and camelCase
-        return ' '.join(re.findall(r'[A-Z]+(?=[A-Z][a-z])|[A-Z][a-z]*', item))
 
 
 class StatementData:
