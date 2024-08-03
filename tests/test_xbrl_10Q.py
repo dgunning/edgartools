@@ -4,7 +4,7 @@ import pytest
 
 from edgar import Filing
 from edgar.xbrl.xbrldata import StatementData, XBRLData, XbrlDocuments
-from edgar.xbrl.financials import Financials
+from edgar.financials import Financials
 
 
 @pytest.fixture(scope='module')

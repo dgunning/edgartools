@@ -1,9 +1,8 @@
-import asyncio
 import time
 from tqdm import tqdm
 from rich import print
 from edgar import *
-from edgar.xbrl.financials import *
+from financials import *
 
 use_local_storage(True)
 popular_tickers = pd.read_csv('data/popular_us_stocks.csv')

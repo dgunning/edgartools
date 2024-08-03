@@ -4,7 +4,8 @@ import pandas as pd
 import pytest
 
 from edgar import Filing
-from edgar.xbrl import XBRLData, XBRLInstance, StatementData, Statements, Financials
+from edgar.xbrl import XBRLData, XBRLInstance, StatementData, Statements
+from edgar.financials import Financials
 from edgar.xbrl.xbrldata import get_primary_units
 
 

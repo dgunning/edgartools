@@ -29,7 +29,7 @@ from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference import states
 from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
-from edgar.xbrl.financials import Financials
+from edgar.financials import Financials
 
 __all__ = [
     'Address',
