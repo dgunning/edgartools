@@ -416,12 +416,43 @@ def is_integer(s):
     return s.isdigit()
 
 
-def format_currency(value: Union[str, float], format_str: str = '{:>15,.0f}') -> str:
+def format_xbrl_value(value: Union[str, float], decimals: str, format_str: str = '{:>15,.0f}') -> str:
     if is_integer(value):
         value = float(value)
-        return format_str.format(value)
+        if decimals != 'INF':
+            try:
+                decimal_int = int(decimals)
+                if decimal_int < 0:
+                    value *= 10 ** (decimal_int)
+            except ValueError:
+                pass
+        if decimals == 'INF':
+            return f"{value:>15}"
+        else:
+            return format_str.format(value)
     else:
         return f"{value:>15}"
+
+
+def get_primary_units(df: pd.DataFrame, column_name: str) -> str:
+    # Count the occurrences of each decimals value in the specified column
+    decimals_counts = df[column_name].value_counts()
+    # Find the most common decimals value
+    most_common_decimals = decimals_counts.idxmax()
+
+    # Determine the primary unit based on the most common decimals value
+    if most_common_decimals == '-6':
+        return "Millions"
+    elif most_common_decimals == '-3':
+        return "Thousands"
+    elif most_common_decimals == '-5':
+        return "Hundreds of Thousands"
+    elif most_common_decimals == '-2':
+        return "Hundreds"
+    elif most_common_decimals == '-1':
+        return "Tens"
+    else:
+        return "Units"  # Default case if no match is found
 
 
 def format_label(label, level):
@@ -517,6 +548,9 @@ class StatementData:
             columns.extend(self.format_columns)
         return self.data[columns].copy()
 
+    def get_primary_units(self):
+        return get_primary_units(self.data, 'decimals')
+
     def __str__(self):
         format_str = " with format" if self.include_format else ""
         return f"{self.name}({len(self.data)} concepts{format_str})"
@@ -549,8 +583,8 @@ class StatementData:
                 label_style = ""
             label = Text(format_label(row.Index, row.level), style=label_style)
 
-            values = [label] + [Text.assemble(*[(format_currency(row[index + 1]), row_style)])
-                                for index, col in enumerate(cols)]
+            values = [label] + [Text.assemble(*[(format_xbrl_value(row[colindex + 1], row.decimals), row_style)])
+                                for colindex, col in enumerate(cols)]
 
             table.add_row(*values, end_section=is_total)
 

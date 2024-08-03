@@ -1,9 +1,11 @@
 import asyncio
 
+import pandas as pd
 import pytest
 
 from edgar import Filing
 from edgar.xbrl import XBRLData, XBRLInstance, StatementData, Statements, Financials
+from edgar.xbrl.xbrldata import get_primary_units
 
 
 @pytest.fixture(scope='module')
@@ -289,3 +291,46 @@ def test_get_dataframe_from_statement(apple_xbrl):
                                                                                                        'abstract',
                                                                                                        'units',
                                                                                                        'decimals']
+
+
+def test_get_primary_units():
+    # Test case with -6 as the most common decimals value
+    data1 = {'decimals': ['-6', '-6', '-6', '-3', '-3', 'INF', '0']}
+    df1 = pd.DataFrame(data1)
+    assert get_primary_units(df1, 'decimals') == "Millions"
+
+    # Test case with -3 as the most common decimals value
+    data2 = {'decimals': ['-3', '-3', '-3', '-6', '-6', 'INF', '0']}
+    df2 = pd.DataFrame(data2)
+    assert get_primary_units(df2, 'decimals') == "Thousands"
+
+    # Test case with -5 as the most common decimals value
+    data3 = {'decimals': ['-5', '-5', '-5', '-3', '-3', 'INF', '0']}
+    df3 = pd.DataFrame(data3)
+    assert get_primary_units(df3, 'decimals') == "Hundreds of Thousands"
+
+    # Test case with -2 as the most common decimals value
+    data4 = {'decimals': ['-2', '-2', '-2', '-6', '-6', 'INF', '0']}
+    df4 = pd.DataFrame(data4)
+    assert get_primary_units(df4, 'decimals') == "Hundreds"
+
+    # Test case with -1 as the most common decimals value
+    data5 = {'decimals': ['-1', '-1', '-1', '-6', '-6', 'INF', '0']}
+    df5 = pd.DataFrame(data5)
+    assert get_primary_units(df5, 'decimals') == "Tens"
+
+    # Test case with INF as the most common decimals value
+    data6 = {'decimals': ['INF', 'INF', 'INF', '-6', '-6', '-1', '0']}
+    df6 = pd.DataFrame(data6)
+    assert get_primary_units(df6, 'decimals') == "Units"
+
+    # Test case with mixed decimals values where no specific case is dominant
+    data7 = {'decimals': ['0', '0', '0', '-6', '-3', '-1', 'INF']}
+    df7 = pd.DataFrame(data7)
+    assert get_primary_units(df7, 'decimals') == "Units"
+
+
+def test_get_primary_units_for_statement(apple_xbrl):
+    financials: Financials = Financials(apple_xbrl)
+    balance_sheet = financials.get_balance_sheet()
+    assert balance_sheet.get_primary_units() == "Millions"

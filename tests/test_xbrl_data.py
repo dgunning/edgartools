@@ -7,6 +7,7 @@ from edgar import Filing
 from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase, XBRLData,
                                  XbrlDocuments,
                                  XBRLInstance, XBRLPresentation, StatementDefinition, StatementData)
+from edgar.xbrl.xbrldata import format_xbrl_value
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -245,3 +246,28 @@ def test_xbrl_data_from_485bpos_xbrl(wisdomtree_485bpos_filing):
     assert xbrl_data
     print(xbrl_data.list_statement_definitions())
 
+
+def test_format_xbrl_value():
+    # Test case with decimals = '-6'
+    assert format_xbrl_value('141988000000', '-6') == '        141,988'
+    assert format_xbrl_value('6118000000', '-6') == '          6,118'
+
+    # Test case with decimals = 'INF'
+    assert format_xbrl_value('0.62', 'INF') == '           0.62'
+
+    # Test case with decimals = '-3'
+    assert format_xbrl_value('1234567', '-3') == '          1,235'
+    assert format_xbrl_value('1000', '-3') == '              1'
+
+    # Test case with decimals = '0'
+    assert format_xbrl_value('1234', '0') == '          1,234'
+    assert format_xbrl_value('0', '0') == '              0'
+
+    # Test case with a non-integer value
+    assert format_xbrl_value("non-integer", '0') == '    non-integer'
+
+    # Test case with a negative value and decimals = '-2'
+    assert format_xbrl_value('-123456', '-2') == '         -1,235'
+
+    # Test case with a value of zero
+    assert format_xbrl_value('0', 'INF') == '            0.0'
