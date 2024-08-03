@@ -274,3 +274,18 @@ def test_handle_financials_with_only_document_and_entity_definition():
     assert not financials.get_statement_of_changes_in_equity()
     assert not financials.get_statement_of_comprehensive_income()
     assert financials.get_cover_page()
+
+
+def test_get_dataframe_from_statement(apple_xbrl):
+    financials: Financials = Financials(apple_xbrl)
+    balance_sheet = financials.get_balance_sheet()
+    assert balance_sheet.get_dataframe().columns.tolist() == ['2023', '2022']
+    assert balance_sheet.get_dataframe(include_concept=True).columns.tolist() == ['2023', '2022', 'concept']
+    assert balance_sheet.get_dataframe(include_format=True).columns.tolist() == ['2023', '2022', 'level', 'abstract',
+                                                                                 'units', 'decimals']
+    assert balance_sheet.get_dataframe(include_concept=True, include_format=True).columns.tolist() == ['2023', '2022',
+                                                                                                       'concept',
+                                                                                                       'level',
+                                                                                                       'abstract',
+                                                                                                       'units',
+                                                                                                       'decimals']

@@ -17,7 +17,6 @@ from rich.text import Text
 from rich.tree import Tree
 
 from edgar._rich import repr_rich, colorize_words
-from edgar.attachments import Attachment
 from edgar.attachments import Attachments
 from edgar.core import log, split_camel_case
 from edgar.httprequests import download_file_async
@@ -430,7 +429,9 @@ def format_label(label, level):
 
 
 class StatementData:
-    meta_columns = ['level', 'abstract', 'concept', 'units', 'decimals']
+    format_columns = ['level', 'abstract', 'units', 'decimals']
+    meta_columns = ['concept'] + format_columns
+
 
     NAMES = {
         "CONSOLIDATEDSTATEMENTSOFOPERATIONS": "CONSOLIDATED STATEMENTS OF OPERATIONS",
@@ -505,6 +506,16 @@ class StatementData:
             value={col: results[col].iloc[0] for col in self.periods}
         )
         return fact
+
+    def get_dataframe(self,
+                      include_format: bool = False,
+                      include_concept: bool = False):
+        columns = [col for col in self.data.columns if col not in self.meta_columns]
+        if include_concept:
+            columns.append('concept')
+        if include_format:
+            columns.extend(self.format_columns)
+        return self.data[columns].copy()
 
     def __str__(self):
         format_str = " with format" if self.include_format else ""
