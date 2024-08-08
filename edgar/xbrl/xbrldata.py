@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import datetime
 from functools import cached_property
+from functools import lru_cache
 from typing import Dict, List, Tuple, Union, Any, Optional
 
 import pandas as pd
@@ -416,14 +417,15 @@ def is_integer(s):
     return s.isdigit()
 
 
-def format_xbrl_value(value: Union[str, float], decimals: str, format_str: str = '{:>15,.0f}') -> str:
+def format_xbrl_value(value: Union[str, float], decimals: str, unit_divisor: int=1,
+                      format_str: str = '{:>15,.0f}') -> str:
     if is_integer(value):
         value = float(value)
         if decimals != 'INF':
             try:
                 decimal_int = int(decimals)
                 if decimal_int < 0:
-                    value *= 10 ** (decimal_int)
+                    value /= unit_divisor
             except ValueError:
                 pass
         if decimals == 'INF':
@@ -434,25 +436,35 @@ def format_xbrl_value(value: Union[str, float], decimals: str, format_str: str =
         return f"{value:>15}"
 
 
-def get_primary_units(df: pd.DataFrame, column_name: str) -> str:
-    # Count the occurrences of each decimals value in the specified column
-    decimals_counts = df[column_name].value_counts()
-    # Find the most common decimals value
-    most_common_decimals = decimals_counts.idxmax()
-
-    # Determine the primary unit based on the most common decimals value
-    if most_common_decimals == '-6':
+def get_primary_units(divisor: int) -> str:
+    if divisor == 1_000_000:
         return "Millions"
-    elif most_common_decimals == '-3':
-        return "Thousands"
-    elif most_common_decimals == '-5':
+    elif divisor == 100_000:
         return "Hundreds of Thousands"
-    elif most_common_decimals == '-2':
+    elif divisor == 1_000:
+        return "Thousands"
+    elif divisor == 100:
         return "Hundreds"
-    elif most_common_decimals == '-1':
+    elif divisor == 10:
         return "Tens"
     else:
         return "Units"  # Default case if no match is found
+
+
+def get_unit_divisor(df: pd.DataFrame, column: str = 'decimals') -> int:
+    # Filter negative decimal values and convert them to integers
+    negative_decimals = df[column].apply(pd.to_numeric, errors='coerce').dropna()
+    negative_decimals = negative_decimals[negative_decimals < 0]
+
+    if negative_decimals.empty:
+        return 1  # Default to no scaling if no negative decimals found
+
+    # Get the largest negative value (smallest divisor)
+    smallest_divisor_decimal = negative_decimals.max()
+
+    # Calculate the divisor
+    divisor = 10 ** -smallest_divisor_decimal
+    return int(divisor)
 
 
 def format_label(label, level):
@@ -462,7 +474,6 @@ def format_label(label, level):
 class StatementData:
     format_columns = ['level', 'abstract', 'units', 'decimals']
     meta_columns = ['concept'] + format_columns
-
 
     NAMES = {
         "CONSOLIDATEDSTATEMENTSOFOPERATIONS": "CONSOLIDATED STATEMENTS OF OPERATIONS",
@@ -548,8 +559,13 @@ class StatementData:
             columns.extend(self.format_columns)
         return self.data[columns].copy()
 
+    @lru_cache(maxsize=1)
+    def get_unit_divisor(self):
+        return get_unit_divisor(self.data, "decimals")
+
     def get_primary_units(self):
-        return get_primary_units(self.data, 'decimals')
+        unit_divisor = get_unit_divisor(self.data, )
+        return get_primary_units(unit_divisor)
 
     def __str__(self):
         format_str = " with format" if self.include_format else ""
@@ -563,6 +579,8 @@ class StatementData:
                       title=Text.assemble(*[(f"{self.entity}\n", "bold red1"),
                                             (self.display_name, "bold")]),
                       box=box.SIMPLE)
+        # What is the unit divisor for the values
+        unit_divisor = self.get_unit_divisor()
         for index, row in enumerate(self.data.itertuples()):
 
             # Detect the end of a section
@@ -582,8 +600,9 @@ class StatementData:
             else:
                 label_style = ""
             label = Text(format_label(row.Index, row.level), style=label_style)
-
-            values = [label] + [Text.assemble(*[(format_xbrl_value(row[colindex + 1], row.decimals), row_style)])
+            # For now don't use the unit divisor until we figure out the logic
+            values = [label] + [Text.assemble(*[(format_xbrl_value(value=row[colindex + 1],
+                                                                   decimals=row.decimals), row_style)])
                                 for colindex, col in enumerate(cols)]
 
             table.add_row(*values, end_section=is_total)
@@ -993,5 +1012,3 @@ class XBRLData(BaseModel):
 
     def __repr__(self):
         return repr_rich(self)
-
-

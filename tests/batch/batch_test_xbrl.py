@@ -43,6 +43,7 @@ def get_financials_for_filing(filing):
     financials.get_cash_flow_statement()
     if balance_sheet:
         print(balance_sheet)
+        print(balance_sheet.get_dataframe(include_concept=True, include_format=True))
         assert not '_' in balance_sheet.labels[0]
     else:
         print(xbrl_data.list_statement_definitions())
@@ -50,5 +51,5 @@ def get_financials_for_filing(filing):
 
 
 if __name__ == '__main__':
-    #get_financials_for_popular_stocks(sleep_time=1)
-    get_financials_for_recent_filings(sleep_time=1)
+    get_financials_for_popular_stocks(sleep_time=1)
+    #get_financials_for_recent_filings(sleep_time=1)

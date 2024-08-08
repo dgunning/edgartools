@@ -4,9 +4,9 @@ import pandas as pd
 import pytest
 
 from edgar import Filing
-from edgar.xbrl import XBRLData, XBRLInstance, StatementData, Statements
 from edgar.financials import Financials
-from edgar.xbrl.xbrldata import get_primary_units
+from edgar.xbrl import XBRLData, XBRLInstance, StatementData, Statements
+from edgar.xbrl.xbrldata import get_primary_units, get_unit_divisor
 
 
 @pytest.fixture(scope='module')
@@ -295,43 +295,60 @@ def test_get_dataframe_from_statement(apple_xbrl):
 
 
 def test_get_primary_units():
-    # Test case with -6 as the most common decimals value
-    data1 = {'decimals': ['-6', '-6', '-6', '-3', '-3', 'INF', '0']}
+    # Test case for Millions
+    assert get_primary_units(1_000_000) == "Millions"
+
+    # Test case for Hundreds of Thousands
+    assert get_primary_units(100_000) == "Hundreds of Thousands"
+
+    # Test case for Thousands
+    assert get_primary_units(1_000) == "Thousands"
+
+    # Test case for Hundreds
+    assert get_primary_units(100) == "Hundreds"
+
+    # Test case for Tens
+    assert get_primary_units(10) == "Tens"
+
+    # Test case for Units (default)
+    assert get_primary_units(1) == "Units"
+
+
+def test_get_unit_divisor():
+    # Test case with -6 and -3 in the column
+    data1 = {'decimals': ['-6', '-6', '-3', '-3', 'INF', '0']}
     df1 = pd.DataFrame(data1)
-    assert get_primary_units(df1, 'decimals') == "Millions"
+    assert get_unit_divisor(df1) == 1000  # 10 ** 3
 
-    # Test case with -3 as the most common decimals value
-    data2 = {'decimals': ['-3', '-3', '-3', '-6', '-6', 'INF', '0']}
+    # Test case with only -3 in the column
+    data2 = {'decimals': ['-3', '-3', 'INF', '0']}
     df2 = pd.DataFrame(data2)
-    assert get_primary_units(df2, 'decimals') == "Thousands"
+    assert get_unit_divisor(df2) == 1000  # 10 ** 3
 
-    # Test case with -5 as the most common decimals value
-    data3 = {'decimals': ['-5', '-5', '-5', '-3', '-3', 'INF', '0']}
+    # Test case with only -6 in the column
+    data3 = {'decimals': ['-6', 'INF', '0']}
     df3 = pd.DataFrame(data3)
-    assert get_primary_units(df3, 'decimals') == "Hundreds of Thousands"
+    assert get_unit_divisor(df3) == 1000000  # 10 ** 6
 
-    # Test case with -2 as the most common decimals value
-    data4 = {'decimals': ['-2', '-2', '-2', '-6', '-6', 'INF', '0']}
+    # Test case with no negative decimals
+    data4 = {'decimals': ['INF', '0', '2']}
     df4 = pd.DataFrame(data4)
-    assert get_primary_units(df4, 'decimals') == "Hundreds"
+    assert get_unit_divisor(df4) == 1  # Default to no scaling
 
-    # Test case with -1 as the most common decimals value
-    data5 = {'decimals': ['-1', '-1', '-1', '-6', '-6', 'INF', '0']}
+    # Test case with mixed positive and negative decimals
+    data5 = {'decimals': ['-2', '-4', 'INF', '2', '0']}
     df5 = pd.DataFrame(data5)
-    assert get_primary_units(df5, 'decimals') == "Tens"
+    assert get_unit_divisor(df5) == 100  # 10 ** 2
 
-    # Test case with INF as the most common decimals value
-    data6 = {'decimals': ['INF', 'INF', 'INF', '-6', '-6', '-1', '0']}
-    df6 = pd.DataFrame(data6)
-    assert get_primary_units(df6, 'decimals') == "Units"
 
-    # Test case with mixed decimals values where no specific case is dominant
-    data7 = {'decimals': ['0', '0', '0', '-6', '-3', '-1', 'INF']}
-    df7 = pd.DataFrame(data7)
-    assert get_primary_units(df7, 'decimals') == "Units"
+def test_get_unit_divisor_for_apple_balance_sheet(apple_xbrl):
+    financials: Financials = Financials(apple_xbrl)
+    balance_sheet = financials.get_balance_sheet()
+    unit_divisor = get_unit_divisor(balance_sheet.data)
+    assert unit_divisor == 1000  # 10 ** 3
 
 
 def test_get_primary_units_for_statement(apple_xbrl):
     financials: Financials = Financials(apple_xbrl)
     balance_sheet = financials.get_balance_sheet()
-    assert balance_sheet.get_primary_units() == "Millions"
+    assert balance_sheet.get_primary_units() == "Thousands"
