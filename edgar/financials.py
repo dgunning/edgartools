@@ -62,13 +62,6 @@ class Financials:
             return None
         return cls(xbrl_data)
 
-    @classmethod
-    def from_filing(cls, filing) -> Optional['Financials']:
-        assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A'], "Filing must be a 10-K or 10-Q"
-        xbrl_data = asyncio.run(XBRLData.from_filing(filing))
-        return Financials(xbrl_data)
-
-
     def _get_statement_name_for_standard_name(self, standard_statement: StandardStatement) -> Optional[str]:
         role = self.xbrl_data.presentation.get_role_by_standard_name(standard_statement.statement_name)
         if not role:
