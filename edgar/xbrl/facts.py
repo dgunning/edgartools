@@ -11,10 +11,12 @@ from rich.table import Table, Column
 from edgar._rich import repr_rich
 from edgar.xbrl.concepts import DEI_CONCEPTS
 from edgar.xbrl.dimensions import Dimensions
+from functools import lru_cache
 
 __all__ = ['XBRLInstance']
 
 
+@lru_cache(maxsize=128)
 def get_duration_label(start_date, end_date):
     if start_date is None or end_date is None:
         return 'instant'
