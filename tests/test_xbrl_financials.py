@@ -352,3 +352,19 @@ def test_get_primary_units_for_statement(apple_xbrl):
     financials: Financials = Financials(apple_xbrl)
     balance_sheet = financials.get_balance_sheet()
     assert balance_sheet.get_primary_units() == "Thousands"
+
+
+def test_financials_extract_from_filing():
+    filing = Filing(form='10-K', filing_date='2024-07-26', company='Swiftmerge Acquisition Corp.',
+                    cik=1845123, accession_no='0001013762-24-001580')
+    financials = Financials.extract(filing)
+    assert financials
+    assert isinstance(financials, Financials)
+
+
+def test_financials_extract_filing():
+    filing = Filing(form='10-K', filing_date='2024-07-26', company='Swiftmerge Acquisition Corp.',
+                    cik=1845123, accession_no='0001013762-24-001580')
+    financials = Financials.extract(filing)
+    assert financials
+    assert isinstance(financials, Financials)

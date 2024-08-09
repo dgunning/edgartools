@@ -5,6 +5,7 @@ import random
 import re
 import sys
 import threading
+import asyncio
 import warnings
 from _thread import interrupt_main
 from dataclasses import dataclass
@@ -76,6 +77,7 @@ __all__ = [
     'binary_extensions',
     'ask_for_identity',
     'use_local_storage',
+    'run_async_or_sync',
     'download_edgar_data',
     'default_page_size',
     'InvalidDateException',
@@ -683,3 +685,25 @@ def split_camel_case(item):
             else:
                 result.append(word)
         return ' '.join(result)
+
+
+def run_async_or_sync(coroutine):
+    try:
+        # Check if we're in an IPython environment
+        ipython = sys.modules['IPython']
+        if 'asyncio' in sys.modules:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # We're in a notebook with an active event loop
+                import nest_asyncio
+                nest_asyncio.apply()
+                return loop.run_until_complete(coroutine)
+            else:
+                # We're in IPython but without an active event loop
+                return loop.run_until_complete(coroutine)
+        else:
+            # We're in IPython but asyncio is not available
+            return ipython.get_ipython().run_cell_magic('time', '', f'import asyncio; asyncio.run({coroutine!r})')
+    except (KeyError, AttributeError):
+        # We're not in an IPython environment, use asyncio.run()
+        return asyncio.run(coroutine)

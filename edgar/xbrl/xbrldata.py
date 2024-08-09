@@ -19,7 +19,7 @@ from rich.tree import Tree
 
 from edgar._rich import repr_rich, colorize_words
 from edgar.attachments import Attachments
-from edgar.core import log, split_camel_case
+from edgar.core import log, split_camel_case, run_async_or_sync
 from edgar.httprequests import download_file_async
 from edgar.xbrl.calculatons import parse_calculation_linkbase
 from edgar.xbrl.concepts import Concept, concept_to_label
@@ -119,12 +119,17 @@ class XbrlDocuments:
         }
         parsed_files = {}
 
-        # First, download and parse the instance and schema files
-        for doc_type in ['instance', 'schema']:
+        # Download all files concurrently
+        download_tasks = []
+        for doc_type in ['instance', 'schema', 'label', 'calculation', 'presentation']:
             attachment = self.get(doc_type)
             if attachment:
-                content = await download_file_async(attachment.url)
-                parsed_files[doc_type] = parsers[doc_type](content)
+                download_tasks.append(XbrlDocuments.download_and_parse(doc_type, parsers[doc_type], attachment.url))
+
+        # Wait for all downloads to complete
+        results = await asyncio.gather(*download_tasks)
+        for result in results:
+            parsed_files.update(result)
 
         # If we don't have all documents, extract from schema
         if not self.has_all_documents() and 'schema' in parsed_files:
@@ -134,31 +139,16 @@ class XbrlDocuments:
                 if linkbase_type not in parsed_files:
                     parsed_files[linkbase_type] = parsers[linkbase_type](content)
 
-        # Download and parse any remaining standalone linkbase files
-        tasks = []
-        for doc_type in ['definition', 'label', 'calculation', 'presentation']:
-            if doc_type not in parsed_files:
-                attachment = self.get(doc_type)
-                if attachment:
-                    tasks.append(self.download_and_parse(doc_type, parsers[doc_type]))
-
-        if tasks:
-            results = await asyncio.gather(*tasks)
-            for result in results:
-                parsed_files.update(result)
-
         # Return the required files
         return (parsed_files.get('instance', ''),
                 parsed_files.get('presentation', ''),
                 parsed_files.get('label', {}),
                 parsed_files.get('calculation', {}))
 
-    async def download_and_parse(self, doc_type: str, parser):
-        attachment = self.get(doc_type)
-        if attachment:
-            content = await download_file_async(attachment.url)
-            return {doc_type: parser(content)}
-        return {}
+    @staticmethod
+    async def download_and_parse(doc_type: str, parser, url: str):
+        content = await download_file_async(url)
+        return {doc_type: parser(content)}
 
     @staticmethod
     def extract_embedded_linkbases(schema_content: str) -> Dict[str, Dict[str, str]]:
@@ -417,7 +407,7 @@ def is_integer(s):
     return s.isdigit()
 
 
-def format_xbrl_value(value: Union[str, float], decimals: str, unit_divisor: int=1,
+def format_xbrl_value(value: Union[str, float], decimals: str, unit_divisor: int = 1,
                       format_str: str = '{:>15,.0f}') -> str:
     if is_integer(value):
         value = float(value)
@@ -580,7 +570,7 @@ class StatementData:
                                             (self.display_name, "bold")]),
                       box=box.SIMPLE)
         # What is the unit divisor for the values
-        unit_divisor = self.get_unit_divisor()
+        #unit_divisor = self.get_unit_divisor()
         for index, row in enumerate(self.data.itertuples()):
 
             # Detect the end of a section
@@ -749,7 +739,7 @@ class XBRLData(BaseModel):
         """
         Extract XBRL data from a filing object.
         """
-        return asyncio.run(cls.from_filing(filing))
+        return run_async_or_sync(cls.from_filing(filing))
 
     def parse_financial_statements(self):
         """
