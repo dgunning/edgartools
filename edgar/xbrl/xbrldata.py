@@ -321,6 +321,7 @@ class StatementDefinition(BaseModel):
                 or StatementDefinition.concept_to_label(concept))
 
     @staticmethod
+    @lru_cache(maxsize=1000)
     def get_fact_values(concept: str, instance: XBRLInstance) -> Dict[str, Any]:
         facts = instance.query_facts(concept=concept)
         values = {}
@@ -557,10 +558,6 @@ class StatementData:
         unit_divisor = get_unit_divisor(self.data, )
         return get_primary_units(unit_divisor)
 
-    def __str__(self):
-        format_str = " with format" if self.include_format else ""
-        return f"{self.name}({len(self.data)} concepts{format_str})"
-
     def __rich__(self):
         cols = [col for col in self.data.columns if col not in self.meta_columns]
         columns = [Column('')] + [Column(col) for col in cols]
@@ -590,10 +587,14 @@ class StatementData:
             else:
                 label_style = ""
             label = Text(format_label(row.Index, row.level), style=label_style)
-            # For now don't use the unit divisor until we figure out the logic
-            values = [label] + [Text.assemble(*[(format_xbrl_value(value=row[colindex + 1],
-                                                                   decimals=row.decimals), row_style)])
-                                for colindex, col in enumerate(cols)]
+            if 'decimals' in self.data:
+                # For now don't use the unit divisor until we figure out the logic
+                values = [label] + [Text.assemble(*[(format_xbrl_value(value=row[colindex + 1],
+                                                                       decimals=row.decimals), row_style)])
+                                    for colindex, col in enumerate(cols)]
+            else:
+                values = [label] + [Text.assemble(*[(row[colindex + 1], row_style)])
+                                    for colindex, col in enumerate(cols)]
 
             table.add_row(*values, end_section=is_total)
 
@@ -619,7 +620,10 @@ class Statements():
         return item in self.names
 
     def __getitem__(self, item):
-        return self.get(item)
+        if isinstance(item, int):
+            return self.get(self.names[item])
+        else:
+            return self.get(item)
 
     def __len__(self):
         return len(self.names)

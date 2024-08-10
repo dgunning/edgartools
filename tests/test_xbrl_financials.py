@@ -2,6 +2,7 @@ import asyncio
 
 import pandas as pd
 import pytest
+from rich import print
 
 from edgar import Filing
 from edgar.financials import Financials
@@ -368,3 +369,30 @@ def test_financials_extract_filing():
     financials = Financials.extract(filing)
     assert financials
     assert isinstance(financials, Financials)
+
+
+def test_get_nonfinancial_statement(apple_xbrl):
+    statements = apple_xbrl.statements
+    assert len(statements) == 78
+
+    # get the cover page
+    cover_page: StatementData = statements.get('CoverPage')
+    assert cover_page
+    assert isinstance(cover_page, StatementData)
+    assert cover_page.get_concept('EntityRegistrantName').value['2023'] == 'Apple Inc.'
+    # Make sure that repr works
+    _repr_ = repr(cover_page)
+    print(_repr_)
+    assert 'Document Type' in _repr_
+
+    for statement in statements:
+        assert repr(statement)
+
+
+def test_get_statement_from_statement_by_int_index(apple_xbrl):
+    statements = apple_xbrl.statements
+    assert len(statements)
+
+    statement: StatementData = statements[0]
+    assert statement
+    assert statement.display_name == "Cover"

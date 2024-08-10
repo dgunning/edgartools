@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field
 from rich import box
 from rich.table import Table, Column
+import hashlib
 
 from edgar._rich import repr_rich
 from edgar.xbrl.concepts import DEI_CONCEPTS
@@ -66,9 +67,9 @@ class XBRLInstance(BaseModel):
     dei_facts: Dict[str, Any] = Field(default_factory=dict)
 
     # Configuration to allow arbitrary types in the model
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+
+    class Config:
+        arbitrary_types_allowed = True
 
     def extract_dei_facts(self):
         # Extract Document and Entity Information facts
@@ -209,6 +210,19 @@ class XBRLInstance(BaseModel):
                 result['dimensions'].apply(lambda d: all(item in d.items() for item in kwargs['dimensions'].items()))]
 
         return result
+
+    @property
+    def instance_hash(self) -> str:
+        hash_string = f"{self.get_entity_name()}_{self.get_document_period()}_{len(self.facts)}"
+        return hashlib.md5(hash_string.encode()).hexdigest()
+
+    def __hash__(self):
+        return hash(self.instance_hash)
+
+    def __eq__(self, other):
+        if not isinstance(other, XBRLInstance):
+            return False
+        return self.instance_hash == other.instance_hash
 
     def __rich__(self):
         document_period = self.get_document_period()
