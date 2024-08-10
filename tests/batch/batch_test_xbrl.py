@@ -41,6 +41,7 @@ def get_financials_for_filing(filing):
     balance_sheet = financials.get_balance_sheet()
     financials.get_income_statement()
     financials.get_cash_flow_statement()
+    repr(financials.get_cover_page())
     if balance_sheet:
         print(balance_sheet)
         print(balance_sheet.get_dataframe(include_concept=True, include_format=True))
