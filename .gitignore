@@ -5,7 +5,7 @@
 # Ignore dynaconf secret files
 .secrets.*
 /.coverage*
-/notebooks/
+/workbooks/
 /site/
 **/__pycache__/
 dist/
