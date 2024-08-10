@@ -41,7 +41,7 @@ dependencies = [
   "unidecode>=1.2.0",
   "pydantic>=2.0.0",
   "tqdm>=4.62.0",
-  "nest-asyncio>=1.5.8"
+  "nest-asyncio>=1.5.1"
 ]
 dynamic = ["version"]
 
