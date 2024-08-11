@@ -8,6 +8,8 @@ from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_calculation_linkbas
                                  XbrlDocuments,
                                  XBRLInstance, XBRLPresentation, StatementDefinition, StatementData)
 from edgar.xbrl.xbrldata import format_xbrl_value
+from edgar.xbrl import get_xbrl_object
+from edgar import *
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -271,3 +273,25 @@ def _temp_disabled_test_format_xbrl_value():
 
     # Test case with a value of zero
     assert format_xbrl_value('0', 'INF') == '            0.0'
+
+
+def test_get_xbrl():
+
+    filings = get_filings(form="D")
+
+    # 424B4 should be XBRLInstance
+    filing = Filing(form='424B2', filing_date='2024-08-09', company='ROYAL BANK OF CANADA',
+                     cik=1000275, accession_no='0000950103-24-012010')
+    instance = get_xbrl_object(filing)
+    assert isinstance(instance, XBRLInstance)
+
+    # 10-K should be XBRLData
+    filing = Filing(form='10-K/A', filing_date='2024-08-09', company='TG THERAPEUTICS, INC.',
+        cik=1001316, accession_no='0001437749-24-025850')
+    xbrl_data = get_xbrl_object(filing)
+    assert isinstance(xbrl_data, XBRLData)
+
+    # Form D should return None
+    filing = Filing(form='D', filing_date='2024-08-09', company='102 Lancaster Partners LLC',
+           cik=2032948, accession_no='0002032948-24-000002')
+    assert get_xbrl_object(filing) is None

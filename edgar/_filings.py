@@ -49,7 +49,8 @@ from edgar.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 
-from edgar.xbrl.xbrldata import XbrlDocuments, XBRLData, XBRLInstance
+from edgar.xbrl.xbrldata import XBRLData, XBRLInstance
+from edgar.xbrl import get_xbrl_object
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
 
@@ -1134,8 +1135,7 @@ class Filing:
         Get the XBRL document for the filing, parsed and as a FilingXbrl object
         :return: Get the XBRL document for the filing, parsed and as a FilingXbrl object, or None
         """
-        xbrl_documents:XbrlDocuments = XbrlDocuments(self.attachments)
-        return xbrl_documents.get_xbrl()
+        return get_xbrl_object(self)
 
     def serve(self, port: int = 8000) -> AttachmentServer:
         """Serve the filings on a local server

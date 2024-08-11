@@ -33,7 +33,7 @@ def get_financials_for_recent_filings(num_filings: int = 100, sleep_time: int = 
 
 
 def get_financials_for_filing(filing):
-    xbrl_data = XBRLData.extract(filing)
+    xbrl_data = filing.xbrl()
     if not xbrl_data:
         print("No XBRL data found for filing")
         return

@@ -1,17 +1,17 @@
 from collections import defaultdict
 from typing import Optional, List, Dict
-import asyncio
+
 import pandas as pd
 from pydantic import BaseModel
-from rich.table import Table, Column
-from rich.panel import Panel
-from rich.text import Text
-from rich.console import Group
 from rich import box
+from rich.console import Group
+from rich.panel import Panel
+from rich.table import Table, Column
+from rich.text import Text
 
 from edgar._rich import repr_rich
-from edgar.xbrl.xbrldata import XBRLData, StatementData
 from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
+from edgar.xbrl.xbrldata import XBRLData, StatementData
 
 
 class StandardStatement(BaseModel):
