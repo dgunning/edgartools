@@ -655,7 +655,7 @@ class Statements():
         return repr_rich(self.__rich__())
 
 
-class fromXBRLData(BaseModel):
+class XBRLData(BaseModel):
     """
        A parser for XBRL (eXtensible Business Reporting Language) documents.
 
