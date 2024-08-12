@@ -3,7 +3,7 @@ import asyncio
 import pytest
 
 from edgar import Filing
-from edgar.xbrl.xbrldata import StatementData, XBRLData, XbrlDocuments
+from edgar.xbrl.xbrldata import Statement, XBRLData, XBRLAttachments
 from edgar.financials import Financials
 
 
@@ -48,7 +48,7 @@ def netflix_xbrl_2010():
                           ('us-gaap_RetainedEarningsAccumulatedDeficit', ['24,921,495,000', '22,589,286,000']),
                           ])
 def test_netflix_10Q_balance_sheet(netflix_xbrl, concept, values):
-    balance_sheet: StatementData = Financials(netflix_xbrl).get_balance_sheet()
+    balance_sheet: Statement = Financials(netflix_xbrl).get_balance_sheet()
     values = [v.replace(',', '') for v in values]
     assert balance_sheet.get_concept(concept).values == values
 
@@ -62,18 +62,18 @@ def test_netflix_10Q_balance_sheet(netflix_xbrl, concept, values):
                           ]
                          )
 def test_netflix_10Q_balance_sheet_2010(netflix_xbrl_2010, concept, values):
-    balance_sheet: StatementData = netflix_xbrl_2010.get_statement('StatementOfFinancialPositionClassified')
+    balance_sheet: Statement = netflix_xbrl_2010.get_statement('StatementOfFinancialPositionClassified')
     values = [v.replace(',', '') for v in values]
     assert balance_sheet.get_concept(concept).values == values
 
 
 def test_get_statement_from_old_filings(netflix_xbrl_2010):
-    balance_sheet: StatementData = netflix_xbrl_2010.get_statement('StatementOfFinancialPositionClassified')
+    balance_sheet: Statement = netflix_xbrl_2010.get_statement('StatementOfFinancialPositionClassified')
     assert balance_sheet is not None
 
 
 def test_statement_files_exist_for_old_filings(netflix_filing_2010):
-    documents: XbrlDocuments =XbrlDocuments(netflix_filing_2010.attachments)
+    documents: XBRLAttachments =XBRLAttachments(netflix_filing_2010.attachments)
     assert sorted(list(documents._documents.keys())) == ['calculation', 'definition', 'instance', 'label', 'presentation', 'schema']
 
 

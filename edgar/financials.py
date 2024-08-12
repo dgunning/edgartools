@@ -11,7 +11,7 @@ from rich.text import Text
 
 from edgar._rich import repr_rich
 from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
-from edgar.xbrl.xbrldata import XBRLData, StatementData
+from edgar.xbrl.xbrldata import XBRLData, Statement
 
 
 class StandardStatement(BaseModel):
@@ -70,7 +70,7 @@ class Financials:
             statement_name = role.split('/')[-1]
             return statement_name
 
-    def get_balance_sheet(self) -> StatementData:
+    def get_balance_sheet(self) -> Statement:
         """
         Retrieves the Balance Sheet (Statement of Financial Position).
 
@@ -78,13 +78,13 @@ class Financials:
         showing its assets, liabilities, and shareholders' equity.
 
         Returns:
-            StatementData: The Balance Sheet data, or None if not found.
+            Statement: The Balance Sheet data, or None if not found.
         """
         statement_name = self._get_statement_name_for_standard_name(balance_sheet)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name, display_name="Consolidated Balance Sheets")
 
-    def get_income_statement(self) -> Optional[StatementData]:
+    def get_income_statement(self) -> Optional[Statement]:
         """
         Retrieves the Income Statement (Statement of Operations).
 
@@ -92,14 +92,14 @@ class Financials:
         It may also be referred to as the Profit and Loss Statement (P&L) or Statement of Earnings.
 
         Returns:
-            StatementData: The Income Statement data, or None if not found.
+            Statement: The Income Statement data, or None if not found.
         """
         statement_name = self._get_statement_name_for_standard_name(income_statement)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name,
                                             display_name="Income Statements") if statement_name else None
 
-    def get_cash_flow_statement(self) -> StatementData:
+    def get_cash_flow_statement(self) -> Statement:
         """
         Retrieves the Statement of Cash Flows.
 
@@ -107,13 +107,13 @@ class Financials:
         breaking the analysis down into operating, investing, and financing activities.
 
         Returns:
-            StatementData: The Cash Flow Statement data, or None if not found.
+            Statement: The Cash Flow Statement data, or None if not found.
         """
         statement_name = self._get_statement_name_for_standard_name(cash_flow_statement)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name, display_name="Consolidated Statement of Cash Flows")
 
-    def get_statement_of_changes_in_equity(self) -> StatementData:
+    def get_statement_of_changes_in_equity(self) -> Statement:
         """
         Retrieves the Statement of Changes in Equity (Statement of Stockholders' Equity).
 
@@ -121,14 +121,14 @@ class Financials:
         share capital, retained earnings, and other equity items.
 
         Returns:
-            StatementData: The Statement of Changes in Equity data, or None if not found.
+            Statement: The Statement of Changes in Equity data, or None if not found.
         """
         statement_name = self._get_statement_name_for_standard_name(statement_of_changes_in_equity)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name,
                                                     display_name="Consolidated Statement of Shareholders Equity")
 
-    def get_statement_of_comprehensive_income(self) -> StatementData:
+    def get_statement_of_comprehensive_income(self) -> Statement:
         """
         Retrieves the Statement of Comprehensive Income.
 
@@ -137,14 +137,14 @@ class Financials:
         Income Statement and other comprehensive income items.
 
         Returns:
-            StatementData: The Statement of Comprehensive Income data, or None if not found.
+            Statement: The Statement of Comprehensive Income data, or None if not found.
         """
         statement_name = self._get_statement_name_for_standard_name(statement_of_comprehensive_income)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name,
                                                     display_name="Comprehensive Income Statement")
 
-    def get_cover_page(self) -> StatementData:
+    def get_cover_page(self) -> Statement:
         """
         Retrieves the Document and Entity Information.
 
@@ -152,7 +152,7 @@ class Financials:
         and the document itself, such as company name, filing date, and other regulatory information.
 
         Returns:
-            StatementData: The Document and Entity Information data, or None if not found.
+            Statement: The Document and Entity Information data, or None if not found.
         """
         statement_name = self._get_statement_name_for_standard_name(cover_page)
         if statement_name:
@@ -182,7 +182,7 @@ class Financials:
             if self._get_statement_name_for_standard_name(standard_statement) is not None
         ]
 
-    def get_dimensioned_statement(self, statement_name: str, dimensions: Dict[str, str]) -> Optional[StatementData]:
+    def get_dimensioned_statement(self, statement_name: str, dimensions: Dict[str, str]) -> Optional[Statement]:
         return self.xbrl_data.generate_dimensioned_statement(statement_name, dimensions)
 
     def pivot_statement(self, statement_name: str, dimension: str) -> pd.DataFrame:

@@ -1,5 +1,5 @@
 from edgar import *
-from edgar.xbrl import XBRLData, XBRLInstance, StatementData, Statements, Financials
+from edgar.xbrl import XBRLData, XBRLInstance, Statement, Statements, Financials
 import time
 from rich import print as rprint
 

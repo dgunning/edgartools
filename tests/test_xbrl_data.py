@@ -5,8 +5,8 @@ from rich import print
 
 from edgar import Filing
 from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase, XBRLData,
-                                 XbrlDocuments,
-                                 XBRLInstance, XBRLPresentation, StatementDefinition, StatementData)
+                                 XBRLAttachments,
+                                 XBRLInstance, XBRLPresentation, StatementDefinition, Statement)
 from edgar.xbrl.xbrldata import format_xbrl_value
 from edgar.xbrl import get_xbrl_object
 from edgar import *
@@ -108,7 +108,7 @@ def test_xbrl_parser_get_financial_statement(sample_instance, sample_presentatio
     )
     parser.parse_financial_statements()
 
-    statement: StatementData = parser.get_statement("CONSOLIDATEDBALANCESHEETS")
+    statement: Statement = parser.get_statement("CONSOLIDATEDBALANCESHEETS")
     assert statement is not None
     assert 'Assets' in statement.labels
     assert 'Liabilities' in statement.labels
@@ -167,7 +167,7 @@ def test_parse_definitions():
 async def test_parse_xbrl_document_for_filing_with_embedded_linkbase():
     filing = Filing(company='HUBSPOT INC', cik=1404655, form='10-K', filing_date='2024-02-14',
                     accession_no='0000950170-24-015277')
-    xbrl_documents = XbrlDocuments(filing.attachments)
+    xbrl_documents = XBRLAttachments(filing.attachments)
     instance_xml, presentation_xml, labels, calculations = await xbrl_documents.load()
     assert presentation_xml
     assert labels
@@ -189,7 +189,7 @@ def test_financial_filing_with_no_attachments():
 def test_filing_with_no_namespace_labels():
     filing = Filing(form='10-K/A', filing_date='2024-07-25', company='RITE AID CORP',
                     cik=84129, accession_no='0001558370-24-010167')
-    xbrl_documents: XbrlDocuments = XbrlDocuments(filing.attachments)
+    xbrl_documents: XBRLAttachments = XBRLAttachments(filing.attachments)
     assert xbrl_documents.get('label') is not None
     print(xbrl_documents)
     xbrl_data: XBRLData = XBRLData.extract(filing)
@@ -209,7 +209,7 @@ def wisdomtree_485bpos_filing():
 
 
 def test_get_xbrl_documents_for_offering_xbrl_filing(rbc_424b2):
-    xbrl_documents: XbrlDocuments = XbrlDocuments(rbc_424b2.attachments)
+    xbrl_documents: XBRLAttachments = XBRLAttachments(rbc_424b2.attachments)
     assert not xbrl_documents.empty
     assert xbrl_documents.has_instance_document
     assert xbrl_documents.instance_only
@@ -222,7 +222,7 @@ def test_get_xbrl_documents_for_offering_xbrl_filing(rbc_424b2):
 
 
 def test_get_xbrl_data_for_485bpos(wisdomtree_485bpos_filing):
-    xbrl_documents:XbrlDocuments = XbrlDocuments(wisdomtree_485bpos_filing.attachments)
+    xbrl_documents:XBRLAttachments = XBRLAttachments(wisdomtree_485bpos_filing.attachments)
     assert not xbrl_documents.empty
     assert xbrl_documents.has_instance_document
     assert not xbrl_documents.instance_only
@@ -232,12 +232,12 @@ def test_get_xbrl_data_for_485bpos(wisdomtree_485bpos_filing):
 
 
 def test_xbrl_documents_get_xbrlinstance_or_xbrldata(wisdomtree_485bpos_filing, rbc_424b2):
-    xbrl_documents:XbrlDocuments = XbrlDocuments(wisdomtree_485bpos_filing.attachments)
+    xbrl_documents:XBRLAttachments = XBRLAttachments(wisdomtree_485bpos_filing.attachments)
     xbrl_data = xbrl_documents.get_xbrl()
     assert xbrl_data
     assert isinstance(xbrl_data, XBRLData)
 
-    xbrl_documents_rbc: XbrlDocuments = XbrlDocuments(rbc_424b2.attachments)
+    xbrl_documents_rbc: XBRLAttachments = XBRLAttachments(rbc_424b2.attachments)
     xbrl_instance = xbrl_documents_rbc.get_xbrl()
     assert xbrl_instance
     assert isinstance(xbrl_instance, XBRLInstance)

@@ -6,7 +6,7 @@ from rich import print
 
 from edgar import Filing
 from edgar.financials import Financials
-from edgar.xbrl import XBRLData, XBRLInstance, StatementData, Statements
+from edgar.xbrl import XBRLData, XBRLInstance, Statement, Statements
 from edgar.xbrl.xbrldata import get_primary_units, get_unit_divisor
 
 
@@ -54,7 +54,7 @@ def gd_xbrl():
 
 @pytest.mark.asyncio
 async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
-    statement: StatementData = Financials(apple_xbrl).get_statement_of_changes_in_equity()
+    statement: Statement = Financials(apple_xbrl).get_statement_of_changes_in_equity()
     assert statement
     assert len(statement.data) == 18
 
@@ -62,14 +62,14 @@ async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
 @pytest.mark.asyncio
 def test_get_statement_name(apple_xbrl):
     financials = Financials(apple_xbrl)
-    statement: StatementData = financials.get_cash_flow_statement()
+    statement: Statement = financials.get_cash_flow_statement()
     assert statement.get_statement_name() == 'CONSOLIDATED STATEMENTS OF CASH FLOWS'
     assert financials.get_statement_of_changes_in_equity().get_statement_name() == 'CONSOLIDATED STATEMENTS OF SHAREHOLDERS EQUITY'
 
 
 @pytest.mark.asyncio
 async def test_statement_get_concept_value(apple_xbrl):
-    statement: StatementData = Financials(apple_xbrl).get_statement_of_changes_in_equity()
+    statement: Statement = Financials(apple_xbrl).get_statement_of_changes_in_equity()
     concept = statement.get_concept('us-gaap_NetIncomeLoss')
     assert concept.value.get('2023') == '96995000000'
     assert concept.value.get('2022') == '99803000000'
@@ -81,7 +81,7 @@ async def test_statement_get_concept_value(apple_xbrl):
 
 
 def test_get_balance_sheet(apple_xbrl):
-    balance_sheet: StatementData = Financials(apple_xbrl).get_balance_sheet()
+    balance_sheet: Statement = Financials(apple_xbrl).get_balance_sheet()
     assert balance_sheet.periods == ['2023', '2022']
 
 
@@ -92,7 +92,7 @@ def test_cover_page_aapl(apple_xbrl):
 
 
 def test_get_concept_using_label(apple_xbrl):
-    cover_page: StatementData = apple_xbrl.get_statement('CoverPage', include_concept=True)
+    cover_page: Statement = apple_xbrl.get_statement('CoverPage', include_concept=True)
     assert cover_page is not None
     fact = cover_page.get_concept(label='Entity Registrant Name')
     assert fact.value['2023'] == 'Apple Inc.'
@@ -106,7 +106,7 @@ def test_statements_property(apple_xbrl):
 
 
 def test_10Q_filings_have_quarterly_dates(netflix_xbrl):
-    balance_sheet: StatementData = Financials(netflix_xbrl).get_balance_sheet()
+    balance_sheet: Statement = Financials(netflix_xbrl).get_balance_sheet()
     assert balance_sheet.periods == ['Mar 31, 2024', 'Dec 31, 2023']
     for name in netflix_xbrl.list_statement_definitions():
         print(name)
@@ -232,7 +232,7 @@ def test_extract_financials_from_filing(gd_xbrl):
 def test_quarterly_data_extracted_correctly(gd_xbrl):
     assert gd_xbrl
     financials: Financials = Financials(gd_xbrl)
-    income_statement: StatementData = financials.get_income_statement()
+    income_statement: Statement = financials.get_income_statement()
     data = income_statement.data
     concept = income_statement.get_concept('us-gaap:CostOfGoodsAndServicesSold')
     assert list(concept.value.keys()) == ['Jun 30, 2024', 'Jul 02, 2023']
@@ -376,9 +376,9 @@ def test_get_nonfinancial_statement(apple_xbrl):
     assert len(statements) == 78
 
     # get the cover page
-    cover_page: StatementData = statements.get('CoverPage')
+    cover_page: Statement = statements.get('CoverPage')
     assert cover_page
-    assert isinstance(cover_page, StatementData)
+    assert isinstance(cover_page, Statement)
     assert cover_page.get_concept('EntityRegistrantName').value['2023'] == 'Apple Inc.'
     # Make sure that repr works
     _repr_ = repr(cover_page)
@@ -393,6 +393,6 @@ def test_get_statement_from_statement_by_int_index(apple_xbrl):
     statements = apple_xbrl.statements
     assert len(statements)
 
-    statement: StatementData = statements[0]
+    statement: Statement = statements[0]
     assert statement
     assert statement.display_name == "Cover"

@@ -1,4 +1,4 @@
-from edgar.xbrl.xbrldata import XBRLData, XbrlDocuments, XBRLInstance,  StatementData, Statements
+from edgar.xbrl.xbrldata import XBRLData, XBRLAttachments, XBRLInstance,  Statement, Statements
 from edgar.xbrl.presentation import XBRLPresentation
 from typing import Optional, Union
 
@@ -9,7 +9,7 @@ def get_xbrl_object(filing: 'Filing') -> Optional[Union[XBRLInstance, XBRLData]]
     :param filing: Filing
     :return: XBRLInstance or XBRLData
     """
-    xbrl_documents: XbrlDocuments = XbrlDocuments(filing.attachments)
+    xbrl_documents: XBRLAttachments = XBRLAttachments(filing.attachments)
     if xbrl_documents.empty:
         return None
     elif xbrl_documents.instance_only:

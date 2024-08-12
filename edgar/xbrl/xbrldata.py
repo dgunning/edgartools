@@ -28,8 +28,8 @@ from edgar.xbrl.facts import XBRLInstance
 from edgar.xbrl.labels import parse_label_linkbase
 from edgar.xbrl.presentation import XBRLPresentation, PresentationElement
 
-__all__ = ['XbrlDocuments', 'XBRLInstance', 'LineItem', 'StatementDefinition', 'XBRLData',
-           'Statements', 'StatementData']
+__all__ = ['XBRLAttachments', 'XBRLInstance', 'LineItem', 'StatementDefinition', 'XBRLData',
+           'Statements', 'Statement']
 
 """
 This implementation includes:
@@ -52,7 +52,7 @@ To use this code, you would need to integrate it with the previously created par
 """
 
 
-class XbrlDocuments:
+class XBRLAttachments:
     """
     An adapter for the Attachments class that provides easy access to the XBRL documents.
     """
@@ -124,7 +124,7 @@ class XbrlDocuments:
         for doc_type in ['instance', 'schema', 'label', 'calculation', 'presentation']:
             attachment = self.get(doc_type)
             if attachment:
-                download_tasks.append(XbrlDocuments.download_and_parse(doc_type, parsers[doc_type], attachment.url))
+                download_tasks.append(XBRLAttachments.download_and_parse(doc_type, parsers[doc_type], attachment.url))
 
         # Wait for all downloads to complete
         results = await asyncio.gather(*download_tasks)
@@ -133,7 +133,7 @@ class XbrlDocuments:
 
         # If we don't have all documents, extract from schema
         if not self.has_all_documents() and 'schema' in parsed_files:
-            embedded_linkbases = XbrlDocuments.extract_embedded_linkbases(parsed_files['schema'])
+            embedded_linkbases = XBRLAttachments.extract_embedded_linkbases(parsed_files['schema'])
 
             for linkbase_type, content in embedded_linkbases['linkbases'].items():
                 if linkbase_type not in parsed_files:
@@ -462,7 +462,7 @@ def format_label(label, level):
     return f"{' ' * level}{label}"
 
 
-class StatementData:
+class Statement:
     format_columns = ['level', 'abstract', 'units', 'decimals']
     meta_columns = ['concept'] + format_columns
 
@@ -655,7 +655,7 @@ class Statements():
         return repr_rich(self.__rich__())
 
 
-class XBRLData(BaseModel):
+class fromXBRLData(BaseModel):
     """
        A parser for XBRL (eXtensible Business Reporting Language) documents.
 
@@ -726,7 +726,7 @@ class XBRLData(BaseModel):
         Returns:
             XBRLData: An instance of XBRLParser with parsed XBRL components.
         """
-        xbrl_documents = XbrlDocuments(filing.attachments)
+        xbrl_documents = XBRLAttachments(filing.attachments)
         if xbrl_documents.empty:
             log.warn(f"No XBRL documents found in the filing. {filing}")
             return None
@@ -797,7 +797,7 @@ class XBRLData(BaseModel):
                       include_concept: bool = True,
                       empty_threshold: float = 0.6,
                       display_name: str = None,
-                      duration: str = None) -> Optional[StatementData]:
+                      duration: str = None) -> Optional[Statement]:
         """
         Get a financial statement as a pandas DataFrame, with formatting and filtering applied.
 
@@ -922,11 +922,11 @@ class XBRLData(BaseModel):
             df.columns = [f"{col[0]}_{col[1]}" if isinstance(col, tuple) else col for col in df.columns]
 
         # Create and return Statements object
-        return StatementData(df=df,
-                             name=statement_name,
-                             display_name=display_name,
-                             label=statement_definition.label,
-                             entity=self.instance.get_entity_name())
+        return Statement(df=df,
+                         name=statement_name,
+                         display_name=display_name,
+                         label=statement_definition.label,
+                         entity=self.instance.get_entity_name())
 
     def get_concept_for_label(self, label: str) -> Optional[str]:
         """
