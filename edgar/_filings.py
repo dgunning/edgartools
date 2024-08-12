@@ -49,8 +49,7 @@ from edgar.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 
-from edgar.xbrl.xbrldata import XBRLData, XBRLInstance
-from edgar.xbrl import get_xbrl_object
+from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.reference import describe_form
 from edgar.search import BM25Search, RegexSearch
 
