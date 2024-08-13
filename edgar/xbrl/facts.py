@@ -9,7 +9,7 @@ from rich import box
 from rich.table import Table, Column
 import hashlib
 
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 from edgar.xbrl.concepts import DEI_CONCEPTS
 from edgar.xbrl.dimensions import Dimensions
 from functools import lru_cache

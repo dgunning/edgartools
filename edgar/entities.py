@@ -22,7 +22,7 @@ from rich.table import Table, Column
 from rich.text import Text
 
 from edgar._filings import Filing, Filings, FilingsState
-from edgar._rich import df_to_rich_table, repr_rich
+from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.core import (log, Result, display_size,
                         filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory)
 from edgar.httprequests import download_json, download_text, download_bulk_data

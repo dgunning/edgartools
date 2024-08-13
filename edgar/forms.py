@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from rich.console import Group, Text
 from rich.markdown import Markdown
 
-from edgar._rich import df_to_rich_table, repr_rich
+from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.core import sec_dot_gov
 from edgar.httprequests import download_file
 

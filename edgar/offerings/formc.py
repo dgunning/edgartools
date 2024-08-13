@@ -12,8 +12,8 @@ from rich.panel import Panel
 from rich.table import Table, Column
 
 from edgar._party import Address
-from edgar._rich import repr_rich
-from edgar._xml import child_text
+from edgar.richtools import repr_rich
+from edgar.xmltools import child_text
 from edgar.core import get_bool, yes_no
 from edgar.entities import Company
 from edgar.reference import states

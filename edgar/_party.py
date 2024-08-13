@@ -7,8 +7,8 @@ from rich.panel import Panel
 from rich.text import Text
 from rich.columns import Columns
 from pydantic import BaseModel
-from edgar._rich import repr_rich
-from edgar._xml import child_text, child_value
+from edgar.richtools import repr_rich
+from edgar.xmltools import child_text, child_value
 from edgar.core import IntString
 
 __all__ = [

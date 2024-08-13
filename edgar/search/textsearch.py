@@ -8,7 +8,7 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 
 from edgar._markdown import convert_table
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 
 PUNCTUATION = re.compile('[%s]' % re.escape(r"""!"#&'()*+,-/:;<=>?@[\]^`{|}~"""))
 

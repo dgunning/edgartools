@@ -8,7 +8,7 @@ from rich.text import Text
 from rich import box
 from rich.console import Group
 from edgar.reference import describe_form, states
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 from edgar._party import Address, get_addresses_as_columns
 from edgar.core import datefmt, reverse_name
 from datetime import datetime

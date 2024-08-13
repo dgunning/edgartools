@@ -12,7 +12,7 @@ from rich.table import Table, Column
 from rich.text import Text
 
 from edgar._party import Address, get_addresses_as_columns
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 from edgar.core import sec_dot_gov, display_size
 from edgar.httprequests import download_file
 from edgar.reference import describe_form

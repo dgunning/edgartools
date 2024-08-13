@@ -12,8 +12,8 @@ from rich.panel import Panel
 from rich.table import Table, Column
 
 from edgar._party import Address
-from edgar._rich import repr_rich
-from edgar._xml import find_element, child_text
+from edgar.richtools import repr_rich
+from edgar.xmltools import find_element, child_text
 from edgar.core import log
 from edgar.reference import cusip_ticker_mapping
 from edgar.sgml import stream_documents

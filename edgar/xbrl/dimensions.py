@@ -5,7 +5,7 @@ from typing import Union, Tuple, List
 import pandas as pd
 from rich.table import Table
 
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 
 __all__ = ['DimensionValue', 'Dimension', 'Dimensions', 'DimensionMetadata', 'DimensionAccessor']
 

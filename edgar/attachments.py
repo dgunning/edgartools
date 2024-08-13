@@ -22,7 +22,7 @@ from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
 
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extensions
 from edgar.httprequests import get_with_retry, download_file, download_file_async
 

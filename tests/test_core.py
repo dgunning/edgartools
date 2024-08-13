@@ -8,7 +8,7 @@ import pytest
 from rich.table import Table
 
 import edgar
-from edgar._rich import *
+from edgar.richtools import *
 from edgar.core import (decode_content,
                         get_identity,
                         set_identity,

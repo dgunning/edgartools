@@ -8,7 +8,7 @@ from rich.panel import Panel
 
 from edgar._filings import Attachments, Attachment
 from edgar._markdown import MarkdownContent
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 from edgar.documents import HtmlDocument
 from edgar.financials import Financials
 from edgar.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items

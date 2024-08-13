@@ -17,7 +17,7 @@ from rich.table import Table, Column
 from rich.text import Text
 from rich.tree import Tree
 
-from edgar._rich import repr_rich, colorize_words
+from edgar.richtools import repr_rich, colorize_words
 from edgar.attachments import Attachments
 from edgar.core import log, split_camel_case, run_async_or_sync
 from edgar.httprequests import download_file_async

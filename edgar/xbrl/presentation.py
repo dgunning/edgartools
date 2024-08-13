@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from rich import print as rprint
 from rich.tree import Tree
 
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 
 __all__ = ['XBRLPresentation', 'PresentationElement']
 

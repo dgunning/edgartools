@@ -6,7 +6,7 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 from edgar.documents import HtmlDocument
 
 __all__ = [

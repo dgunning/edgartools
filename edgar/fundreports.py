@@ -12,8 +12,8 @@ from rich.console import Group, Text
 from rich.table import Table
 
 from edgar.reference import cusip_ticker_mapping
-from edgar._rich import repr_rich, df_to_rich_table
-from edgar._xml import find_element, child_text, optional_decimal
+from edgar.richtools import repr_rich, df_to_rich_table
+from edgar.xmltools import find_element, child_text, optional_decimal
 from edgar.core import moneyfmt, get_bool
 from edgar.funds import get_fund_information, FundSeriesAndContracts, Fund, get_fund
 

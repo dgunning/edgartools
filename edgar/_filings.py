@@ -33,8 +33,8 @@ from rich.text import Text
 
 from edgar._markdown import html_to_markdown, text_to_markdown
 from edgar._party import Address
-from edgar._rich import df_to_rich_table, repr_rich
-from edgar._xml import child_text
+from edgar.richtools import df_to_rich_table, repr_rich
+from edgar.xmltools import child_text
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
 from edgar.core import (log, display_size, sec_edgar,
                         filter_by_date,

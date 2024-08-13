@@ -11,7 +11,7 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar._rich import repr_rich
+from edgar.richtools import repr_rich
 from edgar.datatools import compress_dataframe
 from edgar.datatools import table_html_to_dataframe, dataframe_to_text
 from edgar.documents import HtmlDocument, Block, TableBlock

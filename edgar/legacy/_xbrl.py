@@ -10,8 +10,8 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.text import Text
 
-from edgar._rich import repr_rich, df_to_rich_table
-from edgar._xml import child_text
+from edgar.richtools import repr_rich, df_to_rich_table
+from edgar.xmltools import child_text
 from edgar.core import log
 
 """
