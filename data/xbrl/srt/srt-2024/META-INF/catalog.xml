@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?><catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+<rewriteURI rewritePrefix="../" uriStartString="https://xbrl.fasb.org/srt/2024/"/>
+</catalog>

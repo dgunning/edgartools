@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/OtherLiabilities' xlink:href='../elts/srt-roles-2024.xsd#srt-othliab' xlink:type='simple' />
+  <link:presentationLink xlink:role='http://fasb.org/srt/role/disclosure/OtherLiabilities' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetAbstract' xlink:label='loc_PlatformOperatorCryptoAssetAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetTextBlock' xlink:label='loc_PlatformOperatorCryptoAssetTextBlock' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetPolicyTextBlock' xlink:label='loc_PlatformOperatorCryptoAssetPolicyTextBlock' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetTableTextBlock' xlink:label='loc_PlatformOperatorCryptoAssetTableTextBlock' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetTable' xlink:label='loc_PlatformOperatorCryptoAssetTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CryptoAssetAxis' xlink:label='loc_CryptoAssetAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CryptoAssetDomain' xlink:label='loc_CryptoAssetDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_UseNameOfCryptoAssetAsValueForMemberUnderCryptoAssetDomainGuidance' xlink:label='loc_UseNameOfCryptoAssetAsValueForMemberUnderCryptoAssetDomainGuidance' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CryptoAssetOtherMember' xlink:label='loc_CryptoAssetOtherMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetLineItems' xlink:label='loc_PlatformOperatorCryptoAssetLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetHeldForUser' xlink:label='loc_PlatformOperatorCryptoAssetHeldForUser' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetExtensibleEnumeration' xlink:label='loc_PlatformOperatorCryptoAssetExtensibleEnumeration' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetCryptographicKeyInformationExtensibleEnumeration' xlink:label='loc_PlatformOperatorCryptoAssetCryptographicKeyInformationExtensibleEnumeration' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetInternalRecordkeepingExtensibleEnumeration' xlink:label='loc_PlatformOperatorCryptoAssetInternalRecordkeepingExtensibleEnumeration' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PlatformOperatorCryptoAssetSecureAndProtectFromLossExtensibleEnumeration' xlink:label='loc_PlatformOperatorCryptoAssetSecureAndProtectFromLossExtensibleEnumeration' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FinancialInstrumentGlobalIdentifierFigi' xlink:label='loc_FinancialInstrumentGlobalIdentifierFigi' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SafeguardingAssetPlatformOperatorCryptoAsset' xlink:label='loc_SafeguardingAssetPlatformOperatorCryptoAsset' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SafeguardingLiabilityPlatformOperatorCryptoAsset' xlink:label='loc_SafeguardingLiabilityPlatformOperatorCryptoAsset' xlink:type='locator' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetAbstract' xlink:to='loc_PlatformOperatorCryptoAssetTextBlock' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetTextBlock' xlink:to='loc_PlatformOperatorCryptoAssetPolicyTextBlock' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetPolicyTextBlock' xlink:to='loc_PlatformOperatorCryptoAssetTableTextBlock' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetTableTextBlock' xlink:to='loc_PlatformOperatorCryptoAssetTable' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetTable' xlink:to='loc_CryptoAssetAxis' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_CryptoAssetAxis' xlink:to='loc_CryptoAssetDomain' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_CryptoAssetDomain' xlink:to='loc_UseNameOfCryptoAssetAsValueForMemberUnderCryptoAssetDomainGuidance' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_CryptoAssetDomain' xlink:to='loc_CryptoAssetOtherMember' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetTable' xlink:to='loc_PlatformOperatorCryptoAssetLineItems' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetLineItems' xlink:to='loc_PlatformOperatorCryptoAssetHeldForUser' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetHeldForUser' xlink:to='loc_PlatformOperatorCryptoAssetExtensibleEnumeration' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetLineItems' xlink:to='loc_PlatformOperatorCryptoAssetCryptographicKeyInformationExtensibleEnumeration' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetLineItems' xlink:to='loc_PlatformOperatorCryptoAssetInternalRecordkeepingExtensibleEnumeration' xlink:type='arc' />
+    <link:presentationArc order='40' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetLineItems' xlink:to='loc_PlatformOperatorCryptoAssetSecureAndProtectFromLossExtensibleEnumeration' xlink:type='arc' />
+    <link:presentationArc order='50' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetLineItems' xlink:to='loc_FinancialInstrumentGlobalIdentifierFigi' xlink:type='arc' />
+    <link:presentationArc order='60' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetLineItems' xlink:to='loc_SafeguardingAssetPlatformOperatorCryptoAsset' xlink:type='arc' />
+    <link:presentationArc order='70' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_PlatformOperatorCryptoAssetLineItems' xlink:to='loc_SafeguardingLiabilityPlatformOperatorCryptoAsset' xlink:type='arc' />
+  </link:presentationLink>
+</link:linkbase>

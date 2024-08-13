@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<xs:schema elementFormDefault='qualified' targetNamespace='http://fasb.org/dis/srt-sec-supins/2024' xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:srt-sec-supins='http://fasb.org/dis/srt-sec-supins/2024' xmlns:xbrli='http://www.xbrl.org/2003/instance' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xlink:arcrole='http://www.w3.org/1999/xlink/properties/linkbase' xlink:href='srt-dis-srt-sec-supins-pre-2024.xml' xlink:role='http://www.xbrl.org/2003/role/presentationLinkbaseRef' xlink:type='simple' />
+      <link:linkbaseRef xlink:arcrole='http://www.w3.org/1999/xlink/properties/linkbase' xlink:href='srt-dis-srt-sec-supins-def-2024.xml' xlink:role='http://www.xbrl.org/2003/role/definitionLinkbaseRef' xlink:type='simple' />
+    </xs:appinfo>
+    <xs:documentation>
+                This file is the entry point file for disclosure SEC Schedule, Article 12-16, Supplementary Insurance Information (srt-sec-supins).
+
+                The DTS starting with this entry point includes the following presentation, calculation and definition linkbases:
+                993850 - Disclosure - SEC Schedule, Article 12-16, Supplementary Insurance Information  (presentation)
+                993850 - Disclosure - SEC Schedule, Article 12-16, Supplementary Insurance Information  (definition)
+                </xs:documentation>
+  </xs:annotation>
+  <xs:import namespace='http://www.xbrl.org/2003/instance' schemaLocation='http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd' />
+  <xs:import namespace='http://fasb.org/srt-std/2024' schemaLocation='../elts/srt-std-2024.xsd' />
+</xs:schema>

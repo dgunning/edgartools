@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<xs:schema elementFormDefault='qualified' targetNamespace='http://fasb.org/srt-entryPoint-std/2024' xmlns:srt-entryPoint-std='http://fasb.org/srt-entryPoint-std/2024' xmlns:xbrli='http://www.xbrl.org/2003/instance' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+  <xs:annotation>
+    <xs:appinfo />
+  </xs:annotation>
+  <xs:import namespace='http://www.xbrl.org/2003/instance' schemaLocation='http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd' />
+  <xs:import namespace='http://fasb.org/stm/srt-com/2024' schemaLocation='../stm/srt-stm-srt-com-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-equity/2024' schemaLocation='../dis/srt-dis-srt-equity-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-suppc/2024' schemaLocation='../dis/srt-dis-srt-sec-suppc-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-vq/2024' schemaLocation='../dis/srt-dis-srt-sec-vq-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-re/2024' schemaLocation='../dis/srt-dis-srt-sec-re-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-cndfir/2024' schemaLocation='../dis/srt-dis-srt-sec-cndfir-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-mort/2024' schemaLocation='../dis/srt-dis-srt-sec-mort-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-sum/2024' schemaLocation='../dis/srt-dis-srt-sec-sum-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-supins/2024' schemaLocation='../dis/srt-dis-srt-sec-supins-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-reins/2024' schemaLocation='../dis/srt-dis-srt-sec-reins-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-calc/2024' schemaLocation='../dis/srt-dis-srt-sec-calc-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-ei/2024' schemaLocation='../dis/srt-dis-srt-ei-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-fsbd/2024' schemaLocation='../dis/srt-dis-srt-fsbd-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-sec-srbr/2024' schemaLocation='../dis/srt-dis-srt-sec-srbr-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-bt/2024' schemaLocation='../dis/srt-dis-srt-bt-2024.xsd' />
+  <xs:import namespace='http://fasb.org/dis/srt-othliab/2024' schemaLocation='../dis/srt-dis-srt-othliab-2024.xsd' />
+</xs:schema>

@@ -1,0 +1,37 @@
+<tp:taxonomyPackage xmlns:tp="http://xbrl.org/2016/taxonomy-package" xml:lang="en-US">
+<tp:identifier>http://xbrl.fasb.org/srt/2024</tp:identifier>
+<tp:name>The annual SEC Reporting Taxonomy (SRT)</tp:name>
+<tp:description xml:lang="en-US">The 2024 SEC Reporting Taxonomy (SRT) includes elements to meet U.S. Securities and Exchange Commission (SEC) requirements for financial schedules required by the SEC, condensed consolidating financial information for guarantors, and disclosures about oil and gas producing activities. The SRT also includes dimensional elements whose underlying recognition and measurement are not specified by GAAP. The SRT is intended to be used with other taxonomies that meet SEC requirements.</tp:description>
+<tp:version>2024</tp:version>
+<tp:license href="https://xbrl.fasb.org/terms/SRT_TermsConditions.html" name="Taxonomies Terms and Conditions"/>
+<tp:publisher>Financial Accounting Standard Board</tp:publisher>
+<tp:publisherURL>https://www.fasb.org/</tp:publisherURL>
+<tp:publisherCountry>US</tp:publisherCountry>
+<tp:publicationDate>2024-01-31</tp:publicationDate>
+<tp:entryPoints>
+<tp:entryPoint>
+<tp:name>All SRT components and five related SEC Taxonomies - DEI, COUNTRY, CURRENCY</tp:name>
+<tp:description>This entry point includes ALL components for the SRT. Five related SEC Taxonomies are also imported - DEI, COUNTRY, STPR, EXCH and CURRENCY.</tp:description>
+<tp:version>2024</tp:version>
+<tp:entryPointDocument href="https://xbrl.fasb.org/srt/2024/entire/srt-entryPoint-all-2024.xsd"/>
+</tp:entryPoint>
+<tp:entryPoint>
+<tp:name>All SRT components except for doc and ref linkbases; and three related SEC Taxonomies - DEI, COUNTRY, CURRENCY.</tp:name>
+<tp:description>This entry point includes all components for the SRT except for document and reference linkbases. Three related SEC Taxonomies are also imported - DEI, COUNTRY, and CURRENCY.</tp:description>
+<tp:version>2024</tp:version>
+<tp:entryPointDocument href="https://xbrl.fasb.org/srt/2024/entire/srt-entryPoint-std-2024.xsd"/>
+</tp:entryPoint>
+<tp:entryPoint>
+<tp:name>Elements only</tp:name>
+<tp:description>This is the schema file (elements) for the 2024 SEC Reporting Taxonomy (SRT).</tp:description>
+<tp:version>2024</tp:version>
+<tp:entryPointDocument href="https://xbrl.fasb.org/srt/2024/elts/srt-2024.xsd"/>
+</tp:entryPoint>
+<tp:entryPoint>
+<tp:name>2023 US GAAP Element to 2024 SRT Element Mapping</tp:name>
+<tp:description>This entry point includes all SRT elements with mapping from the 2023 US GAAP Taxonomy by arcrole/dep-concept-deprecatedConcept.</tp:description>
+<tp:version>2024</tp:version>
+<tp:entryPointDocument href="https://xbrl.fasb.org/srt/2024/elts/srt-dep-def-2024.xsd"/>
+</tp:entryPoint>
+</tp:entryPoints>
+</tp:taxonomyPackage>

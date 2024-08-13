@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xbrldt='http://xbrl.org/2005/xbrldt' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:href='../elts/srt-roles-2024.xsd#SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/all' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#all' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/domain-member' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member' xlink:type='simple' />
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:label='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentLineItems' xlink:label='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentLineItems' xlink:type='locator' />
+    <link:definitionArc order='1.0' xbrldt:closed='true' xbrldt:contextElement='segment' xlink:arcrole='http://xbrl.org/int/dim/arcrole/all' xlink:from='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentLineItems' xlink:to='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:label='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductOrServiceAxis' xlink:label='loc_ProductOrServiceAxis' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:to='loc_ProductOrServiceAxis' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductOrServiceAxis' xlink:label='loc_ProductOrServiceAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductsAndServicesDomain' xlink:label='loc_ProductsAndServicesDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ProductOrServiceAxis' xlink:to='loc_ProductsAndServicesDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductOrServiceAxis' xlink:label='loc_ProductOrServiceAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductsAndServicesDomain' xlink:label='loc_ProductsAndServicesDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ProductOrServiceAxis' xlink:to='loc_ProductsAndServicesDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentLineItems' xlink:label='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LifeInsuranceInForceNetAbstract' xlink:label='loc_LifeInsuranceInForceNetAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LifeInsuranceInForceGross' xlink:label='loc_LifeInsuranceInForceGross' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LifeInsuranceInForceCeded' xlink:label='loc_LifeInsuranceInForceCeded' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LifeInsuranceInForceAssumed' xlink:label='loc_LifeInsuranceInForceAssumed' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LifeInsuranceInForceNet' xlink:label='loc_LifeInsuranceInForceNet' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LifeInsuranceInForcePercentageAssumedToNet' xlink:label='loc_LifeInsuranceInForcePercentageAssumedToNet' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SecSchedule1217InsuranceCompaniesReinsuranceAndCoinsuranceIncomeNettedAgainstPremiumCeded' xlink:label='loc_SecSchedule1217InsuranceCompaniesReinsuranceAndCoinsuranceIncomeNettedAgainstPremiumCeded' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentLineItems' xlink:to='loc_LifeInsuranceInForceNetAbstract' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_LifeInsuranceInForceNetAbstract' xlink:to='loc_LifeInsuranceInForceGross' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_LifeInsuranceInForceNetAbstract' xlink:to='loc_LifeInsuranceInForceCeded' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_LifeInsuranceInForceNetAbstract' xlink:to='loc_LifeInsuranceInForceAssumed' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_LifeInsuranceInForceNetAbstract' xlink:to='loc_LifeInsuranceInForceNet' xlink:type='arc' />
+    <link:definitionArc order='6.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentLineItems' xlink:to='loc_LifeInsuranceInForcePercentageAssumedToNet' xlink:type='arc' />
+    <link:definitionArc order='7.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ReinsurancePremiumsForInsuranceCompaniesByProductSegmentLineItems' xlink:to='loc_SecSchedule1217InsuranceCompaniesReinsuranceAndCoinsuranceIncomeNettedAgainstPremiumCeded' xlink:type='arc' />
+  </link:definitionLink>
+</link:linkbase>

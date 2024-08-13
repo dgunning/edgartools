@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-29MortgageLoansOnRealEstate' xlink:href='../elts/srt-roles-2024.xsd#srt-sec-mort' xlink:type='simple' />
+  <link:presentationLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-29MortgageLoansOnRealEstate' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateAbstract' xlink:label='loc_MortgageLoansOnRealEstateAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateByLoanDisclosureTextBlock' xlink:label='loc_MortgageLoansOnRealEstateByLoanDisclosureTextBlock' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateScheduleTable' xlink:label='loc_MortgageLoansOnRealEstateScheduleTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:label='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:label='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ApartmentBuildingMember' xlink:label='loc_ApartmentBuildingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RetailSiteMember' xlink:label='loc_RetailSiteMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_WarehouseMember' xlink:label='loc_WarehouseMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_IndustrialPropertyMember' xlink:label='loc_IndustrialPropertyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OfficeBuildingMember' xlink:label='loc_OfficeBuildingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_HotelMember' xlink:label='loc_HotelMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OtherPropertyMember' xlink:label='loc_OtherPropertyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MultifamilyMember' xlink:label='loc_MultifamilyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SingleFamilyMember' xlink:label='loc_SingleFamilyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementGeographicalAxis' xlink:label='loc_StatementGeographicalAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SegmentGeographicalDomain' xlink:label='loc_SegmentGeographicalDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateDescriptionLoanCategoryAxis' xlink:label='loc_MortgageLoansOnRealEstateDescriptionLoanCategoryAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateLoanCategoryDomain' xlink:label='loc_MortgageLoansOnRealEstateLoanCategoryDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateLoanTypeAxis' xlink:label='loc_MortgageLoansOnRealEstateLoanTypeAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateLoanTypeDomain' xlink:label='loc_MortgageLoansOnRealEstateLoanTypeDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateOriginalLoanAmountAxis' xlink:label='loc_MortgageLoansOnRealEstateOriginalLoanAmountAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateOriginalLoanAmountDomain' xlink:label='loc_MortgageLoansOnRealEstateOriginalLoanAmountDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansUnder250000Member' xlink:label='loc_MortgageLoansUnder250000Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansBetween250000And499999Member' xlink:label='loc_MortgageLoansBetween250000And499999Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansBetween500000And749999Member' xlink:label='loc_MortgageLoansBetween500000And749999Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansBetween750000And999999Member' xlink:label='loc_MortgageLoansBetween750000And999999Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOver1000000Member' xlink:label='loc_MortgageLoansOver1000000Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RangeAxis' xlink:label='loc_RangeAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RangeMember' xlink:label='loc_RangeMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MaximumMember' xlink:label='loc_MaximumMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumMember' xlink:label='loc_MinimumMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateLineItems' xlink:label='loc_MortgageLoansOnRealEstateLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateNumberOfLoans' xlink:label='loc_MortgageLoansOnRealEstateNumberOfLoans' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateInterestRate' xlink:label='loc_MortgageLoansOnRealEstateInterestRate' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoanOnRealEstateFinalMaturityDate' xlink:label='loc_MortgageLoanOnRealEstateFinalMaturityDate' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstatePeriodicPaymentTerms' xlink:label='loc_MortgageLoansOnRealEstatePeriodicPaymentTerms' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstatePeriodicPaymentTermsLevelPayments' xlink:label='loc_MortgageLoansOnRealEstatePeriodicPaymentTermsLevelPayments' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstatePeriodicPaymentTermsVaryingAmounts' xlink:label='loc_MortgageLoansOnRealEstatePeriodicPaymentTermsVaryingAmounts' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstatePeriodicPaymentTermsBalloonPaymentToBeReceived' xlink:label='loc_MortgageLoansOnRealEstatePeriodicPaymentTermsBalloonPaymentToBeReceived' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstatePriorLiens1' xlink:label='loc_MortgageLoansOnRealEstatePriorLiens1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateFaceAmountOfMortgages' xlink:label='loc_MortgageLoansOnRealEstateFaceAmountOfMortgages' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstatePrincipalAmountOfDelinquentLoans' xlink:label='loc_MortgageLoansOnRealEstatePrincipalAmountOfDelinquentLoans' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateDelinquentPrincipalOrInterestAcquiredFromAffiliates' xlink:label='loc_MortgageLoansOnRealEstateDelinquentPrincipalOrInterestAcquiredFromAffiliates' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SecSchedule1229InvestmentInMortgageLoansOnRealEstateLocationOfPropertyExtensibleList' xlink:label='loc_SecSchedule1229InvestmentInMortgageLoansOnRealEstateLocationOfPropertyExtensibleList' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateCollectionsOfPrincipal' xlink:label='loc_MortgageLoansOnRealEstateCollectionsOfPrincipal' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateOtherRequiredDisclosuresAbstract' xlink:label='loc_MortgageLoansOnRealEstateOtherRequiredDisclosuresAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateTransactionsWithAffiliates' xlink:label='loc_MortgageLoansOnRealEstateTransactionsWithAffiliates' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateRenewedAndExtended' xlink:label='loc_MortgageLoansOnRealEstateRenewedAndExtended' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateFederalIncomeTaxBasis1' xlink:label='loc_MortgageLoansOnRealEstateFederalIncomeTaxBasis1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateReserves' xlink:label='loc_MortgageLoansOnRealEstateReserves' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateWriteDownOrReserveTable' xlink:label='loc_MortgageLoansOnRealEstateWriteDownOrReserveTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateWriteDownOrReserveByLoanAxis' xlink:label='loc_MortgageLoansOnRealEstateWriteDownOrReserveByLoanAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateWriteDownOrReserveLoanDomain' xlink:label='loc_MortgageLoansOnRealEstateWriteDownOrReserveLoanDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateWriteDownOrReserveLineItems' xlink:label='loc_MortgageLoansOnRealEstateWriteDownOrReserveLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateWriteDownOrReserveBasis' xlink:label='loc_MortgageLoansOnRealEstateWriteDownOrReserveBasis' xlink:type='locator' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateAbstract' xlink:to='loc_MortgageLoansOnRealEstateByLoanDisclosureTextBlock' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateByLoanDisclosureTextBlock' xlink:to='loc_MortgageLoansOnRealEstateScheduleTable' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateScheduleTable' xlink:to='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:to='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_ApartmentBuildingMember' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_RetailSiteMember' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_WarehouseMember' xlink:type='arc' />
+    <link:presentationArc order='40' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_IndustrialPropertyMember' xlink:type='arc' />
+    <link:presentationArc order='50' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_OfficeBuildingMember' xlink:type='arc' />
+    <link:presentationArc order='60' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_HotelMember' xlink:type='arc' />
+    <link:presentationArc order='70' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_OtherPropertyMember' xlink:type='arc' />
+    <link:presentationArc order='80' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_MultifamilyMember' xlink:type='arc' />
+    <link:presentationArc order='90' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_SingleFamilyMember' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateScheduleTable' xlink:to='loc_StatementGeographicalAxis' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_StatementGeographicalAxis' xlink:to='loc_SegmentGeographicalDomain' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateScheduleTable' xlink:to='loc_MortgageLoansOnRealEstateDescriptionLoanCategoryAxis' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateDescriptionLoanCategoryAxis' xlink:to='loc_MortgageLoansOnRealEstateLoanCategoryDomain' xlink:type='arc' />
+    <link:presentationArc order='40' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateScheduleTable' xlink:to='loc_MortgageLoansOnRealEstateLoanTypeAxis' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLoanTypeAxis' xlink:to='loc_MortgageLoansOnRealEstateLoanTypeDomain' xlink:type='arc' />
+    <link:presentationArc order='50' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateScheduleTable' xlink:to='loc_MortgageLoansOnRealEstateOriginalLoanAmountAxis' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOriginalLoanAmountAxis' xlink:to='loc_MortgageLoansOnRealEstateOriginalLoanAmountDomain' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOriginalLoanAmountDomain' xlink:to='loc_MortgageLoansUnder250000Member' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOriginalLoanAmountDomain' xlink:to='loc_MortgageLoansBetween250000And499999Member' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOriginalLoanAmountDomain' xlink:to='loc_MortgageLoansBetween500000And749999Member' xlink:type='arc' />
+    <link:presentationArc order='40' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOriginalLoanAmountDomain' xlink:to='loc_MortgageLoansBetween750000And999999Member' xlink:type='arc' />
+    <link:presentationArc order='50' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOriginalLoanAmountDomain' xlink:to='loc_MortgageLoansOver1000000Member' xlink:type='arc' />
+    <link:presentationArc order='60' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateScheduleTable' xlink:to='loc_RangeAxis' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_RangeAxis' xlink:to='loc_RangeMember' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_RangeMember' xlink:to='loc_MaximumMember' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_RangeMember' xlink:to='loc_MinimumMember' xlink:type='arc' />
+    <link:presentationArc order='70' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateScheduleTable' xlink:to='loc_MortgageLoansOnRealEstateLineItems' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_MortgageLoansOnRealEstateNumberOfLoans' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_MortgageLoansOnRealEstateInterestRate' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_MortgageLoanOnRealEstateFinalMaturityDate' xlink:type='arc' />
+    <link:presentationArc order='40' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_MortgageLoansOnRealEstatePeriodicPaymentTerms' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstatePeriodicPaymentTerms' xlink:to='loc_MortgageLoansOnRealEstatePeriodicPaymentTermsLevelPayments' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstatePeriodicPaymentTerms' xlink:to='loc_MortgageLoansOnRealEstatePeriodicPaymentTermsVaryingAmounts' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstatePeriodicPaymentTerms' xlink:to='loc_MortgageLoansOnRealEstatePeriodicPaymentTermsBalloonPaymentToBeReceived' xlink:type='arc' />
+    <link:presentationArc order='50' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_MortgageLoansOnRealEstatePriorLiens1' xlink:type='arc' />
+    <link:presentationArc order='60' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_MortgageLoansOnRealEstateFaceAmountOfMortgages' xlink:type='arc' />
+    <link:presentationArc order='70' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_MortgageLoansOnRealEstatePrincipalAmountOfDelinquentLoans' xlink:type='arc' />
+    <link:presentationArc order='80' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_MortgageLoansOnRealEstateDelinquentPrincipalOrInterestAcquiredFromAffiliates' xlink:type='arc' />
+    <link:presentationArc order='90' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateLineItems' xlink:to='loc_SecSchedule1229InvestmentInMortgageLoansOnRealEstateLocationOfPropertyExtensibleList' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateByLoanDisclosureTextBlock' xlink:to='loc_MortgageLoansOnRealEstateCollectionsOfPrincipal' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateByLoanDisclosureTextBlock' xlink:to='loc_MortgageLoansOnRealEstateOtherRequiredDisclosuresAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOtherRequiredDisclosuresAbstract' xlink:to='loc_MortgageLoansOnRealEstateTransactionsWithAffiliates' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOtherRequiredDisclosuresAbstract' xlink:to='loc_MortgageLoansOnRealEstateRenewedAndExtended' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOtherRequiredDisclosuresAbstract' xlink:to='loc_MortgageLoansOnRealEstateFederalIncomeTaxBasis1' xlink:type='arc' />
+    <link:presentationArc order='40' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOtherRequiredDisclosuresAbstract' xlink:to='loc_MortgageLoansOnRealEstateReserves' xlink:type='arc' />
+    <link:presentationArc order='50' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateOtherRequiredDisclosuresAbstract' xlink:to='loc_MortgageLoansOnRealEstateWriteDownOrReserveTable' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateWriteDownOrReserveTable' xlink:to='loc_MortgageLoansOnRealEstateWriteDownOrReserveByLoanAxis' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateWriteDownOrReserveByLoanAxis' xlink:to='loc_MortgageLoansOnRealEstateWriteDownOrReserveLoanDomain' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateWriteDownOrReserveTable' xlink:to='loc_MortgageLoansOnRealEstateWriteDownOrReserveLineItems' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MortgageLoansOnRealEstateWriteDownOrReserveLineItems' xlink:to='loc_MortgageLoansOnRealEstateWriteDownOrReserveBasis' xlink:type='arc' />
+  </link:presentationLink>
+</link:linkbase>

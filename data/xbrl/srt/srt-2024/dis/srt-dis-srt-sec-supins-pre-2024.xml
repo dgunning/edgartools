@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-16SupplementaryInsuranceInformation' xlink:href='../elts/srt-roles-2024.xsd#srt-sec-supins' xlink:type='simple' />
+  <link:presentationLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-16SupplementaryInsuranceInformation' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SupplementaryInsuranceInformationAbstract' xlink:label='loc_SupplementaryInsuranceInformationAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SupplementaryInsuranceInformationForInsuranceCompaniesDisclosureTextBlock' xlink:label='loc_SupplementaryInsuranceInformationForInsuranceCompaniesDisclosureTextBlock' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SupplementaryInsuranceInformationBySegmentTable' xlink:label='loc_SupplementaryInsuranceInformationBySegmentTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SupplementaryInsuranceInformationBySegmentLineItems' xlink:label='loc_SupplementaryInsuranceInformationBySegmentLineItems' xlink:type='locator' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_SupplementaryInsuranceInformationAbstract' xlink:to='loc_SupplementaryInsuranceInformationForInsuranceCompaniesDisclosureTextBlock' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_SupplementaryInsuranceInformationForInsuranceCompaniesDisclosureTextBlock' xlink:to='loc_SupplementaryInsuranceInformationBySegmentTable' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_SupplementaryInsuranceInformationBySegmentTable' xlink:to='loc_SupplementaryInsuranceInformationBySegmentLineItems' xlink:type='arc' />
+  </link:presentationLink>
+</link:linkbase>

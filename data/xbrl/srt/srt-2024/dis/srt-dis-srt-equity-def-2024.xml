@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xbrldt='http://xbrl.org/2005/xbrldt' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/EquityShareRepurchaseProgramTable' xlink:href='../elts/srt-roles-2024.xsd#EquityShareRepurchaseProgramTable' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/all' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#all' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/domain-member' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member' xlink:type='simple' />
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/EquityShareRepurchaseProgramTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramTable' xlink:label='loc_ShareRepurchaseProgramTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramLineItems' xlink:label='loc_ShareRepurchaseProgramLineItems' xlink:type='locator' />
+    <link:definitionArc order='1.0' xbrldt:closed='true' xbrldt:contextElement='segment' xlink:arcrole='http://xbrl.org/int/dim/arcrole/all' xlink:from='loc_ShareRepurchaseProgramLineItems' xlink:to='loc_ShareRepurchaseProgramTable' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/EquityShareRepurchaseProgramTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramTable' xlink:label='loc_ShareRepurchaseProgramTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramAxis' xlink:label='loc_ShareRepurchaseProgramAxis' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_ShareRepurchaseProgramTable' xlink:to='loc_ShareRepurchaseProgramAxis' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/EquityShareRepurchaseProgramTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramAxis' xlink:label='loc_ShareRepurchaseProgramAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramDomain' xlink:label='loc_ShareRepurchaseProgramDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ShareRepurchaseProgramAxis' xlink:to='loc_ShareRepurchaseProgramDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/EquityShareRepurchaseProgramTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramAxis' xlink:label='loc_ShareRepurchaseProgramAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramDomain' xlink:label='loc_ShareRepurchaseProgramDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ShareRepurchaseProgramAxis' xlink:to='loc_ShareRepurchaseProgramDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/EquityShareRepurchaseProgramTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ShareRepurchaseProgramLineItems' xlink:label='loc_ShareRepurchaseProgramLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StockRepurchaseProgramAuthorizedAmount1' xlink:label='loc_StockRepurchaseProgramAuthorizedAmount1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StockRepurchaseProgramNumberOfSharesAuthorizedToBeRepurchased' xlink:label='loc_StockRepurchaseProgramNumberOfSharesAuthorizedToBeRepurchased' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StockRepurchaseProgramExpirationDate' xlink:label='loc_StockRepurchaseProgramExpirationDate' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ShareRepurchaseProgramLineItems' xlink:to='loc_StockRepurchaseProgramAuthorizedAmount1' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ShareRepurchaseProgramLineItems' xlink:to='loc_StockRepurchaseProgramNumberOfSharesAuthorizedToBeRepurchased' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ShareRepurchaseProgramLineItems' xlink:to='loc_StockRepurchaseProgramExpirationDate' xlink:type='arc' />
+  </link:definitionLink>
+</link:linkbase>

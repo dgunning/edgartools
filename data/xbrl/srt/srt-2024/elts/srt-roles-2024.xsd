@@ -1,0 +1,245 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<xs:schema elementFormDefault='qualified' targetNamespace='http://fasb.org/srt-roles/2024' xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:srt-roles='http://fasb.org/srt-roles/2024' xmlns:xbrli='http://www.xbrl.org/2003/instance' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:roleType id='deprecationNote' roleURI='http://fasb.org/srt/role/deprecationNote/deprecationNote'>
+        <link:definition>Deprecation Note</link:definition>
+        <link:usedOn>link:reference</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-equity' roleURI='http://fasb.org/srt/role/disclosure/Equity'>
+        <link:definition>500050 - Disclosure - Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='eedm1' roleURI='http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists'>
+        <link:definition>SRT Extensible Enumeration Domain Members</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='changeNote' roleURI='http://fasb.org/srt/role/changeNote/changeNote'>
+        <link:definition>Change Note</link:definition>
+        <link:usedOn>link:reference</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-com' roleURI='http://fasb.org/srt/role/statement/CommonDomainMembers'>
+        <link:definition>191000 - Statement - Common Domain Members</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-suppc' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-18SupplementalInformationForProperty-CasualtyInsuranceUnderwriters'>
+        <link:definition>994250 - Disclosure - SEC Schedule, Article 12-18, Supplemental Information (for Property-Casualty Insurance Underwriters)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-vq' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-09ValuationAndQualifyingAccounts'>
+        <link:definition>993050 - Disclosure - SEC Schedule, Article 12-09, Valuation and Qualifying Accounts</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-re' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciation'>
+        <link:definition>993250 - Disclosure - SEC Schedule, Article 12-28, Real Estate and Accumulated Depreciation</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-cndfir' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-04CondensedFinancialInformation'>
+        <link:definition>991100 - Disclosure - SEC Schedule, Article 12-04, Condensed Financial Information of Registrant</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-mort' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-29MortgageLoansOnRealEstate'>
+        <link:definition>993450 - Disclosure - SEC Schedule, Article 12-29, Mortgage Loans on Real Estate</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-sum' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-15SummaryOfInvestments-OtherThanInvestmentsInRelatedParties'>
+        <link:definition>993650 - Disclosure - SEC Schedule, Article 12-15, Summary of Investments - Other than Investments in Related Parties</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-supins' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-16SupplementaryInsuranceInformation'>
+        <link:definition>993850 - Disclosure - SEC Schedule, Article 12-16, Supplementary Insurance Information</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-reins' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-17Reinsurance'>
+        <link:definition>994100 - Disclosure - SEC Schedule, Article 12-17, Reinsurance</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-calc' roleURI='http://fasb.org/srt/role/disclosure/SRTCalculations'>
+        <link:definition>991050 - Disclosure - SRT Calculations</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-ei' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustries'>
+        <link:definition>965100 - Disclosure - Extractive Industries</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+		<link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-fsbd' roleURI='http://fasb.org/srt/role/disclosure/FinancialServicesBrokersAndDealers'>
+        <link:definition>942100 - Disclosure - Financial Services, Brokers and Dealers</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-sec-srbr' roleURI='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegistered'>
+        <link:definition>990050 - Disclosure - SEC Disclosure, Security Registered or Being Registered</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-bt' roleURI='http://fasb.org/srt/role/disclosure/FinancialServicesBankingAndThrift'>
+        <link:definition>940002 - Disclosure - Financial Services, Banking and Thrift</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='srt-othliab' roleURI='http://fasb.org/srt/role/disclosure/OtherLiabilities'>
+        <link:definition>470100 - Disclosure - Other Liabilities</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+		<link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesDevelopmentWellsDrilledTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesDevelopmentWellsDrilledTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Oil and Gas, Development Well Drilled [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesDiscountedFutureNetCashFlowsRelatingToProvedOilAndGasReservesTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesDiscountedFutureNetCashFlowsRelatingToProvedOilAndGasReservesTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Discounted Future Net Cash Flows Relating to Proved Oil and Gas Reserves [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesExploratoryWellsDrilledTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesExploratoryWellsDrilledTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Oil and Gas, Exploratory Well Drilled [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesGasAndOilAcreageTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesGasAndOilAcreageTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Oil and Gas, Acreage [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesOilAndGasDeliveryCommitmentsAndContractsTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesOilAndGasDeliveryCommitmentsAndContractsTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Oil and Gas, Delivery Commitment [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesProvedDevelopedAndUndevelopedOilAndGasReserveQuantitiesTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesProvedDevelopedAndUndevelopedOilAndGasReserveQuantitiesTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Proved Developed and Undeveloped Oil and Gas Reserve Quantities [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesAverageSalesPriceAndProductionCostsPerUnitOfProductionTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesAverageSalesPriceAndProductionCostsPerUnitOfProductionTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Oil and Gas, Average Sale Price and Production Cost Per Unit [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesProductiveWellsTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesProductiveWellsTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Oil and Gas, Productive Well [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable'>
+        <link:definition>993250 - Disclosure - SEC Schedule, Article 12-28, Real Estate and Accumulated Depreciation, SEC Schedule, 12-28, Real Estate Companies, Investment in Real Estate and Accumulated Depreciation, by Property [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-17ReinsuranceReinsurancePremiumsForInsuranceCompaniesByProductSegmentTable'>
+        <link:definition>994100 - Disclosure - SEC Schedule, Article 12-17, Reinsurance, SEC Schedule, 12-17, Insurance Companies, Reinsurance [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-29MortgageLoansOnRealEstateMortgageLoansOnRealEstateScheduleTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-29MortgageLoansOnRealEstateMortgageLoansOnRealEstateScheduleTable'>
+        <link:definition>993450 - Disclosure - SEC Schedule, Article 12-29, Mortgage Loans on Real Estate, SEC Schedule, 12-29, Real Estate Companies, Investment in Mortgage Loans on Real Estate Schedule [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-18SupplementalInformationForProperty-CasualtyInsuranceUnderwritersSupplementalInformationForPropertyCasualtyInsuranceUnderwritersTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-18SupplementalInformationForProperty-CasualtyInsuranceUnderwritersSupplementalInformationForPropertyCasualtyInsuranceUnderwritersTable'>
+        <link:definition>994250 - Disclosure - SEC Schedule, Article 12-18, Supplemental Information (for Property-Casualty Insurance Underwriters), SEC Schedule, 12-18, Supplemental Information, Property-Casualty Insurance Underwriters [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-16SupplementaryInsuranceInformationSupplementaryInsuranceInformationBySegmentTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-16SupplementaryInsuranceInformationSupplementaryInsuranceInformationBySegmentTable'>
+        <link:definition>993850 - Disclosure - SEC Schedule, Article 12-16, Supplementary Insurance Information, SEC Schedule, 12-16, Insurance Companies, Supplementary Insurance Information [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-09ValuationAndQualifyingAccountsValuationAndQualifyingAccountsDisclosureTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-09ValuationAndQualifyingAccountsValuationAndQualifyingAccountsDisclosureTable'>
+        <link:definition>993050 - Disclosure - SEC Schedule, Article 12-09, Valuation and Qualifying Accounts, SEC Schedule, 12-09, Valuation and Qualifying Accounts Disclosure [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable'>
+        <link:definition>993250 - Disclosure - SEC Schedule, Article 12-28, Real Estate and Accumulated Depreciation, SEC Schedule, 12-28, Real Estate Companies, Investment in Real Estate, Write-down or Reserve [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-15SummaryOfInvestments-OtherThanInvestmentsInRelatedPartiesSummaryOfInvestmentsOtherThanInvestmentsInRelatedPartiesTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-15SummaryOfInvestments-OtherThanInvestmentsInRelatedPartiesSummaryOfInvestmentsOtherThanInvestmentsInRelatedPartiesTable'>
+        <link:definition>993650 - Disclosure - SEC Schedule, Article 12-15, Summary of Investments - Other than Investments in Related Parties, SEC Schedule, 12-15, Insurance Companies, Summary of Investments, Other than Investments in Related Parties [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-29MortgageLoansOnRealEstateMortgageLoansOnRealEstateWriteDownOrReserveTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-29MortgageLoansOnRealEstateMortgageLoansOnRealEstateWriteDownOrReserveTable'>
+        <link:definition>993450 - Disclosure - SEC Schedule, Article 12-29, Mortgage Loans on Real Estate, SEC Schedule, 12-29, Real Estate Companies, Investment in Mortgage Loans on Real Estate, Write-down or Reserve [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='ExtractiveIndustriesOilAndGasInProcessActivitiesTable' roleURI='http://fasb.org/srt/role/disclosure/ExtractiveIndustriesOilAndGasInProcessActivitiesTable'>
+        <link:definition>965100 - Disclosure - Extractive Industries, Oil and Gas, Present Activity [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-04CondensedFinancialInformationScheduleOfCondensedFinancialStatementsTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-04CondensedFinancialInformationScheduleOfCondensedFinancialStatementsTable'>
+        <link:definition>991100 - Disclosure - SEC Schedule, Article 12-04, Condensed Financial Information of Registrant, Condensed Financial Statements [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-04CondensedFinancialInformationCondensedBalanceSheetStatementTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-04CondensedFinancialInformationCondensedBalanceSheetStatementTable'>
+        <link:definition>991100 - Disclosure - SEC Schedule, Article 12-04, Condensed Financial Information of Registrant, Condensed Balance Sheet Statement [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-04CondensedFinancialInformationCondensedCashFlowStatementTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-04CondensedFinancialInformationCondensedCashFlowStatementTable'>
+        <link:definition>991100 - Disclosure - SEC Schedule, Article 12-04, Condensed Financial Information of Registrant, Condensed Cash Flow Statement [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-04CondensedFinancialInformationCondensedIncomeStatementTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-04CondensedFinancialInformationCondensedIncomeStatementTable'>
+        <link:definition>991100 - Disclosure - SEC Schedule, Article 12-04, Condensed Financial Information of Registrant, Condensed Income Statement [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECScheduleArticle12-04CondensedFinancialInformationCondensedStatementOfComprehensiveIncomeTable' roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-04CondensedFinancialInformationCondensedStatementOfComprehensiveIncomeTable'>
+        <link:definition>991100 - Disclosure - SEC Schedule, Article 12-04, Condensed Financial Information of Registrant, Condensed Statement of Comprehensive Income [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='CommonDomainMembersCommonTable' roleURI='http://fasb.org/srt/role/statement/CommonDomainMembersCommonTable'>
+        <link:definition>191000 - Statement - Common Domain Members, Common [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='FinancialServicesBankingAndThriftDistributionOfAssetsLiabilitiesAndStockholdersEquityTable' roleURI='http://fasb.org/srt/role/disclosure/FinancialServicesBankingAndThriftDistributionOfAssetsLiabilitiesAndStockholdersEquityTable'>
+        <link:definition>940002 - Disclosure - Financial Services, Banking and Thrift, Distribution of Assets, Liabilities and Stockholders' Equity [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='FinancialServicesBankingAndThriftInterestRateAndInterestDifferentialAnalysisTable' roleURI='http://fasb.org/srt/role/disclosure/FinancialServicesBankingAndThriftInterestRateAndInterestDifferentialAnalysisTable'>
+        <link:definition>940002 - Disclosure - Financial Services, Banking and Thrift, Interest Rate and Interest Differential Analysis [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='FinancialServicesBankingAndThriftFinancingReceivableBeforeAllowanceForCreditLossMaturityTable' roleURI='http://fasb.org/srt/role/disclosure/FinancialServicesBankingAndThriftFinancingReceivableBeforeAllowanceForCreditLossMaturityTable'>
+        <link:definition>940002 - Disclosure - Financial Services, Banking and Thrift, Financing Receivable, before Allowance for Credit Loss, Maturity [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='FinancialServicesBankingAndThriftFinancingReceivableCreditRatioTable' roleURI='http://fasb.org/srt/role/disclosure/FinancialServicesBankingAndThriftFinancingReceivableCreditRatioTable'>
+        <link:definition>940002 - Disclosure - Financial Services, Banking and Thrift, Financing Receivable, Credit Ratio [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' roleURI='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable'>
+        <link:definition>990050 - Disclosure - SEC Disclosure, Security Registered or Being Registered, Guarantor and Issuer, Guaranteed Security [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' roleURI='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable'>
+        <link:definition>990050 - Disclosure - SEC Disclosure, Security Registered or Being Registered, Affiliate, Collateralized Security [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='OtherLiabilitiesPlatformOperatorCryptoAssetTable' roleURI='http://fasb.org/srt/role/disclosure/OtherLiabilitiesPlatformOperatorCryptoAssetTable'>
+        <link:definition>470100 - Disclosure - Other Liabilities, Platform Operator, Crypto-Asset [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id='EquityShareRepurchaseProgramTable' roleURI='http://fasb.org/srt/role/disclosure/EquityShareRepurchaseProgramTable'>
+        <link:definition>500050 - Disclosure - Equity, Share Repurchase Program [Table]</link:definition>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+</xs:schema>

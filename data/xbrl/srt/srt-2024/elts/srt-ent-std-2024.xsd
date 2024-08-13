@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<xs:schema elementFormDefault='qualified' targetNamespace='http://fasb.org/srt-ent-std/2024' xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:srt-ent-std='http://fasb.org/srt-ent-std/2024' xmlns:xbrli='http://www.xbrl.org/2003/instance' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+  <xs:annotation>
+    <xs:appinfo />
+    <xs:documentation> This file is an entry point for srt (srt). The DTS starting with this entry point includes
+                              the concepts defined in srt (srt) with their standard, period start, period end,
+                              total and axis default labels. It will not include references. This DTS also
+                              includes the following non industry/statement and non disclosure presentation and
+                              definition linkbases:
+                              </xs:documentation>
+  </xs:annotation>
+  <xs:import namespace='http://www.xbrl.org/2003/instance' schemaLocation='http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd' />
+  <xs:import namespace='http://fasb.org/srt-std/2024' schemaLocation='srt-std-2024.xsd' />
+</xs:schema>

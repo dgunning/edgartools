@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<xs:schema attributeFormDefault='unqualified' elementFormDefault='qualified' targetNamespace='http://fasb.org/cn-part/2024' xmlns:cn-part='http://fasb.org/cn-part/2024' xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+<xs:import namespace='http://www.xbrl.org/2003/linkbase' schemaLocation='http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd' />
+<xs:element id='cn-part_TaxonomyVersion' name='TaxonomyVersion' substitutionGroup='link:part' type='xs:gYear'>
+<xs:annotation>
+<xs:documentation>Taxonomy Version in [YYYY] format</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_SourceName' name='SourceName' substitutionGroup='link:part' type='xs:string'>
+<xs:annotation>
+<xs:documentation>Source for change label. Example includes: Revenue</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_NewElement' name='NewElement' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies new elements</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_ElementDeprecated' name='ElementDeprecated' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies deprecated elements</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_ModifiedDeprecatedLabel' name='ModifiedDeprecatedLabel' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies modified Deprecated Label</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_ModifiedReferences' name='ModifiedReferences' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies reference changes</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_ModifiedLabels' name='ModifiedLabels' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies modified Standard Labels</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_ModifiedDocumentation' name='ModifiedDocumentation' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies modified Documentation Label</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_PreviousDocumentation' name='PreviousDocumentation' substitutionGroup='link:part' type='xs:string'>
+<xs:annotation>
+<xs:documentation>Provides the definition (documentation label) of the element as defined from the prior version of the GAAP Taxonomy</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_DeprecatedLabel' name='DeprecatedLabel' substitutionGroup='link:part' type='xs:string'>
+<xs:annotation>
+<xs:documentation>Contains the reason for the deprecation</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_DeprecationReplacement' name='DeprecationReplacement' substitutionGroup='link:part' type='cn-part:elementListItemType'>
+<xs:annotation>
+<xs:documentation>Contains a possible replacement element or possible replacement elements, if applicable. Multiple replacement elements are separated by a space</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_ModifiedBalanceType' name='ModifiedBalanceType' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies modified balance type attribute</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_ModifiedPeriodType' name='ModifiedPeriodType' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies modified period type attribute</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_ModifiedDataType' name='ModifiedDataType' substitutionGroup='link:part' type='xs:boolean'>
+<xs:annotation>
+<xs:documentation>Identifies modified data type attribute</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element id='cn-part_Source_ASU_Number' name='Source_ASU_Number' substitutionGroup='link:part' type='cn-part:AsuNumber'>
+<xs:annotation>
+<xs:documentation>Accounting Standards Update issued number</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:simpleType name='AsuNumber'>
+<xs:restriction base='xs:string'>
+<xs:pattern value='[\s&#xA0;]*[0-9]{4}-[0-9]{2}([\s&#xA0;]+[0-9]{4}-[0-9]{2})*[\s&#xA0;]*' />
+</xs:restriction>
+</xs:simpleType>
+<xs:simpleType name='elementListItemType'>
+<xs:restriction base='xs:token'>
+<xs:pattern value='\s*(([\i-[:]][\c-[:]]*:)?[\i-[:]][\c-[:]]*(\s+([\i-[:]][\c-[:]]*:)?[\i-[:]][\c-[:]]*)*)?\s*' />
+</xs:restriction>
+</xs:simpleType>
+</xs:schema>

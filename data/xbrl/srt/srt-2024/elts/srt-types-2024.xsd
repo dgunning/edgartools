@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<xs:schema elementFormDefault='qualified' targetNamespace='http://fasb.org/srt-types/2024' xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:srt='http://fasb.org/srt/2024' xmlns:srt-types='http://fasb.org/srt-types/2024' xmlns:xbrli='http://www.xbrl.org/2003/instance' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+  <xs:import namespace='http://www.xbrl.org/2003/instance' schemaLocation='http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd' />
+  <xs:import namespace='http://www.xbrl.org/2006/ref' schemaLocation='http://www.xbrl.org/2006/ref-2006-02-27.xsd' />
+  <xs:annotation>
+    <xs:documentation>
+                This file is the schema file for srt-types (srt-types).
+
+                The DTS starting with this schema file will not contain any linkbases.
+            </xs:documentation>
+  </xs:annotation>
+  <complexType abstract='false' name='perUnitItemType' xmlns='http://www.w3.org/2001/XMLSchema'>
+    <simpleContent>
+      <restriction base='xbrli:decimalItemType' />
+    </simpleContent>
+  </complexType>
+  <complexType abstract='false' name='financialInstrumentGlobalIdentifierItemType' xmlns='http://www.w3.org/2001/XMLSchema'>
+    <simpleContent>
+      <restriction base='xbrli:tokenItemType'>
+        <pattern value='[B-DF-HJ-NP-TV-Z]{2}G[0-9B-DF-HJ-NP-TV-Z]{8}[0-9]' />
+      </restriction>
+    </simpleContent>
+  </complexType>
+</xs:schema>

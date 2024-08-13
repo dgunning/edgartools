@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xbrldt='http://xbrl.org/2005/xbrldt' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' xlink:href='../elts/srt-roles-2024.xsd#SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' xlink:type='simple' />
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' xlink:href='../elts/srt-roles-2024.xsd#SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/all' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#all' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/domain-member' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member' xlink:type='simple' />
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_GuarantorAndIssuerGuaranteedSecurityTable' xlink:label='loc_GuarantorAndIssuerGuaranteedSecurityTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:label='loc_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:type='locator' />
+    <link:definitionArc order='1.0' xbrldt:closed='true' xbrldt:contextElement='segment' xlink:arcrole='http://xbrl.org/int/dim/arcrole/all' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:to='loc_GuarantorAndIssuerGuaranteedSecurityTable' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_GuarantorAndIssuerGuaranteedSecurityTable' xlink:label='loc_GuarantorAndIssuerGuaranteedSecurityTable' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_LegalEntityAxis' xlink:label='loc_LegalEntityAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesAxis' xlink:label='loc_ConsolidatedEntitiesAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityTable' xlink:to='loc_LegalEntityAxis' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityTable' xlink:to='loc_ConsolidatedEntitiesAxis' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityTable' xlink:to='loc_ConsolidationItemsAxis' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_LegalEntityAxis' xlink:label='loc_LegalEntityAxis' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_EntityDomain' xlink:label='loc_EntityDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesAxis' xlink:label='loc_ConsolidatedEntitiesAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesDomain' xlink:label='loc_ConsolidatedEntitiesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_LegalEntityAxis' xlink:to='loc_EntityDomain' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ConsolidatedEntitiesAxis' xlink:to='loc_ConsolidatedEntitiesDomain' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ConsolidationItemsAxis' xlink:to='loc_ConsolidationItemsDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_LegalEntityAxis' xlink:label='loc_LegalEntityAxis' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_EntityDomain' xlink:label='loc_EntityDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesAxis' xlink:label='loc_ConsolidatedEntitiesAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesDomain' xlink:label='loc_ConsolidatedEntitiesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_LegalEntityAxis' xlink:to='loc_EntityDomain' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ConsolidatedEntitiesAxis' xlink:to='loc_ConsolidatedEntitiesDomain' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ConsolidationItemsAxis' xlink:to='loc_ConsolidationItemsDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:label='loc_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ObligorGroupNotMaterial' xlink:label='loc_ObligorGroupNotMaterial' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ObligorGroupNotMateriallyDifferent' xlink:label='loc_ObligorGroupNotMateriallyDifferent' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FinanceSubsidiaryIssuerGuaranteedByParent' xlink:label='loc_FinanceSubsidiaryIssuerGuaranteedByParent' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FinanceSubsidiaryIssuerCoissuedWithParent' xlink:label='loc_FinanceSubsidiaryIssuerCoissuedWithParent' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_GuarantorAndIssuerPreacquisitionSummarizedFinancialInformation' xlink:label='loc_GuarantorAndIssuerPreacquisitionSummarizedFinancialInformation' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:to='loc_ObligorGroupNotMaterial' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:to='loc_ObligorGroupNotMateriallyDifferent' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:to='loc_FinanceSubsidiaryIssuerGuaranteedByParent' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:to='loc_FinanceSubsidiaryIssuerCoissuedWithParent' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_GuarantorAndIssuerGuaranteedSecurityLineItems' xlink:to='loc_GuarantorAndIssuerPreacquisitionSummarizedFinancialInformation' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredGuarantorAndIssuerGuaranteedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesDomain' xlink:label='loc_ConsolidatedEntitiesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ObligorGroupMember' xlink:label='loc_ObligorGroupMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ParentCompanyMember' xlink:label='loc_ParentCompanyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SubsidiaryIssuerMember' xlink:label='loc_SubsidiaryIssuerMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_GuarantorSubsidiariesMember' xlink:label='loc_GuarantorSubsidiariesMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationsMember' xlink:label='loc_ConsolidationEliminationsMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationObligorGroupMember' xlink:label='loc_ConsolidationEliminationObligorGroupMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationObligorGroupAndNonobligorSubsidiaryMember' xlink:label='loc_ConsolidationEliminationObligorGroupAndNonobligorSubsidiaryMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationAffiliateGroupAndRegistrantMember' xlink:label='loc_ConsolidationEliminationAffiliateGroupAndRegistrantMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationAffiliateGroupAndNotPartOfAffiliateGroupMember' xlink:label='loc_ConsolidationEliminationAffiliateGroupAndNotPartOfAffiliateGroupMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReportableLegalEntitiesMember' xlink:label='loc_ReportableLegalEntitiesMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReportableLegalEntityObligorGroupAfterEliminationMember' xlink:label='loc_ReportableLegalEntityObligorGroupAfterEliminationMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReportableLegalEntityAffiliateGroupSecurityPledgedAsCollateralAfterEliminationMember' xlink:label='loc_ReportableLegalEntityAffiliateGroupSecurityPledgedAsCollateralAfterEliminationMember' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidatedEntitiesDomain' xlink:to='loc_ObligorGroupMember' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ObligorGroupMember' xlink:to='loc_ParentCompanyMember' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ObligorGroupMember' xlink:to='loc_SubsidiaryIssuerMember' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ObligorGroupMember' xlink:to='loc_GuarantorSubsidiariesMember' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationItemsDomain' xlink:to='loc_ConsolidationEliminationsMember' xlink:type='arc' />
+    <link:definitionArc order='6.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationEliminationsMember' xlink:to='loc_ConsolidationEliminationObligorGroupMember' xlink:type='arc' />
+    <link:definitionArc order='7.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationEliminationsMember' xlink:to='loc_ConsolidationEliminationObligorGroupAndNonobligorSubsidiaryMember' xlink:type='arc' />
+    <link:definitionArc order='8.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationEliminationsMember' xlink:to='loc_ConsolidationEliminationAffiliateGroupAndRegistrantMember' xlink:type='arc' />
+    <link:definitionArc order='9.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationEliminationsMember' xlink:to='loc_ConsolidationEliminationAffiliateGroupAndNotPartOfAffiliateGroupMember' xlink:type='arc' />
+    <link:definitionArc order='10.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationItemsDomain' xlink:to='loc_ReportableLegalEntitiesMember' xlink:type='arc' />
+    <link:definitionArc order='11.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ReportableLegalEntitiesMember' xlink:to='loc_ReportableLegalEntityObligorGroupAfterEliminationMember' xlink:type='arc' />
+    <link:definitionArc order='12.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ReportableLegalEntitiesMember' xlink:to='loc_ReportableLegalEntityAffiliateGroupSecurityPledgedAsCollateralAfterEliminationMember' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliateCollateralizedSecurityTable' xlink:label='loc_AffiliateCollateralizedSecurityTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliateCollateralizedSecurityLineItems' xlink:label='loc_AffiliateCollateralizedSecurityLineItems' xlink:type='locator' />
+    <link:definitionArc order='1.0' xbrldt:closed='true' xbrldt:contextElement='segment' xlink:arcrole='http://xbrl.org/int/dim/arcrole/all' xlink:from='loc_AffiliateCollateralizedSecurityLineItems' xlink:to='loc_AffiliateCollateralizedSecurityTable' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliateCollateralizedSecurityTable' xlink:label='loc_AffiliateCollateralizedSecurityTable' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_LegalEntityAxis' xlink:label='loc_LegalEntityAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_AffiliateCollateralizedSecurityTable' xlink:to='loc_LegalEntityAxis' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_AffiliateCollateralizedSecurityTable' xlink:to='loc_ConsolidationItemsAxis' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_LegalEntityAxis' xlink:label='loc_LegalEntityAxis' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_EntityDomain' xlink:label='loc_EntityDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_LegalEntityAxis' xlink:to='loc_EntityDomain' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ConsolidationItemsAxis' xlink:to='loc_ConsolidationItemsDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_LegalEntityAxis' xlink:label='loc_LegalEntityAxis' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/dei/2024/dei-2024.xsd#dei_EntityDomain' xlink:label='loc_EntityDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_LegalEntityAxis' xlink:to='loc_EntityDomain' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ConsolidationItemsAxis' xlink:to='loc_ConsolidationItemsDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliateCollateralizedSecurityLineItems' xlink:label='loc_AffiliateCollateralizedSecurityLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliateSecurityPledgedAsCollateralTradingMarket' xlink:label='loc_AffiliateSecurityPledgedAsCollateralTradingMarket' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliateGroupPreacquisitionSummarizedFinancialInformation' xlink:label='loc_AffiliateGroupPreacquisitionSummarizedFinancialInformation' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliateGroupSecurityPledgedAsCollateralNotMaterial' xlink:label='loc_AffiliateGroupSecurityPledgedAsCollateralNotMaterial' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliateGroupSecurityPledgedAsCollateralNotMateriallyDifferent' xlink:label='loc_AffiliateGroupSecurityPledgedAsCollateralNotMateriallyDifferent' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AffiliateCollateralizedSecurityLineItems' xlink:to='loc_AffiliateSecurityPledgedAsCollateralTradingMarket' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AffiliateCollateralizedSecurityLineItems' xlink:to='loc_AffiliateGroupPreacquisitionSummarizedFinancialInformation' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AffiliateCollateralizedSecurityLineItems' xlink:to='loc_AffiliateGroupSecurityPledgedAsCollateralNotMaterial' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AffiliateCollateralizedSecurityLineItems' xlink:to='loc_AffiliateGroupSecurityPledgedAsCollateralNotMateriallyDifferent' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECDisclosureSecurityRegisteredOrBeingRegisteredAffiliateCollateralizedSecurityTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationsMember' xlink:label='loc_ConsolidationEliminationsMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationObligorGroupMember' xlink:label='loc_ConsolidationEliminationObligorGroupMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationObligorGroupAndNonobligorSubsidiaryMember' xlink:label='loc_ConsolidationEliminationObligorGroupAndNonobligorSubsidiaryMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationAffiliateGroupAndRegistrantMember' xlink:label='loc_ConsolidationEliminationAffiliateGroupAndRegistrantMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationAffiliateGroupAndNotPartOfAffiliateGroupMember' xlink:label='loc_ConsolidationEliminationAffiliateGroupAndNotPartOfAffiliateGroupMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReportableLegalEntitiesMember' xlink:label='loc_ReportableLegalEntitiesMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReportableLegalEntityObligorGroupAfterEliminationMember' xlink:label='loc_ReportableLegalEntityObligorGroupAfterEliminationMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReportableLegalEntityAffiliateGroupSecurityPledgedAsCollateralAfterEliminationMember' xlink:label='loc_ReportableLegalEntityAffiliateGroupSecurityPledgedAsCollateralAfterEliminationMember' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationItemsDomain' xlink:to='loc_ConsolidationEliminationsMember' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationEliminationsMember' xlink:to='loc_ConsolidationEliminationObligorGroupMember' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationEliminationsMember' xlink:to='loc_ConsolidationEliminationObligorGroupAndNonobligorSubsidiaryMember' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationEliminationsMember' xlink:to='loc_ConsolidationEliminationAffiliateGroupAndRegistrantMember' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationEliminationsMember' xlink:to='loc_ConsolidationEliminationAffiliateGroupAndNotPartOfAffiliateGroupMember' xlink:type='arc' />
+    <link:definitionArc order='6.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationItemsDomain' xlink:to='loc_ReportableLegalEntitiesMember' xlink:type='arc' />
+    <link:definitionArc order='7.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ReportableLegalEntitiesMember' xlink:to='loc_ReportableLegalEntityObligorGroupAfterEliminationMember' xlink:type='arc' />
+    <link:definitionArc order='8.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ReportableLegalEntitiesMember' xlink:to='loc_ReportableLegalEntityAffiliateGroupSecurityPledgedAsCollateralAfterEliminationMember' xlink:type='arc' />
+  </link:definitionLink>
+</link:linkbase>

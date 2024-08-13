@@ -791,6 +791,18 @@ class XBRLData(BaseModel):
         """Check if the statement exists in the statements dictionary."""
         return self.get_statement_definition(statement_name) is not None
 
+    @staticmethod
+    def get_correct_value(value_info):
+        if isinstance(value_info, dict) and 'dimensional_values' in value_info:
+            # Prefer the value with no dimensions
+            no_dimension_value = next(
+                (v['value'] for v in value_info['dimensional_values'].values() if not v['dimensions']), None)
+            if no_dimension_value is not None:
+                return no_dimension_value
+            # If all values have dimensions, return the first one
+            return next(iter(value_info['dimensional_values'].values()))['value']
+        return value_info.get('value', '')
+
     def get_statement(self,
                       statement_name: str,
                       include_format: bool = True,
@@ -845,29 +857,43 @@ class XBRLData(BaseModel):
             if include_concept:
                 row['concept'] = format_info[item.label]['concept']
             if not format_info[item.label]['abstract']:
+                period_values = {}
                 for period, value_info in item.values.items():
                     end_date = period.split(' to ')[-1]
                     year = end_date.split('-')[0]
                     end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
 
                     if is_quarterly:
-                        # Only include periods matching the specified duration for quarterly reports.
-                        # The default is 3 months
-                        if value_info['duration'] == '6 months':
-                            if value_info['duration'] == duration:
-                                period_label = end_date_obj.strftime("%b %d, %Y")
-                                row[period_label] = value_info['value']
-                        else:
-                            period_label = end_date_obj.strftime("%b %d, %Y")
-                            row[period_label] = value_info['value']
+                        period_label = end_date_obj.strftime("%b %d, %Y")
                     else:
-                        # For annual reports, include annual periods
                         period_label = year
-                        row[period_label] = value_info['value']
+
+                    # Check if this period already has a non-dimensioned value
+                    if period_label not in period_values or period_values[period_label]['has_dimensions']:
+                        current_value = self.get_correct_value(value_info)
+                        has_dimensions = bool(value_info.get('dimensions', {}))
+
+                        # Only update if we don't have a value yet, or if the new value has no dimensions
+                        if period_label not in period_values or not has_dimensions:
+                            period_values[period_label] = {
+                                'value': current_value,
+                                'has_dimensions': has_dimensions,
+                                'units': value_info.get('units', ''),
+                                'decimals': value_info.get('decimals', '')
+                            }
+
+                # After processing all periods, add the selected values to the row
+                for period_label, period_data in period_values.items():
+                    if is_quarterly:
+                        if duration is None or value_info['duration'] == duration:
+                            row[period_label] = period_data['value']
+                    else:
+                        row[period_label] = period_data['value']
 
                     if include_format:
-                        row['units'] = value_info.get('units', '')
-                        row['decimals'] = value_info.get('decimals', '')
+                        row['units'] = period_data['units']
+                        row['decimals'] = period_data['decimals']
+
             data.append(row)
 
         df = pd.DataFrame(data)

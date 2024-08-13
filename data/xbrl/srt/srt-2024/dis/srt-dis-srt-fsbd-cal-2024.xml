@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>  <link:arcroleRef arcroleURI='https://xbrl.org/2023/arcrole/summation-item' xlink:href='https://www.xbrl.org/2023/calculation-1.1.xsd#summation-item' xlink:type='simple'/>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/FinancialServicesBrokersAndDealers' xlink:href='../elts/srt-roles-2024.xsd#srt-fsbd' xlink:type='simple' />
+  <link:calculationLink xlink:role='http://fasb.org/srt/role/disclosure/FinancialServicesBrokersAndDealers' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NetCapital' xlink:label='loc_NetCapital' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExcessNetCapitalAt1500Percent' xlink:label='loc_ExcessNetCapitalAt1500Percent' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumNetCapitalRequired1' xlink:label='loc_MinimumNetCapitalRequired1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumNetCapitalRequiredForEntity1' xlink:label='loc_MinimumNetCapitalRequiredForEntity1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumNetCapitalRequiredForBrokerDealerSubsidiary1' xlink:label='loc_MinimumNetCapitalRequiredForBrokerDealerSubsidiary1' xlink:type='locator' />
+    <link:calculationArc order='10' weight='1.0' xlink:arcrole='https://xbrl.org/2023/arcrole/summation-item' xlink:from='loc_NetCapital' xlink:to='loc_ExcessNetCapitalAt1500Percent' xlink:type='arc' />
+    <link:calculationArc order='20' weight='1.0' xlink:arcrole='https://xbrl.org/2023/arcrole/summation-item' xlink:from='loc_NetCapital' xlink:to='loc_MinimumNetCapitalRequired1' xlink:type='arc' />
+    <link:calculationArc order='10' weight='1.0' xlink:arcrole='https://xbrl.org/2023/arcrole/summation-item' xlink:from='loc_MinimumNetCapitalRequired1' xlink:to='loc_MinimumNetCapitalRequiredForEntity1' xlink:type='arc' />
+    <link:calculationArc order='20' weight='1.0' xlink:arcrole='https://xbrl.org/2023/arcrole/summation-item' xlink:from='loc_MinimumNetCapitalRequired1' xlink:to='loc_MinimumNetCapitalRequiredForBrokerDealerSubsidiary1' xlink:type='arc' />
+  </link:calculationLink>
+</link:linkbase>

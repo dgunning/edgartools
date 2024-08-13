@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xbrldt='http://xbrl.org/2005/xbrldt' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' xlink:href='../elts/srt-roles-2024.xsd#SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='simple' />
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable' xlink:href='../elts/srt-roles-2024.xsd#SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/all' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#all' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/domain-member' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member' xlink:type='simple' />
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateWriteDownOrReserveTable' xlink:label='loc_RealEstateWriteDownOrReserveTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateWriteDownOrReserveLineItems' xlink:label='loc_RealEstateWriteDownOrReserveLineItems' xlink:type='locator' />
+    <link:definitionArc order='1.0' xbrldt:closed='true' xbrldt:contextElement='segment' xlink:arcrole='http://xbrl.org/int/dim/arcrole/all' xlink:from='loc_RealEstateWriteDownOrReserveLineItems' xlink:to='loc_RealEstateWriteDownOrReserveTable' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateWriteDownOrReserveTable' xlink:label='loc_RealEstateWriteDownOrReserveTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:label='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_RealEstateWriteDownOrReserveTable' xlink:to='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:label='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:label='loc_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:to='loc_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:label='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:label='loc_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:to='loc_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateWriteDownOrReserveTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateWriteDownOrReserveLineItems' xlink:label='loc_RealEstateWriteDownOrReserveLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateWriteDownOrReserveBasis' xlink:label='loc_RealEstateWriteDownOrReserveBasis' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RealEstateWriteDownOrReserveLineItems' xlink:to='loc_RealEstateWriteDownOrReserveBasis' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationByPropertyTable' xlink:label='loc_RealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationLineItems' xlink:label='loc_RealEstateAndAccumulatedDepreciationLineItems' xlink:type='locator' />
+    <link:definitionArc order='1.0' xbrldt:closed='true' xbrldt:contextElement='segment' xlink:arcrole='http://xbrl.org/int/dim/arcrole/all' xlink:from='loc_RealEstateAndAccumulatedDepreciationLineItems' xlink:to='loc_RealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationByPropertyTable' xlink:label='loc_RealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:label='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementGeographicalAxis' xlink:label='loc_StatementGeographicalAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:label='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_RealEstateAndAccumulatedDepreciationByPropertyTable' xlink:to='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_RealEstateAndAccumulatedDepreciationByPropertyTable' xlink:to='loc_StatementGeographicalAxis' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_RealEstateAndAccumulatedDepreciationByPropertyTable' xlink:to='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:label='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:label='loc_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementGeographicalAxis' xlink:label='loc_StatementGeographicalAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SegmentGeographicalDomain' xlink:label='loc_SegmentGeographicalDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:label='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:label='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:to='loc_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_StatementGeographicalAxis' xlink:to='loc_SegmentGeographicalDomain' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:to='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:label='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:label='loc_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementGeographicalAxis' xlink:label='loc_StatementGeographicalAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SegmentGeographicalDomain' xlink:label='loc_SegmentGeographicalDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:label='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:label='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_RealEstateAndAccumulatedDepreciationDescriptionOfPropertyAxis' xlink:to='loc_RealEstateAndAccumulatedDepreciationNameOfPropertyDomain' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_StatementGeographicalAxis' xlink:to='loc_SegmentGeographicalDomain' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_MortgageLoansOnRealEstateDescriptionTypeOfPropertyAxis' xlink:to='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationLineItems' xlink:label='loc_RealEstateAndAccumulatedDepreciationLineItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationAmountOfEncumbrances' xlink:label='loc_RealEstateAndAccumulatedDepreciationAmountOfEncumbrances' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationDateOfConstruction1' xlink:label='loc_RealEstateAndAccumulatedDepreciationDateOfConstruction1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RealEstateAndAccumulatedDepreciationDateAcquired1' xlink:label='loc_RealEstateAndAccumulatedDepreciationDateAcquired1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SECScheduleIIIRealEstateNumberOfUnits' xlink:label='loc_SECScheduleIIIRealEstateNumberOfUnits' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RealEstateAndAccumulatedDepreciationLineItems' xlink:to='loc_RealEstateAndAccumulatedDepreciationAmountOfEncumbrances' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RealEstateAndAccumulatedDepreciationLineItems' xlink:to='loc_RealEstateAndAccumulatedDepreciationDateOfConstruction1' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RealEstateAndAccumulatedDepreciationLineItems' xlink:to='loc_RealEstateAndAccumulatedDepreciationDateAcquired1' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RealEstateAndAccumulatedDepreciationLineItems' xlink:to='loc_SECScheduleIIIRealEstateNumberOfUnits' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/disclosure/SECScheduleArticle12-28RealEstateAndAccumulatedDepreciationRealEstateAndAccumulatedDepreciationByPropertyTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:label='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ApartmentBuildingMember' xlink:label='loc_ApartmentBuildingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RetailSiteMember' xlink:label='loc_RetailSiteMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_WarehouseMember' xlink:label='loc_WarehouseMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_IndustrialPropertyMember' xlink:label='loc_IndustrialPropertyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OfficeBuildingMember' xlink:label='loc_OfficeBuildingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_HotelMember' xlink:label='loc_HotelMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OtherPropertyMember' xlink:label='loc_OtherPropertyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MultifamilyMember' xlink:label='loc_MultifamilyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SingleFamilyMember' xlink:label='loc_SingleFamilyMember' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_ApartmentBuildingMember' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_RetailSiteMember' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_WarehouseMember' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_IndustrialPropertyMember' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_OfficeBuildingMember' xlink:type='arc' />
+    <link:definitionArc order='6.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_HotelMember' xlink:type='arc' />
+    <link:definitionArc order='7.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_OtherPropertyMember' xlink:type='arc' />
+    <link:definitionArc order='8.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_MultifamilyMember' xlink:type='arc' />
+    <link:definitionArc order='9.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_MortgageLoansOnRealEstateNamePropertyTypeDomain' xlink:to='loc_SingleFamilyMember' xlink:type='arc' />
+  </link:definitionLink>
+</link:linkbase>

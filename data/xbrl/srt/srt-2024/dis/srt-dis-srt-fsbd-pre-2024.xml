@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/disclosure/FinancialServicesBrokersAndDealers' xlink:href='../elts/srt-roles-2024.xsd#srt-fsbd' xlink:type='simple' />
+  <link:presentationLink xlink:role='http://fasb.org/srt/role/disclosure/FinancialServicesBrokersAndDealers' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_BrokersAndDealersAbstract' xlink:label='loc_BrokersAndDealersAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RegulatoryCapitalRequirementsAbstract' xlink:label='loc_RegulatoryCapitalRequirementsAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ComputationOfNetCapitalUnderSecuritiesAndExchangeCommissionRegulationTextBlock' xlink:label='loc_ComputationOfNetCapitalUnderSecuritiesAndExchangeCommissionRegulationTextBlock' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExcessNetCapitalAt1500PercentAbstract' xlink:label='loc_ExcessNetCapitalAt1500PercentAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NetCapital' xlink:label='loc_NetCapital' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumNetCapitalRequiredAbstract' xlink:label='loc_MinimumNetCapitalRequiredAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumNetCapitalRequiredForEntity1' xlink:label='loc_MinimumNetCapitalRequiredForEntity1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumNetCapitalRequiredForBrokerDealerSubsidiary1' xlink:label='loc_MinimumNetCapitalRequiredForBrokerDealerSubsidiary1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumNetCapitalRequired1' xlink:label='loc_MinimumNetCapitalRequired1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExcessNetCapitalAt1500Percent' xlink:label='loc_ExcessNetCapitalAt1500Percent' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ComputationOfNetCapitalRequirementAlternativeStandardAbstract' xlink:label='loc_ComputationOfNetCapitalRequirementAlternativeStandardAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AlternativeExcessNetCapitalAbstract' xlink:label='loc_AlternativeExcessNetCapitalAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AlternativeNetCapitalRequirementAbstract' xlink:label='loc_AlternativeNetCapitalRequirementAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_TwoPercentOfDebitItems' xlink:label='loc_TwoPercentOfDebitItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CapitalRequirementOfConsolidatedBrokerDealerSubsidiaryElectingAlternativeMethod' xlink:label='loc_CapitalRequirementOfConsolidatedBrokerDealerSubsidiaryElectingAlternativeMethod' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AlternativeNetCapitalRequirement1' xlink:label='loc_AlternativeNetCapitalRequirement1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AlternativeExcessNetCapital' xlink:label='loc_AlternativeExcessNetCapital' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NetCapitalInExcessOfFivePercentOfDebitItems' xlink:label='loc_NetCapitalInExcessOfFivePercentOfDebitItems' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumFinancialRequirementsForFuturesCommissionMerchantsUnderCommodityExchangeActTextBlock' xlink:label='loc_MinimumFinancialRequirementsForFuturesCommissionMerchantsUnderCommodityExchangeActTextBlock' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_DescriptionOfNetCapitalRequirementsUnderCommodityExchangeAct' xlink:label='loc_DescriptionOfNetCapitalRequirementsUnderCommodityExchangeAct' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NetCapitalExcessShortageUnderCommodityExchangeActAbstract' xlink:label='loc_NetCapitalExcessShortageUnderCommodityExchangeActAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NetCapitalUnderCommodityExchangeActComputation' xlink:label='loc_NetCapitalUnderCommodityExchangeActComputation' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RequiredNetCapitalUnderCommodityExchangeAct1' xlink:label='loc_RequiredNetCapitalUnderCommodityExchangeAct1' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NetCapitalExcessShortageUnderCommodityExchangeAct' xlink:label='loc_NetCapitalExcessShortageUnderCommodityExchangeAct' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ItemsIncludedInConsolidatedStatementOfFinancialConditionAbstract' xlink:label='loc_ItemsIncludedInConsolidatedStatementOfFinancialConditionAbstract' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_BankLoans' xlink:label='loc_BankLoans' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_DraftsPayable' xlink:label='loc_DraftsPayable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PayablesToCustomers' xlink:label='loc_PayablesToCustomers' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PayablesToBrokerDealersAndClearingOrganizations' xlink:label='loc_PayablesToBrokerDealersAndClearingOrganizations' xlink:type='locator' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_BrokersAndDealersAbstract' xlink:to='loc_RegulatoryCapitalRequirementsAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_RegulatoryCapitalRequirementsAbstract' xlink:to='loc_ComputationOfNetCapitalUnderSecuritiesAndExchangeCommissionRegulationTextBlock' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ComputationOfNetCapitalUnderSecuritiesAndExchangeCommissionRegulationTextBlock' xlink:to='loc_ExcessNetCapitalAt1500PercentAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ExcessNetCapitalAt1500PercentAbstract' xlink:to='loc_NetCapital' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ExcessNetCapitalAt1500PercentAbstract' xlink:to='loc_MinimumNetCapitalRequiredAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MinimumNetCapitalRequiredAbstract' xlink:to='loc_MinimumNetCapitalRequiredForEntity1' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MinimumNetCapitalRequiredAbstract' xlink:to='loc_MinimumNetCapitalRequiredForBrokerDealerSubsidiary1' xlink:type='arc' />
+    <link:presentationArc order='30' preferredLabel='http://www.xbrl.org/2003/role/totalLabel' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MinimumNetCapitalRequiredAbstract' xlink:to='loc_MinimumNetCapitalRequired1' xlink:type='arc' />
+    <link:presentationArc order='30' preferredLabel='http://www.xbrl.org/2003/role/totalLabel' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ExcessNetCapitalAt1500PercentAbstract' xlink:to='loc_ExcessNetCapitalAt1500Percent' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ComputationOfNetCapitalUnderSecuritiesAndExchangeCommissionRegulationTextBlock' xlink:to='loc_ComputationOfNetCapitalRequirementAlternativeStandardAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ComputationOfNetCapitalRequirementAlternativeStandardAbstract' xlink:to='loc_AlternativeExcessNetCapitalAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_AlternativeExcessNetCapitalAbstract' xlink:to='loc_AlternativeNetCapitalRequirementAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_AlternativeNetCapitalRequirementAbstract' xlink:to='loc_TwoPercentOfDebitItems' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_AlternativeNetCapitalRequirementAbstract' xlink:to='loc_CapitalRequirementOfConsolidatedBrokerDealerSubsidiaryElectingAlternativeMethod' xlink:type='arc' />
+    <link:presentationArc order='30' preferredLabel='http://www.xbrl.org/2003/role/totalLabel' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_AlternativeNetCapitalRequirementAbstract' xlink:to='loc_AlternativeNetCapitalRequirement1' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_AlternativeExcessNetCapitalAbstract' xlink:to='loc_NetCapital' xlink:type='arc' />
+    <link:presentationArc order='30' preferredLabel='http://www.xbrl.org/2003/role/totalLabel' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_AlternativeExcessNetCapitalAbstract' xlink:to='loc_AlternativeExcessNetCapital' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ComputationOfNetCapitalRequirementAlternativeStandardAbstract' xlink:to='loc_NetCapitalInExcessOfFivePercentOfDebitItems' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_RegulatoryCapitalRequirementsAbstract' xlink:to='loc_MinimumFinancialRequirementsForFuturesCommissionMerchantsUnderCommodityExchangeActTextBlock' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MinimumFinancialRequirementsForFuturesCommissionMerchantsUnderCommodityExchangeActTextBlock' xlink:to='loc_DescriptionOfNetCapitalRequirementsUnderCommodityExchangeAct' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_MinimumFinancialRequirementsForFuturesCommissionMerchantsUnderCommodityExchangeActTextBlock' xlink:to='loc_NetCapitalExcessShortageUnderCommodityExchangeActAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_NetCapitalExcessShortageUnderCommodityExchangeActAbstract' xlink:to='loc_NetCapitalUnderCommodityExchangeActComputation' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_NetCapitalExcessShortageUnderCommodityExchangeActAbstract' xlink:to='loc_RequiredNetCapitalUnderCommodityExchangeAct1' xlink:type='arc' />
+    <link:presentationArc order='30' preferredLabel='http://www.xbrl.org/2003/role/totalLabel' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_NetCapitalExcessShortageUnderCommodityExchangeActAbstract' xlink:to='loc_NetCapitalExcessShortageUnderCommodityExchangeAct' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_BrokersAndDealersAbstract' xlink:to='loc_ItemsIncludedInConsolidatedStatementOfFinancialConditionAbstract' xlink:type='arc' />
+    <link:presentationArc order='10' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ItemsIncludedInConsolidatedStatementOfFinancialConditionAbstract' xlink:to='loc_BankLoans' xlink:type='arc' />
+    <link:presentationArc order='20' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ItemsIncludedInConsolidatedStatementOfFinancialConditionAbstract' xlink:to='loc_DraftsPayable' xlink:type='arc' />
+    <link:presentationArc order='30' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ItemsIncludedInConsolidatedStatementOfFinancialConditionAbstract' xlink:to='loc_PayablesToCustomers' xlink:type='arc' />
+    <link:presentationArc order='40' xlink:arcrole='http://www.xbrl.org/2003/arcrole/parent-child' xlink:from='loc_ItemsIncludedInConsolidatedStatementOfFinancialConditionAbstract' xlink:to='loc_PayablesToBrokerDealersAndClearingOrganizations' xlink:type='arc' />
+  </link:presentationLink>
+</link:linkbase>

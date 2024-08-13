@@ -1,0 +1,577 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+(c) 2010-2024 Financial Accounting Foundation; (c) 2007-2010 XBRL US, Inc.  All Rights Reserved.
+Notice: Authorized Uses are Set Forth at https://xbrl.fasb.org/terms/SRT_TermsConditions.html
+  -->
+<link:linkbase xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xbrldt='http://xbrl.org/2005/xbrldt' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd'>
+  <link:roleRef roleURI='http://fasb.org/srt/role/statement/CommonDomainMembersCommonTable' xlink:href='../elts/srt-roles-2024.xsd#CommonDomainMembersCommonTable' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/all' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#all' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default' xlink:type='simple' />
+  <link:arcroleRef arcroleURI='http://xbrl.org/int/dim/arcrole/domain-member' xlink:href='http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member' xlink:type='simple' />
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/statement/CommonDomainMembersCommonTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CommonTable' xlink:label='loc_CommonTable' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AircraftTypeAxis' xlink:label='loc_AircraftTypeAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesAxis' xlink:label='loc_ConsolidatedEntitiesAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CounterpartyNameAxis' xlink:label='loc_CounterpartyNameAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingAMBestAxis' xlink:label='loc_CreditRatingAMBestAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingFitchAxis' xlink:label='loc_CreditRatingFitchAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingMoodysAxis' xlink:label='loc_CreditRatingMoodysAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingStandardPoorsAxis' xlink:label='loc_CreditRatingStandardPoorsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CumulativeEffectPeriodOfAdoptionAxis' xlink:label='loc_CumulativeEffectPeriodOfAdoptionAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CurrencyAxis' xlink:label='loc_CurrencyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MajorCustomersAxis' xlink:label='loc_MajorCustomersAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:label='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementGeographicalAxis' xlink:label='loc_StatementGeographicalAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:label='loc_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LitigationCaseAxis' xlink:label='loc_LitigationCaseAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OwnershipAxis' xlink:label='loc_OwnershipAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductOrServiceAxis' xlink:label='loc_ProductOrServiceAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RangeAxis' xlink:label='loc_RangeAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RestatementAxis' xlink:label='loc_RestatementAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EnergyAxis' xlink:label='loc_EnergyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_TitleOfIndividualAxis' xlink:label='loc_TitleOfIndividualAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementScenarioAxis' xlink:label='loc_StatementScenarioAxis' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_AircraftTypeAxis' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_ConsolidatedEntitiesAxis' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_ConsolidationItemsAxis' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_CounterpartyNameAxis' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_CreditRatingAMBestAxis' xlink:type='arc' />
+    <link:definitionArc order='6.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_CreditRatingFitchAxis' xlink:type='arc' />
+    <link:definitionArc order='7.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_CreditRatingMoodysAxis' xlink:type='arc' />
+    <link:definitionArc order='8.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_CreditRatingStandardPoorsAxis' xlink:type='arc' />
+    <link:definitionArc order='9.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_CumulativeEffectPeriodOfAdoptionAxis' xlink:type='arc' />
+    <link:definitionArc order='10.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_CurrencyAxis' xlink:type='arc' />
+    <link:definitionArc order='11.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_MajorCustomersAxis' xlink:type='arc' />
+    <link:definitionArc order='12.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:type='arc' />
+    <link:definitionArc order='13.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_StatementGeographicalAxis' xlink:type='arc' />
+    <link:definitionArc order='14.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:type='arc' />
+    <link:definitionArc order='15.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_LitigationCaseAxis' xlink:type='arc' />
+    <link:definitionArc order='16.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_OwnershipAxis' xlink:type='arc' />
+    <link:definitionArc order='17.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_ProductOrServiceAxis' xlink:type='arc' />
+    <link:definitionArc order='18.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_RangeAxis' xlink:type='arc' />
+    <link:definitionArc order='19.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_RestatementAxis' xlink:type='arc' />
+    <link:definitionArc order='20.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_EnergyAxis' xlink:type='arc' />
+    <link:definitionArc order='21.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_TitleOfIndividualAxis' xlink:type='arc' />
+    <link:definitionArc order='22.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/hypercube-dimension' xlink:from='loc_CommonTable' xlink:to='loc_StatementScenarioAxis' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/statement/CommonDomainMembersCommonTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AircraftTypeAxis' xlink:label='loc_AircraftTypeAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AircraftTypeMember' xlink:label='loc_AircraftTypeMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesAxis' xlink:label='loc_ConsolidatedEntitiesAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesDomain' xlink:label='loc_ConsolidatedEntitiesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CounterpartyNameAxis' xlink:label='loc_CounterpartyNameAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RepurchaseAgreementCounterpartyNameDomain' xlink:label='loc_RepurchaseAgreementCounterpartyNameDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingAMBestAxis' xlink:label='loc_CreditRatingAMBestAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingAMBestDomain' xlink:label='loc_CreditRatingAMBestDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingFitchAxis' xlink:label='loc_CreditRatingFitchAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingFitchMember' xlink:label='loc_ExternalCreditRatingFitchMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingMoodysAxis' xlink:label='loc_CreditRatingMoodysAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingMoodysMember' xlink:label='loc_ExternalCreditRatingMoodysMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingStandardPoorsAxis' xlink:label='loc_CreditRatingStandardPoorsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingStandardPoorsMember' xlink:label='loc_ExternalCreditRatingStandardPoorsMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CumulativeEffectPeriodOfAdoptionAxis' xlink:label='loc_CumulativeEffectPeriodOfAdoptionAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CumulativeEffectPeriodOfAdoptionDomain' xlink:label='loc_CumulativeEffectPeriodOfAdoptionDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CurrencyAxis' xlink:label='loc_CurrencyAxis' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/currency/2024/currency-2024.xsd#currency_AllCurrenciesDomain' xlink:label='loc_AllCurrenciesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MajorCustomersAxis' xlink:label='loc_MajorCustomersAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NameOfMajorCustomerDomain' xlink:label='loc_NameOfMajorCustomerDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:label='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:label='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementGeographicalAxis' xlink:label='loc_StatementGeographicalAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SegmentGeographicalDomain' xlink:label='loc_SegmentGeographicalDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:label='loc_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EquityMethodInvesteeNameDomain' xlink:label='loc_EquityMethodInvesteeNameDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LitigationCaseAxis' xlink:label='loc_LitigationCaseAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LitigationCaseTypeDomain' xlink:label='loc_LitigationCaseTypeDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OwnershipAxis' xlink:label='loc_OwnershipAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OwnershipDomain' xlink:label='loc_OwnershipDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductOrServiceAxis' xlink:label='loc_ProductOrServiceAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductsAndServicesDomain' xlink:label='loc_ProductsAndServicesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RangeAxis' xlink:label='loc_RangeAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RangeMember' xlink:label='loc_RangeMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RestatementAxis' xlink:label='loc_RestatementAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RestatementDomain' xlink:label='loc_RestatementDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EnergyAxis' xlink:label='loc_EnergyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EnergyDomain' xlink:label='loc_EnergyDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_TitleOfIndividualAxis' xlink:label='loc_TitleOfIndividualAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_TitleOfIndividualWithRelationshipToEntityDomain' xlink:label='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementScenarioAxis' xlink:label='loc_StatementScenarioAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ScenarioUnspecifiedDomain' xlink:label='loc_ScenarioUnspecifiedDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_AircraftTypeAxis' xlink:to='loc_AircraftTypeMember' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ConsolidatedEntitiesAxis' xlink:to='loc_ConsolidatedEntitiesDomain' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ConsolidationItemsAxis' xlink:to='loc_ConsolidationItemsDomain' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_CounterpartyNameAxis' xlink:to='loc_RepurchaseAgreementCounterpartyNameDomain' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_CreditRatingAMBestAxis' xlink:to='loc_CreditRatingAMBestDomain' xlink:type='arc' />
+    <link:definitionArc order='6.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_CreditRatingFitchAxis' xlink:to='loc_ExternalCreditRatingFitchMember' xlink:type='arc' />
+    <link:definitionArc order='7.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_CreditRatingMoodysAxis' xlink:to='loc_ExternalCreditRatingMoodysMember' xlink:type='arc' />
+    <link:definitionArc order='8.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_CreditRatingStandardPoorsAxis' xlink:to='loc_ExternalCreditRatingStandardPoorsMember' xlink:type='arc' />
+    <link:definitionArc order='9.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_CumulativeEffectPeriodOfAdoptionAxis' xlink:to='loc_CumulativeEffectPeriodOfAdoptionDomain' xlink:type='arc' />
+    <link:definitionArc order='10.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_CurrencyAxis' xlink:to='loc_AllCurrenciesDomain' xlink:type='arc' />
+    <link:definitionArc order='11.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_MajorCustomersAxis' xlink:to='loc_NameOfMajorCustomerDomain' xlink:type='arc' />
+    <link:definitionArc order='12.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:to='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:type='arc' />
+    <link:definitionArc order='13.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_StatementGeographicalAxis' xlink:to='loc_SegmentGeographicalDomain' xlink:type='arc' />
+    <link:definitionArc order='14.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:to='loc_EquityMethodInvesteeNameDomain' xlink:type='arc' />
+    <link:definitionArc order='15.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_LitigationCaseAxis' xlink:to='loc_LitigationCaseTypeDomain' xlink:type='arc' />
+    <link:definitionArc order='16.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_OwnershipAxis' xlink:to='loc_OwnershipDomain' xlink:type='arc' />
+    <link:definitionArc order='17.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_ProductOrServiceAxis' xlink:to='loc_ProductsAndServicesDomain' xlink:type='arc' />
+    <link:definitionArc order='18.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_RangeAxis' xlink:to='loc_RangeMember' xlink:type='arc' />
+    <link:definitionArc order='19.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_RestatementAxis' xlink:to='loc_RestatementDomain' xlink:type='arc' />
+    <link:definitionArc order='20.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_EnergyAxis' xlink:to='loc_EnergyDomain' xlink:type='arc' />
+    <link:definitionArc order='21.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_TitleOfIndividualAxis' xlink:to='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:type='arc' />
+    <link:definitionArc order='22.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-domain' xlink:from='loc_StatementScenarioAxis' xlink:to='loc_ScenarioUnspecifiedDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/statement/CommonDomainMembersCommonTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AircraftTypeAxis' xlink:label='loc_AircraftTypeAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AircraftTypeMember' xlink:label='loc_AircraftTypeMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesAxis' xlink:label='loc_ConsolidatedEntitiesAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesDomain' xlink:label='loc_ConsolidatedEntitiesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsAxis' xlink:label='loc_ConsolidationItemsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CounterpartyNameAxis' xlink:label='loc_CounterpartyNameAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RepurchaseAgreementCounterpartyNameDomain' xlink:label='loc_RepurchaseAgreementCounterpartyNameDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingAMBestAxis' xlink:label='loc_CreditRatingAMBestAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingAMBestDomain' xlink:label='loc_CreditRatingAMBestDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingFitchAxis' xlink:label='loc_CreditRatingFitchAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingFitchMember' xlink:label='loc_ExternalCreditRatingFitchMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingMoodysAxis' xlink:label='loc_CreditRatingMoodysAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingMoodysMember' xlink:label='loc_ExternalCreditRatingMoodysMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingStandardPoorsAxis' xlink:label='loc_CreditRatingStandardPoorsAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingStandardPoorsMember' xlink:label='loc_ExternalCreditRatingStandardPoorsMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CumulativeEffectPeriodOfAdoptionAxis' xlink:label='loc_CumulativeEffectPeriodOfAdoptionAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CumulativeEffectPeriodOfAdoptionDomain' xlink:label='loc_CumulativeEffectPeriodOfAdoptionDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CurrencyAxis' xlink:label='loc_CurrencyAxis' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/currency/2024/currency-2024.xsd#currency_AllCurrenciesDomain' xlink:label='loc_AllCurrenciesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MajorCustomersAxis' xlink:label='loc_MajorCustomersAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NameOfMajorCustomerDomain' xlink:label='loc_NameOfMajorCustomerDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:label='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:label='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementGeographicalAxis' xlink:label='loc_StatementGeographicalAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SegmentGeographicalDomain' xlink:label='loc_SegmentGeographicalDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:label='loc_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EquityMethodInvesteeNameDomain' xlink:label='loc_EquityMethodInvesteeNameDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LitigationCaseAxis' xlink:label='loc_LitigationCaseAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LitigationCaseTypeDomain' xlink:label='loc_LitigationCaseTypeDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OwnershipAxis' xlink:label='loc_OwnershipAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OwnershipDomain' xlink:label='loc_OwnershipDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductOrServiceAxis' xlink:label='loc_ProductOrServiceAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProductsAndServicesDomain' xlink:label='loc_ProductsAndServicesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RangeAxis' xlink:label='loc_RangeAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RangeMember' xlink:label='loc_RangeMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RestatementAxis' xlink:label='loc_RestatementAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RestatementDomain' xlink:label='loc_RestatementDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EnergyAxis' xlink:label='loc_EnergyAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EnergyDomain' xlink:label='loc_EnergyDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_TitleOfIndividualAxis' xlink:label='loc_TitleOfIndividualAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_TitleOfIndividualWithRelationshipToEntityDomain' xlink:label='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StatementScenarioAxis' xlink:label='loc_StatementScenarioAxis' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ScenarioUnspecifiedDomain' xlink:label='loc_ScenarioUnspecifiedDomain' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_AircraftTypeAxis' xlink:to='loc_AircraftTypeMember' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ConsolidatedEntitiesAxis' xlink:to='loc_ConsolidatedEntitiesDomain' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ConsolidationItemsAxis' xlink:to='loc_ConsolidationItemsDomain' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_CounterpartyNameAxis' xlink:to='loc_RepurchaseAgreementCounterpartyNameDomain' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_CreditRatingAMBestAxis' xlink:to='loc_CreditRatingAMBestDomain' xlink:type='arc' />
+    <link:definitionArc order='6.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_CreditRatingFitchAxis' xlink:to='loc_ExternalCreditRatingFitchMember' xlink:type='arc' />
+    <link:definitionArc order='7.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_CreditRatingMoodysAxis' xlink:to='loc_ExternalCreditRatingMoodysMember' xlink:type='arc' />
+    <link:definitionArc order='8.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_CreditRatingStandardPoorsAxis' xlink:to='loc_ExternalCreditRatingStandardPoorsMember' xlink:type='arc' />
+    <link:definitionArc order='9.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_CumulativeEffectPeriodOfAdoptionAxis' xlink:to='loc_CumulativeEffectPeriodOfAdoptionDomain' xlink:type='arc' />
+    <link:definitionArc order='10.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_CurrencyAxis' xlink:to='loc_AllCurrenciesDomain' xlink:type='arc' />
+    <link:definitionArc order='11.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_MajorCustomersAxis' xlink:to='loc_NameOfMajorCustomerDomain' xlink:type='arc' />
+    <link:definitionArc order='12.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankAxis' xlink:to='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:type='arc' />
+    <link:definitionArc order='13.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_StatementGeographicalAxis' xlink:to='loc_SegmentGeographicalDomain' xlink:type='arc' />
+    <link:definitionArc order='14.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis' xlink:to='loc_EquityMethodInvesteeNameDomain' xlink:type='arc' />
+    <link:definitionArc order='15.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_LitigationCaseAxis' xlink:to='loc_LitigationCaseTypeDomain' xlink:type='arc' />
+    <link:definitionArc order='16.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_OwnershipAxis' xlink:to='loc_OwnershipDomain' xlink:type='arc' />
+    <link:definitionArc order='17.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_ProductOrServiceAxis' xlink:to='loc_ProductsAndServicesDomain' xlink:type='arc' />
+    <link:definitionArc order='18.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_RangeAxis' xlink:to='loc_RangeMember' xlink:type='arc' />
+    <link:definitionArc order='19.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_RestatementAxis' xlink:to='loc_RestatementDomain' xlink:type='arc' />
+    <link:definitionArc order='20.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_EnergyAxis' xlink:to='loc_EnergyDomain' xlink:type='arc' />
+    <link:definitionArc order='21.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_TitleOfIndividualAxis' xlink:to='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:type='arc' />
+    <link:definitionArc order='22.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/dimension-default' xlink:from='loc_StatementScenarioAxis' xlink:to='loc_ScenarioUnspecifiedDomain' xlink:type='arc' />
+  </link:definitionLink>
+  <link:definitionLink xlink:role='http://fasb.org/srt/role/statement/CommonDomainMembersCommonTable' xlink:type='extended'>
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AircraftTypeMember' xlink:label='loc_AircraftTypeMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B717Member' xlink:label='loc_B717Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B717200Member' xlink:label='loc_B717200Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B737Member' xlink:label='loc_B737Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B737700Member' xlink:label='loc_B737700Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B737800Member' xlink:label='loc_B737800Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B737820Member' xlink:label='loc_B737820Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B737900Member' xlink:label='loc_B737900Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B737MaxMember' xlink:label='loc_B737MaxMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B757Member' xlink:label='loc_B757Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B757200Member' xlink:label='loc_B757200Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B757223Member' xlink:label='loc_B757223Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B767Member' xlink:label='loc_B767Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B767200Member' xlink:label='loc_B767200Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B767300Member' xlink:label='loc_B767300Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B767323Member' xlink:label='loc_B767323Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B777Member' xlink:label='loc_B777Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B777200Member' xlink:label='loc_B777200Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B777223Member' xlink:label='loc_B777223Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_B777300Member' xlink:label='loc_B777300Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_A300Member' xlink:label='loc_A300Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_A312Member' xlink:label='loc_A312Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_A320Member' xlink:label='loc_A320Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_A320200Member' xlink:label='loc_A320200Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_A320NeoMember' xlink:label='loc_A320NeoMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_A330Member' xlink:label='loc_A330Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_A330200Member' xlink:label='loc_A330200Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CRJMember' xlink:label='loc_CRJMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CRJ200Member' xlink:label='loc_CRJ200Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CRJ700Member' xlink:label='loc_CRJ700Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CRJ900Member' xlink:label='loc_CRJ900Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EMBMember' xlink:label='loc_EMBMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EMB120Member' xlink:label='loc_EMB120Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EMB135Member' xlink:label='loc_EMB135Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EMB145Member' xlink:label='loc_EMB145Member' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntitiesDomain' xlink:label='loc_ConsolidatedEntitiesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ParentCompanyMember' xlink:label='loc_ParentCompanyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SubsidiariesMember' xlink:label='loc_SubsidiariesMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_GuarantorSubsidiariesMember' xlink:label='loc_GuarantorSubsidiariesMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NonGuarantorSubsidiariesMember' xlink:label='loc_NonGuarantorSubsidiariesMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SubsidiaryIssuerMember' xlink:label='loc_SubsidiaryIssuerMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidatedEntityExcludingVariableInterestEntitiesVIEMember' xlink:label='loc_ConsolidatedEntityExcludingVariableInterestEntitiesVIEMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PartnershipInterestMember' xlink:label='loc_PartnershipInterestMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AffiliatedEntityMember' xlink:label='loc_AffiliatedEntityMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationItemsDomain' xlink:label='loc_ConsolidationItemsDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReportableGeographicalComponentsMember' xlink:label='loc_ReportableGeographicalComponentsMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_GeographyEliminationsMember' xlink:label='loc_GeographyEliminationsMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ReportableLegalEntitiesMember' xlink:label='loc_ReportableLegalEntitiesMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ConsolidationEliminationsMember' xlink:label='loc_ConsolidationEliminationsMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CreditRatingAMBestDomain' xlink:label='loc_CreditRatingAMBestDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestAPlusPlusRatingMember' xlink:label='loc_AMBestAPlusPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestAPlusRatingMember' xlink:label='loc_AMBestAPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestARatingMember' xlink:label='loc_AMBestARatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestAMinusRatingMember' xlink:label='loc_AMBestAMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestBPlusPlusRatingMember' xlink:label='loc_AMBestBPlusPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestBPlusRatingMember' xlink:label='loc_AMBestBPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestBRatingMember' xlink:label='loc_AMBestBRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestBMinusRatingMember' xlink:label='loc_AMBestBMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestCPlusPlusRatingMember' xlink:label='loc_AMBestCPlusPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestCPlusRatingMember' xlink:label='loc_AMBestCPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestCRatingMember' xlink:label='loc_AMBestCRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestCMinusRatingMember' xlink:label='loc_AMBestCMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestDRatingMember' xlink:label='loc_AMBestDRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestERatingMember' xlink:label='loc_AMBestERatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestFRatingMember' xlink:label='loc_AMBestFRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AMBestSRatingMember' xlink:label='loc_AMBestSRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingFitchMember' xlink:label='loc_ExternalCreditRatingFitchMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchAAARatingMember' xlink:label='loc_FitchAAARatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchAAPlusRatingMember' xlink:label='loc_FitchAAPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchAARatingMember' xlink:label='loc_FitchAARatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchAAMinusRatingMember' xlink:label='loc_FitchAAMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchAPlusRatingMember' xlink:label='loc_FitchAPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchARatingMember' xlink:label='loc_FitchARatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchAMinusRatingMember' xlink:label='loc_FitchAMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBBBPlusRatingMember' xlink:label='loc_FitchBBBPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBBBRatingMember' xlink:label='loc_FitchBBBRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBBBMinusRatingMember' xlink:label='loc_FitchBBBMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBBPlusRatingMember' xlink:label='loc_FitchBBPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBBRatingMember' xlink:label='loc_FitchBBRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBBMinusRatingMember' xlink:label='loc_FitchBBMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBPlusRatingMember' xlink:label='loc_FitchBPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBRatingMember' xlink:label='loc_FitchBRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchBMinusRatingMember' xlink:label='loc_FitchBMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchCCCPlusRatingMember' xlink:label='loc_FitchCCCPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchCCCRatingMember' xlink:label='loc_FitchCCCRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchCCCMinusRatingMember' xlink:label='loc_FitchCCCMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchCCRatingMember' xlink:label='loc_FitchCCRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchCRatingMember' xlink:label='loc_FitchCRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FitchDRatingMember' xlink:label='loc_FitchDRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingMoodysMember' xlink:label='loc_ExternalCreditRatingMoodysMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysAaaRatingMember' xlink:label='loc_MoodysAaaRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysAa1RatingMember' xlink:label='loc_MoodysAa1RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysAa2RatingMember' xlink:label='loc_MoodysAa2RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysAa3RatingMember' xlink:label='loc_MoodysAa3RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysA1RatingMember' xlink:label='loc_MoodysA1RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysA2RatingMember' xlink:label='loc_MoodysA2RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysA3RatingMember' xlink:label='loc_MoodysA3RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysBaa1RatingMember' xlink:label='loc_MoodysBaa1RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysBaa2RatingMember' xlink:label='loc_MoodysBaa2RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysBaa3RatingMember' xlink:label='loc_MoodysBaa3RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysBa1RatingMember' xlink:label='loc_MoodysBa1RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysBa2RatingMember' xlink:label='loc_MoodysBa2RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysBa3RatingMember' xlink:label='loc_MoodysBa3RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysB1RatingMember' xlink:label='loc_MoodysB1RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysB2RatingMember' xlink:label='loc_MoodysB2RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysB3RatingMember' xlink:label='loc_MoodysB3RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysCaa1RatingMember' xlink:label='loc_MoodysCaa1RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysCaa2RatingMember' xlink:label='loc_MoodysCaa2RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysCaa3RatingMember' xlink:label='loc_MoodysCaa3RatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysCaRatingMember' xlink:label='loc_MoodysCaRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MoodysCRatingMember' xlink:label='loc_MoodysCRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExternalCreditRatingStandardPoorsMember' xlink:label='loc_ExternalCreditRatingStandardPoorsMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsAAARatingMember' xlink:label='loc_StandardPoorsAAARatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsAAPlusRatingMember' xlink:label='loc_StandardPoorsAAPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsAARatingMember' xlink:label='loc_StandardPoorsAARatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsAAMinusRatingMember' xlink:label='loc_StandardPoorsAAMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsAPlusRatingMember' xlink:label='loc_StandardPoorsAPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsARatingMember' xlink:label='loc_StandardPoorsARatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsAMinusRatingMember' xlink:label='loc_StandardPoorsAMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBBBPlusRatingMember' xlink:label='loc_StandardPoorsBBBPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBBBRatingMember' xlink:label='loc_StandardPoorsBBBRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBBBMinusRatingMember' xlink:label='loc_StandardPoorsBBBMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBBPlusRatingMember' xlink:label='loc_StandardPoorsBBPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBBRatingMember' xlink:label='loc_StandardPoorsBBRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBBMinusRatingMember' xlink:label='loc_StandardPoorsBBMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBPlusRatingMember' xlink:label='loc_StandardPoorsBPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBRatingMember' xlink:label='loc_StandardPoorsBRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsBMinusRatingMember' xlink:label='loc_StandardPoorsBMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsCCCPlusRatingMember' xlink:label='loc_StandardPoorsCCCPlusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsCCCRatingMember' xlink:label='loc_StandardPoorsCCCRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsCCCMinusRatingMember' xlink:label='loc_StandardPoorsCCCMinusRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsCCRatingMember' xlink:label='loc_StandardPoorsCCRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsCRatingMember' xlink:label='loc_StandardPoorsCRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_StandardPoorsDRatingMember' xlink:label='loc_StandardPoorsDRatingMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CumulativeEffectPeriodOfAdoptionDomain' xlink:label='loc_CumulativeEffectPeriodOfAdoptionDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CumulativeEffectPeriodOfAdoptionAdjustedBalanceMember' xlink:label='loc_CumulativeEffectPeriodOfAdoptionAdjustedBalanceMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember' xlink:label='loc_CumulativeEffectPeriodOfAdoptionAdjustmentMember' xlink:type='locator' />
+    <link:loc xlink:href='https://xbrl.sec.gov/currency/2024/currency-2024.xsd#currency_AllCurrenciesDomain' xlink:label='loc_AllCurrenciesDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OtherCurrencyMember' xlink:label='loc_OtherCurrencyMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:label='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfAtlantaMember' xlink:label='loc_FederalHomeLoanBankOfAtlantaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfBostonMember' xlink:label='loc_FederalHomeLoanBankOfBostonMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfChicagoMember' xlink:label='loc_FederalHomeLoanBankOfChicagoMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfCincinnatiMember' xlink:label='loc_FederalHomeLoanBankOfCincinnatiMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfDallasMember' xlink:label='loc_FederalHomeLoanBankOfDallasMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfDesMoinesMember' xlink:label='loc_FederalHomeLoanBankOfDesMoinesMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfIndianapolisMember' xlink:label='loc_FederalHomeLoanBankOfIndianapolisMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfNewYorkMember' xlink:label='loc_FederalHomeLoanBankOfNewYorkMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfPittsburghMember' xlink:label='loc_FederalHomeLoanBankOfPittsburghMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfSanFranciscoMember' xlink:label='loc_FederalHomeLoanBankOfSanFranciscoMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfSeattleMember' xlink:label='loc_FederalHomeLoanBankOfSeattleMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FederalHomeLoanBankOfTopekaMember' xlink:label='loc_FederalHomeLoanBankOfTopekaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SegmentGeographicalDomain' xlink:label='loc_SegmentGeographicalDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AfricaMember' xlink:label='loc_AfricaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AmericasMember' xlink:label='loc_AmericasMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CentralAmericaMember' xlink:label='loc_CentralAmericaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NorthAmericaMember' xlink:label='loc_NorthAmericaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_SouthAmericaMember' xlink:label='loc_SouthAmericaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AsiaMember' xlink:label='loc_AsiaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_AsiaPacificMember' xlink:label='loc_AsiaPacificMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EuropeMember' xlink:label='loc_EuropeMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_LatinAmericaMember' xlink:label='loc_LatinAmericaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RangeMember' xlink:label='loc_RangeMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MaximumMember' xlink:label='loc_MaximumMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MinimumMember' xlink:label='loc_MinimumMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_WeightedAverageMember' xlink:label='loc_WeightedAverageMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_MedianMember' xlink:label='loc_MedianMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ArithmeticAverageMember' xlink:label='loc_ArithmeticAverageMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RestatementDomain' xlink:label='loc_RestatementDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ScenarioPreviouslyReportedMember' xlink:label='loc_ScenarioPreviouslyReportedMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RestatementAdjustmentMember' xlink:label='loc_RestatementAdjustmentMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RevisionOfPriorPeriodAccountingStandardsUpdateAdjustmentMember' xlink:label='loc_RevisionOfPriorPeriodAccountingStandardsUpdateAdjustmentMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RevisionOfPriorPeriodChangeInAccountingPrincipleAdjustmentMember' xlink:label='loc_RevisionOfPriorPeriodChangeInAccountingPrincipleAdjustmentMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RevisionOfPriorPeriodErrorCorrectionAdjustmentMember' xlink:label='loc_RevisionOfPriorPeriodErrorCorrectionAdjustmentMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_RevisionOfPriorPeriodReclassificationAdjustmentMember' xlink:label='loc_RevisionOfPriorPeriodReclassificationAdjustmentMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_EnergyDomain' xlink:label='loc_EnergyDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_FuelMember' xlink:label='loc_FuelMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CrudeOilMember' xlink:label='loc_CrudeOilMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_HeatingOilMember' xlink:label='loc_HeatingOilMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_CrudeOilAndNGLPerBarrelMember' xlink:label='loc_CrudeOilAndNGLPerBarrelMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_NaturalGasPerThousandCubicFeetMember' xlink:label='loc_NaturalGasPerThousandCubicFeetMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_TitleOfIndividualWithRelationshipToEntityDomain' xlink:label='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ManagementMember' xlink:label='loc_ManagementMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_BoardOfDirectorsChairmanMember' xlink:label='loc_BoardOfDirectorsChairmanMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_DirectorMember' xlink:label='loc_DirectorMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExecutiveOfficerMember' xlink:label='loc_ExecutiveOfficerMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ChiefExecutiveOfficerMember' xlink:label='loc_ChiefExecutiveOfficerMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ChiefFinancialOfficerMember' xlink:label='loc_ChiefFinancialOfficerMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ChiefOperatingOfficerMember' xlink:label='loc_ChiefOperatingOfficerMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ControllerMember' xlink:label='loc_ControllerMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ExecutiveVicePresidentMember' xlink:label='loc_ExecutiveVicePresidentMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_VicePresidentMember' xlink:label='loc_VicePresidentMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_PresidentMember' xlink:label='loc_PresidentMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_OfficerMember' xlink:label='loc_OfficerMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ScenarioUnspecifiedDomain' xlink:label='loc_ScenarioUnspecifiedDomain' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ProFormaMember' xlink:label='loc_ProFormaMember' xlink:type='locator' />
+    <link:loc xlink:href='../elts/srt-2024.xsd#srt_ScenarioForecastMember' xlink:label='loc_ScenarioForecastMember' xlink:type='locator' />
+    <link:definitionArc order='1.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B717Member' xlink:type='arc' />
+    <link:definitionArc order='2.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B717200Member' xlink:type='arc' />
+    <link:definitionArc order='3.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B737Member' xlink:type='arc' />
+    <link:definitionArc order='4.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B737700Member' xlink:type='arc' />
+    <link:definitionArc order='5.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B737800Member' xlink:type='arc' />
+    <link:definitionArc order='6.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B737820Member' xlink:type='arc' />
+    <link:definitionArc order='7.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B737900Member' xlink:type='arc' />
+    <link:definitionArc order='8.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B737MaxMember' xlink:type='arc' />
+    <link:definitionArc order='9.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B757Member' xlink:type='arc' />
+    <link:definitionArc order='10.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B757200Member' xlink:type='arc' />
+    <link:definitionArc order='11.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B757223Member' xlink:type='arc' />
+    <link:definitionArc order='12.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B767Member' xlink:type='arc' />
+    <link:definitionArc order='13.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B767200Member' xlink:type='arc' />
+    <link:definitionArc order='14.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B767300Member' xlink:type='arc' />
+    <link:definitionArc order='15.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B767323Member' xlink:type='arc' />
+    <link:definitionArc order='16.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B777Member' xlink:type='arc' />
+    <link:definitionArc order='17.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B777200Member' xlink:type='arc' />
+    <link:definitionArc order='18.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B777223Member' xlink:type='arc' />
+    <link:definitionArc order='19.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_B777300Member' xlink:type='arc' />
+    <link:definitionArc order='20.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_A300Member' xlink:type='arc' />
+    <link:definitionArc order='21.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_A312Member' xlink:type='arc' />
+    <link:definitionArc order='22.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_A320Member' xlink:type='arc' />
+    <link:definitionArc order='23.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_A320200Member' xlink:type='arc' />
+    <link:definitionArc order='24.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_A320NeoMember' xlink:type='arc' />
+    <link:definitionArc order='25.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_A330Member' xlink:type='arc' />
+    <link:definitionArc order='26.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_A330200Member' xlink:type='arc' />
+    <link:definitionArc order='27.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_CRJMember' xlink:type='arc' />
+    <link:definitionArc order='28.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_CRJ200Member' xlink:type='arc' />
+    <link:definitionArc order='29.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_CRJ700Member' xlink:type='arc' />
+    <link:definitionArc order='30.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_CRJ900Member' xlink:type='arc' />
+    <link:definitionArc order='31.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_EMBMember' xlink:type='arc' />
+    <link:definitionArc order='32.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_EMB120Member' xlink:type='arc' />
+    <link:definitionArc order='33.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_EMB135Member' xlink:type='arc' />
+    <link:definitionArc order='34.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AircraftTypeMember' xlink:to='loc_EMB145Member' xlink:type='arc' />
+    <link:definitionArc order='35.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidatedEntitiesDomain' xlink:to='loc_ParentCompanyMember' xlink:type='arc' />
+    <link:definitionArc order='36.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidatedEntitiesDomain' xlink:to='loc_SubsidiariesMember' xlink:type='arc' />
+    <link:definitionArc order='37.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SubsidiariesMember' xlink:to='loc_GuarantorSubsidiariesMember' xlink:type='arc' />
+    <link:definitionArc order='38.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SubsidiariesMember' xlink:to='loc_NonGuarantorSubsidiariesMember' xlink:type='arc' />
+    <link:definitionArc order='39.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SubsidiariesMember' xlink:to='loc_SubsidiaryIssuerMember' xlink:type='arc' />
+    <link:definitionArc order='40.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidatedEntitiesDomain' xlink:to='loc_ConsolidatedEntityExcludingVariableInterestEntitiesVIEMember' xlink:type='arc' />
+    <link:definitionArc order='41.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidatedEntitiesDomain' xlink:to='loc_PartnershipInterestMember' xlink:type='arc' />
+    <link:definitionArc order='42.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidatedEntitiesDomain' xlink:to='loc_AffiliatedEntityMember' xlink:type='arc' />
+    <link:definitionArc order='43.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationItemsDomain' xlink:to='loc_ReportableGeographicalComponentsMember' xlink:type='arc' />
+    <link:definitionArc order='44.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationItemsDomain' xlink:to='loc_GeographyEliminationsMember' xlink:type='arc' />
+    <link:definitionArc order='45.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationItemsDomain' xlink:to='loc_ReportableLegalEntitiesMember' xlink:type='arc' />
+    <link:definitionArc order='46.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ConsolidationItemsDomain' xlink:to='loc_ConsolidationEliminationsMember' xlink:type='arc' />
+    <link:definitionArc order='47.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestAPlusPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='48.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestAPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='49.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestARatingMember' xlink:type='arc' />
+    <link:definitionArc order='50.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestAMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='51.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestBPlusPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='52.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestBPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='53.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestBRatingMember' xlink:type='arc' />
+    <link:definitionArc order='54.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestBMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='55.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestCPlusPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='56.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestCPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='57.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestCRatingMember' xlink:type='arc' />
+    <link:definitionArc order='58.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestCMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='59.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestDRatingMember' xlink:type='arc' />
+    <link:definitionArc order='60.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestERatingMember' xlink:type='arc' />
+    <link:definitionArc order='61.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestFRatingMember' xlink:type='arc' />
+    <link:definitionArc order='62.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CreditRatingAMBestDomain' xlink:to='loc_AMBestSRatingMember' xlink:type='arc' />
+    <link:definitionArc order='63.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchAAARatingMember' xlink:type='arc' />
+    <link:definitionArc order='64.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchAAPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='65.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchAARatingMember' xlink:type='arc' />
+    <link:definitionArc order='66.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchAAMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='67.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchAPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='68.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchARatingMember' xlink:type='arc' />
+    <link:definitionArc order='69.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchAMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='70.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBBBPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='71.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBBBRatingMember' xlink:type='arc' />
+    <link:definitionArc order='72.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBBBMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='73.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBBPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='74.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBBRatingMember' xlink:type='arc' />
+    <link:definitionArc order='75.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBBMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='76.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='77.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBRatingMember' xlink:type='arc' />
+    <link:definitionArc order='78.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchBMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='79.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchCCCPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='80.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchCCCRatingMember' xlink:type='arc' />
+    <link:definitionArc order='81.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchCCCMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='82.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchCCRatingMember' xlink:type='arc' />
+    <link:definitionArc order='83.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchCRatingMember' xlink:type='arc' />
+    <link:definitionArc order='84.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingFitchMember' xlink:to='loc_FitchDRatingMember' xlink:type='arc' />
+    <link:definitionArc order='85.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysAaaRatingMember' xlink:type='arc' />
+    <link:definitionArc order='86.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysAa1RatingMember' xlink:type='arc' />
+    <link:definitionArc order='87.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysAa2RatingMember' xlink:type='arc' />
+    <link:definitionArc order='88.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysAa3RatingMember' xlink:type='arc' />
+    <link:definitionArc order='89.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysA1RatingMember' xlink:type='arc' />
+    <link:definitionArc order='90.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysA2RatingMember' xlink:type='arc' />
+    <link:definitionArc order='91.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysA3RatingMember' xlink:type='arc' />
+    <link:definitionArc order='92.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysBaa1RatingMember' xlink:type='arc' />
+    <link:definitionArc order='93.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysBaa2RatingMember' xlink:type='arc' />
+    <link:definitionArc order='94.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysBaa3RatingMember' xlink:type='arc' />
+    <link:definitionArc order='95.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysBa1RatingMember' xlink:type='arc' />
+    <link:definitionArc order='96.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysBa2RatingMember' xlink:type='arc' />
+    <link:definitionArc order='97.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysBa3RatingMember' xlink:type='arc' />
+    <link:definitionArc order='98.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysB1RatingMember' xlink:type='arc' />
+    <link:definitionArc order='99.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysB2RatingMember' xlink:type='arc' />
+    <link:definitionArc order='100.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysB3RatingMember' xlink:type='arc' />
+    <link:definitionArc order='101.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysCaa1RatingMember' xlink:type='arc' />
+    <link:definitionArc order='102.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysCaa2RatingMember' xlink:type='arc' />
+    <link:definitionArc order='103.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysCaa3RatingMember' xlink:type='arc' />
+    <link:definitionArc order='104.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysCaRatingMember' xlink:type='arc' />
+    <link:definitionArc order='105.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingMoodysMember' xlink:to='loc_MoodysCRatingMember' xlink:type='arc' />
+    <link:definitionArc order='106.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsAAARatingMember' xlink:type='arc' />
+    <link:definitionArc order='107.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsAAPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='108.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsAARatingMember' xlink:type='arc' />
+    <link:definitionArc order='109.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsAAMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='110.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsAPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='111.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsARatingMember' xlink:type='arc' />
+    <link:definitionArc order='112.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsAMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='113.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBBBPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='114.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBBBRatingMember' xlink:type='arc' />
+    <link:definitionArc order='115.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBBBMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='116.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBBPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='117.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBBRatingMember' xlink:type='arc' />
+    <link:definitionArc order='118.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBBMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='119.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='120.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBRatingMember' xlink:type='arc' />
+    <link:definitionArc order='121.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsBMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='122.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsCCCPlusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='123.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsCCCRatingMember' xlink:type='arc' />
+    <link:definitionArc order='124.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsCCCMinusRatingMember' xlink:type='arc' />
+    <link:definitionArc order='125.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsCCRatingMember' xlink:type='arc' />
+    <link:definitionArc order='126.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsCRatingMember' xlink:type='arc' />
+    <link:definitionArc order='127.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ExternalCreditRatingStandardPoorsMember' xlink:to='loc_StandardPoorsDRatingMember' xlink:type='arc' />
+    <link:definitionArc order='128.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CumulativeEffectPeriodOfAdoptionDomain' xlink:to='loc_CumulativeEffectPeriodOfAdoptionAdjustedBalanceMember' xlink:type='arc' />
+    <link:definitionArc order='129.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_CumulativeEffectPeriodOfAdoptionDomain' xlink:to='loc_CumulativeEffectPeriodOfAdoptionAdjustmentMember' xlink:type='arc' />
+    <link:definitionArc order='130.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AllCurrenciesDomain' xlink:to='loc_OtherCurrencyMember' xlink:type='arc' />
+    <link:definitionArc order='131.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfAtlantaMember' xlink:type='arc' />
+    <link:definitionArc order='132.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfBostonMember' xlink:type='arc' />
+    <link:definitionArc order='133.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfChicagoMember' xlink:type='arc' />
+    <link:definitionArc order='134.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfCincinnatiMember' xlink:type='arc' />
+    <link:definitionArc order='135.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfDallasMember' xlink:type='arc' />
+    <link:definitionArc order='136.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfDesMoinesMember' xlink:type='arc' />
+    <link:definitionArc order='137.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfIndianapolisMember' xlink:type='arc' />
+    <link:definitionArc order='138.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfNewYorkMember' xlink:type='arc' />
+    <link:definitionArc order='139.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfPittsburghMember' xlink:type='arc' />
+    <link:definitionArc order='140.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfSanFranciscoMember' xlink:type='arc' />
+    <link:definitionArc order='141.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfSeattleMember' xlink:type='arc' />
+    <link:definitionArc order='142.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_FederalHomeLoanBankAdvancesBranchOfFHLBBankStateDomain' xlink:to='loc_FederalHomeLoanBankOfTopekaMember' xlink:type='arc' />
+    <link:definitionArc order='143.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SegmentGeographicalDomain' xlink:to='loc_AfricaMember' xlink:type='arc' />
+    <link:definitionArc order='144.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SegmentGeographicalDomain' xlink:to='loc_AmericasMember' xlink:type='arc' />
+    <link:definitionArc order='145.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AmericasMember' xlink:to='loc_CentralAmericaMember' xlink:type='arc' />
+    <link:definitionArc order='146.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AmericasMember' xlink:to='loc_NorthAmericaMember' xlink:type='arc' />
+    <link:definitionArc order='147.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_AmericasMember' xlink:to='loc_SouthAmericaMember' xlink:type='arc' />
+    <link:definitionArc order='148.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SegmentGeographicalDomain' xlink:to='loc_AsiaMember' xlink:type='arc' />
+    <link:definitionArc order='149.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SegmentGeographicalDomain' xlink:to='loc_AsiaPacificMember' xlink:type='arc' />
+    <link:definitionArc order='150.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SegmentGeographicalDomain' xlink:to='loc_EuropeMember' xlink:type='arc' />
+    <link:definitionArc order='151.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_SegmentGeographicalDomain' xlink:to='loc_LatinAmericaMember' xlink:type='arc' />
+    <link:definitionArc order='152.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RangeMember' xlink:to='loc_MaximumMember' xlink:type='arc' />
+    <link:definitionArc order='153.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RangeMember' xlink:to='loc_MinimumMember' xlink:type='arc' />
+    <link:definitionArc order='154.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RangeMember' xlink:to='loc_WeightedAverageMember' xlink:type='arc' />
+    <link:definitionArc order='155.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RangeMember' xlink:to='loc_MedianMember' xlink:type='arc' />
+    <link:definitionArc order='156.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RangeMember' xlink:to='loc_ArithmeticAverageMember' xlink:type='arc' />
+    <link:definitionArc order='157.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RestatementDomain' xlink:to='loc_ScenarioPreviouslyReportedMember' xlink:type='arc' />
+    <link:definitionArc order='158.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RestatementDomain' xlink:to='loc_RestatementAdjustmentMember' xlink:type='arc' />
+    <link:definitionArc order='159.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RestatementAdjustmentMember' xlink:to='loc_RevisionOfPriorPeriodAccountingStandardsUpdateAdjustmentMember' xlink:type='arc' />
+    <link:definitionArc order='160.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RestatementAdjustmentMember' xlink:to='loc_RevisionOfPriorPeriodChangeInAccountingPrincipleAdjustmentMember' xlink:type='arc' />
+    <link:definitionArc order='161.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RestatementAdjustmentMember' xlink:to='loc_RevisionOfPriorPeriodErrorCorrectionAdjustmentMember' xlink:type='arc' />
+    <link:definitionArc order='162.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_RestatementAdjustmentMember' xlink:to='loc_RevisionOfPriorPeriodReclassificationAdjustmentMember' xlink:type='arc' />
+    <link:definitionArc order='163.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_EnergyDomain' xlink:to='loc_FuelMember' xlink:type='arc' />
+    <link:definitionArc order='164.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_EnergyDomain' xlink:to='loc_CrudeOilMember' xlink:type='arc' />
+    <link:definitionArc order='165.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_EnergyDomain' xlink:to='loc_HeatingOilMember' xlink:type='arc' />
+    <link:definitionArc order='166.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_EnergyDomain' xlink:to='loc_CrudeOilAndNGLPerBarrelMember' xlink:type='arc' />
+    <link:definitionArc order='167.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_EnergyDomain' xlink:to='loc_NaturalGasPerThousandCubicFeetMember' xlink:type='arc' />
+    <link:definitionArc order='168.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_ManagementMember' xlink:type='arc' />
+    <link:definitionArc order='169.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_BoardOfDirectorsChairmanMember' xlink:type='arc' />
+    <link:definitionArc order='170.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_DirectorMember' xlink:type='arc' />
+    <link:definitionArc order='171.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_ExecutiveOfficerMember' xlink:type='arc' />
+    <link:definitionArc order='172.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_ChiefExecutiveOfficerMember' xlink:type='arc' />
+    <link:definitionArc order='173.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_ChiefFinancialOfficerMember' xlink:type='arc' />
+    <link:definitionArc order='174.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_ChiefOperatingOfficerMember' xlink:type='arc' />
+    <link:definitionArc order='175.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_ControllerMember' xlink:type='arc' />
+    <link:definitionArc order='176.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_ExecutiveVicePresidentMember' xlink:type='arc' />
+    <link:definitionArc order='177.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_VicePresidentMember' xlink:type='arc' />
+    <link:definitionArc order='178.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_PresidentMember' xlink:type='arc' />
+    <link:definitionArc order='179.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_TitleOfIndividualWithRelationshipToEntityDomain' xlink:to='loc_OfficerMember' xlink:type='arc' />
+    <link:definitionArc order='180.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ScenarioUnspecifiedDomain' xlink:to='loc_ProFormaMember' xlink:type='arc' />
+    <link:definitionArc order='181.0' xlink:arcrole='http://xbrl.org/int/dim/arcrole/domain-member' xlink:from='loc_ScenarioUnspecifiedDomain' xlink:to='loc_ScenarioForecastMember' xlink:type='arc' />
+  </link:definitionLink>
+</link:linkbase>
