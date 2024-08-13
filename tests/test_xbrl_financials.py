@@ -408,5 +408,14 @@ def test_get_statement_from_statement_by_int_index(apple_xbrl):
 
 def test_pfizer_current_assets(pfizer_xbrl):
     financials = Financials(pfizer_xbrl)
-    balance_sheet = pfizer_xbrl.get_statement('ConsolidatedBalanceSheets', include_concept=True, include_format=True)
-    print(balance_sheet)
+    balance_sheet = financials.get_balance_sheet()
+
+    data = balance_sheet.data
+
+    assert data.loc['Goodwill', '2023'] == '67783000000'
+    assert data.loc['Goodwill', '2022'] == '51375000000'
+    assert data.loc['Total current assets', '2023'] == '43333000000'
+    assert data.loc['Total current assets', '2022'] == '51259000000'
+
+    assert data.loc['Total assets', '2023'] == '227000000000'
+    assert data.loc['Total assets', '2022'] == '197000000000'
