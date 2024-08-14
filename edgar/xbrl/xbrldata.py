@@ -526,19 +526,17 @@ class Statement:
 
         if len(results) == 0:
             return None
-        elif len(results) > 1:
-            # Get the first row
-            results = results.iloc[0]
 
-        # Now convert to a fact and return
-        fact = Concept(
-            name=results.concept.iloc[0],
-            unit=results.units.iloc[0] if 'units' in results else None,
-            label=results.index[0],
-            decimals=results.decimals.iloc[0] if 'decimals' in results else None,
-            value={col: results[col].iloc[0] for col in self.periods}
-        )
-        return fact
+        results = results.drop_duplicates()
+        if len(results) == 1:
+            fact = Concept(
+                name=results.concept.iloc[0],
+                unit=results.units.iloc[0] if 'units' in results else None,
+                label=results.index[0],
+                decimals=results.decimals.iloc[0] if 'decimals' in results else None,
+                value={col: results[col].iloc[0] for col in self.periods}
+            )
+            return fact
 
     def get_dataframe(self,
                       include_format: bool = False,
@@ -868,28 +866,31 @@ class XBRLData(BaseModel):
                     else:
                         period_label = year
 
-                    # Check if this period already has a non-dimensioned value
-                    if period_label not in period_values or period_values[period_label]['has_dimensions']:
-                        current_value = self.get_correct_value(value_info)
-                        has_dimensions = bool(value_info.get('dimensions', {}))
+                    current_value = self.get_correct_value(value_info)
+                    has_dimensions = bool(value_info.get('dimensions', {}))
+                    current_duration = value_info.get('duration', '')
 
-                        # Only update if we don't have a value yet, or if the new value has no dimensions
-                        if period_label not in period_values or not has_dimensions:
+                    # Check if this period should be included based on duration
+                    include_period = (
+                            not is_quarterly or
+                            duration is None or
+                            current_duration == duration
+                    )
+
+                    if include_period:
+                        if period_label not in period_values or (
+                                not has_dimensions and period_values[period_label]['has_dimensions']):
                             period_values[period_label] = {
                                 'value': current_value,
                                 'has_dimensions': has_dimensions,
                                 'units': value_info.get('units', ''),
-                                'decimals': value_info.get('decimals', '')
+                                'decimals': value_info.get('decimals', ''),
+                                'duration': current_duration
                             }
 
                 # After processing all periods, add the selected values to the row
                 for period_label, period_data in period_values.items():
-                    if is_quarterly:
-                        if duration is None or value_info['duration'] == duration:
-                            row[period_label] = period_data['value']
-                    else:
-                        row[period_label] = period_data['value']
-
+                    row[period_label] = period_data['value']
                     if include_format:
                         row['units'] = period_data['units']
                         row['decimals'] = period_data['decimals']

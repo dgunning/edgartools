@@ -17,7 +17,7 @@ from edgar.xbrl.xbrldata import XBRLData, Statement
 class StandardStatement(BaseModel):
     statement_name: str
     concept: str
-    display_name:str
+    display_name: str
 
 
 balance_sheet = StandardStatement(statement_name="BALANCE_SHEET",
@@ -30,14 +30,14 @@ cash_flow_statement = StandardStatement(statement_name="CASH_FLOW",
                                         concept="us-gaap_StatementOfCashFlowsAbstract",
                                         display_name="Consolidated Statement of Cash Flows")
 statement_of_changes_in_equity = StandardStatement(statement_name="EQUITY",
-                                                    concept="us-gaap_StatementOfStockholdersEquityAbstract",
-                                                    display_name="Consolidated Statement of Shareholders Equity")
+                                                   concept="us-gaap_StatementOfStockholdersEquityAbstract",
+                                                   display_name="Consolidated Statement of Shareholders Equity")
 statement_of_comprehensive_income = StandardStatement(statement_name="COMPREHENSIVE_INCOME",
-                                                        concept="us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract"
-                                                        ,display_name="Comprehensive Income Statement")
+                                                      concept="us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract"
+                                                      , display_name="Comprehensive Income Statement")
 cover_page = StandardStatement(statement_name="COVER_PAGE",
-                                 concept="dei_CoverAbstract",
-                                 display_name="Cover Page")
+                               concept="dei_CoverAbstract",
+                               display_name="Cover Page")
 
 
 class Financials:
@@ -97,7 +97,7 @@ class Financials:
         statement_name = self._get_statement_name_for_standard_name(income_statement)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name,
-                                            display_name="Income Statements") if statement_name else None
+                                                display_name="Income Statements") if statement_name else None
 
     def get_cash_flow_statement(self) -> Statement:
         """
@@ -126,7 +126,7 @@ class Financials:
         statement_name = self._get_statement_name_for_standard_name(statement_of_changes_in_equity)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name,
-                                                    display_name="Consolidated Statement of Shareholders Equity")
+                                                display_name="Consolidated Statement of Shareholders Equity")
 
     def get_statement_of_comprehensive_income(self) -> Statement:
         """
@@ -142,7 +142,7 @@ class Financials:
         statement_name = self._get_statement_name_for_standard_name(statement_of_comprehensive_income)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name,
-                                                    display_name="Comprehensive Income Statement")
+                                                display_name="Comprehensive Income Statement")
 
     def get_cover_page(self) -> Statement:
         """
@@ -196,13 +196,14 @@ class Financials:
         statements_table = Table(Column(""), Column("Standard Financial Statements", justify="left"),
                                  box=box.ROUNDED, show_header=True)
         for index, statement in enumerate(self.list_standard_statements()):
-            statements_table.add_row(str(index+ 1), statement)
+            statements_table.add_row(str(index + 1), statement)
 
         contents = [statements_table]
 
         panel = Panel(
             Group(*contents),
-            title=Text.assemble((self.xbrl_data.company, "bold deep_sky_blue1"), " financials", (f" period ended {self.xbrl_data.period_end}", "bold green")),
+            title=Text.assemble((self.xbrl_data.company, "bold deep_sky_blue1"), " financials",
+                                (f" period ended {self.xbrl_data.period_end}", "bold green")),
         )
         return panel
 

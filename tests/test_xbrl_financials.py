@@ -18,6 +18,13 @@ def apple_xbrl():
 
 
 @pytest.fixture(scope='module')
+def tesla_xbrl():
+    filing: Filing = Filing(company='Tesla, Inc.', cik=1318605, form='10-Q', filing_date='2024-07-24',
+                            accession_no='0001628280-24-032662')
+    return get_xbrl_object(filing)
+
+
+@pytest.fixture(scope='module')
 def netflix_xbrl():
     filing: Filing = Filing(company='NETFLIX INC', cik=1065280, form='10-Q', filing_date='2024-04-22',
                             accession_no='0001065280-24-000128')
@@ -42,7 +49,7 @@ def orcl_xbrl():
 def msft_xbrl():
     filing = Filing(company='MICROSOFT CORP', cik=789019, form='10-K', filing_date='2023-07-27',
                     accession_no='0000950170-23-035122')
-    return asyncio.run(XBRLData.from_filing(filing))
+    return XBRLData.extract(filing)
 
 
 @pytest.fixture(scope='module')
@@ -51,10 +58,13 @@ def gd_xbrl():
                     accession_no='0000040533-24-000035')
     return XBRLData.extract(filing)
 
+
 @pytest.fixture(scope='module')
 def pfizer_xbrl():
-    filing = Filing(company='PFIZER INC', cik=78003, form='10-K', filing_date='2024-02-22', accession_no='0000078003-24-000039')
+    filing = Filing(company='PFIZER INC', cik=78003, form='10-K', filing_date='2024-02-22',
+                    accession_no='0000078003-24-000039')
     return get_xbrl_object(filing)
+
 
 @pytest.mark.asyncio
 async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
@@ -93,6 +103,14 @@ def test_cover_page_aapl(apple_xbrl):
     cover_page = apple_xbrl.get_statement('CoverPage')
     assert cover_page is not None
     assert cover_page.get_concept(label='Entity Registrant Name').values == ['Apple Inc.']
+
+
+def test_get_concept_from_statement(tesla_xbrl):
+    financials: Financials = Financials(tesla_xbrl)
+    income_statement = financials.get_income_statement()
+    concept = income_statement.get_concept("us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax")
+    assert concept
+    assert concept.value == {'Jun 30, 2023': '24927000000', 'Jun 30, 2024': '25500000000'}
 
 
 def test_get_concept_using_label(apple_xbrl):
@@ -244,8 +262,53 @@ def test_quarterly_data_extracted_correctly(gd_xbrl):
     # a dimension for each of the product and services and {'srt:ProductOrServiceAxis': 'us-gaap:ProductMember'}
     concept = income_statement.get_concept('us-gaap:CostOfGoodsAndServicesSold')
     assert list(concept.value.keys()) == ['Jun 30, 2024', 'Jul 02, 2023']
-    #assert concept.value['Jun 30, 2024'] == '6127000000'
-    #assert concept.value['Jul 02, 2023'] == '4915000000'
+    # assert concept.value['Jun 30, 2024'] == '6127000000'
+    # assert concept.value['Jul 02, 2023'] == '4915000000'
+
+
+def test_3month_extracted_correctly_for_appfolio():
+    filing = Filing(company='APPFOLIO INC', cik=1433195,
+                    form='10-Q', filing_date='2023-10-27',
+                    accession_no='0001433195-23-000126')
+    xbrl_data = get_xbrl_object(filing)
+    # The default income statement is for three months
+    income_statement = xbrl_data.get_statement("CONDENSEDCONSOLIDATEDSTATEMENTSOFOPERATIONS")
+
+    data = income_statement.data
+    assert data.loc['Revenue', 'Sep 30, 2023'] == '165440000'
+    assert data.loc['Revenue', 'Sep 30, 2022'] == '125079000'
+
+    assert data.loc['Net income (loss)', 'Sep 30, 2023'] == '26445000'
+    assert data.loc['Net income (loss)', 'Sep 30, 2022'] == '-4162000'
+
+
+def test_six_month_data_extracted_correctly():
+    filing = Filing(company='APPFOLIO INC', cik=1433195, form='10-Q', filing_date='2024-07-26',
+                    accession_no='0001433195-24-000106')
+    xbrl_data = get_xbrl_object(filing)
+    # The nine month income statement
+    income_statement = xbrl_data.get_statement("CONDENSEDCONSOLIDATEDSTATEMENTSOFOPERATIONS",
+                                               duration="6 months")
+    assert income_statement
+    print(income_statement)
+    data = income_statement.data
+    assert data.loc['Revenue', 'Jun 30, 2024'] == '384805000'
+    assert data.loc['Revenue', 'Jun 30, 2023'] == '283175000'
+
+
+def test_nine_month_data_extracted_correctly():
+    filing = Filing(company='APPFOLIO INC', cik=1433195,
+                    form='10-Q', filing_date='2023-10-27',
+                    accession_no='0001433195-23-000126')
+    xbrl_data = get_xbrl_object(filing)
+    # The nine month income statement
+    income_statement = xbrl_data.get_statement("CONDENSEDCONSOLIDATEDSTATEMENTSOFOPERATIONS",
+                                               duration="9 months")
+    assert income_statement
+    print(income_statement)
+    data = income_statement.data
+    assert data.loc['Revenue', 'Sep 30, 2023'] == '448615000'
+    assert data.loc['Revenue', 'Sep 30, 2022'] == '347825000'
 
 
 def test_get_concepts_for_label(gd_xbrl):

@@ -295,3 +295,4 @@ def test_get_xbrl():
     filing = Filing(form='D', filing_date='2024-08-09', company='102 Lancaster Partners LLC',
            cik=2032948, accession_no='0002032948-24-000002')
     assert get_xbrl_object(filing) is None
+

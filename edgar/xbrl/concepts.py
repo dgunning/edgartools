@@ -45,7 +45,7 @@ class Concept(BaseModel):
     @field_validator('decimals')
     @classmethod
     def validate_decimals(cls, v: Optional[Union[int, str]]) -> Optional[Union[int, str]]:
-        if v is None or v == 'INF':
+        if v is None or v is '' or v == 'INF':
             return v
         try:
             return int(v)
