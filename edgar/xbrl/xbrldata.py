@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from edgar import Filing
+
 import asyncio
 import os
 import xml.etree.ElementTree as ET
@@ -565,7 +572,7 @@ class Statement:
                                             (self.display_name, "bold")]),
                       box=box.SIMPLE)
         # What is the unit divisor for the values
-        #unit_divisor = self.get_unit_divisor()
+        # unit_divisor = self.get_unit_divisor()
         for index, row in enumerate(self.data.itertuples()):
 
             # Detect the end of a section
@@ -714,7 +721,7 @@ class XBRLData(BaseModel):
         return parser
 
     @classmethod
-    async def from_filing(cls, filing: 'Filing'):
+    async def from_filing(cls, filing: Filing):
         """
         Asynchronously create an XBRLParser instance from a Filing object.
 

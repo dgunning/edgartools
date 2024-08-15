@@ -22,12 +22,12 @@ from rich.panel import Panel
 from rich.table import Table, Column
 
 from edgar._party import Address
-from edgar.richtools import repr_rich, df_to_rich_table
-from edgar.xmltools import (child_text, child_value)
 from edgar.core import IntString, get_bool, reverse_name, yes_no
 from edgar.datatools import convert_to_numeric
 from edgar.entities import Entity
 from edgar.ownership.form345 import compute_average_price, format_amount, format_currency
+from edgar.richtools import repr_rich, df_to_rich_table
+from edgar.xmltools import (child_text, child_value)
 
 __all__ = [
     'Owner',

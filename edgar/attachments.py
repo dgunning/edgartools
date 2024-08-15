@@ -417,7 +417,11 @@ class Attachments:
                 path = cols[2].a['href'].strip()
                 document_type = cols[3].text.strip()
                 size = cols[4].text.strip()
-                size = int(size) if size.isdigit() else None
+
+                try:
+                    size = int(size)
+                except ValueError:
+                    size = None
 
                 attachment = Attachment(
                     sequence_number=sequence_number,
@@ -432,13 +436,17 @@ class Attachments:
                 attachments.append(attachment)
                 # If this is the first document, set it as the primary document
                 if documents:
-                    if not min_seq:
+                    if min_seq is None:
                         min_seq = sequence_number
                     if sequence_number == min_seq:
                         primary_documents.append(attachment)
             return attachments, primary_documents
 
-        document_files, primary_documents = parse_table(tables[0], documents=True) if tables else []
+        if tables:
+            document_files, primary_documents = parse_table(tables[0], documents=True)
+        else:
+            document_files, primary_documents = [], []
+
         if len(tables) > 1:
             data_files, _ = parse_table(tables[1], documents=False)
         else:
