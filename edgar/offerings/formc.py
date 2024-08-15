@@ -355,7 +355,7 @@ class FormC:
 
         # Offering Information
         offering_info_tag = form_data_tag.find('offeringInformation')
-        if offering_info_tag is not None and offering_info_tag.contents:
+        if offering_info_tag is not None and offering_info_tag.contents and offering_info_tag.get_text(strip=True):
 
             offering_information = OfferingInformation(
                 compensation_amount=child_text(offering_info_tag, 'compensationAmount'),

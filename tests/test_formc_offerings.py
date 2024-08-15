@@ -1,7 +1,8 @@
-from pathlib import Path
-from edgar.offerings import FormC, Signer
 from datetime import datetime
+from pathlib import Path
+
 from edgar import *
+from edgar.offerings import FormC, Signer
 
 
 def test_parse_formc_offering():
@@ -141,16 +142,25 @@ def test_parse_form_tr():
 def test_form_c_termination_report():
     filing = Filing(form='C-TR', filing_date='2023-12-29', company='H2 Energy Group Inc', cik=1901902,
                     accession_no='0001079973-23-001832')
-    formC:FormC = filing.obj()
+    formC: FormC = filing.obj()
     assert formC.annual_report_disclosure is None
     assert formC.offering_information is None
 
 
 def test_formc_with_fundingportal_with_no_crd():
-    filing = Filing(form='C/A', filing_date='2023-12-29', company='Origo Brands Inc.', cik=1981723, accession_no='0001665160-23-002050')
+    filing = Filing(form='C/A', filing_date='2023-12-29', company='Origo Brands Inc.', cik=1981723,
+                    accession_no='0001665160-23-002050')
     formC = filing.obj()
     funding_portal = formC.issuer_information.funding_portal
     assert funding_portal.cik == "0001665160"
     assert funding_portal.name == "StartEngine Capital, LLC"
     assert funding_portal.file_number == "007-00007"
     assert funding_portal.crd is None
+
+
+def test_formc_with_empty_offering_tag():
+    filing = Filing(form='C-AR', filing_date='2024-07-29', company='Energy Exploration Technologies, Inc.', cik=1830166,
+                    accession_no='0001493152-24-029321')
+    formC = filing.obj()
+    assert formC
+    assert formC.offering_information is None
