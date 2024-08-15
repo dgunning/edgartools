@@ -217,7 +217,7 @@ For more detail see https://www.sec.gov/os/accessing-edgar-data
 from edgar import *
 ```
 
-## [Using the Filing API](FILING_API.md)
+## [Using the Filing API](https://github.com/dgunning/edgartools/wiki/WorkingWithFilings)
 Use the Filing API when you are not working with a specific company, but want to get a list of filings.
 
 For details on how to use the Filing API see **[Using the Filing API](https://github.com/dgunning/edgartools/wiki/WorkingWithFilings)**
