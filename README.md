@@ -220,9 +220,9 @@ from edgar import *
 ## [Using the Filing API](FILING_API.md)
 Use the Filing API when you are not working with a specific company, but want to get a list of filings.
 
-For details on how to use the Filing API see **[Using the Filing API](FILING_API.md)**
+For details on how to use the Filing API see **[Using the Filing API](https://github.com/dgunning/edgartools/wiki/WorkingWithFilings)**
 
-## [Using the Company API](COMPANY_API.md)
+## [Using the Company API](https://github.com/dgunning/edgartools/wiki/WorkingWithCompanies)
 
 With the Company API you can find a company by ticker or CIK, and get the company's filings, facts and financials.
 
@@ -235,7 +235,7 @@ Company("AAPL")
 
 ![expe](docs/images/aapl-10Q.png)
 
-See **[Using the Company API](COMPANY_API.md)**
+See **[Using the Company API](https://github.com/dgunning/edgartools/wiki/WorkingWithCompanies)**
 
 ## Viewing and downloading attachments
 
