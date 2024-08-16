@@ -780,6 +780,11 @@ class XBRLData(BaseModel):
     def period_end(self):
         return self.instance.get_document_period()
 
+    def print_structure(self):
+        """Print the structure of the XBRL data."""
+        if self.presentation:
+            self.presentation.print_structure()
+
     def list_statement_definitions(self) -> List[str]:
         return list(self.statements_dict.keys())
 

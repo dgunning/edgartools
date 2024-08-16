@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 from rich import print as rprint
+from rich.text import Text
 from rich.tree import Tree
 
 from edgar.richtools import repr_rich
@@ -152,7 +153,7 @@ class XBRLPresentation(BaseModel):
     def get_skipped_roles(self):
         return self.skipped_roles
 
-    def get_structure(self, role: str, detailed: bool = False) -> Optional[Tree]:
+    def get_structure(self, role: Optional[str]=None, detailed: bool = False) -> Optional[Tree]:
         """
         Get the presentation structure for a specific role.
         """
@@ -161,6 +162,12 @@ class XBRLPresentation(BaseModel):
                 tree = Tree(f"[bold blue]{role}[/bold blue]")
                 self._build_rich_tree(self.roles[role], tree, detailed)
                 return tree
+        else:
+            main_tree = Tree("[bold green]XBRL Presentation Structure[/bold green]")
+            for role, element in self.roles.items():
+                role_tree = main_tree.add(f"[bold blue]{role}[/bold blue]")
+                self._build_rich_tree(element, role_tree, detailed=detailed)
+            return main_tree
 
     def __rich__(self):
         main_tree = Tree("[bold green]XBRL Presentation Structure[/bold green]")
@@ -195,8 +202,9 @@ class XBRLPresentation(BaseModel):
                 # Simplified view: show only namespace and first part of the name
                 concept = child.href.split('#')[-1]
                 namespace, name = concept.split('_', 1)
-                simplified_name = f"{namespace} {name.split('_')[0]}"
-                node_text = f"[cyan]{simplified_name}[/cyan]"
+                # Just use the first part of the name .. some have a suffix like _xxx, etc.
+                name = name.split('_')[0]
+                node_text = Text.assemble((namespace, "bold yellow"), " ", (name, "bold deep_sky_blue1"))
 
             child_tree = tree.add(node_text)
             self._build_rich_tree(child, child_tree, detailed)
