@@ -21,12 +21,13 @@
 </p>
 
 # Features
-
-- 🧠 **Intuitive and easy to use**: **edgartools** has a super simple API that is easy to use.
-- 🛠️ **Works as a library or a CLI**: You can use edgartools as a library in your code or as a CLI tool.
 - 📁 **Access any SEC filing**: You can access any SEC filing since 1994.
+- 💰 **Company Financials**: Comprehensive company financials from 10-K and 10-Q filings
+- 👤 **Insider Transactions**: Search for and get insider transactions
 - 📅 **List filings for any date range**: List filings for **year, quarter** e.g. or date range `2024-02-29:2024-03-15`
 - 🌟 **Best looking edgar library**: Uses **[rich](https://rich.readthedocs.io/en/stable/introduction.html)** library to display SEC Edgar data in a beautiful way.
+- 🧠 **Intuitive and easy to use**: **edgartools** has a super simple API that is easy to use.
+- 🛠️ **Works as a library or a CLI**: You can use edgartools as a library in your code or as a CLI tool.
 - 🔄 **Page through filings**: Use `filings.next()` and `filings.previous()` to page through filings
 - 🏗️ **Build Data Pipelines**: Build data pipelines by finding, filtering, transforming and saving filings
 - ✅ **Select a filing**: You can select a filing from the list of filings.
@@ -34,7 +35,7 @@
 - 🔢 **Chunk filing text**: You can chunk the filing text into sections for vector embedding.
 - 🔍 **Preview the filing**: You can preview the filing in the terminal or a notebook.
 - 🔎 **Search through a filing**: You can search through a filing for a keyword.
-- 📊 **Parse XBRL**: If a filing has XBRL, you can parse it to a dataframe.
+- 📊 **Parse XBRL**: Extract XBRL data into intuitive data structures.
 - 💾 **Data Objects**: Automatically downloads and parses filings into data objects.
 - 📥 **Download any attachment**: You can download any attachment from the filing.
 - 🕒 **Automatic throttling**: Automatically throttles requests to Edgar to avoid being blocked.
@@ -42,11 +43,11 @@
 - 🔢 **Get company by Ticker or Cik**: Get a company by ticker `Company("SNOW")` or cik `Company(1640147)`
 - 📚 **Get company filings**: You can get all the company's historical filings using `company.get_filings()`
 - 📈 **Get company facts**: You can get company facts using `company.get_facts()`
-- 💰 **Company Financials**: You can get company financials using `company.financials`
 - 🔍 **Lookup Ticker by CUSIP**: You can lookup a ticker by CUSIP
 - 📑 **Dataset of SEC entities**: You can get a dataset of SEC companies and persons
 - 📈 **Fund Reports**: Search for and get 13F-HR fund reports
-- 👤 **Insider Transactions**: Search for and get insider transactions
+- 🛠️ **Works as a library or a CLI**: You can use edgartools as a library in your code or as a CLI tool.
+
 
 # Getting started
 
