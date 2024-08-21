@@ -2,7 +2,7 @@ import asyncio
 
 import pytest
 
-from edgar import Filing
+from edgar import Filing, find
 from edgar.xbrl.xbrldata import Statement, XBRLData, XBRLAttachments
 from edgar.financials import Financials
 
@@ -94,6 +94,15 @@ def test_quarterly_filing_with_no_income_statement():
     financials: Financials = Financials(xbrl_data)
     assert not financials.get_income_statement()
     assert financials.get_statement_of_comprehensive_income()
+
+
+def test_correct_value_with_same_label_for_two_concepts():
+    filing = Filing(form='10-Q', filing_date='2024-08-02', company='Apple Inc.', cik=320193, accession_no='0000320193-24-000081')
+    financials = Financials(filing.xbrl())
+    balance_sheet = financials.get_balance_sheet()
+    print(balance_sheet.data[['concept']])
+    assert balance_sheet.get_concept(label='Cash and cash equivalents').values == ['25565000000', '29965000000']
+    assert balance_sheet.get_concept(label='Accounts receivable, net').values == ['22795000000',  '29508000000']
 
 
 
