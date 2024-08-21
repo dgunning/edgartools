@@ -482,3 +482,10 @@ def test_pfizer_current_assets(pfizer_xbrl):
 
     assert data.loc['Total assets', '2023'] == '227000000000'
     assert data.loc['Total assets', '2022'] == '197000000000'
+
+
+def test_get_correct_value_of_marketable_securities(apple_xbrl):
+    financials = Financials(apple_xbrl)
+    balance_sheet = financials.get_balance_sheet()
+    assert balance_sheet.get_concept('us-gaap_MarketableSecuritiesCurrent').value.get('2022') == '24658000000'
+    assert balance_sheet.get_concept('us-gaap_MarketableSecuritiesCurrent').value.get('2023') == '31590000000'

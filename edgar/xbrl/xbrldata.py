@@ -849,24 +849,23 @@ class XBRLData(BaseModel):
 
         # Create format_info dictionary
         format_info = {
-            item.label: {'level': item.level, 'abstract': item.concept.endswith('Abstract'), 'concept': item.concept}
-            for item in statement_definition.line_items}
+            item.concept: {'level': item.level, 'abstract': item.concept.endswith('Abstract'), 'label': item.label}
+            for item in statement_definition.line_items
+        }
 
         # Use the order of line_items as they appear in the statement
-        ordered_items = [item.label for item in statement_definition.line_items]
+        ordered_items = [item.concept for item in statement_definition.line_items]
 
         # Create DataFrame with preserved order and abstract concepts
         data = []
         for item in statement_definition.line_items:
-            row = {'label': item.label}
+            row = {'concept': item.concept, 'label': item.label}
             if include_format:
-                row['level'] = format_info[item.label]['level']
-                row['abstract'] = format_info[item.label]['abstract']
+                row['level'] = format_info[item.concept]['level']
+                row['abstract'] = format_info[item.concept]['abstract']
                 row['units'] = None if row['abstract'] else ''
                 row['decimals'] = None if row['abstract'] else ''
-            if include_concept:
-                row['concept'] = format_info[item.label]['concept']
-            if not format_info[item.label]['abstract']:
+            if not format_info[item.concept]['abstract']:
                 period_values = {}
                 for period, value_info in item.values.items():
                     end_date = period.split(' to ')[-1]
@@ -914,22 +913,23 @@ class XBRLData(BaseModel):
         if os.getenv('EDGAR_USE_PYARROW_BACKEND'):
             df = pd.DataFrame(data).convert_dtypes(dtype_backend="pyarrow")
 
-        # Consolidate duplicate rows while preserving all information
-        df = df.groupby('label', as_index=False).agg(lambda x: x.dropna().iloc[0] if len(x.dropna()) > 0 else None)
+        # Use both concept and label for grouping to preserve uniqueness
+        df = df.groupby(['concept', 'label'], as_index=False).agg(
+            lambda x: x.dropna().iloc[0] if len(x.dropna()) > 0 else None)
 
-        df = df.set_index('label')
+        # Set both concept and label as index
+        df = df.set_index(['concept', 'label'])
 
-        # Sort columns by period (descending)
-        period_columns = [col for col in df.columns if col not in ['level', 'abstract', 'units', 'decimals', 'concept']]
+        # Identify the columns
+        period_columns = [col for col in df.columns if col not in ['level', 'abstract', 'units', 'decimals']]
         period_columns = sorted(period_columns,
                                 key=lambda x: (x.split()[-1], x.split()[0] if len(x.split()) > 1 else ''), reverse=True)
 
         format_columns = []
-        if include_concept:
-            format_columns.append('concept')
         if include_format:
             format_columns.extend(['level', 'abstract', 'units', 'decimals'])
 
+        # Reorder the columns
         df = df[period_columns + format_columns]
 
         if include_format:
@@ -939,9 +939,6 @@ class XBRLData(BaseModel):
             # Ensure format columns have empty strings instead of NaN
             for col in ['abstract', 'units', 'decimals']:
                 df[col] = df[col].fillna('')
-
-        if include_concept:
-            df['concept'] = df['concept'].fillna('')
 
         df = df.fillna('')
 
@@ -954,14 +951,35 @@ class XBRLData(BaseModel):
         df = df.fillna('')
 
         # Ensure the original order is preserved
-        df = df.reindex(ordered_items)
+        # Create a MultiIndex for reindexing
+        reindex_tuples = [(concept, format_info[concept]['label']) for concept in ordered_items]
+        new_index = pd.MultiIndex.from_tuples(reindex_tuples, names=['concept', 'label'])
+
+        # Reindex the DataFrame
+        df = df.reindex(new_index)
 
         # Flatten the column index if it's multi-level
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = [f"{col[0]}_{col[1]}" if isinstance(col, tuple) else col for col in df.columns]
 
         # Create and return Statements object
-        return Statement(df=df,
+        df_reset = df.reset_index().set_index('label')
+
+        columns_to_include = [col for col
+                              in df_reset.columns if
+                                col not in ['concept', 'level', 'abstract', 'units', 'decimals']]
+
+        if include_concept:
+            columns_to_include.append('concept')
+
+        if include_format:
+            columns_to_include.extend([col for col in df_reset.columns
+                                        if col in ['level', 'abstract', 'units', 'decimals']
+                                      ])
+
+        df_reset = df_reset[columns_to_include]
+
+        return Statement(df=df_reset,
                          name=statement_name,
                          display_name=display_name,
                          label=statement_definition.label,
