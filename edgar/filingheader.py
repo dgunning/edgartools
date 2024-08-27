@@ -495,7 +495,7 @@ class FilingHeader:
                 if cik:
                     from edgar.entities import Entity, EntityData
                     entity: EntityData = Entity(cik, include_old_filings=False)
-                    if not entity.is_company:
+                    if entity and not entity.is_company:
                         name = reverse_name(name)
                     owner = Owner(name=name, cik=cik)
 

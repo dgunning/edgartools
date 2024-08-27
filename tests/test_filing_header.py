@@ -376,3 +376,10 @@ def test_get_header_from_old_filing():
                     accession_no='0001012325-98-000004')
     header = filing.header
     assert header.accession_number == '0001012325-98-000004'
+
+
+def test_get_header_for_filing_with_no_reportingowner_entity():
+    filing = Filing(form='4', filing_date='2024-08-23', company='Hut 8 Corp.', cik=1964789,
+                    accession_no='0001127602-24-022866')
+    header = filing.header
+    assert header
