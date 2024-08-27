@@ -39,7 +39,8 @@ from edgar.core import (edgar_mode,
                         get_identity,
                         set_identity,
                         use_local_storage,
-                        download_edgar_data)
+                        download_edgar_data,
+                        listify)
 from edgar.fundreports import FundReport, NPORT_FORMS
 from edgar.funds import Fund, FundSeries, get_fund, FundClass
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
@@ -94,7 +95,6 @@ def find(search_id: Union[str, int]) -> (
 def matches_form(sec_filing: Filing,
                  form: Union[str, List[str]]) -> bool:
     """Check if the filing matches the forms"""
-    from fastcore.basics import listify
     form_list = listify(form)
     if sec_filing.form in form_list + [f"{f}/A" for f in form_list]:
         return True

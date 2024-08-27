@@ -21,7 +21,6 @@ import pyarrow.csv as pa_csv
 import pyarrow.parquet as pq
 import pytz
 from bs4 import BeautifulSoup
-from fastcore.basics import listify
 from fastcore.parallel import parallel
 from rich import box
 from rich.columns import Columns
@@ -41,6 +40,7 @@ from edgar.core import (log, display_size, sec_edgar,
                         filter_by_form,
                         filter_by_cik,
                         filter_by_ticker,
+                        listify,
                         InvalidDateException, IntString, DataPager)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader

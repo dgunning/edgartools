@@ -19,7 +19,6 @@ import humanize
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
-from fastcore.basics import listify
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 
@@ -67,6 +66,7 @@ __all__ = [
     'pandas_version',
     'python_version',
     'set_identity',
+    'listify',
     'decode_content',
     'filter_by_date',
     'filter_by_form',
@@ -707,3 +707,19 @@ def run_async_or_sync(coroutine):
     except (KeyError, AttributeError):
         # We're not in an IPython environment, use asyncio.run()
         return asyncio.run(coroutine)
+
+
+def listify(value):
+    """
+    Convert the input to a list if it's not already a list.
+
+    Args:
+    value: Any type of input
+
+    Returns:
+    list: The input as a list
+    """
+    if isinstance(value, list):
+        return value
+    else:
+        return [value]
