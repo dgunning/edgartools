@@ -73,7 +73,6 @@ async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
     assert len(statement.data) == 18
 
 
-@pytest.mark.asyncio
 def test_get_statement_name(apple_xbrl):
     financials = Financials(apple_xbrl)
     statement: Statement = financials.get_cash_flow_statement()
