@@ -558,3 +558,19 @@ def test_format_amount():
     assert format_amount(1100000.013) == '1,100,000.01'
     assert format_amount(1100000.019) == '1,100,000.02'
     assert format_amount(1100000.91) == '1,100,000.91'
+
+
+def test_ownership_with_no_company():
+    # These filings failed because no company was found for the reporting owner
+    filing = Filing(form='4', filing_date='2024-08-26', company='Gray Zarrell Thomas', cik=2030612,
+                    accession_no='0001437749-24-027791')
+    form4: Ownership = filing.obj()
+    assert form4
+
+    filing = Filing(form='4', filing_date='2024-08-26', company='HALLADOR ENERGY CO', cik=788965,
+                    accession_no='0001437749-24-027791')
+    form4: Ownership = filing.obj()
+    assert form4
+    filing = Filing(form='4', filing_date='2024-08-23', company='Hut 8 Corp.', cik=1964789, accession_no='0001127602-24-022866')
+    form4: Ownership = filing.obj()
+    assert form4

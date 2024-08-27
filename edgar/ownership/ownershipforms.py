@@ -970,7 +970,8 @@ class ReportingOwners():
             # Check if it is a company. If not, reverse the name
             entity = Entity(int(cik), include_old_filings=False)
 
-            is_company = entity.is_company
+            # Check if the entity is a company or an individual
+            is_company = entity and entity.is_company
             if not is_company:
                 owner_name = reverse_name(owner_name)
 
