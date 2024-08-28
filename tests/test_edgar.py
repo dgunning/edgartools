@@ -1,10 +1,11 @@
+import pytest
+
 from edgar import obj, matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
-from edgar.entities import EntityData
-from edgar.ownership import Ownership
-from edgar.offerings import FormD
 from edgar.company_reports import TenK
 from edgar.effect import Effect
-import pytest
+from edgar.entities import EntityData
+from edgar.offerings import FormD
+from edgar.ownership import Ownership
 
 
 def test_matches_form():
@@ -79,8 +80,13 @@ def test_find():
     assert isinstance(find("CancerVAX, Inc."), CompanySearchResults)
 
 
+def test_find_a_dot_ticker():
+    assert find("BRK.B").cik == 1067983
+    assert find("CRD-A").cik == 25475
+
+
 def test_find_a_current_filing():
-    filings:CurrentFilings = get_current_filings().next()
+    filings: CurrentFilings = get_current_filings().next()
     accession_number = filings.data['accession_number'].to_pylist()[0]
     filing = find(accession_number)
     assert filing

@@ -1,4 +1,4 @@
-from edgar.entities import get_entity_submissions, Entity
+from edgar.entities import get_entity_submissions, Entity, Company
 
 
 def test_entity_is_company():
@@ -78,3 +78,17 @@ def test_ticker_icon():
     assert entity.tickers[0] == "TWO"
     icon = entity.icon
     assert icon is None
+
+
+def test_get_entity_by_ticker():
+    # Activision was acquired by Microsoft so possibly this ticker will be removed in the future
+    assert Company("ATVI", False).cik == 718877
+    assert Company("AAPL", False).cik == 320193
+
+
+def test_get_entity_by_ticker_with_stock_class():
+    assert Company("BRK.B", False).cik == 1067983
+    assert Company("BRK-B", False).cik == 1067983
+    assert Company("BRK", False).cik == 1067983
+    assert Company("AAPL", False).cik == 320193
+    assert Company("ETI.P", False).cik == 1427437

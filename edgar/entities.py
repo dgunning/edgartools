@@ -26,7 +26,7 @@ from edgar.core import (log, Result, display_size, listify,
                         filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory)
 from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference import states
-from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker
+from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
 from edgar.financials import Financials
 
@@ -444,7 +444,7 @@ class EntityData:
 
     @classmethod
     def for_ticker(cls, ticker: str, include_old_filings: bool = True):
-        cik = get_ticker_to_cik_lookup().get(ticker.upper())
+        cik = find_cik(ticker)
         if cik:
             return CompanyData.for_cik(cik, include_old_filings=include_old_filings)
 

@@ -1,4 +1,6 @@
 from edgar.reference import cusip_ticker_mapping, get_ticker_from_cusip, describe_form
+from edgar.reference.tickers import get_cik_tickers, find_cik, get_company_ticker_name_exchange, \
+    get_companies_by_exchange, get_mutual_fund_tickers, find_mutual_fund_cik
 
 
 def test_cusip_ticker_mapping():
@@ -39,3 +41,49 @@ def test_describe_form():
     assert describe_form('3') == 'Form 3: Initial statement of beneficial ownership'
 
     assert describe_form('10-K', prepend_form=False) == 'Annual report for public companies'
+
+
+def test_cik_tickers():
+    tickers = get_cik_tickers()
+    assert tickers.loc[tickers.ticker == 'ATVI'].cik.iloc[0] == 718877
+
+
+def test_find_cik():
+    assert find_cik('ATVI') == 718877
+    assert find_cik('AAPL') == 320193
+    assert find_cik('TSLA') == 1318605
+    assert find_cik('MSFT') == 789019
+    assert find_cik('GOOGL') == 1652044
+    assert find_cik("BRK-B") == find_cik("BRK.B") == find_cik("BRK") == 1067983
+    assert find_cik("BH-A") == find_cik("BH") == 1726173
+
+    # ETF Ticker
+    assert find_cik("CGIC") == 2008516
+
+
+def test_find_mutual_fund_cik():
+    assert find_mutual_fund_cik("CGIC") == 2008516
+    assert find_mutual_fund_cik("ABNZX") == 3794
+
+
+def test_company_ticker_name_exchange():
+    data = get_company_ticker_name_exchange()
+    assert ['cik', 'name', 'ticker', 'exchange'] == data.columns.tolist()
+    print()
+
+
+def test_get_companies_by_exchange():
+    data = get_companies_by_exchange('NYSE')
+    assert 'NYSE' in data.exchange.tolist()
+    assert 'Nasdaq' not in data.exchange.tolist()
+
+    data = get_companies_by_exchange(['NYSE', 'NASDAQ'])
+    assert 'NYSE' in data.exchange.tolist()
+    assert 'Nasdaq' in data.exchange.tolist()
+
+
+def test_get_mutual_fund_tickers():
+    data = get_mutual_fund_tickers()
+    assert data.columns.tolist() == ['cik', 'seriesId', 'classId', 'ticker']
+    print()
+    print(data)
