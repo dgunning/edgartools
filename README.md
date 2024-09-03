@@ -267,20 +267,20 @@ For example, **13F-HR** filings have attached infotable.xml files containing dat
 Fortunately, the library handles this for you. If you call `filing.obj()` it will automatically download and parse the data files
 into a data object, for several different form types. Currently, the following forms are supported:
 
-| Form                       | Data Object            | Description                           |
-|----------------------------|------------------------|---------------------------------------|
-| 10-K                       | `TenK`                 | Annual report                         |
-| 10-Q                       | `TenQ`                 | Quarterly report                      |
-| 8-K                        | `EightK`               | Current report                        |
-| MA-I                       | `MunicipalAdvisorForm` | Municipal advisor initial filing      |
-| Form 144                   | `Form144`              | Notice of proposed sale of securities |
-| C, C-U, C-AR, C-TR         | `FormC`                | Form C Crowdfunding Offering          |
-| D                          | `FormD`                | Form D Offering                       |
-| 3,4,5                      | `Ownership`            | Ownership reports                     |
-| 13F-HR                     | `ThirteenF`            | 13F Holdings Report                   |
-| NPORT-P                    | `FundReport`           | Fund Report                           |
-| EFFECT                     | `Effect`               | Notice of Effectiveness               |
-| And other filing with XBRL | `FilingXbrl`           |                                       |
+| Form                       | Data Object                  | Description                           |
+|----------------------------|------------------------------|---------------------------------------|
+| 10-K                       | `TenK`                       | Annual report                         |
+| 10-Q                       | `TenQ`                       | Quarterly report                      |
+| 8-K                        | `EightK`                     | Current report                        |
+| MA-I                       | `MunicipalAdvisorForm`       | Municipal advisor initial filing      |
+| Form 144                   | `Form144`                    | Notice of proposed sale of securities |
+| C, C-U, C-AR, C-TR         | `FormC`                      | Form C Crowdfunding Offering          |
+| D                          | `FormD`                      | Form D Offering                       |
+| 3,4,5                      | `Ownership`                  | Ownership reports                     |
+| 13F-HR                     | `ThirteenF`                  | 13F Holdings Report                   |
+| NPORT-P                    | `FundReport`                 | Fund Report                           |
+| EFFECT                     | `Effect`                     | Notice of Effectiveness               |
+| And other filing with XBRL | `XBRLData` or `XBRLInstance` | Container for XBRL data               |
 
 For example, to get the data object for a **13F-HR** filing you can do the following:
 
@@ -306,9 +306,8 @@ about the company referred to in that filing.
 The `Filing` class has an `xbrl` function that will download, parse and structure the filing's XBRL document if one exists.
 If it does not exist, then `filing.xbrl()` will return `None`.
 
-The function `filing.xbrl()` returns a `FilingXbrl` instance, which wraps the data, and provides convenient
-ways of working with the xbrl data.
-
+The function `filing.xbrl()` returns an `XBRLData` instance if the XBRL files contain presentation information or `XBRLInstance` if it a simple instance document with just the facts.
+For more details see **[Parsing XBRL](https://github.com/dgunning/edgartools/wiki/ParsingXBRL)**
 
 ```python
 filing_xbrl = filing.xbrl()
@@ -323,10 +322,10 @@ You can get the financials from the XBRL data using the `Financials` class.
 
 ```python
 from edgar.financials import Financials
-financials = Financials.from_xbrl(filing.xbrl())
-financials.balance_sheet
-financials.income_statement
-financials.cash_flow_statement
+financials = Financials(filing.xbrl())
+financials.get_balance_sheet()
+financials.get_income_statement()
+financials.get_cash_flow_statement()
 ```
 Or automatically through the `Tenk` and `TenQ` data objects.
 
