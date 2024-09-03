@@ -314,9 +314,9 @@ class ThirteenF:
 
             # Voting authority
             voting_auth_tag = info_tag.find("votingAuthority")
-            info_table['SoleVoting'] = int(child_text(voting_auth_tag, "Sole"))
-            info_table['SharedVoting'] = int(child_text(voting_auth_tag, "Shared"))
-            info_table['NonVoting'] = int(child_text(voting_auth_tag, "None"))
+            info_table['SoleVoting'] = int(float(child_text(voting_auth_tag, "Sole")))
+            info_table['SharedVoting'] = int(float(child_text(voting_auth_tag, "Shared")))
+            info_table['NonVoting'] = int(float(child_text(voting_auth_tag, "None")))
             rows.append(info_table)
 
         table = pd.DataFrame(rows)
