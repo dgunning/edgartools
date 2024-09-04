@@ -296,3 +296,5 @@ def test_get_xbrl():
            cik=2032948, accession_no='0002032948-24-000002')
     assert get_xbrl_object(filing) is None
 
+
+

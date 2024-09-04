@@ -548,12 +548,48 @@ class Statement:
     def get_dataframe(self,
                       include_format: bool = False,
                       include_concept: bool = False):
+        """
+        Get the statement data as a DataFrame
+        :param include_format: Include format columns (level, abstract, units, decimals)
+        :param include_concept: Include the concept column
+        :return: DataFrame
+        """
         columns = [col for col in self.data.columns if col not in self.meta_columns]
         if include_concept:
             columns.append('concept')
         if include_format:
             columns.extend(self.format_columns)
         return self.data[columns].copy()
+
+    def to_dataframe(self,
+                     include_format: bool = False,
+                     include_concept: bool = False):
+        """
+        Get the statement data as a DataFrame
+        :param include_format: Include format columns (level, abstract, units, decimals)
+        :param include_concept: Include the concept column
+        :return: DataFrame
+        """
+        return self.get_dataframe(include_format, include_concept)
+
+    def to_excel(self,
+                 filename: str = None,
+                 excel_writer: pd.ExcelWriter = None,
+                 include_format: bool = False,
+                 include_concept: bool = True):
+        """
+        Save the statement data to an Excel file
+        :param filename: Output filename
+        :param excel_writer: An existing ExcelWriter object
+        :param include_format: Include format columns (level, abstract, units, decimals)
+        :param include_concept: Include the concept column
+        """
+        df = self.get_dataframe(include_format=include_format, include_concept=include_concept)
+        if excel_writer:
+            df.to_excel(excel_writer, index=False, sheet_name=self.name[:31])
+        else:
+            with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False, sheet_name=self.name[:31])
 
     @lru_cache(maxsize=1)
     def get_unit_divisor(self):

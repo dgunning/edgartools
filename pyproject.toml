@@ -70,6 +70,8 @@ dependencies = [
   "pyright",
   "ruff",
   "tqdm",
+  "xlsxwriter",
+  "openpyxl",
   "jupyter",
   "mkdocs",
   "mkdocstrings[python]",

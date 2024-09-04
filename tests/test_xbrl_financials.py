@@ -1,7 +1,10 @@
 import asyncio
+import os
+import tempfile
 
 import pandas as pd
 import pytest
+from openpyxl import load_workbook
 from rich import print
 
 from edgar import Filing
@@ -488,3 +491,59 @@ def test_get_correct_value_of_marketable_securities(apple_xbrl):
     balance_sheet = financials.get_balance_sheet()
     assert balance_sheet.get_concept('us-gaap_MarketableSecuritiesCurrent').value.get('2022') == '24658000000'
     assert balance_sheet.get_concept('us-gaap_MarketableSecuritiesCurrent').value.get('2023') == '31590000000'
+
+
+@pytest.fixture
+def temp_excel_file():
+    with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp:
+        yield tmp.name
+    os.unlink(tmp.name)
+
+
+def test_statement_to_excel_file(apple_xbrl, temp_excel_file):
+    financials = Financials(apple_xbrl)
+    balance_sheet = financials.get_balance_sheet()
+
+    balance_sheet.to_excel(temp_excel_file)
+
+    # Verify the file was created
+    assert os.path.exists(temp_excel_file)
+
+    # Load the Excel file and check its contents
+    wb = load_workbook(temp_excel_file)
+    assert len(wb.sheetnames) == 1
+    sheet = wb.active
+
+    # Check if the first row (header) matches the DataFrame columns
+    df_columns = balance_sheet.get_dataframe(include_concept=True).columns.tolist()
+    excel_header = [cell.value for cell in sheet[1]]
+    assert excel_header == df_columns
+
+
+def test_statement_to_excel_writer(apple_xbrl, temp_excel_file):
+    financials = Financials(apple_xbrl)
+    balance_sheet = financials.get_balance_sheet()
+    income_statement = financials.get_income_statement()
+
+    with pd.ExcelWriter(temp_excel_file, engine='xlsxwriter') as writer:
+        balance_sheet.to_excel(excel_writer=writer, include_format=True, include_concept=True)
+        income_statement.to_excel(excel_writer=writer, include_format=False, include_concept=False)
+
+    # Verify the file was created
+    assert os.path.exists(temp_excel_file)
+
+    # Load the Excel file and check its contents
+    wb = load_workbook(temp_excel_file)
+    assert len(wb.sheetnames) == 2
+
+    # Check balance sheet
+    bs_sheet = wb['CONSOLIDATEDBALANCESHEETS']
+    bs_df = balance_sheet.get_dataframe(include_format=True, include_concept=True)
+    bs_excel_header = [cell.value for cell in bs_sheet[1]]
+    assert bs_excel_header == bs_df.columns.tolist()
+
+    # Check income statement
+    is_sheet = wb['CONSOLIDATEDSTATEMENTSOFOPERATIONS'[:31]]
+    is_df = income_statement.get_dataframe(include_format=False, include_concept=False)
+    is_excel_header = [cell.value for cell in is_sheet[1]]
+    assert is_excel_header == is_df.columns.tolist()
