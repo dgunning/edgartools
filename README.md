@@ -105,10 +105,10 @@ You can get the company's **filings**, **facts** and **financials**.
 
 | Task                                 | Code                                                  |
 |--------------------------------------|-------------------------------------------------------|
-| Set your EDGAR identity in Linux/Mac | `export EDGAR_IDENTITY="First Last email@domain.com"` |
-| Set your EDGAR identity in Windows   | `set EDGAR_IDENTITY="First Last email@domain.com"`    |
-| Set identity in Windows Powershell   | `$env:EDGAR_IDENTITY="First Last email@domain.com"`   |
-| Set identity in Python               | `set_identity("First Last email@domain.com")`         |
+| Set your EDGAR identity in Linux/Mac | `export EDGAR_IDENTITY="email@domain.com"` |
+| Set your EDGAR identity in Windows   | `set EDGAR_IDENTITY="email@domain.com"`    |
+| Set identity in Windows Powershell   | `$env:EDGAR_IDENTITY="email@domain.com"`   |
+| Set identity in Python               | `set_identity("email@domain.com")`         |
 | Importing the library                | `from edgar import *`                                 |
 
 ### Working with filings
