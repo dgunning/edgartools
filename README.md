@@ -27,7 +27,7 @@
 - 📅 **List filings for any date range**: List filings for **year, quarter** e.g. or date range `2024-02-29:2024-03-15`
 - 🌟 **Best looking edgar library**: Uses **[rich](https://rich.readthedocs.io/en/stable/introduction.html)** library to display SEC Edgar data in a beautiful way.
 - 🧠 **Intuitive and easy to use**: **edgartools** has a super simple API that is easy to use.
-- 🛠️ **Works as a library or a CLI**: You can use edgartools as a library in your code or as a CLI tool.
+- ��️ **Works as a library or a CLI**: You can use edgartools as a library in your code or as a CLI tool.
 - 🔄 **Page through filings**: Use `filings.next()` and `filings.previous()` to page through filings
 - 🏗️ **Build Data Pipelines**: Build data pipelines by finding, filtering, transforming and saving filings
 - ✅ **Select a filing**: You can select a filing from the list of filings.
@@ -41,7 +41,7 @@
 - 🕒 **Automatic throttling**: Automatically throttles requests to Edgar to avoid being blocked.
 - 📥 **Bulk downloads**: Faster batch processing through bulk downloads of filings and facts
 - 🔢 **Get company by Ticker or Cik**: Get a company by ticker `Company("SNOW")` or cik `Company(1640147)`
-- ���� **Get company filings**: You can get all the company's historical filings using `company.get_filings()`
+-  **Get company filings**: You can get all the company's historical filings using `company.get_filings()`
 - 📈 **Get company facts**: You can get company facts using `company.get_facts()`
 - 🔍 **Lookup Ticker by CUSIP**: You can lookup a ticker by CUSIP
 - 📑 **Dataset of SEC entities**: You can get a dataset of SEC companies and persons
@@ -153,25 +153,46 @@ You can get the company's **filings**, **facts** and **financials**.
 | 🎲 Get a random sample of filings  | `filings.sample(20)`     |
 | 🐼 Get filings as a pandas dataframe | `filings.to_pandas()`  |
 
-### Working with a filing
+### Working with a filing 📄
 
-| Task                                      | Code                                                      |
-|-------------------------------------------|-----------------------------------------------------------|
-| Get a single filing                       | `filing = filings[3]`                                     |
-| Get a filing by accession number          | `filing = get_by_accession_number("0000320193-20-34576")` |
-| Get the filing homepage                   | `filing.homepage`                                         |
-| Open a filing in the browser              | `filing.open()`                                           |
-| Open the filing homepage in the browser   | `filing.homepage.open()`                                  |
-| View the filing in the terminal           | `filing.view()`                                           |
-| Get the html of the filing document       | `filing.html()`                                           |
-| Get the XBRL of the filing document       | `filing.xbrl()`                                           |
-| Get the filing document as markdown       | `filing.markdown()`                                       |
-| Get the full submission text of a filing  | `filing.text()`                                           |
-| Get and parse the data object of a filing | `filing.obj()`                                            |
-| Get the filing attachments                | `filing.attachments`                                      |
-| Get a single attachment                   | `attachment = filing.attachments[0]`                      |
-| Open an attachment in the browser         | `attachment.open()`                                       |
-| Download an attachment                    | `content = attachment.download()`                         |
+#### 🔍 Accessing and viewing a Filing
+
+| Task                               | Code                                                      |
+|------------------------------------|-----------------------------------------------------------|
+| 📌 Get a single filing             | `filing = filings[3]`                                     |
+| 🔢 Get a filing by accession number | `filing = get_by_accession_number("0000320193-20-34576")` |
+| 🏠 Get the filing homepage         | `filing.homepage`                                         |
+| 🌐 Open a filing in the browser    | `filing.open()`                                           |
+| 🏠 Open homepage in the browser    | `filing.homepage.open()`                                  |
+| 💻 View the filing in the terminal | `filing.view()`                                           |
+
+#### 📊 Extracting Filing Content
+
+| Task                                | Code                         |
+|-------------------------------------|-----------------------------|
+| 🌐 Get the HTML of the filing       | `filing.html()`              |
+| 📊 Get the XBRL of the filing       | `filing.xbrl()`              |
+| 📝 Get the filing as markdown       | `filing.markdown()`          |
+| 📄 Get the full submission text     | `filing.full_text_submission()` |
+| 🔢 Get and parse filing data object | `filing.obj()`               |
+| 📑 Get filing header                | `filing.header`              |
+
+#### 🔎 Searching inside a Filing
+
+| Task                               | Code                                    |
+|------------------------------------|----------------------------------------|
+| 🔍 Search within the filing        | `filing.search("query")`                |
+| 🔍 Search with regex               | `filing.search("pattern", regex=True)`  |
+| 📊 Get filing sections             | `filing.sections()`                     |
+
+#### 📎 Working with Attachments
+
+| Task                         | Code                               |
+|------------------------------|-----------------------------------|
+| 📁 Get all filing attachments | `filing.attachments`              |
+| 📄 Get a single attachment    | `attachment = filing.attachments[0]` |
+| 🌐 Open attachment in browser | `attachment.open()`               |
+| ⬇️ Download an attachment     | `content = attachment.download()` |
 
 ### Working with a company
 
