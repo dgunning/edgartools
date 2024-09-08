@@ -256,7 +256,7 @@ def chunks2df(chunks: List[List[Block]],
     # Handle deprecation warning in fillna(method='ffill')
     pandas_version = tuple(map(int, pd.__version__.split('.')))
     if pandas_version >= (2, 1, 0):
-        chunk_df.Item = chunk_df.Item.ffill()
+        chunk_df.Item = chunk_df.Item.ffill().infer_objects(copy=False)
     else:
         chunk_df.Item = chunk_df.Item.fillna(method='ffill')
 
