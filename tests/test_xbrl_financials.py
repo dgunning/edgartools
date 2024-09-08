@@ -7,8 +7,9 @@ import pytest
 from openpyxl import load_workbook
 from rich import print
 
-from edgar import Filing
-from edgar.financials import Financials
+from edgar import Filing, Company
+from edgar.financials import (Financials, MultiFinancials, BalanceSheet, CashFlowStatement,
+                              IncomeStatement, StatementOfChangesInEquity, StatementOfComprehensiveIncome)
 from edgar.xbrl import XBRLData, XBRLInstance, Statement, Statements, get_xbrl_object
 from edgar.xbrl.xbrldata import get_primary_units, get_unit_divisor
 
@@ -170,7 +171,7 @@ def test_get_dimension_values(apple_xbrl):
     instance: XBRLInstance = apple_xbrl.instance
     values = instance.get_dimension_values('us-gaap:LongtermDebtTypeAxis')
     assert values == ['aapl:FixedRateNotesMember']
-    assert not instance.get_dimension_values('us-gaap:NonExisting')
+    assert instance.get_dimension_values('us-gaap:NonExisting') == []
 
 
 def test_query_facts(apple_xbrl):
@@ -547,3 +548,69 @@ def test_statement_to_excel_writer(apple_xbrl, temp_excel_file):
     is_df = income_statement.get_dataframe(include_format=False, include_concept=False)
     is_excel_header = [cell.value for cell in is_sheet[1]]
     assert is_excel_header == is_df.columns.tolist()
+
+
+def test_multi_financials():
+    company = Company("AAPL", include_old_filings=False)
+    filings = company.get_filings(form="10-K").latest(3)
+    financials = [
+        Financials(filing.xbrl())
+        for filing in filings
+    ]
+
+    multi_financials = MultiFinancials.merge(financials)
+
+    balance_sheet: Statement = multi_financials.get_balance_sheet()
+    assert balance_sheet.get_concept('us-gaap_CashAndCashEquivalentsAtCarryingValue').value == {'2023': '29965000000',
+                                                                                                '2022': '23646000000',
+                                                                                                '2021': '34940000000',
+                                                                                                '2020': '38016000000'}
+
+
+def test_standardized_statements(apple_xbrl):
+    aapl_financials = Financials(apple_xbrl)
+
+    # Test balance sheet
+    balance_sheet = aapl_financials.get_balance_sheet(standard=True)
+    assert balance_sheet is not None
+    std_concepts = {concept.concept for concept in BalanceSheet.concepts}
+    actual_concepts = set(balance_sheet.data.reset_index()['concept'])
+    assert std_concepts.issuperset(
+        actual_concepts), f"Missing concepts in balance sheet: {std_concepts - actual_concepts}"
+
+    # Test income statement
+    income_statement = aapl_financials.get_income_statement(standard=True)
+    assert income_statement is not None
+    std_concepts = {concept.concept for concept in IncomeStatement.concepts}
+    actual_concepts = set(income_statement.data.reset_index()['concept'])
+    assert std_concepts.issuperset(
+        actual_concepts), f"Missing concepts in income statement: {std_concepts - actual_concepts}"
+
+    # Test cash flow statement
+    cash_flow = aapl_financials.get_cash_flow_statement(standard=True)
+    assert cash_flow is not None
+    std_concepts = {concept.concept for concept in CashFlowStatement.concepts}
+    actual_concepts = set(cash_flow.data.reset_index()['concept'])
+    assert std_concepts.issuperset(
+        actual_concepts), f"Missing concepts in cash flow statement: {std_concepts - actual_concepts}"
+
+    # Test statement of changes in equity
+    equity = aapl_financials.get_statement_of_changes_in_equity(standard=True)
+    assert equity is not None
+    std_concepts = {concept.concept for concept in StatementOfChangesInEquity.concepts}
+    actual_concepts = set(equity.data.reset_index()['concept'])
+    assert std_concepts.issuperset(
+        actual_concepts), f"Missing concepts in statement of changes in equity: {std_concepts - actual_concepts}"
+
+    # Test statement of comprehensive income
+    std_comprehensive_income = aapl_financials.get_statement_of_comprehensive_income(standard=True)
+    assert std_comprehensive_income is not None
+    std_concepts = {concept.concept for concept in StatementOfComprehensiveIncome.concepts}
+    actual_concepts = set(std_comprehensive_income.data.reset_index()['concept'])
+    assert std_concepts.issuperset(
+        actual_concepts), f"Missing concepts in statement of comprehensive income: {std_concepts - actual_concepts}"
+
+    # Test cover page
+    std_cover_page = aapl_financials.get_cover_page()
+    assert std_cover_page is not None
+    # Cover page doesn't have standard concepts defined, so we just check if it exists

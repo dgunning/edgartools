@@ -104,6 +104,7 @@ class XBRLInstance(BaseModel):
         return self.dei_facts.get('dei:DocumentFiscalPeriodFocus', {}).get('value')
 
     def get_entity_name(self):
+        # Get the name of the entity (company) from the DEI facts
         return self.dei_facts.get('dei:EntityRegistrantName', {}).get('value')
 
     @classmethod
@@ -194,7 +195,7 @@ class XBRLInstance(BaseModel):
         return set().union(*self.facts['dimensions'].apply(lambda x: x.keys()))
 
     def get_dimension_values(self, dimension):
-        return self.facts['dimensions'].apply(lambda x: x.get(dimension)).dropna().unique()
+        return self.facts['dimensions'].apply(lambda x: x.get(dimension)).dropna().unique().tolist()
 
     def query_facts(self, **kwargs):
         # Query facts based on given criteria

@@ -3,13 +3,12 @@ from pathlib import Path
 import pytest
 from rich import print
 
-from edgar import Filing
-from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase, XBRLData,
+from edgar import *
+from edgar.xbrl import get_xbrl_object
+from edgar.xbrl.xbrldata import format_xbrl_value
+from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase,
                                  XBRLAttachments,
                                  XBRLInstance, XBRLPresentation, StatementDefinition, Statement)
-from edgar.xbrl.xbrldata import format_xbrl_value
-from edgar.xbrl import get_xbrl_object
-from edgar import *
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -222,17 +221,17 @@ def test_get_xbrl_documents_for_offering_xbrl_filing(rbc_424b2):
 
 
 def test_get_xbrl_data_for_485bpos(wisdomtree_485bpos_filing):
-    xbrl_documents:XBRLAttachments = XBRLAttachments(wisdomtree_485bpos_filing.attachments)
+    xbrl_documents: XBRLAttachments = XBRLAttachments(wisdomtree_485bpos_filing.attachments)
     assert not xbrl_documents.empty
     assert xbrl_documents.has_instance_document
     assert not xbrl_documents.instance_only
-    xbrl_data:XBRLData = XBRLData.extract(wisdomtree_485bpos_filing)
+    xbrl_data: XBRLData = XBRLData.extract(wisdomtree_485bpos_filing)
     assert xbrl_data
     print(xbrl_data)
 
 
 def test_xbrl_documents_get_xbrlinstance_or_xbrldata(wisdomtree_485bpos_filing, rbc_424b2):
-    xbrl_documents:XBRLAttachments = XBRLAttachments(wisdomtree_485bpos_filing.attachments)
+    xbrl_documents: XBRLAttachments = XBRLAttachments(wisdomtree_485bpos_filing.attachments)
     xbrl_data = xbrl_documents.get_xbrl()
     assert xbrl_data
     assert isinstance(xbrl_data, XBRLData)
@@ -276,25 +275,34 @@ def _temp_disabled_test_format_xbrl_value():
 
 
 def test_get_xbrl():
-
     filings = get_filings(form="D")
 
     # 424B4 should be XBRLInstance
     filing = Filing(form='424B2', filing_date='2024-08-09', company='ROYAL BANK OF CANADA',
-                     cik=1000275, accession_no='0000950103-24-012010')
+                    cik=1000275, accession_no='0000950103-24-012010')
     instance = get_xbrl_object(filing)
     assert isinstance(instance, XBRLInstance)
 
     # 10-K should be XBRLData
     filing = Filing(form='10-K/A', filing_date='2024-08-09', company='TG THERAPEUTICS, INC.',
-        cik=1001316, accession_no='0001437749-24-025850')
+                    cik=1001316, accession_no='0001437749-24-025850')
     xbrl_data = get_xbrl_object(filing)
     assert isinstance(xbrl_data, XBRLData)
 
     # Form D should return None
     filing = Filing(form='D', filing_date='2024-08-09', company='102 Lancaster Partners LLC',
-           cik=2032948, accession_no='0002032948-24-000002')
+                    cik=2032948, accession_no='0002032948-24-000002')
     assert get_xbrl_object(filing) is None
 
 
-
+def test_get_dataframe_for_statement_with_no_units_or_decimals():
+    """
+    For REGN, the cash flow statement is only available in HTML format.
+    """
+    filing = Filing(company='REGENERON PHARMACEUTICALS, INC.', cik=872589, form='10-K', filing_date='2024-02-05',
+                    accession_no='0001804220-24-000009')
+    financials = Financials(filing.xbrl())
+    cash_flow_statement = financials.get_cash_flow_statement()
+    cashflow_dataframe = cash_flow_statement.get_dataframe(include_concept=True, include_format=True)
+    assert cashflow_dataframe is not None
+    assert cashflow_dataframe.columns.tolist() == ['2023', 'concept', 'level', 'abstract']

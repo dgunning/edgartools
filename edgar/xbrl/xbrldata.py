@@ -403,7 +403,7 @@ class StatementDefinition(BaseModel):
 
 
 def is_integer(s):
-    if not s:
+    if not s or pd.isna(s):
         return False
     if s[0] in ('-', '+'):
         s = s[1:]
@@ -559,6 +559,8 @@ class Statement:
             columns.append('concept')
         if include_format:
             columns.extend(self.format_columns)
+        # Filter again to make sure the columns exist
+        columns = [col for col in columns if col in self.data.columns]
         return self.data[columns].copy()
 
     def to_dataframe(self,
@@ -643,6 +645,9 @@ class Statement:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+    def __str__(self):
+        return f"{self.display_name}"
 
 
 class Statements():
