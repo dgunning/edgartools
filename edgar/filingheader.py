@@ -633,7 +633,7 @@ class FilingHeader:
             
         # Convert all lists to strings
         for key, value in data.items():
-            if isinstance(value, list):
+            if isinstance(value, list) and all(isinstance(item, str) for item in value):
                 data[key] = ', '.join(value)
 
         # Create a dict of the values in data that are not nested dicts
