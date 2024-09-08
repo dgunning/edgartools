@@ -66,7 +66,7 @@ def get_company_cik_lookup():
 @lru_cache(maxsize=None)
 def get_company_ticker_name_exchange():
     """
-    Return a DataFrame with the company name, ticker symbol, and exchange.
+    Return a DataFrame with columns [cik	name	ticker	exchange]
     """
     data = download_json("https://www.sec.gov/files/company_tickers_exchange.json")
     return pd.DataFrame(data['data'], columns=data['fields'])
@@ -78,11 +78,12 @@ def get_companies_by_exchange(exchange: Union[List[str], str]):
 
     :param exchange: String, like 'Nasdaq' or 'NYSE'
     :return: DataFrame with companies listed on the specified exchange
+    with columns [cik	name	ticker	exchange]
     """
 
     df = get_company_ticker_name_exchange()
     exchanges = [ex.lower() for ex in listify(exchange)]
-    return df[df['exchange'].str.lower().isin(exchanges)]
+    return df[df['exchange'].str.lower().isin(exchanges)].reset_index(drop=True)
 
 
 @lru_cache(maxsize=None)
