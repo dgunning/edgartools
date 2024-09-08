@@ -14,9 +14,12 @@ from edgar.htmltools import ChunkedDocument
 from typing import List, Optional
 
 pd.options.display.max_columns = 10
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def test_html_document_does_not_drop_content():
+    warnings.filterwarnings("ignore")
     html_str = Path("data/ixbrl.simple.html").read_text()
     document = HtmlDocument.from_html(html_str)
 
@@ -174,6 +177,7 @@ def test_parse_inline_divs_with_ixbrl_tags():
 
 def test_parse_ixbrldocument_with_dimensions():
     text = Path("data/cabot.DEF14A.ixbrl.html").read_text()
+    warnings.filterwarnings("ignore")
     headers = BeautifulSoup(text, 'lxml').find_all('ix:header')
     document: DocumentData = DocumentData.parse_headers(headers)
     assert document
