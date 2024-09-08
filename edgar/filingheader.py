@@ -630,6 +630,11 @@ class FilingHeader:
                 if 'FORMER COMPANY' in subject_company_values else None
             )
             subject_companies.append(subject_company)
+            
+        # Convert all lists to strings
+        for key, value in data.items():
+            if isinstance(value, list):
+                data[key] = ', '.join(value)
 
         # Create a dict of the values in data that are not nested dicts
         filing_metadata = {key: value
