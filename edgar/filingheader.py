@@ -407,7 +407,16 @@ class FilingHeader:
                     # The line looks like this <KEY>VALUE
                     key, value = line.split('>')
                     # Strip the leading '<' from the key
-                    data[key[1:]] = value
+                    key = key[1:]
+                    
+                    # If the key already exists, we should convert it to a list
+                    if key in data:
+                        if isinstance(data[key], list):
+                            data[key].append(value)
+                        else:
+                            data[key] = [data[key], value]
+                    else:
+                        data[key] = value
                 elif ':' in line:
                     parts = line.strip().split(':')
                     if len(parts) == 2:
@@ -416,7 +425,14 @@ class FilingHeader:
                         key, value = parts[0], ":".join(parts[1:])
                     value = value.strip()
                     if not current_header:
-                        data[key] = value
+                        # If the key already exists, we should convert it to a list
+                        if key in data:
+                            if isinstance(data[key], list):
+                                data[key].append(value)
+                            else:
+                                data[key] = [data[key], value]
+                        else:
+                            data[key] = value
                     elif not current_subheader:
                         continue
                     else:
