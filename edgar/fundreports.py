@@ -7,15 +7,15 @@ import pandas as pd
 from bs4 import Tag
 from pydantic import BaseModel
 from rich import box
-from rich.panel import Panel
 from rich.console import Group, Text
+from rich.panel import Panel
 from rich.table import Table
 
+from edgar.core import moneyfmt, get_bool
+from edgar.funds import get_fund_information, FundSeriesAndContracts, Fund, get_fund
 from edgar.reference import cusip_ticker_mapping
 from edgar.richtools import repr_rich, df_to_rich_table
 from edgar.xmltools import find_element, child_text, optional_decimal
-from edgar.core import moneyfmt, get_bool
-from edgar.funds import get_fund_information, FundSeriesAndContracts, Fund, get_fund
 
 __all__ = [
     "FundReport",
@@ -373,7 +373,13 @@ class FundReport:
                 for investment in self.investments
             ]
         ).sort_values(['value_usd', 'name', 'title'], ascending=[False, True, True]).reset_index(drop=True)
-        investment_df.ticker = investment_df.ticker.fillna(investment_df.cusip.map(cusip_mapping.Ticker)).fillna("")
+
+        # Step 1: Map CUSIP to Ticker using the cusip_mapping
+        mapped_tickers = investment_df.cusip.map(cusip_mapping.Ticker)
+
+        # Step 2: Fill NaN values in the ticker column with mapped tickers
+        investment_df['ticker'] = investment_df['ticker'].astype(str).fillna(mapped_tickers).fillna("")
+
         return investment_df
 
     @classmethod
