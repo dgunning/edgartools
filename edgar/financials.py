@@ -12,6 +12,7 @@ from rich.text import Text
 from edgar.richtools import repr_rich
 from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
 from edgar.xbrl.xbrldata import XBRLData, Statement
+from functools import lru_cache
 
 
 class StandardConcept(BaseModel):
@@ -415,7 +416,7 @@ class MultiFinancials:
         self.primary_financials = financials_list[0] if financials_list else None
 
     @classmethod
-    def merge(cls, financials_list: List[Financials]) -> 'MultiFinancials':
+    def stitch(cls, financials_list: List[Financials]) -> 'MultiFinancials':
         return cls(financials_list)
 
     def _stitch_statements(self, statement_getter):
@@ -426,33 +427,53 @@ class MultiFinancials:
         if not statements:
             return None
 
-        # Use the first statement as a base
+        # Use the first (most recent) statement as a base
         base_statement = statements[0]
-        base_df = base_statement.data.reset_index()
-
+        
         # Identify metadata columns
-        metadata_columns = ['primary_concept', 'level', 'abstract', 'units', 'decimals']
-        metadata_columns = [col for col in metadata_columns if col in base_df.columns]
+        metadata_columns = ['level', 'abstract', 'units', 'decimals']
+        metadata_columns = [col for col in metadata_columns if col in base_statement.data.reset_index().columns]
 
-        # Create a new DataFrame with label and metadata columns
-        result_df = base_df[['label'] + metadata_columns].copy()
+        # Create a dictionary to store the most recent data for each period
+        period_data = {}
 
-        # Add period columns from all statements
         for statement in statements:
             df = statement.data.reset_index()
-            for col in df.columns:
-                if col not in metadata_columns and col != 'label' and col not in result_df.columns:
-                    result_df[col] = df[col]
+            df.set_index('concept', inplace=True)
+            
+            # Identify period columns
+            period_cols = [col for col in df.columns if col not in metadata_columns and col != 'label']
+            
+            for col in period_cols:
+                if col not in period_data:
+                    period_data[col] = df[col]
+                else:
+                    # Fill missing values in the existing column with values from this statement
+                    period_data[col].fillna(df[col], inplace=True)
 
-        # Sort columns: label, period columns (most recent first), metadata columns
-        sorted_period_columns = sorted(
-            [col for col in result_df.columns if col not in metadata_columns and col != 'label'],
-            reverse=True
-        )
-        column_order = ['label'] + sorted_period_columns + metadata_columns
+        # Create a new DataFrame with the collected period data
+        result_df = pd.DataFrame(period_data)
+
+        # Sort the columns (periods) in descending order
+        result_df = result_df.sort_index(axis=1, ascending=False)
+
+        # Add labels from the most recent statement
+        result_df['label'] = base_statement.data.reset_index().set_index('concept')['label']
+
+        # Add concept column
+        result_df['concept'] = result_df.index
+
+        # Add metadata columns from the base statement
+        base_df = base_statement.data.reset_index()
+        for col in metadata_columns:
+            result_df[col] = base_df.set_index('concept')[col]
+
+        # Reorder columns: label, period columns, concept, metadata columns
+        period_columns = [col for col in result_df.columns if col not in ['label', 'concept'] + metadata_columns]
+        column_order = ['label'] + period_columns + ['concept'] + metadata_columns
         result_df = result_df[column_order]
 
-        # Set 'label' as index
+        # Set 'label' as index for consistency with the original structure
         result_df.set_index('label', inplace=True)
 
         # Create a new Statement object
@@ -466,21 +487,27 @@ class MultiFinancials:
 
         return stitched_statement
 
+    @lru_cache(maxsize=1)
     def get_balance_sheet(self, standard: bool = False) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_balance_sheet(standard=standard))
 
+    @lru_cache(maxsize=1)
     def get_income_statement(self, standard: bool = False) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_income_statement(standard=standard))
 
+    @lru_cache(maxsize=1)
     def get_cash_flow_statement(self, standard: bool = False) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_cash_flow_statement(standard=standard))
 
+    @lru_cache(maxsize=1)
     def get_statement_of_changes_in_equity(self, standard: bool = False) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_statement_of_changes_in_equity(standard=standard))
 
+    @lru_cache(maxsize=1)
     def get_statement_of_comprehensive_income(self, standard: bool = False) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_statement_of_comprehensive_income(standard=standard))
 
+    @lru_cache(maxsize=1)
     def get_cover_page(self) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_cover_page())
 

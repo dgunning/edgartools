@@ -558,13 +558,35 @@ def test_multi_financials():
         for filing in filings
     ]
 
-    multi_financials = MultiFinancials.merge(financials)
+    multi_financials = MultiFinancials.stitch(financials)
 
     balance_sheet: Statement = multi_financials.get_balance_sheet()
     assert balance_sheet.get_concept('us-gaap_CashAndCashEquivalentsAtCarryingValue').value == {'2023': '29965000000',
                                                                                                 '2022': '23646000000',
                                                                                                 '2021': '34940000000',
                                                                                                 '2020': '38016000000'}
+    std_balance_sheet = multi_financials.get_balance_sheet(standard=True)
+    assert std_balance_sheet is not None
+    assert std_balance_sheet.get_concept('us-gaap_CashAndCashEquivalentsAtCarryingValue').value == {
+        '2023': '29965000000',
+        '2022': '23646000000',
+        '2021': '34940000000',
+        '2020': '38016000000'}
+
+    income_statement: Statement = multi_financials.get_income_statement()
+    assert income_statement.get_concept('us-gaap_NetIncomeLoss').value == {'2023': '96995000000',
+                                                                           '2022': '99803000000',
+                                                                           '2021': '94680000000',
+                                                                           '2020': '57411000000',
+                                                                           '2019': '55256000000'}
+    # Cash flow statement
+    cash_flow: Statement = multi_financials.get_cash_flow_statement()
+    cashflow_values = cash_flow.get_concept('us-gaap_NetCashProvidedByUsedInOperatingActivities').value
+    assert cashflow_values == {'2023': '110543000000',
+                               '2022': '122151000000',
+                               '2021': '104038000000',
+                               '2020': '80674000000',
+                               '2019': '69391000000'}
 
 
 def test_standardized_statements(apple_xbrl):

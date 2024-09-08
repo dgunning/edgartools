@@ -774,7 +774,7 @@ class XBRLData(BaseModel):
         """
         xbrl_documents = XBRLAttachments(filing.attachments)
         if xbrl_documents.empty:
-            log.warn(f"No XBRL documents found in the filing. {filing}")
+            log.warning(f"No XBRL documents found in the filing. {filing}")
             return None
 
         assert not xbrl_documents.instance_only, "Instance document must be accompanied by other XBRL documents"
