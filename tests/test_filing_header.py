@@ -383,3 +383,22 @@ def test_get_header_for_filing_with_no_reportingowner_entity():
                     accession_no='0001127602-24-022866')
     header = filing.header
     assert header
+
+def test_get_header_for_list_fields():
+    filing = Filing(form='SC 13G', filing_date='2024-09-06', company='BioCardia, Inc.', cik=925741,
+                    accession_no='0001213900-24-076658')
+    
+    members = filing.header.filing_metadata.get("GROUP MEMBERS") 
+    assert members == "DANIEL B. ASHER, MITCHELL P. KOPIN"
+
+def test_get_header_for_list_fields_with_multiple_entries():
+    # Inject a new field with multiple entries
+    header_content = Path('data/secheader.424B5.abeona.txt').read_text()
+    header_content = f"""{header_content[:-len('</SEC-HEADER>')]}
+<TEST-FIELD>foo
+<TEST-FIELD>bar
+</SEC-HEADER>"""
+
+    filing_header = FilingHeader.parse_from_sgml_text(header_content)
+    
+    assert filing_header.filing_metadata.get("TEST-FIELD") == "foo, bar"
