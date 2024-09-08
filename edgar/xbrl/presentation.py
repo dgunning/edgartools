@@ -3,7 +3,7 @@ from collections import defaultdict, OrderedDict
 from typing import Dict, List, Optional
 
 from bs4 import BeautifulSoup
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from rich import print as rprint
 from rich.text import Text
 from rich.tree import Tree
@@ -32,9 +32,7 @@ class XBRLPresentation(BaseModel):
     concept_index: Dict[str, List[str]] = Field(default_factory=lambda: defaultdict(list))
 
     # Configuration to allow arbitrary types in the model
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def parse(cls, xml_string: str):
@@ -153,7 +151,7 @@ class XBRLPresentation(BaseModel):
     def get_skipped_roles(self):
         return self.skipped_roles
 
-    def get_structure(self, role: Optional[str]=None, detailed: bool = False) -> Optional[Tree]:
+    def get_structure(self, role: Optional[str] = None, detailed: bool = False) -> Optional[Tree]:
         """
         Get the presentation structure for a specific role.
         """

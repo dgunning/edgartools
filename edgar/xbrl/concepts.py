@@ -3,8 +3,7 @@ from datetime import datetime
 from typing import List, Optional, Union, Any, Dict
 
 import pandas as pd
-from pydantic import BaseModel, Field
-from pydantic import field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 __all__ = ['Concept', 'ConceptTableItem', 'ConceptTable', 'Context', 'DEI_CONCEPTS', 'concept_to_label']
 
@@ -52,9 +51,9 @@ class Concept(BaseModel):
         except ValueError:
             raise ValueError(f"Invalid value for decimals: {v}")
 
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True
+    )
 
 
 class ConceptTableItem(BaseModel):
