@@ -1,17 +1,21 @@
+import warnings
 from pathlib import Path
 
 import pandas as pd
+from bs4 import XMLParsedAsHTMLWarning
 from rich import print
 
 from edgar import Filing
 from edgar.company_reports import EightK
 from edgar.datatools import table_html_to_dataframe
 from edgar.htmltools import (
-    html_to_text, html_sections, ChunkedDocument,)
+    html_to_text, html_sections, ChunkedDocument, )
 
 pd.options.display.max_columns = 12
 pd.options.display.max_colwidth = 100
 pd.options.display.width = 1000
+
+
 
 Nvidia_2021_10k = Path("data/Nvidia.10-K.html").read_text()
 
@@ -111,6 +115,7 @@ def test_chunk_document_for_10k_amendment():
 
 
 def test_list_items_in_tenk():
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
     filing = Filing(company='Excelerate Energy, Inc.', cik=1888447, form='10-K', filing_date='2024-02-29',
                     accession_no='0000950170-24-023104')
     chunked_document: ChunkedDocument = ChunkedDocument(filing.html())
@@ -142,6 +147,7 @@ def test_filing_with_pdf_primary_document():
 
 def test_html_text_works_with_no_failures():
     # This used to fail because of a bug in the html_to_text function
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
     filing = Filing(form='10-K', filing_date='2024-01-31', company='ADVANCED MICRO DEVICES INC', cik=2488,
                     accession_no='0000002488-24-000012')
     assert filing.text()
