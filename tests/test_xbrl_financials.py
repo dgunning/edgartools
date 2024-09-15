@@ -550,15 +550,10 @@ def test_statement_to_excel_writer(apple_xbrl, temp_excel_file):
     assert is_excel_header == is_df.columns.tolist()
 
 
-def test_multi_financials():
+def test_multi_financials_values():
     company = Company("AAPL", include_old_filings=False)
     filings = company.get_filings(form="10-K").latest(3)
-    financials = [
-        Financials(filing.xbrl())
-        for filing in filings
-    ]
-
-    multi_financials = MultiFinancials.stitch(financials)
+    multi_financials = MultiFinancials(filings)
 
     balance_sheet: Statement = multi_financials.get_balance_sheet()
     assert balance_sheet.get_concept('us-gaap_CashAndCashEquivalentsAtCarryingValue').value == {'2023': '29965000000',
@@ -587,6 +582,36 @@ def test_multi_financials():
                                '2021': '104038000000',
                                '2020': '80674000000',
                                '2019': '69391000000'}
+
+
+def test_multi_financials_labels():
+    company = Company("TSLA", include_old_filings=False)
+    filings = company.get_filings(form="10-K").latest(3)
+    multi_financials = MultiFinancials(filings)
+    balance_sheet = multi_financials.get_balance_sheet()
+    assert balance_sheet.data.columns.tolist() == ['2023', '2022', '2021', '2020', 'concept',
+                                                   'level',
+                                                   'abstract',
+                                                   'units',
+                                                   'decimals']
+    # Check that the concepts are unique
+    assert balance_sheet.data.concept.nunique() == len(balance_sheet.data)
+    # Test concept values
+    assert balance_sheet.get_concept('us-gaap_CashAndCashEquivalentsAtCarryingValue').value == {
+        '2023': '16398000000', '2022': '16253000000', '2021': '17576000000', '2020': '19384000000'}
+
+    income_statement = multi_financials.get_income_statement()
+    assert income_statement.data.columns.tolist() == ['2023', '2022', '2021', '2020', '2019', 'concept',
+                                                      'level', 'abstract', 'units', 'decimals']
+    # Get the concept for a multifinancial
+    netincome = income_statement.get_concept('us-gaap_NetIncomeLoss')
+    assert income_statement.data.concept.nunique() == len(income_statement.data)
+    assert netincome.value == {'2023': '14997000000',
+                               '2022': '12556000000',
+                               '2021': '5519000000',
+                               '2020': '721000000',
+                               '2019': pd.NA}
+    print(income_statement)
 
 
 def test_standardized_statements(apple_xbrl):

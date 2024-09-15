@@ -403,7 +403,7 @@ class StatementDefinition(BaseModel):
 
 
 def is_integer(s):
-    if not s or pd.isna(s):
+    if s is pd.NA or pd.isna(s) or not s:
         return False
     if s[0] in ('-', '+'):
         s = s[1:]
@@ -431,6 +431,8 @@ def format_xbrl_value(value: Union[str, float], decimals: str, unit_divisor: int
         else:
             return format_str.format(value)
     else:
+        if pd.isna(value):
+            value = ''
         return f"{value:>15}"
 
 

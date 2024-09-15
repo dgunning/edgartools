@@ -1,6 +1,8 @@
 from collections import defaultdict
+from functools import lru_cache
 from typing import Optional, List, Dict
 
+import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 from rich import box
@@ -12,7 +14,6 @@ from rich.text import Text
 from edgar.richtools import repr_rich
 from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
 from edgar.xbrl.xbrldata import XBRLData, Statement
-from functools import lru_cache
 
 
 class StandardConcept(BaseModel):
@@ -406,18 +407,109 @@ class Financials:
 
 
 class MultiFinancials:
-
     """
     Merges the financial statements from multiple periods into a single financials.
     """
 
-    def __init__(self, financials_list: List[Financials]):
-        self.financials_list = financials_list
-        self.primary_financials = financials_list[0] if financials_list else None
+    def __init__(self, filings: List['Filings']):
+        self.financials_list = []
+        for filing in filings:
+            if not filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A']:
+                raise ValueError("Filing must be a 10-K or 10-Q")
+            financials = Financials.extract(filing)
+            self.financials_list.append(financials)
+        self.primary_financials = self.financials_list[0] if self.financials_list else None
 
     @classmethod
     def stitch(cls, financials_list: List[Financials]) -> 'MultiFinancials':
         return cls(financials_list)
+
+    @staticmethod
+    def merge_preserving_order(df0, df1) -> pd.DataFrame:
+        # Ensure 'label' is the index and 'concept' is a column
+        df0 = df0.reset_index().set_index('label') if df0.index.name != 'label' else df0
+        df1 = df1.reset_index().set_index('label') if df1.index.name != 'label' else df1
+
+        # Define metadata columns
+        metadata_cols = ['level', 'abstract', 'units', 'decimals']
+
+        # Identify period columns
+        period_cols0 = [col for col in df0.columns if col not in metadata_cols and col != 'concept']
+        period_cols1 = [col for col in df1.columns if col not in metadata_cols and col != 'concept']
+
+        # Create dictionaries to store the original order of labels in both dataframes
+        order_dict0 = {label: i for i, label in enumerate(df0.index)}
+        order_dict1 = {label: i for i, label in enumerate(df1.index)}
+
+        # Perform an outer merge
+        merged_df = pd.merge(df0, df1, left_index=True, right_index=True, how='outer', suffixes=('_0', '_1'))
+
+        # Custom sorting function
+        def custom_sort(label):
+            in_df0 = label in order_dict0
+            in_df1 = label in order_dict1
+
+            if in_df0:
+                return (0, order_dict0[label])  # Prioritize df0 order
+            elif in_df1:
+                return (1, order_dict1[label])  # Next priority: unique to df1
+            else:
+                return (2, 0)  # Should not happen with outer merge
+
+        # Sort the merged dataframe using the custom sorting function
+        merged_df['sort_key'] = merged_df.index.map(custom_sort)
+        merged_df = merged_df.sort_values('sort_key').drop('sort_key', axis=1)
+
+        # Combine all columns (period, concept, and metadata)
+        all_columns = sorted(set(period_cols0 + period_cols1), reverse=True) + ['concept'] + metadata_cols
+
+        for col in all_columns:
+            if f'{col}_0' in merged_df.columns and f'{col}_1' in merged_df.columns:
+                # Use numpy where to prioritize df0 values
+                merged_df[col] = np.where(merged_df[f'{col}_0'].notna(), merged_df[f'{col}_0'], merged_df[f'{col}_1'])
+                merged_df = merged_df.drop([f'{col}_0', f'{col}_1'], axis=1)
+            elif f'{col}_0' in merged_df.columns:
+                merged_df = merged_df.rename(columns={f'{col}_0': col})
+            elif f'{col}_1' in merged_df.columns:
+                merged_df = merged_df.rename(columns={f'{col}_1': col})
+
+        # Handle specific column dtypes
+        merged_df['level'] = pd.to_numeric(merged_df['level'], errors='coerce').astype('Int64')
+        merged_df['abstract'] = merged_df['abstract'].astype('boolean')
+        merged_df['units'] = merged_df['units'].astype('string')
+        merged_df['decimals'] = merged_df['decimals'].astype('string')
+
+        # Replace NaN with pd.NA in all columns
+        for col in merged_df.columns:
+            if merged_df[col].dtype == 'object':
+                merged_df[col] = merged_df[col].astype('string')
+            merged_df[col] = merged_df[col].fillna(pd.NA)
+
+        # Group by concept and aggregate
+        def agg_func(x):
+            return x.iloc[0] if len(x) > 0 else pd.NA
+
+        merged_df = merged_df.reset_index().groupby('concept').agg({
+            'label': 'first',  # Keep the first label for each concept
+            **{col: agg_func for col in merged_df.columns if col not in ['concept', 'label']}
+        }).reset_index()
+
+        # Restore the original order
+        original_order = {label: i for i, label in enumerate(df0.index)}
+        original_order.update({label: i + len(df0) for i, label in enumerate(df1.index) if label not in original_order})
+
+        merged_df['sort_key'] = merged_df['label'].map(lambda x: original_order.get(x, len(original_order)))
+        merged_df = merged_df.sort_values('sort_key').drop('sort_key', axis=1)
+
+        # Set 'label' as index
+        merged_df = merged_df.set_index('label')
+
+        # Select final columns and order them: period columns, concept, metadata columns
+        period_columns = sorted(set(period_cols0 + period_cols1), reverse=True)
+        final_columns = period_columns + ['concept'] + metadata_cols
+        merged_df = merged_df[final_columns]
+
+        return merged_df
 
     def _stitch_statements(self, statement_getter):
         if not self.financials_list:
@@ -429,52 +521,10 @@ class MultiFinancials:
 
         # Use the first (most recent) statement as a base
         base_statement = statements[0]
-        
-        # Identify metadata columns
-        metadata_columns = ['level', 'abstract', 'units', 'decimals']
-        metadata_columns = [col for col in metadata_columns if col in base_statement.data.reset_index().columns]
+        result_df = base_statement.data
 
-        # Create a dictionary to store the most recent data for each period
-        period_data = {}
-
-        for statement in statements:
-            df = statement.data.reset_index()
-            df.set_index('concept', inplace=True)
-            
-            # Identify period columns
-            period_cols = [col for col in df.columns if col not in metadata_columns and col != 'label']
-            
-            for col in period_cols:
-                if col not in period_data:
-                    period_data[col] = df[col]
-                else:
-                    # Fill missing values in the existing column with values from this statement
-                    period_data[col].fillna(df[col], inplace=True)
-
-        # Create a new DataFrame with the collected period data
-        result_df = pd.DataFrame(period_data)
-
-        # Sort the columns (periods) in descending order
-        result_df = result_df.sort_index(axis=1, ascending=False)
-
-        # Add labels from the most recent statement
-        result_df['label'] = base_statement.data.reset_index().set_index('concept')['label']
-
-        # Add concept column
-        result_df['concept'] = result_df.index
-
-        # Add metadata columns from the base statement
-        base_df = base_statement.data.reset_index()
-        for col in metadata_columns:
-            result_df[col] = base_df.set_index('concept')[col]
-
-        # Reorder columns: label, period columns, concept, metadata columns
-        period_columns = [col for col in result_df.columns if col not in ['label', 'concept'] + metadata_columns]
-        column_order = ['label'] + period_columns + ['concept'] + metadata_columns
-        result_df = result_df[column_order]
-
-        # Set 'label' as index for consistency with the original structure
-        result_df.set_index('label', inplace=True)
+        for statement in statements[1:]:
+            result_df = self.merge_preserving_order(result_df, statement.data)
 
         # Create a new Statement object
         stitched_statement = Statement(
