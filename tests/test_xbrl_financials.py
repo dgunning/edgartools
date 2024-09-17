@@ -583,8 +583,6 @@ def test_multi_financials_values():
                                '2020': '80674000000',
                                '2019': '69391000000'}
 
-
-def test_multi_financials_labels():
     company = Company("TSLA", include_old_filings=False)
     filings = company.get_filings(form="10-K").latest(3)
     multi_financials = MultiFinancials(filings)
@@ -610,7 +608,7 @@ def test_multi_financials_labels():
                                '2022': '12556000000',
                                '2021': '5519000000',
                                '2020': '721000000',
-                               '2019': pd.NA}
+                               '2019': '-862000000'}
 
     # Standardized balance sheet statement
     balance_sheet = multi_financials.get_balance_sheet(standard=True)
@@ -636,7 +634,6 @@ def test_apple_cashflow_correct_negative_values(apple_xbrl):
         '2023': '10833000000',
         '2022': '9038000000',
         '2021': '7906000000'}
-
 
 
 def test_standardized_statements(apple_xbrl):

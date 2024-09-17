@@ -538,23 +538,23 @@ class MultiFinancials:
         return stitched_statement
 
     @lru_cache(maxsize=1)
-    def get_balance_sheet(self, standard: bool = False) -> Optional[Statement]:
+    def get_balance_sheet(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_balance_sheet(standard=standard))
 
     @lru_cache(maxsize=1)
-    def get_income_statement(self, standard: bool = False) -> Optional[Statement]:
+    def get_income_statement(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_income_statement(standard=standard))
 
     @lru_cache(maxsize=1)
-    def get_cash_flow_statement(self, standard: bool = False) -> Optional[Statement]:
+    def get_cash_flow_statement(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_cash_flow_statement(standard=standard))
 
     @lru_cache(maxsize=1)
-    def get_statement_of_changes_in_equity(self, standard: bool = False) -> Optional[Statement]:
+    def get_statement_of_changes_in_equity(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_statement_of_changes_in_equity(standard=standard))
 
     @lru_cache(maxsize=1)
-    def get_statement_of_comprehensive_income(self, standard: bool = False) -> Optional[Statement]:
+    def get_statement_of_comprehensive_income(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_statement_of_comprehensive_income(standard=standard))
 
     @lru_cache(maxsize=1)

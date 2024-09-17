@@ -67,7 +67,6 @@ The resulting calculation_data dictionary will have a structure like this:
             if from_label in locs and to_label in locs:
                 from_concept = locs[from_label]
                 to_concept = locs[to_label]
-                # calculations[role].append((from_concept, to_concept, weight, order))
                 calculations[role].append(
                     Calculation(from_concept=from_concept, to_concept=to_concept, weight=weight, order=order))
 
