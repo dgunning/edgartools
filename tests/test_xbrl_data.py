@@ -275,7 +275,6 @@ def _temp_disabled_test_format_xbrl_value():
 
 
 def test_get_xbrl():
-    filings = get_filings(form="D")
 
     # 424B4 should be XBRLInstance
     filing = Filing(form='424B2', filing_date='2024-08-09', company='ROYAL BANK OF CANADA',
@@ -306,3 +305,12 @@ def test_get_dataframe_for_statement_with_no_units_or_decimals():
     cashflow_dataframe = cash_flow_statement.get_dataframe(include_concept=True, include_format=True)
     assert cashflow_dataframe is not None
     assert cashflow_dataframe.columns.tolist() == ['2023', 'concept', 'level', 'abstract']
+
+
+def test_xbrl_calculations():
+    calculation_xml = Path("data/xbrl/datafiles/aapl/aapl-20230930_cal.xml").read_text()
+    calculations = parse_calculation_linkbase(calculation_xml)
+    assert calculations
+    balance_sheet_calculations = calculations['http://www.apple.com/role/CONSOLIDATEDBALANCESHEETS']
+    assert balance_sheet_calculations[0].weight == 1.0
+    assert balance_sheet_calculations[0].from_concept == 'us-gaap_LiabilitiesNoncurrent'

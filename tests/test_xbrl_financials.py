@@ -611,7 +611,32 @@ def test_multi_financials_labels():
                                '2021': '5519000000',
                                '2020': '721000000',
                                '2019': pd.NA}
-    print(income_statement)
+
+    # Standardized balance sheet statement
+    balance_sheet = multi_financials.get_balance_sheet(standard=True)
+    assert set(balance_sheet.concepts).issubset({concept.concept for concept in BalanceSheet.concepts})
+
+
+def test_apple_cashflow_correct_negative_values(apple_xbrl):
+    financials = Financials(apple_xbrl)
+    calculations = financials.xbrl_data.calculations
+    cash_flow = financials.get_cash_flow_statement()
+    cashflow_values = cash_flow.get_concept('us-gaap_PaymentsForRepurchaseOfCommonStock').value
+    assert cashflow_values == {'2023': '-77550000000',
+                               '2022': '-89402000000',
+                               '2021': '-85971000000'}
+
+    assert cash_flow.get_concept('us-gaap_IncreaseDecreaseInInventories').value == {
+        '2023': '-1618000000',
+        '2022': '-1484000000',
+        '2021': '-2642000000'
+    }
+    # All positive values
+    assert cash_flow.get_concept('us-gaap_ShareBasedCompensation').value == {
+        '2023': '10833000000',
+        '2022': '9038000000',
+        '2021': '7906000000'}
+
 
 
 def test_standardized_statements(apple_xbrl):

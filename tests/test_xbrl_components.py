@@ -1,6 +1,6 @@
 from pathlib import Path
 import pytest
-from edgar.xbrl.calculatons import parse_calculation_linkbase
+from edgar.xbrl.calculations import parse_calculation_linkbase
 from edgar.xbrl.labels import parse_label_linkbase
 from edgar.xbrl.definitions import parse_definition_linkbase
 from edgar.xbrl.concepts import concept_to_label

@@ -1,6 +1,14 @@
 from typing import Dict, List, Tuple
 
 from bs4 import BeautifulSoup
+from pydantic import BaseModel
+
+
+class Calculation(BaseModel):
+    from_concept: str
+    to_concept: str
+    weight: float
+    order: str
 
 
 def parse_calculation_linkbase(xml_string: str) -> Dict[str, List[Tuple[str, str, float, int]]]:
@@ -55,11 +63,12 @@ The resulting calculation_data dictionary will have a structure like this:
                 continue
 
             weight = float(weight)
-            order = float(order)
 
             if from_label in locs and to_label in locs:
                 from_concept = locs[from_label]
                 to_concept = locs[to_label]
-                calculations[role].append((from_concept, to_concept, weight, order))
+                # calculations[role].append((from_concept, to_concept, weight, order))
+                calculations[role].append(
+                    Calculation(from_concept=from_concept, to_concept=to_concept, weight=weight, order=order))
 
     return calculations
