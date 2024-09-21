@@ -16,6 +16,9 @@ from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
 from edgar.xbrl.xbrldata import XBRLData, Statement
 
 
+__all__ = ['Financials', 'MultiFinancials']
+
+
 class StandardConcept(BaseModel):
     concept: str
     label: str
