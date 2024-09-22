@@ -530,16 +530,8 @@ class MultiFinancials:
         return self._stitch_statements(lambda f: f.get_cash_flow_statement(standard=standard))
 
     @lru_cache(maxsize=1)
-    def get_statement_of_changes_in_equity(self, standard: bool = True) -> Optional[Statement]:
-        return self._stitch_statements(lambda f: f.get_statement_of_changes_in_equity(standard=standard))
-
-    @lru_cache(maxsize=1)
     def get_statement_of_comprehensive_income(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_statement_of_comprehensive_income(standard=standard))
-
-    @lru_cache(maxsize=1)
-    def get_cover_page(self) -> Optional[Statement]:
-        return self._stitch_statements(lambda f: f.get_cover_page())
 
     def list_standard_statements(self) -> List[str]:
         if not self.primary_financials:
