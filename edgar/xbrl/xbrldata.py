@@ -438,7 +438,7 @@ def is_integer(s):
 
 
 def format_xbrl_value(value: Union[str, float], decimals: str, unit_divisor: int = 1,
-                      format_str: str = '{:>15,.0f}') -> str:
+                      format_str: str = '{:>16,.0f}') -> str:
     if is_integer(value):
         value = float(value)
         if decimals != 'INF':
