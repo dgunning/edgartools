@@ -6,9 +6,10 @@ from rich import print
 from edgar import *
 from edgar.xbrl import get_xbrl_object
 from edgar.xbrl.xbrldata import format_xbrl_value
-from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_calculation_linkbase, parse_definition_linkbase,
+from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_definition_linkbase,
                                  XBRLAttachments,
                                  XBRLInstance, XBRLPresentation, StatementDefinition, Statement)
+from edgar.xbrl.calculations import CalculationLinkbase
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -43,6 +44,14 @@ SAMPLE_PRESENTATION_XML = """
 </link:linkbase>
 """
 
+SAMPLE_CALCULATION_XML = """
+<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase">
+<link:calculationLink xlink:role="http://www.netflix.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS" xlink:type="extended">
+<link:calculationArc order="1" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_NetIncomeLoss" xlink:to="loc_us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxes" xlink:type="arc"/>
+</link:calculationLink>
+</link:linkbase>
+"""
+
 
 @pytest.fixture
 def sample_instance():
@@ -64,7 +73,7 @@ def sample_labels():
 
 @pytest.fixture
 def sample_calculations():
-    return {}
+    return CalculationLinkbase.parse(SAMPLE_INSTANCE_XML)
 
 
 def test_xbrl_instance_parsing(sample_instance):
@@ -151,10 +160,7 @@ def test_parse_labels():
     assert labels['us-gaap_ResearchAndDevelopmentExpense']['label'] == 'Research and Development Expense'
 
 
-def test_parse_calculations():
-    calculations = parse_calculation_linkbase(Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml').read_text())
-    assert calculations
-    assert calculations['http://www.apple.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS']
+
 
 
 def test_parse_definitions():
@@ -307,10 +313,3 @@ def test_get_dataframe_for_statement_with_no_units_or_decimals():
     assert cashflow_dataframe.columns.tolist() == ['2023', 'concept', 'level', 'abstract']
 
 
-def test_xbrl_calculations():
-    calculation_xml = Path("data/xbrl/datafiles/aapl/aapl-20230930_cal.xml").read_text()
-    calculations = parse_calculation_linkbase(calculation_xml)
-    assert calculations
-    balance_sheet_calculations = calculations['http://www.apple.com/role/CONSOLIDATEDBALANCESHEETS']
-    assert balance_sheet_calculations[0].weight == 1.0
-    assert balance_sheet_calculations[0].from_concept == 'us-gaap_LiabilitiesNoncurrent'

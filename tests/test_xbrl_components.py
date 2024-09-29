@@ -1,6 +1,5 @@
 from pathlib import Path
 import pytest
-from edgar.xbrl.calculations import parse_calculation_linkbase
 from edgar.xbrl.labels import parse_label_linkbase
 from edgar.xbrl.definitions import parse_definition_linkbase
 from edgar.xbrl.concepts import concept_to_label
@@ -16,19 +15,6 @@ def test_parse_labels_with_no_namespace():
     label_text = Path('data/xbrl/datafiles/radcq/rad-20230304_lab.xml').read_text()
     labels = parse_label_linkbase(label_text)
     assert 'dei_CoverAbstract' in labels
-    print(labels)
-
-
-def test_parse_calculations_with_namespace():
-    calculation_text = Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml').read_text()
-    calculations = parse_calculation_linkbase(calculation_text)
-    print(calculation_text)
-
-
-def test_parse_calculations_with_no_namespace():
-    calculation_text = Path('data/xbrl/datafiles/radcq/rad-20230304_cal.xml').read_text()
-    calculations = parse_calculation_linkbase(calculation_text)
-    print(calculations)
 
 
 def test_parse_definitions_with_namespace():

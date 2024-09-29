@@ -683,3 +683,8 @@ def test_standardized_statements(apple_xbrl):
     std_cover_page = aapl_financials.get_cover_page()
     assert std_cover_page is not None
     # Cover page doesn't have standard concepts defined, so we just check if it exists
+
+
+def test_create_statements_with_divisors(apple_xbrl):
+    financials = Financials(apple_xbrl)
+    balance_sheet = financials.get_balance_sheet()

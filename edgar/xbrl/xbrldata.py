@@ -28,7 +28,7 @@ from edgar.richtools import repr_rich, colorize_words
 from edgar.attachments import Attachments
 from edgar.core import log, split_camel_case, run_async_or_sync
 from edgar.httprequests import download_file_async
-from edgar.xbrl.calculations import parse_calculation_linkbase, Calculation
+from edgar.xbrl.calculations import CalculationLinkbase
 from edgar.xbrl.concepts import Concept, concept_to_label
 from edgar.xbrl.definitions import parse_definition_linkbase
 from edgar.xbrl.facts import XBRLInstance
@@ -112,14 +112,14 @@ class XBRLAttachments:
         return all(doc in self._documents for doc in
                    ['instance', 'schema', 'definition', 'label', 'calculation', 'presentation'])
 
-    async def load(self) -> Tuple[str, str, Dict, Dict]:
+    async def load(self) -> Tuple[str, str, Dict, CalculationLinkbase]:
         """
         Load the XBRL documents asynchronously and parse them.
         """
         parsers = {
             'definition': parse_definition_linkbase,
             'label': parse_label_linkbase,
-            'calculation': parse_calculation_linkbase,
+            'calculation': CalculationLinkbase.parse,
             'presentation': lambda x: x,
             'instance': lambda x: x,
             'schema': lambda x: x
@@ -150,7 +150,7 @@ class XBRLAttachments:
         return (parsed_files.get('instance', ''),
                 parsed_files.get('presentation', ''),
                 parsed_files.get('label', {}),
-                parsed_files.get('calculation', {}))
+                parsed_files.get('calculation'))
 
     @staticmethod
     async def download_and_parse(doc_type: str, parser, url: str):
@@ -245,6 +245,7 @@ class LineItem(BaseModel):
     def __hash__(self):
         return hash((self.concept, self.label, self.level))
 
+
 class StatementDefinition(BaseModel):
     name: str
     line_items: List[LineItem] = Field(default_factory=list)
@@ -266,17 +267,23 @@ class StatementDefinition(BaseModel):
         return not self.line_items
 
     @classmethod
-    def create(cls, name: str, presentation_element: PresentationElement, labels: Dict, calculations: Dict,
-               instance: XBRLInstance, preferred_label: str = None) -> 'StatementDefinition':
+    def create(cls,
+               name: str,
+               presentation_element: PresentationElement,
+               labels: Dict,
+               calculations: CalculationLinkbase,
+               instance: XBRLInstance,
+               preferred_label: str = None) -> 'StatementDefinition':
         # Factory method to create a StatementDefinition instance
         statement = cls(name=name)
         # Build the line items for the statement
         statement.build_line_items(presentation_element, labels, calculations, instance, preferred_label)
+
         return statement
 
     def build_line_items(self, presentation_element: PresentationElement,
                          labels: Dict,
-                         flattened_calculations: Dict[str, Calculation],
+                         calculations: CalculationLinkbase,
                          instance: XBRLInstance,
                          preferred_label: str = None):
         seen_sections = defaultdict(int)
@@ -299,7 +306,7 @@ class StatementDefinition(BaseModel):
             seen_sections[label] += 1
             seen_concepts.add(concept)
 
-            values = self.get_fact_values(concept, instance, flattened_calculations)
+            values = self.get_fact_values(concept, instance, calculations)
             self.line_items.append(LineItem(
                 concept=concept,
                 label=label,
@@ -339,14 +346,18 @@ class StatementDefinition(BaseModel):
                 or StatementDefinition.concept_to_label(concept))
 
     @staticmethod
-    def get_fact_values(concept: str, instance: XBRLInstance, flattened_calculations: Dict[str, Calculation]) -> Dict[
-        str, Any]:
+    def get_fact_values(concept: str,
+                        instance: XBRLInstance,
+                        calculation_links: CalculationLinkbase) -> Dict[str, Any]:
         facts = instance.query_facts(concept=concept)
         values = {}
 
         # Get the calculation weight for this concept
-        calc = flattened_calculations.get(concept)
-        weight = calc.weight if calc else 1.0
+        if calculation_links:
+            calc = calculation_links.get_calculation(concept)
+            weight = calc.weight if calc else 1.0
+        else:
+            weight = 1.0
 
         for _, fact in facts.iterrows():
             if fact['period_type'] == 'instant':
@@ -437,25 +448,39 @@ def is_integer(s):
     return s.isdigit()
 
 
-def format_xbrl_value(value: Union[str, float], decimals: str, unit_divisor: int = 1,
-                      format_str: str = '{:>16,.0f}') -> str:
+def format_xbrl_value(value: Union[str, float],
+                      decimals: str,
+                      format_str: str = '{:>10,.0f}') -> str:
+    """
+    Format an XBRL value for display
+    """
     if is_integer(value):
         value = float(value)
         if decimals != 'INF':
             try:
                 decimal_int = int(decimals)
                 if decimal_int < 0:
+                    unit_divisor = 10 ** (-1 * decimal_int)
                     value /= unit_divisor
             except ValueError:
                 pass
         if decimals == 'INF':
-            return f"{value:>15}"
+            return f"{value:>10}"
         else:
             return format_str.format(value)
     else:
         if pd.isna(value):
             value = ''
-        return f"{value:>15}"
+        return f"{value:>10}"
+
+
+def create_unit_label(decimals: str):
+    label = ""
+    if decimals == '-6':
+        label = "millions"
+    elif decimals == '-3':
+        label = "thousands"
+    return Text(label, style="dim grey70")
 
 
 def get_primary_units(divisor: int) -> str:
@@ -627,7 +652,10 @@ class Statement:
 
     def __rich__(self):
         cols = [col for col in self.data.columns if col not in self.meta_columns]
-        columns = [Column('')] + [Column(col) for col in cols]
+        if 'decimals' in self.data:
+            columns = [Column(''), Column('')] + [Column(col, justify='right') for col in cols]
+        else:
+            columns = [Column('')] + [Column(col, justify='right') for col in cols]
 
         table = Table(*columns,
                       title=Text.assemble(*[(f"{self.entity}\n", "bold red1"),
@@ -656,11 +684,16 @@ class Statement:
             label = Text(format_label(row.Index, row.level), style=label_style)
             if 'decimals' in self.data:
                 # For now don't use the unit divisor until we figure out the logic
-                values = [label] + [Text.assemble(*[(format_xbrl_value(value=row[colindex + 1],
-                                                                       decimals=row.decimals), row_style)])
-                                    for colindex, col in enumerate(cols)]
+                values = ([label, create_unit_label(row.decimals)]
+                          + [Text.assemble(*[(format_xbrl_value(value=row[colindex + 1], decimals=row.decimals),
+                                              row_style)]
+                                           )
+                             for colindex, col in enumerate(cols)])
             else:
-                values = [label] + [Text.assemble(*[(row[colindex + 1], row_style)])
+                values = [label] + [Text.assemble(*[(
+                    row[colindex + 1], row_style)
+                ]
+                                                  )
                                     for colindex, col in enumerate(cols)]
 
             table.add_row(*values, end_section=is_total)
@@ -750,18 +783,11 @@ class XBRLData(BaseModel):
     instance: XBRLInstance
     presentation: XBRLPresentation
     labels: Dict
-    calculations: Dict[str, List[Calculation]] = Field(default_factory=lambda: defaultdict(dict))
+    calculations: Optional[CalculationLinkbase] = None
     statements_dict: Dict[str, StatementDefinition] = Field(default_factory=dict)
     label_to_concept_map: Dict[str, str] = Field(default_factory=dict)
-    flattened_calculations: Dict[str, Calculation] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    def preprocess_calculations(self):
-        self.flattened_calculations = {}
-        for role, calc_list in self.calculations.items():
-            for calc in calc_list:
-                self.flattened_calculations[calc.to_concept] = calc
 
     def _build_label_to_concept_map(self):
         for concept, label_dict in self.labels.items():
@@ -769,7 +795,11 @@ class XBRLData(BaseModel):
                 self.label_to_concept_map[label.lower()] = concept
 
     @classmethod
-    def parse(cls, instance_xml: str, presentation_xml: str, labels: Dict, calculations: Dict[List[Calculation]]) -> 'XBRLData':
+    def parse(cls,
+              instance_xml: str,
+              presentation_xml: str,
+              labels: Dict,
+              calculations: CalculationLinkbase) -> 'XBRLData':
         """
         Parse XBRL documents from XML strings and create an XBRLParser instance.
 
@@ -790,7 +820,6 @@ class XBRLData(BaseModel):
             labels=labels,
             calculations=calculations
         )
-        xbrl_data.preprocess_calculations()
         xbrl_data._build_label_to_concept_map()
         xbrl_data.parse_financial_statements()
         return xbrl_data
@@ -838,7 +867,7 @@ class XBRLData(BaseModel):
                 statement_name,
                 root_element,
                 self.labels,
-                self.flattened_calculations,
+                self.calculations,
                 self.instance,
                 preferred_label=root_element.preferred_label
             )
