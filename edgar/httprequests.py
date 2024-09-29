@@ -62,7 +62,7 @@ class Throttler:
         self.sleep_interval = sleep_interval
         self.request_timestamps = deque()
         self.lock = Lock()
-        self.decorated_function = None
+        self.decorated_functions = None
         self.total_calls = 0
         self.peak_call_rate: float = 0.0
 
@@ -92,39 +92,51 @@ class Throttler:
 
     def get_metrics(self):
         return {
-            "decorated_function": self.decorated_function,
+            "decorated_functions": self.decorated_functions,  # Now it's a list
             "total_calls": self.total_calls,
             "peak_call_rate": self.peak_call_rate,
-            "request_rate_limit": self.request_rate.max_requests,  # Include the request_rate limit
+            "request_rate_limit": self.request_rate.max_requests,
         }
 
     def print_metrics(self):
         metrics = self.get_metrics()
-        print(f"Metrics for decorated function: {metrics['decorated_function']}")
+        print(f"Metrics for decorated functions: {', '.join(metrics['decorated_functions'])}")
         print(f"Total calls: {metrics['total_calls']}")
         print(f"Peak call rate: {metrics['peak_call_rate']:.2f} calls per second")
 
 
-_throttler_instances = {}
+_throttler_instances = {} # Singleton instance for throttler
 
 
 def throttle_requests(request_rate=None, requests_per_second=None, **kwargs):
+    """
+    Decorator to throttle the number of requests per second.
+    """
     if requests_per_second is not None:
         request_rate = RequestRate(max_requests=requests_per_second, time_window=1)
     elif request_rate is None:
         raise ValueError("Either request_rate or requests_per_second must be provided")
 
-    throttler = Throttler(request_rate, **kwargs)
+    # Use a single key for all instances to create a global throttler
+    key = "global_throttler"
+
+    if key not in _throttler_instances:
+        _throttler_instances[key] = Throttler(request_rate, **kwargs)
+
+    throttler = _throttler_instances[key]
 
     def decorator(func):
-        throttler.decorated_function = func.__name__  # Store the decorated function name
-
         @wraps(func)
         def wrapper(*args, **kwargs):
             throttler.wait_for_ticket()
             result = func(*args, **kwargs)
             throttler.update_metrics()
             return result
+
+        # Store the decorated function name
+        if throttler.decorated_functions is None:
+            throttler.decorated_functions = []
+        throttler.decorated_functions.append(func.__name__)
 
         return wrapper
 
