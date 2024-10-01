@@ -81,10 +81,15 @@ IncomeStatement = StandardStatement(statement_name="INCOME_STATEMENT",
                       StandardConcept(concept="us-gaap_IncomeStatementAbstract",
                                       label="Income Statement"),
                       StandardConcept(
-                          concept="us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
-                          label="Revenue"),
-                      StandardConcept(concept="us-gaap_OperatingIncomeLoss",
-                                      label="Operating Income"),
+                          concept="us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", label="Revenue"),
+                      StandardConcept(concept="us-gaap_CostOfGoodsAndServicesSold", label="Cost of Sales"),
+                      StandardConcept(concept="us-gaap_OperatingExpensesAbstract", label="Operating Expenses"),
+                      StandardConcept(concept="us-gaap_ResearchAndDevelopmentExpense", label="Research & Development"),
+                      StandardConcept(concept="us-gaap_SellingGeneralAndAdministrativeExpense", label="Selling, General & Admin"),
+                      StandardConcept(concept="us-gaap_OperatingExpenses", label="Total Operating Expenses"),
+
+
+                      StandardConcept(concept="us-gaap_OperatingIncomeLoss", label="Operating Income"),
                       StandardConcept(
                           concept="us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
                           label="Pre-tax Income"),
