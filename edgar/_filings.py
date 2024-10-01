@@ -331,8 +331,16 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
                        ):
     year, quarter = year_and_quarter
     url = full_index_url.format(year, quarter, index, "gz")
-    index_table = fetch_filing_index_at_url(url, index)
-    return (year, quarter), index_table
+    try:
+        index_table = fetch_filing_index_at_url(url, index)
+        return (year, quarter), index_table
+    except httpx.HTTPStatusError as e:
+        if is_start_of_quarter() and e.response.status_code == 403:
+            # Return an empty filing index
+            return (year, quarter), _empty_filing_index()
+        else:
+            raise
+
 
 
 def fetch_daily_filing_index(date: str,
@@ -345,7 +353,7 @@ def fetch_daily_filing_index(date: str,
 
 
 def fetch_filing_index_at_url(url: str,
-                              index: str):
+                              index: str) -> Optional[pa.Table]:
     index_text = download_text(url=url)
     assert index_text is not None
     if index == "xbrl":
@@ -760,18 +768,7 @@ def get_filings(year: Optional[Years] = None,
     (You specified the year {year} and quarter {quarter})   
         """)
         return None
-    try:
-        filing_index = get_filings_for_quarters(year_and_quarters, index=index)
-    except httpx.HTTPStatusError as e:
-        # If we are making a default request e.g. get_filings() and the data is not yet there get the previous quarter
-        if using_default_year and 'AccessDenied' in e.response.text:
-            previous_quarter = [get_previous_quarter(year, quarter)]
-            filing_index = get_filings_for_quarters(previous_quarter, index=index)
-        elif is_start_of_quarter() and e.response.status_code == 403:
-            # The year was provided but the data is not yet there. We should return an empty filing index
-            return None
-        else:
-            raise
+    filing_index = get_filings_for_quarters(year_and_quarters, index=index)
 
     filings = Filings(filing_index)
 
@@ -779,6 +776,11 @@ def get_filings(year: Optional[Years] = None,
         filings = filings.filter(form=form, amendments=amendments, filing_date=filing_date)
 
     if not filings:
+        if using_default_year:
+            # Ensure at least some data is returned
+            previous_quarter = [get_previous_quarter(year, quarter)]
+            filing_index = get_filings_for_quarters(previous_quarter, index=index)
+            return Filings(filing_index)
         return None
 
     # Finally sort by filing date

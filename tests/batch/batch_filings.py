@@ -7,7 +7,11 @@ from edgar import get_filings
 
 def sample_and_test_filings(years, sample_size):
     print(f"Sampling {sample_size} filings from {years}")
-    for filing in tqdm(get_filings(year=years).sample(sample_size)):
+    filings = get_filings(year=years)
+    print("Found", len(filings), "filings")
+    filings_sample = filings.sample(sample_size)
+    print("Running on a sample of", len(filings_sample), "filings")
+    for filing in tqdm(filings_sample):
         try:
             attachments = filing.attachments
             filing.text()
