@@ -13,6 +13,7 @@ from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
 from typing import Union, Optional, Tuple, List
+from pandas.tseries.offsets import BDay
 
 import httpx
 import humanize
@@ -76,6 +77,7 @@ __all__ = [
     'text_extensions',
     'binary_extensions',
     'ask_for_identity',
+    'is_start_of_quarter',
     'use_local_storage',
     'run_async_or_sync',
     'download_edgar_data',
@@ -723,3 +725,22 @@ def listify(value):
         return value
     else:
         return [value]
+
+
+
+def is_start_of_quarter():
+    today = datetime.datetime.now().date()
+
+    # Check if it's the start of a quarter
+    if today.month in [1, 4, 7, 10] and today.day <= 5:
+        # Get the first day of the current quarter
+        first_day_of_quarter = datetime.datetime(today.year, today.month, 1).date()
+
+        # Calculate one business day after the start of the quarter
+        one_business_day_after = (first_day_of_quarter + BDay(1)).date()
+
+        # Check if we haven't passed one full business day yet
+        if today <= one_business_day_after:
+            return True
+
+    return False

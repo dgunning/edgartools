@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from edgar import Filing
 
 import asyncio
-import os
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import datetime
@@ -24,6 +23,7 @@ from rich.table import Table, Column
 from rich.text import Text
 from rich.tree import Tree
 
+from edgar.datatools import replace_all_na_with_empty, na_value
 from edgar.richtools import repr_rich, colorize_words
 from edgar.attachments import Attachments
 from edgar.core import log, split_camel_case, run_async_or_sync
@@ -587,9 +587,9 @@ class Statement:
         if len(results) == 1:
             fact = Concept(
                 name=results.concept.iloc[0],
-                unit=results.units.iloc[0] if 'units' in results else None,
+                unit=na_value(results.units.iloc[0]) if 'units' in results else None,
                 label=results.index[0],
-                decimals=results.decimals.iloc[0] if 'decimals' in results else None,
+                decimals=na_value(results.decimals.iloc[0]) if 'decimals' in results else None,
                 value={col: results[col].iloc[0] for col in self.periods}
             )
             return fact
@@ -684,14 +684,14 @@ class Statement:
             label = Text(format_label(row.Index, row.level), style=label_style)
             if 'decimals' in self.data:
                 # For now don't use the unit divisor until we figure out the logic
-                values = ([label, create_unit_label(row.decimals)]
-                          + [Text.assemble(*[(format_xbrl_value(value=row[colindex + 1], decimals=row.decimals),
+                values = ([label, create_unit_label(na_value(row.decimals))]
+                          + [Text.assemble(*[(format_xbrl_value(value=row[colindex + 1], decimals=na_value(row.decimals)),
                                               row_style)]
                                            )
                              for colindex, col in enumerate(cols)])
             else:
                 values = [label] + [Text.assemble(*[(
-                    row[colindex + 1], row_style)
+                    na_value(row[colindex + 1]), row_style)
                 ]
                                                   )
                                     for colindex, col in enumerate(cols)]
@@ -1012,10 +1012,7 @@ class XBRLData(BaseModel):
 
             data.append(row)
 
-        df = pd.DataFrame(data)
-
-        if os.getenv('EDGAR_USE_PYARROW_BACKEND'):
-            df = pd.DataFrame(data).convert_dtypes(dtype_backend="pyarrow")
+        df = pd.DataFrame(data).convert_dtypes(dtype_backend="pyarrow").fillna(pd.NA)
 
         # Use both concept and label for grouping to preserve uniqueness
         df = df.groupby(['concept', 'label'], as_index=False).agg(
@@ -1042,17 +1039,12 @@ class XBRLData(BaseModel):
 
             # Ensure format columns have empty strings instead of NaN
             for col in ['abstract', 'units', 'decimals']:
-                df[col] = df[col].fillna('')
-
-        df = df.fillna('')
+                replace_all_na_with_empty(df[col])
 
         # Drop columns that are mostly empty
-        empty_counts = (df == '').sum() / len(df)
+        empty_counts = ((df.isna()) | (df == '')).sum() / len(df)
         columns_to_keep = empty_counts[empty_counts < empty_threshold].index
         df = df[columns_to_keep]
-
-        # Fill NaN with empty string for display purposes
-        df = df.fillna('')
 
         # Ensure the original order is preserved
         # Create a MultiIndex for reindexing
@@ -1060,7 +1052,7 @@ class XBRLData(BaseModel):
         new_index = pd.MultiIndex.from_tuples(reindex_tuples, names=['concept', 'label'])
 
         # Reindex the DataFrame
-        df = df.reindex(new_index)
+        df = df.reindex(new_index).fillna('')
 
         # Flatten the column index if it's multi-level
         if isinstance(df.columns, pd.MultiIndex):

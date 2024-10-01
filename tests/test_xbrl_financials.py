@@ -460,6 +460,7 @@ def test_get_nonfinancial_statement(apple_xbrl):
     assert 'Document Type' in _repr_
 
     for statement in statements:
+        print(statement.name)
         assert repr(statement)
 
 

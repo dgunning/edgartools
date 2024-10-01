@@ -6,6 +6,10 @@ from edgar.effect import Effect
 from edgar.entities import EntityData
 from edgar.offerings import FormD
 from edgar.ownership import Ownership
+import httpx
+import pytest
+import edgar.httprequests
+from edgar import get_filings
 
 
 def test_matches_form():
@@ -112,3 +116,19 @@ def test_ticker_name_correspondence(ticker, expected_fund_name, expected_class):
     fund = find(ticker)
     assert fund.name == expected_fund_name
     assert fund.class_contract_name == expected_class
+
+def test_get_filings_before_new_filings_for_quarter(monkeypatch):
+    def mock_download_text(url):
+        raise httpx.HTTPStatusError(
+            "Client error '403 Forbidden' for url 'https://www.sec.gov/Archives/edgar/full-index/2024/QTR4/form.gz'",
+            request=httpx.Request("GET", url),
+            response=httpx.Response(403, request=httpx.Request("GET", url))
+        )
+
+    # Use monkeypatch to replace the original function with our mock
+    monkeypatch.setattr(edgar.httprequests, 'download_text', mock_download_text)
+
+    # Use pytest.raises to check if the function raises the expected exception
+    filings = get_filings()
+    assert filings
+

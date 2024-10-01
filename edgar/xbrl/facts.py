@@ -1,4 +1,3 @@
-import os
 from typing import Dict, Any, Optional
 
 import pandas as pd
@@ -187,9 +186,7 @@ class XBRLInstance(BaseModel):
                 'dimensions': dimensions
             })
 
-        self.facts = pd.DataFrame(facts_data)
-        if os.getenv('EDGAR_USE_PYARROW_BACKEND'):
-            self.facts = pd.DataFrame(self.facts).convert_dtypes(dtype_backend="pyarrow")
+        self.facts = pd.DataFrame(facts_data).convert_dtypes(dtype_backend="pyarrow")
 
     def get_all_dimensions(self):
         return set().union(*self.facts['dimensions'].apply(lambda x: x.keys()))

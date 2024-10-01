@@ -41,6 +41,7 @@ from edgar.core import (log, display_size, sec_edgar,
                         filter_by_cik,
                         filter_by_ticker,
                         listify,
+                        is_start_of_quarter,
                         InvalidDateException, IntString, DataPager)
 from edgar.documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
@@ -762,9 +763,13 @@ def get_filings(year: Optional[Years] = None,
     try:
         filing_index = get_filings_for_quarters(year_and_quarters, index=index)
     except httpx.HTTPStatusError as e:
+        # If we are making a default request e.g. get_filings() and the data is not yet there get the previous quarter
         if using_default_year and 'AccessDenied' in e.response.text:
             previous_quarter = [get_previous_quarter(year, quarter)]
             filing_index = get_filings_for_quarters(previous_quarter, index=index)
+        elif is_start_of_quarter() and e.response.status_code == 403:
+            # The year was provided but the data is not yet there. We should return an empty filing index
+            return None
         else:
             raise
 

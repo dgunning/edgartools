@@ -9,6 +9,8 @@ __all__ = ["compress_dataframe",
            "clean_column_text",
            'convert_to_numeric',
            'describe_dataframe',
+           'na_value',
+           'replace_all_na_with_empty',
            'convert_to_pyarrow_backend']
 
 
@@ -229,3 +231,33 @@ def convert_to_pyarrow_backend(data:pd.DataFrame):
 
     # Now convert to PyArrow
     return data.convert_dtypes(dtype_backend="pyarrow")
+
+
+def replace_all_na_with_empty(df_or_series):
+    if isinstance(df_or_series, pd.DataFrame):
+        for column in df_or_series.columns:
+            # Check if the column is all NA or None
+            if df_or_series[column].isna().all():
+                # Get the length of the DataFrame
+                length = len(df_or_series)
+
+                # Create a new Series of empty strings
+                empty_series = pd.Series([''] * length, name=column)
+
+                # Replace the column with the new Series
+                df_or_series[column] = empty_series
+
+        return df_or_series
+    elif isinstance(df_or_series, pd.Series):
+        # Check if the series is all NA or None
+        if df_or_series.isna().all():
+            # Create a new Series of empty strings with the same index and name
+            return pd.Series('', index=df_or_series.index, name=df_or_series.name)
+        else:
+            # If not all NA, return the original series
+            return df_or_series
+
+def na_value(value, default_value:object=''):
+    if pd.isna(value):
+        return ''
+    return value

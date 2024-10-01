@@ -1,6 +1,6 @@
 import datetime
 from datetime import datetime
-
+from freezegun import freeze_time
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -23,6 +23,7 @@ from edgar.core import (decode_content,
                         CRAWL, CAUTION, extract_dates,
                         reverse_name,
                         get_bool,
+                        is_start_of_quarter,
                         split_camel_case)
 
 
@@ -270,3 +271,37 @@ def test_split_camel_case():
     assert split_camel_case("consolidatedbalancesheets") == "consolidatedbalancesheets"
     assert split_camel_case("SummaryofSignificantAccountingPolicies") == "Summaryof Significant Accounting Policies"
     assert split_camel_case("RoleStatementINCOMESTATEMENTS") == "Role Statement INCOMESTATEMENTS"
+
+
+@pytest.mark.parametrize("test_date, expected_result", [
+    ("2024-01-01", True),   # New Year's Day (start of Q1)
+    ("2024-01-02", True),   # First business day after New Year's
+    ("2024-01-03", False),  # Second business day after New Year's
+    ("2024-03-31", False),  # Last day of Q1
+    ("2024-04-01", True),   # First day of Q2
+    ("2024-04-02", True),   # Possibly first business day of Q2
+    ("2024-04-03", False),  # Second business day of Q2
+    ("2024-07-01", True),   # First day of Q3
+    ("2024-07-02", True),   # Possibly first business day of Q3
+    ("2024-07-03", False),  # Second business day of Q3
+    ("2024-10-01", True),   # First day of Q4
+    ("2024-10-02", True),   # Possibly first business day of Q4
+    ("2024-10-03", False),  # Second business day of Q4
+    ("2024-12-31", False),  # Last day of Q4
+    ("2024-05-15", False),  # Random day in middle of quarter
+])
+def test_is_start_of_quarter(test_date, expected_result):
+    with freeze_time(test_date):
+        assert is_start_of_quarter() == expected_result
+
+@pytest.mark.parametrize("test_datetime, expected_result", [
+    ("2024-01-01 00:00:01", True),   # Just after midnight on New Year's
+    ("2024-01-02 23:59:59", True),   # Just before midnight on Jan 2
+    ("2024-01-03 00:00:01", False),  # Just after midnight on Jan 3
+    ("2024-04-01 12:00:00", True),   # Noon on first day of Q2
+    ("2024-07-01 18:30:00", True),   # Evening on first day of Q3
+    ("2024-10-02 09:00:00", True),   # Morning of possibly first business day of Q4
+])
+def test_is_start_of_quarter_with_time(test_datetime, expected_result):
+    with freeze_time(test_datetime):
+        assert is_start_of_quarter() == expected_result
