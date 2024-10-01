@@ -3,7 +3,7 @@ from tqdm import tqdm
 from rich import print
 from edgar import *
 from financials import *
-
+import pandas as pd
 use_local_storage(True)
 popular_tickers = pd.read_csv('data/popular_us_stocks.csv')
 
