@@ -32,8 +32,6 @@ from rich.text import Text
 
 from edgar._markdown import html_to_markdown, text_to_markdown
 from edgar._party import Address
-from edgar.richtools import df_to_rich_table, repr_rich
-from edgar.xmltools import child_text
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
 from edgar.core import (log, display_size, sec_edgar,
                         filter_by_date,
@@ -49,10 +47,11 @@ from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
-
-from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.reference import describe_form
+from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.search import BM25Search, RegexSearch
+from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
+from edgar.xmltools import child_text
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -340,7 +339,6 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
             return (year, quarter), _empty_filing_index()
         else:
             raise
-
 
 
 def fetch_daily_filing_index(date: str,

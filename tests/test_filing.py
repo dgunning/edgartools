@@ -5,7 +5,7 @@ from datetime import date
 from functools import lru_cache
 from pathlib import Path
 from typing import List
-
+from tqdm.auto import tqdm
 import httpx
 import humanize
 import pandas as pd
@@ -272,7 +272,7 @@ def test_parse_filing_homepage_with_multiple_instruments():
     filers = filing_homepage.get_filers()
     assert len(filing_homepage.get_filers()) > 60
     filer_info = filers[0]
-    assert filer_info.company_name == "T. Rowe Price Small-Cap Stock Fund, Inc. (Filer) CIK: 0000075170"
+    assert filer_info.company_name == "T. Rowe Price Small-Cap Stock Fund, Inc."
     assert "100 EAST PRATT STRET" in filer_info.addresses[0]
 
 
@@ -977,3 +977,4 @@ def test_filter_by_ticker(filings_2022_q3):
     tesla_8k = filings_2022_q3.filter(ticker="TSLA", form="8-K")
     assert len(tesla_8k) > 0
     assert set(tesla_8k.data['form'].to_pylist()) == {'8-K'}
+

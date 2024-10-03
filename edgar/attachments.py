@@ -39,6 +39,7 @@ def sec_document_url(attachment_url: str) -> str:
 
 class FilerInfo(BaseModel):
     company_name: str
+    cik:str
     identification: str
     addresses: List[str]
 
@@ -568,9 +569,19 @@ class FilingHomepage:
             company_info_div = filer_div.find("div", class_="companyInfo")
 
             company_name_span = company_info_div.find("span", class_="companyName")
-            company_name = (re.sub("\n", "", company_name_span.text.strip())
-                            .replace("(see all company filings)", "").rstrip()
-                            if company_name_span else "")
+
+            if company_name_span:
+                full_text = company_name_span.text.strip()
+                # Split the text into company name and CIK
+                parts = full_text.split('CIK: ')
+                company_name = parts[0].strip()
+                cik = parts[1].split()[0] if len(parts) > 1 else ""
+
+                # Clean up the company name
+                company_name = re.sub("\n", "", company_name).replace("(Filer)", "").strip()
+            else:
+                company_name = ""
+                cik = ""
 
             # Get the identification information
             ident_info_div = company_info_div.find("p", class_="identInfo")
@@ -589,11 +600,22 @@ class FilingHomepage:
                          for mailer_div in mailer_divs]
 
             # Create the filer info
-            filer_info = FilerInfo(company_name=company_name, identification=identification, addresses=addresses)
+            filer_info = FilerInfo(company_name=company_name, cik=cik, identification=identification, addresses=addresses)
 
             filer_infos.append(filer_info)
 
         return filer_infos
+
+    @lru_cache(maxsize=None)
+    def get_filing_dates(self)-> Optional[Tuple[str,str]]:
+        # Find the div with the formGrouping class
+        form_grouping = self._soup.find("div", class_="formGrouping")
+        if form_grouping is None:
+            return None
+        info_divs = form_grouping.find_all("div", class_="info")
+        filing_date = info_divs[0].text.strip()
+        accepted_date = info_divs[1].text.strip()
+        return filing_date, accepted_date
 
     @classmethod
     def load(cls, url: str):
