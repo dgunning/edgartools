@@ -204,8 +204,12 @@ class XBRLInstance(BaseModel):
         result = self.facts.query(query) if query else self.facts.copy()
 
         if 'dimensions' in kwargs:
-            result = result[
-                result['dimensions'].apply(lambda d: all(item in d.items() for item in kwargs['dimensions'].items()))]
+            # Check for empty dimensions
+            if not kwargs['dimensions']:
+                result = result[result['dimensions'].apply(lambda d: not d)]
+            else:
+                result = result[
+                    result['dimensions'].apply(lambda d: all(item in d.items() for item in kwargs['dimensions'].items()))]
 
         return result
 
