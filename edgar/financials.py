@@ -10,7 +10,9 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
+import asyncio
 
+from edgar.core import run_async_or_sync
 from edgar.richtools import repr_rich
 from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
 from edgar.xbrl.xbrldata import XBRLData, Statement
@@ -220,8 +222,12 @@ class Financials:
 
     @classmethod
     def extract(cls, filing) -> Optional['Financials']:
+        return run_async_or_sync(cls.extract_async(filing))
+
+    @classmethod
+    async def extract_async(cls, filing) -> Optional['Financials']:
         assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A'], "Filing must be a 10-K or 10-Q"
-        xbrl_data = XBRLData.extract(filing)
+        xbrl_data = await XBRLData.from_filing(filing)
         if not xbrl_data:
             return None
         return cls(xbrl_data)
@@ -396,7 +402,7 @@ class MultiFinancials:
     Merges the financial statements from multiple periods into a single financials.
     """
 
-    def __init__(self, filings: List['Filings']):
+    def __init__(self, filings: 'Filings'):
         self.financials_list = []
         for filing in filings:
             if not filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A']:
@@ -404,6 +410,28 @@ class MultiFinancials:
             financials = Financials.extract(filing)
             self.financials_list.append(financials)
         self.primary_financials = self.financials_list[0] if self.financials_list else None
+
+    @classmethod
+    async def extract_async(cls, filings: 'Filings') -> 'MultiFinancials':
+        financials_list = []
+        tasks = []
+        for filing in filings:
+            if filing.form not in ['10-K', '10-Q', '10-K/A', '10-Q/A']:
+                continue
+            tasks.append(Financials.extract_async(filing))
+
+        financials_results = await asyncio.gather(*tasks)
+        financials_list = [f for f in financials_results if f is not None]
+
+        multi_financials = cls.__new__(cls)
+        multi_financials.financials_list = financials_list
+        multi_financials.primary_financials = financials_list[0] if financials_list else None
+        return multi_financials
+
+    @classmethod
+    def extract(cls, filings: 'Filings') -> 'MultiFinancials':
+        return run_async_or_sync(cls.extract_async(filings))
+
 
     @classmethod
     def stitch(cls, financials_list: List[Financials]) -> 'MultiFinancials':

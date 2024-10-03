@@ -174,10 +174,16 @@ def test_get_dimension_values(apple_xbrl):
     assert instance.get_dimension_values('us-gaap:NonExisting') == []
 
 
-def test_query_facts(apple_xbrl):
+def test_query_facts_by_dimennsion_value(apple_xbrl):
     instance: XBRLInstance = apple_xbrl.instance
     facts = instance.query_facts(dimensions={'ecd:IndividualAxis': 'aapl:DeirdreOBrienMember'})
-    print(facts)
+    assert all([dimension == {'ecd:IndividualAxis': 'aapl:DeirdreOBrienMember'} for dimension in facts.dimensions])
+
+
+def test_query_facts_with_empty_dimensions(apple_xbrl):
+    instance: XBRLInstance = apple_xbrl.instance
+    facts = instance.query_facts(dimensions={})
+    assert all([dimension == {} for dimension in facts.dimensions])
 
 
 def test_get_facts_by_dimension(apple_xbrl):
@@ -614,6 +620,18 @@ def test_multi_financials_values():
     # Standardized balance sheet statement
     balance_sheet = multi_financials.get_balance_sheet(standard=True)
     assert set(balance_sheet.concepts).issubset({concept.concept for concept in BalanceSheet.concepts})
+
+
+@pytest.mark.asyncio
+async def test_multifinanancials_async():
+    company = Company("AAPL", include_old_filings=False)
+    filings = company.get_filings(form="10-K").latest(3)
+    multi_financials = await MultiFinancials.extract_async(filings)
+    assert multi_financials
+    assert isinstance(multi_financials, MultiFinancials)
+    balance_sheet = multi_financials.get_balance_sheet()
+    columns = balance_sheet.get_dataframe().columns.tolist()
+    assert len(columns) > 2
 
 
 def test_apple_cashflow_correct_negative_values(apple_xbrl):
