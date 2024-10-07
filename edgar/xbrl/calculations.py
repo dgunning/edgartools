@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel

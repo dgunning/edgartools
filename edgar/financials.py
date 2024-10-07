@@ -405,7 +405,7 @@ class MultiFinancials:
     def __init__(self, filings: 'Filings'):
         self.financials_list = []
         for filing in filings:
-            if not filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A']:
+            if filing.form not in ['10-K', '10-Q', '10-K/A', '10-Q/A']:
                 raise ValueError("Filing must be a 10-K or 10-Q")
             financials = Financials.extract(filing)
             self.financials_list.append(financials)
