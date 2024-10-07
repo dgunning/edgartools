@@ -172,6 +172,8 @@ def test_filter_by_form():
     # Amendments false
     assert len(filter_by_form(table, form='10-K', amendments=False)) == 2
 
+    assert len(filter_by_form(table, form=['10-K', '10-Q', '10-K/A'], amendments=False)) == 3
+    assert len(filter_by_form(table, form=['10-K', '10-Q', '10-K/A'], amendments=True)) == 4
 
 def test_filter_by_cik():
     arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),

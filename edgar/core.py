@@ -323,9 +323,10 @@ def filter_by_form(data: pa.Table,
     """Return the data filtered by form"""
     # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
     forms = [str(el) for el in listify(form)]
-    # If amendments then add amendments
     if amendments:
         forms = list(set(forms + [f"{val}/A" for val in forms]))
+    else:
+        forms = list(set([val.replace("/A", "") for val in forms]))
     data = data.filter(pc.is_in(data['form'], pa.array(forms)))
     return data
 

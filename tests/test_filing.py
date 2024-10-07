@@ -978,3 +978,8 @@ def test_filter_by_ticker(filings_2022_q3):
     assert len(tesla_8k) > 0
     assert set(tesla_8k.data['form'].to_pylist()) == {'8-K'}
 
+def test_filter_by_amendments(filings_2022_q3):
+    filings = filings_2022_q3.filter(form=["10-K", "20-F", "40-F"])
+    filings_no_amendments = filings.filter(amendments=False)
+    forms = set(filings_no_amendments.data['form'].to_pylist())
+    assert forms == {"10-K", "20-F", "40-F"}

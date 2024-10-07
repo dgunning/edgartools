@@ -478,7 +478,7 @@ class Filings:
 
     def filter(self,
                form: Optional[Union[str, List[IntString]]] = None,
-               amendments: bool = False,
+               amendments: bool = None,
                filing_date: Optional[str] = None,
                date: Optional[str] = None,
                cik: Union[IntString, List[IntString]] = None,
@@ -518,6 +518,10 @@ class Filings:
 
         # Filter by form
         if forms:
+            filing_index = filter_by_form(filing_index, form=forms, amendments=amendments)
+        elif amendments is not None:
+            # Get the unique values of the form as a pylist
+            forms = list(set([form.replace("/A", "") for form in pc.unique(filing_index['form']).to_pylist()]))
             filing_index = filter_by_form(filing_index, form=forms, amendments=amendments)
 
         # filing_date and date are aliases
