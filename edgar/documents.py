@@ -1,15 +1,15 @@
 import re
 import warnings
 from functools import lru_cache
-from typing import Optional, Union, Dict, List, Any
+from typing import Optional, Union, Dict, List, Any, Tuple
 
 import pandas as pd
 from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning
 from rich import box
 from rich.table import Table
 
-from edgar.richtools import repr_rich
 from edgar.datatools import table_html_to_dataframe, clean_column_text
+from edgar.richtools import repr_rich
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
@@ -21,6 +21,7 @@ __all__ = ['DocumentData',
            'TextAnalysis',
            'SECLine',
            'table_to_text',
+           'table_to_markdown',
            'html_to_text',
            'get_clean_html', ]
 
@@ -283,7 +284,7 @@ class TableBlock(Block):
 
     @lru_cache()
     def get_text(self):
-        _text = fixup(table_to_text(self.table_element))
+        _text = table_to_text(self.table_element)
         _text = "\n" + _text + "\n"
         return _text
 
@@ -564,7 +565,7 @@ def extract_and_format_content(element) -> List[Block]:
         return blocks
 
 
-def table_to_text(table_tag):
+def table_to_markdown(table_tag):
     rows = table_tag.find_all('tr')
     col_widths = []
     col_has_content = []
@@ -859,3 +860,222 @@ class TextAnalysis:
     def __str__(self):
         # Show the first 8 characters of the text
         return f"Text Analysis: {self._text}"
+
+def clean_cell_text(col) -> str:
+    text = re.sub(r'<br\s*/?>', '\n', str(col))
+    text = re.sub(r'<[^>]+>', '', text)
+    lines = [' '.join(line.strip().split()) for line in text.split('\n') if line.strip()]
+    return '\n'.join(lines)
+
+
+def process_row(row) -> List[Tuple[str, int, int]]:
+    processed_cells = []
+    cells = row.find_all(['td', 'th'])
+    i = 0
+    while i < len(cells):
+        content = clean_cell_text(cells[i])
+        colspan = int(cells[i].get('colspan', 1))
+        rowspan = int(cells[i].get('rowspan', 1))
+
+        # Check if this cell is just a $ sign and the next cell exists
+        if content == '$' and i + 1 < len(cells):
+            next_content = clean_cell_text(cells[i + 1])
+            content = f'${next_content}'
+            colspan += int(cells[i + 1].get('colspan', 1))
+            i += 1  # Skip the next cell as we've combined it
+        # Check if this cell is empty and the next cell is numeric
+        elif not content.strip() and i + 1 < len(cells):
+            next_content = clean_cell_text(cells[i + 1])
+            if next_content.replace('.', '', 1).isdigit():  # Check if next cell is numeric
+                content = next_content
+                colspan += int(cells[i + 1].get('colspan', 1))
+                i += 1  # Skip the next cell as we've combined it
+
+        # Always add the cell, even if it's empty
+        processed_cells.append((content, colspan, rowspan))
+
+        i += 1
+    return processed_cells
+
+def detect_header_rows(rows):
+    header_rows = []
+    for row in rows:
+        if row.find('th'):
+            header_rows.append(row)
+        elif not header_rows:
+            header_rows.append(row)  # Use first row as header if no <th> found
+        else:
+            break
+    return header_rows
+
+
+def merge_header_rows(header_rows):
+    processed_headers = []
+    for row in header_rows:
+        processed_row = []
+        for content, colspan, _ in row:
+            lines = content.split('\n')
+            processed_row.append((lines, colspan))
+        processed_headers.append(processed_row)
+
+    max_lines = max(len(lines) for row in processed_headers for lines, _ in row)
+    merged_header = []
+
+    for i in range(max_lines):
+        line = []
+        for row in processed_headers:
+            for lines, colspan in row:
+                if i < len(lines):
+                    line.append((lines[i], colspan))
+                else:
+                    line.append(('', colspan))
+        merged_header.append(line)
+
+    # Ensure the first cell is not empty across all lines
+    if all(not line[0][0] for line in merged_header):
+        for line in merged_header:
+            line[0] = (' ', line[0][1])
+
+    return merged_header
+
+
+def is_numeric_or_financial(value):
+    pattern = r'^[\$€£(-]?\s{0,2}\d'
+    return bool(re.match(pattern, value.strip()))
+
+def determine_column_justification(all_processed_rows):
+    max_cols = max(sum(colspan for _, colspan, _ in row) for row in all_processed_rows)
+    justifications = ['left'] * max_cols
+    for col in range(max_cols):
+        numeric_count = 0
+        total_count = 0
+        for row in all_processed_rows:
+            col_index = 0
+            for content, colspan, _ in row:
+                if col_index <= col < col_index + colspan:
+                    if content.strip():
+                        total_count += 1
+                        if is_numeric_or_financial(content):
+                            numeric_count += 1
+                    break
+                col_index += colspan
+        if numeric_count > 1 and numeric_count / total_count > 0.5:
+            for i in range(col, min(col + colspan, max_cols)):
+                justifications[i] = 'right'
+    return justifications
+
+
+def table_to_text(table_tag):
+    try:
+        rows = table_tag.find_all('tr')
+        if not rows:
+            return ""
+
+        header_rows = detect_header_rows(rows)
+
+        all_processed_rows = [process_row(row) for row in rows]
+        header_processed = all_processed_rows[:len(header_rows)]
+        data_processed = all_processed_rows[len(header_rows):]
+
+        merged_header = merge_header_rows(header_processed)
+
+        # Check if the header is entirely empty
+        header_is_empty = all(not content.strip() for header_line in merged_header for content, _ in header_line)
+
+        # Determine the maximum number of columns
+        max_cols = max((sum(colspan for _, colspan, _ in row) for row in all_processed_rows), default=0)
+
+        # Initialize column widths and track non-empty columns
+        col_widths = [0] * max_cols
+        non_empty_cols = set()
+
+        # Calculate header widths if header is not empty
+        if not header_is_empty:
+            for header_line in merged_header:
+                col_index = 0
+                for content, colspan in header_line:
+                    if content.strip():
+                        content_width = max((len(line) for line in content.split('\n')), default=0)
+                        for i in range(colspan):
+                            if col_index + i < max_cols:
+                                col_widths[col_index + i] = max(col_widths[col_index + i], content_width // max(colspan, 1))
+                                non_empty_cols.add(col_index + i)
+                    col_index += colspan
+
+        # Update column widths based on data content
+        for processed_row in data_processed:
+            col_index = 0
+            for content, colspan, _ in processed_row:
+                if content.strip():
+                    content_width = max((len(line) for line in content.split('\n')), default=0)
+                    for i in range(colspan):
+                        if col_index + i < max_cols:
+                            col_widths[col_index + i] = max(col_widths[col_index + i], content_width // max(colspan, 1))
+                            non_empty_cols.add(col_index + i)
+                col_index += colspan
+
+        # Filter out empty columns
+        col_widths = [width for i, width in enumerate(col_widths) if i in non_empty_cols]
+
+        # If all columns are empty, return an empty string
+        if not col_widths:
+            return ""
+
+        # Determine column justifications
+        justifications = determine_column_justification(all_processed_rows)
+        justifications = [just for i, just in enumerate(justifications) if i in non_empty_cols]
+
+        # Render the table
+        rendered_table = []
+
+        # Render header if it's not empty
+        if not header_is_empty:
+            for header_line in merged_header:
+                row_content = []
+                col_index = 0
+                non_empty_cell_count = 0
+                for content, colspan in header_line:
+                    if any(col_index + i in non_empty_cols for i in range(colspan)):
+                        width = sum(col_widths[non_empty_cell_count:non_empty_cell_count + colspan]) + 3 * (colspan - 1)
+                        row_content.append(content.center(width))
+                        non_empty_cell_count += colspan
+                    col_index += colspan
+                rendered_table.append('   '.join(row_content))
+
+            # Add separator line only if header is not empty
+            rendered_table.append('-' * (sum(col_widths) + 3 * (len(col_widths) - 1)))
+
+        # Render data rows
+        for processed_row in data_processed:
+            non_empty_contents = [content for content, _, _ in processed_row if content.strip()]
+            if not non_empty_contents:
+                continue  # Skip empty rows
+
+            row_lines = [''] * max((len(content.split('\n')) for content in non_empty_contents), default=1)
+            for i in range(len(row_lines)):
+                col_index = 0
+                cell_contents = []
+                non_empty_cell_count = 0
+                for content, colspan, _ in processed_row:
+                    if any(col_index + i in non_empty_cols for i in range(colspan)):
+                        width = sum(col_widths[non_empty_cell_count:non_empty_cell_count + colspan]) + 3 * (colspan - 1)
+                        lines = content.split('\n')
+                        if i < len(lines):
+                            if justifications and non_empty_cell_count < len(justifications) and justifications[non_empty_cell_count] == 'right':
+                                cell_contents.append(lines[i].rjust(width))
+                            else:
+                                cell_contents.append(lines[i].ljust(width))
+                        else:
+                            cell_contents.append(' ' * width)
+                        non_empty_cell_count += colspan
+                    col_index += colspan
+                row_lines[i] = '   '.join(cell_contents)
+
+            rendered_table.extend(row_lines)
+
+        return '\n'.join(rendered_table)
+
+    except Exception as e:
+        # Log the error or handle it as appropriate for your use case
+        print(f"Error processing table: {str(e)}")
+        return ""  # Return an empty string in case of any error

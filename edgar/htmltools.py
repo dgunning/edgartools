@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from functools import lru_cache
 from functools import partial
 from io import StringIO
-from typing import Any, Optional, Dict, List, Callable
+from typing import Any, Optional, Dict, Callable
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -11,10 +12,9 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.richtools import repr_rich
 from edgar.datatools import compress_dataframe
-from edgar.datatools import table_html_to_dataframe, dataframe_to_text
-from edgar.documents import HtmlDocument, Block, TableBlock
+from edgar.documents import HtmlDocument, Block, TableBlock, table_to_markdown
+from edgar.richtools import repr_rich
 
 __all__ = [
     "Element",
@@ -226,6 +226,17 @@ def adjust_for_empty_items(chunk_df: pd.DataFrame,
     return chunk_df
 
 
+def _render_blocks_using_old_markdown_tables(blocks:List[Block]):
+    """
+    This renders tables as the old style markdown tables
+    Because thd item chunking uses these tables.
+    So this is a split from the newer table rendering logic
+    """
+    return "".join([
+        table_to_markdown(block.table_element) if isinstance(block, TableBlock) else block.get_text()
+        for block in blocks
+    ]).strip()
+
 def chunks2df(chunks: List[List[Block]],
               item_detector: Callable[[pd.Series], pd.Series] = detect_int_items,
               item_adjuster: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame] = adjust_detected_items,
@@ -237,7 +248,8 @@ def chunks2df(chunks: List[List[Block]],
         : item_structure: A dictionary of items specific to each filing e.g. 8-K, 10-K, 10-Q
     """
     # Create a dataframe from the chunks. Add columns as necessary
-    chunk_df = pd.DataFrame([{'Text': HtmlDocument._render_blocks(blocks), 'Table': isinstance(blocks, TableBlock)}
+    chunk_df = pd.DataFrame([{'Text': _render_blocks_using_old_markdown_tables(blocks),
+                              'Table': isinstance(blocks, TableBlock)}
                              for blocks in chunks]
                             ).assign(Chars=lambda df: df.Text.apply(len),
                                      Signature=lambda df: df.Text.apply(detect_signature).fillna(""),
@@ -279,46 +291,6 @@ def chunks2df(chunks: List[List[Block]],
 decimal_chunk_fn = partial(chunks2df,
                            item_detector=detect_decimal_items,
                            item_adjuster=adjust_for_empty_items)
-
-
-def render_table(table_chunk):
-    table_html = str(table_chunk.metadata.text_as_html)
-    table_df = table_html_to_dataframe(table_html) if table_html else pd.DataFrame()
-    return dataframe_to_text(table_df)
-
-
-class RenderedHtml:
-
-    def __init__(self, text: str):
-        self.text = text
-
-    def __eq__(self, other):
-        if isinstance(other, str):
-            return self.text == other
-        return self.text == other.text
-
-    def __contains__(self, text: str):
-        return text in self.text
-
-    def __hash__(self):
-        return hash(self.text)
-
-    def __rich__(self):
-        return Panel(self.text, box=box.SIMPLE)
-
-    def __repr__(self):
-        return repr_rich(self.__rich__())
-
-
-def render_chunks(chunks):
-    text = '\n'.join([render_table(el)
-                      if "HTMLTable" in str(type(el))
-                      else el.text
-                      for el in chunks])
-    # if the text is empty return None
-    if not text:
-        return None
-    return RenderedHtml(text.strip())
 
 
 class ChunkedDocument:
@@ -376,6 +348,12 @@ class ChunkedDocument:
 
     def average_chunk_size(self):
         return int(self._chunked_data.Chars.mean())
+
+    def tables(self):
+        for chunk in self.chunks:
+            for block in chunk:
+                if isinstance(block, TableBlock):
+                    yield block
 
     def __len__(self):
         return len(self.chunks)

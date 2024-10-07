@@ -1,16 +1,16 @@
-import orjson as json
 from functools import lru_cache
 from pathlib import Path
-import datetime
+
 import humanize
+import orjson as json
 import pyarrow.compute as pc
 from rich import print
 
-from edgar.entities import *
-from edgar.entities import (parse_entity_submissions, CompanyConcept, CompanyFiling, find_company,
-                            CompanySearchIndex, preprocess_company, _parse_cik_lookup_data)
 from edgar._filings import Filing, get_filings
 from edgar.core import default_page_size
+from edgar.entities import *
+from edgar.entities import (parse_entity_submissions, CompanyConcept, CompanyFiling, preprocess_company,
+                            _parse_cik_lookup_data)
 
 
 @lru_cache(maxsize=16)

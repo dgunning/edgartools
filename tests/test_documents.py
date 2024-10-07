@@ -636,4 +636,7 @@ def test_parse_html_document_with_issue_decomposing_page_numbers():
     filing = Filing(form='10-Q', filing_date='2024-07-16', company='Global Arena Holding, Inc.', cik=1138724,
            accession_no='0001756125-24-001116')
     text = filing.text()
+    assert text
+
+
 
