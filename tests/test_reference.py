@@ -1,7 +1,9 @@
 from edgar.reference import cusip_ticker_mapping, get_ticker_from_cusip, describe_form
 from edgar.reference.tickers import get_cik_tickers, find_cik, get_company_ticker_name_exchange, \
     get_companies_by_exchange, get_mutual_fund_tickers, find_mutual_fund_cik
-
+import json
+from unittest.mock import patch
+import pandas as pd
 
 def test_cusip_ticker_mapping():
     data = cusip_ticker_mapping()
@@ -89,3 +91,45 @@ def test_get_mutual_fund_tickers():
     assert data.columns.tolist() == ['cik', 'seriesId', 'classId', 'ticker']
 
     assert not data.query("ticker == 'CRBRX'").empty
+
+
+def test_get_cik_tickers():
+    # Test normal behavior
+    data = get_cik_tickers()
+    assert isinstance(data, pd.DataFrame), "Result should be a pandas DataFrame"
+    assert set(data.columns) == {'ticker', 'cik'}, f"Columns should be 'ticker' and 'cik', got {data.columns}"
+    assert len(data) > 0, "DataFrame should not be empty"
+
+    # Test a few known tickers
+    apple = data[data['ticker'] == 'AAPL']
+    assert len(apple) == 1, "There should be exactly one entry for AAPL"
+    assert apple.iloc[0]['cik'] == 320193, f"AAPL CIK should be '320193', got {apple.iloc[0]['cik']}"
+
+    microsoft = data[data['ticker'] == 'MSFT']
+    assert len(microsoft) == 1, "There should be exactly one entry for MSFT"
+    assert microsoft.iloc[0]['cik'] == 789019, f"MSFT CIK should be '789019', got {microsoft.iloc[0]['cik']}"
+
+    # Test fallback mechanism
+    with patch('edgar.reference.tickers.download_file') as mock_download:
+        # First call raises an exception (primary URL fails)
+        # Second call returns valid JSON data (fallback URL succeeds)
+        mock_download.side_effect = [
+            Exception("Primary URL failed"),
+            json.dumps({
+                "0": {"cik_str": 320193, "ticker": "AAPL", "title": "Apple Inc."},
+                "1": {"cik_str": 789019, "ticker": "MSFT", "title": "MICROSOFT CORP"}
+            })
+        ]
+        
+        # Clear the lru_cache to ensure we're not getting cached results
+        get_cik_tickers.cache_clear()
+        
+        fallback_data = get_cik_tickers()
+        assert isinstance(fallback_data, pd.DataFrame), "Fallback result should be a pandas DataFrame"
+        assert set(fallback_data.columns) == {'ticker', 'cik'}, f"Fallback columns should be 'ticker' and 'cik', got {fallback_data.columns}"
+        assert len(fallback_data) == 2, f"Fallback data should have 2 entries, got {len(fallback_data)}"
+        assert fallback_data['ticker'].tolist() == ['AAPL', 'MSFT'], f"Fallback tickers should be ['AAPL', 'MSFT'], got {fallback_data['ticker'].tolist()}"
+        assert fallback_data['cik'].tolist() == [320193, 789019], f"Fallback CIKs should be [320193, 789019], got {fallback_data['cik'].tolist()}"
+
+        # Verify that download_file was called twice
+        assert mock_download.call_count == 2, f"download_file should be called twice, was called {mock_download.call_count} times"
