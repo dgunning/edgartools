@@ -1,4 +1,5 @@
 import re
+import json
 from functools import lru_cache
 from io import StringIO
 from typing import Optional, Union, List
@@ -34,15 +35,23 @@ def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
 
 @lru_cache(maxsize=None)
 def get_cik_tickers():
-    source = StringIO(download_file("https://www.sec.gov/include/ticker.txt", as_text=True))
-    data = pd.read_csv(source,
-                       sep='\t',
-                       header=None,
-                       names=['ticker', 'cik']).dropna()
+    try:
+        source = StringIO(download_file("https://www.sec.gov/include/ticker.txt", as_text=True))
+        data = pd.read_csv(source,
+                           sep='\t',
+                           header=None,
+                           names=['ticker', 'cik']).dropna()
+    except Exception:
+        # Fallback: Use the JSON data from the alternative URL
+        json_data = json.loads(download_file("https://www.sec.gov/files/company_tickers.json", as_text=True))
+        data = pd.DataFrame.from_dict(json_data, orient='index')
+        data = data.rename(columns={'ticker': 'ticker', 'cik_str': 'cik'})
+        data = data[['ticker', 'cik']]
+        
+        # Ensure CIK is treated as an integer
+        data['cik'] = data['cik'].astype(int)
 
-    # Convert tickers to uppercase
     data['ticker'] = data['ticker'].str.upper()
-
     return data
 
 
