@@ -3,19 +3,22 @@ import json
 from functools import lru_cache
 from io import StringIO
 from typing import Optional, Union, List
-
+from pathlib import Path
 import pandas as pd
 import pyarrow as pa
 from httpx import HTTPStatusError
-
-from edgar.core import listify
-from edgar.httprequests import download_file, download_json
+from edgar.core import listify, log
+from edgar.httprequests import download_file, download_json, download_datafile
 from edgar.reference.data.common import read_parquet_from_package
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange',
            'get_mutual_fund_tickers', 'find_mutual_fund_cik']
 
+ticker_txt_url = "https://www.sec.gov/include/ticker.txt"
+company_tickers_json_url = "https://www.sec.gov/files/company_tickers.json"
+mutual_fund_tickers_url = "https://www.sec.gov/files/company_tickers_mf.json"
+company_tickers_exchange_url = "https://www.sec.gov/files/company_tickers_exchange.json"
 
 @lru_cache(maxsize=1)
 def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
@@ -47,7 +50,7 @@ def get_cik_tickers():
         data = pd.DataFrame.from_dict(json_data, orient='index')
         data = data.rename(columns={'ticker': 'ticker', 'cik_str': 'cik'})
         data = data[['ticker', 'cik']]
-        
+
         # Ensure CIK is treated as an integer
         data['cik'] = data['cik'].astype(int)
 
@@ -234,3 +237,13 @@ def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
             return None
         else:
             raise
+
+def download_ticker_data(reference_data_directory: Path):
+    """
+    Download reference data from the SEC website.
+    """
+    log.info(f"Downloading ticker data to {reference_data_directory}")
+    download_datafile(ticker_txt_url, reference_data_directory)
+    download_datafile(company_tickers_json_url, reference_data_directory)
+    download_datafile(mutual_fund_tickers_url, reference_data_directory)
+    download_datafile(company_tickers_exchange_url, reference_data_directory)

@@ -81,6 +81,7 @@ __all__ = [
     'use_local_storage',
     'run_async_or_sync',
     'download_edgar_data',
+    'get_edgar_data_directory',
     'default_page_size',
     'InvalidDateException',
 ]
@@ -219,6 +220,7 @@ def get_identity() -> str:
     return identity
 
 
+@lru_cache(maxsize=None)
 def get_edgar_data_directory() -> Path:
     """Get the edgar data directory"""
     default_local_data_dir = Path(os.path.join(os.path.expanduser("~"), ".edgar"))
@@ -235,11 +237,14 @@ def use_local_storage(use_local: bool = True):
     os.environ['EDGAR_USE_LOCAL_DATA'] = "1" if use_local else "0"
 
 
-def download_edgar_data(submissions: bool = True, facts: bool = True):
+def download_edgar_data(submissions: bool = True,
+                        facts: bool = True,
+                        reference:bool = True):
     """
     Download Edgar data to the local storage directory
     :param submissions: Download submissions
     :param facts: Download facts
+    :param reference: Download reference data
     """
     if submissions:
         from edgar.entities import download_submissions

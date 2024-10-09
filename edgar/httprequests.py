@@ -18,7 +18,7 @@ from edgar.core import text_extensions, edgar_mode, get_edgar_data_directory
 
 __all__ = ["get_with_retry", "get_with_retry_async", "stream_with_retry", "post_with_retry", "post_with_retry_async",
            "download_file", "download_file_async", "download_json", "download_json_async", "stream_file",
-           "download_text", "download_text_between_tags", "download_bulk_data"]
+           "download_text", "download_text_between_tags", "download_bulk_data", "download_datafile"]
 
 attempts = 6
 retry_timeout = 40
@@ -105,7 +105,7 @@ class Throttler:
         print(f"Peak call rate: {metrics['peak_call_rate']:.2f} calls per second")
 
 
-_throttler_instances = {} # Singleton instance for throttler
+_throttler_instances = {}  # Singleton instance for throttler
 
 
 def throttle_requests(request_rate=None, requests_per_second=None, **kwargs):
@@ -463,7 +463,8 @@ CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
 @retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
-async def stream_file(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, **kwargs) -> Union[str, bytes, None]:
+async def stream_file(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, **kwargs) -> Union[
+    str, bytes, None]:
     """
     Download a file from a URL asynchronously with progress bar using httpx.
 
@@ -585,7 +586,7 @@ def download_text_between_tags(url: str, tag: str):
     return content
 
 
-async def download_bulk_data(data_url:str) -> Path:
+async def download_bulk_data(data_url: str) -> Path:
     """
     Download bulk data e.g. company facts, daily index, etc. from the SEC website
     e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip"
@@ -599,12 +600,27 @@ async def download_bulk_data(data_url:str) -> Path:
     if not download_path.exists():
         download_path.mkdir()
 
-    # Now stream the file to the data directory
-    await stream_file(data_url, as_text=False, path=download_path)
+    as_text = data_url.endswith('.zip')
+
     if filename.endswith(".zip"):
+        # Now stream the file to the data directory
+        await stream_file(data_url, as_text=as_text, path=download_path)
         # Unzip the file to the data directory / file
         with zipfile.ZipFile(download_filename, 'r') as z:
             z.extractall(download_path)
         # Delete the zip file
         download_filename.unlink()
     return download_path
+
+
+def download_datafile(data_url: str, local_directory:Path=None) -> Path:
+    """Download a file to the local storage directory"""
+    filename = os.path.basename(data_url)
+    # Create the directory if it doesn't exist
+    local_directory = local_directory or get_edgar_data_directory()
+    if not local_directory.exists():
+        local_directory.mkdir()
+
+    download_filename = local_directory / filename
+    download_file(data_url, path=download_filename)
+    return download_filename

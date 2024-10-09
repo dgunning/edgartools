@@ -1,14 +1,16 @@
 import datetime
+import os
+import tempfile
 from datetime import datetime
-from freezegun import freeze_time
+
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 import pytest
+from freezegun import freeze_time
 from rich.table import Table
-
+from pathlib import Path
 import edgar
-from edgar.richtools import *
 from edgar.core import (decode_content,
                         get_identity,
                         set_identity,
@@ -24,7 +26,9 @@ from edgar.core import (decode_content,
                         reverse_name,
                         get_bool,
                         is_start_of_quarter,
-                        split_camel_case)
+                        split_camel_case,
+                        download_edgar_data)
+from edgar.richtools import *
 
 
 def test_decode_content():
@@ -175,6 +179,7 @@ def test_filter_by_form():
     assert len(filter_by_form(table, form=['10-K', '10-Q', '10-K/A'], amendments=False)) == 3
     assert len(filter_by_form(table, form=['10-K', '10-Q', '10-K/A'], amendments=True)) == 4
 
+
 def test_filter_by_cik():
     arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
               pa.array([3, 2, 1, 4, 4]),
@@ -267,6 +272,7 @@ def test_get_bool():
     assert get_bool("TRUE")
     assert get_bool("True")
 
+
 def test_split_camel_case():
     assert split_camel_case("CoverPage") == "Cover Page"
     assert split_camel_case("CONSOLIDATEDBALANCESHEETS") == "CONSOLIDATEDBALANCESHEETS"
@@ -276,18 +282,18 @@ def test_split_camel_case():
 
 
 @pytest.mark.parametrize("test_date, expected_result", [
-    ("2024-01-01", True),   # New Year's Day (start of Q1)
-    ("2024-01-02", True),   # First business day after New Year's
+    ("2024-01-01", True),  # New Year's Day (start of Q1)
+    ("2024-01-02", True),  # First business day after New Year's
     ("2024-01-03", False),  # Second business day after New Year's
     ("2024-03-31", False),  # Last day of Q1
-    ("2024-04-01", True),   # First day of Q2
-    ("2024-04-02", True),   # Possibly first business day of Q2
+    ("2024-04-01", True),  # First day of Q2
+    ("2024-04-02", True),  # Possibly first business day of Q2
     ("2024-04-03", False),  # Second business day of Q2
-    ("2024-07-01", True),   # First day of Q3
-    ("2024-07-02", True),   # Possibly first business day of Q3
+    ("2024-07-01", True),  # First day of Q3
+    ("2024-07-02", True),  # Possibly first business day of Q3
     ("2024-07-03", False),  # Second business day of Q3
-    ("2024-10-01", True),   # First day of Q4
-    ("2024-10-02", True),   # Possibly first business day of Q4
+    ("2024-10-01", True),  # First day of Q4
+    ("2024-10-02", True),  # Possibly first business day of Q4
     ("2024-10-03", False),  # Second business day of Q4
     ("2024-12-31", False),  # Last day of Q4
     ("2024-05-15", False),  # Random day in middle of quarter
@@ -296,14 +302,27 @@ def test_is_start_of_quarter(test_date, expected_result):
     with freeze_time(test_date):
         assert is_start_of_quarter() == expected_result
 
+
 @pytest.mark.parametrize("test_datetime, expected_result", [
-    ("2024-01-01 00:00:01", True),   # Just after midnight on New Year's
-    ("2024-01-02 23:59:59", True),   # Just before midnight on Jan 2
+    ("2024-01-01 00:00:01", True),  # Just after midnight on New Year's
+    ("2024-01-02 23:59:59", True),  # Just before midnight on Jan 2
     ("2024-01-03 00:00:01", False),  # Just after midnight on Jan 3
-    ("2024-04-01 12:00:00", True),   # Noon on first day of Q2
-    ("2024-07-01 18:30:00", True),   # Evening on first day of Q3
-    ("2024-10-02 09:00:00", True),   # Morning of possibly first business day of Q4
+    ("2024-04-01 12:00:00", True),  # Noon on first day of Q2
+    ("2024-07-01 18:30:00", True),  # Evening on first day of Q3
+    ("2024-10-02 09:00:00", True),  # Morning of possibly first business day of Q4
 ])
 def test_is_start_of_quarter_with_time(test_datetime, expected_result):
     with freeze_time(test_datetime):
         assert is_start_of_quarter() == expected_result
+
+
+""" 
+def test_download_edgar_data(monkeypatch):
+    with tempfile.TemporaryDirectory() as d:
+        monkeypatch.setenv("EDGAR_LOCAL_DATA_DIR", d)
+        assert os.environ["EDGAR_LOCAL_DATA_DIR"] == d
+        download_edgar_data(submissions=False, facts=False, reference=True)
+        files = set(f.name for f in (Path(d) /"reference").glob("*"))
+        assert files & {'ticker.txt', 'company_tickers_exchange.json', 'company_tickers.json',
+                         'company_tickers_mf.json'}
+"""

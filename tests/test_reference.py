@@ -1,9 +1,12 @@
-from edgar.reference import cusip_ticker_mapping, get_ticker_from_cusip, describe_form
-from edgar.reference.tickers import get_cik_tickers, find_cik, get_company_ticker_name_exchange, \
-    get_companies_by_exchange, get_mutual_fund_tickers, find_mutual_fund_cik
 import json
 from unittest.mock import patch
+
 import pandas as pd
+
+from edgar.reference import cusip_ticker_mapping, get_ticker_from_cusip, describe_form
+from edgar.reference.tickers import get_cik_tickers, find_cik, get_company_ticker_name_exchange, \
+    get_companies_by_exchange, get_mutual_fund_tickers, find_mutual_fund_cik, download_ticker_data
+
 
 def test_cusip_ticker_mapping():
     data = cusip_ticker_mapping()
@@ -120,16 +123,19 @@ def test_get_cik_tickers():
                 "1": {"cik_str": 789019, "ticker": "MSFT", "title": "MICROSOFT CORP"}
             })
         ]
-        
+
         # Clear the lru_cache to ensure we're not getting cached results
         get_cik_tickers.cache_clear()
-        
+
         fallback_data = get_cik_tickers()
         assert isinstance(fallback_data, pd.DataFrame), "Fallback result should be a pandas DataFrame"
-        assert set(fallback_data.columns) == {'ticker', 'cik'}, f"Fallback columns should be 'ticker' and 'cik', got {fallback_data.columns}"
+        assert set(fallback_data.columns) == {'ticker',
+                                              'cik'}, f"Fallback columns should be 'ticker' and 'cik', got {fallback_data.columns}"
         assert len(fallback_data) == 2, f"Fallback data should have 2 entries, got {len(fallback_data)}"
-        assert fallback_data['ticker'].tolist() == ['AAPL', 'MSFT'], f"Fallback tickers should be ['AAPL', 'MSFT'], got {fallback_data['ticker'].tolist()}"
-        assert fallback_data['cik'].tolist() == [320193, 789019], f"Fallback CIKs should be [320193, 789019], got {fallback_data['cik'].tolist()}"
+        assert fallback_data['ticker'].tolist() == ['AAPL',
+                                                    'MSFT'], f"Fallback tickers should be ['AAPL', 'MSFT'], got {fallback_data['ticker'].tolist()}"
+        assert fallback_data['cik'].tolist() == [320193,
+                                                 789019], f"Fallback CIKs should be [320193, 789019], got {fallback_data['cik'].tolist()}"
 
         # Verify that download_file was called twice
         assert mock_download.call_count == 2, f"download_file should be called twice, was called {mock_download.call_count} times"
