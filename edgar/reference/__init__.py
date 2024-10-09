@@ -1,7 +1,9 @@
 import sys
 
 from edgar.reference.forms import describe_form
-from edgar.reference.tickers import get_ticker_from_cusip, get_icon_from_ticker, cusip_ticker_mapping
+from edgar.reference.tickers import get_ticker_from_cusip, get_icon_from_ticker, cusip_ticker_mapping, download_ticker_data
+from edgar.core import log, get_edgar_data_directory
+from edgar.httprequests import download_datafile
 
 
 # A dict of state abbreviations and their full names
@@ -58,6 +60,15 @@ states = {
     "WI": "Wisconsin",
     "WY": "Wyoming",
 }
+
+def download_reference_data():
+    """
+    Download reference data from the SEC website.
+    """
+    log.info(f"Downloading reference data to {get_edgar_data_directory()}")
+    reference_directory = get_edgar_data_directory() / "reference"
+    reference_directory.mkdir(exist_ok=True)
+    download_ticker_data(reference_directory)
 
 
 

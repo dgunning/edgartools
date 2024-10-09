@@ -102,6 +102,9 @@ class XBRLInstance(BaseModel):
     def get_fiscal_period_focus(self):
         return self.dei_facts.get('dei:DocumentFiscalPeriodFocus', {}).get('value')
 
+    def get_common_stock_outstanding(self):
+        return self.dei_facts.get('dei:EntityCommonStockSharesOutstanding', {}).get('value')
+
     def get_entity_name(self):
         # Get the name of the entity (company) from the DEI facts
         return self.dei_facts.get('dei:EntityRegistrantName', {}).get('value')
