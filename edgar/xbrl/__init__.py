@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from edgar import Filing
 
 from edgar.xbrl.xbrldata import XBRLData, XBRLAttachments, XBRLInstance,  Statement, Statements
+from edgar.xbrl.facts import XBRLInstance
 from edgar.xbrl.presentation import XBRLPresentation
 from typing import Optional, Union
 

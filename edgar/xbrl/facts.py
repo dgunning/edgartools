@@ -91,18 +91,23 @@ class XBRLInstance(BaseModel):
     # Getter methods for common DEI facts
 
     def get_document_type(self):
+        # Get the document type from the DEI facts
         return self.dei_facts.get('dei:DocumentType', {}).get('value')
 
     def get_document_period(self):
+        # Get the document period from the DEI facts
         return self.dei_facts.get('dei:DocumentPeriodEndDate', {}).get('value')
 
     def get_fiscal_year_focus(self):
+        # Get the fiscal year focus from the DEI facts
         return self.dei_facts.get('dei:DocumentFiscalYearFocus', {}).get('value')
 
     def get_fiscal_period_focus(self):
+        # Get the fiscal period focus from the DEI facts
         return self.dei_facts.get('dei:DocumentFiscalPeriodFocus', {}).get('value')
 
     def get_common_stock_outstanding(self):
+        # Get the number of common stock shares outstanding from the DEI facts
         return self.dei_facts.get('dei:EntityCommonStockSharesOutstanding', {}).get('value')
 
     def get_entity_name(self):
@@ -154,6 +159,7 @@ class XBRLInstance(BaseModel):
 
     def parse_facts(self, soup: BeautifulSoup):
         facts_data = []
+        seen_facts = set()
         for tag in soup.find_all(lambda t: t.namespace != "http://www.xbrl.org/"):
             if not ('contextRef' in tag.attrs or 'unitRef' in tag.attrs):
                 continue
@@ -174,6 +180,16 @@ class XBRLInstance(BaseModel):
             else:
                 start_date = end_date = period_type = duration = entity_id = None
                 dimensions = {}
+
+            # Eliminate duplicates from being added to the facts data
+            # Create a unique identifier for this fact
+            fact_id = f"{concept}_{context_id}_{value}_{start_date}_{end_date}"
+
+            # If we've already seen this fact, skip it
+            if fact_id in seen_facts:
+                continue
+
+            seen_facts.add(fact_id)
 
             facts_data.append({
                 'concept': concept,

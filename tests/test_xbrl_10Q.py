@@ -42,7 +42,6 @@ def netflix_xbrl_2010():
                           ('us-gaap_PropertyPlantAndEquipmentNet', ['1,501,168,000', '1,491,444,000']),
                           ('us-gaap_AccountsPayableCurrent', ['607,348,000', '747,412,000']),
                           ('us-gaap_ShortTermBorrowings', ['799,000,000', '399,844,000']),
-                          ('us-gaap_ShortTermBorrowings', ['799,000,000', '399,844,000']),
                           ('us-gaap_AccruedLiabilitiesCurrent', ['1,977,428,000', '1,803,960,000']),
                           ('us-gaap_LongTermDebtNoncurrent', ['13,217,038,000', '14,143,417,000']),
                           ('us-gaap_RetainedEarningsAccumulatedDeficit', ['24,921,495,000', '22,589,286,000']),
