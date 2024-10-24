@@ -382,7 +382,7 @@ financials.get_balance_sheet
 Each of the financial statements - `BalanceSheet`, `IncomeStatement` and `CashFlowStatement` - have a `get_dataframe()` method that will return the data as a pandas dataframe.
 
 ```python
-balance_sheet_df = financials.get_balance_sheet.get_dataframe()
+balance_sheet_df = financials.get_balance_sheet().get_dataframe()
 ```
 
 ## Downloading Edgar Data
