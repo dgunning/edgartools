@@ -36,7 +36,7 @@ dependencies = [
   "stamina>=24.2.0",
   "orjson>=3.6.0",
   "textdistance>=4.5.0",
-  "rank_bm25==0.2.1",
+  "rank_bm25>=0.2.1",
   "rapidfuzz>=3.5.0",
   "unidecode>=1.2.0",
   "pydantic>=2.0.0",
