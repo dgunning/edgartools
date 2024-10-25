@@ -259,5 +259,5 @@ def replace_all_na_with_empty(df_or_series):
 
 def na_value(value, default_value:object=''):
     if pd.isna(value):
-        return ''
+        return default_value
     return value

@@ -202,9 +202,9 @@ class Financials:
 
         return Statement(
             df=df,
+            definition=statement.definition,
             name=statement.name,
             display_name=standard_statement.display_name,
-            label=statement.label,
             entity=statement.entity
         )
 
@@ -444,7 +444,7 @@ class MultiFinancials:
         df1 = df1.reset_index().set_index('label') if df1.index.name != 'label' else df1
 
         # Define metadata columns
-        metadata_cols = ['level', 'abstract', 'units', 'decimals']
+        metadata_cols = ['level', 'abstract', 'units', 'decimals', 'node_type', 'section_end', 'has_dimensions']
 
         # Identify period columns
         period_cols0 = [col for col in df0.columns if col not in metadata_cols and col != 'concept']
@@ -542,9 +542,9 @@ class MultiFinancials:
         # Create a new Statement object
         stitched_statement = Statement(
             df=result_df,
+            definition=base_statement.definition,
             name=base_statement.name,
             display_name=base_statement.display_name,
-            label=base_statement.label,
             entity=base_statement.entity
         )
 

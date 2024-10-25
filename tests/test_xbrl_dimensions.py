@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from edgar import Filing
 from edgar.xbrl.xbrldata import XBRLData, XBRLInstance
-from edgar.xbrl.dimensions import Dimensions, DimensionValue, Dimension
+from edgar.xbrl.dimensions import Dimensions, Member, Axis
 
 
 @pytest.fixture(scope='module')
@@ -15,42 +15,33 @@ def apple_xbrl():
 def test_list_xbrl_dimensions(apple_xbrl):
     instance: XBRLInstance = apple_xbrl.instance
     dimensions:Dimensions = instance.dimensions
-    assert len(dimensions) == 75
+    assert len(dimensions) == 256
 
 
 def test_get_dimension_by_index(apple_xbrl):
     instance: XBRLInstance = apple_xbrl.instance
-    dimension_value: DimensionValue = instance.dimensions[0]
-    print(dimension_value)
-    assert dimension_value.dimension == 'ecd:IndividualAxis'
-    assert dimension_value.value == 'aapl:DeirdreOBrienMember'
+    member: Member = instance.dimensions[0]
+    assert member.concept == 'aapl:DebtInstrumentMaturityYearRangeEnd'
 
 
-def test_get_dimension_by_name(apple_xbrl):
+def test_get_axis_by_name(apple_xbrl):
     instance: XBRLInstance = apple_xbrl.instance
-    dimension:Dimension = instance.dimensions['ecd:IndividualAxis']
-    assert dimension.name == 'ecd:IndividualAxis'
-    assert dimension.values ==['aapl:DeirdreOBrienMember', 'aapl:JeffWilliamsMember']
+    axis:Axis = instance.dimensions['ecd:IndividualAxis']
+    assert axis.name == 'ecd:IndividualAxis'
+    assert axis.list_members() ==['aapl:DeirdreOBrienMember', 'aapl:JeffWilliamsMember']
 
 
-def test_get_dimension_value(apple_xbrl):
+def test_get_dimension_axis(apple_xbrl):
     instance: XBRLInstance = apple_xbrl.instance
     dimensions = instance.dimensions
-    dimension_value: DimensionValue = dimensions['ecd:IndividualAxis']['aapl:DeirdreOBrienMember']
-    assert dimension_value.dimension == 'ecd:IndividualAxis'
-    assert dimension_value.value == 'aapl:DeirdreOBrienMember'
+    individual_axis = dimensions['ecd:IndividualAxis']
+    assert individual_axis.name == 'ecd:IndividualAxis'
+    assert len(individual_axis) == 12
 
 
-def test_get_dimension_facts(apple_xbrl):
+
+def test_dimension_facts(apple_xbrl):
     instance: XBRLInstance = apple_xbrl.instance
     dimensions = instance.dimensions
-    dimension_value: DimensionValue = dimensions['ecd:IndividualAxis']['aapl:DeirdreOBrienMember']
-    facts = dimension_value.get_facts()
-    assert len(facts) == 6
-
-
-def test_query_facts_from_dimension(apple_xbrl):
-    instance: XBRLInstance = apple_xbrl.instance
-    dimensions = instance.dimensions
-    facts = dimensions['srt:ProductOrServiceAxis'].get_facts()
+    facts = dimensions['srt:ProductOrServiceAxis'].facts
     assert len(facts) == 24

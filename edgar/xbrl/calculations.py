@@ -24,7 +24,7 @@ class CalculationLinkbase:
         return self.calculations_by_role.get(role, [])
 
     def get_calculation(self, concept:str):
-        return self.concept_calculations.get(concept, None)
+        return self.concept_calculations.get(concept.replace(':','_',1), None)
 
     @classmethod
     def parse(cls, calculation_xml:str):

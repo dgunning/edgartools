@@ -5,11 +5,11 @@ from rich import print
 
 from edgar import *
 from edgar.xbrl import get_xbrl_object
+from edgar.xbrl.calculations import CalculationLinkbase
 from edgar.xbrl.xbrldata import format_xbrl_value
 from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_definition_linkbase,
                                  XBRLAttachments,
                                  XBRLInstance, XBRLPresentation, StatementDefinition, Statement)
-from edgar.xbrl.calculations import CalculationLinkbase
 
 # Sample XML strings for testing
 SAMPLE_INSTANCE_XML = """
@@ -121,6 +121,7 @@ def test_xbrl_parser_get_financial_statement(sample_instance, sample_presentatio
     assert 'Assets' in statement.labels
     assert 'Liabilities' in statement.labels
     assert '2023' in statement.periods
+    print(statement)
 
 
 @pytest.mark.asyncio
@@ -158,9 +159,6 @@ def test_xbrl_presentation_list_roles():
 def test_parse_labels():
     labels = parse_label_linkbase(Path('data/xbrl/datafiles/aapl/aapl-20230930_lab.xml').read_text())
     assert labels['us-gaap_ResearchAndDevelopmentExpense']['label'] == 'Research and Development Expense'
-
-
-
 
 
 def test_parse_definitions():
@@ -281,7 +279,6 @@ def _temp_disabled_test_format_xbrl_value():
 
 
 def test_get_xbrl():
-
     # 424B4 should be XBRLInstance
     filing = Filing(form='424B2', filing_date='2024-08-09', company='ROYAL BANK OF CANADA',
                     cik=1000275, accession_no='0000950103-24-012010')
@@ -310,6 +307,14 @@ def test_get_dataframe_for_statement_with_no_units_or_decimals():
     cash_flow_statement = financials.get_cash_flow_statement()
     cashflow_dataframe = cash_flow_statement.get_dataframe(include_concept=True, include_format=True)
     assert cashflow_dataframe is not None
-    assert cashflow_dataframe.columns.tolist() == ['2023', 'concept', 'level', 'abstract']
+    assert cashflow_dataframe.columns.tolist() == ['2023', 'concept', 'level', 'abstract', 'node_type', 'section_end', 'has_dimensions']
 
 
+def test_xbrl_data_from_files():
+    xb = XBRLData.from_files(
+        instance_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_htm.xml'),
+        label_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_lab.xml'),
+        presentation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_pre.xml'),
+        calculation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml')
+    )
+    assert xb

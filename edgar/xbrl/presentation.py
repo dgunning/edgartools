@@ -1,6 +1,8 @@
 import re
 from collections import defaultdict, OrderedDict
+from functools import lru_cache
 from typing import Dict, List, Optional
+from typing import Union
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field, ConfigDict
@@ -10,10 +12,14 @@ from rich.tree import Tree
 
 from edgar.richtools import repr_rich
 
-__all__ = ['XBRLPresentation', 'PresentationElement']
+__all__ = ['XBRLPresentation', 'PresentationElement', 'get_root_element', 'get_axes_for_role', 'get_members_for_axis']
 
 
 class PresentationElement:
+    """
+    A single node in the presentation linkbase hierarchy.
+    """
+
     def __init__(self, label: str, href: str, order: float, concept: str = None, preferred_label: str = None):
         self.label = label
         self.href = href
@@ -22,6 +28,30 @@ class PresentationElement:
         self.level = 0
         self.children = []
         self.preferred_label = preferred_label
+        self.parent = None
+
+    @property
+    def node_type(self) -> str:
+        if self.concept.endswith('Axis'):
+            return 'Axis'
+        elif self.concept.endswith('Member'):
+            return 'Member'
+        elif self.concept.endswith('Domain'):
+            return 'Domain'
+        elif self.concept.endswith('Table'):
+            return 'Table'
+        elif self.concept.endswith('Abstract'):
+            return 'Abstract'
+        elif self.concept.endswith('LineItems'):
+            return 'LineItems'
+        else:
+            return "LineItem"
+
+    def is_abstract(self):
+        return self.concept.endswith('Abstract')
+
+    def __repr__(self):
+        return f"PresentationElement(label='{self.label}', concept='{self.concept}', children={len(self.children)})"
 
 
 class XBRLPresentation(BaseModel):
@@ -101,6 +131,7 @@ class XBRLPresentation(BaseModel):
                             existing_child.preferred_label = child.preferred_label
                     else:
                         parent.children.append(child)
+                        child.parent = parent
 
             # Add the top-level elements to the role only if there are children
             role_children = [loc for loc in locs.values() if not any(arc[1] == loc.label for arc in arcs)]
@@ -144,6 +175,63 @@ class XBRLPresentation(BaseModel):
             # If the concept is already namespaced or not found with common namespaces
         return self.concept_index.get(concept, [])
 
+    def get_axes_for_role(self, role: Union[str, PresentationElement]) -> List[PresentationElement]:
+        """
+        Find all axes (dimensions) for a given role.
+
+        Args:
+            role: Either a role name (str) or a PresentationElement
+
+        Returns:
+            List of axis names
+        """
+        if role in self.roles:
+            return get_axes_for_role(self.roles[role])
+
+    def get_members_for_axis(self, role: Union[str, PresentationElement], axis: str) -> List[str]:
+        """
+        List all members for a given axis in a specific role.
+
+        Args:
+            role: Either a role name (str) or a PresentationElement
+            axis: The name of the axis to find members for
+
+        Returns:
+            List of member names
+        """
+        if role in self.roles:
+            return get_members_for_axis(self.roles[role], axis)
+
+    def get_statement_line_items(self, role: Union[str, PresentationElement]) -> List[PresentationElement]:
+        """
+        Get all presentation elements that fall under StatementLineItems for a given role.
+
+        Args:
+            role: Either a role name (str) or a PresentationElement
+
+        Returns:
+            List of PresentationElements under StatementLineItems
+        """
+        line_items = []
+
+        def find_line_items(element):
+            if element.node_type == 'Table':
+                for child in element.children:
+                    if child.node_type == 'LineItems':
+                        line_items.extend(child.children)
+                        break
+            else:
+                for child in element.children:
+                    find_line_items(child)
+
+        if isinstance(role, str):
+            if role in self.roles:
+                find_line_items(self.roles[role])
+        else:
+            find_line_items(role)
+
+        return line_items
+
     def list_roles(self) -> List[str]:
         """ List all available roles in the presentation linkbase. """
         return list(self.roles.keys())
@@ -151,14 +239,14 @@ class XBRLPresentation(BaseModel):
     def get_skipped_roles(self):
         return self.skipped_roles
 
-    def get_structure(self, role: Optional[str] = None, detailed: bool = False) -> Optional[Tree]:
+    def get_structure(self, role_name: Optional[str] = None, detailed: bool = False) -> Optional[Tree]:
         """
         Get the presentation structure for a specific role.
         """
-        if role:
-            if role in self.roles:
-                tree = Tree(f"[bold blue]{role}[/bold blue]")
-                self._build_rich_tree(self.roles[role], tree, detailed)
+        if role_name:
+            if role_name in self.roles:
+                tree = Tree(f"[bold blue]{role_name}[/bold blue]")
+                self._build_rich_tree(self.roles[role_name], tree, detailed)
                 return tree
         else:
             main_tree = Tree("[bold green]XBRL Presentation Structure[/bold green]")
@@ -179,6 +267,7 @@ class XBRLPresentation(BaseModel):
 
     def print_structure(self, role: Optional[str] = None, detailed: bool = False):
         # Print the presentation structure using Rich library's Tree
+        rprint('')
         if role:
             if role in self.roles:
                 tree = self.get_structure(role, detailed)
@@ -206,6 +295,74 @@ class XBRLPresentation(BaseModel):
 
             child_tree = tree.add(node_text)
             self._build_rich_tree(child, child_tree, detailed)
+
+
+@lru_cache(maxsize=None)
+def get_axes_for_role(role: PresentationElement) -> List[PresentationElement]:
+    """
+    Find all axes (dimensions) for a given role.
+
+     Args:
+        role: Either a role name (str) or a PresentationElement
+
+    Returns:
+        List of axis names
+    """
+    axes = []
+
+    def find_axes(element):
+        if element.node_type == 'Table':
+            for child in element.children:
+                if child.node_type == 'Axis':
+                    axes.append(child)
+        else:
+            for child in element.children:
+                find_axes(child)
+
+    find_axes(role)
+
+    return axes
+
+
+def get_members_for_axis(role: Union[str, PresentationElement], axis: str) -> List[str]:
+    """
+    List all members for a given axis in a specific role.
+
+    Args:
+        role: Either a role name (str) or a PresentationElement
+        axis: The name of the axis to find members for
+
+    Returns:
+        List of member names
+    """
+    members = []
+
+    def find_members(element):
+        if element.node_type == 'Table':
+            for child in element.children:
+                if child.href.split('#')[-1] == axis:
+                    for grandchild in child.children:
+                        if grandchild.node_type == 'Domain':
+                            for member in grandchild.children:
+                                if member.node_type == 'Member':
+                                    members.append(member.href.split('#')[-1])
+                    break
+        else:
+            for child in element.children:
+                find_members(child)
+
+    find_members(role)
+
+    return members
+
+
+@lru_cache(maxsize=None)
+def get_root_element(element: PresentationElement) -> PresentationElement:
+    """Navigate up to find the root element"""
+    current = element
+    while current.parent:
+        current = current.parent
+    return current
 
 
 class FinancialStatementMapper:
