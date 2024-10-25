@@ -206,9 +206,9 @@ You can get the company's **filings**, **facts** and **financials**.
 | Get company filings by form             | `company.get_filings(form="10-K")`                            |
 | Get a company filing by accession_number | `company.get_filing(accession_number="0000320193-21-000139")` |
 | Get the company's financials            | `company.financials`                                          |
-| Get the company's balance sheet         | `company.financials.balance_sheet`                            |
-| Get the company's income statement      | `company.financials.income_statement`                         |
-| Get the company's cash flow statement   | `company.financials.cash_flow_statement`                      |
+| Get the company's balance sheet         | `company.financials.get_balance_sheet`                            |
+| Get the company's income statement      | `company.financials.get_income_statement`                         |
+| Get the company's cash flow statement   | `company.financials.get_cash_flow_statement`                      |
 
 # Installation
 
@@ -373,7 +373,7 @@ Here is an example that gets the latest Apple financials
 ```python
 tenk = Company("AAPL").get_filings(form="10-K").latest(1).obj()
 financials = tenk.financials
-financials.balance_sheet
+financials.get_balance_sheet
 ```
 ![Balance Sheet](docs/images/balance_sheet.png)
 
@@ -382,7 +382,7 @@ financials.balance_sheet
 Each of the financial statements - `BalanceSheet`, `IncomeStatement` and `CashFlowStatement` - have a `get_dataframe()` method that will return the data as a pandas dataframe.
 
 ```python
-balance_sheet_df = financials.balance_sheet.get_dataframe()
+balance_sheet_df = financials.get_balance_sheet().get_dataframe()
 ```
 
 ## Downloading Edgar Data
