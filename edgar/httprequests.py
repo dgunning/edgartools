@@ -600,11 +600,9 @@ async def download_bulk_data(data_url: str) -> Path:
     if not download_path.exists():
         download_path.mkdir()
 
-    as_text = data_url.endswith('.zip')
-
     if filename.endswith(".zip"):
         # Now stream the file to the data directory
-        await stream_file(data_url, as_text=as_text, path=download_path)
+        await stream_file(data_url, path=download_path)
         # Unzip the file to the data directory / file
         with zipfile.ZipFile(download_filename, 'r') as z:
             z.extractall(download_path)
