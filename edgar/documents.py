@@ -626,7 +626,7 @@ def decompose_toc_links(start_element: Tag):
 
 
 def decompose_page_numbers(start_element: Tag):
-    span_tags_with_numbers = start_element.find_all('span', string=re.compile('^\d{1,3}$'))
+    span_tags_with_numbers = start_element.find_all('span', string=re.compile(r'^\d{1,3}$'))
     sequences = []  # To store the sequences of tags for potential review
     current_sequence = []
     previous_number = None
