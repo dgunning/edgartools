@@ -328,7 +328,7 @@ class ChunkedDocument:
         chunk_df = self._chunked_data
 
         # Handle cases where the item has the decimal point e.g. 5.02
-        item_or_part = item_or_part.replace('.', r'\.')
+        item_or_part = item_or_part.replace('.', '\.')
         pattern = re.compile(rf'^{item_or_part}$', flags=re.IGNORECASE)
 
         col_mask = chunk_df[col].str.match(pattern)
