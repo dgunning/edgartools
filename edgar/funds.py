@@ -375,7 +375,7 @@ def get_fund_with_filings(contract_or_series_id: str):
        to get the fund class or series including the filings
 
     """
-    if not re.match("[CS]\d+", contract_or_series_id):
+    if not re.match(r"[CS]\d+", contract_or_series_id):
         return None
     search_url = fund_class_or_series_search_url.format(contract_or_series_id)
 
