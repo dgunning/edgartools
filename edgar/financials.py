@@ -402,7 +402,7 @@ class MultiFinancials:
     Merges the financial statements from multiple periods into a single financials.
     """
 
-    def __init__(self, filings: 'Filings'):
+    def __init__(self, filings):
         self.financials_list = []
         for filing in filings:
             if filing.form not in ['10-K', '10-Q', '10-K/A', '10-Q/A']:
@@ -412,8 +412,7 @@ class MultiFinancials:
         self.primary_financials = self.financials_list[0] if self.financials_list else None
 
     @classmethod
-    async def extract_async(cls, filings: 'Filings') -> 'MultiFinancials':
-        financials_list = []
+    async def extract_async(cls, filings) -> 'MultiFinancials':
         tasks = []
         for filing in filings:
             if filing.form not in ['10-K', '10-Q', '10-K/A', '10-Q/A']:
@@ -429,7 +428,7 @@ class MultiFinancials:
         return multi_financials
 
     @classmethod
-    def extract(cls, filings: 'Filings') -> 'MultiFinancials':
+    def extract(cls, filings) -> 'MultiFinancials':
         return run_async_or_sync(cls.extract_async(filings))
 
 
