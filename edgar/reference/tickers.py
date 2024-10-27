@@ -1,8 +1,10 @@
 import re
+import os
+import json
 from functools import lru_cache
 from io import StringIO
 from pathlib import Path
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Dict, Any
 
 import pandas as pd
 import pyarrow as pa
@@ -10,7 +12,7 @@ from httpx import HTTPStatusError
 
 from edgar.httprequests import download_file, download_json, download_datafile
 from edgar.reference.data.common import read_parquet_from_package
-from edgar.core import log
+from edgar.core import log, get_edgar_data_directory
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange',
@@ -36,6 +38,20 @@ def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
     if not allow_duplicate_cusips:
         df = df[~df.index.duplicated(keep='first')]
     return df
+
+
+def load_tickers_from_local() -> Optional[Dict[str, Any]]:
+    """
+    Load tickers from local data
+    """
+    reference_dir = get_edgar_data_directory() / "reference"
+    if not reference_dir.exists():
+        return None
+    company_tickers_file = reference_dir / os.path.basename(company_tickers_json_url)
+    if not company_tickers_file.exists():
+        return None
+    return json.loads(company_tickers_file.read_text())
+
 
 @lru_cache(maxsize=1)
 def get_company_tickers(
@@ -63,8 +79,13 @@ def get_company_tickers(
     ])
 
     try:
-        # Download JSON data
-        tickers_json = download_json(company_tickers_json_url)
+        if os.getenv("EDGAR_USE_LOCAL_DATA"):
+            tickers_json = load_tickers_from_local()
+            if not tickers_json:
+                tickers_json = download_json(company_tickers_json_url)
+        else:
+            # Download JSON data
+            tickers_json = download_json(company_tickers_json_url)
 
         # Pre-allocate lists for better memory efficiency
         ciks = []
@@ -110,10 +131,28 @@ def get_company_tickers(
         log.error(f"Error fetching company tickers from [{company_tickers_json_url}]: {str(e)}")
         raise
 
+def load_cik_tickers_from_local() -> Optional[str]:
+    """
+    Load tickers.txt from local data
+    """
+    reference_dir = get_edgar_data_directory() / "reference"
+    if not reference_dir.exists():
+        return None
+    tickers_txt_file = reference_dir / os.path.basename(ticker_txt_url)
+    if not tickers_txt_file.exists():
+        return None
+    return tickers_txt_file.read_text()
+
 def get_cik_tickers_from_ticker_txt():
     """Get CIK and ticker data from ticker.txt file"""
     try:
-        source = StringIO(download_file(ticker_txt_url, as_text=True))
+        if os.getenv("EDGAR_USE_LOCAL_DATA"):
+            ticker_txt = load_cik_tickers_from_local()
+            if not ticker_txt:
+                ticker_txt = download_file(ticker_txt_url, as_text=True)
+        else:
+            ticker_txt = download_file(ticker_txt_url, as_text=True)
+        source = StringIO(ticker_txt)
         data = pd.read_csv(source,
                            sep='\t',
                            header=None,
@@ -121,7 +160,7 @@ def get_cik_tickers_from_ticker_txt():
         data['ticker'] = data['ticker'].str.upper()
         return data
     except Exception as e:
-        log.error(f"Error fetching company tickers from [{company_tickers_json_url}]: {str(e)}")
+        log.error(f"Error fetching company tickers from [{ticker_txt_url}]: {str(e)}")
         return None
 
 @lru_cache(maxsize=1)
