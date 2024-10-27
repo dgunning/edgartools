@@ -11,7 +11,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import cached_property
 from functools import lru_cache
-from typing import Dict, List, Tuple, Union, Any, Optional
+from typing import Dict, List, Tuple, Union, Any, Optional, Set
 
 import pandas as pd
 from pydantic import BaseModel, Field, ConfigDict
@@ -251,20 +251,54 @@ class LineItem(BaseModel):
 
 class StatementDefinition():
 
-    def __init__(self, role: str, label: str):
-        self.role = role
-        self.name = role.split('/')[-1]
-        self.label = label
-        self.line_items: List[LineItem] = []
-        self.durations = set()
+    def __init__(self,
+                 role: str,
+                 label: str,
+                 presentation_element: Optional[PresentationElement] = None):
+        self.role: str = role
+        self.name: str = role.split('/')[-1]
+        self.label: str = label
+        self._presentation_element: Optional[PresentationElement] = presentation_element
+        self._line_items: List[LineItem] = []
+        self._durations: Set[str] = set()
+        self._xbrl_data: Optional['XBRLData'] = None
+        self._built: bool = False
+
+    @property
+    def line_items(self) -> List[LineItem]:
+        """
+        Get the list of line items, building them if necessary.
+
+        Returns:
+            List[LineItem]: The list of line items in the statement
+        """
+        if not self._built and self._xbrl_data is not None:
+            self._build_line_items()
+        return self._line_items
+
+    @property
+    def durations(self) -> Set[str]:
+        """
+        Get the set of durations, building line items if necessary.
+
+        Returns:
+            Set[str]: The set of unique durations in the statement
+        """
+        if not self._built and self._xbrl_data is not None:
+            self._build_line_items()
+        return self._durations
+
+    @property
+    def empty(self) -> bool:
+        return len(self.line_items) == 0
 
     def __hash__(self):
-        return hash((self.name, tuple(self.line_items)))
+        return hash(self.role)
 
     def __eq__(self, other):
         if not isinstance(other, StatementDefinition):
             return False
-        return self.name == other.name and self.line_items == other.line_items
+        return self.role == other.role
 
     @staticmethod
     def _get_label_from_presentation_element(presentation_element: PresentationElement, labels: Dict) -> str:
@@ -279,48 +313,65 @@ class StatementDefinition():
         if not label:
             return presentation_element.label.split('/')[-1]
 
-    @property
-    def empty(self):
-        return not self.line_items
-
     @classmethod
     def create(cls,
                role: str,
                presentation_element: PresentationElement,
                labels: Dict,
-               calculations: CalculationLinkbase,
-               instance: XBRLInstance,
-               preferred_label: str = None) -> 'StatementDefinition':
+               xbrl_data: 'XBRLData') -> 'StatementDefinition':
+
+        if not role or not presentation_element or not labels or not xbrl_data:
+            raise ValueError("All parameters are required")
+
         # Factory method to create a StatementDefinition instance
         label: str = cls._get_label_from_presentation_element(presentation_element, labels)
-        statement = cls(role=role, label=label)
-        # Build the line items for the statement
-        statement.build_line_items(presentation_element, labels, calculations, instance, preferred_label)
 
-        return statement
+        # Create the StatementDefinition
+        statement_definition = cls(role=role, label=label, presentation_element=presentation_element)
+        statement_definition._xbrl_data = xbrl_data
+
+        return statement_definition
+
+    @staticmethod
+    def _find_line_items_container(element: PresentationElement) -> Optional[PresentationElement]:
+        """Find the StatementLineItems container in the hierarchy"""
+        if element.node_type == 'LineItems':
+            return element
+        for child in element.children:
+            result = StatementDefinition._find_line_items_container(child)
+            if result:
+                return result
+        return None
+
+    def _build_line_items(self):
+        """Internal method to build line items"""
+        if self._built:
+            return
+
+        if self._xbrl_data is None:
+            raise ValueError("XBRLData reference not set")
+        if self._presentation_element is None:
+            raise ValueError("Presentation element not set")
+
+        self.build_line_items(
+            self._presentation_element,
+            self._xbrl_data.labels,
+            self._xbrl_data.calculations,
+            self._xbrl_data.instance
+        )
+        self._built = True
 
     def build_line_items(self, presentation_element: PresentationElement,
                          labels: Dict,
                          calculations: CalculationLinkbase,
                          instance: XBRLInstance,
-                         preferred_label: str = None,
                          include_segments: bool = True):
         seen_sections = defaultdict(int)
         seen_concepts = set()
 
-        def find_line_items_container(element: PresentationElement) -> Optional[PresentationElement]:
-            """Find the StatementLineItems container in the hierarchy"""
-            if element.node_type == 'LineItems':
-                return element
-            for child in element.children:
-                result = find_line_items_container(child)
-                if result:
-                    return result
-            return None
-
         def process_element(element: PresentationElement, level: int, is_root: bool = False):
             concept = element.href.split('#')[-1]
-            label = self.get_label(concept, labels, element.preferred_label or preferred_label)
+            label = self.get_label(concept, labels, element.preferred_label)
 
             if seen_sections[label] > 0 and element.children:
                 return
@@ -337,7 +388,7 @@ class StatementDefinition():
             # Only process if it's a line item or abstract
             if element.node_type in ['LineItem', 'Abstract']:
                 values, durations = self.get_fact_values(concept_key, instance, calculations)
-                self.line_items.append(LineItem(
+                self._line_items.append(LineItem(
                     concept=concept,
                     label=label,
                     values=values,
@@ -366,7 +417,7 @@ class StatementDefinition():
                                     member_values[period] = {(): period_values[member_key]}
 
                             if member_values:  # Only add if we have values for this member
-                                self.line_items.append(LineItem(
+                                self._line_items.append(LineItem(
                                     concept=member_name,
                                     label=self.get_label(member_name, labels),
                                     values=member_values,
@@ -374,14 +425,13 @@ class StatementDefinition():
                                 ))
 
                 # Add the durations to the set
-                self.durations.update(durations)
+                self._durations.update(durations)
 
                 # Process children
                 for child in sorted(element.children, key=lambda x: x.order):
                     process_element(child, level + 1)
 
-        # Find the StatementLineItems container
-        line_items_container = find_line_items_container(presentation_element)
+        line_items_container = self._find_line_items_container(presentation_element)
 
         if line_items_container:
             # Process only the elements under StatementLineItems
@@ -391,6 +441,14 @@ class StatementDefinition():
             # Fallback: process all elements if no StatementLineItems container is found
             for child in sorted(presentation_element.children, key=lambda x: x.order):
                 process_element(child, 0, is_root=True)
+
+    def rebuild(self) -> None:
+        """Force rebuild of line items"""
+        self._built = False
+        self._line_items = []
+        self._durations = set()
+        if self._xbrl_data is not None:
+            self._build_line_items()
 
     @staticmethod
     def concept_to_label(concept: str) -> str:
@@ -709,7 +767,7 @@ class Statement:
         # Create columns for the table
         if 'decimals' in self.data:
             columns = [
-                Column('',),  # Label column
+                Column('', ),  # Label column
                 Column('', width=12)  # Units column
             ]
         else:
@@ -999,9 +1057,7 @@ class XBRLData(BaseModel):
                 role,
                 presentation_element=root_element,
                 labels=self.labels,
-                calculations=self.calculations,
-                instance=self.instance,
-                preferred_label=root_element.preferred_label
+                xbrl_data=self
             )
 
     @cached_property

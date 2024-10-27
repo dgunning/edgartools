@@ -96,12 +96,17 @@ def test_xbrl_presentation_parsing(sample_presentation):
 
 def test_financial_statement_creation(sample_instance, sample_presentation, sample_labels, sample_calculations):
     role = "http://www.company.com/role/CONSOLIDATEDBALANCESHEETS"
+    xbrl_data = XBRLData(
+        instance=sample_instance,
+        presentation=sample_presentation,
+        labels=sample_labels,
+        calculations=sample_calculations
+    )
     statement = StatementDefinition.create(
         "Balance Sheet",
         sample_presentation.roles[role],
         sample_labels,
-        sample_calculations,
-        sample_instance
+        xbrl_data
     )
     assert statement.name == "Balance Sheet"
     assert len(statement.line_items) == 2

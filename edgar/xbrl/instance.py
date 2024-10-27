@@ -266,51 +266,65 @@ class XBRLInstance(BaseModel):
         # Start with all facts
         result = self.facts
 
-        # Filter by schema if provided
+        # Apply index-level filters first while keeping the index structure
         if schema:
             mask = result.index.get_level_values('concept').map(self._get_schema) == schema
             result = result[mask]
 
-        # Filter by axis if provided
         if axis:
             if axis in result.index.names:
                 result = result[result.index.get_level_values(axis).notnull()]
 
-        # Filter by non-dimensional attributes
-        for key, value in kwargs.items():
-            if key in result.columns:
-                result = result[result[key] == value]
-            elif key == 'concept':
-                if isinstance(value, list):
-                    result = result[result.index.get_level_values('concept').isin(value)]
-                else:
-                    result = result[result.index.get_level_values('concept') == value]
+        # Handle concept filtering at index level
+        if 'concept' in kwargs:
+            value = kwargs.pop('concept')
+            if isinstance(value, list):
+                result = result[result.index.get_level_values('concept').isin(value)]
+            else:
+                result = result[result.index.get_level_values('concept') == value]
 
-        # If the result is empty after filtering, return an empty DataFrame with original columns
-        if result.empty:
-            return pd.DataFrame(columns=self.facts.reset_index().columns)
-
-        # Reset index to convert MultiIndex to columns
-        result = result.reset_index()
-
-        # Filter by dimensions
-        if  'dimensions' in kwargs:
-            query_dims = kwargs.pop('dimensions', {})
+        # Handle dimensional filters while still indexed
+        if 'dimensions' in kwargs:
+            query_dims = kwargs.pop('dimensions')
             # If dimensions is empty then we filter to only facts that have no dimensions
             if query_dims == {}:
-                # Keep only rows where all dimension values are null
-                result = result[result[self.dimension_columns].isna().all(axis=1)]
+                dim_cols = [col for col in result.index.names if col != 'concept']
+                if dim_cols:
+                    result = result[result.index.get_level_values(dim_cols[0]).isna()]
+                    for dim in dim_cols[1:]:
+                        result = result[result.index.get_level_values(dim).isna()]
             else:
                 # Filter for specific dimension values
                 for dim, value in query_dims.items():
-                    if dim in result.columns:
+                    if dim in result.index.names:
                         if isinstance(value, list):
-                            result = result[result[dim].isin(value)]
+                            result = result[result.index.get_level_values(dim).isin(value)]
                         else:
-                            result = result[result[dim] == value]
+                            result = result[result.index.get_level_values(dim) == value]
 
-        # Drop columns that are entirely empty (all NaN or None)
-        result = result.dropna(axis=1, how='all')
+        # If the result is empty after index filtering, return empty DataFrame
+        if result.empty:
+            return pd.DataFrame(columns=self.facts.reset_index().columns)
+
+        # Only reset index if we have remaining column filters
+        if kwargs:
+            result = result.reset_index()
+
+            # Apply remaining column filters vectorized
+            mask = pd.Series(True, index=result.index)
+            for key, value in kwargs.items():
+                if key in result.columns:
+                    if isinstance(value, list):
+                        mask &= result[key].isin(value)
+                    else:
+                        mask &= result[key] == value
+            result = result[mask]
+
+            # Drop empty columns
+            result = result.dropna(axis=1, how='all')
+        else:
+            # If no column filters, just reset index to maintain consistent output format
+            result = result.reset_index()
 
         return result
 
