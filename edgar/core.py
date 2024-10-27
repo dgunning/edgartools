@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging.config
 import os
@@ -5,7 +6,6 @@ import random
 import re
 import sys
 import threading
-import asyncio
 import warnings
 from _thread import interrupt_main
 from dataclasses import dataclass
@@ -13,13 +13,13 @@ from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
 from typing import Union, Optional, Tuple, List
-from pandas.tseries.offsets import BDay
 
 import httpx
 import humanize
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
+from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 
@@ -239,7 +239,7 @@ def use_local_storage(use_local: bool = True):
 
 def download_edgar_data(submissions: bool = True,
                         facts: bool = True,
-                        reference:bool = True):
+                        reference: bool = True):
     """
     Download Edgar data to the local storage directory
     :param submissions: Download submissions
@@ -349,9 +349,9 @@ def filter_by_ticker(data: pa.Table,
                      ticker: Union[str, List[str]]) -> pa.Table:
     """Return the data filtered by form"""
     # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
-    from edgar.entities import get_company_tickers
-    company_tickers = get_company_tickers()
-    tickers = [str(el) for el in listify(ticker)]
+    from edgar.reference.tickers import get_cik_tickers
+    company_tickers = get_cik_tickers()
+    tickers = listify(ticker)
     filtered_tickers = company_tickers[company_tickers.ticker.isin(tickers)]
     ciks = filtered_tickers.cik.tolist()
     return filter_by_cik(data, cik=ciks)
@@ -688,7 +688,7 @@ def split_camel_case(item):
         # Join the words, preserving consecutive uppercase words
         result = []
         for i, word in enumerate(words):
-            if i > 0 and word.isupper() and words[i-1].isupper():
+            if i > 0 and word.isupper() and words[i - 1].isupper():
                 result[-1] += word
             else:
                 result.append(word)
@@ -731,7 +731,6 @@ def listify(value):
         return value
     else:
         return [value]
-
 
 
 def is_start_of_quarter():

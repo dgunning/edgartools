@@ -27,7 +27,7 @@ from edgar.core import (decode_content,
                         get_bool,
                         is_start_of_quarter,
                         split_camel_case,
-                        download_edgar_data)
+                        download_edgar_data, filter_by_ticker)
 from edgar.richtools import *
 
 
@@ -194,8 +194,21 @@ def test_filter_by_cik():
     assert len(filter_by_cik(table, ['3', 4], )) == 3
     assert len(filter_by_cik(table, ['3'], )) == 1
 
-    # Amendments false
-    # Amendments false
+
+def test_filter_by_ticker():
+
+    arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
+              pa.array([3, 2, 1, 4, 4]),
+              pa.array(['10-K', '10-Q', '10-K', '10-K/A', '4-K']),
+              pa.array([1318605, 320193, 1341439, 789019, 789019]),
+              pa.array(['TSLA', 'AAPL', 'ORCL', 'MSFT', 'MSFT'])
+              ]
+
+    table = pa.Table.from_arrays(arrays, names=['item', 'value', 'form', 'cik', 'ticker'])
+    assert len(filter_by_ticker(table, 'TSLA')) == 1
+    assert len(filter_by_ticker(table, 'MSFT')) == 2
+    assert len(filter_by_ticker(table, 'ORCL')) == 1
+    assert len(filter_by_ticker(table, 'PD')) == 0
 
 
 def test_dataframe_pager():

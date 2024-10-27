@@ -1,24 +1,26 @@
 import re
-import json
 from functools import lru_cache
 from io import StringIO
-from typing import Optional, Union, List
 from pathlib import Path
+from typing import Optional, Union, List
+
 import pandas as pd
 import pyarrow as pa
 from httpx import HTTPStatusError
-from edgar.core import listify, log
+
 from edgar.httprequests import download_file, download_json, download_datafile
 from edgar.reference.data.common import read_parquet_from_package
+from edgar.core import log
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange',
-           'get_mutual_fund_tickers', 'find_mutual_fund_cik']
+           'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers']
 
 ticker_txt_url = "https://www.sec.gov/include/ticker.txt"
 company_tickers_json_url = "https://www.sec.gov/files/company_tickers.json"
 mutual_fund_tickers_url = "https://www.sec.gov/files/company_tickers_mf.json"
 company_tickers_exchange_url = "https://www.sec.gov/files/company_tickers_exchange.json"
+
 
 @lru_cache(maxsize=1)
 def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
@@ -35,27 +37,121 @@ def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
         df = df[~df.index.duplicated(keep='first')]
     return df
 
+@lru_cache(maxsize=1)
+def get_company_tickers(
+        as_dataframe: bool = True,
+        clean_name: bool = True,
+        clean_suffix: bool = False
+) -> Union[pd.DataFrame, pa.Table]:
+    """
+    Fetch and process company ticker data from SEC.
 
-@lru_cache(maxsize=None)
-def get_cik_tickers():
+    Args:
+        as_dataframe (bool): If True, returns pandas DataFrame; if False, returns pyarrow Table
+        clean_name (bool): If True, cleans company names
+        clean_suffix (bool): If True, removes common company suffixes
+
+    Returns:
+        Union[pd.DataFrame, pa.Table]: Processed company data
+    """
+
+    # Pre-define schema for better performance
+    SCHEMA = pa.schema([
+        ('cik', pa.int64()),
+        ('ticker', pa.string()),
+        ('company', pa.string())
+    ])
+
     try:
-        source = StringIO(download_file("https://www.sec.gov/include/ticker.txt", as_text=True))
+        # Download JSON data
+        tickers_json = download_json(company_tickers_json_url)
+
+        # Pre-allocate lists for better memory efficiency
+        ciks = []
+        tickers = []
+        companies = []
+
+        # Process JSON data
+        for item in tickers_json.values():
+            company_name = item['title']
+
+            # Apply name cleaning if requested
+            if clean_name or clean_suffix:
+                if clean_name:
+                    company_name = clean_company_name(company_name)
+                if clean_suffix:
+                    company_name = clean_company_suffix(company_name)
+
+            # Append to respective lists
+            ciks.append(int(item['cik_str']))
+            tickers.append(item['ticker'])
+            companies.append(company_name)
+
+        if as_dataframe:
+            # Create DataFrame directly from lists
+            return pd.DataFrame({
+                'cik': ciks,
+                'ticker': tickers,
+                'company': companies
+            })
+
+        # Create pyarrow arrays
+        cik_array = pa.array(ciks, type=pa.int64())
+        ticker_array = pa.array(tickers, type=pa.string())
+        company_array = pa.array(companies, type=pa.string())
+
+        # Create and return pyarrow Table
+        return pa.Table.from_arrays(
+            [cik_array, ticker_array, company_array],
+            schema=SCHEMA
+        )
+
+    except Exception as e:
+        log.error(f"Error fetching company tickers from [{company_tickers_json_url}]: {str(e)}")
+        raise
+
+def get_cik_tickers_from_ticker_txt():
+    """Get CIK and ticker data from ticker.txt file"""
+    try:
+        source = StringIO(download_file(ticker_txt_url, as_text=True))
         data = pd.read_csv(source,
                            sep='\t',
                            header=None,
                            names=['ticker', 'cik']).dropna()
+        data['ticker'] = data['ticker'].str.upper()
+        return data
+    except Exception as e:
+        log.error(f"Error fetching company tickers from [{company_tickers_json_url}]: {str(e)}")
+        return None
+
+@lru_cache(maxsize=1)
+def get_cik_tickers():
+    """Merge unique records from both sources"""
+    txt_data = get_cik_tickers_from_ticker_txt()
+    try:
+        json_data = get_company_tickers(clean_name=False, clean_suffix=False)[['ticker', 'cik']]
     except Exception:
-        # Fallback: Use the JSON data from the alternative URL
-        json_data = json.loads(download_file("https://www.sec.gov/files/company_tickers.json", as_text=True))
-        data = pd.DataFrame.from_dict(json_data, orient='index')
-        data = data.rename(columns={'ticker': 'ticker', 'cik_str': 'cik'})
-        data = data[['ticker', 'cik']]
+        json_data = None
 
-        # Ensure CIK is treated as an integer
-        data['cik'] = data['cik'].astype(int)
+    if txt_data is None and json_data is None:
+        raise Exception("Both data sources are unavailable")
 
-    data['ticker'] = data['ticker'].str.upper()
-    return data
+    if txt_data is None:
+        return json_data
+
+    if json_data is None:
+        return txt_data
+
+    # Merge both dataframes and keep unique records
+    merged_data = pd.concat([txt_data, json_data], ignore_index=True)
+    merged_data = merged_data.drop_duplicates(subset=['ticker', 'cik'])
+
+    return merged_data
+
+@lru_cache(maxsize=None)
+def list_all_tickers():
+    """List all tickers from the merged data"""
+    return get_cik_tickers()['ticker'].tolist()
 
 
 @lru_cache(maxsize=None)
@@ -92,7 +188,7 @@ def get_companies_by_exchange(exchange: Union[List[str], str]):
     :return: DataFrame with companies listed on the specified exchange
     with columns [cik	name	ticker	exchange]
     """
-
+    from edgar.core import listify
     df = get_company_ticker_name_exchange()
     exchanges = [ex.lower() for ex in listify(exchange)]
     return df[df['exchange'].str.lower().isin(exchanges)].reset_index(drop=True)
@@ -178,38 +274,7 @@ def clean_company_suffix(name: str) -> str:
     return name
 
 
-@lru_cache(maxsize=1)
-def get_company_tickers(as_dataframe: bool = True,
-                        clean_name: bool = True,
-                        clean_suffix: bool = False) -> Union[pd.DataFrame, pa.Table]:
-    # Function to download JSON data
 
-    tickers_json = download_json("https://www.sec.gov/files/company_tickers.json")
-
-    # Extract the data into a list of dictionaries
-    data = []
-    for item in tickers_json.values():
-        company_name = item['title']
-        if clean_name:
-            company_name = clean_company_name(company_name)
-        if clean_suffix:
-            company_name = clean_company_suffix(company_name)
-        data.append({'cik': int(item['cik_str']), 'ticker': item['ticker'], 'company': company_name})
-
-    if as_dataframe:
-        return pd.DataFrame(data)
-
-    # Create a pyarrow schema
-    schema = pa.schema([
-        ('cik', pa.int64()),
-        ('ticker', pa.string()),
-        ('company', pa.string())
-    ])
-
-    # Convert the data to a pyarrow Table
-    table = pa.Table.from_pylist(data, schema=schema)
-
-    return table
 
 
 @lru_cache(maxsize=4)
@@ -237,6 +302,7 @@ def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
             return None
         else:
             raise
+
 
 def download_ticker_data(reference_data_directory: Path):
     """
