@@ -227,11 +227,47 @@ def find_company_cik(ticker):
     ticker = ticker.upper().replace('.', '-')
     return lookup.get(ticker)
 
-def find_company_ticker(cik):
-    cik = str(cik).lstrip('0')
+def find_company_ticker(cik: Union[int, str]) -> Union[str, List[str]]:
+    """
+    Find the ticker for a given CIK.
+
+    Parameters:
+    cik (int or str): The CIK to look up
+
+    Returns:
+    Union[str, List[str]]: A single ticker string if only one ticker is found,
+                           a list of ticker strings if multiple tickers are found,
+                           or an empty list if no tickers are found.
+    """
+    try:
+        # Ensure cik is a string without leading zeros, then convert to int
+        cik = str(cik).lstrip('0')
+        cik = int(cik)
+    except (ValueError, TypeError):
+        return []
+
+    # Get DataFrame of CIK-Ticker mappings
     df = get_cik_tickers()
-    ticker = df[df['cik'] == int(cik)]['ticker']
-    return ticker.values[0]
+
+    # Ensure 'cik' and 'ticker' columns exist
+    if 'cik' not in df.columns or 'ticker' not in df.columns:
+        return []
+
+    # Filter DataFrame for the given CIK
+    ticker_series = df[df['cik'] == cik]['ticker']
+
+    # If no tickers found, return an empty list
+    if ticker_series.empty:
+        return []
+
+    # Filter out None values from tickers
+    tickers = [ticker for ticker in ticker_series.values if ticker is not None]
+
+    # Return a single ticker if only one found
+    if len(tickers) == 1:
+        return tickers[0]
+
+    return tickers
 
 def find_cik(ticker):
     """
