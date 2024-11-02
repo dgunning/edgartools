@@ -5,8 +5,8 @@ import time
 from rich import print as rprint
 
 def run_tenq_financials(num):
-    filings = get_filings(form='10-Q').sample(num)
-    for filing in filings:
+    filings = get_filings(form='10-Q')
+    for filing in filings.sample(min(num, len(filings))):
         print(str(filing))
         xbrl_data = get_xbrl_object(filing)
         if xbrl_data:

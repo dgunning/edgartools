@@ -241,12 +241,71 @@ class XBRLAttachments:
 
 class LineItem(BaseModel):
     concept: str
+    axis: Optional[str] = None
+    segment: Optional[str] = None
     label: str
     values: Dict[str, Any]
     level: int
+    preferred_label: Optional[str] = None
+    is_abstract: bool = False
+    section_type: Optional[str] = None  # 'main', 'subsection', 'total', 'detail'
+    parent_section: Optional[str] = None  # e.g., 'Operating activities', 'Investing activities'
 
-    def __hash__(self):
-        return hash((self.concept, self.label, self.level))
+    @property
+    def is_total(self) -> bool:
+        return (
+                self.preferred_label and
+                ('totalLabel' in self.preferred_label or 'periodEndLabel' in self.preferred_label)
+        )
+
+    @property
+    def is_main_section(self) -> bool:
+        return (
+                self.is_abstract and
+                any(section in self.label.lower() for section in
+                    ['operating activities', 'investing activities', 'financing activities'])
+        )
+
+    @property
+    def is_subsection(self) -> bool:
+        return (
+                self.is_abstract and
+                not self.is_main_section and
+                self.label.endswith('Abstract')
+        )
+
+    @property
+    def should_negate(self) -> bool:
+        return (
+                self.preferred_label and
+                ('negatedLabel' in self.preferred_label or 'negatedTerseLabel' in self.preferred_label)
+        )
+
+    @property
+    def has_dimensions(self) -> bool:
+        """Check if this line item has dimensional values"""
+        return any(
+            any(dim_key != () for dim_key in period_values.keys())
+            for period_values in self.values.values()
+        )
+
+    @property
+    def base_values(self) -> Dict[str, Dict[str, Any]]:
+        """Get only the base (non-dimensional) values"""
+        return {
+            period: period_values.get((), {})
+            for period, period_values in self.values.items()
+            if () in period_values
+        }
+
+    @property
+    def dimensional_values(self) -> Dict[str, Dict[Tuple, Dict[str, Any]]]:
+        """Get only the dimensional values"""
+        return {
+            period: {k: v for k, v in period_values.items() if k != ()}
+            for period, period_values in self.values.items()
+            if any(k != () for k in period_values.keys())
+        }
 
 
 class StatementDefinition():
@@ -334,13 +393,39 @@ class StatementDefinition():
 
     @staticmethod
     def _find_line_items_container(element: PresentationElement) -> Optional[PresentationElement]:
-        """Find the StatementLineItems container in the hierarchy"""
+        """Find the container for line items, handling both regular and dimensional structures"""
+
+        # Case 1: Direct LineItems container
         if element.node_type == 'LineItems':
             return element
+
+        # Case 2: Table structure with dimensions
+        if element.node_type == 'Table':
+            # Find the LineItems element within the table
+            for child in element.children:
+                if child.node_type == 'LineItems':
+                    return child
+
+            # If no explicit LineItems, look for the axis and domain
+            for child in element.children:
+                if child.node_type == 'Axis':
+                    domain = next((c for c in child.children if c.node_type == 'Domain'), None)
+                    if domain:
+                        # Return domain to process its members
+                        return domain
+
+        # Case 3: Statement abstract without Table
+        if (element.node_type == 'Abstract' and
+                element.concept.endswith('Abstract') and
+                not any(child.node_type == 'Table' for child in element.children)):
+            return element
+
+        # Recursive search
         for child in element.children:
             result = StatementDefinition._find_line_items_container(child)
             if result:
                 return result
+
         return None
 
     def _build_line_items(self):
@@ -364,83 +449,121 @@ class StatementDefinition():
     def build_line_items(self, presentation_element: PresentationElement,
                          labels: Dict,
                          calculations: CalculationLinkbase,
-                         instance: XBRLInstance,
-                         include_segments: bool = True):
-        seen_sections = defaultdict(int)
-        seen_concepts = set()
+                         instance: XBRLInstance):
+        """Build line items handling both dimensional and non-dimensional structures"""
 
-        def process_element(element: PresentationElement, level: int, is_root: bool = False):
+        current_main_section = None
+        current_subsection = None
+
+        def process_element(element: PresentationElement,
+                            level: int,
+                            parent_element: Optional[PresentationElement] = None,
+                            axes: List[PresentationElement] = None) -> List[LineItem]:
+            items = []
             concept = element.href.split('#')[-1]
             label = self.get_label(concept, labels, element.preferred_label)
+            nonlocal current_main_section, current_subsection
 
-            if seen_sections[label] > 0 and element.children:
-                return
-
-            if is_root and concept in seen_concepts:
-                return
-
-            seen_sections[label] += 1
-            seen_concepts.add(concept)
-
-            # Get the fact values for this concept. Use the version with ':' instead of '_'
+            # Always create the base line item first
             concept_key = concept.replace('_', ':', 1)
+            values, durations = self.get_fact_values(concept_key, instance, calculations)
 
-            # Only process if it's a line item or abstract
-            if element.node_type in ['LineItem', 'Abstract']:
-                values, durations = self.get_fact_values(concept_key, instance, calculations)
-                self._line_items.append(LineItem(
-                    concept=concept,
-                    label=label,
-                    values=values,
-                    level=level
-                ))
+            self._durations.update(durations)
 
-                # If segments are requested and this is a line item (not abstract)
-                if include_segments and element.node_type == 'LineItem':
-                    root = get_root_element(element)
-                    axes = get_axes_for_role(root)
+            # Create base line item
+            line_item = LineItem(
+                concept=concept,
+                label=label,
+                values=values,
+                level=level,
+                preferred_label=element.preferred_label,
+                is_abstract=element.node_type in ['Abstract', 'Header']
+            )
 
-                    for axis in axes:
-                        axis_name = axis.href.split('#')[-1]
-                        members = get_members_for_axis(root, axis_name)
-                        axis_key = axis_name.replace('_', ':', 1)
-                        # Add a line item for each member
-                        for member in members:
-                            member_name = member.split('#')[-1]
-                            member_key = member_name.replace('_', ':', 1)
-                            # Create a new values dictionary for this member
-                            member_values = {}
-                            for period, period_values in values.items():
-                                # Find the dimensional values for this member
-                                member_key = tuple([(axis_key, member_key)])
-                                if member_key in period_values:
-                                    member_values[period] = {(): period_values[member_key]}
+            # Track sections
+            if line_item.is_main_section:
+                current_main_section = line_item
+                current_subsection = None
+                line_item.section_type = 'main'
+            elif line_item.is_subsection:
+                current_subsection = line_item
+                line_item.section_type = 'subsection'
+                line_item.parent_section = current_main_section.label if current_main_section else None
+            elif line_item.is_total:
+                line_item.section_type = 'total'
+                line_item.parent_section = current_main_section.label if current_main_section else None
+            else:
+                line_item.section_type = 'detail'
+                line_item.parent_section = current_main_section.label if current_main_section else None
 
-                            if member_values:  # Only add if we have values for this member
-                                self._line_items.append(LineItem(
-                                    concept=member_name,
-                                    label=self.get_label(member_name, labels),
-                                    values=member_values,
-                                    level=level + 1
-                                ))
+            # Adjust level based on section hierarchy
+            if current_subsection and not line_item.is_main_section:
+                line_item.level += 1
 
-                # Add the durations to the set
-                self._durations.update(durations)
+            if values:
+                items.append(line_item)
 
-                # Process children
-                for child in sorted(element.children, key=lambda x: x.order):
-                    process_element(child, level + 1)
+            # If we have axes, add dimensional items
+            if axes:
+                for axis in axes:
+                    axis_concept = axis.href.split('#')[-1]
+                    members = get_members_for_axis(axis)
 
+                    for member in members:
+                        member_concept = member.href.split('#')[-1]
+                        dimension = {axis_concept.replace('_', ':', 1): member_concept.replace('_', ':', 1)}
+
+                        # Get the fact values for this concept with dimension
+                        concept_key = concept.replace('_', ':', 1)
+                        values, durations = self.get_fact_values(concept_key, instance, calculations, dimension)
+                        # If no values found, skip this member
+                        if not values:
+                            continue
+
+                        self._durations.update(durations)
+
+                        # Create line item for this member
+                        member_label = self.get_label(member_concept, labels, member.preferred_label)
+                        line_item = LineItem(
+                            concept=concept,
+                            axis=axis_concept.replace('_', ':', 1),
+                            segment=member_concept.replace('_', ':', 1),
+                            label=member_label,  # Use the member label
+                            values=values,
+                            level=level + 1,  # Indent member items
+                            preferred_label=element.preferred_label,
+                            is_abstract=False
+                        )
+
+                        # Set section information
+                        if current_main_section:
+                            line_item.parent_section = current_main_section.label
+                        line_item.section_type = 'detail'
+
+                        items.append(line_item)
+
+            # Process children in presentation order (skip if handling dimensional items)
+            for child in sorted(element.children, key=lambda x: x.order):
+                child_items = process_element(child, level + 1, element, axes)
+                items.extend(child_items)
+
+            return items
+
+        # Find the line items container
         line_items_container = self._find_line_items_container(presentation_element)
+        if not line_items_container:
+            return
 
-        if line_items_container:
-            # Process only the elements under StatementLineItems
-            for child in sorted(line_items_container.children, key=lambda x: x.order):
-                process_element(child, 0, is_root=True)
-        else:
-            # Fallback: process all elements if no StatementLineItems container is found
-            for child in sorted(presentation_element.children, key=lambda x: x.order):
-                process_element(child, 0, is_root=True)
+        root = get_root_element(line_items_container)
+        axes = get_axes_for_role(root) # Can be [] or contain axis elements
+
+        # Process all elements
+        all_items = []
+        for child in sorted(line_items_container.children, key=lambda x: x.order):
+            items = process_element(child, 0, axes=axes)
+            all_items.extend(items)
+
+        self._line_items = all_items
 
     def rebuild(self) -> None:
         """Force rebuild of line items"""
@@ -471,11 +594,29 @@ class StatementDefinition():
     @staticmethod
     def get_fact_values(concept: str,
                         instance: XBRLInstance,
-                        calculation_links: CalculationLinkbase) -> Tuple[Dict[str, Any], List[str]]:
-        facts = instance.query_facts(concept=concept)
-        values = {}
+                        calculation_links: CalculationLinkbase,
+                        dimension: Optional[Dict[str, str]] = None) -> Tuple[Dict[str, Any], List[str]]:
+        """
+        Get fact values for a concept, optionally filtered by dimension
 
-        # Get the durations for all facts for this concept
+        Args:
+            concept: The concept to get values for
+            instance: XBRLInstance containing the facts
+            calculation_links: Calculation linkbase for weight/sign
+            dimension: Optional dictionary of axis:member pairs to filter by
+        """
+        # Query facts using the existing query_facts method
+        if dimension:
+            facts = instance.query_facts(concept=concept, dimensions=dimension)
+        else:
+            facts = instance.query_facts(concept=concept)
+
+        # If no facts found, return empty values
+        if facts.empty:
+            return {}, []
+
+
+        values = {}
         durations = facts['duration'].unique().tolist()
 
         # Get the calculation weight for this concept
@@ -494,11 +635,13 @@ class StatementDefinition():
             if weight == -1.0 and value and value[0] != '-':
                 value = f"-{value}"
 
-            # Create a dictionary of dimensions
-            dimensions = {col: fact[col] for col in facts.columns if col not in
-                          ['concept', 'value', 'units', 'decimals', 'start_date', 'end_date', 'period_type',
-                           'context_id', 'entity_id',
-                           'duration'] and not pd.isna(fact[col])}
+            # Get dimensional information from the fact
+            dimensions = {}
+            for col in facts.columns:
+                if col not in ['concept', 'value', 'units', 'decimals', 'start_date',
+                               'end_date', 'period_type', 'context_id', 'entity_id',
+                               'duration'] and not pd.isna(fact[col]):
+                    dimensions[col] = fact[col]
 
             # Create a unique key for dimensional values
             dim_key = tuple(sorted(dimensions.items()))
@@ -540,11 +683,11 @@ class StatementDefinition():
             child_tree = tree.add(node_text)
             self._build_rich_tree_recursive(child_tree, items[items.index(item) + 1:], item.level + 1, detailed)
 
-    def __rich__(self):
-        return self.build_rich_tree()
-
     def __repr__(self):
-        return repr_rich(self)
+        return str(self)
+
+    def __str__(self):
+        return "Statement Definition: " + self.label
 
     def print_items(self, detailed: bool = False):
         tree = self.build_rich_tree(detailed)
@@ -560,6 +703,8 @@ class StatementDefinition():
 
 def is_integer(s):
     if s is pd.NA or pd.isna(s) or not s:
+        return False
+    if not isinstance(s, str):
         return False
     if s[0] in ('-', '+'):
         s = s[1:]
@@ -579,7 +724,7 @@ def format_xbrl_value(value: Union[str, float],
     """
     if is_integer(value):
         value = float(value)
-        if decimals != 'INF':
+        if not pd.isna(decimals) and decimals != 'INF':
             try:
                 decimal_int = int(decimals)
                 if decimal_int < 0:
@@ -587,7 +732,7 @@ def format_xbrl_value(value: Union[str, float],
                     value /= unit_divisor
             except ValueError:
                 pass
-        if decimals == 'INF':
+        if not pd.isna(decimals) and decimals == 'INF':
             return f"{value:>10}"
         else:
             return format_str.format(value)
@@ -642,8 +787,8 @@ def format_label(label, level):
 
 
 class Statement:
-    format_columns = ['level', 'abstract', 'units', 'decimals', 'node_type', 'section_end', 'has_dimensions']
-    meta_columns = ['concept'] + format_columns
+    format_columns = ['level', 'abstract', 'units', 'decimals', 'node_type', 'section_end', 'dimensions', 'has_dimensions', 'style']
+    meta_columns = ['concept', 'segment'] + format_columns
 
     NAMES = {
         "CONSOLIDATEDSTATEMENTSOFOPERATIONS": "CONSOLIDATED STATEMENTS OF OPERATIONS",
@@ -659,7 +804,8 @@ class Statement:
                  entity: str,
                  df: pd.DataFrame,
                  definition: StatementDefinition,
-                 display_name: str = None):
+                 display_name: str = None,
+                 duration: str = None):
         self.name = name
         self.label = definition.label or name
         self.display_name = display_name or self.label
@@ -669,6 +815,7 @@ class Statement:
         self.include_format = 'level' in df.columns
         self.include_concept = 'concept' in df.columns
         self.durations = definition.durations or set()
+        self.display_duration = duration
 
     @property
     def periods(self):
@@ -721,6 +868,224 @@ class Statement:
             )
             return fact
 
+    def get_dimensional_items(self, concept: str = None, *, label: str = None) -> pd.DataFrame:
+        """
+        Get dimensional breakdowns for a specific concept or label.
+
+        Args:
+            concept: The concept name (e.g., 'us-gaap_Revenue')
+            label: The label to get dimensions for (from label linkbase)
+
+        Returns:
+            DataFrame containing only the dimensional items for the specified concept/label
+        """
+        if 'level' not in self.data.columns:
+            return pd.DataFrame()
+
+        if label:
+            try:
+                if not self.data.loc[label, 'has_dimensions']:
+                    return pd.DataFrame()
+
+                # Get the concept for this label
+                if 'concept' not in self.data.columns:
+                    return pd.DataFrame()
+
+                concept = self.data.loc[label, 'concept']
+                base_level = self.data.loc[label, 'level']
+
+                # Get all items with same concept at deeper levels
+                dim_mask = (
+                        (self.data['concept'] == concept) &
+                        (self.data['level'] > base_level)
+                )
+                return self.data[dim_mask]
+
+            except KeyError:
+                return pd.DataFrame()
+
+        elif concept:
+            if 'concept' not in self.data.columns:
+                raise ValueError("Concept column not included in statement")
+
+            # Find base items for this concept
+            base_mask = (
+                    (self.data['concept'] == concept) &
+                    (self.data['level'] == 0)  # Base items are at level 0
+            )
+            base_items = self.data[base_mask]
+
+            if base_items.empty:
+                return pd.DataFrame()
+
+            # Get all dimensional items for this concept
+            dim_mask = (
+                    (self.data['concept'] == concept) &
+                    (self.data['level'] > 0)
+            )
+            return self.data[dim_mask]
+
+        return pd.DataFrame()
+
+    def get_base_items(self) -> pd.DataFrame:
+        """
+        Get only the non-dimensional items (base concepts without dimensional qualifiers)
+
+        Returns:
+            DataFrame containing only the base (non-dimensional) items
+        """
+        if 'level' not in self.data.columns:
+            return self.data
+
+        base_mask = (
+            # Either it's a header item (abstract)
+                (self.data.get('abstract', False)) |
+                # Or it's a main item at level 0
+                (self.data['level'] == 0)
+        )
+
+        return self.data[base_mask]
+
+    def filter_by_dimension(self, axis: str, member: str = None) -> pd.DataFrame:
+        """
+        Filter the statement to show only items with specific dimensional values.
+
+        Args:
+            axis: The axis concept name (e.g., 'us-gaap_GeographicAreasAxis')
+            member: Optional member concept name (e.g., 'us-gaap_DomesticOperationsMember')
+
+        Returns:
+            DataFrame containing only the matching dimensional items
+        """
+        if 'concept' not in self.data.columns:
+            raise ValueError("Concept column required for dimensional filtering")
+
+        # Get base items that have dimensional breakdowns
+        base_items = self.data[self.data['has_dimensions']]
+
+        result_rows = []
+        for base_label in base_items.index:
+            base_concept = base_items.loc[base_label, 'concept']
+            dim_items = self.get_dimensional_items(concept=base_concept)
+
+            if not dim_items.empty:
+                matching_dims = []
+
+                # Filter dimensional items by axis and member
+                for idx in dim_items.index:
+                    dim_row = dim_items.loc[idx]
+                    dimensions = dim_row.get('dimensions', {})
+
+                    # Check if this item has the specified axis
+                    if isinstance(dimensions, dict) and axis in dimensions:
+                        # If member is specified, check for exact match
+                        if member is None or dimensions[axis] == member:
+                            dim_dict = dim_row.to_dict()
+                            dim_dict['label'] = idx
+                            matching_dims.append(dim_dict)
+
+                # Only include base item if we found matching dimensional items
+                if matching_dims:
+                    base_row = base_items.loc[base_label].to_dict()
+                    base_row['label'] = base_label
+                    result_rows.append(base_row)
+                    result_rows.extend(matching_dims)
+
+        if result_rows:
+            df = pd.DataFrame(result_rows)
+            if 'label' in df.columns:
+                df = df.set_index('label')
+            return df
+
+        return pd.DataFrame(columns=self.data.columns)
+
+    def print_dimensional_structure(self):
+        """
+        Print a hierarchical view of the dimensional structure showing axes and members.
+        """
+        from rich.tree import Tree
+        from rich.console import Console
+        from collections import defaultdict
+
+        console = Console()
+
+        # Get base items with dimensions
+        base_items = self.data[self.data['has_dimensions']]
+
+        if base_items.empty:
+            console.print("[italic]No dimensional items found in statement[/italic]")
+            return
+
+        # Create main tree
+        main_tree = Tree(f"[bold blue]{self.display_name}[/bold blue]")
+
+        for base_label in base_items.index:
+            base_concept = base_items.loc[base_label, 'concept']
+            dim_items = self.get_dimensional_items(concept=base_concept)
+
+            if dim_items.empty:
+                continue
+
+            # Create branch for base concept
+            concept_tree = main_tree.add(
+                f"[bold white]{base_label}[/bold white] ([dim]{base_concept}[/dim])"
+            )
+
+            # Organize dimensions by axis
+            axis_members = defaultdict(list)
+            for idx in dim_items.index:
+                dimensions = dim_items.loc[idx].get('dimensions', {})
+                if isinstance(dimensions, dict):
+                    for axis, member in dimensions.items():
+                        axis_members[axis].append((idx, member))
+
+            # Add axes and their members
+            for axis, members in axis_members.items():
+                # Get axis label if available
+                axis_label = self.definition.labels.get(axis, {}).get('label', axis)
+                axis_tree = concept_tree.add(f"[yellow]{axis_label}[/yellow] ([dim]{axis}[/dim])")
+
+                # Add members under this axis
+                for idx, member in members:
+                    # Get member label if available
+                    member_label = self.definition.labels.get(member, {}).get('label', member)
+                    value = dim_items.loc[idx].get(self.periods[0], '')  # Get first period's value
+                    if value:
+                        axis_tree.add(
+                            f"[green]{member_label}[/green] ([dim]{member}[/dim]): {value}"
+                        )
+                    else:
+                        axis_tree.add(
+                            f"[green]{member_label}[/green] ([dim]{member}[/dim])"
+                        )
+
+        console.print(main_tree)
+
+
+    def get_dimensional_structure(self) -> Dict[str, Dict[str, List[str]]]:
+        """
+        Get a dictionary showing the dimensional structure of the statement
+
+        Returns:
+            Dict mapping concepts to their dimensional breakdowns
+        """
+        structure = {}
+        base_items = self.get_base_items()
+
+        for label, row in base_items.iterrows():
+            if row['has_dimensions']:
+                concept = row['concept']
+                if concept not in structure:
+                    structure[concept] = {
+                        'label': label,
+                        'dimensions': []
+                    }
+
+                dim_items = self.get_dimensional_items(concept=concept)
+                structure[concept]['dimensions'].extend(dim_items.index.tolist())
+
+        return structure
+
     def get_dataframe(self,
                       include_format: bool = False,
                       include_concept: bool = False):
@@ -749,123 +1114,100 @@ class Statement:
             with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
                 df.to_excel(writer, index=True, sheet_name=self.name[:31])
 
-    @lru_cache(maxsize=1)
-    def get_unit_divisor(self):
-        return get_unit_divisor(self.data, "decimals")
-
-    def get_primary_units(self):
-        unit_divisor = self.get_unit_divisor()
-        return get_primary_units(unit_divisor)
 
     def print_structure(self, detailed: bool = False):
         self.definition.print_items(detailed)
 
     def __rich__(self):
-        # Get value columns (excluding formatting columns)
-        value_cols = [col for col in self.data.columns if col not in self.meta_columns]
+        if self.data.empty:
+            return Text.assemble(
+                (f"{self.entity}\n", "bold deep_sky_blue2"),
+                (self.display_name, "bold"),
+                f"\nNo data found for {self.display_name}"
+            )
+        # Get value columns
+        value_cols = [col for col in self.data.columns if col not in self.meta_columns + ['segment', 'axis']]
 
-        # Create columns for the table
-        if 'decimals' in self.data:
-            columns = [
-                Column('', ),  # Label column
-                Column('', width=12)  # Units column
-            ]
+        # Create table
+        if 'decimals' in self.data.columns:
+            table = Table(
+                Column("", width=50),  # Label column
+                Column("", width=12),  # Units column
+                *(Column(col, justify="right") for col in value_cols),
+                title=Text.assemble(
+                    (f"{self.entity}\n", "bold deep_sky_blue2"),
+                    (self.display_name, "bold")
+                ),
+                box=box.SIMPLE,
+                padding=(0, 1),
+                collapse_padding=True
+            )
         else:
-            columns = [Column('')]  # Label column only
-
-        # Add value columns
-        columns.extend([Column(col, justify='right') for col in value_cols])
-
-        # Create table with title
-        table = Table(
-            *columns,
-            title=Text.assemble(
-                *[(f"{self.entity}\n", "bold deep_sky_blue2"),
-                  (self.display_name, "bold")]
-            ),
-            box=box.SIMPLE,
-            padding=(0, 1),  # Add some horizontal padding
-            collapse_padding=True
-        )
+            table = Table(
+                Column("", width=50),  # Label column
+                *(Column(col, justify="right") for col in value_cols),
+                title=Text.assemble(
+                    (f"{self.entity}\n", "bold deep_sky_blue2"),
+                    (self.display_name, "bold")
+                ),
+                box=box.SIMPLE,
+                padding=(0, 1),
+                collapse_padding=True
+            )
 
         # Add rows
-        prev_level = 0
         for index, row in self.data.iterrows():
-            # Get node type and formatting information
-            node_type = row.get('node_type', 'Detail')
-            is_section_end = row.get('section_end', False)
-            has_dimensions = row.get('has_dimensions', False)
-            level = row.get('level', 0)
+            style = row.get('style', 'Detail')
 
-            # Determine styles based on node type
-            if node_type == 'Header':
+            # Determine text style
+            if style == 'Header':
                 label_style = "bold deep_sky_blue3"
-                row_style = ""
-            elif node_type == 'Total':
-                label_style = "bold white"
-                row_style = "bold"
-            elif node_type == 'Detail':
-                label_style = "dim grey74"
-                row_style = ""
-            else:  # MainItem
-                label_style = "white"
-                row_style = ""
-
-            # Add extra spacing before headers if not first row
-            if node_type == 'Header' and prev_level < level:
-                table.add_row("")
-
-            # Format label
-            label_text = index
-            if has_dimensions:
-                label_text += " †"  # Add indicator for items with dimensional breakdowns
-
-            # Add indentation
-            indent = "  " * level
-            label = Text(f"{indent}{label_text}", style=label_style)
-
-            # Format values
-            if 'decimals' in self.data:
-                # Create unit label with appropriate style
-                unit_label = create_unit_label(na_value(row['decimals']))
-                if node_type == 'Header':
-                    unit_label = Text("")  # No unit label for headers
-
-                # Create value columns
-                values = [
-                    label,
-                    unit_label,
-                    *[Text.assemble(
-                        *[(format_xbrl_value(
-                            value=row[col],
-                            decimals=na_value(row['decimals'])
-                        ), row_style)]
-                    ) for col in value_cols]
-                ]
+                value_style = "bold white"
+            elif style == 'Subsection':
+                label_style = "italic grey74"
+                value_style = "italic grey74"
+            elif style == 'Total':
+                label_style = "bold deep_sky_blue3"
+                value_style = "bold deep_sky_blue3"
             else:
-                values = [
-                    label,
-                    *[Text.assemble(
-                        *[(na_value(row[col]), row_style)]
-                    ) for col in value_cols]
-                ]
+                label_style = "white"
+                value_style = ""
 
-            # Add the row
-            table.add_row(*values)
+            # Format label with indentation
+            indent = "  " * row.get('level', 0)
+            if style == 'Header' or style == 'Subsection':
+                formatted_label = f"{indent}{index}:"
+            else:
+                formatted_label = f"{indent}{index}"
 
-            # Add extra spacing after sections
-            if is_section_end:
-                table.add_row("")
+            label = Text(formatted_label, style=label_style)
 
-            prev_level = level
+            # Format numerical values
+            values = []
+            for col in value_cols:
+                raw_value = row[col]
+                if pd.notna(raw_value) and raw_value != '':
+                    try:
+                        num_value = float(raw_value)
+                        if num_value < 0:
+                            formatted_value = f"({format_xbrl_value(str(abs(num_value)), row.get('decimals', '0'))})"
+                        else:
+                            formatted_value = format_xbrl_value(str(num_value), row.get('decimals', '0'))
+                    except ValueError:
+                        formatted_value = str(raw_value)
+                else:
+                    formatted_value = ""
 
-        # Add footer if there are items with dimensional breakdowns
-        if any(self.data.get('has_dimensions', False)):
-            footer = Text("\n† Indicates items with dimensional breakdowns available",
-                          style="dim italic")
-            return Group(table, footer)
+                values.append(Text(formatted_value, style=value_style, justify="right"))
+
+            if 'decimals' in self.data.columns:
+                unit_label = create_unit_label(str(row.get('decimals', '')))
+                table.add_row(label, unit_label, *values)
+            else:
+                table.add_row(label, *values)
 
         return table
+
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -1112,200 +1454,238 @@ class XBRLData(BaseModel):
                       statement_name: str,
                       include_format: bool = True,
                       include_concept: bool = True,
-                      empty_threshold: float = 0.6,
+                      empty_threshold: float = 0.7,
                       display_name: str = None,
                       duration: str = None) -> Optional[Statement]:
-        """
-        Get a financial statement as a pandas DataFrame, with formatting and filtering applied.
 
-        This method retrieves a financial statement, formats it into a DataFrame, applies
-        various data cleaning and formatting operations, and returns the result.
-
-        Args:
-            statement_name (str): The name of the financial statement to retrieve.
-            include_format (bool): Whether to include additional formatting information in the DataFrame.
-            include_concept (bool): Whether to include the concept name in the DataFrame.
-            empty_threshold (float): The threshold for dropping columns that are mostly empty.
-            display_name (str): The display name for the financial statement.
-            duration (str): The duration of the financial statement (either '3 months' or '6 months').
-
-        Returns:
-            Optional[pd.DataFrame]: A formatted DataFrame representing the financial statement,
-                                    or None if the statement is not found.
-        """
         statement_definition = self.get_statement_definition(statement_name)
-
         if not statement_definition:
             return None
 
         fiscal_period_focus = self.instance.get_fiscal_period_focus()
         is_quarterly = fiscal_period_focus in ['Q1', 'Q2', 'Q3', 'Q4']
 
-        format_info = {
-            item.concept: {'level': item.level, 'abstract': item.concept.endswith('Abstract'), 'label': item.label}
-            for item in statement_definition.line_items
-        }
+        def format_value(value: str, decimals: str) -> str:
+            """Convert value to raw numerical form"""
+            if not value or value == '':
+                return ''
 
-        ordered_items = [item.concept for item in statement_definition.line_items]
+            try:
+                # Convert to float for numerical operations
+                num_value = float(value)
+                if not pd.isna(decimals) and decimals == 'INF':
+                    return str(num_value)
+                else:
+                    return f'{num_value:.0f}'  # Return raw numerical value
+            except ValueError:
+                return value
 
-        def get_format_info(item: LineItem, prev_item: Optional[LineItem], next_item: Optional[LineItem]) -> dict:
-            """Generate enhanced formatting information for a line item"""
-            is_abstract = item.concept.endswith('Abstract')
-            is_total = 'Total' in item.label
-
-            # Determine node type
-            if is_abstract:
-                node_type = 'Header'
-            elif is_total:
-                node_type = 'Total'
-            elif item.level > 0:
-                node_type = 'Detail'
+        def get_format_info(item: LineItem) -> dict:
+            """Get formatting information for the line item"""
+            if item.is_main_section:
+                style = 'Header'
+            elif item.is_subsection:
+                style = 'Subsection'
+            elif item.is_total:
+                style = 'Total'
             else:
-                node_type = 'MainItem'
-
-            # Determine if this ends a section
-            ends_section = (
-                    is_total or
-                    (next_item and next_item.level < item.level) or
-                    (next_item and next_item.concept.endswith('Abstract'))
-                    or False
-            )
-
-            # Check for dimensional data
-            has_dimensions = False
-            for period_values in item.values.values():
-                for dim_key, _ in period_values.items():
-                    if dim_key:  # If there are any non-empty dimension tuples
-                        has_dimensions = True
-                        break
-                if has_dimensions:
-                    break
+                style = 'Detail'
 
             return {
                 'level': item.level,
-                'abstract': is_abstract,
-                'node_type': node_type,
-                'section_end': ends_section,
-                'has_dimensions': has_dimensions,
-                'units': None if is_abstract else '',
-                'decimals': None if is_abstract else ''
+                'style': style,
+                'is_abstract': item.is_abstract,
+                'section': item.parent_section
             }
 
+        # Collect data
         data = []
         line_items = statement_definition.line_items
+
         for i, item in enumerate(line_items):
-            prev_item = line_items[i - 1] if i > 0 else None
-            next_item = line_items[i + 1] if i < len(line_items) - 1 else None
-            row = {'concept': item.concept, 'label': item.label}
+            # Base row
+            row = {
+                'concept': item.concept,
+                'label': item.label,
+                'segment': item.segment,
+                'presentation_order': i
+            }
+
             if include_format:
-                row.update(get_format_info(item, prev_item, next_item))
+                row.update(get_format_info(item))
 
-            if not item.concept.endswith('Abstract'):
+            # Process values
+            if not item.is_abstract:
                 for period, period_facts in item.values.items():
-                    if () in period_facts:
-                        default_fact = period_facts[()]
+                    end_date = period.split(' to ')[-1]
+                    end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+                    period_label = end_date_obj.strftime("%b %d, %Y") if is_quarterly else end_date.split('-')[0]
 
-                        end_date = period.split(' to ')[-1]
-                        year = end_date.split('-')[0]
-                        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+                    fact_key = ((item.axis, item.segment),) if item.segment else ()
+                    if fact_key in period_facts:
+                        base_fact = period_facts[fact_key]
+                        current_duration = base_fact['duration']
 
-                        period_label = end_date_obj.strftime("%b %d, %Y") if is_quarterly else year
+                        # Format value
+                        value = format_value(base_fact['value'], base_fact['decimals'])
 
-                        current_value = default_fact['value']
-                        current_duration = default_fact['duration']
+                        column_key = (period_label, current_duration)
+                        row[column_key] = value
 
-                        include_period = True
-                        if is_quarterly:
-                            if duration:
-                                if current_duration != duration:
-                                    include_period = False
-                            else:
-                                # Prefer 3 months if the duration is not specified
-                                if '3 months' in statement_definition.durations:
-                                    include_period = current_duration == '3 months'
-
-                        if include_period:
-                            row[period_label] = current_value
-                            if include_format:
-                                row['units'] = default_fact['units']
-                                row['decimals'] = default_fact['decimals']
+                        if include_format:
+                            row['units'] = base_fact['units']
+                            row['decimals'] = base_fact['decimals']
 
             data.append(row)
 
-        df = pd.DataFrame(data).convert_dtypes(dtype_backend="pyarrow").fillna(pd.NA)
 
-        # Use both concept and label for grouping to preserve uniqueness
-        df = df.groupby(['concept', 'label'], as_index=False).agg(
-            lambda x: x.dropna().iloc[0] if len(x.dropna()) > 0 else None)
+        if len(data) == 0:
+            # Create an empty dataframe with the required columns
+            df = pd.DataFrame(columns=['concept', 'label', 'segment', 'presentation_order'])
 
-        # Set both concept and label as index
-        df = df.set_index(['concept', 'label'])
+            return Statement(
+                df=df,
+                name=statement_name,
+                display_name=display_name,
+                definition=statement_definition,
+                entity=self.instance.get_entity_name(),
+                duration=None
+            )
+        else:
+            df = pd.DataFrame(data)
 
-        # Identify the columns
-        period_columns = [col for col in df.columns if col not in
-                          ['concept', 'level', 'abstract', 'node_type', 'section_end',
-                           'has_dimensions', 'calculation', 'units', 'decimals']]
+        period_columns, selected_duration, date_mapping = self._select_duration_and_columns(df, is_quarterly, duration)
 
-        period_columns = sorted(period_columns,
-                                key=lambda x: (x.split()[-1], x.split()[0] if len(x.split()) > 1 else ''), reverse=True)
+        if not period_columns:
+            # Happens for some rare occasions where annual
+            period_cols = [col for col in df.columns if isinstance(col, tuple)]
+            date_mapping = {col: col[0] for col in period_cols}
 
-        format_columns = []
-        if include_format:
-            format_columns.extend(['level', 'abstract', 'node_type', 'section_end',
-                                   'has_dimensions', 'units', 'decimals'])
-        # Reorder the columns
-        ordered_cols = period_columns + format_columns
-        df = df[ordered_cols]
+        # Select and rename columns
+        format_columns = [col for col in df.columns if not isinstance(col, tuple)]
+        df = df[period_columns + format_columns]
+        df = df.rename(columns=date_mapping)
 
-        if include_format:
-            # Convert level to integer and replace NaN with empty string
-            # df['level'] = pd.to_numeric(df['level'], errors='coerce').fillna(0).astype(int)
-
-            # Ensure format columns have empty strings instead of NaN
-            for col in ['units', 'decimals']:
-                replace_all_na_with_empty(df[col])
+        # Sort and set index
+        df = df.sort_values('presentation_order')
+        df = df.set_index('label')
+        df = df.drop('presentation_order', axis=1)
 
         # Drop columns that are mostly empty
         empty_counts = ((df.isna()) | (df == '')).sum() / len(df)
         columns_to_keep = empty_counts[empty_counts < empty_threshold].index
         df = df[columns_to_keep]
 
-        # Ensure the original order is preserved
-        # Create a MultiIndex for reindexing
-        reindex_tuples = [(concept, format_info[concept]['label']) for concept in ordered_items]
-        new_index = pd.MultiIndex.from_tuples(reindex_tuples, names=['concept', 'label'])
+        # Select final columns
+        value_columns = [col for col in df.columns if col not in
+                         ['concept', 'level', 'style', 'is_abstract', 'units', 'decimals', 'section']]
 
-        # Reindex the DataFrame
-        df = df.reindex(new_index).fillna('')
-
-        # Flatten the column index if it's multi-level
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = [f"{col[0]}_{col[1]}" if isinstance(col, tuple) else col for col in df.columns]
-
-        # Create and return Statements object
-        df_reset = df.reset_index().set_index('label')
-
-        columns_to_include = [col for col
-                              in df_reset.columns if
-                              col not in ['concept', 'level', 'abstract', 'units', 'decimals']]
-
+        columns_to_include = value_columns
         if include_concept:
             columns_to_include.append('concept')
-
         if include_format:
-            columns_to_include.extend([col for col in df_reset.columns
-                                       if col in ['level', 'abstract', 'units', 'decimals']
-                                       ])
+            columns_to_include.extend(['level', 'style'])
+        if 'decimals' in df.columns:
+            columns_to_include.append( 'decimals')
 
-        df_reset = df_reset[columns_to_include]
+        df = df[columns_to_include]
 
         return Statement(
-            df=df_reset,
+            df=df,
             name=statement_name,
             display_name=display_name,
             definition=statement_definition,
-            entity=self.instance.get_entity_name()
+            entity=self.instance.get_entity_name(),
+            duration=selected_duration
         )
+
+    @staticmethod
+    def _select_duration_and_columns(df, is_quarterly: bool, preferred_duration: str = None):
+        """
+        Select the appropriate duration and return corresponding columns and selected duration,
+        while also merging instant values into period columns.
+        """
+        period_columns = [col for col in df.columns if isinstance(col, tuple)]
+
+        if not is_quarterly:
+            # For annual reports, separate instant and annual columns
+            instant_cols = [col for col in period_columns if col[1] == 'instant']
+            annual_cols = [col for col in period_columns if col[1] == 'annual']
+
+            # Group by date
+            date_groups = defaultdict(dict)
+            for col in instant_cols + annual_cols:
+                date, duration = col
+                date_groups[date][duration] = col
+
+            # Merge instant values into annual columns
+            final_columns = []
+            date_mapping = {}
+            for date, columns in date_groups.items():
+                if 'annual' in columns:
+                    annual_col = columns['annual']
+                    if 'instant' in columns:
+                        # Merge instant values
+                        df[annual_col] = df[annual_col].fillna(df[columns['instant']])
+                    final_columns.append(annual_col)
+                    date_mapping[annual_col] = date
+                elif 'instant' in columns:
+                    # Fallback to instant column if no annual column exists
+                    instant_col = columns['instant']
+                    final_columns.append(instant_col)
+                    date_mapping[instant_col] = date
+
+            # Sort columns by date
+            final_columns.sort(key=lambda x: x[0], reverse=True)
+            return final_columns, 'annual', date_mapping
+
+        # For quarterly reports
+        # Group columns by date
+        column_groups = defaultdict(dict)
+        for col in period_columns:
+            date, duration = col
+            column_groups[date][duration] = col
+
+        # Count non-empty values for each duration
+        valid_durations = ['3 months', '6 months', '9 months', 'instant']
+        duration_counts = {dur: 0 for dur in valid_durations}
+
+        for date_group in column_groups.values():
+            for dur in valid_durations:
+                if dur in date_group:
+                    non_empty = df[date_group[dur]].notna().sum()
+                    duration_counts[dur] += non_empty
+
+        # Choose the duration
+        selected_duration = None
+        if preferred_duration and preferred_duration in duration_counts and duration_counts[preferred_duration] > 0:
+            selected_duration = preferred_duration
+        else:
+            # Select the duration with the most non-empty values
+            valid_durations = [dur for dur in valid_durations if duration_counts[dur] > 0]
+            if valid_durations:
+                selected_duration = max(valid_durations, key=lambda x: duration_counts[x])
+
+        if not selected_duration:
+            return [], None, {}
+
+        # Select and merge columns
+        final_columns = []
+        date_mapping = {}
+
+        for date, columns in column_groups.items():
+            if selected_duration in columns:
+                period_col = columns[selected_duration]
+                if 'instant' in columns:
+                    # Merge instant values
+                    df[period_col] = df[period_col].fillna(df[columns['instant']])
+                final_columns.append(period_col)
+                date_mapping[period_col] = date
+
+        # Sort columns by date
+        final_columns.sort(key=lambda x: datetime.strptime(x[0], "%b %d, %Y"), reverse=True)
+
+        return final_columns, selected_duration, date_mapping
 
     def get_concept_for_label(self, label: str) -> Optional[str]:
         """

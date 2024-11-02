@@ -11,47 +11,7 @@ from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_definition_linkbase
                                  XBRLAttachments,
                                  XBRLInstance, XBRLPresentation, StatementDefinition, Statement)
 
-# Sample XML strings for testing
-SAMPLE_INSTANCE_XML = """
-<xbrl xml:lang="en-US"
-      xmlns="http://www.xbrl.org/2003/instance"
-      xmlns:dei="http://xbrl.sec.gov/dei/2023"
-      xmlns:us-gaap="http://fasb.org/us-gaap/2023">
-    <context id="ctx1">
-        <entity><identifier>1234567890</identifier></entity>
-        <period>
-            <startDate>2023-01-01</startDate>
-            <endDate>2023-12-31</endDate>
-        </period>
-    </context>
-    <us-gaap:Assets contextRef="ctx1" unitRef="usd" decimals="-6">1000000</us-gaap:Assets>
-    <us-gaap:Liabilities contextRef="ctx1" unitRef="usd" decimals="-6">500000</us-gaap:Liabilities>
-    <dei:DocumentPeriodEndDate contextRef="ctx1">2023-12-31</dei:DocumentPeriodEndDate>
-</xbrl>
-"""
-
-SAMPLE_PRESENTATION_XML = """
-<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase"
-               xmlns:xlink="http://www.w3.org/1999/xlink"
-               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
-<link:roleRef roleURI="http://www.company.com/role/CONSOLIDATEDBALANCESHEETS" xlink:type="simple" xlink:href="aapl-20230930.xsd#CoverPage"/>
-<link:presentationLink xlink:role="http://www.company.com/role/CONSOLIDATEDBALANCESHEETS">
-    <link:loc xlink:label="loc_assets" xlink:href="#us-gaap_Assets"/>
-    <link:loc xlink:label="loc_liabilities" xlink:href="#us-gaap_Liabilities"/>
-    <link:presentationArc xlink:from="assets" xlink:to="liabilities" order="1"/>
-</link:presentationLink>
-</link:linkbase>
-"""
-
-SAMPLE_CALCULATION_XML = """
-<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase">
-<link:calculationLink xlink:role="http://www.netflix.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS" xlink:type="extended">
-<link:calculationArc order="1" weight="1.0" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaap_NetIncomeLoss" xlink:to="loc_us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxes" xlink:type="arc"/>
-</link:calculationLink>
-</link:linkbase>
-"""
-
+from tests.samples import SAMPLE_INSTANCE_XML, SAMPLE_PRESENTATION_XML, SAMPLE_CALCULATION_XML
 
 @pytest.fixture
 def sample_instance():
@@ -66,9 +26,26 @@ def sample_presentation():
 @pytest.fixture
 def sample_labels():
     return {
-        'us-gaap_Assets': {'label': 'Assets'},
-        'us-gaap_Liabilities': {'label': 'Liabilities'}
+        'us-gaap_StatementOfFinancialPositionAbstract': {
+            'label': 'Statement of Financial Position [Abstract]'
+        },
+        'us-gaap_AssetsAbstract': {
+            'label': 'Assets [Abstract]'
+        },
+        'us-gaap_AssetsCurrent': {
+            'label': 'Total Current Assets',
+            'totalLabel': 'Total Current Assets'
+        },
+        'us-gaap_CashAndCashEquivalentsAtCarryingValue': {
+            'label': 'Cash and Cash Equivalents',
+            'terseLabel': 'Cash and cash equivalents'
+        },
+        'us-gaap_MarketableSecuritiesCurrent': {
+            'label': 'Marketable Securities, Current',
+            'terseLabel': 'Marketable securities'
+        }
     }
+
 
 
 @pytest.fixture
@@ -76,26 +53,46 @@ def sample_calculations():
     return CalculationLinkbase.parse(SAMPLE_INSTANCE_XML)
 
 
+@pytest.fixture
+def sample_xbrl_data(sample_labels):
+    return XBRLData.parse(
+        instance_xml=SAMPLE_INSTANCE_XML,
+        presentation_xml=SAMPLE_PRESENTATION_XML,
+        labels=sample_labels,
+        calculations=CalculationLinkbase.parse(SAMPLE_CALCULATION_XML)
+    )
+
+
+def test_instance_parsing():
+    instance = XBRLInstance.parse(SAMPLE_INSTANCE_XML)
+
+    # Test basic instance properties
+    assert instance.get_entity_name() == "APPLE INC"
+    assert instance.get_document_period() == "2023-09-30"
+
+    # Test fact values
+    cash = instance.query_facts(concept='us-gaap:CashAndCashEquivalentsAtCarryingValue')
+    assert len(cash) == 1
+    assert cash.iloc[0]['value'] == '29965000000'
+    assert cash.iloc[0]['decimals'] == '-6'
+    assert cash.iloc[0]['units'] == 'USD'
+
+
+
+
 def test_xbrl_instance_parsing(sample_instance):
-    assert len(sample_instance.facts) == 3
-    assert sample_instance.get_document_period() == '2023-12-31'
+    assert len(sample_instance.facts) == 5
+    assert sample_instance.get_document_period() == '2023-09-30'
 
 
 def test_xbrl_instance_query_facts(sample_instance):
-    assets = sample_instance.query_facts(concept='us-gaap:Assets')
+    assets = sample_instance.query_facts(concept='us-gaap:AssetsCurrent')
     assert len(assets) == 1
-    assert assets.iloc[0]['value'] == '1000000'
-
-
-def test_xbrl_presentation_parsing(sample_presentation):
-    assert len(sample_presentation.roles) == 1
-    role = "http://www.company.com/role/CONSOLIDATEDBALANCESHEETS"
-    assert role in sample_presentation.roles
-    assert len(sample_presentation.roles[role].children) == 2
+    assert assets.iloc[0]['value'] == '154770000000'
 
 
 def test_financial_statement_creation(sample_instance, sample_presentation, sample_labels, sample_calculations):
-    role = "http://www.company.com/role/CONSOLIDATEDBALANCESHEETS"
+    role = "http://www.apple.com/role/CONSOLIDATEDBALANCESHEETS"
     xbrl_data = XBRLData(
         instance=sample_instance,
         presentation=sample_presentation,
@@ -109,7 +106,7 @@ def test_financial_statement_creation(sample_instance, sample_presentation, samp
         xbrl_data
     )
     assert statement.name == "Balance Sheet"
-    assert len(statement.line_items) == 2
+    assert len(statement.line_items) == 3
 
 
 def test_xbrl_parser_get_financial_statement(sample_instance, sample_presentation, sample_labels, sample_calculations):
@@ -123,9 +120,10 @@ def test_xbrl_parser_get_financial_statement(sample_instance, sample_presentatio
 
     statement: Statement = parser.get_statement("CONSOLIDATEDBALANCESHEETS")
     assert statement is not None
-    assert 'Assets' in statement.labels
-    assert 'Liabilities' in statement.labels
+    assert 'Total Current Assets' in [l.strip() for l in statement.labels]
+    assert 'Cash and cash equivalents' in [l.strip() for l in statement.labels]
     assert '2023' in statement.periods
+    print()
     print(statement)
 
 
@@ -134,10 +132,10 @@ async def test_xbrl_parser_from_filing():
     filing = Filing(company='Accenture plc', cik=1467373, form='10-K', filing_date='2023-10-12',
                     accession_no='0001467373-23-000324')
 
-    parser = await XBRLData.from_filing(filing)
-    assert isinstance(parser, XBRLData)
-    assert isinstance(parser.instance, XBRLInstance)
-    assert isinstance(parser.presentation, XBRLPresentation)
+    xbrl_data = await XBRLData.from_filing(filing)
+    assert isinstance(xbrl_data, XBRLData)
+    assert isinstance(xbrl_data.instance, XBRLInstance)
+    assert isinstance(xbrl_data.presentation, XBRLPresentation)
 
 
 def test_parse_xbrl_presentation():
@@ -155,10 +153,6 @@ def test_xbrl_presentation_get_structure_for_role():
     print(structure)
 
 
-def test_xbrl_presentation_list_roles():
-    presentation = XBRLPresentation.parse(Path('data/xbrl/datafiles/aapl/aapl-20230930_pre.xml').read_text())
-    roles = presentation.list_roles()
-    assert 'http://www.apple.com/role/Leases' in roles
 
 
 def test_parse_labels():
@@ -312,7 +306,8 @@ def test_get_dataframe_for_statement_with_no_units_or_decimals():
     cash_flow_statement = financials.get_cash_flow_statement()
     cashflow_dataframe = cash_flow_statement.get_dataframe(include_concept=True, include_format=True)
     assert cashflow_dataframe is not None
-    assert cashflow_dataframe.columns.tolist() == ['2023', 'concept', 'level', 'abstract', 'node_type', 'section_end', 'has_dimensions']
+    cols = cashflow_dataframe.columns.tolist()
+    assert cols == ['2023', 'concept', 'level', 'style']
 
 
 def test_xbrl_data_from_files():
@@ -323,3 +318,6 @@ def test_xbrl_data_from_files():
         calculation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml')
     )
     assert xb
+    bs = xb.get_statement('CONSOLIDATEDBALANCESHEETS')
+    assert bs
+    assert bs.periods == ['2023', '2022']

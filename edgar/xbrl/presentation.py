@@ -32,20 +32,50 @@ class PresentationElement:
 
     @property
     def node_type(self) -> str:
-        if self.concept.endswith('Axis'):
-            return 'Axis'
-        elif self.concept.endswith('Member'):
-            return 'Member'
-        elif self.concept.endswith('Domain'):
-            return 'Domain'
-        elif self.concept.endswith('Table'):
+        """
+        Determine the type of node based on the concept name and common XBRL patterns.
+
+        Returns:
+            str: The type of node ('Statement', 'Axis', 'Member', 'Domain', 'Table',
+                 'Abstract', 'LineItems', or 'LineItem')
+        """
+        # Special case for statement root elements (role URIs)
+        if self.concept.startswith('http://') and 'role' in self.concept.lower():
+            return 'Statement'
+
+        concept_lower = self.concept.lower()
+
+        # Check for Table patterns
+        if self.concept.endswith('Table') or 'statementtable' in concept_lower:
             return 'Table'
-        elif self.concept.endswith('Abstract'):
-            return 'Abstract'
-        elif self.concept.endswith('LineItems'):
+
+        # Check for LineItems patterns
+        if (self.concept.endswith('LineItems') or
+                'statementlineitems' in concept_lower or
+                'schedulelineitems' in concept_lower):
             return 'LineItems'
-        else:
-            return "LineItem"
+
+        # Check for Axis patterns
+        if self.concept.endswith('Axis') or '[axis]' in concept_lower:
+            return 'Axis'
+
+        # Check for Member patterns
+        if self.concept.endswith('Member') or '[member]' in concept_lower:
+            return 'Member'
+
+        # Check for Domain patterns
+        if self.concept.endswith('Domain') or '[domain]' in concept_lower:
+            return 'Domain'
+
+        # Check for Abstract patterns
+        if (self.concept.endswith('Abstract') or
+                '[abstract]' in concept_lower or
+                'abstract' in concept_lower):
+            return 'Abstract'
+
+        # Default case
+        return 'LineItem'
+
 
     def is_abstract(self):
         return self.concept.endswith('Abstract')
@@ -138,6 +168,9 @@ class XBRLPresentation(BaseModel):
             if role_children:
                 presentation.roles[role] = PresentationElement(label=role, href='', order=0,
                                                                concept=normalize_concept(role))
+                # Set the parent of each child to the role element
+                for role_child in role_children:
+                    role_child.parent = presentation.roles[role]
                 presentation.roles[role].children = role_children
 
         # Build the statement map and concept index
@@ -188,19 +221,17 @@ class XBRLPresentation(BaseModel):
         if role in self.roles:
             return get_axes_for_role(self.roles[role])
 
-    def get_members_for_axis(self, role: Union[str, PresentationElement], axis: str) -> List[str]:
+    def get_members_for_axis(self, axis: PresentationElement) -> List[str]:
         """
         List all members for a given axis in a specific role.
 
         Args:
-            role: Either a role name (str) or a PresentationElement
-            axis: The name of the axis to find members for
+            axis: The axis to find members for
 
         Returns:
             List of member names
         """
-        if role in self.roles:
-            return get_members_for_axis(self.roles[role], axis)
+        return get_members_for_axis(axis)
 
     def get_statement_line_items(self, role: Union[str, PresentationElement]) -> List[PresentationElement]:
         """
@@ -324,34 +355,24 @@ def get_axes_for_role(role: PresentationElement) -> List[PresentationElement]:
     return axes
 
 
-def get_members_for_axis(role: Union[str, PresentationElement], axis: str) -> List[str]:
+def get_members_for_axis(axis_element:PresentationElement,
+                         ) -> List[str]:
     """
     List all members for a given axis in a specific role.
 
     Args:
-        role: Either a role name (str) or a PresentationElement
-        axis: The name of the axis to find members for
+        axis: The presentation element
 
     Returns:
         List of member names
     """
     members = []
 
-    def find_members(element):
-        if element.node_type == 'Table':
-            for child in element.children:
-                if child.href.split('#')[-1] == axis:
-                    for grandchild in child.children:
-                        if grandchild.node_type == 'Domain':
-                            for member in grandchild.children:
-                                if member.node_type == 'Member':
-                                    members.append(member.href.split('#')[-1])
-                    break
-        else:
-            for child in element.children:
-                find_members(child)
-
-    find_members(role)
+    for domain in axis_element.children:
+        if domain.node_type == 'Domain':
+            for member in domain.children:
+                if member.node_type == 'Member':
+                    members.append(member)
 
     return members
 

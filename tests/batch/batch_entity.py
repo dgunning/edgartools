@@ -8,7 +8,7 @@ def view_entities():
     entities = get_cik_lookup_data().sample(200)
     for entity in tqdm(entities.itertuples(), total=len(entities)):
         try:
-            entity = Entity(entity.cik)
+            entity = Entity(entity.cik, include_old_filings=False)
             print()
             print(entity)
         except Exception as e:
