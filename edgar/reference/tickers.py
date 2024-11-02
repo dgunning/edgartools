@@ -253,7 +253,7 @@ def find_company_ticker(cik: Union[int, str]) -> Union[str, List[str], None]:
     # Filter DataFrame for the given CIK
     ticker_series = df[df['cik'] == cik]['ticker']
 
-    # If no tickers found, return an empty list
+    # If no tickers found, return None
     if ticker_series.empty:
         return None
 
