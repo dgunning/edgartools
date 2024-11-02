@@ -227,6 +227,11 @@ def find_company_cik(ticker):
     ticker = ticker.upper().replace('.', '-')
     return lookup.get(ticker)
 
+def find_company_ticker(cik):
+    cik = str(cik).lstrip('0')
+    df = get_cik_tickers()
+    ticker = df[df['cik'] == int(cik)]['ticker']
+    return ticker.values[0]
 
 def find_cik(ticker):
     """
