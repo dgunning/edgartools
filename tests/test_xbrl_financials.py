@@ -376,9 +376,9 @@ def test_handle_financials_with_only_document_and_entity_definition():
 def test_get_dataframe_from_statement(apple_xbrl):
     financials: Financials = Financials(apple_xbrl)
     balance_sheet = financials.get_balance_sheet()
-    assert balance_sheet.get_dataframe().columns.tolist() == ['2023', '2022']
+    assert balance_sheet.get_dataframe(include_concept=False).columns.tolist() == ['2023', '2022']
     assert balance_sheet.get_dataframe(include_concept=True).columns.tolist() == ['2023', '2022', 'concept']
-    assert balance_sheet.get_dataframe(include_format=True).columns.tolist() == ['2023', '2022', 'level', 'decimals', 'style']
+    assert balance_sheet.get_dataframe(include_format=True).columns.tolist() == ['2023', '2022', 'concept', 'level', 'decimals', 'style']
     assert balance_sheet.get_dataframe(include_concept=True, include_format=True).columns.tolist() == ['2023', '2022',
                                                                                                        'concept',
                                                                                                        'level',
@@ -717,4 +717,14 @@ def test_statement_definition_durations(teradyne_xbrl):
 def test_duration_with_data_selected_for_quarterly_income_statement(teradyne_xbrl):
     fin = Financials(teradyne_xbrl)
     cs = fin.get_cash_flow_statement()
-    print(cs)
+    df = cs.get_dataframe()
+    cols = df.columns.tolist()
+    assert 'Jun 30, 2024' in cols
+    assert 'Jul 02, 2023' in cols
+
+
+def test_formatting_of_equity_value():
+    filing = Filing(company='Palo Alto Networks Inc', cik=1327567, form='10-K', filing_date='2024-09-06', accession_no='0001327567-24-000029')
+    xb = filing.xbrl()
+    st = xb.get_statement('CONSOLIDATEDBALANCESHEETSParenthetical')
+    assert st.name == 'CONSOLIDATEDBALANCESHEETSParenthetical'

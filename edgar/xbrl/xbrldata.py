@@ -815,7 +815,7 @@ class Statement:
         self.include_format = 'level' in df.columns
         self.include_concept = 'concept' in df.columns
         self.durations = definition.durations or set()
-        self.display_duration = duration
+        self.display_duration = duration or ''
 
     @property
     def periods(self):
@@ -1088,7 +1088,7 @@ class Statement:
 
     def get_dataframe(self,
                       include_format: bool = False,
-                      include_concept: bool = False):
+                      include_concept: bool = True):
         columns = [col for col in self.data.columns if col not in self.meta_columns]
         if include_concept:
             columns.append('concept')
@@ -1136,7 +1136,8 @@ class Statement:
                 *(Column(col, justify="right") for col in value_cols),
                 title=Text.assemble(
                     (f"{self.entity}\n", "bold deep_sky_blue2"),
-                    (self.display_name, "bold")
+                           (f"{self.display_name}\n", "bold"),
+                           (f"{self.display_duration.title()}", "italic grey74")
                 ),
                 box=box.SIMPLE,
                 padding=(0, 1),

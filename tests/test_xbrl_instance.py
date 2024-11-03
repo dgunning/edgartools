@@ -2,6 +2,7 @@ from edgar.xbrl.instance import XBRLInstance
 from pathlib import Path
 import pytest
 
+
 @pytest.fixture()
 def apple_instance():
     instance_xml = Path('data/xbrl/datafiles/aapl/aapl-20230930_htm.xml').read_text()
@@ -62,3 +63,4 @@ def test_instance_contains_dimensioned_facts_like_ipad():
     facts = instance.facts
     print()
     print(facts)
+
