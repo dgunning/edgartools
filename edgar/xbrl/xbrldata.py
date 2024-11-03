@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from datetime import datetime
 from functools import cached_property
-from functools import lru_cache
 from typing import Dict, List, Tuple, Union, Any, Optional, Set
 
 import pandas as pd
@@ -23,7 +22,7 @@ from rich.table import Table, Column
 from rich.text import Text
 from rich.tree import Tree
 
-from edgar.datatools import replace_all_na_with_empty, na_value
+from edgar.datatools import na_value
 from edgar.richtools import repr_rich, colorize_words
 from edgar.attachments import Attachments
 from edgar.core import log, split_camel_case, run_async_or_sync
