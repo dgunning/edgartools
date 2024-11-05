@@ -232,13 +232,17 @@ class EntityFilings(Filings):
             is_inline_xbrl=self.data['isInlineXBRL'][item].as_py()
         )
 
+
     def filter(self,
                form: Union[str, List[str]] = None,
                amendments: bool = None,
                filing_date: str = None,
-               date: str = None):
+               date: str = None,
+               cik: Union[IntString, List[IntString]] = None,
+               ticker: Union[str, List[str]] = None,
+               accession_number: Union[str, List[str]] = None,):
         # The super filter returns Filings. We want CompanyFilings
-        res = super().filter(form, amendments, filing_date, date)
+        res = super().filter(form, amendments, filing_date, date, accession_number)
         return CompanyFilings(data=res.data, cik=self.cik, company_name=self.company_name)
 
     def latest(self, n: int = 1):

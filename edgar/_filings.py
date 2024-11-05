@@ -38,6 +38,7 @@ from edgar.core import (log, display_size, sec_edgar,
                         filter_by_form,
                         filter_by_cik,
                         filter_by_ticker,
+                        filter_by_accession_number,
                         listify,
                         is_start_of_quarter,
                         InvalidDateException, IntString, DataPager)
@@ -482,7 +483,8 @@ class Filings:
                filing_date: Optional[str] = None,
                date: Optional[str] = None,
                cik: Union[IntString, List[IntString]] = None,
-               ticker: Union[str, List[str]] = None):
+               ticker: Union[str, List[str]] = None,
+               accession_number: Union[str, List[str]] = None) -> Optional['Filings']:
         """
         Get some filings
 
@@ -508,6 +510,7 @@ class Filings:
         :param date: An alias for the filing date
         :param cik: The CIK or list of CIKs to filter by
         :param ticker: The ticker or list of tickers to filter by
+        :param accession_number: The accession number or list of accession numbers to filter by
         :return: The filtered filings
         """
         filing_index = self.data
@@ -539,6 +542,10 @@ class Filings:
 
         if ticker:
             filing_index = filter_by_ticker(filing_index, ticker)
+
+        # Filter by accession number
+        if accession_number:
+            filing_index = filter_by_accession_number(filing_index, accession_number=accession_number)
 
         return Filings(filing_index)
 

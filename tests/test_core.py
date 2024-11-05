@@ -20,6 +20,7 @@ from edgar.core import (decode_content,
                         filter_by_date,
                         filter_by_form,
                         filter_by_cik,
+                        filter_by_accession_number,
                         InvalidDateException,
                         client_headers,
                         CRAWL, CAUTION, extract_dates,
@@ -180,6 +181,21 @@ def test_filter_by_form():
     assert len(filter_by_form(table, form=['10-K', '10-Q', '10-K/A'], amendments=True)) == 4
 
 
+def test_filter_by_accession_number():
+    arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
+              pa.array([3, 2, 1, 4, 4]),
+              pa.array(['10-K', '10-Q', '10-K', '10-K/A', '4-K']),
+              pa.array([3, 2, 1, 4, 4])
+              ]
+
+    table = pa.Table.from_arrays(arrays, names=['item', 'value', 'form', 'accession_number'])
+
+    assert len(filter_by_accession_number(table, 1)) == 1
+    assert len(filter_by_accession_number(table, [3, 4], )) == 3
+    assert len(filter_by_accession_number(table, ['3', 4], )) == 3
+    assert len(filter_by_accession_number(table, ['3'], )) == 1
+
+
 def test_filter_by_cik():
     arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
               pa.array([3, 2, 1, 4, 4]),
@@ -196,7 +212,6 @@ def test_filter_by_cik():
 
 
 def test_filter_by_ticker():
-
     arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
               pa.array([3, 2, 1, 4, 4]),
               pa.array(['10-K', '10-Q', '10-K', '10-K/A', '4-K']),

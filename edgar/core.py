@@ -73,6 +73,7 @@ __all__ = [
     'filter_by_form',
     'filter_by_cik',
     'filter_by_ticker',
+    'filter_by_accession_number',
     'split_camel_case',
     'text_extensions',
     'binary_extensions',
@@ -320,6 +321,15 @@ def filter_by_date(data: pa.Table,
         # filter by filings on date
         filtered_data = data.filter(pc.field(date_col) == pc.scalar(start_date))
     return filtered_data
+
+
+def filter_by_accession_number(data: pa.Table,
+                               accession_number: Union[IntString, List[IntString]]) -> pa.Table:
+    """Return the data filtered by accession number"""
+    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
+    accession_numbers = [str(el) for el in listify(accession_number)]
+    data = data.filter(pc.is_in(data['accession_number'], pa.array(accession_numbers)))
+    return data
 
 
 def filter_by_form(data: pa.Table,
