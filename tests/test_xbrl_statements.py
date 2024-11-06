@@ -247,10 +247,6 @@ def test_correct_labels_selected(aapl_xbrl):
     assert aapl_xbrl.statements.CONSOLIDATEDBALANCESHEETS
     assert aapl_xbrl.statements.EarningsPerShare
 
-    # Test dot accessor
-    assert aapl_xbrl.CONSOLIDATEDBALANCESHEETS
-    assert aapl_xbrl.EarningsPerShare
-
 def test_formatting_of_value_with_decimals_INF(aapl_xbrl):
     se = aapl_xbrl.statements['CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY']
     se_repr = repr(se)

@@ -1300,7 +1300,7 @@ class Statements():
 
     def __rich__(self):
         table = Table("", "Statements", box=box.ROUNDED, show_header=True)
-        for index, statement_name in enumerate(self.xbrl_data.statements_dict.keys()):
+        for index, statement_name in enumerate(self.names):
             table.add_row(str(index), Statements.colorize_name(statement_name))
         return table
 
@@ -1448,9 +1448,6 @@ class XBRLData():
                 xbrl_data=self
             )
 
-    def __getattr__(self, name):
-        return self.statements.get(name)
-
     @cached_property
     def statements(self):
         return Statements(self)
@@ -1495,9 +1492,6 @@ class XBRLData():
             # If all values have dimensions, return the first one
             return next(iter(value_info['dimensional_values'].values()))['value']
         return value_info.get('value', '')
-
-    def get_durations(self, statement_name):
-        ...
 
     def get_statement(self,
                       statement_name: str,
