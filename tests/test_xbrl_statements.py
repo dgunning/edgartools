@@ -1,13 +1,13 @@
 from pathlib import Path
-from rich import print
+from typing import Dict
+
+import pandas as pd
 import pytest
-from typing import Dict, Tuple
+from rich import print
 
 from edgar import Financials
 from edgar.xbrl import XBRLData, Statement
 from edgar.xbrl.xbrldata import StatementDefinition
-
-import pandas as pd
 
 
 @pytest.fixture
@@ -19,8 +19,9 @@ def aapl_xbrl():
         calculation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml')
     )
 
-def test_cover_page_renders_with_values(aapl_xbrl:XBRLData):
-    cover_page:Statement = aapl_xbrl.get_statement('CoverPage')
+
+def test_cover_page_renders_with_values(aapl_xbrl: XBRLData):
+    cover_page: Statement = aapl_xbrl.get_statement('CoverPage')
     assert cover_page
     cover_repr = repr(cover_page)
     print(cover_repr)
@@ -31,15 +32,17 @@ def test_get_presentation_structure_for_non_dimensioned_statement(aapl_xbrl):
     bs = Financials(aapl_xbrl).get_balance_sheet()
     bs.print_structure()
 
+
 def test_get_presentation_structure_for_dimensioned_statement(aapl_xbrl):
     sd = aapl_xbrl.get_statement_definition('RevenueNetSalesDisaggregatedbySignificantProductsandServicesDetails')
     sd.print_items()
 
-def test_statement_displays_with_correct_segments(aapl_xbrl:XBRLData):
+
+def test_statement_displays_with_correct_segments(aapl_xbrl: XBRLData):
     sd = aapl_xbrl.get_statement_definition('RevenueNetSalesDisaggregatedbySignificantProductsandServicesDetails')
     line_items = sd.line_items
     assert len(line_items) == 6
-    #assert len(statement_definition.line_items) == 6
+    # assert len(statement_definition.line_items) == 6
     line_item = line_items[0]
     assert line_item.concept == 'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax'
     assert line_item.label == 'Net sales'
@@ -50,13 +53,14 @@ def test_statement_displays_with_correct_segments(aapl_xbrl:XBRLData):
     assert line_item.label == 'iPhone'
     assert line_item.segment == 'aapl:IPhoneMember'
 
-    statement:Statement = aapl_xbrl.get_statement('RevenueNetSalesDisaggregatedbySignificantProductsandServicesDetails')
+    statement: Statement = aapl_xbrl.get_statement(
+        'RevenueNetSalesDisaggregatedbySignificantProductsandServicesDetails')
     statement_repr = repr(statement)
     print(statement)
-    #assert all(label in statement_repr for label in ['Net sales', 'iPhone', 'iPad', 'Mac', 'Wearables', 'Services'])
+    # assert all(label in statement_repr for label in ['Net sales', 'iPhone', 'iPad', 'Mac', 'Wearables', 'Services'])
 
 
-def test_list_axes_for_statement_definition(aapl_xbrl:XBRLData):
+def test_list_axes_for_statement_definition(aapl_xbrl: XBRLData):
     print()
     print(aapl_xbrl.statements)
     print(aapl_xbrl.statements[7])
@@ -235,8 +239,17 @@ def test_statement_dimensional_handling():
 
 
 def test_correct_labels_selected(aapl_xbrl):
+    print(aapl_xbrl.statements)
     bs = aapl_xbrl.statements['CONSOLIDATEDBALANCESHEETS']
-    assert 'Cash and cash equivalents'  in bs.data.index
+    assert 'Cash and cash equivalents' in bs.data.index
+
+    # Test dot accessor
+    assert aapl_xbrl.statements.CONSOLIDATEDBALANCESHEETS
+    assert aapl_xbrl.statements.EarningsPerShare
+
+    # Test dot accessor
+    assert aapl_xbrl.CONSOLIDATEDBALANCESHEETS
+    assert aapl_xbrl.EarningsPerShare
 
 def test_formatting_of_value_with_decimals_INF(aapl_xbrl):
     se = aapl_xbrl.statements['CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY']

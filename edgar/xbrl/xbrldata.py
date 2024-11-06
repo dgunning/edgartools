@@ -13,7 +13,7 @@ from functools import cached_property
 from typing import Dict, List, Tuple, Union, Any, Optional, Set
 
 import pandas as pd
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel
 from rich import box
 from rich import print as rprint
 from rich.console import Group
@@ -554,7 +554,7 @@ class StatementDefinition():
             return
 
         root = get_root_element(line_items_container)
-        axes = get_axes_for_role(root) # Can be [] or contain axis elements
+        axes = get_axes_for_role(root)  # Can be [] or contain axis elements
 
         # Process all elements
         all_items = []
@@ -613,7 +613,6 @@ class StatementDefinition():
         # If no facts found, return empty values
         if facts.empty:
             return {}, []
-
 
         values = {}
         durations = facts['duration'].unique().tolist()
@@ -786,7 +785,8 @@ def format_label(label, level):
 
 
 class Statement:
-    format_columns = ['level', 'abstract', 'units', 'decimals', 'node_type', 'section_end', 'dimensions', 'has_dimensions', 'style']
+    format_columns = ['level', 'abstract', 'units', 'decimals', 'node_type', 'section_end', 'dimensions',
+                      'has_dimensions', 'style']
     meta_columns = ['concept', 'segment'] + format_columns
 
     NAMES = {
@@ -1060,7 +1060,6 @@ class Statement:
 
         console.print(main_tree)
 
-
     def get_dimensional_structure(self) -> Dict[str, Dict[str, List[str]]]:
         """
         Get a dictionary showing the dimensional structure of the statement
@@ -1113,7 +1112,6 @@ class Statement:
             with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
                 df.to_excel(writer, index=True, sheet_name=self.name[:31])
 
-
     def print_structure(self, detailed: bool = False):
         self.definition.print_items(detailed)
 
@@ -1165,8 +1163,8 @@ class Statement:
                 *(Column(col, justify="right") for col in value_cols),
                 title=Text.assemble(
                     (f"{self.entity}\n", "bold deep_sky_blue2"),
-                           (f"{self.display_name}\n", "bold"),
-                           (f"{self.display_duration.title()}", "italic grey74")
+                    (f"{self.display_name}\n", "bold"),
+                    (f"{self.display_duration.title()}", "italic grey74")
                 ),
                 box=box.SIMPLE,
                 padding=(0, 1),
@@ -1267,6 +1265,10 @@ class Statements():
             include_concept: bool = True):
         return self.xbrl_data.get_statement(statement_name, include_format, include_concept)
 
+    def __getattr__(self, name):
+        if name in self.names:
+            return self.get(name)
+
     def __contains__(self, item):
         return item in self.names
 
@@ -1306,7 +1308,7 @@ class Statements():
         return repr_rich(self.__rich__())
 
 
-class XBRLData(BaseModel):
+class XBRLData():
     """
        A parser for XBRL (eXtensible Business Reporting Language) documents.
 
@@ -1328,14 +1330,19 @@ class XBRLData(BaseModel):
                Asynchronously create an XBRL instance from a Filing object.
 
        """
-    instance: XBRLInstance
-    presentation: XBRLPresentation
-    labels: Dict
-    calculations: Optional[CalculationLinkbase] = None
-    statements_dict: Dict[str, StatementDefinition] = Field(default_factory=dict)
-    label_to_concept_map: Dict[str, str] = Field(default_factory=dict)
+    def __init__(self,
+                 instance: XBRLInstance,
+                 presentation: XBRLPresentation,
+                 labels: Dict,
+                 calculations: Optional[CalculationLinkbase] = None
+                 ):
+        self.instance = instance
+        self.presentation = presentation
+        self.labels = labels
+        self.calculations = calculations
+        self.statements_dict: Dict[str, StatementDefinition] = dict()
+        self.label_to_concept_map: Dict[str, str] = dict()
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def _build_label_to_concept_map(self):
         for concept, label_dict in self.labels.items():
@@ -1440,6 +1447,9 @@ class XBRLData(BaseModel):
                 labels=self.labels,
                 xbrl_data=self
             )
+
+    def __getattr__(self, name):
+        return self.statements.get(name)
 
     @cached_property
     def statements(self):
@@ -1577,7 +1587,6 @@ class XBRLData(BaseModel):
 
             data.append(row)
 
-
         if len(data) == 0:
             # Create an empty dataframe with the required columns
             df = pd.DataFrame(columns=['concept', 'label', 'segment', 'presentation_order'])
@@ -1625,7 +1634,7 @@ class XBRLData(BaseModel):
         if include_format:
             columns_to_include.extend(['level', 'style'])
         if 'decimals' in df.columns:
-            columns_to_include.append( 'decimals')
+            columns_to_include.append('decimals')
 
         df = df[columns_to_include]
 
