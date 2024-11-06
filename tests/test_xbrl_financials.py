@@ -105,9 +105,9 @@ async def test_statement_get_concept_value(apple_xbrl):
     statement: Statement = Financials(apple_xbrl).get_statement_of_changes_in_equity()
     concept = statement.data.query("concept == 'us-gaap_NetIncomeLoss' ")
     print()
-    assert concept['2023'][0] == '96995000000'
-    assert concept['2022'][0] == '99803000000'
-    assert concept['2021'][0] == '94680000000'
+    assert concept['2023'].iloc[0] == '96995000000'
+    assert concept['2022'].iloc[0] == '99803000000'
+    assert concept['2021'].iloc[0] == '94680000000'
 
 
 def test_get_balance_sheet(apple_xbrl):

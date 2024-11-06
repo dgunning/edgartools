@@ -1117,6 +1117,36 @@ class Statement:
     def print_structure(self, detailed: bool = False):
         self.definition.print_items(detailed)
 
+    def durations_table(self):
+        # Create a compact duration table
+        if self.durations:
+            duration_table = Table(
+                Column("Duration", style="dim grey74"),
+                box=None,
+                show_header=False,
+                padding=(0, 2)
+            )
+
+            # Format durations in rows of 3
+            durations_list = sorted(list([d for d in self.durations if d != 'instant']))
+            current_row = []
+
+            for duration in durations_list:
+                formatted_duration = duration.title()
+                if duration == self.display_duration:
+                    current_row.append(Text(formatted_duration, style="bold deep_sky_blue3"))
+                else:
+                    current_row.append(Text(formatted_duration, style="dim grey74"))
+
+                if len(current_row) == 3:
+                    duration_table.add_row(*current_row)
+                    current_row = []
+
+            # Add any remaining durations
+            if current_row:
+                duration_table.add_row(*current_row)
+            return duration_table
+
     def __rich__(self):
         if self.data.empty:
             return Text.assemble(
@@ -1206,8 +1236,17 @@ class Statement:
             else:
                 table.add_row(label, *values)
 
-        return table
+        duration_table = self.durations_table()
+        if not duration_table or len(duration_table.columns) < 2:
+            return table
 
+        # Return both tables in a group
+        return Group(
+            table,
+            Text(""),  # Empty line as spacing
+            Text("Available durations for this statement:", style="dim grey74"),
+            duration_table
+        )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
