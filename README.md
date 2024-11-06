@@ -116,13 +116,14 @@ You can get the company's **filings**, **facts** and **financials**.
 #### 🔍 Getting Filings
 
 |                                        | Code                                            |
-|----------------------------------------|--------------------------------------------------|
+|----------------------------------------|-------------------------------------------------|
 | 📅 Get filings for the year to date    | `filings = get_filings()`                       |
 | 📊 Get only XBRL filings               | `filings = get_filings(index="xbrl")`           |
 | 📆 Get filings for a specific year     | `filings = get_filings(2020)`                   |
-| 🗓️ Get filings for a specific quarter | `filings = get_filings(2020, 1)`              |
+| 🗓️ Get filings for a specific quarter | `filings = get_filings(2020, 1)`                |
 | 📚 Get filings for multiple years      | `filings = get_filings([2020, 2021])`           |
 | 📈 Get filings for a range of years    | `filings = get_filings(year=range(2010, 2020))` |
+| 📈 Get filings released just now       | `filings = get_latest_filings()`                |
 
 #### 📄 Filtering Filings
 
