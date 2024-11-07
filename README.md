@@ -127,19 +127,19 @@ You can get the company's **filings**, **facts** and **financials**.
 
 #### 📄 Filtering Filings
 
-|                                   | Code                                                  |
-|-----------------------------------|-------------------------------------------------------|
-| 📝 Filter by form type            | `filings.filter(form="10-K")`                         |
-| 📑 Filter by multiple forms       | `filings.filter(form=["10-K", "10-Q"])`               |
-| 🔄 Include form amendments        | `filings.filter(form="10-K", amendments=True)`        |
-| 🏢 Filter by CIK                  | `filings.filter(cik="0000320193")`                    |
-| 🏙️ Filter by multiple CIKs       | `filings.filter(cik=["0000320193", "1018724"])`       |
-| 🏷️ Filter by ticker              | `filings.filter(ticker="AAPL")`                       |
-| 🏷️🏷️ Filter by multiple tickers | `filings.filter(ticker=["AAPL", "MSFT"])`             |
-| 📅 Filter on a specific date      | `filings.filter(date="2020-01-01")`                   |
-| 📅↔️📅 Filter between dates       | `filings.filter(date="2020-01-01:2020-03-01")`        |
-| 📅⬅️ Filter before a date         | `filings.filter(date=":2020-03-01")`                  |
-| 📅➡️ Filter after a date          | `filings.filter(date="2020-03-01:")`                  |
+|                                   | Code                                                             |
+|-----------------------------------|------------------------------------------------------------------|
+| 📝 Filter by form type            | `filings.filter(form="10-K")`                                    |
+| 📑 Filter by multiple forms       | `filings.filter(form=["10-K", "10-Q"])`                          |
+| 🔄 Include form amendments        | `filings.filter(form="10-K", amendments=True)`                   |
+| 🏢 Filter by CIK                  | `filings.filter(cik="0000320193")`                               |
+| 🏙️ Filter by multiple CIKs       | `filings.filter(cik=["0000320193", "1018724"])`                  |
+| 🏷️ Filter by ticker              | `filings.filter(ticker="AAPL")`                                  |
+| 🏷️🏷️ Filter by multiple tickers | `filings.filter(ticker=["AAPL", "MSFT"])`                        |
+| 📅 Filter on a specific date      | `filings.filter(date="2020-01-01")`                              |
+| 📅↔️📅 Filter between dates       | `filings.filter(date="2020-01-01:2020-03-01")`                   |
+| 📅⬅️ Filter before a date         | `filings.filter(date=":2020-03-01")`                             |
+| 📅➡️ Filter after a date          | `filings.filter(date="2020-03-01:")`                             |
 | 🔀 Combine multiple filters       | `filings.filter(form="10-K", date="2020-01-01:", ticker="AAPL")` |
 
 #### 📊 Viewing and Manipulating Filings
