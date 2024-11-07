@@ -716,7 +716,7 @@ def is_integer(s):
 
 def format_xbrl_value(value: Union[str, float],
                       decimals: str,
-                      format_str: str = '{:>10,.0f}') -> str:
+                      format_str: str = '{:>8,.0f}') -> str:
     """
     Format an XBRL value for display
     """
@@ -731,13 +731,13 @@ def format_xbrl_value(value: Union[str, float],
             except ValueError:
                 pass
         if not pd.isna(decimals) and decimals == 'INF':
-            return f"{value:>10}"
+            return f"{value:>8}"
         else:
             return format_str.format(value)
     else:
         if pd.isna(value):
             value = ''
-        return f"{value:>10}"
+        return f"{value:>8}"
 
 
 def create_unit_label(decimals: str):
