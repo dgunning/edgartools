@@ -401,11 +401,12 @@ The data is stored by default in the `~/.edgar` directory. You can change this b
 ```bash
 
 ```python
-def download_edgar_data(submissions: bool = True, facts: bool = True):
+def download_edgar_data(submissions: bool = True, facts: bool = True, reference: bool = True):
     """
     Download all the company data from Edgar
     :param submissions: Download all the company submissions
     :param facts: Download all the company facts
+    :param reference: Download reference data
     """
 download_edgar_data()
 

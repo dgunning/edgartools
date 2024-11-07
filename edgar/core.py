@@ -253,6 +253,9 @@ def download_edgar_data(submissions: bool = True,
     if facts:
         from edgar.entities import download_facts
         download_facts()
+    if reference:
+        from edgar.reference import download_reference_data
+        download_reference_data()
 
 
 class InvalidDateException(Exception):
