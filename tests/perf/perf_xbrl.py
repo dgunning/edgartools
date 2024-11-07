@@ -1,5 +1,3 @@
-from edgar.xbrl import XBRLData
-from edgar.financials import Financials
 from edgar import *
 from pyinstrument import Profiler
 

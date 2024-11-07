@@ -9,7 +9,7 @@ from rich import print
 
 from edgar import Filing, Company
 from edgar.financials import (Financials, MultiFinancials, BalanceSheet, CashFlowStatement,
-                              IncomeStatement, StatementOfChangesInEquity, StatementOfComprehensiveIncome)
+                        IncomeStatement, StatementOfChangesInEquity, StatementOfComprehensiveIncome)
 from edgar.xbrl import XBRLData, XBRLInstance, Statement, Statements, get_xbrl_object
 from edgar.xbrl.xbrldata import get_primary_units, get_unit_divisor
 
@@ -161,8 +161,8 @@ def test_10Q_filings_have_quarterly_dates(netflix_xbrl):
 async def test_labels_for_orcl_10K(orcl_xbrl):
     financials: Financials = Financials(orcl_xbrl)
     balance_sheet = financials.get_balance_sheet()
-    print(balance_sheet)
-    #assert not balance_sheet.labels[0].startswith('us-gaap_')
+    labels = balance_sheet.data.index.tolist()
+    assert all([not label.startswith('us-gaap_') for label in labels])
 
 
 @pytest.mark.asyncio
@@ -728,3 +728,24 @@ def test_formatting_of_equity_value():
     xb = filing.xbrl()
     st = xb.get_statement('CONSOLIDATEDBALANCESHEETSParenthetical')
     assert st.name == 'CONSOLIDATEDBALANCESHEETSParenthetical'
+
+
+def test_financials_short_properties(apple_xbrl):
+    f = Financials(apple_xbrl)
+    assert f.balance
+    assert not f.balance.data.empty
+
+    assert f.income
+    assert not f.income.data.empty
+
+    assert f.cashflow
+    assert not f.cashflow.data.empty
+
+    assert f.equity
+    assert not f.equity.data.empty
+
+    assert f.comprehensive_income
+    assert not f.comprehensive_income.data.empty
+    print(f.balance)
+
+

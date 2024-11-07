@@ -1,5 +1,4 @@
-from edgar.xbrl import XBRLData, XBRLInstance
-from edgar.financials import Financials
+from edgar.xbrl import XBRLInstance
 from pathlib import Path
 
 from edgar import *

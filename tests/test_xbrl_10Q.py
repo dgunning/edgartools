@@ -2,7 +2,7 @@ import asyncio
 
 import pytest
 
-from edgar import Filing, find
+from edgar import Filing
 from edgar.xbrl.xbrldata import Statement, XBRLData, XBRLAttachments
 from edgar.financials import Financials
 

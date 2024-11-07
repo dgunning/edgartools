@@ -1,5 +1,5 @@
 from collections import defaultdict
-from functools import lru_cache
+from functools import lru_cache, cached_property
 from typing import Optional, List, Dict
 
 import numpy as np
@@ -187,6 +187,11 @@ cover_page = StandardStatement(statement_name="COVER_PAGE",
 
 class Financials:
 
+    """
+    A convenience class to extract and work with financial statements from an XBRL filing.
+    Wraps and XbrlData object and provides methods to extract standard financial statements
+    """
+
     @staticmethod
     def _filter_standard_statement(statement: Statement, standard_statement: StandardStatement) -> Statement:
         if statement is None:
@@ -240,6 +245,10 @@ class Financials:
             statement_name = role.split('/')[-1]
             return statement_name
 
+    @cached_property
+    def balance(self):
+        return self.get_balance_sheet()
+
     def get_balance_sheet(self, standard: bool = False) -> Statement:
         """
         Retrieves the Balance Sheet (Statement of Financial Position).
@@ -256,6 +265,10 @@ class Financials:
             if standard and statement:
                 return self._filter_standard_statement(statement, BalanceSheet)
             return statement
+
+    @cached_property
+    def income(self):
+        return self.get_income_statement()
 
     def get_income_statement(self, standard: bool = False) -> Optional[Statement]:
         """
@@ -275,6 +288,10 @@ class Financials:
                 return self._filter_standard_statement(statement, IncomeStatement)
             return statement
 
+    @cached_property
+    def cashflow(self):
+        return self.get_cash_flow_statement()
+
     def get_cash_flow_statement(self, standard: bool = False) -> Statement:
         """
         Retrieves the Statement of Cash Flows.
@@ -292,6 +309,10 @@ class Financials:
             if standard and statement:
                 return self._filter_standard_statement(statement, CashFlowStatement)
             return statement
+
+    @cached_property
+    def equity(self):
+        return self.get_statement_of_changes_in_equity()
 
     def get_statement_of_changes_in_equity(self, standard: bool = False) -> Statement:
         """
@@ -311,6 +332,10 @@ class Financials:
                 return self._filter_standard_statement(statement, StatementOfChangesInEquity)
             return statement
 
+    @cached_property
+    def comprehensive_income(self):
+        return self.get_statement_of_comprehensive_income()
+
     def get_statement_of_comprehensive_income(self, standard: bool = False) -> Statement:
         """
         Retrieves the Statement of Comprehensive Income.
@@ -329,6 +354,10 @@ class Financials:
             if standard and statement:
                 return self._filter_standard_statement(statement, StatementOfComprehensiveIncome)
             return statement
+
+    @cached_property
+    def cover(self):
+        return self.get_cover_page()
 
     def get_cover_page(self) -> Statement:
         """

@@ -1,5 +1,4 @@
 from edgar import *
-from edgar.financials import *
 from functools import lru_cache
 
 tickers = ['AAPL', 'NFLX', 'TSLA']
