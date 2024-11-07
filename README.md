@@ -360,13 +360,15 @@ filing_xbrl = filing.xbrl()
 Some filings, notably **10-K** and **10-Q** filings contain financial statements in XBRL format. 
 You can get the financials from the XBRL data using the `Financials` class.
 
+The Company object has a `financials` property that will return the financials for the company.
 ```python
 from edgar.financials import Financials
 
-financials = Financials(filing.xbrl())
+company = Company("AAPL")
+financials = company.financials
 
 ```
-Or automatically through the `Tenk` and `TenQ` data objects.
+You can also get the financials through the `Tenk` and `TenQ` data objects.
 
 Here is an example that gets the latest Apple financials
 
@@ -381,6 +383,7 @@ financials.get_cash_flow_statement()               # or financials.cashflow
 financials.get_statement_of_changes_in_equity()    # or financials.equity
 financials.get_statement_of_comprehensive_income() # or financials.comprehensive_income
 ```
+
 ![Balance Sheet](docs/images/balance_sheet.png)
 
 ### Get the financial data as a pandas dataframe
