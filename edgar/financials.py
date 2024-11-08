@@ -517,9 +517,6 @@ class MultiFinancials:
 
         # Handle specific column dtypes
         merged_df['level'] = pd.to_numeric(merged_df['level'], errors='coerce').astype('Int64')
-        #merged_df['abstract'] = merged_df['abstract'].astype('boolean')
-        #merged_df['units'] = merged_df['units'].astype('string')
-       # merged_df['decimals'] = merged_df['decimals'].astype('string')
 
         # Replace NaN with pd.NA in all columns
         for col in merged_df.columns:
@@ -619,4 +616,4 @@ class MultiFinancials:
         return panel
 
     def __repr__(self):
-        return repr_rich(self.__rich__())
+        return repr_rich(self.__rich__(), width=160)

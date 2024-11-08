@@ -1159,8 +1159,8 @@ class Statement:
         if 'decimals' in self.data.columns:
             table = Table(
                 Column("", width=50),  # Label column
-                Column("", width=12),  # Units column
-                *(Column(col, justify="right") for col in value_cols),
+                Column("", width=10),  # Units column
+                *(Column(col, width=10, justify="right") for col in value_cols),
                 title=Text.assemble(
                     (f"{self.entity}\n", "bold deep_sky_blue2"),
                     (f"{self.display_name}\n", "bold"),
@@ -1247,7 +1247,7 @@ class Statement:
         )
 
     def __repr__(self):
-        return repr_rich(self.__rich__())
+        return repr_rich(self.__rich__(), width=100)
 
     def __str__(self):
         return f"{self.display_name}"
@@ -1516,10 +1516,13 @@ class XBRLData():
             try:
                 # Convert to float for numerical operations
                 num_value = float(value)
-                if not pd.isna(decimals) and decimals == 'INF':
+                if pd.isna(decimals):
+                    return f'{num_value:.0f}'
+                elif decimals == 'INF':
                     return str(num_value)
-                else:
-                    return f'{num_value:.0f}'  # Return raw numerical value
+                elif decimals.isdigit():
+                    return f'{num_value:.{decimals}f}'
+                return f'{num_value:.0f}'  # Return raw numerical value
             except ValueError:
                 return value
 

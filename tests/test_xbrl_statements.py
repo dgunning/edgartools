@@ -19,6 +19,15 @@ def aapl_xbrl():
         calculation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml')
     )
 
+@pytest.fixture
+def tsla_xbrl():
+    return XBRLData.from_files(
+        instance_path=Path('data/xbrl/datafiles/tsla/tsla-20240630_htm.xml'),
+        label_path=Path('data/xbrl/datafiles/tsla/tsla-20240630_lab.xml'),
+        presentation_path=Path('data/xbrl/datafiles/tsla/tsla-20240630_pre.xml'),
+        calculation_path=Path('data/xbrl/datafiles/tsla/tsla-20240630_cal.xml'),
+    )
+
 
 def test_cover_page_renders_with_values(aapl_xbrl: XBRLData):
     cover_page: Statement = aapl_xbrl.get_statement('CoverPage')
@@ -26,6 +35,23 @@ def test_cover_page_renders_with_values(aapl_xbrl: XBRLData):
     cover_repr = repr(cover_page)
     print(cover_repr)
     assert "One Apple Park Way" in cover_repr
+
+def test_statement_renders_with_sufficient_width(aapl_xbrl):
+    bs = aapl_xbrl.get_statement('CONSOLIDATEDBALANCESHEETS')
+    bs_repr = repr(bs)
+    width = len(bs_repr.splitlines()[0])
+    assert width > 80
+    print(bs_repr)
+    assert "Cash and cash equivalents" in bs_repr
+
+def test_statement_small_decimal_values_keep_format(aapl_xbrl, tsla_xbrl):
+    inc = Financials(aapl_xbrl).income
+    inc_repr = repr(inc)
+    print(inc_repr)
+    assert '6.13' in inc_repr
+    assert '6.16' in inc_repr
+
+    bs = Financials(tsla_xbrl).balance_sheet
 
 
 def test_get_presentation_structure_for_non_dimensioned_statement(aapl_xbrl):
@@ -239,13 +265,13 @@ def test_statement_dimensional_handling():
 
 
 def test_correct_labels_selected(aapl_xbrl):
-    print(aapl_xbrl.statements)
     bs = aapl_xbrl.statements['CONSOLIDATEDBALANCESHEETS']
     assert 'Cash and cash equivalents' in bs.data.index
 
     # Test dot accessor
     assert aapl_xbrl.statements.CONSOLIDATEDBALANCESHEETS
     assert aapl_xbrl.statements.EarningsPerShare
+
 
 def test_formatting_of_value_with_decimals_INF(aapl_xbrl):
     se = aapl_xbrl.statements['CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY']
