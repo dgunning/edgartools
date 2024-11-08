@@ -68,38 +68,28 @@ filings = get_filings()
 
 # Key Concepts
 
-## How do I find a filing?
-Depends on what you know
+## Getting financials
+```python
+c = Company("AAPL")
+filing = c.get_filings(form="10-Q").latest(1)
+tenq = filing.obj()
+financials = tenq.financials
+```
 
-### A. I know the accession number
+## Listing filings
+
+```python
+filings = get_filings(form=['10-K', '10-Q'], year=2020)
+filing = filings[0]
+```
+
+## Finding things
 
 ```python
 filing = find("0001065280-23-000273")
 ```
-
-### B. I know the company ticker or cik
-
-```python
-filings = Company("NFLX").get_filings(form="10-Q").latest(1)
-```
-
 For a deeper dive see **[Finding things with edgartools](https://github.com/dgunning/edgartools/wiki/FindingThings)**
 
-### C. Show me a list of filings
-
-```python
-filings = get_filings(form="10-Q")
-filing = filings[0]
-```
-
-## What can I do with a filing
-
-You can **view** it in the terminal or **open** it in the browser, get the filing as **html**, **xml** or **text**, 
-and download **attachments**. You can extract data from the filing into a data object.
-
-## What can I do with a company
-
-You can get the company's **filings**, **facts** and **financials**.
 
 # How to use edgartools
 
