@@ -367,7 +367,7 @@ tenk = Company("AAPL").get_filings(form="10-K").latest(1).obj()
 
 financials = tenk.financials
 
-financials.get_balance_sheet()                     # or financials.balance
+financials.get_balance_sheet()                     # or financials.balance_sheet
 financials.get_income_statement()                  # or financials.income
 financials.get_cash_flow_statement()               # or financials.cashflow
 financials.get_statement_of_changes_in_equity()    # or financials.equity
