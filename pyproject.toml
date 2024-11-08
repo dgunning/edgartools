@@ -7,7 +7,7 @@ name = "edgartools"
 description = 'One of the nicest looking EDGAR libraries out there'
 readme = "README.md"
 requires-python = ">=3.9"
-license = "MIT"
+license = {text = "MIT"}
 keywords = ["sec", "edgar", "filings", "company", "python", "finance", "financial", "reports"]
 authors = [
   { name = "Dwight Gunning", email = "dgunning@gmail.com" },
@@ -21,6 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
+  "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
   "httpx>=0.25.0",
