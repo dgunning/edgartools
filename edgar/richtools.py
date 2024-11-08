@@ -78,7 +78,7 @@ def df_to_rich_table(
     return rich_table
 
 
-def repr_rich(renderable) -> str:
+def repr_rich(renderable, **console_args) -> str:
     """
     This renders a rich object to a string
 
@@ -94,11 +94,12 @@ def repr_rich(renderable) -> str:
         console.print("[bold red]Hello[/] World")
         str_output = console.file.getvalue()
 
-    :param renderable:
-    :return:
+    :param renderable: A rich renderable object
+    :param console_args: The console arguments
+    :return: A string representation of the renderable object
     """
     from rich.console import Console
-    console = Console()
+    console = Console(**console_args)
     with console.capture() as capture:
         console.print(renderable)
     str_output = capture.get()
