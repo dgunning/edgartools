@@ -732,8 +732,8 @@ def test_formatting_of_equity_value():
 
 def test_financials_short_properties(apple_xbrl):
     f = Financials(apple_xbrl)
-    assert f.balance
-    assert not f.balance.data.empty
+    assert f.balance_sheet
+    assert not f.balance_sheet.data.empty
 
     assert f.income
     assert not f.income.data.empty
@@ -746,6 +746,6 @@ def test_financials_short_properties(apple_xbrl):
 
     assert f.comprehensive_income
     assert not f.comprehensive_income.data.empty
-    print(f.balance)
+    print(f.balance_sheet)
 
 

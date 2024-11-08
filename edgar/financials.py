@@ -246,7 +246,7 @@ class Financials:
             return statement_name
 
     @cached_property
-    def balance(self):
+    def balance_sheet(self):
         return self.get_balance_sheet()
 
     def get_balance_sheet(self, standard: bool = False) -> Statement:
