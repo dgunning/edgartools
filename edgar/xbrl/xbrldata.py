@@ -1159,8 +1159,8 @@ class Statement:
         if 'decimals' in self.data.columns:
             table = Table(
                 Column("", width=50),  # Label column
-                Column("", width=10),  # Units column
-                *(Column(col, width=10, justify="right") for col in value_cols),
+                Column(""),  # Units column
+                *(Column(col, justify="right") for col in value_cols),
                 title=Text.assemble(
                     (f"{self.entity}\n", "bold deep_sky_blue2"),
                     (f"{self.display_name}\n", "bold"),
@@ -1247,7 +1247,7 @@ class Statement:
         )
 
     def __repr__(self):
-        return repr_rich(self.__rich__(), width=100)
+        return repr_rich(self.__rich__(), width=120)
 
     def __str__(self):
         return f"{self.display_name}"

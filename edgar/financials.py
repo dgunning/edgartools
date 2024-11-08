@@ -616,4 +616,4 @@ class MultiFinancials:
         return panel
 
     def __repr__(self):
-        return repr_rich(self.__rich__(), width=160)
+        return repr_rich(self.__rich__(), width=240)

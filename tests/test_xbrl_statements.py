@@ -44,14 +44,15 @@ def test_statement_renders_with_sufficient_width(aapl_xbrl):
     print(bs_repr)
     assert "Cash and cash equivalents" in bs_repr
 
-def test_statement_small_decimal_values_keep_format(aapl_xbrl, tsla_xbrl):
+def test_statement_small_decimal_values_keep_format(aapl_xbrl):
     inc = Financials(aapl_xbrl).income
     inc_repr = repr(inc)
     print(inc_repr)
     assert '6.13' in inc_repr
     assert '6.16' in inc_repr
+    assert '5.67' in inc_repr
+    assert '5.61' in inc_repr
 
-    bs = Financials(tsla_xbrl).balance_sheet
 
 
 def test_get_presentation_structure_for_non_dimensioned_statement(aapl_xbrl):
