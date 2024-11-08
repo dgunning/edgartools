@@ -1247,7 +1247,7 @@ class Statement:
         )
 
     def __repr__(self):
-        return repr_rich(self.__rich__(), width=120)
+        return repr_rich(self.__rich__(), width=240)
 
     def __str__(self):
         return f"{self.display_name}"

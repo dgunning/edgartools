@@ -576,17 +576,33 @@ class MultiFinancials:
 
         return stitched_statement
 
+    @cached_property
+    def balance_sheet(self, standard: bool = True) -> Optional[Statement]:
+        return self.get_balance_sheet(standard=standard)
+
     @lru_cache(maxsize=1)
     def get_balance_sheet(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_balance_sheet(standard=standard))
+
+    @cached_property
+    def income(self, standard: bool = True) -> Optional[Statement]:
+        return self.get_income_statement(standard=standard)
 
     @lru_cache(maxsize=1)
     def get_income_statement(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_income_statement(standard=standard))
 
+    @cached_property
+    def cashflow(self, standard: bool = True) -> Optional[Statement]:
+        return self.get_cash_flow_statement(standard=standard)
+
     @lru_cache(maxsize=1)
     def get_cash_flow_statement(self, standard: bool = True) -> Optional[Statement]:
         return self._stitch_statements(lambda f: f.get_cash_flow_statement(standard=standard))
+
+    @cached_property
+    def comprehensive_income(self, standard: bool = True) -> Optional[Statement]:
+        return self.get_statement_of_comprehensive_income(standard=standard)
 
     @lru_cache(maxsize=1)
     def get_statement_of_comprehensive_income(self, standard: bool = True) -> Optional[Statement]:
@@ -616,4 +632,4 @@ class MultiFinancials:
         return panel
 
     def __repr__(self):
-        return repr_rich(self.__rich__(), width=240)
+        return repr_rich(self.__rich__())

@@ -88,8 +88,6 @@ async def test_get_shareholder_equity_statement_for_10K(apple_xbrl):
     assert statement
     print(statement)
     print(statement.data)
-    #shareholders_equity = statement.get_concept(concept='us-gaap_StockholdersEquity')
-    #assert shareholders_equity.value == {'2023': '62146000000'}
 
 
 def test_get_statement_definition_line_item_root(apple_xbrl):
