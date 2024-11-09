@@ -21,14 +21,14 @@ from rich.table import Table, Column
 from rich.text import Text
 
 from edgar._filings import Filing, Filings, FilingsState
-from edgar.richtools import df_to_rich_table, repr_rich
-from edgar.core import (log, Result, display_size, listify,
+from edgar.core import (log, Result, display_size, listify, is_using_local_storage,
                         filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory)
+from edgar.financials import Financials
 from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference import states
 from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
+from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
-from edgar.financials  import Financials
 
 __all__ = [
     'Address',
@@ -232,7 +232,6 @@ class EntityFilings(Filings):
             is_inline_xbrl=self.data['isInlineXBRL'][item].as_py()
         )
 
-
     def filter(self,
                form: Union[str, List[str]] = None,
                amendments: bool = None,
@@ -240,7 +239,7 @@ class EntityFilings(Filings):
                date: str = None,
                cik: Union[IntString, List[IntString]] = None,
                ticker: Union[str, List[str]] = None,
-               accession_number: Union[str, List[str]] = None,):
+               accession_number: Union[str, List[str]] = None, ):
         # The super filter returns Filings. We want CompanyFilings
         res = super().filter(form, amendments, filing_date, date, accession_number)
         return CompanyFilings(data=res.data, cik=self.cik, company_name=self.company_name)
@@ -363,6 +362,7 @@ class EntityData:
                  state_of_incorporation: str,
                  state_of_incorporation_description: str,
                  former_names: List[str],
+                 files: List[str]
                  ):
         self.cik: int = cik
         self.name: str = name
@@ -387,19 +387,35 @@ class EntityData:
         self.state_of_incorporation: str = state_of_incorporation
         self.state_of_incorporation_description: str = state_of_incorporation_description
         self.former_names: List[str] = former_names
+        self._files = files
+        self._full_loaded: bool = False
 
     @property
     def financials(self):
+        """
+        Get the latest 10-K financials
+        """
         if self.is_company:
             # Get the latest 10-K
-            latest_10k = self.filings.filter(form="10-K").latest()
+            latest_10k = self.get_filings(form='10-K', trigger_full_load=False).latest()
+            if latest_10k is not None:
+                return Financials.extract(latest_10k)
+
+    @property
+    def quarterly_financials(self):
+        """
+        Get the latest 10-Q financials
+        """
+        if self.is_company:
+            # Get the latest 10-K
+            latest_10k = self.get_filings(form='10-Q', trigger_full_load=False).latest()
             if latest_10k is not None:
                 return Financials.extract(latest_10k)
 
     @property
     def is_company(self) -> bool:
         return not self.is_individual
-    
+
     @property
     def icon(self) -> Optional[bytes]:
         # If there are no tickers, we can't get an icon
@@ -409,10 +425,12 @@ class EntityData:
         return get_icon_from_ticker(self.tickers[0])
 
     @property
-    # Companies have a ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
-    # There may be other edge cases
     def is_individual(self) -> bool:
-        # If you have a ticker or exchange you are a company
+        """ Tricky logic to detect if a company is an individual or a company.
+            Companies have a ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
+            There may be other edge cases
+            If you have a ticker or exchange you are a company
+        """
         if len(self.tickers) > 0 or len(self.exchanges) > 0:
             return False
         if self.state_of_incorporation is not None and self.state_of_incorporation != '':
@@ -443,14 +461,14 @@ class EntityData:
         return self.sic_description
 
     @classmethod
-    def for_cik(cls, cik: int, include_old_filings: bool = True):
-        return get_entity_submissions(cik, include_old_filings=include_old_filings)
+    def for_cik(cls, cik: int):
+        return get_entity_submissions(cik)
 
     @classmethod
-    def for_ticker(cls, ticker: str, include_old_filings: bool = True):
+    def for_ticker(cls, ticker: str):
         cik = find_cik(ticker)
         if cik:
-            return CompanyData.for_cik(cik, include_old_filings=include_old_filings)
+            return CompanyData.for_cik(cik)
 
     def get_facts(self) -> Optional[EntityFacts]:
         """
@@ -462,6 +480,21 @@ class EntityData:
         except NoCompanyFactsFound:
             return None
 
+    def _load_older_filings(self):
+        """
+        Load the older filings
+        """
+        if not self._files:
+            return
+
+        filing_tables = [self.filings.data]
+        for file in self._files:
+            submissions = download_json("https://data.sec.gov/submissions/" + file['name'])
+            filing_table = extract_company_filings_table(submissions)
+            filing_tables.append(filing_table)
+        combined_tables = pa.concat_tables(filing_tables)
+        self.filings = CompanyFilings(combined_tables, cik=self.cik, company_name=self.name)
+
     def get_filings(self,
                     *,
                     form: Union[str, List] = None,
@@ -471,7 +504,8 @@ class EntityData:
                     date: Union[str, Tuple[str, str]] = None,
                     is_xbrl: bool = None,
                     is_inline_xbrl: bool = None,
-                    sort_by: Union[str, List[Tuple[str, str]]] = None
+                    sort_by: Union[str, List[Tuple[str, str]]] = None,
+                    trigger_full_load: bool = True
                     ):
         """
         Get the company's filings and optionally filter by multiple criteria
@@ -488,6 +522,12 @@ class EntityData:
 
         :return: The CompanyFiling instance with the filings that match the filters
         """
+
+        if not self._full_loaded:
+            if not is_using_local_storage():
+                self._load_older_filings()
+                self._full_loaded = True
+
         company_filings = self.filings.data
 
         # Filter by accession number
@@ -626,78 +666,84 @@ CompanyFacts = EntityFacts
 CompanyData = EntityData
 
 
-def parse_filings(filings_json: Dict[str, object],
-                  cik: int,
-                  company_name: str) -> CompanyFilings:
+def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
+    """
+       Extract company filings from the json response
+       """
     # Handle case of no data
-    if filings_json['recent']['accessionNumber'] == []:
-        # Create an empty table
-        filings_table = pa.Table.from_arrays(arrays=
-                                             [pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.date32()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              pa.array([], type=pa.string()),
-                                              ],
-                                             names=['accession_number',
-                                                    'filing_date',
-                                                    'reportDate',
-                                                    'acceptanceDateTime',
-                                                    'act',
-                                                    'form',
-                                                    'fileNumber',
-                                                    'items',
-                                                    'size',
-                                                    'isXBRL',
-                                                    'isInlineXBRL',
-                                                    'primaryDocument',
-                                                    'primaryDocDescription'
-                                                    ]
-                                             )
-    else:
-        rjson: Dict[str, List[object]] = filings_json['recent']
+    if not filings_json['accessionNumber']:
 
+        schema = pa.schema([
+            ('accession_number', pa.string()),
+            ('filing_date', pa.date32()),
+            ('reportDate', pa.string()),
+            ('acceptanceDateTime', pa.string()),
+            ('act', pa.string()),
+            ('form', pa.string()),
+            ('fileNumber', pa.string()),
+            ('items', pa.string()),
+            ('size', pa.string()),
+            ('isXBRL', pa.string()),
+            ('isInlineXBRL', pa.string()),
+            ('primaryDocument', pa.string()),
+            ('primaryDocDescription', pa.string())
+        ])
+
+        filings_table = pa.Table.from_arrays([[] for _ in range(13)], schema=schema)
+    else:
+
+        fields = {
+            'accession_number': filings_json['accessionNumber'],
+            'filing_date': pc.cast(pc.strptime(pa.array(filings_json['filingDate']), '%Y-%m-%d', 'us'), pa.date32()),
+            'reportDate': filings_json['reportDate'],
+            'acceptanceDateTime': filings_json['acceptanceDateTime'],
+            'act': filings_json['act'],
+            'form': filings_json['form'],
+            'fileNumber': filings_json['fileNumber'],
+            'items': filings_json['items'],
+            'size': filings_json['size'],
+            'isXBRL': filings_json['isXBRL'],
+            'isInlineXBRL': filings_json['isInlineXBRL'],
+            'primaryDocument': filings_json['primaryDocument'],
+            'primaryDocDescription': filings_json['primaryDocDescription']
+        }
+
+        # Create table using dictionary
         filings_table = pa.Table.from_arrays(
-            [pa.array(rjson['accessionNumber']),
-             pc.cast(pc.strptime(pa.array(rjson['filingDate']), '%Y-%m-%d', 'us'), pa.date32()),
-             pa.array(rjson['reportDate']),
-             pa.array(rjson['acceptanceDateTime']),
-             pa.array(rjson['act']),
-             pa.array(rjson['form']),
-             pa.array(rjson['fileNumber']),
-             pa.array(rjson['items']),
-             pa.array(rjson['size']),
-             pa.array(rjson['isXBRL']),
-             pa.array(rjson['isInlineXBRL']),
-             pa.array(rjson['primaryDocument']),
-             pa.array(rjson['primaryDocDescription'])
-             ],
-            names=['accession_number',
-                   'filing_date',
-                   'reportDate',
-                   'acceptanceDateTime',
-                   'act',
-                   'form',
-                   'fileNumber',
-                   'items',
-                   'size',
-                   'isXBRL',
-                   'isInlineXBRL',
-                   'primaryDocument',
-                   'primaryDocDescription'
-                   ]
+            arrays=[pa.array(v) if k != 'filing_date' else v for k, v in fields.items()],
+            names=list(fields.keys())
         )
-    return CompanyFilings(filings_table,
-                          cik=cik,
-                          company_name=company_name)
+    return filings_table
+
+
+def create_company_filings(filings_json: Dict[str, Any],
+                           cik: int,
+                           company_name: str) -> CompanyFilings:
+    """
+    Extract company filings from the json response
+    """
+    recent_filings = extract_company_filings_table(filings_json['recent'])
+    return CompanyFilings(recent_filings, cik=cik, company_name=company_name)
+
+
+class AdditionalFilings:
+    """Tracks additional filing files that haven't been loaded yet"""
+
+    def __init__(self, files: List[Dict[str, str]]):
+        self.files = files
+        self.loaded = False
+
+    def load(self) -> List[Dict[str, Any]]:
+        """Load all additional filing files"""
+        if not self.loaded:
+            additional_filings = []
+            for file in self.files:
+                file_data = download_json("https://data.sec.gov/submissions/" + file['name'])
+
+                additional_filings.append(file_data)
+            self.loaded = True
+            return additional_filings
+        return []
 
 
 def parse_entity_submissions(cjson: Dict[str, Any]):
@@ -732,7 +778,7 @@ def parse_entity_submissions(cjson: Dict[str, Any]):
                            state_or_country=business_addr['stateOrCountry'],
                            zipcode=business_addr['zipCode'],
                        ),
-                       filings=parse_filings(cjson['filings'], cik=cik, company_name=company_name),
+                       filings=create_company_filings(cjson['filings'], cik=cik, company_name=company_name),
                        insider_transaction_for_owner_exists=bool(cjson['insiderTransactionForOwnerExists']),
                        insider_transaction_for_issuer_exists=bool(cjson['insiderTransactionForIssuerExists']),
                        ein=cjson['ein'],
@@ -742,11 +788,12 @@ def parse_entity_submissions(cjson: Dict[str, Any]):
                        state_of_incorporation=cjson['stateOfIncorporation'],
                        state_of_incorporation_description=cjson['stateOfIncorporationDescription'],
                        former_names=cjson['formerNames'],
+                       files=cjson['filings']['files']
                        )
 
 
 @lru_cache(maxsize=64)
-def get_entity(entity_identifier: IntString, include_old_filings: bool = True) -> EntityData:
+def get_entity(entity_identifier: IntString) -> EntityData:
     """
         Get a company by cik or ticker
 
@@ -759,7 +806,6 @@ def get_entity(entity_identifier: IntString, include_old_filings: bool = True) -
         >>> get_entity(1090990)
 
     :param entity_identifier: The company identifier. Can be a cik or a ticker
-    :param include_old_filings: Include older filings
     :return:
     """
     is_int_cik = isinstance(entity_identifier, int)
@@ -769,13 +815,13 @@ def get_entity(entity_identifier: IntString, include_old_filings: bool = True) -
 
     if is_cik:
         # Cast to int to handle zero-padding
-        return EntityData.for_cik(int(entity_identifier), include_old_filings=include_old_filings)
+        return EntityData.for_cik(int(entity_identifier))
 
     # Get by ticker
     is_ticker = isinstance(entity_identifier, str) and re.match("[A-Za-z]{1,6}", entity_identifier, re.IGNORECASE)
 
     if is_ticker:
-        return EntityData.for_ticker(entity_identifier, include_old_filings=include_old_filings)
+        return EntityData.for_ticker(entity_identifier)
 
     log.warn("""
     To use get_company() provide a valid cik or ticker.
@@ -796,23 +842,21 @@ Entity = get_entity
 
 
 @lru_cache(maxsize=32)
-def get_entity_submissions(cik: int,
-                           include_old_filings: bool = True) -> Optional[EntityData]:
+def get_entity_submissions(cik: int) -> Optional[EntityData]:
     # Check the environment var EDGAR_USE_LOCAL_DATA
     submissions_json: Optional[Dict[str, Any]] = None
-    if os.getenv("EDGAR_USE_LOCAL_DATA"):
+    if is_using_local_storage():
         submissions_json = load_company_submissions_from_local(cik)
         if not submissions_json:
-            submissions_json = download_entity_submissions_from_sec(cik, include_old_filings=include_old_filings)
+            submissions_json = download_entity_submissions_from_sec(cik)
     else:
-        submissions_json = download_entity_submissions_from_sec(cik, include_old_filings=include_old_filings)
+        submissions_json = download_entity_submissions_from_sec(cik)
     if submissions_json:
         return parse_entity_submissions(submissions_json)
 
 
 @lru_cache(maxsize=32)
-def download_entity_submissions_from_sec(cik: int,
-                                         include_old_filings: bool = True) -> Dict[str, Any]:
+def download_entity_submissions_from_sec(cik: int) -> Optional[Dict[str, Any]]:
     """Get the company filings for a given cik"""
     try:
         submission_json = download_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
@@ -823,11 +867,6 @@ def download_entity_submissions_from_sec(cik: int,
         else:
             raise
             # check for older submission files
-    if include_old_filings:
-        for old_file in submission_json['filings']['files']:
-            old_sub = download_json("https://data.sec.gov/submissions/" + old_file['name'])
-            for column in old_sub:
-                submission_json['filings']['recent'][column] += old_sub[column]
     return submission_json
 
 

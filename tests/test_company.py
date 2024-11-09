@@ -273,7 +273,7 @@ def test_get_company_by_cik():
 
 
 def test_get_company_by_ticker():
-    company = Company("SNOW", include_old_filings=False)
+    company = Company("SNOW")
     assert company.cik == 1640147
 
 
@@ -409,13 +409,13 @@ def test_company_financials():
 
 
 def test_company_with_no_latest_10k_has_no_financials():
-    company = Company('TD', include_old_filings=False)
+    company = Company('TD')
     financials = company.financials
     assert financials is None
 
 
 def test_iterate_company_filings():
-    company = Company('AAPL', include_old_filings=False)
+    company = Company('AAPL')
     filings: CompanyFilings = company.get_filings(form='10-K')
     assert isinstance(filings, CompanyFilings)
 
@@ -432,7 +432,7 @@ def test_iterate_company_filings():
 
 
 def test_company_to_dict():
-    company = Company(1012605, include_old_filings=False)
+    company = Company(1012605)
     company_dict = company.to_dict()
     print(type(company_dict))
     assert company_dict.get('cik') == 1012605

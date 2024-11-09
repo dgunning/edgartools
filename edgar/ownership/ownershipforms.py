@@ -968,7 +968,7 @@ class ReportingOwners():
             owner_name = child_text(reporting_owner_id_tag, "rptOwnerName")
 
             # Check if it is a company. If not, reverse the name
-            entity = Entity(int(cik), include_old_filings=False)
+            entity = Entity(int(cik))
 
             # Check if the entity is a company or an individual
             is_company = entity and entity.is_company

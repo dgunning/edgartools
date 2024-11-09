@@ -80,6 +80,7 @@ __all__ = [
     'ask_for_identity',
     'is_start_of_quarter',
     'use_local_storage',
+    'is_using_local_storage',
     'run_async_or_sync',
     'download_edgar_data',
     'get_edgar_data_directory',
@@ -236,6 +237,13 @@ def use_local_storage(use_local: bool = True):
     Will use local data if set to True
     """
     os.environ['EDGAR_USE_LOCAL_DATA'] = "1" if use_local else "0"
+
+
+def is_using_local_storage() -> bool:
+    """
+    Returns True if using local storage
+    """
+    return os.getenv('EDGAR_USE_LOCAL_DATA', "0") == "1"
 
 
 def download_edgar_data(submissions: bool = True,

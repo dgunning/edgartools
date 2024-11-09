@@ -557,7 +557,7 @@ def test_statement_to_excel_writer(apple_xbrl, temp_excel_file):
 
 
 def test_multi_financials_values():
-    company = Company("AAPL", include_old_filings=False)
+    company = Company("AAPL")
     filings = company.get_filings(form="10-K").filter(filing_date="2020-01-01:2024-03-01").latest(3)
     print(filings)
     multi_financials = MultiFinancials(filings)
@@ -590,7 +590,7 @@ def test_multi_financials_values():
                                '2020': '80674000000',
                                '2019': '69391000000'}
 
-    company = Company("TSLA", include_old_filings=False)
+    company = Company("TSLA")
     filings = company.get_filings(form="10-K").latest(3)
     multi_financials = MultiFinancials(filings)
     balance_sheet = multi_financials.get_balance_sheet()
@@ -624,7 +624,7 @@ def test_multi_financials_values():
 
 @pytest.mark.asyncio
 async def test_multifinanancials_async():
-    company = Company("AAPL", include_old_filings=False)
+    company = Company("AAPL")
     filings = company.get_filings(form="10-K").latest(3)
     multi_financials = await MultiFinancials.extract_async(filings)
     assert multi_financials
