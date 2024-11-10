@@ -1,3 +1,4 @@
+from edgar import get_entity
 from edgar.entities import get_entity_submissions, Entity, Company
 
 
@@ -93,12 +94,10 @@ def test_get_entity_by_ticker_with_stock_class():
     assert Company("AAPL").cik == 320193
     assert Company("ETI.P").cik == 1427437
 
-def test_company_full_filing_load_not_triggered_when_using_local_storage(monkeypatch):
-    monkeypatch.setenv("EDGAR_USE_LOCAL_DATA", "1")
+def test_company_is_created_with_only_recent_filings():
+    get_entity.cache_clear()
     c = Company("AAPL")
-    assert len(c.filings) < 2000
     assert not c._full_loaded
 
-    filings = c.get_filings()
-    assert len(filings) < 2000
-    assert not c._full_loaded
+    c.get_filings()
+    assert c._full_loaded
