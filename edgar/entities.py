@@ -388,7 +388,7 @@ class EntityData:
         self.state_of_incorporation_description: str = state_of_incorporation_description
         self.former_names: List[str] = former_names
         self._files = files
-        self._full_loaded: bool = False
+        self._loaded_all_filings: bool = False
 
     @property
     def financials(self):
@@ -523,10 +523,11 @@ class EntityData:
         :return: The CompanyFiling instance with the filings that match the filters
         """
 
-        if not self._full_loaded:
+        if not self._loaded_all_filings:
             if not is_using_local_storage():
-                self._load_older_filings()
-                self._full_loaded = True
+                if trigger_full_load:
+                    self._load_older_filings()
+                    self._loaded_all_filings = True
 
         company_filings = self.filings.data
 

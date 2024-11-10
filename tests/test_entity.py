@@ -94,10 +94,9 @@ def test_get_entity_by_ticker_with_stock_class():
     assert Company("AAPL").cik == 320193
     assert Company("ETI.P").cik == 1427437
 
-def test_company_is_created_with_only_recent_filings():
-    get_entity.cache_clear()
-    c = Company("AAPL")
-    assert not c._full_loaded
 
-    c.get_filings()
-    assert c._full_loaded
+def test_getting_company_financials_does_not_load_additional_filings():
+    c = Company("KO")
+    f = c.financials
+    assert f
+    assert not c._loaded_all_filings
