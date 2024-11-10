@@ -96,6 +96,16 @@ class Address:
                 f'zipcode="{self.zipcode or ""}", state_or_country="{self.state_or_country}")'
                 )
 
+    def to_json(self):
+        return {
+            'street1': self.street1,
+            'street2': self.street2,
+            'city': self.city,
+            'state_or_country': self.state_or_country,
+            'zipcode': self.zipcode,
+            'state_or_country_desc': self.state_or_country_desc
+        }
+
 
 class Fact:
 
@@ -1023,7 +1033,7 @@ class CompanyConcept:
             unit=row.unit
         )
 
-    def latest(self) -> List[Fact]:
+    def latest(self) -> pd.DataFrame:
         return (self.data
                 .assign(cnt=self.data.groupby(['unit']).cumcount())
                 .query("cnt==0")
