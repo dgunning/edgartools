@@ -1,6 +1,6 @@
 from edgar import get_entity
 from edgar.entities import get_entity_submissions, Entity, Company
-
+from edgar.company_reports import TenK, TenQ
 
 def test_entity_is_company():
     # TSLA
@@ -100,3 +100,13 @@ def test_getting_company_financials_does_not_load_additional_filings():
     f = c.financials
     assert f
     assert not c._loaded_all_filings
+
+
+def test_get_latest_company_reports():
+    c = Company(1318605)
+    tenk = c.latest_tenk
+    assert tenk
+    assert isinstance(tenk, TenK)
+    tenq = c.latest_tenq
+    assert tenq
+    assert isinstance(tenq, TenQ)

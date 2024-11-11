@@ -24,6 +24,7 @@ from edgar._filings import Filing, Filings, FilingsState
 from edgar.core import (log, Result, display_size, listify, is_using_local_storage,
                         filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory)
 from edgar.financials import Financials
+from edgar.company_reports import TenK, TenQ
 from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference import states
 from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
@@ -401,26 +402,36 @@ class EntityData:
         self._loaded_all_filings: bool = False
 
     @property
-    def financials(self):
+    def latest_tenk(self) -> Optional[TenK]:
+        if self.is_company:
+            latest_10k = self.get_filings(form='10-K', trigger_full_load=False).latest()
+            if latest_10k is not None:
+                return latest_10k.obj()
+
+    @property
+    def latest_tenq(self) -> Optional[TenQ]:
+        if self.is_company:
+            latest_10q = self.get_filings(form='10-Q', trigger_full_load=False).latest()
+            if latest_10q is not None:
+                return latest_10q.obj()
+
+    @property
+    def financials(self) -> Optional[Financials]:
         """
         Get the latest 10-K financials
         """
-        if self.is_company:
-            # Get the latest 10-K
-            latest_10k = self.get_filings(form='10-K', trigger_full_load=False).latest()
-            if latest_10k is not None:
-                return Financials.extract(latest_10k)
+        tenk_filing = self.latest_tenk
+        if tenk_filing is not None:
+            return tenk_filing.financials
 
     @property
-    def quarterly_financials(self):
+    def quarterly_financials(self)-> Optional[Financials]:
         """
         Get the latest 10-Q financials
         """
-        if self.is_company:
-            # Get the latest 10-K
-            latest_10k = self.get_filings(form='10-Q', trigger_full_load=False).latest()
-            if latest_10k is not None:
-                return Financials.extract(latest_10k)
+        tenq_filing = self.latest_tenq
+        if tenq_filing is not None:
+            return tenq_filing.financials
 
     @property
     def is_company(self) -> bool:
