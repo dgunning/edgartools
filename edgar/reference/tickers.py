@@ -1,6 +1,6 @@
-import re
-import os
 import json
+import os
+import re
 from functools import lru_cache
 from io import StringIO
 from pathlib import Path
@@ -10,12 +10,12 @@ import pandas as pd
 import pyarrow as pa
 from httpx import HTTPStatusError
 
-from edgar.httprequests import download_file, download_json, download_datafile
-from edgar.reference.data.common import read_parquet_from_package
 from edgar.core import log, get_edgar_data_directory
+from edgar.httprequests import download_file, download_json, download_datafile
+from edgar.reference.data.common import read_parquet_from_package, read_csv_from_package
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
-           'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange',
+           'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange', 'popular_us_stocks',
            'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers']
 
 ticker_txt_url = "https://www.sec.gov/include/ticker.txt"
@@ -379,6 +379,13 @@ def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
             return None
         else:
             raise
+
+def popular_us_stocks():
+    df = (read_csv_from_package('popular_us_stocks.csv', dtype={'Cik': int})
+          .set_index('Cik')
+          )
+    return df
+
 
 
 def download_ticker_data(reference_data_directory: Path):

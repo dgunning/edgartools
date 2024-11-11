@@ -1,5 +1,5 @@
 
-from edgar.reference.tickers import cusip_ticker_mapping, get_ticker_from_cusip, get_company_tickers, get_icon_from_ticker, clean_company_suffix
+from edgar.reference.tickers import popular_us_stocks, get_ticker_from_cusip, get_company_tickers, get_icon_from_ticker, clean_company_suffix
 import pandas as pd
 import pyarrow as pa
 import pytest
@@ -49,3 +49,9 @@ def test_get_icon_bad_ticker():
 
     with pytest.raises(ValueError):
         icon = get_icon_from_ticker(123)
+
+
+def test_popular_us_stocks():
+    stocks = popular_us_stocks()
+    assert not stocks.empty
+    assert stocks[stocks.Ticker=='WDAY'].index.item() ==1327811

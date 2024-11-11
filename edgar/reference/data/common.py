@@ -32,11 +32,10 @@ def read_pyarrow_from_package(parquet_filename: str):
     return table
 
 
-@lru_cache(maxsize=1)
-def read_csv_from_package(csv_filename: str):
+def read_csv_from_package(csv_filename: str, **pandas_kwargs):
     package_name = 'edgar.reference.data'
 
     with resources.path(package_name, csv_filename) as csv_path:
-        df = pd.read_csv(csv_path)
+        df = pd.read_csv(csv_path, **pandas_kwargs)
 
     return df
