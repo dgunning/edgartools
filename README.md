@@ -321,7 +321,7 @@ filing = filings[0]
 thirteenf = filing.obj()
 ```
 
-![Filing attachments](docs/images/thirteenF.png)
+![Filing attachments](docs/images/ThirteenF.png)
 
 If you call `obj()` on a filing that does not have a data file, then it will return `None`.
 
