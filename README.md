@@ -289,7 +289,7 @@ attachment = filing.attachments[0]
 
 You can download the attachment using `attachment.download()`. This will download the attachment to string or bytes in memory. 
 
-## Automatic parsing of filing data
+## Data Objects
 
 Now the reason you may want to download attachments is to get information contained in data files.
 For example, **13F-HR** filings have attached infotable.xml files containing data from the holding report for that filing.
@@ -383,6 +383,25 @@ Each of the financial statements - `BalanceSheet`, `IncomeStatement` and `CashFl
 ```python
 balance_sheet_df = financials.get_balance_sheet().get_dataframe()
 ```
+
+
+## TenK (10-K) Data Object
+
+For 10-K filngs the 10-K Data Object allows you to access almost any data related to the filing - both text and financial data.
+
+```python
+c = Company("ORCL")
+filing = c.get_filings(form="10-K").latest()
+tenk = filing.obj()
+```
+
+You can also get it directly using the property `latest_tenk` on the `Company` object.
+
+```python
+c = Company("ORCL")
+c.latest_tenk
+```
+![10K Data Object](docs/images/orcl-tenk.png)
 
 ## Downloading Edgar Data
 
