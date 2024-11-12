@@ -415,7 +415,6 @@ It will however dramatically speed up loading companies by cik or ticker.
 The submissions and facts bulk data files are each over 1.GB in size, and take around a few minutes each.
 The data is stored by default in the `~/.edgar` directory. You can change this by setting the `EDGAR_LOCAL_DATA_DIR` environment variable.
 
-```bash
 
 ```python
 def download_edgar_data(submissions: bool = True, facts: bool = True, reference: bool = True):
@@ -442,8 +441,6 @@ You can download attachments from a filing using the `download` method on the at
 
 ```python
 class Attachments:
-    
-    ...
     
     def download(self, path: Union[str, Path], archive: bool = False):
         """
