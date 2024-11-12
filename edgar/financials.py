@@ -12,7 +12,7 @@ from rich.table import Table, Column
 from rich.text import Text
 import asyncio
 
-from edgar.core import run_async_or_sync
+from edgar.core import run_async_or_sync, datefmt
 from edgar.richtools import repr_rich
 from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
 from edgar.xbrl.xbrldata import XBRLData, Statement
@@ -408,19 +408,19 @@ class Financials:
         return self.xbrl_data.compare_dimension_values(statement_name, dimension, value1, value2)
 
     def __rich__(self):
-        statements_table = Table(Column(""), Column("Standard Financial Statements", justify="left"),
-                                 box=box.ROUNDED, show_header=True)
+        title = Text.assemble((self.xbrl_data.company, "bold deep_sky_blue1"),
+                              " Financials"
+                              )
+        subtitle  = Text.assemble(("Period ending ", "grey70"), (f"{datefmt(self.xbrl_data.period_end, '%B %d, %Y')}", "bold"))
+        statements_table = Table(Column(""), Column("Standard Financial Statements",
+                                                    justify="left"),
+                                 box=box.ROUNDED,
+                                 show_header=False,
+                                 title=title,
+                                 caption=subtitle)
         for index, statement in enumerate(self.list_standard_statements()):
-            statements_table.add_row(str(index + 1), statement)
-
-        contents = [statements_table]
-
-        panel = Panel(
-            Group(*contents),
-            title=Text.assemble((self.xbrl_data.company, "bold deep_sky_blue1"), " financials",
-                                (f" period ended {self.xbrl_data.period_end}", "bold green")),
-        )
-        return panel
+            statements_table.add_row(str(index + 1), Text(statement, style="bold"))
+        return statements_table
 
     def __repr__(self):
         return repr_rich(self.__rich__())

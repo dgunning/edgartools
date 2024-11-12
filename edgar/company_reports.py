@@ -1,19 +1,21 @@
 from datetime import datetime
 from functools import lru_cache, partial
 from typing import Dict, List
-from rich.table import Table
+
 from rich import box
 from rich import print
 from rich.console import Group, Text
 from rich.panel import Panel
 from rich.tree import Tree
-from edgar.core import datefmt
+from rich.padding import Padding
+
 from edgar._filings import Attachments, Attachment
 from edgar._markdown import MarkdownContent
-from edgar.richtools import repr_rich
+from edgar.core import datefmt
 from edgar.documents import HtmlDocument
 from edgar.financials import Financials
 from edgar.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
+from edgar.richtools import repr_rich
 
 __all__ = [
     'TenK',
@@ -24,7 +26,6 @@ __all__ = [
     'PressReleases',
     'is_valid_item_for_filing'
 ]
-
 
 
 class CompanyReport:
@@ -300,16 +301,19 @@ class TenK(CompanyReport):
             (f"{self.form}", "bold"),
         )
         periods = Text.assemble(
-            (f"Period ending ", ""),
+            (f"Period ending ", "grey70"),
             (f"{datefmt(self.period_of_report, '%B %d, %Y')}", "bold"),
-            (f" filed on ", ""),
+            (" filed on ", "grey70"),
             (f"{datefmt(self.filing_date, '%B %d, %Y')}", "bold"),
 
         )
         panel = Panel(
             Group(
                 periods,
-                self.get_structure()
+                Padding(" ", (1, 0, 0, 0)),
+                self.get_structure(),
+                Padding(" ", (1, 0, 0, 0)),
+                self.financials or Text("No financial data available", style="italic")
             ),
             title=title,
             box=box.ROUNDED,
