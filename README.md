@@ -403,6 +403,32 @@ c.latest_tenk
 ```
 ![10K Data Object](docs/images/orcl-tenk.png)
 
+### Getting 10-K Items
+
+You can get the text of individual sections of the 10-K filing using tge bracket `[]` operator.
+
+```python
+tenk['Item 1']
+```
+
+There are also a few convenience methods to get the most common sections.
+
+```python
+# Get Item 1 - Business
+tenk.business
+
+# Get Item 1A - Risk Factors
+tenk.risk_factors
+
+# Get Item 7 - Management's Discussion and Analysis
+tenk.management_discussion
+
+# Get Item 10 - Directors, Officers and Corporate Governance
+tenk.directors_officers_and_governance
+```
+
+
+
 ## Downloading Edgar Data
 
 The library is designed to make real time calls to EDGAR to get the latest data. However, you may want to download data for offline use or to build a dataset.
