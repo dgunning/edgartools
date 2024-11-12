@@ -276,7 +276,8 @@ Every filing has a list of attachments. You can view the attachments using `fili
 # View the attachments
 filing.attachments
 ```
-![Filing attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filing_attachments.png)
+![Filing attachments](docs/images/filing_attachments.png)
+
 
 You can access each attachment using the bracket operator `[]` and the index of the attachment.
     
@@ -285,7 +286,7 @@ You can access each attachment using the bracket operator `[]` and the index of 
 attachment = filing.attachments[0]
 ```
 
-![Filing attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filing_attachment.png)
+![Filing attachment](docs/images/filing_attachment.png)
 
 You can download the attachment using `attachment.download()`. This will download the attachment to string or bytes in memory. 
 
