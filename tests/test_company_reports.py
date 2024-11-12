@@ -72,7 +72,8 @@ def test_is_valid_item_for_filing():
 
 
 def test_chunk_items_for_company_reports():
-    filing = find("0001193125-23-086073")
+    filing = Filing(form='10-K', filing_date='2023-03-31', company='7GC & Co. Holdings Inc.',
+cik=1826011, accession_no='0001193125-23-086073')
     html = filing.html()
     chunked_document = ChunkedDocument(html)
     print()
@@ -99,4 +100,21 @@ def test_items_for_10k_filing():
     assert 'FINANCIAL STATEMENTS' in item_15
     assert tenk['ITEM 15'] == item_15
     print(item_15)
+
+def test_tenk_item_structure():
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
+    tenk = filing.obj()
+    tenk_repr = repr(tenk)
+    print()
+    print(tenk_repr)
+    assert "Item 1" in tenk_repr
+
+
+def test_tenk_section_properties():
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
+    tenk:TenK = filing.obj()
+    assert tenk.management_discussion
+    assert tenk.business
+    assert tenk.risk_factors
+    assert tenk.directors_officers_and_governance
 

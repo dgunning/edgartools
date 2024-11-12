@@ -635,6 +635,8 @@ def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
         # If value matches %Y%m%d%H%M%s, then parse it
         elif re.match(r"^\d{14}$", value):
             value = datetime.datetime.strptime(value, "%Y%m%d%H%M%S")
+        elif re.match(r"^\d{4}-\d{2}-\d{2}$", value):
+            value = datetime.datetime.strptime(value, "%Y-%m-%d")
         return value.strftime(fmt)
     else:
         return value.strftime(fmt)
@@ -770,3 +772,15 @@ def is_start_of_quarter():
             return True
 
     return False
+
+def format_date(date: Union[str, datetime.datetime], fmt: str = "%Y-%m-%d") -> str:
+    """
+    Format a date as a string
+    :param date: The date to format
+    :param fmt: The format to use
+    :return: The formatted date
+    """
+    if isinstance(date, str):
+        return date
+    else:
+        return date.strftime(fmt)

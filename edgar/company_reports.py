@@ -1,11 +1,13 @@
 from datetime import datetime
 from functools import lru_cache, partial
 from typing import Dict, List
-
+from rich.table import Table
+from rich import box
 from rich import print
 from rich.console import Group, Text
 from rich.panel import Panel
-
+from rich.tree import Tree
+from edgar.core import datefmt
 from edgar._filings import Attachments, Attachment
 from edgar._markdown import MarkdownContent
 from edgar.richtools import repr_rich
@@ -22,6 +24,7 @@ __all__ = [
     'PressReleases',
     'is_valid_item_for_filing'
 ]
+
 
 
 class CompanyReport:
@@ -57,6 +60,10 @@ class CompanyReport:
     @lru_cache(1)
     def financials(self):
         return Financials.extract(self._filing)
+
+    @property
+    def period_of_report(self):
+        return self._filing.header.period_of_report
 
     @property
     @lru_cache(maxsize=1)
@@ -231,8 +238,83 @@ class TenK(CompanyReport):
         assert filing.form in ['10-K', '10-K/A'], f"This form should be a 10-K but was {filing.form}"
         super().__init__(filing)
 
+    @property
+    def business(self):
+        return self['Item 1']
+
+    @property
+    def risk_factors(self):
+        return self['Item 1A']
+
+    @property
+    def management_discussion(self):
+        return self['Item 7']
+
+    @property
+    def directors_officers_and_governance(self):
+        return self['Item 10']
+
     def __str__(self):
         return f"""TenK('{self.company}')"""
+
+    def get_structure(self):
+        # Create the main tree
+        tree = Tree("📄 ")
+
+        # Get the actual items from the filing
+        actual_items = self.items
+
+        # Create a mapping of uppercase to actual case items
+        case_mapping = {item.upper(): item for item in actual_items}
+
+        # Process each part in the structure
+        for part, items in self.structure.structure.items():
+            # Create a branch for each part
+            part_tree = tree.add(f"[bold blue]{part}[/]")
+
+            # Add items under each part
+            for item_key, item_data in items.items():
+                # Check if this item exists in the actual filing
+                if item_key in case_mapping:
+                    # Use the actual case from the filing
+                    actual_item = case_mapping[item_key]
+                    item_text = Text.assemble(
+                        (f"{actual_item:<7} ", "bold green"),
+                        (f"{item_data['Title']}", "bold"),
+                    )
+                else:
+                    # Item doesn't exist - show in grey with original structure case
+                    item_text = Text.assemble(
+                        (f"{item_key}: ", "dim"),
+                        (f"{item_data['Title']}", "dim"),
+                    )
+
+                part_tree.add(item_text)
+
+        return tree
+
+    def __rich__(self):
+        title = Text.assemble(
+            (f"{self.company}", "bold deep_sky_blue1"),
+            (" ", ""),
+            (f"{self.form}", "bold"),
+        )
+        periods = Text.assemble(
+            (f"Period ending ", ""),
+            (f"{datefmt(self.period_of_report, '%B %d, %Y')}", "bold"),
+            (f" filed on ", ""),
+            (f"{datefmt(self.filing_date, '%B %d, %Y')}", "bold"),
+
+        )
+        panel = Panel(
+            Group(
+                periods,
+                self.get_structure()
+            ),
+            title=title,
+            box=box.ROUNDED,
+        )
+        return panel
 
 
 class TenQ(CompanyReport):
