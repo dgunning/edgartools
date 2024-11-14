@@ -1498,7 +1498,7 @@ class XBRLData():
                       statement_name: str,
                       include_format: bool = True,
                       include_concept: bool = True,
-                      empty_threshold: float = 0.7,
+                      empty_threshold: float = 0.9,
                       display_name: str = None,
                       duration: str = None) -> Optional[Statement]:
 
