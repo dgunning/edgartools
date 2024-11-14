@@ -32,8 +32,9 @@ from edgar.xbrl.concepts import Concept, concept_to_label
 from edgar.xbrl.definitions import parse_definition_linkbase
 from edgar.xbrl.instance import XBRLInstance
 from edgar.xbrl.labels import parse_label_linkbase
-from edgar.xbrl.presentation import XBRLPresentation, PresentationElement, get_root_element, get_axes_for_role, \
-    get_members_for_axis
+from edgar.xbrl.statements import BalanceSheet, IncomeStatement, CashFlowStatement, StatementOfChangesInEquity,StatementOfComprehensiveIncome, StandardStatement
+from edgar.xbrl.presentation import (XBRLPresentation, PresentationElement, get_root_element, get_axes_for_role,
+    get_members_for_axis)
 from pathlib import Path
 
 __all__ = ['XBRLAttachments', 'XBRLInstance', 'LineItem', 'StatementDefinition', 'XBRLData',
@@ -1800,12 +1801,51 @@ class XBRLData():
         comparison = pd.merge(df1, df2, on='concept', suffixes=('_' + value1, '_' + value2))
         return comparison[[f'{value_column}_{value1}', f'{value_column}_{value2}']]
 
+    def find_role_by_concept(self, concept: str) -> Optional[str]:
+        """
+        Helper method to find a role containing specific concepts.
+
+        Args:
+            primary_concept str: Concept names to search for.
+
+        Returns:
+            Optional[str]: The role containing the most matching concepts, or None if no matches found.
+        """
+        role_matches = defaultdict(int)
+        for role in self.presentation.get_roles_containing_concept(concept):
+            role_matches[role] += 1
+
+        return max(role_matches, key=role_matches.get) if role_matches else None
+
+    def get_statement_name_for_standard_name(self, standard_statement: StandardStatement) -> Optional[str]:
+        role = self.presentation.get_role_by_standard_name(standard_statement.statement_name)
+        if not role:
+            role = self.find_role_by_concept(standard_statement.primary_concept)
+        if role:
+            statement_name = role.split('/')[-1]
+            return statement_name
+
+    def get_standard_statement_table(self):
+        table = Table(Column("Name", width=34, style="bold"), Column("Accessor"),
+                      box=box.SIMPLE_HEAD, show_header=True, title="Financial Statements")
+        if self.get_statement_name_for_standard_name(BalanceSheet):
+            table.add_row(Text("Balance Sheet"), Text('financials.balance_sheet', style="italic"))
+        if self.get_statement_name_for_standard_name(IncomeStatement):
+            table.add_row(Text("Income Statement"), Text('financials.income', style="italic"))
+        if self.get_statement_name_for_standard_name(CashFlowStatement):
+            table.add_row(Text("Cash Flow Statement"), Text('financials.cashflow', style="italic"))
+        if self.get_statement_name_for_standard_name(StatementOfChangesInEquity):
+            table.add_row(Text("Statement of Changes in Equity"), Text('financials.equity', style="italic"))
+        if self.get_statement_name_for_standard_name(StatementOfComprehensiveIncome):
+            table.add_row(Text("Statement of Comprehensive Income"), Text('financials.comprehensive_income', style="italic"))
+        return table
+
     def __rich__(self):
         group = Group(
             self.instance,
-            self.statements,
+            self.get_standard_statement_table(),
         )
-        panel = Panel(group, title=Text.assemble("XBRL Data for ", (f"{self.company}\n", "bold deep_sky_blue3")))
+        panel = Panel(group, title="XBRL")
         return panel
 
     def __repr__(self):

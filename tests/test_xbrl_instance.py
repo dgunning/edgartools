@@ -1,4 +1,5 @@
 from edgar.xbrl.instance import XBRLInstance
+from rich import print
 from pathlib import Path
 import pytest
 
@@ -10,6 +11,8 @@ def apple_instance():
 
 def test_query_facts_by_concept(apple_instance):
    facts = apple_instance.query_facts(concept="ecd:Rule10b51ArrAdoptedFlag")
+   print()
+   print(apple_instance)
    assert len(facts) == 2
    assert all(concept == "ecd:Rule10b51ArrAdoptedFlag" for concept in facts.concept)
 

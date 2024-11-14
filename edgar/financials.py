@@ -1,192 +1,27 @@
-from collections import defaultdict
+import asyncio
 from functools import lru_cache, cached_property
 from typing import Optional, List, Dict
 
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
-import asyncio
 
 from edgar.core import run_async_or_sync, datefmt
 from edgar.richtools import repr_rich
 from edgar.xbrl.presentation import FinancialStatementMapper, XBRLPresentation
 from edgar.xbrl.xbrldata import XBRLData, Statement
-
+from edgar.xbrl.statements import StandardStatement, BalanceSheet, IncomeStatement, CashFlowStatement, \
+    StatementOfChangesInEquity, StatementOfComprehensiveIncome, cover_page
 
 __all__ = ['Financials', 'MultiFinancials']
 
 
-class StandardConcept(BaseModel):
-    concept: str
-    label: str
-
-
-class StandardStatement(BaseModel):
-    statement_name: str
-    primary_concept: str
-    display_name: str
-    concepts: List[StandardConcept]
-
-
-BalanceSheet = StandardStatement(statement_name="BALANCE_SHEET",
-                  primary_concept="us-gaap_StatementOfFinancialPositionAbstract",
-                  display_name="Consolidated Balance Sheets",
-                  concepts=[
-                      StandardConcept(concept="us-gaap_AssetsAbstract", label="Assets"),
-                      StandardConcept(concept="us-gaap_AssetsCurrentAbstract", label="Current Assets:"),
-                      StandardConcept(concept="us-gaap_CashAndCashEquivalentsAtCarryingValue",
-                                      label="Cash & Equivalents"),
-                      StandardConcept(concept="us-gaap_AccountsReceivableNetCurrent",
-                                      label="Accounts Receivable"),
-                      StandardConcept(concept="us-gaap_InventoryNet", label="Inventory"),
-                      StandardConcept(concept="us-gaap_AssetsCurrent", label="Total Current Assets"),
-                      StandardConcept(concept="us-gaap_PropertyPlantAndEquipmentNet",
-                                      label="Property, Plant and Equipment"),
-                      StandardConcept(concept="us-gaap_Goodwill", label="Goodwill"),
-                      StandardConcept(concept="us-gaap_OtherAssetsNoncurrent", label="Other Assets"),
-                      StandardConcept(concept="us-gaap_Assets", label="Total Assets"),
-                      StandardConcept(concept="us-gaap_LiabilitiesAndStockholdersEquityAbstract",
-                                      label="Liabilities & Equity"),
-                      StandardConcept(concept="us-gaap_LiabilitiesCurrentAbstract",
-                                      label="Current Liabilities:"),
-                      StandardConcept(concept="us-gaap_AccountsPayableCurrent",
-                                      label="Accounts Payable"),
-                      StandardConcept(concept="us-gaap_LiabilitiesCurrent",
-                                      label="Total Current Liabilities"),
-                      StandardConcept(concept="us-gaap_OtherLiabilitiesNoncurrent",
-                                      label="Long-term Liabilities"),
-                      StandardConcept(concept="us-gaap_Liabilities", label="Total Liabilities"),
-                      StandardConcept(concept="us-gaap_CommitmentsAndContingencies",
-                                      label="Commitments & Contingencies"),
-                      StandardConcept(concept="us-gaap_StockholdersEquityAbstract",
-                                      label="Stockholders' Equity:"),
-                      StandardConcept(concept="us-gaap_CommonStockValue", label="Common Stock"),
-                      StandardConcept(concept="us-gaap_RetainedEarningsAccumulatedDeficit",
-                                      label="Retained Earnings"),
-                      StandardConcept(concept="us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax",
-                                      label="Other Comprehensive Income"),
-                      StandardConcept(concept="us-gaap_StockholdersEquity",
-                                      label="Total Stockholders' Equity"),
-                      StandardConcept(concept="us-gaap_LiabilitiesAndStockholdersEquity",
-                                      label="Total Liabilities & Equity"),
-                  ]
-                  )
-IncomeStatement = StandardStatement(statement_name="INCOME_STATEMENT",
-                  primary_concept="us-gaap_IncomeStatementAbstract",
-                  display_name="Income Statements",
-                  concepts=[
-                      StandardConcept(concept="us-gaap_IncomeStatementAbstract",
-                                      label="Income Statement"),
-                      StandardConcept(
-                          concept="us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", label="Revenue"),
-                      StandardConcept(concept="us-gaap_CostOfGoodsAndServicesSold", label="Cost of Sales"),
-                      StandardConcept(concept="us-gaap_OperatingExpensesAbstract", label="Operating Expenses"),
-                      StandardConcept(concept="us-gaap_ResearchAndDevelopmentExpense", label="Research & Development"),
-                      StandardConcept(concept="us-gaap_SellingGeneralAndAdministrativeExpense", label="Selling, General & Admin"),
-                      StandardConcept(concept="us-gaap_OperatingExpenses", label="Total Operating Expenses"),
-
-
-                      StandardConcept(concept="us-gaap_OperatingIncomeLoss", label="Operating Income"),
-                      StandardConcept(
-                          concept="us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
-                          label="Pre-tax Income"),
-                      StandardConcept(concept="us-gaap_IncomeTaxExpenseBenefit",
-                                      label="Income Tax"),
-                      StandardConcept(concept="us-gaap_NetIncomeLoss",
-                                      label="Net Income"),
-                      StandardConcept(concept="us-gaap_EarningsPerShareBasic",
-                                      label="EPS Basic"),
-                      StandardConcept(concept="us-gaap_EarningsPerShareDiluted",
-                                      label="EPS Diluted"),
-                      StandardConcept(
-                          concept="us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
-                          label="Shares Basic"),
-                      StandardConcept(
-                          concept="us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
-                          label="Shares Diluted"),
-                  ]
-                  )
-CashFlowStatement = StandardStatement(statement_name="CASH_FLOW",
-                  primary_concept="us-gaap_StatementOfCashFlowsAbstract",
-                  display_name="Consolidated Statement of Cash Flows",
-                  concepts=[
-                      StandardConcept(concept="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract",
-                                      label="Operating Activities:"),
-                      StandardConcept(concept="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
-                                      label="Adjustments to Net Income:"),
-                      StandardConcept(concept="us-gaap_ShareBasedCompensation",
-                                      label="Stock-based Compensation"),
-                      StandardConcept(concept="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
-                                      label="Changes in Working Capital:"),
-                      StandardConcept(concept="us-gaap_IncreaseDecreaseInInventories",
-                                      label="Inventories"),
-                      StandardConcept(concept="us-gaap_NetCashProvidedByUsedInOperatingActivities",
-                                      label="Net Cash from Operations"),
-                      StandardConcept(concept="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract",
-                                      label="Investing Activities:"),
-                      StandardConcept(concept="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment",
-                                      label="Capital Expenditures"),
-                      StandardConcept(concept="us-gaap_NetCashProvidedByUsedInInvestingActivities",
-                                      label="Net Cash from Investing"),
-                      StandardConcept(concept="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
-                                      label="Financing Activities:"),
-                      StandardConcept(concept="us-gaap_PaymentsForRepurchaseOfCommonStock",
-                                      label="Stock Repurchases"),
-                      StandardConcept(concept="us-gaap_NetCashProvidedByUsedInFinancingActivities",
-                                      label="Net Cash from Financing"),
-                      StandardConcept(concept="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
-                                      label="Total Cash and Equivalents"),
-                      StandardConcept(concept="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
-                                      label="Net Change in Cash"),
-                  ]
-)
-StatementOfChangesInEquity = StandardStatement(statement_name="EQUITY",
-                                               primary_concept="us-gaap_StatementOfStockholdersEquityAbstract",
-                                               display_name="Consolidated Statement of Shareholders Equity",
-                                               concepts=[
-                                                   StandardConcept(concept="us-gaap_CommonStockMember",
-                                                                   label="Common Stock"),
-                                                   StandardConcept(concept="us-gaap_AdditionalPaidInCapitalMember",
-                                                                   label="Additional Paid-in Capital"),
-                                                   StandardConcept(
-                                                       concept="us-gaap_AccumulatedOtherComprehensiveIncomeMember",
-                                                       label="Accumulated Other Comprehensive Income (Loss)"),
-                                                   StandardConcept(concept="us-gaap_RetainedEarningsMember",
-                                                                   label="Retained Earnings"),
-                                                   StandardConcept(concept="us-gaap_StatementLineItems",
-                                                                   label="Statement [Line Items]"),
-                                                   StandardConcept(
-                                                       concept="us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
-                                                       label="Increase (Decrease) in Stockholders' Equity [Roll Forward]"),
-                                                   StandardConcept(
-                                                       concept="us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
-                                                       label="Stock-based compensation"),
-                                               ]
-                                               )
-StatementOfComprehensiveIncome = StandardStatement(statement_name="COMPREHENSIVE_INCOME",
-                                                   primary_concept="us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract"
-                                                   , display_name="Comprehensive Income Statement",
-                                                   concepts=[
-                                                       StandardConcept(
-                                                           concept="us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract",
-                                                           label="Statement of Comprehensive Income"),
-                                                       StandardConcept(concept="us-gaap_ComprehensiveIncomeNetOfTax",
-                                                                       label="Comprehensive income"),
-                                                   ]
-                                                   )
-cover_page = StandardStatement(statement_name="COVER_PAGE",
-                               primary_concept="dei_CoverAbstract",
-                               display_name="Cover Page",
-                               concepts=[])
-
 
 class Financials:
-
     """
     A convenience class to extract and work with financial statements from an XBRL filing.
     Wraps and XbrlData object and provides methods to extract standard financial statements
@@ -237,14 +72,6 @@ class Financials:
             return None
         return cls(xbrl_data)
 
-    def _get_statement_name_for_standard_name(self, standard_statement: StandardStatement) -> Optional[str]:
-        role = self.xbrl_data.presentation.get_role_by_standard_name(standard_statement.statement_name)
-        if not role:
-            role = self.find_role_by_concept(standard_statement.primary_concept)
-        if role:
-            statement_name = role.split('/')[-1]
-            return statement_name
-
     @cached_property
     def balance_sheet(self):
         return self.get_balance_sheet()
@@ -259,7 +86,7 @@ class Financials:
         Returns:
             Statement: The Balance Sheet data, or None if not found.
         """
-        statement_name = self._get_statement_name_for_standard_name(BalanceSheet)
+        statement_name = self.xbrl_data.get_statement_name_for_standard_name(BalanceSheet)
         if statement_name:
             statement = self.xbrl_data.get_statement(statement_name, display_name="Consolidated Balance Sheets")
             if standard and statement:
@@ -280,7 +107,7 @@ class Financials:
         Returns:
             Statement: The Income Statement data, or None if not found.
         """
-        statement_name = self._get_statement_name_for_standard_name(IncomeStatement)
+        statement_name = self.xbrl_data.get_statement_name_for_standard_name(IncomeStatement)
         if statement_name:
             statement = self.xbrl_data.get_statement(statement_name,
                                                      display_name="Income Statements") if statement_name else None
@@ -302,7 +129,7 @@ class Financials:
         Returns:
             Statement: The Cash Flow Statement data, or None if not found.
         """
-        statement_name = self._get_statement_name_for_standard_name(CashFlowStatement)
+        statement_name = self.xbrl_data.get_statement_name_for_standard_name(CashFlowStatement)
         if statement_name:
             statement = self.xbrl_data.get_statement(statement_name,
                                                      display_name="Consolidated Statement of Cash Flows")
@@ -324,7 +151,7 @@ class Financials:
         Returns:
             Statement: The Statement of Changes in Equity data, or None if not found.
         """
-        statement_name = self._get_statement_name_for_standard_name(StatementOfChangesInEquity)
+        statement_name = self.xbrl_data.get_statement_name_for_standard_name(StatementOfChangesInEquity)
         if statement_name:
             statement = self.xbrl_data.get_statement(statement_name,
                                                      display_name="Consolidated Statement of Shareholders Equity")
@@ -347,7 +174,7 @@ class Financials:
         Returns:
             Statement: The Statement of Comprehensive Income data, or None if not found.
         """
-        statement_name = self._get_statement_name_for_standard_name(StatementOfComprehensiveIncome)
+        statement_name = self.xbrl_data.get_statement_name_for_standard_name(StatementOfComprehensiveIncome)
         if statement_name:
             statement = self.xbrl_data.get_statement(statement_name,
                                                      display_name="Comprehensive Income Statement")
@@ -369,32 +196,20 @@ class Financials:
         Returns:
             Statement: The Document and Entity Information data, or None if not found.
         """
-        statement_name = self._get_statement_name_for_standard_name(cover_page)
+        statement_name = self.xbrl_data.get_statement_name_for_standard_name(cover_page)
         if statement_name:
             return self.xbrl_data.get_statement(statement_name, display_name="Cover Page")
 
-    def find_role_by_concept(self, concept: str) -> Optional[str]:
-        """
-        Helper method to find a role containing specific concepts.
-
-        Args:
-            primary_concept str: Concept names to search for.
-
-        Returns:
-            Optional[str]: The role containing the most matching concepts, or None if no matches found.
-        """
-        role_matches = defaultdict(int)
-        for role in self.xbrl_data.presentation.get_roles_containing_concept(concept):
-            role_matches[role] += 1
-
-        return max(role_matches, key=role_matches.get) if role_matches else None
 
     def list_standard_statements(self) -> List[str]:
+        """
+        List the standard financial statements available in this filing.
+        """
         return [
             standard_statement.display_name
             for standard_statement in [cover_page, BalanceSheet, IncomeStatement, CashFlowStatement,
                                        StatementOfChangesInEquity, StatementOfComprehensiveIncome]
-            if self._get_statement_name_for_standard_name(standard_statement) is not None
+            if self.xbrl_data.get_statement_name_for_standard_name(standard_statement) is not None
         ]
 
     def get_dimensioned_statement(self, statement_name: str, dimensions: Dict[str, str]) -> Optional[Statement]:
@@ -411,7 +226,8 @@ class Financials:
         title = Text.assemble((self.xbrl_data.company, "bold deep_sky_blue1"),
                               " Financials"
                               )
-        subtitle  = Text.assemble(("Period ending ", "grey70"), (f"{datefmt(self.xbrl_data.period_end, '%B %d, %Y')}", "bold"))
+        subtitle = Text.assemble(("Period ending ", "grey70"),
+                                 (f"{datefmt(self.xbrl_data.period_end, '%B %d, %Y')}", "bold"))
         statements_table = Table(Column(""), Column("Standard Financial Statements",
                                                     justify="left"),
                                  box=box.ROUNDED,
@@ -460,7 +276,6 @@ class MultiFinancials:
     def extract(cls, filings) -> 'MultiFinancials':
         return run_async_or_sync(cls.extract_async(filings))
 
-
     @classmethod
     def stitch(cls, financials_list: List[Financials]) -> 'MultiFinancials':
         return cls(financials_list)
@@ -473,7 +288,7 @@ class MultiFinancials:
 
         # Define metadata columns
         metadata_cols = [col for col in ['segment', 'level', 'decimals', 'style']
-                            if col in df0.columns or col in df1.columns]
+                         if col in df0.columns or col in df1.columns]
 
         # Identify period columns
         period_cols0 = [col for col in df0.columns if col not in metadata_cols and col != 'concept']

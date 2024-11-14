@@ -62,6 +62,14 @@ def sample_xbrl_data(sample_labels):
         calculations=CalculationLinkbase.parse(SAMPLE_CALCULATION_XML)
     )
 
+@pytest.fixture
+def apple_xbrl():
+    return XBRLData.from_files(
+        instance_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_htm.xml'),
+        label_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_lab.xml'),
+        presentation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_pre.xml'),
+        calculation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml')
+    )
 
 def test_instance_parsing():
     instance = XBRLInstance.parse(SAMPLE_INSTANCE_XML)
@@ -151,7 +159,6 @@ def test_xbrl_presentation_get_structure_for_role():
     structure = presentation.get_structure('http://www.apple.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS')
     assert structure
     print(structure)
-
 
 
 
@@ -310,14 +317,11 @@ def test_get_dataframe_for_statement_with_no_units_or_decimals():
     assert cols == ['2023', 'concept', 'level', 'style']
 
 
-def test_xbrl_data_from_files():
-    xb = XBRLData.from_files(
-        instance_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_htm.xml'),
-        label_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_lab.xml'),
-        presentation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_pre.xml'),
-        calculation_path=Path('data/xbrl/datafiles/aapl/aapl-20230930_cal.xml')
-    )
-    assert xb
-    bs = xb.get_statement('CONSOLIDATEDBALANCESHEETS')
+def test_xbrl_data_from_files(apple_xbrl):
+    assert apple_xbrl
+    bs = apple_xbrl.get_statement('CONSOLIDATEDBALANCESHEETS')
     assert bs
     assert bs.periods == ['2023', '2022']
+    print()
+    print(apple_xbrl)
+

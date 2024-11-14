@@ -7,12 +7,13 @@ from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field
 from rich import box
-from rich.table import Table, Column
+from rich.table import Table
+from rich.text import Text
 
+from edgar.core import datefmt
 from edgar.richtools import repr_rich
-from edgar.xmltools import child_text
 from edgar.xbrl.dimensions import Dimensions
-
+from edgar.xmltools import child_text
 
 
 @lru_cache(maxsize=128)
@@ -348,19 +349,12 @@ class XBRLInstance(BaseModel):
         return self.instance_hash == other.instance_hash
 
     def __rich__(self):
-        document_period = self.get_document_period()
-
-        table = Table(Column("Company"),
-                      Column("Number of Facts"),
-                      title="XBRL Instance Document", box=box.ROUNDED)
-        if document_period:
-            table.add_column("Document Period")
-            table.add_row(self.get_entity_name(),
-                          f"{len(self.facts):,}",
-                          self.get_document_period())
-        else:
-            table.add_row(self.get_entity_name(),
-                          f"{len(self.facts):,}")
+        fields = [('Company', Text(self.get_entity_name(), style="bold deep_sky_blue3")),('Form', self.get_document_type())]
+        if self.get_document_period():
+            fields.append(('Period', datefmt(self.get_document_period(), '%B %d, %Y')))
+        fields.append(('Facts', f"{len(self.facts):,}"))
+        table = Table(*[field[0] for field in fields], title="XBRL Instance", box=box.SIMPLE_HEAD)
+        table.add_row(*[field[1] for field in fields])
 
         return table
 

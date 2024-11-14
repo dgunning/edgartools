@@ -313,7 +313,7 @@ class XBRLPresentation(BaseModel):
         for child in sorted(element.children, key=lambda x: x.order):
             if detailed:
                 # Detailed view: show full label, concept, and preferred label
-                node_text = f"[yellow]{child.label}[/yellow] ([cyan]{child.href.split('#')[-1]}[/cyan])"
+                node_text = f"[green]{child.label}[/green] ([cyan]{child.href.split('#')[-1]}[/cyan])"
                 if child.preferred_label:
                     node_text += f" [magenta]PL: {child.preferred_label.split('/')[-1]}[/magenta]"
             else:
@@ -322,7 +322,7 @@ class XBRLPresentation(BaseModel):
                 namespace, name = concept.split('_', 1)
                 # Just use the first part of the name .. some have a suffix like _xxx, etc.
                 name = name.split('_')[0]
-                node_text = Text.assemble((namespace, "bold yellow"), " ", (name, "bold deep_sky_blue1"))
+                node_text = Text.assemble((namespace, "bold grey70"), " ", (name, "bold deep_sky_blue1"))
 
             child_tree = tree.add(node_text)
             self._build_rich_tree(child, child_tree, detailed)

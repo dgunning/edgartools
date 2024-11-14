@@ -301,7 +301,7 @@ class TenK(CompanyReport):
             (f"{self.form}", "bold"),
         )
         periods = Text.assemble(
-            (f"Period ending ", "grey70"),
+            ("Period ending ", "grey70"),
             (f"{datefmt(self.period_of_report, '%B %d, %Y')}", "bold"),
             (" filed on ", "grey70"),
             (f"{datefmt(self.filing_date, '%B %d, %Y')}", "bold"),
