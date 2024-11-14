@@ -161,6 +161,8 @@ async def test_labels_for_orcl_10K(orcl_xbrl):
     balance_sheet = financials.get_balance_sheet()
     labels = balance_sheet.data.index.tolist()
     assert all([not label.startswith('us-gaap_') for label in labels])
+    repr_ = repr(balance_sheet)
+    assert repr_
 
 
 @pytest.mark.asyncio
@@ -224,11 +226,6 @@ def test_query_facts_with_empty_dimensions(apple_xbrl):
     facts = instance.query_facts(dimensions={})
 
     assert all([col not in instance.dimension_columns for col in facts.columns])
-
-
-def test_xbrl_instance_dimensions(apple_xbrl):
-    instance: XBRLInstance = apple_xbrl.instance
-    print(instance.dimensions)
 
 
 def test_xbrl_presentation_role_with_almost_duplicate_name(apple_xbrl):

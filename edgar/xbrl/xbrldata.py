@@ -1165,7 +1165,7 @@ class Statement:
                 title=Text.assemble(
                     (f"{self.entity}\n", "bold deep_sky_blue2"),
                     (f"{self.display_name}\n", "bold"),
-                    (f"{self.display_duration.title()}", "italic grey74")
+                    (f"{self.display_duration.title()}", "italic grey60")
                 ),
                 box=box.SIMPLE,
                 padding=(0, 1),
@@ -1193,14 +1193,14 @@ class Statement:
                 label_style = "bold deep_sky_blue3"
                 value_style = "bold white"
             elif style == 'Subsection':
-                label_style = "italic grey74"
-                value_style = "italic grey74"
+                label_style = "italic grey60"
+                value_style = "italic grey60"
             elif style == 'Total':
                 label_style = "bold deep_sky_blue3"
                 value_style = "bold deep_sky_blue3"
             else:
-                label_style = "white"
-                value_style = ""
+                label_style = "grey42"
+                value_style = "grey42"
 
             # Format label with indentation
             indent = "  " * row.get('level', 0)
