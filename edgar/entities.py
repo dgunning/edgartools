@@ -3,9 +3,10 @@ import logging
 import os
 import re
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import lru_cache, cached_property
 from pathlib import Path
 from typing import List, Dict, Optional, Union, Tuple, Any
+from itertools import zip_longest
 
 import httpx
 import numpy as np
@@ -19,10 +20,9 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
-
 from edgar._filings import Filing, Filings, FilingsState
 from edgar.core import (log, Result, display_size, listify, is_using_local_storage,
-                        filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory)
+                        filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory, datefmt)
 from edgar.financials import Financials
 from edgar.company_reports import TenK, TenQ
 from edgar.httprequests import download_json, download_text, download_bulk_data
@@ -372,7 +372,7 @@ class EntityData:
                  investor_website: str,
                  state_of_incorporation: str,
                  state_of_incorporation_description: str,
-                 former_names: List[str],
+                 former_names: List[Dict[str, Any]],
                  files: List[str]
                  ):
         self.cik: int = cik
@@ -397,7 +397,7 @@ class EntityData:
         self.investor_website: str = investor_website
         self.state_of_incorporation: str = state_of_incorporation
         self.state_of_incorporation_description: str = state_of_incorporation_description
-        self.former_names: List[str] = former_names
+        self.former_names: List[Dict[str, Any]] = former_names
         self._files = files
         self._loaded_all_filings: bool = False
 
@@ -433,7 +433,7 @@ class EntityData:
         if tenq_filing is not None:
             return tenq_filing.financials
 
-    @property
+    @cached_property
     def is_company(self) -> bool:
         return not self.is_individual
 
@@ -445,7 +445,7 @@ class EntityData:
         # Get the icon for the first ticker, if it exists.
         return get_icon_from_ticker(self.tickers[0])
 
-    @property
+    @cached_property
     def is_individual(self) -> bool:
         """ Tricky logic to detect if a company is an individual or a company.
             Companies have a ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
@@ -646,36 +646,209 @@ class EntityData:
             company_dict['filings'] = self.filings.to_dict()
         return company_dict
 
-    def __rich__(self):
-        info_table = Table(Column("CIK", style="bold magenta"), box=box.SIMPLE)
-        row = [str(self.cik)]
-        if self.category:
-            info_table.add_column("Category")
-            row.append(self.category)
-        if self.sic:
-            info_table.add_column("Industry")
-            row.append(self.industry)
-        if self.state_of_incorporation:
-            info_table.add_column("Incorporated")
-            row.append(states.get(self.state_of_incorporation, self.state_of_incorporation_description))
-        info_table.add_row(*row)
 
-        # The addresses
-        addresses = []
-        if not self.mailing_address.empty:
-            addresses.append(Panel(Text(str(self.mailing_address)), title='\U00002709 Mailing Address', width=40))
-        if not self.business_address.empty:
-            addresses.append(Panel((Text(str(self.business_address))), title='\U0001F3E2 Business Address', width=40))
-        address_columns = Columns(addresses, equal=True, expand=True)
+    @staticmethod
+    def get_operating_type_emoticon(entity_type: str) -> str:
+        """
+        Generate a meaningful single-width symbol based on the SEC entity type.
+        All symbols are chosen to be single-width to work well with rich borders.
 
+        Args:
+            entity_type (str): The SEC entity type (case-insensitive)
+
+        Returns:
+            str: A single-width symbol representing the entity type
+        """
+        symbols = {
+            "operating": "○",  # Circle for active operations
+            "subsidiary": "→",  # Arrow showing connection to parent
+            "inactive": "×",  # Cross for inactive
+            "holding company": "■",  # Square for solid corporate structure
+            "investment company": "$",  # Dollar for investment focus
+            "investment trust": "$",  # Dollar for investment focus
+            "shell": "□",  # Empty square for shell
+            "development stage": "∆",  # Triangle for growth/development
+            "financial services": "¢",  # Cent sign for financial services
+            "reit": "⌂",  # House symbol
+            "spv": "◊",  # Diamond for special purpose
+            "joint venture": "∞"  # Infinity for partnership
+        }
+
+        # Clean input: convert to lowercase and strip whitespace
+        cleaned_type = entity_type.lower().strip()
+
+        # Handle some common variations
+        if "investment" in cleaned_type:
+            return symbols["investment company"]
+        if "real estate" in cleaned_type or "reit" in cleaned_type:
+            return symbols["reit"]
+
+        # Return default question mark if type not found
+        return symbols.get(cleaned_type, "")
+
+    @staticmethod
+    def format_fiscal_year_date(date_str):
+        # Dictionary of months
+        months = {
+            "01": "Jan", "02": "Feb", "03": "Mar",
+            "04": "Apr", "05": "May", "06": "Jun",
+            "07": "Jul", "08": "Aug", "09": "Sep",
+            "10": "Oct", "11": "Nov", "12": "Dec"
+        }
+
+        # Extract month and day
+        month = date_str[:2]
+        day = str(int(date_str[2:]))  # Remove leading zero
+
+        return f"{months[month]} {day}"
+
+    def __rich__(self) -> Panel:
+        """Creates a rich representation of the entity with clear information hierarchy."""
+
+        # Primary entity identification section
         if self.is_company:
-            display_name = f"{self.display_name} ({self.ticker_display})" if self.ticker_display else self.display_name
+            ticker_display = f" ({self.ticker_display})" if self.ticker_display else ""
+            entity_title = Text.assemble("🏢", (f"{self.display_name}{ticker_display}", "bold green"))
         else:
-            display_name = f"{self._unicode_symbol} {self.display_name}"
+            entity_title = Text.assemble("👤", (self.display_name, "bold deep_sky_blue3"))
 
-        title_style = "bold dark_sea_green4" if self.is_company else "bold dodger_blue1"
-        return Panel(Group(info_table, address_columns),
-                     title=Text(f"{display_name}", style=title_style))
+
+        # Primary Information Table
+        main_info = Table(box=box.SIMPLE_HEAVY, show_header=False, padding=(0, 1))
+        main_info.add_column("Row", style="")  # Single column for the entire row
+
+        row_parts = []
+        row_parts.extend([Text("CIK", style="grey60"), Text(str(self.cik), style="bold green")])
+        if self.entity_type:
+            if self.is_individual:
+                row_parts.extend([Text("Type", style="grey60"),
+                                  Text("Individual", style="bold yellow")])
+            else:
+                row_parts.extend([Text("Type", style="grey60"),
+                                  Text(self.entity_type.title(), style="bold yellow"),
+                                  Text(EntityData.get_operating_type_emoticon(self.entity_type), style="bold yellow")])
+        main_info.add_row(*row_parts)
+
+        # Detailed Information Table
+        details = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+        details.add_column("Category", style="bold grey70")
+        details.add_column("Industry", style="bold grey70")
+        details.add_column("Fiscal Year End", style="bold grey70")
+
+        details.add_row(
+            self.category or "-",
+            f"{self.sic}: {self.sic_description}" if self.sic else "-",
+            EntityData.format_fiscal_year_date(self.fiscal_year_end) if self.fiscal_year_end else "-"
+        )
+
+        # Combine main_info and details in a single panel
+        if self.is_company:
+            basic_info_renderables = [main_info, details]
+        else:
+            basic_info_renderables = [main_info]
+        basic_info_panel = Panel(
+            Group(*basic_info_renderables),
+            title="📋 Basic Information",
+            border_style="grey50"
+        )
+
+        # Trading Information
+        if self.tickers and self.exchanges:
+            trading_info = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+            trading_info.add_column("Exchange", style="bold grey70")
+            trading_info.add_column("Symbol", style="bold green")
+
+            for exchange, ticker in zip_longest(self.exchanges, self.tickers, fillvalue="-"):
+                trading_info.add_row(exchange, ticker)
+
+            trading_panel = Panel(
+                trading_info,
+                title="📈 Trading Information",
+                border_style="grey50"
+            )
+        else:
+            trading_panel = Panel(
+                Text("No trading information available", style="grey58"),
+                title="📈 Trading Information",
+                border_style="grey50"
+            )
+
+        # Contact Information
+        contact_info = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
+        contact_info.add_column("Label", style="bold grey70")
+        contact_info.add_column("Value")
+
+        has_contact_info = any([self.phone, self.website, self.investor_website])
+        if self.website:
+            contact_info.add_row("Website", self.website)
+        if self.investor_website:
+            contact_info.add_row("Investor Relations", self.investor_website)
+        if self.phone:
+            contact_info.add_row("Phone", self.phone)
+
+        # Three-column layout for addresses and contact info
+        contact_renderables = []
+        if not self.business_address.empty:
+            contact_renderables.append(Panel(
+                Text(str(self.business_address), style="grey85"),
+                title="🏢 Business Address",
+                border_style="grey50"
+            ))
+        if not self.mailing_address.empty:
+            contact_renderables.append(Panel(
+                Text(str(self.mailing_address), style="grey85"),
+                title="📫 Mailing Address",
+                border_style="grey50"
+            ))
+        if has_contact_info:
+            contact_renderables.append(Panel(
+                contact_info,
+                title="📞 Contact Information",
+                border_style="grey50"
+            ))
+
+        # Former Names Table (if any exist)
+        if self.former_names:
+            former_names_table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
+            former_names_table.add_column("Previous Company Names", style="bold grey70")
+            former_names_table.add_column("", style="grey85")  # Empty column for better spacing
+
+            for former_name in self.former_names:
+                from_date = datefmt(former_name['from'], '%B %Y')
+                to_date = datefmt(former_name['to'], '%B %Y')
+                former_names_table.add_row(Text(former_name['name'], style="italic"), f"{from_date} to {to_date}" )
+
+            former_names_panel = Panel(
+                former_names_table,
+                title="📜 Former Names",
+                border_style="grey50"
+            )
+        else:
+            former_names_panel = None
+
+        # Combine all sections using Group
+        if self.is_company:
+            content_renderables = [basic_info_panel, trading_panel]
+            if len(content_renderables):
+                contact_and_addresses = Columns(contact_renderables, equal=True, expand=True)
+                content_renderables.append(contact_and_addresses)
+            if former_names_panel:
+                content_renderables.append(former_names_panel)
+        else:
+            content_renderables = [basic_info_panel]
+            if len(contact_renderables):
+                contact_and_addresses = Columns(contact_renderables, equal=True, expand=True)
+                content_renderables.append(contact_and_addresses)
+
+        content = Group(*content_renderables)
+
+        # Create the main panel
+        return Panel(
+            content,
+            title=entity_title,
+            subtitle="SEC Entity Data",
+            border_style="grey50"
+        )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -773,6 +946,10 @@ def parse_entity_submissions(cjson: Dict[str, Any]):
     business_addr = cjson['addresses']['business']
     cik = cjson['cik']
     company_name = cjson["name"]
+    former_names = cjson.get('formerNames', [])
+    for former_name in former_names:
+        former_name['from'] = former_name['from'][:10] if former_name['from'] else former_name['from']
+        former_name['to'] = former_name['to'][:10] if former_name['to'] else former_name['to']
     return CompanyData(cik=int(cik),
                        name=company_name,
                        tickers=cjson['tickers'],
@@ -809,7 +986,7 @@ def parse_entity_submissions(cjson: Dict[str, Any]):
                        investor_website=cjson['investorWebsite'],
                        state_of_incorporation=cjson['stateOfIncorporation'],
                        state_of_incorporation_description=cjson['stateOfIncorporationDescription'],
-                       former_names=cjson['formerNames'],
+                       former_names=former_names,
                        files=cjson['filings']['files']
                        )
 

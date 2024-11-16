@@ -110,3 +110,18 @@ def test_get_latest_company_reports():
     tenq = c.latest_tenq
     assert tenq
     assert isinstance(tenq, TenQ)
+
+
+def test_company_repr():
+    c= Company(789019)
+    c_repr = repr(c)
+    print()
+    print(c_repr)
+    assert "MICROSOFT CORP" in c_repr
+
+def test_individual_repr():
+    i = Entity(1771340)
+    i_repr = repr(i)
+    print()
+    print(i_repr)
+    assert "Vaibhav" in i_repr
