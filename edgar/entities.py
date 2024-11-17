@@ -17,10 +17,10 @@ import pyarrow.compute as pc
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
+from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
-from rich.padding import Padding
 
 from edgar._filings import Filing, Filings, FilingsState
 from edgar.company_reports import TenK, TenQ
