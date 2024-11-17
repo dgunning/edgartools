@@ -255,6 +255,13 @@ For details on how to use the Filing API see **[Using the Filing API](https://gi
 
 ## [Using the Company API](https://github.com/dgunning/edgartools/wiki/WorkingWithCompanies)
 
+You can use the company ticker or CIK to get a company.
+
+```python
+c = Company("AAPL") # or Company("0000320193") or Company(320193)
+```
+![AAPL](docs/images/company-AAPL.png)
+
 With the Company API you can find a company by ticker or CIK, and get the company's filings, facts and financials.
 
 ```python
