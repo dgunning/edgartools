@@ -4,9 +4,9 @@ import os
 import re
 from dataclasses import dataclass
 from functools import lru_cache, cached_property
+from itertools import zip_longest
 from pathlib import Path
 from typing import List, Dict, Optional, Union, Tuple, Any
-from itertools import zip_longest
 
 import httpx
 import numpy as np
@@ -20,13 +20,15 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
+from rich.padding import Padding
+
 from edgar._filings import Filing, Filings, FilingsState
-from edgar.core import (log, Result, display_size, listify, is_using_local_storage,
-                        filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory, datefmt)
-from edgar.financials import Financials
 from edgar.company_reports import TenK, TenQ
+from edgar.core import (log, Result, display_size, listify, is_using_local_storage,
+                        filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory,
+                        datefmt)
+from edgar.financials import Financials
 from edgar.httprequests import download_json, download_text, download_bulk_data
-from edgar.reference import states
 from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
 from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
@@ -425,7 +427,7 @@ class EntityData:
             return tenk_filing.financials
 
     @property
-    def quarterly_financials(self)-> Optional[Financials]:
+    def quarterly_financials(self) -> Optional[Financials]:
         """
         Get the latest 10-Q financials
         """
@@ -646,7 +648,6 @@ class EntityData:
             company_dict['filings'] = self.filings.to_dict()
         return company_dict
 
-
     @staticmethod
     def get_operating_type_emoticon(entity_type: str) -> str:
         """
@@ -708,17 +709,16 @@ class EntityData:
         # Primary entity identification section
         if self.is_company:
             ticker_display = f" ({self.ticker_display})" if self.ticker_display else ""
-            entity_title = Text.assemble("🏢", (f"{self.display_name}{ticker_display}", "bold green"))
+            entity_title = Text.assemble("🏢", (f"{self.display_name}{ticker_display}", "bold deep_sky_blue3"))
         else:
-            entity_title = Text.assemble("👤", (self.display_name, "bold deep_sky_blue3"))
-
+            entity_title = Text.assemble("👤", (self.display_name, "bold green"))
 
         # Primary Information Table
         main_info = Table(box=box.SIMPLE_HEAVY, show_header=False, padding=(0, 1))
         main_info.add_column("Row", style="")  # Single column for the entire row
 
         row_parts = []
-        row_parts.extend([Text("CIK", style="grey60"), Text(str(self.cik), style="bold green")])
+        row_parts.extend([Text("CIK", style="grey60"), Text(str(self.cik), style="bold deep_sky_blue3")])
         if self.entity_type:
             if self.is_individual:
                 row_parts.extend([Text("Type", style="grey60"),
@@ -748,7 +748,7 @@ class EntityData:
             basic_info_renderables = [main_info]
         basic_info_panel = Panel(
             Group(*basic_info_renderables),
-            title="📋 Basic Information",
+            title="📋 Entity",
             border_style="grey50"
         )
 
@@ -756,14 +756,14 @@ class EntityData:
         if self.tickers and self.exchanges:
             trading_info = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
             trading_info.add_column("Exchange", style="bold grey70")
-            trading_info.add_column("Symbol", style="bold green")
+            trading_info.add_column("Symbol", style="bold deep_sky_blue3")
 
             for exchange, ticker in zip_longest(self.exchanges, self.tickers, fillvalue="-"):
                 trading_info.add_row(exchange, ticker)
 
             trading_panel = Panel(
                 trading_info,
-                title="📈 Trading Information",
+                title="📈 Exchanges",
                 border_style="grey50"
             )
         else:
@@ -816,7 +816,7 @@ class EntityData:
             for former_name in self.former_names:
                 from_date = datefmt(former_name['from'], '%B %Y')
                 to_date = datefmt(former_name['to'], '%B %Y')
-                former_names_table.add_row(Text(former_name['name'], style="italic"), f"{from_date} to {to_date}" )
+                former_names_table.add_row(Text(former_name['name'], style="italic"), f"{from_date} to {to_date}")
 
             former_names_panel = Panel(
                 former_names_table,
@@ -828,14 +828,14 @@ class EntityData:
 
         # Combine all sections using Group
         if self.is_company:
-            content_renderables = [basic_info_panel, trading_panel]
+            content_renderables = [Padding("", (1, 0, 0, 0)), basic_info_panel, trading_panel]
             if len(content_renderables):
                 contact_and_addresses = Columns(contact_renderables, equal=True, expand=True)
                 content_renderables.append(contact_and_addresses)
             if former_names_panel:
                 content_renderables.append(former_names_panel)
         else:
-            content_renderables = [basic_info_panel]
+            content_renderables = [Padding("", (1, 0, 0, 0)), basic_info_panel]
             if len(contact_renderables):
                 contact_and_addresses = Columns(contact_renderables, equal=True, expand=True)
                 content_renderables.append(contact_and_addresses)
