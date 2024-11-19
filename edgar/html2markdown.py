@@ -348,41 +348,6 @@ class SECHTMLParser:
         """Return a placeholder for tables that will be replaced later"""
         return f"[[TABLE_{id(self)}]]"
 
-    def _process_table(self, element: Tag, style: StyleInfo) -> DocumentNode:
-        """Process table elements into structured data"""
-        headers = []
-        rows = []
-        col_alignments = []
-
-        # Process table headers
-        thead = element.find('thead')
-        if thead:
-            header_row = thead.find('tr')
-            if header_row:
-                headers = self._process_table_row(header_row)
-                # Determine column alignments from header cells
-                col_alignments = self._get_column_alignments(header_row)
-
-        # Process table body
-        tbody = element.find('tbody') or element
-        for row in tbody.find_all('tr'):
-            if row.parent == thead:  # Skip if this row is in thead
-                continue
-            processed_row = self._process_table_row(row)
-            if processed_row:  # Only add non-empty rows
-                rows.append(processed_row)
-
-        # Create table node with structured data
-        return DocumentNode(
-            type='table',
-            content={
-                'headers': headers,
-                'rows': rows,
-                'alignments': col_alignments,
-                'style': style
-            },
-            style=style
-        )
 
     def _process_table_row(self, row: Tag) -> List[str]:
         """Process a table row, handling both th and td elements"""
@@ -591,9 +556,6 @@ class SECHTMLParser:
 
         # Check font weight
         is_bold = style.font_weight in ['bold', '700', '800', '900']
-
-        # Check text alignment
-        is_centered = style.text_align == 'center'
 
         # Check content length
         text = element.get_text(strip=True)
