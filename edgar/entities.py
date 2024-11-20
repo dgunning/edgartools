@@ -493,6 +493,10 @@ class EntityData:
         if cik:
             return CompanyData.for_cik(cik)
 
+    def latest(self, form: str, n=1):
+        """Get the latest for a given form"""
+        return self.get_filings(form=form, trigger_full_load=False).latest(n)
+
     def get_facts(self) -> Optional[EntityFacts]:
         """
         Get the company facts
