@@ -1,13 +1,13 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.26.3"]
 build-backend = "hatchling.build"
 
 [project]
 name = "edgartools"
-description = 'One of the nicest looking EDGAR libraries out there'
+description = 'Navigate Edgar filings with ease'
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = "MIT"
 keywords = ["sec", "edgar", "filings", "company", "python", "finance", "financial", "reports"]
 authors = [
   { name = "Dwight Gunning", email = "dgunning@gmail.com" },
@@ -58,6 +58,10 @@ path = "edgar/__about__.py"
 include = [
   "edgar/**/*.py",
   "edgar/reference/data/*",
+  "LICENSE.txt"
+]
+artifacts = [
+  "LICENSE.txt"  # And this line
 ]
 
 [tool.hatch.envs.default]
@@ -121,4 +125,3 @@ line-length = 150
 env = [
     "EDGAR_IDENTITY=Dev Gunning developer-gunning@gmail.com",
 ]
-
