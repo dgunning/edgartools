@@ -30,7 +30,7 @@ from rich.status import Status
 from rich.table import Table
 from rich.text import Text
 
-from edgar._markdown import html_to_markdown, text_to_markdown
+from edgar._markdown import text_to_markdown
 from edgar.html2markdown import to_markdown
 from edgar._party import Address
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
