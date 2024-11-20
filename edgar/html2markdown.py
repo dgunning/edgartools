@@ -4,6 +4,8 @@ from typing import List, Optional, Union, Tuple, Dict, Any
 from edgar.documents import HtmlDocument, clean_html_root
 from bs4 import Tag, NavigableString
 
+__all__ = ['SECHTMLParser', 'Document', 'DocumentNode', 'StyleInfo', 'MarkdownRenderer', 'to_markdown']
+
 
 @dataclass
 class StyleInfo:
@@ -253,7 +255,8 @@ class SECHTMLParser:
 
         # First, determine if this element itself should be a specific node type
         if element.name == 'table':
-            return self._process_table(element, self.parse_style(element.get('style', '')))
+            table_node = self._process_table(element, self.parse_style(element.get('style', '')))
+            return table_node if table_node else None
         elif element.name == 'div':
             return self._process_div(element, self.parse_style(element.get('style', '')))
 
@@ -344,46 +347,7 @@ class SECHTMLParser:
         text = ''.join(parts)
         return text if is_inline else text
 
-    def _process_table_placeholder(self) -> str:
-        """Return a placeholder for tables that will be replaced later"""
-        return f"[[TABLE_{id(self)}]]"
 
-
-    def _process_table_row(self, row: Tag) -> List[str]:
-        """Process a table row, handling both th and td elements"""
-        cells = []
-        for cell in row.find_all(['td', 'th']):
-            # Handle colspan
-            colspan = int(cell.get('colspan', 1))
-            cell_content = self._get_cell_content(cell)
-
-            # Add the cell content (repeated for colspan)
-            cells.extend([cell_content] * colspan)
-        return cells
-
-    def _get_cell_content(self, cell: Tag) -> str:
-        """Extract and clean cell content"""
-        # Handle special elements like ix:nonfraction
-        ix_element = cell.find('ix:nonfraction')
-        if ix_element:
-            return self._process_ix_nonfraction(ix_element)
-
-        # Get text content
-        text = self._get_text_with_spacing(cell)
-        return self._clean_cell_text(text)
-
-    def _clean_cell_text(self, text: str) -> str:
-        """Clean and normalize table cell text"""
-        # Remove table placeholders
-        text = re.sub(r'\[\[TABLE_\d+\]\]', '', text)
-
-        # Normalize whitespace
-        text = ' '.join(text.split())
-
-        # Clean up any remaining special characters
-        text = text.replace('\n', ' ').strip()
-
-        return text
 
     def _get_column_alignments(self, row: Tag) -> List[str]:
         """Determine column alignments from cell styles"""
@@ -564,22 +528,72 @@ class SECHTMLParser:
         # Combined heuristics
         return (is_larger or is_bold) and is_short
 
-    def _process_table(self, element: Tag, style: StyleInfo) -> DocumentNode:
-        # Extract table data
+    def _process_table_placeholder(self) -> str:
+        """Return a placeholder for tables that will be replaced later"""
+        return f"[[TABLE_{id(self)}]]"
+
+    def _process_table_row(self, row: Tag) -> List[str]:
+        """Process a table row, preserving the exact structure from HTML"""
+        cells = []
+        for cell in row.find_all(['td', 'th']):
+            # Get content and colspan
+            content = self._get_cell_content(cell)
+            colspan = int(cell.get('colspan', 1))
+
+            # Add the cell content, repeated for colspan
+            cells.extend([content] * colspan)
+
+        return cells
+
+    def _get_cell_content(self, cell: Tag) -> str:
+        """Extract cell content preserving structure"""
+        # Replace <br> with newlines
+        for br in cell.find_all('br'):
+            br.replace_with('\n')
+
+        # Get text content preserving whitespace
+        text = cell.get_text(strip=True)
+
+        # Clean up newlines and spaces while preserving structure
+        lines = [line.strip() for line in text.split('\n')]
+        return '\n'.join(line for line in lines if line)
+
+    def _clean_cell_text(self, text: str) -> str:
+        """Clean and normalize table cell text"""
+        # Remove table placeholders
+        text = re.sub(r'\[\[TABLE_\d+\]\]', '', text)
+
+        # Normalize whitespace
+        text = ' '.join(text.split())
+
+        # Clean up any remaining special characters
+        text = text.replace('\n', ' ').strip()
+
+        return text
+
+    def _process_table(self, element: Tag, style: StyleInfo) -> Optional[DocumentNode]:
         rows = []
         headers = []
 
-        # Process table headers
+        # Process headers
         thead = element.find('thead')
         if thead:
-            headers = [th.get_text(strip=True) for th in thead.find_all('th')]
+            header_row = thead.find('tr')
+            if header_row:
+                headers = [th.get_text(strip=True) for th in header_row.find_all(['th', 'td'])]
 
-        # Process table rows
+        # Process body
         tbody = element.find('tbody') or element
         for tr in tbody.find_all('tr'):
-            row = [td.get_text(strip=True) for td in tr.find_all(['td', 'th'])]
-            if row:
-                rows.append(row)
+            row_data = []
+            for cell in tr.find_all(['td', 'th']):
+                text = cell.get_text(strip=True)
+                # Preserve negative numbers in parentheses
+                if text.startswith('(') and text.endswith(')'):
+                    text = f"({text[1:-1]})"
+                row_data.append(text)
+            if any(cell for cell in row_data):  # Only add non-empty rows
+                rows.append(row_data)
 
         return DocumentNode(
             type='table',
@@ -608,15 +622,34 @@ class MarkdownRenderer:
         rendered_parts = []
 
         for node in self.document.nodes:
+            rendered = ""
             if node.type == 'paragraph':
-                rendered_parts.append(self._render_paragraph(node))
+                rendered = self._render_paragraph(node)
             elif node.type == 'table':
-                rendered_parts.append(self._render_table(node))
+                rendered = self._render_table(node)
             elif node.type == 'heading':
-                rendered_parts.append(self._render_heading(node))
-            # ... handle other node types
+                rendered = self._render_heading(node)
 
-        return '\n\n'.join(filter(None, rendered_parts))
+            if rendered:
+                rendered_parts.append(rendered.rstrip())  # Remove trailing whitespace
+
+        # Join with single newline and clean up multiple newlines
+        return self._clean_spacing('\n\n'.join(filter(None, rendered_parts)))
+
+    def _clean_spacing(self, text: str) -> str:
+        """Clean up spacing while maintaining valid markdown"""
+        # Replace 3 or more newlines with 2 newlines
+        text = re.sub(r'\n{3,}', '\n\n', text)
+
+        # Ensure proper spacing around headers
+        text = re.sub(r'\n*(#{1,6}.*?)\n*', r'\n\n\1\n', text)
+
+        # Clean up spacing around paragraphs
+        text = re.sub(r'\n{2,}(?=\S)', '\n\n', text)
+
+        # Trim leading/trailing whitespace
+        return text.strip()
+
 
     def _render_header(self) -> str:
         """Render SEC filing header with metadata"""
@@ -672,7 +705,7 @@ class MarkdownRenderer:
         return f"{prefix} {text} {{#{anchor}}}"
 
     def _render_paragraph(self, node: DocumentNode) -> str:
-        """Render paragraph with proper spacing"""
+        """Render paragraph with minimal spacing"""
         text = node.content.strip()
 
         # Apply styling
@@ -680,54 +713,67 @@ class MarkdownRenderer:
             if node.style.font_weight == 'bold':
                 text = f"**{text}**"
             if node.style.text_align == 'center':
-                text = f"<div align='center'>\n\n{text}\n\n</div>"
+                text = f"<div align='center'>{text}</div>"
 
-        # Ensure paragraphs are separated by blank lines
-        return f"{text}\n\n"
+        return text
 
     def _render_table(self, node: DocumentNode) -> str:
-        """Render table in markdown format"""
+        """Render table with proper alignment and formatting"""
         if not isinstance(node.content, dict):
             return ''
 
         headers = node.content.get('headers', [])
         rows = node.content.get('rows', [])
-        alignments = node.content.get('alignments', [])
 
         if not headers and not rows:
             return ''
 
-        # If no headers provided but we have rows, create numeric headers
-        if not headers and rows:
-            headers = ["" for i in range(len(rows[0]))]
+        # Determine max number of columns
+        num_cols = max(
+            len(headers),
+            max((len(row) for row in rows), default=0)
+        )
 
-        # Create alignment indicators
-        if not alignments:
-            alignments = ['left'] * len(headers)
+        # Pad headers if needed
+        headers = headers + [''] * (num_cols - len(headers))
 
-        align_markers = {
-            'left': ':---',
-            'right': '---:',
-            'center': ':---:'
-        }
-
-        # Build table markdown
-        lines = []
-
-        # Headers
-        lines.append('| ' + ' | '.join(str(h) for h in headers) + ' |')
-
-        # Alignment row
-        lines.append('| ' + ' | '.join(align_markers.get(a, '---') for a in alignments) + ' |')
-
-        # Data rows
+        # Pad rows if needed
+        padded_rows = []
         for row in rows:
-            # Ensure row has enough cells
-            while len(row) < len(headers):
-                row.append('')
-            lines.append('| ' + ' | '.join(str(cell) for cell in row) + ' |')
+            padded_row = row + [''] * (num_cols - len(row))
+            padded_rows.append(padded_row)
 
-        return '\n'.join(lines)
+        # Determine column widths based on content
+        col_widths = []
+        for col_idx in range(num_cols):
+            col_content = [headers[col_idx]] + [str(row[col_idx]) for row in padded_rows]
+            col_widths.append(max(len(str(cell)) for cell in col_content) + 2)  # +2 for padding
+
+        # Render headers
+        header_line = '|'
+        separator_line = '|'
+        for idx, header in enumerate(headers):
+            header_line += f" {str(header):<{col_widths[idx]}} |"
+            separator_line += f" {'-' * col_widths[idx]} |"
+
+        # Render rows
+        row_lines = []
+        for row in padded_rows:
+            line = '|'
+            for idx, cell in enumerate(row):
+                cell_content = str(cell)
+
+                # Right-align numbers and currency
+                if cell_content.strip().startswith('$') or cell_content.strip().startswith('(') or \
+                        cell_content.replace(',', '').replace('-', '').replace('.', '').isdigit():
+                    line += f" {cell_content:>{col_widths[idx]}} |"
+                else:
+                    line += f" {cell_content:<{col_widths[idx]}} |"
+            row_lines.append(line)
+
+        # Combine all parts
+        table_lines = [header_line, separator_line] + row_lines
+        return '\n'.join(table_lines)
 
     def _render_list(self, node: DocumentNode) -> str:
         if not node.children:
@@ -793,3 +839,10 @@ class MarkdownRenderer:
             return f"{num:,.2f}"
 
         return re.sub(r'\d+(?:,\d{3})*(?:\.\d+)?', replace_number, text)
+
+
+def to_markdown(html_content: str) -> str:
+    parser = SECHTMLParser(html_content)
+    document = parser.parse()
+    renderer = MarkdownRenderer(document)
+    return renderer.render()
