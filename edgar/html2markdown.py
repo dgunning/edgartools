@@ -374,22 +374,6 @@ class SECHTMLParser:
             alignments.extend([alignment] * colspan)
         return alignments
 
-    def _process_ix_nonfraction(self, element: Tag) -> str:
-        """Process ix:nonfraction elements commonly found in SEC filings"""
-        value = element.string or ''
-        scale = int(element.get('scale', 0))
-        decimals = int(element.get('decimals', 0))
-
-        try:
-            num = float(value)
-            # Apply scaling
-            num *= 10 ** scale
-            # Format according to decimals
-            if decimals >= 0:
-                return f"{num:.{decimals}f}"
-            return str(int(round(num, decimals)))
-        except ValueError:
-            return value
 
     def _clean_block_text(self, text: str) -> str:
         """Clean block text while preserving meaningful whitespace"""
