@@ -173,36 +173,6 @@ class SECHTMLParser:
             style=style
         )
 
-    def _process_text(self, element: Tag, style: StyleInfo,
-                      bold: bool = False, italic: bool = False) -> DocumentNode:
-        """Process text elements with formatting"""
-        text = element.get_text(strip=True)
-        if not text:
-            return None
-
-        # Update style based on formatting
-        if bold:
-            style.font_weight = 'bold'
-        if italic:
-            style.font_style = 'italic'
-
-        # Handle special characters and entities
-        text = self._clean_text(text)
-
-        # Detect if this might be a header based on context
-        if self._looks_like_header(element, style):
-            return DocumentNode(
-                type='heading',
-                content=text,
-                style=style,
-                level=self._determine_heading_level(style)
-            )
-
-        return DocumentNode(
-            type='text',
-            content=text,
-            style=style
-        )
 
     def _clean_text(self, text: str) -> str:
         """Clean and normalize text content while preserving meaningful whitespace"""
@@ -364,35 +334,6 @@ class SECHTMLParser:
         text = ''.join(parts)
         return text if is_inline else text
 
-    def _get_column_alignments(self, row: Tag) -> List[str]:
-        """Determine column alignments from cell styles"""
-        alignments = []
-        for cell in row.find_all(['td', 'th']):
-            style = self.parse_style(cell.get('style', ''))
-            alignment = style.text_align or 'left'
-            colspan = int(cell.get('colspan', 1))
-            alignments.extend([alignment] * colspan)
-        return alignments
-
-
-    def _clean_block_text(self, text: str) -> str:
-        """Clean block text while preserving meaningful whitespace"""
-        # Replace multiple newlines with double newline
-        text = re.sub(r'\n{3,}', '\n\n', text)
-
-        # Replace multiple spaces with single space
-        text = re.sub(r' {2,}', ' ', text)
-
-        # Clean up spacing around newlines
-        text = re.sub(r' *\n *', '\n', text)
-
-        # Ensure proper spacing after punctuation
-        text = re.sub(r'([.!?])([A-Z])', r'\1 \2', text)
-
-        # Remove leading/trailing whitespace
-        text = text.strip()
-
-        return text
 
     def _merge_adjacent_nodes(self, nodes: List[DocumentNode]) -> List[DocumentNode]:
         """Merge adjacent nodes while preserving proper spacing"""
@@ -429,24 +370,6 @@ class SECHTMLParser:
 
         return merged
 
-    def _process_block_element(self, element: Tag, text: str, style: StyleInfo) -> DocumentNode:
-        """Process block-level elements with proper spacing"""
-        # Clean up excessive whitespace while preserving meaningful breaks
-        cleaned_text = self._clean_block_text(text)
-
-        if self._is_heading(element, style):
-            return DocumentNode(
-                type='heading',
-                content=cleaned_text,
-                style=style,
-                level=self._determine_heading_level(style)
-            )
-
-        return DocumentNode(
-            type='paragraph',
-            content=cleaned_text,
-            style=style
-        )
 
     def _process_div(self, element: Tag, style: StyleInfo) -> Optional[Union[DocumentNode, List[DocumentNode]]]:
         """Process div elements"""
@@ -527,22 +450,6 @@ class SECHTMLParser:
         # Combined heuristics
         return (is_larger or is_bold) and is_short
 
-    def _process_table_placeholder(self) -> str:
-        """Return a placeholder for tables that will be replaced later"""
-        return f"[[TABLE_{id(self)}]]"
-
-    def _process_table_row(self, row: Tag) -> List[str]:
-        """Process a table row, preserving the exact structure from HTML"""
-        cells = []
-        for cell in row.find_all(['td', 'th']):
-            # Get content and colspan
-            content = self._get_cell_content(cell)
-            colspan = int(cell.get('colspan', 1))
-
-            # Add the cell content, repeated for colspan
-            cells.extend([content] * colspan)
-
-        return cells
 
     def _get_cell_content(self, cell: Tag) -> str:
         """Extract cell content preserving structure"""
@@ -556,19 +463,6 @@ class SECHTMLParser:
         # Clean up newlines and spaces while preserving structure
         lines = [line.strip() for line in text.split('\n')]
         return '\n'.join(line for line in lines if line)
-
-    def _clean_cell_text(self, text: str) -> str:
-        """Clean and normalize table cell text"""
-        # Remove table placeholders
-        text = re.sub(r'\[\[TABLE_\d+\]\]', '', text)
-
-        # Normalize whitespace
-        text = ' '.join(text.split())
-
-        # Clean up any remaining special characters
-        text = text.replace('\n', ' ').strip()
-
-        return text
 
     def _process_table(self, element: Tag, style: StyleInfo) -> Optional[DocumentNode]:
         """Process table using explicit cell alignments"""
@@ -657,124 +551,6 @@ class SECHTMLParser:
 
         return DocumentNode(type='table', content=rows, style=style)
 
-    def _render_table(self, node: DocumentNode) -> str:
-        """Render table with proper alignments"""
-        if not isinstance(node.content, list) or not node.content:
-            return ''
-
-        rows = node.content
-
-        # Calculate column spans and alignments
-        columns = []
-        first_row = rows[0]
-        current_col = 0
-        for cell in first_row.cells:
-            for _ in range(cell.colspan):
-                columns.append({
-                    'width': 0,
-                    'align': cell.align
-                })
-                current_col += 1
-
-        # Calculate column widths
-        for row in rows:
-            current_col = 0
-            for cell in row.cells:
-                content_width = len(cell.content)
-                for i in range(cell.colspan):
-                    col_idx = current_col + i
-                    if col_idx < len(columns):
-                        columns[col_idx]['width'] = max(
-                            columns[col_idx]['width'],
-                            content_width // cell.colspan
-                        )
-                current_col += cell.colspan
-
-        # Render table
-        lines = []
-
-        # Render rows
-        for row_idx, row in enumerate(rows):
-            line = '|'
-            current_col = 0
-
-            for cell in row.cells:
-                content = cell.content
-                # Calculate total width for spanned columns
-                total_width = sum(columns[i]['width'] for i in range(current_col, current_col + cell.colspan))
-                # Add spacing for column separators
-                total_width += (cell.colspan - 1) * 3
-
-                # Format content based on alignment
-                if cell.align == 'right':
-                    formatted = f" {content:>{total_width}} "
-                elif cell.align == 'center':
-                    formatted = f" {content:^{total_width}} "
-                else:
-                    formatted = f" {content:<{total_width}} "
-
-                line += formatted + '|'
-                current_col += cell.colspan
-
-            lines.append(line)
-
-            # Add separator row after header
-            if row_idx == 0:
-                separator = '|'
-                for col in columns:
-                    width = col['width']
-                    if col['align'] == 'right':
-                        separator += ' ' + '-' * width + ': |'
-                    elif col['align'] == 'center':
-                        separator += ' :' + '-' * (width - 2) + ': |'
-                    else:
-                        separator += ' ' + '-' * width + ' |'
-                lines.append(separator)
-
-        return '\n'.join(lines)
-
-    def _generate_financial_headers(self, rows: List[TableRow]) -> Optional[TableRow]:
-        """Generate appropriate headers for financial tables"""
-        if not rows:
-            return None
-
-        first_row = rows[0]
-        if not first_row or not first_row.cells:
-            return None
-
-        # Analyze content to determine table type
-        try:
-            # Check if it's a year-based financial table
-            if any(cell.content.strip().isdigit() for cell in first_row.cells):
-                return TableRow(
-                    cells=[
-                        TableCell(content="Year", align='left'),
-                        TableCell(content="Amount", align='right')
-                    ],
-                    is_header=True
-                )
-
-            # Check if it's a category-based financial table
-            if any(cell.is_currency for cell in first_row.cells):
-                return TableRow(
-                    cells=[
-                        TableCell(content="Category", align='left'),
-                        TableCell(content="Amount", align='right')
-                    ],
-                    is_header=True
-                )
-
-            # If we can't determine the type, use generic headers
-            return TableRow(
-                cells=[
-                    TableCell(content="Description", align='left'),
-                    TableCell(content="Value", align='right')
-                ],
-                is_header=True
-            )
-        except Exception:
-            # If anything goes wrong, return None
-            return None
 
     def _similar_styles(self, style1: StyleInfo, style2: StyleInfo) -> bool:
         # Compare relevant style attributes to determine if they're similar
@@ -960,13 +736,6 @@ class MarkdownRenderer:
 
         return normalized
 
-    def _calculate_virtual_columns(self, rows: List[TableRow]) -> int:
-        """Calculate total number of virtual columns needed"""
-        max_columns = 0
-        for row in rows:
-            virtual_cols = sum(cell.colspan for cell in row.cells)
-            max_columns = max(max_columns, virtual_cols)
-        return max_columns
 
     def _calculate_column_widths(self, rows: List[TableRow]) -> List[int]:
         """Calculate column widths accounting for colspans"""
@@ -996,61 +765,6 @@ class MarkdownRenderer:
 
         return widths
 
-    def _generate_separator(self, rows: List[TableRow], col_structure: List[Dict]) -> str:
-        """Generate separator row with proper alignment indicators"""
-        separators = []
-
-        for col in col_structure:
-            width = col['width']
-            align = col['align'] or 'left'
-
-            if align == 'right' or col['is_numeric']:
-                separator = '-' * width + ':'
-            elif align == 'center':
-                separator = ':' + '-' * (width - 2) + ':'
-            else:
-                separator = ':' + '-' * width
-
-            separators.append(separator.ljust(width + 2))  # +2 for padding
-
-        return "|" + "|".join(separators) + "|"
-
-    def _clean_cell_content(self, content: str) -> str:
-        """Clean cell content while preserving meaningful formatting"""
-        # Remove excessive whitespace while preserving single spaces
-        content = ' '.join(content.split())
-
-        # Preserve special characters
-        content = content.replace('&nbsp;', ' ')
-        content = content.replace('&lt;', '<')
-        content = content.replace('&gt;', '>')
-        content = content.replace('&amp;', '&')
-
-        # Ensure proper spacing around parentheses
-        content = re.sub(r'\(\s+', '(', content)
-        content = re.sub(r'\s+\)', ')', content)
-
-        return content.strip()
-
-    def _get_effective_alignment(self, cell: TableCell, col_info: Dict) -> str:
-        """Determine effective alignment considering cell style and column properties"""
-        # Priority:
-        # 1. Cell style alignment
-        # 2. Numeric content alignment
-        # 3. Column default alignment
-        # 4. Left alignment as fallback
-
-        if cell.style.text_align:
-            return cell.style.text_align
-
-        content = cell.content.strip()
-        if content.replace(',', '').replace('-', '').replace('.', '').replace('(', '').replace(')', '').isdigit():
-            return 'right'
-
-        if col_info['is_numeric']:
-            return 'right'
-
-        return col_info['align'] or 'left'
 
     def _render_table_row(self, row: TableRow, col_widths: List[int]) -> str:
         """Render a single table row"""
