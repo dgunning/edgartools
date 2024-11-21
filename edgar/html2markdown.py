@@ -1,4 +1,8 @@
 import re
+import mdformat
+from io import StringIO
+from rich.console import Console
+from rich.markdown import Markdown
 from dataclasses import dataclass
 from typing import List, Optional, Union, Tuple, Dict, Any
 
@@ -872,9 +876,22 @@ class MarkdownRenderer:
 
         return re.sub(r'\d+(?:,\d{3})*(?:\.\d+)?', replace_number, text)
 
+    def render_to_text(self):
+        # Create string buffer console
+        output = StringIO()
+        console = Console(file=output, force_terminal=True, width=120)
+
+        # Render markdown
+        markdown = Markdown(self.render())
+        console.print(markdown)
+
+        return output.getvalue()
+
 
 def to_markdown(html_content: str) -> str:
     parser = SECHTMLParser(html_content)
     document = parser.parse()
     renderer = MarkdownRenderer(document)
     return renderer.render()
+
+
