@@ -480,7 +480,21 @@ class SECHTMLParser:
 
         def process_cell(cell: Tag) -> TableCell:
             """Process cell preserving explicit alignment"""
-            content = cell.get_text(strip=True)
+            divs = cell.find_all('div')
+            if divs:
+                # Check if divs have inline style
+                texts = []
+                for div in divs:
+                    style = self.parse_style(div.get('style', ''))
+                    text = div.get_text(strip=True)
+                    if style.display == 'inline':
+                        texts.append(text)
+                    else:
+                        texts.append(f"\n{text}" if texts else text)
+                content = ''.join(texts)
+            else:
+                content = cell.get_text(strip=True)
+
             colspan = int(cell.get('colspan', 1))
             align = get_cell_alignment(cell)
 
@@ -695,12 +709,21 @@ class MarkdownRenderer:
         return '\n'.join(table_lines)
 
     def _normalize_table_structure(self, rows: List[TableRow]) -> List[TableRow]:
-        """Normalize table structure accounting for colspans"""
-        # Calculate true maximum columns considering colspans
+        """Normalize table structure by analyzing header pattern"""
+        if not rows:
+            return []
+
+        # Analyze first few rows to determine column structure
         max_cols = 0
-        for row in rows:
-            virtual_cols = sum(cell.colspan for cell in row.cells)
-            max_cols = max(max_cols, virtual_cols)
+        for row in rows[:3]:  # Check first 3 rows
+            num_cols = 0
+            for cell in row.cells:
+                if cell.content.strip() == '$':
+                    # Count $ and following number as separate columns
+                    num_cols += 2
+                else:
+                    num_cols += 1
+            max_cols = max(max_cols, num_cols)
 
         normalized = []
         for row in rows:
@@ -708,26 +731,15 @@ class MarkdownRenderer:
             current_cols = 0
 
             for cell in row.cells:
-                if current_cols >= max_cols:
-                    break
+                if cell.content.strip() == '$':
+                    # Keep $ as separate column
+                    normalized_cells.append(cell)
+                    current_cols += 1
+                else:
+                    normalized_cells.append(cell)
+                    current_cols += 1
 
-                # Handle currency symbols as before
-                if cell.content == '$' and len(normalized_cells) + 1 < len(row.cells):
-                    next_cell = row.cells[len(normalized_cells) + 1]
-                    if next_cell.content.replace(',', '').replace('.', '').isdigit():
-                        normalized_cells.append(TableCell(
-                            content=f"${next_cell.content}",
-                            align='right',
-                            is_currency=True,
-                            colspan=next_cell.colspan
-                        ))
-                        current_cols += next_cell.colspan
-                        continue
-
-                normalized_cells.append(cell)
-                current_cols += cell.colspan
-
-            # Pad remaining columns with empty cells
+            # Pad if needed
             while current_cols < max_cols:
                 normalized_cells.append(TableCell(content="", align='left'))
                 current_cols += 1
@@ -765,17 +777,22 @@ class MarkdownRenderer:
 
         return widths
 
-
     def _render_table_row(self, row: TableRow, col_widths: List[int]) -> str:
         """Render a single table row"""
         cells = []
         for cell, width in zip(row.cells, col_widths):
-            content = cell.content
-            if cell.align == 'right':
-                formatted = f" {content:>{width}} "
-            else:
-                formatted = f" {content:<{width}} "
-            cells.append(formatted)
+            lines = cell.content.split('\n')
+            # Pad each line to match column width
+            padded_lines = []
+            for line in lines:
+                if cell.align == 'right':
+                    formatted = f" {line:>{width}} "
+                else:
+                    formatted = f" {line:<{width}} "
+                padded_lines.append(formatted)
+            # Join lines with spaces matching column width
+            content = ' '.join(padded_lines)
+            cells.append(content)
 
         return '|' + '|'.join(cells) + '|'
 
