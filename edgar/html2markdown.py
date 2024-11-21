@@ -587,19 +587,34 @@ class SECHTMLParser:
         return text
 
     def _process_table(self, element: Tag, style: StyleInfo) -> Optional[DocumentNode]:
-        """Process table preserving cell alignments"""
+        """Process table using explicit cell alignments"""
 
         def get_cell_alignment(cell: Tag) -> str:
-            """Extract text alignment from cell style"""
+            """Extract text alignment directly from cell style"""
             style_str = cell.get('style', '')
             if 'text-align:right' in style_str:
                 return 'right'
             elif 'text-align:center' in style_str:
                 return 'center'
-            return 'left'
+            elif 'text-align:left' in style_str:
+                return 'left'
+            return 'left'  # Default to left if not specified
+
+        def process_cell(cell: Tag) -> TableCell:
+            """Process cell preserving explicit alignment"""
+            content = cell.get_text(strip=True)
+            colspan = int(cell.get('colspan', 1))
+            align = get_cell_alignment(cell)
+
+            return TableCell(
+                content=content,
+                colspan=colspan,
+                align=align,
+                is_currency='$' in content
+            )
 
         def merge_cells(cells: List[TableCell]) -> List[TableCell]:
-            """Merge cells preserving alignment"""
+            """Merge cells preserving explicit alignment"""
             if not cells:
                 return []
 
@@ -614,10 +629,16 @@ class SECHTMLParser:
                     current = cell
                     continue
 
-                # When merging $ with numbers, keep right alignment
+                # When merging $ with numbers or numbers with %, preserve right alignment
                 if current.content.strip() == '$' and cell.align == 'right':
                     current.content = f"${cell.content.strip()}"
-                    current.align = 'right'  # Ensure right alignment for currency
+                    current.align = 'right'
+                    current.colspan += cell.colspan
+                    continue
+                elif (cell.content.strip() == '%' and
+                      current.content.strip().replace(',', '').replace('.', '').isdigit()):
+                    current.content = f"{current.content.strip()}%"
+                    current.align = 'right'
                     current.colspan += cell.colspan
                     continue
 
@@ -628,24 +649,6 @@ class SECHTMLParser:
                 merged.append(current)
 
             return merged
-
-        def process_cell(cell: Tag) -> TableCell:
-            """Process cell with alignment"""
-            content = cell.get_text(strip=True)
-            colspan = int(cell.get('colspan', 1))
-            align = get_cell_alignment(cell)
-
-            # For numeric/currency content, enforce right alignment
-            if content and (content.replace(',', '').replace('.', '').isdigit() or
-                            (content.startswith('$') and content[1:].replace(',', '').replace('.', '').isdigit())):
-                align = 'right'
-
-            return TableCell(
-                content=content,
-                colspan=colspan,
-                align=align,
-                is_currency='$' in content
-            )
 
         def process_row(tr: Tag) -> Optional[TableRow]:
             cells = []
@@ -661,7 +664,7 @@ class SECHTMLParser:
             is_header = bool(tr.find('th')) or tr.find_parent('thead')
             return TableRow(cells=cells, is_header=is_header) if cells else None
 
-        # Main processing
+        # Process all rows
         rows = []
         for tr in element.find_all('tr'):
             row = process_row(tr)
