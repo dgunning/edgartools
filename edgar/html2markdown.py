@@ -1,12 +1,11 @@
 import re
-import mdformat
-from io import StringIO
-from rich.console import Console
-from rich.markdown import Markdown
 from dataclasses import dataclass
+from io import StringIO
 from typing import List, Optional, Union, Tuple, Dict, Any
 
 from bs4 import Tag, NavigableString
+from rich.console import Console
+from rich.markdown import Markdown
 
 from edgar.documents import HtmlDocument, clean_html_root
 
