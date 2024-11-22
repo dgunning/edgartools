@@ -615,6 +615,8 @@ class MarkdownRenderer:
         # Clean up spacing around paragraphs
         text = re.sub(r'\n{2,}(?=\S)', '\n\n', text)
 
+        text = re.sub("\xa0", " ", text)
+
         # Trim leading/trailing whitespace
         return text.strip()
 
@@ -861,19 +863,6 @@ class MarkdownRenderer:
             'see accompanying notes', 'refer to'
         ]
         return any(indicator in text.lower() for indicator in note_indicators)
-
-    def _format_financial_numbers(self, text: str) -> str:
-        """Format financial numbers with proper separators"""
-
-        def replace_number(match):
-            num = float(match.group(0).replace(',', ''))
-            if num >= 1_000_000:
-                return f"{num / 1_000_000:.2f}M"
-            if num >= 1_000:
-                return f"{num / 1_000:.2f}K"
-            return f"{num:,.2f}"
-
-        return re.sub(r'\d+(?:,\d{3})*(?:\.\d+)?', replace_number, text)
 
     def render_to_text(self):
         # Create string buffer console
