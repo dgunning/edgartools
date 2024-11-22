@@ -71,8 +71,14 @@ filings = get_filings()
 ## Getting financials
 ```python
 c = Company("AAPL")
-filing = c.get_filings(form="10-Q").latest(1)
+# Get the latest 10-Q filing
+
+filing = c.latest("10-Q")
+
+# Convert to a data object, in this case a TenQ object
 tenq = filing.obj()
+
+# Get the financials
 financials = tenq.financials
 ```
 
@@ -187,19 +193,21 @@ For a deeper dive see **[Finding things with edgartools](https://github.com/dgun
 
 ### Working with a company
 
-|                                         | Code                                                          |
-|-----------------------------------------|---------------------------------------------------------------|
-| Get a company by ticker                 | `company = Company("AAPL")`                                   |
-| Get a company by CIK                    | `company = Company("0000320193")`                             |
-| Get company facts                       | `company.get_facts()`                                         |
-| Get company facts as a pandas dataframe | `company.get_facts().to_pandas()`                             |
-| Get company filings                     | `company.get_filings()`                                       |
-| Get company filings by form             | `company.get_filings(form="10-K")`                            |
+|                                          | Code                                                          |
+|------------------------------------------|---------------------------------------------------------------|
+| Get a company by ticker                  | `company = Company("AAPL")`                                   |
+| Get a company by CIK                     | `company = Company("0000320193")`                             |
+| Get company facts                        | `company.get_facts()`                                         |
+| Get company facts as a pandas dataframe  | `company.get_facts().to_pandas()`                             |
+| Get company filings                      | `company.get_filings()`                                       |
+| Get company filings by form              | `company.get_filings(form="10-K")`                            |
+| Get the latest 10-Q                      | `company.latest("10-Q")`                                      |
+| Get the last 5 10-Q's                    | `company.get_filings(form="10-Q", 5)`                         |
 | Get a company filing by accession_number | `company.get_filing(accession_number="0000320193-21-000139")` |
-| Get the company's financials            | `company.financials`                                          |
-| Get the company's balance sheet         | `company.financials.get_balance_sheet`                            |
-| Get the company's income statement      | `company.financials.get_income_statement`                         |
-| Get the company's cash flow statement   | `company.financials.get_cash_flow_statement`                      |
+| Get the company's financials             | `company.financials`                                          |
+| Get the company's balance sheet          | `company.financials.get_balance_sheet`                        |
+| Get the company's income statement       | `company.financials.get_income_statement`                     |
+| Get the company's cash flow statement    | `company.financials.get_cash_flow_statement`                  |
 
 # Installation
 
