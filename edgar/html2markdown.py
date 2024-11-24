@@ -139,7 +139,7 @@ class Document:
         return text
 
     def _render_table(self, node: DocumentNode) -> Optional[Table]:
-        """Render table with simplified colspan handling"""
+        """Render table with multiline cell support and optimized column handling"""
         if not isinstance(node.content, list) or not node.content:
             return None
 
@@ -147,46 +147,105 @@ class Document:
         if not rows:
             return None
 
-        # Calculate total virtual columns needed
-        total_cols = max(
-            sum(cell.colspan for cell in row.cells)
-            for row in rows
-        )
+        def process_cell_content(content: str) -> str:
+            """Process cell content to handle HTML breaks and cleanup"""
+            # Replace HTML line breaks with actual line breaks
+            content = content.replace('<br/>', '\n').replace('<br>', '\n')
+            # Clean up any excess whitespace while preserving line breaks
+            lines = [line.strip() for line in content.split('\n')]
+            return '\n'.join(line for line in lines if line)
 
-        # Create table
+        # First create the full virtual column data to analyze
+        virtual_rows = []
+        max_cols = max(sum(cell.colspan for cell in row.cells) for row in rows)
+
+        # Convert all rows to virtual columns first
+        for row in rows:
+            virtual_row = [""] * max_cols
+            current_col = 0
+
+            for cell in row.cells:
+                content = process_cell_content(cell.content)
+
+                # Handle currency values only if content doesn't contain line breaks
+                if '\n' not in content and cell.is_currency and content.replace(',', '').replace('.', '').isdigit():
+                    content = f"${float(content.replace(',', '')):,.2f}"
+
+                if cell.colspan > 1:
+                    # Place in second virtual column of span
+                    virtual_row[current_col + 1] = content
+                else:
+                    virtual_row[current_col] = content
+
+                current_col += cell.colspan
+
+            virtual_rows.append(virtual_row)
+
+        # Analyze columns for emptiness
+        empty_cols = []
+        for col in range(max_cols):
+            if all(row[col].strip() == "" for row in virtual_rows):
+                empty_cols.append(col)
+
+        # Process empty columns:
+        # 1. Remove leading empty columns
+        # 2. Keep one empty column between content for spacing
+        # 3. Remove all trailing empty columns
+        cols_to_remove = set()
+
+        # Handle leading empty columns
+        for col in range(max_cols):
+            if col in empty_cols:
+                cols_to_remove.add(col)
+            else:
+                break
+
+        # Handle trailing empty columns
+        for col in reversed(range(max_cols)):
+            if col in empty_cols:
+                cols_to_remove.add(col)
+            else:
+                break
+
+        # Handle consecutive empty columns in the middle
+        i = 0
+        while i < max_cols - 1:
+            if i in empty_cols and (i + 1) in empty_cols:
+                consecutive_empty = 0
+                j = i
+                while j < max_cols and j in empty_cols:
+                    consecutive_empty += 1
+                    j += 1
+
+                # Keep first empty column, remove others
+                cols_to_remove.update(range(i + 1, i + consecutive_empty))
+                i = j
+            else:
+                i += 1
+
+        # Create optimized rows
+        optimized_rows = []
+        for virtual_row in virtual_rows:
+            optimized_row = [col for idx, col in enumerate(virtual_row) if idx not in cols_to_remove]
+            optimized_rows.append(optimized_row)
+
+        # Create table with optimized columns
         table = Table(
             box=box.SIMPLE,
             border_style="blue",
             padding=(0, 1),
-            show_header=False  # Don't treat any row as special header
+            show_header=False
         )
 
-        # Add columns
-        for _ in range(total_cols):
-            table.add_column(justify="right")
+        # Add columns with appropriate justification
+        for col_idx in range(len(optimized_rows[0])):
+            # First column left-aligned, rest right-aligned
+            justify = "left" if col_idx == 0 else "right"
+            table.add_column(justify=justify)
 
-        # Process all rows the same way
-        for row in rows:
-            row_data = [""] * total_cols
-            current_col = 0
-
-            for cell in row.cells:
-                content = cell.content
-
-                # Handle currency values
-                if cell.is_currency and content.replace(',', '').replace('.', '').isdigit():
-                    content = f"${float(content.replace(',', '')):,.2f}"
-
-                if cell.colspan > 1:
-                    # For multi-column spans, always place in second virtual column
-                    row_data[current_col + 1] = content
-                else:
-                    # Single column cells go in their natural position
-                    row_data[current_col] = content
-
-                current_col += cell.colspan
-
-            table.add_row(*row_data)
+        # Add rows
+        for row in optimized_rows:
+            table.add_row(*row)
 
         return table
 
@@ -407,7 +466,7 @@ class SECHTMLParser:
 
                 # Process the child element
                 if child.name == 'table':
-                    table_node = self._process_table(child, self.parse_style(child.get('style', '')))
+                    table_node = self._process_table(child)
                     if table_node:
                         nodes.append(table_node)
                 elif child.name == 'br':
