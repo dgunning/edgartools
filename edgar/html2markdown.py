@@ -1,15 +1,23 @@
 import re
 from dataclasses import dataclass
 from io import StringIO
-from typing import List, Optional, Union, Tuple, Dict, Any
+from typing import List
+from typing import Optional, Union, Tuple, Dict, Any
 
 from bs4 import Tag, NavigableString
-from rich.console import Console
+from rich.align import Align
+from rich.console import Group, Console, RenderResult
 from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
+from rich import box
+from edgar.richtools import repr_rich
 
 from edgar.documents import HtmlDocument, clean_html_root
 
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode', 'StyleInfo', 'MarkdownRenderer', 'to_markdown']
+
 
 
 @dataclass
@@ -39,6 +47,10 @@ class TableRow:
     cells: List[TableCell]
     is_header: bool = False
 
+    @property
+    def virtual_columns(self):
+        return sum(cell.colspan for cell in self.cells)
+
 
 @dataclass
 class DocumentNode:
@@ -51,6 +63,132 @@ class DocumentNode:
 @dataclass
 class Document:
     nodes: List[DocumentNode]
+
+    def __len__(self):
+        return len(self.nodes)
+
+    def __getitem__(self, index):
+        return self.nodes[index]
+
+    def to_markdown(self) -> str:
+        return MarkdownRenderer(self).render()
+
+    def __rich__(self) -> RenderResult:
+        """Rich console protocol for rendering document"""
+        renderable_elements = []
+
+        for node in self.nodes:
+            if node.type == 'heading':
+                element = self._render_heading(node)
+            elif node.type == 'paragraph':
+                element = self._render_paragraph(node)
+            elif node.type == 'table':
+                element = self._render_table(node)
+            else:
+                # Fallback for unknown types
+                element = Text(str(node.content))
+
+            if element:
+                renderable_elements.append(element)
+
+        return Group(*renderable_elements)
+
+    def __repr__(self):
+        return repr_rich(self)
+
+    def _render_heading(self, node: DocumentNode) -> Panel:
+        """Render heading with appropriate level styling"""
+        # Style based on heading level
+        styles = {
+            1: ("bold cyan", 'SIMPLE'),
+            2: ("bold blue", 'SIMPLE'),
+            3: ("bold", 'SIMPLE'),
+            4: ("dim bold", 'SIMPLE')
+        }
+
+        style, box_style = styles.get(node.level, ("", "single"))
+
+        text = Text(node.content.strip(), style=style)
+
+        # Center if specified in style
+        if node.style and node.style.text_align == 'center':
+            text = Align.center(text)
+
+        return Panel(
+            text,
+            box=box.SIMPLE,
+            padding=(0, 2),
+            expand=True
+        )
+
+    def _render_paragraph(self, node: DocumentNode) -> Text:
+        """Render paragraph with styling"""
+        text = Text(node.content.strip())
+
+        # Apply styling based on StyleInfo
+        if node.style:
+            if node.style.font_weight == 'bold':
+                text.stylize("bold")
+
+            # Handle text alignment
+            if node.style.text_align == 'center':
+                return Text(node.content.strip(), justify='center')
+            elif node.style.text_align == 'right':
+                return Text(node.content.strip(), justify='right')
+
+        return text
+
+    def _render_table(self, node: DocumentNode) -> Optional[Table]:
+        """Render table with simplified colspan handling"""
+        if not isinstance(node.content, list) or not node.content:
+            return None
+
+        rows = node.content
+        if not rows:
+            return None
+
+        # Calculate total virtual columns needed
+        total_cols = max(
+            sum(cell.colspan for cell in row.cells)
+            for row in rows
+        )
+
+        # Create table
+        table = Table(
+            box=box.SIMPLE,
+            border_style="blue",
+            padding=(0, 1),
+            show_header=False  # Don't treat any row as special header
+        )
+
+        # Add columns
+        for _ in range(total_cols):
+            table.add_column(justify="right")
+
+        # Process all rows the same way
+        for row in rows:
+            row_data = [""] * total_cols
+            current_col = 0
+
+            for cell in row.cells:
+                content = cell.content
+
+                # Handle currency values
+                if cell.is_currency and content.replace(',', '').replace('.', '').isdigit():
+                    content = f"${float(content.replace(',', '')):,.2f}"
+
+                if cell.colspan > 1:
+                    # For multi-column spans, always place in second virtual column
+                    row_data[current_col + 1] = content
+                else:
+                    # Single column cells go in their natural position
+                    row_data[current_col] = content
+
+                current_col += cell.colspan
+
+            table.add_row(*row_data)
+
+        return table
 
 
 class SECHTMLParser:
@@ -245,7 +383,7 @@ class SECHTMLParser:
 
         # First, determine if this element itself should be a specific node type
         if element.name == 'table':
-            table_node = self._process_table(element, self.parse_style(element.get('style', '')))
+            table_node = self._process_table(element, )
             return table_node if table_node else None
         elif element.name == 'div':
             return self._process_div(element, self.parse_style(element.get('style', '')))
@@ -412,7 +550,7 @@ class SECHTMLParser:
                             current_text = []
 
                         # Process the table
-                        table_node = self._process_table(child, self.parse_style(child.get('style', '')))
+                        table_node = self._process_table(child)
                         if table_node:
                             child_nodes.append(table_node)
                     else:
@@ -467,106 +605,61 @@ class SECHTMLParser:
         lines = [line.strip() for line in text.split('\n')]
         return '\n'.join(line for line in lines if line)
 
-    def _process_table(self, element: Tag, style: StyleInfo) -> Optional[DocumentNode]:
-        """Process table using explicit cell alignments"""
+    def _process_table(self, element: Tag) -> Optional[DocumentNode]:
+        """Process table using virtual columns from row colspans and correct value positioning"""
+        if not element:
+            return None
 
-        def get_cell_alignment(cell: Tag) -> str:
-            """Extract text alignment directly from cell style"""
-            style_str = cell.get('style', '')
-            if 'text-align:right' in style_str:
-                return 'right'
-            elif 'text-align:center' in style_str:
-                return 'center'
-            elif 'text-align:left' in style_str:
-                return 'left'
-            return 'left'  # Default to left if not specified
+        def process_cell(cell: Tag) -> List[TableCell]:
+            """Process cell preserving exact colspan and positioning values correctly"""
+            colspan = int(cell.get('colspan', '1'))
+            text = cell.get_text(strip=True)
+            style = self.parse_style(cell.get('style', ''))
 
-        def process_cell(cell: Tag) -> TableCell:
-            """Process cell preserving explicit alignment"""
-            divs = cell.find_all('div')
-            if divs:
-                # Check if divs have inline style
-                texts = []
-                for div in divs:
-                    style = self.parse_style(div.get('style', ''))
-                    text = div.get_text(strip=True)
-                    if style.display == 'inline':
-                        texts.append(text)
-                    else:
-                        texts.append(f"\n{text}" if texts else text)
-                content = ''.join(texts)
-            else:
-                content = cell.get_text(strip=True)
+            # If this is a right-aligned cell with colspan > 1 (like percentage values)
+            if style.text_align == 'right' and colspan > 1:
+                # Create empty cells for all but last column of colspan
+                cells = [
+                    TableCell(content='', colspan=1, align='right', is_currency=False)
+                    for _ in range(colspan - 1)
+                ]
+                # Add actual value in last column
+                cells.append(TableCell(
+                    content=text.strip(),  # Remove any trailing spaces
+                    colspan=1,
+                    align='right',
+                    is_currency=False
+                ))
+                return cells
 
-            colspan = int(cell.get('colspan', 1))
-            align = get_cell_alignment(cell)
-
-            return TableCell(
-                content=content,
+            # For single cells (including $ symbols and % symbols)
+            return [TableCell(
+                content=text.strip(),
                 colspan=colspan,
-                align=align,
-                is_currency='$' in content
-            )
+                align=style.text_align or 'left',
+                is_currency=text.startswith('$')
+            )]
 
-        def merge_cells(cells: List[TableCell]) -> List[TableCell]:
-            """Merge cells preserving explicit alignment"""
-            if not cells:
-                return []
-
-            merged = []
-            current = None
-
-            for cell in cells:
-                if not cell.content.strip() and cell.colspan == 1:
-                    continue
-
-                if not current:
-                    current = cell
-                    continue
-
-                # When merging $ with numbers or numbers with %, preserve right alignment
-                if current.content.strip() == '$' and cell.align == 'right':
-                    current.content = f"${cell.content.strip()}"
-                    current.align = 'right'
-                    current.colspan += cell.colspan
-                    continue
-                elif (cell.content.strip() == '%' and
-                      current.content.strip().replace(',', '').replace('.', '').isdigit()):
-                    current.content = f"{current.content.strip()}%"
-                    current.align = 'right'
-                    current.colspan += cell.colspan
-                    continue
-
-                merged.append(current)
-                current = cell
-
-            if current:
-                merged.append(current)
-
-            return merged
-
-        def process_row(tr: Tag) -> Optional[TableRow]:
+        def process_row(row: Tag) -> TableRow:
+            """Process row preserving cell structure"""
             cells = []
-            for td in tr.find_all(['td', 'th']):
-                cell = process_cell(td)
-                if cell:
-                    cells.append(cell)
+            for td in row.find_all(['td', 'th']):
+                cells.extend(process_cell(td))
 
-            if not any(cell.content.strip() for cell in cells):
-                return None
-
-            cells = merge_cells(cells)
-            is_header = bool(tr.find('th')) or tr.find_parent('thead')
-            return TableRow(cells=cells, is_header=is_header) if cells else None
+            return TableRow(cells=cells, is_header=row.find_parent('thead') is not None)
 
         # Process all rows
         rows = []
         for tr in element.find_all('tr'):
             row = process_row(tr)
-            if row and row.cells:
+            if row.cells:
                 rows.append(row)
 
-        return DocumentNode(type='table', content=rows, style=style)
+        return DocumentNode(
+            type='table',
+            content=rows,
+            style=self.parse_style(element.get('style', ''))
+        )
 
 
     def _similar_styles(self, style1: StyleInfo, style2: StyleInfo) -> bool:
