@@ -1448,8 +1448,14 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
 
 
 @lru_cache(maxsize=16)
-def get_by_accession_number(accession_number: str):
-    """Find the filing using the accession number"""
+def get_by_accession_number(accession_number: str, show_progress: bool = True):
+    """
+    Find the filing using the accession number
+
+    Args:
+        accession_number (str): The accession number to search for
+        show_progress (bool): If True, shows a progress spinner during the search. Defaults to True.
+    """
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
         f"{accession_number} is not a valid accession number .. should be 10digits-2digits-6digits"
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
@@ -1462,13 +1468,24 @@ def get_by_accession_number(accession_number: str):
         # Search all quarters
         quarters = range(1, 5)
 
-    with Status(f"[bold deep_sky_blue1]Searching for filing {accession_number}...", spinner="dots2"):
+    def search_quarters():
         for quarter in quarters:
             filings = _get_cached_filings(year=year, quarter=quarter)
             if filings:
                 filing = filings.get(accession_number)
                 if filing:
                     return filing
+        return None
+
+    if show_progress:
+        with Status(f"[bold deep_sky_blue1]Searching for filing {accession_number}...", spinner="dots2"):
+            result = search_quarters()
+    else:
+        result = search_quarters()
+
+    if result:
+        return result
+
     # We haven't found the filing normally so check the most recent SEC filings
     # Check if the year is the current year
     if year == datetime.now().year:

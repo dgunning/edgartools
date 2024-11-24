@@ -722,6 +722,12 @@ def test_get_by_accession_number():
     assert get_by_accession_number("9990072333-45-000015") is None
     assert get_by_accession_number("9990072333-22-000015") is None
 
+def test_get_by_accession_number_show_progress_false():
+    filing = get_by_accession_number("0000072333-23-000015", show_progress=False)
+    assert filing.company == "NORDSTROM INC"
+    assert filing.cik == 72333
+    assert filing.form == "8-K"
+
 
 def test_find_old_filing():
     filing = get_by_accession_number("0000320193-96-000018")
