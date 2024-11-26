@@ -1,5 +1,5 @@
 from pyinstrument import Profiler
-from edgar.documents import HtmlDocument
+from html.html_documents import HtmlDocument
 
 from edgar import Filing
 
