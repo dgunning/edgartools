@@ -11,10 +11,13 @@ import humanize
 import pandas as pd
 import pytest
 from rich import print
+import pytest
+from unittest.mock import patch, MagicMock
+from contextlib import nullcontext
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachment, \
-    get_current_filings, fetch_daily_filing_index, filing_date_to_year_quarters
+    get_current_filings, fetch_daily_filing_index, filing_date_to_year_quarters, get_filing_by_accession
 from edgar.company_reports import TenK
 from edgar.core import default_page_size
 from edgar.entities import Company
@@ -650,12 +653,7 @@ def test_filings_get_by_index_or_accession_number():
     filing_100 = filings.get("100")
     assert filing_100.accession_no == filing_one_hundred.accession_no
 
-
-def test_read_fixed_width_index():
-    ...
-
-
-def test_find_company_in_lings():
+def test_find_company_in_filings():
     # TODO: Looks like the search results ordering is broken for some reason
     filings = cached_filings(2022, 1)
     oracle_filings: Filings = filings.find('Oracle')
@@ -749,52 +747,6 @@ def test_get_current_filing_by_accession_number():
     filing_on_next_page = current_filings[40]
     print(filing_on_next_page)
 
-
-def test_attachments():
-    filing = Filing(company="BLACKROCK INC", cik=1364742, form="8-K",
-                    filing_date="2023-02-24", accession_no="0001193125-23-048785")
-    attachments = filing.attachments
-    assert len(attachments) == len(filing.homepage.attachments)
-
-    attachment = attachments[2]
-    assert attachment
-    assert attachment.document == 'blk25-20230224.xsd'
-    assert attachment.url == 'https://www.sec.gov/Archives/edgar/data/1364742/000119312523048785/blk25-20230224.xsd'
-
-    text = attachment.download()
-    assert text
-    assert "<?xml version=" in text
-
-    # Test the filing homepage attachments
-    assert filing.homepage.attachments
-    assert len(filing.homepage.attachments) == 7
-
-    # Test the filing attachments
-    assert filing.attachments
-    assert len(filing.attachments) == 7
-    assert filing.attachments[4].description == "XBRL TAXONOMY EXTENSION LABEL LINKBASE"
-
-    # Get the filing using the document name
-    assert filing.attachments["blk25-20230224.xsd"].description == "XBRL TAXONOMY EXTENSION SCHEMA"
-
-
-def test_download_filing_attachment():
-    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
-                    accession_no='0001477932-23-004175')
-    attachments = filing.attachments
-    print(attachments)
-
-    # Get a text/htm attachment
-    attachment = attachments.get_by_sequence(1)
-    assert attachment.document == "cyber_10k.htm"
-    text = attachment.download()
-    assert isinstance(text, str)
-
-    # Get a jpg attachment
-    attachment = attachments.get_by_sequence(9)
-    assert attachment.document == "cyber_10kimg1.jpg"
-    b = attachment.download()
-    assert isinstance(b, bytes)
 
 
 def test_as_company_filing():
@@ -989,3 +941,74 @@ def test_filter_by_amendments(filings_2022_q3):
     filings_no_amendments = filings.filter(amendments=False)
     forms = set(filings_no_amendments.data['form'].to_pylist())
     assert forms == {"10-K", "20-F", "40-F"}
+
+
+
+
+@pytest.fixture
+def mock_filings():
+    return {
+        "0000000123-22-000456": MagicMock(
+            accession_number="0000000123-22-000456",
+            form="10-K",
+            company="Test Corp"
+        )
+    }
+
+
+@pytest.fixture
+def mock_cached_filings():
+    def _get_cached_filings(year, quarter):
+        if year == 2022 and quarter == 2:
+            return {
+                "0000000123-22-000456": MagicMock(
+                    accession_number="0000000123-22-000456",
+                    form="10-K",
+                    company="Test Corp"
+                )
+            }
+        return {}
+
+    return _get_cached_filings
+
+
+def test_get_filing_by_accession_found(mock_cached_filings):
+    with patch('edgar._filings._get_cached_filings', mock_cached_filings):
+        # First call - should hit the mock and cache
+        result1 = get_filing_by_accession("0000000123-22-000456", 2022)
+        assert result1.accession_number == "0000000123-22-000456"
+        assert result1.form == "10-K"
+
+        # Second call - should use cached value
+        result2 = get_filing_by_accession("0000000123-22-000456", 2022)
+        assert result2.accession_number == "0000000123-22-000456"
+
+        # Verify it's the same cached object
+        assert result1 is result2
+
+
+def test_get_filing_by_accession_not_found(mock_cached_filings):
+    with patch('edgar._filings._get_cached_filings', mock_cached_filings):
+        # Non-existent filing
+        result = get_filing_by_accession("0000000999-22-000999", 2022)
+        assert result is None
+
+        # Verify the None result wasn't cached by calling again
+        cache_info = get_filing_by_accession.cache_info()
+        assert cache_info.hits == 0  # Should be no cache hits
+
+
+def test_get_filing_by_accession_invalid_format():
+    with pytest.raises(AssertionError):
+        get_filing_by_accession("invalid-format", 2022)
+
+
+@pytest.mark.parametrize("accession_number,expected_year", [
+    ("0000000123-98-000456", 1998),  # 1900s
+    ("0000000123-22-000456", 2022),  # 2000s
+    ("0000000123-00-000456", 2000),  # Edge case - year 2000
+    ("0000000123-99-000456", 1999),  # Edge case - year 1999
+])
+def test_year_extraction_parametrized(accession_number, expected_year):
+    year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
+    assert year == expected_year

@@ -10,7 +10,7 @@ from io import BytesIO
 from os import PathLike
 from pathlib import Path
 from typing import Tuple, List, Dict, Union, Optional, Any, cast
-
+from contextlib import nullcontext
 import httpx
 import numpy as np
 import orjson as json
@@ -31,7 +31,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar._markdown import text_to_markdown
-from edgar.html2markdown import to_markdown
+from edgar.files.html import to_markdown
 from edgar._party import Address
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
 from edgar.core import (log, display_size, sec_edgar,
@@ -41,12 +41,13 @@ from edgar.core import (log, display_size, sec_edgar,
                         filter_by_ticker,
                         filter_by_accession_number,
                         listify,
+                        cache_except_none,
                         is_start_of_quarter,
                         InvalidDateException, IntString, DataPager)
-from edgar.documents import HtmlDocument, get_clean_html
+from edgar.files.html_documents import HtmlDocument, get_clean_html
 from edgar.filingheader import FilingHeader
 from edgar.headers import FilingDirectory, IndexHeaders
-from edgar.htmltools import html_sections
+from edgar.files.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
@@ -1447,51 +1448,32 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
             )
 
 
-@lru_cache(maxsize=16)
-def get_by_accession_number(accession_number: str, show_progress: bool = True):
-    """
-    Find the filing using the accession number
+@cache_except_none(maxsize=16)
+def get_filing_by_accession(accession_number: str, year: int):
+    """Cache-friendly version that takes year as parameter instead of using datetime.now()"""
+    assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number)
 
-    Args:
-        accession_number (str): The accession number to search for
-        show_progress (bool): If True, shows a progress spinner during the search. Defaults to True.
-    """
-    assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number), \
-        f"{accession_number} is not a valid accession number .. should be 10digits-2digits-6digits"
+    # Static logic that doesn't depend on current time
+    for quarter in range(1, 5):
+        filings = _get_cached_filings(year=year, quarter=quarter)
+        if filings and (filing := filings.get(accession_number)):
+            return filing
+
+    return None
+
+
+def get_by_accession_number(accession_number: str, show_progress: bool = True):
+    """Wrapper that handles progress display and current time logic"""
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
 
-    if year == datetime.now().year:
-        # For the current year create a range of quarters to search from 1 up to the current quarter of the year
-        current_quarter = (datetime.now().month - 1) // 3 + 1
-        quarters = range(1, current_quarter + 1)
-    else:
-        # Search all quarters
-        quarters = range(1, 5)
+    with Status("[bold deep_sky_blue1]Searching...", spinner="dots2") if show_progress else nullcontext():
+        filing = get_filing_by_accession(accession_number, year)
 
-    def search_quarters():
-        for quarter in quarters:
-            filings = _get_cached_filings(year=year, quarter=quarter)
-            if filings:
-                filing = filings.get(accession_number)
-                if filing:
-                    return filing
-        return None
+        if not filing and year == datetime.now().year:
+            filings = get_current_filings()
+            filing = filings.get(accession_number)
 
-    if show_progress:
-        with Status(f"[bold deep_sky_blue1]Searching for filing {accession_number}...", spinner="dots2"):
-            result = search_quarters()
-    else:
-        result = search_quarters()
-
-    if result:
-        return result
-
-    # We haven't found the filing normally so check the most recent SEC filings
-    # Check if the year is the current year
-    if year == datetime.now().year:
-        # Get the most recent filings
-        filings = get_current_filings()
-        return filings.get(accession_number)
+    return filing
 
 
 def form_with_amendments(*forms: str):
