@@ -1,6 +1,7 @@
-
+from docutils.nodes import document
 
 from edgar.files.html import *
+from edgar.files.markdown import to_markdown, MarkdownRenderer
 from pathlib import Path
 from edgar import Company, Filing
 from rich import print
@@ -34,42 +35,39 @@ def test_filing_to_markdown():
     renderer = MarkdownRenderer(document)
     print(renderer.render_to_text())
 
-def test_apple_tenq_rendering():
-    filing = Filing(company='Apple Inc.', cik=320193, form='10-Q', filing_date='2024-08-02', accession_no='0000320193-24-000081')
-    html = filing.html()
-    parser = SECHTMLParser(html)
-    document = parser.parse()
-    renderer = MarkdownRenderer(document)
-    md = renderer.render()
-    Path('data/Apple.10-Q.md').write_text(md)
+def test_document_tables():
+    html = Path("data/html/Apple.10-Q.html").read_text()
+    document = Document.parse(html)
+
+    tables = document.tables
+    assert all(table.type == "table" for table in tables)
 
 
 def test_parse_financial_table_with_two_header_rows():
     html = Path("data/html/AppleIncomeTaxTable.html").read_text()
-    #print(html)
-    parser = SECHTMLParser(html)
     document:Document = Document.parse(html)
-    # There is nodes in the document
+    # There are nodes in the document
     assert len(document) == 1
-    # Get the node
     node:DocumentNode = document[0]
     assert node.type == "table"
     header = node.content[0]
-    #assert header.virtual_columns == 24
-
-
+    assert header.virtual_columns == 24
     print(document)
 
+def test_oracle_10K_document():
+    document = Document.parse(Path("data/html/Oracle.10-Q.html").read_text())
+    print(document)
+
+def test_oracle_randd_table():
+    html = Path("data/html/OracleR&DTable.html").read_text()
+    document = Document.parse(html)
+    print(document)
 
 
 def test_8k_markdown():
     print("")
-    filing = Filing(company='ORACLE CORP', cik=1341439, form='8-K', filing_date='2024-11-18', accession_no='0001193125-24-260986')
-    html = filing.html()
-    parser = SECHTMLParser(html)
-    document = parser.parse()
-    renderer = MarkdownRenderer(document)
-    md = renderer.render()
+    document = Document.parse(Path('data/html/Oracle.8-K.html').read_text())
+    md = document.to_markdown()
     print(md)
 
 
@@ -111,3 +109,14 @@ def test_read_html_document_wih_financials():
     parser = SECHTMLParser(html)
     document = parser.parse()
     print(document)
+
+
+def test_document_correctly_parses_tables():
+    html = Path("data/html/Oracle.10-Q.html").read_text()
+    document = Document.parse(html)
+    md = document.to_markdown()
+    tables = document.tables
+    assert len(tables) == 4
+    #md = document.to_markdown()
+    #print()
+    #print(md)

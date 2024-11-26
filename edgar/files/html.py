@@ -1,15 +1,12 @@
 import re
 from dataclasses import dataclass
-from io import StringIO
-from typing import List, Dict, Tuple
-from typing import Optional, Union, Any
+from typing import List, Dict
+from typing import Optional, Union, Any, Literal, TypeGuard
 
 from bs4 import Tag, NavigableString
 from rich import box
 from rich.align import Align
-from rich.console import Console
 from rich.console import Group, RenderResult
-from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
@@ -17,7 +14,7 @@ from rich.text import Text
 from edgar.files.html_documents import HtmlDocument, clean_html_root
 from edgar.richtools import repr_rich
 
-__all__ = ['SECHTMLParser', 'Document', 'DocumentNode', 'StyleInfo', 'MarkdownRenderer', 'to_markdown']
+__all__ = ['SECHTMLParser', 'Document', 'DocumentNode', 'StyleInfo']
 
 
 
@@ -53,12 +50,47 @@ class TableRow:
         return sum(cell.colspan for cell in self.cells)
 
 
+# 1. Add type literals and type guards
+NodeType = Literal['heading', 'paragraph', 'table']
+ContentType = Union[str, Dict[str, Any], List[TableRow]]
+
+def is_table_content(content: ContentType) -> TypeGuard[List[TableRow]]:
+    return isinstance(content, list) and all(isinstance(x, TableRow) for x in content)
+
+def is_text_content(content: ContentType) -> TypeGuard[str]:
+    return isinstance(content, str)
+
+def is_dict_content(content: ContentType) -> TypeGuard[Dict[str, Any]]:
+    return isinstance(content, dict)
+
 @dataclass
 class DocumentNode:
-    type: str
+    type: NodeType
     content: Union[str, Dict[str, Any], List[TableRow]]  # Modified to handle structured table data
     style: StyleInfo
     level: int = 0
+
+    def _validate_content(self) -> None:
+        """Validate content matches the node type"""
+        if self.type == 'table' and not is_table_content(self.content):
+            raise ValueError(f"Table node must have List[TableRow] content, got {type(self.content)}")
+        elif self.type in ('heading', 'paragraph') and not is_text_content(self.content):
+            raise ValueError(f"{self.type} node must have string content, got {type(self.content)}")
+
+    @property
+    def text(self) -> str:
+        """Helper method for accessing text content"""
+        if not is_text_content(self.content):
+            raise ValueError(f"Cannot get text from {self.type} node")
+        return self.content
+
+    @property
+    def rows(self) -> List[TableRow]:
+        """Helper method for accessing table rows"""
+        if not is_table_content(self.content):
+            raise ValueError(f"Cannot get rows from {self.type} node")
+        return self.content
+
 
 
 @dataclass
@@ -71,12 +103,18 @@ class Document:
     def __getitem__(self, index):
         return self.nodes[index]
 
+    @property
+    def tables(self) -> List[DocumentNode]:
+        """Get all table nodes in the document"""
+        return [node for node in self.nodes if node.type == 'table']
+
     @classmethod
     def parse(cls, html:str) -> 'Document':
         parser = SECHTMLParser(html)
         return parser.parse()
 
     def to_markdown(self) -> str:
+        from edgar.files.markdown import MarkdownRenderer
         return MarkdownRenderer(self).render()
 
     def __rich__(self) -> RenderResult:
@@ -99,8 +137,6 @@ class Document:
 
         return Group(*renderable_elements)
 
-    def __repr__(self):
-        return repr_rich(self)
 
     def _render_heading(self, node: DocumentNode) -> Panel:
         """Render heading with appropriate level styling"""
@@ -145,119 +181,37 @@ class Document:
         return text
 
     def _render_table(self, node: DocumentNode) -> Optional[Table]:
-        """Render table with multiline cell support and optimized column handling"""
-        if not isinstance(node.content, list) or not node.content:
+        """Render node as Rich table"""
+        from edgar.files.tables import TableProcessor, ProcessedTable
+        processed_table = TableProcessor.process_table(node)
+        if not processed_table:
             return None
+        return self._render_table_rich(processed_table)
 
-        rows = node.content
-        if not rows:
-            return None
-
-        def process_cell_content(content: str) -> str:
-            """Process cell content to handle HTML breaks and cleanup"""
-            # Replace HTML line breaks with actual line breaks
-            content = content.replace('<br/>', '\n').replace('<br>', '\n')
-            # Clean up any excess whitespace while preserving line breaks
-            lines = [line.strip() for line in content.split('\n')]
-            return '\n'.join(line for line in lines if line)
-
-        # First create the full virtual column data to analyze
-        virtual_rows = []
-        max_cols = max(sum(cell.colspan for cell in row.cells) for row in rows)
-
-        # Convert all rows to virtual columns first
-        for row in rows:
-            virtual_row = [""] * max_cols
-            current_col = 0
-
-            for cell in row.cells:
-                content = process_cell_content(cell.content)
-
-                # Handle currency values only if content doesn't contain line breaks
-                if '\n' not in content and cell.is_currency and content.replace(',', '').replace('.', '').isdigit():
-                    content = f"${float(content.replace(',', '')):,.2f}"
-
-                if cell.colspan > 1:
-                    # Place in second virtual column of span
-                    virtual_row[current_col + 1] = content
-                else:
-                    virtual_row[current_col] = content
-
-                current_col += cell.colspan
-
-            virtual_rows.append(virtual_row)
-
-        # Analyze columns for emptiness
-        empty_cols = []
-        for col in range(max_cols):
-            if all(row[col].strip() == "" for row in virtual_rows):
-                empty_cols.append(col)
-
-        # Process empty columns:
-        # 1. Remove leading empty columns
-        # 2. Keep one empty column between content for spacing
-        # 3. Remove all trailing empty columns
-        cols_to_remove = set()
-
-        # Handle leading empty columns
-        for col in range(max_cols):
-            if col in empty_cols:
-                cols_to_remove.add(col)
-            else:
-                break
-
-        # Handle trailing empty columns
-        for col in reversed(range(max_cols)):
-            if col in empty_cols:
-                cols_to_remove.add(col)
-            else:
-                break
-
-        # Handle consecutive empty columns in the middle
-        i = 0
-        while i < max_cols - 1:
-            if i in empty_cols and (i + 1) in empty_cols:
-                consecutive_empty = 0
-                j = i
-                while j < max_cols and j in empty_cols:
-                    consecutive_empty += 1
-                    j += 1
-
-                # Keep first empty column, remove others
-                cols_to_remove.update(range(i + 1, i + consecutive_empty))
-                i = j
-            else:
-                i += 1
-
-        # Create optimized rows
-        optimized_rows = []
-        for virtual_row in virtual_rows:
-            has_content = any(col.strip() for col in virtual_row)
-            if not has_content:
-                continue
-            optimized_row = [col for idx, col in enumerate(virtual_row) if idx not in cols_to_remove]
-            optimized_rows.append(optimized_row)
-
-        # Create table with optimized columns
+    def _render_table_rich(self, processed: 'ProcessedTable') -> Table:
+        """Render processed table as Rich Table"""
         table = Table(
             box=box.SIMPLE,
             border_style="blue",
             padding=(0, 1),
-            show_header=False,
-            row_styles=["bold", ""]
+            show_header=bool(processed.headers),
+            row_styles=["", "dim"],
+            collapse_padding=True,
+            width=None
         )
 
-        # Add columns with appropriate justification
-        for col_idx in range(len(optimized_rows[0])):
-            # First column left-aligned, rest right-aligned
-            justify = "left" if col_idx == 0 else "right"
-            table.add_column(justify=justify)
+        # Add columns
+        for col_idx, alignment in enumerate(processed.column_alignments):
+            table.add_column(
+                header=processed.headers[col_idx] if processed.headers else None,
+                justify=alignment,
+                vertical="middle"
+            )
 
-        # Add rows
-        for row in optimized_rows:
-            table.add_row(*row)
+    def __repr__(self):
+        return repr_rich(self)
 
-        return table
+
 
 
 class SECHTMLParser:
@@ -452,7 +406,7 @@ class SECHTMLParser:
 
         # First, determine if this element itself should be a specific node type
         if element.name == 'table':
-            table_node = self._process_table(element, )
+            table_node = self._process_table(element)
             return table_node if table_node else None
         elif element.name == 'div':
             return self._process_div(element, self.parse_style(element.get('style', '')))
@@ -460,21 +414,22 @@ class SECHTMLParser:
         # Process children
         for child in element.children:
             if isinstance(child, NavigableString):
-                # Handle text nodes
                 text = str(child).strip()
                 if text:
                     current_text.append(text)
             elif isinstance(child, Tag):
-                # If we have accumulated text, create a paragraph node
                 if current_text:
-                    nodes.append(DocumentNode(
-                        type='paragraph',
-                        content=' '.join(current_text),
-                        style=self.parse_style(element.get('style', ''))
-                    ))
+                    try:
+                        nodes.append(DocumentNode(
+                            type='paragraph',
+                            content=' '.join(current_text),
+                            style=self.parse_style(element.get('style', ''))
+                        ))
+                    except ValueError as e:
+                        # Log the error but continue processing
+                        print(f"Warning: Failed to create paragraph node: {e}")
                     current_text = []
 
-                # Process the child element
                 if child.name == 'table':
                     table_node = self._process_table(child)
                     if table_node:
@@ -482,7 +437,6 @@ class SECHTMLParser:
                 elif child.name == 'br':
                     current_text.append('\n')
                 else:
-                    # Recursively process other elements
                     child_result = self._process_element(child)
                     if child_result:
                         if isinstance(child_result, list):
@@ -490,22 +444,18 @@ class SECHTMLParser:
                         else:
                             nodes.append(child_result)
 
-        # Handle any remaining text
         if current_text:
-            nodes.append(DocumentNode(
-                type='paragraph',
-                content=' '.join(current_text),
-                style=self.parse_style(element.get('style', ''))
-            ))
+            try:
+                nodes.append(DocumentNode(
+                    type='paragraph',
+                    content=' '.join(current_text),
+                    style=self.parse_style(element.get('style', ''))
+                ))
+            except ValueError as e:
+                print(f"Warning: Failed to create paragraph node: {e}")
 
-        # If we only have one node, return it directly
-        if len(nodes) == 1:
-            return nodes[0]
-        # If we have multiple nodes, return the list
-        elif len(nodes) > 1:
-            return nodes
-        # If we have no nodes, return None
-        return None
+        return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
 
     def _get_text_with_spacing(self, element: Tag) -> str:
         """Extract text while preserving meaningful whitespace"""
@@ -757,308 +707,5 @@ class SECHTMLParser:
         )
 
 
-class MarkdownRenderer:
-    def __init__(self, document: Document):
-        self.document = document
-        self.toc_entries: List[Tuple[int, str, str]] = []  # level, text, anchor
-        self.reference_links: Dict[str, str] = {}
-        self.current_section = ""
-
-    def render(self) -> str:
-        """Render complete document"""
-        rendered_parts = []
-
-        for node in self.document.nodes:
-            rendered = ""
-            if node.type == 'paragraph':
-                rendered = self._render_paragraph(node)
-            elif node.type == 'table':
-                rendered = self._render_table(node)
-            elif node.type == 'heading':
-                rendered = self._render_heading(node)
-
-            if rendered:
-                rendered_parts.append(rendered.rstrip())  # Remove trailing whitespace
-
-        # Join with single newline and clean up multiple newlines
-        return self._clean_spacing('\n\n'.join(filter(None, rendered_parts)))
-
-    def _clean_spacing(self, text: str) -> str:
-        """Clean up spacing while maintaining valid markdown"""
-        # Replace 3 or more newlines with 2 newlines
-        text = re.sub(r'\n{3,}', '\n\n', text)
-
-        # Ensure proper spacing around headers
-        text = re.sub(r'\n*(#{1,6}.*?)\n*', r'\n\n\1\n', text)
-
-        # Clean up spacing around paragraphs
-        text = re.sub(r'\n{2,}(?=\S)', '\n\n', text)
-
-        text = re.sub("\xa0", " ", text)
-
-        # Trim leading/trailing whitespace
-        return text.strip()
-
-    def _render_header(self) -> str:
-        """Render SEC filing header with metadata"""
-        header_parts = []
-
-        # Try to find filing type and registration number
-        for node in self.document.nodes[:5]:  # Check first few nodes
-            if node.type == 'paragraph':
-                if 'registration no.' in node.content.lower():
-                    header_parts.append(f"**Registration No.:** {node.content.split('.')[-1].strip()}")
-                if 'filed pursuant to' in node.content.lower():
-                    header_parts.append(f"**Filing Type:** {node.content.strip()}")
-
-        return "\n".join(header_parts) if header_parts else ""
-
-    def _render_toc(self) -> str:
-        """Render table of contents"""
-        if not self.toc_entries:
-            return ""
-
-        toc_lines = ["# Table of Contents\n"]
-
-        for level, text, anchor in self.toc_entries:
-            indent = "    " * (level - 1)
-            toc_lines.append(f"{indent}- [{text}](#{anchor})")
-
-        return "\n".join(toc_lines)
-
-    def _render_main_content(self) -> str:
-        """Render main document content"""
-        return "\n\n".join(self._render_node(node) for node in self.document.nodes)
-
-    def _render_node(self, node: DocumentNode) -> str:
-        if node.type == 'heading':
-            return self._render_heading(node)
-        elif node.type == 'paragraph':
-            return self._render_paragraph(node)
-        elif node.type == 'table':
-            return self._render_table(node)
-        elif node.type == 'list':
-            return self._render_list(node)
-        else:
-            return node.content
-
-    def _render_heading(self, node: DocumentNode) -> str:
-        prefix = '#' * node.level
-        text = node.content.strip()
-        anchor = self._create_anchor(text)
-
-        # Add extra spacing for major sections
-        if node.level == 1:
-            return f"\n\n{prefix} {text} {{#{anchor}}}\n"
-        return f"{prefix} {text} {{#{anchor}}}"
-
-    def _render_paragraph(self, node: DocumentNode) -> str:
-        """Render paragraph with minimal spacing"""
-        text = node.content.strip()
-
-        # Apply styling
-        if node.style:
-            if node.style.font_weight == 'bold':
-                text = f"**{text}**"
-            if node.style.text_align == 'center':
-                text = f"<div align='center'>{text}</div>"
-
-        return text
-
-    def _render_table(self, node: DocumentNode) -> str:
-        if not isinstance(node.content, list) or not node.content:
-            return ''
-
-        rows = node.content
-
-        # Normalize table structure
-        normalized_rows = self._normalize_table_structure(rows)
-
-        # Calculate column widths
-        col_widths = self._calculate_column_widths(normalized_rows)  # No longer needs virtual_columns
-
-        # Render table
-        table_lines = []
-
-        # Render each row
-        for i, row in enumerate(normalized_rows):
-            line = self._render_table_row(row, col_widths)
-            table_lines.append(line)
-
-            # Add separator after header
-            if i == 0:
-                separator = self._render_separator(col_widths, row)
-                table_lines.append(separator)
-
-        return '\n'.join(table_lines)
-
-    def _normalize_table_structure(self, rows: List[TableRow]) -> List[TableRow]:
-        """Normalize table structure by analyzing header pattern"""
-        if not rows:
-            return []
-
-        # Analyze first few rows to determine column structure
-        max_cols = 0
-        for row in rows[:3]:  # Check first 3 rows
-            num_cols = 0
-            for cell in row.cells:
-                if cell.content.strip() == '$':
-                    # Count $ and following number as separate columns
-                    num_cols += 2
-                else:
-                    num_cols += 1
-            max_cols = max(max_cols, num_cols)
-
-        normalized = []
-        for row in rows:
-            normalized_cells = []
-            current_cols = 0
-
-            for cell in row.cells:
-                if cell.content.strip() == '$':
-                    # Keep $ as separate column
-                    normalized_cells.append(cell)
-                    current_cols += 1
-                else:
-                    normalized_cells.append(cell)
-                    current_cols += 1
-
-            # Pad if needed
-            while current_cols < max_cols:
-                normalized_cells.append(TableCell(content="", align='left'))
-                current_cols += 1
-
-            normalized.append(TableRow(cells=normalized_cells, is_header=row.is_header))
-
-        return normalized
-
-
-    def _calculate_column_widths(self, rows: List[TableRow]) -> List[int]:
-        """Calculate column widths accounting for colspans"""
-        if not rows:
-            return []
-
-        # Get true number of columns from normalized structure
-        virtual_cols = sum(cell.colspan for cell in rows[0].cells)
-        widths = [0] * virtual_cols
-
-        for row in rows:
-            current_col = 0
-            for cell in row.cells:
-                # Calculate width needed for this cell
-                content_width = len(cell.content)
-                if cell.colspan > 1:
-                    # Distribute width across spanned columns
-                    width_per_col = (content_width + cell.colspan - 1) // cell.colspan
-                    for i in range(current_col, current_col + cell.colspan):
-                        if i < virtual_cols:
-                            widths[i] = max(widths[i], width_per_col)
-                else:
-                    if current_col < virtual_cols:
-                        widths[current_col] = max(widths[current_col], content_width)
-
-                current_col += cell.colspan
-
-        return widths
-
-    def _render_table_row(self, row: TableRow, col_widths: List[int]) -> str:
-        """Render a single table row"""
-        cells = []
-        for cell, width in zip(row.cells, col_widths):
-            lines = cell.content.split('\n')
-            # Pad each line to match column width
-            padded_lines = []
-            for line in lines:
-                if cell.align == 'right':
-                    formatted = f" {line:>{width}} "
-                else:
-                    formatted = f" {line:<{width}} "
-                padded_lines.append(formatted)
-            # Join lines with spaces matching column width
-            content = ' '.join(padded_lines)
-            cells.append(content)
-
-        return '|' + '|'.join(cells) + '|'
-
-    def _render_separator(self, col_widths: List[int], header_row: TableRow) -> str:
-        """Render separator row with proper alignment indicators"""
-        separators = []
-        for cell, width in zip(header_row.cells, col_widths):
-            if cell.align == 'right':
-                separator = '-' * (width + 1) + ':'
-            else:
-                separator = ':' + '-' * (width + 1)
-            separators.append(separator)
-        return '|' + '|'.join(separators) + '|'
-
-    def _render_list(self, node: DocumentNode) -> str:
-        if not node.children:
-            return ""
-
-        list_items = []
-        for child in node.children:
-            prefix = '-' if node.style.list_type == 'unordered' else '1.'
-            list_items.append(f"{prefix} {child.content}")
-
-        return '\n'.join(list_items)
-
-    def _render_references(self) -> str:
-        """Render collected reference links"""
-        if not self.reference_links:
-            return ""
-
-        ref_lines = ["\n## References\n"]
-        for ref_id, url in self.reference_links.items():
-            ref_lines.append(f"[{ref_id}]: {url}")
-
-        return '\n'.join(ref_lines)
-
-    def _collect_document_metadata(self, nodes: List[DocumentNode]) -> None:
-        """First pass to collect TOC entries and references"""
-        for node in nodes:
-            if node.type == 'heading':
-                anchor = self._create_anchor(node.content)
-                self.toc_entries.append((node.level, node.content, anchor))
-
-            # Collect reference links
-            if node.type == 'paragraph':
-                self._extract_references(node.content)
-
-    def _create_anchor(self, text: str) -> str:
-        """Create GitHub-style anchors from heading text"""
-        return re.sub(r'[^\w\s-]', '', text.lower()).replace(' ', '-')
-
-    def _extract_references(self, text: str) -> None:
-        """Extract reference links from text"""
-        ref_pattern = r'\[([^\]]+)\]\(([^)]+)\)'
-        for match in re.finditer(ref_pattern, text):
-            ref_id, url = match.groups()
-            self.reference_links[ref_id] = url
-
-    def _is_note_paragraph(self, text: str) -> bool:
-        """Detect if paragraph is a note or important statement"""
-        note_indicators = [
-            'note:', 'important:', 'attention:',
-            'see accompanying notes', 'refer to'
-        ]
-        return any(indicator in text.lower() for indicator in note_indicators)
-
-    def render_to_text(self):
-        # Create string buffer console
-        output = StringIO()
-        console = Console(file=output, force_terminal=True, width=120)
-
-        # Render markdown
-        markdown = Markdown(self.render())
-        console.print(markdown)
-
-        return output.getvalue()
-
-
-def to_markdown(html_content: str) -> str:
-    parser = SECHTMLParser(html_content)
-    document = parser.parse()
-    renderer = MarkdownRenderer(document)
-    return renderer.render()
 
 

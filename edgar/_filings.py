@@ -31,7 +31,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar._markdown import text_to_markdown
-from edgar.files.html import to_markdown
+from edgar.files.markdown import to_markdown
 from edgar._party import Address
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
 from edgar.core import (log, display_size, sec_edgar,
