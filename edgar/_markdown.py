@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar.richtools import repr_rich
-from edgar.documents import HtmlDocument
+from edgar.files.html_documents import HtmlDocument
 
 __all__ = [
     'convert_table',

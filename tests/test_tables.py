@@ -1,8 +1,8 @@
 from bs4 import BeautifulSoup
 
-from edgar.documents import table_to_markdown, table_to_text
+from edgar.files.html_documents import table_to_markdown, table_to_text
 from edgar import *
-from edgar.htmltools import ChunkedDocument
+from edgar.files.htmltools import ChunkedDocument
 
 
 def test_table_to_text():

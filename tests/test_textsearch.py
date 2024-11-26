@@ -4,7 +4,7 @@ from edgar.search.textsearch import numeric_shape, preprocess, convert_items_to_
 from rich import print
 from edgar import Filing
 from edgar.search import SearchResults
-from edgar.documents import html_to_markdown
+from edgar.files.html_documents import html_to_markdown
 
 blackrock_8k = Path('data/form8K.Blackrock.html').read_text()
 document_sections = re.split(r"\n\s*\n", html_to_markdown(blackrock_8k))

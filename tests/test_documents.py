@@ -8,10 +8,10 @@ from rich import print
 
 from edgar import Filing
 from edgar.datatools import dataframe_to_text
-from edgar.documents import *
-from edgar.documents import fixup
-from edgar.htmltools import ChunkedDocument
-from typing import List, Optional
+from edgar.files.html_documents import *
+from edgar.files.html_documents import fixup
+from edgar.files.htmltools import ChunkedDocument
+from typing import Optional
 
 pd.options.display.max_columns = 10
 import warnings

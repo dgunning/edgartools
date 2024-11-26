@@ -1,20 +1,21 @@
 import re
 from dataclasses import dataclass
 from io import StringIO
-from typing import List
-from typing import Optional, Union, Tuple, Dict, Any
+from typing import List, Dict, Tuple
+from typing import Optional, Union, Any
 
 from bs4 import Tag, NavigableString
+from rich import box
 from rich.align import Align
-from rich.console import Group, Console, RenderResult
+from rich.console import Console
+from rich.console import Group, RenderResult
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from rich import box
-from edgar.richtools import repr_rich
 
-from edgar.documents import HtmlDocument, clean_html_root
+from edgar.files.html_documents import HtmlDocument, clean_html_root
+from edgar.richtools import repr_rich
 
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode', 'StyleInfo', 'MarkdownRenderer', 'to_markdown']
 
@@ -69,6 +70,11 @@ class Document:
 
     def __getitem__(self, index):
         return self.nodes[index]
+
+    @classmethod
+    def parse(cls, html:str) -> 'Document':
+        parser = SECHTMLParser(html)
+        return parser.parse()
 
     def to_markdown(self) -> str:
         return MarkdownRenderer(self).render()
@@ -226,6 +232,9 @@ class Document:
         # Create optimized rows
         optimized_rows = []
         for virtual_row in virtual_rows:
+            has_content = any(col.strip() for col in virtual_row)
+            if not has_content:
+                continue
             optimized_row = [col for idx, col in enumerate(virtual_row) if idx not in cols_to_remove]
             optimized_rows.append(optimized_row)
 
@@ -234,7 +243,8 @@ class Document:
             box=box.SIMPLE,
             border_style="blue",
             padding=(0, 1),
-            show_header=False
+            show_header=False,
+            row_styles=["bold", ""]
         )
 
         # Add columns with appropriate justification
@@ -672,7 +682,24 @@ class SECHTMLParser:
         def process_cell(cell: Tag) -> List[TableCell]:
             """Process cell preserving exact colspan and positioning values correctly"""
             colspan = int(cell.get('colspan', '1'))
-            text = cell.get_text(strip=True)
+
+            def extract_cell_text(cell: Tag) -> str:
+                # If cell has div children
+                divs = cell.find_all('div', recursive=False)
+                if divs:
+                    # Join text from each div with newlines
+                    return '\n'.join(div.get_text(strip=True) for div in divs)
+
+                # Handle <br/> tags by replacing them with newlines
+                # Convert <br/> to newlines first
+                for br in cell.find_all('br'):
+                    br.replace_with('\n')
+
+                # If no divs, get regular text
+                return cell.get_text(strip=False).strip()
+
+            text = extract_cell_text(cell)
+
             style = self.parse_style(cell.get('style', ''))
 
             # If this is a right-aligned cell with colspan > 1 (like percentage values)

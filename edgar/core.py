@@ -13,6 +13,7 @@ from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
 from typing import Union, Optional, Tuple, List
+from functools import wraps
 
 import httpx
 import humanize
@@ -75,6 +76,7 @@ __all__ = [
     'filter_by_ticker',
     'filter_by_accession_number',
     'split_camel_case',
+    'cache_except_none',
     'text_extensions',
     'binary_extensions',
     'ask_for_identity',
@@ -784,3 +786,31 @@ def format_date(date: Union[str, datetime.datetime], fmt: str = "%Y-%m-%d") -> s
         return date
     else:
         return date.strftime(fmt)
+
+
+def cache_except_none(maxsize=128):
+    """
+    A decorator that caches the result of a function, but only if the result is not None.
+    """
+    def decorator(func):
+        cache = lru_cache(maxsize=maxsize)
+
+        @cache
+        def cached_func(*args, **kwargs):
+            result = func(*args, **kwargs)
+            if result is None:
+                # Clear this result from the cache
+                cached_func.cache_clear()
+            return result
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return cached_func(*args, **kwargs)
+
+        # Preserve cache methods
+        wrapper.cache_info = cached_func.cache_info
+        wrapper.cache_clear = cached_func.cache_clear
+        return wrapper
+
+    return decorator
+

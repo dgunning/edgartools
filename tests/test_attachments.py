@@ -1,12 +1,11 @@
 import tempfile
 from pathlib import Path
-import httpx
 
 import pytest
 from rich import print
 
 from edgar import Filing
-from edgar.attachments import Attachment, Attachments, AttachmentServer
+from edgar.attachments import Attachment, Attachments
 from edgar.httprequests import download_file
 
 
@@ -142,9 +141,55 @@ def test_list_exhibits():
 
 def test_list_graphics():
     filing = Filing(company='Gitlab Inc.', cik=1653482, form='10-K', filing_date='2024-03-26',
-           accession_no='0001628280-24-012963')
+                    accession_no='0001628280-24-012963')
     graphics = filing.attachments.graphics
     assert len(graphics) == 2
     assert graphics[0].document_type == 'GRAPHIC'
     assert graphics[1].document_type == 'GRAPHIC'
 
+
+def test_attachments():
+    filing = Filing(company="BLACKROCK INC", cik=1364742, form="8-K",
+                    filing_date="2023-02-24", accession_no="0001193125-23-048785")
+    attachments = filing.attachments
+    assert len(attachments) == len(filing.homepage.attachments)
+
+    attachment = attachments[2]
+    assert attachment
+    assert attachment.document == 'blk25-20230224.xsd'
+    assert attachment.url == 'https://www.sec.gov/Archives/edgar/data/1364742/000119312523048785/blk25-20230224.xsd'
+
+    text = attachment.download()
+    assert text
+    assert "<?xml version=" in text
+
+    # Test the filing homepage attachments
+    assert filing.homepage.attachments
+    assert len(filing.homepage.attachments) == 7
+
+    # Test the filing attachments
+    assert filing.attachments
+    assert len(filing.attachments) == 7
+    assert filing.attachments[4].description == "XBRL TAXONOMY EXTENSION LABEL LINKBASE"
+
+    # Get the filing using the document name
+    assert filing.attachments["blk25-20230224.xsd"].description == "XBRL TAXONOMY EXTENSION SCHEMA"
+
+
+def test_download_filing_attachment():
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    attachments = filing.attachments
+    print(attachments)
+
+    # Get a text/htm attachment
+    attachment = attachments.get_by_sequence(1)
+    assert attachment.document == "cyber_10k.htm"
+    text = attachment.download()
+    assert isinstance(text, str)
+
+    # Get a jpg attachment
+    attachment = attachments.get_by_sequence(9)
+    assert attachment.document == "cyber_10kimg1.jpg"
+    b = attachment.download()
+    assert isinstance(b, bytes)

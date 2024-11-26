@@ -2,9 +2,8 @@ import pandas as pd
 from rich import print
 
 from edgar import Filing
-from edgar import find
 from edgar.company_reports import TenK, TenQ, TwentyF, EightK
-from edgar.htmltools import ChunkedDocument
+from edgar.files.htmltools import ChunkedDocument
 
 pd.options.display.max_colwidth = 40
 

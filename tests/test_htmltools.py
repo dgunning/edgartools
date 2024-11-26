@@ -8,7 +8,7 @@ from rich import print
 from edgar import Filing
 from edgar.company_reports import EightK
 from edgar.datatools import table_html_to_dataframe
-from edgar.htmltools import (
+from edgar.files.htmltools import (
     html_to_text, html_sections, ChunkedDocument, )
 
 pd.options.display.max_columns = 12

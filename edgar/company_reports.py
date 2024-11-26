@@ -12,9 +12,9 @@ from rich.padding import Padding
 from edgar._filings import Attachments, Attachment
 from edgar._markdown import MarkdownContent
 from edgar.core import datefmt
-from edgar.documents import HtmlDocument
+from edgar.files.html_documents import HtmlDocument
 from edgar.financials import Financials
-from edgar.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
+from edgar.files.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
 from edgar.richtools import repr_rich
 
 __all__ = [

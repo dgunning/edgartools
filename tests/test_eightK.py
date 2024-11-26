@@ -2,7 +2,7 @@ from rich import print
 
 from edgar import Filing
 from edgar.company_reports import EightK, PressRelease, PressReleases
-from edgar.htmltools import ChunkedDocument
+from edgar.files.htmltools import ChunkedDocument
 
 
 def test_eightk_has_items_in_repr():

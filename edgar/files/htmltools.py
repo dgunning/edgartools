@@ -13,7 +13,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar.datatools import compress_dataframe
-from edgar.documents import HtmlDocument, Block, TableBlock, table_to_markdown
+from edgar.files.html_documents import HtmlDocument, Block, TableBlock, table_to_markdown
 from edgar.richtools import repr_rich
 
 __all__ = [
