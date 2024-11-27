@@ -182,7 +182,7 @@ class Document:
 
     def _render_table(self, node: DocumentNode) -> Optional[Table]:
         """Render node as Rich table"""
-        from edgar.files.tables import TableProcessor, ProcessedTable
+        from edgar.files.tables import TableProcessor
         processed_table = TableProcessor.process_table(node)
         if not processed_table:
             return None
