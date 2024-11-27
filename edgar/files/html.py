@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 from typing import List, Dict
-from typing import Optional, Union, Any, Literal, TypeGuard
+from typing import Optional, Union, Any, Literal
 
 from bs4 import Tag, NavigableString
 from rich import box
@@ -54,13 +54,13 @@ class TableRow:
 NodeType = Literal['heading', 'paragraph', 'table']
 ContentType = Union[str, Dict[str, Any], List[TableRow]]
 
-def is_table_content(content: ContentType) -> TypeGuard[List[TableRow]]:
+def is_table_content(content: ContentType) -> bool:
     return isinstance(content, list) and all(isinstance(x, TableRow) for x in content)
 
-def is_text_content(content: ContentType) -> TypeGuard[str]:
+def is_text_content(content: ContentType) -> bool:
     return isinstance(content, str)
 
-def is_dict_content(content: ContentType) -> TypeGuard[Dict[str, Any]]:
+def is_dict_content(content: ContentType) -> bool:
     return isinstance(content, dict)
 
 @dataclass
