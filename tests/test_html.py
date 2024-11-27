@@ -145,3 +145,22 @@ def test_document_markdown_headings_parsed_correctly():
     print()
     print(md)
     assert "# SECURITIES AND EXCHANGE COMMISSION" in md
+
+
+def test_document_parsed_from_plain_text_returns_plain_text():
+    html = """
+    This document is just test
+    """
+    document = Document.parse(html)
+    assert document
+    assert len(document) == 1
+    assert document[0].type == "paragraph"
+    assert document[0].content == html.strip()
+
+def test_document_from_filing_with_plain_text_filing_document():
+    f = Filing(form='SC 13G/A', filing_date='2024-11-25', company='Bridgeline Digital, Inc.', cik=1378590, accession_no='0001968076-24-000022')
+    text = f.html()
+    document = Document.parse(text)
+    assert document
+    assert len(document) == 1
+    assert document[0].type == "paragraph"
