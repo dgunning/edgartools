@@ -163,3 +163,12 @@ def test_document_from_filing_with_plain_text_filing_document():
     assert document
     assert len(document) == 1
     assert document[0].type == "paragraph"
+
+def test_text_in_spans():
+    html="""<p id="part_ii_or_information"><span>PART II. OTHE</span><span>R INFORMATION</span></p>"""
+    document = Document.parse(html)
+    assert document.nodes[0].content == "PART II. OTHER INFORMATION"
+
+    html = """<div><p style="font-size:10pt;margin-top:0;font-family:Times New Roman;margin-bottom:0;text-align:justify;" id="part_i_financial_information"><span style="color:#000000;white-space:pre-wrap;font-weight:bold;font-size:10pt;font-family:'Calibri',sans-serif;min-width:fit-content;">PART I. FINANCI</span><span style="color:#000000;white-space:pre-wrap;font-weight:bold;font-size:10pt;font-family:'Calibri',sans-serif;min-width:fit-content;">AL INFORMATION</span></p></div>"""
+    document = Document.parse(html)
+    assert document.nodes[0].content == "PART I. FINANCIAL INFORMATION"

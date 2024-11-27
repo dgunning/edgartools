@@ -403,17 +403,11 @@ class SECHTMLParser:
 
     def _process_element(self, element: Tag) -> Optional[Union[DocumentNode, List[DocumentNode]]]:
         """Process an element into one or more document nodes"""
-        nodes = []
-        current_text = []
-
         # Handle ix: tags by getting their content
         if element.name.startswith('ix:'):
-            # Find the first meaningful child (like a table)
             for child in element.children:
                 if isinstance(child, Tag):
                     return self._process_element(child)
-            # If no meaningful children, treat as regular text container
-            #text = element.get_text(strip=True)
             text = self._get_text_with_spacing(element)
             if text:
                 return DocumentNode(
@@ -422,65 +416,59 @@ class SECHTMLParser:
                     style=self.parse_style(element.get('style', ''))
                 )
 
-        # First, determine if this element itself should be a specific node type
+        # Process specific element types
         if element.name == 'table':
-            table_node = self._process_table(element)
-            return table_node if table_node else None
+            return self._process_table(element)
         elif element.name == 'div':
             return self._process_div(element, self.parse_style(element.get('style', '')))
+        elif element.name == 'p':
+            return self._process_paragraph(element)
 
-        # Process children
+        # Process other elements
+        nodes = []
         for child in element.children:
-            if isinstance(child, NavigableString):
-                text = str(child).strip()
-                if text:
-                    current_text.append(text)
-            elif isinstance(child, Tag):
-                if current_text:
-                    try:
-                        nodes.append(DocumentNode(
-                            type='paragraph',
-                            content=' '.join(current_text),
-                            style=self.parse_style(element.get('style', ''))
-                        ))
-                    except ValueError as e:
-                        # Log the error but continue processing
-                        print(f"Warning: Failed to create paragraph node: {e}")
-                    current_text = []
-
-                if child.name == 'table':
-                    table_node = self._process_table(child)
-                    if table_node:
-                        nodes.append(table_node)
-                elif child.name == 'br':
-                    current_text.append('\n')
-                elif child.name.startswith('ix:'):
-                    # Process ix: tags recursively
-                    ix_result = self._process_element(child)
-                    if ix_result:
-                        if isinstance(ix_result, list):
-                            nodes.extend(ix_result)
-                        else:
-                            nodes.append(ix_result)
-                else:
-                    child_result = self._process_element(child)
-                    if child_result:
-                        if isinstance(child_result, list):
-                            nodes.extend(child_result)
-                        else:
-                            nodes.append(child_result)
-
-        if current_text:
-            try:
-                nodes.append(DocumentNode(
-                    type='paragraph',
-                    content=' '.join(current_text),
-                    style=self.parse_style(element.get('style', ''))
-                ))
-            except ValueError as e:
-                print(f"Warning: Failed to create paragraph node: {e}")
+            if isinstance(child, Tag):
+                child_result = self._process_element(child)
+                if child_result:
+                    if isinstance(child_result, list):
+                        nodes.extend(child_result)
+                    else:
+                        nodes.append(child_result)
 
         return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
+    def _process_paragraph(self, element: Tag) -> Optional[DocumentNode]:
+        """Process a paragraph element into a single text node"""
+        text_parts = []
+
+        for child in element.children:
+            if isinstance(child, NavigableString):
+                text = str(child)  # Don't strip individual NavigableStrings
+                if text:
+                    text_parts.append(text)
+            elif isinstance(child, Tag):
+                if child.name == 'br':
+                    text_parts.append('\n')
+                elif child.name in ['span', 'strong', 'em', 'b', 'i', 'a']:
+                    # Handle inline elements
+                    inline_text = child.get_text()  # Don't strip inline text
+                    if inline_text:
+                        text_parts.append(inline_text)
+                # We'll ignore any div elements since they shouldn't be in paragraphs
+
+        if not text_parts:
+            return None
+
+        # Join all parts and then normalize whitespace at the end
+        combined_text = ''.join(text_parts)
+        # Replace multiple spaces with single space and strip at the end
+        normalized_text = ' '.join(combined_text.split())
+
+        return DocumentNode(
+            type='paragraph',
+            content=normalized_text,
+            style=self.parse_style(element.get('style', ''))
+        )
 
 
     def _get_text_with_spacing(self, element: Tag) -> str:
