@@ -1,6 +1,7 @@
 from docutils.nodes import document
 
 from edgar.files.html import *
+from edgar.files.tables import TableProcessor
 from edgar.files.markdown import to_markdown, MarkdownRenderer
 from pathlib import Path
 from edgar import Company, Filing
@@ -71,10 +72,10 @@ def test_8k_markdown():
     print(md)
 
 
-def test_document_parse():
+def test_document_parse_nextpoint_8k():
     document = Document.parse(Path('data/NextPoint.8K.html').read_text())
     assert document
-    assert len(document) == 32
+    assert len(document) == 34
     print()
     print(document)
 
@@ -100,6 +101,18 @@ def test_document_repr():
     print()
     print(document)
 
+def test_table_processor_process_table():
+    document = Document.parse(Path('data/html/AppleRSUTable.html').read_text())
+    table_node = document.nodes[0]
+    assert table_node
+    processed_table = TableProcessor.process_table(table_node)
+    assert processed_table
+    assert len(processed_table.data_rows) == 5
+    assert processed_table.data_rows[0][0].startswith("Balance")
+    table = document._render_table(table_node)
+    assert table
+    print(table)
+
 
 def test_read_html_document_wih_financials():
     f = Filing(company='BUCKLE INC', cik=885245, form='8-K', filing_date='2024-11-22', accession_no='0000885245-24-000103')
@@ -111,12 +124,24 @@ def test_read_html_document_wih_financials():
     print(document)
 
 
-def test_document_correctly_parses_tables():
-    html = Path("data/html/Oracle.10-Q.html").read_text()
+def test_document_parses_table_inside_ix_elements():
+    html = Path("data/html/TableInsideIxElement.html").read_text()
     document = Document.parse(html)
     md = document.to_markdown()
+    nodes = document.nodes
+    assert len(nodes) == 1
     tables = document.tables
-    assert len(tables) == 4
+    assert len(tables) == 1
+    table = tables[0]
+    assert len(table.rows) == 7
     #md = document.to_markdown()
     #print()
     #print(md)
+
+def test_document_markdown_headings_parsed_correctly():
+    html = Path("data/NextPoint.8K.html").read_text()
+    document = Document.parse(html)
+    md = document.to_markdown()
+    print()
+    print(md)
+    assert "# SECURITIES AND EXCHANGE COMMISSION" in md

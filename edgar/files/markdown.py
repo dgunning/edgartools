@@ -42,8 +42,8 @@ class MarkdownRenderer:
         # Replace 3 or more newlines with 2 newlines
         text = re.sub(r'\n{3,}', '\n\n', text)
 
-        # Ensure proper spacing around headers
-        text = re.sub(r'\n*(#{1,6}.*?)\n*', r'\n\n\1\n', text)
+        # Fix header spacing by treating the header line as a complete unit
+        text = re.sub(r'\n*(#{1,6} [^\n]*[A-Za-z0-9][^\n]*)\n*', r'\n\n\1\n', text)
 
         # Clean up spacing around paragraphs
         text = re.sub(r'\n{2,}(?=\S)', '\n\n', text)

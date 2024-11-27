@@ -186,27 +186,29 @@ class Document:
         processed_table = TableProcessor.process_table(node)
         if not processed_table:
             return None
-        return self._render_table_rich(processed_table)
-
-    def _render_table_rich(self, processed: 'ProcessedTable') -> Table:
-        """Render processed table as Rich Table"""
         table = Table(
             box=box.SIMPLE,
             border_style="blue",
             padding=(0, 1),
-            show_header=bool(processed.headers),
+            show_header=bool(processed_table.headers),
             row_styles=["", "dim"],
             collapse_padding=True,
             width=None
         )
 
         # Add columns
-        for col_idx, alignment in enumerate(processed.column_alignments):
+        for col_idx, alignment in enumerate(processed_table.column_alignments):
             table.add_column(
-                header=processed.headers[col_idx] if processed.headers else None,
+                header=processed_table.headers[col_idx] if processed_table.headers else None,
                 justify=alignment,
                 vertical="middle"
             )
+
+        # Add data rows
+        for row in processed_table.data_rows:
+            table.add_row(*row)
+
+        return table
 
     def __repr__(self):
         return repr_rich(self)
@@ -404,6 +406,22 @@ class SECHTMLParser:
         nodes = []
         current_text = []
 
+        # Handle ix: tags by getting their content
+        if element.name.startswith('ix:'):
+            # Find the first meaningful child (like a table)
+            for child in element.children:
+                if isinstance(child, Tag):
+                    return self._process_element(child)
+            # If no meaningful children, treat as regular text container
+            #text = element.get_text(strip=True)
+            text = self._get_text_with_spacing(element)
+            if text:
+                return DocumentNode(
+                    type='paragraph',
+                    content=text,
+                    style=self.parse_style(element.get('style', ''))
+                )
+
         # First, determine if this element itself should be a specific node type
         if element.name == 'table':
             table_node = self._process_table(element)
@@ -436,6 +454,14 @@ class SECHTMLParser:
                         nodes.append(table_node)
                 elif child.name == 'br':
                     current_text.append('\n')
+                elif child.name.startswith('ix:'):
+                    # Process ix: tags recursively
+                    ix_result = self._process_element(child)
+                    if ix_result:
+                        if isinstance(ix_result, list):
+                            nodes.extend(ix_result)
+                        else:
+                            nodes.append(ix_result)
                 else:
                     child_result = self._process_element(child)
                     if child_result:
@@ -530,11 +556,32 @@ class SECHTMLParser:
 
         return merged
 
-
     def _process_div(self, element: Tag, style: StyleInfo) -> Optional[Union[DocumentNode, List[DocumentNode]]]:
         """Process div elements"""
-        # Check if this div should be a heading
-        if self._is_heading(element, style):
+        # First check for ix: tags and handle their content
+        ix_elements = element.find_all(lambda tag: tag.name.startswith('ix:'), recursive=False)
+        if ix_elements:
+            child_nodes = []
+            for ix_elem in ix_elements:
+                # Look for tables within the ix tag
+                tables = ix_elem.find_all('table', recursive=True)
+                if tables:
+                    for table in tables:
+                        table_node = self._process_table(table)
+                        if table_node:
+                            child_nodes.append(table_node)
+                else:
+                    # If no tables, process normally
+                    result = self._process_element(ix_elem)
+                    if result:
+                        if isinstance(result, list):
+                            child_nodes.extend(result)
+                        else:
+                            child_nodes.append(result)
+            return child_nodes if len(child_nodes) > 1 else child_nodes[0] if child_nodes else None
+
+        # Check if this div should be a heading (modified to avoid catching tables)
+        if self._is_heading(element, style) and not element.find('table', recursive=True):
             return DocumentNode(
                 type='heading',
                 content=element.get_text(strip=True),
@@ -572,6 +619,14 @@ class SECHTMLParser:
                         table_node = self._process_table(child)
                         if table_node:
                             child_nodes.append(table_node)
+                    elif child.name.startswith('ix:'):
+                        # Process ix: tags
+                        ix_result = self._process_element(child)
+                        if ix_result:
+                            if isinstance(ix_result, list):
+                                child_nodes.extend(ix_result)
+                            else:
+                                child_nodes.append(ix_result)
                     else:
                         # Recursively process non-table elements
                         child_result = self._process_element(child)
