@@ -1,4 +1,3 @@
-from docutils.nodes import document
 
 from edgar.files.html import *
 from edgar.files.tables import TableProcessor
