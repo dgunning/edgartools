@@ -1,10 +1,8 @@
-from docutils.nodes import document
 
 from edgar.files.html import *
 from edgar.files.tables import TableProcessor
-from edgar.files.markdown import to_markdown, MarkdownRenderer
 from pathlib import Path
-from edgar import Company, Filing
+from edgar import Filing
 from rich import print
 from edgar.richtools import rich_to_text
 
