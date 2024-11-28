@@ -5,12 +5,19 @@ import pyarrow as pa
 from rich import box
 from rich.table import Table
 from rich.text import Text
+from rich.console import Console
+from io import StringIO
 import itertools
+from rich.highlighter import RegexHighlighter
+from rich.theme import Theme
 
 __all__ = [
     'repr_rich',
+    'rich_to_text',
     'df_to_rich_table',
-    'colorize_words'
+    'colorize_words',
+    'print_xml',
+    'print_rich'
 ]
 
 table_styles = {
@@ -106,6 +113,40 @@ def repr_rich(renderable, **console_args) -> str:
     return str_output
 
 
+def rich_to_text(rich_object, width=120) -> str:
+    """
+    Convert a Rich renderable object to plain text while preserving layout.
+
+    Args:
+        rich_object: Any Rich renderable object (Panel, Table, Tree, etc.)
+
+    Returns:
+        str: Plain text representation with layout preserved
+    """
+    # Create a string buffer to capture the output
+    string_buffer = StringIO()
+
+    # Create a Console that will write to our string buffer instead of stdout
+    # force_terminal=False ensures we get plain text output
+    # no_color=True removes all color codes
+    console = Console(
+        file=string_buffer,
+        force_terminal=False,
+        no_color=True,
+        width=width  # Set desired width - adjust as needed
+    )
+
+    # Render the rich object to our console
+    console.print(rich_object)
+
+    # Get the resulting string and strip any trailing whitespace
+    result = string_buffer.getvalue().rstrip()
+
+    # Clean up
+    string_buffer.close()
+
+    return result
+
 def colorize_words(words, colors=None) -> Text:
     """ Colorize a list of words with a list of colors"
     """
@@ -118,3 +159,41 @@ def colorize_words(words, colors=None) -> Text:
         colored_words.append((word, color))
 
     return Text.assemble(*colored_words)
+
+
+class XMLHighlighter(RegexHighlighter):
+    """Apply style to XML syntax elements."""
+
+    base_style = "xml."
+    highlights = [
+        # XML tags with namespaces
+        r'(?P<namespace>[a-zA-Z0-9_-]+)(?=:)',  # matches the namespace prefix
+        r'(?P<colon>:)',  # matches the colon separator
+        r'(?P<tagname>[a-zA-Z0-9_-]+)(?:\s|>|/>)',  # matches the tag name after namespace
+        # Attribute names and values
+        r'(?P<attribute>\s[a-zA-Z0-9_-]+)(?==)',
+        r'(?P<value>"[^"]*")',
+        # Comments
+        r'(?P<comment><!--[\s\S]*?-->)',
+        # URLs in xmlns attributes
+        r'(?P<url>http://[^\s<>"]+)',
+    ]
+
+# Define theme colors for different XML elements
+xml_theme = Theme({
+    "xml.namespace": "magenta",  # pink/magenta for namespaces like 'us-gaap'
+    "xml.colon": "magenta",     # keeping the colon the same color as namespace
+    "xml.tagname": "light_goldenrod3",   # tag names after the namespace
+    "xml.attribute": "grey70",  # gray for attributes like 'contextRef'
+    "xml.value": "green",       # green for attribute values and URLs
+    "xml.comment": "grey58",  # gray for comments
+    "xml.url": "green",         # green for URLs in xmlns
+})
+
+def print_xml(xml: str):
+    console = Console(highlighter=XMLHighlighter(), theme=xml_theme)
+    console.print(xml)
+
+def print_rich(rich_object, **args):
+    console = Console(**args)
+    console.print(rich_object)

@@ -2,6 +2,7 @@ import itertools
 import pickle
 import re
 import webbrowser
+from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import date
 from datetime import datetime
@@ -10,7 +11,7 @@ from io import BytesIO
 from os import PathLike
 from pathlib import Path
 from typing import Tuple, List, Dict, Union, Optional, Any, cast
-from contextlib import nullcontext
+
 import httpx
 import numpy as np
 import orjson as json
@@ -22,6 +23,7 @@ import pyarrow.parquet as pq
 import pytz
 from bs4 import BeautifulSoup
 from fastcore.parallel import parallel
+from jupyter_events.cli import console
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
@@ -30,8 +32,8 @@ from rich.status import Status
 from rich.table import Table
 from rich.text import Text
 
+from core import has_html_content
 from edgar._markdown import text_to_markdown
-from edgar.files.markdown import to_markdown
 from edgar._party import Address
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
 from edgar.core import (log, display_size, sec_edgar,
@@ -44,17 +46,19 @@ from edgar.core import (log, display_size, sec_edgar,
                         cache_except_none,
                         is_start_of_quarter,
                         InvalidDateException, IntString, DataPager)
-from edgar.files.html_documents import HtmlDocument, get_clean_html
+from edgar.files.html_documents import get_clean_html
+from edgar.files.htmltools import html_sections
+from edgar.files.markdown import to_markdown
 from edgar.filingheader import FilingHeader
 from edgar.headers import FilingDirectory, IndexHeaders
-from edgar.files.htmltools import html_sections
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
-from edgar.richtools import df_to_rich_table, repr_rich
+from edgar.richtools import df_to_rich_table, repr_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
+from edgar.files.html import Document
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -1109,22 +1113,16 @@ class Filing:
     def text(self) -> str:
         """Convert the html of the main filing document to text"""
         html_content = self.html()
-        if html_content:
-            html_document = HtmlDocument.from_html(html_content, extract_data=False)
-            if html_document:
-                return html_document.text
-            else:
-                return download_text_between_tags(self.text_url, "TEXT")
+        if html_content and has_html_content(html_content):
+            document = Document.parse(html_content)
+            return rich_to_text(document, 200)
         else:
-            # Some Form types like UPLOAD don't have a primary document. Look for a TEXT EXTRACT attachment
-            # Look for an attachment that is TEXT EXTRACT
             text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
             if len(text_extract_attachments) > 0 and text_extract_attachments[0] is not None:
                 text_extract_attachment = text_extract_attachments[0]
                 assert text_extract_attachment is not None
                 return download_text_between_tags(text_extract_attachment.url, "TEXT")
             else:
-                # Use the full text submission
                 return download_text_between_tags(self.text_url, "TEXT")
 
     def full_text_submission(self) -> str:
@@ -1145,7 +1143,12 @@ class Filing:
 
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""
-        print(self.text())
+        html_content = self.html()
+        if html_content:
+            document = Document.parse(html_content)
+            console.print(document)
+        else:
+            console.print(self.text())
 
     def xbrl(self) -> Optional[Union[XBRLData, XBRLInstance]]:
         """

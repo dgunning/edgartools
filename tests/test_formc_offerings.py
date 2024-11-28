@@ -41,7 +41,7 @@ def test_parse_formc_offering():
 
 
 def test_formc_offering_with_annual_report_disclosures():
-    offering_xml = Path("data/Anesu.FormC.xml").read_text()
+    offering_xml = Path("data/xml/Anesu.FormC.xml").read_text()
     formC: FormC = FormC.from_xml(offering_xml, form="C")
     assert formC.filer_information.cik == "0002017182"
     assert formC.issuer_information.funding_portal.cik == "0001707214"

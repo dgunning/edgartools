@@ -5,7 +5,7 @@ from typing import List, Tuple, Dict
 from rich.console import Console
 from rich.markdown import Markdown
 
-from edgar.files.html import Document, DocumentNode, TableRow, TableCell, SECHTMLParser
+from edgar.files.html import Document, DocumentNode, TableRow, TableCell
 from edgar.files.tables import ProcessedTable, TableProcessor
 
 __all__ = ['to_markdown', 'MarkdownRenderer']
@@ -354,7 +354,4 @@ class MarkdownRenderer:
 
 
 def to_markdown(html_content: str) -> str:
-    parser = SECHTMLParser(html_content)
-    document = parser.parse()
-    renderer = MarkdownRenderer(document)
-    return renderer.render()
+    return Document.parse(html_content).to_markdown()

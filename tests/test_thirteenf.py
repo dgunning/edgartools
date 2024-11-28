@@ -5,7 +5,7 @@ from edgar import *
 
 
 def test_parse_infotable():
-    infotable = ThirteenF.parse_infotable_xml(Path("data/13F-HR.infotable.xml").read_text())
+    infotable = ThirteenF.parse_infotable_xml(Path("data/xml/13F-HR.infotable.xml").read_text())
     assert len(infotable) == 255
 
 

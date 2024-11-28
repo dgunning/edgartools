@@ -1,6 +1,4 @@
 import datetime
-import os
-import tempfile
 from datetime import datetime
 
 import pandas as pd
@@ -9,7 +7,7 @@ import pyarrow.compute as pc
 import pytest
 from freezegun import freeze_time
 from rich.table import Table
-from pathlib import Path
+
 import edgar
 from edgar.core import (decode_content,
                         get_identity,
@@ -28,7 +26,8 @@ from edgar.core import (decode_content,
                         get_bool,
                         is_start_of_quarter,
                         split_camel_case,
-                        download_edgar_data, filter_by_ticker)
+                        has_html_content,
+                        filter_by_ticker)
 from edgar.richtools import *
 
 
@@ -344,13 +343,28 @@ def test_is_start_of_quarter_with_time(test_datetime, expected_result):
         assert is_start_of_quarter() == expected_result
 
 
-""" 
-def test_download_edgar_data(monkeypatch):
-    with tempfile.TemporaryDirectory() as d:
-        monkeypatch.setenv("EDGAR_LOCAL_DATA_DIR", d)
-        assert os.environ["EDGAR_LOCAL_DATA_DIR"] == d
-        download_edgar_data(submissions=False, facts=False, reference=True)
-        files = set(f.name for f in (Path(d) /"reference").glob("*"))
-        assert files & {'ticker.txt', 'company_tickers_exchange.json', 'company_tickers.json',
-                         'company_tickers_mf.json'}
-"""
+def test_has_html_content():
+    assert has_html_content(
+        """
+        <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SEC FORM 
+        """
+    )
+
+    assert has_html_content(
+        """
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:m1="http://www.sec.gov/edgar/rega/oneafiler" xmlns:ns1="http://www.sec.gov/edgar/common"  
+        """
+    )
+    assert not has_html_content(
+        """
+        <?xml version="1.0"?>
+<SEC-DOCUMENT>0001193125-23-048785.txt : 20230224
+<SEC-HEADER>0001193125-23-048785.hdr.sgml : 20230224
+<ACCEPTANCE-DATETIME>20230224163457
+        """
+    )

@@ -22,8 +22,9 @@ from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
 
-from edgar.richtools import repr_rich
-from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extensions
+
+from edgar.richtools import repr_rich, print_xml, print_rich
+from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extensions, has_html_content
 from edgar.httprequests import get_with_retry, download_file, download_file_async
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
@@ -93,6 +94,12 @@ class Attachment(BaseModel):
         """Is this a text document"""
         return self.extension in text_extensions
 
+    def is_xml(self):
+        return self.extension.lower() in [".xsd", ".xml", ".xbrl"]
+
+    def is_html(self):
+        return self.extension.lower() in [".htm", ".html"]
+
     def is_binary(self) -> bool:
         """Is this a binary document"""
         return self.extension in binary_extensions
@@ -129,6 +136,20 @@ class Attachment(BaseModel):
             file_path.write_text(downloaded)
 
         return str(file_path)
+
+    def view(self):
+        if self.is_text():
+            content = self.download()
+            if self.is_html() or has_html_content(content):
+                from edgar import Document
+                document = Document.parse(content)
+                print_rich(document)
+            elif self.is_xml():
+                print_xml(content)
+            else:
+                print(content)
+        else:
+            print(self)
 
     def __rich__(self):
         table = Table("Document", "Description", "Type", "Size", box=box.ROUNDED)

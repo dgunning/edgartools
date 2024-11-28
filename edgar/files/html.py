@@ -16,6 +16,7 @@ from edgar.richtools import repr_rich
 
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode', 'StyleInfo']
 
+from files.html_documents import DocumentData
 
 
 @dataclass
@@ -109,9 +110,11 @@ class Document:
         return [node for node in self.nodes if node.type == 'table']
 
     @classmethod
-    def parse(cls, html:str) -> 'Document':
-        parser = SECHTMLParser(html)
-        return parser.parse()
+    def parse(cls, html:str) -> Optional['Document']:
+        root = HtmlDocument.get_root(html)
+        if root:
+            parser = SECHTMLParser(root)
+            return parser.parse()
 
     def to_markdown(self) -> str:
         from edgar.files.markdown import MarkdownRenderer
@@ -217,10 +220,9 @@ class Document:
 
 
 class SECHTMLParser:
-    def __init__(self, html_content: str, extract_data: bool = True):
-        root = HtmlDocument.get_root(html_content)
-        self.data = HtmlDocument.extract_data(root) if extract_data else None
-        self.root = clean_html_root(root)
+    def __init__(self, root: Tag, extract_data: bool = True):
+        self.data:DocumentData = HtmlDocument.extract_data(root) if extract_data else None
+        self.root:Tag = clean_html_root(root)
         self.base_font_size = 10.0  # Default base font size in pt
 
     def parse(self) -> Document:

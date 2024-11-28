@@ -84,6 +84,7 @@ __all__ = [
     'use_local_storage',
     'is_using_local_storage',
     'run_async_or_sync',
+    'has_html_content',
     'download_edgar_data',
     'get_edgar_data_directory',
     'default_page_size',
@@ -814,3 +815,23 @@ def cache_except_none(maxsize=128):
 
     return decorator
 
+def has_html_content(content: str) -> bool:
+    """
+    Check if the content is HTML
+    """
+    if isinstance(content, bytes):
+        content = content.decode('utf-8', errors='ignore')
+
+    # Strip only leading whitespace and get first 200 chars for doctype check
+    content = content.lstrip()
+    first_200_lower = content[:200].lower()  # DOCTYPE should be at the start
+
+    # Check for XHTML doctype declarations
+    if '<!doctype html public "-//w3c//dtd xhtml' in first_200_lower or \
+            '<!doctype html system "http://www.w3.org/tr/xhtml1/dtd/' in first_200_lower or \
+            '<!doctype html public "-//w3c//dtd html 4.01 transitional//en"' in first_200_lower:
+        return True
+
+    # Check first 1000 chars for xmlns if doctype wasn't found
+    # No need to lowercase this check as XML namespaces are case-sensitive
+    return 'xmlns="http://www.w3.org/1999/xhtml"' in content[:1000]

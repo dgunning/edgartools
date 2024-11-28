@@ -193,3 +193,5 @@ def test_download_filing_attachment():
     assert attachment.document == "cyber_10kimg1.jpg"
     b = attachment.download()
     assert isinstance(b, bytes)
+
+

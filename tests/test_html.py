@@ -1,3 +1,4 @@
+from docutils.nodes import document
 
 from edgar.files.html import *
 from edgar.files.tables import TableProcessor
@@ -5,35 +6,14 @@ from edgar.files.markdown import to_markdown, MarkdownRenderer
 from pathlib import Path
 from edgar import Company, Filing
 from rich import print
-
+from edgar.richtools import rich_to_text
 
 def test_parse_markdown():
     html_content = Path('data/NextPoint.8K.html').read_text()
-    parser = SECHTMLParser(html_content)
-    document = parser.parse()
+    document = Document.parse(html_content)
+    markdown_content = document.to_markdown()
+    assert "# NEXPOINT CAPITAL, INC." in markdown_content
 
-    # Render to markdown
-    renderer = MarkdownRenderer(document)
-    markdown_content = renderer.render()
-    print(markdown_content)
-
-
-def test_filing_to_markdown():
-    filing = Filing(company='Apple Inc.', cik=320193, form='8-K', filing_date='2024-10-31', accession_no='0000320193-24-000120')
-    Path('data/Apple.8-K.md').write_text(filing.markdown())
-
-    filing = Company("AAPL").latest("10-K")
-    #filing.open()
-    print(str(filing))
-    html = filing.html()
-    parser = SECHTMLParser(html)
-    document = parser.parse()
-    md = to_markdown(filing.html())
-    Path('data/Apple.10-K.md').write_text(md)
-    #print(Markdown(md))
-    #print(md)
-    renderer = MarkdownRenderer(document)
-    print(renderer.render_to_text())
 
 def test_document_tables():
     html = Path("data/html/Apple.10-Q.html").read_text()
@@ -92,14 +72,6 @@ def test_financial_table_header_displays_line_breaks():
     #print(row)
 
 
-
-def test_document_repr():
-    html_content = Path('data/NextPoint.8K.html').read_text()
-    parser = SECHTMLParser(html_content)
-    document = parser.parse()
-    print()
-    print(document)
-
 def test_table_processor_process_table():
     document = Document.parse(Path('data/html/AppleRSUTable.html').read_text())
     table_node = document.nodes[0]
@@ -118,9 +90,8 @@ def test_read_html_document_wih_financials():
     print()
     attachment = f.attachments[1]
     html = attachment.download()
-    parser = SECHTMLParser(html)
-    document = parser.parse()
-    print(document)
+    document = Document.parse(html)
+    assert document
 
 
 def test_document_parses_table_inside_ix_elements():
@@ -172,3 +143,17 @@ def test_text_in_spans():
     html = """<div><p style="font-size:10pt;margin-top:0;font-family:Times New Roman;margin-bottom:0;text-align:justify;" id="part_i_financial_information"><span style="color:#000000;white-space:pre-wrap;font-weight:bold;font-size:10pt;font-family:'Calibri',sans-serif;min-width:fit-content;">PART I. FINANCI</span><span style="color:#000000;white-space:pre-wrap;font-weight:bold;font-size:10pt;font-family:'Calibri',sans-serif;min-width:fit-content;">AL INFORMATION</span></p></div>"""
     document = Document.parse(html)
     assert document.nodes[0].content == "\nPART I. FINANCIAL INFORMATION\n"
+
+def test_document_to_text():
+    document = Document.parse(
+        """
+        <html>
+        <body>
+        <p>Basic Document</p>
+        <body>
+        </html>
+        """
+    )
+    text = rich_to_text(document)
+    assert text == "Basic Document"
+    print(text)
