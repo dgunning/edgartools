@@ -32,7 +32,6 @@ from rich.status import Status
 from rich.table import Table
 from rich.text import Text
 
-from core import has_html_content
 from edgar._markdown import text_to_markdown
 from edgar._party import Address
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
@@ -45,7 +44,9 @@ from edgar.core import (log, display_size, sec_edgar,
                         listify,
                         cache_except_none,
                         is_start_of_quarter,
+                        has_html_content,
                         InvalidDateException, IntString, DataPager)
+from edgar.files.html import Document
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
@@ -58,7 +59,6 @@ from edgar.richtools import df_to_rich_table, repr_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
-from edgar.files.html import Document
 
 """ Contain functionality for working with SEC filing indexes and filings
 
