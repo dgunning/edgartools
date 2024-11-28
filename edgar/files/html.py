@@ -16,7 +16,7 @@ from edgar.richtools import repr_rich
 
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode', 'StyleInfo']
 
-from files.html_documents import DocumentData
+from edgar.files.html_documents import DocumentData
 
 
 @dataclass
