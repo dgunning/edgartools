@@ -23,7 +23,6 @@ import pyarrow.parquet as pq
 import pytz
 from bs4 import BeautifulSoup
 from fastcore.parallel import parallel
-from jupyter_events.cli import console
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
@@ -55,7 +54,7 @@ from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
-from edgar.richtools import df_to_rich_table, repr_rich, rich_to_text
+from edgar.richtools import df_to_rich_table, repr_rich, rich_to_text, print_rich
 from edgar.search import BM25Search, RegexSearch
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
@@ -1146,9 +1145,9 @@ class Filing:
         html_content = self.html()
         if html_content:
             document = Document.parse(html_content)
-            console.print(document)
+            print_rich(document)
         else:
-            console.print(self.text())
+            print(self.text())
 
     def xbrl(self) -> Optional[Union[XBRLData, XBRLInstance]]:
         """
