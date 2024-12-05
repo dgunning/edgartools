@@ -1,2 +1,3 @@
 data/* linguist-vendored
 docs/* linguist-documentation
+*.html linguist-detectable=false
