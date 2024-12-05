@@ -16,7 +16,7 @@
 
 <p align="center">
 <a href="https://github.com/dgunning/edgartools">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgar-demo.gif" alt="edgardemo" height="500">
+    <img src="docs/images/edgartools-demo.gif" alt="edgardemo" height="500">
 </a>
 </p>
 
