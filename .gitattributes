@@ -1,4 +1,4 @@
 data/* linguist-vendored
 docs/* linguist-documentation
-data/*.html linguist-vendored
+*.html linguist-vendored
 
