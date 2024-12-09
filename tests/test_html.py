@@ -155,3 +155,16 @@ def test_document_to_text():
     text = rich_to_text(document)
     assert text == "Basic Document"
     print(text)
+
+
+def test_get_document_from_html_inside_text_tag():
+    filing = Filing(form='8-K', filing_date='2024-12-06', company='Beyond Air, Inc.', cik=1641631,
+           accession_no='0001493152-24-049048')
+    filing.home.open()
+    exhibits = filing.exhibits
+    exhibit = exhibits[1]
+    exhibit.view()
+    #content = Path("data/html/BeyondAir.html").read_text()
+    #print(content)
+    #Document.par
+    #print(html)
