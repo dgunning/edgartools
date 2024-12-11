@@ -904,10 +904,6 @@ class SECHTMLParser:
 
         # Handle specific HTML tags and their attributes
         if element.name == 'font':
-            # Handle font tag attributes
-            if color := element.get('color'):
-                # Add color handling if needed
-                pass
             if size := element.get('size'):
                 try:
                     size_num = float(size.replace('pt', ''))
