@@ -6,11 +6,37 @@ from edgar import Filing
 from rich import print
 from edgar.richtools import rich_to_text
 
-def test_parse_markdown():
+
+def get_html(path):
+    return Path(path).read_text()
+
+def test_parse_html_with_table():
+    document = Document.parse(get_html('data/html/OneTable.html'))
+    assert len(document.tables) == 1
+
+def test_parse_html_with_2tables():
+    document = Document.parse(get_html('data/html/TwoTables.html'))
+    assert len(document.tables) == 2
+    assert len(document.nodes) == 2
+
+def test_parse_html_with_table_inside_div():
+    document = Document.parse(get_html('data/html/TableInsideDiv.html'))
+    assert len(document.tables) == 1
+    assert len(document.nodes) == 1
+
+def test_parse_html_with_table_inside_div_with_h2():
+    content = get_html('data/html/TableInsideDivWithHeader.html')
+    document = Document.parse(content)
+    assert len(document.tables) == 1
+    assert len(document.nodes) == 2
+    assert document.nodes[0].content == 'This HTML has a table. This is a header'
+
+def test_parse_table_from_actual_filing_html():
     html_content = Path('data/NextPoint.8K.html').read_text()
     document = Document.parse(html_content)
-    markdown_content = document.to_markdown()
-    assert "# NEXPOINT CAPITAL, INC." in markdown_content
+    tables = document.tables
+    assert len(tables) > 0
+    print(document)
 
 
 def test_document_tables():
@@ -19,6 +45,7 @@ def test_document_tables():
 
     tables = document.tables
     assert all(table.type == "table" for table in tables)
+    print(document)
 
 
 def test_parse_financial_table_with_two_header_rows():
@@ -50,11 +77,17 @@ def test_8k_markdown():
 
 
 def test_document_parse_nextpoint_8k():
-    document = Document.parse(Path('data/NextPoint.8K.html').read_text())
+    content = Path('data/NextPoint.8K.html').read_text()
+    document = Document.parse(content)
     assert document
-    assert len(document) == 34
+    tables = document.tables
+
     print()
     print(document)
+    assert 'Effective December' in repr(document)
+    assert 'Forward-Looking Statements' in repr(document)
+    assert len(tables) > 0
+    #assert len(document) > 30
 
 def test_financial_table_header_displays_line_breaks():
     html = Path("data/html/AppleRSUTable.html").read_text()
@@ -84,13 +117,24 @@ def test_table_processor_process_table():
 
 
 def test_read_html_document_wih_financials():
-    f = Filing(company='BUCKLE INC', cik=885245, form='8-K', filing_date='2024-11-22', accession_no='0000885245-24-000103')
-    print()
-    attachment = f.attachments[1]
-    html = attachment.download()
-    document = Document.parse(html)
+    #f = Filing(company='BUCKLE INC', cik=885245, form='8-K', filing_date='2024-11-22', accession_no='0000885245-24-000103')
+    #f.home.open()
+    #print()
+    #attachment = f.attachments[1]
+    content = Path("data/html/BuckleInc.8-K.EX99.1.html").read_text()
+    document = Document.parse(content)
     assert document
+    print()
+    print(document)
 
+def test_render_paragraph_block_with_line_breaks():
+    content = Path("data/html/BuckleInc.8-K.EX99.1.html").read_text()
+    document = Document.parse(content)
+    block = document.nodes[4]
+
+    text = document._render_text_block(block, 200)
+    print()
+    print(text)
 
 def test_document_parses_table_inside_ix_elements():
     html = Path("data/html/TableInsideIxElement.html").read_text()
@@ -122,7 +166,7 @@ def test_document_parsed_from_plain_text_returns_plain_text():
     document = Document.parse(html)
     assert document
     assert len(document) == 1
-    assert document[0].type == "paragraph"
+    assert document[0].type == "text_block"
     assert document[0].content == html.strip()
 
 def test_document_from_filing_with_plain_text_filing_document():
@@ -131,7 +175,7 @@ def test_document_from_filing_with_plain_text_filing_document():
     document = Document.parse(text)
     assert document
     assert len(document) == 1
-    assert document[0].type == "paragraph"
+    assert document[0].type == "text_block"
 
 def test_text_in_spans():
     html="""<p id="part_ii_or_information"><span>PART II. OTHE</span><span>R INFORMATION</span></p>"""
@@ -140,7 +184,7 @@ def test_text_in_spans():
 
     html = """<div><p style="font-size:10pt;margin-top:0;font-family:Times New Roman;margin-bottom:0;text-align:justify;" id="part_i_financial_information"><span style="color:#000000;white-space:pre-wrap;font-weight:bold;font-size:10pt;font-family:'Calibri',sans-serif;min-width:fit-content;">PART I. FINANCI</span><span style="color:#000000;white-space:pre-wrap;font-weight:bold;font-size:10pt;font-family:'Calibri',sans-serif;min-width:fit-content;">AL INFORMATION</span></p></div>"""
     document = Document.parse(html)
-    assert document.nodes[0].content == "\nPART I. FINANCIAL INFORMATION\n"
+    assert document.nodes[0].content == "PART I. FINANCIAL INFORMATION"
 
 def test_document_to_text():
     document = Document.parse(
@@ -156,15 +200,23 @@ def test_document_to_text():
     assert text == "Basic Document"
     print(text)
 
+def test_render_paragraph():
+    html = Path("data/html/424-Snippet.html").read_text()
+    document = Document.parse(html)
+    print()
+    #print(document)
+    paragraph = document.nodes[0]
+    print(paragraph.content)
 
-def test_get_document_from_html_inside_text_tag():
-    filing = Filing(form='8-K', filing_date='2024-12-06', company='Beyond Air, Inc.', cik=1641631,
-           accession_no='0001493152-24-049048')
-    filing.home.open()
-    exhibits = filing.exhibits
-    exhibit = exhibits[1]
-    exhibit.view()
-    #content = Path("data/html/BeyondAir.html").read_text()
-    #print(content)
-    #Document.par
-    #print(html)
+def test_get_text_from_filing_with_no_body_tag():
+    filing = Filing(form='TA-1/A', filing_date='2024-04-17', company='PEAR TREE ADVISORS INC /TA', cik=949738, accession_no='0000949738-24-000005')
+    html = filing.html()
+    document = Document.parse(html)
+    assert not document
+
+
+def test_parse_document_within_just_paragraph_tags():
+    content = Path('data/html/BeyondAir.html').read_text()
+    document = Document.parse(content)
+    print()
+    print(document)

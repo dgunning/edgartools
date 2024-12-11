@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from rich import print
 
-from edgar import Filing
+from edgar import Filing, find
 from edgar.attachments import Attachment, Attachments
 from edgar.httprequests import download_file
 
@@ -195,3 +195,10 @@ def test_download_filing_attachment():
     assert isinstance(b, bytes)
 
 
+def test_filing_with_apparently_no_attachments():
+    filing = find("0000929638-24-004206")
+    header = filing.header
+    directory = filing.filing_directory
+    print(directory)
+    print(header)
+    #print(filing)
