@@ -1,9 +1,7 @@
-import sys
 
 from edgar.reference.forms import describe_form
 from edgar.reference.tickers import get_ticker_from_cusip, get_icon_from_ticker, cusip_ticker_mapping, download_ticker_data
 from edgar.core import log, get_edgar_data_directory
-from edgar.httprequests import download_datafile
 
 
 # A dict of state abbreviations and their full names
