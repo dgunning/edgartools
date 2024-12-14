@@ -1408,7 +1408,7 @@ class SECHTMLParser:
                 'mm': 3.7795,  # 1mm ≈ 3.7795px
                 '%': 1  # Handle percentages separately
             }
-            return width.value * conversions.get(width.width.unit, 1)
+            return width.value * conversions.get(width.unit, 1)
 
         def can_merge_nodes(node1: BaseNode, node2: BaseNode) -> bool:
             """Determine if two nodes can be safely merged"""
