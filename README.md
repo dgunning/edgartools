@@ -326,7 +326,7 @@ into a data object, for several different form types. Currently, the following f
 | 13F-HR                     | `ThirteenF`                  | 13F Holdings Report                   |
 | NPORT-P                    | `FundReport`                 | Fund Report                           |
 | EFFECT                     | `Effect`                     | Notice of Effectiveness               |
-| And other filing with XBRL | `XBRLData` or `XBRLInstance` | Container for XBRL data               |
+| Any other filing with XBRL | `XBRLData` or `XBRLInstance` | Container for XBRL data               |
 
 For example, to get the data object for a **13F-HR** filing you can do the following:
 
