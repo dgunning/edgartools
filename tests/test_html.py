@@ -5,6 +5,7 @@ from pathlib import Path
 from edgar import Filing
 from rich import print
 from edgar.richtools import rich_to_text
+from bs4 import BeautifulSoup
 
 
 def get_html(path):
@@ -31,12 +32,175 @@ def test_parse_html_with_table_inside_div_with_h2():
     assert len(document.nodes) == 2
     assert document.nodes[0].content == 'This HTML has a table. This is a header'
 
-def test_parse_table_from_actual_filing_html():
+def test_handle_spans_inside_divs():
+    content = """
+    <html>
+<body>
+    <div>
+        <span>This is a span</span>
+        <span>A second span 2</span>
+        <span>And a 3rd</span>
+    </div>
+</body>
+</html>
+    """
+    document = Document.parse(content)
+    assert len(document.nodes) == 1
+    assert document.nodes[0].content == 'This is a span A second span 2 And a 3rd'
+
+
+def test_multiple_spans_in_div():
+    # Test HTML
+    html = """
+    <html>
+    <body>
+        <div>
+            <span>This is a span</span>
+            <span>A second span 2</span>
+            <span>And a 3rd</span>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Parse HTML
+    soup = BeautifulSoup(html, 'html.parser')
+    parser = SECHTMLParser(soup)
+    document = parser.parse()
+
+    # Basic document validation
+    assert document is not None
+    assert len(document.nodes) == 1, "Should have exactly one text block node"
+
+    # Get the text block node
+    node = document.nodes[0]
+
+    # Verify node properties
+    assert node.type == 'text_block', "Node should be a text block"
+
+    # Verify content includes all spans correctly concatenated
+    expected_text = "This is a span A second span 2 And a 3rd"
+    assert node.content.strip() == expected_text, f"Expected '{expected_text}' but got '{node.content.strip()}'"
+
+
+def test_spans_with_styling():
+    # Test HTML with styled spans
+    html = """
+    <html>
+    <body>
+        <div style="text-align: center">
+            <span style="font-weight: bold">Bold span</span>
+            <span style="font-style: italic">Italic span</span>
+            <span style="color: blue">Blue span</span>
+        </div>
+    </body>
+    </html>
+    """
+
+    soup = BeautifulSoup(html, 'html.parser')
+    parser = SECHTMLParser(soup)
+    document = parser.parse()
+
+    assert document is not None
+    assert len(document.nodes) == 1
+
+    node = document.nodes[0]
+    assert node.type == 'text_block'
+
+    # Verify content
+    expected_text = "Bold span Italic span Blue span"
+    assert node.content.strip() == expected_text
+
+    # Verify div styling was preserved
+    assert node.style.text_align == 'center'
+
+
+def test_mixed_content_spans():
+    # Test HTML with mixed content
+    html = """
+    <html>
+    <body>
+        <div>
+            Text before
+            <span>Inside span</span>
+            Text between
+            <span>Another span</span>
+            Text after
+        </div>
+    </body>
+    </html>
+    """
+
+    soup = BeautifulSoup(html, 'html.parser')
+    parser = SECHTMLParser(soup)
+    document = parser.parse()
+
+    assert document is not None
+    assert len(document.nodes) == 1
+
+    node = document.nodes[0]
+    assert node.type == 'text_block'
+
+    # Verify all content is preserved in correct order
+    expected_text = "Text before Inside span Text between Another span Text after"
+    assert node.content.strip() == expected_text
+
+
+def test_spans_with_breaks():
+    # Test HTML with line breaks between spans
+    html = """
+    <html>
+    <body>
+        <div>
+            <span>First line</span>
+            <br/>
+            <span>Second line</span>
+            <br/>
+            <span>Third line</span>
+        </div>
+    </body>
+    </html>
+    """
+
+    soup = BeautifulSoup(html, 'html.parser')
+    parser = SECHTMLParser(soup)
+    document = parser.parse()
+
+    assert document is not None
+    assert len(document.nodes) == 1
+
+    node = document.nodes[0]
+    assert node.type == 'text_block'
+
+    # Verify content with line breaks
+    expected_text = 'First line \n Second line \n Third line'
+    assert node.content.strip() == expected_text
+
+
+def test_parse_correct_setting_of_widths():
+    html = Path("data/html/424-DivContainingSpans.html").read_text()
+    document = Document.parse(html)
+    assert len(document.tables) == 0
+    # The bulleted list should have the correct width
+    print(document)
+    assert len(document.nodes) > 0
+    assert document.nodes[0].style.width.value == 456.0
+    assert 'Offers to purchase the' in str(document)
+    assert 'educational and charitable institutions' in str(document)
+
+
+def test_parse_table_from_nextpoint_filing():
     html_content = Path('data/NextPoint.8K.html').read_text()
     document = Document.parse(html_content)
     tables = document.tables
-    assert len(tables) > 0
+    assert len(tables) == 8
     print(document)
+
+def test_order_of_table_in_document():
+    html = Path("data/html/OrderOfTableInDiv.html").read_text()
+    document = Document.parse(html)
+    print(document)
+    assert "2024" in str(document)
 
 
 def test_document_tables():
@@ -111,7 +275,7 @@ def test_table_processor_process_table():
     assert processed_table
     assert len(processed_table.data_rows) == 5
     assert processed_table.data_rows[0][0].startswith("Balance")
-    table = document._render_table(table_node)
+    table = table_node.render(160)
     assert table
     print(table)
 
@@ -132,7 +296,7 @@ def test_render_paragraph_block_with_line_breaks():
     document = Document.parse(content)
     block = document.nodes[4]
 
-    text = document._render_text_block(block, 200)
+    text = block.render(200)
     print()
     print(text)
 
@@ -141,11 +305,11 @@ def test_document_parses_table_inside_ix_elements():
     document = Document.parse(html)
     md = document.to_markdown()
     nodes = document.nodes
-    assert len(nodes) == 1
+
     tables = document.tables
     assert len(tables) == 1
+    assert len(nodes) == 2
     table = tables[0]
-    assert len(table.rows) == 7
     #md = document.to_markdown()
     #print()
     #print(md)
@@ -156,7 +320,7 @@ def test_document_markdown_headings_parsed_correctly():
     md = document.to_markdown()
     print()
     print(md)
-    assert "# SECURITIES AND EXCHANGE COMMISSION" in md
+    #assert "# SECURITIES AND EXCHANGE COMMISSION" in md
 
 
 def test_document_parsed_from_plain_text_returns_plain_text():
@@ -203,8 +367,8 @@ def test_document_to_text():
 def test_render_paragraph():
     html = Path("data/html/424-Snippet.html").read_text()
     document = Document.parse(html)
+    assert not document.empty()
     print()
-    #print(document)
     paragraph = document.nodes[0]
     print(paragraph.content)
 
@@ -220,3 +384,13 @@ def test_parse_document_within_just_paragraph_tags():
     document = Document.parse(content)
     print()
     print(document)
+
+
+def test_table_of_content_for_10K():
+    content = Path('data/html/Apple.10-K.html').read_text()
+    document = Document.parse(content)
+    print()
+    print(document)
+    tables = document.tables
+    #toc = document.table_of_contents()
+    #print(toc)

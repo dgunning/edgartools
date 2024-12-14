@@ -1,8 +1,8 @@
 import re
-from dataclasses import dataclass
-from typing import List, Dict
+from dataclasses import dataclass, field
+from typing import List, Dict, Set
 from typing import Optional, Union, Any, Literal
-
+from abc import ABC, abstractmethod
 from bs4 import Tag, NavigableString
 from prompt_toolkit.contrib.telnet.log import logger
 from rich import box
@@ -124,6 +124,182 @@ class StyleInfo:
         return min(self.width, console_width)
 
 
+class BaseNode(ABC):
+
+    """Abstract base class for all document nodes with metadata support"""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    """Abstract base class for all document nodes"""
+    @abstractmethod
+    def render(self, console_width: int) -> RenderResult:
+        """Render the node for display"""
+        pass
+
+    @property
+    @abstractmethod
+    def type(self) -> str:
+        """Return the type of the node"""
+        pass
+
+    def add_metadata(self, key: str, value: Any) -> None:
+        """Add or update metadata"""
+        self.metadata[key] = value
+
+    def get_metadata(self, key: str, default: Any = None) -> Any:
+        """Get metadata value with optional default"""
+        return self.metadata.get(key, default)
+
+    def remove_metadata(self, key: str) -> None:
+        """Remove metadata if it exists"""
+        self.metadata.pop(key, None)
+
+
+
+@dataclass
+class HeadingNode(BaseNode):
+    content: str
+    style: StyleInfo
+    level: int = 1
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def type(self) -> str:
+        return 'heading'
+
+    def render(self, console_width: int) -> RenderResult:
+        """Render heading with enhanced styling based on level"""
+        # Enhanced style configurations based on heading level
+        styles = {
+            1: {
+                "text_style": "bold cyan",
+                "box": box.DOUBLE,
+                "border_style": "cyan",
+                "padding": (1, 2),
+                "title": "§" if self.content else None  # Section symbol for level 1
+            },
+            2: {
+                "text_style": "bold blue",
+                "box": box.ROUNDED,
+                "border_style": "blue",
+                "padding": (1, 2),
+                "title": "•" if self.content else None  # Bullet for level 2
+            },
+            3: {
+                "text_style": "bold",
+                "box": box.SIMPLE,
+                "border_style": "white",
+                "padding": (0, 2),
+                "title": ">" if self.content else None  # Arrow for level 3
+            },
+            4: {
+                "text_style": "dim bold",
+                "box": box.MINIMAL,
+                "border_style": "grey70",
+                "padding": (0, 1),
+                "title": "-" if self.content else None  # Dash for level 4
+            }
+        }
+
+        # Get style configuration for current heading level, defaulting to level 4
+        style_config = styles.get(self.level, styles[4])
+
+        # Create base text with style
+        text = Text(self.content.strip(), style=style_config["text_style"])
+
+        # Apply text alignment based on style
+        if self.style and self.style.text_align == 'center':
+            text = Align.center(text)
+
+        # Create panel with enhanced styling
+        return Panel(
+            text,
+            box=style_config["box"],
+            border_style=style_config["border_style"],
+            padding=style_config["padding"],
+            expand=True,
+            title=style_config["title"],
+            title_align="left"
+        )
+
+
+@dataclass
+class TextBlockNode(BaseNode):
+    content: str
+    style: StyleInfo
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def type(self) -> str:
+        return 'text_block'
+
+    def render(self, console_width: int) -> RenderResult:
+        if not self.content:
+            return Text("")
+
+        width = console_width
+        if self.style and self.style.width:
+            width = min(self.style.width.to_chars(console_width), console_width)
+
+        # Wrap text with improved handling
+        def wrap_line(line: str) -> List[str]:
+            if not line.strip():
+                return ['']
+            if len(line) <= width:
+                return [line]
+
+            wrapped = textwrap.wrap(
+                line,
+                width=width,
+                break_long_words=True,
+                break_on_hyphens=True,
+                expand_tabs=True
+            )
+
+            # Handle orphaned words
+            processed = []
+            i = 0
+            while i < len(wrapped):
+                current_line = wrapped[i]
+                if i < len(wrapped) - 1:
+                    next_line = wrapped[i + 1]
+                    if len(next_line) < width * 0.2 or ' ' not in next_line.strip():
+                        combined = current_line + ' ' + next_line
+                        if len(combined) <= width:
+                            processed.append(combined)
+                            i += 2
+                            continue
+                processed.append(current_line)
+                i += 1
+            return processed
+
+        lines = self.content.splitlines(keepends=False)
+        rendered_lines = []
+        for line in lines:
+            wrapped_lines = wrap_line(line.rstrip('\n'))
+            rendered_lines.extend(wrapped_lines)
+            if line.endswith('\n'):
+                rendered_lines.append('')
+
+        final_text = '\n'.join(rendered_lines)
+        result = Text(final_text)
+
+        if self.style:
+            if self.style.text_align:
+                align_map = {
+                    'center': 'center',
+                    'right': 'right',
+                    'justify': 'full',
+                    'left': 'left'
+                }
+                result.justify = align_map.get(self.style.text_align, 'left')
+
+            if self.style.font_weight in ('bold', '700', '800', '900'):
+                result.stylize("bold")
+
+        return result
+
+
+
 @dataclass
 class TableCell:
     content: str
@@ -141,6 +317,67 @@ class TableRow:
     @property
     def virtual_columns(self):
         return sum(cell.colspan for cell in self.cells)
+
+
+@dataclass
+class TableNode(BaseNode):
+    content: List[TableRow]
+    style: StyleInfo
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def type(self) -> str:
+        return 'table'
+
+    def render(self, console_width: int) -> RenderResult:
+        from edgar.files.tables import TableProcessor
+        processed_table = TableProcessor.process_table(self)
+        if not processed_table:
+            return None
+
+        table = Table(
+            box=box.SIMPLE,
+            border_style="blue",
+            padding=(0, 1),
+            show_header=bool(processed_table.headers),
+            row_styles=["", "gray54"],
+            collapse_padding=True,
+            width=None
+        )
+
+        # Add columns
+        for col_idx, alignment in enumerate(processed_table.column_alignments):
+            table.add_column(
+                header=processed_table.headers[col_idx] if processed_table.headers else None,
+                justify=alignment,
+                vertical="middle"
+            )
+
+        # Add data rows
+        for row in processed_table.data_rows:
+            table.add_row(*row)
+
+        return table
+
+
+def create_node(
+        type_: str,
+        content: Union[str, List[TableRow]],
+        style: StyleInfo,
+        level: int = 1,
+        metadata: Optional[Dict[str, Any]] = None
+) -> BaseNode:
+    """Create a node with optional metadata"""
+    metadata = metadata or {}
+
+    if type_ == 'heading':
+        return HeadingNode(content=content, style=style, level=level, metadata=metadata)
+    elif type_ == 'text_block':
+        return TextBlockNode(content=content, style=style, metadata=metadata)
+    elif type_ == 'table':
+        return TableNode(content=content, style=style, metadata=metadata)
+    else:
+        raise ValueError(f"Unknown node type: {type_}")
 
 
 # 1. Add type literals and type guards
@@ -188,9 +425,8 @@ class DocumentNode:
 
 @dataclass
 class Document:
-
-    def __init__(self, nodes: List[DocumentNode]):
-        self.nodes = nodes
+    """Document class that works with the new node hierarchy"""
+    nodes: List[BaseNode]
 
     def __len__(self):
         return len(self.nodes)
@@ -198,18 +434,21 @@ class Document:
     def __getitem__(self, index):
         return self.nodes[index]
 
+    def empty(self) -> bool:
+        return len(self.nodes) == 0
+
     @staticmethod
     def _get_width() -> int:
         """Get the width of the console that this document is being rendered into"""
         return Console().width
 
     @property
-    def tables(self) -> List[DocumentNode]:
+    def tables(self) -> List[BaseNode]:
         """Get all table nodes in the document"""
         return [node for node in self.nodes if node.type == 'table']
 
     @classmethod
-    def parse(cls, html:str) -> Optional['Document']:
+    def parse(cls, html: str) -> Optional['Document']:
         root = HtmlDocument.get_root(html)
         if root:
             parser = SECHTMLParser(root)
@@ -226,173 +465,11 @@ class Document:
 
         renderable_elements = []
         for node in self.nodes:
-            if node.type == 'heading':
-                element = self._render_heading(node)
-            elif node.type == 'text_block':
-                element = self._render_text_block(node, console_width)
-            elif node.type == 'table':
-                element = self._render_table(node)
-            else:
-                element = Text(str(node.content))
-
+            element = node.render(console_width)
             if element:
                 renderable_elements.append(element)
 
         return Group(*renderable_elements)
-
-
-    def _render_heading(self, node: DocumentNode) -> Panel:
-        """Render heading with appropriate level styling"""
-        # Style based on heading level
-        styles = {
-            1: ("bold cyan", 'SIMPLE'),
-            2: ("bold blue", 'SIMPLE'),
-            3: ("bold", 'SIMPLE'),
-            4: ("dim bold", 'SIMPLE')
-        }
-
-        style, box_style = styles.get(node.level, ("", "single"))
-
-        text = Text(node.content.strip(), style=style)
-
-        # Center if specified in style
-        if node.style and node.style.text_align == 'center':
-            text = Align.center(text)
-
-        return Panel(
-            text,
-            box=box.SIMPLE,
-            padding=(0, 2),
-            expand=True
-        )
-
-    def _render_text_block(self, node: DocumentNode, console_width: int) -> Text:
-        """Render text block with improved line wrapping to avoid orphaned words"""
-        if not node.content:
-            return Text("")
-
-        # Calculate width
-        width = console_width
-        if node.style and node.style.width:
-            width = min(node.style.width.to_chars(console_width), console_width)
-
-        def wrap_line(line: str) -> List[str]:
-            """Wrap a single line with improved handling of word breaks"""
-            if not line.strip():
-                return ['']
-
-            if len(line) <= width:
-                return [line]
-
-            # Initial wrap
-            wrapped = textwrap.wrap(
-                line,
-                width=width,
-                break_long_words=True,
-                break_on_hyphens=True,
-                expand_tabs=True
-            )
-
-            # Post-process to handle orphaned words
-            processed = []
-            i = 0
-            while i < len(wrapped):
-                current_line = wrapped[i]
-
-                # Check if next line is very short (e.g., single word)
-                if i < len(wrapped) - 1:
-                    next_line = wrapped[i + 1]
-                    # If next line is short (less than 20% of width or just one word)
-                    if len(next_line) < width * 0.2 or ' ' not in next_line.strip():
-                        # Try to fit it on current line if possible
-                        combined = current_line + ' ' + next_line
-                        if len(combined) <= width:
-                            processed.append(combined)
-                            i += 2
-                            continue
-
-                        # If we can't combine, try to rebalance the lines
-                        words = (current_line + ' ' + next_line).split()
-                        if len(words) >= 3:
-                            # Distribute words more evenly
-                            midpoint = len(words) // 2
-                            line1 = ' '.join(words[:midpoint])
-                            line2 = ' '.join(words[midpoint:])
-                            if len(line1) <= width and len(line2) <= width:
-                                processed.extend([line1, line2])
-                                i += 2
-                                continue
-
-                processed.append(current_line)
-                i += 1
-
-            return processed
-
-        # Split content into lines preserving existing breaks
-        lines = node.content.splitlines(keepends=False)
-
-        # Process each line
-        rendered_lines = []
-        for line in lines:
-            stripped = line.rstrip('\n')
-            wrapped_lines = wrap_line(stripped)
-            rendered_lines.extend(wrapped_lines)
-
-            # Preserve original line endings
-            if line.endswith('\n'):
-                rendered_lines.append('')
-
-        # Join preserving line breaks
-        final_text = '\n'.join(rendered_lines)
-
-        # Create Rich Text object
-        result = Text(final_text)
-
-        # Apply styling
-        if node.style:
-            if node.style.text_align:
-                align_map = {
-                    'center': 'center',
-                    'right': 'right',
-                    'justify': 'full',
-                    'left': 'left'
-                }
-                result.justify = align_map.get(node.style.text_align, 'left')
-
-            if node.style.font_weight in ('bold', '700', '800', '900'):
-                result.stylize("bold")
-
-        return result
-
-    def _render_table(self, node: DocumentNode) -> Optional[Table]:
-        """Render node as Rich table"""
-        from edgar.files.tables import TableProcessor
-        processed_table = TableProcessor.process_table(node)
-        if not processed_table:
-            return None
-        table = Table(
-            box=box.SIMPLE,
-            border_style="blue",
-            padding=(0, 1),
-            show_header=bool(processed_table.headers),
-            row_styles=["", "dim"],
-            collapse_padding=True,
-            width=None
-        )
-
-        # Add columns
-        for col_idx, alignment in enumerate(processed_table.column_alignments):
-            table.add_column(
-                header=processed_table.headers[col_idx] if processed_table.headers else None,
-                justify=alignment,
-                vertical="middle"
-            )
-
-        # Add data rows
-        for row in processed_table.data_rows:
-            table.add_row(*row)
-
-        return table
 
     def __repr__(self):
         return repr_rich(self)
@@ -422,7 +499,7 @@ class SECHTMLParser:
         nodes = self._parse_element(body)
         return Document(nodes=nodes)
 
-    def _parse_element(self, element: Tag) -> List[DocumentNode]:
+    def _parse_element(self, element: Tag) -> List[BaseNode]:
         nodes = []
 
         for child in element.children:
@@ -582,23 +659,28 @@ class SECHTMLParser:
 
     def _looks_like_header(self, element: Tag, style: StyleInfo) -> bool:
         """Determine if a div looks like it should be treated as a heading"""
+        # Don't treat divs with spans as headers unless they have very clear heading characteristics
+        if element.find('span'):
+            return False
+
         # Get text content
         text = element.get_text(strip=True)
         if not text:
             return False
 
-        # Check header-like characteristics, converting each to explicit boolean
+        # More strict header characteristics
         hints = [
             bool(style.font_weight and style.font_weight in ['bold', '700', '800', '900']),  # Bold text
-            bool(style.margin_top and style.margin_top > 12),  # Significant top margin
-            bool(len(text.split()) <= 10),  # Relatively short text
+            bool(style.margin_top and style.margin_top > 18),  # Significant top margin
+            bool(len(text.split()) <= 8),  # Very short text (reduced from 10)
             not bool(element.find('table')),  # No tables inside
-            not any(c.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] for c in element.find_all()),  # No header tags inside
-            bool(style.font_size and style.font_size >= self.base_font_size)  # Font size >= base size
+            not any(c.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'] for c in element.find_all()),
+            # No header or paragraph tags inside
+            bool(style.font_size and style.font_size >= 1.2 * self.base_font_size)  # Notably larger font
         ]
 
-        # Consider it a header if it meets most criteria
-        return sum(hints) >= 3
+        # More strict requirements: need more positive hints
+        return sum(hints) >= 4 and hints[0]  # Must be bold plus at least 3 other hints
 
     def _determine_heading_level(self, style: StyleInfo) -> int:
         """Determine heading level based on styling"""
@@ -621,8 +703,16 @@ class SECHTMLParser:
 
         return 4  # Default to lowest level if uncertain
 
-    def _process_element(self, element: Tag) -> Optional[Union[DocumentNode, List[DocumentNode]]]:
-        """Process an element into one or more document nodes with inherited styles"""
+    def _process_element(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process an element into one or more nodes with inherited styles"""
+        # Phase 1: Mark all ancestors of tables
+        tables = element.find_all('table', recursive=True)
+        for table in tables:
+            parent = table.parent
+            while parent:
+                parent['has_table'] = True
+                parent = parent.parent
+
         # Parse current element's style
         current_style = self.parse_style(element.get('style', ''))
 
@@ -634,68 +724,68 @@ class SECHTMLParser:
         self.style_stack.append(current_style)
 
         try:
-            # Handle ix: tags by getting their content
+            # Handle ix: tags by processing their content sequentially
             if element.name.startswith('ix:'):
-                for child in element.children:
-                    if isinstance(child, Tag):
-                        return self._process_element(child)
-                text = self._get_text_with_spacing(element)
-                if text:
-                    return DocumentNode(
-                        type='text_block',
-                        content=text,
-                        style=current_style
-                    )
+                nodes = []
+                children = list(element.children)  # Convert to list to avoid iterator modification
 
-            # Process specific element types
+                for i, child in enumerate(children):
+                    if isinstance(child, Tag):
+                        if child.name == 'table':
+                            # Process table
+                            table_node = self._process_table(child)
+                            if table_node:
+                                nodes.append(table_node)
+                        elif child.name == 'p':
+                            # Process paragraph
+                            para_node = self._process_paragraph(child, current_style)
+                            if para_node:
+                                nodes.append(para_node)
+                        elif child.name == 'div':
+                            # Process div with its own style
+                            div_style = self.parse_style(child.get('style', '')).merge(current_style)
+                            div_result = self._process_structured_content(child, div_style)
+                            if div_result:
+                                if isinstance(div_result, list):
+                                    nodes.extend(div_result)
+                                else:
+                                    nodes.append(div_result)
+                        else:
+                            # Process other elements recursively
+                            child_result = self._process_element(child)
+                            if child_result:
+                                if isinstance(child_result, list):
+                                    nodes.extend(child_result)
+                                else:
+                                    nodes.append(child_result)
+
+                # Return the collected nodes
+                return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
+            # Process table elements directly
             if element.name == 'table':
                 return self._process_table(element)
+
             elif element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
                 level = int(element.name[1])
-                return DocumentNode(
-                    type='heading',
+                return create_node(
+                    type_='heading',
                     content=element.get_text(strip=True),
                     style=current_style,
                     level=level
                 )
+
             elif element.name == 'p':
                 return self._process_paragraph(element, current_style)
+
             elif element.name == 'div':
-                # Check if this div looks like a heading
-                if self._looks_like_header(element, current_style):
-                    return DocumentNode(
-                        type='heading',
-                        content=element.get_text(strip=True),
-                        style=current_style,
-                        level=self._determine_heading_level(current_style)
-                    )
-
-                # First check if this div has direct text content
-                has_direct_text = any(isinstance(child, NavigableString) and child.strip()
-                                      for child in element.children)
-
-                # If it has direct text, process it as a paragraph
-                if has_direct_text:
-                    text = self._get_text_with_spacing(element)
-                    if text.strip():
-                        return DocumentNode(
-                            type='text_block',
-                            content=text.strip(),
-                            style=current_style
-                        )
-
-                # Otherwise process children normally
-                nodes = []
-                for child in element.children:
-                    if isinstance(child, Tag):
-                        child_result = self._process_element(child)
-                        if child_result:
-                            if isinstance(child_result, list):
-                                nodes.extend(child_result)
-                            else:
-                                nodes.append(child_result)
-
-                return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+                # Phase 2: Process content based on whether this div contains tables
+                if element.get('has_table'):
+                    # Structure-preserving mode for divs with tables
+                    return self._process_structured_content(element, current_style)
+                else:
+                    # Content-combining mode for divs without tables
+                    return self._process_inline_content(element, current_style)
 
             # For other elements, process children
             nodes = []
@@ -714,124 +804,345 @@ class SECHTMLParser:
             # Always pop the style from stack when done with this element
             self.style_stack.pop()
 
-
-    def _process_paragraph(self, element: Tag, parent_style: StyleInfo) -> Optional[DocumentNode]:
-        """Process a paragraph element with inherited styles"""
+    def _process_structured_content(self, element: Tag, style: StyleInfo) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process content in structure-preserving mode (for elements containing tables)"""
+        nodes = []
         text_parts = []
+
+        def flush_text():
+            if text_parts:
+                text = ' '.join(text_parts).strip()
+                if text:
+                    nodes.append(create_node(
+                        type_='text_block',
+                        content=text,
+                        style=style
+                    ))
+                text_parts.clear()
 
         for child in element.children:
             if isinstance(child, NavigableString):
-                text = str(child)
+                text = str(child).strip()
                 if text:
+                    text_parts.append(text)
+            elif isinstance(child, Tag):
+                if child.name == 'table':
+                    flush_text()
+                    table_node = self._process_table(child)
+                    if table_node:
+                        nodes.append(table_node)
+                elif child.get('has_table'):
+                    # This child contains a table somewhere, process structurally
+                    flush_text()
+                    child_result = self._process_element(child)
+                    if child_result:
+                        if isinstance(child_result, list):
+                            nodes.extend(child_result)
+                        else:
+                            nodes.append(child_result)
+                else:
+                    # Non-table-containing element, can process for text
+                    text = self._get_text_with_spacing(child).strip()
+                    if text:
+                        text_parts.append(text)
+
+        flush_text()
+        return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
+    def _process_inline_content(self, element: Tag, style: StyleInfo) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process content in content-combining mode (for elements without tables)"""
+        nodes = []
+        text_parts = []
+
+        def flush_text():
+            if text_parts:
+                text = ' '.join(text_parts).strip()
+                if text:
+                    nodes.append(create_node(
+                        type_='text_block',
+                        content=text,
+                        style=style
+                    ))
+                text_parts.clear()
+
+        # Process children while handling special cases
+        for child in element.children:
+            if isinstance(child, NavigableString):
+                text = str(child).strip()
+                if text and text != '​':  # Skip zero-width spaces
                     text_parts.append(text)
             elif isinstance(child, Tag):
                 if child.name == 'br':
                     text_parts.append('\n')
-                elif child.name in ['span', 'strong', 'em', 'b', 'i', 'a']:
-                    inline_text = child.get_text()
-                    if inline_text:
-                        text_parts.append(inline_text)
-
-        if not text_parts:
-            return None
-
-        combined_text = ''.join(text_parts)
-        normalized_text = ' '.join(combined_text.split())
-
-        # Merge paragraph's own style with parent style
-        style = self.parse_style(element.get('style', '')).merge(parent_style)
-
-        return DocumentNode(
-            type='text_block',
-            content=normalized_text,
-            style=style
-        )
-
-    def _process_content(self, element: Tag, style: StyleInfo) -> List[DocumentNode]:
-        """Process any content-containing element into document nodes"""
-        nodes = []
-        current_pieces: List[StyledText] = []
-
-        def flush_text() -> None:
-            """Convert accumulated text pieces into text block node"""
-            if not current_pieces:
-                return
-
-            # Determine if this is from a paragraph tag
-            is_paragraph = any(piece.is_paragraph for piece in current_pieces)
-            text = self._normalize_text(current_pieces, is_paragraph)
-
-            # Use the most specific (last) style for the block
-            final_style = current_pieces[-1].style
-
-            if text.strip():
-                nodes.append(DocumentNode(
-                    type='text_block',
-                    content=text,
-                    style=final_style
-                ))
-            current_pieces.clear()
-
-        # First check if this element should be a heading
-        if self._is_heading(element, style) and not element.find('table', recursive=True):
-            return [DocumentNode(
-                type='heading',
-                content=element.get_text(strip=True),
-                style=style,
-                level=self._determine_heading_level(style)
-            )]
-
-        def process_node(node: Union[Tag, NavigableString]) -> None:
-            nonlocal current_pieces
-
-            if isinstance(node, NavigableString):
-                text = str(node)
-                if text:
-                    # Not from a <p> tag, preserve line breaks
-                    current_pieces.append(StyledText(text, style, is_paragraph=False))
-            elif isinstance(node, Tag):
-                if node.name == 'table':
-                    # Flush any accumulated text before table
+                elif child.name == 'p':
+                    # Flush any current text before handling paragraph
                     flush_text()
-                    # Process table and add to nodes
-                    table_node = self._process_table(node)
-                    if table_node:
-                        nodes.append(table_node)
-                elif node.name == 'br':
-                    current_pieces.append(StyledText('\n', style, is_paragraph=False))
-                elif node.name == 'p':
-                    # Flush any previous content
-                    flush_text()
-                    # Process paragraph content with stricter normalization
-                    node_style = self._get_combined_style(node, style)
-                    text = self._get_text_with_spacing(node)
+                    # Process paragraph content
+                    para_style = self.parse_style(child.get('style', '')).merge(style)
+                    para_result = self._process_paragraph(child, para_style)
+                    if para_result:
+                        nodes.append(para_result)
+                        # Add newline after paragraph if there isn't one
+                        if text_parts and text_parts[-1] != '\n':
+                            text_parts.append('\n')
+                elif child.name == 'font':
+                    # Process font tag content
+                    text = self._get_text_with_spacing(child).strip()
                     if text:
-                        current_pieces.append(StyledText(text, node_style, is_paragraph=True))
-                    flush_text()
-                else:
-                    # Handle other elements
-                    node_style = self._get_combined_style(node, style)
-
-                    if self._is_block_element(node):
-                        # Flush current content before block element
-                        flush_text()
-                        # Process block element
-                        block_nodes = self._process_content(node, node_style)
-                        nodes.extend(block_nodes)
+                        text_parts.append(text)
+                elif child.name == 'div':
+                    # Check for bullet point structure
+                    float_style = self.parse_style(child.get('style', '')).display
+                    if float_style == 'float:left':
+                        # This is a bullet point marker
+                        bullet_text = child.get_text().strip()
+                        if bullet_text:
+                            text_parts.append(bullet_text + ' ')
+                    elif 'clear:both' in child.get('style', ''):
+                        # This is a bullet point separator
+                        if text_parts and text_parts[-1] != '\n':
+                            text_parts.append('\n')
                     else:
-                        # Handle inline element
-                        text = self._get_text_with_spacing(node)
-                        if text:
-                            current_pieces.append(StyledText(text, node_style, is_paragraph=False))
-
-        # Process all children
-        for child in element.children:
-            process_node(child)
+                        # Regular div - process its content
+                        inner_result = self._process_inline_content(child, style)
+                        if inner_result:
+                            # Flush any current text before adding the new content
+                            flush_text()
+                            if isinstance(inner_result, list):
+                                nodes.extend(inner_result)
+                            else:
+                                nodes.append(inner_result)
+                elif not self._is_block_element(child):
+                    text = self._get_text_with_spacing(child).strip()
+                    if text:
+                        text_parts.append(text)
 
         # Flush any remaining text
         flush_text()
 
-        return nodes
+        # Return appropriate result based on what we collected
+        if len(nodes) == 1:
+            return nodes[0]
+        elif len(nodes) > 1:
+            return nodes
+        elif len(text_parts) > 0:
+            text = ' '.join(text_parts).strip()
+            if text:
+                return create_node(
+                    type_='text_block',
+                    content=text,
+                    style=style
+                )
+        return None
+
+
+
+    def _normalize_text_parts(self, parts: List[str]) -> str:
+        """Normalize text parts while preserving intentional line breaks"""
+        # Remove empty parts and normalize spaces
+        normalized_parts = []
+        for i, part in enumerate(parts):
+            if part == '\n':
+                # Keep newlines but ensure no extra spaces around them
+                normalized_parts.append('\n')
+            else:
+                # For text content, strip and add only if non-empty
+                stripped = part.strip()
+                if stripped:
+                    # Don't add space if previous part was a newline or this is the first part
+                    if normalized_parts and normalized_parts[-1] != '\n' and i > 0:
+                        normalized_parts.append(' ')
+                    normalized_parts.append(stripped)
+
+        # Join all parts and remove any extra whitespace around newlines
+        text = ''.join(normalized_parts)
+
+        # Clean up any potential multiple newlines or spaces
+        #text = re.sub(r'\s*\n\s*', '\n', text)
+        text = re.sub(r' +', ' ', text)
+
+        return text.strip()
+
+    def _process_table(self, element: Tag) -> Optional[BaseNode]:
+        """Process table element into a TableNode with precise line break handling"""
+        if not element:
+            return None
+
+        def replace_html_entities(text: str) -> str:
+            """Replace HTML entities with markdown-safe alternatives"""
+            # Map of HTML entities to their markdown-safe replacements
+            entity_replacements = {
+                '&horbar;': '-----',  # Horizontal bar
+                '&mdash;': '-----',  # Em dash
+                '&ndash;': '---',  # En dash
+                '&minus;': '-',  # Minus sign
+                '&hyphen;': '-',  # Hyphen
+                '&dash;': '-',  # Generic dash
+                # Add other common entities that might need replacement
+                '&nbsp;': ' ',  # Non-breaking space
+                '&amp;': '&',  # Ampersand
+                '&lt;': '<',  # Less than
+                '&gt;': '>',  # Greater than
+                '&quot;': '"',  # Quote
+                '&apos;': "'",  # Apostrophe
+                '&#8202;': ' ',  # Hair space
+                '&#8203;': '',  # Zero-width space
+                '&#x2014;': '-----',  # Another way to encode mdash
+                '&#x2013;': '---',  # Another way to encode ndash
+                '&#x2212;': '-',  # Another way to encode minus
+            }
+
+            # Also handle numeric entities that might represent dashes
+            # Unicode values for various dashes
+            dash_codepoints = {
+                '8208': '-',  # hyphen
+                '8209': '-',  # non-breaking hyphen
+                '8210': '-',  # figure dash
+                '8211': '---',  # en dash
+                '8212': '-----',  # em dash
+                '8213': '-----',  # horizontal bar
+                '8722': '-',  # minus sign
+            }
+
+            result = text
+            # Replace named entities
+            for entity, replacement in entity_replacements.items():
+                result = result.replace(entity, replacement)
+
+            # Replace numeric entities (both decimal and hex) for dashes
+            for code, replacement in dash_codepoints.items():
+                # Replace decimal format
+                result = result.replace(f'&#{code};', replacement)
+                # Replace hexadecimal format
+                result = result.replace(f'&#x{hex(int(code))[2:]};', replacement)
+
+            return result
+
+        def extract_cell_text(cell: Tag) -> str:
+            """Extract text from cell with careful line break handling"""
+            # First check for div children
+            divs = cell.find_all('div', recursive=False)
+            if divs:
+                # Get text from each div and handle entities
+                div_texts = [replace_html_entities(div.get_text(strip=True)) for div in divs]
+                return '\n'.join(div_texts)
+
+            # Handle <br/> tags by replacing them with newlines
+            for br in cell.find_all('br'):
+                br.replace_with('\n')
+
+            # Get text and handle entities
+            text = cell.get_text(strip=False)
+            text = replace_html_entities(text)
+            return text.strip()
+
+        def process_cell(cell: Tag) -> List[TableCell]:
+            """Process cell preserving exact colspan and positioning values correctly"""
+            colspan = int(cell.get('colspan', '1'))
+            style = self.parse_style(cell.get('style', ''))
+
+            text = extract_cell_text(cell)
+
+            # If this is a right-aligned cell with colspan > 1 (like percentage values)
+            if style.text_align == 'right' and colspan > 1:
+                # Create empty cells for all but last column of colspan
+                cells = [
+                    TableCell(content='', colspan=1, align='right', is_currency=False)
+                    for _ in range(colspan - 1)
+                ]
+                # Add actual value in last column
+                cells.append(TableCell(
+                    content=text,
+                    colspan=1,
+                    align='right',
+                    is_currency=False
+                ))
+                return cells
+
+            # For single cells
+            return [TableCell(
+                content=text,
+                colspan=colspan,
+                align=style.text_align or 'left',
+                is_currency=text.startswith('$')
+            )]
+
+
+        def process_row(row: Tag) -> TableRow:
+            """Process row preserving cell structure"""
+            cells = []
+            for td in row.find_all(['td', 'th']):
+                cells.extend(process_cell(td))
+
+            return TableRow(cells=cells, is_header=row.find_parent('thead') is not None)
+
+        # Process all rows
+        rows = []
+        for tr in element.find_all('tr'):
+            row = process_row(tr)
+            if row.cells:
+                rows.append(row)
+
+        if rows:
+            # Create metadata from table attributes
+            metadata = {
+                'id': element.get('id', ''),
+                'class': element.get('class', []),
+                'data_attrs': {
+                    k: v for k, v in element.attrs.items()
+                    if k.startswith('data-')
+                }
+            }
+
+            return create_node(
+                'table',
+                rows,
+                self.parse_style(element.get('style', '')),
+                metadata=metadata
+            )
+
+        return None
+
+    def _process_paragraph(self, element: Tag, style: StyleInfo) -> Optional[BaseNode]:
+        """Process a paragraph element with inherited styles"""
+        text_parts = []
+        last_was_text = False
+
+        for child in element.children:
+            if isinstance(child, NavigableString):
+                text = str(child)
+                if text.strip():
+                    text_parts.append(text)
+                    last_was_text = True
+                elif text.isspace() and last_was_text:
+                    text_parts.append(' ')
+            elif isinstance(child, Tag):
+                if child.name == 'br':
+                    text_parts.append('\n')
+                    last_was_text = False
+                elif child.name in ['span', 'font', 'strong', 'em', 'b', 'i', 'a']:
+                    text = self._get_text_with_spacing(child)
+                    if text.strip():
+                        text_parts.append(text.strip())
+                        last_was_text = True
+
+        if not text_parts:
+            return None
+
+        # Join all parts and normalize whitespace while preserving intentional breaks
+        text = ''.join(text_parts)
+        # Split into lines, normalize each line's whitespace, then rejoin
+        lines = [' '.join(line.split()) for line in text.split('\n')]
+        text = '\n'.join(line for line in lines if line)
+
+        if text.strip():
+            return create_node(
+                type_='text_block',
+                content=text,
+                style=style
+            )
+
+        return None
 
     def _normalize_text(self, pieces: List[StyledText], is_paragraph: bool) -> str:
         """Normalize text differently for paragraphs vs general text blocks"""
@@ -862,8 +1173,6 @@ class SECHTMLParser:
             text = '\n'.join(lines)
             return re.sub(r'\n{3,}', '\n\n', text)
 
-
-
     def _is_block_element(self, element: Tag) -> bool:
         """Determine if an element is block-level"""
         # Check explicit display style first
@@ -878,7 +1187,8 @@ class SECHTMLParser:
             'table', 'form', 'fieldset', 'address'
         }
 
-        return element.name in block_elements
+        return element.name in block_elements and 'float:left' not in element.get('style', '')
+
 
     def _collect_styled_text(self, element: Tag, style: StyleInfo) -> List[StyledText]:
         """Collect text with style information from inline elements"""
@@ -986,49 +1296,135 @@ class SECHTMLParser:
         """Check if text is effectively empty"""
         return not bool(text.strip())
 
-
     def _get_text_with_spacing(self, element: Tag) -> str:
         """Extract text while preserving meaningful whitespace"""
-        # Don't process tables in text extraction
         if element.name == 'table':
             return ''
 
-        style = self.parse_style(element.get('style', ''))
-        is_inline = (
-                style.display == 'inline' or
-                element.name in ['span', 'strong', 'em', 'b', 'i', 'a']
-                or element.name.startswith('ix:')
-        )
+        texts = []
+        last_was_text = False
 
-        parts = []
         for child in element.children:
             if isinstance(child, NavigableString):
-                parts.append(str(child))
-            elif child.name == 'br':
-                parts.append('\n')
-            elif child.name == 'table':
-                continue  # Skip tables in text extraction
-            elif child.name in ['p', 'div']:
-                child_style = self.parse_style(child.get('style', ''))
-                child_is_inline = child_style.display == 'inline'
-
-                text = self._get_text_with_spacing(child)
+                text = str(child)
                 if text.strip():
-                    if child_is_inline:
-                        parts.append(text)
-                    else:
-                        parts.append(f'\n{text}\n')
+                    texts.append(text.strip())
+                    last_was_text = True
+                elif text.isspace() and last_was_text:
+                    texts.append(' ')
+            elif child.name == 'br':
+                texts.append('\n')
+                last_was_text = False
+            elif child.name == 'table':
+                continue
             else:
-                parts.append(self._get_text_with_spacing(child))
+                child_text = self._get_text_with_spacing(child)
+                if child_text.strip():
+                    # Only add space if needed
+                    if texts and last_was_text and not texts[-1].endswith(' ') and not child_text.startswith(' '):
+                        texts.append(' ')
+                    texts.append(child_text.strip())
+                    last_was_text = True
 
-        text = ''.join(parts)
-        return text if is_inline else text
+        return ''.join(texts)
 
-
-    def _merge_adjacent_nodes(self, nodes: List[DocumentNode]) -> List[DocumentNode]:
-        """Merge adjacent nodes while preserving proper spacing"""
+    def _merge_adjacent_nodes(self, nodes: List[BaseNode]) -> List[BaseNode]:
+        """Merge adjacent nodes while preserving styling from both nodes"""
         if not nodes:
             return []
+
+        def merge_styles(style1: StyleInfo, style2: StyleInfo) -> StyleInfo:
+            """Merge two styles intelligently"""
+            # Start with a new style object
+            merged = StyleInfo()
+
+            # For each style attribute, take the non-None value
+            # If both have values, use the more specific one
+            merged.display = style2.display or style1.display
+            merged.margin_top = style1.margin_top  # Keep first node's top margin
+            merged.margin_bottom = style2.margin_bottom  # Keep second node's bottom margin
+
+            # For font properties, prefer the second node's style if it's different
+            # This preserves intentional style changes in the second block
+            if style2.font_size and style2.font_size != style1.font_size:
+                merged.font_size = style2.font_size
+            else:
+                merged.font_size = style1.font_size
+
+            if style2.font_weight and style2.font_weight != style1.font_weight:
+                merged.font_weight = style2.font_weight
+            else:
+                merged.font_weight = style1.font_weight
+
+            # For alignment, if they differ, don't merge
+            if style1.text_align != style2.text_align:
+                return None
+            merged.text_align = style1.text_align
+
+            # Improved width handling
+            if style1.width and style2.width:
+                # If units differ, prefer the larger width's unit
+                if style1.width.unit != style2.width.unit:
+                    # Convert both to pixels for comparison
+                    # This is a simplified conversion - you might want to use the existing
+                    # Width.to_chars method for more accurate conversion
+                    w1_px = _to_pixels(style1.width)
+                    w2_px = _to_pixels(style2.width)
+
+                    # If one width is significantly smaller (like a bullet point)
+                    # use the larger width
+                    if w1_px < w2_px * 0.3:  # First node is much smaller
+                        merged.width = style2.width
+                    elif w2_px < w1_px * 0.3:  # Second node is much smaller
+                        merged.width = style1.width
+                    else:
+                        # Widths are comparable, use the second node's width
+                        merged.width = style2.width
+                else:
+                    # Same units, apply the same logic
+                    if style1.width.value < style2.width.value * 0.3:
+                        merged.width = style2.width
+                    elif style2.width.value < style1.width.value * 0.3:
+                        merged.width = style1.width
+                    else:
+                        merged.width = style2.width
+            else:
+                # If only one has width, use that
+                merged.width = style2.width or style1.width
+
+            merged.text_decoration = style2.text_decoration or style1.text_decoration
+            merged.line_height = style2.line_height or style1.line_height
+
+            return merged
+
+        def _to_pixels(width: Width) -> float:
+            """Convert width to pixels for comparison"""
+            # Conversion factors (approximate)
+            conversions = {
+                'px': 1,
+                'pt': 1.333,  # 1pt ≈ 1.333px
+                'in': 96,  # 1in = 96px
+                'cm': 37.795,  # 1cm ≈ 37.795px
+                'mm': 3.7795,  # 1mm ≈ 3.7795px
+                '%': 1  # Handle percentages separately
+            }
+            return width.value * conversions.get(width.width.unit, 1)
+
+        def can_merge_nodes(node1: BaseNode, node2: BaseNode) -> bool:
+            """Determine if two nodes can be safely merged"""
+            if node1.type != 'text_block' or node2.type != 'text_block':
+                return False
+
+            # Don't merge if either has special metadata
+            if node1.metadata or node2.metadata:
+                return False
+
+            # Try to merge styles
+            merged_style = merge_styles(node1.style, node2.style)
+            if merged_style is None:
+                return False
+
+            return True
 
         merged = []
         current = None
@@ -1038,19 +1434,15 @@ class SECHTMLParser:
                 current = node
                 continue
 
-            # Handle different node combinations
-            if (current.type == 'text_block' and
-                    node.type == 'text_block' and
-                    self._similar_styles(current.style, node.style)):
-                # Merge paragraphs with appropriate spacing
-                current.content = f"{current.content}\n\n{node.content}"
-            elif current.type == 'linebreak':
-                # Handle explicit line breaks
-                if merged:
-                    merged[-1].content += '\n'
-                else:
-                    merged.append(current)
-                current = node
+            if can_merge_nodes(current, node):
+                merged_style = merge_styles(current.style, node.style)
+                # Create new merged text block with the combined style
+                merged_content = f"{current.content}\n\n{node.content}"
+                current = create_node(
+                    'text_block',
+                    merged_content,
+                    merged_style
+                )
             else:
                 merged.append(current)
                 current = node
@@ -1059,6 +1451,8 @@ class SECHTMLParser:
             merged.append(current)
 
         return merged
+
+
 
     def _is_heading(self, element: Tag, style: StyleInfo) -> bool:
         # Heuristics for heading detection
@@ -1078,79 +1472,6 @@ class SECHTMLParser:
         # Combined heuristics
         return (is_larger or is_bold) and is_short
 
-
-    def _process_table(self, element: Tag) -> Optional[DocumentNode]:
-        """Process table using virtual columns from row colspans and correct value positioning"""
-        if not element:
-            return None
-
-        def process_cell(cell: Tag) -> List[TableCell]:
-            """Process cell preserving exact colspan and positioning values correctly"""
-            colspan = int(cell.get('colspan', '1'))
-
-            def extract_cell_text(cell: Tag) -> str:
-                # If cell has div children
-                divs = cell.find_all('div', recursive=False)
-                if divs:
-                    # Join text from each div with newlines
-                    return '\n'.join(div.get_text(strip=True) for div in divs)
-
-                # Handle <br/> tags by replacing them with newlines
-                # Convert <br/> to newlines first
-                for br in cell.find_all('br'):
-                    br.replace_with('\n')
-
-                # If no divs, get regular text
-                return cell.get_text(strip=False).strip()
-
-            text = extract_cell_text(cell)
-
-            style = self.parse_style(cell.get('style', ''))
-
-            # If this is a right-aligned cell with colspan > 1 (like percentage values)
-            if style.text_align == 'right' and colspan > 1:
-                # Create empty cells for all but last column of colspan
-                cells = [
-                    TableCell(content='', colspan=1, align='right', is_currency=False)
-                    for _ in range(colspan - 1)
-                ]
-                # Add actual value in last column
-                cells.append(TableCell(
-                    content=text.strip(),  # Remove any trailing spaces
-                    colspan=1,
-                    align='right',
-                    is_currency=False
-                ))
-                return cells
-
-            # For single cells (including $ symbols and % symbols)
-            return [TableCell(
-                content=text.strip(),
-                colspan=colspan,
-                align=style.text_align or 'left',
-                is_currency=text.startswith('$')
-            )]
-
-        def process_row(row: Tag) -> TableRow:
-            """Process row preserving cell structure"""
-            cells = []
-            for td in row.find_all(['td', 'th']):
-                cells.extend(process_cell(td))
-
-            return TableRow(cells=cells, is_header=row.find_parent('thead') is not None)
-
-        # Process all rows
-        rows = []
-        for tr in element.find_all('tr'):
-            row = process_row(tr)
-            if row.cells:
-                rows.append(row)
-
-        return DocumentNode(
-            type='table',
-            content=rows,
-            style=self.parse_style(element.get('style', ''))
-        )
 
 
     def _similar_styles(self, style1: StyleInfo, style2: StyleInfo) -> bool:
