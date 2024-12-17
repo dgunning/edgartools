@@ -272,8 +272,6 @@ def is_heading(element: Tag, style: StyleInfo) -> bool:
         score -= 2
         debug_evidence.append("-2 for medium length")
 
-    # 2. Text patterns (max 4 points)
-    pattern_matched = False
 
     # Primary document structure patterns
     primary_patterns = [
@@ -303,7 +301,6 @@ def is_heading(element: Tag, style: StyleInfo) -> bool:
         if re.match(pattern, text):
             score += points
             debug_evidence.append(f"+{points} for {desc}")
-            pattern_matched = True
             break
 
     # 3. All caps bonus for short text
@@ -347,10 +344,10 @@ def is_heading(element: Tag, style: StyleInfo) -> bool:
         if parent_style.margin_top:
             if parent_style.margin_top >= StyleUnit(18, 'pt'):
                 score += 2
-                debug_evidence.append(f"+2 for large parent margin")
+                debug_evidence.append("+2 for large parent margin")
             elif parent_style.margin_top >= StyleUnit(12, 'pt'):
                 score += 1
-                debug_evidence.append(f"+1 for medium parent margin")
+                debug_evidence.append("+1 for medium parent margin")
 
     # Debug output
     print(f"\nHeading detection for: '{text[:50]}{'...' if len(text) > 50 else ''}'")
@@ -492,7 +489,7 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
                     )
 
                 if debug:
-                    print(f"\nProcessing split heading:")
+                    print("\nProcessing split heading:")
                     print(f"Combined text: '{combined_text}'")
                     print(f"Has bold span: {has_bold}")
 
