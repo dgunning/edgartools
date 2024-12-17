@@ -531,9 +531,3 @@ Report a bug by [opening a new issue](https://github.com/dgunning/edgartools/iss
 
 [![Star History Chart](https://api.star-history.com/svg?repos=dgunning/edgartools&type=Timeline)](https://star-history.com/#dgunning/edgartools&Timeline)
 
-
-## Subscribe to Polar
-<picture>
-2  <source media="(prefers-color-scheme: dark)" srcset="https://polar.sh/embed/subscribe.svg?org=polarsource&label=Subscribe&darkmode">
-3  <img alt="Subscribe on Polar" src="https://polar.sh/embed/subscribe.svg?org=polarsource&label=Subscribe">
-4</picture>
