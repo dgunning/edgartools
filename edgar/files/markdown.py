@@ -1,6 +1,6 @@
 import re
 from typing import List, Tuple, Dict
-
+from typing import Optional
 from edgar.files.html import Document, BaseNode
 from edgar.files.tables import ProcessedTable, TableProcessor
 
@@ -174,5 +174,9 @@ class MarkdownRenderer:
 
 
 
-def to_markdown(html_content: str) -> str:
-    return Document.parse(html_content).to_markdown()
+def to_markdown(html_content: str) -> Optional[str]:
+    """Convert HTML content to markdown"""
+    document = Document.parse(html_content)
+    if document:
+        return document.to_markdown()
+    return None

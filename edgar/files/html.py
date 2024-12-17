@@ -389,7 +389,7 @@ class StyledText:
 class SECHTMLParser:
     def __init__(self, root: Tag, extract_data: bool = True):
         self.data:DocumentData = HtmlDocument.extract_data(root) if extract_data else None
-        self.root:Tag = clean_html_root(root)
+        self.root:Tag = root
         self.base_font_size = 10.0  # Default base font size in pt
         self.style_stack: List[StyleInfo] = []
 

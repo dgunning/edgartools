@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from edgar import Filing, Document
 from rich import print
 from rich.panel import Panel
 
@@ -144,9 +144,16 @@ def test_markdown_to_dataframe_for_header_only_table():
     assert df.shape == (1, 2)
 
 def test_markdown_text_has_correct_spaces():
-    from edgar import Filing
+
     filing = Filing(company='Paramount Global', cik=813828, form='8-K', filing_date='2024-04-29',
                     accession_no='0000813828-24-000018')
 
     md = filing.markdown()
     print(md)
+
+
+def test_obscure_filing_to_markdown():
+    filing = Filing(form='TA-1/A', filing_date='2024-03-13', company='DB SERVICES AMERICAS INC /TA', cik=1018490, accession_no='0001018490-24-000008')
+    html = filing.html()
+    md = filing.markdown()
+    assert not md
