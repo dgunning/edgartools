@@ -20,6 +20,9 @@
 </a>
 </p>
 
+# Why edgartools?
+📊 Access company financials, insider trades, and SEC filings instantly with Python's most powerful EDGAR data library. 🚀 Easy to use, fast results.
+
 # Features
 - 📁 **Access any SEC filing**: You can access any SEC filing since 1994.
 - 💰 **Company Financials**: Comprehensive company financials from 10-K and 10-Q filings
