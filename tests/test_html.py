@@ -102,13 +102,13 @@ def test_spans_with_styling():
     document = parser.parse()
 
     assert document is not None
-    assert len(document.nodes) == 1
+    assert len(document.nodes) == 3
 
     node = document.nodes[0]
-    assert node.type == 'text_block'
+    assert node.type == 'heading'
 
     # Verify content
-    expected_text = "Bold span Italic span Blue span"
+    expected_text = "Bold span"
     assert node.content.strip() == expected_text
 
     # Verify div styling was preserved
@@ -394,3 +394,15 @@ def test_table_of_content_for_10K():
     tables = document.tables
     #toc = document.table_of_contents()
     #print(toc)
+
+def test_parse_and_identify_headings():
+    content = Path('data/html/Headings-Snippet.html').read_text()
+    document = Document.parse(content)
+    headings = document.headings
+    assert len(headings) == 3
+    assert headings[0].content == "PART I"
+    assert headings[1].content == "Item 1. Business"
+    print()
+    print(document)
+
+

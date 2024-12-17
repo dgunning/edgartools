@@ -1,8 +1,10 @@
 import re
-from dataclasses import dataclass, field
-from typing import List, Dict, Set
-from typing import Optional, Union, Any, Literal
+import textwrap
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import List, Dict
+from typing import Optional, Union, Any, Literal
+
 from bs4 import Tag, NavigableString
 from prompt_toolkit.contrib.telnet.log import logger
 from rich import box
@@ -11,117 +13,13 @@ from rich.console import Console, Group, RenderResult
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-import textwrap
-from edgar.files.html_documents import HtmlDocument, clean_html_root
+
 from edgar.files.html_documents import DocumentData
+from edgar.files.html_documents import HtmlDocument, clean_html_root
+from edgar.files.styles import StyleInfo, Width, parse_style, get_heading_level
 from edgar.richtools import repr_rich
 
-__all__ = ['SECHTMLParser', 'Document', 'DocumentNode', 'StyleInfo']
-
-
-
-# Define unit types for type checking
-UnitType = Literal['pt', 'px', 'in', 'cm', 'mm', '%']
-
-
-
-@dataclass
-class Width:
-    """Represents a width value with its unit"""
-    value: float
-    unit: UnitType
-
-    def to_chars(self, console_width: int) -> int:
-        """Convert width to character count based on console width"""
-        # Base conversion rates (at standard 80-char width)
-        BASE_CONSOLE_WIDTH = 80  # standard width
-        CHARS_PER_INCH = 12.3  # at standard width
-
-        # Scale factor based on actual console width
-        scale = console_width / BASE_CONSOLE_WIDTH
-
-        # Convert to inches first
-        inches = self._to_inches()
-
-        # Convert to characters, scaling based on console width
-        chars = round(inches * CHARS_PER_INCH * scale)
-
-        # Handle percentage
-        if self.unit == '%':
-            return round(console_width * (self.value / 100))
-
-        return min(chars, console_width)
-
-    def _to_inches(self) -> float:
-        """Convert any unit to inches"""
-        conversions = {
-            'in': 1.0,
-            'pt': 1 / 72,  # 72 points per inch
-            'px': 1 / 96,  # 96 pixels per inch
-            'cm': 0.393701,  # 1 cm = 0.393701 inches
-            'mm': 0.0393701,  # 1 mm = 0.0393701 inches
-            '%': 1.0  # percentage handled separately in to_chars
-        }
-        return self.value * conversions[self.unit]
-
-
-@dataclass
-class StyleInfo:
-    display: Optional[str] = None
-    margin_top: Optional[float] = None
-    margin_bottom: Optional[float] = None
-    font_size: Optional[float] = None
-    font_weight: Optional[str] = None
-    text_align: Optional[str] = None
-    line_height: Optional[float] = None
-    width: Optional[Width] = None # Width in characters
-    text_decoration: Optional[str] = None
-
-    def merge(self, parent_style: Optional['StyleInfo']) -> 'StyleInfo':
-        """Merge this style with parent style, child properties take precedence"""
-        if not parent_style:
-            return self
-
-        # Create new style with parent values
-        merged = StyleInfo(
-            display=parent_style.display,
-            margin_top=parent_style.margin_top,
-            margin_bottom=parent_style.margin_bottom,
-            font_size=parent_style.font_size,
-            font_weight=parent_style.font_weight,
-            text_align=parent_style.text_align,
-            line_height=parent_style.line_height,
-            width=parent_style.width,
-            text_decoration=parent_style.text_decoration
-        )
-
-        # Override with child values where they exist
-        if self.display is not None:
-            merged.display = self.display
-        if self.margin_top is not None:
-            merged.margin_top = self.margin_top
-        if self.margin_bottom is not None:
-            merged.margin_bottom = self.margin_bottom
-        if self.font_size is not None:
-            merged.font_size = self.font_size
-        if self.font_weight is not None:
-            merged.font_weight = self.font_weight
-        if self.text_align is not None:
-            merged.text_align = self.text_align
-        if self.line_height is not None:
-            merged.line_height = self.line_height
-        if self.width is not None:
-            merged.width = self.width
-        if self.text_decoration is not None:
-            merged.text_decoration = self.text_decoration
-
-        return merged
-
-    def get_char_width(self, console_width: int = 80) -> Optional[int]:
-        """Get width in characters, respecting console width"""
-        if self.width is None:
-            return None
-        return min(self.width, console_width)
+__all__ = ['SECHTMLParser', 'Document', 'DocumentNode']
 
 
 class BaseNode(ABC):
@@ -185,18 +83,18 @@ class HeadingNode(BaseNode):
                 "title": "•" if self.content else None  # Bullet for level 2
             },
             3: {
-                "text_style": "bold",
-                "box": box.SIMPLE,
+                "text_style": "bold blue",
+                "box": box.SIMPLE_HEAVY,
                 "border_style": "white",
                 "padding": (0, 2),
-                "title": ">" if self.content else None  # Arrow for level 3
+                "title": "" if self.content else None  # Arrow for level 3
             },
             4: {
-                "text_style": "dim bold",
+                "text_style": "bold underline",
                 "box": box.MINIMAL,
-                "border_style": "grey70",
+                "border_style": "grey62",
                 "padding": (0, 1),
-                "title": "-" if self.content else None  # Dash for level 4
+                "title": "" if self.content else None  # Dash for level 4
             }
         }
 
@@ -447,6 +345,11 @@ class Document:
         """Get all table nodes in the document"""
         return [node for node in self.nodes if node.type == 'table']
 
+    @property
+    def headings(self) -> List[BaseNode]:
+        """Get all heading nodes in the document"""
+        return [node for node in self.nodes if node.type == 'heading']
+
     @classmethod
     def parse(cls, html: str) -> Optional['Document']:
         root = HtmlDocument.get_root(html)
@@ -512,45 +415,6 @@ class SECHTMLParser:
 
         return self._merge_adjacent_nodes(nodes)
 
-    def parse_style(self, style_str: str) -> StyleInfo:
-        """Parse inline CSS style string into StyleInfo object"""
-        style = StyleInfo()
-        if not style_str:
-            return style
-
-        # Split style string into individual properties
-        properties = [p.strip() for p in style_str.split(';') if p.strip()]
-        for prop in properties:
-            if ':' not in prop:
-                continue
-
-            key, value = prop.split(':', 1)
-            key = key.strip().lower()
-            value = value.strip().lower()
-
-            # Parse different style properties
-            if key == 'width':
-                width = self._parse_width(value)
-                if width:
-                    style.width = width
-            elif key == 'display':
-                style.display = value
-            elif key == 'margin-top':
-                style.margin_top = self._parse_unit(value)
-            elif key == 'margin-bottom':
-                style.margin_bottom = self._parse_unit(value)
-            elif key == 'font-size':
-                style.font_size = self._parse_unit(value)
-            elif key == 'font-weight':
-                style.font_weight = value
-            elif key == 'text-align':
-                style.text_align = value
-            elif key == 'line-height':
-                style.line_height = self._parse_unit(value)
-            elif key == 'text-decoration':
-                style.text_decoration = value
-
-        return style
 
     def _parse_width(self, value: str) -> Optional[Width]:
         """Parse CSS width value into Width object"""
@@ -632,7 +496,6 @@ class SECHTMLParser:
         multiplier = chars_per_unit.get(unit, 1.0)
         return int(number * multiplier)
 
-
     def _clean_text(self, text: str) -> str:
         """Clean and normalize text content while preserving meaningful whitespace"""
         # Replace HTML entities
@@ -644,64 +507,33 @@ class SECHTMLParser:
             '&quot;': '"',
             '&apos;': "'",
             '&#8202;': ' ',  # hair space
-            '&#8203;': ''  # zero-width space
+            '&#8203;': '',  # zero-width space
+            '\xa0': ' ',  # non-breaking space
+            '\u200b': '',  # zero-width space
+            '\u200c': '',  # zero-width non-joiner
+            '\u200d': '',  # zero-width joiner
+            '\u2028': ' ',  # line separator
+            '\u2029': ' ',  # paragraph separator
+            '\ufeff': ''  # byte order mark
         }
 
         for entity, replacement in entities.items():
             text = text.replace(entity, replacement)
+
+        # Replace multiple consecutive spaces with a single space
+        text = ' '.join(text.split())
 
         # Normalize whitespace while preserving single newlines
         lines = text.splitlines()
         lines = [' '.join(line.split()) for line in lines]
         text = '\n'.join(lines)
 
-        return text
+        # Clean up any remaining multiple spaces around newlines
+        text = re.sub(r'\s*\n\s*', '\n', text)
 
-    def _looks_like_header(self, element: Tag, style: StyleInfo) -> bool:
-        """Determine if a div looks like it should be treated as a heading"""
-        # Don't treat divs with spans as headers unless they have very clear heading characteristics
-        if element.find('span'):
-            return False
-
-        # Get text content
-        text = element.get_text(strip=True)
-        if not text:
-            return False
-
-        # More strict header characteristics
-        hints = [
-            bool(style.font_weight and style.font_weight in ['bold', '700', '800', '900']),  # Bold text
-            bool(style.margin_top and style.margin_top > 18),  # Significant top margin
-            bool(len(text.split()) <= 8),  # Very short text (reduced from 10)
-            not bool(element.find('table')),  # No tables inside
-            not any(c.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'] for c in element.find_all()),
-            # No header or paragraph tags inside
-            bool(style.font_size and style.font_size >= 1.2 * self.base_font_size)  # Notably larger font
-        ]
-
-        # More strict requirements: need more positive hints
-        return sum(hints) >= 4 and hints[0]  # Must be bold plus at least 3 other hints
-
-    def _determine_heading_level(self, style: StyleInfo) -> int:
-        """Determine heading level based on styling"""
-        if not style:
-            return 2  # Default level
-
-        # Use font size relative to base size to determine level
-        if style.font_size:
-            size_ratio = style.font_size / self.base_font_size
-            if size_ratio >= 1.8:  # Much larger
-                return 1
-            elif size_ratio >= 1.4:  # Notably larger
-                return 2
-            elif size_ratio >= 1.2:  # Somewhat larger
-                return 3
-
-        # If bold but not significantly larger, treat as lower-level heading
-        if style.font_weight in ['bold', '700', '800', '900']:
-            return 3
-
-        return 4  # Default to lowest level if uncertain
+        # Remove any remaining consecutive spaces
+        text = re.sub(r' +', ' ', text)
+        return text.strip()
 
     def _process_element(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
         """Process an element into one or more nodes with inherited styles"""
@@ -714,7 +546,7 @@ class SECHTMLParser:
                 parent = parent.parent
 
         # Parse current element's style
-        current_style = self.parse_style(element.get('style', ''))
+        current_style = parse_style(element.get('style', ''))
 
         # Merge with parent style if there is one
         if self.style_stack:
@@ -724,6 +556,18 @@ class SECHTMLParser:
         self.style_stack.append(current_style)
 
         try:
+            # First check if this element could be a heading
+            text = element.get_text(strip=True)
+            if text:  # Only check for headings if there's text content
+                heading_level = get_heading_level(element, current_style, text)
+                if heading_level is not None:
+                    return create_node(
+                        type_='heading',
+                        content=text,
+                        style=current_style,
+                        level=heading_level
+                    )
+
             # Handle ix: tags by processing their content sequentially
             if element.name.startswith('ix:'):
                 nodes = []
@@ -743,7 +587,7 @@ class SECHTMLParser:
                                 nodes.append(para_node)
                         elif child.name == 'div':
                             # Process div with its own style
-                            div_style = self.parse_style(child.get('style', '')).merge(current_style)
+                            div_style = parse_style(child.get('style', '')).merge(current_style)
                             div_result = self._process_structured_content(child, div_style)
                             if div_result:
                                 if isinstance(div_result, list):
@@ -766,26 +610,30 @@ class SECHTMLParser:
             if element.name == 'table':
                 return self._process_table(element)
 
-            elif element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
-                level = int(element.name[1])
-                return create_node(
-                    type_='heading',
-                    content=element.get_text(strip=True),
-                    style=current_style,
-                    level=level
-                )
-
             elif element.name == 'p':
+                # Check for heading in paragraph first
+                para_text = element.get_text(strip=True)
+                if para_text:
+                    heading_level = get_heading_level(element, current_style, para_text)
+                    if heading_level is not None:
+                        return create_node(
+                            type_='heading',
+                            content=para_text,
+                            style=current_style,
+                            level=heading_level
+                        )
                 return self._process_paragraph(element, current_style)
 
             elif element.name == 'div':
                 # Phase 2: Process content based on whether this div contains tables
                 if element.get('has_table'):
                     # Structure-preserving mode for divs with tables
-                    return self._process_structured_content(element, current_style)
+                    block_result = self._process_structured_content(element, current_style)
+                    return block_result
                 else:
                     # Content-combining mode for divs without tables
-                    return self._process_inline_content(element, current_style)
+                    block_result = self._process_inline_content(element, current_style)
+                    return block_result
 
             # For other elements, process children
             nodes = []
@@ -803,6 +651,7 @@ class SECHTMLParser:
         finally:
             # Always pop the style from stack when done with this element
             self.style_stack.pop()
+
 
     def _process_structured_content(self, element: Tag, style: StyleInfo) -> Optional[Union[BaseNode, List[BaseNode]]]:
         """Process content in structure-preserving mode (for elements containing tables)"""
@@ -851,19 +700,42 @@ class SECHTMLParser:
 
     def _process_inline_content(self, element: Tag, style: StyleInfo) -> Optional[Union[BaseNode, List[BaseNode]]]:
         """Process content in content-combining mode (for elements without tables)"""
+
+        # First check if the entire element is a heading
+        text = element.get_text(strip=True)
+        if text:
+            heading_level = get_heading_level(element, style, text)
+            if heading_level is not None:
+                return create_node(
+                    type_='heading',
+                    content=text,
+                    style=style,
+                    level=heading_level
+                )
+
         nodes = []
-        text_parts = []
+        text_parts: List[str] = []  # Explicitly type as strings
 
         def flush_text():
             if text_parts:
                 text = ' '.join(text_parts).strip()
                 if text:
-                    nodes.append(create_node(
-                        type_='text_block',
-                        content=text,
-                        style=style
-                    ))
-                text_parts.clear()
+                    # Check if combined text forms a heading
+                    heading_level = get_heading_level(element, style, text)
+                    if heading_level is not None:
+                        nodes.append(create_node(
+                            type_='heading',
+                            content=text,
+                            style=style,
+                            level=heading_level
+                        ))
+                    else:
+                        nodes.append(create_node(
+                            type_='text_block',
+                            content=text,
+                            style=style
+                        ))
+                    text_parts.clear()
 
         # Process children while handling special cases
         for child in element.children:
@@ -874,66 +746,41 @@ class SECHTMLParser:
             elif isinstance(child, Tag):
                 if child.name == 'br':
                     text_parts.append('\n')
-                elif child.name == 'p':
-                    # Flush any current text before handling paragraph
-                    flush_text()
-                    # Process paragraph content
-                    para_style = self.parse_style(child.get('style', '')).merge(style)
-                    para_result = self._process_paragraph(child, para_style)
-                    if para_result:
-                        nodes.append(para_result)
-                        # Add newline after paragraph if there isn't one
-                        if text_parts and text_parts[-1] != '\n':
-                            text_parts.append('\n')
-                elif child.name == 'font':
-                    # Process font tag content
-                    text = self._get_text_with_spacing(child).strip()
-                    if text:
-                        text_parts.append(text)
-                elif child.name == 'div':
-                    # Check for bullet point structure
-                    float_style = self.parse_style(child.get('style', '')).display
-                    if float_style == 'float:left':
-                        # This is a bullet point marker
-                        bullet_text = child.get_text().strip()
-                        if bullet_text:
-                            text_parts.append(bullet_text + ' ')
-                    elif 'clear:both' in child.get('style', ''):
-                        # This is a bullet point separator
-                        if text_parts and text_parts[-1] != '\n':
-                            text_parts.append('\n')
-                    else:
-                        # Regular div - process its content
-                        inner_result = self._process_inline_content(child, style)
-                        if inner_result:
-                            # Flush any current text before adding the new content
-                            flush_text()
-                            if isinstance(inner_result, list):
-                                nodes.extend(inner_result)
-                            else:
-                                nodes.append(inner_result)
                 elif not self._is_block_element(child):
+                    # Get the child's style combined with parent style
+                    child_style = parse_style(child.get('style', '')).merge(style)
                     text = self._get_text_with_spacing(child).strip()
                     if text:
-                        text_parts.append(text)
+                        # Check if this individual child is a heading
+                        heading_level = get_heading_level(child, child_style, text)
+                        if heading_level is not None:
+                            # Flush any existing text first
+                            flush_text()
+                            nodes.append(create_node(
+                                type_='heading',
+                                content=text,
+                                style=child_style,
+                                level=heading_level
+                            ))
+                        else:
+                            # Store just the text, but use child_style when creating the node
+                            text_parts.append(text)
+                            # Update the style for the current text block to use the child's style
+                            style = child_style
+                else:
+                    # For block elements, flush current text and process the element
+                    flush_text()
+                    child_result = self._process_element(child)
+                    if child_result:
+                        if isinstance(child_result, list):
+                            nodes.extend(child_result)
+                        else:
+                            nodes.append(child_result)
 
         # Flush any remaining text
         flush_text()
 
-        # Return appropriate result based on what we collected
-        if len(nodes) == 1:
-            return nodes[0]
-        elif len(nodes) > 1:
-            return nodes
-        elif len(text_parts) > 0:
-            text = ' '.join(text_parts).strip()
-            if text:
-                return create_node(
-                    type_='text_block',
-                    content=text,
-                    style=style
-                )
-        return None
+        return nodes[0] if len(nodes) == 1 else nodes if nodes else None
 
 
 
@@ -1039,7 +886,7 @@ class SECHTMLParser:
         def process_cell(cell: Tag) -> List[TableCell]:
             """Process cell preserving exact colspan and positioning values correctly"""
             colspan = int(cell.get('colspan', '1'))
-            style = self.parse_style(cell.get('style', ''))
+            style = parse_style(cell.get('style', ''))
 
             text = extract_cell_text(cell)
 
@@ -1097,7 +944,7 @@ class SECHTMLParser:
             return create_node(
                 'table',
                 rows,
-                self.parse_style(element.get('style', '')),
+                parse_style(element.get('style', '')),
                 metadata=metadata
             )
 
@@ -1176,7 +1023,7 @@ class SECHTMLParser:
     def _is_block_element(self, element: Tag) -> bool:
         """Determine if an element is block-level"""
         # Check explicit display style first
-        style = self.parse_style(element.get('style', ''))
+        style = parse_style(element.get('style', ''))
         if style.display:
             return style.display != 'inline'
 
@@ -1210,7 +1057,7 @@ class SECHTMLParser:
 
     def _get_combined_style(self, element: Tag, parent_style: StyleInfo) -> StyleInfo:
         """Combine element's style with parent style, including HTML attributes"""
-        style = self.parse_style(element.get('style', ''))
+        style = parse_style(element.get('style', ''))
 
         # Handle specific HTML tags and their attributes
         if element.name == 'font':
@@ -1280,7 +1127,7 @@ class SECHTMLParser:
 
     def _is_inline(self, element: Tag) -> bool:
         """Determine if an element should be treated as inline"""
-        style = self.parse_style(element.get('style', ''))
+        style = parse_style(element.get('style', ''))
         if style.display == 'inline':
             return True
 
@@ -1306,7 +1153,7 @@ class SECHTMLParser:
 
         for child in element.children:
             if isinstance(child, NavigableString):
-                text = str(child)
+                text = self._clean_text(str(child))
                 if text.strip():
                     texts.append(text.strip())
                     last_was_text = True
@@ -1451,27 +1298,6 @@ class SECHTMLParser:
             merged.append(current)
 
         return merged
-
-
-
-    def _is_heading(self, element: Tag, style: StyleInfo) -> bool:
-        # Heuristics for heading detection
-        if not style:
-            return False
-
-        # Check font size
-        is_larger = (style.font_size or 0) > self.base_font_size
-
-        # Check font weight
-        is_bold = style.font_weight in ['bold', '700', '800', '900']
-
-        # Check content length
-        text = element.get_text(strip=True)
-        is_short = len(text) < 200  # Arbitrary threshold
-
-        # Combined heuristics
-        return (is_larger or is_bold) and is_short
-
 
 
     def _similar_styles(self, style1: StyleInfo, style2: StyleInfo) -> bool:
