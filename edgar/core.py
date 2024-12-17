@@ -755,6 +755,8 @@ def listify(value):
     """
     if isinstance(value, list):
         return value
+    elif isinstance(value, range):
+        return list(value)
     else:
         return [value]
 

@@ -5,15 +5,13 @@ from datetime import date
 from functools import lru_cache
 from pathlib import Path
 from typing import List
-from tqdm.auto import tqdm
+from unittest.mock import patch, MagicMock
+
 import httpx
 import humanize
 import pandas as pd
 import pytest
 from rich import print
-import pytest
-from unittest.mock import patch, MagicMock
-from contextlib import nullcontext
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachment, \
@@ -1012,3 +1010,9 @@ def test_get_filing_by_accession_invalid_format():
 def test_year_extraction_parametrized(accession_number, expected_year):
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
     assert year == expected_year
+
+def test_get_filings_by_range():
+    filings = get_filings(year=range(2022, 2024))
+    assert not filings.empty
+    assert len(filings) > 1000
+    assert filings.date_range == (datetime.date(2022, 1, 3), datetime.date(2023, 12, 29))
