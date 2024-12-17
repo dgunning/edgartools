@@ -524,7 +524,8 @@ Report a bug by [opening a new issue](https://github.com/dgunning/edgartools/iss
 
 ## Contact
 
-[LinkedIn](https://www.linkedin.com/in/dwight-gunning-860124/)
+- **[Dwight Gunning on LinkedIn](https://www.linkedin.com/in/dwight-gunning-860124/)**
+- **[Edgartools Blog](https://www.edgartools.io)**
 
 ## Star History
 
