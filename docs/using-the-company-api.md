@@ -129,28 +129,3 @@ df = company_facts.to_pandas()
 ```
 
 Facts differ among companies. To see what facts are available you can use the `facts_meta` property.
-
-
-# Working with a Filing
-
-Once you have a filing you can do many things with it including getting the html text of the filing, get xbrl or xml, or list all the files in the filing.
-
-## Getting the html text of a filing
-
-```python
-html = filing.html()
-```
-
-
-To get the html text of the filing call `filing.html()`
-
-## Get the Homepage Url
-
-`filing.homepage_url` returns the homepage url of the filing. This is the main index page which lists
-all the files attached in the filing
-
-## Get the filing homepage
-
-To get access to all the documents on the filing you would call `filing.get_homepage()`.
-This gives you access to the `FilingHomepage` class that you can use to list all the documents
-and datafiles on the filing.

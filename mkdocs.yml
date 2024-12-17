@@ -11,8 +11,7 @@ plugins:
 
 nav:
   - Overview: index.md
-  - using-the-filings-api.md
   - using-the-company-api.md
-  - parsing-filing-data.md
-  - working-with-xbrl.md
+  - company-financials.md
+  - data-objects.md
   - eightk-filings.md
