@@ -802,14 +802,14 @@ def test_filing_to_dict():
     assert filing_dict['filing_date'] == '2024-03-08'
     assert filing_dict['company'] == '3M CO'
     assert filing_dict['cik'] == 66740
-    assert filing_dict['accession_no'] == '0000066740-24-000023'
+    assert filing_dict['accession_number'] == '0000066740-24-000023'
 
     filing = Filing.from_dict(filing_dict)
     assert filing.form == '8-K'
     assert filing.filing_date == '2024-03-08'
     assert filing.company == '3M CO'
     assert filing.cik == 66740
-    assert filing.accession_no == '0000066740-24-000023'
+    assert filing.accession_number == '0000066740-24-000023'
 
 
 def test_save_filing_to_file():

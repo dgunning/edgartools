@@ -1198,7 +1198,7 @@ class Filing:
 
     def to_dict(self) -> Dict[str, Union[str, int]]:
         """Return the filing as a Dict string"""
-        return {'accession_no': self.accession_no,
+        return {'accession_number': self.accession_number,
                 'cik': self.cik,
                 'company': self.company,
                 'form': self.form,
@@ -1209,13 +1209,13 @@ class Filing:
         """Create a Filing from a dictionary.
         Thw dict must have the keys cik, company, form, filing_date, accession_no
         """
-        assert all(key in data for key in ['cik', 'company', 'form', 'filing_date', 'accession_no']), \
-            "The dict must have the keys cik, company, form, filing_date, accession_no"
+        assert all(key in data for key in ['cik', 'company', 'form', 'filing_date', 'accession_number']), \
+            "The dict must have the keys cik, company, form, filing_date, accession_number"
         return cls(cik=int(data['cik']),
                    company=str(data['company']),
                    form=str(data['form']),
                    filing_date=str(data['filing_date']),
-                   accession_no=str(data['accession_no']))
+                   accession_no=str(data['accession_number']))
 
     @classmethod
     def from_json(cls, path: str):
