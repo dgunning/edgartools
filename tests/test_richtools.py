@@ -1,8 +1,8 @@
 from rich.table import Table
-from richtools import rich_to_svg, rich_to_png  # Assuming this is the module name
+from edgar.richtools import rich_to_svg
 from rich.panel import Panel
 from rich.tree import Tree
-from rich.text import Text
+
 
 def test_rich_to_svg_table():
     """Test SVG export of a Rich Table"""
