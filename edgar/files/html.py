@@ -6,7 +6,6 @@ from typing import List, Dict
 from typing import Optional, Union, Any, Literal
 
 from bs4 import Tag, NavigableString
-from prompt_toolkit.contrib.telnet.log import logger
 from rich import box
 from rich.align import Align
 from rich.console import Console, Group, RenderResult
@@ -14,8 +13,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from edgar.files.html_documents import DocumentData
-from edgar.files.html_documents import HtmlDocument, clean_html_root
+from edgar.files.html_documents import HtmlDocument, DocumentData
 from edgar.files.styles import StyleInfo, Width, parse_style, get_heading_level
 from edgar.richtools import repr_rich
 
