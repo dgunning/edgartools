@@ -13,6 +13,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.core import log
 from edgar.files.html_documents import HtmlDocument, DocumentData
 from edgar.files.styles import StyleInfo, Width, parse_style, get_heading_level
 from edgar.richtools import repr_rich
@@ -394,7 +395,7 @@ class SECHTMLParser:
     def parse(self) -> Optional[Document]:
         body = self.root.find('body')
         if not body:
-            logger.warn("No body tag found in HTML")
+            log.warn("No body tag found in HTML")
             return None
 
         nodes = self._parse_element(body)
