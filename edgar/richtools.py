@@ -147,6 +147,99 @@ def rich_to_text(rich_object, width=120) -> str:
 
     return result
 
+
+def rich_to_svg(rich_object, width: int = 120) -> str:
+    """
+    Convert a Rich renderable object to SVG format while preserving layout and styling.
+
+    This function uses Rich's built-in SVG export capabilities to convert any Rich
+    renderable (Panel, Table, Tree, etc.) to an SVG string representation.
+
+    Args:
+        rich_object: Any Rich renderable object (Panel, Table, Tree, etc.)
+        width: The width of the output in characters (default: 120)
+
+    Returns:
+        str: SVG representation of the Rich object with preserved layout and styling
+
+    Example:
+        >>> from rich.table import Table
+        >>> table = Table(title="Example")
+        >>> table.add_column("Name")
+        >>> table.add_row("Alice")
+        >>> svg_output = rich_to_svg(table)
+    """
+    from rich.console import Console
+    from io import StringIO
+
+    # Create a console specifically for SVG export
+    console = Console(
+        file=StringIO(),
+        force_terminal=True,  # Ensure styling is applied
+        record=True,  # Enable recording for SVG export
+        width=width,  # Set desired width
+        color_system="standard"  # Use standard colors for better SVG compatibility
+    )
+
+    # Record the rich object rendering
+    console.print(rich_object)
+
+    # Export to SVG with default styling
+    svg_output = console.export_svg()
+
+    return svg_output
+
+
+def rich_to_png(rich_object, width: int = 120, output_path: str = None) -> Optional[bytes]:
+    """
+    Convert a Rich renderable object to PNG format.
+
+    This function first converts the Rich object to SVG using rich_to_svg,
+    then converts that SVG to PNG using CairoSVG.
+
+    Args:
+        rich_object: Any Rich renderable object (Panel, Table, Tree, etc.)
+        width: The width of the output in characters (default: 120)
+        output_path: Optional path to save the PNG file. If not provided,
+                    returns the PNG as bytes.
+
+    Returns:
+        bytes: PNG image data if output_path is None,
+              None if output_path is provided (file is saved instead)
+
+    Example:
+        >>> from rich.table import Table
+        >>> table = Table(title="Example")
+        >>> table.add_column("Name")
+        >>> table.add_row("Alice")
+        >>> png_data = rich_to_png(table)
+        >>> # Or save to file:
+        >>> rich_to_png(table, output_path="output.png")
+    """
+    try:
+        import cairosvg
+    except ImportError:
+        raise ImportError(
+            "CairoSVG is required for PNG conversion. "
+            "Install it with: pip install cairosvg"
+        )
+
+    # First get the SVG output
+    svg_content = rich_to_svg(rich_object, width=width)
+
+    # Convert SVG to PNG
+    if output_path:
+        cairosvg.svg2png(
+            bytestring=svg_content.encode('utf-8'),
+            write_to=output_path
+        )
+        return None
+    else:
+        png_data = cairosvg.svg2png(bytestring=svg_content.encode('utf-8'))
+        return png_data
+
+
+
 def colorize_words(words, colors=None) -> Text:
     """ Colorize a list of words with a list of colors"
     """
