@@ -2,8 +2,9 @@ import re
 import textwrap
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Dict
-from typing import Optional, Union, Any, Literal
+from functools import cached_property
+from typing import Optional, List, Dict, Any
+from typing import Union, Literal
 
 from bs4 import Tag, NavigableString
 from rich import box
@@ -16,6 +17,7 @@ from rich.text import Text
 from edgar.core import log
 from edgar.files.html_documents import HtmlDocument, DocumentData
 from edgar.files.styles import StyleInfo, Width, parse_style, get_heading_level
+from edgar.files.tables import ProcessedTable, TableProcessor
 from edgar.richtools import repr_rich
 
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode']
@@ -221,10 +223,62 @@ class TableNode(BaseNode):
     content: List[TableRow]
     style: StyleInfo
     metadata: Dict[str, Any] = field(default_factory=dict)
+    _processed_table: Optional[ProcessedTable] = None
 
     @property
     def type(self) -> str:
         return 'table'
+
+    @property
+    def row_count(self) -> int:
+        """Quick count of rows without processing"""
+        return len(self.content)
+
+    @property
+    def approximate_column_count(self) -> int:
+        """Quick approximate of columns using max cells in any row"""
+        if not self.content:
+            return 0
+        return max(row.virtual_columns for row in self.content)
+
+    @cached_property
+    def _processed(self) -> Optional[ProcessedTable]:
+        """Cached access to processed table"""
+        if self._processed_table is None:
+            self._processed_table = TableProcessor.process_table(self)
+        return self._processed_table
+
+    @property
+    def processed_row_count(self) -> int:
+        """Accurate row count after processing"""
+        if not self._processed:
+            return self.row_count
+        return len(self._processed.data_rows) + (len(self._processed.headers or []) > 0)
+
+    @property
+    def processed_column_count(self) -> int:
+        """Accurate column count after processing"""
+        if not self._processed:
+            return self.approximate_column_count
+        if self._processed.headers:
+            return len(self._processed.headers)
+        elif self._processed.data_rows:
+            return len(self._processed.data_rows[0])
+        return 0
+
+    def force_process(self) -> None:
+        """Force table processing if needed"""
+        if self._processed_table is None:
+            self._processed_table = TableProcessor.process_table(self)
+
+    def reset_processing(self) -> None:
+        """Clear cached processed table"""
+        self._processed_table = None
+        # Clear cached properties
+        try:
+            del self._processed
+        except AttributeError:
+            pass
 
     def render(self, console_width: int) -> RenderResult:
         from edgar.files.tables import TableProcessor
@@ -289,6 +343,88 @@ def is_text_content(content: ContentType) -> bool:
 
 def is_dict_content(content: ContentType) -> bool:
     return isinstance(content, dict)
+
+
+class IXTagTracker:
+    """Tracks IX tag context throughout HTML parsing"""
+
+    def __init__(self):
+        # Maps continuation IDs to their original ix tag info
+        self.continuation_map: Dict[str, Dict[str, str]] = {}
+        # Current stack of ix tags
+        self.tag_stack: List[Dict[str, str]] = []
+
+    def enter_tag(self, element: Tag) -> None:
+        """Process entering an ix: tag, handling both regular tags and continuations"""
+        if not element.name.startswith('ix:'):
+            return
+
+        if element.name == 'ix:continuation':
+            # For continuation tags, look up the original tag's metadata
+            continued_at = element.get('continuedAt')
+            tag_id = element.get('id')
+            if continued_at and tag_id:
+                self.continuation_map[tag_id] = self.continuation_map.get(continued_at, {})
+        else:
+            # For regular ix tags, store their metadata
+            tag_info = {
+                'name': element.get('name', ''),
+                'contextRef': element.get('contextRef', ''),
+                'id': element.get('id', '')
+            }
+            # Store any additional attributes
+            for key, value in element.attrs.items():
+                if key not in {'name', 'contextRef', 'id'}:
+                    tag_info[key] = value
+
+            # Add to continuation map if this tag has an ID
+            if tag_info['id']:
+                self.continuation_map[tag_info['id']] = tag_info
+
+            self.tag_stack.append(tag_info)
+
+    def exit_tag(self, element: Tag) -> None:
+        """Record exiting an ix: tag"""
+        if element.name.startswith('ix:') and element.name != 'ix:continuation':
+            if self.tag_stack:
+                self.tag_stack.pop()
+
+    def get_current_context(self, element: Tag) -> Dict[str, Any]:
+        """Get the current ix tag context, handling both regular tags and continuations"""
+        # First check if we're in a continuation
+        if element.name == 'ix:continuation':
+            tag_id = element.get('id')
+            if tag_id in self.continuation_map:
+                original_tag = self.continuation_map[tag_id]
+                return {
+                    'ix_tag': original_tag.get('name'),
+                    'ix_context': original_tag.get('contextRef'),
+                    'ix_original_id': original_tag.get('id'),
+                    'ix_continuation_id': tag_id,
+                    **{f'ix_{k}': v for k, v in original_tag.items()
+                       if k not in {'name', 'contextRef', 'id'}}
+                }
+            return {}
+
+        # Otherwise use current tag stack
+        if not self.tag_stack:
+            return {}
+
+        current = self.tag_stack[-1]
+        metadata = {
+            'ix_tag': current.get('name'),
+            'ix_context': current.get('contextRef'),
+            'ix_id': current.get('id')
+        }
+
+        # Add any additional attributes
+        for key, value in current.items():
+            if key not in {'name', 'contextRef', 'id'}:
+                metadata[f'ix_{key}'] = value
+
+        return metadata
+
+
 
 @dataclass
 class DocumentNode:
@@ -391,6 +527,7 @@ class SECHTMLParser:
         self.root:Tag = root
         self.base_font_size = 10.0  # Default base font size in pt
         self.style_stack: List[StyleInfo] = []
+        self.ix_tracker = IXTagTracker()  # Add IX tag tracker
 
     def parse(self) -> Optional[Document]:
         body = self.root.find('body')
@@ -535,7 +672,7 @@ class SECHTMLParser:
         return text.strip()
 
     def _process_element(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
-        """Process an element into one or more nodes with inherited styles"""
+        """Process an element into one or more nodes with inherited styles and ix metadata"""
         # Phase 1: Mark all ancestors of tables
         tables = element.find_all('table', recursive=True)
         for table in tables:
@@ -551,105 +688,161 @@ class SECHTMLParser:
         if self.style_stack:
             current_style = current_style.merge(self.style_stack[-1])
 
-        # Push current style to stack before processing children
-        self.style_stack.append(current_style)
+        # Track entering ix tags and get metadata
+        self.ix_tracker.enter_tag(element)
+        ix_metadata = self.ix_tracker.get_current_context(element)
 
         try:
-            # First check if this element could be a heading
-            text = element.get_text(strip=True)
-            if text:  # Only check for headings if there's text content
-                heading_level = get_heading_level(element, current_style, text)
-                if heading_level is not None:
-                    return create_node(
-                        type_='heading',
-                        content=text,
-                        style=current_style,
-                        level=heading_level
-                    )
+            # Push current style to stack before processing children
+            self.style_stack.append(current_style)
 
-            # Handle ix: tags by processing their content sequentially
-            if element.name.startswith('ix:'):
-                nodes = []
-                children = list(element.children)  # Convert to list to avoid iterator modification
-
-                for i, child in enumerate(children):
-                    if isinstance(child, Tag):
-                        if child.name == 'table':
-                            # Process table
-                            table_node = self._process_table(child)
-                            if table_node:
-                                nodes.append(table_node)
-                        elif child.name == 'p':
-                            # Process paragraph
-                            para_node = self._process_paragraph(child, current_style)
-                            if para_node:
-                                nodes.append(para_node)
-                        elif child.name == 'div':
-                            # Process div with its own style
-                            div_style = parse_style(child.get('style', '')).merge(current_style)
-                            div_result = self._process_structured_content(child, div_style)
-                            if div_result:
-                                if isinstance(div_result, list):
-                                    nodes.extend(div_result)
-                                else:
-                                    nodes.append(div_result)
-                        else:
-                            # Process other elements recursively
-                            child_result = self._process_element(child)
-                            if child_result:
-                                if isinstance(child_result, list):
-                                    nodes.extend(child_result)
-                                else:
-                                    nodes.append(child_result)
-
-                # Return the collected nodes
-                return nodes[0] if len(nodes) == 1 else nodes if nodes else None
-
-            # Process table elements directly
-            if element.name == 'table':
-                return self._process_table(element)
-
-            elif element.name == 'p':
-                # Check for heading in paragraph first
-                para_text = element.get_text(strip=True)
-                if para_text:
-                    heading_level = get_heading_level(element, current_style, para_text)
+            try:
+                # First check if this element could be a heading
+                text = element.get_text(strip=True)
+                if text:  # Only check for headings if there's text content
+                    heading_level = get_heading_level(element, current_style, text)
                     if heading_level is not None:
-                        return create_node(
+                        node = create_node(
                             type_='heading',
-                            content=para_text,
+                            content=text,
                             style=current_style,
                             level=heading_level
                         )
-                return self._process_paragraph(element, current_style)
+                        if ix_metadata:
+                            node.metadata.update(ix_metadata)
+                        return node
 
-            elif element.name == 'div':
-                # Phase 2: Process content based on whether this div contains tables
-                if element.get('has_table'):
-                    # Structure-preserving mode for divs with tables
-                    block_result = self._process_structured_content(element, current_style)
-                    return block_result
-                else:
-                    # Content-combining mode for divs without tables
-                    block_result = self._process_inline_content(element, current_style)
-                    return block_result
+                # Handle ix: tags by processing their content sequentially
+                if element.name.startswith('ix:'):
+                    nodes = []
+                    children = list(element.children)  # Convert to list to avoid iterator modification
 
-            # For other elements, process children
-            nodes = []
-            for child in element.children:
-                if isinstance(child, Tag):
-                    child_result = self._process_element(child)
-                    if child_result:
-                        if isinstance(child_result, list):
-                            nodes.extend(child_result)
-                        else:
-                            nodes.append(child_result)
+                    for i, child in enumerate(children):
+                        if isinstance(child, Tag):
+                            if child.name == 'table':
+                                # Process table
+                                table_node = self._process_table(child)
+                                if table_node:
+                                    if ix_metadata:
+                                        table_node.metadata.update(ix_metadata)
+                                    nodes.append(table_node)
+                            elif child.name == 'p':
+                                # Process paragraph
+                                para_node = self._process_paragraph(child, current_style)
+                                if para_node:
+                                    if ix_metadata:
+                                        para_node.metadata.update(ix_metadata)
+                                    nodes.append(para_node)
+                            elif child.name == 'div':
+                                # Process div with its own style
+                                div_style = parse_style(child.get('style', '')).merge(current_style)
+                                div_result = self._process_structured_content(child, div_style)
+                                if div_result:
+                                    if isinstance(div_result, list):
+                                        for node in div_result:
+                                            if ix_metadata:
+                                                node.metadata.update(ix_metadata)
+                                        nodes.extend(div_result)
+                                    else:
+                                        if ix_metadata:
+                                            div_result.metadata.update(ix_metadata)
+                                        nodes.append(div_result)
+                            else:
+                                # Process other elements recursively
+                                child_result = self._process_element(child)
+                                if child_result:
+                                    if isinstance(child_result, list):
+                                        for node in child_result:
+                                            if ix_metadata:
+                                                node.metadata.update(ix_metadata)
+                                        nodes.extend(child_result)
+                                    else:
+                                        if ix_metadata:
+                                            child_result.metadata.update(ix_metadata)
+                                        nodes.append(child_result)
 
-            return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+                    # Return the collected nodes
+                    return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
+                # Process table elements directly
+                if element.name == 'table':
+                    table_node = self._process_table(element)
+                    if table_node and ix_metadata:
+                        table_node.metadata.update(ix_metadata)
+                    return table_node
+
+                elif element.name == 'p':
+                    # Check for heading in paragraph first
+                    para_text = element.get_text(strip=True)
+                    if para_text:
+                        heading_level = get_heading_level(element, current_style, para_text)
+                        if heading_level is not None:
+                            node = create_node(
+                                type_='heading',
+                                content=para_text,
+                                style=current_style,
+                                level=heading_level
+                            )
+                            if ix_metadata:
+                                node.metadata.update(ix_metadata)
+                            return node
+                    para_node = self._process_paragraph(element, current_style)
+                    if para_node and ix_metadata:
+                        para_node.metadata.update(ix_metadata)
+                    return para_node
+
+                elif element.name == 'div':
+                    # Phase 2: Process content based on whether this div contains tables
+                    if element.get('has_table'):
+                        # Structure-preserving mode for divs with tables
+                        block_result = self._process_structured_content(element, current_style)
+                        if block_result:
+                            if isinstance(block_result, list):
+                                for node in block_result:
+                                    if ix_metadata:
+                                        node.metadata.update(ix_metadata)
+                            else:
+                                if ix_metadata:
+                                    block_result.metadata.update(ix_metadata)
+                        return block_result
+                    else:
+                        # Content-combining mode for divs without tables
+                        block_result = self._process_inline_content(element, current_style)
+                        if block_result:
+                            if isinstance(block_result, list):
+                                for node in block_result:
+                                    if ix_metadata:
+                                        node.metadata.update(ix_metadata)
+                            else:
+                                if ix_metadata:
+                                    block_result.metadata.update(ix_metadata)
+                        return block_result
+
+                # For other elements, process children
+                nodes = []
+                for child in element.children:
+                    if isinstance(child, Tag):
+                        child_result = self._process_element(child)
+                        if child_result:
+                            if isinstance(child_result, list):
+                                for node in child_result:
+                                    if ix_metadata:
+                                        node.metadata.update(ix_metadata)
+                                nodes.extend(child_result)
+                            else:
+                                if ix_metadata:
+                                    child_result.metadata.update(ix_metadata)
+                                nodes.append(child_result)
+
+                return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
+            finally:
+                # Always pop the style from stack when done
+                self.style_stack.pop()
 
         finally:
-            # Always pop the style from stack when done with this element
-            self.style_stack.pop()
+            # Always track exiting ix tags
+            self.ix_tracker.exit_tag(element)
 
 
     def _process_structured_content(self, element: Tag, style: StyleInfo) -> Optional[Union[BaseNode, List[BaseNode]]]:

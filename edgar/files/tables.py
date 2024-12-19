@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 import re
-from edgar.files.html import DocumentNode
+
 
 @dataclass
 class ProcessedTable:
@@ -13,7 +13,7 @@ class ProcessedTable:
 
 class TableProcessor:
     @staticmethod
-    def process_table(node: DocumentNode) -> Optional[ProcessedTable]:
+    def process_table(node) -> Optional[ProcessedTable]:
         """Process table node into a format ready for rendering"""
         if not isinstance(node.content, list) or not node.content:
             return None

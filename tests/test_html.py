@@ -209,7 +209,25 @@ def test_document_tables():
 
     tables = document.tables
     assert all(table.type == "table" for table in tables)
-    print(document)
+    revenue_table = tables[17]
+    #print(revenue_table.render(160))
+    assert revenue_table.metadata['ix_tag'] == 'us-gaap:DisaggregationOfRevenueTableTextBlock'
+
+    for table in document.tables:
+        if table.metadata.get('ix_has_table'):
+            print(table.metadata.get("ix_tag"))
+            print(table.render(160))
+            print("-" * 80)
+
+def test_document_tables_in_10K():
+    html = Path("data/html/Apple.10-K.html").read_text()
+    document = Document.parse(html)
+    print()
+    for table in document.tables:
+        if table.metadata.get('ix_has_table'):
+            print(table.metadata.get("ix_tag"))
+            print(table.render(160))
+            print("-" * 80)
 
 
 def test_parse_financial_table_with_two_header_rows():
@@ -259,12 +277,14 @@ def test_financial_table_header_displays_line_breaks():
     print(document)
     assert len(document) == 1
     table = document.nodes[0]
-    #print(table)
     row = table.content[1]
     cell = row.cells[1]
-    #print(cell)
     assert cell.content == 'Number of\nRSUs\n(in thousands)'
-    #print(row)
+
+def test_table_metadata():
+    html = Path("data/html/AppleRSUTable.html").read_text()
+    document: Document = Document.parse(html)
+    table = document.nodes[0]
 
 
 def test_table_processor_process_table():
@@ -281,10 +301,6 @@ def test_table_processor_process_table():
 
 
 def test_read_html_document_wih_financials():
-    #f = Filing(company='BUCKLE INC', cik=885245, form='8-K', filing_date='2024-11-22', accession_no='0000885245-24-000103')
-    #f.home.open()
-    #print()
-    #attachment = f.attachments[1]
     content = Path("data/html/BuckleInc.8-K.EX99.1.html").read_text()
     document = Document.parse(content)
     assert document
