@@ -1,0 +1,988 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+        <link rel="next" href="using-the-company-api/">
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>edgartools</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.6f8fc17f.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#edgar-tools-documentation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="edgartools" class="md-header__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            edgartools
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="edgartools" class="md-nav__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    edgartools
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-using-pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install using pip
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import-the-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import the library
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting filings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting filings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters-for-get_filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters for get_filings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-the-latest-unpublished-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get the latest unpublished filings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering filings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paginating-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Paginating filings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subsetting-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Subsetting filings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#looping-through-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Looping through filings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-a-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with a Filing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with a Filing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-a-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting a Filing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open-a-filing-in-your-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open a Filing in your browser
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open-the-filing-homepage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open the Filing homepage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-the-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      View the Filing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-the-html-of-a-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get the HTML of a Filing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-the-text-of-a-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting the text of a Filing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-attachments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Attachments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Attachments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#looping-through-attachments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Looping through Attachments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-an-attachment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting an Attachment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-an-attachment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing an Attachment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#downloading-attachments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloading Attachments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="using-the-company-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Companies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="company-financials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Company Financials
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="data-objects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Objects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="eightk-filings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Eight-K Filings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-using-pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install using pip
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import-the-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import the library
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting filings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting filings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters-for-get_filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters for get_filings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-the-latest-unpublished-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get the latest unpublished filings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering filings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paginating-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Paginating filings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subsetting-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Subsetting filings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#looping-through-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Looping through filings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-a-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with a Filing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with a Filing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-a-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting a Filing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open-a-filing-in-your-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open a Filing in your browser
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open-the-filing-homepage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open the Filing homepage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-the-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      View the Filing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-the-html-of-a-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get the HTML of a Filing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-the-text-of-a-filing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting the text of a Filing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-attachments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Attachments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Attachments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#looping-through-attachments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Looping through Attachments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-an-attachment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting an Attachment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-an-attachment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing an Attachment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#downloading-attachments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloading Attachments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="edgar-tools-documentation">Edgar Tools Documentation</h1>
+<p>EdgarTools is a Python library designed to interact with and process SEC EDGAR filings and data. It provides a comprehensive set of tools for analyzing various SEC forms, financial data, and regulatory disclosures.</p>
+<h2 id="usage">Usage</h2>
+<h3 id="install-using-pip">Install using pip</h3>
+<pre><code class="language-bash">pip install edgartools
+</code></pre>
+<h3 id="import-the-library">Import the library</h3>
+<p>Import the library using <code>from edgar import *</code>. You also need to set your identity using <code>set_identity</code> so that the SEC knows who you are and allows you to access their data. This can just be an email address or a name and email.</p>
+<pre><code class="language-python">from edgar import *
+set_identity(&quot;mike.mccalum@indigo.com&quot;)
+</code></pre>
+<h3 id="getting-filings">Getting filings</h3>
+<p>You can get the filings for a company using the <code>get_filings</code> function. By default this will get all filings for the current year and quarter. </p>
+<pre><code class="language-python">filings = get_filings()
+</code></pre>
+<h4 id="parameters-for-get_filings">Parameters for get_filings</h4>
+<p>The <code>get_filings</code> function takes the following parameters:</p>
+<ul>
+<li><strong><code>year</code></strong> - The year <strong>2025</strong> or list of years <strong>[2024,2024]</strong> to get filings for. Default is the current year.</li>
+<li><strong><code>quarter</code></strong> - The quarter <strong>1</strong> or list of quarters <strong>[1,2,3,4]</strong> to get filings for. Default is the current quarter.</li>
+<li><strong><code>form</code></strong> - The form to get filings for. Default is all forms.</li>
+<li><strong><code>amendments</code></strong> - Whether to include amendments e.g. include "10-K/A" if filtering for "10-K".. Default is True.</li>
+<li><strong><code>filing_date</code></strong> - The filing date to get filings for. Default is all filings. Can be a single date or a range of dates.</li>
+<li><strong><code>index</code></strong> - The index type - "form" or "xbrl". Default is "form". Use index="xbrl" to limit to only filings published using XBRL.</li>
+</ul>
+<pre><code class="language-python">
+from edgar import get_filings
+
+# Get filings for 2021
+filings_ = get_filings(2021) 
+
+# Get filings for 2021 Q4
+filings_ = get_filings(2021, 4) 
+
+# Get filings for 2021 Q3 and Q4
+filings_ = get_filings(2021, [3,4]) 
+
+# Get filings for 2020 and 2021
+filings_ = get_filings([2020, 2021]) 
+
+# Get filings for Q4 of 2020 and 2021
+filings_ = get_filings([2020, 2021], 4) 
+
+# Get filings between 2010 and 2021 - does not include 2021
+filings_ = get_filings(range(2010, 2021)) 
+
+# Get filings for 2021 Q4 for form D
+filings_ = get_filings(2021, 4, form=&quot;D&quot;) 
+
+# Get filings for 2021 Q4 on &quot;2021-10-01&quot;
+filings_ = get_filings(2021, 4, filing_date=&quot;2021-10-01&quot;) 
+
+# Get filings for 2021 Q4 between &quot;2021-10-01&quot; and &quot;2021-10-10&quot;
+filings_ = get_filings(2021, 4, filing_date=&quot;2021-10-01:2021-10-10&quot;) 
+
+</code></pre>
+<h3 id="get-the-latest-unpublished-filings">Get the latest unpublished filings</h3>
+<p>The <code>get_filings</code> function downloads the filing indexes from the SEC EDGAR website. The data is generallly available by <strong>10:30 PM EST</strong> on the day of the filing and so will not include filings filed after this time but not yet released. To get the latest unpublished filings use the <code>get_unpublished_filings</code> function. For example:</p>
+<pre><code class="language-python">filings = get_latest_filings()
+</code></pre>
+<h3 id="filtering-filings">Filtering filings</h3>
+<p>After getting filings, you can filter filings using the <code>filter</code> method. 
+You can filter filings by form, date, CIK, ticker, and accession number.
+For example:</p>
+<pre><code class="language-python">
+        &gt;&gt;&gt; filings = get_filings()
+
+        Filter the filings
+
+        On a date
+        &gt;&gt;&gt; filings.filter(date=&quot;2020-01-01&quot;)
+
+        Up to a date
+        &gt;&gt;&gt; filings.filter(date=&quot;:2020-03-01&quot;)
+
+        From a date
+        &gt;&gt;&gt; filings.filter(date=&quot;2020-01-01:&quot;)
+
+        # Between dates
+        &gt;&gt;&gt; filings.filter(date=&quot;2020-01-01:2020-03-01&quot;)
+
+        :param form: The form or list of forms to filter by
+        :param amendments: Whether to include amendments to the forms e.g. include &quot;10-K/A&quot; if filtering for &quot;10-K&quot;
+        :param filing_date: The filing date
+        :param date: An alias for the filing date
+        :param cik: The CIK or list of CIKs to filter by
+        :param ticker: The ticker or list of tickers to filter by
+        :param accession_number: The accession number or list of accession numbers to filter by
+        :return: The filtered filings
+
+</code></pre>
+<h3 id="paginating-filings">Paginating filings</h3>
+<p>The <code>Filings</code> object is a container for a list of filings. The list of filings can  be large but by default you can only see the first page of filings. </p>
+<p>To change the page, you can paginate filings using the <code>next</code> and <code>prev</code> methods. For example:</p>
+<pre><code class="language-python">filings = get_filings()
+filings.next()
+filings.prev()
+</code></pre>
+<h3 id="subsetting-filings">Subsetting filings</h3>
+<p>You can subset filings using the <code>head</code> and <code>tail</code> and <code>sample</code> methods. For example:</p>
+<pre><code class="language-python">filings = get_filings()
+filings.head(10)
+filings.tail(10)
+filings.sample(10)
+</code></pre>
+<h3 id="looping-through-filings">Looping through filings</h3>
+<p>You can loop through filings using the <code>for</code> loop. For example:</p>
+<pre><code class="language-python">filings = get_filings()
+for filing in filings:
+    print(filing)
+</code></pre>
+<h2 id="working-with-a-filing">Working with a Filing</h2>
+<p>A filing is a handle to a single SEC EDGAR filing. With it you can access all the documents and datafiles on the filing.</p>
+<h3 id="getting-a-filing">Getting a Filing</h3>
+<p>You can get a filing using the <code>[]</code> operator. For example:</p>
+<pre><code class="language-python">filings = get_filings()
+filing = filings[0]
+</code></pre>
+<h3 id="open-a-filing-in-your-browser">Open a Filing in your browser</h3>
+<p>The <code>open</code> method opens the main document of a filing in your browser</p>
+<pre><code class="language-python">filing.open()
+</code></pre>
+<h3 id="open-the-filing-homepage">Open the Filing homepage</h3>
+<p>The filing homepage is the landing page for a filing. It links to all the documents and datafiles on the filing.</p>
+<pre><code class="language-python">filing.open_homepage()
+</code></pre>
+<h3 id="view-the-filing">View the Filing</h3>
+<p>This downloads the filing's HTML content, parses it and displays it as close to the original as is possible in the console or in a Jupyter notebook. This is a good way to preview a filing, but won't be perfect so if you need a perfect copy of the filing, you should use the <code>open</code> method to view it in the browser.</p>
+<pre><code class="language-python">filing.view()
+</code></pre>
+<h3 id="get-the-html-of-a-filing">Get the HTML of a Filing</h3>
+<p>This downloads the filing's HTML content and returns it as a string.</p>
+<pre><code class="language-python">html = filing.html()
+</code></pre>
+<h3 id="getting-the-text-of-a-filing">Getting the text of a Filing</h3>
+<p>The <code>text</code> method returns the text of a filing</p>
+<pre><code class="language-python">text = filing.text()
+</code></pre>
+<h2 id="working-with-attachments">Working with Attachments</h2>
+<p>The <code>attachments</code> attribute returns a list of the attachments on a filing</p>
+<pre><code class="language-python">attachments = filing.attachments
+</code></pre>
+<h3 id="looping-through-attachments">Looping through Attachments</h3>
+<p>You can loop through attachments using the <code>for</code> loop.</p>
+<pre><code class="language-python">for attachment in filings.attachments:
+    print(attachment)
+</code></pre>
+<h3 id="getting-an-attachment">Getting an Attachment</h3>
+<p>The <code>[]</code> operator returns an attachment by index</p>
+<pre><code class="language-python">attachment = filing.attachments[0]
+</code></pre>
+<h3 id="viewing-an-attachment">Viewing an Attachment</h3>
+<p>The <code>view</code> method displays the text of an attachment in the console. This works for text and html attachments</p>
+<pre><code class="language-python">attachment.view()
+</code></pre>
+<h3 id="downloading-attachments">Downloading Attachments</h3>
+<p>The <code>download</code> method downloads all the attachments to a folder of your choice.</p>
+<pre><code class="language-python">filing.attachments.download(path)
+</code></pre>
+<p>Last Updated: December 16, 2024</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>

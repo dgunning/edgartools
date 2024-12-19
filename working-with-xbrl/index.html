@@ -1,0 +1,471 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>Working with XBRL in edgartools - edgartools</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#working-with-xbrl-in-edgartools" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="edgartools" class="md-header__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            edgartools
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Working with XBRL in edgartools
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="edgartools" class="md-nav__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    edgartools
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-the-company-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Companies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-financials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Company Financials
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-objects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Objects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eightk-filings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Eight-K Filings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Data Model
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Data Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#xbrlinstance" class="md-nav__link">
+    <span class="md-ellipsis">
+      XbrlInstance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#xbrldata" class="md-nav__link">
+    <span class="md-ellipsis">
+      XbrlData
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Statements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statement
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#financials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Financials
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="working-with-xbrl-in-edgartools">Working with XBRL in edgartools</h1>
+<p>XBRL is an data format used by companies, mainly for financial reporting in their 10-Q and 10-K filings.
+EdgarTools can parse and extract data from XBRL files into dataframes as well as rich objects that allow you to manipulate and visualize the data inside.</p>
+<p>While the primary usage of XBRL is for reporting financial data, particularly for 10K and 10Q filings, it is also used to report for other non-financial filings such as 424B offerings.
+The <strong>EdgarTools</strong> data model is flexible enough to accommodate a wide variation of data across companies and filings when it comes to XBRL.</p>
+<h2 id="the-data-model">The Data Model</h2>
+<p>Looking at the data model, it is worth starting at the top. When searching for filings, you can limit the results to xbrl filings by using <code>index="xbrl"</code>.</p>
+<pre><code class="language-python">filings = get_filings(index=&quot;xbrl&quot;)
+</code></pre>
+<p><img alt="XBL Filings" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/xbrl-filings.jpg" /></p>
+<p>Each <code>Filing</code> has <code>xbrl()</code> function that will download and parse the XBRL attached to the filing or <code>None</code> if it does not. </p>
+<pre><code class="language-python">filing = filings[0]
+filing.xbrl()
+</code></pre>
+<p>The <code>xbrl()</code> function will return an <code>XBRLInstance</code> object in simple cases, or an <code>XbrlData</code> object in more complicated cases.</p>
+<p><img alt="Apple XBRL" src="../images/aapl-xbrl.png" />
+Here you can see the <code>XbrlData</code> object for Apple Inc. 10-K filing. It contains the <code>XBRLInstance</code> object, which holds the primary facts reported in the filings, as well as a list of statement.
+Each statement is a container for a group of facts, such as a balance sheet or income statement.</p>
+<p>For simpler filings there might only be an <code>XBRLInstance</code> document attached to the filing in which cases <code>.xbrl()</code> will return an <code>XbrlInstance</code> object, and there will be no statements.</p>
+<h3 id="xbrlinstance">XbrlInstance</h3>
+<p>The main XBRL container for data is called XBRL instance. It contains the primary data reported for that filing.
+The data is in a very well-structured XML format, but the EdgarTools XBRL parser unrolls that into a data frame.
+For simple XBRL, the data inside an XBRL instance is self-contained, so it is straightforward to parse into data structures like data frames. </p>
+<h3 id="xbrldata">XbrlData</h3>
+<p>For more complicated XBRL, some aspects of the data will have to be resolved against the other XBRL files for that filing, such as the presentation and calculation files.
+In this case, the parser will return an XBRLData container containing the XBRLInstance and the other XBRL files.</p>
+<p>These files can include</p>
+<ul>
+<li>presentation: This file describes how the XBRL data is presented in the filing. It is used to resolve the hierarchy of the data.</li>
+<li>calculation: This file describes how the XBRL data is calculated. It is used to resolve the calculations of the data.</li>
+<li>definition: This file describes the definitions of the XBRL data. It is used to resolve the meaning of the data.</li>
+<li>label: This file describes the labels of the XBRL data. It is used to resolve the labels of the data.</li>
+</ul>
+<h2 id="statements">Statements</h2>
+<p>But those are the data that go into the XbrlData data object - the output is more interesting. Within the data are usually financial statements like the balance sheet and income statement, or other non-financial statements such as auditor information or firm disclosures.</p>
+<p><img alt="Statements" src="../images/xbrlstatements.png" /></p>
+<p>These can be accessed using the XbrlData <code>get_statement()</code> function.</p>
+<p>To see the statements that are included in the XBRL data, use <code>XbrlData.statements</code>. This is useful and often necessary since firms will use their own specific names for statements.</p>
+<pre><code class="language-python">statements = xbrl_data.statements
+</code></pre>
+<p>You can access a specific statement using the bracket notation or loop over all the statements</p>
+<pre><code class="language-python">statements['CONSOLIDATEDBALANCESHEETS']
+</code></pre>
+<p><img alt="Statements" src="../images/consolidatedbalancesheet.png" /></p>
+<p>This is equivalent to</p>
+<pre><code class="language-python">xbrl_data.get_statement('CONSOLIDATEDBALANCESHEETS')
+</code></pre>
+<h3 id="statement">Statement</h3>
+<p>Inside each statement is a data frame which you can access using <code>statement.data</code>. </p>
+<pre><code class="language-python">statement.data
+</code></pre>
+<p>This will also contain metadata columns that you may or may not need to see it's preferable to use <code>statement.get_dataframe()</code>
+<img alt="Statements Get Dataframe" src="../images/statement_getdataframe.png" /></p>
+<h2 id="financials">Financials</h2>
+<p>Experts' data can contain both financial and non-financial statements. Mostly you will be interested in financial statements, so the <code>Financials</code> class
+Is a convenient wrapper over the most common financial statements.</p>
+<pre><code class="language-python">financials = Financials(xbrl_data)
+</code></pre>
+<p><img alt="Apple Financials" src="../images/apple_financials.png" /></p>
+<h1 id="summary">Summary</h1>
+<p>Hopefully this gives you a good overview of working with XBRL data using <strong>edgartools</strong>. 
+It's very complicated and a lot of work has gone into XBRL parsing in Edgar tools, and there may still be enhancements to be made. 
+If you have any questions or suggestions, please feel free to reach out to us on the <a href="https://github.com/dgunning/edgartools">Edgartools GitHub repository</a>   </p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>
