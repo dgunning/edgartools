@@ -726,7 +726,13 @@ def run_async_or_sync(coroutine):
         # Check if we're in an IPython environment
         ipython = sys.modules['IPython']
         if 'asyncio' in sys.modules:
-            loop = asyncio.get_event_loop()
+            # try is needed for ipython console
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                import nest_asyncio
+                nest_asyncio.apply()
+                loop = asyncio.get_event_loop()
             if loop.is_running():
                 # We're in a notebook with an active event loop
                 import nest_asyncio
