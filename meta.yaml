@@ -3,6 +3,7 @@ package:
   version: "3.3.1"
 
 source:
+  git_rev: c39a1c1eebc6d40a9f9982d18e341dd9eb958aa3
   git_url: https://github.com/dgunning/edgartools
 
 requirements:
