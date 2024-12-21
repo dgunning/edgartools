@@ -1143,10 +1143,10 @@ def load_company_facts_from_local(cik: int) -> Optional[Dict[str, Any]]:
     Load company facts from local data
     """
     company_facts_dir = get_edgar_data_directory() / "companyfacts"
-    if not os.path.exists(company_facts_dir):
+    if not company_facts_dir.exists():
         return None
     company_facts_file = company_facts_dir / f"CIK{cik:010}.json"
-    if not os.path.exists(company_facts_file):
+    if not company_facts_file.exists():
         company_facts_json = download_company_facts_from_sec(cik)
         with open(company_facts_file, "wb") as f:
             f.write(json.dumps(company_facts_json))
@@ -1161,10 +1161,10 @@ def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
     Load company submissions from local data
     """
     submissions_dir = get_edgar_data_directory() / "submissions"
-    if not os.path.exists(submissions_dir):
+    if not submissions_dir.exists():
         return None
     submissions_file = submissions_dir / f"CIK{cik:010}.json"
-    if not os.path.exists(submissions_file):
+    if not submissions_file.exists():
         submissions_json = download_entity_submissions_from_sec(cik)
         with open(submissions_file, "wb") as f:
             f.write(json.dumps(submissions_json))
