@@ -1048,12 +1048,9 @@ Entity = get_entity
 def get_entity_submissions(cik: int) -> Optional[EntityData]:
     # Check the environment var EDGAR_USE_LOCAL_DATA
     submissions_json: Optional[Dict[str, Any]] = None
-    print(f"using local storage {is_using_local_storage()}")
     if is_using_local_storage():
-        print(f"loading {cik} from local")
         submissions_json = load_company_submissions_from_local(cik)
         if not submissions_json:
-            print(f"downloading {cik} from sec")
             submissions_json = download_entity_submissions_from_sec(cik)
     else:
         submissions_json = download_entity_submissions_from_sec(cik)
