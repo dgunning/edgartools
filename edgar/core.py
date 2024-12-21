@@ -137,8 +137,16 @@ CAUTION = EdgarSettings(http_timeout=20, max_connections=5)
 # Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
 CRAWL = EdgarSettings(http_timeout=25, max_connections=2, retries=2)
 
-# Use normal mode
-edgar_mode = NORMAL
+edgar_access_mode = os.getenv('EDGAR_ACCESS_MODE', 'NORMAL')
+if edgar_access_mode == 'CAUTION':
+    # A bit more cautious mode of accessing edgar
+    edgar_mode = CAUTION
+elif edgar_access_mode == 'CRAWL':
+    # Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
+    edgar_mode = CRAWL
+else:
+    # The normal mode of accessing edgar
+    edgar_mode = NORMAL
 
 edgar_identity = 'EDGAR_IDENTITY'
 
