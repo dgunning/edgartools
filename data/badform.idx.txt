@@ -1,0 +1,19 @@
+Description:           Master Index of EDGAR Dissemination Feed by Form Type
+Last Data Received:    March 31, 2021
+Comments:              webmaster@sec.gov
+Anonymous FTP:         ftp://ftp.sec.gov/edgar/
+
+
+
+
+Form Type   Company Name                                                  CIK         Date Filed  File Name
+---------------------------------------------------------------------------------------------------------------------------------------------
+1-A         A-Game Beverages, Inc.                                        1838675     2021-02-05  edgar/data/1838675/0001213900-21-007106.txt
+1-A         AFR Inc.                                                      1831099     2021-03-03  edgar/data/1831099/0001831099-21-000001.txt
+1-A         AGILE GROUP, INC. / NV                                        1843120     2021-01-29  edgar/data/1843120/0001096906-21-000194.txt
+1-A         AHP Title Holdings LLC                                        1839212     2021-01-20  edgar/data/1839212/0001683168-21-000201.txt
+1-A         ALFADAN INC.                                                  1809660     2021-03-26  edgar/data/1809660/0001477932-21-001700.txt
+X-17A-5     UNITED PLANNERS' FINANCIAL SERVICES OF AMERICA A LIMITED PARTNER  820694      2021-02-24  edgar/data/820694/9999999997-21-003146.txt
+X-17A-5     UNIVEST SECURITIES, LLC                                       920097      2021-03-05  edgar/data/920097/9999999997-23-001153.txt
+X-17A-5     UNLU SECURITIES INC.                                          1643230     2021-02-24  edgar/data/1643230/0001643230-21-000003.txt
+X-17A-5     UOB GLOBAL EQUITY SALES LLC                                   1225152     2021-02-25  edgar/data/1225152/0001225152-21-000002.txt
