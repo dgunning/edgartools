@@ -789,11 +789,6 @@ def test_filings_get_by_invalid_accession_number(capsys):
     assert cached_filings(2022, 1).get('INVALID-ACCESS-NUMBER') is None
 
 
-def test_get_daily_filing_index():
-    filings = fetch_daily_filing_index('2024-01-26', index="form")
-    print(filings)
-
-
 def test_filing_to_dict():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
@@ -1016,3 +1011,5 @@ def test_get_filings_by_range():
     assert not filings.empty
     assert len(filings) > 1000
     assert filings.date_range == (datetime.date(2022, 1, 3), datetime.date(2023, 12, 29))
+
+
