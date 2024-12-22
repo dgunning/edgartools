@@ -263,6 +263,9 @@ company_specs = FileSpecs(
      ]
 )
 
+FORM_INDEX_COLUMNS = ['form', 'company', 'cik', 'filing_date', 'accession_number']
+COMPANY_INDEX_COLUMNS = ['company', 'form', 'cik', 'filing_date', 'accession_number']
+
 
 def read_fixed_width_index(index_text: str,
                            file_specs: FileSpecs) -> pa.Table:
@@ -307,6 +310,54 @@ def read_fixed_width_index(index_text: str,
         arrays=arrays,
         names=list(file_specs.schema.names),
     )
+
+
+def read_index_file(index_text: str, columns:List[str] = FORM_INDEX_COLUMNS) -> pa.Table:
+    """
+    Read the index text using multiple spaces as delimiter
+    """
+    # Split into lines and find the data start
+    lines = index_text.rstrip('\n').split('\n')
+    data_start = 0
+    for index, line in enumerate(lines):
+        if line.startswith("-----"):
+            data_start = index + 1
+            break
+
+    # Process data lines
+    data_lines = lines[data_start:]
+
+    # Split each line by 2 or more spaces
+    rows = [line.split() for line in data_lines if line.strip()]
+
+    # Convert to arrays
+    forms = pa.array([row[0] for row in rows])
+
+    # Company names may have single spaces within them
+    companies = pa.array([' '.join(row[1:-3]) for row in rows])
+
+    # CIKs are always the third-to-last field
+    ciks = pa.array([int(row[-3]) for row in rows], type=pa.int32())
+
+    # Dates are always second-to-last field
+    dates = pc.strptime(pa.array([row[-2] for row in rows]), '%Y-%m-%d', 'us')
+    dates = pc.cast(dates, pa.date32())
+
+    # Accession numbers are in the file path
+    accession_numbers = pa.array([row[-1][-24:-4] for row in rows])
+
+    return pa.Table.from_arrays(
+        [forms, companies, ciks, dates, accession_numbers],
+        names=columns
+    )
+
+def read_form_index_file(index_text: str) -> pa.Table:
+    """Read the form index file"""
+    return read_index_file(index_text, columns=FORM_INDEX_COLUMNS)
+
+def read_company_index_file(index_text: str) -> pa.Table:
+    """Read the company index file"""
+    return read_index_file(index_text, columns=COMPANY_INDEX_COLUMNS)
 
 
 def read_pipe_delimited_index(index_text: str) -> pa.Table:
@@ -364,9 +415,8 @@ def fetch_filing_index_at_url(url: str,
         index_table: pa.Table = read_pipe_delimited_index(str(index_text))
     else:
         # Read as a fixed width index file
-        file_specs: FileSpecs = form_specs if index == "form" else company_specs
-        index_table: pa.Table = read_fixed_width_index(index_text,
-                                                       file_specs=file_specs)
+        columns = FORM_INDEX_COLUMNS if index == "form" else COMPANY_INDEX_COLUMNS
+        index_table: pa.Table = read_index_file(index_text, columns=columns)
     return index_table
 
 

@@ -189,11 +189,15 @@ class StyleInfo:
             text_decoration=self.text_decoration or parent_style.text_decoration
         )
 
+
 def parse_style(style_str: str) -> StyleInfo:
-    """Parse inline CSS style string into StyleInfo object"""
+    """Parse inline CSS style string into StyleInfo object with robust unit validation"""
     style = StyleInfo()
     if not style_str:
         return style
+
+    # Use UnitType enum for valid units
+    valid_units = {unit.value for unit in UnitType}
 
     properties = [p.strip() for p in style_str.split(';') if p.strip()]
     for prop in properties:
@@ -204,43 +208,49 @@ def parse_style(style_str: str) -> StyleInfo:
         key = key.strip().lower()
         value = value.strip().lower()
 
-        # Handle font-weight specially
+        # Handle non-numeric properties
         if key == 'font-weight':
-            style.font_weight = value  # Store the raw value ('700', 'bold', etc.)
+            style.font_weight = value
             continue
-
-        # Handle text-align
-        if key == 'text-align':
+        elif key == 'text-align':
             style.text_align = value
             continue
-
-        # Handle display
-        if key == 'display':
+        elif key == 'display':
             style.display = value
             continue
-
-        # Handle text-decoration
-        if key == 'text-decoration':
+        elif key == 'text-decoration':
             style.text_decoration = value
             continue
 
         # For properties that expect numeric values with units
         match = re.match(r'(-?\d*\.?\d+)([a-z%]*)', value)
         if match:
-            num_val = float(match.group(1))
-            unit = match.group(2) or 'px'  # Default to pixels
-            style_unit = StyleUnit(num_val, unit)
+            try:
+                num_val = float(match.group(1))
+                unit = match.group(2) or 'px'  # Default to pixels
 
-            if key == 'margin-top':
-                style.margin_top = style_unit
-            elif key == 'margin-bottom':
-                style.margin_bottom = style_unit
-            elif key == 'font-size':
-                style.font_size = style_unit
-            elif key == 'line-height':
-                style.line_height = style_unit
-            elif key == 'width':
-                style.width = style_unit
+                # Validate the unit is supported
+                if unit not in valid_units:
+                    continue  # Skip this property if unit is invalid
+
+                # Scientific notation check
+                if 'e' in str(num_val).lower():
+                    continue  # Skip scientific notation values
+
+                style_unit = StyleUnit(num_val, unit)
+
+                if key == 'margin-top':
+                    style.margin_top = style_unit
+                elif key == 'margin-bottom':
+                    style.margin_bottom = style_unit
+                elif key == 'font-size':
+                    style.font_size = style_unit
+                elif key == 'line-height':
+                    style.line_height = style_unit
+                elif key == 'width':
+                    style.width = style_unit
+            except (ValueError, TypeError):
+                continue  # Skip this property if number parsing fails
 
     return style
 
