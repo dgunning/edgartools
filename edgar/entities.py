@@ -1144,7 +1144,12 @@ def load_company_facts_from_local(cik: int) -> Optional[Dict[str, Any]]:
         return None
     company_facts_file = company_facts_dir / f"CIK{cik:010}.json"
     if not company_facts_file.exists():
-        return None
+        company_facts_json = download_company_facts_from_sec(cik)
+        with open(company_facts_file, "wb") as f:
+            f.write(json.dumps(company_facts_json))
+            f.flush()
+            f.close()
+        return company_facts_json
     return json.loads(company_facts_file.read_text())
 
 
@@ -1157,7 +1162,12 @@ def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
         return None
     submissions_file = submissions_dir / f"CIK{cik:010}.json"
     if not submissions_file.exists():
-        return None
+        submissions_json = download_entity_submissions_from_sec(cik)
+        with open(submissions_file, "wb") as f:
+            f.write(json.dumps(submissions_json))
+            f.flush()
+            f.close()
+        return submissions_json
     return json.loads(submissions_file.read_text())
 
 
