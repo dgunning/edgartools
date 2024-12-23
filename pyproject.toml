@@ -33,7 +33,6 @@ dependencies = [
   "rich>=13.0.0",
   "fastcore>=1.5.29",
   "humanize>=4.0.0",
-  "tenacity==8.3.0",
   "stamina>=24.2.0",
   "orjson>=3.6.0",
   "textdistance>=4.5.0",
