@@ -71,7 +71,7 @@ def test_read_form_filing_index_year_and_quarter():
     assert filings.data.column_names == ['form', 'company', 'cik', 'filing_date', 'accession_number']
     print(filings.data.schema)
     print('Bytes', humanize.naturalsize(filings.data.nbytes, binary=True))
-    assert filings.data[0][0].as_py() == '1-A'
+    assert filings.data[0][0].as_py() == '10-Q'
 
 
 def test_read_form_filing_index_year():

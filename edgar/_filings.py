@@ -764,12 +764,57 @@ class Filings:
         return repr_rich(self.__rich__())
 
 
+def sort_filings_by_priority(filing_table: pa.Table,
+                             priority_forms: Optional[List[str]] = None) -> pa.Table:
+    """
+    Sort a filings table by date (descending) and form priority.
+
+    Args:
+        filing_table: PyArrow table containing filings data
+        priority_forms: List of forms in priority order. Forms not in list will be sorted
+                       alphabetically after priority forms. Defaults to common forms if None.
+
+    Returns:
+        PyArrow table sorted by date and form priority
+    """
+    if priority_forms is None:
+        priority_forms = ['10-Q', '10-Q/A', '10-K', '10-K/A',  '8-K', '8-K/A',
+                          '6-K', '6-K/A', '13F-HR', '144',  '4', 'D', 'SC 13D', 'SC 13G']
+
+    # Create form priority values
+    forms_array = filing_table['form']
+    priorities = []
+    for form_type in forms_array.to_pylist():
+        try:
+            priority = priority_forms.index(form_type)
+        except ValueError:
+            priority = len(priority_forms)
+        priorities.append(priority)
+
+    # Add priority column
+    with_priority = filing_table.append_column(
+        'form_priority',
+        pa.array(priorities, type=pa.int32())
+    )
+
+    # Sort by date (descending), priority (ascending), form name (ascending)
+    sorted_table = with_priority.sort_by([
+        ("filing_date", "descending"),
+        ("form_priority", "ascending"),
+        ("form", "ascending")
+    ])
+
+    # Remove temporary priority column
+    return sorted_table.drop(['form_priority'])
+
+
 def get_filings(year: Optional[Years] = None,
                 quarter: Optional[Quarters] = None,
                 form: Optional[Union[str, List[IntString]]] = None,
                 amendments: bool = True,
                 filing_date: Optional[str] = None,
-                index="form") -> Optional[Filings]:
+                index="form",
+                priority_forms: Optional[List[str]] = None) -> Optional[Filings]:
     """
     Downloads the filing index for a given year or list of years, and a quarter or list of quarters.
 
@@ -847,9 +892,10 @@ def get_filings(year: Optional[Years] = None,
             return Filings(filing_index)
         return None
 
-    # Finally sort by filing date
-    filings = Filings(filings.data.sort_by([("filing_date", "descending")]))
-    return filings
+    # Sort the filings using the separate sort function
+    sorted_filing_index = sort_filings_by_priority(filings.data, priority_forms)
+
+    return Filings(sorted_filing_index)
 
 
 """
