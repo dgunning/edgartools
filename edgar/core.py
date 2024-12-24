@@ -542,9 +542,15 @@ class DataPager:
         self.total_pages = (len(self.data) // page_size) + 1
         self.current_page = 1
 
+    def has_next(self):
+        return self.current_page < self.total_pages
+
+    def has_previous(self):
+        return self.current_page > 1
+
     def next(self):
         """Get the next page of data"""
-        if self.current_page < self.total_pages:
+        if self.has_next():
             self.current_page += 1
             return self.current()
         else:
@@ -552,7 +558,7 @@ class DataPager:
 
     def previous(self):
         """Get the previous page of data"""
-        if self.current_page > 1:
+        if self.has_previous():
             self.current_page -= 1
             return self.current()
         else:
