@@ -348,7 +348,7 @@ class EntityFilings(Filings):
         # Add columns with specific styling and alignment
         table.add_column("#", style="dim", justify="right")
         table.add_column("Form", width=8, style="bold yellow")
-        table.add_column("Description", width=50, style="blue"),
+        table.add_column("Description", width=50, style="bold blue"),
         table.add_column("Filing Date", width=11)
         table.add_column("Accession Number", style="dim", width=20)
 
