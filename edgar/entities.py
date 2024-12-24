@@ -30,6 +30,7 @@ from edgar.core import (log, Result, display_size, listify, is_using_local_stora
 from edgar.financials import Financials
 from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
+from edgar.reference.forms import describe_form
 from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
 
@@ -333,16 +334,86 @@ class EntityFilings(Filings):
         return repr_rich(self.__rich__())
 
     def __rich__(self):
-        page = self.data_pager.current().to_pandas()
-        page.index = self._page_index()
-        page_info = f"Showing {len(page)} filings of {self._original_state.num_filings:,} total"
+        # Create table with appropriate columns and styling
+        table = Table(
+            show_header=True,
+            header_style="bold",
+            show_edge=True,
+            expand=False,
+            padding=(0, 1),
+            box=box.SIMPLE,
+            row_styles=["", "bold"]
+        )
+
+        # Add columns with specific styling and alignment
+        table.add_column("#", style="dim", justify="right")
+        table.add_column("Form", width=8, style="bold yellow")
+        table.add_column("Description", width=60, style="blue"),
+        table.add_column("Filing Date", width=11)
+        table.add_column("Accession Number", style="dim", width=20)
+
+        # Get current page from data pager
+        current_page = self.data_pager.current()
+
+        # Calculate start index for proper indexing
+        start_idx = self._original_state.page_start if self._original_state else self.data_pager.start_index
+
+        # Iterate through rows in current page
+        for i in range(len(current_page)):
+            form = current_page['form'][i].as_py()
+            description = describe_form(current_page['form'][i].as_py(), prepend_form=False)
+
+            row = [
+                str(start_idx + i),
+                form,
+                description,
+                str(current_page['filing_date'][i].as_py()),
+                current_page['accession_number'][i].as_py()
+            ]
+            table.add_row(*row)
+
+        # Show paging information only if there are multiple pages
+        elements = [table]
+
+        if self.data_pager.total_pages > 1:
+            total_filings = self._original_state.num_filings
+            current_count = len(current_page)
+            start_num = start_idx + 1
+            end_num = start_idx + current_count
+
+            page_info = Text.assemble(
+                ("Showing ", "dim"),
+                (f"{start_num:,}", "bold red"),
+                (" to ", "dim"),
+                (f"{end_num:,}", "bold red"),
+                (" of ", "dim"),
+                (f"{total_filings:,}", "bold"),
+                (" filings.", "dim"),
+                (" Page using ", "dim"),
+                ("← prev()", "bold gray54"),
+                (" and ", "dim"),
+                ("next() →", "bold gray54")
+            )
+
+            elements.extend([Text("\n"), page_info])
+
+        # Get the title
+        title = Text.assemble(
+            ("Filings for ", "bold"),
+            (f"{self.company_name}", "bold green"),
+            (" [", "dim"),
+            (f"{self.cik}", "bold yellow"),
+            ("]", "dim")
+        )
+
+        # Get the subtitle
+        start_date, end_date = self.date_range
+        subtitle = f"Company filings between {start_date:%Y-%m-%d} and {end_date:%Y-%m-%d}" if start_date else ""
         return Panel(
-            Group(
-                df_to_rich_table(CompanyFilings.summarize(page),
-                                 max_rows=len(page),
-                                 ),
-                Text(page_info)
-            ), title=f"Filings for {self.company_name} [{self.cik}]"
+            Group(*elements),
+            title=title,
+            subtitle=subtitle,
+            border_style="bold grey54"
         )
 
 
