@@ -754,17 +754,18 @@ class Filings:
             header_style="bold",
             show_edge=True,
             expand=False,
+            padding=(0, 1),
             box=box.SIMPLE,
             row_styles=["", "bold"]
         )
 
         # Add columns with specific styling and alignment
-        table.add_column("#", style="dim", width=4, justify="right")
-        table.add_column("Form", width=8)
+        table.add_column("#", style="dim", justify="right")
+        table.add_column("Form", width=6)
         table.add_column("CIK", style="dim", width=10, justify="right")
-        table.add_column("Ticker", style="yellow", width=6)
-        table.add_column("Company", style="bold green", width=60, no_wrap=True)
-        table.add_column("Filing Date", width=12)
+        table.add_column("Ticker", width=6, style="yellow")
+        table.add_column("Company", style="bold green", width=38, no_wrap=True)
+        table.add_column("Filing Date", width=11)
         table.add_column("Accession Number", style="dim", width=20)
 
         # Get current page from data pager
