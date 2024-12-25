@@ -332,7 +332,7 @@ def read_index_file(index_text: str, columns:List[str] = FORM_INDEX_COLUMNS) -> 
     rows = [line.split() for line in data_lines if line.strip()]
 
     # Convert to arrays
-    forms = pa.array([row[0] for row in rows])
+    forms = pa.array([line[:12].strip() for line in data_lines]) # The form might contain spaces like '1-A POS'
 
     # Company names may have single spaces within them
     companies = pa.array([' '.join(row[1:-3]) for row in rows])
