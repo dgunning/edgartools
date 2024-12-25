@@ -761,7 +761,7 @@ class Filings:
 
         # Add columns with specific styling and alignment
         table.add_column("#", style="dim", justify="right")
-        table.add_column("Form", width=6)
+        table.add_column("Form", width=7)
         table.add_column("CIK", style="dim", width=10, justify="right")
         table.add_column("Ticker", width=6, style="yellow")
         table.add_column("Company", style="bold green", width=38, no_wrap=True)
