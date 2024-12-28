@@ -16,7 +16,7 @@ from edgar.reference.data.common import read_parquet_from_package, read_csv_from
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange', 'popular_us_stocks',
-           'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers']
+           'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers', 'find_ticker', 'get_cik_ticker_lookup',]
 
 ticker_txt_url = "https://www.sec.gov/include/ticker.txt"
 company_tickers_json_url = "https://www.sec.gov/files/company_tickers.json"
@@ -211,6 +211,38 @@ def get_company_cik_lookup():
 
 
 @lru_cache(maxsize=None)
+def get_cik_ticker_lookup():
+    """Create a mapping of CIK to base ticker symbols.
+    For CIKs with multiple tickers, uses the shortest ticker (usually the base symbol).
+    """
+    company_lookup = get_company_cik_lookup()
+    cik_to_tickers = {}
+    for ticker, cik in company_lookup.items():
+        # Prefer the base ticker (without share class)
+        base_ticker = ticker.split('-')[0]
+        if cik not in cik_to_tickers or len(base_ticker) < len(cik_to_tickers[cik]):
+            cik_to_tickers[cik] = base_ticker
+    return cik_to_tickers
+
+
+def find_ticker(cik: Union[int, str]) -> str:
+    """Find the ticker symbol for a given CIK.
+    Returns empty string if no ticker is found.
+
+    Args:
+        cik: Central Index Key (CIK) as integer or string
+
+    Returns:
+        str: Ticker symbol or empty string if not found
+    """
+    try:
+        # Ensure cik is an integer
+        cik = int(str(cik).lstrip('0'))
+        return get_cik_ticker_lookup().get(cik, "")
+    except (ValueError, TypeError):
+        return ""
+
+@lru_cache(maxsize=None)
 def get_company_ticker_name_exchange():
     """
     Return a DataFrame with columns [cik	name	ticker	exchange]
@@ -349,8 +381,6 @@ def clean_company_suffix(name: str) -> str:
     # Remove other common suffixes, including "PLC", "LTD", "LIMITED", and combinations like "LTD CO"
     name = re.sub(r'\b(?:Inc\.?|CO|CORP|PLC|LTD|LIMITED|L\.P\.)\b\.?$', '', name, flags=re.IGNORECASE).strip()
     return name
-
-
 
 
 

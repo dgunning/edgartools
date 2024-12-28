@@ -119,6 +119,8 @@ def test_filings_date_range(filings_2021_q1_xbrl):
 
 def test_filings_repr(filings_2021_q1_xbrl):
     filings: Filings = filings_2021_q1_xbrl
+    print()
+    print(filings)
     filings_repr = str(filings)
     assert filings_repr
 
