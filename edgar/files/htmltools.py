@@ -282,6 +282,9 @@ def chunks2df(chunks: List[List[Block]],
     # Fill the Item column with "" then set to title case
     chunk_df.Item = chunk_df.Item.fillna("").str.title()
 
+    # Normalize spaces in item
+    chunk_df.Item = chunk_df.Item.apply(lambda item: re.sub(r'\s+', ' ', item))
+
     # Finalize the colums
     chunk_df = chunk_df[['Text', 'Table', 'Chars', 'Signature', 'TocLink', 'Toc', 'Empty', 'Item']]
     return chunk_df
