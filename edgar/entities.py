@@ -1149,23 +1149,28 @@ def parse_company_facts(fjson: Dict[str, object]):
     fact_meta_lst = []
     columns = ['namespace', 'fact', 'val', 'accn', 'start', 'end', 'fy', 'fp', 'form', 'filed', 'frame']
 
-    for namespace, namespace_json in fjson['facts'].items():
-        for fact, fact_json in namespace_json.items():
-            # Metadata about the facts
-            fact_meta_lst.append({'fact': fact,
-                                  'label': fact_json['label'],
-                                  'description': fact_json['description']})
+    # facts must be present
+    if 'facts' in fjson:
+        for namespace, namespace_json in fjson['facts'].items():
+            for fact, fact_json in namespace_json.items():
+                # Metadata about the facts
+                fact_meta_lst.append({'fact': fact,
+                                    'label': fact_json['label'],
+                                    'description': fact_json['description']})
 
-            for unit_key, unit_json in fact_json['units'].items():
-                unit_data = (pd.DataFrame(unit_json)
-                             .assign(namespace=namespace,
-                                     fact=fact,
-                                     label=fact_json['label'])
-                             .filter(columns)
-                             )
-                unit_dfs.append(unit_data)
+                for unit_key, unit_json in fact_json['units'].items():
+                    unit_data = (pd.DataFrame(unit_json)
+                                .assign(namespace=namespace,
+                                        fact=fact,
+                                        label=fact_json['label'])
+                                .filter(columns)
+                                )
+                    unit_dfs.append(unit_data)
 
-    facts = pa.Table.from_pandas(pd.concat(unit_dfs, ignore_index=True))
+    # can't concatenate an empty list
+    if len(unit_dfs) > 0:
+        unit_dfs = pd.concat(unit_dfs, ignore_index=True)
+    facts = pa.Table.from_pandas(unit_dfs)
     return CompanyFacts(cik=fjson['cik'],
                         name=fjson['entityName'],
                         facts=facts,
