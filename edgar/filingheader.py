@@ -401,7 +401,8 @@ class FilingHeader:
                     current_header = line.strip().split(':')[0]
                     if current_header not in data:
                         data[current_header] = []
-                    data[current_header].append({})
+                    if isinstance(data[current_header], list):
+                        data[current_header].append({})
             else:
                 if line.strip().startswith("<"):
                     # The line looks like this <KEY>VALUE
