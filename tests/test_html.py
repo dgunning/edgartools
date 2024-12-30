@@ -422,3 +422,10 @@ def test_parse_and_identify_headings():
     print(document)
 
 
+
+def test_html_from_old_filings_is_none():
+    f = Filing(form='8-K', filing_date='1998-01-05', company='YAHOO INC', cik=1011006, accession_no='0001047469-98-000122')
+    text = f.text()
+    assert text
+    html = f.html()
+    assert not html

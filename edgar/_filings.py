@@ -1277,13 +1277,21 @@ class Filing:
             document = Document.parse(html_content)
             return rich_to_text(document, 200)
         else:
-            text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
-            if len(text_extract_attachments) > 0 and text_extract_attachments[0] is not None:
-                text_extract_attachment = text_extract_attachments[0]
-                assert text_extract_attachment is not None
-                return download_text_between_tags(text_extract_attachment.url, "TEXT")
-            else:
-                return download_text_between_tags(self.text_url, "TEXT")
+            return self._download_filing_text()
+
+    def _download_filing_text(self):
+        """
+        Download the text of the filing directly from the primary tesxt sources.
+        Either from the text url or the text extract attachment
+        """
+        text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
+        if len(text_extract_attachments) > 0 and text_extract_attachments[0] is not None:
+            text_extract_attachment = text_extract_attachments[0]
+            assert text_extract_attachment is not None
+            return download_text_between_tags(text_extract_attachment.url, "TEXT")
+        else:
+            return download_text_between_tags(self.text_url, "TEXT")
+
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
