@@ -97,8 +97,8 @@ def chunk(html: str):
     return list(document.generate_chunks())
 
 
-int_item_pattern = r"^(Item [0-9]{1,2}[A-Z]?)\.?"
-decimal_item_pattern = r"^(Item [0-9]{1,2}\.[0-9]{2})\.?"
+int_item_pattern = r"^(Item\s{1,3}[0-9]{1,2}[A-Z]?)\.?"
+decimal_item_pattern = r"^(Item\s{1,3}[0-9]{1,2}\.[0-9]{2})\.?"
 
 
 def detect_table_of_contents(text: str):
@@ -281,6 +281,9 @@ def chunks2df(chunks: List[List[Block]],
 
     # Fill the Item column with "" then set to title case
     chunk_df.Item = chunk_df.Item.fillna("").str.title()
+
+    # Normalize spaces in item
+    chunk_df.Item = chunk_df.Item.apply(lambda item: re.sub(r'\s+', ' ', item))
 
     # Finalize the colums
     chunk_df = chunk_df[['Text', 'Table', 'Chars', 'Signature', 'TocLink', 'Toc', 'Empty', 'Item']]
