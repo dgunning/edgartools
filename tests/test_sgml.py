@@ -84,3 +84,11 @@ def test_get_attachment_content_from_sgml():
                 sgml_document = filing_sgml.get_by_sequence(attachment.sequence_number)
                 assert sgml_document
                 assert sgml_document.text()
+
+
+def test_sgml_parsing_of_headers():
+    filing = Filing(form='8-K', filing_date='2003-03-05', company='NEW YORK COMMUNITY BANCORP INC', cik=910073, accession_no='0001169232-03-001935')
+    filing_sgml = FilingSgml.from_filing(filing)
+    assert filing_sgml
+    eightk = filing.obj()
+    repr(eightk)

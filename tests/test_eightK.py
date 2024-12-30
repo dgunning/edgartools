@@ -137,3 +137,44 @@ def test_get_press_release_for_8k_multiple_ex99_files():
     assert press_release.description == 'PRESS RELEASE DATED JANUARY 16, 2024'
     assert eightK.press_releases[1].description == 'PRESS RELEASE DATED JANUARY 17, 2024'
     assert eightK.press_releases[2].description == 'PRESS RELEASE DATED JANUARY 19, 2024'
+
+
+def test_get_exhibit_content_for_new_filing():
+    filing = Filing(form='8-K', filing_date='2024-12-27', company='1895 Bancorp of Wisconsin, Inc. /MD/', cik=1847360,
+                    accession_no='0000943374-24-000509')
+    eightk = filing.obj()
+    exhibit = filing.exhibits[0]
+    content = eightk._get_exhibit_content(exhibit)
+    assert content
+
+def test_get_exhibit_content_for_old_filing():
+    f = Filing(form='8-K', filing_date='1998-01-05', company='YAHOO INC', cik=1011006, accession_no='0001047469-98-000122')
+    eightk = f.obj()
+    exhibit = f.exhibits[0]
+    content = eightk._get_exhibit_content(exhibit)
+    assert content
+    text = eightk.text()
+    assert text
+    assert "Yahoo" in text
+
+
+def test_create_eightk_from_old_filing_with_no_html():
+    f = Filing(form='8-K', filing_date='1998-01-05', company='YAHOO INC', cik=1011006, accession_no='0001047469-98-000122')
+    eightk = f.obj()
+    assert eightk
+    html = f.html()
+    print(html)
+
+
+def test_get_content_for_eightk_with_binary_exhibit():
+    filing = Filing(form='8-K', filing_date='2010-02-26', company='MANNATECH INC', cik=1056358, accession_no='0001056358-10-000003')
+    eightk = filing.obj()
+    exhibits = filing.exhibits
+    print(exhibits)
+    content = eightk._content_renderables()
+    assert content
+
+def test_eightk_date_of_report():
+    f = Filing(form='8-K', filing_date='1995-01-24', company='AMERICAN EXPRESS CO', cik=4962, accession_no='0000004962-95-000001')
+    eightk = f.obj()
+    assert eightk.date_of_report == ''

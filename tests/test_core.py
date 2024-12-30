@@ -368,3 +368,11 @@ def test_has_html_content():
 <ACCEPTANCE-DATETIME>20230224163457
         """
     )
+
+    assert has_html_content(
+        """
+        <?xml version=\'1.0\' encoding=\'ASCII\'?>\n<html xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:link="http://www.xbrl.org/2003/linkbase" 
+        xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" 
+        xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:srt="http://fasb.org/srt/2024" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" 
+        """
+    )

@@ -6,7 +6,7 @@ from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import date
 from datetime import datetime
-from functools import lru_cache
+from functools import lru_cache, cached_property
 from io import BytesIO
 from os import PathLike
 from pathlib import Path
@@ -58,6 +58,7 @@ from edgar.richtools import df_to_rich_table, repr_rich, rich_to_text, print_ric
 from edgar.search import BM25Search, RegexSearch
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
+from edgar.sgml import FilingSgml
 from edgar.reference.tickers import find_ticker
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -1357,6 +1358,10 @@ class Filing:
     @lru_cache(maxsize=1)
     def filing_directory(self) -> FilingDirectory:
         return FilingDirectory.load(self.base_dir)
+
+    @cached_property
+    def filing_sgml(self) -> str:
+        return FilingSgml.from_filing(self)
 
     @property
     @lru_cache(maxsize=1)

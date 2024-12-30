@@ -1,21 +1,25 @@
 from datetime import datetime
 from functools import lru_cache, partial
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from rich import box
 from rich import print
 from rich.console import Group, Text
-from rich.panel import Panel
-from rich.tree import Tree
 from rich.padding import Padding
+from rich.panel import Panel
+from rich.table import Table
+from rich.tree import Tree
+from rich.layout import Layout
 
 from edgar._filings import Attachments, Attachment
 from edgar._markdown import MarkdownContent
 from edgar.core import datefmt
+from edgar.files.html import Document
 from edgar.files.html_documents import HtmlDocument
-from edgar.financials import Financials
 from edgar.files.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
+from edgar.financials import Financials
 from edgar.richtools import repr_rich
+from edgar.richtools import rich_to_text
 
 __all__ = [
     'TenK',
@@ -612,6 +616,7 @@ class EightK():
                                    item_detector=detect_decimal_items,
                                    item_adjuster=adjust_for_empty_items,
                                    item_structure=self.structure)
+
         return ChunkedDocument(html,
                                chunk_fn=decimal_chunk_fn)
 
@@ -639,18 +644,83 @@ class EightK():
     @property
     def date_of_report(self):
         """Return the period of report for this filing"""
-        period_of_report = datetime.strptime(self._filing.header.period_of_report, "%Y-%m-%d")
-        return period_of_report.strftime("%B %d, %Y")
+        period_of_report_str = self._filing.header.period_of_report
+        if period_of_report_str:
+            period_of_report = datetime.strptime(period_of_report_str, "%Y-%m-%d")
+            return period_of_report.strftime("%B %d, %Y")
+        return ""
+
+    def _get_exhibit_content(self, exhibit: Attachment) -> Optional[str]:
+        """
+        Get the content of the exhibit
+        """
+        # For old filings the exhibit might not have a document. So we need to get the full text content
+        # from the sgml content
+        if exhibit.empty:
+            # Download the SGML document
+            sgml_document = self._filing.filing_sgml.get_by_sequence(exhibit.sequence_number)
+            if sgml_document:
+                exhibit_content = sgml_document.text()
+                return exhibit_content
+        else:
+            html_content = exhibit.download()
+            if html_content:
+                document = Document.parse(html_content)
+                return rich_to_text(document, 200)
+
+    def _content_renderables(self):
+        """Get the content of the exhibits as renderables"""
+        renderables = []
+        for exhibit in self._filing.exhibits:
+            # Skip binary files
+            if exhibit.is_binary():
+                continue
+            exhibit_content = self._get_exhibit_content(exhibit)
+
+            if exhibit_content:
+                title = Text.assemble(("Exhibit ", "bold gray54"), (exhibit.document_type, "bold green"))
+                renderables.append(Panel(exhibit_content,
+                                         title=title,
+                                         subtitle=Text(exhibit.description, style="gray54"),
+                                         box=box.ROUNDED))
+        return Group(*renderables)
+
+    def text(self):
+        """Get the text of the EightK filing
+           This includes the text content of all the exhibits
+        """
+        return rich_to_text(self._content_renderables())
 
     def __rich__(self):
-        item_renderables = []
-        for item in self.items:
-            item_renderables.append(Text(self[item]))
+
+        # Renderables for the panel.
+        renderables = []
+
+        # List the exhibits as a table
+        exhibit_table = Table("", "Type", "Description",
+                      title="Exhibits", show_header=True, header_style="bold", box=box.ROUNDED)
+        renderables.append(exhibit_table)
+        for exhibit in self._filing.exhibits:
+            exhibit_table.add_row(exhibit.sequence_number, exhibit.document_type, exhibit.description)
+
+        panel_title = Text.assemble(
+            (f"{self.company}", "bold deep_sky_blue1"),
+            (" ", ""),
+            (f"{self.form}", "bold green"),
+            (" ", ""),
+            (f"{self.date_of_report}", "bold yellow")
+        )
+
+        # Add the content of the exhibits
+        renderables.append(self._content_renderables())
 
         return Panel(
-            Group(*item_renderables),
-            title=f"{self._filing.company} 8-K {self.date_of_report}"
+            Group(*renderables),
+            title=panel_title
         )
+
+    def __str__(self):
+        return f"{self.company} {self.form} {self.date_of_report}"
 
     def __repr__(self):
         return repr_rich(self.__rich__())

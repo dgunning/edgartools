@@ -195,10 +195,11 @@ def test_download_filing_attachment():
     assert isinstance(b, bytes)
 
 
-def test_filing_with_apparently_no_attachments():
-    filing = find("0000929638-24-004206")
-    header = filing.header
-    directory = filing.filing_directory
-    print(directory)
-    print(header)
-    #print(filing)
+def test_filings_with_no_content_in_attachments():
+    filing = Filing(form='8-K', filing_date='1998-12-31', company='AAMES CAPITAL CORP', cik=913951, accession_no='0001011438-98-000429')
+    attachments = filing.attachments
+    print()
+    print(attachments)
+    attachment = attachments[0]
+    assert attachment.empty
+    print(attachment.url)
