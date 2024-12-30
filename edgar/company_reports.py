@@ -605,11 +605,14 @@ class EightK():
     @property
     @lru_cache(maxsize=1)
     def chunked_document(self):
+        html = self._filing.html()
+        if not html:
+            return None
         decimal_chunk_fn = partial(chunks2df,
                                    item_detector=detect_decimal_items,
                                    item_adjuster=adjust_for_empty_items,
                                    item_structure=self.structure)
-        return ChunkedDocument(self._filing.html(),
+        return ChunkedDocument(html,
                                chunk_fn=decimal_chunk_fn)
 
     @property
@@ -618,7 +621,9 @@ class EightK():
 
     @property
     def items(self) -> List[str]:
-        return self.chunked_document.list_items()
+        if self.chunked_document:
+            return self.chunked_document.list_items()
+        return []
 
     def __getitem__(self, item_or_part: str):
         # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
