@@ -1,90 +1,183 @@
-"""
-Handles the parsing of SGML documents from the SEC EDGAR database.
-"""
-import re
 
-from pydantic import BaseModel
+import re
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterator, Union, Optional
 
 from edgar.httprequests import stream_with_retry
-from pathlib import Path
 
-__all__ = ['SgmlDocument', 'stream_documents']
+__all__ = ['SgmlDocument', 'iter_documents', 'FilingSgml']
 
 
-class SgmlDocument(BaseModel):
+
+@dataclass
+class SgmlDocument:
     type: str
     sequence: str
     filename: str
     description: str
-    text_content: str = ""
+    raw_content: str = ""
 
     def __str__(self):
         return f"Document(type={self.type}, sequence={self.sequence}, filename={self.filename}, description={self.description})"
 
-    def __repr__(self):
-        return f"Document(type={self.type}, sequence={self.sequence}, filename={self.filename}, description={self.description})"
+    def text(self) -> str:
+        """Extract content between <TEXT> tags."""
+        match = re.search(r'<TEXT>([\s\S]*?)</TEXT>', self.raw_content, re.DOTALL | re.IGNORECASE)
+        return match.group(1).strip() if match else ""
 
+    def xml(self) -> Optional[str]:
+        """Extract content between <XML> tags if present."""
+        match = re.search(r'<XML>([\s\S]*?)</XML>', self.raw_content, re.DOTALL | re.IGNORECASE)
+        return match.group(1).strip() if match else None
+
+    def html(self) -> Optional[str]:
+        """Extract content between <HTML> tags if present."""
+        match = re.search(r'<HTML>([\s\S]*?)</HTML>', self.raw_content, re.DOTALL | re.IGNORECASE)
+        return match.group(1).strip() if match else None
+
+    def xbrl(self) -> Optional[str]:
+        """Extract content between <XBRL> tags if present."""
+        match = re.search(r'<XBRL>([\s\S]*?)</XBRL>', self.raw_content, re.DOTALL | re.IGNORECASE)
+        return match.group(1).strip() if match else None
+
+    def get_content_type(self) -> str:
+        """
+        Determine the primary content type of the document.
+        Returns: 'xml', 'html', 'xbrl', or 'text'
+        """
+        if self.xml():
+            return 'xml'
+        elif self.html():
+            return 'html'
+        elif self.xbrl():
+            return 'xbrl'
+        return 'text'
 
 def strip_tags(text: str, start_tag: str, end_tag: str) -> str:
+    """Strip XML/HTML tags from text if present."""
     if text.startswith(start_tag) and text.endswith(end_tag):
         return text[len(start_tag):-len(end_tag)].strip()
     return text
 
 
 def parse_document(document_str: str) -> SgmlDocument:
-    fields_pattern = re.compile(
-        r'<TYPE>([^\n<]+)\s*'
-        r'<SEQUENCE>([^\n<]+)\s*'
-        r'<FILENAME>([^\n<]+)\s*'
-        r'(?:<DESCRIPTION>([^\n<]+)\s*)?',
-        re.DOTALL
-    )
-    text_pattern = re.compile(r'<TEXT>(.*?)</TEXT>', re.DOTALL)
-
-    fields_match = fields_pattern.search(document_str)
-    text_match = text_pattern.search(document_str)
-
-    # Check and strip XML or HTML tags from text content
-    text_content = text_match.group(1).strip() if text_match else ""
-    text_content = strip_tags(text_content, '<XML>', '</XML>')
-    text_content = strip_tags(text_content, '<HTML>', '</HTML>')
+    """
+    Parse a single SGML document section, maintaining raw content.
+    """
+    # Extract individual fields with separate patterns
+    type_match = re.search(r'<TYPE>([^<\n]+)', document_str)
+    sequence_match = re.search(r'<SEQUENCE>([^<\n]+)', document_str)
+    filename_match = re.search(r'<FILENAME>([^<\n]+)', document_str)
+    description_match = re.search(r'<DESCRIPTION>([^<\n]+)', document_str)
 
     return SgmlDocument(
-        type=fields_match.group(1).strip() if fields_match else "",
-        sequence=fields_match.group(2).strip() if fields_match else "",
-        filename=fields_match.group(3).strip() if fields_match else "",
-        description=fields_match.group(4).strip() if fields_match and fields_match.group(4) else "",
-        text_content=text_content
+        type=type_match.group(1).strip() if type_match else "",
+        sequence=sequence_match.group(1).strip() if sequence_match else "",
+        filename=filename_match.group(1).strip() if filename_match else "",
+        description=description_match.group(1).strip() if description_match else "",
+        raw_content=document_str
     )
 
 
-def stream_documents(source):
-    if isinstance(source, str) and source.startswith('http'):
-        # Handle URL
+def read_content(source: Union[str, Path]) -> Iterator[str]:
+    """
+    Read content from either a URL or file path, yielding lines.
+
+    Args:
+        source: Either a URL string or a file path
+
+    Yields:
+        str: Lines of content from the source
+
+    Raises:
+        TooManyRequestsError: If the server returns a 429 response
+        FileNotFoundError: If the file path doesn't exist
+    """
+    if isinstance(source, str) and (source.startswith('http://') or source.startswith('https://')):
+        # Handle URL using stream_with_retry
         for response in stream_with_retry(source):
-            yield from process_stream(response.iter_lines())
-    elif isinstance(source, (str, Path)):
-        # Handle file path
-        file_path = Path(source)
-        with file_path.open('r') as file:
-            yield from process_stream(file)
+            # Process each line from the response
+            for line in response.iter_lines():
+                yield line
     else:
-        raise ValueError("Source must be a URL or a file path")
+        # Handle file path
+        path = Path(source)
+        with path.open('r', encoding='utf-8') as file:
+            yield from file
 
 
-def process_stream(line_iterable):
-    document_str = ""
-    in_document = False
-    for line in line_iterable:
-        if '<DOCUMENT>' in line:
-            in_document = True
-            document_str = line
-        elif '</DOCUMENT>' in line:
-            in_document = False
-            document_str += line
-            document = parse_document(document_str)
+def iter_documents(source: Union[str, Path]) -> Iterator[SgmlDocument]:
+    """
+    Stream SGML documents from either a URL or file path, yielding parsed documents.
+
+    Args:
+        source: Either a URL string or a file path (string or Path object)
+
+    Yields:
+        SgmlDocument objects containing the parsed content
+
+    Raises:
+        ValueError: If the source is invalid
+        ConnectionError: If URL retrieval fails after retries
+        FileNotFoundError: If the file path doesn't exist
+    """
+    try:
+        content = ''.join(read_content(source))
+        document_pattern = re.compile(r'<DOCUMENT>([\s\S]*?)</DOCUMENT>')
+
+        for match in document_pattern.finditer(content):
+            document = parse_document(match.group(1))
             if document:
                 yield document
-            document_str = ""
-        elif in_document:
-            document_str += line
+
+    except (ValueError, ConnectionError, FileNotFoundError) as e:
+        raise type(e)(f"Error processing source {source}: {str(e)}")
+
+def list_documents(source: Union[str, Path]) -> list[SgmlDocument]:
+    """
+    Convenience method to parse all documents from a source into a list.
+
+    Args:
+        source: Either a URL string or a file path
+
+    Returns:
+        List of SgmlDocument objects
+    """
+    return list(iter_documents(source))
+
+
+def parse_file(source: Union[str, Path]) -> list[SgmlDocument]:
+    """
+    Convenience method to parse all documents from a source into a list.
+
+    Args:
+        source: Either a URL string or a file path
+
+    Returns:
+        List of SgmlDocument objects
+    """
+    return list(iter_documents(source))
+
+class FilingSgml:
+
+    def __init__(self, sgml_documents: Dict[str, SgmlDocument]):
+        self.sgml_documents = sgml_documents
+
+
+    def get_by_sequence(self, sequence:str) -> SgmlDocument:
+        """Get the sqml document by sequence number."""
+        return self.sgml_documents.get(sequence)
+
+
+    @classmethod
+    def from_source(cls, source:Union[str, Path]):
+        sgml_documents = {
+            document.sequence: document
+            for document in iter_documents(source)
+        }
+        return cls(sgml_documents)
+
+    @classmethod
+    def from_filing(cls, filing: 'Filing'):
+        return cls.from_source(filing.text_url)

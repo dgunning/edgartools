@@ -1,0 +1,671 @@
+-----BEGIN PRIVACY-ENHANCED MESSAGE-----
+Proc-Type: 2001,MIC-CLEAR
+Originator-Name: webmaster@www.sec.gov
+Originator-Key-Asymmetric:
+ MFgwCgYEVQgBAQICAf8DSgAwRwJAW2sNKK9AVtBzYZmr6aGjlWyK3XmZv3dTINen
+ TWSM7vrzLADbmYQaionwg5sDW3P6oaM5D3tdezXMm7z1T+B+twIDAQAB
+MIC-Info: RSA-MD5,RSA,
+ VehqyCiJT9MFGSskria09evLny+MHIYdPY3Q8uhMvTMH2nKql4gJ0inbsWp2eKSs
+ gAxnIySNoudrd65SscJALg==
+
+<SEC-DOCUMENT>0001011438-98-000429.txt : 19990101
+<SEC-HEADER>0001011438-98-000429.hdr.sgml : 19990101
+ACCESSION NUMBER:		0001011438-98-000429
+CONFORMED SUBMISSION TYPE:	8-K
+PUBLIC DOCUMENT COUNT:		2
+CONFORMED PERIOD OF REPORT:	19981215
+ITEM INFORMATION:
+FILED AS OF DATE:		19981231
+
+FILER:
+
+	COMPANY DATA:
+		COMPANY CONFORMED NAME:			AAMES CAPITAL CORP
+		CENTRAL INDEX KEY:			0000913951
+		STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
+		IRS NUMBER:				954438859
+		STATE OF INCORPORATION:			CA
+		FISCAL YEAR END:			0630
+
+	FILING VALUES:
+		FORM TYPE:		8-K
+		SEC ACT:
+		SEC FILE NUMBER:	033-70636
+		FILM NUMBER:		98779541
+
+	BUSINESS ADDRESS:
+		STREET 1:		350 SOUTH GRAND AVE 52ND FLOOR
+		STREET 2:		C/O GARY K JUDIS
+		CITY:			LOS ANGELES
+		STATE:			CA
+		ZIP:			90071
+		BUSINESS PHONE:		2132105000
+
+	MAIL ADDRESS:
+		STREET 1:		350 SOUTH GRAND AVE
+		STREET 2:		3731 WILSHIRE BLVD 2ND FLOOR
+		CITY:			LOS ANGELES
+		STATE:			CA
+		ZIP:			90071
+</SEC-HEADER>
+<DOCUMENT>
+<TYPE>8-K
+<SEQUENCE>1
+<DESCRIPTION>CURRENT REPORT
+<TEXT>
+
+
+                       SECURITIES AND EXCHANGE COMMISSION
+
+                             Washington, D.C. 20549
+
+                                    FORM 8-K
+
+                                 CURRENT REPORT
+
+                     PURSUANT TO SECTION 13 OR 15(d) OF THE
+                       SECURITIES AND EXCHANGE ACT OF 1934
+
+
+                Date of Report (Date of earliest event reported)
+                                DECEMBER 15, 1998
+
+
+                            AAMES CAPITAL CORPORATION
+        ----------------------------------------------------------------
+             (Exact name of Registrant as specified in its charter)
+
+           CALIFORNIA                  333-46893-01              95-4438859
+ ---------------------------          -------------             -----------
+(State or other jurisdiction           (Commission            (I.R.S. employer
+       of incorporation)               file numbers)         identification no.)
+
+
+350 SOUTH GRAND AVENUE
+LOS ANGELES, CALIFORNIA                                                  90071
+- ---------------------------------------                              -----------
+(Address of principal executive offices)                              (ZIP Code)
+
+
+                                 (213) 210-5000
+               --------------------------------------------------
+               Registrant's telephone number, including area code
+
+                                       NA
+          -------------------------------------------------------------
+          (Former name or former address, if changed since last report)
+
+               ===================================================
+
+<PAGE>
+
+
+
+Item 7. FINANCIAL STATEMENTS; PRO FORMA FINANCIAL INFORMATION AND EXHIBITS.
+        ------------------------------------------------------------------
+
+
+(a)      Not applicable.
+
+(b)      Not applicable.
+
+(c)      Exhibits:
+
+                  20.1     Aames Capital Corporation, Mortgage Pass-Through
+         Certificates, Series 1998-C - Statement to Certificateholders
+
+                                       2
+
+<PAGE>
+
+
+
+                                   SIGNATURES
+
+         Pursuant to the requirements of the Securities Exchange Act of 1934, as
+amended,  the  Registrant has duly caused this report to be signed on its behalf
+by the undersigned hereunto duly authorized.
+
+                                            AAMES CAPITAL CORPORATION
+
+                                            By:   /S/ BARBARA S. POLSKY
+                                               --------------------------
+                                                     Barbara S. Polsky
+                                                     Executive Vice President
+
+
+Dated:  December 31, 1998
+
+
+                                       3
+<PAGE>
+
+
+                                INDEX TO EXHIBITS
+
+
+EXHIBIT
+- -------
+
+
+20.1              Aames Capital Corporation, Mortgage Pass-Through
+                  Certificates, Series 1998-C - Statement to Certificateholders
+
+</TEXT>
+</DOCUMENT>
+<DOCUMENT>
+<TYPE>EX-20.1
+<SEQUENCE>2
+<DESCRIPTION>STATEMENT TO CERTIFICATEHOLDERS
+<TEXT>
+
+
+
+
+
+                                  EXHIBIT 20.1
+
+                            AAMES CAPITAL CORPORATION
+                       MORTGAGE PASS-THROUGH CERTIFICATES
+                                  SERIES 1998-C
+                                     REMIC I
+                         STATEMENT TO CERTIFICATEHOLDERS
+<TABLE>
+<CAPTION>
+- ----------------------------------------------------------------------------------------------------------------------------------
+                       DISTRIBUTIONS IN DOLLARS
+                                   PRIOR                                                                                  CURRENT
+                 ORIGINAL      PRINCIPAL                                                   REALIZED       DEFERRED      PRINCIPAL
+CLASS          FACE VALUE        BALANCE       INTEREST      PRINCIPAL         TOTAL         LOSSES       INTEREST        BALANCE
+- ----------------------------------------------------------------------------------------------------------------------------------
+
+<S>          <C>            <C>                <C>           <C>           <C>                 <C>            <C>    <C>
+     I-1F    1,184,000.00   1,156,444.26       9,162.44      25,739.98     34,902.42           0.00           0.00   1,130,704.28
+     I-2F      803,000.00     803,000.00       6,362.12           0.00      6,362.12           0.00           0.00     803,000.00
+     I-3F      399,000.00     399,000.00       3,161.25           0.00      3,161.25           0.00           0.00     399,000.00
+     I-4F      721,000.00     721,000.00       5,712.44           0.00      5,712.44           0.00           0.00     721,000.00
+     I-5F      403,000.00     403,000.00       3,192.94           0.00      3,192.94           0.00           0.00     403,000.00
+     I-6F      390,000.00     390,000.00       3,089.95           0.00      3,089.95           0.00           0.00     390,000.00
+     I-MF  386,100,000.00 383,371,981.77   3,037,432.62   2,548,257.74  5,585,690.36           0.00           0.00 380,823,724.03
+     I-1A    1,950,000.00   1,927,639.85      14,590.07      22,424.65     37,014.72           0.00           0.00   1,905,215.20
+     I-2A      650,000.00     650,000.00       4,919.77           0.00      4,919.77           0.00           0.00     650,000.00
+     I-MA  257,400,000.00 255,186,345.58   1,931,474.36   2,220,040.75  4,151,515.11           0.00           0.00 252,966,304.83
+     R-I             0.00           0.00           0.00           0.00          0.00           0.00           0.00           0.00
+
+
+
+
+
+
+
+
+
+
+- ----------------------------------------------------------------------------------------------------------------------------------
+TOTALS     650,000,000.00 645,008,411.46   5,019,097.96   4,816,463.12  9,835,561.08           0.00           0.00 640,191,948.34
+- ----------------------------------------------------------------------------------------------------------------------------------
+</TABLE>
+
+
+
+<TABLE>
+<CAPTION>
+- -----------------------------------------------------------------------------------------------------------------------------------
+                         FACTOR INFORMATION PER $1000 OF ORIGINAL FACE                                       PASS-THROUGH
+                                    PRIOR                                                    CURRENT             RATES
+                                PRINCIPAL                                                  PRINCIPAL                     ESTIMATED
+ CLASS          CUSIP             BALANCE       INTEREST      PRINCIPAL         TOTAL        BALANCE        CURRENT           NEXT
+- -----------------------------------------------------------------------------------------------------------------------------------
+
+     <S>                     <C>               <C>           <C>           <C>           <C>             <C>            <C>
+      I-1F                     976.726571       7.738547      21.739846     29.478393     954.986726      9.507526%      9.504372%
+      I-2F                   1,000.000000       7.922939       0.000000      7.922939   1,000.000000      9.507526%      9.504372%
+      I-3F                   1,000.000000       7.922932       0.000000      7.922932   1,000.000000      9.507526%      9.504372%
+      I-4F                   1,000.000000       7.922940       0.000000      7.922940   1,000.000000      9.507526%      9.504372%
+      I-5F                   1,000.000000       7.922928       0.000000      7.922928   1,000.000000      9.507526%      9.504372%
+      I-6F                   1,000.000000       7.922949       0.000000      7.922949   1,000.000000      9.507526%      9.504372%
+      I-MF                     992.934426       7.866958       6.599994     14.466953     986.334432      9.507526%      9.504372%
+      I-1A                     988.533259       7.482087      11.499823     18.981910     977.033436      9.082654%      9.081353%
+      I-2A                   1,000.000000       7.568877       0.000000      7.568877   1,000.000000      9.082654%      9.081353%
+      I-MA                     991.399944       7.503785       8.624867     16.128652     982.775077      9.082654%      9.081353%
+
+
+
+
+This    statement   is   also    available   on   Bankers    Trust's    website,
+http://online.bankerstrust.com/invr.  We begin posting statements to the website
+at 7:00 p.m. EST on the business day before each distribution date.
+
+
+
+- ----------------------------------------------------------------------------------------------------------------------------------
+SELLER:                            Aames Capital Corporation                      ADMINISTRATOR:             David West
+SERVICER:                          Aames Capital Corporation                                            Bankers Trust Company
+LEAD UNDERWRITER:            NationsBanc Montgomery Securities LLC                                          3 Park Plaza
+RECORD DATE:                           November 30, 1998                                                  Irvine, CA 92614
+DISTRIBUTION DATE:                     December 15, 1998                           FACTOR INFORMATION:     (800) 735-7777
+- ----------------------------------------------------------------------------------------------------------------------------------
+                                                            Page 1 of 6                   (C) COPYRIGHT 1998 Bankers Trust Company
+</TABLE>
+
+
+
+
+                            AAMES CAPITAL CORPORATION
+                       MORTGAGE PASS-THROUGH CERTIFICATES
+                                  SERIES 1998-C
+                                    REMIC II
+                         STATEMENT TO CERTIFICATEHOLDERS
+<TABLE>
+<CAPTION>
+
+- -----------------------------------------------------------------------------------------------------------------------------------
+                        DISTRIBUTIONS IN DOLLARS
+                                    PRIOR                                                                                  CURRENT
+                  ORIGINAL      PRINCIPAL                                                   REALIZED       DEFERRED      PRINCIPAL
+ CLASS          FACE VALUE        BALANCE       INTEREST      PRINCIPAL         TOTAL         LOSSES       INTEREST        BALANCE
+- -----------------------------------------------------------------------------------------------------------------------------------
+
+<S>         <C>            <C>                <C>          <C>           <C>                    <C>            <C>  <C>
+      A-1F  118,400,000.00 113,781,143.26     591,567.13   3,600,398.47  4,191,965.60           0.00           0.00 110,180,744.79
+      A-2F   80,300,000.00  80,300,000.00     403,975.92           0.00    403,975.92           0.00           0.00  80,300,000.00
+      A-3F   39,900,000.00  39,900,000.00     202,525.75           0.00    202,525.75           0.00           0.00  39,900,000.00
+      A-4F   72,100,000.00  72,100,000.00     376,602.33           0.00    376,602.33           0.00           0.00  72,100,000.00
+      A-5F   40,300,000.00  40,300,000.00     222,758.25           0.00    222,758.25           0.00           0.00  40,300,000.00
+      A-6F   39,000,000.00  39,000,000.00     199,322.50           0.00    199,322.50           0.00           0.00  39,000,000.00
+      A-1A  195,000,000.00 191,237,567.00     853,113.39   2,990,208.50  3,843,321.89           0.00           0.00 188,247,358.50
+      A-2A   65,000,000.00  65,000,000.00     320,233.33           0.00    320,233.33           0.00           0.00  65,000,000.00
+      C               0.00   3,532,291.89           0.00           0.00          0.00           0.00   1,833,007.72   5,365,299.61
+      R-II            0.00           0.00           0.00           0.00          0.00           0.00           0.00           0.00
+
+
+
+
+
+
+
+
+
+
+
+- -----------------------------------------------------------------------------------------------------------------------------------
+TOTALS      650,000,000.00 645,151,002.15   3,170,098.60   6,590,606.96  9,760,705.56           0.00   1,833,007.72 640,393,402.90
+- -----------------------------------------------------------------------------------------------------------------------------------
+</TABLE>
+
+<TABLE>
+<CAPTION>
+- -----------------------------------------------------------------------------------------------------------------------------------
+                         FACTOR INFORMATION PER $1000 OF ORIGINAL FACE                                       PASS-THROUGH
+                                    PRIOR                                                    CURRENT             RATES
+                                PRINCIPAL                                                  PRINCIPAL                     ESTIMATED
+ CLASS          CUSIP             BALANCE       INTEREST      PRINCIPAL         TOTAL        BALANCE        CURRENT           NEXT
+- -----------------------------------------------------------------------------------------------------------------------------------
+
+     <S>      <C>            <C>                <C>           <C>           <C>           <C>             <C>            <C>
+      A-1F    00253CFD4        960.989386       4.996344      30.408771     35.405115     930.580615      6.239000%      6.239000%
+      A-2F    00253CFE2      1,000.000000       5.030833       0.000000      5.030833   1,000.000000      6.037000%      6.037000%
+      A-3F    00253CFF9      1,000.000000       5.075833       0.000000      5.075833   1,000.000000      6.091000%      6.091000%
+      A-4F    00253CFG7      1,000.000000       5.223333       0.000000      5.223333   1,000.000000      6.268000%      6.268000%
+      A-5F    00253CFH5      1,000.000000       5.527500       0.000000      5.527500   1,000.000000      6.633000%      6.633000%
+      A-6F    00253CFJ1      1,000.000000       5.110833       0.000000      5.110833   1,000.000000      6.133000%      6.133000%
+      A-1A    00253CFK8        980.705472       4.374940      15.334403     19.709343     965.371069      5.537810%      5.795470%
+      A-2A    00253CFL6      1,000.000000       4.926667       0.000000      4.926667   1,000.000000      5.912000%      5.912000%
+      C                          0.000000       0.000000       0.000000      0.000000       0.000000      0.000000%      0.000000%
+      R-II                       0.000000       0.000000       0.000000      0.000000       0.000000      0.000000%      0.000000%
+
+
+
+
+
+
+
+
+
+
+- ----------------------------------------------------------------------------------------------------------------------------------
+SELLER:                                 Aames Capital Corporation                      ADMINISTRATOR:             David West
+SERVICER:                               Aames Capital Corporation                                            Bankers Trust Company
+LEAD UNDERWRITER:                 NationsBanc Montgomery Securities LLC                                          3 Park Plaza
+RECORD DATE:                                November 30, 1998                                                  Irvine, CA 92614
+DISTRIBUTION DATE:                          December 15, 1998                           FACTOR INFORMATION:     (800) 735-7777
+- ----------------------------------------------------------------------------------------------------------------------------------
+                                                                 Page 2 of 6              (C) COPYRIGHT 1998 Bankers Trust Company
+</TABLE>
+
+
+
+
+                            AAMES CAPITAL CORPORATION
+                       MORTGAGE PASS-THROUGH CERTIFICATES
+                                  SERIES 1998-C
+
+                         STATEMENT TO CERTIFICATEHOLDERS
+<TABLE>
+<CAPTION>
+
+- ---------------------------------------------------------------------------------------------------------------------------------
+
+Distribution Date:             December 15, 1998
+- ---------------------------------------------------------------------------------------------------------------------------------
+
+
+- ---------------------------------------------------------------------------------------------------------------------------------
+
+                                                                   1              2             3+
+                DELINQUENT LOAN INFORMATION                     Payment       Payments       Payments                 Total
+- ---------------------------------------------------------------------------------------------------------------------------------
+<S>                                                            <C>           <C>               <C>                 <C>
+  Fixed Group   PRINCIPAL BALANCE                              8,802,302.47  1,920,506.60      54,600.00           10,777,409.07
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         2.28827%      0.49926%       0.01419%                2.80173%
+                NUMBER OF LOANS                                         158            28              2                     188
+                PERCENTAGE OF POOL LOANS                           2.72602%      0.48309%       0.03451%                3.24362%
+- ---------------------------------------------------------------------------------------------------------------------------------
+   ADJ GROUP    PRINCIPAL BALANCE                              6,603,459.86  2,301,262.71           0.00            8,904,722.57
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         2.58431%      0.90061%       0.00000%                3.48492%
+                NUMBER OF LOANS                                          83            21              0                     104
+                PERCENTAGE OF POOL LOANS                           3.25618%      0.82385%       0.00000%                4.08003%
+- ---------------------------------------------------------------------------------------------------------------------------------
+                FORECLOSURE LOAN INFORMATION
+- ---------------------------------------------------------------------------------------------------------------------------------
+  FIXED GROUP   PRINCIPAL BALANCE                                      0.00  2,046,501.00   1,636,759.19            3,683,260.19
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         0.00000%      0.53201%       0.42550%                0.95751%
+                NUMBER OF LOANS                                           0            33             22                      55
+                PERCENTAGE OF POOL LOANS                           0.00000%      0.56936%       0.37957%                0.94893%
+- ---------------------------------------------------------------------------------------------------------------------------------
+   ADJ GROUP    PRINCIPAL BALANCE                                      0.00  1,779,115.32   2,998,918.01            4,778,033.33
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         0.00000%      0.69627%       1.17365%                1.86991%
+                NUMBER OF LOANS                                           0            18             27                      45
+                PERCENTAGE OF POOL LOANS                           0.00000%      0.70616%       1.05924%                1.76540%
+- ---------------------------------------------------------------------------------------------------------------------------------
+                REO LOAN INFORMATION
+- ---------------------------------------------------------------------------------------------------------------------------------
+  FIXED GROUP   PRINCIPAL BALANCE                                      0.00          0.00           0.00                    0.00
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         0.00000%      0.00000%       0.00000%                0.00000%
+                NUMBER OF LOANS                                           0             0              0                       0
+                PERCENTAGE OF POOL LOANS                           0.00000%      0.00000%       0.00000%                0.00000%
+- ---------------------------------------------------------------------------------------------------------------------------------
+   ADJ GROUP    PRINCIPAL BALANCE                                      0.00          0.00           0.00                    0.00
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         0.00000%      0.00000%       0.00000%                0.00000%
+                NUMBER OF LOANS                                           0             0              0                       0
+                PERCENTAGE OF POOL LOANS                           0.00000%      0.00000%       0.00000%                0.00000%
+- ---------------------------------------------------------------------------------------------------------------------------------
+                BANKRUPTCY LOAN INFORMATION
+- ---------------------------------------------------------------------------------------------------------------------------------
+  FIXED GROUP   PRINCIPAL BALANCE                                 82,876.56          0.00           0.00               82,876.56
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         0.02154%      0.00000%       0.00000%                0.02154%
+                NUMBER OF LOANS                                           2             0              0                       2
+                PERCENTAGE OF POOL LOANS                           0.03451%      0.00000%       0.00000%                0.03451%
+- ---------------------------------------------------------------------------------------------------------------------------------
+   ADJ GROUP    PRINCIPAL BALANCE                                      0.00          0.00      35,973.90               35,973.90
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         0.00000%      0.00000%       0.01408%                0.01408%
+                NUMBER OF LOANS                                           0             0              1                       1
+                PERCENTAGE OF POOL LOANS                           0.00000%      0.00000%       0.03923%                0.03923%
+- ---------------------------------------------------------------------------------------------------------------------------------
+
+                TOTAL
+- ---------------------------------------------------------------------------------------------------------------------------------
+  FIXED GROUP   PRINCIPAL BALANCE                              8,885,179.03  3,967,007.60   1,691,359.19           14,543,545.82
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         2.30982%      1.03127%       0.43969%                3.78078%
+                NUMBER OF LOANS                                         160            61             24                     245
+                PERCENTAGE OF POOL LOANS                           2.76052%      1.05245%       0.41408%                4.22705%
+- ---------------------------------------------------------------------------------------------------------------------------------
+   ADJ GROUP    PRINCIPAL BALANCE                              6,603,459.86  4,080,378.03   3,034,891.91           13,718,729.80
+- ----------------
+                PERCENTAGE OF POOL BALANCE                         2.58431%      1.59688%       1.18772%                5.36891%
+                NUMBER OF LOANS                                          83            39             28                     150
+                PERCENTAGE OF POOL LOANS                           3.25618%      1.53001%       1.09847%                5.88466%
+- ---------------------------------------------------------------------------------------------------------------------------------
+                                                                 Page 3 of 6            (C) COPYRIGHT 1998 Bankers Trust Company
+
+</TABLE>
+
+
+                            AAMES CAPITAL CORPORATION
+                       MORTGAGE PASS-THROUGH CERTIFICATES
+                                  SERIES 1998-C
+
+                         STATEMENT TO CERTIFICATEHOLDERS
+<TABLE>
+<CAPTION>
+- -------------------------------------------------------------------------------------------------------------------
+
+Distribution Date:             December 15, 1998
+- -------------------------------------------------------------------------------------------------------------------
+
+
+COLLECTION ACCOUNT INFORMATION
+- -------------------------------------------------------------------------------------------------------------------
+
+                SOURCES OF PRINCIPAL                                   FIXED GROUP     ADJ GROUP        TOTAL
+- -------------------------------------------------------------------------------------------------------------------
+
+<S>                                                                       <C>            <C>            <C>
+                SCHEDULED PRINCIPAL RECEIVED                              425,326.69     141,631.39     566,958.08
+                PREPAYMENTS & CURTAILMENTS                              2,148,671.03   2,100,834.01   4,249,505.04
+                REPURCHASES/SUBSTITUTIONS                                       0.00           0.00           0.00
+                NET LIQUIDATION PROCEEDS                                        0.00           0.00           0.00
+                INSURANCE PROCEEDS                                              0.00           0.00           0.00
+                OTHER PRINCIPAL                                                 0.00           0.00           0.00
+                PREFUNDING ACCOUNT TERMINATION                                  0.00           0.00           0.00
+
+                LESS: REALIZED LOSSES                                           0.00           0.00           0.00
+
+                TOTAL  PRINCIPAL                                        2,573,997.72   2,242,465.40   4,816,463.12
+
+- -------------------------------------------------------------------------------------------------------------------
+                SOURCES OF INTEREST
+- -------------------------------------------------------------------------------------------------------------------
+
+                SCHEDULED INTEREST                                      3,229,465.60   2,058,385.87   5,287,851.47
+                REPURCHASES/SUBSTITUTIONS                                       0.00           0.00           0.00
+                LIQUIDATION PROCEEDS                                            0.00           0.00           0.00
+                INSURANCE PROCEEDS                                              0.00           0.00           0.00
+                OTHER INTEREST                                                  0.00           0.00           0.00
+                LESS: DELINQUENT INTEREST                                (497,568.25)   (340,438.75)   (838,007.00)
+                LESS: PPIS                                                      0.00           0.00           0.00
+                LESS: PPIS CIVIL RELIEF SHORTFALL                               0.00           0.00           0.00
+                LESS: CURRENT SERVICING FEES                             (138,604.96)    (90,976.28)   (229,581.24)
+                LESS: REALIZED LOSSES                                           0.00           0.00           0.00
+                PLUS: COMPENSATING INTEREST                                     0.00           0.00           0.00
+                PLUS: INTEREST ADVANCED AMOUNT                            474,821.37     324,013.36     798,834.73
+                PLUS: CAPITALIZED INTEREST AMOUNT                               0.00           0.00           0.00
+                PLUS: CLOSING DATE DEPOSIT                                      0.00           0.00           0.00
+
+                TOTAL INTEREST                                          3,068,113.76   1,950,984.20   5,019,097.96
+
+- -------------------------------------------------------------------------------------------------------------------
+                PERMITTED WITHDRAWALS
+- -------------------------------------------------------------------------------------------------------------------
+                                                                                0.00           0.00           0.00
+
+- -------------------------------------------------------------------------------------------------------------------
+                TOTAL SOURCES
+- -------------------------------------------------------------------------------------------------------------------
+
+                                                                        5,642,111.48   4,193,449.60   9,835,561.08
+- -------------------------------------------------------------------------------------------------------------------
+
+
+CAPITALIZED INTEREST DEPOSIT FOR CERTIFICATE ACCOUNT                                                          0.00
+PREFUNDING DEPOSIT FOR CERTIFICATE ACCOUNT                                                                    0.00
+
+TOTAL REMITTANCE DUE                                                                                  9,835,561.08
+
+- -------------------------------------------------------------------------------------------------------------------
+                                                          Page 4 of 6      (C) COPYRIGHT 1998 Bankers Trust Company
+</TABLE>
+
+
+
+
+
+                            AAMES CAPITAL CORPORATION
+                       MORTGAGE PASS-THROUGH CERTIFICATES
+                                  SERIES 1998-C
+
+                         STATEMENT TO CERTIFICATEHOLDERS
+<TABLE>
+<CAPTION>
+
+- ------------------------------------------------------------------------------------------------------------------------------
+
+Distribution Date:             December 15, 1998
+- ------------------------------------------------------------------------------------------------------------------------------
+
+- ------------------------------------------------------------------------------------------------------------------------------
+
+SERVICING FEES                                                                    FIXED GROUP     ADJ GROUP        TOTAL
+- ------------------------------------------------------------------------------------------------------------------------------
+<S>                                                                                  <C>            <C>            <C>
+ACCRUED SERVICING FEE FOR THE CURRENT PERIOD:                                        161,351.84     107,401.66     268,753.50
+LESS:~ AMOUNTS TO COVER INTEREST SHORTFALLS:                                               0.00           0.00           0.00
+LESS:~ DELINQUENT SERVICE FEES:                                                      (22,746.88)    (16,425.38)    (39,172.26)
+
+COLLECTED SERVICING FEES FOR CURRENT PERIOD:                                         138,604.96      90,976.28     229,581.24
+AMOUNT PER $1000 CERTIFICATE:
+- ------------------------------------------------------------------------------------------------------------------------------
+
+
+
+- ------------------------------------------------------------------------------------------------------------------------------
+
+POOL INFORMATION                                                                  FIXED GROUP     ADJ GROUP        Total
+- ------------------------------------------------------------------------------------------------------------------------------
+PRIOR PRINCIPAL BALANCE OF POOL:                                                 387,244,426.03 257,763,985.43 645,008,411.46
+CURRENT PRINCIPAL BALANCE OF POOL:                                               384,670,428.31 255,521,520.03 640,191,948.34
+GROUP FACTOR                                                                          98.63344%      98.27751%      98.49107%
+PRIOR NUMBER OF LOANS:                                                                    5,831          2,570          8,401
+CURRENT NUMBER OF LOANS:                                                                  5,796          2,549          8,345
+NUMBER OF LOANS PURCHASED FROM Mortgage Replacement                                           0              0              0
+CURRENT PRINCIPAL BAL. OF LOANS PURCHASED FROM MORT REPLACEMENT                               0              0           0.00
+
+NUMBER OF LOANS PAID IN FULL:                                                                35             21             56
+
+CURRENT WEIGHTED AVERAGE MORTGAGE RATE:                                               10.00753%       9.58265%
+NEXT WEIGHTED AVERAGE MORTGAGE RATE:                                                  10.00437%       9.58135%
+WEIGHTED AVERAGE TERM TO MATURITY:                                                          306            354
+- ------------------------------------------------------------------------------------------------------------------------------
+- ------------------------------------------------------------------------------------------------------------------------------
+
+TRIGGER EVENTS                                                                    FIXED GROUP     ADJ GROUP
+- ------------------------------------------------------------------------------------------------------------------------------
+
+
+HAS A ROLLING LOSS RATE EVENT OCCURRED?                                                NO             NO
+HAS A CUMULATIVE LOSS RATE EVENT OCCURRED?                                             NO             NO
+HAS A DELINQUENCY RATE EVENT OCCURRED?                                                 NO             NO
+
+
+
+
+
+
+- ------------------------------------------------------------------------------------------------------------------------------
+
+- ------------------------------------------------------------------------------------------------------------------------------
+
+OVERCOLLATERALIZATION                                                             FIXED GROUP     ADJ GROUP
+- ------------------------------------------------------------------------------------------------------------------------------
+
+EXTRA PRINCIPAL DISTRIBUTION AMOUNT                                                1,026,400.75     747,743.10
+OVERCOLLATERALIZATION AMOUNT                                                       2,889,683.52   2,274,161.53
+TARGET OVERCOLLATERALIZATION AMOUNT                                               10,335,000.00  16,510,000.00
+
+- ------------------------------------------------------------------------------------------------------------------------------
+                                                        Page 5 OF 6                   (C) COPYRIGHT 1998 Bankers Trust Company
+</TABLE>
+
+
+
+
+
+
+                            AAMES CAPITAL CORPORATION
+                       MORTGAGE PASS-THROUGH CERTIFICATES
+                                  SERIES 1998-C
+
+                         STATEMENT TO CERTIFICATEHOLDERS
+<TABLE>
+<CAPTION>
+
+- ----------------------------------------------------------------------------------------------------------------------------
+
+Distribution Date:             December 15, 1998
+- ----------------------------------------------------------------------------------------------------------------------------
+
+
+
+- ----------------------------------------------------------------------------------------------------------------------------
+
+ACCRUED CERTIFICATE INTEREST                                                                      PRIOR         CURRENT
+- ----------------------------------------------------------------------------------------------------------------------------
+
+<S>                     <C>                                                                       <C>            <C>
+                CLASS A-1F                                                                        606,282.02     591,567.13
+                CLASS A-2F                                                                        403,975.92     403,975.92
+                CLASS A-3F                                                                        202,525.75     202,525.75
+                CLASS A-4F                                                                        376,602.33     376,602.33
+                CLASS A-5F                                                                        222,758.25     222,758.25
+                CLASS A-6F                                                                        199,322.50     199,322.50
+                CLASS A-1A                                                                        975,243.32     853,113.39
+                CLASS A-2A                                                                        320,233.33     320,233.33
+                CLASS C                                                                                 0.00           0.00
+
+
+
+
+- ----------------------------------------------------------------------------------------------------------------------------
+
+INTEREST CARRY FORWARD AMOUNT                                                                     PRIOR         CURRENT
+- ----------------------------------------------------------------------------------------------------------------------------
+
+                CLASS A-1F                                                                              0.00           0.00
+                CLASS A-2F                                                                              0.00           0.00
+                CLASS A-3F                                                                              0.00           0.00
+                CLASS A-4F                                                                              0.00           0.00
+                CLASS A-5F                                                                              0.00           0.00
+                CLASS A-6F                                                                              0.00           0.00
+                CLASS A-1A                                                                              0.00           0.00
+                CLASS A-2A                                                                              0.00           0.00
+                CLASS C                                                                                 0.00           0.00
+
+
+- ----------------------------------------------------------------------------------------------------------------------------
+
+
+- ----------------------------------------------------------------------------------------------------------------------------
+
+CERTIFICATE INSURER INFORMATION
+- ----------------------------------------------------------------------------------------------------------------------------
+
+MBIA PREMIUM PAID:                                                                                                74,855.52
+INSURED AMOUNTS:                                                                                                       0.00
+UNPAID INSURED AMOUNTS AND INTEREST ON THE AMOUNTS:                                                                    0.00
+
+- ----------------------------------------------------------------------------------------------------------------------------
+
+
+- ----------------------------------------------------------------------------------------------------------------------------
+
+SUPPLEMENTAL INTEREST AMOUNT (PAID)                                                                                    0.00
+SUPPLEMENTAL INTEREST AMOUNT (REMAINING UNPAID)                                                                        0.00
+
+
+
+- ----------------------------------------------------------------------------------------------------------------------------
+                                                                 Page 6 of 6            COPYRIGHT 1998 Bankers Trust Company
+</TABLE>
+</TEXT>
+</DOCUMENT>
+</SEC-DOCUMENT>
+-----END PRIVACY-ENHANCED MESSAGE-----
