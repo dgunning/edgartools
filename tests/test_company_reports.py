@@ -117,3 +117,9 @@ def test_tenk_section_properties():
     assert tenk.risk_factors
     assert tenk.directors_officers_and_governance
 
+
+def test_tenk_detect_items_with_spaces():
+    f = Filing(company='LOCKHEED MARTIN CORP', cik=936468, form='10-K', filing_date='2024-01-23', accession_no='0000936468-24-000010')
+    tenk = f.obj()
+    # Previously we were not detecting items with spaces
+    assert "Item 1" in tenk.items
