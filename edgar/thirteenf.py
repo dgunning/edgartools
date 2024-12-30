@@ -16,7 +16,7 @@ from edgar.richtools import repr_rich
 from edgar.xmltools import find_element, child_text
 from edgar.core import log
 from edgar.reference import cusip_ticker_mapping
-from edgar.sgml import stream_documents
+from edgar.sgml import iter_documents
 
 __all__ = [
     'ThirteenF',
@@ -125,9 +125,9 @@ class ThirteenF:
         Use the SGML parser to get the infotable file
         """
         if self.has_infotable():
-            for document in stream_documents(self.filing.text_url):
+            for document in iter_documents(self.filing.text_url):
                 if document.type == "INFORMATION TABLE":
-                    return document.text_content
+                    return document.raw_content
 
     def _get_infotable_from_attachment(self):
         """
