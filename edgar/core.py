@@ -837,16 +837,17 @@ def cache_except_none(maxsize=128):
 
     return decorator
 
+
 def has_html_content(content: str) -> bool:
     """
-    Check if the content is HTML
+    Check if the content is HTML or inline XBRL HTML
     """
     if isinstance(content, bytes):
         content = content.decode('utf-8', errors='ignore')
 
     # Strip only leading whitespace and get first 200 chars for doctype check
     content = content.lstrip()
-    first_200_lower = content[:200].lower()  # DOCTYPE should be at the start
+    first_200_lower = content[:200].lower()
 
     # Check for XHTML doctype declarations
     if '<!doctype html public "-//w3c//dtd xhtml' in first_200_lower or \
@@ -854,6 +855,19 @@ def has_html_content(content: str) -> bool:
             '<!doctype html public "-//w3c//dtd html 4.01 transitional//en"' in first_200_lower:
         return True
 
-    # Check first 1000 chars for xmlns if doctype wasn't found
-    # No need to lowercase this check as XML namespaces are case-sensitive
-    return 'xmlns="http://www.w3.org/1999/xhtml"' in content[:1000]
+    # Look for common XML/HTML indicators in first 1000 chars
+    first_1000 = content[:1000]
+
+    # Check for standard XHTML namespace
+    if 'xmlns="http://www.w3.org/1999/xhtml"' in first_1000:
+        return True
+
+    # Check for HTML root element
+    if '<html' in first_1000:
+        # Check for common inline XBRL namespaces
+        if ('xmlns:xbrli' in first_1000 or
+                'xmlns:ix' in first_1000 or
+                'xmlns:html' in first_1000):
+            return True
+
+    return False
