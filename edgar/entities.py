@@ -255,7 +255,13 @@ class EntityFilings(Filings):
                ticker: Union[str, List[str]] = None,
                accession_number: Union[str, List[str]] = None, ):
         # The super filter returns Filings. We want CompanyFilings
-        res = super().filter(form, amendments, filing_date, date, accession_number)
+        res = super().filter(form=form,
+                             amendments=amendments,
+                             filing_date=filing_date,
+                             date=date,
+                             cik=cik,
+                             ticker=ticker,
+                             accession_number=accession_number)
         return CompanyFilings(data=res.data, cik=self.cik, company_name=self.company_name)
 
     def latest(self, n: int = 1):

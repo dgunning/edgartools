@@ -125,3 +125,10 @@ def test_individual_repr():
     print()
     print(i_repr)
     assert "Vaibhav" in i_repr
+
+
+def test_filter_by_accession_number():
+    # A TSLA filing
+    c = Company(1318605)
+    filing = c.filings.filter(accession_number="0002007317-24-000625")
+    assert filing
