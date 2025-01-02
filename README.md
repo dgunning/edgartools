@@ -69,6 +69,8 @@ set_identity("Michael Mccallum mike.mccalum@indigo.com")
 filings = get_filings()
 ```
 
+![](docs/images/get_filings.png)
+
 # Key Concepts
 
 ## Getting financials
