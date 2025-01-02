@@ -363,7 +363,7 @@ For more details see **[Parsing XBRL](https://github.com/dgunning/edgartools/wik
 filing_xbrl = filing.xbrl()
 ```
 
-![Filing homapage](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/10Q_xbrl.jpg)
+![Filing homapage](docs/images/10Q_xbrl.png)
 
 ## Financials
 
