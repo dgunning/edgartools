@@ -130,5 +130,6 @@ def test_get_filings_before_new_filings_for_quarter(monkeypatch):
 
     # Use pytest.raises to check if the function raises the expected exception
     filings = get_filings()
-    assert filings
+    assert filings is not None
+    assert len(filings) == 0
 

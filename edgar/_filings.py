@@ -54,7 +54,7 @@ from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
-from edgar.richtools import df_to_rich_table, repr_rich, rich_to_text, print_rich
+from edgar.richtools import repr_rich, rich_to_text, print_rich
 from edgar.search import BM25Search, RegexSearch
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
@@ -955,7 +955,8 @@ def get_filings(year: Optional[Years] = None,
             # Ensure at least some data is returned
             previous_quarter = [get_previous_quarter(year, quarter)]
             filing_index = get_filings_for_quarters(previous_quarter, index=index)
-            return Filings(filing_index)
+            sorted_filing_index = sort_filings_by_priority(filings.data, priority_forms)
+            return Filings(sorted_filing_index)
         return None
 
     # Sort the filings using the separate sort function
@@ -1150,16 +1151,73 @@ class CurrentFilings(Filings):
         return None
 
     def __rich__(self):
-        page: pd.DataFrame = self.to_pandas()
+
+        # Create table with appropriate columns and styling
+        table = Table(
+            show_header=True,
+            header_style="bold",
+            show_edge=True,
+            expand=False,
+            padding=(0, 1),
+            box=box.SIMPLE,
+            row_styles=["", "bold"]
+        )
+
+        # Add columns with specific styling and alignment
+        table.add_column("#", style="dim", justify="right")
+        table.add_column("Form", width=7)
+        table.add_column("CIK", style="dim", width=10, justify="right")
+        table.add_column("Ticker", width=6, style="yellow")
+        table.add_column("Company", style="bold green", width=38, no_wrap=True)
+        table.add_column("Filing Date", width=11)
+        table.add_column("Accession Number", style="dim", width=20)
+
+        # Get current page from data pager
+        current_page = self.data.to_pandas()
 
         # compute the index from the start and page_size and set it as the index of the page
-        page.index = range(self._start - 1, self._start - 1 + len(page))
+        current_page.index = range(self._start - 1, self._start - 1 + len(current_page))
 
+        # Iterate through rows in current page
+        for t in current_page.itertuples():
+            cik = t.cik
+            ticker = find_ticker(cik)
+
+            row = [
+                str(t.Index),
+                t.form,
+                str(cik),
+                ticker,
+                t.company,
+                str(t.filing_date),
+                t.accession_number
+            ]
+            table.add_row(*row)
+
+        # Show paging information only if there are multiple pages
+        elements = [table]
+
+        page_info = Text.assemble(
+                ("Showing ", "dim"),
+                (f"{current_page.index.min():,}", "bold red"),
+                (" to ", "dim"),
+                (f"{current_page.index.max():,}", "bold red"),
+                (" Page using ", "dim"),
+                ("← prev()", "bold gray54"),
+                (" and ", "dim"),
+                ("next() →", "bold gray54")
+            )
+
+        elements.extend([Text("\n"), page_info])
+
+        # Get the subtitle
+        start_date, end_date = self.date_range
+        subtitle = "Most recent filings from the SEC"
         return Panel(
-            Group(
-                df_to_rich_table(page),
-                Text(f"Filings {page.index.min()} to {page.index.max()}")
-            ), title=f"Current Filings on {self.start_date}"
+            Group(*elements),
+            title="SEC Filings",
+            subtitle=subtitle,
+            border_style="bold grey54"
         )
 
 

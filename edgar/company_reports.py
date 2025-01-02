@@ -9,7 +9,6 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
-from rich.layout import Layout
 
 from edgar._filings import Attachments, Attachment
 from edgar._markdown import MarkdownContent

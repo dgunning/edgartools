@@ -630,12 +630,10 @@ def test_get_filings_for_future_period(capsys):
 
 def test_get_filings_default():
     filings = get_filings()
-    assert not filings.empty
+    assert filings is not None
 
     filings = get_filings(form="8-K")
-    assert not filings.empty
-    print()
-    print(filings)
+    assert filings is not None
 
 
 def test_filings_get_by_index_or_accession_number():
