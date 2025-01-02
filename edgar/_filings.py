@@ -1202,6 +1202,7 @@ class CurrentFilings(Filings):
                 (f"{current_page.index.min():,}", "bold red"),
                 (" to ", "dim"),
                 (f"{current_page.index.max():,}", "bold red"),
+                (" most recent filings.", "dim"),
                 (" Page using ", "dim"),
                 ("← prev()", "bold gray54"),
                 (" and ", "dim"),

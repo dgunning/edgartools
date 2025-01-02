@@ -50,6 +50,8 @@ from edgar.financials import Financials, MultiFinancials
 
 # Another name for get_current_filings
 get_latest_filings = get_current_filings
+latest_filings = get_current_filings
+current_filings = get_current_filings
 
 # Fund portfolio report filings
 get_fund_portfolio_filings = partial(get_filings, form=NPORT_FORMS)
