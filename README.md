@@ -279,8 +279,7 @@ With the Company API you can find a company by ticker or CIK, and get the compan
 
 ```python
 Company("AAPL")
-        .get_filings(form="10-Q")
-        .latest(1)
+        .latest("10-Q")
         .obj()
 ```
 
