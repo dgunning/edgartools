@@ -1,0 +1,598 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>Parsing Filing Data - edgartools</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#parsing-filing-data" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="edgartools" class="md-header__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            edgartools
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Parsing Filing Data
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="edgartools" class="md-nav__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    edgartools
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-the-company-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Companies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-financials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Company Financials
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-objects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Objects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eightk-filings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Eight-K Filings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#filing-types-with-data-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filing types with data objects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ownership-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ownership Documents
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ownership Documents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ownership-forms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ownership Forms
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-ownership-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Ownership Documents
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#derivative-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      Derivative Table
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Derivative Table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#derivative-holdings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Derivative Holdings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#derivative-transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Derivative Transactions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#non-derivative-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      Non Derivative Table
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Non Derivative Table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#non-derivative-holdings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Non Derivative Holdings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#non-derivative-transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Non Derivative Transactions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="parsing-filing-data">Parsing Filing Data</h1>
+<p>An SEC filing represents information a company wishes to make public. The information is sometimes contained in data files attached to the filing, such as XBRL, XML or JSON.</p>
+<p>In <strong>edgartools</strong> each <strong>Filing</strong> has a <code>.obj()</code> function that converts the filing to a parsed version of the data file.</p>
+<p>For example, the following code converts the filing for the 10-K for Apple Inc. to a <code>TenK</code> object containing the data from the filing:</p>
+<pre><code class="language-python">    from edgar import get_filings 
+    filings = get_filings(form=&quot;10-K&quot;)
+    filing = filings[0]
+    tenk = filing.obj()
+</code></pre>
+<p>Under the hood, the <code>.obj()</code> function gets the data file for the filing, which is usually the filing's XML, parses it, and converts it to the approaptate data object.</p>
+<p>If a filing has no corresponding data object, the <code>.obj()</code> function returns <code>None</code></p>
+<h2 id="filing-types-with-data-objects">Filing types with data objects</h2>
+<p>The following table lists the filing types that have data objects:</p>
+<table>
+<thead>
+<tr>
+<th>Filing type</th>
+<th>Data object</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10-K</td>
+<td><code>TenK</code></td>
+<td>Annual report</td>
+</tr>
+<tr>
+<td>10-Q</td>
+<td><code>TenQ</code></td>
+<td>Quarterly report</td>
+</tr>
+<tr>
+<td>8-K</td>
+<td><code>EightK</code></td>
+<td>Current report</td>
+</tr>
+<tr>
+<td>144</td>
+<td><code>Form144</code></td>
+<td>Insider trading report</td>
+</tr>
+<tr>
+<td>3,4,5</td>
+<td><code>Ownership</code></td>
+<td>Insider trading report</td>
+</tr>
+<tr>
+<td>D</td>
+<td><code>Effect</code></td>
+<td>Effect filing for the Form D</td>
+</tr>
+<tr>
+<td>NPORT</td>
+<td><code>NPORT</code></td>
+<td>Investment company report</td>
+</tr>
+<tr>
+<td>13F-HR</td>
+<td><code>ThirteenF</code></td>
+<td>Institutional investment manager's report</td>
+</tr>
+<tr>
+<td>Any other filing with XBRL</td>
+<td><code>XbrlFiling</code></td>
+<td>XBRL filing object with the data</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ownership-documents">Ownership Documents</h2>
+<p>Ownership documents are SEC forms that contain information about ownership of securities.</p>
+<h3 id="ownership-forms">Ownership Forms</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Form</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;"><strong>3</strong></td>
+<td style="text-align: left;">Initial statement of beneficial ownership of securities</td>
+</tr>
+<tr>
+<td style="text-align: right;"><strong>4</strong></td>
+<td style="text-align: left;">Statement of changes of beneficial ownership of securities</td>
+</tr>
+<tr>
+<td style="text-align: right;"><strong>5</strong></td>
+<td style="text-align: left;">Annual statement of changes in beneficial ownership of securities</td>
+</tr>
+</tbody>
+</table>
+<p>The module <code>edgar.ownership</code> module parses XML into an <code>OwnershipDocument</code> instance, 
+containing data about transactions and holdings.</p>
+<h3 id="getting-ownership-documents">Getting Ownership Documents</h3>
+<ul>
+<li>get a form <strong>3</strong>, <strong>4</strong>, or <strong>5</strong> filing</li>
+<li>get the xml document</li>
+<li>call <code>OwnershipDocument.from_xml()</code></li>
+</ul>
+<pre><code class="language-python">from edgar import CompanyData
+from edgar.ownership import Ownership
+
+# Get Snowflake
+company = CompanyData.for_ticker(&quot;SNOW&quot;)
+
+# Get Form 4 filings for Snowflake
+filings = company.get_filings(form=&quot;4&quot;)
+
+# Get the first filing
+filing = filings[0]
+
+# Get the filing xml
+xml = filing.xml()
+
+# Now get the OwnershipDocument
+ownership = Ownership.from_xml(xml)
+</code></pre>
+<h3 id="derivative-table">Derivative Table</h3>
+<p>This contains data on derivative holdings and transactions. To access it call
+<code>ownership_document.derivatives</code>.</p>
+<h4 id="derivative-holdings">Derivative Holdings</h4>
+<p>To access derivative transactions use <code>ownership.derivatives.holdings</code></p>
+<h4 id="derivative-transactions">Derivative Transactions</h4>
+<p>To access derivative transactions use <code>ownership.derivatives.transactions</code></p>
+<p>You can access individual transaction using the <code>[]</code> notation.</p>
+<pre><code class="language-python">ownership.derivative_table.transactions[0]
+</code></pre>
+<p><img alt="Derivative Transaction" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/derivative_transaction.png" /></p>
+<h3 id="non-derivative-table">Non Derivative Table</h3>
+<p>This contains data on non-derivative holdings and transactions. To access it call
+<code>ownership_document.non_
+derivatives</code>.</p>
+<h4 id="non-derivative-holdings">Non Derivative Holdings</h4>
+<p>To access derivative holdings use <code>ownership.non_derivatives.holdings</code></p>
+<p>You can access individual holdings using the <code>[]</code> notation.</p>
+<pre><code class="language-python">holding = ownership.non_derivative_table.holdings[0]
+holding
+</code></pre>
+<p><img alt="Non Derivative Holding" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/non_derivative_holding.png" /></p>
+<h4 id="non-derivative-transactions">Non Derivative Transactions</h4>
+<p>To access derivative transactions use <code>ownership.non_derivatives.transactions</code></p>
+<p>You can access individual transactions using the <code>[]</code> notation.</p>
+<pre><code class="language-python">transaction = ownership.non_derivative_table.transactions[0]
+transaction
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>
