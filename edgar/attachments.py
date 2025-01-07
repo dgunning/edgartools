@@ -627,6 +627,12 @@ class FilingHomepage:
 
         return filer_infos
 
+    @property
+    def period_of_report(self)-> Optional[str]:
+        "Get the period of report"
+        _,_, period = self.get_filing_dates()
+        return period
+
     @lru_cache(maxsize=None)
     def get_filing_dates(self)-> Optional[Tuple[str,str, Optional[str]]]:
         # Find the form grouping divs

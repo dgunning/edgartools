@@ -5,3 +5,5 @@ def test_get_filing_period_from_homepage():
     home = f.homepage
     filing_date, acceptance, period = home.get_filing_dates()
     assert (filing_date, acceptance, period) == ('2025-01-03', '2025-01-03 16:28:38', '2025-01-02')
+    assert home.period_of_report == '2025-01-02'
+    assert f.period_of_report == '2025-01-02'

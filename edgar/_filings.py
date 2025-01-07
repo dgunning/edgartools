@@ -1308,6 +1308,13 @@ class Filing:
         return self.homepage.primary_documents
 
     @property
+    def period_of_report(self):
+        """
+        Get the period of report for the filing
+        """
+        return self.homepage.period_of_report
+
+    @property
     def attachments(self):
         # Return all the attachments on the filing
         return self.homepage.attachments
