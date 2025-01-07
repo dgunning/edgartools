@@ -1,6 +1,6 @@
-from edgar import get_entity
 from edgar.entities import get_entity_submissions, Entity, Company
 from edgar.company_reports import TenK, TenQ
+from datetime import datetime
 
 def test_entity_is_company():
     # TSLA
@@ -132,3 +132,9 @@ def test_filter_by_accession_number():
     c = Company(1318605)
     filing = c.filings.filter(accession_number="0002007317-24-000625")
     assert filing
+
+def test_company_filing_acceptance_datetime():
+    c = Company(1318605)
+    assert c.filings.data['acceptanceDateTime']
+    acceptance_datetime = c.filings.data['acceptanceDateTime'][0].as_py()
+    assert isinstance(acceptance_datetime, datetime)

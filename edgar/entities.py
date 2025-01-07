@@ -26,7 +26,7 @@ from edgar._filings import Filing, Filings, FilingsState
 from edgar.company_reports import TenK, TenQ
 from edgar.core import (log, Result, display_size, listify, is_using_local_storage,
                         filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory,
-                        datefmt)
+                        parse_acceptance_datetime, datefmt)
 from edgar.financials import Financials
 from edgar.httprequests import download_json, download_text, download_bulk_data
 from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
@@ -148,6 +148,7 @@ class EntityFiling(Filing):
                  form: str,
                  filing_date: str,
                  report_date: str,
+                 acceptance_datetime: str,
                  accession_no: str,
                  file_number: str,
                  items: str,
@@ -158,6 +159,7 @@ class EntityFiling(Filing):
                  is_inline_xbrl: bool):
         super().__init__(cik=cik, company=company, form=form, filing_date=filing_date, accession_no=accession_no)
         self.report_date = report_date
+        self.acceptance_datetime = acceptance_datetime
         self.file_number: str = file_number
         self.items: str = items
         self.size: int = size
@@ -236,6 +238,7 @@ class EntityFilings(Filings):
             form=self.data['form'][item].as_py(),
             filing_date=self.data['filing_date'][item].as_py(),
             report_date=self.data['reportDate'][item].as_py(),
+            acceptance_datetime=self.data['acceptanceDateTime'][item].as_py(),
             accession_no=self.data['accession_number'][item].as_py(),
             file_number=self.data['fileNumber'][item].as_py(),
             items=self.data['items'][item].as_py(),
@@ -944,16 +947,15 @@ CompanyData = EntityData
 
 def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
     """
-       Extract company filings from the json response
-       """
+    Extract company filings from the json response
+    """
     # Handle case of no data
     if not filings_json['accessionNumber']:
-
         schema = pa.schema([
             ('accession_number', pa.string()),
             ('filing_date', pa.date32()),
             ('reportDate', pa.string()),
-            ('acceptanceDateTime', pa.string()),
+            ('acceptanceDateTime', pa.timestamp('us')),  # Changed to timestamp
             ('act', pa.string()),
             ('form', pa.string()),
             ('fileNumber', pa.string()),
@@ -967,12 +969,16 @@ def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
 
         filings_table = pa.Table.from_arrays([[] for _ in range(13)], schema=schema)
     else:
+        # Convert acceptanceDateTime string to datetime
+        acceptance_datetimes = [
+            parse_acceptance_datetime(dt) for dt in filings_json['acceptanceDateTime']
+        ]
 
         fields = {
             'accession_number': filings_json['accessionNumber'],
             'filing_date': pc.cast(pc.strptime(pa.array(filings_json['filingDate']), '%Y-%m-%d', 'us'), pa.date32()),
             'reportDate': filings_json['reportDate'],
-            'acceptanceDateTime': filings_json['acceptanceDateTime'],
+            'acceptanceDateTime': acceptance_datetimes,  # Now passing datetime objects
             'act': filings_json['act'],
             'form': filings_json['form'],
             'fileNumber': filings_json['fileNumber'],
@@ -986,11 +992,11 @@ def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
 
         # Create table using dictionary
         filings_table = pa.Table.from_arrays(
-            arrays=[pa.array(v) if k != 'filing_date' else v for k, v in fields.items()],
+            arrays=[pa.array(v) if k not in ['filing_date', 'acceptanceDateTime']
+                   else v for k, v in fields.items()],
             names=list(fields.keys())
         )
     return filings_table
-
 
 def create_company_filings(filings_json: Dict[str, Any],
                            cik: int,
@@ -1124,7 +1130,6 @@ Entity = get_entity
 @lru_cache(maxsize=32)
 def get_entity_submissions(cik: int) -> Optional[EntityData]:
     # Check the environment var EDGAR_USE_LOCAL_DATA
-    submissions_json: Optional[Dict[str, Any]] = None
     if is_using_local_storage():
         submissions_json = load_company_submissions_from_local(cik)
         if not submissions_json:

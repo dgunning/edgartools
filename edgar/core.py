@@ -88,6 +88,7 @@ __all__ = [
     'download_edgar_data',
     'get_edgar_data_directory',
     'default_page_size',
+    'parse_acceptance_datetime',
     'InvalidDateException',
 ]
 
@@ -657,6 +658,9 @@ def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
         return value.strftime(fmt)
     else:
         return value.strftime(fmt)
+
+def parse_acceptance_datetime(acceptance_datetime: str) -> datetime.datetime:
+    return datetime.datetime.fromisoformat(acceptance_datetime.replace('Z', '+00:00'))
 
 
 def sample_table(table, n=None, frac=None, replace=False, random_state=None):
