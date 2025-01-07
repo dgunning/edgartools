@@ -628,15 +628,23 @@ class FilingHomepage:
         return filer_infos
 
     @lru_cache(maxsize=None)
-    def get_filing_dates(self)-> Optional[Tuple[str,str]]:
-        # Find the div with the formGrouping class
-        form_grouping = self._soup.find("div", class_="formGrouping")
-        if form_grouping is None:
+    def get_filing_dates(self)-> Optional[Tuple[str,str, Optional[str]]]:
+        # Find the form grouping divs
+        grouping_divs = self._soup.find_all("div", class_="formGrouping")
+        if len(grouping_divs) == 0:
             return None
-        info_divs = form_grouping.find_all("div", class_="info")
+        date_grouping_div = grouping_divs[0]
+        info_divs = date_grouping_div.find_all("div", class_="info")
         filing_date = info_divs[0].text.strip()
         accepted_date = info_divs[1].text.strip()
-        return filing_date, accepted_date
+
+        if len(grouping_divs) > 1:
+            period_grouping_div = grouping_divs[1]
+            first_info_div = period_grouping_div.find("div", class_="info")
+            if first_info_div:
+                period = first_info_div.text.strip()
+                return filing_date, accepted_date, period
+        return filing_date, accepted_date, None
 
     @classmethod
     def load(cls, url: str):
