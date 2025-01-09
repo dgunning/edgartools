@@ -2,9 +2,7 @@ from edgar.files.styles import parse_style, UnitType
 from typing import Optional
 from bs4 import BeautifulSoup, Tag
 from edgar.files.styles import get_heading_level
-from edgar import Filing
-from edgar.files.html import Document
-from pathlib import Path
+
 
 def create_test_element(html: str, parent_style: Optional[str] = None) -> Tag:
     """Helper to create a test element with optional parent styling"""
@@ -80,8 +78,6 @@ def test_mda_heading_detection():
     print("-" * 50)
     level = get_heading_level(element, style, text, debug=True)
     print("\nFinal heading level:", level)
-
-    return level
 
 def test_parse_malformed_style_string():
     style_str = 'margin-top:2.1316282072803E-14pt;margin-bottom:21.86pt;margin-left:69.66pt;width:456pt;'

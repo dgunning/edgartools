@@ -532,7 +532,7 @@ class SECHTMLParser:
     def parse(self) -> Optional[Document]:
         body = self.root.find('body')
         if not body:
-            log.warn("No body tag found in HTML")
+            log.warning("No body tag found in HTML")
             return None
 
         nodes = self._parse_element(body)
