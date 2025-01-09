@@ -1,7 +1,5 @@
 import gzip
-import os
 import time
-import zipfile
 from collections import deque
 from functools import wraps
 from io import BytesIO
@@ -586,29 +584,102 @@ def download_text_between_tags(url: str, tag: str):
     return content
 
 
-async def download_bulk_data(data_url: str) -> Path:
+import tarfile
+from pathlib import Path
+import os
+import zipfile
+import shutil
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+async def download_bulk_data(data_url: str,
+                             data_directory: Path = get_edgar_data_directory()) -> Path:
     """
-    Download bulk data e.g. company facts, daily index, etc. from the SEC website
-    e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip"
+    Download and extract bulk data from zip or tar.gz archives
+
+    Args:
+        data_url: URL to download from (e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
+        data_directory: Base directory for downloads
+
+    Returns:
+        Path to the directory containing the extracted data
+
+    Raises:
+        ValueError: If the URL or filename is invalid
+        IOError: If there are file system operation failures
+        zipfile.BadZipFile: If the downloaded zip file is corrupted
+        tarfile.TarError: If the downloaded tar.gz file is corrupted
     """
+    if not data_url:
+        raise ValueError("Data URL cannot be empty")
+
     filename = os.path.basename(data_url)
+    if not filename:
+        raise ValueError("Invalid URL - cannot extract filename")
+
     local_dir = filename.split('.')[0]
-    download_path = get_edgar_data_directory() / local_dir
+    download_path = data_directory / local_dir
     download_filename = download_path / filename
 
-    # Create the directory if it doesn't exist
-    if not download_path.exists():
-        download_path.mkdir()
+    try:
+        # Create the directory with parents=True and exist_ok=True to avoid race conditions
+        download_path.mkdir(parents=True, exist_ok=True)
 
-    if filename.endswith(".zip"):
-        # Now stream the file to the data directory
-        await stream_file(data_url, path=download_path)
-        # Unzip the file to the data directory / file
-        with zipfile.ZipFile(download_filename, 'r') as z:
-            z.extractall(download_path)
-        # Delete the zip file
-        download_filename.unlink()
-    return download_path
+        # Download the file
+        try:
+            await stream_file(data_url, path=download_path)
+        except Exception as e:
+            raise IOError(f"Failed to download file: {e}")
+
+        # Extract based on file extension
+        try:
+            if filename.endswith(".zip"):
+                with zipfile.ZipFile(download_filename, 'r') as z:
+                    z.extractall(download_path)
+            elif any(filename.endswith(ext) for ext in (".tar.gz", ".tgz")):
+                with tarfile.open(download_filename, 'r:gz') as tar:
+                    # Security check for tar files to prevent path traversal
+                    def is_within_directory(directory: Path, target: Path) -> bool:
+                        try:
+                            return os.path.commonpath([directory, target]) == str(directory)
+                        except ValueError:
+                            return False
+
+                    def safe_extract(tar: tarfile.TarFile, path: str) -> None:
+                        for member in tar.getmembers():
+                            member_path = os.path.join(path, member.name)
+                            if not is_within_directory(path, member_path):
+                                raise ValueError(f"Attempted path traversal in tar file: {member.name}")
+                        tar.extractall(path)
+
+                    safe_extract(tar, str(download_path))
+            else:
+                raise ValueError(f"Unsupported file format: {filename}")
+
+        except (zipfile.BadZipFile, tarfile.TarError) as e:
+            raise type(e)(f"Failed to extract archive {filename}: {e}")
+
+        finally:
+            # Always try to clean up the archive file, but don't fail if we can't
+            try:
+                if download_filename.exists():
+                    download_filename.unlink()
+            except Exception as e:
+                logger.warning(f"Failed to delete archive file {download_filename}: {e}")
+
+        return download_path
+
+    except Exception as e:
+        # Clean up the download directory in case of any errors
+        try:
+            if download_path.exists():
+                shutil.rmtree(download_path)
+        except Exception as cleanup_error:
+            logger.error(f"Failed to clean up after error: {cleanup_error}")
+        raise
+
 
 
 def download_datafile(data_url: str, local_directory:Path=None) -> Path:

@@ -1,11 +1,9 @@
-import asyncio
 import logging
 import os
 import re
 from dataclasses import dataclass
 from functools import lru_cache, cached_property
 from itertools import zip_longest
-from pathlib import Path
 from typing import List, Dict, Optional, Union, Tuple, Any
 
 import httpx
@@ -24,13 +22,14 @@ from rich.text import Text
 
 from edgar._filings import Filing, Filings, FilingsState
 from edgar.company_reports import TenK, TenQ
-from edgar.core import (log, Result, display_size, listify, is_using_local_storage,
-                        filter_by_date, IntString, InvalidDateException, reverse_name, get_edgar_data_directory,
+from edgar.core import (log, Result, display_size, listify,
+                        filter_by_date, IntString, InvalidDateException, reverse_name,
                         parse_acceptance_datetime, datefmt)
+from edgar.storage import is_using_local_storage, get_edgar_data_directory
 from edgar.financials import Financials
-from edgar.httprequests import download_json, download_text, download_bulk_data
-from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
+from edgar.httprequests import download_json, download_text
 from edgar.reference.forms import describe_form
+from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
 from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
 
@@ -993,10 +992,11 @@ def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
         # Create table using dictionary
         filings_table = pa.Table.from_arrays(
             arrays=[pa.array(v) if k not in ['filing_date', 'acceptanceDateTime']
-                   else v for k, v in fields.items()],
+                    else v for k, v in fields.items()],
             names=list(fields.keys())
         )
     return filings_table
+
 
 def create_company_filings(filings_json: Dict[str, Any],
                            cik: int,
@@ -1166,16 +1166,16 @@ def parse_company_facts(fjson: Dict[str, object]):
             for fact, fact_json in namespace_json.items():
                 # Metadata about the facts
                 fact_meta_lst.append({'fact': fact,
-                                    'label': fact_json['label'],
-                                    'description': fact_json['description']})
+                                      'label': fact_json['label'],
+                                      'description': fact_json['description']})
 
                 for unit_key, unit_json in fact_json['units'].items():
                     unit_data = (pd.DataFrame(unit_json)
-                                .assign(namespace=namespace,
-                                        fact=fact,
-                                        label=fact_json['label'])
-                                .filter(columns)
-                                )
+                                 .assign(namespace=namespace,
+                                         fact=fact,
+                                         label=fact_json['label'])
+                                 .filter(columns)
+                                 )
                     unit_dfs.append(unit_data)
 
     # can't concatenate an empty list
@@ -1256,36 +1256,6 @@ def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
             f.close()
         return submissions_json
     return json.loads(submissions_file.read_text())
-
-
-async def download_facts_async() -> Path:
-    """
-    Download company facts
-    """
-    log.info(f"Downloading Company facts to {get_edgar_data_directory()}/companyfacts")
-    return await download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
-
-
-def download_facts() -> Path:
-    """
-    Download company facts
-    """
-    return asyncio.run(download_facts_async())
-
-
-async def download_submissions_async() -> Path:
-    """
-    Download company submissions
-    """
-    log.info(f"Downloading Company submissions to {get_edgar_data_directory()}/submissions")
-    return await download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip")
-
-
-def download_submissions() -> Path:
-    """
-    Download company facts
-    """
-    return asyncio.run(download_submissions_async())
 
 
 @dataclass(frozen=True)

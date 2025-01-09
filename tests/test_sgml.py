@@ -92,3 +92,10 @@ def test_sgml_parsing_of_headers():
     assert filing_sgml
     eightk = filing.obj()
     repr(eightk)
+
+
+def test_sgml_from_nc_file():
+    source = Path("data/sgml/0002002260-24-000001.nc")
+    filing_sgml = FilingSgml.from_source(source)
+    print(filing_sgml)
+    assert filing_sgml

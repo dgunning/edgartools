@@ -3,7 +3,6 @@ import os
 import re
 from functools import lru_cache
 from io import StringIO
-from pathlib import Path
 from typing import Optional, Union, List, Dict, Any
 
 import pandas as pd
@@ -11,12 +10,15 @@ import pyarrow as pa
 from httpx import HTTPStatusError
 
 from edgar.core import log, get_edgar_data_directory
-from edgar.httprequests import download_file, download_json, download_datafile
+from edgar.httprequests import download_file, download_json
 from edgar.reference.data.common import read_parquet_from_package, read_csv_from_package
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange', 'popular_us_stocks',
-           'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers', 'find_ticker', 'get_cik_ticker_lookup',]
+           'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers', 'find_ticker', 'get_cik_ticker_lookup',
+           'get_company_cik_lookup', 'get_cik_tickers_from_ticker_txt', 'get_cik_tickers', 'get_company_tickers',
+           'ticker_txt_url', 'company_tickers_json_url', 'mutual_fund_tickers_url', 'company_tickers_exchange_url',
+           ]
 
 ticker_txt_url = "https://www.sec.gov/include/ticker.txt"
 company_tickers_json_url = "https://www.sec.gov/files/company_tickers.json"
@@ -418,12 +420,4 @@ def popular_us_stocks():
 
 
 
-def download_ticker_data(reference_data_directory: Path):
-    """
-    Download reference data from the SEC website.
-    """
-    log.info(f"Downloading ticker data to {reference_data_directory}")
-    download_datafile(ticker_txt_url, reference_data_directory)
-    download_datafile(company_tickers_json_url, reference_data_directory)
-    download_datafile(mutual_fund_tickers_url, reference_data_directory)
-    download_datafile(company_tickers_exchange_url, reference_data_directory)
+

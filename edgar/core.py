@@ -11,9 +11,9 @@ from _thread import interrupt_main
 from dataclasses import dataclass
 from decimal import Decimal
 from functools import lru_cache
-from pathlib import Path
-from typing import Union, Optional, Tuple, List
 from functools import wraps
+from typing import Union, Optional, Tuple, List
+from pathlib import Path
 
 import httpx
 import humanize
@@ -81,12 +81,9 @@ __all__ = [
     'binary_extensions',
     'ask_for_identity',
     'is_start_of_quarter',
-    'use_local_storage',
-    'is_using_local_storage',
     'run_async_or_sync',
-    'has_html_content',
-    'download_edgar_data',
     'get_edgar_data_directory',
+    'has_html_content',
     'default_page_size',
     'parse_acceptance_datetime',
     'InvalidDateException',
@@ -242,40 +239,6 @@ def get_edgar_data_directory() -> Path:
     if not edgar_data_dir.exists():
         os.makedirs(edgar_data_dir)
     return edgar_data_dir
-
-
-def use_local_storage(use_local: bool = True):
-    """
-    Will use local data if set to True
-    """
-    os.environ['EDGAR_USE_LOCAL_DATA'] = "1" if use_local else "0"
-
-
-def is_using_local_storage() -> bool:
-    """
-    Returns True if using local storage
-    """
-    return os.getenv('EDGAR_USE_LOCAL_DATA', "0") == "1"
-
-
-def download_edgar_data(submissions: bool = True,
-                        facts: bool = True,
-                        reference: bool = True):
-    """
-    Download Edgar data to the local storage directory
-    :param submissions: Download submissions
-    :param facts: Download facts
-    :param reference: Download reference data
-    """
-    if submissions:
-        from edgar.entities import download_submissions
-        download_submissions()
-    if facts:
-        from edgar.entities import download_facts
-        download_facts()
-    if reference:
-        from edgar.reference import download_reference_data
-        download_reference_data()
 
 
 class InvalidDateException(Exception):
