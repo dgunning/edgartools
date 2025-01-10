@@ -291,25 +291,26 @@ class Attachments:
         path = Path(path)
 
         # If the path is a directory, save the files in that directory
-        if path.is_dir():
-            for attachment, downloaded in zip(self._attachments, downloaded_files):
-                file_path = path / attachment.document
-                if isinstance(downloaded, bytes):
-                    file_path.write_bytes(downloaded)
-                else:
-                    file_path.write_text(downloaded, encoding='utf-8')
-
-        # If the path is an archive file, save the files in that file
-        else:
-            if archive:
+        if archive:
+            if path.is_dir():
+                raise ValueError("Path must be a zip file name to create zipfile")
+            else:
                 with zipfile.ZipFile(path, 'w') as zipf:
                     for attachment, downloaded in zip(self._attachments, downloaded_files):
                         if isinstance(downloaded, bytes):
                             zipf.writestr(attachment.document, downloaded)
                         else:
                             zipf.writestr(attachment.document, downloaded.encode('utf-8'))
+        else:
+            if path.is_dir():
+                for attachment, downloaded in zip(self._attachments, downloaded_files):
+                    file_path = path / attachment.document
+                    if isinstance(downloaded, bytes):
+                        file_path.write_bytes(downloaded)
+                    else:
+                        file_path.write_text(downloaded, encoding='utf-8')
             else:
-                raise ValueError("Path must be a directory or an archive file")
+                raise ValueError("Path must be a directory")
 
     def serve(self, port: int = 8000) -> Tuple[Thread, socketserver.TCPServer, str]:
         """
