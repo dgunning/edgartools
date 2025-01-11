@@ -14,7 +14,8 @@ from functools import lru_cache
 from functools import wraps
 from typing import Union, Optional, Tuple, List
 from pathlib import Path
-
+from datetime import date
+import pytz
 import httpx
 import humanize
 import pandas as pd
@@ -87,14 +88,25 @@ __all__ = [
     'default_page_size',
     'parse_acceptance_datetime',
     'InvalidDateException',
+    'Years',
+    'Quarters',
+    'YearAndQuarter',
+    'YearAndQuarters',
+    'quarters_in_year',
 ]
 
 IntString = Union[str, int]
+quarters_in_year: List[int] = list(range(1, 5))
+
+YearAndQuarter = Tuple[int, int]
+YearAndQuarters = List[YearAndQuarter]
+Years = Union[int, List[int], range]
+Quarters = Union[int, List[int], range]
 
 # Date patterns
 YYYY_MM_DD = "\\d{4}-\\d{2}-\\d{2}"
 DATE_PATTERN = re.compile(YYYY_MM_DD)
-DATE_RANGE_PATTERN = re.compile(f"({YYYY_MM_DD})?:?(({YYYY_MM_DD})?)?")
+DATE_RANGE_PATTERN = re.compile(f"^({YYYY_MM_DD}(:({YYYY_MM_DD})?)?|:({YYYY_MM_DD}))$")
 
 default_http_timeout: int = 12
 default_page_size = 50
@@ -253,38 +265,119 @@ class TooManyRequestsException(Exception):
         super().__init__(message)
 
 
-def extract_dates(date: str) -> Tuple[Optional[str], Optional[str], bool]:
+def extract_dates(date_str: str) -> Tuple[Optional[datetime], Optional[datetime], bool]:
     """
     Split a date or a date range into start_date and end_date
-        split_date("2022-03-04")
-          2022-03-04, None, False
-       split_date("2022-03-04:2022-04-05")
-        2022-03-04, 2022-04-05, True
-       split_date("2022-03-04:")
-        2022-03-04, None, True
-       split_date(":2022-03-04")
-        None, 2022-03-04, True
-    :param date: The date to split
-    :return:
+    Examples:
+        extract_dates("2022-03-04") -> 2022-03-04, None, False
+        extract_dates("2022-03-04:2022-04-05") -> 2022-03-04, 2022-04-05, True
+        extract_dates("2022-03-04:") -> 2022-03-04, <current_date>, True
+        extract_dates(":2022-03-04") -> 1994-07-01, 2022-03-04, True
+
+    Args:
+        date_str: Date string in YYYY-MM-DD format, optionally with a range separator ':'
+
+    Returns:
+        Tuple of (start_date, end_date, is_range) where dates are datetime objects
+        and is_range indicates if this was a date range query
+
+    Raises:
+        InvalidDateException: If the date string cannot be parsed
     """
-    match = re.match(DATE_RANGE_PATTERN, date)
-    if match:
-        start_date, _, end_date = match.groups()
-        try:
-            start_date_tm = datetime.datetime.strptime(start_date, "%Y-%m-%d") if start_date else None
-            end_date_tm = datetime.datetime.strptime(end_date, "%Y-%m-%d") if end_date else None
-            if start_date_tm or end_date_tm:
-                return start_date_tm, end_date_tm, ":" in date
-        except ValueError:
-            log.error(f"The date {date} cannot be extracted using date pattern YYYY-MM-DD")
-    raise InvalidDateException(f"""
-    Cannot extract a date or date range from string {date}
-    Provide either 
-        1. A date in the format "YYYY-MM-DD" e.g. "2022-10-27"
-        2. A date range in the format "YYYY-MM-DD:YYYY-MM-DD" e.g. "2022-10-01:2022-10-27"
-        3. A partial date range "YYYY-MM-DD:" to specify dates after the value e.g.  "2022-10-01:"
-        4. A partial date range ":YYYY-MM-DD" to specify dates before the value  e.g. ":2022-10-27"
-    """)
+    if not date_str:
+        raise InvalidDateException("Empty date string provided")
+
+    try:
+        # Split on colon, handling the single date case
+        has_colon = ':' in date_str
+        parts = date_str.split(':') if has_colon else [date_str]
+
+        # Handle invalid formats
+        if len(parts) != (2 if has_colon else 1):
+            raise InvalidDateException("Invalid date range format")
+
+        # Parse start date
+        if not has_colon or parts[0]:
+            start_date = datetime.datetime.strptime(parts[0], "%Y-%m-%d")
+        else:
+            start_date = datetime.datetime.strptime('1994-07-01', '%Y-%m-%d')
+
+        # Parse end date
+        if has_colon and parts[1]:
+            end_date = datetime.datetime.strptime(parts[1], "%Y-%m-%d")
+        elif has_colon:
+            end_date = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            end_date = None
+
+        # Validate date order if both dates are present
+        if has_colon and end_date and start_date > end_date:
+            raise InvalidDateException(
+                f"Invalid date range: start date ({start_date.date()}) "
+                f"cannot be after end date ({end_date.date()})"
+            )
+
+        return start_date, end_date, has_colon
+
+    except ValueError as e:
+        raise InvalidDateException(f"""
+        Cannot extract a date or date range from string {date_str}
+        Provide either 
+            1. A date in the format "YYYY-MM-DD" e.g. "2022-10-27"
+            2. A date range in the format "YYYY-MM-DD:YYYY-MM-DD" e.g. "2022-10-01:2022-10-27"
+            3. A partial date range "YYYY-MM-DD:" to specify dates after the value e.g.  "2022-10-01:"
+            4. A partial date range ":YYYY-MM-DD" to specify dates before the value  e.g. ":2022-10-27"
+        """) from e
+
+
+def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
+    if ":" in filing_date:
+        start_date, end_date = filing_date.split(":")
+
+        if not start_date:
+            start_date = "1994-06-01"
+
+        if not end_date:
+            end_date = date.today().strftime("%Y-%m-%d")
+
+        start_year, start_month, _ = map(int, start_date.split("-"))
+        end_year, end_month, _ = map(int, end_date.split("-"))
+
+        start_quarter = (start_month - 1) // 3 + 1
+        end_quarter = (end_month - 1) // 3 + 1
+
+        result = []
+        for year in range(start_year, end_year + 1):
+            if year == start_year and year == end_year:
+                quarters = range(start_quarter, end_quarter + 1)
+            elif year == start_year:
+                quarters = range(start_quarter, 5)
+            elif year == end_year:
+                quarters = range(1, end_quarter + 1)
+            else:
+                quarters = range(1, 5)
+
+            for quarter in quarters:
+                result.append((year, quarter))
+
+        return result
+    else:
+        year, month, _ = map(int, filing_date.split("-"))
+        quarter = (month - 1) // 3 + 1
+        return [(year, quarter)]
+
+
+def current_year_and_quarter() -> Tuple[int, int]:
+    # Define the Eastern timezone
+    eastern = pytz.timezone('America/New_York')
+
+    # Get the current time in Eastern timezone
+    now_eastern = datetime.datetime.now(eastern)
+
+    # Calculate the current year and quarter
+    current_year, current_quarter = now_eastern.year, (now_eastern.month - 1) // 3 + 1
+
+    return current_year, current_quarter
 
 
 def filter_by_date(data: pa.Table,
@@ -764,6 +857,7 @@ def is_start_of_quarter():
             return True
 
     return False
+
 
 def format_date(date: Union[str, datetime.datetime], fmt: str = "%Y-%m-%d") -> str:
     """

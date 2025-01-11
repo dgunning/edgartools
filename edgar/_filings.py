@@ -4,7 +4,6 @@ import re
 import webbrowser
 from contextlib import nullcontext
 from dataclasses import dataclass
-from datetime import date
 from datetime import datetime
 from functools import lru_cache, cached_property
 from io import BytesIO
@@ -20,7 +19,7 @@ import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as pa_csv
 import pyarrow.parquet as pq
-import pytz
+
 from bs4 import BeautifulSoup
 from fastcore.parallel import parallel
 from rich import box
@@ -44,8 +43,18 @@ from edgar.core import (log, display_size, sec_edgar,
                         cache_except_none,
                         is_start_of_quarter,
                         has_html_content,
-                        InvalidDateException, IntString, DataPager)
+                        InvalidDateException,
+                        IntString,
+                        current_year_and_quarter,
+                        Years,
+                        Quarters,
+                        YearAndQuarter,
+                        YearAndQuarters,
+                        quarters_in_year,
+                        filing_date_to_year_quarters,
+                        DataPager)
 from edgar.files.html import Document
+
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
@@ -99,29 +108,14 @@ xbrl_index = "xbrl"
 company_index = "company"
 
 max_concurrent_http_connections = 10
-quarters_in_year: List[int] = list(range(1, 5))
 
-YearAndQuarter = Tuple[int, int]
-YearAndQuarters = List[YearAndQuarter]
-Years = Union[int, List[int], range]
-Quarters = Union[int, List[int], range]
 
 accession_number_re = re.compile(r"\d{10}-\d{2}-\d{6}$")
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
 
 
-def current_year_and_quarter() -> Tuple[int, int]:
-    # Define the Eastern timezone
-    eastern = pytz.timezone('America/New_York')
 
-    # Get the current time in Eastern timezone
-    now_eastern = datetime.now(eastern)
-
-    # Calculate the current year and quarter
-    current_year, current_quarter = now_eastern.year, (now_eastern.month - 1) // 3 + 1
-
-    return current_year, current_quarter
 
 
 def is_valid_filing_date(filing_date: str) -> bool:
@@ -176,8 +170,8 @@ def available_quarters() -> YearAndQuarters:
     return start_quarters + in_between_quarters + end_quarters
 
 
-def expand_quarters(year: Years,
-                    quarter: Optional[Quarters] = None) -> YearAndQuarters:
+def expand_quarters(year: Union[int, List[int]],
+                    quarter: Optional[Union[int, List[int]]] = None) -> YearAndQuarters:
     """
     Expand the list of years and a list of quarters to a full list of tuples covering the full range
     :param year: The year or years
@@ -192,41 +186,7 @@ def expand_quarters(year: Years,
             ]
 
 
-def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
-    if ":" in filing_date:
-        start_date, end_date = filing_date.split(":")
 
-        if not start_date:
-            start_date = "1994-06-01"
-
-        if not end_date:
-            end_date = date.today().strftime("%Y-%m-%d")
-
-        start_year, start_month, _ = map(int, start_date.split("-"))
-        end_year, end_month, _ = map(int, end_date.split("-"))
-
-        start_quarter = (start_month - 1) // 3 + 1
-        end_quarter = (end_month - 1) // 3 + 1
-
-        result = []
-        for year in range(start_year, end_year + 1):
-            if year == start_year and year == end_year:
-                quarters = range(start_quarter, end_quarter + 1)
-            elif year == start_year:
-                quarters = range(start_quarter, 5)
-            elif year == end_year:
-                quarters = range(1, end_quarter + 1)
-            else:
-                quarters = range(1, 5)
-
-            for quarter in quarters:
-                result.append((year, quarter))
-
-        return result
-    else:
-        year, month, _ = map(int, filing_date.split("-"))
-        quarter = (month - 1) // 3 + 1
-        return [(year, quarter)]
 
 
 class FileSpecs:
