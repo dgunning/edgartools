@@ -265,7 +265,7 @@ class TooManyRequestsException(Exception):
         super().__init__(message)
 
 
-def extract_dates(date_str: str) -> Tuple[Optional[datetime], Optional[datetime], bool]:
+def extract_dates(date_str: str) -> Tuple[Optional[datetime], Optional[datetime.datetime], bool]:
     """
     Split a date or a date range into start_date and end_date
     Examples:
