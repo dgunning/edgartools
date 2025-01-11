@@ -1161,7 +1161,7 @@ def parse_company_facts(fjson: Dict[str, object]):
     columns = ['namespace', 'fact', 'val', 'accn', 'start', 'end', 'fy', 'fp', 'form', 'filed', 'frame']
 
     # facts must be present
-    if 'facts' in fjson:
+    if 'facts' in fjson and fjson['facts']:
         for namespace, namespace_json in fjson['facts'].items():
             for fact, fact_json in namespace_json.items():
                 # Metadata about the facts
@@ -1177,6 +1177,8 @@ def parse_company_facts(fjson: Dict[str, object]):
                                  .filter(columns)
                                  )
                     unit_dfs.append(unit_data)
+    else:
+        return None
 
     # can't concatenate an empty list
     if len(unit_dfs) > 0:
