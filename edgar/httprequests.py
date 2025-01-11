@@ -1,5 +1,10 @@
 import gzip
+import logging
+import os
+import shutil
+import tarfile
 import time
+import zipfile
 from collections import deque
 from functools import wraps
 from io import BytesIO
@@ -492,13 +497,16 @@ async def stream_file(url: str, as_text: bool = None, path: Optional[Union[str, 
                 # Download as binary
                 content = b''
                 progress_bar = tqdm(
-                    total=total_size / (1024 * 1024),  # Convert to MB
+                    total=total_size / (1024 * 1024),
                     unit='MB',
                     unit_scale=True,
                     unit_divisor=1024,
+                    leave=False,  # Force horizontal display
+                    position=0,  # Lock the position
+                    dynamic_ncols=True,  # Adapt to terminal width
                     bar_format='{l_bar}{bar}| {n:.2f}/{total:.2f}MB [{elapsed}<{remaining}, {rate_fmt}]',
                     desc=f"Downloading {os.path.basename(url)}",
-                    ascii=False  # Use Unicode characters for a nicer looking bar
+                    ascii=False
                 )
                 downloaded = 0
                 async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
@@ -584,12 +592,7 @@ def download_text_between_tags(url: str, tag: str):
     return content
 
 
-import tarfile
-from pathlib import Path
-import os
-import zipfile
-import shutil
-import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -671,7 +674,7 @@ async def download_bulk_data(data_url: str,
 
         return download_path
 
-    except Exception as e:
+    except Exception:
         # Clean up the download directory in case of any errors
         try:
             if download_path.exists():
