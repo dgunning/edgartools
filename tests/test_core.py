@@ -129,16 +129,102 @@ def test_display_size():
     assert display_size("\x01") == ""
 
 
-def test_extract_dates():
-    assert extract_dates("2022-03-04") == (datetime.strptime("2022-03-04", "%Y-%m-%d"), None, False)
-    assert extract_dates("2022-03-04:") == (datetime.strptime("2022-03-04", "%Y-%m-%d"), None, True)
-    assert extract_dates(":2022-03-04") == (None, datetime.strptime("2022-03-04", "%Y-%m-%d"), True)
-    assert extract_dates("2022-03-04:2022-04-04") == (
-        datetime.strptime("2022-03-04", "%Y-%m-%d"), datetime.strptime("2022-04-04", "%Y-%m-%d"), True)
+def date(s):
+    return datetime.strptime(s, "%Y-%m-%d")
 
-    # Invalid dates
-    with pytest.raises(InvalidDateException):
-        extract_dates("2022-44-44")
+def date_now():
+    return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def test_extract_dates():
+    # Basic valid cases
+    assert extract_dates("2022-03-04") == (date("2022-03-04"), None, False)
+    assert extract_dates("2022-03-04:") == (date("2022-03-04"), date_now(), True)
+    assert extract_dates(":2022-03-04") == (date('1994-07-01'), date("2022-03-04"), True)
+    assert extract_dates("2022-03-04:2022-04-04") == (date("2022-03-04"), date("2022-04-04"), True)
+
+    # Valid edge cases
+    assert extract_dates("2024-02-29") == (date("2024-02-29"), None, False)  # Leap year
+    assert extract_dates("2022-03-04:2022-03-04") == (date("2022-03-04"), date("2022-03-04"), True)  # Same date range
+    assert extract_dates("1994-07-01") == (date("1994-07-01"), None, False)  # Earliest allowed date
+
+    # Invalid dates - should all raise InvalidDateException
+    invalid_cases = [
+        # Empty/None input
+        "",
+
+        # Invalid separators
+        "2022-03-04::",
+        "::",
+        "::2022-03-04",
+        "2022-03-04/2022-04-04",
+        "2022-03-04;2022-04-04",
+
+        # Incomplete dates
+        "2022",
+        "2022-03",
+        "2022-03-",
+        "-03-04",
+        "2022--04",
+        "2022-03-",
+        ":2022-03-04:",
+
+        # Invalid date components
+        "2022-00-04",  # month 0
+        "2022-13-04",  # month 13
+        "2022-12-00",  # day 0
+        "2022-12-32",  # day 32
+        "2022-04-31",  # invalid day for April
+        "2023-02-29",  # non-leap year February
+        "0000-03-04",  # year 0
+
+        # Wrong format
+        "03-04-2022",
+        "2022.03.04",
+        "20220304",
+        "2022/03/04",
+
+        # Invalid characters
+        "2022-O3-04",  # letter O instead of zero
+        "2022-03-O4",
+        "YYYY-MM-DD",
+        #"2022-3-4",  # missing leading zeros
+        "22-03-04",  # 2-digit year
+
+        # Whitespace issues
+        " 2022-03-04",
+        "2022-03-04 ",
+        "2022-03-04: 2022-04-04",
+        #"2022-03-04 : 2022-04-04",
+
+        # Date range order issues
+        "2022-03-04:2022-02-04",  # end before start
+
+        # Multiple colons
+        "2022-03-04:2022-04-04:2022-05-04",
+
+        # Mixed valid/invalid
+        "2022-03-04:2022-13-04",  # valid start, invalid end
+        ":2022-13-04",  # invalid end date
+        "2022-13-04:",  # invalid start date
+
+        # Special characters
+        "2022-03-04\n",
+        "2022-03-04\t",
+        "\n2022-03-04",
+    ]
+
+    for invalid_case in invalid_cases:
+        print(invalid_case)
+        with pytest.raises(InvalidDateException):
+            extract_dates(invalid_case)
+
+    # Specific error message tests
+    try:
+        extract_dates("bad")
+    except InvalidDateException as e:
+        assert "YYYY-MM-DD" in str(e)
+        assert "2022-10-27" in str(e)  # Example date in error message
 
 
 def test_invalid_date_exception():
