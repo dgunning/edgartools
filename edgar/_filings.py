@@ -58,7 +58,8 @@ from edgar.files.html import Document
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
-from edgar.filingheader import FilingHeader
+from edgar.sgml import FilingSgml
+from edgar.sgml.header import FilingHeader
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
@@ -67,7 +68,7 @@ from edgar.richtools import repr_rich, rich_to_text, print_rich
 from edgar.search import BM25Search, RegexSearch
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
-from edgar.sgml import FilingSgml
+from edgar.storage import local_filing_path
 from edgar.reference.tickers import find_ticker
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -1433,6 +1434,11 @@ class Filing:
         except Exception:
             # Try again with preprocessing - likely with a filing from the 1990's
             return FilingHeader.parse_from_sgml_text(sec_header_content, preprocess=True)
+
+    def sgml(self):
+        local_path = local_filing_path(str(self.filing_date), self.accession_no)
+        if local_path.exists():
+            return FilingSgml.from_source(local_path)
 
     def data_object(self):
         """ Get this filing as the data object that it might be"""

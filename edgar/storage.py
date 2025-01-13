@@ -17,7 +17,7 @@ from edgar.reference.tickers import (ticker_txt_url,
                                      mutual_fund_tickers_url,
                                      company_tickers_exchange_url)
 
-__all__ = ['download_edgar_data', 'get_edgar_data_directory', 'use_local_storage', 'is_using_local_storage']
+__all__ = ['download_edgar_data', 'get_edgar_data_directory', 'use_local_storage', 'is_using_local_storage', 'local_filing_path']
 
 def use_local_storage(use_local: bool = True):
     """
@@ -311,5 +311,13 @@ def latest_filing_date():
     from edgar import get_filings
     return get_filings().end_date
 
-
-
+def local_filing_path(filing_date:str,
+                      accession_number:str,
+                      correction:bool=False) -> Path:
+    """
+    Get the local path for a filing
+    If correction is True, will look for the corrected filing with extension 'corr'
+    """
+    ext = 'corr' if correction else 'nc'
+    filing_date = filing_date.replace('-', '')
+    return get_edgar_data_directory() / 'filings' / filing_date / f"{accession_number}.{ext}"

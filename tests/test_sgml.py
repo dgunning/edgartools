@@ -1,4 +1,5 @@
-from edgar.sgml import iter_documents, list_documents, FilingSgml
+from edgar.sgml import iter_documents, list_documents, FilingSgml, FilingHeader
+from edgar.sgml.parser import SgmlDocument, SGMLParser, SGMLFormatType
 from pathlib import Path
 from edgar import Filing
 
@@ -33,7 +34,7 @@ def test_parse_sgml_with_xbrl():
 
 def test_sgml_document_from_source():
     fs = FilingSgml.from_source("data/sgml/0001011438-98-000429.txt")
-    document = fs.get_by_sequence("1")
+    document = fs.get_document_by_sequence("1")
     assert document
     assert document.type == "8-K"
     print(document)
@@ -45,7 +46,7 @@ def test_sgml_document_from_source():
 def test_sgml_from_url():
     fs = FilingSgml.from_source('https://www.sec.gov/Archives/edgar/data/730200/000073020016000084/0000730200-16-000084.txt')
     assert fs
-    document = fs.get_by_sequence("1")
+    document = fs.get_document_by_sequence("1")
     assert document
     assert document.type == "485BPOS"
     assert document.description == ""
@@ -56,10 +57,23 @@ def test_sgm_sequence_numbers_match_attachment_sequence_numbers():
     filing = Filing(form='3', filing_date='2018-12-21', company='Aptose Biosciences Inc.', cik=882361, accession_no='0001567619-18-008556')
     attachments = filing.attachments
     filing_sgml = FilingSgml.from_filing(filing)
-    sgml_sequences = set(filing_sgml.sgml_documents.keys())
+    sgml_sequences = set(filing_sgml.documents.keys())
     attachment_sequences = {attachment.sequence_number for attachment in attachments if attachment.sequence_number.isdigit()}
     assert sgml_sequences & attachment_sequences
 
+
+def test_sgml_from_filing():
+    filing = Filing(form='S-3/A', filing_date='1995-05-25', company='PAGE AMERICA GROUP INC', cik=311048,
+           accession_no='0000899681-95-000096')
+    filing_sgml = FilingSgml.from_filing(filing)
+    assert filing_sgml
+    assert filing_sgml.header.is_empty()
+
+def test_sgml_parser_detect_content():
+    parser = SGMLParser()
+    assert parser.detect_format(Path("data/sgml/0001011438-98-000429.txt").read_text()) == SGMLFormatType.SEC_DOCUMENT
+    assert parser.detect_format(Path("data/sgml/0000899681-95-000096.txt").read_text()) == SGMLFormatType.SEC_DOCUMENT
+    assert parser.detect_format(Path("data/sgml/0001398344-24-000491.nc").read_text()) == SGMLFormatType.SUBMISSION
 
 def test_get_attachment_content_from_sgml():
 
@@ -81,7 +95,7 @@ def test_get_attachment_content_from_sgml():
         filing_sgml = FilingSgml.from_filing(filing)
         for attachment in filing.attachments:
             if attachment.sequence_number.isdigit():
-                sgml_document = filing_sgml.get_by_sequence(attachment.sequence_number)
+                sgml_document = filing_sgml.get_document_by_sequence(attachment.sequence_number)
                 assert sgml_document
                 assert sgml_document.text()
 
@@ -94,8 +108,48 @@ def test_sgml_parsing_of_headers():
     repr(eightk)
 
 
-def test_sgml_from_nc_file():
+def test_sgml_from_submission_file():
     source = Path("data/sgml/0002002260-24-000001.nc")
     filing_sgml = FilingSgml.from_source(source)
-    print(filing_sgml)
+    header = filing_sgml.header
+    print()
+
+    # Test the header
     assert filing_sgml
+    assert header.accession_number == '0002002260-24-000001'
+    assert header.filing_date == '2024-01-11'
+    assert header.form == 'D'
+    assert not header.acceptance_datetime
+
+    # Documents
+    assert filing_sgml.documents
+    assert len(filing_sgml.documents) == 1
+    document:SgmlDocument = filing_sgml.get_document_by_sequence("1")
+    assert document
+    assert document.filename == "primary_doc.xml"
+    text = document.text()
+    assert text
+
+
+def test_sgml_with_multiple_subject_companies():
+    source = Path("data/sgml/0001104659-25-002604.txt")
+    filing_sgml = FilingSgml.from_source(source)
+    header:FilingHeader = filing_sgml.header
+    assert len(header.subject_companies) == 2
+    subject_company_0 = header.subject_companies[0]
+    assert subject_company_0.company_information.cik == '0001376139'
+    assert subject_company_0.company_information.name == 'CVR ENERGY INC'
+    assert subject_company_0.filing_information.form == 'SC 13D/A'
+
+    subject_company_1 = header.subject_companies[1]
+    assert subject_company_1.company_information.cik == '0001376139'
+    assert subject_company_1.company_information.name == 'CVR ENERGY INC'
+    assert subject_company_1.filing_information.form == 'SC TO-T/A'
+    assert filing_sgml
+
+def test_sgml_with_reporting_owner():
+    source = Path("data/sgml/0001127602-25-001055.txt")
+    filing_sgml = FilingSgml.from_source(source)
+    header:FilingHeader = filing_sgml.header
+    reporting_owner = header.reporting_owners[0]
+    assert reporting_owner.owner.name == 'Jessica A. Garascia'

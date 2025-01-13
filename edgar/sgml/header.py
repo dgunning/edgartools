@@ -11,6 +11,7 @@ from edgar.reference import describe_form, states
 from edgar.richtools import repr_rich
 from edgar._party import Address, get_addresses_as_columns
 from edgar.core import datefmt, reverse_name
+from edgar.sgml.parser import SubmissionFormatParser
 from datetime import datetime
 
 # Title text
@@ -24,6 +25,18 @@ filing_title = "\U0001F4D1 Filing"
 
 __all__ = ['FilingMetadata', 'CompanyInformation', 'FilingInformation', 'FormerCompany', 'Filer', 'Owner',
            'ReportingOwner', 'SubjectCompany', 'Issuer', 'FilingHeader']
+
+
+def collect_repeated_tags(text: str, tag_name: str) -> list[str]:
+    """
+    Collects values from sequences of unclosed tags with the same name.
+    Example:
+        <ITEMS>06b
+        <ITEMS>3C
+        Returns: ['06b', '3C']
+    """
+    pattern = f"<{tag_name}>([^\n<]+)"  # Match tag and capture until newline or next tag
+    return [match.group(1).strip() for match in re.finditer(pattern, text, re.MULTILINE)]
 
 
 def preprocess_old_headers(text: str) -> str:
@@ -309,6 +322,9 @@ class FilingHeader:
         self.issuers: List[Issuer] = issuers
         self.subject_companies: List[SubjectCompany] = subject_companies
 
+    def is_empty(self):
+        return not self.filing_metadata.metadata
+
     @property
     def accession_number(self):
         return self.filing_metadata.get("ACCESSION NUMBER")
@@ -354,6 +370,85 @@ class FilingHeader:
             numbers.extend(
                 [subject_company.filing_information.file_number for subject_company in self.subject_companies])
         return list(set(numbers))
+
+    @classmethod
+    def parse_submission_format(cls, header_text: str):
+        """Parse SUBMISSION format into same data structure"""
+        parser = SubmissionFormatParser()
+        parsed_data = parser.parse(header_text)
+
+        # Transform SUBMISSION format into expected structure
+        filing_metadata = {}
+        filers = []
+        reporting_owners = []
+        issuers = []
+        subject_companies = []
+
+        # Map top-level metadata
+        filing_metadata.update({
+            'ACCESSION NUMBER': parsed_data.get('ACCESSION-NUMBER'),
+            'PUBLIC DOCUMENT COUNT': parsed_data.get('PUBLIC-DOCUMENT-COUNT'),
+            'CONFORMED SUBMISSION TYPE': parsed_data.get('TYPE'),
+            'FILED AS OF DATE': parsed_data.get('FILING-DATE'),
+            'DATE AS OF FILING DATE CHANGE': parsed_data.get('DATE-OF-FILING-DATE-CHANGE')
+        })
+
+        # Handle FILER section
+        if 'FILER' in parsed_data:
+            filer_data = parsed_data['FILER']
+
+            # Create Filer object from COMPANY-DATA
+            company_data = filer_data.get('COMPANY-DATA', {})
+            company_info = CompanyInformation(
+                name=company_data.get('CONFORMED-NAME'),
+                cik=company_data.get('CIK'),
+                sic=company_data.get('STANDARD INDUSTRIAL CLASSIFICATION'),
+                irs_number=company_data.get('IRS NUMBER'),
+                state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
+                fiscal_year_end=company_data.get('FISCAL-YEAR-END')
+            )
+
+            # Create Filing Information from FILING-VALUES
+            filing_values = filer_data.get('FILING-VALUES', {})
+            filing_info = FilingInformation(
+                form=filing_values.get('FORM-TYPE'),
+                file_number=filing_values.get('FILE-NUMBER'),
+                sec_act=filing_values.get('ACT'),
+                film_number=filing_values.get('FILM-NUMBER')
+            )
+
+            # Create Address objects
+            business_address = Address(
+                street1=filer_data.get('BUSINESS-ADDRESS', {}).get('STREET1'),
+                city=filer_data.get('BUSINESS-ADDRESS', {}).get('CITY'),
+                state_or_country=filer_data.get('BUSINESS-ADDRESS', {}).get('STATE'),
+                zipcode=filer_data.get('BUSINESS-ADDRESS', {}).get('ZIP')
+            )
+
+            mail_address = Address(
+                street1=filer_data.get('MAIL-ADDRESS', {}).get('STREET1'),
+                city=filer_data.get('MAIL-ADDRESS', {}).get('CITY'),
+                state_or_country=filer_data.get('MAIL-ADDRESS', {}).get('STATE'),
+                zipcode=filer_data.get('MAIL-ADDRESS', {}).get('ZIP')
+            )
+
+            # Create Filer object
+            filer = Filer(
+                company_information=company_info,
+                filing_information=filing_info,
+                business_address=business_address,
+                mailing_address=mail_address
+            )
+            filers.append(filer)
+
+        return cls(
+            text=header_text,
+            filing_metadata=filing_metadata,
+            filers=filers,
+            reporting_owners=reporting_owners,
+            issuers=issuers,
+            subject_companies=subject_companies
+        )
 
     @classmethod
     def parse_from_sgml_text(cls, header_text: str, preprocess=False):
