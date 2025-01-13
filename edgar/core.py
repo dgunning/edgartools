@@ -25,24 +25,13 @@ from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 
-# Rich logging
-logging.basicConfig(
-    level="INFO",
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(rich_tracebacks=True)]
-)
-
-log = logging.getLogger("rich")
+log = logging.getLogger(__name__)
 
 # Pandas version
 pandas_version = tuple(map(int, pd.__version__.split('.')))
 
 # sys version
 python_version = tuple(map(int, sys.version.split()[0].split('.')))
-
-# Turn down 3rd party logging
-logging.getLogger("httpx").setLevel(logging.WARNING)
 
 __all__ = [
     'log',
@@ -932,3 +921,16 @@ def has_html_content(content: str) -> bool:
             return True
 
     return False
+
+
+def initialize_rich_logging():
+    # Rich logging
+    logging.basicConfig(
+        level="INFO",
+        format="%(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler(rich_tracebacks=True)]
+    )
+
+    # Turn down 3rd party logging
+    logging.getLogger("httpx").setLevel(logging.WARNING)
