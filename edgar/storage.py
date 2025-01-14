@@ -1,9 +1,9 @@
 import asyncio
 import os
 import re
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -99,17 +99,17 @@ def download_edgar_data(submissions: bool = True,
         download_reference_data()
 
 
-def download_filing_in_bulk(filing_date: Optional[str],
-                            data_directory: Optional[str] = None,
-                            overwrite_existing:bool=False):
+def download_filings(filing_date: Optional[str],
+                     data_directory: Optional[str] = None,
+                     overwrite_existing:bool=False):
     """
     Download feed files for the specified date or date range.
 
     Examples
 
-    download_filing_in_bulk('2025-01-03:')
-    download_filing_in_bulk('2025-01-03', overwrite_existing=False)
-    download_filing_in_bulk('2024-01-01:2025-01-05', overwrite_existing=True)
+    download_filings('2025-01-03:')
+    download_filings('2025-01-03', overwrite_existing=False)
+    download_filings('2024-01-01:2025-01-05', overwrite_existing=True)
 
     Args:
         filing_date: String in format 'YYYY-MM-DD', 'YYYY-MM-DD:', ':YYYY-MM-DD',
@@ -311,7 +311,7 @@ def latest_filing_date():
     from edgar import get_filings
     return get_filings().end_date
 
-def local_filing_path(filing_date:str,
+def local_filing_path(filing_date:Union[str, date],
                       accession_number:str,
                       correction:bool=False) -> Path:
     """
@@ -319,5 +319,7 @@ def local_filing_path(filing_date:str,
     If correction is True, will look for the corrected filing with extension 'corr'
     """
     ext = 'corr' if correction else 'nc'
+    if isinstance(filing_date, date):
+        filing_date = filing_date.strftime('%Y-%m-%d')
     filing_date = filing_date.replace('-', '')
     return get_edgar_data_directory() / 'filings' / filing_date / f"{accession_number}.{ext}"

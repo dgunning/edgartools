@@ -1,7 +1,8 @@
 from edgar.sgml import iter_documents, list_documents, FilingSgml, FilingHeader
-from edgar.sgml.parser import SgmlDocument, SGMLParser, SGMLFormatType
+from edgar.sgml.parsers import SGMLDocument, SGMLParser, SGMLFormatType
+from edgar.sgml.tools import get_content_between_tags
 from pathlib import Path
-from edgar import Filing
+from edgar import Filing, find
 
 def test_parse_old_full_text():
     source = Path("data/sgml/0001011438-98-000429.txt")
@@ -124,7 +125,7 @@ def test_sgml_from_submission_file():
     # Documents
     assert filing_sgml.documents
     assert len(filing_sgml.documents) == 1
-    document:SgmlDocument = filing_sgml.get_document_by_sequence("1")
+    document:SGMLDocument = filing_sgml.get_document_by_sequence("1")
     assert document
     assert document.filename == "primary_doc.xml"
     text = document.text()
@@ -153,3 +154,55 @@ def test_sgml_with_reporting_owner():
     header:FilingHeader = filing_sgml.header
     reporting_owner = header.reporting_owners[0]
     assert reporting_owner.owner.name == 'Jessica A. Garascia'
+
+def test_get_attachments_from_sgml_filings():
+    source = Path("data/sgml/0001127602-25-001055.txt")
+    filing_sgml = FilingSgml.from_source(source)
+    s_attachments = filing_sgml.attachments
+    assert s_attachments
+    assert len(s_attachments.documents) == 2
+    assert len(s_attachments.primary_documents) == 1
+    assert s_attachments.primary_documents[0].document == 'form4.xml'
+
+def test_html_from_sgml_filing():
+    source = Path("data/localstorage/filings/20250108/0001493152-25-001317.nc")
+    filing_sgml = FilingSgml.from_source(source)
+    html = filing_sgml.html()
+    assert html
+
+def test_xml_from_sgml_filing():
+    # A form 4 filing
+    source = Path("data/localstorage/filings/20250108/0001562180-25-000280.nc")
+    filing_sgml = FilingSgml.from_source(source)
+    xml = filing_sgml.xml()
+    assert xml
+
+def test_get_content_between_tags():
+    content = """
+    <DOCUMENT>
+    <TYPE>8-K
+    <SEQUENCE>1
+    <FILENAME>form8-k.htm
+    <TEXT>
+    <XBRL>
+    Raw content here
+    </XBRL>
+    </TEXT>
+    </DOCUMENT>
+    """
+
+    # Get XBRL content specifically
+    xbrl_content = get_content_between_tags(content, "XBRL")  # Returns "Raw content here"
+    assert xbrl_content.strip() == "Raw content here"
+
+    # Get TEXT content
+    text_content = get_content_between_tags(content, "TEXT")  # Returns "<XBRL>\nRaw content here\n</XBRL>"
+    assert text_content.strip() == '<XBRL>\n    Raw content here\n    </XBRL>'
+
+    # Get innermost content
+    inner_content = get_content_between_tags(content)  # Returns "Raw content here"
+
+    assert inner_content.strip() == "Raw content here"
+
+
+

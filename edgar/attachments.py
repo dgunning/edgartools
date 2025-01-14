@@ -199,8 +199,13 @@ class Attachments:
         for doc in self.primary_documents:
             if doc.display_extension == ".html" or doc.display_extension == '.htm':
                 return doc
-        # Shouldn't get here but just open the first document
+        """
+        Most filings have html primary documents. Some don't. 
+        E.g. Form's 3,4,5 do when loaded directly from edgar but not when loaded from local files
+        However, there are unusual filings with endings like ".fil" that require a return. So return the first one
+        """
         return self.primary_documents[0]
+
 
     @property
     def primary_xml_document(self) -> Optional[Attachment]:
@@ -554,7 +559,7 @@ class FilingHomepage:
 
     @property
     def primary_html_document(self) -> Optional[Attachment]:
-        """Get the primary xml document on the filing"""
+        """Get the primary html document on the filing"""
         return self.attachments.primary_html_document
 
     @property

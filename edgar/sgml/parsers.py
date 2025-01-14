@@ -2,8 +2,9 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Iterator, Optional
+from edgar.sgml.tools import get_content_between_tags
 
-__all__ = ['SGMLParser', 'SGMLFormatType', 'SgmlDocument']
+__all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument']
 
 class SGMLFormatType(Enum):
     SEC_DOCUMENT = "sec_document"  # <SEC-DOCUMENT>...<SEC-HEADER> style
@@ -11,7 +12,7 @@ class SGMLFormatType(Enum):
 
 
 @dataclass
-class SgmlDocument:
+class SGMLDocument:
     type: str
     sequence: str
     filename: str
@@ -19,7 +20,7 @@ class SgmlDocument:
     raw_content: str = ""
 
     @classmethod
-    def from_parsed_data(cls, data: dict) -> 'SgmlDocument':
+    def from_parsed_data(cls, data: dict) -> 'SGMLDocument':
         """Create document from parser output"""
         return cls(
             type=data['type'],
@@ -28,6 +29,10 @@ class SgmlDocument:
             description=data['description'],
             raw_content=data['content']
         )
+
+    @property
+    def content(self):
+        return get_content_between_tags(self.raw_content, )
 
     def __str__(self):
         return f"Document(type={self.type}, sequence={self.sequence}, filename={self.filename}, description={self.description})"
@@ -504,7 +509,7 @@ class SecDocumentFormatParser:
 
         return doc_data
 
-def list_documents(content:str) -> list[SgmlDocument]:
+def list_documents(content:str) -> list[SGMLDocument]:
     """
     Convenience method to parse all documents from a source into a list.
 
@@ -512,11 +517,11 @@ def list_documents(content:str) -> list[SgmlDocument]:
         content: The content string to parse
 
     Returns:
-        List of SgmlDocument objects
+        List of SGMLDocument objects
     """
     return list(iter_documents(content))
 
-def iter_documents(content:str) -> Iterator[SgmlDocument]:
+def iter_documents(content:str) -> Iterator[SGMLDocument]:
     """
     Stream SGML documents from either a URL or file path, yielding parsed documents.
 
@@ -524,7 +529,7 @@ def iter_documents(content:str) -> Iterator[SgmlDocument]:
         content: The content string to parse
 
     Yields:
-        SgmlDocument objects containing the parsed content
+        SGMLDocument objects containing the parsed content
 
     Raises:
         ValueError: If the source is invalid
@@ -539,7 +544,7 @@ def iter_documents(content:str) -> Iterator[SgmlDocument]:
             yield document
 
 
-def parse_document(document_str: str) -> SgmlDocument:
+def parse_document(document_str: str) -> SGMLDocument:
     """
     Parse a single SGML document section, maintaining raw content.
     """
@@ -549,7 +554,7 @@ def parse_document(document_str: str) -> SgmlDocument:
     filename_match = re.search(r'<FILENAME>([^<\n]+)', document_str)
     description_match = re.search(r'<DESCRIPTION>([^<\n]+)', document_str)
 
-    return SgmlDocument(
+    return SGMLDocument(
         type=type_match.group(1).strip() if type_match else "",
         sequence=sequence_match.group(1).strip() if sequence_match else "",
         filename=filename_match.group(1).strip() if filename_match else "",

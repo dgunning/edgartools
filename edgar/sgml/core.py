@@ -1,23 +1,19 @@
 import re
 from pathlib import Path
-from typing import Dict, List, Union, Optional
+from typing import List, Union, Optional
 from typing import Iterator
-
+from functools import cached_property
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.header import FilingHeader
-from edgar.sgml.parser import SGMLParser, SGMLFormatType, SgmlDocument
+from edgar.sgml.parsers import SGMLParser, SGMLFormatType, SGMLDocument
+from edgar.sgml.tools import is_xml
+from collections import defaultdict
+from edgar.attachments import Attachments, Attachment
 
 __all__ = ['iter_documents', 'list_documents', 'FilingSgml', 'FilingHeader']
 
 
-def strip_tags(text: str, start_tag: str, end_tag: str) -> str:
-    """Strip XML/HTML tags from text if present."""
-    if text.startswith(start_tag) and text.endswith(end_tag):
-        return text[len(start_tag):-len(end_tag)].strip()
-    return text
-
-
-def parse_document(document_str: str) -> SgmlDocument:
+def parse_document(document_str: str) -> SGMLDocument:
     """
     Parse a single SGML document section, maintaining raw content.
     """
@@ -27,7 +23,7 @@ def parse_document(document_str: str) -> SgmlDocument:
     filename_match = re.search(r'<FILENAME>([^<\n]+)', document_str)
     description_match = re.search(r'<DESCRIPTION>([^<\n]+)', document_str)
 
-    return SgmlDocument(
+    return SGMLDocument(
         type=type_match.group(1).strip() if type_match else "",
         sequence=sequence_match.group(1).strip() if sequence_match else "",
         filename=filename_match.group(1).strip() if filename_match else "",
@@ -91,7 +87,7 @@ def read_content_as_string(source: Union[str, Path]) -> str:
     return ''.join(lines)
 
 
-def iter_documents(source: Union[str, Path]) -> Iterator[SgmlDocument]:
+def iter_documents(source: Union[str, Path]) -> Iterator[SGMLDocument]:
     """
     Stream SGML documents from either a URL or file path, yielding parsed documents.
 
@@ -99,7 +95,7 @@ def iter_documents(source: Union[str, Path]) -> Iterator[SgmlDocument]:
         source: Either a URL string or a file path (string or Path object)
 
     Yields:
-        SgmlDocument objects containing the parsed content
+        SGMLDocument objects containing the parsed content
 
     Raises:
         ValueError: If the source is invalid
@@ -118,7 +114,7 @@ def iter_documents(source: Union[str, Path]) -> Iterator[SgmlDocument]:
     except (ValueError, ConnectionError, FileNotFoundError) as e:
         raise type(e)(f"Error processing source {source}: {str(e)}")
 
-def list_documents(source: Union[str, Path]) -> list[SgmlDocument]:
+def list_documents(source: Union[str, Path]) -> list[SGMLDocument]:
     """
     Convenience method to parse all documents from a source into a list.
 
@@ -126,12 +122,12 @@ def list_documents(source: Union[str, Path]) -> list[SgmlDocument]:
         source: Either a URL string or a file path
 
     Returns:
-        List of SgmlDocument objects
+        List of SGMLDocument objects
     """
     return list(iter_documents(source))
 
 
-def parse_file(source: Union[str, Path]) -> list[SgmlDocument]:
+def parse_file(source: Union[str, Path]) -> list[SGMLDocument]:
     """
     Convenience method to parse all documents from a source into a list.
 
@@ -139,7 +135,7 @@ def parse_file(source: Union[str, Path]) -> list[SgmlDocument]:
         source: Either a URL string or a file path
 
     Returns:
-        List of SgmlDocument objects
+        List of SGMLDocument objects
     """
     return list(iter_documents(source))
 
@@ -150,18 +146,62 @@ class FilingSgml:
     Main class that parses and provides access to both the header and documents
     from an SGML filing.
     """
-    __slots__ = ('header', 'documents')  # Use slots for memory efficiency
+    __slots__ = ('header', 'documents', '__dict__')  # Use slots for memory efficiency
 
-    def __init__(self, header: FilingHeader, documents: Dict[str, SgmlDocument]):
+    def __init__(self, header: FilingHeader, documents: defaultdict[str, SGMLDocument]):
         """
         Initialize FilingSGML with parsed header and documents.
 
         Args:
             header (FilingHeader): Parsed header information
-            documents (Dict[str, SgmlDocument]): Dictionary of parsed documents keyed by sequence
+            documents (Dict[str, SGMLDocument]): Dictionary of parsed documents keyed by sequence
         """
         self.header:FilingHeader = header
-        self.documents:Dict[str, SgmlDocument] = documents
+        self.documents:defaultdict[str, SGMLDocument] = documents
+
+    def html(self):
+        document_lst = self.documents.get("1")
+        for document in document_lst:
+            if document.filename.lower().endswith((".htm", ".html")):
+                return document.content
+
+    def xml(self):
+        document_lst = self.documents.get("1")
+        for document in document_lst:
+            if document.filename.lower().endswith(".xml"):
+                return document.content
+
+    @cached_property
+    def attachments(self) -> Attachments:
+        """
+        Get all attachments from the filing.
+        """
+        is_datafile = False
+        documents, datafiles, primary_files = [], [], []
+        for sequence, document_lst in self.documents.items():
+            for document in document_lst:
+                attachment = Attachment(
+                    sequence_number=sequence,
+                    ixbrl=False,
+                    path="<in sgml>",
+                    document=document.filename,
+                    document_type=document.type,
+                    description=document.description,
+                    size=None
+                )
+                if sequence == "1":
+                    primary_files.append(attachment)
+                    documents.append(attachment)
+                else:
+                    if not is_datafile:
+                        is_datafile = is_xml(filename=document.filename)
+                    if is_datafile:
+                        datafiles.append(attachment)
+                    else:
+                        documents.append(attachment)
+
+        return Attachments(document_files=documents, data_files=datafiles, primary_documents=primary_files)
+
 
     @classmethod
     def from_source(cls, source: Union[str, Path]) -> 'FilingSGML':
@@ -212,22 +252,24 @@ class FilingSgml:
             header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
 
         # Create document dictionary
-        documents = {
-            doc_data['sequence']: SgmlDocument.from_parsed_data(doc_data)
-            for doc_data in parsed_data['documents']
-        }
+        documents = defaultdict(list)
+        for doc_data in parsed_data['documents']:
+            doc = SGMLDocument.from_parsed_data(doc_data)
+            documents[doc.sequence].append(doc)
 
         return cls(header=header, documents=documents)
 
 
-    def get_document_by_sequence(self, sequence: str) -> Optional[SgmlDocument]:
+    def get_document_by_sequence(self, sequence: str) -> Optional[SGMLDocument]:
         """
         Get a document by its sequence number.
         Direct dictionary lookup for O(1) performance.
         """
-        return self.documents.get(sequence)
+        results = self.documents.get(sequence)
+        if results and len(results) > 0:
+            return results[0]
 
-    def get_documents_by_type(self, doc_type: str) -> List[SgmlDocument]:
+    def get_documents_by_type(self, doc_type: str) -> List[SGMLDocument]:
         """
         Get all documents of a specific type.
         """
@@ -265,7 +307,3 @@ class FilingSgml:
     def get_document_count(self) -> int:
         """Get total number of documents."""
         return len(self.documents)
-
-def get_local_sgml_file(accession_number: str) -> Path:
-    """Get local file path for a given accession number."""
-    ...

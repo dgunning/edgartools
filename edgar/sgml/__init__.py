@@ -1,1 +1,2 @@
-from edgar.sgml.documents import *
+from edgar.sgml.core import *
+from edgar.sgml.parsers import SGMLDocument

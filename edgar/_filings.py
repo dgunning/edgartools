@@ -68,7 +68,7 @@ from edgar.richtools import repr_rich, rich_to_text, print_rich
 from edgar.search import BM25Search, RegexSearch
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
-from edgar.storage import local_filing_path
+from edgar.storage import local_filing_path, is_using_local_storage
 from edgar.reference.tickers import find_ticker
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -1287,12 +1287,24 @@ class Filing:
 
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
+        # First check local storage
+        if is_using_local_storage():
+            sgml = self.sgml()
+            if sgml:
+                return sgml.html()
+
         if self.document and not self.document.is_binary() and not self.document.empty:
             return str(self.document.download())
 
     @lru_cache(maxsize=4)
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
+        # First check local storage
+        if is_using_local_storage():
+            sgml = self.sgml()
+            if sgml:
+                return sgml.xml()
+
         xml_document = self.homepage.primary_xml_document
         if xml_document:
             return str(xml_document.download())
@@ -1309,7 +1321,7 @@ class Filing:
 
     def _download_filing_text(self):
         """
-        Download the text of the filing directly from the primary tesxt sources.
+        Download the text of the filing directly from the primary text sources.
         Either from the text url or the text extract attachment
         """
         text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
@@ -1428,6 +1440,11 @@ class Filing:
     @property
     @lru_cache(maxsize=1)
     def header(self):
+        if is_using_local_storage():
+            sgml = self.sgml()
+            if sgml:
+                return sgml.header
+
         sec_header_content = download_text_between_tags(self.text_url, "SEC-HEADER")
         try:
             return FilingHeader.parse_from_sgml_text(sec_header_content)
@@ -1436,6 +1453,9 @@ class Filing:
             return FilingHeader.parse_from_sgml_text(sec_header_content, preprocess=True)
 
     def sgml(self):
+        """
+        Read the filing from the local storage path if it exists
+        """
         local_path = local_filing_path(str(self.filing_date), self.accession_no)
         if local_path.exists():
             return FilingSgml.from_source(local_path)
