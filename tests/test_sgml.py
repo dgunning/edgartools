@@ -205,4 +205,10 @@ def test_get_content_between_tags():
     assert inner_content.strip() == "Raw content here"
 
 
+def test_sgml_format_for_really_old_filing():
+    filing = Filing(form='8-K', filing_date='1995-02-14', company='ALBERTO CULVER CO', cik=3327, accession_no='0000003327-95-000017')
+    filing_sgml = FilingSgml.from_filing(filing)
+    assert filing_sgml
+
+
 

@@ -78,6 +78,9 @@ class SGMLParser:
             return SGMLFormatType.SUBMISSION
         elif '<SEC-DOCUMENT>' in content:
             return SGMLFormatType.SEC_DOCUMENT
+        elif '<IMS-DOCUMENT>' in content:
+            # For old filings from the 1990's
+            return SGMLFormatType.SEC_DOCUMENT
         elif '<DOCUMENT>' in content[:1000]:
             # For old filings from the 1990's
             return SGMLFormatType.SEC_DOCUMENT
@@ -446,10 +449,10 @@ class SecDocumentFormatParser:
         document_buffer = []
 
         for line in content.splitlines():
-            if '<SEC-HEADER>' in line:
+            if '<SEC-HEADER>' in line or '<IMS-HEADER>' in line:
                 self.in_header = True
                 continue
-            elif '</SEC-HEADER>' in line:
+            elif '</SEC-HEADER>' in line or '</IMS-HEADER>' in line:
                 self.in_header = False
                 self.data['header'] = '\n'.join(self.header_text)
                 continue
