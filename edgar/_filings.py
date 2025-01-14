@@ -1285,6 +1285,7 @@ class Filing:
         # Return all the exhibits on the filing
         return self.homepage.attachments.exhibits
 
+    @lru_cache(maxsize=4)
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
         # First check local storage
