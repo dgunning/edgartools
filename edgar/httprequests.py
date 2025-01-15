@@ -597,6 +597,7 @@ def download_text_between_tags(url: str, tag: str):
 logger = logging.getLogger(__name__)
 
 
+@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 async def download_bulk_data(data_url: str,
                              data_directory: Path = get_edgar_data_directory()) -> Path:
     """
