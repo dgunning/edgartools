@@ -47,11 +47,39 @@ def download_edgar_data(submissions: bool = True,
 ## Downloading Complete Filings
 
 You can download filings to local storage by calling the `download_filings()` function.
-This will download for each filing a complete text file that contains all the attachments for that filing.
+This will download for each filing a complete SGML text file that contains all the attachments for that filing.
+These will be placed in the directory `EDGAR_LOCAL_DATA_DIR/filings/YYYYMMDD`. 
 
-These will be placed in the directory `EDGAR_LOCAL_DATA_DIR/filings/YYYYMMDD`
+If local storage is enabled, edgartools will first check if the filing is available in local storage before making a request to the SEC.
+This will speed up processing and for the most part calls like `html()` and `text()` will behave transparently.
 
-### Accessing the attachments
+Note that there are some differences between local attachments and attachments when doownloaded from the SEC.
+
+### Downloading by dates
+
+The `download_filings(filing_date)` function accepts a filing date that can be a single date or a range of dates.
+The date format must be `YYYY-MM-DD` or `YYYY-MM-DD:YYYY-MM-DD`. You can also use open ended ranges like `YYYY-MM-DD:`  
+or `:YYYY-MM-DD`. 
+
+Note that downloading filing attachment files can take a long time so be prepared when downloading for a range of dates.
+
+## Accessing the downloaded filings
+
+When you call `filing.attachments` on a locally downloaded filing, you will have access to the attachments that were downloaded.
+If you want to have each file independently you can use `attachments.download()`.
+
+```python
+    def download(self, path: Union[str, Path], archive: bool = False):
+        """
+        Download all the attachments to a specified path.
+        If the path is a directory, the file is saved with its original name in that directory.
+        If the path is a file, the file is saved with the given path name.
+        If archive is True, the attachments are saved in a zip file.
+        path: str or Path - The path to save the attachments
+        archive: bool (default False) - If True, save the attachments in a zip file
+        """
+```
+
 
 
 
