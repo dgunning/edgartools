@@ -911,3 +911,7 @@ def initialize_rich_logging():
 
     # Turn down 3rd party logging
     logging.getLogger("httpx").setLevel(logging.WARNING)
+
+# Turn on rich logging if the environment variable is set
+if os.getenv('EDGAR_USE_RICH_LOGGING', '0') == '1':
+    initialize_rich_logging()
