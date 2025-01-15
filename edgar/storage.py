@@ -99,7 +99,7 @@ def download_edgar_data(submissions: bool = True,
         download_reference_data()
 
 
-def download_filings(filing_date: Optional[str],
+def download_filings(filing_date: Optional[str] = None,
                      data_directory: Optional[str] = None,
                      overwrite_existing:bool=False):
     """
