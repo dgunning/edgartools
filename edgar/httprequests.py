@@ -486,7 +486,7 @@ async def stream_file(url: str, as_text: bool = None, path: Optional[Union[str, 
         # Set the default based on the file extension
         as_text = url.endswith(text_extensions)
 
-    async with httpx.AsyncClient(timeout=edgar_mode.http_timeout, headers=kwargs['headers']) as client:
+    async with ahttp_client(headers=kwargs['headers']) as client:
         async with client.stream('GET', url) as response:
             inspect_response(response)
             total_size = int(response.headers.get('Content-Length', 0))
@@ -599,7 +599,7 @@ def download_text_between_tags(url: str, tag: str):
 logger = logging.getLogger(__name__)
 
 
-@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 async def download_bulk_data(data_url: str,
                              data_directory: Path = get_edgar_data_directory()) -> Path:
     """
