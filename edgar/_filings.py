@@ -60,6 +60,7 @@ from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
 from edgar.sgml import FilingSgml
 from edgar.sgml.header import FilingHeader
+from edgar.sgml.tools import get_content_between_tags
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
@@ -1295,7 +1296,13 @@ class Filing:
                 return sgml.html()
 
         if self.document and not self.document.is_binary() and not self.document.empty:
-            return str(self.document.download())
+            html_text = self.document.download()
+            if isinstance(html_text, bytes):
+                html_text = html_text.decode('utf-8')
+            # Some html content is wrapped within document tags
+            if html_text.startswith("<DOCUMENT>"):
+                html_text = get_content_between_tags(html_text, )
+            return html_text
 
     @lru_cache(maxsize=4)
     def xml(self) -> Optional[str]:

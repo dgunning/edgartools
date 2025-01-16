@@ -28,8 +28,7 @@ def extract_text_between_tags(content: str, tag: str) -> str:
 
 def get_content_between_tags(content: str, outer_tag: str = None) -> str:
     """
-    Extract content between specified uppercase tags, handling nested tags.
-    If no tag specified, returns innermost content that has no tags.
+    Extract content between specified tags, starting from most nested tags.
 
     Args:
         content: Raw content containing tagged sections
@@ -38,40 +37,20 @@ def get_content_between_tags(content: str, outer_tag: str = None) -> str:
     Returns:
         str: Content between the specified tags, or innermost content if no tag specified
     """
-    # Find all opening and closing tags
-    tag_pattern = r'<([A-Z][A-Z0-9]*)>|</([A-Z][A-Z0-9]*)>'
-    tags = [(m.group(1) or m.group(2), m.start(), m.end(), bool(m.group(1)))
-            for m in re.finditer(tag_pattern, content)]
-
-    if not tags:
-        return content
-
-    # Stack to track nested tags
-    stack = []
-    tag_contents = {}
-
-    for tag, start, end, is_opening in tags:
-        if is_opening:
-            stack.append((tag, start, end))
-        elif stack and stack[-1][0] == tag:
-            # Found matching closing tag
-            open_tag, open_start, open_end = stack.pop()
-            # Extract content between tags
-            content_between = content[open_end:start]
-            # Check if this content has any tags in it
-            has_nested_tags = bool(re.search(tag_pattern, content_between))
-            tag_contents[open_tag] = {
-                'content': content_between,
-                'has_nested': has_nested_tags
-            }
+    known_tags = ["XBRL", "XML", "TEXT"]  # Ordered from most nested to least nested
 
     if outer_tag:
-        return tag_contents.get(outer_tag, {}).get('content', '')
+        # Extract content for specific tag
+        pattern = f'<{outer_tag}>(.*?)</{outer_tag}>'
+        match = re.search(pattern, content, re.DOTALL)
+        return match.group(1).strip() if match else ''
 
-    # If no specific tag requested, return first content without nested tags
-    for tag_info in tag_contents.values():
-        if not tag_info['has_nested']:
-            return tag_info['content']
+    # If no tag specified, find the first matching tag from most nested to least
+    for tag in known_tags:
+        pattern = f'<{tag}>(.*?)</{tag}>'
+        match = re.search(pattern, content, re.DOTALL)
+        if match:
+            return match.group(1).strip()
 
     return ''
 
