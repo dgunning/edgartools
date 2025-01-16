@@ -1,30 +1,123 @@
 import httpx
 import logging
-
+from asyncio import Lock
 from contextlib import contextmanager, asynccontextmanager
-
-from edgar.core import edgar_mode
+from functools import partial
+from edgar.core import edgar_mode, client_headers
+from contextvars import ContextVar
+import threading
 
 log = logging.getLogger(__name__)
 
-@contextmanager
-def http_client(**kwargs):
+REUSE_CLIENTS = False
+
+def _http_client_closure():
     """
-    Context manager for synchronous HTTP client usage.
+    When REUSE_CLIENTS, creates and reuses a single client.
+    """
+
+    client = None
+
+    @contextmanager
+    def _get_client(**kwargs):
+        if REUSE_CLIENTS:
+
+            nonlocal client
+            if client is None:
+
+                log.info("Creating new HTTP Client")
+                
+                client = httpx.Client(headers=client_headers(),
+                                    timeout=edgar_mode.http_timeout,
+                                    limits=edgar_mode.limits,
+                                    default_encoding="utf-8",
+                                    **kwargs)
+            yield client
+        else:
+            # Create a new client per request
+            with httpx.Client(headers=client_headers(),
+                                    timeout=edgar_mode.http_timeout,
+                                    limits=edgar_mode.limits,
+                                    default_encoding="utf-8",
+                                    **kwargs) as _client:
+                yield _client
     
-    This design is intended to make it easy to swap in and override the httpxclient initialization.
+    def _close_client():
+        nonlocal client
+
+        if client is not None:
+            try:
+                client.close()
+            except Exception:
+                log.exception("Exception closing client")
+            
+            client = None
+
+    return _get_client, _close_client
+
+def _ahttp_client_closure():
     """
-    with httpx.Client(timeout=edgar_mode.http_timeout, **kwargs) as client:
-        yield client
-
-
-
-@asynccontextmanager
-async def ahttp_client(**kwargs):
+    Creates a AsyncClient per thread. Necessary to avoid sharing across eventloops.
     """
-    Async context manager for the HTTP client.
+    
+    lock = Lock()
 
-    This design is intended to make it easy to swap in and override the httpxclient initialization.
+    @asynccontextmanager
+    async def _get_client(**kwargs):
+
+        if REUSE_CLIENTS:
+             
+            async with lock:
+                # Creates 
+                tl = threading.local()
+
+                client = getattr(tl, "edgar_httpclient_aclient", None)
+
+                if client is None:
+                    log.info("Creating new Async HTTP Client")
+                    client = httpx.AsyncClient(
+                        headers=client_headers(), 
+                        timeout=edgar_mode.http_timeout, 
+                        limits=edgar_mode.limits, 
+                        **kwargs
+                    )
+                setattr(tl, "edgar_httpclient_aclient", client)
+
+            yield client
+
+        else:
+            # Create a new client per request
+            async with httpx.AsyncClient(
+                        headers=client_headers(), 
+                        timeout=edgar_mode.http_timeout, 
+                        limits=edgar_mode.limits, 
+                        **kwargs
+                    ) as _client:
+                yield _client
+
+    def _aclose_client():
+        tl = threading.local()
+
+        client = getattr(tl, "edgar_httpclient_aclient", None)
+
+        if client is not None:
+            try:
+                client.close()
+            except Exception:
+                log.exception("Exception closing client")
+            
+            client = setattr(tl, "edgar_httpclient_aclient", None)
+
+    return _get_client, _aclose_client
+
+
+http_client, _close_client = _http_client_closure()
+ahttp_client, _aclose_client = _ahttp_client_closure()
+
+def close_clients():
     """
-    async with httpx.AsyncClient(timeout=edgar_mode.http_timeout, **kwargs) as client:
-        yield client
+    Closes and invalidates existing client sessions
+    """
+
+    _close_client()
+    _aclose_client()
