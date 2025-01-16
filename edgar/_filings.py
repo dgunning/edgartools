@@ -13,7 +13,7 @@ from typing import Tuple, List, Dict, Union, Optional, Any, cast
 
 import httpx
 import numpy as np
-import orjson as json
+import json
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -408,7 +408,7 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
     Get the filings for the quarters
     :param year_and_quarters:
     :param index: The index to use - "form", "company", or "xbrl"
-    :return:
+    :return: The filings as a pyarrow table
     """
 
     if len(year_and_quarters) == 1:

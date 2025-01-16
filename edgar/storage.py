@@ -224,7 +224,7 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
         html = download_text(url)
     except HTTPStatusError as e:
         if e.response.status_code == 403:
-            log.warn(f"There are no feed files for url {url}")
+            log.warning(f"There are no feed files for url {url}")
             return pd.DataFrame(columns=['Name', 'File', 'Size', 'Modified'])
         elif e.response.status_code == 404:
             raise FileNotFoundError(f"Page not found: {url}")

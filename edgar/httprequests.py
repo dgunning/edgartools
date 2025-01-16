@@ -17,7 +17,7 @@ import orjson as json
 from stamina import retry
 from tqdm import tqdm
 
-from edgar.core import text_extensions, edgar_mode, get_edgar_data_directory
+from edgar.core import text_extensions, get_edgar_data_directory
 from edgar.httpclient import http_client, ahttp_client
 
 __all__ = ["get_with_retry", "get_with_retry_async", "stream_with_retry", "post_with_retry", "post_with_retry_async",
@@ -354,7 +354,6 @@ def save_or_return_content(content: Union[str, bytes], path: Optional[Union[str,
     Args:
         content (str or bytes): The content to save or return.
         path (str or Path, optional): The path where the content should be saved. If None, return the content.
-        as_text (bool): Whether the content is text or binary.
 
     Returns:
         str or bytes or None: The content if not saved, or None if saved.
@@ -656,7 +655,7 @@ async def download_bulk_data(data_url: str,
                     def safe_extract(tar: tarfile.TarFile, path: str) -> None:
                         for member in tar.getmembers():
                             member_path = os.path.join(path, member.name)
-                            if not is_within_directory(path, member_path):
+                            if not is_within_directory(Path(path), Path(member_path)):
                                 raise ValueError(f"Attempted path traversal in tar file: {member.name}")
                         tar.extractall(path)
 
