@@ -441,29 +441,6 @@ def filter_by_ticker(data: pa.Table,
 def client_headers():
     return {'User-Agent': get_identity()}
 
-
-def http_client():
-    return httpx.Client(headers=client_headers(),
-                        timeout=edgar_mode.http_timeout,
-                        limits=edgar_mode.limits,
-                        default_encoding="utf-8")
-
-
-def async_http_client():
-    return httpx.AsyncClient(headers=client_headers(),
-                             timeout=edgar_mode.http_timeout,
-                             limits=edgar_mode.limits,
-                             default_encoding='utf-8')
-
-
-def get_json(data_url: str):
-    with http_client() as client:
-        r = client.get(data_url)
-        if r.status_code == 200:
-            return r.json()
-        r.raise_for_status()
-
-
 def decode_content(content: bytes):
     try:
         return content.decode('utf-8')

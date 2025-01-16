@@ -12,12 +12,13 @@ from pathlib import Path
 from threading import Lock
 from typing import Union, Optional
 
-import httpx
+from httpx import RequestError, Response
 import orjson as json
 from stamina import retry
 from tqdm import tqdm
 
 from edgar.core import text_extensions, edgar_mode, get_edgar_data_directory
+from edgar.httpclient import http_client, ahttp_client
 
 __all__ = ["get_with_retry", "get_with_retry_async", "stream_with_retry", "post_with_retry", "post_with_retry_async",
            "download_file", "download_file_async", "download_json", "download_json_async", "stream_file",
@@ -170,7 +171,8 @@ def with_identity(func):
     return wrapper
 
 
-@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+
+@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
@@ -189,7 +191,7 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
     """
-    with httpx.Client(timeout=edgar_mode.http_timeout) as client:
+    with http_client() as client:        
         response = client.get(url, **kwargs)
         if response.status_code == 429:
             raise TooManyRequestsError(url)
@@ -199,7 +201,7 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
         return response
 
 
-@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 async def get_with_retry_async(url, identity=None, identity_callable=None, **kwargs):
@@ -218,7 +220,7 @@ async def get_with_retry_async(url, identity=None, identity_callable=None, **kwa
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
     """
-    async with httpx.AsyncClient(timeout=edgar_mode.http_timeout) as client:
+    async with ahttp_client() as client:
         response = await client.get(url, **kwargs)
         if response.status_code == 429:
             raise TooManyRequestsError(url)
@@ -228,7 +230,7 @@ async def get_with_retry_async(url, identity=None, identity_callable=None, **kwa
         return response
 
 
-@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
@@ -247,7 +249,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
     """
-    with httpx.Client(timeout=edgar_mode.http_timeout) as client:
+    with http_client() as client:
         with client.stream("GET", url, **kwargs) as response:
             if response.status_code == 429:
                 raise TooManyRequestsError(url)
@@ -259,7 +261,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
                 yield response
 
 
-@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 def post_with_retry(url, data=None, json=None, identity=None, identity_callable=None,
@@ -281,7 +283,7 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
     """
-    with httpx.Client(timeout=edgar_mode.http_timeout) as client:
+    with http_client() as client:
         response = client.post(url, data=data, json=json, **kwargs)
         if response.status_code == 429:
             raise TooManyRequestsError(url)
@@ -291,7 +293,7 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
         return response
 
 
-@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 async def post_with_retry_async(url,
@@ -316,7 +318,7 @@ async def post_with_retry_async(url,
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
     """
-    async with httpx.AsyncClient(timeout=edgar_mode.http_timeout) as client:
+    async with ahttp_client() as client:
         response = await client.post(url, data=data, json=json, **kwargs)
         if response.status_code == 429:
             raise TooManyRequestsError(url)
@@ -326,7 +328,7 @@ async def post_with_retry_async(url,
         return response
 
 
-def inspect_response(response: httpx.Response):
+def inspect_response(response: Response):
     """
     Check if the response is successful and raise an exception if not.
     """
@@ -463,7 +465,7 @@ async def download_file_async(url: str, as_text: bool = None, path: Optional[Uni
 CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
 
 
-@retry(on=httpx.RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 async def stream_file(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, **kwargs) -> Union[
