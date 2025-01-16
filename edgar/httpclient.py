@@ -10,15 +10,15 @@ from edgar.core import client_headers, edgar_mode
 
 log = logging.getLogger(__name__)
 
-REUSE_CLIENTS = False
+REUSE_CLIENT = False
 
 def _http_client_closure():
-    """When REUSE_CLIENTS, creates and reuses a single client."""
+    """When REUSE_CLIENT, creates and reuses a single client."""
     client = None
 
     @contextmanager
     def _get_client( **kwargs):
-        if REUSE_CLIENTS:
+        if REUSE_CLIENT:
 
             nonlocal client
             if client is None:
@@ -60,7 +60,7 @@ def _ahttp_client_closure():
     @asynccontextmanager
     async def _get_client(**kwargs):
 
-        if REUSE_CLIENTS:
+        if REUSE_CLIENT:
             async with lock:
                 tl = threading.local()
 
