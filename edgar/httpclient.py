@@ -2,15 +2,14 @@ import logging
 import threading
 import asyncio
 from contextlib import asynccontextmanager, contextmanager
-
+from weakref import WeakKeyDictionary
 import httpx
 
 from edgar.core import client_headers, edgar_mode
 
-
 log = logging.getLogger(__name__)
 
-REUSE_CLIENT = True
+PERSISTENT_CLIENT = True # When enabled, httpclient reuses httpx clients rather than creating a single request per client
 
 DEFAULT_PARAMS = {
     "timeout": edgar_mode.http_timeout,
@@ -18,43 +17,42 @@ DEFAULT_PARAMS = {
     "default_encoding": "utf-8",
 }
 
-def _client_params(async_client: bool = False, **kwargs) -> dict:
-    """Merges defaults and additional kw args for httpx Client initialization.
-
-    Args:
-        async_client (bool, optional): Indicates whether this is used for a httpx.AsyncClient, as some options 
-        may be specific to particular modes, such as httpx Transports. Defaults to False.
-
-    Returns:
-        dict: _description_
-    """
-
+def _client_factory(**kwargs)-> httpx.Client:
     params = DEFAULT_PARAMS.copy()
-    params["headers"] =  client_headers()
-    params.update(kwargs)
+    params["headers"] = client_headers()
+    
+    params.update(**kwargs)
+    
+    return httpx.Client(**params)
 
-    return params
+def _async_client_factory(**kwargs) -> httpx.AsyncClient:
+    params = DEFAULT_PARAMS.copy()
+    params["headers"] = client_headers()
+    
+    params.update(**kwargs)
 
-def _http_client_closure():
-    """When REUSE_CLIENT, creates and reuses a single client."""
+    return httpx.AsyncClient(**params)
+
+def _http_client_manager():
+    """When PERSISTENT_CLIENT, creates and reuses a single client. Otherwise, creates a new client per invocation."""
     client = None
     lock = threading.Lock()
 
     @contextmanager
     def _get_client( **kwargs):
-        if REUSE_CLIENT:
+        if PERSISTENT_CLIENT:
             nonlocal client
 
             if client is None:
                 with lock:
                     if client is None: 
-                        log.info("Creating new HTTP Client")
-
-                        client = httpx.Client(**_client_params(async_client = False, **kwargs))
+                        client = _client_factory(**kwargs)
+                        log.info("Creating new HTTPX Client")
+                        
             yield client
         else:
             # Create a new client per request
-            with httpx.Client(**_client_params(async_client = False, **kwargs)) as _client:
+            with _client_factory(**kwargs) as _client:
                 yield _client
 
     def _close_client():
@@ -70,71 +68,54 @@ def _http_client_closure():
 
     return _get_client, _close_client
 
-def _ahttp_client_closure():
-    """Creates a AsyncClient per thread. Necessary to avoid sharing across eventloops."""
+def _async_client_manager():
+    """When PERSISTENT_CLIENT, creates and reuses a single client per asyncio loop. Otherwise, creates a new client per invocation."""
     
     asynciolock = asyncio.Lock()
     threadlock = threading.Lock()
 
-
-    def _local_client():
-        try:
-            loop = asyncio.get_running_loop()            
-            if loop is None:
-                return None
-            else:
-                return getattr(loop, "edgar_httpclient_asyncclient", None)
-        except RuntimeError: 
-            log.debug("No running asyncio event loop found.")
-            return None
-        
-        
-    def _set_client(client):
-        loop = asyncio.get_running_loop()
-        loop.edgar_httpclient_asyncclient = client
+    clients = WeakKeyDictionary()  # store in a weakkeydictionary, to allow GC when out of scope
 
     @asynccontextmanager
     async def _get_client(**kwargs):
+        loop = asyncio.get_running_loop()            
 
-        client = _local_client()
+        client = clients.get(loop, None)
         if client is not None:
             yield client
-        elif REUSE_CLIENT:
+        elif PERSISTENT_CLIENT:
             with threadlock: 
                 async with asynciolock:
                     if client is None:
-                        log.info("Creating new Async HTTP Client")
-                        client = httpx.AsyncClient(**_client_params(async_client = True, **kwargs)
-                        )
-                    _set_client(client)
+                        log.info("Creating new Async HTTPX Client")
+                        client = _async_client_factory(**kwargs)
+                    clients[loop] = (client)
 
                 yield client
         else:
             # Create a new client per request
-            async with httpx.AsyncClient(
-                        **_client_params(async_client = True, **kwargs)
-                    ) as _client:
+            async with _async_client_factory(**kwargs) as _client:
                 yield _client
 
-    def _aclose_client():
-        client = _local_client()
+    def _clear_all_async_clients():
+        """Clears clients, allows GC. Try to async run them, but this will fail in a nested asyncio loop."""
 
-        if client is not None:
+        for client in clients.values():
             try:
-                client.close()
-            except Exception:
-                log.exception("Exception closing client")
+                asyncio.run(client.aclose())
+            except Exception as e:
+                log.debug("Couldn't close %s", e)
 
-            _set_client(None)
-            client = None
+        clients.clear()
+        
+    return _get_client, _clear_all_async_clients
 
-    return _get_client, _aclose_client
 
-
-http_client, _close_client = _http_client_closure()
-ahttp_client, _aclose_client = _ahttp_client_closure()
+http_client, _close_client = _http_client_manager()
+ahttp_client, _aclose_client = _async_client_manager()
 
 def close_clients():
     """Closes and invalidates existing client sessions."""
     _close_client()
     _aclose_client()
+
