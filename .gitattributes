@@ -1,5 +1,6 @@
-data/* linguist-vendored
+data/** -linguist-detectable
+notebooks/** -linguist-detectable
+workbooks/** -linguist-detectable
 docs/* linguist-documentation
 *.html linguist-vendored
-data/*.html linguist-vendored
 
