@@ -1323,7 +1323,7 @@ class Filing:
         html_content = self.html()
         if html_content and has_html_content(html_content):
             document = Document.parse(html_content)
-            return rich_to_text(document, 200)
+            return repr_rich(document, width=240, force_terminal=False)
         else:
             return self._download_filing_text()
 

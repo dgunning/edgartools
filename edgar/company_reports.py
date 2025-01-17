@@ -665,7 +665,7 @@ class EightK():
             html_content = exhibit.download()
             if html_content:
                 document = Document.parse(html_content)
-                return rich_to_text(document, 200)
+                return repr_rich(document, width=200, force_terminal=False)
 
     def _content_renderables(self):
         """Get the content of the exhibits as renderables"""
@@ -688,7 +688,7 @@ class EightK():
         """Get the text of the EightK filing
            This includes the text content of all the exhibits
         """
-        return rich_to_text(self._content_renderables())
+        return repr_rich(self._content_renderables(), width=240)
 
     def __rich__(self):
 
