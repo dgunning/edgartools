@@ -76,13 +76,22 @@ def _ahttp_client_closure():
     asynciolock = asyncio.Lock()
     threadlock = threading.Lock()
 
-    tl = threading.local()  # Shared thread-local storage per thread
 
     def _local_client():
-        return getattr(tl, "edgar_httpclient_asyncclient", None)
-
+        try:
+            loop = asyncio.get_running_loop()            
+            if loop is None:
+                return None
+            else:
+                return getattr(loop, "edgar_httpclient_asyncclient", None)
+        except RuntimeError: 
+            log.debug("No running asyncio event loop found.")
+            return None
+        
+        
     def _set_client(client):
-        tl.edgar_httpclient_asyncclient = client
+        loop = asyncio.get_running_loop()
+        loop.edgar_httpclient_asyncclient = client
 
     @asynccontextmanager
     async def _get_client(**kwargs):
