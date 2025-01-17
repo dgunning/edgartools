@@ -48,7 +48,6 @@ __all__ = [
     'IntString',
     'DataPager',
     'yes_no',
-    'http_client',
     'sec_dot_gov',
     'display_size',
     'reverse_name',
@@ -873,6 +872,10 @@ def has_html_content(content: str) -> bool:
                 'xmlns:ix' in first_1000 or
                 'xmlns:html' in first_1000):
             return True
+
+    # Just check for straightforward HTML
+    if first_200_lower.startswith('<html>') and content[-7:].lower().startswith('</html>'):
+        return True
 
     return False
 

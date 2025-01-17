@@ -644,4 +644,6 @@ def test_get_html_wrapped_in_document_tag():
     filing = Filing(form='F-1', filing_date='2024-06-13', company='Haoxi Health Technology Ltd', cik=1954594, accession_no='0001213900-24-052441')
     html = filing.html()
     assert html.upper().startswith("<HTML>")
+    text = filing.text()
+    assert text[:100].strip().startswith("As filed with the")
 
