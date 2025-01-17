@@ -25,6 +25,8 @@ from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 
+from edgar.httpclient import close_clients
+
 log = logging.getLogger(__name__)
 
 # Pandas version
@@ -171,6 +173,8 @@ def set_identity(user_identity: str):
     """
     os.environ[edgar_identity] = user_identity
     log.info(f"Identity of the Edgar REST client set to [{user_identity}]")
+
+    close_clients() # close any httpx clients, to reset the identity. 
 
 
 identity_prompt = """
