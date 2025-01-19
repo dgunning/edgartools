@@ -63,13 +63,14 @@ http_client, _close_client = _http_client_manager()
 
 @asynccontextmanager
 async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs) -> AsyncGenerator[httpx.AsyncClient]:
-    """Async callers do not reuse clients, and are expected to create / tear down the client via the contextmanager.
+    """
+    Async callers should create a single client for a group of tasks, rather than creating a single client per task.
     
-    The nullable client parameter is used for methods that may or may not be passed an AsyncClient. If an AsyncClient is passed, this is a noop... it returns the client and doesn't close it.
+    Client: Optional parameter to allow code paths that accept optional clients: if a client is passed, this is a no-op and the client isn't closed.
     """
 
     if client is not None:
-        yield nullcontext(client) # type: ignore # caller responsible for closing
+        yield nullcontext(client)  # Caller is responsible for closing
 
     params = DEFAULT_PARAMS.copy()
     params["headers"] = client_headers()
