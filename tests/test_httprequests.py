@@ -47,8 +47,8 @@ def test_get_with_retry_for_redirect(status_code, monkeypatch):
 
     with patch("httpx.Client.get", return_value=mock_response):
         with patch("edgar.httprequests.get_with_retry") as mock_retry:
-            get_with_retry("http://example.com")
-            mock_retry.assert_called_once_with("http://example.com/redirected",
+            get_with_retry(url="http://example.com")
+            mock_retry.assert_called_once_with(url="http://example.com/redirected",
                                                identity=os.environ['EDGAR_IDENTITY'],
                                                headers={'User-Agent': 'Dev Gunning developer-gunning@gmail.com'},
                                                identity_callable=None)

@@ -211,13 +211,13 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
     """
-    with http_client() as client:        
+    with http_client() as client:
         response = client.get(url, **kwargs)
         if response.status_code == 429:
             raise TooManyRequestsError(url)
         elif is_redirect(response):
-            return get_with_retry(response.headers["Location"], identity=identity, identity_callable=identity_callable,
-                                  **kwargs)
+            return get_with_retry(url=response.headers["Location"], identity=identity, identity_callable=identity_callable,
+                                 **kwargs)
         return response
 
 
