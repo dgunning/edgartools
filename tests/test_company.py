@@ -8,6 +8,7 @@ from rich import print
 
 from edgar._filings import Filing, get_filings
 from edgar.core import default_page_size
+from edgar.company import public_companies
 from edgar.entities import *
 from edgar.entities import (parse_entity_submissions, CompanyConcept, CompanyFiling, preprocess_company,
                             _parse_cik_lookup_data)
@@ -442,3 +443,12 @@ def test_company_to_dict():
     print(company_dict)
 
     assert 'filings' in company.to_dict(include_filings=True)
+
+def test_iterate_companies():
+
+    index = 0
+    for company in public_companies():
+        assert company
+        index += 1
+        if index > 3:
+            break
