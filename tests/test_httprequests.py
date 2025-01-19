@@ -77,18 +77,17 @@ async def test_get_with_retry_async(status_code):
 @pytest.mark.parametrize("status_code", [301, 302])
 async def test_get_with_retry_async_for_redirect(status_code):
     mock_response = httpx.Response(status_code=status_code)
-    async with async_http_client() as client:
-        # Set the Location header for status codes 301 and 302
-        if status_code in [301, 302]:
-            mock_response.headers["Location"] = "http://example.com/redirected"
+    # Set the Location header for status codes 301 and 302
+    if status_code in [301, 302]:
+        mock_response.headers["Location"] = "http://example.com/redirected"
 
-        with patch("httpx.Client.get", return_value=mock_response):
-            with patch("edgar.httprequests.get_with_retry") as mock_retry:
-                get_with_retry(client=client, url="http://example.com")
-                mock_retry.assert_called_once_with(client=client, url="http://example.com/redirected",
-                                                identity=os.environ['EDGAR_IDENTITY'],
-                                                headers={'User-Agent': 'Dev Gunning developer-gunning@gmail.com'},
-                                                identity_callable=None)
+    with patch("httpx.Client.get", return_value=mock_response):
+        with patch("edgar.httprequests.get_with_retry") as mock_retry:
+            get_with_retry(url="http://example.com")
+            mock_retry.assert_called_once_with(url="http://example.com/redirected",
+                                            identity=os.environ['EDGAR_IDENTITY'],
+                                            headers={'User-Agent': 'Dev Gunning developer-gunning@gmail.com'},
+                                            identity_callable=None)
 
 def test_post_with_retry():
     mock_response = httpx.Response(status_code=200)
