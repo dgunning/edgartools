@@ -62,7 +62,7 @@ def _http_client_manager():
 http_client, _close_client = _http_client_manager()
 
 @asynccontextmanager
-async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs) -> AsyncGenerator[httpx.AsyncClient]:
+async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs) -> AsyncGenerator[httpx.AsyncClient, None]:
     """
     Async callers should create a single client for a group of tasks, rather than creating a single client per task.
     
