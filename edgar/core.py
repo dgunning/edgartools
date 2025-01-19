@@ -171,6 +171,9 @@ def set_identity(user_identity: str):
     os.environ[edgar_identity] = user_identity
     log.info(f"Identity of the Edgar REST client set to [{user_identity}]")
 
+    from edgar.httpclient import close_clients
+    close_clients() # close any httpx clients, to reset the identity. 
+
 
 identity_prompt = """
 [bold turquoise4]Identify your client to SEC Edgar[/bold turquoise4]

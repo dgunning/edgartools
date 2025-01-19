@@ -7,7 +7,7 @@ from typing import Optional, Union
 
 import pandas as pd
 from bs4 import BeautifulSoup
-from httpx import HTTPStatusError
+from httpx import HTTPStatusError, AsyncClient
 from tqdm.auto import tqdm
 
 from edgar.core import log, get_edgar_data_directory, filing_date_to_year_quarters, extract_dates
@@ -38,34 +38,35 @@ def is_using_local_storage() -> bool:
     return os.getenv('EDGAR_USE_LOCAL_DATA', "0") == "1"
 
 
-async def download_facts_async() -> Path:
+async def download_facts_async(client: Optional[AsyncClient]) -> Path:
     """
     Download company facts
     """
     log.info(f"Downloading Company facts to {get_edgar_data_directory()}/companyfacts")
-    return await download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
 
+    return await download_bulk_data(client, "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
 
 def download_facts() -> Path:
     """
     Download company facts
     """
-    return asyncio.run(download_facts_async())
+    
+    return asyncio.run(download_facts_async(client = None))
 
-
-async def download_submissions_async() -> Path:
+async def download_submissions_async(client: Optional[AsyncClient]) -> Path:
     """
     Download company submissions
     """
     log.info(f"Downloading Company submissions to {get_edgar_data_directory()}/submissions")
-    return await download_bulk_data("https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip")
+
+    return await download_bulk_data(client, "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip")
 
 
 def download_submissions() -> Path:
     """
     Download company facts
     """
-    return asyncio.run(download_submissions_async())
+    return asyncio.run(download_submissions_async(client = None))
 
 def download_ticker_data(reference_data_directory: Path):
     """
@@ -160,7 +161,7 @@ def download_filings(filing_date: Optional[str] = None,
                     if bulk_file_directory.exists():
                         log.info('Skipping %s. Already exists', bulk_file_directory)
                         continue
-                path = asyncio.run(download_bulk_data(bulk_filing_file, data_directory=data_directory))
+                path = asyncio.run(download_bulk_data(client=None, data_url=bulk_filing_file, data_directory=data_directory))
                 log.info('Downloaded feed file to %s', path)
 
 
