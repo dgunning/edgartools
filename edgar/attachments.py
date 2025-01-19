@@ -26,6 +26,7 @@ from rich.text import Text
 from edgar.richtools import repr_rich, print_xml, print_rich
 from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extensions, has_html_content
 from edgar.httprequests import get_with_retry, download_file, download_file_async
+from edgar.httpclient import async_http_client
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
 
@@ -275,8 +276,10 @@ class Attachments:
     @staticmethod
     async def _download_all_attachments(attachments: List[Attachment]):
         import asyncio
-        return await asyncio.gather(
-            *[download_file_async(attachment.url, as_text=attachment.is_text()) for attachment in attachments])
+
+        async with async_http_client() as client:
+            return await asyncio.gather(
+                *[download_file_async(client, attachment.url, as_text=attachment.is_text()) for attachment in attachments])
 
     def download(self, path: Union[str, Path], archive: bool = False):
         """

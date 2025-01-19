@@ -12,13 +12,13 @@ from pathlib import Path
 from threading import Lock
 from typing import Union, Optional
 
-from httpx import RequestError, Response
+from httpx import RequestError, Response, AsyncClient
 import orjson as json
 from stamina import retry
 from tqdm import tqdm
 
 from edgar.core import text_extensions, get_edgar_data_directory
-from edgar.httpclient import http_client, ahttp_client
+from edgar.httpclient import http_client, async_http_client
 
 __all__ = ["get_with_retry", "get_with_retry_async", "stream_with_retry", "post_with_retry", "post_with_retry_async",
            "download_file", "download_file_async", "download_json", "download_json_async", "stream_file",
@@ -171,6 +171,26 @@ def with_identity(func):
     return wrapper
 
 
+def async_with_identity(func):
+    @wraps(func)
+    def wrapper(client, url, identity=None, identity_callable=None, *args, **kwargs):
+        if identity is None:
+            if identity_callable is not None:
+                identity = identity_callable()
+            else:
+                identity = os.environ.get("EDGAR_IDENTITY")
+        if identity is None:
+            raise IdentityNotSetException("User-Agent identity is not set")
+
+        headers = kwargs.get("headers", {})
+        headers["User-Agent"] = identity
+        kwargs["headers"] = headers
+
+        return func(client, url, identity=identity, identity_callable=identity_callable, *args, **kwargs)
+
+    return wrapper
+
+
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
@@ -202,9 +222,9 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
-@with_identity
+@async_with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
-async def get_with_retry_async(url, identity=None, identity_callable=None, **kwargs):
+async def get_with_retry_async(client: AsyncClient, url, identity=None, identity_callable=None, **kwargs):
     """
     Sends an asynchronous GET request with retry functionality and identity handling.
 
@@ -220,14 +240,13 @@ async def get_with_retry_async(url, identity=None, identity_callable=None, **kwa
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
     """
-    async with ahttp_client() as client:
-        response = await client.get(url, **kwargs)
-        if response.status_code == 429:
-            raise TooManyRequestsError(url)
-        elif is_redirect(response):
-            return await get_with_retry_async(response.headers["Location"], identity=identity,
-                                              identity_callable=identity_callable, **kwargs)
-        return response
+    response = await client.get(url, **kwargs)
+    if response.status_code == 429:
+        raise TooManyRequestsError(url)
+    elif is_redirect(response):
+        return await get_with_retry_async(client=client, url=response.headers["Location"], identity=identity,
+                                            identity_callable=identity_callable, **kwargs)
+    return response
 
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
@@ -294,9 +313,10 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
 
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
-@with_identity
+@async_with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
-async def post_with_retry_async(url,
+async def post_with_retry_async(client: AsyncClient, 
+                                url,
                                 data=None,
                                 json=None,
                                 identity=None,
@@ -318,14 +338,13 @@ async def post_with_retry_async(url,
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
     """
-    async with ahttp_client() as client:
-        response = await client.post(url, data=data, json=json, **kwargs)
-        if response.status_code == 429:
-            raise TooManyRequestsError(url)
-        elif is_redirect(response):
-            return await post_with_retry_async(response.headers["Location"], data=data, json=json, identity=identity,
-                                               identity_callable=identity_callable, **kwargs)
-        return response
+    response = await client.post(url, data=data, json=json, **kwargs)
+    if response.status_code == 429:
+        raise TooManyRequestsError(url)
+    elif is_redirect(response):
+        return await post_with_retry_async(client, response.headers["Location"], data=data, json=json, identity=identity,
+                                            identity_callable=identity_callable, **kwargs)
+    return response
 
 
 def inspect_response(response: Response):
@@ -423,7 +442,7 @@ def download_file(url: str, as_text: bool = None, path: Optional[Union[str, Path
     return save_or_return_content(file_content, path)
 
 
-async def download_file_async(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None) -> Union[
+async def download_file_async(client: AsyncClient, url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None) -> Union[
     str, bytes, None]:
     """
     Download a file from a URL asynchronously.
@@ -441,7 +460,7 @@ async def download_file_async(url: str, as_text: bool = None, path: Optional[Uni
         # Set the default based on the file extension
         as_text = url.endswith(text_extensions)
 
-    response = await get_with_retry_async(url)
+    response = await get_with_retry_async(client, url)
     inspect_response(response)
 
     if as_text:
@@ -467,7 +486,7 @@ CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
-async def stream_file(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, **kwargs) -> Union[
+async def stream_file(client: Optional[AsyncClient], url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, **kwargs) -> Union[
     str, bytes, None]:
     """
     Download a file from a URL asynchronously with progress bar using httpx.
@@ -485,8 +504,8 @@ async def stream_file(url: str, as_text: bool = None, path: Optional[Union[str, 
         # Set the default based on the file extension
         as_text = url.endswith(text_extensions)
 
-    async with ahttp_client(headers=kwargs['headers']) as client:
-        async with client.stream('GET', url) as response:
+    async with async_http_client(client) as async_client:
+        async with async_client.stream('GET', url) as response:
             inspect_response(response)
             total_size = int(response.headers.get('Content-Length', 0))
 
@@ -547,7 +566,7 @@ def download_text(url: str) -> Optional[str]:
     return download_file(url, as_text=True)
 
 
-async def download_json_async(data_url: str) -> dict:
+async def download_json_async(client: AsyncClient, data_url: str) -> dict:
     """
     Download JSON data from a URL asynchronously.
 
@@ -557,7 +576,7 @@ async def download_json_async(data_url: str) -> dict:
     Returns:
         dict: The parsed JSON data.
     """
-    content = await download_file_async(data_url, as_text=True)
+    content = await download_file_async(client=client, url=data_url, as_text=True)
     return json.loads(content)
 
 
@@ -599,7 +618,7 @@ logger = logging.getLogger(__name__)
 
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
-async def download_bulk_data(data_url: str,
+async def download_bulk_data(client: Optional[AsyncClient], data_url: str,
                              data_directory: Path = get_edgar_data_directory()) -> Path:
     """
     Download and extract bulk data from zip or tar.gz archives
@@ -634,7 +653,7 @@ async def download_bulk_data(data_url: str,
 
         # Download the file
         try:
-            await stream_file(data_url, path=download_path)
+            await stream_file(client, data_url, path=download_path)
         except Exception as e:
             raise IOError(f"Failed to download file: {e}")
 

@@ -27,6 +27,7 @@ from edgar.richtools import repr_rich, colorize_words
 from edgar.attachments import Attachments
 from edgar.core import log, split_camel_case, run_async_or_sync
 from edgar.httprequests import download_file_async
+from edgar.httpclient import async_http_client
 from edgar.xbrl.calculations import CalculationLinkbase
 from edgar.xbrl.concepts import Concept, concept_to_label
 from edgar.xbrl.definitions import parse_definition_linkbase
@@ -36,6 +37,7 @@ from edgar.xbrl.statements import BalanceSheet, IncomeStatement, CashFlowStateme
 from edgar.xbrl.presentation import (XBRLPresentation, PresentationElement, get_root_element, get_axes_for_role,
     get_members_for_axis)
 from pathlib import Path
+
 
 __all__ = ['XBRLAttachments', 'XBRLInstance', 'LineItem', 'StatementDefinition', 'XBRLData',
            'Statements', 'Statement']
@@ -119,45 +121,48 @@ class XBRLAttachments:
         """
         Load the XBRL documents asynchronously and parse them.
         """
-        parsers = {
-            'definition': parse_definition_linkbase,
-            'label': parse_label_linkbase,
-            'calculation': CalculationLinkbase.parse,
-            'presentation': lambda x: x,
-            'instance': lambda x: x,
-            'schema': lambda x: x
-        }
-        parsed_files = {}
 
-        # Download all files concurrently
-        download_tasks = []
-        for doc_type in ['instance', 'schema', 'label', 'calculation', 'presentation']:
-            attachment = self.get(doc_type)
-            if attachment:
-                download_tasks.append(XBRLAttachments.download_and_parse(doc_type, parsers[doc_type], attachment.url))
+        async with async_http_client() as client:
 
-        # Wait for all downloads to complete
-        results = await asyncio.gather(*download_tasks)
-        for result in results:
-            parsed_files.update(result)
+            parsers = {
+                'definition': parse_definition_linkbase,
+                'label': parse_label_linkbase,
+                'calculation': CalculationLinkbase.parse,
+                'presentation': lambda x: x,
+                'instance': lambda x: x,
+                'schema': lambda x: x
+            }
+            parsed_files = {}
 
-        # If we don't have all documents, extract from schema
-        if not self.has_all_documents() and 'schema' in parsed_files:
-            embedded_linkbases = XBRLAttachments.extract_embedded_linkbases(parsed_files['schema'])
+            # Download all files concurrently
+            download_tasks = []
+            for doc_type in ['instance', 'schema', 'label', 'calculation', 'presentation']:
+                attachment = self.get(doc_type)
+                if attachment:
+                    download_tasks.append(XBRLAttachments.download_and_parse(client, doc_type, parsers[doc_type], attachment.url))
 
-            for linkbase_type, content in embedded_linkbases['linkbases'].items():
-                if linkbase_type not in parsed_files:
-                    parsed_files[linkbase_type] = parsers[linkbase_type](content)
+            # Wait for all downloads to complete
+            results = await asyncio.gather(*download_tasks)
+            for result in results:
+                parsed_files.update(result)
 
-        # Return the required files
-        return (parsed_files.get('instance', ''),
-                parsed_files.get('presentation', ''),
-                parsed_files.get('label', {}),
-                parsed_files.get('calculation'))
+            # If we don't have all documents, extract from schema
+            if not self.has_all_documents() and 'schema' in parsed_files:
+                embedded_linkbases = XBRLAttachments.extract_embedded_linkbases(parsed_files['schema'])
+
+                for linkbase_type, content in embedded_linkbases['linkbases'].items():
+                    if linkbase_type not in parsed_files:
+                        parsed_files[linkbase_type] = parsers[linkbase_type](content)
+
+            # Return the required files
+            return (parsed_files.get('instance', ''),
+                    parsed_files.get('presentation', ''),
+                    parsed_files.get('label', {}),
+                    parsed_files.get('calculation'))
 
     @staticmethod
-    async def download_and_parse(doc_type: str, parser, url: str):
-        content = await download_file_async(url)
+    async def download_and_parse(client, doc_type: str, parser, url: str):
+        content = await download_file_async(client, url)
         return {doc_type: parser(content)}
 
     @staticmethod
