@@ -1,0 +1,598 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../eightk-filings/">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>Dowloading to Local Storage - edgartools</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dowloading-to-local-storage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="edgartools" class="md-header__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            edgartools
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dowloading to Local Storage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="edgartools" class="md-nav__button md-logo" aria-label="edgartools" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    edgartools
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-the-company-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Companies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-financials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Company Financials
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-objects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Objects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eightk-filings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Eight-K Filings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Dowloading to Local Storage
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Dowloading to Local Storage
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#local-data-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Data Directory
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-local-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using local storage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#downloading-data-to-local-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloading data to local storage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#downloading-complete-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloading Complete Filings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Downloading Complete Filings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#downloading-by-dates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloading by dates
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-downloaded-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the downloaded filings
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#local-data-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Data Directory
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-local-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using local storage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#downloading-data-to-local-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloading data to local storage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#downloading-complete-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloading Complete Filings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Downloading Complete Filings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#downloading-by-dates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Downloading by dates
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-downloaded-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the downloaded filings
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="dowloading-to-local-storage">Dowloading to Local Storage</h1>
+<p>When you use <strong>edgartools</strong> to get Company, or the html content of a filing, this usually results in one of more requests to the SEC. However, you can download data in bulk to local storage to minimize these requests and speed up processing. </p>
+<p>This includes the following data</p>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Descriptionn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Company Submissions</strong></td>
+<td>Company metadata, their 1000 most recent filings</td>
+</tr>
+<tr>
+<td><strong>Company Facts</strong></td>
+<td>Company facts</td>
+</tr>
+<tr>
+<td><strong>Filing Attachments</strong></td>
+<td>Filing attachments</td>
+</tr>
+<tr>
+<td><strong>Reference data</strong></td>
+<td>Reference data like company and mutual fund tickers, exchanges etc</td>
+</tr>
+</tbody>
+</table>
+<h2 id="local-data-directory">Local Data Directory</h2>
+<p>The local data directory is the directory where the data is stored. The default directory is</p>
+<p><code>&lt;USER_HOME&gt;/.edgar</code></p>
+<p>You can change this directory by setting the <code>EDGAR_LOCAL_DATA_DIR</code> environment variable.</p>
+<pre><code class="language-bash">export EDGAR_LOCAL_DATA_DIR=&quot;/path/to/local/data&quot;
+</code></pre>
+<h2 id="using-local-storage">Using local storage</h2>
+<p>By default local storage is not used and the library will access the data from the SEC website. 
+To use local storage you have to </p>
+<ol>
+<li>Download data using <code>download_edgar_data()</code></li>
+<li>Turn on local storage using the environment variable <code>EDGAR_USE_LOCAL_DATA</code> or by calling <code>use_local_storage()</code></li>
+</ol>
+<h2 id="downloading-data-to-local-storage">Downloading data to local storage</h2>
+<p>You can download data to local storage by calling the <code>download_edgar_data()</code> function. 
+The function takes the following parameters so you have the option to download only the data you need.</p>
+<pre><code class="language-python">def download_edgar_data(submissions: bool = True,
+                        facts: bool = True,
+                        reference: bool = True):
+</code></pre>
+<h2 id="downloading-complete-filings">Downloading Complete Filings</h2>
+<p>You can download filings to local storage by calling the <code>download_filings()</code> function.
+This will download for each filing a complete SGML text file that contains all the attachments for that filing.
+These will be placed in the directory <code>EDGAR_LOCAL_DATA_DIR/filings/YYYYMMDD</code>. </p>
+<p>If local storage is enabled, edgartools will first check if the filing is available in local storage before making a request to the SEC.
+This will speed up processing and for the most part calls like <code>html()</code> and <code>text()</code> will behave transparently.</p>
+<p>Note that there are some differences between local attachments and attachments when doownloaded from the SEC.</p>
+<h3 id="downloading-by-dates">Downloading by dates</h3>
+<p>The <code>download_filings(filing_date)</code> function accepts a filing date that can be a single date or a range of dates.
+The date format must be <code>YYYY-MM-DD</code> or <code>YYYY-MM-DD:YYYY-MM-DD</code>. You can also use open ended ranges like <code>YYYY-MM-DD:</code><br />
+or <code>:YYYY-MM-DD</code>. </p>
+<p>Note that downloading filing attachment files can take a long time so be prepared when downloading for a range of dates.</p>
+<h2 id="accessing-the-downloaded-filings">Accessing the downloaded filings</h2>
+<p>When you call <code>filing.attachments</code> on a locally downloaded filing, you will have access to the attachments that were downloaded.
+If you want to have each file independently you can use <code>attachments.download()</code>.</p>
+<pre><code class="language-python">    def download(self, path: Union[str, Path], archive: bool = False):
+        &quot;&quot;&quot;
+        Download all the attachments to a specified path.
+        If the path is a directory, the file is saved with its original name in that directory.
+        If the path is a file, the file is saved with the given path name.
+        If archive is True, the attachments are saved in a zip file.
+        path: str or Path - The path to save the attachments
+        archive: bool (default False) - If True, save the attachments in a zip file
+        &quot;&quot;&quot;
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>
