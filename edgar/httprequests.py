@@ -22,7 +22,8 @@ from edgar.httpclient import http_client, async_http_client
 
 __all__ = ["get_with_retry", "get_with_retry_async", "stream_with_retry", "post_with_retry", "post_with_retry_async",
            "download_file", "download_file_async", "download_json", "download_json_async", "stream_file",
-           "download_text", "download_text_between_tags", "download_bulk_data", "download_datafile"]
+           "download_text", "download_text_between_tags", "download_bulk_data", "download_datafile",
+           "throttle_requests"]
 
 attempts = 6
 retry_timeout = 40
@@ -618,12 +619,14 @@ logger = logging.getLogger(__name__)
 
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
-async def download_bulk_data(client: Optional[AsyncClient], data_url: str,
+async def download_bulk_data(client: Optional[AsyncClient],
+                             data_url: str,
                              data_directory: Path = get_edgar_data_directory()) -> Path:
     """
     Download and extract bulk data from zip or tar.gz archives
 
     Args:
+        client: The httpx.AsyncClient instance
         data_url: URL to download from (e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
         data_directory: Base directory for downloads
 
