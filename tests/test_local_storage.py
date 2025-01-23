@@ -1,10 +1,8 @@
-from edgar import *
-from pathlib import Path
+
 from datetime import datetime
-import shutil
 from edgar import *
 from edgar.storage import list_filing_feed_files, list_filing_feed_files_for_quarter, is_feed_file_in_date_range
-from edgar.storage import local_filing_path
+
 
 
 def test_get_html_from_local_storage(monkeypatch):
@@ -51,4 +49,3 @@ def test_is_feed_file_in_date_range():
     assert is_feed_file_in_date_range('20240103.nc.tar.gz', parse_date('2024-01-02'), parse_date('2024-01-05'))
     assert not is_feed_file_in_date_range('20240203.nc.tar.gz', parse_date('2024-01-02'), parse_date('2024-01-05'))
     assert not is_feed_file_in_date_range('20240203.nc.tar.gz', None, parse_date('2024-01-05'))
-

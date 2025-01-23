@@ -44,7 +44,7 @@ async def download_facts_async(client: Optional[AsyncClient]) -> Path:
     """
     log.info(f"Downloading Company facts to {get_edgar_data_directory()}/companyfacts")
 
-    return await download_bulk_data(client, "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
+    return await download_bulk_data(client=client, url="https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
 
 def download_facts() -> Path:
     """
@@ -59,7 +59,7 @@ async def download_submissions_async(client: Optional[AsyncClient]) -> Path:
     """
     log.info(f"Downloading Company submissions to {get_edgar_data_directory()}/submissions")
 
-    return await download_bulk_data(client, "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip")
+    return await download_bulk_data(client=client, url="https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip")
 
 
 def download_submissions() -> Path:
@@ -161,7 +161,7 @@ def download_filings(filing_date: Optional[str] = None,
                     if bulk_file_directory.exists():
                         log.info('Skipping %s. Already exists', bulk_file_directory)
                         continue
-                path = asyncio.run(download_bulk_data(client=None, data_url=bulk_filing_file, data_directory=data_directory))
+                path = asyncio.run(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory))
                 log.info('Downloaded feed file to %s', path)
         else:
             log.info('No feed files found for %d Q%d in date range %s', year, quarter, filing_date)

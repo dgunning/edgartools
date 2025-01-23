@@ -624,9 +624,9 @@ logger = logging.getLogger(__name__)
 
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
-async def download_bulk_data(client: Optional[AsyncClient],
-                             url: str,
-                             data_directory: Path = get_edgar_data_directory()) -> Path:
+async def download_bulk_data(url: str,
+                             data_directory: Path = get_edgar_data_directory(),
+                             client: Optional[AsyncClient] = None) -> Path:
     """
     Download and extract bulk data from zip or tar.gz archives
 
