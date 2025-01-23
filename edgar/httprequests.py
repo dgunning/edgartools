@@ -487,7 +487,11 @@ CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
-async def stream_file(client: Optional[AsyncClient], url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, **kwargs) -> Union[
+async def stream_file(url: str,
+                      as_text: bool = None,
+                      path: Optional[Union[str, Path]] = None,
+                      client: Optional[AsyncClient]=None,
+                      **kwargs) -> Union[
     str, bytes, None]:
     """
     Download a file from a URL asynchronously with progress bar using httpx.
@@ -497,6 +501,7 @@ async def stream_file(client: Optional[AsyncClient], url: str, as_text: bool = N
         as_text (bool, optional): Whether to download the file as text or binary.
             If None, the default is determined based on the file extension. Defaults to None.
         path (str or Path, optional): The path where the file should be saved.
+        client: The httpx.AsyncClient instance
 
     Returns:
         str or bytes: The content of the downloaded file, either as text or binary data.
@@ -620,14 +625,14 @@ logger = logging.getLogger(__name__)
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 async def download_bulk_data(client: Optional[AsyncClient],
-                             data_url: str,
+                             url: str,
                              data_directory: Path = get_edgar_data_directory()) -> Path:
     """
     Download and extract bulk data from zip or tar.gz archives
 
     Args:
         client: The httpx.AsyncClient instance
-        data_url: URL to download from (e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
+        url: URL to download from (e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
         data_directory: Base directory for downloads
 
     Returns:
@@ -639,10 +644,10 @@ async def download_bulk_data(client: Optional[AsyncClient],
         zipfile.BadZipFile: If the downloaded zip file is corrupted
         tarfile.TarError: If the downloaded tar.gz file is corrupted
     """
-    if not data_url:
+    if not url:
         raise ValueError("Data URL cannot be empty")
 
-    filename = os.path.basename(data_url)
+    filename = os.path.basename(url)
     if not filename:
         raise ValueError("Invalid URL - cannot extract filename")
 
@@ -656,7 +661,7 @@ async def download_bulk_data(client: Optional[AsyncClient],
 
         # Download the file
         try:
-            await stream_file(client, data_url, path=download_path)
+            await stream_file(url, client=client, path=download_path)
         except Exception as e:
             raise IOError(f"Failed to download file: {e}")
 
