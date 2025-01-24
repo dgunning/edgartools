@@ -205,7 +205,8 @@ class Attachments:
         E.g. Form's 3,4,5 do when loaded directly from edgar but not when loaded from local files
         However, there are unusual filings with endings like ".fil" that require a return. So return the first one
         """
-        return self.primary_documents[0]
+        if len(self.primary_documents) > 0:
+            return self.primary_documents[0]
 
 
     @property

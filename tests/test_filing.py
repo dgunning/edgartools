@@ -892,7 +892,7 @@ def test_get_text_from_old_filing():
                     accession_no='0000912057-00-023442')
     assert filing.document.empty
     html = filing.html()
-    assert html is None
+    assert html
     text = filing.text()
     assert text
 

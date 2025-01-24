@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 from typing import List, Union, Optional
-from typing import Iterator
+from typing import Iterator, Dict
 from functools import cached_property
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.header import FilingHeader
@@ -158,18 +158,33 @@ class FilingSgml:
         """
         self.header:FilingHeader = header
         self.documents:defaultdict[str, SGMLDocument] = documents
+        self._documents_by_name:Dict[str, SGMLDocument] = {
+            doc.filename: doc for doc_lst in documents.values() for doc in doc_lst
+        }
 
     def html(self):
-        document_lst = self.documents.get("1")
-        for document in document_lst:
-            if document.filename.lower().endswith((".htm", ".html")):
-                return document.content
+        html_document = self.attachments.primary_html_document
+        if html_document and not html_document.is_binary() and not html_document.empty:
+            html_text = self.get_content(html_document.document)
+            if isinstance(html_text, bytes):
+                html_text = html_text.decode('utf-8')
+            return html_text
 
     def xml(self):
-        document_lst = self.documents.get("1")
-        for document in document_lst:
-            if document.filename.lower().endswith(".xml"):
-                return document.content
+        xml_document = self.attachments.primary_xml_document
+        if xml_document and not xml_document.is_binary() and not xml_document.empty:
+            xml_text = self.get_content(xml_document.document)
+            if isinstance(xml_text, bytes):
+                xml_text = xml_text.decode('utf-8')
+            return xml_text
+
+    def get_content(self, filename: str) -> Optional[str]:
+        """
+        Get the content of a document by its filename.
+        """
+        document = self._documents_by_name.get(filename)
+        if document:
+            return document.content
 
     @cached_property
     def attachments(self) -> Attachments:

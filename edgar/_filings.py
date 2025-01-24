@@ -1289,33 +1289,29 @@ class Filing:
     @lru_cache(maxsize=4)
     def html(self) -> Optional[str]:
         """Returns the html contents of the primary document if it is html"""
-        # First check local storage
-        if is_using_local_storage():
-            sgml = self.sgml()
-            if sgml:
-                return sgml.html()
-
-        if self.document and not self.document.is_binary() and not self.document.empty:
-            html_text = self.document.download()
-            if isinstance(html_text, bytes):
-                html_text = html_text.decode('utf-8')
-            # Some html content is wrapped within document tags
-            if html_text.startswith("<DOCUMENT>"):
-                html_text = get_content_between_tags(html_text, )
-            return html_text
+        sgml = self.sgml()
+        html = sgml.html()
+        if html:
+            # skip PDF (for now)
+            if html.endswith("</PDF>"):
+                return None
+            if has_html_content(html):
+                return html
+            # Handle naked content without HTML tags
+            if not "</html>" in html[-100:].lower():
+                return f"<html><body><div>{html}</div></body></html>"
+            return None
+        # If the html document is not in the SGML the we have to go to the homepage
+        html = self.homepage.primary_html_document.download()
+        if isinstance(html, bytes):
+            return html.decode("utf-8")
+        return html
 
     @lru_cache(maxsize=4)
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
-        # First check local storage
-        if is_using_local_storage():
-            sgml = self.sgml()
-            if sgml:
-                return sgml.xml()
-
-        xml_document = self.homepage.primary_xml_document
-        if xml_document:
-            return str(xml_document.download())
+        sgml = self.sgml()
+        return sgml.xml()
 
     @lru_cache(maxsize=4)
     def text(self) -> str:
@@ -1460,13 +1456,17 @@ class Filing:
             # Try again with preprocessing - likely with a filing from the 1990's
             return FilingHeader.parse_from_sgml_text(sec_header_content, preprocess=True)
 
+    @lru_cache(maxsize=4)
     def sgml(self):
         """
         Read the filing from the local storage path if it exists
         """
-        local_path = local_filing_path(str(self.filing_date), self.accession_no)
-        if local_path.exists():
-            return FilingSgml.from_source(local_path)
+        if is_using_local_storage():
+            local_path = local_filing_path(str(self.filing_date), self.accession_no)
+            if local_path.exists():
+                return FilingSgml.from_source(local_path)
+        else:
+            return FilingSgml.from_filing(self)
 
     def data_object(self):
         """ Get this filing as the data object that it might be"""

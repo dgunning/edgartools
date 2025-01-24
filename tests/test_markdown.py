@@ -154,6 +154,5 @@ def test_markdown_text_has_correct_spaces():
 
 def test_obscure_filing_to_markdown():
     filing = Filing(form='TA-1/A', filing_date='2024-03-13', company='DB SERVICES AMERICAS INC /TA', cik=1018490, accession_no='0001018490-24-000008')
-    html = filing.html()
     md = filing.markdown()
-    assert not md
+    assert md
