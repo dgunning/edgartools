@@ -239,8 +239,7 @@ def get_edgar_data_directory() -> Path:
     """Get the edgar data directory"""
     default_local_data_dir = Path(os.path.join(os.path.expanduser("~"), ".edgar"))
     edgar_data_dir = Path(os.getenv('EDGAR_LOCAL_DATA_DIR', default_local_data_dir))
-    if not edgar_data_dir.exists():
-        os.makedirs(edgar_data_dir)
+    os.makedirs(edgar_data_dir, exist_ok=True)
     return edgar_data_dir
 
 
