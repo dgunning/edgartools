@@ -58,7 +58,7 @@ from edgar.files.html import Document
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
-from edgar.sgml import FilingSgml
+from edgar.sgml import FilingSGML
 from edgar.sgml.header import FilingHeader
 from edgar.sgml.tools import get_content_between_tags
 from edgar.headers import FilingDirectory, IndexHeaders
@@ -1260,6 +1260,10 @@ class Filing:
         """
         :return: The primary display document on the filing, generally HTML but can be XHTML
         """
+        document = self.sgml().attachments.primary_html_document
+        # If the document is not in the SGML then we have to go to the homepage
+        if document:
+            return document
         return self.homepage.primary_html_document
 
     @property
@@ -1267,7 +1271,10 @@ class Filing:
         """
         :return: a list of the primary documents on the filing, generally HTML or XHTML and optionally XML
         """
-        return self.homepage.primary_documents
+        documents = self.sgml().attachments.primary_documents
+        if len(documents) == 0:
+            documents = self.homepage.primary_documents
+        return documents
 
     @property
     def period_of_report(self):
@@ -1279,12 +1286,13 @@ class Filing:
     @property
     def attachments(self):
         # Return all the attachments on the filing
-        return self.homepage.attachments
+        sgml_filing:FilingSGML = self.sgml()
+        return sgml_filing.attachments
 
     @property
     def exhibits(self):
         # Return all the exhibits on the filing
-        return self.homepage.attachments.exhibits
+        return self.attachments.exhibits
 
     @lru_cache(maxsize=4)
     def html(self) -> Optional[str]:
@@ -1304,7 +1312,10 @@ class Filing:
         # If the html document is not in the SGML the we have to go to the homepage
         html = self.homepage.primary_html_document.download()
         if isinstance(html, bytes):
-            return html.decode("utf-8")
+            try:
+                return html.decode("utf-8")
+            except UnicodeDecodeError:
+                return None
         return html
 
     @lru_cache(maxsize=4)
@@ -1321,7 +1332,13 @@ class Filing:
             document = Document.parse(html_content)
             return repr_rich(document, width=240, force_terminal=False)
         else:
-            return self._download_filing_text()
+            text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
+            if len(text_extract_attachments) > 0 and text_extract_attachments[0] is not None:
+                text_extract_attachment = text_extract_attachments[0]
+                return text_extract_attachment.content
+            else:
+                return self._download_filing_text()
+
 
     def _download_filing_text(self):
         """
@@ -1404,7 +1421,7 @@ class Filing:
 
     @cached_property
     def filing_sgml(self) -> str:
-        return FilingSgml.from_filing(self)
+        return FilingSGML.from_filing(self)
 
     @property
     @lru_cache(maxsize=1)
@@ -1464,9 +1481,8 @@ class Filing:
         if is_using_local_storage():
             local_path = local_filing_path(str(self.filing_date), self.accession_no)
             if local_path.exists():
-                return FilingSgml.from_source(local_path)
-        else:
-            return FilingSgml.from_filing(self)
+                return FilingSGML.from_source(local_path)
+        return FilingSGML.from_filing(self)
 
     def data_object(self):
         """ Get this filing as the data object that it might be"""
