@@ -24,10 +24,9 @@ from rich.tree import Tree
 
 from edgar.datatools import na_value
 from edgar.richtools import repr_rich, colorize_words
-from edgar.attachments import Attachments
+from edgar.attachments import Attachments, Attachment
 from edgar.core import log, split_camel_case, run_async_or_sync
 from edgar.httprequests import download_file_async
-from edgar.httpclient import async_http_client
 from edgar.xbrl.calculations import CalculationLinkbase
 from edgar.xbrl.concepts import Concept, concept_to_label
 from edgar.xbrl.definitions import parse_definition_linkbase
@@ -72,8 +71,10 @@ class XBRLAttachments:
         self._documents = dict()
         if attachments.data_files:
             for attachment in attachments.data_files:
-                if attachment.document_type in ['XML', 'EX-101.INS']:
-                    self._documents['instance'] = attachment
+                if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(('.xml', '.XML')):
+                    content = attachment.content
+                    if '<xbrl' in content[:2000]:
+                        self._documents['instance'] = attachment
                 elif attachment.document_type == 'EX-101.SCH':
                     self._documents['schema'] = attachment
                 elif attachment.document_type == 'EX-101.DEF':
@@ -122,9 +123,7 @@ class XBRLAttachments:
         Load the XBRL documents asynchronously and parse them.
         """
 
-        async with async_http_client() as client:
-
-            parsers = {
+        parsers = {
                 'definition': parse_definition_linkbase,
                 'label': parse_label_linkbase,
                 'calculation': CalculationLinkbase.parse,
@@ -132,36 +131,65 @@ class XBRLAttachments:
                 'instance': lambda x: x,
                 'schema': lambda x: x
             }
-            parsed_files = {}
+        parsed_files = {}
 
-            # Download all files concurrently
-            download_tasks = []
-            for doc_type in ['instance', 'schema', 'label', 'calculation', 'presentation']:
-                attachment = self.get(doc_type)
-                if attachment:
-                    download_tasks.append(XBRLAttachments.download_and_parse(client, doc_type, parsers[doc_type], attachment.url))
+        # Download all files concurrently
+        load_tasks = []
+        for doc_type in ['instance', 'schema', 'label', 'calculation', 'presentation']:
+            attachment = self.get(doc_type)
+            if attachment:
+                load_tasks.append(XBRLAttachments.parse_content(doc_type, parsers[doc_type], attachment))
 
-            # Wait for all downloads to complete
-            results = await asyncio.gather(*download_tasks)
-            for result in results:
-                parsed_files.update(result)
+        # Wait for all downloads to complete
+        results = await asyncio.gather(*load_tasks)
+        for result in results:
+            parsed_files.update(result)
 
-            # If we don't have all documents, extract from schema
-            if not self.has_all_documents() and 'schema' in parsed_files:
-                embedded_linkbases = XBRLAttachments.extract_embedded_linkbases(parsed_files['schema'])
+        # If we don't have all documents, extract from schema
+        if not self.has_all_documents() and 'schema' in parsed_files:
+            embedded_linkbases = XBRLAttachments.extract_embedded_linkbases(parsed_files['schema'])
 
-                for linkbase_type, content in embedded_linkbases['linkbases'].items():
-                    if linkbase_type not in parsed_files:
-                        parsed_files[linkbase_type] = parsers[linkbase_type](content)
+            for linkbase_type, content in embedded_linkbases['linkbases'].items():
+                if linkbase_type not in parsed_files:
+                    parsed_files[linkbase_type] = parsers[linkbase_type](content)
 
-            # Return the required files
-            return (parsed_files.get('instance', ''),
-                    parsed_files.get('presentation', ''),
-                    parsed_files.get('label', {}),
-                    parsed_files.get('calculation'))
+        # Return the required files
+        return (parsed_files.get('instance', ''),
+                parsed_files.get('presentation', ''),
+                parsed_files.get('label', {}),
+                parsed_files.get('calculation'))
+
+    def load_content(self):
+        """
+        Load the XBRL documents and parse them.
+        """
+        if self.empty:
+            return None
+        elif self.instance_only:
+            return XBRLInstance.parse(self._documents['instance'].download())
+        else:
+            instance_xml, presentation_xml, labels, calculations = asyncio.run(self.load())
+            return XBRLData.parse(instance_xml=instance_xml, presentation_xml=presentation_xml, labels=labels,
+                                  calculations=calculations)
+
+    @staticmethod
+    async def parse_content(doc_type: str, parser, attachment:Attachment):
+        """
+        Parse the content of an attachment asynchronously.
+        doc_type: str: The type of document being parsed.
+        parser: Callable: The parser function to use.
+        attachment: Attachment: The attachment to parse.
+        """
+        return {doc_type: parser(attachment.content)}
 
     @staticmethod
     async def download_and_parse(client, doc_type: str, parser, url: str):
+        """
+        Download and parse a document asynchronously.
+        doc_type: str: The type of document being parsed.
+        parser: Callable: The parser function to use.
+        url: str: The URL of the document to download.
+        """
         content = await download_file_async(client, url)
         return {doc_type: parser(content)}
 
@@ -384,7 +412,7 @@ class StatementDefinition():
                labels: Dict,
                xbrl_data: 'XBRLData') -> 'StatementDefinition':
 
-        if not role or not presentation_element or not labels or not xbrl_data:
+        if not role or not presentation_element or not xbrl_data:
             raise ValueError("All parameters are required")
 
         # Factory method to create a StatementDefinition instance
@@ -1407,7 +1435,9 @@ class XBRLData():
         parsed_documents = await xbrl_documents.load()
         if parsed_documents:
             instance_xml, presentation_xml, labels, calculations = parsed_documents
-            return cls.parse(instance_xml=instance_xml, presentation_xml=presentation_xml, labels=labels,
+            return cls.parse(instance_xml=instance_xml,
+                             presentation_xml=presentation_xml,
+                             labels=labels,
                              calculations=calculations)
 
     @classmethod

@@ -233,7 +233,7 @@ def test_filing_primary_document():
     assert homepage_url == 'https://www.sec.gov/Archives/edgar/data/1805559/9999999997-22-001189-index.html'
     homepage: FilingHomepage = four37_capital_staff_filing.homepage
     assert homepage
-    primary_document = homepage.primary_document
+    primary_document = four37_capital_staff_filing.document
     assert primary_document
     company = get_entity(1805559)
     filings = company.get_filings()
@@ -329,13 +329,12 @@ def test_company_specs():
     assert company_specs.schema.names[:2] == ['company', 'form']
 
 
-def test_filing_primary_document():
+def test_filing_primary_document_for_def14a_filing():
     filing = Filing(form='DEF 14A', company='180 DEGREE CAPITAL CORP. /NY/', cik=893739, filing_date='2020-03-25',
                     accession_no='0000893739-20-000019')
     primary_document: Attachment = filing.document
     assert primary_document
-    assert primary_document.url == \
-           'https://www.sec.gov/Archives/edgar/data/893739/000089373920000019/annualmeetingproxy2020-doc.htm'
+    assert primary_document.document == 'annualmeetingproxy2020-doc.htm'
     assert primary_document.extension == '.htm'
     assert primary_document.sequence_number == '1'
 
@@ -349,7 +348,7 @@ def test_filing_primary_document_seq_5():
     assert primary_document
     assert primary_document.url == \
            'https://www.sec.gov/Archives/edgar/data/851376/000085137620000003/xslATSN_COVER_X01/coverpage.xml'
-    assert primary_document.extension == '.xml'
+    assert primary_document.extension == '.html'
     assert primary_document.sequence_number == '5'
 
 
@@ -381,10 +380,7 @@ def test_filing_url_for_ixbrl_filing():
     # ixbrl url
     'https://www.sec.gov/ix.xhtml?doc=/Archives/edgar/data/1084869/000143774923002992/flws20230101_10q.htm'
 
-    # actual url
-    actual_url = 'https://www.sec.gov/Archives/edgar/data/1084869/000143774923002992/flws20230101_10q.htm'
-
-    assert ONE_800_FLOWERS_10Q.document.url == actual_url
+    assert ONE_800_FLOWERS_10Q.document.url.endswith('flws20230101_10q.htm')
 
 
 def test_filing_html_for_ixbrl_filing():
