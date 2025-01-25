@@ -8,9 +8,10 @@ from edgar.sgml.header import FilingHeader
 from edgar.sgml.parsers import SGMLParser, SGMLFormatType, SGMLDocument
 from edgar.sgml.tools import is_xml
 from collections import defaultdict
+import zipfile
 from edgar.attachments import Attachments, Attachment
 
-__all__ = ['iter_documents', 'list_documents', 'FilingSgml', 'FilingHeader']
+__all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
 
 def parse_document(document_str: str) -> SGMLDocument:
@@ -141,14 +142,14 @@ def parse_file(source: Union[str, Path]) -> list[SGMLDocument]:
 
 
 
-class FilingSgml:
+class FilingSGML:
     """
     Main class that parses and provides access to both the header and documents
     from an SGML filing.
     """
     __slots__ = ('header', 'documents', '__dict__')  # Use slots for memory efficiency
 
-    def __init__(self, header: FilingHeader, documents: defaultdict[str, SGMLDocument]):
+    def __init__(self, header: FilingHeader, documents: defaultdict[str, List[SGMLDocument]]):
         """
         Initialize FilingSGML with parsed header and documents.
 
@@ -157,7 +158,7 @@ class FilingSgml:
             documents (Dict[str, SGMLDocument]): Dictionary of parsed documents keyed by sequence
         """
         self.header:FilingHeader = header
-        self.documents:defaultdict[str, SGMLDocument] = documents
+        self.documents:defaultdict[str, List[SGMLDocument]] = documents
         self._documents_by_name:Dict[str, SGMLDocument] = {
             doc.filename: doc for doc_lst in documents.values() for doc in doc_lst
         }
@@ -198,11 +199,12 @@ class FilingSgml:
                 attachment = Attachment(
                     sequence_number=sequence,
                     ixbrl=False,
-                    path="<in sgml>",
+                    path=f"/<SGML FILE>/{document.filename}",
                     document=document.filename,
                     document_type=document.type,
                     description=document.description,
-                    size=None
+                    size=None,
+                    sgml_document=document
                 )
                 if sequence == "1":
                     primary_files.append(attachment)
@@ -215,7 +217,42 @@ class FilingSgml:
                     else:
                         documents.append(attachment)
 
-        return Attachments(document_files=documents, data_files=datafiles, primary_documents=primary_files)
+        return Attachments(document_files=documents, data_files=datafiles, primary_documents=primary_files, sgml=self)
+
+    def download(self,  path: Union[str, Path], archive: bool = False):
+        """
+        Download all the attachments to a specified path.
+        If the path is a directory, the file is saved with its original name in that directory.
+        If the path is a file, the file is saved with the given path name.
+        If archive is True, the attachments are saved in a zip file.
+        path: str or Path - The path to save the attachments
+        archive: bool (default False) - If True, save the attachments in a zip file
+        """
+        if archive:
+            if path.is_dir():
+                raise ValueError("Path must be a zip file name to create zipfile")
+            else:
+                with zipfile.ZipFile(path, 'w') as zipf:
+                    for document in self._documents_by_name.values():
+                        zipf.writestr(document.filename, document.content)
+        else:
+            if path.is_dir():
+                for document in self._documents_by_name.values():
+                    file_path = path / document.filename
+                    content = document.content
+                    if isinstance(content, bytes):
+                        file_path.write_bytes(content)
+                    else:
+                        file_path.write_text(content, encoding='utf-8')
+            else:
+                raise ValueError("Path must be a directory")
+
+    @property
+    def primary_documents(self):
+        """
+        Get the primary documents from the filing.
+        """
+        return self.attachments.primary_documents
 
 
     @classmethod
