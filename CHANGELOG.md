@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.0] - 2025-01-26
+
+### Changed
+- This release uses SGML as the primary means of getting attachments and text from SEC filings. This is a significant change from the previous release that used the Filing homepage and access the documents directly. This will make it work better with local storage
+
+### Added
+- Implement getting attachments from the SGML text file
+- Implement getting html and xml from the SGML attachments
+- Add uu_decode function to decode uuencoded files
+
+### Fixed
+- Download related filings from the SEC when local storage is enabled but not yet refreshed
+- Return empty filings when no filings are found for a company
+
 ## [3.9.1] - 2025-01-23
 
 ### Fixed
