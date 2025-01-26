@@ -49,3 +49,12 @@ def test_is_feed_file_in_date_range():
     assert is_feed_file_in_date_range('20240103.nc.tar.gz', parse_date('2024-01-02'), parse_date('2024-01-05'))
     assert not is_feed_file_in_date_range('20240203.nc.tar.gz', parse_date('2024-01-02'), parse_date('2024-01-05'))
     assert not is_feed_file_in_date_range('20240203.nc.tar.gz', None, parse_date('2024-01-05'))
+
+
+def test_local_storage_and_related_filings(monkeypatch):
+
+    filing = Filing(form='13F-HR', filing_date='2025-01-24', company='ABNER HERRMAN & BROCK LLC', cik=1038661,
+           accession_no='0001667731-25-000122')
+    monkeypatch.setenv("EDGAR_USE_LOCAL_DATA", "1")
+    related_filings = filing.related_filings()
+    assert len(related_filings) > 10

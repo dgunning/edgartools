@@ -60,7 +60,6 @@ from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
 from edgar.sgml import FilingSGML
 from edgar.sgml.header import FilingHeader
-from edgar.sgml.tools import get_content_between_tags
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
@@ -1589,10 +1588,25 @@ class Filing:
             return
 
         filings = company.get_filings(accession_number=self.accession_no)
-        if filings and not filings.empty:
-            file_number = filings[0].file_number
-            return company.get_filings(file_number=file_number,
+        if not filings or filings.empty:
+            if is_using_local_storage():
+                # In this case the local storage is missing the filing so we have to download it
+                log.warning(f"Filing {self.accession_no} not found in local storage. Downloading from SEC ...")
+                from edgar import download_entity_submissions_from_sec, parse_entity_submissions
+                submissions_json = download_entity_submissions_from_sec(self.cik)
+                c_from_sec = parse_entity_submissions(submissions_json)
+                filings = c_from_sec.get_filings(accession_number=self.accession_no)
+
+                if not filings or filings.empty:
+                    # Shouldn't get here
+                    return company.get_empty_filings()
+            else:
+                return company.get_empty_filings()
+        file_number = filings[0].file_number
+        return company.get_filings(file_number=file_number,
                                        sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")])
+
+
 
     def __hash__(self):
         return hash(self.accession_no)
