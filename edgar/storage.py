@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from httpx import HTTPStatusError, AsyncClient
 from tqdm.auto import tqdm
 
-from edgar.core import log, get_edgar_data_directory, filing_date_to_year_quarters, extract_dates
+from edgar.core import log, get_edgar_data_directory, filing_date_to_year_quarters, extract_dates, strtobool
 from edgar.httprequests import download_bulk_data, download_datafile, download_text, throttle_requests
 from edgar.reference.tickers import (ticker_txt_url,
                                      company_tickers_json_url,
@@ -35,7 +35,7 @@ def is_using_local_storage() -> bool:
     """
     Returns True if using local storage
     """
-    return os.getenv('EDGAR_USE_LOCAL_DATA', "0") == "1"
+    return strtobool(os.getenv('EDGAR_USE_LOCAL_DATA', "False"))
 
 
 async def download_facts_async(client: Optional[AsyncClient]) -> Path:

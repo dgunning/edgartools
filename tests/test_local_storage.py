@@ -4,6 +4,24 @@ from edgar import *
 from edgar.storage import list_filing_feed_files, list_filing_feed_files_for_quarter, is_feed_file_in_date_range
 
 
+def test_local_storage_env_variable(monkeypatch):
+    monkeypatch.setenv("EDGAR_USE_LOCAL_DATA", "1")
+    assert is_using_local_storage()
+
+    monkeypatch.setenv("EDGAR_USE_LOCAL_DATA", "0")
+    assert not is_using_local_storage()
+
+    monkeypatch.setenv("EDGAR_USE_LOCAL_DATA", "True")
+    assert is_using_local_storage()
+
+    monkeypatch.setenv("EDGAR_USE_LOCAL_DATA", "Yes")
+    assert is_using_local_storage()
+
+    monkeypatch.setenv("EDGAR_USE_LOCAL_DATA", "No")
+    assert not is_using_local_storage()
+
+    monkeypatch.setenv("EDGAR_USE_LOCAL_DATA", "1")
+    assert is_using_local_storage()
 
 def test_get_html_from_local_storage(monkeypatch):
     filing = Filing(form='10-Q',
