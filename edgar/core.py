@@ -57,6 +57,7 @@ __all__ = [
     'pandas_version',
     'python_version',
     'set_identity',
+    'strtobool',
     'listify',
     'decode_content',
     'filter_by_date',
@@ -102,6 +103,22 @@ default_max_connections = 10
 default_retries = 3
 
 limits = httpx.Limits(max_connections=default_max_connections)
+
+
+def strtobool (val):
+    """Convert a string representation of truth to true (1) or false (0).
+
+    True values are case insensitive 'y', 'yes', 't', 'true', 'on', and '1'.
+    false values are case insensitive 'n', 'no', 'f', 'false', 'off', and '0'.
+    Raises ValueError if 'val' is anything else.
+    """
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return 1
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return 0
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
 
 
 @dataclass
