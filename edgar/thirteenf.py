@@ -117,17 +117,6 @@ class ThirteenF:
             infotable_content = self._get_infotable_from_attachment()
             if "informationTable" in infotable_content:
                 return infotable_content
-            log.warning("Could not find infotable in attachment. Trying to get it from SGML")
-            return self._get_infotable_from_sgml()
-
-    def _get_infotable_from_sgml(self):
-        """
-        Use the SGML parser to get the infotable file
-        """
-        if self.has_infotable():
-            for document in iter_documents(self.filing.text_url):
-                if document.type == "INFORMATION TABLE":
-                    return document.raw_content
 
     def _get_infotable_from_attachment(self):
         """
