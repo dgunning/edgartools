@@ -2,6 +2,7 @@ from pathlib import Path
 from decimal import Decimal
 import pytest
 from edgar import *
+from edgar.storage import local_filing_path
 
 
 def test_parse_infotable():
@@ -202,4 +203,10 @@ def test_thirteenf_put_call():
     thirteenf:ThirteenF = ThirteenF(filing)
     puts = thirteenf.infotable.query("PutCall == 'Put'")
     assert len(puts) == 3
-    print(thirteenf)
+
+
+def test_thirteenf_from_local_storage():
+    filing = find("0001951757-25-000093")
+    print(str(filing))
+    local_path = local_filing_path(filing.filing_date, filing.accession_no)
+    print(local_path, Path(local_path).exists())

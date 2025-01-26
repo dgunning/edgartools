@@ -152,12 +152,12 @@ def test_attachments():
     filing = Filing(company="BLACKROCK INC", cik=1364742, form="8-K",
                     filing_date="2023-02-24", accession_no="0001193125-23-048785")
     attachments = filing.attachments
-    assert len(attachments) == len(filing.homepage.attachments)
+    assert len(attachments) == 13
 
     attachment = attachments[2]
     assert attachment
-    assert attachment.document == 'blk25-20230224.xsd'
-    assert attachment.url == 'https://www.sec.gov/Archives/edgar/data/1364742/000119312523048785/blk25-20230224.xsd'
+    assert attachment.document == 'blk25-20230224_def.xml'
+    assert attachment.url == 'https://www.sec.gov/<SGML FILE>/blk25-20230224_def.xml'
 
     text = attachment.download()
     assert text
@@ -169,8 +169,8 @@ def test_attachments():
 
     # Test the filing attachments
     assert filing.attachments
-    assert len(filing.attachments) == 7
-    assert filing.attachments[4].description == "XBRL TAXONOMY EXTENSION LABEL LINKBASE"
+    assert len(filing.attachments) == 13
+    assert filing.attachments[4].description == 'XBRL TAXONOMY EXTENSION PRESENTATION LINKBASE'
 
     # Get the filing using the document name
     assert filing.attachments["blk25-20230224.xsd"].description == "XBRL TAXONOMY EXTENSION SCHEMA"

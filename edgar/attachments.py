@@ -28,6 +28,7 @@ from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extens
 from edgar.httprequests import get_with_retry, download_file, download_file_async
 from edgar.httpclient import async_http_client
 
+
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
 
 __all__ = ['Attachment', 'Attachments', 'FilingHomepage', 'FilerInfo', 'AttachmentServer', 'sec_document_url']
@@ -55,17 +56,35 @@ class FilerInfo(BaseModel):
         return repr_rich(self.__rich__())
 
 
-class Attachment(BaseModel):
+class Attachment:
     """
     A class to represent an attachment in an SEC filing
     """
-    sequence_number: str
-    description: str
-    document: str
-    ixbrl: bool
-    path: str
-    document_type: str
-    size: Optional[int]
+
+    def __init__(self,
+                 sequence_number: str,
+                 description: str,
+                 document: str,
+                 ixbrl: bool,
+                 path: str,
+                 document_type: str,
+                 size: Optional[int],
+                 sgml_document: Optional['SGMLDocument'] = None):
+        self.sequence_number = sequence_number
+        self.description = description
+        self.document = document
+        self.ixbrl = ixbrl
+        self.path = path
+        self.document_type = document_type
+        self.size = size
+        self.sgml_document:Optional['SGMLDocument'] = sgml_document
+
+    @property
+    def content(self):
+        if self.sgml_document:
+            return self.sgml_document.content
+        else:
+            return download_file(self.url)
 
     @property
     def url(self):
@@ -76,7 +95,7 @@ class Attachment(BaseModel):
         """The actual extension of the filing document
          Usually one of .xml or .html or .pdf or .txt or .paper
          """
-        return os.path.splitext(self.path)[1]
+        return os.path.splitext(self.document)[1]
 
     @property
     def display_extension(self) -> str:
@@ -85,7 +104,6 @@ class Attachment(BaseModel):
         """
         return os.path.splitext(self.document)[1]
 
-    @field_validator('sequence_number')
     def validate_sequence_number(cls, v):
         if not v.isdigit() and v != '':
             raise ValueError('sequence_number must be digits or an empty string')
@@ -117,9 +135,8 @@ class Attachment(BaseModel):
             If the path is a directory, the file is saved with its original name in that directory.
             If the path is a file, the file is saved with the given path name.
             """
-        downloaded = download_file(self.url, as_text=self.is_text())
         if path is None:
-            return downloaded
+            return self.content
 
         # Ensure path is a Path object
         path = Path(path)
@@ -131,16 +148,16 @@ class Attachment(BaseModel):
             file_path = path
 
         # Save the file
-        if isinstance(downloaded, bytes):
-            file_path.write_bytes(downloaded)
+        if isinstance(self.content, bytes):
+            file_path.write_bytes(self.content)
         else:
-            file_path.write_text(downloaded)
+            file_path.write_text(self.content)
 
         return str(file_path)
 
     def view(self):
         if self.is_text():
-            content = self.download()
+            content = self.content
             if self.is_html() or has_html_content(content):
                 from edgar import Document
                 document = Document.parse(content)
@@ -173,11 +190,14 @@ class Attachments:
     def __init__(self,
                  document_files: List[Attachment],
                  data_files: Optional[List[Attachment]],
-                 primary_documents: List[Attachment]):
+                 primary_documents: List[Attachment],
+                 sgml:Optional['FilingSGML'] = None):
         self.documents = document_files
         self.data_files = data_files
         self._attachments = document_files + (data_files or [])
         self.primary_documents = primary_documents
+        self.sgml = sgml
+
 
     def __getitem__(self, item: Union[int, str]):
         if isinstance(item, int):
@@ -205,7 +225,8 @@ class Attachments:
         E.g. Form's 3,4,5 do when loaded directly from edgar but not when loaded from local files
         However, there are unusual filings with endings like ".fil" that require a return. So return the first one
         """
-        return self.primary_documents[0]
+        if len(self.primary_documents) > 0:
+            return self.primary_documents[0]
 
 
     @property
@@ -231,7 +252,10 @@ class Attachments:
         primary_documents = [self.primary_html_document]
         exhibits_documents = self.query("re.match('EX-', document_type)", False).documents
         return Attachments(
-            document_files=primary_documents + exhibits_documents, data_files=[], primary_documents=primary_documents)
+            document_files=primary_documents + exhibits_documents,
+            data_files=[],
+            primary_documents=primary_documents,
+            sgml=self.sgml)
 
     @property
     def graphics(self):
@@ -271,7 +295,7 @@ class Attachments:
             new_data_files = []
 
         return Attachments(document_files=new_documents, data_files=new_data_files,
-                           primary_documents=self.primary_documents)
+                           primary_documents=self.primary_documents, sgml=self.sgml)
 
     @staticmethod
     async def _download_all_attachments(attachments: List[Attachment]):
@@ -280,6 +304,7 @@ class Attachments:
         async with async_http_client() as client:
             return await asyncio.gather(
                 *[download_file_async(client, attachment.url, as_text=attachment.is_text()) for attachment in attachments])
+
 
     def download(self, path: Union[str, Path], archive: bool = False):
         """
@@ -290,6 +315,9 @@ class Attachments:
         path: str or Path - The path to save the attachments
         archive: bool (default False) - If True, save the attachments in a zip file
         """
+        if self.sgml:
+            self.sgml.download(path, archive)
+            return
 
         import asyncio
         loop = asyncio.get_event_loop()
@@ -319,6 +347,7 @@ class Attachments:
                         file_path.write_text(downloaded, encoding='utf-8')
             else:
                 raise ValueError("Path must be a directory")
+
 
     def serve(self, port: int = 8000) -> Tuple[Thread, socketserver.TCPServer, str]:
         """

@@ -18,7 +18,6 @@ from edgar.files.html_documents import HtmlDocument
 from edgar.files.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
 from edgar.financials import Financials
 from edgar.richtools import repr_rich
-from edgar.richtools import rich_to_text
 
 __all__ = [
     'TenK',

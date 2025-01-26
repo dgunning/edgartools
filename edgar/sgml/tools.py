@@ -1,5 +1,7 @@
 import re
-__all__ = ['extract_text_between_tags']
+import base64
+
+__all__ = ['extract_text_between_tags', 'get_content_between_tags', 'strip_tags', 'is_xml', 'decode_uu']
 
 def extract_text_between_tags(content: str, tag: str) -> str:
     """
@@ -66,3 +68,15 @@ def is_xml(filename: str) -> bool:
     .xsd, .xml, .xbrl
     """
     return filename.lower().endswith(('.xsd', '.xml', '.xbrl'))
+
+
+def decode_uu(uu_content):
+    lines = uu_content.split('\n')
+    data = ''
+    for line in lines[1:]:  # Skip "begin" line
+        if line.startswith('`') or line.startswith('end'):
+            break
+        # Convert UU to base64 padding
+        data += ''.join([chr(((ord(c) - 32) & 63) + 32) for c in line.strip()])
+
+    return base64.b64decode(data)

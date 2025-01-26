@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Iterator, Optional
-from edgar.sgml.tools import get_content_between_tags
+from edgar.sgml.tools import get_content_between_tags, decode_uu
 
 __all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument']
 
@@ -32,7 +32,11 @@ class SGMLDocument:
 
     @property
     def content(self):
-        return get_content_between_tags(self.raw_content, )
+        text = get_content_between_tags(self.raw_content)
+        if text:
+            if text.startswith("begin"):
+                return decode_uu(text)
+            return text
 
     def __str__(self):
         return f"Document(type={self.type}, sequence={self.sequence}, filename={self.filename}, description={self.description})"

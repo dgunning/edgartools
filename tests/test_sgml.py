@@ -1,8 +1,12 @@
-from edgar.sgml import iter_documents, list_documents, FilingSgml, FilingHeader
+from edgar.sgml import iter_documents, list_documents, FilingSGML, FilingHeader
 from edgar.sgml.parsers import SGMLDocument, SGMLParser, SGMLFormatType
 from edgar.sgml.tools import get_content_between_tags
 from pathlib import Path
+import tempfile
+import zipfile
 from edgar import Filing, find
+from edgar.sgml.tools import decode_uu
+from edgar import *
 
 def test_parse_old_full_text():
     source = Path("data/sgml/0001011438-98-000429.txt")
@@ -34,7 +38,7 @@ def test_parse_sgml_with_xbrl():
 
 
 def test_sgml_document_from_source():
-    fs = FilingSgml.from_source("data/sgml/0001011438-98-000429.txt")
+    fs = FilingSGML.from_source("data/sgml/0001011438-98-000429.txt")
     document = fs.get_document_by_sequence("1")
     assert document
     assert document.type == "8-K"
@@ -45,7 +49,7 @@ def test_sgml_document_from_source():
     assert text
 
 def test_sgml_from_url():
-    fs = FilingSgml.from_source('https://www.sec.gov/Archives/edgar/data/730200/000073020016000084/0000730200-16-000084.txt')
+    fs = FilingSGML.from_source('https://www.sec.gov/Archives/edgar/data/730200/000073020016000084/0000730200-16-000084.txt')
     assert fs
     document = fs.get_document_by_sequence("1")
     assert document
@@ -57,7 +61,7 @@ def test_sgml_from_url():
 def test_sgm_sequence_numbers_match_attachment_sequence_numbers():
     filing = Filing(form='3', filing_date='2018-12-21', company='Aptose Biosciences Inc.', cik=882361, accession_no='0001567619-18-008556')
     attachments = filing.attachments
-    filing_sgml = FilingSgml.from_filing(filing)
+    filing_sgml = FilingSGML.from_filing(filing)
     sgml_sequences = set(filing_sgml.documents.keys())
     attachment_sequences = {attachment.sequence_number for attachment in attachments if attachment.sequence_number.isdigit()}
     assert sgml_sequences & attachment_sequences
@@ -66,7 +70,7 @@ def test_sgm_sequence_numbers_match_attachment_sequence_numbers():
 def test_sgml_from_filing():
     filing = Filing(form='S-3/A', filing_date='1995-05-25', company='PAGE AMERICA GROUP INC', cik=311048,
            accession_no='0000899681-95-000096')
-    filing_sgml = FilingSgml.from_filing(filing)
+    filing_sgml = FilingSGML.from_filing(filing)
     assert filing_sgml
     assert filing_sgml.header.is_empty()
 
@@ -93,7 +97,7 @@ def test_get_attachment_content_from_sgml():
                accession_no='0000950103-24-007264')
     ]
     for filing in filings:
-        filing_sgml = FilingSgml.from_filing(filing)
+        filing_sgml = FilingSGML.from_filing(filing)
         for attachment in filing.attachments:
             if attachment.sequence_number.isdigit():
                 sgml_document = filing_sgml.get_document_by_sequence(attachment.sequence_number)
@@ -103,7 +107,7 @@ def test_get_attachment_content_from_sgml():
 
 def test_sgml_parsing_of_headers():
     filing = Filing(form='8-K', filing_date='2003-03-05', company='NEW YORK COMMUNITY BANCORP INC', cik=910073, accession_no='0001169232-03-001935')
-    filing_sgml = FilingSgml.from_filing(filing)
+    filing_sgml = FilingSGML.from_filing(filing)
     assert filing_sgml
     eightk = filing.obj()
     repr(eightk)
@@ -111,7 +115,7 @@ def test_sgml_parsing_of_headers():
 
 def test_sgml_from_submission_file():
     source = Path("data/sgml/0002002260-24-000001.nc")
-    filing_sgml = FilingSgml.from_source(source)
+    filing_sgml = FilingSGML.from_source(source)
     header = filing_sgml.header
     print()
 
@@ -134,7 +138,7 @@ def test_sgml_from_submission_file():
 
 def test_sgml_with_multiple_subject_companies():
     source = Path("data/sgml/0001104659-25-002604.txt")
-    filing_sgml = FilingSgml.from_source(source)
+    filing_sgml = FilingSGML.from_source(source)
     header:FilingHeader = filing_sgml.header
     assert len(header.subject_companies) == 2
     subject_company_0 = header.subject_companies[0]
@@ -150,14 +154,14 @@ def test_sgml_with_multiple_subject_companies():
 
 def test_sgml_with_reporting_owner():
     source = Path("data/sgml/0001127602-25-001055.txt")
-    filing_sgml = FilingSgml.from_source(source)
+    filing_sgml = FilingSGML.from_source(source)
     header:FilingHeader = filing_sgml.header
     reporting_owner = header.reporting_owners[0]
     assert reporting_owner.owner.name == 'Jessica A. Garascia'
 
 def test_get_attachments_from_sgml_filings():
     source = Path("data/sgml/0001127602-25-001055.txt")
-    filing_sgml = FilingSgml.from_source(source)
+    filing_sgml = FilingSGML.from_source(source)
     s_attachments = filing_sgml.attachments
     assert s_attachments
     assert len(s_attachments.documents) == 2
@@ -166,14 +170,14 @@ def test_get_attachments_from_sgml_filings():
 
 def test_html_from_sgml_filing():
     source = Path("data/localstorage/filings/20250108/0001493152-25-001317.nc")
-    filing_sgml = FilingSgml.from_source(source)
+    filing_sgml = FilingSGML.from_source(source)
     html = filing_sgml.html()
     assert html
 
 def test_xml_from_sgml_filing():
     # A form 4 filing
     source = Path("data/localstorage/filings/20250108/0001562180-25-000280.nc")
-    filing_sgml = FilingSgml.from_source(source)
+    filing_sgml = FilingSGML.from_source(source)
     xml = filing_sgml.xml()
     assert xml
 
@@ -224,22 +228,36 @@ def test_get_content_between_tags():
 
 def test_sgml_format_for_really_old_filing():
     filing = Filing(form='8-K', filing_date='1995-02-14', company='ALBERTO CULVER CO', cik=3327, accession_no='0000003327-95-000017')
-    filing_sgml = FilingSgml.from_filing(filing)
+    filing_sgml = FilingSGML.from_filing(filing)
     assert filing_sgml
 
-    content = """
-    <DOCUMENT>
-    <TYPE>8-K
-    <SEQUENCE>1
-    <FILENAME>form8-k.htm
-    <TEXT>
-    <XBRL>
-    Raw content here
-    </XBRL>
-    </TEXT>
-    </DOCUMENT>
-    """
+
+def test_download_to_directory():
+    sgml: FilingSGML = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        sgml.download(temp_path)
+
+        for document in sgml._documents_by_name.values():
+            file_path = temp_path / document.filename
+            assert file_path.exists()
 
 
+def test_download_to_archive():
+    sgml: FilingSGML = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        archive_path = Path(temp_dir) / "attachments.zip"
+        sgml.download(archive_path, archive=True)
+
+        with zipfile.ZipFile(archive_path, 'r') as zipf:
+            archive_names = zipf.namelist()
+            for document in sgml._documents_by_name.values():
+                assert document.filename in archive_names
 
 
+def test_get_sgml_from_filing_when_no_local_storage_exists(monkeypatch):
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01',
+            accession_no='0000320193-24-000123')
+    monkeypatch.setenv('EDGAR_USE_LOCAL_DATA', '1')
+    filing_sgml = filing.sgml()
+    assert filing_sgml

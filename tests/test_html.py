@@ -392,7 +392,7 @@ def test_get_text_from_filing_with_no_body_tag():
     filing = Filing(form='TA-1/A', filing_date='2024-04-17', company='PEAR TREE ADVISORS INC /TA', cik=949738, accession_no='0000949738-24-000005')
     html = filing.html()
     document = Document.parse(html)
-    assert not document
+    assert document
 
 
 def test_parse_document_within_just_paragraph_tags():
@@ -428,4 +428,4 @@ def test_html_from_old_filings_is_none():
     text = f.text()
     assert text
     html = f.html()
-    assert not html
+    assert html

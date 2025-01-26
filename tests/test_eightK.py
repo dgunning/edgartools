@@ -178,3 +178,10 @@ def test_eightk_date_of_report():
     f = Filing(form='8-K', filing_date='1995-01-24', company='AMERICAN EXPRESS CO', cik=4962, accession_no='0000004962-95-000001')
     eightk = f.obj()
     assert eightk.date_of_report == ''
+
+
+def test_extract_xbrl_from_8k():
+    filing = Filing(form='8-K', filing_date='2022-11-02', company='Sovos Brands, Inc.', cik=1856608, accession_no='0001558370-22-015992')
+    print()
+    xbrl = filing.xbrl()
+    assert xbrl

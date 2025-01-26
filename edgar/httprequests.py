@@ -274,9 +274,10 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
             if response.status_code == 429:
                 raise TooManyRequestsError(url)
             elif is_redirect(response):
-                yield stream_with_retry(response.headers["Location"],
+                response = stream_with_retry(response.headers["Location"],
                                         identity=identity,
                                         identity_callable=identity_callable, **kwargs)
+                yield from response
             else:
                 yield response
 
