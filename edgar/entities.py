@@ -52,6 +52,7 @@ __all__ = [
     'get_company_facts',
     'get_company_tickers',
     'get_entity_submissions',
+    'empty_company_filings',
     'parse_entity_submissions',
     'get_ticker_to_cik_lookup',
     'get_cik_lookup_data'
@@ -601,6 +602,9 @@ class EntityData:
         combined_tables = pa.concat_tables(filing_tables)
         self.filings = CompanyFilings(combined_tables, cik=self.cik, company_name=self.name)
 
+    def get_empty_filings(self):
+        return empty_company_filings(self.cik, self.name)
+
     def get_filings(self,
                     *,
                     form: Union[str, List] = None,
@@ -943,14 +947,7 @@ CompanyFilings = EntityFilings
 CompanyFacts = EntityFacts
 CompanyData = EntityData
 
-
-def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
-    """
-    Extract company filings from the json response
-    """
-    # Handle case of no data
-    if not filings_json['accessionNumber']:
-        schema = pa.schema([
+COMPANY_FILINGS_SCHEMA = schema = pa.schema([
             ('accession_number', pa.string()),
             ('filing_date', pa.date32()),
             ('reportDate', pa.string()),
@@ -966,7 +963,22 @@ def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
             ('primaryDocDescription', pa.string())
         ])
 
-        filings_table = pa.Table.from_arrays([[] for _ in range(13)], schema=schema)
+def empty_company_filings_table():
+    """
+    Create an empty company filings table
+    """
+    return pa.Table.from_arrays([[] for _ in range(13)], schema=COMPANY_FILINGS_SCHEMA)
+
+def empty_company_filings(cik:IntString, company_name:str):
+    return CompanyFilings(empty_company_filings_table(), cik=cik, company_name=company_name)
+
+def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
+    """
+    Extract company filings from the json response
+    """
+    # Handle case of no data
+    if not filings_json['accessionNumber']:
+        filings_table = empty_company_filings_table()
     else:
         # Convert acceptanceDateTime string to datetime
         acceptance_datetimes = [
