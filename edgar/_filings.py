@@ -52,7 +52,8 @@ from edgar.core import (log, display_size, sec_edgar,
                         YearAndQuarters,
                         quarters_in_year,
                         filing_date_to_year_quarters,
-                        DataPager)
+                        DataPager,
+                        PagingState)
 from edgar.files.html import Document
 
 from edgar.files.html_documents import get_clean_html
@@ -84,7 +85,7 @@ __all__ = [
     'Filings',
     'get_filings',
     'FilingHeader',
-    'FilingsState',
+    'PagingState',
     'Attachment',
     'Attachments',
     'FilingHomepage',
@@ -427,12 +428,6 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
     return final_index_table
 
 
-@dataclass
-class FilingsState:
-    page_start: int
-    num_filings: int
-
-
 class Filings:
     """
     A container for filings
@@ -440,11 +435,11 @@ class Filings:
 
     def __init__(self,
                  filing_index: pa.Table,
-                 original_state: Optional[FilingsState] = None):
+                 original_state: Optional[PagingState] = None):
         self.data: pa.Table = filing_index
         self.data_pager = DataPager(self.data)
         # This keeps track of where the index should start in case this is just a page in the Filings
-        self._original_state = original_state or FilingsState(0, len(self.data))
+        self._original_state = original_state or PagingState(0, len(self.data))
 
     def to_pandas(self, *columns) -> pd.DataFrame:
         """Return the filing index as a python dataframe"""
@@ -610,7 +605,7 @@ class Filings:
             log.warning("End of data .. use prev() \u2190 ")
             return None
         start_index, _ = self.data_pager._current_range
-        filings_state = FilingsState(page_start=start_index, num_filings=len(self))
+        filings_state = PagingState(page_start=start_index, num_records=len(self))
         return Filings(data_page, original_state=filings_state)
 
     def previous(self):
@@ -623,7 +618,7 @@ class Filings:
             log.warning(" No previous data .. use next() \u2192 ")
             return None
         start_index, _ = self.data_pager._current_range
-        filings_state = FilingsState(page_start=start_index, num_filings=len(self))
+        filings_state = PagingState(page_start=start_index, num_records=len(self))
         return Filings(data_page, original_state=filings_state)
 
     def prev(self):
@@ -697,7 +692,7 @@ class Filings:
     @property
     def summary(self):
         return (f"Showing {self.data_pager.page_size} of "
-                f"{self._original_state.num_filings:,} filings")
+                f"{self._original_state.num_records:,} filings")
 
     def _page_index(self) -> range:
         """Create the range index to set on the page dataframe depending on where in the data we are
@@ -756,7 +751,7 @@ class Filings:
         elements = [table]
 
         if self.data_pager.total_pages > 1:
-            total_filings = self._original_state.num_filings
+            total_filings = self._original_state.num_records
             current_count = len(current_page)
             start_num = start_idx + 1
             end_num = start_idx + current_count
