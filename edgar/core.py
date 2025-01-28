@@ -77,6 +77,7 @@ __all__ = [
     'default_page_size',
     'parse_acceptance_datetime',
     'InvalidDateException',
+    'PagingState',
     'Years',
     'Quarters',
     'YearAndQuarter',
@@ -105,20 +106,23 @@ default_retries = 3
 limits = httpx.Limits(max_connections=default_max_connections)
 
 
-def strtobool (val):
+def strtobool (val:str):
     """Convert a string representation of truth to true (1) or false (0).
 
     True values are case insensitive 'y', 'yes', 't', 'true', 'on', and '1'.
     false values are case insensitive 'n', 'no', 'f', 'false', 'off', and '0'.
     Raises ValueError if 'val' is anything else.
     """
+    if not val:
+        return False
     val = val.lower()
     if val in ('y', 'yes', 't', 'true', 'on', '1'):
         return 1
     elif val in ('n', 'no', 'f', 'false', 'off', '0'):
         return 0
     else:
-        raise ValueError("invalid truth value %r" % (val,))
+        return 0
+        #raise ValueError("invalid truth value %r" % (val,))
 
 
 @dataclass
@@ -608,6 +612,13 @@ class DataPager:
     @property
     def end_index(self):
         return self.start_index + self.page_size
+
+
+@dataclass
+class PagingState:
+    page_start: int
+    num_records: int
+
 
 
 def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
