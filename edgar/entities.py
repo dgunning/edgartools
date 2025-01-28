@@ -20,7 +20,7 @@ from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
 
-from edgar._filings import Filing, Filings, FilingsState
+from edgar._filings import Filing, Filings, PagingState
 from edgar.company_reports import TenK, TenQ
 from edgar.core import (log, Result, display_size, listify,
                         filter_by_date, IntString, InvalidDateException, reverse_name,
@@ -219,7 +219,7 @@ class EntityFilings(Filings):
                  data: pa.Table,
                  cik: int,
                  company_name: str,
-                 original_state: FilingsState = None):
+                 original_state: PagingState = None):
         super().__init__(data, original_state=original_state)
         self.cik = cik
         self.company_name = company_name
@@ -317,7 +317,7 @@ class EntityFilings(Filings):
             log.warning("End of data .. use prev() \u2190 ")
             return None
         start_index, _ = self.data_pager._current_range
-        filings_state = FilingsState(page_start=start_index, num_filings=len(self))
+        filings_state = PagingState(page_start=start_index, num_records=len(self))
         return CompanyFilings(data_page,
                               cik=self.cik,
                               company_name=self.company_name,
@@ -333,7 +333,7 @@ class EntityFilings(Filings):
             log.warning(" No previous data .. use next() \u2192 ")
             return None
         start_index, _ = self.data_pager._current_range
-        filings_state = FilingsState(page_start=start_index, num_filings=len(self))
+        filings_state = PagingState(page_start=start_index, num_records=len(self))
         return CompanyFilings(data_page,
                               cik=self.cik,
                               company_name=self.company_name,
@@ -385,7 +385,7 @@ class EntityFilings(Filings):
         elements = [table]
 
         if self.data_pager.total_pages > 1:
-            total_filings = self._original_state.num_filings
+            total_filings = self._original_state.num_records
             current_count = len(current_page)
             start_num = start_idx + 1
             end_num = start_idx + current_count
