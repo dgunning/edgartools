@@ -6,6 +6,7 @@ from functools import cached_property
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.header import FilingHeader
 from edgar.sgml.parsers import SGMLParser, SGMLFormatType, SGMLDocument
+from edgar.sgml.summary import FilingSummary
 from edgar.sgml.tools import is_xml
 from collections import defaultdict
 import zipfile
@@ -219,6 +220,13 @@ class FilingSGML:
 
         return Attachments(document_files=documents, data_files=datafiles, primary_documents=primary_files, sgml=self)
 
+    @cached_property
+    def filing_summary(self):
+        summary_attachments = self.attachments.query("document=='FilingSummary.xml'")
+        if len(summary_attachments) ==1:
+            summary_attachment = summary_attachments[0]
+            return FilingSummary.parse(summary_attachment.content)
+
     def download(self,  path: Union[str, Path], archive: bool = False):
         """
         Download all the attachments to a specified path.
@@ -320,12 +328,6 @@ class FilingSGML:
         results = self.documents.get(sequence)
         if results and len(results) > 0:
             return results[0]
-
-    def get_documents_by_type(self, doc_type: str) -> List[SGMLDocument]:
-        """
-        Get all documents of a specific type.
-        """
-        return [doc for doc in self.documents.values() if doc.type == doc_type]
 
     @classmethod
     def from_filing(cls, filing: 'Filing') -> 'FilingSGML':

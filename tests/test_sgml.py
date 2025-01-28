@@ -261,3 +261,8 @@ def test_get_sgml_from_filing_when_no_local_storage_exists(monkeypatch):
     monkeypatch.setenv('EDGAR_USE_LOCAL_DATA', '1')
     filing_sgml = filing.sgml()
     assert filing_sgml
+
+def test_get_filing_summary():
+    sgml: FilingSGML = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
+    summary = sgml.filing_summary
+    assert summary
