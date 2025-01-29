@@ -20,6 +20,8 @@ def test_attachments_query():
     # test for attachments not found
     powerpoints = attachments.query("document_type=='POWERPOINT'")
     assert len(powerpoints) == 0
+    print()
+
 
 
 def test_get_attachment_by_type():

@@ -11,7 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from threading import Thread
 from typing import List, Optional, Tuple
-from typing import Union
+from typing import Union, Dict
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, field_validator
@@ -38,6 +38,79 @@ def sec_document_url(attachment_url: str) -> str:
     # Remove "ix?doc=/" or "ix.xhtml?doc=/" from the filing url
     attachment_url = re.sub(r"ix(\.xhtml)?\?doc=/", "", attachment_url)
     return f"{sec_dot_gov}{attachment_url}"
+
+def sequence_sort_key(x):
+    seq = x.sequence_number
+    if seq.strip() == '':  # Handle empty or whitespace-only strings
+        return (float('inf'), '')  # Sort to end using infinity
+    try:
+        return (0, float(seq))  # Convert to number for numeric sorting
+    except ValueError:
+        return (1, seq)  #
+
+
+# Mapping of SEC filing file types to Unicode symbols
+FILE_TYPE_SYMBOLS: Dict[str, str] = {
+    # Main SEC filing documents
+    "10-K": "📄",  # Document emoji for main filing
+    "EX-21.1": "📎",  # Paperclip for exhibits
+    "EX-23.1": "📎",
+    "EX-31.1": "📎",
+    "EX-31.2": "📎",
+    "EX-32.1": "📎",
+    "EX-97.1": "📎",
+
+    # XBRL-related documents
+    "EX-101.SCH": "📋",  # Clipboard for schema
+    "EX-101.CAL": "🔢",  # Numbers for calculations
+    "EX-101.DEF": "📚",  # Books for definitions
+    "EX-101.LAB": "🏷️",  # Label for labels
+    "EX-101.PRE": "📊",  # Chart for presentation
+
+    # Common file types
+    "XML": "🔰",  # XML files
+    "HTML": "🌐",  # HTML files (for any .htm files)
+    "GRAPHIC": "🖼️",  # Images/graphics
+    "EXCEL": "📊",  # Excel files
+    "JSON": "📝",  # JSON files
+    "ZIP": "📦",  # ZIP archives
+    "CSS": "🎨",  # CSS files (for corrected report.css)
+    "JS": "⚙️",  # JavaScript files (for corrected Show.js)
+    ".css": "🎨",  # CSS files by extension
+    ".js": "⚙️",  # JavaScript files by extension
+}
+
+
+def get_extension(filename: str) -> str:
+    """Extract the file extension including the dot."""
+    if '.' in filename:
+        return filename[filename.rindex('.'):]
+    return ''
+
+def get_file_icon(file_type: str, sequence: str = None, filename: str = None) -> str:
+    """
+    Get the Unicode symbol for a given file type and sequence number.
+
+    Args:
+        file_type: The type of the file from SEC filing
+        sequence: The sequence number of the file in the filing
+        filename: The name of the file to extract the extension
+
+    Returns:
+        Unicode symbol corresponding to the file type.
+        If sequence is 1, returns "📜" (scroll) to indicate main filing document.
+        Returns "📄" (document) as default if type not found.
+    """
+    if sequence == "1":
+        return "📜"  # Scroll emoji for main document
+
+    # Check for file extension first if filename is provided
+    if filename:
+        ext = get_extension(filename)
+        if ext in FILE_TYPE_SYMBOLS:
+            return FILE_TYPE_SYMBOLS[ext]
+
+    return FILE_TYPE_SYMBOLS.get(file_type, "📄")
 
 
 class FilerInfo(BaseModel):
@@ -416,36 +489,29 @@ class Attachments:
     def __rich__(self):
 
         # Document files
-        document_table = Table('Seq', Column('Document'), 'Description', 'Type', 'Size',
-                               title='Documents',
-                               row_styles=["", "bold"],
+        document_table = Table(Column('Seq', style="dim", header_style="dim"),
+                                        Column('Document', header_style="dim"),
+                                        Column('Description', header_style="dim"),
+                                        Column('Type', header_style="dim"),
+                               title='Attachments',
+                               #row_styles=["", "dim"],
                                box=box.SIMPLE)
-        for index, _attachment in enumerate(self.documents):
-            document_table.add_row(str(_attachment.sequence_number),
-                                   _attachment.document,
-                                   _attachment.description,
-                                   _attachment.document_type,
-                                   display_size(_attachment.size))
-        document_panel = Panel(document_table, box=box.ROUNDED)
+        all_attachments = sorted(self.documents + (self.data_files or []), key=sequence_sort_key)
 
-        renderables = [document_panel]
 
-        # Data files
-        if self.data_files:
-            data_table = Table('Seq', Column('Document'), 'Description', 'Type', 'Size',
-                               title='Data Files',
-                               row_styles=["", "bold"],
-                               box=box.SIMPLE)
-            for index, _attachment in enumerate(self.data_files):
-                data_table.add_row(str(_attachment.sequence_number),
-                                   _attachment.document,
-                                   _attachment.description,
-                                   _attachment.document_type,
-                                   display_size(_attachment.size))
-            data_panel = Panel(data_table, box=box.ROUNDED)
-            renderables.append(data_panel)
 
-        return Group(*renderables)
+        for attachment in all_attachments:
+            # Get the file icon for each attachment
+            icon = get_file_icon(file_type=attachment.document_type,
+                                 sequence= attachment.sequence_number,
+                                 filename=attachment.document)
+            document_table.add_row(str(attachment.sequence_number),
+                                   Text(attachment.document, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else attachment.document,
+                                   Text(attachment.description, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else attachment.description,
+                                   Text.assemble((icon, ""), " ", (attachment.document_type, "bold deep_sky_blue1" if attachment.sequence_number == "1" else "")),)
+
+
+        return document_table
 
     def __repr__(self):
         return repr_rich(self.__rich__())
