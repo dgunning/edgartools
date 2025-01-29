@@ -225,7 +225,10 @@ class FilingSGML:
         summary_attachments = self.attachments.query("document=='FilingSummary.xml'")
         if len(summary_attachments) ==1:
             summary_attachment = summary_attachments[0]
-            return FilingSummary.parse(summary_attachment.content)
+            filing_summary = FilingSummary.parse(summary_attachment.content)
+            filing_summary.reports._filing_summary = filing_summary
+            filing_summary._filing_sgml = self
+            return filing_summary
 
     def download(self,  path: Union[str, Path], archive: bool = False):
         """

@@ -2,6 +2,7 @@ from rich import print
 import pytest
 from pathlib import Path
 from edgar.sgml.summary import FilingSummary, Reports, Report
+from edgar.sgml import FilingSGML
 
 
 @pytest.fixture
@@ -62,8 +63,17 @@ def test_summary_statements(aapl_summary):
     assert(statements)
     print(statements)
 
-    balance_sheet = statements[5]
+    balance_sheet = statements.balance_sheet
     print(balance_sheet)
+
+def test_report_content():
+    sgml: FilingSGML = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
+    filing_summary:FilingSummary = sgml.filing_summary
+    statements = filing_summary.statements
+    balance_sheet = statements.balance_sheet
+    content = balance_sheet.content
+    assert(content)
+    balance_sheet.view()
 
 def test_summary_tables(aapl_summary):
     tables = aapl_summary.tables

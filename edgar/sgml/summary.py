@@ -4,12 +4,18 @@ from bs4 import BeautifulSoup
 from edgar.xmltools import child_text
 from edgar.core import strtobool, DataPager, PagingState, log
 from edgar.richtools import repr_rich
+from edgar.files.html import Document
 from rich.console import Group
 from rich.table import Table
 from rich.panel import Panel
 from rich import box
+from edgar.richtools import print_rich
 import pyarrow as pa
 import pyarrow.compute as pc
+import re
+from typing import List, Dict, Set, Tuple
+from enum import Enum
+
 
 __all__ = ['Report', 'File', 'FilingSummary']
 
@@ -17,13 +23,41 @@ class Reports:
 
     def __init__(self,
                  data:pa.Table,
+                 filing_summary: Optional['FilingSummary'] = None,
                  original_state: Optional[PagingState] = None):
         self.data:pa.Table = data
         self.data_pager = DataPager(data)
         self._original_state = original_state or PagingState(0, len(self.data))
+        self.n = 0
+        self._filing_summary = filing_summary
 
     def __len__(self):
         return len(self.data)
+
+    def __iter__(self):
+        self.n = 0
+        return self
+
+    def __next__(self):
+        if self.n < len(self.data):
+            report = Report(
+                instance=self.data['instance'][self.n].as_py(),
+                is_default=self.data['IsDefault'][self.n].as_py(),
+                has_embedded_reports=self.data['HasEmbeddedReports'][self.n].as_py(),
+                html_file_name=self.data['HtmlFileName'][self.n].as_py(),
+                long_name=self.data['LongName'][self.n].as_py(),
+                report_type=self.data['ReportType'][self.n].as_py(),
+                role=self.data['Role'][self.n].as_py(),
+                parent_role=self.data['ParentRole'][self.n].as_py(),
+                short_name=self.data['ShortName'][self.n].as_py(),
+                menu_category=self.data['MenuCategory'][self.n].as_py(),
+                position=self.data['Position'][self.n].as_py(),
+                reports = self
+            )
+            self.n += 1
+            return report
+        else:
+            raise StopIteration
 
     def current(self):
         """Display the current page ... which is the default for this filings object"""
@@ -60,8 +94,8 @@ class Reports:
         if record:
             return record
 
-    @staticmethod
-    def create_from_record(data:pa.Table):
+
+    def create_from_record(self, data:pa.Table):
         return Report(
                 instance=data['instance'][0].as_py(),
                 is_default=data['IsDefault'][0].as_py(),
@@ -73,7 +107,8 @@ class Reports:
                 parent_role=data['ParentRole'][0].as_py(),
                 short_name=data['ShortName'][0].as_py(),
                 menu_category=data['MenuCategory'][0].as_py(),
-                position=data['Position'][0].as_py()
+                position=data['Position'][0].as_py(),
+                reports = self
             )
 
     @property
@@ -89,7 +124,7 @@ class Reports:
         Get a single report by category
         """
         data = self.data.filter(pc.equal(self.data['MenuCategory'], category))
-        return Reports(data)
+        return Reports(data, filing_summary=self._filing_summary)
 
     def get_by_filename(self, file_name: str):
         """
@@ -97,7 +132,7 @@ class Reports:
         """
         data = self.data.filter(pc.equal(self.data['HtmlFileName'], file_name))
         if len(data) ==1:
-            return Reports.create_from_record(data)
+            return self.create_from_record(data)
 
     def get_by_short_name(self, short_name: str):
         """
@@ -105,7 +140,7 @@ class Reports:
         """
         data = self.data.filter(pc.equal(self.data['ShortName'], short_name))
         if len(data) == 1:
-            return Reports.create_from_record(data)
+            return self.create_from_record(data)
 
     def filter(self, column: Union[str, List[str]], value: Union[str, List[str]]):
         if isinstance(column, str):
@@ -123,7 +158,7 @@ class Reports:
         data = self.data.filter(mask)
         # Return a single Report or new Reports instance
         if len(data) == 1:
-            return Reports.create_from_record(data)
+            return self.create_from_record(data)
         return Reports(data)
 
     def __rich__(self):
@@ -165,19 +200,47 @@ class Reports:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-@dataclass
+
 class Report:
-    is_default: bool
-    has_embedded_reports: bool
-    long_name: str
-    short_name: str
-    menu_category: Optional[str]
-    position:Optional[int]
-    instance: Optional[str]
-    html_file_name: Optional[str]
-    report_type: Optional[str]
-    role: Optional[str]
-    parent_role: Optional[str] = None
+
+    def __init__(self,
+                 instance: Optional[str],
+                 is_default: Optional[bool],
+                 has_embedded_reports: Optional[bool],
+                 long_name: Optional[str],
+                 short_name: Optional[str],
+                 menu_category: Optional[str],
+                 position: Optional[int],
+                 html_file_name: Optional[str],
+                 report_type: Optional[str],
+                 role: Optional[str],
+                 parent_role: Optional[str] = None,
+                 reports = None):
+        self.instance = instance
+        self.is_default = is_default
+        self.has_embedded_reports = has_embedded_reports
+        self.long_name = long_name
+        self.short_name = short_name
+        self.menu_category = menu_category
+        self.position = position
+        self.html_file_name = html_file_name
+        self.report_type = report_type
+        self.role = role
+        self.parent_role = parent_role
+        self._reports = reports
+
+    @property
+    def content(self):
+        sgml = self._reports._filing_summary._filing_sgml
+        if sgml:
+            return sgml.get_content(self.html_file_name)
+
+    def view(self):
+        document = Document.parse(self.content)
+        print_rich(document)
+
+    def __str__(self):
+        return f"Report(short_name={self.short_name}, category={self.menu_category}, file_name={self.html_file_name})"
 
 @dataclass
 class File:
@@ -206,6 +269,7 @@ class FilingSummary:
                     has_presentation_linkbase: Optional[bool] = None,
                     has_calculation_linkbase: Optional[bool] = None):
         self.reports:Reports = reports
+        self.reports._filing_summary = self
         self._short_name_map = short_name_map
         self._category_map = category_map
         self.input_files = input_files
@@ -220,6 +284,7 @@ class FilingSummary:
         self.tuples_reported = tuples_reported
         self.has_presentation_linkbase = has_presentation_linkbase
         self.has_calculation_linkbase = has_calculation_linkbase
+        self._filing_sgml = None
 
     @classmethod
     def parse(cls, xml_text:str):
@@ -329,7 +394,8 @@ class FilingSummary:
 
     @property
     def statements(self):
-        return self.get_reports_by_category('Statements')
+        reports = self.get_reports_by_category('Statements')
+        return Statements(reports)
 
     @property
     def tables(self):
@@ -339,4 +405,166 @@ class FilingSummary:
         return f"FilingSummary(report_format={self.report_format})"
 
 
+class StatementType(Enum):
+    INCOME = "income"
+    BALANCE = "balance"
+    CASH_FLOW = "cash_flow"
+    COMPREHENSIVE_INCOME = "comprehensive_income"
+    EQUITY = "equity"
 
+
+class StatementMapper:
+    def __init__(self):
+        # Define pattern matchers for each statement type
+        self.patterns = {
+            StatementType.INCOME: [
+                (r'(?i)statement.*of.*(?:operation|income|earning)s?(?!\s+and\s+comprehensive)', 3),
+                # High confidence direct match
+                (r'(?i)(?:operation|income|earning)s?\s+statement', 2),  # Alternative format
+                (r'(?i)profit.*loss', 1),  # P&L reference
+            ],
+            StatementType.BALANCE: [
+                (r'(?i)balance\s*sheet', 3),  # Very consistent naming
+                (r'(?i)statement.*of.*financial\s+position', 2),  # Alternative format
+            ],
+            StatementType.CASH_FLOW: [
+                (r'(?i)statement.*of.*cash\s*flows?', 3),  # Primary pattern
+                (r'(?i)cash\s*flows?\s*statement', 2),  # Alternative format
+            ],
+            StatementType.COMPREHENSIVE_INCOME: [
+                (r'(?i)statement.*of.*comprehensive\s*(?:income|loss)', 3),  # Primary pattern
+                (r'(?i)comprehensive\s*(?:income|loss)\s*statement', 2),  # Alternative format
+            ],
+            StatementType.EQUITY: [
+                (r'(?i)statement.*of.*(?:stockholders|shareholders|owners)[\'\s]*equity', 3),  # Primary pattern
+                (r'(?i)statement.*of.*changes\s+in\s+(?:stockholders|shareholders|owners)[\'\s]*equity', 3),
+                # With "changes in"
+                (r'(?i)statement.*of.*equity', 2),  # Generic equity
+            ]
+        }
+
+        # Define combined statement patterns
+        self.combined_patterns = [
+            (r'(?i)statement.*of.*operations?\s+and\s+comprehensive\s*(?:income|loss)',
+             {StatementType.INCOME, StatementType.COMPREHENSIVE_INCOME}),
+        ]
+
+    def normalize_statement(self, statement: str) -> str:
+        """Normalize statement name by removing common variations."""
+        statement = statement.strip().upper()
+        # Remove common prefixes if they exist
+        prefixes = ['CONSOLIDATED', 'COMBINED']
+        for prefix in prefixes:
+            if statement.startswith(prefix):
+                statement = statement[len(prefix):].strip()
+        return statement
+
+    def match_statement(self, statement: str) -> Dict[StatementType, float]:
+        """
+        Match a statement name to possible statement types with confidence scores.
+        Returns a dictionary of {StatementType: confidence_score}
+        """
+        normalized = self.normalize_statement(statement)
+        scores: Dict[StatementType, float] = {}
+
+        # First check for combined statements
+        for pattern, types in self.combined_patterns:
+            if re.search(pattern, normalized):
+                for stmt_type in types:
+                    scores[stmt_type] = 1.0
+                return scores
+
+        # Then check individual patterns
+        for stmt_type, patterns in self.patterns.items():
+            max_score = 0
+            for pattern, weight in patterns:
+                if re.search(pattern, normalized):
+                    max_score = max(max_score, weight / 3.0)  # Normalize to 0-1 range
+            if max_score > 0:
+                scores[stmt_type] = max_score
+
+        return scores
+
+    def classify_statement(self, statement: str, threshold: float = 0.5) -> Set[StatementType]:
+        """
+        Classify a statement into one or more statement types.
+        Returns a set of StatementType enums.
+        """
+        scores = self.match_statement(statement)
+        return {stmt_type for stmt_type, score in scores.items() if score >= threshold}
+
+    def get_best_matches(self, statements: List[str]) -> Dict[StatementType, str]:
+        """
+        Given a list of statement names, returns the best matching statement
+        for each statement type.
+        """
+        result: Dict[StatementType, Tuple[str, float]] = {}
+
+        for statement in statements:
+            scores = self.match_statement(statement)
+            for stmt_type, score in scores.items():
+                if (stmt_type not in result or
+                        score > result[stmt_type][1]):
+                    result[stmt_type] = (statement, score)
+
+        return {stmt_type: stmt for stmt_type, (stmt, _) in result.items()}
+
+
+class Statements:
+    def __init__(self, statement_reports:Reports):
+        self._reports = statement_reports
+        self.statements = [report.short_name for report in self._reports]
+        self.mapper = StatementMapper()
+        self._matches: Dict[StatementType, Tuple[str, float]] = {}
+        self._initialize_matches()
+
+    def _initialize_matches(self) -> None:
+        """Initialize best matches for each statement type."""
+        for statement in self.statements:
+            scores = self.mapper.match_statement(statement)
+            for stmt_type, score in scores.items():
+                if (stmt_type not in self._matches or
+                    score > self._matches[stmt_type][1]):
+                    self._matches[stmt_type] = (statement, score)
+
+    def _get_statement(self, stmt_type: StatementType, threshold: float = 0.5) -> Optional[Report]:
+        """Helper method to get a statement of a specific type."""
+        if stmt_type in self._matches:
+            statement, score = self._matches[stmt_type]
+            if score >= threshold:
+                return self._reports.get_by_short_name(statement)
+        return None
+
+    @property
+    def balance_sheet(self) -> Optional[Report]:
+        """Returns the detected balance sheet statement."""
+        return self._get_statement(StatementType.BALANCE)
+
+    @property
+    def income_statement(self) -> Optional[Report]:
+        """Returns the detected income statement."""
+        return self._get_statement(StatementType.INCOME)
+
+    @property
+    def cash_flow_statement(self) -> Optional[Report]:
+        """Returns the detected cash flow statement."""
+        return self._get_statement(StatementType.CASH_FLOW)
+
+    @property
+    def comprehensive_income_statement(self) -> Optional[Report]:
+        """Returns the detected comprehensive income statement."""
+        return self._get_statement(StatementType.COMPREHENSIVE_INCOME)
+
+    @property
+    def equity_statement(self) -> Optional[Report]:
+        """Returns the detected equity statement."""
+        return self._get_statement(StatementType.EQUITY)
+
+    @property
+    def detected_statements(self) -> Dict[StatementType, str]:
+        """Returns all detected statements with scores above threshold."""
+        return {
+            stmt_type: stmt for stmt_type, (stmt, score)
+            in self._matches.items()
+            if score >= 0.5
+        }
