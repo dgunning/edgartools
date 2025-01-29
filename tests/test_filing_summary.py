@@ -79,3 +79,8 @@ def test_summary_tables(aapl_summary):
     tables = aapl_summary.tables
     assert(tables)
     print(tables)
+
+def test_filing_summary_repr(aapl_summary):
+    result = repr(aapl_summary)
+    print()
+    print(result)

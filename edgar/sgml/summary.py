@@ -8,6 +8,7 @@ from edgar.files.html import Document
 from rich.console import Group
 from rich.table import Table
 from rich.panel import Panel
+from rich.text import Text
 from rich import box
 from edgar.richtools import print_rich
 import pyarrow as pa
@@ -24,12 +25,14 @@ class Reports:
     def __init__(self,
                  data:pa.Table,
                  filing_summary: Optional['FilingSummary'] = None,
-                 original_state: Optional[PagingState] = None):
+                 original_state: Optional[PagingState] = None,
+                 title: Optional[str] = "Reports"):
         self.data:pa.Table = data
         self.data_pager = DataPager(data)
         self._original_state = original_state or PagingState(0, len(self.data))
         self.n = 0
         self._filing_summary = filing_summary
+        self.title = title
 
     def __len__(self):
         return len(self.data)
@@ -124,7 +127,7 @@ class Reports:
         Get a single report by category
         """
         data = self.data.filter(pc.equal(self.data['MenuCategory'], category))
-        return Reports(data, filing_summary=self._filing_summary)
+        return Reports(data, filing_summary=self._filing_summary, title=category)
 
     def get_by_filename(self, file_name: str):
         """
@@ -163,39 +166,32 @@ class Reports:
 
     def __rich__(self):
         table = Table(
-            title="Reports",
             show_header=True,
             header_style="bold magenta",
             show_lines=True,
-            box=box.SIMPLE
+            box=box.SIMPLE,
+            border_style="bold grey54",
+            title=self.title,
+            row_styles=["", "bold"]
         )
-        table.add_column("#", justify="left")
-        table.add_column("Short Name", style="dim", width=40)
-        table.add_column("Category", justify="left")
-        table.add_column("File Name", justify="left")
-
-        # Get current page from data pager
-        current_page = self.data_pager.current()
+        table.add_column("#", style="dim", justify="left")
+        table.add_column("Report", style="bold", width=38)
+        table.add_column("Category", width=10)
+        table.add_column("File", justify="left")
 
         # Iterate through rows in current page
-        for i in range(len(current_page)):
-            position = current_page['Position'][i].as_py()
+        for i in range(len(self)):
+            position = self.data['Position'][i].as_py()
 
             row = [
                 str(position) if position else "-",
-                current_page['ShortName'][i].as_py(),
-                current_page['MenuCategory'][i].as_py() or "",
-                current_page['HtmlFileName'][i].as_py() or ""
+                self.data['ShortName'][i].as_py(),
+                self.data['MenuCategory'][i].as_py() or "",
+                self.data['HtmlFileName'][i].as_py() or ""
             ]
             table.add_row(*row)
 
-        elements=[table]
-
-        return Panel(
-            Group(*elements),
-            title="Reports",
-            border_style="bold grey54"
-        )
+        return table
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -237,10 +233,21 @@ class Report:
 
     def view(self):
         document = Document.parse(self.content)
-        print_rich(document)
+        table = document.tables[0]
+        print_rich(table.render(240))
 
     def __str__(self):
         return f"Report(short_name={self.short_name}, category={self.menu_category}, file_name={self.html_file_name})"
+
+    def __rich__(self):
+        return Panel(
+            Text(f"Report: {self.long_name}"),
+            title=self.short_name,
+            subtitle=self.menu_category
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 @dataclass
 class File:
@@ -403,6 +410,18 @@ class FilingSummary:
 
     def __str__(self):
         return f"FilingSummary(report_format={self.report_format})"
+
+
+    def __rich__(self):
+        renderables = [self.reports]
+        return Panel(
+            Group(*renderables),
+            box=box.ROUNDED,
+            title="Filing Summary"
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 
 class StatementType(Enum):
@@ -568,3 +587,12 @@ class Statements:
             in self._matches.items()
             if score >= 0.5
         }
+
+    def __rich__(self):
+        return Panel(
+            self._reports,
+            title="Statements",
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
