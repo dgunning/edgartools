@@ -266,3 +266,10 @@ def test_get_filing_summary():
     sgml: FilingSGML = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
     summary = sgml.filing_summary
     assert summary
+
+def test_unusual_sgml_format():
+    filing = Filing(form='NPORT-P', filing_date='2024-08-14', company='RMB INVESTORS TRUST', cik=30126, accession_no='0001145549-24-048310')
+    sgml = filing.sgml()
+    assert sgml
+    sgml = FilingSGML.from_source(filing.text_url)
+    assert sgml

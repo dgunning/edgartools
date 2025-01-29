@@ -19,6 +19,7 @@ def sample_and_test_filings(years, sample_size):
             filing.markdown()
             filing.obj()
             filing.xbrl()
+            filing.sgml().filing_summary
             print(filing.header)
         except Exception as e:
             print(f"Failed to get text for {filing}")
