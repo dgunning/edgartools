@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.1] - 2025-01-29
+
+### Added
+- Improved rich styling of attachments
+- Implement parsing of FilingSummary
+- Implement getting content of individual SGML reports
+- Implement viewing individual attachments in the SGML report e.g. balance sheet, income statement, etc.
+
+### Changed
+- `EDGAR_USE_LOCAL_DATA` now accepts more boolean values `'y', 'yes', 't', 'true', 'on', '1'` or `'n', 'no', 'f', 'false', 'off', '0'` to enable or disable local storage. This is to make it easier to set the environment variable in different environments.
+
 ## [3.10.0] - 2025-01-26
 
 ### Changed
