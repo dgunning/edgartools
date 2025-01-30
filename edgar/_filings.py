@@ -1,4 +1,5 @@
 import itertools
+import json
 import pickle
 import re
 import webbrowser
@@ -13,13 +14,11 @@ from typing import Tuple, List, Dict, Union, Optional, Any, cast
 
 import httpx
 import numpy as np
-import json
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as pa_csv
 import pyarrow.parquet as pq
-
 from bs4 import BeautifulSoup
 from fastcore.parallel import parallel
 from rich import box
@@ -55,22 +54,21 @@ from edgar.core import (log, display_size, sec_edgar,
                         DataPager,
                         PagingState)
 from edgar.files.html import Document
-
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
-from edgar.sgml import FilingSGML
-from edgar.sgml.header import FilingHeader
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
-from edgar.richtools import repr_rich, rich_to_text, print_rich
+from edgar.reference.tickers import find_ticker
+from edgar.richtools import repr_rich, print_rich
 from edgar.search import BM25Search, RegexSearch
+from edgar.sgml import FilingSGML
+from edgar.sgml.header import FilingHeader
+from edgar.storage import local_filing_path, is_using_local_storage
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
-from edgar.storage import local_filing_path, is_using_local_storage
-from edgar.reference.tickers import find_ticker
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -1300,7 +1298,7 @@ class Filing:
             if has_html_content(html):
                 return html
             # Handle naked content without HTML tags
-            if not "</html>" in html[-100:].lower():
+            if "</html>" not in html[-100:].lower():
                 return f"<html><body><div>{html}</div></body></html>"
             return None
         # If the html document is not in the SGML the we have to go to the homepage
@@ -1327,8 +1325,8 @@ class Filing:
             return repr_rich(document, width=240, force_terminal=False)
         else:
             text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
-            if len(text_extract_attachments) > 0 and text_extract_attachments[0] is not None:
-                text_extract_attachment = text_extract_attachments[0]
+            if len(text_extract_attachments) > 0 and text_extract_attachments.get_by_index(0) is not None:
+                text_extract_attachment = text_extract_attachments.get_by_index(0)
                 return text_extract_attachment.content
             else:
                 return self._download_filing_text()
