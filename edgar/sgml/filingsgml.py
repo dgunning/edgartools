@@ -1,16 +1,17 @@
 import re
-from pathlib import Path
-from typing import List, Union, Optional
-from typing import Iterator, Dict
+import zipfile
+from collections import defaultdict
 from functools import cached_property
+from pathlib import Path
+from typing import Iterator, Dict
+from typing import List, Union, Optional
+
+from edgar.attachments import Attachments, Attachment
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.header import FilingHeader
 from edgar.sgml.parsers import SGMLParser, SGMLFormatType, SGMLDocument
 from edgar.sgml.summary import FilingSummary
 from edgar.sgml.tools import is_xml
-from collections import defaultdict
-import zipfile
-from edgar.attachments import Attachments, Attachment
 
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
@@ -148,7 +149,7 @@ class FilingSGML:
     Main class that parses and provides access to both the header and documents
     from an SGML filing.
     """
-    __slots__ = ('header', 'documents', '__dict__')  # Use slots for memory efficiency
+    __slots__ = ('header', '_documents_by_sequence', '__dict__')  # Use slots for memory efficiency
 
     def __init__(self, header: FilingHeader, documents: defaultdict[str, List[SGMLDocument]]):
         """
@@ -159,10 +160,31 @@ class FilingSGML:
             documents (Dict[str, SGMLDocument]): Dictionary of parsed documents keyed by sequence
         """
         self.header:FilingHeader = header
-        self.documents:defaultdict[str, List[SGMLDocument]] = documents
+        self._documents_by_sequence:defaultdict[str, List[SGMLDocument]] = documents
         self._documents_by_name:Dict[str, SGMLDocument] = {
             doc.filename: doc for doc_lst in documents.values() for doc in doc_lst
         }
+
+    @property
+    def accession_number(self):
+        return self.header.accession_number
+
+    @property
+    def form(self):
+        return self.header.form
+
+    @property
+    def filing_date(self):
+        return self.header.filing_date
+
+    @property
+    def date_as_of_change(self):
+        return self.header.date_as_of_change
+
+    @property
+    def effective_date(self):
+        return self.header.filing_metadata.get('EFFECTIVE DATE')
+
 
     def html(self):
         html_document = self.attachments.primary_html_document
@@ -195,7 +217,11 @@ class FilingSGML:
         """
         is_datafile = False
         documents, datafiles, primary_files = [], [], []
-        for sequence, document_lst in self.documents.items():
+
+        # Get the filing summary
+        filing_summary = self.filing_summary
+
+        for sequence, document_lst in self._documents_by_sequence.items():
             for document in document_lst:
                 attachment = Attachment(
                     sequence_number=sequence,
@@ -207,6 +233,12 @@ class FilingSGML:
                     size=None,
                     sgml_document=document
                 )
+                # Add from the filing summary if available
+                if filing_summary:
+                    report = filing_summary.get_reports_by_filename(document.filename)
+                    if report:
+                        attachment.purpose = report.short_name
+                # Check if the document is a primary document
                 if sequence == "1":
                     primary_files.append(attachment)
                     documents.append(attachment)
@@ -222,9 +254,8 @@ class FilingSGML:
 
     @cached_property
     def filing_summary(self):
-        summary_attachments = self.attachments.query("document=='FilingSummary.xml'")
-        if len(summary_attachments) ==1:
-            summary_attachment = summary_attachments[0]
+        summary_attachment = self._documents_by_name.get("FilingSummary.xml")
+        if summary_attachment:
             filing_summary = FilingSummary.parse(summary_attachment.content)
             filing_summary.reports._filing_summary = filing_summary
             filing_summary._filing_sgml = self
@@ -328,9 +359,16 @@ class FilingSGML:
         Get a document by its sequence number.
         Direct dictionary lookup for O(1) performance.
         """
-        results = self.documents.get(sequence)
+        results = self._documents_by_sequence.get(sequence)
         if results and len(results) > 0:
             return results[0]
+
+    def get_document_by_name(self, filename: str) -> Optional[SGMLDocument]:
+        """
+        Get a document by its filename.
+        Direct dictionary lookup for O(1) performance.
+        """
+        return self._documents_by_name.get(filename)
 
     @classmethod
     def from_filing(cls, filing: 'Filing') -> 'FilingSGML':
@@ -339,28 +377,26 @@ class FilingSGML:
 
     def __str__(self) -> str:
         """String representation with basic filing info."""
-        doc_count = len(self.documents)
+        doc_count = len(self._documents_by_name)
         return f"FilingSGML(accession={self.header.accession_number}, document_count={doc_count})"
 
     def __repr__(self) -> str:
-        """Detailed representation for debugging."""
-        docs = [f"{k}:{v.type}" for k, v in self.documents.items()]
-        return f"FilingSGML(header={self.header!r}, documents={docs!r})"
+        return str(self)
 
     def get_document_sequences(self) -> List[str]:
         """
         Get all document sequences.
         Using list() is more efficient than sorted() when order doesn't matter.
         """
-        return list(self.documents.keys())
+        return list(self._documents_by_sequence.keys())
 
     def get_all_document_types(self) -> List[str]:
         """
         Get unique document types in filing.
         Using set for deduplication.
         """
-        return list({doc.type for doc in self.documents.values()})
+        return list({doc.type for doc in self._documents_by_sequence.values()})
 
     def get_document_count(self) -> int:
         """Get total number of documents."""
-        return len(self.documents)
+        return len(self._documents_by_sequence)

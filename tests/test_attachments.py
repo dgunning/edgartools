@@ -21,6 +21,7 @@ def test_attachments_query():
     powerpoints = attachments.query("document_type=='POWERPOINT'")
     assert len(powerpoints) == 0
     print()
+    print(attachments)
 
 
 

@@ -1,12 +1,12 @@
-from edgar.sgml import iter_documents, list_documents, FilingSGML, FilingHeader
-from edgar.sgml.parsers import SGMLDocument, SGMLParser, SGMLFormatType
-from edgar.sgml.tools import get_content_between_tags
-from pathlib import Path
 import tempfile
 import zipfile
-from edgar import Filing, find
-from edgar.sgml.tools import decode_uu
+from pathlib import Path
+
 from edgar import *
+from edgar.sgml import iter_documents, list_documents, FilingSGML
+from edgar.sgml.parsers import SGMLDocument, SGMLParser, SGMLFormatType
+from edgar.sgml.tools import get_content_between_tags
+
 
 def test_parse_old_full_text():
     source = Path("data/sgml/0001011438-98-000429.txt")
@@ -62,7 +62,7 @@ def test_sgm_sequence_numbers_match_attachment_sequence_numbers():
     filing = Filing(form='3', filing_date='2018-12-21', company='Aptose Biosciences Inc.', cik=882361, accession_no='0001567619-18-008556')
     attachments = filing.attachments
     filing_sgml = FilingSGML.from_filing(filing)
-    sgml_sequences = set(filing_sgml.documents.keys())
+    sgml_sequences = set(filing_sgml._documents_by_sequence.keys())
     attachment_sequences = {attachment.sequence_number for attachment in attachments if attachment.sequence_number.isdigit()}
     assert sgml_sequences & attachment_sequences
 
@@ -127,8 +127,8 @@ def test_sgml_from_submission_file():
     assert not header.acceptance_datetime
 
     # Documents
-    assert filing_sgml.documents
-    assert len(filing_sgml.documents) == 1
+    assert filing_sgml._documents_by_sequence
+    assert len(filing_sgml._documents_by_sequence) == 1
     document:SGMLDocument = filing_sgml.get_document_by_sequence("1")
     assert document
     assert document.filename == "primary_doc.xml"
@@ -273,3 +273,8 @@ def test_unusual_sgml_format():
     assert sgml
     sgml = FilingSGML.from_source(filing.text_url)
     assert sgml
+
+def test_filing_sgml_repr():
+    sgml: FilingSGML = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
+    _repr = repr(sgml)
+    assert _repr
