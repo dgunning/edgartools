@@ -18,7 +18,7 @@ from typing import List, Dict, Set, Tuple
 from enum import Enum
 
 
-__all__ = ['Report', 'File', 'FilingSummary']
+__all__ = ['Report', 'Reports', 'File', 'FilingSummary']
 
 class Reports:
 
@@ -398,6 +398,9 @@ class FilingSummary:
 
     def get_reports_by_category(self, category: str) -> Reports:
         return self.reports.get_by_category(category)
+
+    def get_reports_by_filename(self, file_name: str) -> Optional[Report]:
+        return self.reports.get_by_filename(file_name)
 
     @property
     def statements(self):
