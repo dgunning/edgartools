@@ -119,6 +119,14 @@ def get_file_icon(file_type: str, sequence: str = None, filename: str = None) ->
     if sequence == "1":
         return "📜"  # Scroll emoji for main document
 
+    # Check if it's an XBRL exhibit (EX-101.*)
+    if file_type.startswith("EX-101."):
+        return FILE_TYPE_SYMBOLS.get(file_type, "📄")
+
+    # Check if it's a regular exhibit (starts with EX-)
+    if file_type.startswith("EX-"):
+        return "📋 ✍️"  # Clipboard + writing hand for exhibits
+
     # Check for file extension first if filename is provided
     if filename:
         ext = get_extension(filename)
@@ -533,7 +541,7 @@ class Attachments:
         # Document files
         document_table = Table(Column('Seq', header_style="dim"),
                                         Column('Document', header_style="dim"),
-                                        Column('Description', header_style="dim", min_width=20, width=60),
+                                        Column('Description', header_style="dim", min_width=60),
                                         Column('Type', header_style="dim"),
                                title='Attachments',
                                row_styles=["", "bold"],
