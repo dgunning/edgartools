@@ -14,7 +14,7 @@ from typing import List, Optional, Tuple
 from typing import Union, Dict
 
 from bs4 import BeautifulSoup
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
@@ -31,7 +31,7 @@ from edgar.httpclient import async_http_client
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
 
-__all__ = ['Attachment', 'Attachments', 'FilingHomepage', 'FilerInfo', 'AttachmentServer', 'sec_document_url']
+__all__ = ['Attachment', 'Attachments', 'FilingHomepage', 'FilerInfo', 'AttachmentServer', 'sec_document_url', 'get_document_type']
 
 
 def sec_document_url(attachment_url: str) -> str:
@@ -78,6 +78,9 @@ FILE_TYPE_SYMBOLS: Dict[str, str] = {
     "JS": "⚙️",  # JavaScript files (for corrected Show.js)
     ".css": "🎨",  # CSS files by extension
     ".js": "⚙️",  # JavaScript files by extension
+    "PDF": "📕",  # PDF files by type
+    ".pdf": "📕",  # PDF files by extension
+    "INFORMATION TABLE": "🔢",  # Text files
 }
 
 
@@ -86,6 +89,18 @@ def get_extension(filename: str) -> str:
     if '.' in filename:
         return filename[filename.rindex('.'):]
     return ''
+
+def get_document_type(filename: str, declared_document_type:str) -> str:
+    """
+    Sometimes the SEC gets the document type wrong. This function uses the extension to determine the document type
+    """
+    if declared_document_type.upper() in ["XML", "HTML", "PDF", "HTM",  "JS", "CSS", "ZIP", "XLS", "XSLX", "JSON"]:
+        extension = get_extension(filename)
+        document_type = extension[1:].upper()
+        if document_type in ["HTM", "HTML"]:
+            return "HTML"
+        return document_type
+    return declared_document_type
 
 def get_file_icon(file_type: str, sequence: str = None, filename: str = None) -> str:
     """
@@ -244,6 +259,17 @@ class Attachment:
         else:
             print(self)
 
+    def text(self):
+        if self.is_text():
+            content = self.content
+            if self.is_html() or has_html_content(content):
+                from edgar import Document
+                document = Document.parse(content)
+                return repr_rich(document, width=240, force_terminal=False)
+            else:
+                return content
+        return None
+
     def __rich__(self):
         table = Table("Document", "Description", "Type", "Size", box=box.ROUNDED)
         table.add_row(self.document, self.description, self.document_type,
@@ -272,11 +298,15 @@ class Attachments:
         self._attachments = document_files + (data_files or [])
         self.primary_documents = primary_documents
         self.sgml = sgml
+        self.n = 0
 
 
     def __getitem__(self, item: Union[int, str]):
-        if isinstance(item, int):
-            return self._attachments[item]
+        """
+        Get the attachment by sequence number as set in the SEC filing SGML file
+        """
+        if isinstance(item, int) or item.isdigit():
+            return self.get_by_sequence(item)
         elif isinstance(item, str):
             for doc in self._attachments:
                 if doc.document == item:
@@ -284,10 +314,20 @@ class Attachments:
         raise KeyError(f"Document not found: {item}")
 
     def get_by_sequence(self, sequence: Union[str, int]):
+        """
+        Get the attachment by sequence number starting at 1
+        The sequence number is the exact sequence number in the filing
+        """
         for doc in self._attachments:
             if doc.sequence_number == str(sequence):
                 return doc
         raise KeyError(f"Document not found: {sequence}")
+
+    def get_by_index(self, index: int):
+        """
+        Get the attachment by index starting at 1
+        """
+        return self._attachments[index]
 
     @property
     def primary_html_document(self) -> Optional[Attachment]:
@@ -491,7 +531,7 @@ class Attachments:
     def __rich__(self):
 
         # Document files
-        document_table = Table(Column('Seq', style="dim", header_style="dim"),
+        document_table = Table(Column('Seq', header_style="dim"),
                                         Column('Document', header_style="dim"),
                                         Column('Description', header_style="dim", min_width=20, width=60),
                                         Column('Type', header_style="dim"),
@@ -507,8 +547,9 @@ class Attachments:
             icon = get_file_icon(file_type=attachment.document_type,
                                  sequence= attachment.sequence_number,
                                  filename=attachment.document)
+            sequence_number = f"{attachment.sequence_number}" if attachment.sequence_number == "1" else attachment.sequence_number
             description = attachment.purpose or attachment.description
-            document_table.add_row(str(attachment.sequence_number),
+            document_table.add_row(Text(sequence_number, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else sequence_number,
                                    Text(attachment.document, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else attachment.document,
                                    Text(description, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else description,
                                    Text.assemble((icon, ""), " ", (attachment.document_type, "bold deep_sky_blue1" if attachment.sequence_number == "1" else "")),)

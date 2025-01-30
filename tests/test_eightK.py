@@ -143,14 +143,14 @@ def test_get_exhibit_content_for_new_filing():
     filing = Filing(form='8-K', filing_date='2024-12-27', company='1895 Bancorp of Wisconsin, Inc. /MD/', cik=1847360,
                     accession_no='0000943374-24-000509')
     eightk = filing.obj()
-    exhibit = filing.exhibits[0]
+    exhibit = filing.exhibits.get_by_index(0)
     content = eightk._get_exhibit_content(exhibit)
     assert content
 
 def test_get_exhibit_content_for_old_filing():
     f = Filing(form='8-K', filing_date='1998-01-05', company='YAHOO INC', cik=1011006, accession_no='0001047469-98-000122')
     eightk = f.obj()
-    exhibit = f.exhibits[0]
+    exhibit = f.exhibits.get_by_index(0)
     content = eightk._get_exhibit_content(exhibit)
     assert content
     text = eightk.text()

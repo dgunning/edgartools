@@ -1,22 +1,23 @@
+import re
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Union
-from bs4 import BeautifulSoup
-from edgar.xmltools import child_text
-from edgar.core import strtobool, DataPager, PagingState, log
-from edgar.richtools import repr_rich
-from edgar.files.html import Document
-from rich.console import Group
-from rich.table import Table
-from rich.panel import Panel
-from rich.text import Text
-from rich import box
-from edgar.richtools import print_rich
+from enum import Enum
+from typing import List, Dict, Set, Tuple
+from typing import Optional, Union
+
 import pyarrow as pa
 import pyarrow.compute as pc
-import re
-from typing import List, Dict, Set, Tuple
-from enum import Enum
+from bs4 import BeautifulSoup
+from rich import box
+from rich.console import Group
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
+from edgar.core import strtobool, DataPager, PagingState, log
+from edgar.files.html import Document
+from edgar.richtools import print_rich
+from edgar.richtools import repr_rich
+from edgar.xmltools import child_text
 
 __all__ = ['Report', 'Reports', 'File', 'FilingSummary']
 

@@ -591,7 +591,7 @@ def test_multi_financials_values():
     filings = company.get_filings(form="10-K").latest(3)
     multi_financials = MultiFinancials(filings)
     balance_sheet = multi_financials.get_balance_sheet()
-    assert balance_sheet.data.columns.tolist() == ['2023', '2022', '2021', '2020', 'concept',
+    assert balance_sheet.data.columns.tolist() == ['2024', '2023', '2022', '2021', '2020', 'concept',
                                                    'level',
                                                    'decimals',
                                                    'style'
@@ -600,19 +600,19 @@ def test_multi_financials_values():
     assert balance_sheet.data.concept.nunique() == len(balance_sheet.data)
     # Test concept values
     assert balance_sheet.get_concept('us-gaap_CashAndCashEquivalentsAtCarryingValue').value == {
-        '2023': '16398000000', '2022': '16253000000', '2021': '17576000000', '2020': '19384000000'}
+        '2024': '16139000000', '2023': '16398000000', '2022': '16253000000', '2021': '17576000000', '2020': '19384000000'}
 
     income_statement = multi_financials.get_income_statement()
-    assert income_statement.data.columns.tolist() == ['2023', '2022', '2021', '2020', '2019', 'concept',
+    assert income_statement.data.columns.tolist() == ['2024', '2023', '2022', '2021', '2020',  'concept',
                                                       'segment', 'level', 'decimals', 'style']
     # Get the concept for a multifinancial
     netincome = income_statement.get_concept('us-gaap_NetIncomeLoss')
     assert income_statement.data.concept.nunique() == len(income_statement.data)
-    assert netincome.value == {'2023': '14997000000',
+    assert netincome.value == {'2024': '7091000000',
+                               '2023': '14997000000',
                                '2022': '12556000000',
                                '2021': '5519000000',
-                               '2020': '721000000',
-                               '2019': '-862000000'}
+                               '2020': '721000000',}
 
     # Standardized balance sheet statement
     balance_sheet = multi_financials.get_balance_sheet(standard=True)

@@ -569,7 +569,7 @@ def test_document_get_text():
     """Render text from a document"""
     filing = Filing(company='Paramount Global', cik=813828, form='8-K', filing_date='2024-04-29',
                     accession_no='0000813828-24-000018')
-    document:HtmlDocument = HtmlDocument.from_html(filing.attachments[1].download())
+    document:HtmlDocument = HtmlDocument.from_html(filing.attachments.get_by_index(1).download())
     text = document.text
     assert "A Quiet Place, Mission Impossible, Scream, Teenage Mutant Ninja Turtles and PAW Patrol" in text
     print(text)
@@ -580,7 +580,7 @@ def test_document_get_markdown():
     filing = Filing(company='Paramount Global', cik=813828, form='8-K', filing_date='2024-04-29',
                     accession_no='0000813828-24-000018')
     """ """
-    document:HtmlDocument = HtmlDocument.from_html(filing.attachments[1].download())
+    document:HtmlDocument = HtmlDocument.from_html(filing.attachments.get_by_index(1).download())
     md = document.markdown
     assert md
     assert "A Quiet Place, Mission Impossible, Scream, Teenage Mutant Ninja Turtles and PAW Patrol" in md

@@ -56,7 +56,7 @@ def test_attachment_is_empty():
                     accession_no='0000912057-00-023442')
     attachments = filing.attachments
     print(attachments)
-    attachment: Attachment = attachments[0]
+    attachment: Attachment = attachments[1]
     assert attachment.document == ''
     assert attachment.empty
 
@@ -138,8 +138,8 @@ def test_list_exhibits():
     exhibits = attachments.exhibits
     print(exhibits)
     assert len(exhibits) == 2
-    assert exhibits[0].document_type == '8-K'
-    assert exhibits[1].document_type == 'EX-99.1'
+    assert exhibits[1].document_type == '8-K'
+    assert exhibits[2].document_type == 'EX-99.1'
 
 
 def test_list_graphics():
@@ -147,8 +147,8 @@ def test_list_graphics():
                     accession_no='0001628280-24-012963')
     graphics = filing.attachments.graphics
     assert len(graphics) == 2
-    assert graphics[0].document_type == 'GRAPHIC'
-    assert graphics[1].document_type == 'GRAPHIC'
+    assert next(graphics).document_type == 'GRAPHIC'
+    assert next(graphics).document_type == 'GRAPHIC'
 
 
 def test_attachments():
@@ -157,7 +157,7 @@ def test_attachments():
     attachments = filing.attachments
     assert len(attachments) == 13
 
-    attachment = attachments[2]
+    attachment = attachments[3]
     assert attachment
     assert attachment.document == 'blk25-20230224_def.xml'
     assert attachment.url == 'https://www.sec.gov/<SGML FILE>/blk25-20230224_def.xml'
@@ -173,7 +173,7 @@ def test_attachments():
     # Test the filing attachments
     assert filing.attachments
     assert len(filing.attachments) == 13
-    assert filing.attachments[4].description == 'XBRL TAXONOMY EXTENSION PRESENTATION LINKBASE'
+    assert filing.attachments[5].description == 'XBRL TAXONOMY EXTENSION PRESENTATION LINKBASE'
 
     # Get the filing using the document name
     assert filing.attachments["blk25-20230224.xsd"].description == "XBRL TAXONOMY EXTENSION SCHEMA"
@@ -203,6 +203,8 @@ def test_filings_with_no_content_in_attachments():
     attachments = filing.attachments
     print()
     print(attachments)
-    attachment = attachments[0]
+    attachment = attachments[1]
     assert attachment.empty
     print(attachment.url)
+
+

@@ -12,11 +12,9 @@ from rich.panel import Panel
 from rich.table import Table, Column
 
 from edgar._party import Address
+from edgar.reference import cusip_ticker_mapping
 from edgar.richtools import repr_rich
 from edgar.xmltools import find_element, child_text
-from edgar.core import log
-from edgar.reference import cusip_ticker_mapping
-from edgar.sgml import iter_documents
 
 __all__ = [
     'ThirteenF',
@@ -125,7 +123,7 @@ class ThirteenF:
         if self.has_infotable():
             query = "document_type=='INFORMATION TABLE' and document.lower().endswith('.xml')"
             attachments = self.filing.attachments.query(query)
-            return attachments[0].download()
+            return attachments.get_by_index(0).download()
 
     @property
     @lru_cache(maxsize=1)

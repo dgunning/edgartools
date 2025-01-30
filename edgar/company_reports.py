@@ -736,7 +736,7 @@ class PressReleases:
         return len(self.attachments)
 
     def __getitem__(self, item):
-        attachment = self.attachments[item]
+        attachment = self.attachments.get_by_index(item)
         if attachment:
             return PressRelease(attachment)
 

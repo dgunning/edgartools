@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Iterator, Dict
 from typing import List, Union, Optional
 
-from edgar.attachments import Attachments, Attachment
+from edgar.attachments import Attachments, Attachment, get_document_type
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.header import FilingHeader
 from edgar.sgml.parsers import SGMLParser, SGMLFormatType, SGMLDocument
@@ -228,7 +228,7 @@ class FilingSGML:
                     ixbrl=False,
                     path=f"/<SGML FILE>/{document.filename}",
                     document=document.filename,
-                    document_type=document.type,
+                    document_type=get_document_type(filename=document.filename, declared_document_type=document.type),
                     description=document.description,
                     size=None,
                     sgml_document=document
