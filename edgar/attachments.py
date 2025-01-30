@@ -142,7 +142,8 @@ class Attachment:
                  path: str,
                  document_type: str,
                  size: Optional[int],
-                 sgml_document: Optional['SGMLDocument'] = None):
+                 sgml_document: Optional['SGMLDocument'] = None,
+                 purpose: Optional[str] = None):
         self.sequence_number = sequence_number
         self.description = description
         self.document = document
@@ -151,6 +152,7 @@ class Attachment:
         self.document_type = document_type
         self.size = size
         self.sgml_document:Optional['SGMLDocument'] = sgml_document
+        self.purpose = purpose
 
     @property
     def content(self):
@@ -491,10 +493,10 @@ class Attachments:
         # Document files
         document_table = Table(Column('Seq', style="dim", header_style="dim"),
                                         Column('Document', header_style="dim"),
-                                        Column('Description', header_style="dim"),
+                                        Column('Description', header_style="dim", min_width=20, width=60),
                                         Column('Type', header_style="dim"),
                                title='Attachments',
-                               #row_styles=["", "dim"],
+                               row_styles=["", "bold"],
                                box=box.SIMPLE)
         all_attachments = sorted(self.documents + (self.data_files or []), key=sequence_sort_key)
 
@@ -505,9 +507,10 @@ class Attachments:
             icon = get_file_icon(file_type=attachment.document_type,
                                  sequence= attachment.sequence_number,
                                  filename=attachment.document)
+            description = attachment.purpose or attachment.description
             document_table.add_row(str(attachment.sequence_number),
                                    Text(attachment.document, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else attachment.document,
-                                   Text(attachment.description, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else attachment.description,
+                                   Text(description, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else description,
                                    Text.assemble((icon, ""), " ", (attachment.document_type, "bold deep_sky_blue1" if attachment.sequence_number == "1" else "")),)
 
 
