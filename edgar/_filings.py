@@ -1468,7 +1468,7 @@ class Filing:
             return FilingHeader.parse_from_sgml_text(sec_header_content, preprocess=True)
 
     @lru_cache(maxsize=4)
-    def sgml(self):
+    def sgml(self) -> FilingSGML:
         """
         Read the filing from the local storage path if it exists
         """
