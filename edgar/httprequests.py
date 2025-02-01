@@ -29,7 +29,7 @@ attempts = 6
 retry_timeout = 40
 wait_initial = 0.1
 max_requests_per_second = 8
-
+throttle_disabled = False
 
 class TooManyRequestsError(Exception):
     def __init__(self, url, message="Too Many Requests"):
@@ -117,6 +117,7 @@ def throttle_requests(request_rate=None, requests_per_second=None, **kwargs):
     """
     Decorator to throttle the number of requests per second.
     """
+
     if requests_per_second is not None:
         request_rate = RequestRate(max_requests=requests_per_second, time_window=1)
     elif request_rate is None:
@@ -133,10 +134,13 @@ def throttle_requests(request_rate=None, requests_per_second=None, **kwargs):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            throttler.wait_for_ticket()
-            result = func(*args, **kwargs)
-            throttler.update_metrics()
-            return result
+            if throttle_disabled:
+                return func(*args, **kwargs)
+            else:
+                throttler.wait_for_ticket()
+                result = func(*args, **kwargs)
+                throttler.update_metrics()
+                return result
 
         # Store the decorated function name
         if throttler.decorated_functions is None:
