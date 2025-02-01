@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.2] - 2025-01-30
+
+### Added
+- Add `attachments.get_by_index` to get attachments by index. Indexing starts at 0. There is also `get_by_sequence` that starts at 1
+
+### Changed
+- Improved the styling of Attachments using emoticons for different file types
+- Add descriptions of reports from the `FilingSummary.xml`
+- Add getting attachment text using `attachment.text()`
+- Getting attachments using`[]` uses `get_by_sequence` rather than `get_by_index`
+
+### Fixed
+- Fixed bug when calling `repr(FilingSGML)`
+
+
 ## [3.10.1] - 2025-01-29
 
 ### Added
