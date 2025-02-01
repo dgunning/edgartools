@@ -279,7 +279,7 @@ class InvestmentOrSecurity(BaseModel):
     desc_other_units: Optional[str]
     currency_code: Optional[str]
     value_usd: Decimal
-    pct_value: Decimal
+    pct_value: Optional[Decimal]
     payoff_profile: Optional[str]
     asset_category: Optional[str]
     issuer_category: Optional[str]
