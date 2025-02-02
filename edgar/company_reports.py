@@ -17,7 +17,7 @@ from edgar.files.html import Document
 from edgar.files.html_documents import HtmlDocument
 from edgar.files.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items
 from edgar.financials import Financials
-from edgar.richtools import repr_rich
+from edgar.richtools import repr_rich, rich_to_text
 
 __all__ = [
     'TenK',
@@ -682,14 +682,14 @@ class CurrentReport():
                 renderables.append(Panel(exhibit_content,
                                          title=title,
                                          subtitle=Text(exhibit.description, style="gray54"),
-                                         box=box.ROUNDED))
+                                         box=box.SIMPLE))
         return Group(*renderables)
 
     def text(self):
         """Get the text of the EightK filing
            This includes the text content of all the exhibits
         """
-        return repr_rich(self._content_renderables(), width=240)
+        return rich_to_text(self._content_renderables())
 
     def __rich__(self):
 
@@ -716,7 +716,8 @@ class CurrentReport():
 
         return Panel(
             Group(*renderables),
-            title=panel_title
+            title=panel_title,
+            box=box.SIMPLE
         )
 
     def __str__(self):
