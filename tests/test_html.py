@@ -374,7 +374,7 @@ def test_document_to_text():
         """
     )
     text = rich_to_text(document)
-    assert text == "Basic Document"
+    assert text == "Basic Document\n"
     print(text)
 
 def test_render_paragraph():

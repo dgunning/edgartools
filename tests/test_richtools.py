@@ -1,7 +1,9 @@
 from rich.table import Table
-from edgar.richtools import rich_to_svg
+from edgar.richtools import rich_to_svg, repr_rich, rich_to_text
 from rich.panel import Panel
 from rich.tree import Tree
+from rich.text import Text
+from rich.table import Table
 
 
 def test_rich_to_svg_table():
@@ -81,3 +83,13 @@ def test_rich_to_svg_empty_input():
     assert svg_output.rstrip().endswith('</svg>')
 
 
+def test_rich_to_text():
+    port = Text("Brugge", style="bold blue")
+    text = rich_to_text(port)
+    assert text == "Brugge\n"
+
+    table = Table("City", "State", title=Text("Cities", style="bold red"))
+    table.add_row("Brugge", "West Flanders")
+    text = rich_to_text(table)
+    print()
+    print(text)

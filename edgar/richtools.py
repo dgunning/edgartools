@@ -10,6 +10,7 @@ from io import StringIO
 import itertools
 from rich.highlighter import RegexHighlighter
 from rich.theme import Theme
+import re
 
 __all__ = [
     'repr_rich',
@@ -85,7 +86,17 @@ def df_to_rich_table(
     return rich_table
 
 
-def repr_rich(renderable, **console_args) -> str:
+def strip_ansi_text(text: str) -> str:
+    """
+    Remove ANSI escape sequences from text
+
+    :param text: Text containing ANSI escape sequences
+    :return: Clean text without ANSI formatting
+    """
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+def repr_rich(renderable, strip_ansi:bool=False, **console_args) -> str:
     """
     This renders a rich object to a string
 
@@ -102,6 +113,7 @@ def repr_rich(renderable, **console_args) -> str:
         str_output = console.file.getvalue()
 
     :param renderable: A rich renderable object
+    :param strip_ansi: Whether to strip ANSI escape sequences from the output
     :param console_args: The console arguments
     :return: A string representation of the renderable object
     """
@@ -110,42 +122,28 @@ def repr_rich(renderable, **console_args) -> str:
     with console.capture() as capture:
         console.print(renderable)
     str_output = capture.get()
+    if strip_ansi:
+        str_output = strip_ansi_text(str_output)
     return str_output
 
 
-def rich_to_text(rich_object, width=120) -> str:
+def rich_to_text(rich_object, width:int=None) -> str:
     """
     Convert a Rich renderable object to plain text while preserving layout.
 
     Args:
         rich_object: Any Rich renderable object (Panel, Table, Tree, etc.)
+        width: The width of the output in characters (default: None)
 
     Returns:
         str: Plain text representation with layout preserved
     """
-    # Create a string buffer to capture the output
-    string_buffer = StringIO()
-
-    # Create a Console that will write to our string buffer instead of stdout
-    # force_terminal=False ensures we get plain text output
-    # no_color=True removes all color codes
-    console = Console(
-        file=string_buffer,
-        force_terminal=False,
-        no_color=True,
-        width=width  # Set desired width - adjust as needed
-    )
-
-    # Render the rich object to our console
-    console.print(rich_object)
-
-    # Get the resulting string and strip any trailing whitespace
-    result = string_buffer.getvalue().rstrip()
-
-    # Clean up
-    string_buffer.close()
-
-    return result
+    if width:
+        text = repr_rich(rich_object, force_terminal=False, width=width)
+    else:
+        text = repr_rich(rich_object, force_terminal=False)
+    text = strip_ansi_text(text)
+    return text
 
 
 def rich_to_svg(rich_object, width: int = 120) -> str:
@@ -170,7 +168,6 @@ def rich_to_svg(rich_object, width: int = 120) -> str:
         >>> svg_output = rich_to_svg(table)
     """
     from rich.console import Console
-    from io import StringIO
 
     # Create a console specifically for SVG export
     console = Console(

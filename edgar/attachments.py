@@ -23,7 +23,7 @@ from rich.table import Table, Column
 from rich.text import Text
 
 
-from edgar.richtools import repr_rich, print_xml, print_rich
+from edgar.richtools import repr_rich, print_xml, print_rich, rich_to_text
 from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extensions, has_html_content
 from edgar.httprequests import get_with_retry, download_file, download_file_async
 from edgar.httpclient import async_http_client
@@ -273,7 +273,7 @@ class Attachment:
             if self.is_html() or has_html_content(content):
                 from edgar import Document
                 document = Document.parse(content)
-                return repr_rich(document, width=240, force_terminal=False)
+                return rich_to_text(document)
             else:
                 return content
         return None

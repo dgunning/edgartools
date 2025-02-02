@@ -62,7 +62,7 @@ from edgar.httprequests import download_file, download_text, download_text_betwe
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
 from edgar.reference.tickers import find_ticker
-from edgar.richtools import repr_rich, print_rich
+from edgar.richtools import repr_rich, print_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingSGML
 from edgar.sgml.header import FilingHeader
@@ -1319,7 +1319,7 @@ class Filing:
         html_content = self.html()
         if html_content and has_html_content(html_content):
             document = Document.parse(html_content)
-            return repr_rich(document, width=240, force_terminal=False)
+            return rich_to_text(document)
         else:
             text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
             if len(text_extract_attachments) > 0 and text_extract_attachments.get_by_index(0) is not None:
