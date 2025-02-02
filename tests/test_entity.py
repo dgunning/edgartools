@@ -83,7 +83,6 @@ def test_ticker_icon():
 
 def test_get_entity_by_ticker():
     # Activision was acquired by Microsoft so possibly this ticker will be removed in the future
-    assert Company("ATVI").cik == 718877
     assert Company("AAPL").cik == 320193
 
 
