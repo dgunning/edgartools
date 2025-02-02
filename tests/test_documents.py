@@ -590,13 +590,11 @@ def test_document_get_markdown():
 def test_filing_text_for_file_with_fil_extension():
     filing = Filing(form='NSAR-A', filing_date='2016-06-28',
                     company='AMERICAN FUNDS GLOBAL BALANCED FUND', cik=1505612, accession_no='0000051931-16-002553')
-    assert "American Funds Global Balanced Fund" in filing.html()
     assert "American Funds Global Balanced Fund" in filing.text()
     #assert "American Funds Global Balanced Fund" in filing.markdown()
 
     filing = Filing(form='NSAR-A', filing_date='2016-09-28', company='Investment Managers Series Trust', cik=1318342,
                     accession_no='0000926877-16-000629')
-    assert "A000000 INVESTMENT MANAGERS SERIES TRUST" in filing.html()
     assert "A000000 INVESTMENT MANAGERS SERIES TRUST" in filing.text()
 
 
@@ -615,8 +613,7 @@ def test_get_clean_html_from_unusual_filing():
     filing =  Filing(form='NSAR-B', filing_date='2016-12-29', company='Thrivent Cash Management Trust', cik=1300087,
                      accession_no='0001193125-16-805810')
     html = filing.html()
-    clean_html = get_clean_html(html)
-    assert clean_html
+    assert not html
     markdown = filing.markdown()
     assert markdown
 

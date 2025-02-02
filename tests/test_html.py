@@ -351,11 +351,8 @@ def test_document_parsed_from_plain_text_returns_plain_text():
 
 def test_document_from_filing_with_plain_text_filing_document():
     f = Filing(form='SC 13G/A', filing_date='2024-11-25', company='Bridgeline Digital, Inc.', cik=1378590, accession_no='0001968076-24-000022')
-    text = f.html()
-    document = Document.parse(text)
-    assert document
-    assert len(document) == 1
-    assert document[0].type == "text_block"
+    html = f.html()
+    assert not html
 
 def test_text_in_spans():
     html="""<p id="part_ii_or_information"><span>PART II. OTHE</span><span>R INFORMATION</span></p>"""
@@ -391,8 +388,9 @@ def test_render_paragraph():
 def test_get_text_from_filing_with_no_body_tag():
     filing = Filing(form='TA-1/A', filing_date='2024-04-17', company='PEAR TREE ADVISORS INC /TA', cik=949738, accession_no='0000949738-24-000005')
     html = filing.html()
-    document = Document.parse(html)
-    assert document
+    assert html
+    text = filing.text()
+    assert text
 
 
 def test_parse_document_within_just_paragraph_tags():
