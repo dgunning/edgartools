@@ -41,7 +41,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-LIMITER = Limiter(rate=10, units=1)
+LIMITER = Limiter(rate=10, capacity=10, units=1)
 
 def custom_key_generator(request: httpcore.Request, body: bytes | None) -> str:
     """ Generates a stable, readable key for a given request.
@@ -59,7 +59,9 @@ def custom_key_generator(request: httpcore.Request, body: bytes | None) -> str:
     url = request.url.target.decode()
 
     url_p = url.replace("/", "__")
-    return f"{host}_{url_p}"
+
+    key = f"{host}_{url_p}"
+    return key
 
 def _get_cache_controller(**kwargs):
     controller = hishel.Controller(
@@ -67,21 +69,10 @@ def _get_cache_controller(**kwargs):
         cacheable_status_codes=[200],
         key_generator=custom_key_generator,
         **kwargs
-        # allow_stale=True, # Use the stale response if there is a connection issue and the new response cannot be obtained.
-        # always_revalidate=False,
-        # allow_heuristics=True 
     )
 
     return controller
 
-class RateLimiterTransport(httpx.HTTPTransport):
-    @LIMITER()
-    def handle_request(
-            self,
-            request: httpx.Request,
-        ) -> httpx.Response:
-            return super().handle_request(request)
-       
 def cached_factory(cache_directory: Path | None = None, controller_args: dict | None = None, **kwargs):
     params = httpclient.DEFAULT_PARAMS.copy()
     params["headers"] = httpclient.client_headers()
@@ -89,22 +80,21 @@ def cached_factory(cache_directory: Path | None = None, controller_args: dict | 
     if controller_args is None:
         controller_args = {}
 
+    controller = _get_cache_controller(**controller_args)
     client = hishel.CacheClient(
-        transport=RateLimiterTransport(),
-        controller=_get_cache_controller(**controller_args),
+        controller=controller,
         storage=hishel.FileStorage(base_path = cache_directory),
         **params
     )
 
+    handler = client._transport.handle_request
+
+    @LIMITER
+    def decorated_request(req):
+        return handler(req)
+    client._transport.handle_request = decorated_request
+
     return client
-     
-class AsyncRateLimiterTransport(httpx.AsyncHTTPTransport):
-    @LIMITER()
-    async def handle_async_request(
-            self,
-            request: httpx.Request,
-        ) -> httpx.Response:
-                return await super().handle_async_request(request)
 
 @asynccontextmanager
 async def asynccached_factory(cache_directory: Path | None = None, controller_args: dict | None = None, **kwargs):
@@ -114,12 +104,19 @@ async def asynccached_factory(cache_directory: Path | None = None, controller_ar
     if controller_args is None:
         controller_args = {}
 
+    controller = _get_cache_controller(**controller_args)
     client = hishel.AsyncCacheClient(
-        transport=AsyncRateLimiterTransport(),
-        controller=_get_cache_controller(**controller_args),
+        controller=controller,
         storage=hishel.AsyncFileStorage(base_path = cache_directory),
         **params
     )
+        
+    handler = client._transport.handle_async_request
+    @LIMITER
+    async def decorated_async_request(req):
+        return await handler(req)
+    client._transport.handle_async_request = decorated_async_request
+
     async with client:
         yield client
 
@@ -128,7 +125,7 @@ async def asynccached_factory(cache_directory: Path | None = None, controller_ar
 
 def install_cached_client(cache_directory: Path | None, controller_args: dict | None = None):
     if cache_directory is None:
-        cache_directory = Path(core.edgar_data_dir) / "requestcache"
+        cache_directory = core.get_edgar_data_directory() / "requestcache"
 
     httprequests.throttle_disabled = True  # Use the RateLimiterTransport
     httpclient.client_factory_class = partial(cached_factory, cache_directory=cache_directory, controller_args=controller_args)
