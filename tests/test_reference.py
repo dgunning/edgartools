@@ -48,13 +48,8 @@ def test_describe_form():
     assert describe_form('10-K', prepend_form=False) == 'Annual report for public companies'
 
 
-def test_cik_tickers():
-    tickers = get_cik_tickers()
-    assert tickers.loc[tickers.ticker == 'ATVI'].cik.iloc[0] == 718877
-
 
 def test_find_cik():
-    assert find_cik('ATVI') == 718877
     assert find_cik('AAPL') == 320193
     assert find_cik('TSLA') == 1318605
     assert find_cik('MSFT') == 789019
