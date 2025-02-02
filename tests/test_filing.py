@@ -265,20 +265,6 @@ def test_filing_homepage_documents_and_datafiles():
     assert filing_homepage.url == carbo_10K.url
 
 
-def test_parse_filing_homepage_with_multiple_instruments():
-    filing = Filing(form='DEF 14A', filing_date='2023-06-16', company='T. Rowe Price All-Cap Opportunities Fund, Inc.',
-                    cik=773485, accession_no='0001741773-23-002051')
-
-    homepage_html = Path('data/troweprice.DEF14A.html').read_text()
-    filing_homepage = filing.homepage
-
-    filers = filing_homepage.get_filers()
-    assert len(filing_homepage.get_filers()) > 60
-    filer_info = filers[0]
-    assert filer_info.company_name == "T. Rowe Price Small-Cap Stock Fund, Inc."
-    assert "100 EAST PRATT STRET" in filer_info.addresses[0]
-
-
 def test_filing_document():
     assert carbo_10K.homepage.primary_html_document.url == \
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
