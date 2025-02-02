@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.4] - 2025-02-02
+
+### Added
+- Added function `strip_ansi` to remove ansi characters from text generated from rich objects
+
+### Changed
+- The `rich_to_text` function now uses the output of `repr_rich` and `strip_ansi` to remove ansi characters
+- Use `rich_to_text` when getting text of `CurrentReport` 
+- Remove borders from panels when rendering text
+
+### Fixed
+- The `text()` function of `Attachment` and `Filing` now use an amended version of `rich_to_text` that strips ansi characters
+
 ## [3.10.3] - 2025-02-01
 
 ### Added
