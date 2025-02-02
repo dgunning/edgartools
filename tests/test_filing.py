@@ -15,7 +15,7 @@ from rich import print
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachment, \
-    get_current_filings, fetch_daily_filing_index, filing_date_to_year_quarters, get_filing_by_accession
+    get_current_filings, filing_date_to_year_quarters, get_filing_by_accession
 from edgar.company_reports import TenK
 from edgar.core import default_page_size
 from edgar.entities import Company
@@ -1009,3 +1009,7 @@ def test_get_filings_by_range():
     assert filings.date_range == (datetime.date(2022, 1, 3), datetime.date(2023, 12, 29))
 
 
+def test_filing_url():
+    filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
+                    accession_no='0000066740-24-000023')
+    assert filing.filing_url == 'https://www.sec.gov/Archives/edgar/data/66740/000006674024000023/mmm-20240308.htm'

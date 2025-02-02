@@ -119,13 +119,15 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :param sec_filing: The filing
     :return:
     """
-    from edgar.company_reports import TenK, TenQ, TwentyF, EightK
+    from edgar.company_reports import TenK, TenQ, TwentyF, EightK, CurrentReport
     from edgar.effect import Effect
     from edgar.offerings import FormC, FormD
     from edgar.ownership import Ownership, Form3, Form4, Form5
     from edgar.form144 import Form144
     from edgar.muniadvisors import MunicipalAdvisorForm
 
+    if matches_form(sec_filing, "6-K"):
+        return CurrentReport(sec_filing)
     if matches_form(sec_filing, "8-K"):
         return EightK(sec_filing)
     elif matches_form(sec_filing, "10-Q"):

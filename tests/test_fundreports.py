@@ -240,3 +240,9 @@ def test_annualized_rate():
                     accession_no='0001145549-24-008079')
     fund_report: FundReport = filing.obj()
     assert fund_report
+
+
+def test_fund_report_with_missing_pct_value():
+    filing = Filing(form='NPORT-P', filing_date='2023-11-28', company='BNY MELLON INVESTMENT PORTFOLIOS', cik=1056707, accession_no='0001775697-23-001044')
+    fund_report: FundReport = filing.obj()
+    assert fund_report

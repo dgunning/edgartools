@@ -23,6 +23,8 @@ __all__ = [
     'TenK',
     'TenQ',
     'TwentyF',
+    'CurrentReport',
+    'SixK',
     'EightK',
     'PressRelease',
     'PressReleases',
@@ -489,7 +491,7 @@ class TwentyF(CompanyReport):
         return f"""TwentyF('{self.company}')"""
 
 
-class EightK():
+class CurrentReport():
     structure = ItemOnlyFilingStructure({
         "ITEM 1.01": {
             "Title": "Entry into a Material Definitive Agreement",
@@ -572,7 +574,7 @@ class EightK():
     })
 
     def __init__(self, filing):
-        assert filing.form in ['8-K', '8-K/A'], f"This form should be an 8-K but was {filing.form}"
+        assert filing.form in ['8-K', '8-K/A', '6-K', '6-K/A'], f"This form should be an 8-K but was {filing.form}"
         self._filing = filing
 
     @property
@@ -723,6 +725,9 @@ class EightK():
     def __repr__(self):
         return repr_rich(self.__rich__())
 
+# Aliases fpr the current report
+EightK = CurrentReport
+SixK = CurrentReport
 
 class PressReleases:
     """

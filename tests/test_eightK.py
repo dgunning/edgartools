@@ -185,3 +185,9 @@ def test_extract_xbrl_from_8k():
     print()
     xbrl = filing.xbrl()
     assert xbrl
+
+
+def test_parse_6K():
+    filing  = Filing(form='6-K', filing_date='2003-03-31', company='MARCONI CORP PLC', cik=1122135,
+           accession_no='0001156973-03-000451')
+    assert filing.text()

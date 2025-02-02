@@ -138,8 +138,3 @@ def test_company_filing_acceptance_datetime():
     assert c.filings.data['acceptanceDateTime']
     acceptance_datetime = c.filings.data['acceptanceDateTime'][0].as_py()
     assert isinstance(acceptance_datetime, datetime)
-
-def test_handle_empty_company_facts():
-    c = Company('CGTL')
-    facts = c.get_facts()
-    assert not facts

@@ -1291,17 +1291,14 @@ class Filing:
         """Returns the html contents of the primary document if it is html"""
         sgml = self.sgml()
         html = sgml.html()
-        if html:
+        if html and not html.startswith("<?xml"):
             # skip PDF (for now)
             if html.endswith("</PDF>"):
                 return None
             if has_html_content(html):
                 return html
-            # Handle naked content without HTML tags
-            if "</html>" not in html[-100:].lower():
-                return f"<html><body><div>{html}</div></body></html>"
             return None
-        # If the html document is not in the SGML the we have to go to the homepage
+        # If the html document is not in the SGML then we have to go to the homepage
         html = self.homepage.primary_html_document.download()
         if isinstance(html, bytes):
             try:
@@ -1492,7 +1489,8 @@ class Filing:
     def open(self):
         """Open the main filing document"""
         assert self.document is not None
-        webbrowser.open(self.document.url)
+        # Use the homepage to determine the url since SGML sometimes miss the primary HTML file
+        webbrowser.open(self.homepage.primary_html_document.url)
 
     @lru_cache(maxsize=1)
     def sections(self) -> List[str]:
@@ -1515,6 +1513,10 @@ class Filing:
         if regex:
             return self.__get_regex_search_index().search(query)
         return self.__get_bm25_search_index().search(query)
+
+    @property
+    def filing_url(self) -> str:
+        return f"{self.base_dir}/{self.document.document}"
 
     @property
     def homepage_url(self) -> str:

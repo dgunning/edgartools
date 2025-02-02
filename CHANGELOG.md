@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.3] - 2025-02-01
+
+### Added
+- Add class `CurrentReport` as the data object for the **8-K** and **6-K** forms
+- Add class `SixK` as an alias for `CurrentReport`
+
+### Changed
+- `EightK` is now an alias for `CurrentReport`
+- Plain text files are now read as text rather than html
+- For Forms, **3**, **4**, **5** filings the html is downloaded from the filing homepage instead of from the SGML
+
+### Fixed
+- Made `pct_value` optional when parsing `FundReports` to avoid a ValidationError
+
+## [3.10.2] - 2025-01-30
+
+### Added
+- Add `attachments.get_by_index` to get attachments by index. Indexing starts at 0. There is also `get_by_sequence` that starts at 1
+
+### Changed
+- Improved the styling of Attachments using emoticons for different file types
+- Add descriptions of reports from the `FilingSummary.xml`
+- Add getting attachment text using `attachment.text()`
+- Getting attachments using`[]` uses `get_by_sequence` rather than `get_by_index`
+
+### Fixed
+- Fixed bug when calling `repr(FilingSGML)`
+
+
 ## [3.10.1] - 2025-01-29
 
 ### Added
