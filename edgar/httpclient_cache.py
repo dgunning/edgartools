@@ -128,3 +128,5 @@ def install_cached_client(cache_directory: Path | None, controller_args: dict | 
     httprequests.throttle_disabled = True  # Use the RateLimiterTransport
     httpclient.client_factory_class = partial(cached_factory, cache_directory=cache_directory, controller_args=controller_args)
     httpclient.asyncclient_factory_class = partial(asynccached_factory, cache_directory=cache_directory, controller_args=controller_args)
+
+    httpclient.close_clients()
