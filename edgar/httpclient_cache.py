@@ -28,16 +28,14 @@ import logging
 logging.getLogger("hishel.controller").setLevel(logging.INFO)
 ```
 """
-from edgar import httpclient, core, httprequests, httpclient_limitertransport
+from edgar import httpclient, core, httprequests
 import logging
 import hishel
 import httpcore
 from pathlib import Path
 from functools import partial
 from contextlib import asynccontextmanager
-
 from limiter import Limiter 
-import httpx
 
 logger = logging.getLogger(__name__)
 
