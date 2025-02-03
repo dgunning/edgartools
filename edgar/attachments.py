@@ -166,7 +166,8 @@ class Attachment:
                  document_type: str,
                  size: Optional[int],
                  sgml_document: Optional['SGMLDocument'] = None,
-                 purpose: Optional[str] = None):
+                 purpose: Optional[str] = None,
+                 filing_sgml: Optional['FilingSGML'] = None):
         self.sequence_number = sequence_number
         self.description = description
         self.document = document
@@ -175,6 +176,7 @@ class Attachment:
         self.document_type = document_type
         self.size = size
         self.sgml_document:Optional['SGMLDocument'] = sgml_document
+        self.sgml = filing_sgml
         self.purpose = purpose
 
     @property
@@ -254,20 +256,35 @@ class Attachment:
         return str(file_path)
 
     def view(self):
-        if self.is_text():
-            content = self.content
-            if self.is_html() or has_html_content(content):
-                from edgar import Document
-                document = Document.parse(content)
-                print_rich(document)
-            elif self.is_xml():
-                print_xml(content)
-            else:
-                print(content)
+        # Check if this is a report
+        if self.is_report() and self.sgml:
+            report = self.sgml.filing_summary.reports.get_by_filename(self.document)
+            if report:
+                report.view()
         else:
-            print(self)
+            if self.is_text():
+                content = self.content
+                if self.is_html() or has_html_content(content):
+                    from edgar import Document
+                    document = Document.parse(content)
+                    print_rich(document)
+                elif self.is_xml():
+                    print_xml(content)
+                else:
+                    print(content)
+            else:
+                print(self)
+
+    def is_report(self):
+        return re.match(r"R\d+\.htm", self.document)
 
     def text(self):
+        # Check if this is a report
+        if self.is_report() and self.sgml:
+            report = self.sgml.filing_summary.reports.get_by_filename(self.document)
+            if report:
+                return report.text()
+
         if self.is_text():
             content = self.content
             if self.is_html() or has_html_content(content):
@@ -336,6 +353,17 @@ class Attachments:
         Get the attachment by index starting at 1
         """
         return self._attachments[index]
+
+
+    def get_report(self, filename:str) -> 'Report':
+        """
+        Get a report by filename
+        """
+        if self.sgml:
+            reports = self.sgml.filing_summary.reports
+            if reports:
+                return reports.get_by_filename(filename)
+
 
     @property
     def primary_html_document(self) -> Optional[Attachment]:
@@ -612,6 +640,9 @@ class Attachments:
                 )
                 # Add the attachment to the list
                 attachments.append(attachment)
+
+                # Set the SGML on the attachment
+                attachment.sgml = attachment.sgml
                 # If this is the first document, set it as the primary document
                 if documents:
                     if min_seq is None:

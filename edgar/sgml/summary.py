@@ -16,8 +16,9 @@ from rich.text import Text
 from edgar.core import strtobool, DataPager, PagingState, log
 from edgar.files.html import Document
 from edgar.richtools import print_rich
-from edgar.richtools import repr_rich
+from edgar.richtools import repr_rich, rich_to_text
 from edgar.xmltools import child_text
+from functools import lru_cache
 
 __all__ = ['Report', 'Reports', 'File', 'FilingSummary']
 
@@ -228,14 +229,36 @@ class Report:
 
     @property
     def content(self):
+        """
+        Get the content of the report
+        """
         sgml = self._reports._filing_summary._filing_sgml
         if sgml:
             return sgml.get_content(self.html_file_name)
 
-    def view(self):
+    def text(self):
+        """
+        Get the text content of the report
+        """
+        table = self._get_report_table()
+        if table:
+            return rich_to_text(table.render(500))
+
+    @lru_cache
+    def _get_report_table(self):
+        """
+        Get the first table in the document
+        """
         document = Document.parse(self.content)
-        table = document.tables[0]
-        print_rich(table.render(240))
+        if len(document.tables) == 0:
+            log.warning(f"No tables found in {self.html_file_name}")
+            return None
+        return document.tables[0]
+
+    def view(self):
+        table = self._get_report_table()
+        if table:
+            print_rich(table.render(500))
 
     def __str__(self):
         return f"Report(short_name={self.short_name}, category={self.menu_category}, file_name={self.html_file_name})"

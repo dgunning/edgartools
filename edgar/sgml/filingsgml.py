@@ -231,7 +231,8 @@ class FilingSGML:
                     document_type=get_document_type(filename=document.filename, declared_document_type=document.type),
                     description=document.description,
                     size=None,
-                    sgml_document=document
+                    sgml_document=document,
+                    filing_sgml=self
                 )
                 # Add from the filing summary if available
                 if filing_summary:

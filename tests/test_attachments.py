@@ -6,6 +6,7 @@ from rich import print
 
 from edgar import Filing, find
 from edgar.attachments import Attachment, Attachments
+from edgar.sgml import FilingSGML
 from edgar.httprequests import download_file
 
 
@@ -206,5 +207,18 @@ def test_filings_with_no_content_in_attachments():
     attachment = attachments[1]
     assert attachment.empty
     print(attachment.url)
+
+
+def test_get_report_attachments():
+    filing_sgml = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
+    attachments = filing_sgml.attachments
+    report = attachments.get_report('R5.htm')
+    assert report
+    assert report.html_file_name == 'R5.htm'
+    print()
+    text = report.text()
+    print(text)
+    assert 'CONSOLIDATED BALANCE SHEETS' in text
+
 
 
