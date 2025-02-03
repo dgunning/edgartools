@@ -201,7 +201,7 @@ class TextBlockNode(BaseNode):
 
 @dataclass
 class TableCell:
-    content: str
+    content: Union[str, BaseNode]
     colspan: int = 1
     rowspan: int = 1
     align: str = 'left'
@@ -1110,14 +1110,29 @@ class SECHTMLParser:
         def process_row(row: Tag) -> TableRow:
             """Process row preserving cell structure"""
             cells = []
-            for td in row.find_all(['td', 'th']):
-                cells.extend(process_cell(td))
+            # Make non-recursive in case of nested tables
+            for td in row.find_all(['td', 'th'], recursive=False):
+                # Check if cell contains a nested table
+                nested_table = td.find('table')
+                if nested_table:
+                    # Create a TableNode from the nested table using _process_table
+                    table_node = self._process_table(nested_table)
+                    if table_node:
+                        # Store the table node in the cell content
+                        cells.extend([TableCell(
+                            content=table_node,  # We'll need to handle this special content later
+                            colspan=int(td.get('colspan', '1')),
+                            align=td.get('align', 'left')
+                        )])
+
+                else:
+                    cells.extend(process_cell(td))
 
             return TableRow(cells=cells, is_header=row.find_parent('thead') is not None)
 
         # Process all rows
         rows = []
-        for tr in element.find_all('tr'):
+        for tr in element.find_all('tr', recursive=False):
             row = process_row(tr)
             if row.cells:
                 rows.append(row)

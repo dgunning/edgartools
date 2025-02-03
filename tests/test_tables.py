@@ -3,6 +3,10 @@ from bs4 import BeautifulSoup
 from edgar.files.html_documents import table_to_markdown, table_to_text
 from edgar import *
 from edgar.files.htmltools import ChunkedDocument
+from edgar.richtools import rich_to_text
+from pathlib import Path
+from rich.table import Table
+from rich import print
 
 
 def test_table_to_text():
@@ -243,3 +247,21 @@ of Directors or Certain Officers; Election of Directors; Appointment of Certain 
     result = table_to_markdown(soup.find('table'))
     print()
     print(result)
+
+def test_load_wide_table():
+    html = Path('data/html/MSFT-Property.html').read_text()
+    document = Document.parse(html)
+    table = document.tables[0]
+    table_str = rich_to_text(table.render(400))
+    assert 'Buildings and improvements' in table_str
+    assert 'Furniture and equipment' in table_str
+    assert '212,012' in table_str
+
+def test_nested_tables():
+    table = Table("Column 1", "Column 2")
+    table.add_row("Data 1", "Data 2")
+
+    parent = Table("Parent Column 1", "Parent Column 2")
+    parent.add_row("Parent Data 1", table)
+    print()
+    print(parent)

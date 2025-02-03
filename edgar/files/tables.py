@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
+from edgar.richtools import rich_to_text
 import re
 
 
@@ -18,11 +19,16 @@ class TableProcessor:
         if not isinstance(node.content, list) or not node.content:
             return None
 
-        def process_cell_content(content: str) -> str:
+        def process_cell_content(content: Union[str, 'BaseNode']) -> str:
             """Process cell content to handle HTML breaks and cleanup"""
-            content = content.replace('<br/>', '\n').replace('<br>', '\n')
-            lines = [line.strip() for line in content.split('\n')]
-            return '\n'.join(line for line in lines if line)
+            if isinstance(content, str):
+                content = content.replace('<br/>', '\n').replace('<br>', '\n')
+                lines = [line.strip() for line in content.split('\n')]
+                return '\n'.join(line for line in lines if line)
+            else:
+                # Recursively process nested nodes
+                processed_table = content.render(500)
+                return rich_to_text(processed_table)
 
         # Process all rows into virtual columns
         virtual_rows = []
