@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.5] - 2025-02-03
+
+### Fixed
+- Nested HTML tables are now parsed and displayed correctly
+
+### Changed
+- Report attachments for **10-K** filings now display just the primary table in the report
+
+
 ## [3.10.4] - 2025-02-02
 
 ### Added
