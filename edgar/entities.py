@@ -52,6 +52,7 @@ __all__ = [
     'get_company_facts',
     'get_company_tickers',
     'get_entity_submissions',
+    'download_entity_submissions_from_sec',
     'empty_company_filings',
     'parse_entity_submissions',
     'get_ticker_to_cik_lookup',
