@@ -1587,7 +1587,7 @@ class Filing:
             if is_using_local_storage():
                 # In this case the local storage is missing the filing so we have to download it
                 log.warning(f"Filing {self.accession_no} not found in local storage. Downloading from SEC ...")
-                from edgar import download_entity_submissions_from_sec, parse_entity_submissions
+                from edgar.entities import download_entity_submissions_from_sec, parse_entity_submissions
                 submissions_json = download_entity_submissions_from_sec(self.cik)
                 c_from_sec = parse_entity_submissions(submissions_json)
                 filings = c_from_sec.get_filings(accession_number=self.accession_no)
