@@ -1,8 +1,12 @@
 import re
+import warnings
 from dataclasses import dataclass
 from enum import Enum
+from io import BytesIO
 from typing import Iterator, Optional
-from edgar.sgml.tools import get_content_between_tags, decode_uu
+
+from edgar.sgml.tools import get_content_between_tags
+from edgar.vendored import uu
 
 __all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument']
 
@@ -32,11 +36,24 @@ class SGMLDocument:
 
     @property
     def content(self):
-        text = get_content_between_tags(self.raw_content)
-        if text:
-            if text.startswith("begin"):
-                return decode_uu(text)
-            return text
+        raw_content = get_content_between_tags(self.raw_content)
+        if raw_content:
+            if raw_content.startswith("begin"):
+                # Create input and output streams
+                # Suppress the binascii warning
+
+                warnings.filterwarnings('ignore')
+
+                # Create input and output streams
+                input_stream = BytesIO(raw_content.encode("utf-8"))
+                output_stream = BytesIO()
+
+                # Decode the UU content
+                uu.decode(input_stream, output_stream)
+
+                # Get the decoded bytes
+                return output_stream.getvalue()
+            return raw_content
 
     def __str__(self):
         return f"Document(type={self.type}, sequence={self.sequence}, filename={self.filename}, description={self.description})"

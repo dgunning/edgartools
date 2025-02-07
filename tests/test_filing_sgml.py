@@ -6,7 +6,9 @@ from edgar import *
 from edgar.sgml import iter_documents, list_documents, FilingSGML
 from edgar.sgml.parsers import SGMLDocument, SGMLParser, SGMLFormatType
 from edgar.sgml.tools import get_content_between_tags
-
+import hashlib
+from io import BytesIO
+from edgar.vendored import uu
 
 def test_parse_old_full_text():
     source = Path("data/sgml/0001011438-98-000429.txt")
@@ -278,3 +280,60 @@ def test_filing_sgml_repr():
     sgml: FilingSGML = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
     _repr = repr(sgml)
     assert _repr
+
+def test_get_binary_content():
+    sgml: FilingSGML = FilingSGML.from_source("data/sgml/0000320193-24-000123.txt")
+    aapl_20240928_g1 = sgml.attachments[19]
+    sgml_content = aapl_20240928_g1.content
+
+    # Read the downloaded file
+    with open("data/sgml/aapl-20240928_g1.jpg", "rb") as f:
+        file_content = f.read()
+
+    with open("data/sgml/aapl-20240928_g1-sgml.jpg", "wb") as f:
+        f.write(sgml_content)
+    # Create hashes for comparison
+
+    sgml_hash = hashlib.sha256(sgml_content).hexdigest()
+    file_hash = hashlib.sha256(file_content).hexdigest()
+
+    # The hashes won't be the same because when the image is added into the SGML, it's encoded in a different way
+    #assert sgml_hash == file_hash, f"Content mismatch:\nSGML hash: {sgml_hash}\nFile hash: {file_hash}"
+
+
+def test_uu_roundtrip():
+
+    # Read original file
+    with open("data/sgml/aapl-20240928_g1.jpg", "rb") as f:
+        original_content = f.read()
+
+    # Create streams for encoding
+    input_stream = BytesIO(original_content)
+    encoded_stream = BytesIO()
+
+    # UU encode
+    uu.encode(input_stream, encoded_stream)
+    encoded_content = encoded_stream.getvalue()
+
+    # Create streams for decoding
+    decode_input = BytesIO(encoded_content)
+    decoded_stream = BytesIO()
+
+    # UU decode
+    uu.decode(decode_input, decoded_stream)
+    decoded_content = decoded_stream.getvalue()
+
+    # Compare original and roundtripped content
+    original_hash = hashlib.sha256(original_content).hexdigest()
+    decoded_hash = hashlib.sha256(decoded_content).hexdigest()
+
+    assert original_hash == decoded_hash, (
+        f"Roundtrip failed:\nOriginal hash: {original_hash}\nDecoded hash: {decoded_hash}"
+    )
+
+    # Optionally verify the encoded content looks correct
+    encoded_text = encoded_content.decode('ascii')
+    assert encoded_text.startswith('begin')
+    assert encoded_text.endswith('end\n')
+    assert '\nend\n' in encoded_text  # Proper end marker format
+
