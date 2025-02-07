@@ -66,7 +66,7 @@ class Financials:
 
     @classmethod
     async def extract_async(cls, filing) -> Optional['Financials']:
-        assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A'], "Filing must be a 10-K or 10-Q"
+        assert filing.form in ['10-K', '10-Q', '10-K/A', '10-Q/A', '20-F', '20-F/A'], "Filing must be a 10-K, 10-Q or 20-F"
         xbrl_data = await XBRLData.from_filing(filing)
         if not xbrl_data:
             return None
