@@ -439,6 +439,7 @@ def download_file(url: str, as_text: bool = None, path: Optional[Union[str, Path
         else:
             file_content = response.content
 
+    path = Path(path) if path else None
     if path and path.is_dir():
         path = path / os.path.basename(url)
     return save_or_return_content(file_content, path)
