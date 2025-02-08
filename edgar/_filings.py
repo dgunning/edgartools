@@ -1602,7 +1602,6 @@ class Filing:
                                        sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")])
 
 
-
     def __hash__(self):
         return hash(self.accession_no)
 
@@ -1640,26 +1639,29 @@ class Filing:
         └──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
         :return: a rich table version of this filing
         """
-        summary_table = Table(box=box.ROUNDED, show_header=False)
-        summary_table.add_column("Accession#", style="bold deep_sky_blue1", header_style="bold")
-        summary_table.add_column("Filed")
-        summary_table.add_row(self.accession_no, str(self.filing_date))
+        ticker = find_ticker(self.cik)
+        ticker = f"{ticker}" if ticker else ""
 
-        homepage_url = Text(f"\U0001F3E0 {self.homepage_url.replace('//www.', '//')}")
-        primary_doc_url = Text(f"\U0001F4C4 {self.document.url.replace('//www.', '//') if self.document else ''}")
-        submission_text_url = Text(f"\U0001F4DC {self.text_url.replace('//www.', '//')}")
+        # The title of the panel
+        title = Text.assemble((f"{unicode_for_form(self.form)} Form {self.form} ", "bold"),
+                              Text.assemble((self.company, "bold green"), " ", (ticker, "bold yellow"))
+                              )
+        # The subtitle of the panel
+        subtitle = Text(describe_form(self.form, False), "dim")
 
-        links_table = Table(
-            "[b]Links[/b]: \U0001F3E0 Homepage \U0001F4C4 Primary Document \U0001F4DC Full Submission Text",
-            box=box.ROUNDED)
-        links_table.add_row(homepage_url)
-        links_table.add_row(primary_doc_url)
-        links_table.add_row(submission_text_url)
-
+        attachments = self.attachments
+        # The filing information table
+        filing_info_table = Table("Accession Number", "Filing Date", "Period of Report", "Documents",
+                                  header_style="dim",
+                                  box=box.SIMPLE_HEAD)
+        filing_info_table.add_row(Text(self.accession_no, "bold deep_sky_blue1"),
+                                    Text(str(self.filing_date), "bold"),
+                                  Text(str(self.period_of_report), "bold"),
+                                  f"{len(attachments)}")
         return Panel(
-            Group(summary_table, links_table),
-            title=Text(f"{self.company} [{self.cik}] {self.form} {unicode_for_form(self.form)}", style="bold"),
-            subtitle=describe_form(self.form),
+            Group(filing_info_table),
+            title=title,
+            subtitle=subtitle,
             box=box.ROUNDED
         )
 
@@ -1747,11 +1749,92 @@ page_facing_up = '\U0001F4C4'
 classical_building = '\U0001F3DB'
 
 
-def unicode_for_form(form: str):
-    if form in ['10-K', '10-Q', '10-K/A', '10-Q/A', '6-K', '6-K/A']:
-        return barchart
+def unicode_for_form(form: str) -> str:
+    """
+    Returns a meaningful Unicode symbol based on SEC form type.
+
+    Args:
+        form (str): SEC form type identifier
+
+    Returns:
+        str: Unicode symbol representing the form type
+
+    Form type categories:
+    - Periodic Reports (10-K, 10-Q): 📊 (financial statements/data)
+    - Current Reports (8-K, 6-K): ⚡ (immediate/material events)
+    - Registration & Offerings:
+        - S-1, F-1: 🎯 (initial public offerings)
+        - S-3, F-3: 🔄 (follow-on offerings)
+        - Prospectuses (424B*): 📖 (offering documents)
+    - Insider Forms (3, 4, 5): 👥 (insider activity)
+    - Beneficial Ownership:
+        - SC 13D/G: 🏰 (significant ownership stakes)
+        - 13F-HR: 📈 (institutional holdings)
+    - Investment Company:
+        - N-CSR, N-Q: 💼 (investment portfolio reports)
+        - N-PX: 🗳️ (proxy voting record)
+    - Foreign Company Forms (20-F, 40-F): 🌐 (international)
+    - Municipal Advisor Forms (MA): ⚖️ (regulation/compliance)
+    - Communications (CORRESP/UPLOAD): 💬 (dialogue with SEC)
+    - Proxy Materials (DEF 14A): 📩 (shareholder voting)
+    - Default: 📄 (generic document)
+    """
+
+    # Periodic financial reports
+    if form in ['10-K', '10-Q', '10-K/A', '10-Q/A']:
+        return '📊'  # Chart for financial statements
+
+    # Current reports (material events)
+    elif form in ['8-K', '8-K/A', '6-K', '6-K/A']:
+        return '⚡'  # Lightning bolt for immediate/current events
+
+    # Initial registration statements
+    elif form.startswith(('S-1', 'F-1')) or form in ['S-1/A', 'F-1/A']:
+        return '🎯'  # Target for initial offerings
+
+    # Shelf registration statements
+    elif form.startswith(('S-3', 'F-3')) or form in ['S-3/A', 'F-3/A']:
+        return '🔄'  # Circular arrows for repeat/follow-on offerings
+
+    # Prospectuses
+    elif form.startswith('424B'):
+        return '📖'  # Open book for offering documents
+
+    # Foreign issuer annual reports
+    elif form in ['20-F', '20-F/A', '40-F', '40-F/A']:
+        return '🌐'  # Globe for international filings
+
+    # Insider trading forms
     elif form in ['3', '4', '5', '3/A', '4/A', '5/A']:
-        return ticket
-    elif form in ['MA-I', 'MA-I/A', 'MA', 'MA/A']:
-        return classical_building
-    return page_facing_up
+        return '👥'  # People for insider/beneficial owner reports
+
+    # Significant beneficial ownership reports
+    elif form.startswith(('SC 13D', 'SC 13G')) or form in ['SC 13D/A', 'SC 13G/A']:
+        return '🏰'  # Castle for large ownership stakes
+
+    # Institutional investment holdings
+    elif form in ['13F-HR', '13F-HR/A', '13F-NT', '13F-NT/A']:
+        return '📈'  # Chart up for investment positions
+
+    # Investment company reports
+    elif form in ['N-CSR', 'N-CSR/A', 'N-Q', 'N-Q/A']:
+        return '💼'  # Briefcase for investment portfolio
+
+    # Proxy voting records
+    elif form in ['N-PX', 'N-PX/A']:
+        return '🗳️'  # Ballot box for voting records
+
+    # Municipal advisor forms
+    elif form in ['MA', 'MA/A', 'MA-I', 'MA-I/A']:
+        return '⚖️'  # Scales for regulatory/compliance
+
+    # SEC correspondence
+    elif form in ['CORRESP', 'UPLOAD']:
+        return '💬'  # Speech bubble for communications
+
+    # Proxy statements
+    elif form in ['DEF 14A', 'PRE 14A', 'DEFA14A', 'DEFC14A']:
+        return '📩'  # Envelope for shareholder communications
+
+    # Default case - generic document
+    return '📄'

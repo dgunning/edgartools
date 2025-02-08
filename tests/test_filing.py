@@ -515,11 +515,9 @@ def test_filing_str():
 
 def test_filing_repr():
     filing_repr = carbo_10K.__repr__()
-    assert str(carbo_10K.cik) in filing_repr
     assert str(carbo_10K.company) in filing_repr
     assert str(carbo_10K.form) in filing_repr
     assert str(carbo_10K.filing_date) in filing_repr
-    print(carbo_10K)
 
 
 def test_filing_homepage_repr():
