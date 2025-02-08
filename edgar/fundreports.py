@@ -385,6 +385,8 @@ class FundReport:
     @classmethod
     def from_filing(cls, filing):
         xml = filing.xml()
+        if not xml:
+            return None
         fund_report_dict = FundReport.parse_fund_xml(xml)
         # Parse ticker, fund, series information from the filing header
         fund_report_dict['series_and_contracts'] = get_fund_information(filing.header)
