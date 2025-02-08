@@ -1644,7 +1644,10 @@ class Filing:
 
         # The title of the panel
         title = Text.assemble((f"{unicode_for_form(self.form)} Form {self.form} ", "bold"),
-                              Text.assemble((self.company, "bold green"), " ", (ticker, "bold yellow"))
+                              (self.company, "bold green"),
+                              " ",
+                              (f"[{self.cik}] ", "dim"),
+                              (ticker, "bold yellow")
                               )
         # The subtitle of the panel
         subtitle = Text(describe_form(self.form, False), "dim")
