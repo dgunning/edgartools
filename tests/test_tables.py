@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 
 from edgar.files.html_documents import table_to_markdown, table_to_text
+from edgar.files.html import BaseNode
 from edgar import *
 from edgar.files.htmltools import ChunkedDocument
 from edgar.richtools import rich_to_text
@@ -265,3 +266,17 @@ def test_nested_tables():
     parent.add_row("Parent Data 1", table)
     print()
     print(parent)
+
+def test_correct_parsing_of_table_headers():
+    html = Path("data/html/aapl-R3.html").read_text()
+    document = Document.parse(html)
+    table:BaseNode = document.tables[0]
+    rich_table = table.render(400)
+    print(rich_table)
+
+def test_correct_parsing_of_table_headers_operations():
+    html = Path("data/html/aapl-R4.html").read_text()
+    document = Document.parse(html)
+    table:BaseNode = document.tables[0]
+    rich_table = table.render(400)
+    print(rich_table)

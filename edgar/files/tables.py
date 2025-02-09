@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional, Union
 from edgar.richtools import rich_to_text
 import re
+from functools import lru_cache
 
 
 @dataclass
@@ -11,6 +12,64 @@ class ProcessedTable:
     data_rows: list[list[str]]
     column_alignments: list[str]  # "left" or "right" for each column
 
+
+# Looks for actual numeric data values, currency, or calculations
+data_indicators = [
+    r'\$\s*\d',  # Currency with numbers
+    r'\d+(?:,\d{3})+',  # Numbers with thousands separators
+    r'\d+\s*[+\-*/]\s*\d+',  # Basic calculations
+    r'\(\s*\d+(?:,\d{3})*\s*\)',  # Parenthesized numbers
+]
+
+data_pattern = '|'.join(data_indicators)
+
+
+def is_number(s: str) -> bool:
+    """
+    Check if a string represents a number in common financial formats.
+
+    Handles:
+    - Regular numbers (123, -123, 123.45)
+    - Currency ($123, $123.45)
+    - Parenthetical negatives ((123), (123.45))
+    - Thousands separators (1,234, 1,234.56)
+    - Mixed formats ($1,234.56)
+    - Various whitespace
+    - En/Em dashes for negatives
+    - Multiple decimal formats (123.45, 123,45)
+
+    Args:
+        s: String to check
+
+    Returns:
+        bool: True if string represents a valid number
+    """
+    if not s or s.isspace():
+        return False
+
+    # Convert unicode minus/dash characters to regular minus
+    s = s.replace('−', '-').replace('–', '-').replace('—', '-')
+
+    # Handle parenthetical negatives
+    s = s.strip()
+    if s.startswith('(') and s.endswith(')'):
+        s = '-' + s[1:-1]
+
+    # Remove currency symbols and whitespace
+    s = s.replace('$', '').replace(' ', '')
+
+    # Handle European number format (convert 123,45 to 123.45)
+    if ',' in s and '.' not in s and len(s.split(',')[1]) == 2:
+        s = s.replace(',', '.')
+    else:
+        # Remove thousands separators
+        s = s.replace(',', '')
+
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 class TableProcessor:
     @staticmethod
@@ -78,10 +137,14 @@ class TableProcessor:
         # Detect headers
         header_rows, data_start_idx = TableProcessor._analyze_table_structure(optimized_rows)
 
-        # Process headers
+        # Detect and fix misalignment in all rows
+        fixed_rows = TableProcessor._detect_and_fix_misalignment(optimized_rows, data_start_idx)
+
+        # Use the fixed header portion for processing headers
         headers = None
         if header_rows:
-            headers = TableProcessor._merge_header_rows(header_rows)
+            fixed_headers = fixed_rows[:data_start_idx]  # Take header portion from fixed rows
+            headers = TableProcessor._merge_header_rows(fixed_headers)
 
         # Determine column alignments
         col_count = len(optimized_rows[0])
@@ -134,28 +197,47 @@ class TableProcessor:
             'total_cells': len(row)
         }
 
+    @lru_cache(maxsize=None)
     @staticmethod
     def _get_period_header_pattern() -> re.Pattern:
         """Create regex pattern for common financial period headers"""
+        # Base components
         periods = r'(?:three|six|nine|twelve|[1-4]|first|second|third|fourth)'
         timeframes = r'(?:month|quarter|year|week)'
         ended_variants = r'(?:ended|ending|end|period)'
-        date_patterns = r'(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{1,2}'
-        years = r'(?:19|20)\d{2}'
+        as_of_variants = r'(?:as\s+of|at|as\s+at)'
 
-        # Combine into flexible patterns that match common variations
+        # Enhanced date pattern
+        months = r'(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)'
+        day = r'\d{1,2}'
+        year = r'(?:19|20)\d{2}'
+        date = fr'{months}\s*\.?\s*{day}\s*,?\s*{year}'
+
+        # Combine into patterns
         patterns = [
-            # "Three Months Ended December 31,"
-            fr'{periods}\s+{timeframes}\s+{ended_variants}(?:\s+{date_patterns})?',
-            # "Fiscal Year Ended"
+            # Standard period headers
+            fr'{periods}\s+{timeframes}\s+{ended_variants}(?:\s+{date})?',
             fr'(?:fiscal\s+)?{timeframes}\s+{ended_variants}',
-            # "Quarters Ended June 30, 2023"
-            fr'{timeframes}\s+{ended_variants}(?:\s+{date_patterns})?(?:\s*,?\s*{years})?'
+            fr'{timeframes}\s+{ended_variants}(?:\s+{date})?',
+
+            # Balance sheet date headers
+            fr'{as_of_variants}\s+{date}',
+
+            # Multiple dates in sequence (common in headers)
+            fr'{date}(?:\s*(?:and|,)\s*{date})*',
+
+            # Single date with optional period specification
+            fr'(?:{ended_variants}\s+)?{date}'
         ]
 
-        # Combine all patterns with non-capturing group
+        # Combine all patterns
         combined_pattern = '|'.join(f'(?:{p})' for p in patterns)
         return re.compile(combined_pattern, re.IGNORECASE)
+
+    @staticmethod
+    def _contains_data(self, text):
+        # Check if the string contains data indicators
+        return bool(re.search(data_pattern, text))
 
     @staticmethod
     def _analyze_table_structure(rows: list) -> tuple[list, int]:
@@ -170,9 +252,11 @@ class TableProcessor:
         period_pattern = TableProcessor._get_period_header_pattern()
 
         # Pattern 1: Look for period headers
-        for i, row in enumerate(rows[:3]):  # Check first 3 rows
+        for i, row in enumerate(rows[:3]):  # Check first 4 rows
             header_text = ' '.join(cell.strip() for cell in row).lower()
-            if period_pattern.search(header_text):
+            has_period_header = period_pattern.search(header_text)
+            contains_data = bool(re.search(data_pattern, header_text))
+            if has_period_header and not contains_data:
                 # Found a period header, check if next row has years or is part of header
                 if i + 1 < len(rows):
                     next_row = rows[i + 1]
@@ -203,6 +287,64 @@ class TableProcessor:
 
         # Default to no headers if no clear pattern found
         return [], 0
+
+    # In TableProcessor class
+    @staticmethod
+    def _detect_and_fix_misalignment(virtual_rows: list[list[str]], data_start_idx: int) -> list[list[str]]:
+        """
+        Detect and fix misalignment between date headers and numeric data columns.
+        Returns corrected virtual rows.
+        """
+        if not virtual_rows or data_start_idx >= len(virtual_rows):
+            return virtual_rows
+
+        # Get header row (assumes dates are in the last header row)
+        header_idx = data_start_idx - 1
+        if header_idx < 0:
+            return virtual_rows
+
+        header_row = virtual_rows[data_start_idx - 1]
+
+        # Find date columns in header
+        date_columns = []
+        for i, cell in enumerate(header_row):
+            if TableProcessor._is_date_header(cell):
+                date_columns.append(i)
+
+        if not date_columns:
+            return virtual_rows  # No date headers found
+
+        # Find numeric columns in first few data rows
+        numeric_columns = set()
+        for row in virtual_rows[data_start_idx:data_start_idx + 3]:  # Check first 3 data rows
+            for i, cell in enumerate(row):
+                if TableProcessor._is_financial_value(cell, row, i):
+                    numeric_columns.add(i)
+
+        # Detect misalignment
+        if date_columns and numeric_columns:
+            # Check if dates are shifted right compared to numeric columns
+            dates_shifted = all(
+                (i + 1) in numeric_columns
+                for i in date_columns
+            )
+            if dates_shifted:
+                # Fix alignment by shifting only the row containing dates
+                fixed_rows = virtual_rows.copy()
+                # Find and fix only the row containing the dates
+                for row_idx, row in enumerate(virtual_rows):
+                    if row_idx < data_start_idx:  # Only check header rows
+                        # Check if this row contains the dates by counting date headers
+                        date_count = sum(1 for cell in row if TableProcessor._is_date_header(cell))
+                        if date_count >= 2:  # If multiple dates found, this is our target row
+                            new_row = [""] * len(row)  # Start with empty row
+                            for i in range(len(row) - 1):
+                                new_row[i + 1] = row[i]  # Copy each value one position right
+                            fixed_rows[row_idx] = new_row
+                            break  # Only fix one row
+                return fixed_rows
+
+        return virtual_rows
 
     @staticmethod
     def _get_columns_to_remove(empty_cols: list[int], max_cols: int) -> set[int]:
@@ -285,16 +427,6 @@ class TableProcessor:
         Takes the full row and column index to check for adjacent $ symbols
         """
         text = text.strip()
-
-        # First check if it's a standalone number
-        def is_number(s: str) -> bool:
-            # Remove commas, spaces, parentheses
-            s = s.replace(",", "").replace(" ", "").strip("()")
-            try:
-                float(s)
-                return True
-            except ValueError:
-                return False
 
         # If it's a $ symbol by itself, not a financial value
         if text == '$':
