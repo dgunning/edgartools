@@ -64,6 +64,7 @@ __all__ = [
     'filter_by_form',
     'filter_by_cik',
     'filter_by_ticker',
+    'filter_by_exchange',
     'filter_by_accession_number',
     'split_camel_case',
     'cache_except_none',
@@ -443,6 +444,16 @@ def filter_by_cik(data: pa.Table,
     ciks = [int(el) for el in listify(cik)]
     data = data.filter(pc.is_in(data['cik'], pa.array(ciks)))
     return data
+
+def filter_by_exchange(data: pa.Table, exchange: Union[str, List[str]]) -> pa.Table:
+    """Return the data filtered by exchange"""
+    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
+    from edgar.reference.tickers import get_company_ticker_name_exchange
+    exchanges = [str(el).upper() for el in listify(exchange)]
+    exchange_df = get_company_ticker_name_exchange()
+    exchange_df = exchange_df[exchange_df.exchange.str.upper().isin(exchanges)]
+    return filter_by_cik(data, exchange_df.cik.tolist())
+
 
 
 def filter_by_ticker(data: pa.Table,

@@ -488,7 +488,7 @@ def test_print_filings():
     print(ten_k_filings)
 
     # Filter with non-existent form
-    loop_filings = ten_k_filings.filter("LOOP")
+    loop_filings = ten_k_filings.filter(ticker="LOOP")
     print(loop_filings)
 
 

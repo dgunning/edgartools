@@ -36,6 +36,7 @@ from edgar.core import (log, display_size, sec_edgar,
                         filter_by_date,
                         filter_by_form,
                         filter_by_cik,
+                        filter_by_exchange,
                         filter_by_ticker,
                         filter_by_accession_number,
                         listify,
@@ -61,6 +62,7 @@ from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
+from edgar.reference.tickers import Exchange
 from edgar.reference.tickers import find_ticker
 from edgar.richtools import repr_rich, print_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
@@ -109,13 +111,9 @@ company_index = "company"
 
 max_concurrent_http_connections = 10
 
-
 accession_number_re = re.compile(r"\d{10}-\d{2}-\d{6}$")
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
-
-
-
 
 
 def is_valid_filing_date(filing_date: str) -> bool:
@@ -184,9 +182,6 @@ def expand_quarters(year: Union[int, List[int]],
             for yq in itertools.product(years, quarters)
             if yq in available_quarters()
             ]
-
-
-
 
 
 class FileSpecs:
@@ -274,7 +269,7 @@ def read_fixed_width_index(index_text: str,
     )
 
 
-def read_index_file(index_text: str, columns:List[str] = FORM_INDEX_COLUMNS) -> pa.Table:
+def read_index_file(index_text: str, columns: List[str] = FORM_INDEX_COLUMNS) -> pa.Table:
     """
     Read the index text using multiple spaces as delimiter
     """
@@ -293,7 +288,7 @@ def read_index_file(index_text: str, columns:List[str] = FORM_INDEX_COLUMNS) -> 
     rows = [line.split() for line in data_lines if line.strip()]
 
     # Convert to arrays
-    forms = pa.array([line[:12].strip() for line in data_lines]) # The form might contain spaces like '1-A POS'
+    forms = pa.array([line[:12].strip() for line in data_lines])  # The form might contain spaces like '1-A POS'
 
     # Company names may have single spaces within them
     companies = pa.array([' '.join(row[1:-3]) for row in rows])
@@ -313,9 +308,11 @@ def read_index_file(index_text: str, columns:List[str] = FORM_INDEX_COLUMNS) -> 
         names=columns
     )
 
+
 def read_form_index_file(index_text: str) -> pa.Table:
     """Read the form index file"""
     return read_index_file(index_text, columns=FORM_INDEX_COLUMNS)
+
 
 def read_company_index_file(index_text: str) -> pa.Table:
     """Read the company index file"""
@@ -488,12 +485,13 @@ class Filings:
             return filings[0]
         return filings
 
-    def filter(self,
+    def filter(self, *,
                form: Optional[Union[str, List[IntString]]] = None,
                amendments: bool = None,
                filing_date: Optional[str] = None,
                date: Optional[str] = None,
                cik: Union[IntString, List[IntString]] = None,
+               exchange: Union[str, List[str], Exchange, List[Exchange]] = None,
                ticker: Union[str, List[str]] = None,
                accession_number: Union[str, List[str]] = None) -> Optional['Filings']:
         """
@@ -520,6 +518,7 @@ class Filings:
         :param filing_date: The filing date
         :param date: An alias for the filing date
         :param cik: The CIK or list of CIKs to filter by
+        :param exchange: The exchange or list of exchanges to filter by
         :param ticker: The ticker or list of tickers to filter by
         :param accession_number: The accession number or list of accession numbers to filter by
         :return: The filtered filings
@@ -550,6 +549,10 @@ class Filings:
         # Filter by cik
         if cik:
             filing_index = filter_by_cik(filing_index, cik)
+
+        # Filter by exchange
+        if exchange:
+            filing_index = filter_by_exchange(filing_index, exchange)
 
         if ticker:
             filing_index = filter_by_ticker(filing_index, ticker)
@@ -798,8 +801,8 @@ def sort_filings_by_priority(filing_table: pa.Table,
         PyArrow table sorted by date and form priority
     """
     if priority_forms is None:
-        priority_forms = ['10-Q', '10-Q/A', '10-K', '10-K/A',  '8-K', '8-K/A',
-                          '6-K', '6-K/A', '13F-HR', '144',  '4', 'D', 'SC 13D', 'SC 13G']
+        priority_forms = ['10-Q', '10-Q/A', '10-K', '10-K/A', '8-K', '8-K/A',
+                          '6-K', '6-K/A', '13F-HR', '144', '4', 'D', 'SC 13D', 'SC 13G']
 
     # Create form priority values
     forms_array = filing_table['form']
@@ -1152,16 +1155,16 @@ class CurrentFilings(Filings):
         elements = [table]
 
         page_info = Text.assemble(
-                ("Showing ", "dim"),
-                (f"{current_page.index.min():,}", "bold red"),
-                (" to ", "dim"),
-                (f"{current_page.index.max():,}", "bold red"),
-                (" most recent filings.", "dim"),
-                (" Page using ", "dim"),
-                ("← prev()", "bold gray54"),
-                (" and ", "dim"),
-                ("next() →", "bold gray54")
-            )
+            ("Showing ", "dim"),
+            (f"{current_page.index.min():,}", "bold red"),
+            (" to ", "dim"),
+            (f"{current_page.index.max():,}", "bold red"),
+            (" most recent filings.", "dim"),
+            (" Page using ", "dim"),
+            ("← prev()", "bold gray54"),
+            (" and ", "dim"),
+            ("next() →", "bold gray54")
+        )
 
         elements.extend([Text("\n"), page_info])
 
@@ -1278,7 +1281,7 @@ class Filing:
     @property
     def attachments(self):
         # Return all the attachments on the filing
-        sgml_filing:FilingSGML = self.sgml()
+        sgml_filing: FilingSGML = self.sgml()
         return sgml_filing.attachments
 
     @property
@@ -1328,7 +1331,6 @@ class Filing:
             else:
                 return self._download_filing_text()
 
-
     def _download_filing_text(self):
         """
         Download the text of the filing directly from the primary text sources.
@@ -1341,7 +1343,6 @@ class Filing:
             return download_text_between_tags(text_extract_attachment.url, "TEXT")
         else:
             return download_text_between_tags(self.text_url, "TEXT")
-
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
@@ -1599,8 +1600,7 @@ class Filing:
                 return company.get_empty_filings()
         file_number = filings[0].file_number
         return company.get_filings(file_number=file_number,
-                                       sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")])
-
+                                   sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")])
 
     def __hash__(self):
         return hash(self.accession_no)
@@ -1643,7 +1643,7 @@ class Filing:
         ticker = f"{ticker}" if ticker else ""
 
         # The title of the panel
-        title = Text.assemble((f"{unicode_for_form(self.form)} Form {self.form} ", "bold"),
+        title = Text.assemble((f"Form {self.form} ", "bold"),
                               (self.company, "bold green"),
                               " ",
                               (f"[{self.cik}] ", "dim"),
@@ -1658,8 +1658,8 @@ class Filing:
                                   header_style="dim",
                                   box=box.SIMPLE_HEAD)
         filing_info_table.add_row(Text(self.accession_no, "bold deep_sky_blue1"),
-                                    Text(str(self.filing_date), "bold"),
-                                  Text(str(self.period_of_report), "bold"),
+                                  Text(str(self.filing_date), "bold"),
+                                  Text(self.period_of_report or "-", "bold"),
                                   f"{len(attachments)}")
         return Panel(
             Group(filing_info_table),
