@@ -8,8 +8,9 @@ from typing import Optional, Union, List, Dict, Any
 import pandas as pd
 import pyarrow as pa
 from httpx import HTTPStatusError
+from enum import Enum
 
-from edgar.core import log, get_edgar_data_directory
+from edgar.core import log, get_edgar_data_directory, listify
 from edgar.httprequests import download_file, download_json
 from edgar.reference.data.common import read_parquet_from_package, read_csv_from_package
 
@@ -18,6 +19,7 @@ __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers
            'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers', 'find_ticker', 'get_cik_ticker_lookup',
            'get_company_cik_lookup', 'get_cik_tickers_from_ticker_txt', 'get_cik_tickers', 'get_company_tickers',
            'ticker_txt_url', 'company_tickers_json_url', 'mutual_fund_tickers_url', 'company_tickers_exchange_url',
+           'Exchange'
            ]
 
 ticker_txt_url = "https://www.sec.gov/include/ticker.txt"
@@ -261,7 +263,6 @@ def get_companies_by_exchange(exchange: Union[List[str], str]):
     :return: DataFrame with companies listed on the specified exchange
     with columns [cik	name	ticker	exchange]
     """
-    from edgar.core import listify
     df = get_company_ticker_name_exchange()
     exchanges = [ex.lower() for ex in listify(exchange)]
     return df[df['exchange'].str.lower().isin(exchanges)].reset_index(drop=True)
@@ -418,6 +419,14 @@ def popular_us_stocks():
           )
     return df
 
+class Exchange(Enum):
 
+    Nasdaq = "Nasdaq"
+    NYSE = "NYSE"
+    OTC = "OTC"
+    CBOE = "CBOE"
+
+    def __str__(self):
+        return self.value
 
 
