@@ -4,8 +4,11 @@ theme:
 
 nav:
   - Overview: index.md
+  - Filtering: filtering-filings.md
+  - Navigating: navigating-filings.md
+  - Working with Filings: working-with-filings.md
   - using-the-company-api.md
-  - company-financials.md
+  - Financials: company-financials.md
   - data-objects.md
   - eightk-filings.md
   - local-data.md
