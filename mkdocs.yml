@@ -1,6 +1,6 @@
 site_name: edgartools
 theme:
-  name: "material"
+  name: "readthedocs"
 
 plugins:
   - mkdocstrings:
