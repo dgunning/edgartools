@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-02-09
+## [3.11.1] - 2025-02-10
+
+### Fixed
+- Add code to align date headers over value columns in HTML table
+- Optimize the width of column headers and labels to fit more table data on the screen
 
 ### Added
 - Added filtering by exchange to `Filings` e.g `filings.filter(exchange='NASDAQ')` will return filings for companies listed on the NASDAQ exchange
