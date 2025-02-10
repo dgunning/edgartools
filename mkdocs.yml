@@ -2,13 +2,6 @@ site_name: edgartools
 theme:
   name: "readthedocs"
 
-plugins:
-  - mkdocstrings:
-      handlers:
-        python:
-          options:
-            show_source: false
-
 nav:
   - Overview: index.md
   - using-the-company-api.md
