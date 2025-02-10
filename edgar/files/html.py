@@ -17,7 +17,7 @@ from rich.text import Text
 from edgar.core import log
 from edgar.files.html_documents import HtmlDocument, DocumentData
 from edgar.files.styles import StyleInfo, Width, parse_style, get_heading_level
-from edgar.files.tables import ProcessedTable, TableProcessor
+from edgar.files.tables import ProcessedTable, TableProcessor, ColumnOptimizer
 from edgar.richtools import repr_rich
 
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode']
@@ -266,11 +266,6 @@ class TableNode(BaseNode):
             return len(self._processed.data_rows[0])
         return 0
 
-    def force_process(self) -> None:
-        """Force table processing if needed"""
-        if self._processed_table is None:
-            self._processed_table = TableProcessor.process_table(self)
-
     def reset_processing(self) -> None:
         """Clear cached processed table"""
         self._processed_table = None
@@ -285,6 +280,10 @@ class TableNode(BaseNode):
         processed_table = TableProcessor.process_table(self)
         if not processed_table:
             return None
+
+        # Optimize the table
+        column_optimizer:ColumnOptimizer = ColumnOptimizer()
+        widths, processed_table = column_optimizer.optimize_columns(processed_table)
 
         table = Table(
             box=box.SIMPLE,

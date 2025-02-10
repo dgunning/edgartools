@@ -480,3 +480,174 @@ class TableProcessor:
                 formatted_row.append(content)
             formatted_rows.append(formatted_row)
         return formatted_rows
+
+
+class ColumnOptimizer:
+    """Optimizes column widths for table rendering"""
+
+    def __init__(self, total_width: int = 100, min_data_col_width: int = 15,
+                 max_left_col_ratio: float = 0.5, target_left_col_ratio: float = 0.4):
+        self.total_width = total_width
+        self.min_data_col_width = min_data_col_width
+        self.max_left_col_ratio = max_left_col_ratio  # Maximum portion of total width for left column
+        self.target_left_col_ratio = target_left_col_ratio  # Target portion for left column
+
+    def _measure_content_width(self, content: str) -> int:
+        """Measure the display width of content, handling multiline text"""
+        if not content:
+            return 0
+        lines = content.split('\n')
+        return max(len(line) for line in lines)
+
+    def _wrap_text(self, text: str, max_width: int) -> str:
+        """
+        Wrap text to specified width, preserving existing line breaks and word boundaries.
+        If text already contains line breaks, preserve the original formatting.
+        """
+        if not text or len(text) <= max_width:
+            return text
+
+        # If text already contains line breaks, preserve them
+        if '\n' in text:
+            return text
+
+        # Special handling for financial statement line items
+        if ',' in text and ':' in text:
+            # Split into main description and details
+            parts = text.split(':', 1)
+            if len(parts) == 2:
+                desc, details = parts
+                wrapped_desc = self._wrap_text(desc.strip(), max_width)
+                wrapped_details = self._wrap_text(details.strip(), max_width)
+                return f"{wrapped_desc}:\n{wrapped_details}"
+
+        words = text.split()
+        lines = []
+        current_line = []
+        current_length = 0
+
+        for word in words:
+            word_length = len(word)
+
+            # Handle very long words
+            if word_length > max_width:
+                # If we have a current line, add it first
+                if current_line:
+                    lines.append(' '.join(current_line))
+                    current_line = []
+                    current_length = 0
+
+                # Split long word across lines
+                while word_length > max_width:
+                    lines.append(word[:max_width - 1] + '-')
+                    word = word[max_width - 1:]
+                    word_length = len(word)
+                if word:
+                    current_line = [word]
+                    current_length = word_length
+                continue
+
+            if current_length + word_length + (1 if current_line else 0) <= max_width:
+                current_line.append(word)
+                current_length += word_length + (1 if current_length else 0)
+            else:
+                if current_line:
+                    lines.append(' '.join(current_line))
+                current_line = [word]
+                current_length = word_length
+
+        if current_line:
+            lines.append(' '.join(current_line))
+
+        return '\n'.join(lines)
+
+    def optimize_columns(self, table: ProcessedTable) -> tuple[list[int], ProcessedTable]:
+        """
+        Optimize column widths and wrap text as needed.
+        Returns (column_widths, modified_table)
+        """
+        col_count = len(table.data_rows[0]) if table.data_rows else 0
+        if not col_count:
+            return [], table
+
+        # Calculate maximum left column width based on total width
+        max_left_col_width = int(self.total_width * self.max_left_col_ratio)
+        target_left_col_width = int(self.total_width * self.target_left_col_ratio)
+
+        # Initialize widths array
+        widths = [0] * col_count
+
+        # First pass: calculate minimum required widths for data columns
+        for col in range(1, col_count):
+            col_content_width = self.min_data_col_width
+            if table.headers:
+                col_content_width = max(col_content_width,
+                                        self._measure_content_width(table.headers[col]))
+
+            # Check numeric data width
+            for row in table.data_rows:
+                if col < len(row):
+                    col_content_width = max(col_content_width,
+                                            self._measure_content_width(row[col]))
+
+            widths[col] = col_content_width
+
+        # Calculate available space for left column
+        data_cols_width = sum(widths[1:])
+        available_left_width = self.total_width - data_cols_width
+
+        # Determine left column width
+        left_col_max_content = 0
+        if table.headers and table.headers[0]:
+            left_col_max_content = self._measure_content_width(table.headers[0])
+        for row in table.data_rows:
+            if row:
+                left_col_max_content = max(left_col_max_content,
+                                           self._measure_content_width(row[0]))
+
+        # Set left column width based on constraints
+        if left_col_max_content <= target_left_col_width:
+            widths[0] = left_col_max_content
+        else:
+            widths[0] = min(max_left_col_width,
+                            max(target_left_col_width, available_left_width))
+
+        # If we still exceed total width, redistribute data column space
+        total_width = sum(widths)
+        if total_width > self.total_width:
+            excess = total_width - self.total_width
+            data_cols = len(widths) - 1
+            reduction_per_col = excess // data_cols
+
+            # Reduce data columns while ensuring minimum width
+            for i in range(1, len(widths)):
+                if widths[i] - reduction_per_col >= self.min_data_col_width:
+                    widths[i] -= reduction_per_col
+
+        # Apply width constraints and wrap text
+        modified_table = self._apply_column_constraints(table, widths)
+
+        return widths, modified_table
+
+    def _apply_column_constraints(self, table: ProcessedTable, widths: list[int]) -> ProcessedTable:
+        """Apply width constraints to table content, wrapping text as needed"""
+        # Wrap headers if present
+        wrapped_headers = None
+        if table.headers:
+            wrapped_headers = [
+                self._wrap_text(header, widths[i])
+                for i, header in enumerate(table.headers)
+            ]
+
+        # Wrap data in first column only
+        wrapped_rows = []
+        for row in table.data_rows:
+            wrapped_row = list(row)  # Make a copy
+            wrapped_row[0] = self._wrap_text(row[0], widths[0])
+            wrapped_rows.append(wrapped_row)
+
+        return ProcessedTable(
+            headers=wrapped_headers,
+            data_rows=wrapped_rows,
+            column_alignments=table.column_alignments
+        )
