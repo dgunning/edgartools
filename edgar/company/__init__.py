@@ -1,4 +1,4 @@
-from edgar.entities import *
+from edgar.entities import Company
 from edgar.reference.tickers import get_cik_tickers
 from typing import Iterable
 
