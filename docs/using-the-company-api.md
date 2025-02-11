@@ -32,7 +32,7 @@ or `Company("SNOW")`
 snow = Company("snow")
 ```
 
-![snow inspect](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/snow.png)
+![snow](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/snow.png)
 
 
 

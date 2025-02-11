@@ -8,6 +8,7 @@ nav:
   - Navigating: navigating-filings.md
   - Filings: working-with-filings.md
   - Companies: using-the-company-api.md
+  - Attachments: attachments.md
   - Financials: company-financials.md
   - Data Objects: data-objects.md
   - eightk-filings.md
