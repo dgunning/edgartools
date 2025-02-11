@@ -21,10 +21,11 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.text import Text
+import textwrap
 
 
 from edgar.richtools import repr_rich, print_xml, print_rich, rich_to_text
-from edgar.core import sec_dot_gov, display_size, binary_extensions, text_extensions, has_html_content
+from edgar.core import sec_dot_gov, binary_extensions, text_extensions, has_html_content
 from edgar.httprequests import get_with_retry, download_file, download_file_async
 from edgar.httpclient import async_http_client
 
@@ -52,7 +53,7 @@ def sequence_sort_key(x):
 # Mapping of SEC filing file types to Unicode symbols
 FILE_TYPE_SYMBOLS: Dict[str, str] = {
     # Main SEC filing documents
-    "10-K": "📄",  # Document emoji for main filing
+    "10-K": "📄",     # Document emoji for main filing
     "EX-21.1": "📎",  # Paperclip for exhibits
     "EX-23.1": "📎",
     "EX-31.1": "📎",
@@ -61,26 +62,26 @@ FILE_TYPE_SYMBOLS: Dict[str, str] = {
     "EX-97.1": "📎",
 
     # XBRL-related documents
-    "EX-101.SCH": "📋",  # Clipboard for schema
-    "EX-101.CAL": "🔢",  # Numbers for calculations
+    "EX-101.SCH": "🔰",  # Clipboard for schema
+    "EX-101.CAL": "📊",  # Chart for calculations
     "EX-101.DEF": "📚",  # Books for definitions
-    "EX-101.LAB": "🏷️",  # Label for labels
-    "EX-101.PRE": "📊",  # Chart for presentation
+    "EX-101.LAB": "📎",  # Paperclip for labels (changed from label)
+    "EX-101.PRE": "📈",  # Graph for presentation
 
     # Common file types
-    "XML": "🔰",  # XML files
-    "HTML": "🌐",  # HTML files (for any .htm files)
-    "GRAPHIC": "🖼️",  # Images/graphics
-    "EXCEL": "📊",  # Excel files
-    "JSON": "📝",  # JSON files
-    "ZIP": "📦",  # ZIP archives
-    "CSS": "🎨",  # CSS files (for corrected report.css)
-    "JS": "⚙️",  # JavaScript files (for corrected Show.js)
-    ".css": "🎨",  # CSS files by extension
-    ".js": "⚙️",  # JavaScript files by extension
-    "PDF": "📕",  # PDF files by type
-    ".pdf": "📕",  # PDF files by extension
-    "INFORMATION TABLE": "🔢",  # Text files
+    "XML": "🔷",      # Document for XML files
+    "HTML": "🌍",     # Page for HTML files
+    "GRAPHIC": "🎨",  # Camera for images
+    "EXCEL": "📊",    # Chart for Excel
+    "JSON": "📝",     # Note for JSON
+    "ZIP": "📦",      # Package for ZIP
+    "CSS": "📃",      # Page for CSS
+    "JS": "📄",       # Document for JavaScript
+    ".css": "📃",     # Page for CSS extension
+    ".js": "📄",      # Document for JS extension
+    "PDF": "📕",      # Book for PDF
+    ".pdf": "📕",     # Book for PDF extension
+    "INFORMATION TABLE": "📊"  # Chart for tables
 }
 
 
@@ -116,24 +117,28 @@ def get_file_icon(file_type: str, sequence: str = None, filename: str = None) ->
         If sequence is 1, returns "📜" (scroll) to indicate main filing document.
         Returns "📄" (document) as default if type not found.
     """
+    icon = None
     if sequence == "1":
-        return "📜"  # Scroll emoji for main document
+        icon = "📜"  # Scroll emoji for main document
 
     # Check if it's an XBRL exhibit (EX-101.*)
-    if file_type.startswith("EX-101."):
-        return FILE_TYPE_SYMBOLS.get(file_type, "📄")
+    elif file_type.startswith("EX-101."):
+        icon = FILE_TYPE_SYMBOLS.get(file_type, "📄")
 
     # Check if it's a regular exhibit (starts with EX-)
-    if file_type.startswith("EX-"):
-        return "📋 ✍️"  # Clipboard + writing hand for exhibits
+    elif file_type.startswith("EX-"):
+        icon = "📋"  # Clipboard + writing hand for exhibits
 
     # Check for file extension first if filename is provided
-    if filename:
+    elif filename:
         ext = get_extension(filename)
         if ext in FILE_TYPE_SYMBOLS:
-            return FILE_TYPE_SYMBOLS[ext]
+            icon = FILE_TYPE_SYMBOLS[ext]
 
-    return FILE_TYPE_SYMBOLS.get(file_type, "📄")
+    if not icon:
+        icon =FILE_TYPE_SYMBOLS.get(file_type, "📄")
+    icon = f"{icon} " if len(icon) == 1 else icon # Add spaces around the icon for padding
+    return icon
 
 
 class FilerInfo(BaseModel):
@@ -296,10 +301,18 @@ class Attachment:
         return None
 
     def __rich__(self):
-        table = Table("Document", "Description", "Type", "Size", box=box.ROUNDED)
-        table.add_row(self.document, self.description, self.document_type,
-                      display_size(self.size))
-        return table
+        icon = get_file_icon(self.document_type, self.sequence_number, self.document)
+        text = Text.assemble( (f"{self.sequence_number:<3} ", "dim italic"),
+                             " ",
+                             (self.document, "bold"),
+                             " ", (self.purpose or self.description, "grey54"),
+                             " ",
+                             (icon, ""),
+                              " ",
+                              (self.document_type,
+                               "bold deep_sky_blue1" if self.sequence_number == "1" else "")
+                             )
+        return Panel(text, box=box.ROUNDED, width=200, expand=False)
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -570,10 +583,10 @@ class Attachments:
         document_table = Table(Column('Seq', header_style="dim"),
                                         Column('Document', header_style="dim"),
                                         Column('Description', header_style="dim", min_width=60),
-                                        Column('Type', header_style="dim"),
+                                        Column('Type', header_style="dim", min_width=16),
                                title='Attachments',
                                row_styles=["", "bold"],
-                               box=box.SIMPLE)
+                               box=box.ROUNDED)
         all_attachments = sorted(self.documents + (self.data_files or []), key=sequence_sort_key)
 
 
@@ -584,7 +597,7 @@ class Attachments:
                                  sequence= attachment.sequence_number,
                                  filename=attachment.document)
             sequence_number = f"{attachment.sequence_number}" if attachment.sequence_number == "1" else attachment.sequence_number
-            description = attachment.purpose or attachment.description
+            description = "\n".join(textwrap.wrap(attachment.purpose or attachment.description, 100))
             document_table.add_row(Text(sequence_number, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else sequence_number,
                                    Text(attachment.document, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else attachment.document,
                                    Text(description, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else description,
