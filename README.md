@@ -490,7 +490,7 @@ Report a bug by [opening a new issue](https://github.com/dgunning/edgartools/iss
 
 ## Contact
 
-- **[Project Documentation](https://dgunning.github.io/edgartools/)**
+- **[Project Documentation](https://edgartools.readthedocs.io/)**
 - **[Edgartools Blog](https://www.edgartools.io)**
 - **[Dwight Gunning on LinkedIn](https://www.linkedin.com/in/dwight-gunning-860124/)**
 
