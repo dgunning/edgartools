@@ -29,7 +29,7 @@ from edgar.storage import is_using_local_storage, get_edgar_data_directory
 from edgar.financials import Financials
 from edgar.httprequests import download_json, download_text
 from edgar.reference.forms import describe_form
-from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik
+from edgar.reference.tickers import get_company_tickers, get_icon_from_ticker, find_cik, find_ticker
 from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
 
@@ -796,8 +796,16 @@ class EntityData:
 
         # Primary entity identification section
         if self.is_company:
-            ticker_display = f" ({self.ticker_display})" if self.ticker_display else ""
-            entity_title = Text.assemble("🏢", (f"{self.display_name}{ticker_display}", "bold deep_sky_blue3"))
+            ticker = find_ticker(self.cik)
+            ticker = f"{ticker}" if ticker else ""
+
+            # The title of the panel
+            entity_title = Text.assemble("🏢 ",
+                                  (self.display_name, "bold green"),
+                                  " ",
+                                  (f"[{self.cik}] ", "dim"),
+                                  (ticker, "bold yellow")
+                                  )
         else:
             entity_title = Text.assemble("👤", (self.display_name, "bold green"))
 
@@ -819,9 +827,9 @@ class EntityData:
 
         # Detailed Information Table
         details = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-        details.add_column("Category", style="bold grey70")
-        details.add_column("Industry", style="bold grey70")
-        details.add_column("Fiscal Year End", style="bold grey70")
+        details.add_column("Category")
+        details.add_column("Industry")
+        details.add_column("Fiscal Year End")
 
         details.add_row(
             self.category or "-",
@@ -843,8 +851,8 @@ class EntityData:
         # Trading Information
         if self.tickers and self.exchanges:
             trading_info = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-            trading_info.add_column("Exchange", style="bold grey70")
-            trading_info.add_column("Symbol", style="bold deep_sky_blue3")
+            trading_info.add_column("Exchange")
+            trading_info.add_column("Symbol", style="bold yellow")
 
             for exchange, ticker in zip_longest(self.exchanges, self.tickers, fillvalue="-"):
                 trading_info.add_row(exchange, ticker)
@@ -878,13 +886,13 @@ class EntityData:
         contact_renderables = []
         if not self.business_address.empty:
             contact_renderables.append(Panel(
-                Text(str(self.business_address), style="grey85"),
+                Text(str(self.business_address)),
                 title="🏢 Business Address",
                 border_style="grey50"
             ))
         if not self.mailing_address.empty:
             contact_renderables.append(Panel(
-                Text(str(self.mailing_address), style="grey85"),
+                Text(str(self.mailing_address)),
                 title="📫 Mailing Address",
                 border_style="grey50"
             ))
@@ -898,8 +906,8 @@ class EntityData:
         # Former Names Table (if any exist)
         if self.former_names:
             former_names_table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
-            former_names_table.add_column("Previous Company Names", style="bold grey70")
-            former_names_table.add_column("", style="grey85")  # Empty column for better spacing
+            former_names_table.add_column("Previous Company Names")
+            former_names_table.add_column("")  # Empty column for better spacing
 
             for former_name in self.former_names:
                 from_date = datefmt(former_name['from'], '%B %Y')
