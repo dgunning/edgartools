@@ -6,9 +6,9 @@ nav:
   - Overview: index.md
   - Filtering: filtering-filings.md
   - Navigating: navigating-filings.md
-  - Working with Filings: working-with-filings.md
-  - using-the-company-api.md
+  - Filings: working-with-filings.md
+  - Companies: using-the-company-api.md
   - Financials: company-financials.md
-  - data-objects.md
+  - Data Objects: data-objects.md
   - eightk-filings.md
   - local-data.md

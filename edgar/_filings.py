@@ -1665,7 +1665,9 @@ class Filing:
             Group(filing_info_table),
             title=title,
             subtitle=subtitle,
-            box=box.ROUNDED
+            box=box.ROUNDED,
+            height=10,
+            expand=False
         )
 
     def __repr__(self):
