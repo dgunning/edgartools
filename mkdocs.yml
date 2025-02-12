@@ -7,9 +7,9 @@ nav:
   - Filtering: filtering-filings.md
   - Navigating: navigating-filings.md
   - Filings: working-with-filings.md
-  - Companies: using-the-company-api.md
+  - Companies: company.md
   - Attachments: attachments.md
   - Financials: company-financials.md
+  - XBRL: xbrl.md
   - Data Objects: data-objects.md
-  - eightk-filings.md
-  - local-data.md
+  - Local Storage: local-data.md
