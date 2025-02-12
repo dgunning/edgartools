@@ -24,6 +24,10 @@ __all__ = ['Report', 'Reports', 'File', 'FilingSummary']
 
 class Reports:
 
+    """
+    A collection of reports in a filing summary
+    """
+
     def __init__(self,
                  data:pa.Table,
                  filing_summary: Optional['FilingSummary'] = None,
@@ -131,6 +135,15 @@ class Reports:
         data = self.data.filter(pc.equal(self.data['MenuCategory'], category))
         return Reports(data, filing_summary=self._filing_summary, title=category)
 
+    @property
+    def statements(self) -> Optional['Statements']:
+        """
+        Get all reports in the Statements category
+        """
+        reports = self.get_by_category('Statements')
+        if reports:
+            return Statements(reports)
+
     def get_by_filename(self, file_name: str):
         """
         Get a single report by file name
@@ -169,16 +182,15 @@ class Reports:
     def __rich__(self):
         table = Table(
             show_header=True,
-            header_style="bold magenta",
+            header_style="dim",
             show_lines=True,
             box=box.SIMPLE,
             border_style="bold grey54",
-            title=self.title,
             row_styles=["", "bold"]
         )
         table.add_column("#", style="dim", justify="left")
-        table.add_column("Report", style="bold", width=38)
-        table.add_column("Category", width=10)
+        table.add_column("Report", style="bold", width=60)
+        table.add_column("Category", width=12)
         table.add_column("File", justify="left")
 
         # Iterate through rows in current page
@@ -193,7 +205,8 @@ class Reports:
             ]
             table.add_row(*row)
 
-        return table
+        panel = Panel(table, title=self.title, expand=False)
+        return panel
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -265,9 +278,11 @@ class Report:
 
     def __rich__(self):
         return Panel(
-            Text(f"Report: {self.long_name}"),
-            title=self.short_name,
-            subtitle=self.menu_category
+            Text.assemble(("Report ", "dim"), (self.long_name, "bold")),
+            subtitle=Text(self.menu_category, style='dim italic'),
+            expand=False,
+            width=400,
+            height=4
         )
 
     def __repr__(self):
@@ -557,6 +572,10 @@ class StatementMapper:
 
 
 class Statements:
+
+    """
+    A wrapper class for detected financial statements in a filing summary.
+    """
     def __init__(self, statement_reports:Reports):
         self._reports = statement_reports
         self.statements = [report.short_name for report in self._reports]
@@ -580,6 +599,9 @@ class Statements:
             if score >= threshold:
                 return self._reports.get_by_short_name(statement)
         return None
+
+    def __getitem__(self, item):
+        return self._reports[item]
 
     @property
     def balance_sheet(self) -> Optional[Report]:
@@ -616,10 +638,8 @@ class Statements:
         }
 
     def __rich__(self):
-        return Panel(
-            self._reports,
-            title="Statements",
-        )
+        return self._reports
+
 
     def __repr__(self):
         return repr_rich(self.__rich__())

@@ -162,14 +162,6 @@ class SubmissionFormatParser:
         # It's an unclosed tag only if there's non-empty content after the '>'
         return bool(content_after)
 
-    def _is_section_start(self, line: str) -> bool:
-        """Check if line starts a new section"""
-        line = line.strip()
-        return (line.startswith('<') and
-                '>' in line and
-                not line.startswith('</') and
-                line.endswith('>'))
-
     def _is_section_end(self, line: str) -> bool:
         """Check if line ends a section"""
         return line.strip().startswith('</')
@@ -377,6 +369,7 @@ class SubmissionFormatParser:
 
     def parse(self, content: str) -> dict:
         """Parse SGML content in SUBMISSION format"""
+        document_buffer = None
         for line in content.splitlines():
             # Once we hit <DOCUMENT>, stop header parsing
             if '<DOCUMENT>' in line:

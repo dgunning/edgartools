@@ -8,9 +8,9 @@ from typing import List, Union, Optional
 
 from edgar.attachments import Attachments, Attachment, get_document_type
 from edgar.httprequests import stream_with_retry
-from edgar.sgml.header import FilingHeader
-from edgar.sgml.parsers import SGMLParser, SGMLFormatType, SGMLDocument
-from edgar.sgml.summary import FilingSummary
+from edgar.sgml.sgml_header import FilingHeader
+from edgar.sgml.sgml_parser import SGMLParser, SGMLFormatType, SGMLDocument
+from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.tools import is_xml
 
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']

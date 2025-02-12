@@ -1,7 +1,7 @@
 from rich import print
 import pytest
 from pathlib import Path
-from edgar.sgml.summary import FilingSummary, Reports, Report
+from edgar.sgml.filing_summary import FilingSummary, Reports, Report
 from edgar.sgml import FilingSGML
 
 

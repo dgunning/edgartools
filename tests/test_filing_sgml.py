@@ -4,7 +4,7 @@ from pathlib import Path
 
 from edgar import *
 from edgar.sgml import iter_documents, list_documents, FilingSGML
-from edgar.sgml.parsers import SGMLDocument, SGMLParser, SGMLFormatType
+from edgar.sgml.sgml_parser import SGMLDocument, SGMLParser, SGMLFormatType
 from edgar.sgml.tools import get_content_between_tags
 import hashlib
 from io import BytesIO
