@@ -66,8 +66,7 @@ from edgar.reference.tickers import Exchange
 from edgar.reference.tickers import find_ticker
 from edgar.richtools import repr_rich, print_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
-from edgar.sgml import FilingSGML
-from edgar.sgml.header import FilingHeader
+from edgar.sgml import FilingSGML, Reports, Statements, FilingHeader
 from edgar.storage import local_filing_path, is_using_local_storage
 from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
@@ -1404,18 +1403,43 @@ class Filing:
         with path.open("rb") as file:
             return pickle.load(file)
 
-    @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def filing_directory(self) -> FilingDirectory:
         return FilingDirectory.load(self.base_dir)
 
-    @cached_property
-    def filing_sgml(self) -> str:
+    @lru_cache()
+    def sgml(self) -> FilingSGML:
+        """
+        Read the filing from the local storage path if it exists
+        """
+        if is_using_local_storage():
+            local_path = local_filing_path(str(self.filing_date), self.accession_no)
+            if local_path.exists():
+                return FilingSGML.from_source(local_path)
         return FilingSGML.from_filing(self)
 
-    @property
-    @lru_cache(maxsize=1)
+    @cached_property
+    def reports(self)  -> Optional[Reports]:
+        """
+        If the filing has report attachments then return the reports
+        """
+        filing_summary = self.sgml().filing_summary
+        if filing_summary:
+            return filing_summary.reports
+
+    @cached_property
+    def statements(self) -> Optional[Statements]:
+        """
+        Get the statements for a report
+        """
+        if self.reports:
+            return self.reports.statements
+
+    @cached_property
     def index_headers(self) -> IndexHeaders:
+        """
+        Get the index headers for the filing. This is a listing of all the files in the filing directory
+        """
         index_headers_url = f"{self.base_dir}/{self.accession_no}-index-headers.html"
         index_header_text = download_text(index_headers_url)
         return IndexHeaders.load(index_header_text)
@@ -1452,9 +1476,9 @@ class Filing:
     @lru_cache(maxsize=1)
     def header(self):
         if is_using_local_storage():
-            sgml = self.sgml()
-            if sgml:
-                return sgml.header
+            _sgml = self.sgml()
+            if _sgml:
+                return _sgml.header
 
         sec_header_content = download_text_between_tags(self.text_url, "SEC-HEADER")
         try:
@@ -1463,16 +1487,7 @@ class Filing:
             # Try again with preprocessing - likely with a filing from the 1990's
             return FilingHeader.parse_from_sgml_text(sec_header_content, preprocess=True)
 
-    @lru_cache(maxsize=4)
-    def sgml(self) -> FilingSGML:
-        """
-        Read the filing from the local storage path if it exists
-        """
-        if is_using_local_storage():
-            local_path = local_filing_path(str(self.filing_date), self.accession_no)
-            if local_path.exists():
-                return FilingSGML.from_source(local_path)
-        return FilingSGML.from_filing(self)
+
 
     def data_object(self):
         """ Get this filing as the data object that it might be"""

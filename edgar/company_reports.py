@@ -658,7 +658,7 @@ class CurrentReport():
         # from the sgml content
         if exhibit.empty:
             # Download the SGML document
-            sgml_document = self._filing.filing_sgml.get_document_by_sequence(exhibit.sequence_number)
+            sgml_document = self._filing.sgml().get_document_by_sequence(exhibit.sequence_number)
             if sgml_document:
                 exhibit_content = sgml_document.text()
                 return exhibit_content

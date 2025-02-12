@@ -7,7 +7,7 @@ from rich import print
 
 from edgar import Filing
 from edgar.sgml.tools import extract_text_between_tags
-from edgar.sgml.header import preprocess_old_headers, FilingHeader, Filer
+from edgar.sgml.sgml_header import preprocess_old_headers, FilingHeader, Filer
 
 
 @pytest.fixture(scope='module')
