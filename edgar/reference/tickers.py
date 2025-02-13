@@ -229,6 +229,7 @@ def get_cik_ticker_lookup():
     return cik_to_tickers
 
 
+@lru_cache(maxsize=128)
 def find_ticker(cik: Union[int, str]) -> str:
     """Find the ticker symbol for a given CIK.
     Returns empty string if no ticker is found.
