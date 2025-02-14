@@ -387,6 +387,11 @@ def clean_company_suffix(name: str) -> str:
     return name
 
 
+def get_ticker_icon_url(ticker: str) -> str:
+    """
+    Get the URL for the icon of a company with the given ticker.
+    """
+    return f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{ticker.upper()}.png"
 
 @lru_cache(maxsize=4)
 def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
