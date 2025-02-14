@@ -492,7 +492,6 @@ Your contribution helps support:
 - Community support and issue resolution
 
 <a href="https://buy.polar.sh/polar_cl_4URWus0XT8CtHrbOEP4FfDTAbVFkp0RiZqgwd1tNIdg" data-polar-checkout data-polar-checkout-theme="dark">**Donate to edgartools**</a>
-<script src="https://cdn.jsdelivr.net/npm/@polar-sh/checkout@0.1/dist/embed.global.js" defer data-auto-init></script>
 
 ## Reporting Issues
 We use GitHub issues to track public bugs. 
