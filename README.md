@@ -468,7 +468,31 @@ filing.attachments.download(path)
 
 # Contributing
 
-Contributions are welcome! We would love to hear your thoughts on how this library could be better at working with SEC Edgar.
+A big welcome and thank you to all contributors! 🎉
+
+There are many ways to contribute to this project. Here are a few:
+- **Report bugs**: If you find a bug, please open an issue.
+- **Fix bugs**: If you can fix a bug, please open a pull request.
+- **Add features**: If you have an idea for a feature, please open a pull request.
+- **Improve the documentation**: If you see something that could be improved, please open a pull request.
+- **Write tutorials**: If you have a good understanding of how to use the library, please write a tutorial.
+- **Write tests**: If you can write tests, please write tests for the library.
+- **Expertise**: If you have expertise in SEC filings, XBRL, company finance contact me.
+- **Star the project**: If you like the project, please star it on GitHub.
+
+## Donations
+
+If you find this library useful, please consider making a donation to support its development.
+
+Your contribution helps support:
+- Ongoing development and maintenance
+- Bug fixes and performance improvements
+- New features to make SEC filing analysis even easier
+- Documentation updates and examples
+- Community support and issue resolution
+
+<a href="https://buy.polar.sh/polar_cl_4URWus0XT8CtHrbOEP4FfDTAbVFkp0RiZqgwd1tNIdg" data-polar-checkout data-polar-checkout-theme="dark">**Donate to edgartools**</a>
+<script src="https://cdn.jsdelivr.net/npm/@polar-sh/checkout@0.1/dist/embed.global.js" defer data-auto-init></script>
 
 ## Reporting Issues
 We use GitHub issues to track public bugs. 
