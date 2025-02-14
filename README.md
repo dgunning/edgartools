@@ -1,7 +1,7 @@
 <!-- align a paragraph to the center -->
 <p align="center">
 <a href="https://github.com/dgunning/edgartools">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-logo.png" alt="edgar-tools-logo" height="80">
+    <img src="docs/images/edgartools-logo.png" alt="edgar-tools-logo" height="80">
 </a>
 </p>
 <p align="center">The world's easiest, most powerful edgar library</p>
