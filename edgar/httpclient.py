@@ -16,13 +16,16 @@ DEFAULT_PARAMS = {
     "default_encoding": "utf-8",
 }
 
+client_factory_class = httpx.Client
+asyncclient_factory_class = httpx.AsyncClient
+
 def _client_factory(**kwargs)-> httpx.Client:
     params = DEFAULT_PARAMS.copy()
     params["headers"] = client_headers()
     
     params.update(**kwargs)
     
-    return httpx.Client(**params)
+    return client_factory_class(**params)
 
 def _http_client_manager():
     """When PERSISTENT_CLIENT, creates and reuses a single client. Otherwise, creates a new client per invocation."""
@@ -76,7 +79,7 @@ async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs
     params["headers"] = client_headers()
     
     params.update(**kwargs)
-    async with httpx.AsyncClient(**params) as client:
+    async with asyncclient_factory_class(**params) as client:
         yield client
 
 def close_clients():
