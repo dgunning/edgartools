@@ -1,4 +1,4 @@
-# Dowloading to Local Storage
+# Downloading to Local Storage
 
 When you use **edgartools** to get Company, or the html content of a filing, this usually results in one of more requests to the SEC. However, you can download data in bulk to local storage to minimize these requests and speed up processing. 
 
