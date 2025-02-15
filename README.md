@@ -75,7 +75,6 @@ set_identity("mike@indigo.com")
 
 # 3. Start using the library
 filings = get_filings()
-filings
 ```
 
 ![Getting filings](docs/images/get_filings.png)
@@ -83,34 +82,6 @@ filings
 After getting filings you can select a single filing and view its attachments
 ![Getting filings attachments](docs/images/filing_and_attachments.png)
 
-## Set your Edgar user identity as an environment variable
-As an alternative to using `set_identity()` you can set your Edgar user identity as an environment variable.
-
-The reason you need to set your identity is that the SEC Edgar API requires all requests to be identified.
-So you should set your user identity so that the library can make API requests on your behalf. 
-Your identity is usually a name and email, but you can also just use an email.
-
-The user identity is sent in the User-Agent string and the Edgar API will refuse to respond to your request without it.
-
-EdgarTools will look for an environment variable called `EDGAR_IDENTITY` and use that in each request.
-So, you need to set this environment variable before using it.
-
-### Setting EDGAR_IDENTITY in Linux/Mac
-```bash
-export EDGAR_IDENTITY="mcalum@gmail.com"
-```
-
-### Setting EDGAR_IDENTITY in Windows Powershell
-```bash
- $Env:EDGAR_IDENTITY="mcalum@gmail.com"
-```
-Alternatively, you can call `set_identity` which does the same thing.
-
-```python
-from edgar import set_identity
-set_identity("mcalum@gmail.com")
-```
-For more detail see https://www.sec.gov/os/accessing-edgar-data
 
 ## [Using the Filing API](https://github.com/dgunning/edgartools/wiki/WorkingWithFilings)
 Use the Filing API when you are not working with a specific company, but want to get a list of filings.
