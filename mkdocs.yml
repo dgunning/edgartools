@@ -11,6 +11,7 @@ nav:
   - Attachments: attachments.md
   - Financials: company-financials.md
   - XBRL: xbrl.md
+  - SGML: sgml.md
   - Data Objects: data-objects.md
   - Local Storage: local-data.md
   - Quick Guide: quick-guide.md
