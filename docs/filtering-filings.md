@@ -49,6 +49,40 @@ as well as after a date. For example:
 filings = get_filings(filing_date='2022-01-10:')
 ```
 
+#### More filtering examples
+
+```python
+
+from edgar import get_filings
+
+# Get filings for 2021
+filings_ = get_filings(2021) 
+
+# Get filings for 2021 Q4
+filings_ = get_filings(2021, 4) 
+
+# Get filings for 2021 Q3 and Q4
+filings_ = get_filings(2021, [3,4]) 
+
+# Get filings for 2020 and 2021
+filings_ = get_filings([2020, 2021]) 
+
+# Get filings for Q4 of 2020 and 2021
+filings_ = get_filings([2020, 2021], 4) 
+
+# Get filings between 2010 and 2021 - does not include 2021
+filings_ = get_filings(range(2010, 2021)) 
+
+# Get filings for 2021 Q4 for form D
+filings_ = get_filings(2021, 4, form="D") 
+
+# Get filings for 2021 Q4 on "2021-10-01"
+filings_ = get_filings(2021, 4, filing_date="2021-10-01") 
+
+# Get filings for 2021 Q4 between "2021-10-01" and "2021-10-10"
+filings_ = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") 
+                                                                       
+```
 ### Filtering by CIK
 
 You can filter filings by CIK using the `cik` parameter to get all filings for a company. For example:
