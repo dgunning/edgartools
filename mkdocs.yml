@@ -5,7 +5,6 @@ theme:
 nav:
   - Overview: index.md
   - Filtering: filtering-filings.md
-  - Navigating: navigating-filings.md
   - Filings: working-with-filings.md
   - Companies: company.md
   - Attachments: attachments.md
