@@ -339,8 +339,20 @@ def test_uu_roundtrip():
 
 
 def test_parse_filing_sgml_from_filing_with_new_series():
-    filing = Filing(form='485APOS', filing_date='2024-04-18', company='iSHARES TRUST', cik=1100663, accession_no='0001193125-24-100942')
     sgml = FilingSGML.from_source('data/sgml/0001193125-24-100942.txt')
     assert sgml
     sgml = FilingSGML.from_source('data/sgml/0001193125-24-100942.nc')
+    assert sgml
+
+def test_sgml_from_abs_filing():
+    sgml = FilingSGML.from_source('data/sgml/0000929638-25-000114.nc')
+    assert sgml
+
+
+def test_sgml_from_old_filing():
+    sgml = FilingSGML.from_source('data/sgml/0001193125-10-145855.nc')
+    assert sgml
+
+def test_sgml_from_really_old_filing_needing_preprocessing():
+    sgml = FilingSGML.from_source('data/sgml/0001094891-00-000193.txt')
     assert sgml

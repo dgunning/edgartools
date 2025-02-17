@@ -328,7 +328,10 @@ class FilingSGML:
         else:
             # For SEC-DOCUMENT format, pass the header text to the
             # specialized header parser since we need additional processing
-            header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
+            try:
+                header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
+            except Exception as e:
+                header = FilingHeader.parse_from_sgml_text(parsed_data['header'], preprocess=True)
 
         # Create document dictionary
         documents = defaultdict(list)

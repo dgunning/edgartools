@@ -11,7 +11,7 @@ from rich.table import Table, Column
 from rich.text import Text
 
 from edgar._party import Address, get_addresses_as_columns
-from edgar.core import datefmt, reverse_name
+from edgar.core import datefmt, reverse_name, log
 from edgar.reference import describe_form, states
 from edgar.richtools import repr_rich
 
@@ -682,7 +682,8 @@ class FilingHeader:
                         continue
                     else:
                         if current_subheader == "FORMER COMPANY":
-                            data[current_header][-1][current_subheader][-1][key.strip()] = value
+                            subheader_obj = data[current_header][-1][current_subheader][-1]
+                            subheader_obj[key.strip()] = value
                         else:
                             data[current_header][-1][current_subheader][key.strip()] = value
 

@@ -146,6 +146,9 @@ class SubmissionFormatParser:
             'COMPANY-DATA',
             'REPORTING-OWNER',
             'ISSUER',
+            'DEPOSITOR',
+            'SECURITIZER',
+            'ISSUING_ENTITY',
             'FORMER-COMPANY',
             'SUBJECT-COMPANY',
             'FILED-BY',
@@ -156,8 +159,15 @@ class SubmissionFormatParser:
             'CLASS-CONTRACT',
             'SERIES',
             'NEW-SERIES',
+            'NEW-CLASSES-CONTRACTS',
+            'ACQUIRING-DATA',
+            'TARGET-DATA',
+            'SERIAL-COMPANY',
+            'MERGER',
             'SERIES-AND-CLASSES-CONTRACTS-DATA',
-            'NEW-SERIES-AND-CLASSES-CONTRACTS'
+            'NEW-SERIES-AND-CLASSES-CONTRACTS',
+            'MERGER-SERIES-AND-CLASSES-CONTRACTS',
+            'EXISTING-SERIES-AND-CLASSES-CONTRACTS'
         }
 
         # Tags that can appear multiple times and should be stored as lists
