@@ -1407,6 +1407,12 @@ class Filing:
     def filing_directory(self) -> FilingDirectory:
         return FilingDirectory.load(self.base_dir)
 
+    def _local_path(self) -> Path:
+        """
+        Get the local path for the filing
+        """
+        return local_filing_path(str(self.filing_date), self.accession_no)
+
     @lru_cache()
     def sgml(self) -> FilingSGML:
         """

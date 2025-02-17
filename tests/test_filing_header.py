@@ -8,6 +8,7 @@ from rich import print
 from edgar import Filing
 from edgar.sgml.tools import extract_text_between_tags
 from edgar.sgml.sgml_header import preprocess_old_headers, FilingHeader, Filer
+from edgar.sgml import FilingSGML
 
 
 @pytest.fixture(scope='module')
@@ -39,7 +40,9 @@ def test_filing_sec_header(carbo_ceramics_header):
     assert filer.filing_information.film_number == '18674418'
     assert filer.filing_information.sec_act == '1934 Act'
 
-    assert filer.business_address.street1 == '575 NORTH DAIRY ASHFORD'
+    mailing_address = filer.mailing_address
+    business_address = filer.business_address
+    assert filer.mailing_address.street1 == '575 NORTH DAIRY ASHFORD'
     assert filer.business_address.street2 == 'SUITE 300'
     assert filer.business_address.city == 'HOUSTON'
     assert filer.business_address.state_or_country == 'TX'
@@ -86,7 +89,7 @@ def test_parse_filing_header_with_filer():
     assert filer.former_company_names[0].name == 'PLASMATECH BIOPHARMACEUTICALS INC'
 
     assert not filing_header.reporting_owners
-    assert not filing_header.issuers
+    assert not filing_header.issuer
 
     # Goldman Sachs
     # This Goldman Sachs filing has an extra : in the Street2 field
@@ -113,8 +116,8 @@ def test_parse_filing_header_with_reporting_owner():
     assert reporting_owner.filing_information.file_number == '001-40575'
     assert reporting_owner.filing_information.film_number == '23997535'
 
-    assert filing_header.issuers
-    issuer = filing_header.issuers[0]
+    assert filing_header.issuer
+    issuer = filing_header.issuer
     assert issuer.company_information.name == 'EverCommerce Inc.'
     assert issuer.company_information.cik == '0001853145'
     assert issuer.company_information.sic == 'SERVICES-PREPACKAGED SOFTWARE [7372]'
@@ -402,3 +405,95 @@ def test_get_header_for_list_fields_with_multiple_entries():
     filing_header = FilingHeader.parse_from_sgml_text(header_content)
     
     assert filing_header.filing_metadata.get("TEST-FIELD") == "foo, bar"
+
+
+def test_header_has_filers():
+    # Issue https://gist.github.com/kevinhu/3414663899d139c02a7bb31d8b176416
+    sgml : FilingSGML = FilingSGML.from_source('data/sgml/0001193125-24-100942.nc')
+    print()
+    header:FilingHeader = sgml.header
+    assert len(header.filers) == 2
+    filer = header.filers[0]
+    assert filer.company_information.name == 'iSHARES TRUST'
+    assert filer.company_information.cik == '0001100663'
+
+    business_address = filer.business_address
+    assert business_address.street1 == '400 HOWARD STREET'
+    assert business_address.city == 'SAN FRANCISCO'
+    assert business_address.state_or_country == 'CA'
+    assert business_address.zipcode == '94105'
+
+    mailing_address = filer.mailing_address
+    assert mailing_address.street1 == '400 HOWARD STREET'
+    assert mailing_address.city == 'SAN FRANCISCO'
+    assert mailing_address.state_or_country == 'CA'
+    assert mailing_address.zipcode == '94105'
+
+
+def test_header_has_reporting_owner_and_issuers():
+    sgml : FilingSGML = FilingSGML.from_source('data/sgml/0001127602-25-004598.nc')
+    print()
+    header:FilingHeader = sgml.header
+    reporting_owners = header.reporting_owners
+    assert len(header.reporting_owners) == 1
+    reporting_owner = reporting_owners[0]
+
+    assert reporting_owner.owner.name == 'Jean-Claude Carine Lamercie'
+    assert reporting_owner.owner.cik == '0001870985'
+    assert reporting_owner.filing_information.form == '4'
+    assert reporting_owner.filing_information.file_number == '001-04482'
+
+    mailing_address = reporting_owner.mailing_address
+    assert mailing_address.street1 == '9151 E PANORAMA CIR'
+    assert mailing_address.city == 'CENTENNIAL'
+
+    # Issuers
+    issuer = header.issuer
+    print(issuer)
+    assert issuer
+    assert issuer.company_information.name == 'ARROW ELECTRONICS, INC.'
+    assert issuer.company_information.cik == '0000007536'
+    assert issuer.company_information.irs_number == '111806155'
+    assert issuer.company_information.state_of_incorporation == 'NY'
+    assert issuer.company_information.fiscal_year_end == '1231'
+
+    # Business Address
+    business_address = issuer.business_address
+    assert business_address.street1 == '9151 EAST PANORAMA CIRCLE'
+    assert business_address.city == 'CENTENNIAL'
+
+    # Mailing Address
+    mailing_address = issuer.mailing_address
+    assert mailing_address.street1 == '9151 EAST PANORAMA CIRCLE'
+    assert mailing_address.city == 'CENTENNIAL'
+
+    # Former Company Names
+    assert len(issuer.former_company_names) == 2
+    assert issuer.former_company_names[0].name == 'ARROW ELECTRONICS, INC'
+    assert issuer.former_company_names[0].date_of_change == '20221117'
+    assert issuer.former_company_names[1].name == 'ARROW ELECTRONICS INC'
+    assert issuer.former_company_names[1].date_of_change == '19920703'
+
+def test_header_with_subject_company():
+    sgml: FilingSGML = FilingSGML.from_source('data/sgml/0001104659-25-002604.nc')
+    header = sgml.header
+    print()
+    print(header)
+    assert len(header.subject_companies) == 2
+    subject_company = header.subject_companies[0]
+    print(subject_company)
+    assert subject_company.company_information.name == 'CVR ENERGY INC'
+    assert subject_company.company_information.cik == '0001376139'
+    business_address = subject_company.business_address
+    assert business_address.street1 == '2277 PLAZA DRIVE'
+    assert business_address.city == 'SUGAR LAND'
+    assert business_address.state_or_country == 'TX'
+
+    mailing_address = subject_company.mailing_address
+    assert mailing_address.street1 == '2277 PLAZA DRIVE'
+    assert mailing_address.city == 'SUGAR LAND'
+    assert mailing_address.state_or_country == 'TX'
+
+    subject_company1 = header.subject_companies[1]
+    assert subject_company1.company_information.name == 'CVR ENERGY INC'
+    assert subject_company1.company_information.cik == '0001376139'

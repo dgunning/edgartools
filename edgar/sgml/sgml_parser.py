@@ -126,64 +126,29 @@ class SGMLParser:
 
 
 class SubmissionFormatParser:
-
     def __init__(self):
-        self.stack = []
+        # Initialize main data structure
         self.data = {
             'format': SGMLFormatType.SUBMISSION,
             'header': '',
             'documents': [],
-            'filer': {}
         }
-        self.current_tag = None
-        self.buffer = []
-        self.header_lines = []
+
+        # Parser state
+        self.current_path = []  # Stack to track current position in hierarchy
+        self.header_lines = []  # Collect header lines
         self.in_documents = False
 
-
-    def _is_unclosed_tag(self, line: str) -> bool:
-        """
-        Check if line is an unclosed tag with value.
-
-        Examples:
-            "<TAG>value" -> True
-            "<TAG>" -> False
-            "</TAG>" -> False
-            "<TAG>  " -> False
-        """
-        line = line.strip()
-        if not (line.startswith('<') and '>' in line and not line.startswith('</')):
-            return False
-
-        # Get the content after the tag
-        tag_end = line.index('>')
-        content_after = line[tag_end + 1:].strip()
-
-        # It's an unclosed tag only if there's non-empty content after the '>'
-        return bool(content_after)
-
-    def _is_section_end(self, line: str) -> bool:
-        """Check if line ends a section"""
-        return line.strip().startswith('</')
-
-    def _is_section_start(self, line: str) -> bool:
-        """
-        Identifies if a line starts a new nested section.
-        These are tags that will be followed by more tags.
-
-        Examples:
-            "<FILER>" -> True
-            "<COMPANY-DATA>" -> True
-            "<ACCESSION-NUMBER>12345" -> False
-            "<ORGANIZATION-NAME>" -> False
-        """
-        SECTION_TAGS = {
+        # Known section tags that can contain nested content
+        self.SECTION_TAGS = {
             'FILER',
             'OWNER-DATA',
             'COMPANY-DATA',
             'REPORTING-OWNER',
             'ISSUER',
             'FORMER-COMPANY',
+            'SUBJECT-COMPANY',
+            'FILED-BY',
             'FORMER-NAME',
             'FILING-VALUES',
             'BUSINESS-ADDRESS',
@@ -191,40 +156,56 @@ class SubmissionFormatParser:
             'CLASS-CONTRACT',
             'SERIES',
             'NEW-SERIES',
-            'ACQUIRING-DATA',
-            'TARGET-DATA',
-            'EXISTING-SERIES-AND-CLASSES-CONTRACTS',
             'SERIES-AND-CLASSES-CONTRACTS-DATA',
-            'NEW-SERIES-AND-CLASSES-CONTRACTS',
-            'MERGER-SERIES-AND-CLASSES-CONTRACTS',
-            'NEW-CLASSES-CONTRACTS',
-            'MERGER',
-            'ISSUING_ENTITY',
-            'SUBJECT-COMPANY',
-            'FILED-BY',
-            'DEPOSITOR',
-            'SECURITIZER'
-            # Add other section tags as needed
+            'NEW-SERIES-AND-CLASSES-CONTRACTS'
         }
 
+        # Tags that can appear multiple times and should be stored as lists
+        self.REPEATABLE_TAGS = {
+            'FILER',
+            'REPORTING-OWNER',
+            'SERIES',
+            'CLASS-CONTRACT',
+            'FORMER-COMPANY',
+            'SUBJECT-COMPANY'
+        }
+
+    def _get_current_context(self) -> dict:
+        """Navigate to current position in data hierarchy."""
+        context = self.data
+        for path_element in self.current_path:
+            tag, index = path_element
+            if index is not None:
+                context = context[tag][index]
+            else:
+                context = context[tag]
+        return context
+
+    def _is_unclosed_tag(self, line: str) -> bool:
+        """Check if line is an unclosed tag with value."""
+        line = line.strip()
+        if not (line.startswith('<') and '>' in line and not line.startswith('</')):
+            return False
+
+        tag_end = line.index('>')
+        content_after = line[tag_end + 1:].strip()
+        return bool(content_after)
+
+    def _is_section_end(self, line: str) -> bool:
+        """Check if line ends a section."""
+        return line.strip().startswith('</')
+
+    def _is_section_start(self, line: str) -> bool:
+        """Identifies if a line starts a new nested section."""
         line = line.strip()
         if not line.startswith('<') or not line.endswith('>'):
             return False
 
-        # Extract tag name
         tag = line[1:-1]  # Remove < and >
-        return tag in SECTION_TAGS
+        return tag in self.SECTION_TAGS
 
     def _is_data_tag(self, line: str) -> bool:
-        """
-        Identifies if a line contains a tag with a value.
-
-        Examples:
-            "<ACCESSION-NUMBER>0002002260-24-000001" -> True
-            "<TYPE>D" -> True
-            "<ORGANIZATION-NAME>" -> False
-            "<FILER>" -> False
-        """
+        """Identifies if a line contains a tag with a value."""
         line = line.strip()
         if not line.startswith('<'):
             return False
@@ -233,14 +214,7 @@ class SubmissionFormatParser:
         return len(parts) == 2 and bool(parts[1].strip())
 
     def _is_empty_tag(self, line: str) -> bool:
-        """
-        Identifies if a line is an empty tag.
-
-        Examples:
-            "<ORGANIZATION-NAME>" -> True
-            "<ACCESSION-NUMBER>12345" -> False
-            "<FILER>" -> False
-        """
+        """Identifies if a line is an empty tag."""
         line = line.strip()
         return (line.startswith('<') and
                 line.endswith('>') and
@@ -248,175 +222,122 @@ class SubmissionFormatParser:
                 not self._is_section_start(line) and
                 not self._is_data_tag(line))
 
-    def _handle_unclosed_tag(self, line: str) -> None:
-        """Handle tags like <ITEMS>value"""
+    def _handle_section_start(self, line: str) -> None:
+        """Handle start of nested section."""
+        tag = line.strip()[1:-1]  # Remove < and >
+
+        current_context = self._get_current_context()
+
+        # Initialize tag in current context if needed
+        if tag not in current_context:
+            if tag in self.REPEATABLE_TAGS:
+                current_context[tag] = []
+            else:
+                current_context[tag] = {}
+
+        # For repeatable tags, append new dict and track index
+        if tag in self.REPEATABLE_TAGS:
+            current_context[tag].append({})
+            self.current_path.append((tag, len(current_context[tag]) - 1))
+        else:
+            self.current_path.append((tag, None))
+
+    def _handle_section_end(self, line: str) -> None:
+        """Handle end of nested section."""
+        tag = line.strip()[2:-1]  # Remove </ and >
+
+        # Verify we're closing the correct tag
+        current_tag, _ = self.current_path[-1]
+        if tag != current_tag:
+            raise ValueError(f"Mismatched tags: expected </{current_tag}>, got </{tag}>")
+
+        # Pop the current section from the path
+        self.current_path.pop()
+
+    def _handle_data_tag(self, line: str) -> None:
+        """Handle tags with values."""
         line = line.strip()
         tag_end = line.index('>')
         tag = line[1:tag_end]
         value = line[tag_end + 1:].strip()
 
-        # Handle repeated tags (like ITEMS)
-        if tag in self.data:
-            if not isinstance(self.data[tag], list):
-                self.data[tag] = [self.data[tag]]
-            self.data[tag].append(value)
+        current_context = self._get_current_context()
+
+        # Handle repeated tags
+        if tag in current_context:
+            if not isinstance(current_context[tag], list):
+                current_context[tag] = [current_context[tag]]
+            current_context[tag].append(value)
         else:
-            self.data[tag] = value
-
-    def _handle_section_start(self, line: str) -> None:
-        """Handle start of nested section, e.g. <FILER>"""
-        line = line.strip()
-        tag = line[1:-1]  # Remove < and >
-
-        # Push current state to stack
-        if self.current_tag:
-            self.stack.append((self.current_tag, self.buffer))
-
-        self.current_tag = tag
-        self.buffer = []
-
-        # Initialize data structure for this section
-        if tag not in self.data:
-            self.data[tag] = []
-        # Add new empty dict for this section instance
-        self.data[tag].append({})
-
-    def _handle_section_end(self, line: str) -> None:
-        """Handle end of nested section"""
-        line = line.strip()
-        tag = line[2:-1]  # Remove </ and >
-
-        if tag != self.current_tag:
-            raise ValueError(f"Mismatched tags: expected </{self.current_tag}>, got </{tag}>")
-
-        # Process buffered content
-        section_data = {}
-        nested_buffer = []
-
-        for content in self.buffer:
-            if self._is_unclosed_tag(content):
-                # Handle single line tag-value pair
-                tag_end = content.index('>')
-                nested_tag = content[1:tag_end]
-                value = content[tag_end + 1:].strip()
-                section_data[nested_tag] = value
-            else:
-                # Add to nested buffer
-                nested_buffer.append(content)
-
-        if nested_buffer:
-            section_data['_content'] = '\n'.join(nested_buffer)
-
-        # Add processed section to data
-        if self.current_tag in self.data:
-            if not isinstance(self.data[self.current_tag], list):
-                self.data[self.current_tag] = [self.data[self.current_tag]]
-            self.data[self.current_tag].append(section_data)
-        else:
-            self.data[self.current_tag] = section_data
-
-        # Restore previous state from stack
-        if self.stack:
-            self.current_tag, self.buffer = self.stack.pop()
-        else:
-            self.current_tag = None
-            self.buffer = []
-
-    def _handle_content(self, line: str) -> None:
-        """Handle content within sections"""
-        if self.current_tag:
-            self.buffer.append(line.rstrip())
-
-    def _handle_data_tag(self, line: str) -> None:
-        """
-        Handle tags with values, e.g., "<ACCESSION-NUMBER>0002002260-24-000001"
-        Stores the tag value in the current data context.
-        """
-        line = line.strip()
-        tag_end = line.index('>')
-        tag = line[1:tag_end]  # Remove < and get tag name
-        value = line[tag_end + 1:].strip()
-
-        # If we're inside a nested structure, add to current context
-        if self.current_tag:
-            current_section = self.data[self.current_tag][-1]
-            if tag in current_section:
-                # If tag already exists, convert to list or append to existing list
-                existing = current_section[tag]
-                if isinstance(existing, list):
-                    existing.append(value)
-                else:
-                    current_section[tag] = [existing, value]
-            else:
-                current_section[tag] = value
-        else:
-            # Add to root level data
-            if tag in self.data:
-                # Handle repeated tags (like ITEMS)
-                if isinstance(self.data[tag], list):
-                    self.data[tag].append(value)
-                else:
-                    self.data[tag] = [self.data[tag], value]
-            else:
-                self.data[tag] = value
+            current_context[tag] = value
 
     def _handle_empty_tag(self, line: str) -> None:
-        """
-        Handle empty tags like "<ORGANIZATION-NAME>"
-        Stores as an empty string or None depending on context
-        """
-        line = line.strip()
-        tag = line[1:-1]  # Remove < and >
+        """Handle empty tags."""
+        tag = line.strip()[1:-1]  # Remove < and >
+        current_context = self._get_current_context()
+        current_context[tag] = ""
 
-        # If we're inside a nested structure
-        if self.current_tag:
-            self.data[self.current_tag][-1][tag] = ""
+    def _handle_unclosed_tag(self, line: str) -> None:
+        """Handle tags like <ITEMS>value."""
+        line = line.strip()
+        tag_end = line.index('>')
+        tag = line[1:tag_end]
+        value = line[tag_end + 1:].strip()
+
+        current_context = self._get_current_context()
+
+        if tag in current_context:
+            if not isinstance(current_context[tag], list):
+                current_context[tag] = [current_context[tag]]
+            current_context[tag].append(value)
         else:
-            # Add to root level data
-            self.data[tag] = ""
+            current_context[tag] = value
 
     def parse(self, content: str) -> dict:
-        """Parse SGML content in SUBMISSION format"""
+        """Parse SGML content in SUBMISSION format."""
         document_buffer = None
+
         for line in content.splitlines():
-            # Once we hit <DOCUMENT>, stop header parsing
+            # Check for document section
             if '<DOCUMENT>' in line:
-                # Store accumulated header
                 self.data['header'] = '\n'.join(self.header_lines)
                 self.in_documents = True
-                # Start collecting document content
                 document_buffer = [line]
                 continue
 
             if self.in_documents:
-                # Handle document section separately
                 if '</DOCUMENT>' in line:
                     document_buffer.append(line)
                     doc_content = '\n'.join(document_buffer)
                     doc_data = self._parse_document_section(doc_content)
                     if doc_data:
                         self.data['documents'].append(doc_data)
-                    document_buffer = []
-                else:
+                    document_buffer = None
+                elif document_buffer is not None:
                     document_buffer.append(line)
             else:
-                # Still in header section
+                # Header section parsing
                 self.header_lines.append(line)
+                line = line.strip()
+
+                if not line:
+                    continue
+
                 if self._is_section_start(line):
                     self._handle_section_start(line)
+                elif self._is_section_end(line):
+                    self._handle_section_end(line)
                 elif self._is_data_tag(line):
                     self._handle_data_tag(line)
                 elif self._is_empty_tag(line):
                     self._handle_empty_tag(line)
-                elif line.startswith('</'):
-                    self._handle_section_end(line)
-                elif line.strip():
-                    self._handle_content(line)
+                elif self._is_unclosed_tag(line):
+                    self._handle_unclosed_tag(line)
 
         return self.data
 
     def _parse_document_section(self, content: str) -> dict:
-        """Parse a single document section"""
+        """Parse a single document section."""
         doc_data = {
             'type': '',
             'sequence': '',
@@ -425,7 +346,7 @@ class SubmissionFormatParser:
             'content': content
         }
 
-        # Extract document metadata using regex
+        # Extract document metadata
         type_match = re.search(r'<TYPE>([^<\n]+)', content)
         if type_match:
             doc_data['type'] = type_match.group(1).strip()
@@ -443,7 +364,6 @@ class SubmissionFormatParser:
             doc_data['description'] = description_match.group(1).strip()
 
         return doc_data
-
 
 class SecDocumentFormatParser:
     """Parser for <SEC-DOCUMENT> style SGML"""

@@ -324,23 +324,7 @@ class FilingSGML:
         # Create FilingHeader using already parsed data
         if parsed_data['format'] == SGMLFormatType.SUBMISSION:
             # For submission format, we already have parsed filer data
-            metadata = {
-                "ACCESSION NUMBER": parsed_data.get("ACCESSION-NUMBER"),
-                "CONFORMED SUBMISSION TYPE": parsed_data.get("TYPE"),
-                "FILED AS OF DATE": parsed_data.get("FILING-DATE"),
-                "DATE AS OF CHANGE": parsed_data.get("DATE-OF-FILING-DATE-CHANGE"),
-                "EFFECTIVE DATE": parsed_data.get("EFFECTIVENESS-DATE"),
-            }
-
-            # No need to reparse the header text
-            header = FilingHeader(
-                text=parsed_data['header'],
-                filing_metadata=metadata,
-                filers=parsed_data.get('filer', []),
-                reporting_owners=parsed_data.get('reporting_owners', []),
-                issuers=parsed_data.get('issuers', []),
-                subject_companies=parsed_data.get('subject_companies', [])
-            )
+            header = FilingHeader.parse_submission_format_header(parsed_data=parsed_data)
         else:
             # For SEC-DOCUMENT format, pass the header text to the
             # specialized header parser since we need additional processing

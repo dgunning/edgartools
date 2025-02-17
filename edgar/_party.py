@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from bs4 import Tag
 from rich.console import Group
@@ -34,6 +34,16 @@ class Address(BaseModel):
     def empty(self):
         return not self.street1 and not self.street2 and not self.city and not self.state_or_country and not self.zipcode
 
+    @classmethod
+    def from_dict(cls, address_dict: Dict[str, Any]):
+        return Address(
+                street1=address_dict.get('STREET1'),
+                street2=address_dict.get('STREET2'),
+                city=address_dict.get('CITY'),
+                state_or_country=address_dict.get('STATE'),
+                zipcode=address_dict.get('ZIP')
+            )
+
     def __str__(self):
         if not self.street1:
             return ""
@@ -56,7 +66,9 @@ class Address(BaseModel):
                 )
 
 
-def get_addresses_as_columns(mailing_address: Optional[Address], business_address: Optional[Address]) -> Columns:
+def get_addresses_as_columns(*,
+                             mailing_address: Optional[Address],
+                             business_address: Optional[Address]) -> Columns:
     """
     Returns a rich Columns object with mailing and business addresses
     """
