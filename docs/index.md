@@ -60,6 +60,9 @@ The library is designed to be easy to use and flexible. You can start by getting
 ```python
 filings = get_filings()
 ```
+
+![Get Filings Image](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/get_filings.png)
+
 You can expand beyond the current year and quarter by using the parameters of the `get_filings` function.
 
 For example you can specify the year you want to get filings for:
