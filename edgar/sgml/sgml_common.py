@@ -299,31 +299,23 @@ class FilingSGML:
 
 
     @classmethod
-    def from_source(cls, source: Union[str, Path, None]=None, content: Union[str, None]=None) -> 'FilingSGML':
+    def from_source(cls, source: Union[str, Path]) -> 'FilingSGML':
         """
         Create FilingSGML instance from either a URL or file path.
         Parses both header and documents.
 
         Args:
             source: Either a URL string or a file path
-            content: The content of the filing as a string
 
         Returns:
             FilingSGML: New instance with parsed header and documents
 
         Raises:
-            ValueError: If incorrect number of arguments provided or header section cannot be found
+            ValueError: If header section cannot be found
             IOError: If file cannot be read
         """
-
-        if content is None:
-            if source is None:
-                raise ValueError("Either source or content must be provided")
-            else:
-                # Read content once
-                content = read_content_as_string(source)
-        elif source is not None:
-            raise ValueError("Only one of source or content must be provided")
+        # Read content once
+        content = read_content_as_string(source)
 
         # Create parser and get structure including header and documents
         parser = SGMLParser()
