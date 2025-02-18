@@ -299,7 +299,7 @@ class FilingSGML:
 
 
     @classmethod
-    def from_source(cls, *, source: Union[str, Path, None]=None, content: Union[str, None]=None) -> 'FilingSGML':
+    def from_source(cls, source: Union[str, Path, None]=None, content: Union[str, None]=None) -> 'FilingSGML':
         """
         Create FilingSGML instance from either a URL or file path.
         Parses both header and documents.
