@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.5] - 2025-02-19
+
+### Added 
+
+- Add `FilingSGML.from_text()` to create a `FilingSGML` object from text in addition to files and a URL
+- Add `num_documents` property to `FilingHeader` to get the number of documents in the SGML
+
+### Changed
+
+- Use filing form types to `Entity.is_individual` to make determining if an entity is an individual or a company more accurate
+
 ## [3.11.4] - 2025-02-17
 
 ### Fixed
