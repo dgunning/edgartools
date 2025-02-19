@@ -202,7 +202,7 @@ N-CR,Current report for money market funds
 N-CSR,Certified annual shareholder report
 N-CSRS,Certified semi-annual shareholder report
 N-MFP2/A,Monthly portfolio holdings for money market funds
-N-MFP3,Monthly portfolio holdings for money market funds (Effective 6/11/2024)
+N-MFP3,Monthly portfolio holdings for money market funds
 NPORT-EX,Portfolio holdings exhibit to Form N-PORT
 NPORT-NP,Non-public monthly portfolio investments report
 NPORT-P,Public monthly portfolio investments report
@@ -240,7 +240,7 @@ PREM14C,Preliminary merger information statement
 PREN14A,Preliminary proxy statement filed by non-management
 PRER14A,Preliminary revised proxy materials
 PRER14C,Preliminary revised information statements
-PRRN14A,Revised preliminary proxy statement filed by non-management
+PRRN14A,Revised preliminary proxy statement non-management
 PX14A6G,Exempt solicitation
 PX14A6N,Exempt solicitation for roll-up transaction
 QRTLYRPT,Development banks quarterly report
@@ -248,12 +248,12 @@ RW,Registration withdrawal
 RW WD,Withdrawal of registration withdrawal
 S-1,Securities registration
 S-11,Real estate securities registration
-S-11MEF,Registration statement filed relating to prior Form S-11
-S-1MEF,Registration statement filed relating to prior Form S-1
+S-11MEF,Registration statement for prior Form S-11
+S-1MEF,Registration statement for prior Form S-1
 S-20,Standardized options registration
 S-3,Simplified securities registration
 S-3ASR,Automatic shelf registration
-S-3D,Automatically securities registration for dividend reinvestment plans
+S-3D,Dividend reinvestment plans automatic securities registration
 S-3DPOS,Post-effective amendment to Form S-3D
 S-3MEF,Registration statement filed relating to prior Form S-3
 S-4 POS,Post-effective amendment to Form S-4
@@ -265,26 +265,26 @@ S-8,Employee securities registration
 S-8 POS,Post-effective amendment to Form S-8
 S-B,Foreign governments securities registration
 S-BMEF,Registration statement filed relating to prior Form S-B
-SBSE,Application for registration as a security-based swap dealer or major participant
+SBSE,Security-based swap dealer registration
 SBSE-A,Abbreviated application for SEC-registered swap entities also registered with CFTC
 SBSE-BD,Application for broker-dealer security-based swap dealers/major participants
 SBSE-C,Certifications for security-based swap dealer/major participant registration
 SBSE-W,Request to withdraw registration as security-based swap dealer/major participant
 SBSE-DISPUTE NOTICE,Notice of valuation dispute by a security-based swap entity
-SBSE-CCO-RPT,Annual compliance report for security-based swap dealers and major participants
+SBSE-CCO-RPT,Annual compliance report for security-based swap dealers
 SC 13D,Ownership for control disclosure
 SCHEDULE 13D,Disclosure of beneficial ownership over 5% (XML)
 SC 13E1,Issuer statement for going private transactions
 SC 13E3,Schedule for going private transactions
 SC 13G,Beneficial ownership
-SCHEDULE 13G,Disclosure of beneficial ownership by passive investors and institutions (XML)
+SCHEDULE 13G,Beneficial ownership by passive investors/institutions
 SC 14D9,Solicitation/recommendation statement for third-party tender offers
 SC 14F1,Statement for changes to majority of directors
 SC 14N,Information by nominating shareholders
 SC 14N-S,Solicitation relating to Rule 14a-11 nominating groups
 SC TO-C,Written communication relating to tender offers
-SC TO-I,Issuer tender offer statement
-SC TO-T,Third party tender offer statement
+SC TO-I,Tender offer by issuer
+SC TO-T,Tender offer by third party
 SC13E4F,Foreign issuer tender
 SC14D1F,3rd party tender offer by foreign issuer
 SC14D9C,Subject company communication relating to third-party tender offer
