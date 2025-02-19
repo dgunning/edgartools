@@ -59,6 +59,89 @@ __all__ = [
     'get_cik_lookup_data'
 ]
 
+# Performance optimization: use set for O(1) lookups
+COMPANY_FORMS =  {
+    # Registration statements
+    "S-1", "S-3", "S-4", "S-8", "S-11",
+    # Foreign issuers registration forms
+    "F-1", "F-3", "F-4", "F-6", "F-7", "F-8", "F-9", "F-10", "F-80",
+    # Foreign form amendments and effectiveness
+    "F-6EF", "F-6 POS", "F-3ASR", "F-4MEF", "F-10EF", "F-3D", "F-3MEF",
+    # Exchange Act registration
+    "10-12B", "10-12G",
+    # Periodic reports
+    "10-K", "10-Q", "10-K/A", "10-Q/A",
+    "20-F", "40-F",  # Foreign issuers
+    "11-K",  # Employee benefit plans
+    # Current reports
+    "8-K", "6-K",
+    # Proxy materials
+    "DEF 14A", "PRE 14A", "DEFA14A", "DEFM14A",
+    # Other corporate filings
+    "424B1", "424B2", "424B3", "424B4", "424B5",
+    "ARS", "NT 10-K", "NT 10-Q",
+    "SC 13D", "SC 13G", "SC TO-I", "SC TO-T",
+    "SD", "PX14A6G",
+    # Specialized corporate filings
+    "N-CSR", "N-Q", "N-MFP", "N-CEN",
+    "X-17A-5", "17-H",
+    "TA-1", "TA-2",
+    "ATS-N",
+    # Corporate disclosures
+    "EFFECT", "FWP", "425", "CB",
+    "POS AM", "CORRESP", "UPLOAD"
+}
+
+def has_company_filings(filings_form_array: pa.ChunkedArray, max_filings: int = 50) -> bool:
+    """
+    Efficiently check if any form in the PyArrow ChunkedArray matches company-only forms.
+    Limited to checking the first max_filings entries for performance.
+    """
+
+    # Early exit for empty arrays
+    if filings_form_array.null_count == filings_form_array.length:
+        return False
+
+    # Handle case with fewer than max_filings
+    total_filings = filings_form_array.length()
+    filings_to_check = min(total_filings, max_filings)
+
+    # Track how many we've checked so far
+    checked_count = 0
+
+    # Process chunks in the ChunkedArray until we hit our limit
+    for chunk in filings_form_array.chunks:
+        chunk_size = len(chunk)
+
+        # If this chunk would exceed our limit, slice it
+        if checked_count + chunk_size > filings_to_check:
+            # Only check remaining forms needed to reach filings_to_check
+            remaining = filings_to_check - checked_count
+            sliced_chunk = chunk.slice(0, remaining)
+
+            # Use safer iteration over array values
+            for i in range(len(sliced_chunk)):
+                # Get value safely, handling nulls
+                val = sliced_chunk.take([i]).to_pylist()[0]
+                if val is not None and val in COMPANY_FORMS:
+                    return True
+        else:
+            # Process full chunk safely
+            for val in chunk.to_pylist():
+                if val is not None and val in COMPANY_FORMS:
+                    return True
+
+        # Update count of checked filings
+        if checked_count + chunk_size > filings_to_check:
+            checked_count += (filings_to_check - checked_count)
+        else:
+            checked_count += chunk_size
+
+        # Stop if we've checked enough
+        if checked_count >= filings_to_check:
+            break
+
+    return False
 
 class Address:
     def __init__(self,
@@ -537,13 +620,18 @@ class EntityData:
         """
         if len(self.tickers) > 0 or len(self.exchanges) > 0:
             return False
-        if self.state_of_incorporation is not None and self.state_of_incorporation != '':
+        elif self.state_of_incorporation is not None and self.state_of_incorporation != '':
             return False
-        if self.entity_type not in ['', 'other']:
+        elif self.entity_type not in ['', 'other']:
             return False
-        if self.ein is None or self.ein == "000000000":  # The Warren Buffett case
+        elif has_company_filings(self.filings.data['form']):
+            if self.cik == 315090:  # The Warren Buffett exception
+                return True
+            return False
+        elif self.ein is None or self.ein == "000000000":
             return True
-        return False
+        else:
+            return False
 
     @property
     def _unicode_symbol(self):

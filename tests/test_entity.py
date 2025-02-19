@@ -38,6 +38,9 @@ def test_entity_is_company():
     # 360 Funds
     assert Entity(1319067).is_company
 
+    # Jeronimo Martins
+    assert Entity(1438077).is_company
+
 
 def test_warren_buffett():
     # Warren Buffett
