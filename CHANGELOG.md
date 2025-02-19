@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.4] - 2025-02-17
+
+### Fixed
+
+- Fixed bug that caused **Filers**, **SubjectCompany** to be missing when parsing SGML files
+
+
+## [3.11.3] - 2025-02-14
+
+### Fixed
+
+- Fixed bug when parsing SGML from files with the .nc format
+
+### Changed
+
+- Add `lru_cache` to `find_ticker` function
+
+## Added
+
+- Add function `get_ticker_icon_url` in `reference.tickers` to get the icon url for a ticker
+
+
 ## [3.11.2] - 2025-02-11
 
 ### Changed

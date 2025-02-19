@@ -337,3 +337,22 @@ def test_uu_roundtrip():
     assert encoded_text.endswith('end\n')
     assert '\nend\n' in encoded_text  # Proper end marker format
 
+
+def test_parse_filing_sgml_from_filing_with_new_series():
+    sgml = FilingSGML.from_source('data/sgml/0001193125-24-100942.txt')
+    assert sgml
+    sgml = FilingSGML.from_source('data/sgml/0001193125-24-100942.nc')
+    assert sgml
+
+def test_sgml_from_abs_filing():
+    sgml = FilingSGML.from_source('data/sgml/0000929638-25-000114.nc')
+    assert sgml
+
+
+def test_sgml_from_old_filing():
+    sgml = FilingSGML.from_source('data/sgml/0001193125-10-145855.nc')
+    assert sgml
+
+def test_sgml_from_really_old_filing_needing_preprocessing():
+    sgml = FilingSGML.from_source('data/sgml/0001094891-00-000193.txt')
+    assert sgml

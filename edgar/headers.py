@@ -124,7 +124,7 @@ class Filer(BaseModel):
 
     def __rich__(self):
         contents = [self.company_data,
-                    get_addresses_as_columns(self.business_address, self.mail_address)
+                    get_addresses_as_columns(business_address=self.business_address, mailing_address=self.mail_address)
                     ]
 
         return Panel(Group(*contents), title="Filer", style="bold", box=box.ROUNDED)
@@ -142,7 +142,7 @@ class SubjectCompany(BaseModel):
 
     def __rich__(self):
         contents = [self.company_data,
-                    get_addresses_as_columns(self.business_address, self.mail_address)
+                    get_addresses_as_columns(business_address=self.business_address, mailing_address=self.mail_address)
                     ]
 
         return Panel(Group(*contents), title="Subject Company", style="bold", box=box.ROUNDED)
