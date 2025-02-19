@@ -3,8 +3,8 @@ import zipfile
 from collections import defaultdict
 from functools import cached_property
 from pathlib import Path
-from typing import Iterator, Dict
-from typing import List, Union, Optional
+from typing import Iterator, Dict, DefaultDict
+from typing import List, Union, Optional, Tuple
 
 from edgar.attachments import Attachments, Attachment, get_document_type
 from edgar.httprequests import stream_with_retry
@@ -141,6 +141,51 @@ def parse_file(source: Union[str, Path]) -> list[SGMLDocument]:
         List of SGMLDocument objects
     """
     return list(iter_documents(source))
+
+def parse_submission_text(content: str) -> Tuple[FilingHeader, DefaultDict[str, List[SGMLDocument]]]:
+    """
+    Parses the raw submission text and returns the filing header along with
+    a dictionary mapping document sequence numbers to lists of SGMLDocument objects.
+    Args:
+        content (str): The raw text content of the submission.
+    Returns:
+        Tuple[FilingHeader, DefaultDict[str, List[SGMLDocument]]]:
+            A tuple where the first element is the FilingHeader object representing
+            the parsed header information, and the second element is a defaultdict
+            mapping document sequence identifiers to their corresponding list of SGMLDocument objects.
+    Details:
+        - For submissions with the SGMLFormatType.SUBMISSION format, the function uses
+          the pre-parsed filer data to create the FilingHeader.
+        - For SEC-DOCUMENT formatted content, the header is initially parsed from the SGML text;
+          if this fails, the header is parsed again with preprocessing enabled.
+        - The function creates an SGMLDocument for each parsed document and groups them by
+          their sequence identifier.
+    Raises:
+        Exception: Any exceptions raised during header parsing (handled internally
+                   by attempting to preprocess the header in case of failure).
+    """
+    # Create parser and get structure including header and documents
+    parser = SGMLParser()
+    parsed_data = parser.parse(content)
+
+    # Create FilingHeader using already parsed data
+    if parsed_data['format'] == SGMLFormatType.SUBMISSION:
+        # For submission format, we already have parsed filer data
+        header = FilingHeader.parse_submission_format_header(parsed_data=parsed_data)
+    else:
+        # For SEC-DOCUMENT format, pass the header text to the
+        # specialized header parser since we need additional processing
+        try:
+            header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
+        except Exception as e:
+            header = FilingHeader.parse_from_sgml_text(parsed_data['header'], preprocess=True)
+
+    # Create document dictionary
+    documents = defaultdict(list)
+    for doc_data in parsed_data['documents']:
+        doc = SGMLDocument.from_parsed_data(doc_data)
+        documents[doc.sequence].append(doc)
+    return header, documents
 
 
 
@@ -299,7 +344,7 @@ class FilingSGML:
 
 
     @classmethod
-    def from_source(cls, source: Union[str, Path]) -> 'FilingSGML':
+    def from_source(cls, source: Union[str, Path]) -> "FilingSGML":
         """
         Create FilingSGML instance from either a URL or file path.
         Parses both header and documents.
@@ -317,28 +362,31 @@ class FilingSGML:
         # Read content once
         content = read_content_as_string(source)
 
-        # Create parser and get structure including header and documents
-        parser = SGMLParser()
-        parsed_data = parser.parse(content)
+        # Parse header and documents
+        header, documents = parse_submission_text(content)
 
-        # Create FilingHeader using already parsed data
-        if parsed_data['format'] == SGMLFormatType.SUBMISSION:
-            # For submission format, we already have parsed filer data
-            header = FilingHeader.parse_submission_format_header(parsed_data=parsed_data)
-        else:
-            # For SEC-DOCUMENT format, pass the header text to the
-            # specialized header parser since we need additional processing
-            try:
-                header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
-            except Exception as e:
-                header = FilingHeader.parse_from_sgml_text(parsed_data['header'], preprocess=True)
+        # Create FilingSGML instance
+        return cls(header=header, documents=documents)
+    
+    @classmethod
+    def from_text(cls, full_text_submission: str) -> "FilingSGML":
+        """
+        Create FilingSGML instance from either full text submission.
+        Parses both header and documents.
 
-        # Create document dictionary
-        documents = defaultdict(list)
-        for doc_data in parsed_data['documents']:
-            doc = SGMLDocument.from_parsed_data(doc_data)
-            documents[doc.sequence].append(doc)
+        Args:
+            full_text_submission: String containing full text submission
 
+        Returns:
+            FilingSGML: New instance with parsed header and documents
+
+        Raises:
+            ValueError: If header section cannot be found
+        """
+        # Parse header and documents
+        header, documents = parse_submission_text(full_text_submission)
+
+        # Create FilingSGML instance
         return cls(header=header, documents=documents)
 
 
