@@ -81,6 +81,12 @@ class FilingMetadata:
                 value = datefmt(value, "%Y-%m-%d")
         return value
 
+    @property
+    def num_documents(self):
+        count = self.metadata.get("PUBLIC DOCUMENT COUNT")
+        if count and count.isdigit():
+            return int(count)
+
     def __getitem__(self, key: str):
         return self.get(key)
 
