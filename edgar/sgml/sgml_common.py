@@ -1,10 +1,12 @@
+from ast import Tuple
+from email import header
 import re
 import zipfile
 from collections import defaultdict
 from functools import cached_property
 from pathlib import Path
-from typing import Iterator, Dict
-from typing import List, Union, Optional
+from typing import Iterator, Dict, Tuple
+from typing import List, Union, Optional, DefaultDict
 
 from edgar.attachments import Attachments, Attachment, get_document_type
 from edgar.httprequests import stream_with_retry
@@ -13,7 +15,7 @@ from edgar.sgml.sgml_parser import SGMLParser, SGMLFormatType, SGMLDocument
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.tools import is_xml
 
-__all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
+__all__ = ["iter_documents", "list_documents", "FilingSGML", "FilingHeader"]
 
 
 def parse_document(document_str: str) -> SGMLDocument:
@@ -21,17 +23,17 @@ def parse_document(document_str: str) -> SGMLDocument:
     Parse a single SGML document section, maintaining raw content.
     """
     # Extract individual fields with separate patterns
-    type_match = re.search(r'<TYPE>([^<\n]+)', document_str)
-    sequence_match = re.search(r'<SEQUENCE>([^<\n]+)', document_str)
-    filename_match = re.search(r'<FILENAME>([^<\n]+)', document_str)
-    description_match = re.search(r'<DESCRIPTION>([^<\n]+)', document_str)
+    type_match = re.search(r"<TYPE>([^<\n]+)", document_str)
+    sequence_match = re.search(r"<SEQUENCE>([^<\n]+)", document_str)
+    filename_match = re.search(r"<FILENAME>([^<\n]+)", document_str)
+    description_match = re.search(r"<DESCRIPTION>([^<\n]+)", document_str)
 
     return SGMLDocument(
         type=type_match.group(1).strip() if type_match else "",
         sequence=sequence_match.group(1).strip() if sequence_match else "",
         filename=filename_match.group(1).strip() if filename_match else "",
         description=description_match.group(1).strip() if description_match else "",
-        raw_content=document_str
+        raw_content=document_str,
     )
 
 
@@ -49,7 +51,9 @@ def read_content(source: Union[str, Path]) -> Iterator[str]:
         TooManyRequestsError: If the server returns a 429 response
         FileNotFoundError: If the file path doesn't exist
     """
-    if isinstance(source, str) and (source.startswith('http://') or source.startswith('https://')):
+    if isinstance(source, str) and (
+        source.startswith("http://") or source.startswith("https://")
+    ):
         # Handle URL using stream_with_retry
         for response in stream_with_retry(source):
             # Process each line from the response and decode from bytes
@@ -59,7 +63,7 @@ def read_content(source: Union[str, Path]) -> Iterator[str]:
     else:
         # Handle file path
         path = Path(source)
-        with path.open('r', encoding='utf-8') as file:
+        with path.open("r", encoding="utf-8") as file:
             yield from file
 
 
@@ -83,11 +87,11 @@ def read_content_as_string(source: Union[str, Path]) -> str:
     for line in read_content(source):
         # Handle both string and bytes from response
         if isinstance(line, bytes):
-            lines.append(line.decode('utf-8', errors='replace'))
+            lines.append(line.decode("utf-8", errors="replace"))
         else:
             lines.append(line)
 
-    return ''.join(lines)
+    return "".join(lines)
 
 
 def iter_documents(source: Union[str, Path]) -> Iterator[SGMLDocument]:
@@ -106,8 +110,8 @@ def iter_documents(source: Union[str, Path]) -> Iterator[SGMLDocument]:
         FileNotFoundError: If the file path doesn't exist
     """
     try:
-        content = ''.join(read_content(source))
-        document_pattern = re.compile(r'<DOCUMENT>([\s\S]*?)</DOCUMENT>')
+        content = "".join(read_content(source))
+        document_pattern = re.compile(r"<DOCUMENT>([\s\S]*?)</DOCUMENT>")
 
         for match in document_pattern.finditer(content):
             document = parse_document(match.group(1))
@@ -116,6 +120,7 @@ def iter_documents(source: Union[str, Path]) -> Iterator[SGMLDocument]:
 
     except (ValueError, ConnectionError, FileNotFoundError) as e:
         raise type(e)(f"Error processing source {source}: {str(e)}")
+
 
 def list_documents(source: Union[str, Path]) -> list[SGMLDocument]:
     """
@@ -143,15 +148,61 @@ def parse_file(source: Union[str, Path]) -> list[SGMLDocument]:
     return list(iter_documents(source))
 
 
+def parse_submission_text(
+    content: str,
+) -> Tuple[FilingHeader, DefaultDict[str, List[SGMLDocument]]]:
+    # Create parser and get structure including header and documents
+    parser = SGMLParser()
+    parsed_data = parser.parse(content)
+
+    # Create FilingHeader using already parsed data
+    if parsed_data["format"] == SGMLFormatType.SUBMISSION:
+        # For submission format, we already have parsed filer data
+        metadata = {
+            "ACCESSION NUMBER": parsed_data.get("ACCESSION-NUMBER"),
+            "CONFORMED SUBMISSION TYPE": parsed_data.get("TYPE"),
+            "FILED AS OF DATE": parsed_data.get("FILING-DATE"),
+            "DATE AS OF CHANGE": parsed_data.get("DATE-OF-FILING-DATE-CHANGE"),
+            "EFFECTIVE DATE": parsed_data.get("EFFECTIVENESS-DATE"),
+        }
+
+        # No need to reparse the header text
+        header = FilingHeader(
+            text=parsed_data["header"],
+            filing_metadata=metadata,
+            filers=parsed_data.get("filer", []),
+            reporting_owners=parsed_data.get("reporting_owners", []),
+            issuers=parsed_data.get("issuers", []),
+            subject_companies=parsed_data.get("subject_companies", []),
+        )
+    else:
+        # For SEC-DOCUMENT format, pass the header text to the
+        # specialized header parser since we need additional processing
+        header = FilingHeader.parse_from_sgml_text(parsed_data["header"])
+
+    # Create document dictionary
+    documents = defaultdict(list)
+    for doc_data in parsed_data["documents"]:
+        doc = SGMLDocument.from_parsed_data(doc_data)
+        documents[doc.sequence].append(doc)
+    return header, documents
+
 
 class FilingSGML:
     """
     Main class that parses and provides access to both the header and documents
     from an SGML filing.
     """
-    __slots__ = ('header', '_documents_by_sequence', '__dict__')  # Use slots for memory efficiency
 
-    def __init__(self, header: FilingHeader, documents: defaultdict[str, List[SGMLDocument]]):
+    __slots__ = (
+        "header",
+        "_documents_by_sequence",
+        "__dict__",
+    )  # Use slots for memory efficiency
+
+    def __init__(
+        self, header: FilingHeader, documents: defaultdict[str, List[SGMLDocument]]
+    ):
         """
         Initialize FilingSGML with parsed header and documents.
 
@@ -159,9 +210,9 @@ class FilingSGML:
             header (FilingHeader): Parsed header information
             documents (Dict[str, SGMLDocument]): Dictionary of parsed documents keyed by sequence
         """
-        self.header:FilingHeader = header
-        self._documents_by_sequence:defaultdict[str, List[SGMLDocument]] = documents
-        self._documents_by_name:Dict[str, SGMLDocument] = {
+        self.header: FilingHeader = header
+        self._documents_by_sequence: defaultdict[str, List[SGMLDocument]] = documents
+        self._documents_by_name: Dict[str, SGMLDocument] = {
             doc.filename: doc for doc_lst in documents.values() for doc in doc_lst
         }
 
@@ -183,15 +234,14 @@ class FilingSGML:
 
     @property
     def effective_date(self):
-        return self.header.filing_metadata.get('EFFECTIVE DATE')
-
+        return self.header.filing_metadata.get("EFFECTIVE DATE")
 
     def html(self):
         html_document = self.attachments.primary_html_document
         if html_document and not html_document.is_binary() and not html_document.empty:
             html_text = self.get_content(html_document.document)
             if isinstance(html_text, bytes):
-                html_text = html_text.decode('utf-8')
+                html_text = html_text.decode("utf-8")
             return html_text
 
     def xml(self):
@@ -199,7 +249,7 @@ class FilingSGML:
         if xml_document and not xml_document.is_binary() and not xml_document.empty:
             xml_text = self.get_content(xml_document.document)
             if isinstance(xml_text, bytes):
-                xml_text = xml_text.decode('utf-8')
+                xml_text = xml_text.decode("utf-8")
             return xml_text
 
     def get_content(self, filename: str) -> Optional[str]:
@@ -228,11 +278,13 @@ class FilingSGML:
                     ixbrl=False,
                     path=f"/<SGML FILE>/{document.filename}",
                     document=document.filename,
-                    document_type=get_document_type(filename=document.filename, declared_document_type=document.type),
+                    document_type=get_document_type(
+                        filename=document.filename, declared_document_type=document.type
+                    ),
                     description=document.description,
                     size=None,
                     sgml_document=document,
-                    filing_sgml=self
+                    filing_sgml=self,
                 )
                 # Add from the filing summary if available
                 if filing_summary:
@@ -251,7 +303,12 @@ class FilingSGML:
                     else:
                         documents.append(attachment)
 
-        return Attachments(document_files=documents, data_files=datafiles, primary_documents=primary_files, sgml=self)
+        return Attachments(
+            document_files=documents,
+            data_files=datafiles,
+            primary_documents=primary_files,
+            sgml=self,
+        )
 
     @cached_property
     def filing_summary(self):
@@ -262,7 +319,7 @@ class FilingSGML:
             filing_summary._filing_sgml = self
             return filing_summary
 
-    def download(self,  path: Union[str, Path], archive: bool = False):
+    def download(self, path: Union[str, Path], archive: bool = False):
         """
         Download all the attachments to a specified path.
         If the path is a directory, the file is saved with its original name in that directory.
@@ -275,7 +332,7 @@ class FilingSGML:
             if path.is_dir():
                 raise ValueError("Path must be a zip file name to create zipfile")
             else:
-                with zipfile.ZipFile(path, 'w') as zipf:
+                with zipfile.ZipFile(path, "w") as zipf:
                     for document in self._documents_by_name.values():
                         zipf.writestr(document.filename, document.content)
         else:
@@ -286,7 +343,7 @@ class FilingSGML:
                     if isinstance(content, bytes):
                         file_path.write_bytes(content)
                     else:
-                        file_path.write_text(content, encoding='utf-8')
+                        file_path.write_text(content, encoding="utf-8")
             else:
                 raise ValueError("Path must be a directory")
 
@@ -297,9 +354,8 @@ class FilingSGML:
         """
         return self.attachments.primary_documents
 
-
     @classmethod
-    def from_source(cls, source: Union[str, Path]) -> 'FilingSGML':
+    def from_source(cls, source: Union[str, Path]) -> "FilingSGML":
         """
         Create FilingSGML instance from either a URL or file path.
         Parses both header and documents.
@@ -317,43 +373,32 @@ class FilingSGML:
         # Read content once
         content = read_content_as_string(source)
 
-        # Create parser and get structure including header and documents
-        parser = SGMLParser()
-        parsed_data = parser.parse(content)
+        # Parse header and documents
+        header, documents = parse_submission_text(content)
 
-        # Create FilingHeader using already parsed data
-        if parsed_data['format'] == SGMLFormatType.SUBMISSION:
-            # For submission format, we already have parsed filer data
-            metadata = {
-                "ACCESSION NUMBER": parsed_data.get("ACCESSION-NUMBER"),
-                "CONFORMED SUBMISSION TYPE": parsed_data.get("TYPE"),
-                "FILED AS OF DATE": parsed_data.get("FILING-DATE"),
-                "DATE AS OF CHANGE": parsed_data.get("DATE-OF-FILING-DATE-CHANGE"),
-                "EFFECTIVE DATE": parsed_data.get("EFFECTIVENESS-DATE"),
-            }
-
-            # No need to reparse the header text
-            header = FilingHeader(
-                text=parsed_data['header'],
-                filing_metadata=metadata,
-                filers=parsed_data.get('filer', []),
-                reporting_owners=parsed_data.get('reporting_owners', []),
-                issuers=parsed_data.get('issuers', []),
-                subject_companies=parsed_data.get('subject_companies', [])
-            )
-        else:
-            # For SEC-DOCUMENT format, pass the header text to the
-            # specialized header parser since we need additional processing
-            header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
-
-        # Create document dictionary
-        documents = defaultdict(list)
-        for doc_data in parsed_data['documents']:
-            doc = SGMLDocument.from_parsed_data(doc_data)
-            documents[doc.sequence].append(doc)
-
+        # Create FilingSGML instance
         return cls(header=header, documents=documents)
 
+    @classmethod
+    def from_text(cls, full_text_submission: str) -> "FilingSGML":
+        """
+        Create FilingSGML instance from either full text submission.
+        Parses both header and documents.
+
+        Args:
+            full_text_submission: String containing full text submission
+
+        Returns:
+            FilingSGML: New instance with parsed header and documents
+
+        Raises:
+            ValueError: If header section cannot be found
+        """
+        # Parse header and documents
+        header, documents = parse_submission_text(full_text_submission)
+
+        # Create FilingSGML instance
+        return cls(header=header, documents=documents)
 
     def get_document_by_sequence(self, sequence: str) -> Optional[SGMLDocument]:
         """
@@ -372,7 +417,7 @@ class FilingSGML:
         return self._documents_by_name.get(filename)
 
     @classmethod
-    def from_filing(cls, filing: 'Filing') -> 'FilingSGML':
+    def from_filing(cls, filing: "Filing") -> "FilingSGML":
         """Create from a Filing object that provides text_url."""
         return cls.from_source(filing.text_url)
 
