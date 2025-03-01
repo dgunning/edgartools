@@ -434,6 +434,7 @@ class Filings:
         self.data_pager = DataPager(self.data)
         # This keeps track of where the index should start in case this is just a page in the Filings
         self._original_state = original_state or PagingState(0, len(self.data))
+        self._hash = None
 
     def to_pandas(self, *columns) -> pd.DataFrame:
         """Return the filing index as a python dataframe"""
@@ -703,6 +704,46 @@ class Filings:
                          + min(self.data_pager.page_size, len(self.data)))  # set the index to the size of the page
         else:
             return range(*self.data_pager._current_range)
+
+    def __eq__(self, other):
+        # Check if other is Filings or subclass of Filings
+        if not isinstance(other, self.__class__) and not issubclass(other.__class__, self.__class__):
+            return False
+
+        if len(self) != len(other):
+            return False
+
+        if self.start_date != other.start_date or self.end_date != other.end_date:
+            return False
+
+        # Handle empty tables
+        if len(self) == 0:
+            return True  # Two empty tables with same dates are equal
+
+        # Compare just accession_number columns
+        return self.data['accession_number'].equals(other.data['accession_number'])
+
+
+    def __hash__(self):
+        if self._hash is None:
+            # Base hash components
+            hash_components = [self.__class__.__name__, len(self), self.start_date, self.end_date]
+
+            # Only add accession numbers if table is not empty
+            if len(self) > 0:
+                # Handle different table sizes appropriately
+                if len(self) == 1:
+                    hash_components.append(self.data['accession_number'][0].as_py())
+                elif len(self) == 2:
+                    hash_components.append(self.data['accession_number'][0].as_py())
+                    hash_components.append(self.data['accession_number'][1].as_py())
+                else:
+                    hash_components.append(self.data['accession_number'][0].as_py())
+                    hash_components.append(self.data['accession_number'][len(self) // 2].as_py())
+                    hash_components.append(self.data['accession_number'][len(self) - 1].as_py())
+
+            self._hash = hash(tuple(hash_components))
+        return self._hash
 
     def __rich__(self) -> Panel:
         # Create table with appropriate columns and styling
@@ -1481,18 +1522,8 @@ class Filing:
     @property
     @lru_cache(maxsize=1)
     def header(self):
-        if is_using_local_storage():
-            _sgml = self.sgml()
-            if _sgml:
-                return _sgml.header
-
-        sec_header_content = download_text_between_tags(self.text_url, "SEC-HEADER")
-        try:
-            return FilingHeader.parse_from_sgml_text(sec_header_content)
-        except Exception:
-            # Try again with preprocessing - likely with a filing from the 1990's
-            return FilingHeader.parse_from_sgml_text(sec_header_content, preprocess=True)
-
+        _sgml = self.sgml()
+        return _sgml.header
 
 
     def data_object(self):

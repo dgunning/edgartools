@@ -174,7 +174,7 @@ def test_get_content_for_eightk_with_binary_exhibit():
 def test_eightk_date_of_report():
     f = Filing(form='8-K', filing_date='1995-01-24', company='AMERICAN EXPRESS CO', cik=4962, accession_no='0000004962-95-000001')
     eightk = f.obj()
-    assert eightk.date_of_report == ''
+    assert eightk.date_of_report == 'January 23, 1995'
 
 
 def test_extract_xbrl_from_8k():
