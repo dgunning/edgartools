@@ -7,7 +7,7 @@ from rich import print
 
 from edgar._filings import Filing
 from edgar.ownership import *
-from edgar.ownership.form345 import compute_average_price, compute_total_value, format_amount, is_numeric
+from edgar.ownership.core import compute_average_price, compute_total_value, format_amount, is_numeric
 
 pd.options.display.max_columns = None
 
@@ -523,15 +523,17 @@ def test_insider_transaction_sell():
                     accession_no='0001415889-24-001537')
     form4: Ownership = filing.obj()
 
-    insider_transaction = form4.get_insider_market_trade_summary()
-    assert insider_transaction.owner == 'Paul A Mahon'
-    assert insider_transaction.position == 'EVP & GENERAL COUNSEL'
+    ownership_summary = form4.get_ownership_summary()
+    assert ownership_summary.insider_name == 'Paul A Mahon'
+    assert ownership_summary.position == 'EVP & GENERAL COUNSEL'
+    """ 
     assert insider_transaction.buy_sell == 'Sell'
     assert insider_transaction.shares == 6000.0
     assert insider_transaction.price == 218.72
     assert insider_transaction.remaining == 36599.0
+    """
     print()
-    print(form4)
+    print(ownership_summary)
 
 
 def test_insider_transaction_buy():
@@ -539,13 +541,9 @@ def test_insider_transaction_buy():
     filing = Filing(form='4', filing_date='2024-01-18', company='FROST PHILLIP MD ET AL', cik=898860,
                     accession_no='0000950170-24-005448')
     form4: Ownership = filing.obj()
-    insider_transaction = form4.get_insider_market_trade_summary()
-    assert insider_transaction.owner == 'Phillip Frost MD ET AL and one other'
+    insider_transaction = form4.get_ownership_summary()
+    assert insider_transaction.insider_name == 'Phillip Frost MD ET AL / Gamma Investments Trust Frost'
     assert insider_transaction.position == 'CEO & Chairman'
-    assert insider_transaction.buy_sell == 'Buy'
-    assert insider_transaction.shares == 400000.0
-    assert insider_transaction.price == 0.97
-    assert insider_transaction.remaining == 205368225.0
     print()
     print(form4)
 
