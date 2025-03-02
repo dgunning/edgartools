@@ -941,15 +941,18 @@ class ReportingOwners():
         return len(self.owners)
 
     def __rich__(self):
-        table = Table(Column("Owner", style="bold deep_sky_blue1"), "Position", "Location", box=box.SIMPLE,
+        table = Table(Column("Owner", style="bold deep_sky_blue1"),
+                      "Position",
+                      "Cik",
+                      "Location", box=box.SIMPLE,
                       row_styles=["", "bold"])
         for owner in self.owners:
-            table.add_row(owner.name, owner.position, f"{owner.address.city}")
+            table.add_row(owner.name, owner.position, owner.cik, f"{owner.address.city}")
 
         title = "\U0001F468\u200D\U0001F4BC Reporting Owner"
         if len(self) > 1:
             title += "s"
-        return Panel(table, title=title)
+        return Panel(table, title=title, expand=False)
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -1049,6 +1052,11 @@ class TransactionActivity:
     value: Any = 0
     price_per_share: Any = None  # Add explicit price per share field
     description: str = ""
+    security_type: str = "non-derivative"  # "non-derivative" or "derivative"
+    security_title: str = ""
+    underlying_security: str = ""  # For derivative securities
+    exercise_date: Optional[str] = None
+    expiration_date: Optional[str] = None
 
     @property
     def shares_numeric(self) -> Optional[int]:
@@ -1064,6 +1072,11 @@ class TransactionActivity:
     def price_numeric(self) -> Optional[float]:
         """Get price as a numeric value, handling footnotes"""
         return safe_numeric(self.price_per_share)
+
+    @property
+    def is_derivative(self) -> bool:
+        """Check if this is a derivative transaction"""
+        return self.security_type == "derivative"
 
     @property
     def code_description(self) -> str:
@@ -1092,6 +1105,13 @@ class TransactionActivity:
         """Get the display name for the transaction"""
         if self.description:
             return self.description
+
+        if self.security_type == "derivative":
+            base_desc = self.code_description
+            if self.underlying_security:
+                return f"{base_desc} ({self.underlying_security})"
+            return base_desc
+
         return self.code_description
 
     @property
@@ -1325,6 +1345,16 @@ class TransactionSummary(OwnershipSummary):
         return list(set(t.transaction_type for t in self.transactions))
 
     @property
+    def has_only_derivatives(self) -> bool:
+        """Check if filing only contains derivative transactions"""
+        return all(t.is_derivative for t in self.transactions)
+
+    @property
+    def has_non_derivatives(self) -> bool:
+        """Check if filing contains non-derivative transactions"""
+        return any(not t.is_derivative for t in self.transactions)
+
+    @property
     def net_change(self) -> int:
         """Calculate total net change in shares"""
         purchases = sum(t.shares_numeric or 0 for t in self.transactions
@@ -1345,6 +1375,18 @@ class TransactionSummary(OwnershipSummary):
     @property
     def primary_activity(self) -> str:
         """Determine the primary activity type for display purposes"""
+        # Handle derivative-only case
+        if self.has_only_derivatives:
+            if "derivative_purchase" in self.transaction_types and "derivative_sale" in self.transaction_types:
+                return "DERIVATIVE TRANSACTIONS"
+            elif "derivative_purchase" in self.transaction_types:
+                return "DERIVATIVE ACQUISITION"
+            elif "derivative_sale" in self.transaction_types:
+                return "DERIVATIVE DISPOSITION"
+            else:
+                return "DERIVATIVE TRANSACTION"
+
+        # Original logic for non-derivative transactions
         if "purchase" in self.transaction_types and "sale" in self.transaction_types:
             return "Mixed Transactions"
         elif "purchase" in self.transaction_types:
@@ -1461,75 +1503,113 @@ class TransactionSummary(OwnershipSummary):
 
         elements = [header]
 
-        # Create transaction table if we have transactions
+        # Create transaction table with price column
         if self.transactions:
-            transaction_table = Table(box=box.SIMPLE, title="Transaction Details", title_style="bold")
-            transaction_table.add_column("Type", style="bold")
-            transaction_table.add_column("Code", justify="center")
-            transaction_table.add_column("Description", style="italic")
-            transaction_table.add_column("Shares", justify="right")
-            transaction_table.add_column("Price/Share", justify="right")  # Add price per share column
-            transaction_table.add_column("Value", justify="right")
+            # Group transactions by type
+            non_derivative_trans = [t for t in self.transactions if not t.is_derivative]
+            derivative_trans = [t for t in self.transactions if t.is_derivative]
 
-            # Add rows for each transaction
-            for transaction in self.transactions:
-                transaction_table.add_row(
-                    Text(transaction.transaction_type.upper(), style=transaction.style),
-                    transaction.code,
-                    transaction.display_name,
-                    format_numeric(transaction.shares),
-                    format_numeric(transaction.price_per_share, currency=True),  # Add price display
-                    format_numeric(transaction.value, currency=True)
-                )
+            # Display non-derivative transactions if present
+            if non_derivative_trans:
+                transaction_table = Table(box=box.SIMPLE, title="Common Stock Transactions", title_style="bold")
+                transaction_table.add_column("Type", style="bold")
+                transaction_table.add_column("Code", justify="center")
+                transaction_table.add_column("Description", style="italic")
+                transaction_table.add_column("Shares", justify="right")
+                transaction_table.add_column("Price/Share", justify="right")
+                transaction_table.add_column("Value", justify="right")
 
-            # Calculate summary data for purchases and sales
-            purchase_transactions = [t for t in self.transactions if t.transaction_type == "purchase"]
-            sale_transactions = [t for t in self.transactions if t.transaction_type == "sale"]
+                # Add rows for each non-derivative transaction
+                for transaction in non_derivative_trans:
+                    transaction_table.add_row(
+                        Text(transaction.transaction_type.upper(), style=transaction.style),
+                        transaction.code,
+                        transaction.display_name,
+                        format_numeric(transaction.shares),
+                        format_numeric(transaction.price_per_share, currency=True),
+                        format_numeric(transaction.value, currency=True)
+                    )
 
-            # Add summary rows
-            if "purchase" in self.transaction_types or "sale" in self.transaction_types:
-                net_style = "green bold" if self.net_change >= 0 else "red bold"
+                # Calculate summary data for purchases and sales
+                purchase_transactions = [t for t in non_derivative_trans if t.transaction_type == "purchase"]
+                sale_transactions = [t for t in non_derivative_trans if t.transaction_type == "sale"]
 
-                # First add NET CHANGE row
-                transaction_table.add_row(
-                    Text("NET CHANGE", style=net_style),
-                    "", "",
-                    Text(f"{self.net_change:,}", style=net_style),
-                    "",
-                    Text(f"${self.net_value:,.2f}", style=net_style)
-                )
+                # Add summary rows for non-derivative transactions
+                if purchase_transactions or sale_transactions:
+                    net_change = sum(t.shares_numeric or 0 for t in purchase_transactions) - \
+                                 sum(t.shares_numeric or 0 for t in sale_transactions)
+                    net_value = sum(t.value_numeric or 0 for t in purchase_transactions) - \
+                                sum(t.value_numeric or 0 for t in sale_transactions)
 
-                if purchase_transactions:
-                    total_purchase_shares = sum(t.shares_numeric or 0 for t in purchase_transactions)
-                    if total_purchase_shares > 0:
-                        avg_purchase_price = sum((t.price_numeric or 0) * (t.shares_numeric or 0)
+                    net_style = "green bold" if net_change >= 0 else "red bold"
+
+                    # First add NET CHANGE row
+                    transaction_table.add_row(
+                        Text("NET CHANGE", style=net_style),
+                        "", "",
+                        Text(f"{net_change:,}", style=net_style),
+                        "",
+                        Text(f"${net_value:,.2f}", style=net_style)
+                    )
+
+                    # Add average price info after the net change row
+                    if purchase_transactions:
+                        total_purchase_shares = sum(t.shares_numeric or 0 for t in purchase_transactions)
+                        if total_purchase_shares > 0:
+                            avg_purchase_price = sum((t.price_numeric or 0) * (t.shares_numeric or 0)
                                                      for t in purchase_transactions) / total_purchase_shares
-                        transaction_table.add_row(
-                            Text("AVG PURCHASE PRICE", style="green dim"),
-                            "", "", "",
-                            Text(format_numeric(avg_purchase_price, currency=True), style="green"),
-                            ""
-                        )
+                            transaction_table.add_row(
+                                Text("AVG BUY PRICE", style="green dim"),
+                                "", "", "",
+                                Text(format_numeric(avg_purchase_price, currency=True), style="green"),
+                                ""
+                            )
 
-                if sale_transactions:
-                    total_sale_shares = sum(t.shares_numeric or 0 for t in sale_transactions)
-                    if total_sale_shares > 0:
-                        avg_sale_price = sum((t.price_numeric or 0) * (t.shares_numeric or 0)
+                    if sale_transactions:
+                        total_sale_shares = sum(t.shares_numeric or 0 for t in sale_transactions)
+                        if total_sale_shares > 0:
+                            avg_sale_price = sum((t.price_numeric or 0) * (t.shares_numeric or 0)
                                                  for t in sale_transactions) / total_sale_shares
-                        transaction_table.add_row(
-                            Text("AVG SALE PRICE", style="red dim"),
-                            "", "", "",
-                            Text(format_numeric(avg_sale_price, currency=True), style="red"),
-                            ""
-                        )
+                            transaction_table.add_row(
+                                Text("AVG SELL PRICE", style="red dim"),
+                                "", "", "",
+                                Text(format_numeric(avg_sale_price, currency=True), style="red"),
+                                ""
+                            )
 
-            elements.append(transaction_table)
+                elements.append(transaction_table)
 
-        # Add derivative transaction indicator if needed
-        if self.has_derivative_transactions:
-            derivative_note = Text("* This filing includes derivative transactions (options, convertibles, etc.)",
-                                   style="italic dim")
-            elements.append(derivative_note)
+            # Display derivative transactions if present
+            if derivative_trans:
+                derivative_table = Table(box=box.SIMPLE,
+                                         title="Derivative Securities Transactions",
+                                         title_style="bold blue")
+                derivative_table.add_column("Type", style="bold")
+                derivative_table.add_column("Security", style="italic")
+                derivative_table.add_column("Underlying", style="italic")
+                derivative_table.add_column("Shares", justify="right")
+                derivative_table.add_column("Exercise Price", justify="right")
+                derivative_table.add_column("Expiration", justify="right")
+
+                # Add rows for each derivative transaction
+                for transaction in derivative_trans:
+                    derivative_table.add_row(
+                        Text("ACQUIRE" if transaction.transaction_type == "derivative_purchase"
+                             else "DISPOSE", style=transaction.style),
+                        transaction.security_title,
+                        transaction.underlying_security,
+                        format_numeric(transaction.shares),
+                        format_numeric(transaction.price_per_share, currency=True),
+                        transaction.expiration_date or "N/A"
+                    )
+
+                elements.append(derivative_table)
+        else:
+            # No transactions handling
+            no_trans_text = Text("No transactions reported", style="italic")
+            elements.append(no_trans_text)
+
+        # Position info and remarks remain unchanged...
 
         # Create position info
         position_table = Table.grid(padding=(0, 1))
@@ -1630,8 +1710,10 @@ class Ownership:
                     transaction_type=transaction_type,
                     code=row.Code,
                     shares=row.Shares,
-                    price_per_share=row.Price,  # Add explicit price per share
+                    price_per_share=row.Price,
                     value=row.Shares * row.Price if not pd.isna(row.Price) else 0,
+                    security_type="non-derivative",
+                    security_title=row.Security,
                 ))
 
         # Process non-derivative non-market transactions (other codes)
@@ -1661,7 +1743,30 @@ class Ownership:
                     price_per_share=row.Price if pd.notna(row.Price) else None,  # Add price
                     # Don't calculate value for non-market transactions unless price available
                     value=row.Shares * row.Price if pd.notna(row.Price) and row.Price > 0 else 0,
+                    security_type="non-derivative",
+                    security_title=row.Security,
                 ))
+
+        # Process derivative transactions
+        if self.derivative_table and self.derivative_table.has_transactions:
+            derivative_trans = self.derivative_table.transactions.data
+            if not derivative_trans.empty:
+                for _, row in derivative_trans.iterrows():
+                    transaction_type = "derivative_purchase" if row.AcquiredDisposed == 'A' else "derivative_sale"
+                    underlying, price = safe_numeric(row.UnderlyingShares), safe_numeric(row.Price)
+
+                    activities.append(TransactionActivity(
+                        transaction_type=transaction_type,
+                        code=row.Code,
+                        shares=row.UnderlyingShares,
+                        price_per_share=row.ExercisePrice if pd.notna(row.ExercisePrice) else None,
+                        value=row.UnderlyingShares * row.Price if price and underlying else 0,
+                        security_type="derivative",
+                        security_title=row.Security,
+                        underlying_security=row.Underlying,
+                        exercise_date=row.ExerciseDate if pd.notna(row.ExerciseDate) else None,
+                        expiration_date=row.ExpirationDate if pd.notna(row.ExpirationDate) else None,
+                    ))
 
         return activities
 

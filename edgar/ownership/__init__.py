@@ -21,4 +21,5 @@ from edgar.ownership.ownershipforms import (
     PostTransactionAmounts,
     NonDerivativeTransaction,
     NonDerivativeTransactions,
+    TransactionSummary
 )
