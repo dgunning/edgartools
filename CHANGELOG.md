@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [3.12.0] - 2025-03-01
+
+### Changed
+
+- Improved the styling of the `Ownership` classes
+- Revamped the data structure of the `Ownership` classes to make it easier to access the data
+- Changed from getting the header from the filing homepage to getting it from the SGML
+
+### Added
+
+- Add `to_dataframe` method to `Ownership` classes to convert the data to a pandas DataFrame
+- Add `InitialOwnershipSummary` class to summarize the initial ownership of insiders in a company
+- Add `TransactionSummary` class to summarize the transactions of insiders in a company
+
 ## [3.11.5] - 2025-02-19
 
 ### Added 
