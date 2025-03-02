@@ -52,6 +52,9 @@ __all__ = [
     'PostTransactionAmounts',
     'NonDerivativeTransaction',
     'NonDerivativeTransactions',
+    'TransactionActivity',
+    'TransactionSummary',
+    'OwnershipSummary',
 ]
 
 
@@ -1044,6 +1047,7 @@ class TransactionActivity:
     code: str
     shares: Any = 0  # Handle footnote references
     value: Any = 0
+    price_per_share: Any = None  # Add explicit price per share field
     description: str = ""
 
     @property
@@ -1055,6 +1059,11 @@ class TransactionActivity:
     def value_numeric(self) -> Optional[float]:
         """Get value as a numeric value, handling footnotes"""
         return safe_numeric(self.value)
+
+    @property
+    def price_numeric(self) -> Optional[float]:
+        """Get price as a numeric value, handling footnotes"""
+        return safe_numeric(self.price_per_share)
 
     @property
     def code_description(self) -> str:
@@ -1150,7 +1159,7 @@ class InitialOwnershipSummary(OwnershipSummary):
     @property
     def total_shares(self) -> int:
         """Get total non-derivative shares owned"""
-        return sum(h.shares for h in self.holdings if not h.is_derivative)
+        return sum(safe_numeric(h.shares) or 0 for h in self.holdings if not h.is_derivative)
 
     @property
     def has_derivatives(self) -> bool:
@@ -1262,7 +1271,7 @@ class InitialOwnershipSummary(OwnershipSummary):
                 for holding in non_derivative:
                     stock_table.add_row(
                         holding.security_title,
-                        f"{holding.shares:,}",
+                        format_numeric(holding.shares),
                         holding.ownership_description
                     )
 
@@ -1274,8 +1283,8 @@ class InitialOwnershipSummary(OwnershipSummary):
                 deriv_table.add_column("Security", style="bold")
                 deriv_table.add_column("Underlying", style="italic")
                 deriv_table.add_column("Shares", justify="right")
-                deriv_table.add_column("Exercise Price", justify="right")
-                deriv_table.add_column("Expiration")
+                deriv_table.add_column("Exercise Price", justify="right", style="green")  # Highlight exercise price
+                deriv_table.add_column("Expiration",  style="dim")
                 deriv_table.add_column("Ownership")
 
                 for holding in derivative:
@@ -1380,6 +1389,7 @@ class TransactionSummary(OwnershipSummary):
                     'Code': trans.code,
                     'Description': trans.display_name,
                     'Shares': trans.shares,
+                    'Price': trans.price_numeric,  # Add price column
                     'Value': trans.value if trans.value > 0 else None
                 }
 
@@ -1411,6 +1421,7 @@ class TransactionSummary(OwnershipSummary):
 
             # Add counts by transaction type
             for trans_type in set(t.transaction_type for t in self.transactions):
+                type_transactions = [t for t in self.transactions if t.transaction_type == trans_type]
                 type_count = sum(1 for t in self.transactions if t.transaction_type == trans_type)
                 type_shares = sum(t.shares for t in self.transactions if t.transaction_type == trans_type)
                 df[f'{trans_type.title()} Count'] = type_count
@@ -1420,6 +1431,15 @@ class TransactionSummary(OwnershipSummary):
                     type_value = sum(t.value for t in self.transactions
                                      if t.transaction_type == trans_type and t.value > 0)
                     df[f'{trans_type.title()} Value'] = type_value
+
+                    # Add average price
+                    valid_price_transactions = [t for t in type_transactions if t.price_numeric]
+                    if valid_price_transactions:
+                        weighted_price_sum = sum((t.price_numeric or 0) * (t.shares_numeric or 0)
+                                                 for t in valid_price_transactions)
+                        weighted_shares = sum(t.shares_numeric or 0 for t in valid_price_transactions)
+                        if weighted_shares > 0:
+                            df[f'Avg {trans_type.title()} Price'] = weighted_price_sum / weighted_shares
 
             return df
 
@@ -1448,6 +1468,7 @@ class TransactionSummary(OwnershipSummary):
             transaction_table.add_column("Code", justify="center")
             transaction_table.add_column("Description", style="italic")
             transaction_table.add_column("Shares", justify="right")
+            transaction_table.add_column("Price/Share", justify="right")  # Add price per share column
             transaction_table.add_column("Value", justify="right")
 
             # Add rows for each transaction
@@ -1457,20 +1478,50 @@ class TransactionSummary(OwnershipSummary):
                     transaction.code,
                     transaction.display_name,
                     format_numeric(transaction.shares),
+                    format_numeric(transaction.price_per_share, currency=True),  # Add price display
                     format_numeric(transaction.value, currency=True)
-                    if transaction.value_numeric else "N/A"
                 )
 
-            # Add net change row if we have purchase/sale transactions
+            # Calculate summary data for purchases and sales
+            purchase_transactions = [t for t in self.transactions if t.transaction_type == "purchase"]
+            sale_transactions = [t for t in self.transactions if t.transaction_type == "sale"]
+
+            # Add summary rows
             if "purchase" in self.transaction_types or "sale" in self.transaction_types:
                 net_style = "green bold" if self.net_change >= 0 else "red bold"
+
+                # First add NET CHANGE row
                 transaction_table.add_row(
                     Text("NET CHANGE", style=net_style),
-                    "",
-                    "",
+                    "", "",
                     Text(f"{self.net_change:,}", style=net_style),
+                    "",
                     Text(f"${self.net_value:,.2f}", style=net_style)
                 )
+
+                if purchase_transactions:
+                    total_purchase_shares = sum(t.shares_numeric or 0 for t in purchase_transactions)
+                    if total_purchase_shares > 0:
+                        avg_purchase_price = sum((t.price_numeric or 0) * (t.shares_numeric or 0)
+                                                     for t in purchase_transactions) / total_purchase_shares
+                        transaction_table.add_row(
+                            Text("AVG PURCHASE PRICE", style="green dim"),
+                            "", "", "",
+                            Text(format_numeric(avg_purchase_price, currency=True), style="green"),
+                            ""
+                        )
+
+                if sale_transactions:
+                    total_sale_shares = sum(t.shares_numeric or 0 for t in sale_transactions)
+                    if total_sale_shares > 0:
+                        avg_sale_price = sum((t.price_numeric or 0) * (t.shares_numeric or 0)
+                                                 for t in sale_transactions) / total_sale_shares
+                        transaction_table.add_row(
+                            Text("AVG SALE PRICE", style="red dim"),
+                            "", "", "",
+                            Text(format_numeric(avg_sale_price, currency=True), style="red"),
+                            ""
+                        )
 
             elements.append(transaction_table)
 
@@ -1579,6 +1630,7 @@ class Ownership:
                     transaction_type=transaction_type,
                     code=row.Code,
                     shares=row.Shares,
+                    price_per_share=row.Price,  # Add explicit price per share
                     value=row.Shares * row.Price if not pd.isna(row.Price) else 0,
                 ))
 
@@ -1606,6 +1658,7 @@ class Ownership:
                     transaction_type=transaction_type,
                     code=row.Code,
                     shares=row.Shares,
+                    price_per_share=row.Price if pd.notna(row.Price) else None,  # Add price
                     # Don't calculate value for non-market transactions unless price available
                     value=row.Shares * row.Price if pd.notna(row.Price) and row.Price > 0 else 0,
                 ))

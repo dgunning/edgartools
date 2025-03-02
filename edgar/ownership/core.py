@@ -128,8 +128,11 @@ def format_numeric(value: Any, currency: bool = False, default: str = "N/A") -> 
         return f"${number:,.2f}"
     else:
         # Format integers without decimal places
-        if isinstance(number, int) or number.is_integer():
+        if isinstance(number, int) or (isinstance(number, float) and number.is_integer()):
             return f"{int(number):,}"
         return f"{number:,.2f}"
 
-
+  # Add a dedicated currency formatter
+def format_price(value: Any, default: str = "N/A") -> str:
+    """Format a price value with currency symbol"""
+    return format_numeric(value, currency=True, default=default)

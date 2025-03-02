@@ -1,14 +1,15 @@
 from tqdm import tqdm
 from edgar import get_filings
-from edgar.ownership import Form4
+from edgar.ownership import Ownership
 
 if __name__ == '__main__':
-    for filing in tqdm(get_filings(form=[4], year=2024).sample(100)):
+    for filing in tqdm(get_filings(form=[3,4,5], year=2024).sample(200)):
         try:
-            form4:Form4 = filing.obj()
-            print(form4)
+            ownership:Ownership = filing.obj()
+            print()
+            print(ownership)
         except Exception as e:
-            print(f"Failed to Form 4 {filing}")
+            print(f"Failed to create Ownership {filing}")
             filing.open()
             print(e)
             raise
