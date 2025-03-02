@@ -820,7 +820,8 @@ class Filings:
             Group(*elements),
             title="SEC Filings",
             subtitle=subtitle,
-            border_style="bold grey54"
+            border_style="bold grey54",
+            expand=False
         )
 
     def __repr__(self):
