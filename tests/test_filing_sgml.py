@@ -3,7 +3,7 @@ import zipfile
 from pathlib import Path
 
 from edgar import *
-from edgar.sgml import iter_documents, list_documents, FilingSGML
+from edgar.sgml import iter_documents, list_documents, FilingSGML, Filer
 from edgar.sgml.sgml_parser import SGMLDocument, SGMLParser, SGMLFormatType
 from edgar.sgml.tools import get_content_between_tags
 import hashlib
@@ -356,3 +356,22 @@ def test_sgml_from_old_filing():
 def test_sgml_from_really_old_filing_needing_preprocessing():
     sgml = FilingSGML.from_source('data/sgml/0001094891-00-000193.txt')
     assert sgml
+
+def test_sgml_header_has_company_information_485POS():
+    filing = Filing(form='485APOS', filing_date='2024-03-13', company='iSHARES TRUST', cik=1100663, accession_no='0001193125-24-066744')
+    # This was failing because the header text had extra newlines
+    _repr = repr(filing)
+
+def test_parse_header_with_double_newlines():
+    content = Path("data/sgml/header_with_double_newlines.txt").read_text()
+
+    filing_header = FilingHeader.parse_from_sgml_text(content)
+    assert filing_header
+    filer:Filer = filing_header.filers[0]
+    print()
+    print(filer)
+    assert filer.company_information
+    assert filer.company_information.name == 'iSHARES TRUST'
+    assert filer.business_address.city== 'SAN FRANCISCO'
+
+    assert filer.mailing_address.city == 'SAN FRANCISCO'

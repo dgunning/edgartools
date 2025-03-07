@@ -163,6 +163,9 @@ class Filer:
     mailing_address: Address
     former_company_names: Optional[List[FormerCompany]] = None
 
+    def __str__(self):
+        return f"{self.company_information.name} [{self.company_information.cik}]"
+
     def __rich__(self):
         filer_renderables = [self.company_information]
 
@@ -617,6 +620,9 @@ class FilingHeader:
         # Preprocess the text to handle a different format from the 1990's
         if preprocess:
             header_text = preprocess_old_headers(header_text)
+
+        # In case there are double newlines, replace them with a single newline
+        header_text = header_text.replace('\n\n', '\n')
 
         # Read the lines in the content. This starts with <ACCEPTANCE-DATETIME>20230606213204
         lines = header_text.split('\n')
