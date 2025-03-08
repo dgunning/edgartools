@@ -87,9 +87,8 @@ def safe_numeric(value: Any) -> Optional[Union[int, float]]:
         # Remove commas, dollar signs, and whitespace
         cleaned = value.replace(',', '').replace('$', '').strip()
 
-        # Check for footnote references like [F1], [1], etc.
-        if re.search(r'\[\w+\]', cleaned) or re.search(r'\(\w+\)', cleaned):
-            return None
+        # Remove footnote references like [F1], [1], etc.
+        cleaned = re.sub(r'\[\w+]', '', cleaned)
 
         # Try numeric conversion
         try:

@@ -1,4 +1,6 @@
 from edgar.ownership import Ownership, Form4, TransactionSummary
+from edgar.ownership.core import safe_numeric
+
 from edgar import *
 
 
@@ -31,3 +33,13 @@ def test_create_form4_with_non_numeric_underlying():
     assert form4
     print()
     print(form4)
+
+def test_detailed_transaction_counts():
+    filing = Filing(form='4', filing_date='2025-03-07', company='DYADIC INTERNATIONAL INC', cik=1213809, accession_no='0001437749-25-006667')
+    form4 = filing.obj()
+    df = form4.to_dataframe(detailed=False)
+    print()
+    print(df.columns)
+    assert df['Tax Shares'][0] == 27517
+
+    assert not df.empty

@@ -1465,7 +1465,7 @@ class TransactionSummary(OwnershipSummary):
             for trans_type in set(t.transaction_type for t in self.transactions):
                 type_transactions = [t for t in self.transactions if t.transaction_type == trans_type]
                 type_count = sum(1 for t in self.transactions if t.transaction_type == trans_type)
-                type_shares = sum(t.shares for t in self.transactions if t.transaction_type == trans_type)
+                type_shares = sum(t.shares_numeric or 0 for t in self.transactions if t.transaction_type == trans_type)
                 df[f'{trans_type.title()} Count'] = type_count
                 df[f'{trans_type.title()} Shares'] = type_shares
 

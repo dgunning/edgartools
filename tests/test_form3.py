@@ -12,3 +12,17 @@ def test_form3_initial_holdings():
     ownership_summary = form3.get_ownership_summary()
     assert ownership_summary.position == 'Executive Vice President'
     assert ownership_summary.total_shares == 50257.0
+
+def test_initial_holdings_to_dataframe():
+    f = Filing(form='3',
+              filing_date='2025-03-05',
+              company='AMERICAN WOODMARK CORP',
+              cik=794619,
+              accession_no='0000794619-25-000009')
+    form3: Form3 = f.obj()
+    df = form3.to_dataframe()
+    print()
+    print(df.columns)
+
+    df2 = form3.to_dataframe(detailed=False)
+    print(df2.columns)

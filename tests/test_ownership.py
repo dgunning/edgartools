@@ -7,7 +7,7 @@ from rich import print
 
 from edgar._filings import Filing
 from edgar.ownership import *
-from edgar.ownership.core import compute_average_price, compute_total_value, format_amount, is_numeric
+from edgar.ownership.core import compute_average_price, compute_total_value, format_amount, is_numeric, safe_numeric
 
 pd.options.display.max_columns = None
 
@@ -17,6 +17,11 @@ snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
 aapl_form4: Ownership = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
                                accession_no='0000320193-23-000089').obj()
 
+def test_safe_numeric():
+    assert safe_numeric('7500 [F1]') == 7500
+    assert safe_numeric('7500') == 7500
+    assert safe_numeric('7500.0') == 7500.0
+    assert safe_numeric('[F1]') == None
 
 def test_is_numeric():
     # Test that these pandas series are numeric
