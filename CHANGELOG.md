@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.12.2] - 2025-03-09
+
+### Fixed
+
+- Fixed bug about Live Rich Display when calling `get_by_accession_number` on a same day filing
+- Fix parsing of SGML header when the header has double newlines
+
+### Changed
+
+- Improve XBRL instance `query_facts` by dropping empty columns
+- For Funds get all filings by looping through the extra pages not just the first page
+- Improve numeric handling for Insider Transaction values with footnotes e.g. `7500 [F1]`
+
 ## [3.12.1] - 2025-03-02
 
 ### Changed
