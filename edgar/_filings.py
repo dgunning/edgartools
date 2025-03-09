@@ -1783,15 +1783,16 @@ def get_filing_by_accession(accession_number: str, year: int):
     return None
 
 
-def get_by_accession_number(accession_number: str, show_progress: bool = True):
+def get_by_accession_number(accession_number: str, show_progress: bool = False):
     """Wrapper that handles progress display and current time logic"""
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
 
-    filing = get_filing_by_accession(accession_number, year)
+    with Status("[bold deep_sky_blue1]Searching...", spinner="dots2") if show_progress else nullcontext():
+        filing = get_filing_by_accession(accession_number, year)
 
-    if not filing and year == datetime.now().year:
-        filings = get_current_filings()
-        filing = filings.get(accession_number)
+        if not filing and year == datetime.now().year:
+            filings = get_current_filings()
+            filing = filings.get(accession_number)
 
     return filing
 
