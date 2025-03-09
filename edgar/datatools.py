@@ -1,4 +1,7 @@
 import pandas as pd
+import numpy as np
+import pyarrow as pa
+import pyarrow.compute as pc
 from lxml import html as lxml_html
 
 __all__ = ["compress_dataframe",
@@ -11,7 +14,8 @@ __all__ = ["compress_dataframe",
            'describe_dataframe',
            'na_value',
            'replace_all_na_with_empty',
-           'convert_to_pyarrow_backend']
+           'convert_to_pyarrow_backend',
+           'drop_duplicates_pyarrow',]
 
 
 def clean_column_text(text: str):
@@ -261,3 +265,46 @@ def na_value(value, default_value:object=''):
     if pd.isna(value):
         return default_value
     return value
+
+
+def drop_duplicates_pyarrow(table, column_name, keep='first'):
+    """
+    Drop duplicates from a PyArrow Table based on a specified column.
+
+    Parameters:
+    - table (pa.Table): The input PyArrow Table
+    - column_name (str): The column to check for duplicates
+    - keep (str): 'first' to keep first occurrence, 'last' to keep last occurrence
+
+    Returns:
+    - pa.Table: A new table with duplicates removed
+    """
+    if column_name not in table.column_names:
+        raise ValueError(f"Column '{column_name}' not found in table")
+
+    if keep not in ['first', 'last']:
+        raise ValueError("Parameter 'keep' must be 'first' or 'last'")
+
+    # Extract the column as an array
+    column_array = table[column_name]
+
+    # Convert to NumPy array and get unique indices
+    np_array = column_array.to_numpy()
+    unique_values, unique_indices = np.unique(np_array, return_index=True)
+
+    if keep == 'first':
+        # Sort indices to maintain original order for first occurrences
+        sorted_indices = np.sort(unique_indices)
+    else:  # keep == 'last'
+        # Get the last occurrence by reversing the array logic
+        reverse_indices = len(np_array) - 1 - np.unique(np_array[::-1], return_index=True)[1]
+        sorted_indices = np.sort(reverse_indices)
+
+    # Create a boolean mask to filter the table
+    mask = np.zeros(len(table), dtype=bool)
+    mask[sorted_indices] = True
+
+    # Filter the table using the mask
+    deduplicated_table = table.filter(pa.array(mask))
+
+    return deduplicated_table

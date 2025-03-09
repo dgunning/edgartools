@@ -13,11 +13,12 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, Column
 
-from edgar.entities import Company
 from edgar._filings import FilingHeader, Filings
-from edgar.richtools import repr_rich, df_to_rich_table
 from edgar.core import log
+from edgar.datatools import drop_duplicates_pyarrow
+from edgar.entities import Company
 from edgar.httprequests import download_text
+from edgar.richtools import repr_rich, df_to_rich_table
 
 __all__ = [
     'Fund',
@@ -218,6 +219,18 @@ class FundCompanyInfo:
         addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
                      for mailer_div in mailer_divs]
 
+
+        filing_index = cls.extract_filings(soup, company_name, cik)
+        filings = Filings(filing_index=filing_index)
+
+        return cls(name=company_name,
+                   cik=cik,
+                   filings=filings,
+                   ident_info=ident_info_dict,
+                   addresses=addresses)
+
+    @classmethod
+    def extract_filings(cls, soup:Tag, company_name:str, cik:str) -> pa.Table:
         filings_table = soup.find("table", class_="tableFile2")
         rows = filings_table.find_all("tr")[1:]
 
@@ -253,17 +266,9 @@ class FundCompanyInfo:
             pa.array(filing_dates, type=pa.date32()),
             pa.array(accession_nos, type=pa.string()),
         ], schema=schema)
-        # Drop duplicate filings by accession number
-        # There are duplicates on the results page because each duplicate row actually point to another file number
-        filing_index = pa.Table.from_pandas(filing_index.to_pandas().drop_duplicates(subset=["accession_number"]))
 
-        filings = Filings(filing_index=filing_index)
+        return filing_index
 
-        return cls(name=company_name,
-                   cik=cik,
-                   filings=filings,
-                   ident_info=ident_info_dict,
-                   addresses=addresses)
 
     def __rich__(self):
         table = Table("CIK", Column("Fund Company", style="bold"), box=box.SIMPLE)
@@ -377,7 +382,9 @@ def get_fund_with_filings(contract_or_series_id: str):
     """
     if not re.match(r"[CS]\d+", contract_or_series_id):
         return None
-    search_url = fund_class_or_series_search_url.format(contract_or_series_id)
+    base_url = fund_class_or_series_search_url.format(contract_or_series_id)
+    # Start at 0 and download 100
+    search_url = base_url + f"&start=0&count=100"
 
     fund_text = download_text(search_url)
 
@@ -386,6 +393,28 @@ def get_fund_with_filings(contract_or_series_id: str):
 
     # Company Info
     company_info = FundCompanyInfo.from_html(fund_text)
+
+    # Get the remaining filings
+    start, count = 101, 100
+
+    filing_index = company_info.filings.data
+    while True:
+        # Get the next page
+        next_page = base_url + f"&start={start}&count={count}"
+        fund_text = download_text(next_page)
+        soup = BeautifulSoup(fund_text, features="html.parser")
+        filing_index_on_page = FundCompanyInfo.extract_filings(soup, company_info.name, company_info.cik)
+        if len(filing_index_on_page) == 0:
+            break
+        filing_index = pa.concat_tables([filing_index, filing_index_on_page])
+        start += count
+
+    # Drop duplicate filings by accession number
+    # There are duplicates on the results page because each duplicate row actually point to another file number
+    filing_index = drop_duplicates_pyarrow(filing_index, column_name='accession_number')
+
+    company_info.filings = Filings(filing_index=filing_index)
+
 
     if contract_or_series_id.startswith('C'):
         return FundClass(company_info)
