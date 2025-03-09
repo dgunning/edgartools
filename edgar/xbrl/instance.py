@@ -327,6 +327,9 @@ class XBRLInstance(BaseModel):
             # If no column filters, just reset index to maintain consistent output format
             result = result.reset_index()
 
+        # Drop empty columns
+        result = result.dropna(axis=1, how='all')
+
         return result
 
     def get_facts_for_concept(self, concept):
