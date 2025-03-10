@@ -384,13 +384,7 @@ class XBRL:
         
         # Try element ID itself (often used in facts)
         concept_names.append(element_id)
-        
-        # Try with common XBRL namespaces prefixed
-        concept_names.extend([
-            f"us-gaap:{element_id}",
-            f"ifrs:{element_id}",
-        ])
-        
+
         # Try additional variations of element names
         additional_names = []
         for name in concept_names:
@@ -409,19 +403,6 @@ class XBRL:
         
         concept_names.extend(additional_names)
         
-        # Try to normalize names by removing common prefixes
-        normalized_names = []
-        for name in concept_names:
-            if ':' in name:
-                normalized_names.append(name.split(':')[-1])
-            elif '_' in name:
-                # For names like us-gaap_Cash, get just Cash
-                parts = name.split("_", 1)
-                if len(parts) == 2 and parts[0] in ['us-gaap', 'ifrs', 'dei']:
-                    normalized_names.append(parts[1])
-        
-        concept_names.extend(normalized_names)
-        
         # Remove duplicates
         concept_names = list(set(concept_names))
             
@@ -431,23 +412,55 @@ class XBRL:
             relevant_facts = self._find_facts_for_element(concept_name, period_filter)
             all_relevant_facts.update(relevant_facts)
             
-        # Process all found facts
+        # Group facts by period for better selection
+        facts_by_period = {}
+        
+        # Process all found facts and group by period
         for context_id, fact in all_relevant_facts.items():
             # Get period key for this context
             period_key = self.context_period_map.get(context_id)
-            if period_key:
-                # Store the value
-                values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+            if not period_key:
+                continue  # Skip if no period key found
                 
-                # Store the decimals info for proper scaling
-                if fact.decimals is not None:
-                    try:
-                        if fact.decimals == 'INF':
-                            decimals[period_key] = 0  # Infinite precision, no scaling
-                        else:
-                            decimals[period_key] = int(fact.decimals)
-                    except (ValueError, TypeError):
-                        decimals[period_key] = 0  # Default if decimals can't be converted
+            # Initialize period entry if not exists
+            if period_key not in facts_by_period:
+                facts_by_period[period_key] = []
+                
+            # Add this fact to the period
+            facts_by_period[period_key].append((context_id, fact))
+        
+        # Process facts by period, selecting the most appropriate fact for each period
+        for period_key, period_facts in facts_by_period.items():
+            # If only one fact, use it
+            if len(period_facts) == 1:
+                context_id, fact = period_facts[0]
+            else:
+                # Multiple facts for same period - prioritize based on dimensions
+                # Sort facts by preference: no dimensions first, then by dimension count (fewer dimensions preferred)
+                sorted_facts = []
+                for ctx_id, f in period_facts:
+                    context = self.contexts.get(ctx_id)
+                    dimension_count = len(context.dimensions) if context and hasattr(context, 'dimensions') else 999
+                    sorted_facts.append((dimension_count, ctx_id, f))
+                
+                # Sort by dimension count (no dimensions or fewer dimensions first)
+                sorted_facts.sort()
+                
+                # Use the first fact (with fewest dimensions)
+                _, context_id, fact = sorted_facts[0]
+            
+            # Store the value
+            values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+            
+            # Store the decimals info for proper scaling
+            if fact.decimals is not None:
+                try:
+                    if fact.decimals == 'INF':
+                        decimals[period_key] = 0  # Infinite precision, no scaling
+                    else:
+                        decimals[period_key] = int(fact.decimals)
+                except (ValueError, TypeError):
+                    decimals[period_key] = 0  # Default if decimals can't be converted
         
         # Create line item
         line_item = {
@@ -519,49 +532,8 @@ class XBRL:
                         relevant_facts[context_id] = fact
         
         # If we found exact matches, return them
-        if relevant_facts:
-            return relevant_facts
-        
-        # Otherwise, try more flexible matching based on scanning all facts
-        # This is slower but more thorough
-        element_name_parts = element_name.lower()
-        # Remove namespace prefix if present
-        if ':' in element_name_parts:
-            element_name_parts = element_name_parts.split(':')[-1]
-        elif '_' in element_name_parts:
-            parts = element_name_parts.split('_', 1)
-            if parts[0] in ['us-gaap', 'ifrs', 'dei']:
-                element_name_parts = parts[1]
-                
-        # Skip very short element names to avoid false matches
-        if len(element_name_parts) <= 3:
-            return relevant_facts
-            
-        # Scan all facts to find partial matches
-        for fact_key, fact in self.facts.items():
-            # Skip if we already have this context
-            context_id = fact.context_ref
-            if context_id in relevant_facts:
-                continue
-                
-            # Check if element name contains or is similar to our target
-            fact_element = fact.element_id.lower()
-            
-            # Remove namespace prefix if present
-            if ':' in fact_element:
-                fact_element = fact_element.split(':')[-1]
-                
-            # Check for similarity
-            if fact_element == element_name_parts or element_name_parts in fact_element:
-                # If period filter is specified, check if context matches period
-                if period_filter:
-                    period_key = self.context_period_map.get(context_id)
-                    if period_key == period_filter:
-                        relevant_facts[context_id] = fact
-                else:
-                    relevant_facts[context_id] = fact
-        
         return relevant_facts
+
     
     def get_period_views(self, statement_type: str) -> List[Dict[str, Any]]:
         """

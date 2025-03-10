@@ -218,15 +218,14 @@ def render_statement(
             # Check for shares-related values by examining label
             label_lower = label.lower()
             if any(keyword in label_lower for keyword in [
-                'shares', 'share', 'stock', 'eps', 'earnings per share', 
-                'weighted average', 'number of', 'per common share', 'per share',
-                'per basic', 'per diluted', 'outstanding', 'issued'
+                'earnings per share', 'per common share', 'per share', 'in shares', 'shares outstanding'
+                'per basic', 'per diluted'
             ]):
                 is_monetary = False
             
             # Ratio-related items should not be monetary
             if any(keyword in label_lower for keyword in [
-                'ratio', 'margin', 'percentage', 'rate', 'per cent'
+                'ratio', 'margin', 'percentage', 'per cent'
             ]):
                 is_monetary = False
             

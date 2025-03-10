@@ -46,9 +46,35 @@ def test_xbrl_statements(aapl_xbrl:XBRL):
 
 def test_render_balance_sheet(aapl_xbrl:XBRL):
     print()
-    #print(aapl_xbrl)
     balance_sheet = aapl_xbrl.render_statement('BalanceSheet')
     print(balance_sheet)
+
+def test_render_cashflow_statement():
+    f = Filing(company='Apple Inc.', cik=320193,
+               form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
+    xbrl = XBRL.from_filing(f)
+    cash_flow = xbrl.render_statement("CashFlowStatement")
+    print(cash_flow)
+
+
+def test_find_facts_for_concept(aapl_xbrl:XBRL):
+    print()
+    concept = 'us-gaap_CashAndCashEquivalentsAtCarryingValue'
+    facts = aapl_xbrl._find_facts_for_element(concept)
+    print(f"Facts for concept '{concept}': {len(facts)}")
+    print(facts)
+
+
+def test_find_balance_sheet_facts():
+    'us-gaap_Assets'
+    f = Filing(company='Apple Inc.', cik=320193,
+               form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
+    xbrl = XBRL.from_filing(f)
+    #facts = xbrl._find_facts_for_element('us-gaap_Assets')
+    #print(facts)
+    balance_sheet = xbrl.render_statement('BalanceSheet')
+    print(balance_sheet)
+
 
 def test_period_views(aapl_xbrl:XBRL):
     print()
@@ -92,11 +118,6 @@ def test_to_pandas(aapl_xbrl:XBRL):
         print(statement_df.head(3))
 
 
-def test_render_cashflow_statement():
-    f = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
-    xbrl = XBRL.from_filing(f)
-    cash_flow = xbrl.render_statement("CashFlowStatement")
-    print(cash_flow)
 
 def test_get_entity_info(aapl_xbrl):
     entity_info = aapl_xbrl.entity_info

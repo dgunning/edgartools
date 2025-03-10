@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union, Tuple
+from edgar.core import log
 
 from edgar.xbrl2.models import (
     ElementCatalog, Context, Fact, PresentationNode, PresentationTree,
@@ -265,7 +266,7 @@ class XBRLParser:
             return embedded_data
         except Exception as e:
             # Log the error but don't fail - just return empty embedded data
-            print(f"Warning: Error extracting embedded linkbases: {str(e)}")
+            log.warning(f"Warning: Error extracting embedded linkbases: {str(e)}")
             return embedded_data
     
     def parse_labels(self, file_path: Union[str, Path]) -> None:
@@ -1173,13 +1174,13 @@ class XBRLParser:
                 fact_count += 1
             
             # Debug information
-            print(f"Extracted {fact_count} facts")
+            log.debug(f"Extracted {fact_count} facts")
             if nonstandard_facts:
-                print(f"Found {len(nonstandard_facts)} non-standard namespaces: {nonstandard_facts[:5]}...")
+                log.debug(f"Found {len(nonstandard_facts)} non-standard namespaces: {nonstandard_facts[:5]}...")
             
             # Double check that we found facts
             if fact_count == 0:
-                print("WARNING: No facts were extracted from the instance document!")
+                log.warning("WARNING: No facts were extracted from the instance document!")
                 
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting facts: {str(e)}")
@@ -1260,7 +1261,7 @@ class XBRLParser:
                                 dei_facts[info_key] = fact
             
             # Debug output
-            print(f"Found {len(dei_facts)} DEI facts")
+            log.debug(f"Found {len(dei_facts)} DEI facts")
             
             # Extract entity name
             if 'entity_name' in dei_facts:
@@ -1387,11 +1388,11 @@ class XBRLParser:
                             pass
             
             # Debug output
-            print(f"Entity info: {self.entity_info}")
+            log.debug(f"Entity info: {self.entity_info}")
             
         except Exception as e:
             # Log error but don't fail
-            print(f"Warning: Error extracting entity info: {str(e)}")
+            log.warning(f"Warning: Error extracting entity info: {str(e)}")
     
     def _build_reporting_periods(self) -> None:
         """Build reporting periods from contexts."""
@@ -1492,15 +1493,15 @@ class XBRLParser:
             
             # Debug printout to verify periods are extracted
             if len(self.reporting_periods) > 0:
-                print(f"Found {len(self.reporting_periods)} reporting periods.")
-                print(f"First period: {self.reporting_periods[0]['label']}")
+                log.debug(f"Found {len(self.reporting_periods)} reporting periods.")
+                log.debug(f"First period: {self.reporting_periods[0]['label']}")
             else:
-                print("Warning: No reporting periods found!")
+                log.debug("Warning: No reporting periods found!")
                 
             # Debug context period map
-            print(f"Context period map has {len(self.context_period_map)} entries.")
+            log.debug(f"Context period map has {len(self.context_period_map)} entries.")
             
         except Exception as e:
             # Log error but don't fail
-            print(f"Warning: Error building reporting periods: {str(e)}")
+            log.debug(f"Warning: Error building reporting periods: {str(e)}")
             self.reporting_periods = []
