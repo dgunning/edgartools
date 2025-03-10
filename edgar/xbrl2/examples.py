@@ -191,6 +191,50 @@ def example_with_real_filing():
         console.print(f"[bold red]Error loading real filing: {str(e)}[/bold red]")
         console.print("[yellow]Note: This example requires internet access to fetch filings from SEC EDGAR.[/yellow]")
 
+
+def standardized_statements_example():
+    """
+    Demonstrates the use of standardized concept labels.
+    """
+    # Path to XBRL files
+    sample_dir = Path(__file__).parent / "aapl"
+    
+    # Create an XBRL object by parsing the directory
+    xbrl = XBRL.parse_directory(sample_dir)
+    
+    # Create a Statements object for easier access
+    statements = Statements(xbrl)
+    
+    console = Console()
+    
+    # Display original income statement
+    console.print("\n[bold]Income Statement (Original Labels):[/bold]")
+    income_statement = statements.income_statement()
+    console.print(income_statement)
+    
+    # Display standardized income statement
+    console.print("\n[bold]Income Statement (Standardized Labels):[/bold]")
+    income_statement_std = statements.income_statement(standard=True)
+    console.print(income_statement_std)
+    
+    # Display original balance sheet
+    console.print("\n[bold]Balance Sheet (Original Labels):[/bold]")
+    balance_sheet = statements.balance_sheet()
+    console.print(balance_sheet)
+    
+    # Display standardized balance sheet
+    console.print("\n[bold]Balance Sheet (Standardized Labels):[/bold]")
+    balance_sheet_std = statements.balance_sheet(standard=True)
+    console.print(balance_sheet_std)
+    
+    # Show standardized statement with a specific period view
+    period_views = statements.get_period_views("BalanceSheet")
+    if period_views:
+        view_name = period_views[0]['name']
+        console.print(f"\n[bold]Balance Sheet ({view_name}) with Standardized Labels:[/bold]")
+        balance_sheet_view_std = statements.balance_sheet(period_view=view_name, standard=True)
+        console.print(balance_sheet_view_std)
+
 if __name__ == "__main__":
     console = Console()
     console.print("[bold cyan]XBRL2 Module Examples[/bold cyan]")
@@ -198,10 +242,11 @@ if __name__ == "__main__":
     console.print("1. Render Financial Statements (Direct XBRL API)")
     console.print("2. Using Statements API (User-friendly API)")
     console.print("3. Example with Real Filing (Requires Internet)")
-    console.print("4. Run All Examples")
+    console.print("4. Standardized Statements (Concept Standardization)")
+    console.print("5. Run All Examples")
     
     try:
-        choice = input("\nEnter your choice (1-4): ")
+        choice = input("\nEnter your choice (1-5): ")
         
         if choice == "1":
             render_financial_statements()
@@ -210,6 +255,8 @@ if __name__ == "__main__":
         elif choice == "3":
             example_with_real_filing()
         elif choice == "4":
+            standardized_statements_example()
+        elif choice == "5":
             console.print("\n[bold]Running All Examples[/bold]\n")
             console.print("\n[bold cyan]Example 1: Render Financial Statements[/bold cyan]\n")
             render_financial_statements()
@@ -219,6 +266,9 @@ if __name__ == "__main__":
             console.print("\n" + "-" * 80 + "\n")
             console.print("\n[bold cyan]Example 3: Example with Real Filing[/bold cyan]\n")
             example_with_real_filing()
+            console.print("\n" + "-" * 80 + "\n")
+            console.print("\n[bold cyan]Example 4: Standardized Statements[/bold cyan]\n")
+            standardized_statements_example()
         else:
             console.print("[bold red]Invalid choice. Please run the script again and select a valid option.[/bold red]")
     

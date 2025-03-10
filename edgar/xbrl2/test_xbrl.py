@@ -49,6 +49,9 @@ def test_render_balance_sheet(aapl_xbrl:XBRL):
     balance_sheet = aapl_xbrl.render_statement('BalanceSheet')
     print(balance_sheet)
 
+    balance_sheet = aapl_xbrl.render_statement('BalanceSheet', standard=True)
+    print(balance_sheet)
+
 def test_render_cashflow_statement():
     f = Filing(company='Apple Inc.', cik=320193,
                form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
@@ -70,8 +73,8 @@ def test_find_balance_sheet_facts():
     f = Filing(company='Apple Inc.', cik=320193,
                form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
     xbrl = XBRL.from_filing(f)
-    #facts = xbrl._find_facts_for_element('us-gaap_Assets')
-    #print(facts)
+    facts = xbrl._find_facts_for_element('us-gaap_Assets')
+    print(facts)
     balance_sheet = xbrl.render_statement('BalanceSheet')
     print(balance_sheet)
 

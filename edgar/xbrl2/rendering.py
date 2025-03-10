@@ -14,6 +14,7 @@ from rich.table import Table as RichTable
 from edgar.xbrl2.core import (
     determine_dominant_scale, format_value, format_date, parse_date
 )
+from edgar.xbrl2 import standardization
 
 
 def render_statement(
@@ -22,6 +23,7 @@ def render_statement(
     statement_title: str,
     statement_type: str,
     entity_info: Dict[str, Any] = None,
+    standard: bool = False,
 ) -> RichTable:
     """
     Render a financial statement as a rich table.
@@ -32,11 +34,27 @@ def render_statement(
         statement_title: Title of the statement
         statement_type: Type of statement (BalanceSheet, IncomeStatement, etc.)
         entity_info: Entity information (optional)
+        standard: Whether to use standardized concept labels (default: False)
         
     Returns:
         RichTable: A formatted table representation of the statement
     """
     entity_info = entity_info or {}
+    
+    # Apply standardization if requested
+    if standard:
+        # Create a concept mapper with default mappings
+        mapper = standardization.ConceptMapper(standardization.initialize_default_mappings())
+        
+        # Add statement type to context for better mapping
+        for item in statement_data:
+            item['statement_type'] = statement_type
+        
+        # Standardize the statement data
+        statement_data = standardization.standardize_statement(statement_data, mapper)
+        
+        # Indicate that standardization is being used in the title
+        statement_title = f"{statement_title} (Standardized)"
     
     # Create the table
     table = RichTable(title=statement_title, box=box.SIMPLE)
@@ -225,7 +243,7 @@ def render_statement(
             
             # Ratio-related items should not be monetary
             if any(keyword in label_lower for keyword in [
-                'ratio', 'margin', 'percentage', 'per cent'
+                'ratio', 'percentage', 'per cent'
             ]):
                 is_monetary = False
             

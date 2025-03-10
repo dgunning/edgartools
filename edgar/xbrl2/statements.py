@@ -68,53 +68,57 @@ class Statements:
             table.add_row(stmt['definition'], stmt['type'] or "", str(stmt['element_count']))
         return table
     
-    def balance_sheet(self, period_view: Optional[str] = None) -> Table:
+    def balance_sheet(self, period_view: Optional[str] = None, standard: bool = False) -> Table:
         """
         Get a formatted balance sheet.
         
         Args:
             period_view: Optional period view name
+            standard: Whether to use standardized concept labels (default: False)
             
         Returns:
             Rich Table containing the balance sheet
         """
-        return self.xbrl.render_statement("BalanceSheet", period_view=period_view)
+        return self.xbrl.render_statement("BalanceSheet", period_view=period_view, standard=standard)
     
-    def income_statement(self, period_view: Optional[str] = None) -> Table:
+    def income_statement(self, period_view: Optional[str] = None, standard: bool = False) -> Table:
         """
         Get a formatted income statement.
         
         Args:
             period_view: Optional period view name
+            standard: Whether to use standardized concept labels (default: False)
             
         Returns:
             Rich Table containing the income statement
         """
-        return self.xbrl.render_statement("IncomeStatement", period_view=period_view)
+        return self.xbrl.render_statement("IncomeStatement", period_view=period_view, standard=standard)
     
-    def cash_flow_statement(self, period_view: Optional[str] = None) -> Table:
+    def cash_flow_statement(self, period_view: Optional[str] = None, standard: bool = False) -> Table:
         """
         Get a formatted cash flow statement.
         
         Args:
             period_view: Optional period view name
+            standard: Whether to use standardized concept labels (default: False)
             
         Returns:
             Rich Table containing the cash flow statement
         """
-        return self.xbrl.render_statement("CashFlowStatement", period_view=period_view)
+        return self.xbrl.render_statement("CashFlowStatement", period_view=period_view, standard=standard)
     
-    def statement_of_equity(self, period_view: Optional[str] = None) -> Table:
+    def statement_of_equity(self, period_view: Optional[str] = None, standard: bool = False) -> Table:
         """
         Get a formatted statement of equity.
         
         Args:
             period_view: Optional period view name
+            standard: Whether to use standardized concept labels (default: False)
             
         Returns:
             Rich Table containing the statement of equity
         """
-        return self.xbrl.render_statement("StatementOfEquity", period_view=period_view)
+        return self.xbrl.render_statement("StatementOfEquity", period_view=period_view, standard=standard)
     
     def get_period_views(self, statement_type: str) -> List[Dict[str, Any]]:
         """
