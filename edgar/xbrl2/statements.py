@@ -132,13 +132,14 @@ class Statements:
         """
         return self.xbrl.get_period_views(statement_type)
     
-    def to_dataframe(self, statement_type: str, period_view: Optional[str] = None) -> pd.DataFrame:
+    def to_dataframe(self, statement_type: str, period_view: Optional[str] = None, standard: bool = True) -> pd.DataFrame:
         """
         Convert a statement to a pandas DataFrame.
         
         Args:
             statement_type: Type of statement to convert
             period_view: Optional period view name
+            standard: Whether to use standardized concept labels (default: True)
             
         Returns:
             pandas DataFrame containing the statement data
@@ -172,8 +173,15 @@ class Statements:
         
         if not statement_data:
             return pd.DataFrame()  # Empty DataFrame if statement not found
+            
+        # Use XBRL's to_pandas method which now supports standardization
+        dataframes = self.xbrl.to_pandas(statement_type, standard=standard)
         
-        # Convert to DataFrame
+        # Return the statement dataframe if available
+        if 'statement' in dataframes:
+            return dataframes['statement']
+            
+        # Fallback to manual conversion if to_pandas didn't work
         rows = []
         for item in statement_data:
             # Prepare row data
@@ -184,6 +192,10 @@ class Statements:
                 'is_abstract': item['is_abstract'],
                 'has_values': item.get('has_values', False),
             }
+            
+            # Add original label if standardized
+            if 'original_label' in item:
+                row['original_label'] = item['original_label']
             
             # Add values for each period
             for period, value in item.get('values', {}).items():

@@ -5,17 +5,16 @@ This module demonstrates how to use the XBRL class to parse XBRL files and
 extract information from them.
 """
 
-import os
-from pathlib import Path
 import datetime
-import pandas as pd
-from rich.console import Console
-from edgar import *
-from edgar.xbrl2.xbrl import XBRL
-from edgar.xbrl2.statements import Statements
+from pathlib import Path
+
 import pytest
 from rich import print
+from rich.console import Console
 
+from edgar import *
+from edgar.xbrl2.statements import Statements
+from edgar.xbrl2.xbrl import XBRL
 
 
 @pytest.fixture

@@ -585,7 +585,16 @@ class XBRL:
         if statement_type in ['BalanceSheet']:
             # For Balance Sheet, we can show different years/quarters as columns
             if len(instant_periods) >= 2:
-                # Current period vs. Previous period
+                # Create views with multiple periods
+                if len(instant_periods) >= 3:
+                    # Three-year view
+                    period_views.append({
+                        'name': 'Three-Year Comparison',
+                        'description': 'Shows the most recent three periods',
+                        'period_keys': [instant_periods[0]['key'], instant_periods[1]['key'], instant_periods[2]['key']]
+                    })
+                
+                # Current period vs. Previous period (always included)
                 period_views.append({
                     'name': 'Current vs. Previous Period',
                     'description': 'Shows the current period and the previous period',
@@ -614,10 +623,17 @@ class XBRL:
                     annual_periods.append(period)
             
             if len(annual_periods) >= 2:
+                if len(annual_periods) >= 3:
+                    period_views.append({
+                        'name': 'Three-Year Annual Comparison',
+                        'description': 'Shows three fiscal years for comparison',
+                        'period_keys': [p['key'] for p in annual_periods[:3]]
+                    })
+                
                 period_views.append({
                     'name': 'Annual Comparison',
-                    'description': 'Shows multiple years for comparison',
-                    'period_keys': [p['key'] for p in annual_periods[:min(3, len(annual_periods))]]
+                    'description': 'Shows two fiscal years for comparison',
+                    'period_keys': [p['key'] for p in annual_periods[:min(2, len(annual_periods))]]
                 })
             
         elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
@@ -651,10 +667,19 @@ class XBRL:
             
             # Annual comparisons
             if len(annual_periods) >= 2:
+                # Three-year view if available
+                if len(annual_periods) >= 3:
+                    period_views.append({
+                        'name': 'Three-Year Comparison',
+                        'description': 'Compares three fiscal years',
+                        'period_keys': [p['key'] for p in annual_periods[:3]]
+                    })
+                
+                # Default two-year view
                 period_views.append({
                     'name': 'Annual Comparison',
-                    'description': 'Compares full years',
-                    'period_keys': [p['key'] for p in annual_periods[:min(3, len(annual_periods))]]
+                    'description': 'Compares recent fiscal years',
+                    'period_keys': [p['key'] for p in annual_periods[:min(2, len(annual_periods))]]
                 })
             
             # Quarterly comparisons
@@ -686,17 +711,24 @@ class XBRL:
                 
                 # Sequential quarters
                 period_views.append({
-                    'name': 'Sequential Quarters',
-                    'description': 'Shows most recent quarters in sequence',
-                    'period_keys': [p['key'] for p in quarterly_periods[:min(4, len(quarterly_periods))]]
+                    'name': 'Three Recent Quarters',
+                    'description': 'Shows three most recent quarters in sequence',
+                    'period_keys': [p['key'] for p in quarterly_periods[:min(3, len(quarterly_periods))]]
                 })
             
             # YTD comparisons
             if len(ytd_periods) >= 2:
+                if len(ytd_periods) >= 3:
+                    period_views.append({
+                        'name': 'Three-Year YTD Comparison',
+                        'description': 'Compares year-to-date figures across three years',
+                        'period_keys': [p['key'] for p in ytd_periods[:3]]
+                    })
+                
                 period_views.append({
                     'name': 'Year-to-Date Comparison',
                     'description': 'Compares year-to-date figures across years',
-                    'period_keys': [p['key'] for p in ytd_periods[:min(3, len(ytd_periods))]]
+                    'period_keys': [p['key'] for p in ytd_periods[:min(2, len(ytd_periods))]]
                 })
             
             # Mixed view - current YTD + quarterly breakdown
@@ -893,17 +925,31 @@ class XBRL:
                                 except (ValueError, TypeError):
                                     continue
                         
-                        # If still no match found, just take the second most recent period
+                        # If still no match found, take up to two more recent periods (3 total)
                         if len(periods_to_display) == 1 and len(instant_periods) > 1:
+                            # Add second period
                             period = instant_periods[1]
                             period_key = f"instant_{period['date']}"
                             periods_to_display.append((period_key, period['label']))
+                            
+                            # Add third period if available
+                            if len(instant_periods) > 2:
+                                period = instant_periods[2]
+                                period_key = f"instant_{period['date']}"
+                                periods_to_display.append((period_key, period['label']))
                     except (ValueError, TypeError):
-                        # If date parsing failed, just take the two most recent periods
+                        # If date parsing failed, take up to three most recent periods
                         if len(instant_periods) > 1:
+                            # Add second period
                             period = instant_periods[1]
                             period_key = f"instant_{period['date']}"
                             periods_to_display.append((period_key, period['label']))
+                            
+                            # Add third period if available
+                            if len(instant_periods) > 2:
+                                period = instant_periods[2]
+                                period_key = f"instant_{period['date']}"
+                                periods_to_display.append((period_key, period['label']))
             
             # For Income Statement or Cash Flow - use duration periods
             elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
@@ -928,11 +974,18 @@ class XBRL:
                     period_key = current_period['key']
                     periods_to_display.append((period_key, current_period['label']))
                     
-                    # Previous annual period if available
+                    # Previous annual periods (up to 2) if available
                     if len(annual_periods) > 1:
+                        # Add second period (previous year)
                         prev_period = annual_periods[1]
                         period_key = prev_period['key']
                         periods_to_display.append((period_key, prev_period['label']))
+                        
+                        # Add third period (2 years ago) if available
+                        if len(annual_periods) > 2:
+                            prev_prev_period = annual_periods[2]
+                            period_key = prev_prev_period['key']
+                            periods_to_display.append((period_key, prev_prev_period['label']))
                 
                 # For quarterly reports, show current quarter and same quarter last year
                 elif fiscal_period_focus in ['Q1', 'Q2', 'Q3', 'Q4'] and duration_periods:
@@ -941,11 +994,14 @@ class XBRL:
                     period_key = current_period['key']
                     periods_to_display.append((period_key, current_period['label']))
                     
-                    # Try to find same quarter from previous year
+                    # Try to find same quarter from previous years (up to 2 years back)
                     try:
                         current_start = datetime.strptime(current_period['start_date'], '%Y-%m-%d').date()
                         current_end = datetime.strptime(current_period['end_date'], '%Y-%m-%d').date()
                         current_days = (current_end - current_start).days
+                        
+                        # Periods from previous years to add (up to 2)
+                        prev_year_periods = []
                         
                         # Compare with other periods
                         for period in duration_periods[1:]:
@@ -956,13 +1012,25 @@ class XBRL:
                                 
                                 # Similar length periods from approximately a year apart
                                 days_apart = abs((current_end - period_end).days)
+                                # Check for 1 year ago period
                                 if (abs(period_days - current_days) <= 10 and  # Similar duration
                                     350 <= days_apart <= 380):  # About a year apart
-                                    period_key = period['key']
-                                    periods_to_display.append((period_key, period['label']))
-                                    break
+                                    prev_year_periods.append((days_apart, period))
+                                
+                                # Check for 2 years ago period
+                                if (abs(period_days - current_days) <= 10 and  # Similar duration
+                                    730 - 30 <= days_apart <= 730 + 30):  # About two years apart
+                                    prev_year_periods.append((days_apart, period))
                             except (ValueError, TypeError):
                                 continue
+                        
+                        # Sort by how closely they match the expected timeframes
+                        prev_year_periods.sort()
+                        
+                        # Add up to 2 periods from previous years
+                        for i, (_, period) in enumerate(prev_year_periods[:2]):
+                            period_key = period['key']
+                            periods_to_display.append((period_key, period['label']))
                     except (ValueError, TypeError):
                         pass
                 
@@ -970,12 +1038,12 @@ class XBRL:
                 if not periods_to_display:
                     # Try to use annual periods if available
                     if annual_periods:
-                        for period in annual_periods[:min(2, len(annual_periods))]:
+                        for period in annual_periods[:min(3, len(annual_periods))]:
                             period_key = period['key']
                             periods_to_display.append((period_key, period['label']))
                     else:
                         # Fall back to any available duration periods
-                        for period in duration_periods[:min(2, len(duration_periods))]:
+                        for period in duration_periods[:min(3, len(duration_periods))]:
                             period_key = period['key']
                             periods_to_display.append((period_key, period['label']))
             
@@ -991,6 +1059,12 @@ class XBRL:
                     period = all_periods[1]
                     period_key = period['key']
                     periods_to_display.append((period_key, period['label']))
+                
+                # Add a third period if available
+                if len(all_periods) > 2:
+                    period = all_periods[2]
+                    period_key = period['key']
+                    periods_to_display.append((period_key, period['label']))
         
         # Use the rendering module to render the statement
         return render_statement(
@@ -1002,12 +1076,13 @@ class XBRL:
             standard
         )
     
-    def to_pandas(self, statement_role: Optional[str] = None) -> Dict[str, pd.DataFrame]:
+    def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
         """
         Convert XBRL data to pandas DataFrames.
         
         Args:
             statement_role: Optional role URI to convert only a specific statement
+            standard: Whether to use standardized concept labels (default: True)
             
         Returns:
             Dictionary of DataFrames for different aspects of the XBRL data
@@ -1121,6 +1196,29 @@ class XBRL:
             
             # Convert statement data to DataFrame if found
             if statement_data:
+                # Apply standardization if requested
+                if standard:
+                    # Get statement type for context
+                    stmt_type = statement_role
+                    if not stmt_type.startswith('http'):
+                        stmt_type = statement_role
+                    else:
+                        # Try to determine statement type from role
+                        all_statements = self.get_all_statements()
+                        for stmt in all_statements:
+                            if stmt['role'] == statement_role:
+                                stmt_type = stmt['type']
+                                break
+                    
+                    # Add statement type to each item
+                    for item in statement_data:
+                        item['statement_type'] = stmt_type
+                    
+                    # Apply standardization
+                    from edgar.xbrl2 import standardization
+                    mapper = standardization.ConceptMapper(standardization.initialize_default_mappings())
+                    statement_data = standardization.standardize_statement(statement_data, mapper)
+                
                 # Create rows for the DataFrame
                 rows = []
                 
@@ -1142,6 +1240,10 @@ class XBRL:
                         'is_abstract': item['is_abstract'],
                         'has_values': item.get('has_values', False),
                     }
+                    
+                    # Add original label if standardized
+                    if 'original_label' in item:
+                        row['original_label'] = item['original_label']
                     
                     # Add period values
                     for period in sorted_periods:

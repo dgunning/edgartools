@@ -145,6 +145,18 @@ def using_statements_api():
         income_statement_view = statements.income_statement(period_view=view_name)
         console.print(income_statement_view)
     
+    # Display three-column view if available
+    console.print("\n[bold]Three-Column Statement View (if available):[/bold]")
+    period_views = statements.get_period_views("BalanceSheet")
+    three_year_view = next((v for v in period_views if "Three" in v['name']), None)
+    if three_year_view:
+        console.print(f"\n[bold]Balance Sheet with Three Periods ({three_year_view['name']}):[/bold]")
+        console.print(f"Description: {three_year_view['description']}")
+        three_col_bs = statements.balance_sheet(period_view=three_year_view['name'])
+        console.print(three_col_bs)
+    else:
+        console.print("[yellow]No three-period view available for this filing.[/yellow]")
+    
     # Convert to dataframe
     console.print("\n[bold]Converting to DataFrame:[/bold]")
     df = statements.to_dataframe("IncomeStatement")
@@ -234,6 +246,26 @@ def standardized_statements_example():
         console.print(f"\n[bold]Balance Sheet ({view_name}) with Standardized Labels:[/bold]")
         balance_sheet_view_std = statements.balance_sheet(period_view=view_name, standard=True)
         console.print(balance_sheet_view_std)
+    
+    # Demonstrate standardized DataFrames
+    console.print("\n[bold]Converting to DataFrame with Standardized Labels:[/bold]")
+    
+    # Original DataFrame
+    console.print("\n[bold]Original DataFrame:[/bold]")
+    df_orig = statements.to_dataframe("IncomeStatement", standard=False)
+    if not df_orig.empty:
+        console.print(f"DataFrame shape: {df_orig.shape}")
+        console.print(df_orig[['concept', 'label']].head(3))
+    
+    # Standardized DataFrame
+    console.print("\n[bold]Standardized DataFrame:[/bold]")
+    df_std = statements.to_dataframe("IncomeStatement", standard=True)
+    if not df_std.empty:
+        console.print(f"DataFrame shape: {df_std.shape}")
+        if 'original_label' in df_std.columns:
+            console.print(df_std[['concept', 'label', 'original_label']].head(3))
+        else:
+            console.print(df_std[['concept', 'label']].head(3))
 
 if __name__ == "__main__":
     console = Console()

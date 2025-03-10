@@ -48,9 +48,10 @@ def format_date(date_obj: datetime.date) -> str:
         date_obj: datetime.date object
         
     Returns:
-        Formatted date string (e.g., "September 30, 2023")
+        Formatted date string (e.g., "Sep 30, 2023")
     """
-    formatted_date = date_obj.strftime('%B %d, %Y')
+    # Use abbreviated month format (%b) instead of full month (%B)
+    formatted_date = date_obj.strftime('%b %d, %Y')
     
     # Remove leading zeros from day
     if formatted_date.split()[1].startswith('0'):
