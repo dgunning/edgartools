@@ -119,7 +119,9 @@ class MappingStore:
     def _save_mappings(self) -> None:
         """Save mappings to the JSON file."""
         # Ensure directory exists
-        os.makedirs(os.path.dirname(self.source), exist_ok=True)
+        directory = os.path.dirname(self.source)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
         
         # Convert sets to lists for JSON serialization
         serializable_mappings = {k: list(v) for k, v in self.mappings.items()}

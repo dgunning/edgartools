@@ -325,3 +325,11 @@ def test_xbrl_data_from_files(apple_xbrl):
     print()
     print(apple_xbrl)
 
+
+def test_get_xbrl_from_filing_with_embedded_linkbases():
+    c = Company("ORCL")
+    filing  = c.latest("10-K")
+    print()
+    print(filing)
+    xbrl = filing.xbrl()
+    print(xbrl)

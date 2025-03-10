@@ -6,9 +6,6 @@
     "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
     "us-gaap_SalesRevenueGoodsNet",
     "us-gaap_OperatingRevenue",
-    "us-gaap_Revenue",
-    "us-gaap_SalesRevenueNet",
-    "us-gaap_Revenues"
   ],
   "Cost of Revenue": [
     "us-gaap_CostOfGoodsSold",
@@ -55,10 +52,7 @@
     "us-gaap_NetIncomeLoss",
     "us-gaap_ProfitLoss",
     "us-gaap_NetIncome",
-    "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
-    "us-gaap_NetIncome",
-    "us-gaap_NetIncomeLoss",
-    "us-gaap_ProfitLoss"
+    "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest"
   ],
   "Cash and Cash Equivalents": [
     "us-gaap_CashEquivalentsAtCarryingValue",
@@ -129,9 +123,7 @@
   ],
   "Total Liabilities": [
     "us-gaap_LiabilitiesTotal",
-    "us-gaap_Liabilities",
-    "us-gaap_Liabilities",
-    "us-gaap_LiabilitiesTotal"
+    "us-gaap_Liabilities"
   ],
   "Common Stock": [
     "us-gaap_CommonStockValue",

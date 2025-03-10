@@ -298,6 +298,76 @@ class XBRL:
             })
         
         return statements
+        
+    def get_statement_by_type(self, statement_type: str) -> Optional[Dict[str, Any]]:
+        """
+        Get the first statement matching the given type.
+        
+        Args:
+            statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+            
+        Returns:
+            Statement data if found, None otherwise
+        """
+        # Get all statements
+        statements = self.get_all_statements()
+        
+        # Find the first matching statement
+        for statement in statements:
+            if statement['type'] == statement_type:
+                # Get statement data
+                role = statement['role']
+                statement_data = self.get_statement_data(role)
+                
+                if statement_data:
+                    return {
+                        'role': role,
+                        'definition': statement['definition'],
+                        'statement_type': statement_type,
+                        'periods': statement_data['periods'],
+                        'data': statement_data['statement_data']
+                    }
+        
+        return None
+
+    @classmethod
+    def stitch_statements(cls, xbrl_list: List['XBRL'], 
+                        statement_type: str = 'IncomeStatement',
+                        period_type: str = 'RECENT_PERIODS',
+                        max_periods: int = 3,
+                        standard: bool = True) -> Dict[str, Any]:
+        """
+        Stitch together statements from multiple XBRL objects.
+        
+        Args:
+            xbrl_list: List of XBRL objects, should be from the same company and ordered by date
+            statement_type: Type of statement to stitch ('IncomeStatement', 'BalanceSheet', etc.)
+            period_type: Type of period view to generate
+            max_periods: Maximum number of periods to include (default: 3)
+            standard: Whether to use standardized concept labels (default: True)
+            
+        Returns:
+            Stitched statement data
+        """
+        from edgar.xbrl2.stitching import stitch_statements as _stitch_statements
+        return _stitch_statements(xbrl_list, statement_type, period_type, max_periods, standard)
+
+    def render_stitched_statement(self, stitched_data: Dict[str, Any],
+                                statement_title: str,
+                                statement_type: str) -> 'RichTable':
+        """
+        Render a stitched statement.
+        
+        Args:
+            stitched_data: Stitched statement data
+            statement_title: Title of the statement
+            statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+            
+        Returns:
+            RichTable: A formatted table representation of the stitched statement
+        """
+        from edgar.xbrl2.stitching import render_stitched_statement as _render_stitched_statement
+        return _render_stitched_statement(stitched_data, statement_title, statement_type, self.entity_info)
     
     def get_statement(self, role_or_type: str, period_filter: Optional[str] = None) -> List[Dict[str, Any]]:
         """

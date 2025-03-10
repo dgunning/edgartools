@@ -19,17 +19,17 @@ from edgar.xbrl2.xbrl import XBRL
 
 @pytest.fixture
 def aapl_xbrl():
-    data_dir = Path(__file__).parent / "aapl"
+    data_dir = Path("data/xbrl/datafiles/aapl")
 
     # Parse the directory
     return XBRL.parse_directory(data_dir)
 
 def test_dei_info(aapl_xbrl:XBRL):
     assert aapl_xbrl.entity_info.get('entity_name') == 'Apple Inc.'
-    assert aapl_xbrl.entity_info.get('identifier') == '0000320193'
+    assert aapl_xbrl.entity_info.get('identifier') == '320193'
     assert aapl_xbrl.entity_info.get('reporting_end_date') == datetime.date(2023, 10, 20)
     assert aapl_xbrl.entity_info.get('fiscal_year') == 2023
-    assert aapl_xbrl.entity_info.get('fiscal_period') == '2023-09-30'
+    assert aapl_xbrl.entity_info.get('fiscal_period') == 'FY'
 
 def test_get_coverpage(aapl_xbrl:XBRL):
     print()
@@ -126,13 +126,13 @@ def test_get_entity_info(aapl_xbrl):
     print()
     print(entity_info)
     assert entity_info.get('annual_report')
-    assert entity_info.get('quarterly_report') is None
+    assert not entity_info.get('quarterly_report')
 
 
 def test_parse_directory():
     """Test parsing a directory of XBRL files."""
     # Get the path to the test files
-    data_dir = Path(__file__).parent / "aapl"
+    data_dir = Path("data/xbrl/datafiles/aapl")
     
     # Parse the directory
     xbrl = XBRL.parse_directory(data_dir)

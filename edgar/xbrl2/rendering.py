@@ -207,11 +207,11 @@ def render_statement(
     for item in statement_data:
         # Skip rows with no values if they're abstract (headers without data)
         # But keep abstract items with children (section headers)
-        if not item.get('has_values', False) and item['is_abstract'] and not item['children']:
+        if not item.get('has_values', False) and item.get('is_abstract') and not item.get('children'):
             continue
             
         # Skip non-abstract items without values (missing data)
-        if not item.get('has_values', False) and not item['is_abstract'] and not item['children']:
+        if not item.get('has_values', False) and not item.get('is_abstract') and not item.get('children'):
             continue
             
         # Skip axis/dimension items (they contain brackets in their labels)
@@ -240,11 +240,10 @@ def render_statement(
                 'per basic', 'per diluted'
             ]):
                 is_monetary = False
-            
+
             # Ratio-related items should not be monetary
-            if any(keyword in label_lower for keyword in [
-                'ratio', 'percentage', 'per cent'
-            ]):
+            if any(keyword == word for keyword in ['ratio', 'percentage', 'per cent']
+                   for word in label_lower.split()):
                 is_monetary = False
             
             # Format numeric values
