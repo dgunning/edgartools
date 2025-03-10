@@ -4,11 +4,74 @@ Financial statement processing for XBRL data.
 This module provides functions for working with financial statements.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 
 import pandas as pd
 from rich import box
 from rich.table import Table
+
+
+class Statement:
+    """
+    A single financial statement extracted from XBRL data.
+    
+    This class provides convenient methods for rendering and manipulating a specific
+    financial statement.
+    """
+    
+    def __init__(self, xbrl, role_or_type: str):
+        """
+        Initialize with an XBRL object and statement identifier.
+        
+        Args:
+            xbrl: XBRL object containing parsed data
+            role_or_type: Role URI, statement type, or statement short name
+        """
+        self.xbrl = xbrl
+        self.role_or_type = role_or_type
+        
+    def render(self, period_filter: Optional[str] = None, 
+               period_view: Optional[str] = None, 
+               standard: bool = False) -> Table:
+        """
+        Render the statement as a formatted table.
+        
+        Args:
+            period_filter: Optional period key to filter facts
+            period_view: Optional name of a predefined period view
+            standard: Whether to use standardized concept labels
+            
+        Returns:
+            Rich Table containing the rendered statement
+        """
+        return self.xbrl.render_statement(self.role_or_type, 
+                                        period_filter=period_filter,
+                                        period_view=period_view, 
+                                        standard=standard)
+    
+    def to_pandas(self, standard: bool = True) -> Dict[str, pd.DataFrame]:
+        """
+        Convert the statement to pandas DataFrames.
+        
+        Args:
+            standard: Whether to use standardized concept labels
+            
+        Returns:
+            Dictionary of DataFrames for different aspects of the statement
+        """
+        return self.xbrl.to_pandas(self.role_or_type, standard=standard)
+    
+    def get_data(self, period_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Get the raw statement data.
+        
+        Args:
+            period_filter: Optional period key to filter facts
+            
+        Returns:
+            List of line items with values
+        """
+        return self.xbrl.get_statement(self.role_or_type, period_filter=period_filter)
 
 
 class Statements:
@@ -37,20 +100,26 @@ class Statements:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
     
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Union[Dict[str, Any], List[Dict[str, Any]], Statement]:
         """
-        Get a statement by index.
+        Get a statement by index, type, or role.
         
         Args:
-            item: Integer index or string statement type
+            item: Integer index, string statement type, or role URI
             
         Returns:
-            Statement data or list of statements
+            Statement instance for the requested statement
         """
         if isinstance(item, int):
-            return self.statements[item]
+            if 0 <= item < len(self.statements):
+                stmt = self.statements[item]
+                return Statement(self.xbrl, stmt['role'])
         elif isinstance(item, str):
-            return self.statement_by_type.get(item, [])
+            # If it's a statement type with multiple statements, return the first one
+            if item in self.statement_by_type and self.statement_by_type[item]:
+                return Statement(self.xbrl, self.statement_by_type[item][0]['role'])
+            # Otherwise, try to use it directly as a role or statement name
+            return Statement(self.xbrl, item)
         return None
     
     def __rich__(self):
@@ -61,11 +130,12 @@ class Statements:
             Rich Table object
         """
         table = Table(title="Available Statements", box=box.SIMPLE)
+        table.add_column("#")
         table.add_column("Statement")
         table.add_column("Type")
         table.add_column("Elements")
-        for stmt in self.statements:
-            table.add_row(stmt['definition'], stmt['type'] or "", str(stmt['element_count']))
+        for index, stmt in enumerate(self.statements):
+            table.add_row(str(index), stmt['definition'], stmt['type'] or "", str(stmt['element_count']))
         return table
     
     def balance_sheet(self, period_view: Optional[str] = None, standard: bool = False) -> Table:

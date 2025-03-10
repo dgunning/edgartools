@@ -240,6 +240,11 @@ class XBRL:
             xbrl.legacy_instance = None
         
         return xbrl
+
+    @property
+    def statements(self):
+        from edgar.xbrl2.statements import Statements
+        return Statements(self)
     
     def get_all_statements(self) -> List[Dict[str, Any]]:
         """
@@ -371,30 +376,58 @@ class XBRL:
     
     def get_statement(self, role_or_type: str, period_filter: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Get a financial statement by role or statement type.
+        Get a financial statement by role URI, statement type, or statement short name.
         
         Args:
-            role_or_type: Extended link role URI or statement type name (e.g., "BalanceSheet")
+            role_or_type: Can be one of:
+                - Extended link role URI (e.g. "http://apple.com/role/ConsolidatedStatementOfIncome")
+                - Statement type name (e.g. "BalanceSheet")
+                - Statement short name (e.g. "ConsolidatedStatementOfIncome")
             period_filter: Optional period key to filter facts
             
         Returns:
             List of line items with values
         """
-        # If requesting by statement type rather than role URI
-        if not role_or_type.startswith('http'):
-            # Get all statements and find the appropriate one
+        # If requesting by full role URI, use as is
+        if role_or_type.startswith('http'):
+            role_uri = role_or_type
+        else:
+            # Check if it's a statement type
             all_statements = self.get_all_statements()
+            
+            # First try to match by type (e.g., "BalanceSheet")
             matching_statements = [stmt for stmt in all_statements if stmt['type'] == role_or_type]
             
+            # If not found by type, try to match by the last part of the role URI (short name)
+            if not matching_statements:
+                for stmt in all_statements:
+                    # Extract the short name from the role (last part after / or #)
+                    role = stmt['role']
+                    short_name = role.split('/')[-1] if '/' in role else role.split('#')[-1] if '#' in role else ''
+                    
+                    # Also try to extract from the definition if available
+                    definition_short_name = ''
+                    if 'definition' in stmt and stmt['definition']:
+                        # Remove spaces and standardize
+                        definition_words = ''.join(stmt['definition'].split())
+                        if definition_words:
+                            definition_short_name = definition_words
+                    
+                    # Check if either short name matches
+                    if (short_name and short_name.lower() == role_or_type.lower()) or \
+                       (definition_short_name and definition_short_name.lower() == role_or_type.lower()):
+                        matching_statements.append(stmt)
+            
+            # If found, use the role
             if matching_statements:
-                role_or_type = matching_statements[0]['role']
+                role_uri = matching_statements[0]['role']
             else:
                 return []  # No matching statement found
         
-        if role_or_type not in self.presentation_trees:
+        if role_uri not in self.presentation_trees:
             return []
         
-        tree = self.presentation_trees[role_or_type]
+        tree = self.presentation_trees[role_uri]
         
         # Find the root element
         root_id = tree.root_element_id

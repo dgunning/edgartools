@@ -10,11 +10,45 @@ from rich import box
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table as RichTable
+from rich.text import Text
 
 from edgar.xbrl2.core import (
     determine_dominant_scale, format_value, format_date, parse_date
 )
 from edgar.xbrl2 import standardization
+from edgar.richtools import rich_to_text
+from edgar.files.html import Document
+
+
+def _is_html(text: str) -> bool:
+    """
+    Simple check to determine if a string contains HTML content.
+    
+    Args:
+        text: The string to check
+        
+    Returns:
+        bool: True if the string appears to contain HTML, False otherwise
+    """
+    html_tags = ['<p', '<div', '<span', '<br', '<table', '<tr', '<td', '<th',
+                '<ul>', '<li', '<ol>', '<h1>', '<h2>', '<h3>', '<h4>', '<h5>', '<h6>']
+    
+    text_lower = text.lower()
+    return any(tag in text_lower for tag in html_tags)
+
+
+def html_to_text(html: str) -> str:
+    """
+    Convert HTML to plain text.
+    
+    Args:
+        html: HTML content to convert
+        
+    Returns:
+        str: Plain text representation of the HTML
+    """
+    document = Document.parse(html)
+    return rich_to_text(document.__str__())
 
 
 def render_statement(
@@ -201,7 +235,7 @@ def render_statement(
     # Add columns with right-alignment for numeric columns
     table.add_column("Line Item", justify="left")
     for _, period_label in formatted_periods:
-        table.add_column(period_label, justify="right")
+        table.add_column(period_label)
     
     # Add rows
     for item in statement_data:
@@ -248,11 +282,14 @@ def render_statement(
             
             # Format numeric values
             if isinstance(value, (int, float)):
-                formatted_value = format_value(value, is_monetary, dominant_scale, fact_decimals)
+                formatted_value = Text(format_value(value, is_monetary, dominant_scale, fact_decimals), justify="right")
             else:
-                # Non-numeric values
-                formatted_value = str(value) if value else ""  # Em dash for empty values
-            
+                # Non-numeric values - check if it's HTML and convert if needed
+                if value and isinstance(value, str) and _is_html(value):
+                    formatted_value = html_to_text(value)
+                else:
+                    formatted_value = str(value) if value else "" # Empty string for empty values
+
             period_values.append(formatted_value)
         
         # Apply different formatting based on level and abstract status
