@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.13.0] - 2025-03-11
 
 ### Added
+- Add stitching of statements to produce a single statement across multiple filings
+- Add `Statement` class to represent a single statement and `Statements` class to represent multiple statements
+- Add `XBRLS` class to combine data from multiple periods with intelligent handling of concept changes
+- Add `XBRLS.from_filings` to create a `XBRLS` object from a list of filings
+- Add `XBRLS.statements` property to get the statements from the `XBRLS` object
+
+## [3.13.0] - 2025-03-11
+
+### Added
 
 - A preview rewrite of XBRL functionality is added in the `edgar.xbrl2`. The goal is to test this for a few weeks. The `edgar.xbrl` module will be deprecated in the future.
 
