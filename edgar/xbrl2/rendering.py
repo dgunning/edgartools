@@ -18,6 +18,7 @@ from edgar.xbrl2.core import (
 from edgar.xbrl2 import standardization
 from edgar.richtools import rich_to_text
 from edgar.files.html import Document
+from datetime import datetime
 
 
 def _is_html(text: str) -> bool:
@@ -47,8 +48,11 @@ def html_to_text(html: str) -> str:
     Returns:
         str: Plain text representation of the HTML
     """
+    # Wrap in html tag if not present
+    html = f"<html>{html}</html>" if not html.startswith("<html>") else html
     document = Document.parse(html)
     return rich_to_text(document.__str__())
+
 
 
 def render_statement(
@@ -57,7 +61,7 @@ def render_statement(
     statement_title: str,
     statement_type: str,
     entity_info: Dict[str, Any] = None,
-    standard: bool = False,
+    standard: bool = True,
 ) -> RichTable:
     """
     Render a financial statement as a rich table.
@@ -68,7 +72,7 @@ def render_statement(
         statement_title: Title of the statement
         statement_type: Type of statement (BalanceSheet, IncomeStatement, etc.)
         entity_info: Entity information (optional)
-        standard: Whether to use standardized concept labels (default: False)
+        standard: Whether to use standardized concept labels (default: True)
         
     Returns:
         RichTable: A formatted table representation of the statement
@@ -180,28 +184,144 @@ def render_statement(
     
     # Create formatted period columns
     for period_key, original_label in periods_to_display:
-        # Extract the end date
+        # If we have a date-based label, ensure it uses abbreviated months
+        # This handles both our internal date formatting and dates from XBRL data
+        if original_label and ',' in original_label:
+            # Check if it contains a full month name that needs to be abbreviated
+            for full_month, abbr in [
+                ('January', 'Jan'), ('February', 'Feb'), ('March', 'Mar'),
+                ('April', 'Apr'), ('May', 'May'), ('June', 'Jun'),
+                ('July', 'Jul'), ('August', 'Aug'), ('September', 'Sep'),
+                ('October', 'Oct'), ('November', 'Nov'), ('December', 'Dec')
+            ]:
+                if full_month in original_label:
+                    # Try to extract and reformat the date properly
+                    try:
+                        # Extract year from the original label
+                        year = int(''.join(c for c in original_label.split(',')[1] if c.isdigit()))
+                        # Extract day - find digits after the month
+                        day_part = original_label.split(full_month)[1].strip()
+                        day = int(''.join(c for c in day_part.split(',')[0] if c.isdigit()))
+                        # Create a proper date and format it
+                        month_num = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+                                   'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}[abbr]
+                        date_obj = None
+                        try:
+                            date_obj = datetime(year, month_num, day).date()
+                            formatted_periods.append((period_key, format_date(date_obj)))
+                            break
+                        except ValueError:
+                            # Handle invalid dates (like Sep 31) by using a valid date for that month
+                            if day > 28:  # Potentially invalid day
+                                # Use last day of month instead
+                                if month_num == 2:  # February
+                                    day = 28 if year % 4 != 0 else 29
+                                elif month_num in [4, 6, 9, 11]:  # 30-day months
+                                    day = 30
+                                else:  # 31-day months
+                                    day = 31
+                                try:
+                                    date_obj = datetime(year, month_num, day).date()
+                                    formatted_periods.append((period_key, format_date(date_obj)))
+                                    break
+                                except ValueError:
+                                    pass
+                    except (ValueError, IndexError):
+                        pass
+            
+            # If we couldn't extract and reformat, but it's already using abbreviated months, use as is
+            if len(formatted_periods) == 0 or formatted_periods[-1][0] != period_key:
+                for abbr in ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']:
+                    if abbr in original_label:
+                        formatted_periods.append((period_key, original_label))
+                        break
+                else:
+                    # If we get here, no month abbreviation was found, use original
+                    formatted_periods.append((period_key, original_label))
+            continue
+            
+        # For better clarity, prefer to use the original labels which include fiscal year information
+        # This helps distinguish between periods like Sep 30, 2023 and Sep 24, 2022 in the rendering
+        if original_label and len(original_label) > 4:
+            # Get a cleaner version of the label if it's too verbose
+            if len(original_label) > 30 and ':' in original_label:
+                # Extract just the fiscal period and date information
+                try:
+                    if "Annual:" in original_label:
+                        # Extract fiscal year end date
+                        parts = original_label.split('to')
+                        if len(parts) > 1:
+                            end_date_str = parts[1].strip()
+                            end_date = parse_date(end_date_str)
+                            cleaner_label = format_date(end_date)
+                            formatted_periods.append((period_key, cleaner_label))
+                            continue
+                    elif "Quarterly:" in original_label:
+                        # Extract quarter end date
+                        parts = original_label.split('to')
+                        if len(parts) > 1:
+                            end_date_str = parts[1].strip()
+                            end_date = parse_date(end_date_str)
+                            cleaner_label = format_date(end_date)
+                            formatted_periods.append((period_key, cleaner_label))
+                            continue
+                except (ValueError, TypeError):
+                    pass
+                    
+            # If we couldn't extract a cleaner version, use the original
+            formatted_periods.append((period_key, original_label))
+            continue
+        
+        # If we don't have a good original label, extract and format the date
         if period_key.startswith('instant_'):
             date_str = period_key.split('_')[1]
-        else:  # duration
-            date_str = period_key.split('_')[2]  # end date
-            
-        try:
-            # Format the date in a more readable format
-            date = parse_date(date_str)
-            formatted_date = format_date(date)
-            
-            # Debug check - we shouldn't be displaying dates after document_period_end_date
-            if doc_period_end_date and date > doc_period_end_date:
-                # This should never happen due to our filtering above
-                # If it does, fall back to document_period_end_date
-                fallback_date = format_date(doc_period_end_date)
-                formatted_periods.append((period_key, fallback_date))
-            else:
+            try:
+                date = parse_date(date_str)
+                # For better comparison, use a consistent fiscal year date format
+                formatted_date = format_date(date)
                 formatted_periods.append((period_key, formatted_date))
-        except (ValueError, TypeError, IndexError):
-            # Fall back to original label if date parsing fails
-            formatted_periods.append((period_key, original_label))
+            except (ValueError, TypeError, IndexError):
+                # Fall back to original label if date parsing fails
+                formatted_periods.append((period_key, original_label))
+        else:  # duration
+            # For duration periods, try to extract end date to show fiscal year
+            parts = period_key.split('_')
+            if len(parts) >= 3:
+                try:
+                    start_date_str = parts[1]
+                    end_date_str = parts[2]
+                    start_date = parse_date(start_date_str)
+                    end_date = parse_date(end_date_str)
+                    
+                    # Use a consistent format focusing on the end date which is typically
+                    # the fiscal period end that users care about
+                    formatted_date = format_date(end_date)
+                    
+                    # For quarterly reports, include quarter information
+                    duration_days = (end_date - start_date).days
+                    if 80 <= duration_days <= 100:  # Quarterly
+                        # Determine quarter number
+                        month = end_date.month
+                        if month <= 3 or month == 12:
+                            q_num = "Q1"
+                        elif month <= 6:
+                            q_num = "Q2"
+                        elif month <= 9:
+                            q_num = "Q3"
+                        else:
+                            q_num = "Q4"
+                            
+                        # Only add quarter information if it adds clarity
+                        if statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                            formatted_date = f"{formatted_date} ({q_num})"
+                    
+                    formatted_periods.append((period_key, formatted_date))
+                except (ValueError, TypeError, IndexError):
+                    # Fall back to original label if date parsing fails
+                    formatted_periods.append((period_key, original_label))
+            else:
+                # Fall back to original label for malformed period keys
+                formatted_periods.append((period_key, original_label))
     
     # Determine the dominant scale for monetary values in this statement
     dominant_scale = determine_dominant_scale(statement_data, periods_to_display)

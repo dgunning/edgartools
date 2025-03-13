@@ -9,6 +9,7 @@ from typing import Dict, List, Any, Optional, Union
 import pandas as pd
 from rich import box
 from rich.table import Table
+from edgar.richtools import repr_rich
 
 
 class Statement:
@@ -32,7 +33,7 @@ class Statement:
         
     def render(self, period_filter: Optional[str] = None, 
                period_view: Optional[str] = None, 
-               standard: bool = False) -> Table:
+               standard: bool = True) -> Table:
         """
         Render the statement as a formatted table.
         
@@ -48,7 +49,19 @@ class Statement:
                                         period_filter=period_filter,
                                         period_view=period_view, 
                                         standard=standard)
-    
+
+    def __rich__(self):
+        """
+        Rich console representation.
+
+        Returns:
+            Rich Table object
+        """
+        return self.render()
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
     def to_pandas(self, standard: bool = True) -> Dict[str, pd.DataFrame]:
         """
         Convert the statement to pandas DataFrames.
@@ -100,7 +113,7 @@ class Statements:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
     
-    def __getitem__(self, item) -> Union[Dict[str, Any], List[Dict[str, Any]], Statement]:
+    def __getitem__(self, item) -> Optional[Statement]:
         """
         Get a statement by index, type, or role.
         
@@ -117,10 +130,9 @@ class Statements:
         elif isinstance(item, str):
             # If it's a statement type with multiple statements, return the first one
             if item in self.statement_by_type and self.statement_by_type[item]:
-                return Statement(self.xbrl, self.statement_by_type[item][0]['role'])
+                return Statement(self.xbrl, item)
             # Otherwise, try to use it directly as a role or statement name
             return Statement(self.xbrl, item)
-        return None
     
     def __rich__(self):
         """
@@ -137,59 +149,46 @@ class Statements:
         for index, stmt in enumerate(self.statements):
             table.add_row(str(index), stmt['definition'], stmt['type'] or "", str(stmt['element_count']))
         return table
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
     
-    def balance_sheet(self, period_view: Optional[str] = None, standard: bool = False) -> Table:
+    def balance_sheet(self) -> Statement:
         """
-        Get a formatted balance sheet.
-        
-        Args:
-            period_view: Optional period view name
-            standard: Whether to use standardized concept labels (default: False)
+        Get a balance sheet.
             
         Returns:
-            Rich Table containing the balance sheet
+            A balance sheet statement
         """
-        return self.xbrl.render_statement("BalanceSheet", period_view=period_view, standard=standard)
+        return self["BalanceSheet"]
     
-    def income_statement(self, period_view: Optional[str] = None, standard: bool = False) -> Table:
+    def income_statement(self) -> Statement:
         """
-        Get a formatted income statement.
-        
-        Args:
-            period_view: Optional period view name
-            standard: Whether to use standardized concept labels (default: False)
+        Get an income statement.
+
+        Returns:
+            An income statement
+        """
+        return self["IncomeStatement"]
+    
+    def cash_flow_statement(self) -> Statement:
+        """
+        Get a cash flow statement.
+
+        Returns:
+             The cash flow statement
+        """
+        return self["CashFlowStatement"]
+    
+    def statement_of_equity(self) -> Statement:
+        """
+        Get a statement of equity.
             
         Returns:
-            Rich Table containing the income statement
+           The statement of equity
         """
-        return self.xbrl.render_statement("IncomeStatement", period_view=period_view, standard=standard)
-    
-    def cash_flow_statement(self, period_view: Optional[str] = None, standard: bool = False) -> Table:
-        """
-        Get a formatted cash flow statement.
-        
-        Args:
-            period_view: Optional period view name
-            standard: Whether to use standardized concept labels (default: False)
-            
-        Returns:
-            Rich Table containing the cash flow statement
-        """
-        return self.xbrl.render_statement("CashFlowStatement", period_view=period_view, standard=standard)
-    
-    def statement_of_equity(self, period_view: Optional[str] = None, standard: bool = False) -> Table:
-        """
-        Get a formatted statement of equity.
-        
-        Args:
-            period_view: Optional period view name
-            standard: Whether to use standardized concept labels (default: False)
-            
-        Returns:
-            Rich Table containing the statement of equity
-        """
-        return self.xbrl.render_statement("StatementOfEquity", period_view=period_view, standard=standard)
-    
+        return self["StatementOfEquity"]
+
     def get_period_views(self, statement_type: str) -> List[Dict[str, Any]]:
         """
         Get available period views for a statement type.
@@ -274,3 +273,258 @@ class Statements:
             rows.append(row)
         
         return pd.DataFrame(rows)
+
+
+class StitchedStatement:
+    """
+    A stitched financial statement across multiple time periods.
+    
+    This class provides convenient methods for rendering and manipulating a stitched
+    financial statement from multiple filings.
+    """
+    
+    def __init__(self, xbrls, statement_type: str, max_periods: int = 8, standardize: bool = True):
+        """
+        Initialize with XBRLS object and statement parameters.
+        
+        Args:
+            xbrls: XBRLS object containing stitched data
+            statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+        """
+        self.xbrls = xbrls
+        self.statement_type = statement_type
+        self.max_periods = max_periods
+        self.standardize = standardize
+        
+        # Statement titles
+        self.statement_titles = {
+            'BalanceSheet': 'CONSOLIDATED BALANCE SHEET',
+            'IncomeStatement': 'CONSOLIDATED INCOME STATEMENT',
+            'CashFlowStatement': 'CONSOLIDATED STATEMENT OF CASH FLOWS',
+            'StatementOfEquity': 'CONSOLIDATED STATEMENT OF STOCKHOLDERS\' EQUITY',
+            'ComprehensiveIncome': 'CONSOLIDATED STATEMENT OF COMPREHENSIVE INCOME'
+        }
+        self.title = self.statement_titles.get(statement_type, statement_type.upper())
+        
+        # Cache statement data
+        self._statement_data = None
+    
+    @property
+    def statement_data(self):
+        """Get the underlying statement data, loading it if necessary."""
+        if self._statement_data is None:
+            self._statement_data = self.xbrls.get_statement(
+                self.statement_type, 
+                self.max_periods, 
+                self.standardize
+            )
+        return self._statement_data
+    
+    def render(self) -> Table:
+        """
+        Render the stitched statement as a formatted table.
+        
+        Returns:
+            Rich Table containing the rendered statement
+        """
+        from edgar.xbrl2.stitching import render_stitched_statement
+        
+        return render_stitched_statement(
+            self.statement_data,
+            statement_title=self.title,
+            statement_type=self.statement_type,
+            entity_info=self.xbrls.entity_info
+        )
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        """
+        Convert the stitched statement to a pandas DataFrame.
+        
+        Returns:
+            pandas DataFrame with periods as columns and concepts as rows
+        """
+        from edgar.xbrl2.stitching import to_pandas
+        
+        return to_pandas(self.statement_data)
+    
+    def __rich__(self):
+        """
+        Rich console representation.
+        
+        Returns:
+            Rich Table object
+        """
+        return self.render()
+    
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+    
+    def __str__(self) -> str:
+        """
+        String representation.
+        
+        Returns:
+            String representation
+        """
+        return f"StitchedStatement({self.statement_type}, periods={len(self.statement_data['periods'])})"
+
+
+class StitchedStatements:
+    """
+    User-friendly access to stitched financial statements across multiple time periods.
+    
+    This class provides a simplified API for accessing and rendering stitched financial
+    statements from multiple filings, without requiring detailed knowledge of the
+    underlying stitching process.
+    """
+    
+    def __init__(self, xbrls):
+        """
+        Initialize with an XBRLS object.
+        
+        Args:
+            xbrls: The XBRLS object to extract stitched statements from
+        """
+        self.xbrls = xbrls
+        
+    def balance_sheet(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+        """
+        Get a stitched balance sheet across multiple time periods.
+        
+        Args:
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+            
+        Returns:
+            StitchedStatement for the balance sheet
+        """
+        return StitchedStatement(self.xbrls, 'BalanceSheet', max_periods, standardize)
+    
+    def income_statement(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+        """
+        Get a stitched income statement across multiple time periods.
+        
+        Args:
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+            
+        Returns:
+            StitchedStatement for the income statement
+        """
+        return StitchedStatement(self.xbrls, 'IncomeStatement', max_periods, standardize)
+    
+    def cash_flow_statement(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+        """
+        Get a stitched cash flow statement across multiple time periods.
+        
+        Args:
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+            
+        Returns:
+            StitchedStatement for the cash flow statement
+        """
+        return StitchedStatement(self.xbrls, 'CashFlowStatement', max_periods, standardize)
+    
+    def statement_of_equity(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+        """
+        Get a stitched statement of changes in equity across multiple time periods.
+        
+        Args:
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+            
+        Returns:
+            StitchedStatement for the statement of equity
+        """
+        return StitchedStatement(self.xbrls, 'StatementOfEquity', max_periods, standardize)
+    
+    def comprehensive_income(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+        """
+        Get a stitched statement of comprehensive income across multiple time periods.
+        
+        Args:
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+            
+        Returns:
+            StitchedStatement for the comprehensive income statement
+        """
+        return StitchedStatement(self.xbrls, 'ComprehensiveIncome', max_periods, standardize)
+    
+    def __getitem__(self, statement_type: str) -> StitchedStatement:
+        """
+        Get a statement by type using dictionary syntax.
+        
+        Args:
+            statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+            
+        Returns:
+            StitchedStatement for the requested statement type
+        """
+        return StitchedStatement(self.xbrls, statement_type)
+    
+    def __rich__(self):
+        """
+        Rich console representation.
+        
+        Returns:
+            Rich Table object
+        """
+        table = Table(title="Available Stitched Statements", box=box.SIMPLE)
+        table.add_column("Statement Type")
+        table.add_column("Periods")
+        
+        # Get information about available statements
+        statement_types = set()
+        for xbrl in self.xbrls.xbrl_list:
+            statements = xbrl.get_all_statements()
+            for stmt in statements:
+                if stmt['type']:
+                    statement_types.add(stmt['type'])
+        
+        # Get periods
+        periods = self.xbrls.get_periods()
+        period_count = len(periods)
+        
+        # Add rows for each statement type
+        for stmt_type in sorted(statement_types):
+            table.add_row(stmt_type, str(period_count))
+        
+        return table
+    
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+    
+    def __str__(self) -> str:
+        """
+        String representation listing available statements.
+        
+        Returns:
+            String representation
+        """
+        # Get information about available statements
+        statement_types = set()
+        for xbrl in self.xbrls.xbrl_list:
+            statements = xbrl.get_all_statements()
+            for stmt in statements:
+                if stmt['type']:
+                    statement_types.add(stmt['type'])
+        
+        # Get information about periods
+        periods = self.xbrls.get_periods()
+        period_count = len(periods)
+        
+        # Format output
+        output = [f"Stitched statements across {period_count} periods:"]
+        for stmt_type in sorted(statement_types):
+            output.append(f"  - {stmt_type}")
+        
+        output.append("\nAvailable methods:")
+        output.append("  - balance_sheet()")
+        output.append("  - income_statement()")
+        output.append("  - cash_flow_statement()")
+        
+        return "\n".join(output)

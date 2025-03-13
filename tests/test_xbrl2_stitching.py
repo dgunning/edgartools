@@ -3,12 +3,16 @@ Tests for the XBRL statement stitching functionality.
 """
 
 from unittest.mock import MagicMock, patch
+from edgar import *
+from edgar.xbrl2 import XBRL, XBRLS
+from rich import print
 
 import pytest
 
 from edgar.xbrl2.stitching import (
     StatementStitcher, stitch_statements, render_stitched_statement, to_pandas
 )
+
 
 
 @pytest.fixture
@@ -227,3 +231,62 @@ def test_stitch_statements_function(mock_stitcher_class):
     )
     assert result == {'result': 'test'}
 
+def test_stitch_aapl_statements():
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)  # 2 filings should cover ~4 years with overlaps
+    print()
+    xbrls = [XBRL.from_filing(f) for f in filings]
+
+    # Print information about the individual filings
+    for i, xbrl in enumerate(xbrls):
+        # Count available periods for this filing
+        periods = []
+        for period in xbrl.reporting_periods:
+            if period['type'] == 'duration':
+                key = f"duration_{period['start_date']}_{period['end_date']}"
+                periods.append((key, period['label']))
+        
+        print(f"\nFiling {i+1} periods: {[p[1] for p in periods]}")
+        print(xbrl.render_statement("IncomeStatement"))
+
+    # Use ALL_PERIODS and higher max_periods to ensure we see all years
+    statement_data = stitch_statements(
+        xbrls, 
+        statement_type="IncomeStatement",
+        period_type=StatementStitcher.PeriodType.ALL_PERIODS,
+        max_periods=10  # Allow up to 10 periods to ensure we capture all
+    )
+    
+    # Print the periods we found in the stitched data
+    print(f"\nPERIODS IN STITCHED DATA: {[p[1] for p in statement_data['periods']]}")
+    print(f"Number of periods: {len(statement_data['periods'])}")
+    
+    # Render the stitched statement
+    result = render_stitched_statement(
+        statement_data,
+        statement_title="CONSOLIDATED STATEMENT OF INCOME",
+        statement_type="IncomeStatement"
+    )
+
+    print("\nSTITCHED STATEMENT:")
+    print(result)
+    
+    # Convert to pandas for easier viewing of column structure
+    df = to_pandas(statement_data)
+    print("\nDataFrame Columns (should be unique periods):")
+    print(df.columns.tolist())
+    
+    # Assert we have at least 4 periods in the stitched data (no duplicates)
+    assert len(statement_data['periods']) >= 4, f"Expected at least 4 periods, got {len(statement_data['periods'])}"
+    
+    # Assert the DataFrame columns match the unique periods
+    assert len(df.columns) == len(statement_data['periods']), f"Column mismatch: {len(df.columns)} vs {len(statement_data['periods'])}"
+
+
+def test_stitching_using_xbrls():
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls:XBRLS = XBRLS.from_filings(filings)
+    income_statement = xbrls.statements.income_statement()
+    print(income_statement)
+    df = income_statement.to_dataframe()

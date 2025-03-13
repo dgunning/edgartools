@@ -13,7 +13,7 @@ from rich import print
 from rich.console import Console
 
 from edgar import *
-from edgar.xbrl2.statements import Statements
+from edgar.xbrl2.statements import Statements, Statement
 from edgar.xbrl2.xbrl import XBRL
 
 
@@ -36,20 +36,23 @@ def test_get_coverpage(aapl_xbrl:XBRL):
     #print(aapl_xbrl)
     cover_page = aapl_xbrl.render_statement('BalanceSheet')
     print(cover_page)
-    print(aapl_xbrl.get_all_statements())
+    #print(aapl_xbrl.get_all_statements())
 
 def test_xbrl_statements(aapl_xbrl:XBRL):
     print()
     statements = Statements(aapl_xbrl)
-    print(statements)
+    assert statements
 
-def test_render_balance_sheet(aapl_xbrl:XBRL):
+def test_render_balance_sheet_using_short_name_or_standard_name(aapl_xbrl:XBRL):
     print()
-    balance_sheet = aapl_xbrl.render_statement('BalanceSheet')
-    print(balance_sheet)
+    # Standard Name
+    statement = aapl_xbrl.render_statement('BalanceSheet')
+    print(statement)
 
-    balance_sheet = aapl_xbrl.render_statement('BalanceSheet', standard=True)
-    print(balance_sheet)
+    # Short Name
+    statement = aapl_xbrl.render_statement('CONSOLIDATEDBALANCESHEETS')
+    print(statement)
+
 
 def test_render_cashflow_statement():
     f = Filing(company='Apple Inc.', cik=320193,

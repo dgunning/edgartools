@@ -23,7 +23,7 @@ from rich.table import Table as RichTable
 
 # Import legacy XBRL data for compatibility
 from edgar.xbrl.instance import XBRLInstance as LegacyXbrlInstance
-from edgar.xbrl2.core import STANDARD_LABEL
+from edgar.xbrl2.core import STANDARD_LABEL, format_date
 # Import refactored components
 from edgar.xbrl2.models import (
     Fact, PresentationNode, XBRLProcessingError
@@ -322,15 +322,28 @@ class XBRL:
             if statement['type'] == statement_type:
                 # Get statement data
                 role = statement['role']
-                statement_data = self.get_statement_data(role)
+                statement_data = self.get_statement(role)
                 
                 if statement_data:
+                    # Extract periods from the statement data
+                    periods = {}
+                    for item in statement_data:
+                        for period_id, value in item.get('values', {}).items():
+                            if period_id not in periods:
+                                # Get period label from reporting_periods
+                                period_label = period_id
+                                for period in self.reporting_periods:
+                                    if period['key'] == period_id:
+                                        period_label = period['label']
+                                        break
+                                periods[period_id] = {'label': period_label}
+                    
                     return {
                         'role': role,
                         'definition': statement['definition'],
                         'statement_type': statement_type,
-                        'periods': statement_data['periods'],
-                        'data': statement_data['statement_data']
+                        'periods': periods,
+                        'data': statement_data
                     }
         
         return None
@@ -697,12 +710,20 @@ class XBRL:
                         'period_keys': [instant_periods[0]['key'], instant_periods[1]['key'], instant_periods[2]['key']]
                     })
                 
-                # Current period vs. Previous period (always included)
-                period_views.append({
-                    'name': 'Current vs. Previous Period',
-                    'description': 'Shows the current period and the previous period',
-                    'period_keys': [instant_periods[0]['key'], instant_periods[1]['key']]
-                })
+                # Current period vs. Previous periods (always included)
+                # If we have 3 or more periods, show all three for balance sheets
+                if len(instant_periods) >= 3:
+                    period_views.append({
+                        'name': 'Current vs. Previous Periods',
+                        'description': 'Shows the current period and two previous periods',
+                        'period_keys': [instant_periods[0]['key'], instant_periods[1]['key'], instant_periods[2]['key']]
+                    })
+                else:
+                    period_views.append({
+                        'name': 'Current vs. Previous Period',
+                        'description': 'Shows the current period and the previous period',
+                        'period_keys': [instant_periods[0]['key'], instant_periods[1]['key']]
+                    })
             
             # If we have more periods, show annual comparisons
             annual_periods = []
@@ -884,6 +905,7 @@ class XBRL:
         
         Args:
             statement_type: Type of statement to render (e.g., "BalanceSheet", "IncomeStatement")
+                           or a specific statement role/name (e.g., "CONSOLIDATEDBALANCESHEETS")
             period_filter: Optional period key to filter by specific reporting period
             period_view: Optional name of a predefined period view (e.g., "Quarterly: Current vs Previous")
             standard: Whether to use standardized concept labels (default: False)
@@ -896,10 +918,41 @@ class XBRL:
         if not statement_data:
             return RichTable(title=f"No {statement_type} found")
         
-        # Get the statement definition
+        # Get the statement definition and determine actual statement type (if using a role/name)
         all_statements = self.get_all_statements()
         matching_statements = [stmt for stmt in all_statements if stmt['type'] == statement_type]
+        
+        # If not found by type, it might be a specific statement name/role
+        actual_statement_type = statement_type
+        if not matching_statements:
+            # Try to find the statement by role or other matching
+            for stmt in all_statements:
+                role = stmt['role']
+                # Check if the role URI matches
+                if role == statement_type:
+                    matching_statements = [stmt]
+                    actual_statement_type = stmt['type'] or statement_type
+                    break
+                    
+                # Check if short name matches
+                short_name = role.split('/')[-1] if '/' in role else role.split('#')[-1] if '#' in role else ''
+                if short_name.lower() == statement_type.lower():
+                    matching_statements = [stmt]
+                    actual_statement_type = stmt['type'] or statement_type
+                    break
+                    
+                # Check definition
+                if 'definition' in stmt and stmt['definition']:
+                    if stmt['definition'].lower().replace(' ', '') == statement_type.lower().replace(' ', ''):
+                        matching_statements = [stmt]
+                        actual_statement_type = stmt['type'] or statement_type
+                        break
+        
+        # Use the statement title from definition if available
         statement_title = f"{matching_statements[0]['definition']}" if matching_statements else statement_type
+        
+        # Use the actual statement type for period selection logic to ensure consistent formatting
+        statement_type = actual_statement_type
         
         # Determine the periods to display
         periods_to_display = []
@@ -1028,74 +1081,161 @@ class XBRL:
                                 except (ValueError, TypeError):
                                     continue
                         
-                        # If still no match found, take up to two more recent periods (3 total)
-                        if len(periods_to_display) == 1 and len(instant_periods) > 1:
-                            # Add second period
-                            period = instant_periods[1]
-                            period_key = f"instant_{period['date']}"
-                            periods_to_display.append((period_key, period['label']))
+                        # For balance sheets, show appropriate comparison periods
+                        # For annual reports, only show other annual periods (fiscal year ends)
+                        # For quarterly reports, only show the same quarter from previous years
+                        
+                        # First determine if this is an annual report or a quarterly report
+                        is_annual_report = (fiscal_period_focus == 'FY')
+                        
+                        # Find the fiscal year end month/day from the current period
+                        current_fiscal_month = None
+                        current_fiscal_day = None
+                        
+                        if 'fiscal_year_end_month' in self.entity_info and 'fiscal_year_end_day' in self.entity_info:
+                            # Use fiscal year end month/day from entity info
+                            current_fiscal_month = self.entity_info.get('fiscal_year_end_month')
+                            current_fiscal_day = self.entity_info.get('fiscal_year_end_day')
+                        else:
+                            # Try to infer from current date for annual reports
+                            if is_annual_report:
+                                current_fiscal_month = current_date.month
+                                current_fiscal_day = current_date.day
+                        
+                        # Only add comparable periods (up to a total of 3)
+                        added_period_keys = [key for key, _ in periods_to_display]
+                        for period in instant_periods[1:]:  # Skip current period which should be first
+                            if len(periods_to_display) >= 3:
+                                break  # Stop when we have 3 periods
+                                
+                            # For annual reports, only add periods that are also fiscal year ends
+                            if is_annual_report and current_fiscal_month is not None:
+                                try:
+                                    # Check if this period is close to the fiscal year end
+                                    period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
+                                    is_fiscal_year_end = (
+                                        period_date.month == current_fiscal_month and
+                                        abs(period_date.day - current_fiscal_day) <= 15  # Allow some flexibility
+                                    )
+                                    
+                                    # Only include this period if it's a fiscal year end
+                                    if not is_fiscal_year_end:
+                                        continue  # Skip non-fiscal-year-end periods
+                                except (ValueError, TypeError):
+                                    continue  # Skip periods with invalid dates
                             
-                            # Add third period if available
-                            if len(instant_periods) > 2:
-                                period = instant_periods[2]
-                                period_key = f"instant_{period['date']}"
-                                periods_to_display.append((period_key, period['label']))
+                            period_key = f"instant_{period['date']}"
+                            if period_key not in added_period_keys:
+                                try:
+                                    # Format consistently
+                                    period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
+                                    simple_label = format_date(period_date)
+                                    periods_to_display.append((period_key, simple_label))
+                                except (ValueError, TypeError):
+                                    # Skip periods with invalid dates
+                                    continue
                     except (ValueError, TypeError):
-                        # If date parsing failed, take up to three most recent periods
-                        if len(instant_periods) > 1:
-                            # Add second period
-                            period = instant_periods[1]
-                            period_key = f"instant_{period['date']}"
-                            periods_to_display.append((period_key, period['label']))
+                        # If date parsing failed, still try to select appropriate periods
+                        # For annual reports, we should only show fiscal year end periods
+                        is_annual_report = (fiscal_period_focus == 'FY')
+                        
+                        # Get fiscal year end month/day if available
+                        current_fiscal_month = self.entity_info.get('fiscal_year_end_month')
+                        current_fiscal_day = self.entity_info.get('fiscal_year_end_day')
+                        
+                        added_count = 0
+                        for i, period in enumerate(instant_periods):
+                            if i == 0:
+                                continue  # Skip first period which should already be added
+                                
+                            if added_count >= 2:  # Already added 2 more (for a total of 3)
+                                break
                             
-                            # Add third period if available
-                            if len(instant_periods) > 2:
-                                period = instant_periods[2]
+                            # For annual reports, only add periods that are close to fiscal year end
+                            if is_annual_report and current_fiscal_month is not None and current_fiscal_day is not None:
+                                try:
+                                    period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
+                                    # Only add periods close to fiscal year end
+                                    if period_date.month != current_fiscal_month or abs(period_date.day - current_fiscal_day) > 15:
+                                        continue  # Skip periods that aren't fiscal year ends
+                                except (ValueError, TypeError):
+                                    continue  # Skip periods with invalid dates
+                            
+                            try:
+                                period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
+                                simple_label = format_date(period_date)
                                 period_key = f"instant_{period['date']}"
-                                periods_to_display.append((period_key, period['label']))
+                                periods_to_display.append((period_key, simple_label))
+                                added_count += 1
+                            except (ValueError, TypeError):
+                                # Skip periods with invalid dates
+                                continue
             
             # For Income Statement or Cash Flow - use duration periods
             elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
                 # First identify annual periods
                 annual_periods = []
+                
+                # Use fiscal_year_end information if available to better identify annual periods
+                fiscal_year_end_month = self.entity_info.get('fiscal_year_end_month')
+                fiscal_year_end_day = self.entity_info.get('fiscal_year_end_day')
+                
                 for period in duration_periods:
                     try:
                         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
                         end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
                         days = (end_date - start_date).days
                         
-                        # Typical annual report is about 365 days
-                        if 350 <= days <= 380:
+                        # Check if this is likely an annual period
+                        is_annual = False
+                        
+                        # First check fiscal period info (most reliable)
+                        if period.get('fiscal_period') == 'FY':
+                            is_annual = True
+                        # Then check duration (typical annual report is about 365 days)
+                        elif 350 <= days <= 380:
+                            is_annual = True
+                        # Also consider fiscal year end date if available
+                        elif (fiscal_year_end_month and fiscal_year_end_day and 
+                              abs(days - 365) <= 30 and 
+                              end_date.month == fiscal_year_end_month and
+                              abs(end_date.day - fiscal_year_end_day) <= 15):
+                            is_annual = True
+                            
+                        if is_annual:
                             annual_periods.append(period)
                     except (ValueError, TypeError):
                         pass
                 
-                # For annual reports, show current and previous annual periods
-                if fiscal_period_focus == 'FY' and annual_periods:
-                    # Current annual period
-                    current_period = annual_periods[0]
-                    period_key = current_period['key']
-                    periods_to_display.append((period_key, current_period['label']))
-                    
-                    # Previous annual periods (up to 2) if available
-                    if len(annual_periods) > 1:
-                        # Add second period (previous year)
-                        prev_period = annual_periods[1]
-                        period_key = prev_period['key']
-                        periods_to_display.append((period_key, prev_period['label']))
-                        
-                        # Add third period (2 years ago) if available
-                        if len(annual_periods) > 2:
-                            prev_prev_period = annual_periods[2]
-                            period_key = prev_prev_period['key']
-                            periods_to_display.append((period_key, prev_prev_period['label']))
+                # Sort annual periods by end date to ensure chronological order
+                annual_periods.sort(key=lambda p: p['end_date'], reverse=True)
                 
-                # For quarterly reports, show current quarter and same quarter last year
+                # For annual reports, show FY to FY comparisons (current and previous annual periods)
+                if fiscal_period_focus == 'FY' and annual_periods:
+                    # Get up to 3 most recent fiscal year periods for comparison
+                    for i, period in enumerate(annual_periods[:3]):
+                        try:
+                            # Use end date to determine fiscal year
+                            end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                            # Format using the consistent date formatter
+                            simple_label = format_date(end_date)
+                            periods_to_display.append((period['key'], simple_label))
+                        except (ValueError, TypeError):
+                            # Fall back to original label if date parsing fails
+                            periods_to_display.append((period['key'], period.get('label', '')))
+                
+                # For quarterly reports, show current quarter and same quarter previous year
                 elif fiscal_period_focus in ['Q1', 'Q2', 'Q3', 'Q4'] and duration_periods:
                     # Current quarter
                     current_period = duration_periods[0]
-                    period_key = current_period['key']
-                    periods_to_display.append((period_key, current_period['label']))
+                    
+                    try:
+                        current_end = datetime.strptime(current_period['end_date'], '%Y-%m-%d').date()
+                        simple_label = format_date(current_end)
+                        periods_to_display.append((current_period['key'], simple_label))
+                    except (ValueError, TypeError):
+                        # Fall back to original label if date parsing fails
+                        periods_to_display.append((current_period['key'], current_period['label']))
                     
                     # Try to find same quarter from previous years (up to 2 years back)
                     try:
@@ -1132,23 +1272,63 @@ class XBRL:
                         
                         # Add up to 2 periods from previous years
                         for i, (_, period) in enumerate(prev_year_periods[:2]):
-                            period_key = period['key']
-                            periods_to_display.append((period_key, period['label']))
+                            # Create a more consistent label for comparison periods
+                            try:
+                                end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                                simple_label = format_date(end_date)
+                                periods_to_display.append((period['key'], simple_label))
+                            except (ValueError, TypeError):
+                                # Fall back to original label if date parsing fails
+                                periods_to_display.append((period['key'], period.get('label', '')))
                     except (ValueError, TypeError):
                         pass
                 
-                # If no periods selected yet, use generic approach 
-                if not periods_to_display:
+                # If no periods selected yet, or we have less than 3 periods for a balance sheet,
+                # use generic approach to select periods. For balance sheets, we want to show 3 columns when available
+                needs_more_periods = (statement_type == 'BalanceSheet' and len(periods_to_display) < 3)
+                
+                if not periods_to_display or needs_more_periods:
+                    # For balance sheets, if we already have some periods selected but not enough,
+                    # figure out which periods we already have
+                    existing_period_keys = [key for key, _ in periods_to_display]
+                    
                     # Try to use annual periods if available
                     if annual_periods:
-                        for period in annual_periods[:min(3, len(annual_periods))]:
-                            period_key = period['key']
-                            periods_to_display.append((period_key, period['label']))
+                        for i, period in enumerate(annual_periods[:min(3, len(annual_periods))]):
+                            # Check if this period is already selected
+                            if period['key'] in existing_period_keys:
+                                continue
+                                
+                            # If we have enough periods, stop
+                            if len(periods_to_display) >= 3 and statement_type == 'BalanceSheet':
+                                break
+                                
+                            try:
+                                # Use end date to determine fiscal year for consistent labeling
+                                end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                                simple_label = format_date(end_date)
+                                periods_to_display.append((period['key'], simple_label))
+                            except (ValueError, TypeError):
+                                # Fall back to original label if date parsing fails
+                                periods_to_display.append((period['key'], period.get('label', '')))
                     else:
-                        # Fall back to any available duration periods
+                        # Fall back to any available duration periods with consistent labeling
                         for period in duration_periods[:min(3, len(duration_periods))]:
-                            period_key = period['key']
-                            periods_to_display.append((period_key, period['label']))
+                            # Check if this period is already selected
+                            if period['key'] in existing_period_keys:
+                                continue
+                                
+                            # If we have enough periods, stop
+                            if len(periods_to_display) >= 3 and statement_type == 'BalanceSheet':
+                                break
+                                
+                            try:
+                                end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                                simple_label = format_date(end_date)
+                                periods_to_display.append((period['key'], simple_label))
+                            except (ValueError, TypeError):
+                                # Fall back to original label if date parsing fails
+                                periods_to_display.append((period['key'], period.get('label', '')))
             
             # If we still don't have any periods, use whatever is available
             if not periods_to_display and all_periods:

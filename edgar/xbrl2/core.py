@@ -33,11 +33,36 @@ def parse_date(date_str: str) -> datetime.date:
     Returns:
         datetime.date object
     """
+    if not date_str:
+        raise ValueError("Empty date string provided")
+        
     try:
-        return datetime.strptime(date_str, '%Y-%m-%d').date()
-    except (ValueError, TypeError):
-        # Return None or raise a more specific error if needed
-        raise ValueError(f"Invalid date format: {date_str}")
+        # Parse the date string
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+        
+        # Additional validation - some dates in XBRL can have invalid day values
+        # (e.g. September 31, which doesn't exist)
+        year, month, day = map(int, date_str.split('-'))
+        
+        # Validate day of month
+        if month == 2:  # February
+            if day > 29:
+                # February never has more than 29 days
+                raise ValueError(f"Invalid day {day} for February")
+            elif day == 29 and not (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)):
+                # February 29 is only valid in leap years
+                raise ValueError(f"Invalid day 29 for February in non-leap year {year}")
+        elif month in [4, 6, 9, 11] and day > 30:
+            # April, June, September, November have 30 days max
+            raise ValueError(f"Invalid day {day} for month {month}")
+        elif day > 31:
+            # No month has more than 31 days
+            raise ValueError(f"Invalid day {day}")
+            
+        return date_obj
+    except (ValueError, TypeError) as e:
+        # Provide more specific error message
+        raise ValueError(f"Invalid date format or value: {date_str} - {str(e)}")
 
 
 def format_date(date_obj: datetime.date) -> str:

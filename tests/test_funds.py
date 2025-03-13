@@ -274,11 +274,10 @@ def test_get_fund_by_mutual_fund_ticker():
 
 def test_funds_gets_all_filings():
     fund = get_fund("CAAPX")
-    filings = fund.filings
     nport_filings = fund.filings.filter(form="NPORT-P")
     print()
     print(nport_filings)
-    assert len(nport_filings) > 0
+    assert len(nport_filings) > 20
     print(len(nport_filings))
     #filings = fund.get_fund_company().get_filings(form="NPORT-P")
     #print(filings)

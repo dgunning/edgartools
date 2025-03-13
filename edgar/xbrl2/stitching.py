@@ -117,7 +117,7 @@ class StatementStitcher:
     
     def _extract_periods(self, statements: List[Dict[str, Any]]) -> List[Tuple[str, datetime]]:
         """
-        Extract and sort all periods from the statements.
+        Extract and sort all periods from the statements, de-duplicating periods with the same date.
         
         Args:
             statements: List of statement data
@@ -125,25 +125,71 @@ class StatementStitcher:
         Returns:
             List of (period_id, end_date) tuples, sorted by date (newest first)
         """
-        all_periods = []
+        # Use a dictionary to track unique periods by their end date
+        # This will handle cases where different period_ids reference the same date
+        unique_periods = {}  # key: date string, value: (period_id, datetime, statement_index)
         
-        for statement in statements:
+        for i, statement in enumerate(statements):
+            # Use statement index (i) to prioritize more recent filings
+            # Lower index = more recent filing
             for period_id, period_info in statement['periods'].items():
                 # Extract end date for sorting
-                if period_id.startswith('instant_'):
-                    date_str = period_id.split('_')[1]
-                    display_date = period_info['label']
-                else:  # duration
-                    date_str = period_id.split('_')[2]  # end date
-                    display_date = period_info['label']
-                
                 try:
+                    if period_id.startswith('instant_'):
+                        date_str = period_id.split('_')[1]
+                        # Format the date consistently with single statements
+                        try:
+                            date_obj = parse_date(date_str)
+                            display_date = format_date(date_obj)
+                        except ValueError:
+                            # Fall back to original label if parsing fails
+                            display_date = period_info['label']
+                        period_type = 'instant'
+                    else:  # duration
+                        # For durations, extract both start and end dates
+                        parts = period_id.split('_')
+                        if len(parts) >= 3:
+                            start_date_str = parts[1]
+                            end_date_str = parts[2]
+                            start_date = parse_date(start_date_str)
+                            end_date = parse_date(end_date_str)
+                            date_str = end_date_str  # Use end date for sorting
+                            
+                            # Format end date consistently - for stitched statements,
+                            # we only need the end date for duration periods as that's what users compare
+                            display_date = format_date(end_date)
+                            period_type = 'duration'
+                            # Create a normalized key that combines period type, start date, and end date
+                            normalized_key = f"{period_type}_{format_date(start_date)}_{format_date(end_date)}"
+                        else:
+                            # Skip malformed period IDs
+                            continue
+                    
+                    # For instant periods, create a normalized key with just the date
+                    if period_type == 'instant':
+                        normalized_key = f"{period_type}_{date_str}"
+                    
+                    # Parse the end date for sorting
                     end_date = parse_date(date_str)
-                    all_periods.append((period_id, end_date))
-                    self.period_dates[period_id] = display_date
+                    
+                    # Check if we already have this period (by normalized key)
+                    if normalized_key in unique_periods:
+                        existing_idx = unique_periods[normalized_key][2]
+                        # Only replace if this statement is from a more recent filing
+                        if i < existing_idx:
+                            unique_periods[normalized_key] = (period_id, end_date, i)
+                            self.period_dates[period_id] = display_date
+                    else:
+                        # Add new period
+                        unique_periods[normalized_key] = (period_id, end_date, i)
+                        self.period_dates[period_id] = display_date
+                
                 except (ValueError, TypeError, IndexError):
                     # Skip periods with invalid dates
                     continue
+        
+        # Extract and sort the unique periods
+        all_periods = [(period_id, end_date) for period_id, end_date, _ in unique_periods.values()]
         
         # Sort by date, newest first
         return sorted(all_periods, key=lambda x: x[1], reverse=True)
@@ -494,3 +540,227 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
     df = pd.DataFrame(data, index=index)
     
     return df
+
+
+class XBRLS:
+    """
+    A class representing multiple XBRL filings stitched together.
+    
+    This provides a unified view of financial data across multiple time periods,
+    automatically handling the complexities of statement stitching.
+    """
+    
+    def __init__(self, xbrl_list: List[Any]):
+        """
+        Initialize an XBRLS instance with a list of XBRL objects.
+        
+        Args:
+            xbrl_list: List of XBRL objects, should be from the same company
+                       and ordered from newest to oldest
+        """
+        # Store the list of XBRL objects
+        self.xbrl_list = xbrl_list
+        
+        # Extract entity info from the most recent XBRL
+        self.entity_info = xbrl_list[0].entity_info if xbrl_list else {}
+        
+        # Cache for stitched statements
+        self._statement_cache = {}
+    
+    @classmethod
+    def from_filings(cls, filings: List[Any]) -> 'XBRLS':
+        """
+        Create an XBRLS object from a list of Filing objects.
+        
+        Args:
+            filings: List of Filing objects, should be from the same company
+            
+        Returns:
+            XBRLS object with stitched data
+        """
+        from edgar.xbrl2.xbrl import XBRL
+        
+        # Sort filings by date (newest first)
+        sorted_filings = sorted(filings, key=lambda f: f.filing_date, reverse=True)
+        
+        # Create XBRL objects from filings
+        xbrl_list = []
+        for filing in sorted_filings:
+            try:
+                xbrl = XBRL.from_filing(filing)
+                xbrl_list.append(xbrl)
+            except Exception as e:
+                print(f"Warning: Could not parse XBRL from filing {filing.accession_number}: {e}")
+        
+        return cls(xbrl_list)
+    
+    @classmethod
+    def from_xbrl_objects(cls, xbrl_list: List[Any]) -> 'XBRLS':
+        """
+        Create an XBRLS object from a list of XBRL objects.
+        
+        Args:
+            xbrl_list: List of XBRL objects, should be from the same company
+            
+        Returns:
+            XBRLS object with stitched data
+        """
+        return cls(xbrl_list)
+    
+    @property
+    def statements(self) -> 'StitchedStatements':
+        """
+        Get a user-friendly interface to access stitched financial statements.
+        
+        Returns:
+            StitchedStatements object
+        """
+        from edgar.xbrl2.statements import StitchedStatements
+        return StitchedStatements(self)
+    
+    def get_statement(self, statement_type: str, 
+                     max_periods: int = 8, 
+                     standardize: bool = True) -> Dict[str, Any]:
+        """
+        Get a stitched statement of the specified type.
+        
+        Args:
+            statement_type: Type of statement to stitch ('IncomeStatement', 'BalanceSheet', etc.)
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+            
+        Returns:
+            Dictionary with stitched statement data
+        """
+        # Check cache first
+        cache_key = f"{statement_type}_{max_periods}_{standardize}"
+        if cache_key in self._statement_cache:
+            return self._statement_cache[cache_key]
+        
+        # Stitch the statement
+        result = stitch_statements(
+            self.xbrl_list,
+            statement_type=statement_type,
+            period_type=StatementStitcher.PeriodType.ALL_PERIODS,
+            max_periods=max_periods,
+            standard=standardize
+        )
+        
+        # Cache the result
+        self._statement_cache[cache_key] = result
+        
+        return result
+    
+    def render_statement(self, statement_type: str, 
+                        max_periods: int = 8, 
+                        standardize: bool = True) -> 'RichTable':
+        """
+        Render a stitched statement in a rich table format.
+        
+        Args:
+            statement_type: Type of statement to render ('BalanceSheet', 'IncomeStatement', etc.)
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+            
+        Returns:
+            RichTable: A formatted table representation of the stitched statement
+        """
+        # Create a StitchedStatement object and use its render method
+        from edgar.xbrl2.statements import StitchedStatement
+        statement = StitchedStatement(self, statement_type, max_periods, standardize)
+        return statement.render()
+    
+    def to_dataframe(self, statement_type: str, 
+                    max_periods: int = 8, 
+                    standardize: bool = True) -> pd.DataFrame:
+        """
+        Convert a stitched statement to a pandas DataFrame.
+        
+        Args:
+            statement_type: Type of statement to convert ('BalanceSheet', 'IncomeStatement', etc.)
+            max_periods: Maximum number of periods to include
+            standardize: Whether to use standardized concept labels
+            
+        Returns:
+            DataFrame with periods as columns and concepts as index
+        """
+        # Create a StitchedStatement object and use its to_dataframe method
+        from edgar.xbrl2.statements import StitchedStatement
+        statement = StitchedStatement(self, statement_type, max_periods, standardize)
+        return statement.to_dataframe()
+    
+    def get_periods(self) -> List[Dict[str, str]]:
+        """
+        Get all available periods across all XBRL objects.
+        
+        Returns:
+            List of period information dictionaries
+        """
+        all_periods = []
+        
+        # Go through all XBRL objects to collect periods
+        for xbrl in self.xbrl_list:
+            all_periods.extend(xbrl.reporting_periods)
+        
+        # De-duplicate periods with the same labels
+        unique_periods = {}
+        for period in all_periods:
+            # Use the date string as the unique key
+            key = period['date'] if period['type'] == 'instant' else f"{period['start_date']}_{period['end_date']}"
+            if key not in unique_periods:
+                unique_periods[key] = period
+        
+        return list(unique_periods.values())
+    
+    def __str__(self) -> str:
+        """
+        String representation of the XBRLS object.
+        
+        Returns:
+            String representation
+        """
+        filing_count = len(self.xbrl_list)
+        periods = self.get_periods()
+        return f"XBRLS with {filing_count} filings covering {len(periods)} unique periods"
+    
+    def __rich__(self) -> str:
+        """
+        Rich representation for pretty console output.
+        
+        Returns:
+            Rich console representation
+        """
+        from rich.console import Console
+        from rich.panel import Panel
+        from rich.text import Text
+        
+        console = Console(record=True)
+        
+        # Get information about the XBRLS object
+        filing_count = len(self.xbrl_list)
+        periods = self.get_periods()
+        
+        # Create a panel with the information
+        content = Text.from_markup(f"[bold]XBRLS Object[/bold]\n")
+        content.append(f"Filings: {filing_count}\n")
+        content.append(f"Unique Periods: {len(periods)}\n")
+        
+        # List available statement types
+        statement_types = set()
+        for xbrl in self.xbrl_list:
+            statements = xbrl.get_all_statements()
+            for stmt in statements:
+                if stmt['type']:
+                    statement_types.add(stmt['type'])
+        
+        content.append("\n[bold]Available Statement Types:[/bold]\n")
+        for stmt_type in sorted(statement_types):
+            content.append(f"- {stmt_type}\n")
+        
+        # Show how to access statements
+        content.append("\n[bold]Example Usage:[/bold]\n")
+        content.append("xbrls.statements.income_statement()\n")
+        content.append("xbrls.statements.balance_sheet()\n")
+        content.append("xbrls.to_dataframe('IncomeStatement')\n")
+        
+        return Panel(content, title="XBRLS", expand=False)
