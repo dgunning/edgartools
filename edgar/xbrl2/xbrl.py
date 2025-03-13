@@ -1370,7 +1370,6 @@ class XBRL:
         Returns:
             Dictionary of DataFrames for different aspects of the XBRL data
         """
-        import pandas as pd
         
         dataframes = {}
         
@@ -1517,7 +1516,6 @@ class XBRL:
                 for item in statement_data:
                     row = {
                         'concept': item['concept'],
-                        'name': item.get('name'),
                         'label': item['label'],
                         'level': item['level'],
                         'is_abstract': item['is_abstract'],
@@ -1537,6 +1535,11 @@ class XBRL:
                 
                 if rows:
                     dataframes['statement'] = pd.DataFrame(rows)
+                    # Rename columns to remove duration/instant prefixes
+                    dataframes['statement'].columns = [
+                        col.replace('duration_', '').replace('instant_', '')
+                        for col in dataframes['statement'].columns
+                    ]
             
         return dataframes
     

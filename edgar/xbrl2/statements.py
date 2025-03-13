@@ -62,7 +62,7 @@ class Statement:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def to_pandas(self, standard: bool = True) -> Dict[str, pd.DataFrame]:
+    def _pandas_dataframes(self, standard: bool = True) -> Dict[str, pd.DataFrame]:
         """
         Convert the statement to pandas DataFrames.
         
@@ -73,8 +73,11 @@ class Statement:
             Dictionary of DataFrames for different aspects of the statement
         """
         return self.xbrl.to_pandas(self.role_or_type, standard=standard)
+
+    def to_dataframe(self):
+        return self._pandas_dataframes()['statement']
     
-    def get_data(self, period_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_raw_data(self, period_filter: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get the raw statement data.
         

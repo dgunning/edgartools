@@ -87,6 +87,13 @@ def test_get_income_statement(tsla_xbrl):
     assert statement
     print(statement)
 
+def test_statement_to_dataframe(aapl_xbrl):
+    cashflow_statement:Statement = aapl_xbrl.statements.cash_flow_statement()
+    print()
+    print(cashflow_statement)
+    df = cashflow_statement.to_dataframe()
+    assert all(col in df.columns for col in ['2020-09-26', '2021-09-25', '2022-09-24'])
+
 def test_non_financial_statement():
     f = Filing(company='SOUTHERN COPPER CORP/', cik=1001838, form='10-K', filing_date='2025-03-03', accession_no='0001558370-25-002017')
     xbrl:XBRL = XBRL.from_filing(f)

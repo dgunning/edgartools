@@ -290,3 +290,4 @@ def test_stitching_using_xbrls():
     income_statement = xbrls.statements.income_statement()
     print(income_statement)
     df = income_statement.to_dataframe()
+    print(df.columns)
