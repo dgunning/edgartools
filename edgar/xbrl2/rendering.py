@@ -62,6 +62,7 @@ def render_statement(
     statement_type: str,
     entity_info: Dict[str, Any] = None,
     standard: bool = True,
+    show_date_range: bool = False,
 ) -> RichTable:
     """
     Render a financial statement as a rich table.
@@ -73,6 +74,7 @@ def render_statement(
         statement_type: Type of statement (BalanceSheet, IncomeStatement, etc.)
         entity_info: Entity information (optional)
         standard: Whether to use standardized concept labels (default: True)
+        show_date_range: Whether to show full date ranges for duration periods (default: False)
         
     Returns:
         RichTable: A formatted table representation of the statement
@@ -280,6 +282,13 @@ def render_statement(
                 # For better comparison, use a consistent fiscal year date format
                 formatted_date = format_date(date)
                 formatted_periods.append((period_key, formatted_date))
+                
+                # Store period metadata for later filtering of similar periods
+                period_metadata = {
+                    'key': period_key, 
+                    'type': 'instant',
+                    'date': date
+                }
             except (ValueError, TypeError, IndexError):
                 # Fall back to original label if date parsing fails
                 formatted_periods.append((period_key, original_label))
@@ -293,9 +302,14 @@ def render_statement(
                     start_date = parse_date(start_date_str)
                     end_date = parse_date(end_date_str)
                     
-                    # Use a consistent format focusing on the end date which is typically
-                    # the fiscal period end that users care about
-                    formatted_date = format_date(end_date)
+                    # Determine if we should show the full date range or just the end date
+                    if show_date_range:
+                        # Show full date range for duration periods
+                        formatted_date = f"{format_date(start_date)} - {format_date(end_date)}"
+                    else:
+                        # Use a consistent format focusing on the end date which is typically
+                        # the fiscal period end that users care about
+                        formatted_date = format_date(end_date)
                     
                     # For quarterly reports, include quarter information
                     duration_days = (end_date - start_date).days
@@ -313,9 +327,22 @@ def render_statement(
                             
                         # Only add quarter information if it adds clarity
                         if statement_type in ['IncomeStatement', 'CashFlowStatement']:
-                            formatted_date = f"{formatted_date} ({q_num})"
+                            # If we're showing date range, put quarter in parentheses
+                            if show_date_range:
+                                formatted_date = f"{formatted_date} ({q_num})"
+                            else:
+                                formatted_date = f"{formatted_date} ({q_num})"
                     
                     formatted_periods.append((period_key, formatted_date))
+                    
+                    # Store period metadata for later filtering of similar periods
+                    period_metadata = {
+                        'key': period_key, 
+                        'type': 'duration',
+                        'start_date': start_date,
+                        'end_date': end_date,
+                        'duration_days': duration_days
+                    }
                 except (ValueError, TypeError, IndexError):
                     # Fall back to original label if date parsing fails
                     formatted_periods.append((period_key, original_label))
@@ -352,6 +379,200 @@ def render_statement(
         if subtitles:
             table.title = f"{statement_title}\n{' '.join(subtitles)}"
     
+    # Extract period metadata for each period for better filtering
+    period_metadatas = []
+    for period_key, period_label in formatted_periods:
+        # Try to extract dates from the period key
+        if period_key.startswith('instant_'):
+            try:
+                date_str = period_key.split('_')[1]
+                date = parse_date(date_str)
+                period_metadatas.append({
+                    'key': period_key,
+                    'label': period_label,
+                    'type': 'instant',
+                    'date': date,
+                    'end_date': date,  # Use same date as end_date for comparison
+                    'has_metadata': True
+                })
+                continue
+            except (ValueError, TypeError, IndexError):
+                pass
+        elif '_' in period_key and len(period_key.split('_')) >= 3:
+            try:
+                parts = period_key.split('_')
+                start_date_str = parts[1]
+                end_date_str = parts[2]
+                start_date = parse_date(start_date_str)
+                end_date = parse_date(end_date_str)
+                duration_days = (end_date - start_date).days
+                period_metadatas.append({
+                    'key': period_key,
+                    'label': period_label,
+                    'type': 'duration',
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'duration_days': duration_days,
+                    'has_metadata': True
+                })
+                continue
+            except (ValueError, TypeError, IndexError):
+                pass
+        
+        # If we get here, we couldn't extract meaningful metadata
+        period_metadatas.append({
+            'key': period_key,
+            'label': period_label,
+            'type': 'unknown',
+            'has_metadata': False
+        })
+    
+    # Check if columns are mostly empty or all empty
+    # Calculate the percentage of non-empty values for each period
+    period_value_counts = {period_key: 0 for period_key, _ in formatted_periods}
+    period_item_counts = {period_key: 0 for period_key, _ in formatted_periods}
+    
+    # Count non-empty values for each period
+    for item in statement_data:
+        # Skip abstract items as they typically don't have values
+        if item.get('is_abstract', False):
+            continue
+        
+        # Skip items with brackets in labels (usually axis/dimension items)
+        if any(bracket in item['label'] for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
+            continue
+        
+        for period_key, _ in formatted_periods:
+            # Count this item for the period
+            period_item_counts[period_key] += 1
+            
+            # Check if it has a value
+            value = item['values'].get(period_key)
+            if value not in (None, "", 0):  # Consider 0 as a value for financial statements
+                period_value_counts[period_key] += 1
+    
+    # Calculate percentage of non-empty values for each period
+    period_value_percentages = {}
+    for period_key, count in period_item_counts.items():
+        if count > 0:
+            period_value_percentages[period_key] = period_value_counts[period_key] / count
+        else:
+            period_value_percentages[period_key] = 0
+    
+    # Add data density to period metadata
+    for metadata in period_metadatas:
+        data_density = period_value_percentages.get(metadata['key'], 0)
+        metadata['data_density'] = data_density
+        metadata['num_values'] = period_value_counts.get(metadata['key'], 0)
+        metadata['total_items'] = period_item_counts.get(metadata['key'], 0)
+        
+        # For debugging - useful when diagnosing period selection issues
+        if metadata['has_metadata'] and data_density > 0.01:  # Only log periods with some data
+            date_info = ""
+            if metadata['type'] == 'instant':
+                date_info = f"date: {metadata['date']}"
+            elif metadata['type'] == 'duration':
+                date_info = f"from {metadata['start_date']} to {metadata['end_date']} ({metadata['duration_days']} days)"
+            
+            # This print will only appear in debug output, not to the user
+            # print(f"Period {metadata['key']}: {metadata['label']} - {metadata['type']} {date_info} - density: {data_density:.2%} ({metadata['num_values']}/{metadata['total_items']} items)")
+    
+    # Filter out periods that are too similar to others
+    # 1. Filter by data density (keep periods with more data)
+    # 2. Filter by appropriateness for statement type (instant for balance sheet, duration for income statement)
+    # 3. Filter by date proximity (avoid almost identical end dates)
+    
+    # First, filter by data density threshold
+    threshold = 0.02  # 2% non-empty values threshold for all statements
+    
+    # Filter periods that have enough data
+    dense_periods = [m for m in period_metadatas if m['data_density'] >= threshold]
+    
+    # If we filtered out all periods, keep at least one (the most populated)
+    if not dense_periods and period_metadatas:
+        # Find period with most values
+        best_metadata = max(period_metadatas, key=lambda x: x['data_density'])
+        dense_periods = [best_metadata]
+    
+    # Next, filter by period type appropriateness for statement type
+    # For balance sheets, prefer instant periods
+    # For income statements, prefer duration periods
+    appropriate_periods = []
+    
+    if statement_type == 'BalanceSheet':
+        # For balance sheets, prefer instant periods
+        instant_periods = [p for p in dense_periods if p['type'] == 'instant' and p['has_metadata']]
+        if instant_periods:
+            appropriate_periods = instant_periods
+        else:
+            appropriate_periods = dense_periods
+    elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
+        # For income statements, prefer duration periods
+        duration_periods = [p for p in dense_periods if p['type'] == 'duration' and p['has_metadata']]
+        if duration_periods:
+            appropriate_periods = duration_periods
+        else:
+            appropriate_periods = dense_periods
+    else:
+        # For other statement types, use the dense periods
+        appropriate_periods = dense_periods
+    
+    # Finally, filter out periods that are too similar in date
+    # Sort periods by end date (for proper chronological ordering)
+    periods_with_dates = [p for p in appropriate_periods if p['has_metadata']]
+    periods_without_dates = [p for p in appropriate_periods if not p['has_metadata']]
+    
+    # Only apply date filtering if we have periods with date metadata
+    if periods_with_dates:
+        # Sort by end date (most recent first), then by data density (descending)
+        periods_with_dates.sort(key=lambda x: (x['end_date'], -x['data_density']), reverse=True)
+        
+        # Filter out periods that are too close to each other (within a few days)
+        filtered_periods_by_date = []
+        
+        for period in periods_with_dates:
+            # Check if this period is too close to any already included period
+            too_close = False
+            for included_period in filtered_periods_by_date:
+                # Skip comparison if types don't match
+                if period['type'] != included_period['type']:
+                    continue
+                
+                # Calculate date difference
+                days_diff = abs((period['end_date'] - included_period['end_date']).days)
+                
+                # Periods are too similar if they are of the same type and within 14 days
+                if days_diff <= 14:
+                    # If the current period has more data, replace the included one
+                    # Being more aggressive about preferring periods with more data
+                    if period['data_density'] > 1.2 * included_period['data_density']:
+                        filtered_periods_by_date.remove(included_period)
+                    else:
+                        # Otherwise, consider this period too close
+                        too_close = True
+                    break
+            
+            # Add the period if it's not too close to any included period
+            if not too_close:
+                filtered_periods_by_date.append(period)
+        
+        # Combine filtered periods with those without dates
+        appropriate_periods = filtered_periods_by_date + periods_without_dates
+    
+    # Convert metadata back to (key, label) format
+    filtered_periods = [(m['key'], m['label']) for m in appropriate_periods]
+    
+    # If we filtered out all periods, keep at least one (the most populated)
+    if not filtered_periods and formatted_periods:
+        # Find period with most values
+        best_period_key = max(period_value_percentages.items(), key=lambda x: x[1])[0]
+        # Find the corresponding label
+        best_period_label = next((label for key, label in formatted_periods if key == best_period_key), "")
+        filtered_periods.append((best_period_key, best_period_label))
+    
+    # Update formatted_periods with the filtered list
+    formatted_periods = filtered_periods
+    
     # Add columns with right-alignment for numeric columns
     table.add_column("Line Item", justify="left")
     for _, period_label in formatted_periods:
@@ -379,7 +600,7 @@ def render_statement(
         
         # Get values for each period
         period_values = []
-        for period_key, _ in periods_to_display:
+        for period_key, _ in formatted_periods:
             value = item['values'].get(period_key, "")
             fact_decimals = item.get('decimals', {}).get(period_key, 0)
             

@@ -171,7 +171,7 @@ if latest_period['type'] == 'instant':
 
 ```python
 # Get raw statement data for custom processing
-raw_data = statements.balance_sheet().get_data()
+raw_data = statements.balance_sheet().get_raw_data()
 
 # Extract specific information
 assets = [item for item in raw_data if 'assets' in item['label'].lower()]

@@ -33,7 +33,8 @@ class Statement:
         
     def render(self, period_filter: Optional[str] = None, 
                period_view: Optional[str] = None, 
-               standard: bool = True) -> Table:
+               standard: bool = True,
+               show_date_range: bool = False) -> Table:
         """
         Render the statement as a formatted table.
         
@@ -41,6 +42,7 @@ class Statement:
             period_filter: Optional period key to filter facts
             period_view: Optional name of a predefined period view
             standard: Whether to use standardized concept labels
+            show_date_range: Whether to show full date ranges for duration periods
             
         Returns:
             Rich Table containing the rendered statement
@@ -48,7 +50,8 @@ class Statement:
         return self.xbrl.render_statement(self.role_or_type, 
                                         period_filter=period_filter,
                                         period_view=period_view, 
-                                        standard=standard)
+                                        standard=standard,
+                                        show_date_range=show_date_range)
 
     def __rich__(self):
         """

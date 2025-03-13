@@ -899,7 +899,8 @@ class XBRL:
     def render_statement(self, statement_type: str = "BalanceSheet", 
                          period_filter: Optional[str] = None, 
                          period_view: Optional[str] = None,
-                         standard: bool = False) -> RichTable:
+                         standard: bool = False,
+                         show_date_range: bool = False) -> RichTable:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         
@@ -909,6 +910,7 @@ class XBRL:
             period_filter: Optional period key to filter by specific reporting period
             period_view: Optional name of a predefined period view (e.g., "Quarterly: Current vs Previous")
             standard: Whether to use standardized concept labels (default: False)
+            show_date_range: Whether to show full date ranges for duration periods (default: False)
             
         Returns:
             RichTable: A formatted table representation of the statement
@@ -1356,7 +1358,8 @@ class XBRL:
             statement_title,
             statement_type,
             self.entity_info,
-            standard
+            standard,
+            show_date_range
         )
     
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:

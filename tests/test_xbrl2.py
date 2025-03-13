@@ -54,6 +54,12 @@ def test_render_balance_sheet_using_short_name_or_standard_name(aapl_xbrl:XBRL):
     print(statement)
 
 
+def test_filtering_of_mostly_empty_columns(aapl_xbrl:XBRL):
+    print()
+    # Standard Name
+    statement = aapl_xbrl.render_statement('BalanceSheet')
+    print(statement)
+
 def test_render_cashflow_statement():
     f = Filing(company='Apple Inc.', cik=320193,
                form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
