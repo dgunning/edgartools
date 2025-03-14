@@ -289,7 +289,7 @@ class StitchedStatement:
     financial statement from multiple filings.
     """
     
-    def __init__(self, xbrls, statement_type: str, max_periods: int = 8, standardize: bool = True):
+    def __init__(self, xbrls, statement_type: str, max_periods: int = 8, standardize: bool = True, use_optimal_periods: bool = True):
         """
         Initialize with XBRLS object and statement parameters.
         
@@ -298,11 +298,14 @@ class StitchedStatement:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            use_optimal_periods: Whether to use entity info to determine optimal periods
         """
         self.xbrls = xbrls
         self.statement_type = statement_type
         self.max_periods = max_periods
         self.standardize = standardize
+        self.use_optimal_periods = use_optimal_periods
+        self.show_date_range = False  # Default to not showing date ranges
         
         # Statement titles
         self.statement_titles = {
@@ -324,24 +327,30 @@ class StitchedStatement:
             self._statement_data = self.xbrls.get_statement(
                 self.statement_type, 
                 self.max_periods, 
-                self.standardize
+                self.standardize,
+                self.use_optimal_periods
             )
         return self._statement_data
     
-    def render(self) -> Table:
+    def render(self, show_date_range: bool = False) -> Table:
         """
         Render the stitched statement as a formatted table.
         
+        Args:
+            show_date_range: Whether to show full date ranges for duration periods
+            
         Returns:
             Rich Table containing the rendered statement
         """
         from edgar.xbrl2.stitching import render_stitched_statement
         
+        # Update the render_stitched_statement function call to pass the show_date_range parameter
         return render_stitched_statement(
             self.statement_data,
             statement_title=self.title,
             statement_type=self.statement_type,
-            entity_info=self.xbrls.entity_info
+            entity_info=self.xbrls.entity_info,
+            show_date_range=show_date_range
         )
     
     def to_dataframe(self) -> pd.DataFrame:
@@ -395,70 +404,100 @@ class StitchedStatements:
         """
         self.xbrls = xbrls
         
-    def balance_sheet(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+    def balance_sheet(self, max_periods: int = 8, standardize: bool = True, 
+                     use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched balance sheet across multiple time periods.
         
         Args:
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            use_optimal_periods: Whether to use entity info to determine optimal periods
+            show_date_range: Whether to show full date ranges for duration periods
             
         Returns:
             StitchedStatement for the balance sheet
         """
-        return StitchedStatement(self.xbrls, 'BalanceSheet', max_periods, standardize)
+        statement = StitchedStatement(self.xbrls, 'BalanceSheet', max_periods, standardize, use_optimal_periods)
+        if show_date_range:
+            statement.show_date_range = show_date_range
+        return statement
     
-    def income_statement(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+    def income_statement(self, max_periods: int = 8, standardize: bool = True,
+                         use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched income statement across multiple time periods.
         
         Args:
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            use_optimal_periods: Whether to use entity info to determine optimal periods
+            show_date_range: Whether to show full date ranges for duration periods
             
         Returns:
             StitchedStatement for the income statement
         """
-        return StitchedStatement(self.xbrls, 'IncomeStatement', max_periods, standardize)
+        statement = StitchedStatement(self.xbrls, 'IncomeStatement', max_periods, standardize, use_optimal_periods)
+        if show_date_range:
+            statement.show_date_range = show_date_range
+        return statement
     
-    def cash_flow_statement(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+    def cash_flow_statement(self, max_periods: int = 8, standardize: bool = True,
+                           use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched cash flow statement across multiple time periods.
         
         Args:
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            use_optimal_periods: Whether to use entity info to determine optimal periods
+            show_date_range: Whether to show full date ranges for duration periods
             
         Returns:
             StitchedStatement for the cash flow statement
         """
-        return StitchedStatement(self.xbrls, 'CashFlowStatement', max_periods, standardize)
+        statement = StitchedStatement(self.xbrls, 'CashFlowStatement', max_periods, standardize, use_optimal_periods)
+        if show_date_range:
+            statement.show_date_range = show_date_range
+        return statement
     
-    def statement_of_equity(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+    def statement_of_equity(self, max_periods: int = 8, standardize: bool = True,
+                           use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched statement of changes in equity across multiple time periods.
         
         Args:
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            use_optimal_periods: Whether to use entity info to determine optimal periods
+            show_date_range: Whether to show full date ranges for duration periods
             
         Returns:
             StitchedStatement for the statement of equity
         """
-        return StitchedStatement(self.xbrls, 'StatementOfEquity', max_periods, standardize)
+        statement = StitchedStatement(self.xbrls, 'StatementOfEquity', max_periods, standardize, use_optimal_periods)
+        if show_date_range:
+            statement.show_date_range = show_date_range
+        return statement
     
-    def comprehensive_income(self, max_periods: int = 8, standardize: bool = True) -> StitchedStatement:
+    def comprehensive_income(self, max_periods: int = 8, standardize: bool = True,
+                            use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched statement of comprehensive income across multiple time periods.
         
         Args:
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            use_optimal_periods: Whether to use entity info to determine optimal periods
+            show_date_range: Whether to show full date ranges for duration periods
             
         Returns:
             StitchedStatement for the comprehensive income statement
         """
-        return StitchedStatement(self.xbrls, 'ComprehensiveIncome', max_periods, standardize)
+        statement = StitchedStatement(self.xbrls, 'ComprehensiveIncome', max_periods, standardize, use_optimal_periods)
+        if show_date_range:
+            statement.show_date_range = show_date_range
+        return statement
     
     def __getitem__(self, statement_type: str) -> StitchedStatement:
         """
@@ -470,7 +509,7 @@ class StitchedStatements:
         Returns:
             StitchedStatement for the requested statement type
         """
-        return StitchedStatement(self.xbrls, statement_type)
+        return StitchedStatement(self.xbrls, statement_type, use_optimal_periods=True)
     
     def __rich__(self):
         """

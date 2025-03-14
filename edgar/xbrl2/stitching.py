@@ -8,7 +8,7 @@ consistency issues and normalizing data representation.
 
 from typing import Dict, List, Any, Optional, Union, Tuple, Set
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, date
 import pandas as pd
 from enum import Enum
 
@@ -17,6 +17,319 @@ from edgar.xbrl2.standardization import (
     ConceptMapper, MappingStore, standardize_statement, StandardConcept, 
     initialize_default_mappings
 )
+
+
+def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> List[Dict[str, Any]]:
+    """
+    Determine the optimal periods to display for stitched statements from a list of XBRL objects.
+    
+    This function analyzes entity info and reporting periods across multiple XBRL instances
+    to select the most appropriate periods for display, ensuring consistency in period selection
+    when creating stitched statements.
+    
+    Args:
+        xbrl_list: List of XBRL objects ordered chronologically
+        statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+        
+    Returns:
+        List of period metadata dictionaries containing information for display
+    """
+    all_period_metadata = []
+    
+    # First, extract all relevant reporting periods with their metadata
+    for i, xbrl in enumerate(xbrl_list):
+        # Skip XBRLs with no reporting periods
+        if not xbrl.reporting_periods:
+            continue
+            
+        entity_info = xbrl.entity_info or {}
+        doc_period_end_date = None
+        
+        # Try to parse document_period_end_date from entity_info
+        if 'document_period_end_date' in entity_info:
+            try:
+                doc_period_end_date = entity_info['document_period_end_date']
+                if not isinstance(doc_period_end_date, date):
+                    doc_period_end_date = parse_date(str(doc_period_end_date))
+            except (ValueError, TypeError):
+                pass
+        
+        # Get fiscal information if available
+        fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
+        fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
+        fiscal_period = entity_info.get('fiscal_period')
+        fiscal_year = entity_info.get('fiscal_year')
+        
+        # Filter appropriate periods based on statement type
+        appropriate_periods = []
+        if statement_type == 'BalanceSheet':
+            # For balance sheets, we want instant periods
+            periods = [p for p in xbrl.reporting_periods if p['type'] == 'instant']
+            
+            # If we have a document_period_end_date, use that to find the most appropriate period
+            # (the one that matches the financial statement date, not the filing/reporting date)
+            if doc_period_end_date:
+                # Find the period closest to document_period_end_date
+                closest_period = None
+                min_days_diff = float('inf')
+                
+                for period in periods:
+                    try:
+                        period_date = parse_date(period['date'])
+                        days_diff = abs((period_date - doc_period_end_date).days)
+                        
+                        # Prioritize exact matches or very close dates (within 3 days)
+                        if days_diff <= 3:
+                            closest_period = period
+                            break
+                        
+                        # Otherwise, keep track of the closest one
+                        if days_diff < min_days_diff:
+                            min_days_diff = days_diff
+                            closest_period = period
+                    except (ValueError, TypeError):
+                        continue
+                
+                # Use the closest period if found and within 30 days (to avoid completely wrong periods)
+                if closest_period and min_days_diff <= 30:
+                    appropriate_periods.append(closest_period)
+            
+            # If we couldn't find a period based on document_period_end_date or don't have one,
+            # fall back to the most recent period
+            if not appropriate_periods and periods:
+                # Sort by date (latest first)
+                periods.sort(key=lambda x: x['date'], reverse=True)
+                appropriate_periods.append(periods[0])
+        else:
+            # For income and cash flow statements, we want duration periods
+            periods = [p for p in xbrl.reporting_periods if p['type'] == 'duration']
+            
+            # For income statements, different types of durations are appropriate:
+            # - Fiscal year (annual report)
+            # - Quarter (quarterly report)
+            # - Year-to-date (quarterly report with cumulative data)
+            
+            # First, determine if this is an annual or quarterly report
+            is_annual = fiscal_period == 'FY'
+            
+            # Group periods by duration length
+            grouped_periods = defaultdict(list)
+            for period in periods:
+                try:
+                    start_date = parse_date(period['start_date'])
+                    end_date = parse_date(period['end_date'])
+                    duration_days = (end_date - start_date).days
+                    period_with_days = period.copy()
+                    period_with_days['duration_days'] = duration_days
+                    grouped_periods[duration_days].append(period_with_days)
+                except (ValueError, TypeError):
+                    continue
+            
+            # Select appropriate periods based on document type
+            if is_annual:
+                # For annual reports, prefer periods closest to 365 days
+                annual_periods = []
+                for days in range(350, 380):
+                    if days in grouped_periods:
+                        annual_periods.extend(grouped_periods[days])
+                
+                if annual_periods and doc_period_end_date:
+                    # Find the annual period that best matches document_period_end_date
+                    closest_period = None
+                    min_days_diff = float('inf')
+                    
+                    for period in annual_periods:
+                        try:
+                            end_date = parse_date(period['end_date'])
+                            days_diff = abs((end_date - doc_period_end_date).days)
+                            
+                            # Prioritize exact matches or very close dates
+                            if days_diff <= 3:
+                                closest_period = period
+                                break
+                            
+                            # Otherwise track the closest one
+                            if days_diff < min_days_diff:
+                                min_days_diff = days_diff
+                                closest_period = period
+                        except (ValueError, TypeError):
+                            continue
+                    
+                    # Use the closest period if found and within reasonable range
+                    if closest_period and min_days_diff <= 30:
+                        appropriate_periods.append(closest_period)
+                    else:
+                        # Fall back to latest if no good match
+                        annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                        appropriate_periods.append(annual_periods[0])
+                elif annual_periods:
+                    # If no document_period_end_date, use the latest
+                    annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                    appropriate_periods.append(annual_periods[0])
+            else:
+                # For quarterly reports, prefer:
+                # 1. The quarter duration (~90 days)
+                # 2. The YTD (year-to-date) duration if available
+                
+                # Look for quarterly duration
+                quarterly_periods = []
+                for days in range(85, 100):
+                    if days in grouped_periods:
+                        quarterly_periods.extend(grouped_periods[days])
+                
+                if quarterly_periods and doc_period_end_date:
+                    # Find the quarterly period that best matches document_period_end_date
+                    closest_period = None
+                    min_days_diff = float('inf')
+                    
+                    for period in quarterly_periods:
+                        try:
+                            end_date = parse_date(period['end_date'])
+                            days_diff = abs((end_date - doc_period_end_date).days)
+                            
+                            # Prioritize exact matches or very close dates
+                            if days_diff <= 3:
+                                closest_period = period
+                                break
+                            
+                            # Otherwise track the closest one
+                            if days_diff < min_days_diff:
+                                min_days_diff = days_diff
+                                closest_period = period
+                        except (ValueError, TypeError):
+                            continue
+                    
+                    # Use the closest period if found and within reasonable range
+                    if closest_period and min_days_diff <= 30:
+                        appropriate_periods.append(closest_period)
+                    else:
+                        # Fall back to latest if no good match
+                        quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                        appropriate_periods.append(quarterly_periods[0])
+                elif quarterly_periods:
+                    # If no document_period_end_date, use the latest
+                    quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                    appropriate_periods.append(quarterly_periods[0])
+                    
+                # Look for YTD duration if this is not Q1
+                if fiscal_period in ['Q2', 'Q3', 'Q4']:
+                    # Q2 YTD is ~180 days, Q3 YTD is ~270 days
+                    ytd_days_range = {
+                        'Q2': range(175, 190),
+                        'Q3': range(265, 285),
+                        'Q4': range(350, 370)
+                    }.get(fiscal_period, range(0, 0))
+                    
+                    ytd_periods = []
+                    for days in ytd_days_range:
+                        if days in grouped_periods:
+                            ytd_periods.extend(grouped_periods[days])
+                    
+                    if ytd_periods and doc_period_end_date:
+                        # Find the YTD period that best matches document_period_end_date
+                        closest_period = None
+                        min_days_diff = float('inf')
+                        
+                        for period in ytd_periods:
+                            try:
+                                end_date = parse_date(period['end_date'])
+                                days_diff = abs((end_date - doc_period_end_date).days)
+                                
+                                # Prioritize exact matches or very close dates
+                                if days_diff <= 3:
+                                    closest_period = period
+                                    break
+                                
+                                # Otherwise track the closest one
+                                if days_diff < min_days_diff:
+                                    min_days_diff = days_diff
+                                    closest_period = period
+                            except (ValueError, TypeError):
+                                continue
+                        
+                        # Use the closest period if found and within reasonable range
+                        if closest_period and min_days_diff <= 30:
+                            appropriate_periods.append(closest_period)
+                        else:
+                            # Fall back to latest if no good match
+                            ytd_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                            appropriate_periods.append(ytd_periods[0])
+                    elif ytd_periods:
+                        # If no document_period_end_date, use the latest
+                        ytd_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                        appropriate_periods.append(ytd_periods[0])
+        
+        # Add metadata and source XBRL index to each selected period
+        for period in appropriate_periods:
+            # Add useful metadata
+            period_metadata = {
+                'xbrl_index': i,
+                'period_key': period['key'],
+                'period_label': period['label'],
+                'period_type': period['type'],
+                'entity_info': entity_info,
+                'doc_period_end_date': doc_period_end_date,
+                'fiscal_period': fiscal_period,
+                'fiscal_year': fiscal_year
+            }
+            
+            # Add date information
+            if period['type'] == 'instant':
+                period_metadata['date'] = parse_date(period['date'])
+                period_metadata['display_date'] = format_date(period_metadata['date'])
+            else:  # duration
+                period_metadata['start_date'] = parse_date(period['start_date'])
+                period_metadata['end_date'] = parse_date(period['end_date']) 
+                period_metadata['duration_days'] = period.get('duration_days', 
+                    (period_metadata['end_date'] - period_metadata['start_date']).days)
+                period_metadata['display_date'] = format_date(period_metadata['end_date'])
+            
+            all_period_metadata.append(period_metadata)
+    
+    # Now, select the optimal set of periods to display
+    # 1. Remove duplicates (same end date or very close)
+    # 2. Ensure proper chronological ordering
+    # 3. Limit to a reasonable number of periods
+    
+    # First, sort all periods by date (most recent first)
+    if statement_type == 'BalanceSheet':
+        all_period_metadata.sort(key=lambda x: x['date'], reverse=True)
+    else:
+        all_period_metadata.sort(key=lambda x: x['end_date'], reverse=True)
+    
+    # Filter out periods that are too close to each other
+    filtered_periods = []
+    for period in all_period_metadata:
+        too_close = False
+        for included_period in filtered_periods:
+            # Skip if period types don't match
+            if period['period_type'] != included_period['period_type']:
+                continue
+            
+            # Calculate date difference
+            if period['period_type'] == 'instant':
+                date1 = period['date']
+                date2 = included_period['date']
+            else:  # duration
+                date1 = period['end_date']
+                date2 = included_period['end_date']
+            
+            days_diff = abs((date1 - date2).days)
+            
+            # Periods are too close if they are within 14 days
+            if days_diff <= 14:
+                too_close = True
+                break
+        
+        if not too_close:
+            filtered_periods.append(period)
+    
+    # Limit to a reasonable number of periods (8 is usually sufficient)
+    MAX_PERIODS = 8
+    if len(filtered_periods) > MAX_PERIODS:
+        filtered_periods = filtered_periods[:MAX_PERIODS]
+    
+    return filtered_periods
 
 
 class StatementStitcher:
@@ -335,6 +648,10 @@ class StatementStitcher:
             period_map: Map of period IDs to period information
             relevant_periods: Set of periods from this statement to include
         """
+        # Map to track concepts by their underlying concept ID, not just label
+        # This helps merge rows that represent the same concept but have different labels
+        concept_to_label_map = {}
+        
         for item in statement_data:
             concept = item.get('concept')
             label = item.get('label')
@@ -351,18 +668,68 @@ class StatementStitcher:
             if any(bracket in label for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
                 continue
             
-            # Use label as the concept identifier for data storage
-            # This works well with standardized labels
-            concept_key = label
+            # Use concept as the primary key for identifying the same financial line item
+            # This is more reliable than labels which may vary across filings
+            
+            # If we've already seen this concept, use the existing label as the key
+            # This ensures we merge rows that represent the same concept
+            if concept in concept_to_label_map:
+                concept_key = concept_to_label_map[concept]
+            else:
+                # For a new concept, use the current label as the key
+                concept_key = label
+                # Remember this mapping for future occurrences
+                concept_to_label_map[concept] = concept_key
             
             # Store metadata about the concept (level, abstract status, etc.)
+            # If we've already seen this concept, only update metadata if it's from a more recent period
+            # This ensures we use labels from the most recent filing when merging rows
             if concept_key not in self.concept_metadata:
                 self.concept_metadata[concept_key] = {
                     'level': item.get('level', 0),
                     'is_abstract': item.get('is_abstract', False),
                     'is_total': item.get('is_total', False) or 'total' in label.lower(),
-                    'original_concept': concept
+                    'original_concept': concept,
+                    'latest_label': label  # Store the original label too
                 }
+            else:
+                # For existing concepts, update the label to use the most recent one
+                # We determine which periods are most recent based on position in self.periods
+                # (earlier indices are more recent periods)
+                
+                # Find the periods in this statement
+                statement_periods = [p for p in relevant_periods if p in self.periods]
+                if statement_periods:
+                    # Get the most recent period in this statement
+                    most_recent_period = min(statement_periods, key=lambda p: self.periods.index(p))
+                    most_recent_idx = self.periods.index(most_recent_period)
+                    
+                    # Find the earliest period where we have data for this concept
+                    existing_periods = [p for p in self.data[concept_key].keys() if p in self.periods]
+                    if existing_periods:
+                        earliest_existing_idx = min(self.periods.index(p) for p in existing_periods)
+                        
+                        # If this statement has more recent data, update the label
+                        if most_recent_idx < earliest_existing_idx:
+                            # Update the concept key label for display
+                            new_concept_key = label
+                            
+                            # If we're changing the label, we need to migrate existing data
+                            if new_concept_key != concept_key:
+                                # Copy existing data to the new key
+                                if new_concept_key not in self.data:
+                                    self.data[new_concept_key] = self.data[concept_key].copy()
+                                    
+                                # Update metadata
+                                self.concept_metadata[new_concept_key] = self.concept_metadata[concept_key].copy()
+                                self.concept_metadata[new_concept_key]['latest_label'] = label
+                                
+                                # Update the concept mapping
+                                concept_to_label_map[concept] = new_concept_key
+                                concept_key = new_concept_key
+                            else:
+                                # Just update the latest label
+                                self.concept_metadata[concept_key]['latest_label'] = label
             
             # Store values for relevant periods
             for period_id in relevant_periods:
@@ -396,7 +763,8 @@ class StatementStitcher:
         for concept, metadata in ordered_concepts:
             # Create an item for each concept
             item = {
-                'label': concept,
+                # Use the latest label if available, otherwise fall back to the concept key
+                'label': metadata.get('latest_label', concept),
                 'level': metadata['level'],
                 'is_abstract': metadata['is_abstract'],
                 'is_total': metadata['is_total'],
@@ -426,7 +794,8 @@ def stitch_statements(
     statement_type: str = 'IncomeStatement',
     period_type: Union[StatementStitcher.PeriodType, str] = StatementStitcher.PeriodType.RECENT_PERIODS,
     max_periods: int = 3,
-    standard: bool = True
+    standard: bool = True,
+    use_optimal_periods: bool = True
 ) -> Dict[str, Any]:
     """
     Stitch together statements from multiple XBRL objects.
@@ -437,6 +806,7 @@ def stitch_statements(
         period_type: Type of period view to generate
         max_periods: Maximum number of periods to include (default: 3)
         standard: Whether to use standardized concept labels (default: True)
+        use_optimal_periods: Whether to use the entity info to determine optimal periods (default: True)
         
     Returns:
         Stitched statement data
@@ -447,11 +817,71 @@ def stitch_statements(
     # Collect statements of the specified type from each XBRL object
     statements = []
     
-    for xbrl in xbrl_list:
-        # Get statement data for the specified type
-        statement = xbrl.get_statement_by_type(statement_type)
-        if statement:
-            statements.append(statement)
+    # If using optimal periods based on entity info
+    if use_optimal_periods:
+        # Use our utility function to determine the best periods
+        optimal_periods = determine_optimal_periods(xbrl_list, statement_type)
+        
+        # Limit to max_periods if needed
+        if len(optimal_periods) > max_periods:
+            optimal_periods = optimal_periods[:max_periods]
+            
+        # Extract the XBRL objects that contain our optimal periods
+        for period_metadata in optimal_periods:
+            xbrl_index = period_metadata['xbrl_index']
+            xbrl = xbrl_list[xbrl_index]
+            
+            # Get the statement and period info
+            statement = xbrl.get_statement_by_type(statement_type)
+            if statement:
+                # Only include the specific period from this statement
+                period_key = period_metadata['period_key']
+                
+                # Check if this period exists in the statement
+                if period_key in statement['periods']:
+                    # Create a filtered version of the statement with just this period
+                    filtered_statement = {
+                        'role': statement['role'],
+                        'definition': statement['definition'],
+                        'statement_type': statement['statement_type'],
+                        'periods': {period_key: statement['periods'][period_key]},
+                        'data': statement['data']
+                    }
+                    
+                    # Update the period label to include information from entity_info
+                    display_date = period_metadata['display_date']
+                    period_type = period_metadata['period_type']
+                    fiscal_period = period_metadata.get('fiscal_period')
+                    
+                    # Create a more informative label
+                    if period_type == 'instant':
+                        if fiscal_period == 'FY':
+                            period_label = f"FY {display_date}"
+                        else:
+                            period_label = display_date
+                    else:  # duration
+                        # For duration periods, add fiscal quarter/year info if available
+                        if fiscal_period == 'FY':
+                            period_label = f"FY {display_date}"
+                        elif fiscal_period in ['Q1', 'Q2', 'Q3', 'Q4']:
+                            period_label = f"{fiscal_period} {display_date}"
+                        else:
+                            period_label = display_date
+                            
+                    # Update the period label
+                    filtered_statement['periods'][period_key] = {
+                        'label': period_label,
+                        'original_label': statement['periods'][period_key]['label']
+                    }
+                    
+                    statements.append(filtered_statement)
+    # Traditional approach without using entity info
+    else:
+        for xbrl in xbrl_list:
+            # Get statement data for the specified type
+            statement = xbrl.get_statement_by_type(statement_type)
+            if statement:
+                statements.append(statement)
     
     # Stitch the statements
     return stitcher.stitch_statements(statements, period_type, max_periods, standard)
@@ -461,7 +891,8 @@ def render_stitched_statement(
     stitched_data: Dict[str, Any],
     statement_title: str,
     statement_type: str,
-    entity_info: Dict[str, Any] = None
+    entity_info: Dict[str, Any] = None,
+    show_date_range: bool = False
 ) -> 'RichTable':
     """
     Render a stitched statement using the same rendering logic as individual statements.
@@ -471,6 +902,7 @@ def render_stitched_statement(
         statement_title: Title of the statement
         statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
         entity_info: Entity information (optional)
+        show_date_range: Whether to show full date ranges for duration periods
         
     Returns:
         RichTable: A formatted table representation of the stitched statement
@@ -487,13 +919,14 @@ def render_stitched_statement(
         period_desc = f" ({len(periods_to_display)}-Period View)"
         statement_title = f"{statement_title}{period_desc}"
     
-    # Use the existing rendering function
+    # Use the existing rendering function with the new show_date_range parameter
     return render_statement(
         statement_data=statement_data,
         periods_to_display=periods_to_display,
         statement_title=statement_title,
         statement_type=statement_type,
-        entity_info=entity_info
+        entity_info=entity_info,
+        show_date_range=show_date_range
     )
 
 
@@ -514,6 +947,9 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
     # Create a dictionary for the DataFrame
     data = {}
     index = []
+
+    # Initialize the concept column
+    data['concept'] = [None] * len(statement_data)
     
     for i, item in enumerate(statement_data):
         # Skip abstract items without values
@@ -525,6 +961,8 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
         indent = "  " * level
         label = f"{indent}{item['label']}"
         index.append(label)
+
+        data['concept'][i] = item['concept']
         
         # Add values for each period
         for j, (period_id, period_label) in enumerate(stitched_data['periods']):
@@ -620,7 +1058,8 @@ class XBRLS:
     
     def get_statement(self, statement_type: str, 
                      max_periods: int = 8, 
-                     standardize: bool = True) -> Dict[str, Any]:
+                     standardize: bool = True,
+                     use_optimal_periods: bool = True) -> Dict[str, Any]:
         """
         Get a stitched statement of the specified type.
         
@@ -628,12 +1067,13 @@ class XBRLS:
             statement_type: Type of statement to stitch ('IncomeStatement', 'BalanceSheet', etc.)
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            use_optimal_periods: Whether to use entity info to determine optimal periods
             
         Returns:
             Dictionary with stitched statement data
         """
         # Check cache first
-        cache_key = f"{statement_type}_{max_periods}_{standardize}"
+        cache_key = f"{statement_type}_{max_periods}_{standardize}_{use_optimal_periods}"
         if cache_key in self._statement_cache:
             return self._statement_cache[cache_key]
         
@@ -643,7 +1083,8 @@ class XBRLS:
             statement_type=statement_type,
             period_type=StatementStitcher.PeriodType.ALL_PERIODS,
             max_periods=max_periods,
-            standard=standardize
+            standard=standardize,
+            use_optimal_periods=use_optimal_periods
         )
         
         # Cache the result
@@ -653,7 +1094,9 @@ class XBRLS:
     
     def render_statement(self, statement_type: str, 
                         max_periods: int = 8, 
-                        standardize: bool = True) -> 'RichTable':
+                        standardize: bool = True,
+                        use_optimal_periods: bool = True,
+                        show_date_range: bool = False) -> 'RichTable':
         """
         Render a stitched statement in a rich table format.
         
@@ -661,14 +1104,16 @@ class XBRLS:
             statement_type: Type of statement to render ('BalanceSheet', 'IncomeStatement', etc.)
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            use_optimal_periods: Whether to use entity info to determine optimal periods
+            show_date_range: Whether to show full date ranges for duration periods
             
         Returns:
             RichTable: A formatted table representation of the stitched statement
         """
         # Create a StitchedStatement object and use its render method
         from edgar.xbrl2.statements import StitchedStatement
-        statement = StitchedStatement(self, statement_type, max_periods, standardize)
-        return statement.render()
+        statement = StitchedStatement(self, statement_type, max_periods, standardize, use_optimal_periods)
+        return statement.render(show_date_range=show_date_range)
     
     def to_dataframe(self, statement_type: str, 
                     max_periods: int = 8, 
