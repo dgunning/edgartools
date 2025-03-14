@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.13.0] - 2025-03-11
+## [3.13.2] - 2025-03-14
+
+# Changed
+
+- Add `to_dataframe` to `Statement` to get the data in a consitent way. This replaces `to_pandas`
+- Implement merging of rows when stitching statements
+- Add more standardized concepts
+
+## [3.13.1] - 2025-03-11
 
 ### Added
 - Add stitching of statements to produce a single statement across multiple filings
