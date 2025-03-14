@@ -5,7 +5,7 @@
     "us-gaap_Revenues",
     "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
     "us-gaap_SalesRevenueGoodsNet",
-    "us-gaap_OperatingRevenue",
+    "us-gaap_OperatingRevenue"
   ],
   "Cost of Revenue": [
     "us-gaap_CostOfGoodsSold",
@@ -36,13 +36,18 @@
     "us-gaap_OperatingIncome",
     "us-gaap_IncomeLossFromContinuingOperationsBeforeInterestAndTaxes"
   ],
+  "Nonoperating Income/Expense": [
+    "us-gaap_NonoperatingIncomeExpense",
+    "orcl_NonoperatingIncomeExpenseIncludingEliminationOfNetIncomeLossAttributableToNoncontrollingInterests"
+  ],
   "Interest Expense": [
     "us-gaap_InterestExpense",
     "us-gaap_InterestAndDebtExpense"
   ],
   "Income Before Tax": [
     "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
-    "us-gaap_IncomeLossBeforeIncomeTaxes"
+    "us-gaap_IncomeLossBeforeIncomeTaxes",
+    "orcl_IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems"
   ],
   "Income Tax Expense": [
     "us-gaap_IncomeTaxExpenseBenefit",
@@ -54,6 +59,14 @@
     "us-gaap_NetIncome",
     "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest"
   ],
+  "Earnings Per Share": [
+    "us-gaap_EarningsPerShareBasic",
+    "us-gaap_EarningsPerShareDiluted"
+  ],
+  "Shares Outstanding": [
+    "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+    "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding"
+  ],
   "Cash and Cash Equivalents": [
     "us-gaap_CashEquivalentsAtCarryingValue",
     "us-gaap_Cash",
@@ -63,7 +76,8 @@
   "Accounts Receivable": [
     "us-gaap_AccountsReceivableNet",
     "us-gaap_AccountsReceivableGross",
-    "us-gaap_ReceivablesNetCurrent"
+    "us-gaap_ReceivablesNetCurrent",
+    "us-gaap_AccountsReceivableNetCurrent"
   ],
   "Inventory": [
     "us-gaap_InventoryNet",
@@ -73,6 +87,9 @@
   "Prepaid Expenses": [
     "us-gaap_PrepaidExpenseCurrent",
     "us-gaap_PrepaidExpenseAndOtherAssetsCurrent"
+  ],
+  "Marketable Securities": [
+    "us-gaap_AvailableForSaleSecuritiesDebtSecuritiesCurrent"
   ],
   "Total Current Assets": [
     "us-gaap_AssetsCurrent"
@@ -87,7 +104,8 @@
   ],
   "Intangible Assets": [
     "us-gaap_IntangibleAssetsNetExcludingGoodwill",
-    "us-gaap_IntangibleAssetsNetIncludingGoodwill"
+    "us-gaap_IntangibleAssetsNetIncludingGoodwill",
+    "us-gaap_FiniteLivedIntangibleAssetsNet"
   ],
   "Total Assets": [
     "us-gaap_AssetsTotal",
@@ -101,7 +119,8 @@
   ],
   "Accrued Liabilities": [
     "us-gaap_AccruedLiabilitiesCurrent",
-    "us-gaap_OtherAccruedLiabilitiesCurrent"
+    "us-gaap_OtherAccruedLiabilitiesCurrent",
+    "us-gaap_EmployeeRelatedLiabilitiesCurrent"
   ],
   "Short-Term Debt": [
     "us-gaap_ShortTermBorrowings",
@@ -127,16 +146,28 @@
   ],
   "Common Stock": [
     "us-gaap_CommonStockValue",
-    "us-gaap_StockholdersEquityCommonStock"
+    "us-gaap_StockholdersEquityCommonStock",
+    "us-gaap_CommonStocksIncludingAdditionalPaidInCapital"
+  ],
+  "Preferred Stock": [
+    "us-gaap_PreferredStockValue"
   ],
   "Retained Earnings": [
     "us-gaap_RetainedEarningsAccumulatedDeficit",
     "us-gaap_RetainedEarnings"
   ],
+  "Minority Interest": [
+    "us-gaap_MinorityInterest",
+    "us-gaap_NoncontrollingInterest"
+  ],
   "Total Stockholders' Equity": [
     "us-gaap_StockholdersEquity",
     "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
-    "us-gaap_EquityAttributableToParent"
+    "us-gaap_EquityAttributableToParent",
+    "us-gaap_StockholdersEquityAttributableToParent"
+  ],
+  "Total Liabilities and Stockholders' Equity": [
+    "us-gaap_LiabilitiesAndStockholdersEquity"
   ],
   "Net Cash from Operating Activities": [
     "us-gaap_NetCashProvidedByUsedInOperatingActivities",
@@ -153,5 +184,47 @@
   "Net Change in Cash": [
     "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
     "us-gaap_IncreaseDecreaseInCashAndCashEquivalents"
+  ],
+  "Payments for Property, Plant and Equipment": [
+    "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment"
+  ],
+  "Payments of Dividends": [
+    "us-gaap_PaymentsOfDividends"
+  ],
+  "Tax Withholding for Share-Based Compensation": [
+    "us-gaap_PaymentsRelatedToTaxWithholdingForShareBasedCompensation"
+  ],
+  "Payments to Acquire Businesses": [
+    "us-gaap_PaymentsToAcquireBusinessesNetOfCashAcquired"
+  ],
+  "Proceeds from Issuance of Common Stock": [
+    "us-gaap_ProceedsFromIssuanceOfCommonStock"
+  ],
+  "Proceeds from Issuance of Long-Term Debt": [
+    "us-gaap_ProceedsFromIssuanceOfLongTermDebt"
+  ],
+  "Proceeds from Maturities, Prepayments and Calls of Securities": [
+    "us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities"
+  ],
+  "Proceeds from Sale and Maturity of Other Investments": [
+    "us-gaap_ProceedsFromSaleAndMaturityOfOtherInvestments"
+  ],
+  "Proceeds from Sale of Debt Securities, ": [
+    "us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt"
+  ],
+  "Other Assets": [
+    "us-gaap_OtherAssets",
+    "us-gaap_OtherAssetsCurrent",
+    "us-gaap_OtherAssetsNoncurrent"
+  ],
+  "Other Liabilities": [
+    "us-gaap_OtherLiabilities",
+    "us-gaap_OtherLiabilitiesCurrent",
+    "us-gaap_OtherLiabilitiesNoncurrent"
+  ],
+  "Depreciation and Amortization": [
+    "us-gaap_Depreciation",
+    "us-gaap_AmortizationOfIntangibleAssets",
+    "us-gaap_DepreciationAndAmortization"
   ]
 }
