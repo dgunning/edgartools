@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Changed
 
-- Add `to_dataframe` to `Statement` to get the data in a consitent way. This replaces `to_pandas`
-- Implement merging of rows when stitching statements
+- Implement merging of rows on concepts when stitching statements
+- Add `get_optimum_periods` to determine the best periods to use when stitching statements
 - Add more standardized concepts
+- Add `to_dataframe` to `Statement` to get the data in a consistent way. This replaces `to_pandas`
 
 ## [3.13.1] - 2025-03-11
 
