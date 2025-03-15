@@ -47,6 +47,7 @@
   "Income Before Tax": [
     "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
     "us-gaap_IncomeLossBeforeIncomeTaxes",
+    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
     "orcl_IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems"
   ],
   "Income Tax Expense": [
@@ -148,6 +149,12 @@
     "us-gaap_LiabilitiesTotal",
     "us-gaap_Liabilities"
   ],
+  "Common Stock Shares Outstanding": [
+    "us-gaap_CommonStockSharesOutstanding"
+  ],
+    "Common Stock Shares Issued": [
+    "us-gaap_CommonStockSharesIssued"
+  ],
   "Common Stock": [
     "us-gaap_CommonStockValue",
     "us-gaap_StockholdersEquityCommonStock",
@@ -187,7 +194,8 @@
   ],
   "Net Change in Cash": [
     "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
-    "us-gaap_IncreaseDecreaseInCashAndCashEquivalents"
+    "us-gaap_IncreaseDecreaseInCashAndCashEquivalents",
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
   ],
   "Payments for Property, Plant and Equipment": [
     "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment"
@@ -215,6 +223,9 @@
   ],
   "Proceeds from Sale of Debt Securities, ": [
     "us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt"
+  ],
+  "Proceeds from (Repayments of) Commercial Paper": [
+    "us-gaap_ProceedsFromRepaymentsOfCommercialPaper"
   ],
   "Other Assets": [
     "us-gaap_OtherAssets",
