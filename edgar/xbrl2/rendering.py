@@ -483,7 +483,7 @@ def render_statement(
     # 3. Filter by date proximity (avoid almost identical end dates)
     
     # First, filter by data density threshold
-    threshold = 0.02  # 2% non-empty values threshold for all statements
+    threshold = 0.08  # 2% non-empty values threshold for all statements
     
     # Filter periods that have enough data
     dense_periods = [m for m in period_metadatas if m['data_density'] >= threshold]
