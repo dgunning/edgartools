@@ -100,3 +100,4 @@ def test_initialize_default_mappings():
     assert store.get_standard_concept("us-gaap_Revenue") == "Revenue"
     assert store.get_standard_concept("us-gaap_NetIncome") == "Net Income"
     assert store.get_standard_concept("us-gaap_Assets") == "Total Assets"
+    assert store.get_standard_concept("us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect") == "Net Change in Cash"

@@ -250,13 +250,12 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
     
     # Apply scaling
     scaled_value = value
-    if is_monetary:
-        if scale <= -9:  # Billions
-            scaled_value = value / 1_000_000_000
-        elif scale <= -6:  # Millions
-            scaled_value = value / 1_000_000
-        elif scale <= -3:  # Thousands
-            scaled_value = value / 1_000
+    if scale <= -9:  # Billions
+        scaled_value = value / 1_000_000_000
+    elif scale <= -6:  # Millions
+        scaled_value = value / 1_000_000
+    elif scale <= -3:  # Thousands
+        scaled_value = value / 1_000
     
     # Determine decimal places to show
     if isinstance(decimals, int):
@@ -265,23 +264,17 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
             decimal_places = min(2, decimals)
         else:
             # For negative decimals, adjust based on scaling
-            if is_monetary:
-                if scale <= -9:  # Billions
-                    decimal_places = min(2, max(0, decimals + 9))
-                elif scale <= -6:  # Millions
-                    decimal_places = min(2, max(0, decimals + 6))
-                elif scale <= -3:  # Thousands
-                    decimal_places = min(2, max(0, decimals + 3))
-                else:
-                    decimal_places = 0
+            if scale <= -9:  # Billions
+                decimal_places = min(2, max(0, decimals + 9))
+            elif scale <= -6:  # Millions
+                decimal_places = min(2, max(0, decimals + 6))
+            elif scale <= -3:  # Thousands
+                decimal_places = min(2, max(0, decimals + 3))
             else:
-                # For non-monetary values like share counts
-                # Check if the value is effectively a whole number
-                if abs(round(value) - value) < 0.001:
-                    decimal_places = 0  # Display as whole number
-                else:
-                    # Otherwise use decimals attribute to determine precision
-                    decimal_places = max(0, -decimals)
+                # For unscaled values, respect the decimals attribute
+                # If decimals is negative, show that many zeros to the left of decimal
+                # E.g., decimals=-2 means precision to hundreds place (two zeros after decimal)
+                decimal_places = max(0, -decimals)
     else:
         # Default decimal places
         if is_monetary:

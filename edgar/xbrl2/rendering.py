@@ -20,6 +20,14 @@ from edgar.richtools import rich_to_text
 from edgar.files.html import Document
 from datetime import datetime
 
+share_concepts = [
+    'us-gaap_CommonStockSharesOutstanding',
+    'us-gaap_WeightedAverageNumberOfSharesOutstandingBasic',
+    'us-gaap_WeightedAverageNumberOfSharesOutstandingDiluted',
+    'us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding',
+    'us-gaap_CommonStockSharesIssued'
+]
+
 
 def _is_html(text: str) -> bool:
     """
@@ -353,7 +361,26 @@ def render_statement(
     # Determine the dominant scale for monetary values in this statement
     dominant_scale = determine_dominant_scale(statement_data, periods_to_display)
     
-    # Add the fiscal period indicator and units note as a subtitle if available
+    # Determine the scale used for share amounts if present
+    shares_scale = None
+
+    # Look for share-related concepts to determine their scaling from the decimals attribute
+    for item in statement_data:
+        concept = item.get('concept', '')
+        if concept in share_concepts:
+            # Check decimals attribute to determine proper scaling
+            for period_key, _ in periods_to_display:
+                decimals = item.get('decimals', {}).get(period_key)
+                if isinstance(decimals, int) and decimals <= 0:
+                    # Use the decimals attribute to determine the scale
+                    # For shares, decimals is typically negative
+                    # -3 means thousands, -6 means millions, etc.
+                    shares_scale = decimals
+                    break
+            if shares_scale is not None:
+                break
+    
+    # Add the fiscal period indicator and note as a subtitle if available
     if formatted_periods:
         subtitles = []
         
@@ -363,12 +390,36 @@ def render_statement(
         
         # Add units note
         if is_monetary_statement:
+            monetary_scale_text = ""
             if dominant_scale == -3:
-                units_note = "[italic](In thousands, except per share data)[/italic]"
+                monetary_scale_text = "thousands"
             elif dominant_scale == -6:
-                units_note = "[italic](In millions, except per share data)[/italic]"
+                monetary_scale_text = "millions"
             elif dominant_scale == -9:
-                units_note = "[italic](In billions, except per share data)[/italic]"
+                monetary_scale_text = "billions"
+            
+            shares_scale_text = ""
+            if shares_scale is not None:
+                if shares_scale == -3:
+                    shares_scale_text = "thousands"
+                elif shares_scale == -6:
+                    shares_scale_text = "millions"
+                elif shares_scale == -9:
+                    shares_scale_text = "billions"
+                elif shares_scale == 0:
+                    shares_scale_text = "actual amounts"
+                else:
+                    # For other negative scales (like -4, -5, -7, etc.)
+                    # Use a more generic description based on the scale
+                    scale_factor = 10 ** (-shares_scale)
+                    if scale_factor >= 1000:
+                        shares_scale_text = f"scaled by {scale_factor:,}"
+            
+            # Construct appropriate units note
+            if monetary_scale_text and shares_scale_text and shares_scale != dominant_scale:
+                units_note = f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text})[/italic]"
+            elif monetary_scale_text:
+                units_note = f"[italic](In {monetary_scale_text}, except per share data)[/italic]"
             else:
                 units_note = ""
             
@@ -595,8 +646,11 @@ def render_statement(
             
         # Format the label based on level and abstract status
         level = item['level']
+
         # Remove [Abstract] from label if present
         label = item['label'].replace(' [Abstract]', '')
+
+        concept = item['concept']
         
         # Get values for each period
         period_values = []
@@ -608,14 +662,16 @@ def render_statement(
             # Check label to identify non-monetary items like shares, ratios, etc.
             is_monetary = is_monetary_statement
             
-            # Check for shares-related values by examining label
+            # Check for shares-related values by examining concept names
             label_lower = label.lower()
-            if any(keyword in label_lower for keyword in [
-                'earnings per share', 'per common share', 'per share', 'in shares', 'shares outstanding'
-                'per basic', 'per diluted'
-            ]):
-                is_monetary = False
+            is_share_value = False
 
+            if concept in ['us-gaap_EarningsPerShareBasic', 'us-gaap_EarningsPerShareDiluted']:
+                is_monetary = False
+            elif concept in share_concepts:
+                is_monetary = False
+                is_share_value = True
+            
             # Ratio-related items should not be monetary
             if any(keyword == word for keyword in ['ratio', 'percentage', 'per cent']
                    for word in label_lower.split()):
@@ -623,7 +679,22 @@ def render_statement(
             
             # Format numeric values
             if isinstance(value, (int, float)):
-                formatted_value = Text(format_value(value, is_monetary, dominant_scale, fact_decimals), justify="right")
+                # Handle share values differently
+                if is_share_value and isinstance(fact_decimals, int):
+                    # Use fact_decimals to determine the appropriate scaling for share values
+                    # This ensures correct display for companies of all sizes
+                    if fact_decimals <= -3:
+                        # Apply appropriate scaling based on the actual decimals value
+                        scale_factor = 10 ** (-fact_decimals)
+                        scaled_value = value / scale_factor
+                        # Always display share amounts with 0 decimal places for cleaner presentation
+                        formatted_value = Text(f"{scaled_value:,.0f}", justify="right")
+                    else:
+                        # For smaller numbers or positive decimals, use unscaled values
+                        formatted_value = Text(f"{value:,.0f}", justify="right")
+                else:
+                    # Format other values normally using the flexible format_value function
+                    formatted_value = Text(format_value(value, is_monetary, dominant_scale, fact_decimals), justify="right")
             else:
                 # Non-numeric values - check if it's HTML and convert if needed
                 if value and isinstance(value, str) and _is_html(value):

@@ -9,6 +9,7 @@ statements regardless of the filing entity.
 import json
 import os
 from enum import Enum
+from json import JSONDecodeError
 from typing import Dict, List, Optional, Set, Tuple, Any
 from difflib import SequenceMatcher
 
@@ -107,8 +108,10 @@ class MappingStore:
                 else:
                     # Flat structure
                     return {k: set(v) for k, v in data.items()}
-                    
-        except (FileNotFoundError, json.JSONDecodeError):
+
+        except JSONDecodeError as e:
+            raise
+        except FileNotFoundError:
             # Return default mappings if file doesn't exist or is invalid
             return {
                 "Revenue": {"us-gaap_SalesRevenueNet", "us-gaap_Revenue", "us-gaap_Revenues"},
