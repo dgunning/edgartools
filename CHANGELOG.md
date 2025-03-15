@@ -5,9 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.13.3] - 2025-03-15
+
+### Changed
+
+- Separate earnings labels into Basic and Diluted
+- Increase data density threshold to 8% to filter out low-density columns
+- Add more standardized cash flow concepts
+- Format share amounts using their decimal values
+
 ## [3.13.2] - 2025-03-14
 
-# Changed
+### Changed
 
 - Implement merging of rows on concepts when stitching statements
 - Add `get_optimum_periods` to determine the best periods to use when stitching statements
