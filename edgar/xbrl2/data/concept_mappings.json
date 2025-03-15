@@ -60,11 +60,15 @@
     "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest"
   ],
   "Earnings Per Share": [
-    "us-gaap_EarningsPerShareBasic",
+    "us-gaap_EarningsPerShareBasic"
+  ],
+    "Earnings Per Share (Diluted)": [
     "us-gaap_EarningsPerShareDiluted"
   ],
   "Shares Outstanding": [
-    "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+    "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic"
+  ],
+    "Shares Outstanding (Diluted)": [
     "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding"
   ],
   "Cash and Cash Equivalents": [
