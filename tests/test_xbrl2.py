@@ -236,5 +236,42 @@ def test_parse_directory():
             console.print(dfs['statement'].head(5))
 
 
+def test_period_views_for_AAPL():
+    c = Company("AAPL")
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
+    filing = c.latest("10-K")
+    print(str(filing))
+    xbrl = XBRL.from_filing(filing)
+
+    period_filter ="Three-Year Comparison"
+
+    revenue_facts = xbrl._find_facts_for_element('us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax',
+                                                 period_filter)
+    print(revenue_facts)
+
+    statement_data = xbrl.get_statement("IncomeStatement")
+    values = [
+        item['values'] for item in statement_data if item['has_values']
+    ]
+    print(values)
+    statement = xbrl.render_statement("IncomeStatement",period_view="Three-Year Comparison")
+    print(statement)
+
+
+def test_period_views_for_INTC():
+    filing = Filing(company='INTEL CORP', cik=50863, form='10-K', filing_date='2025-01-31',accession_no='0000050863-25-000009')
+    xbrl = XBRL.from_filing(filing)
+    print(xbrl.get_period_views("IncomeStatement"))
+
+    period_filter = "Three Recent Quarters"
+
+    revenue_facts = xbrl._find_facts_for_element('us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax')
+    #print(revenue_facts)
+
+    statement = xbrl.render_statement("IncomeStatement", period_view="Three Recent Quarters")
+    print(statement)
+
+
+
 if __name__ == "__main__":
     test_parse_directory()

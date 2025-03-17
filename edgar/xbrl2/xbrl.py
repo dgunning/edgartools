@@ -12,8 +12,6 @@ organizing facts according to presentation hierarchies, validating calculations,
 and handling dimensional qualifiers.
 """
 
-from __future__ import annotations
-
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union
@@ -21,6 +19,7 @@ from typing import Dict, List, Any, Optional, Union
 import pandas as pd
 from rich.table import Table as RichTable
 
+from edgar.richtools import repr_rich
 # Import legacy XBRL data for compatibility
 from edgar.xbrl.instance import XBRLInstance as LegacyXbrlInstance
 from edgar.xbrl2.core import STANDARD_LABEL, format_date
@@ -245,6 +244,13 @@ class XBRL:
     def statements(self):
         from edgar.xbrl2.statements import Statements
         return Statements(self)
+        
+    @property
+    def facts_view(self):
+        from edgar.xbrl2.facts import FactsView
+        if not hasattr(self, '_facts_view'):
+            self._facts_view = FactsView(self)
+        return self._facts_view
     
     def get_all_statements(self) -> List[Dict[str, Any]]:
         """
@@ -1549,6 +1555,9 @@ class XBRL:
     def __rich__(self):
         """Rich representation for pretty printing in console."""
         return generate_rich_representation(self)
+
+    def __repr__(self):
+        return repr_rich(self)
     
     def __str__(self):
         """String representation."""

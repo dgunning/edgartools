@@ -186,10 +186,48 @@ The XBRL2 module is designed with these principles:
 3. **Flexible Output Options**: Rich tables for display, DataFrames for analysis, and raw data for custom processing
 4. **Consistency Across Companies**: Standardized concepts that enable cross-company comparison
 
+## Enhanced Facts API
+
+The XBRL2 module includes a powerful facts query interface for direct access to individual XBRL facts:
+
+```python
+from edgar import Company
+from edgar.xbrl2 import XBRL
+
+# Parse XBRL data
+company = Company('AAPL')
+filing = company.latest_10k()
+xbrl = XBRL.from_filing(filing)
+
+# Access the facts view
+facts = xbrl.facts_view
+
+# Query facts by various attributes
+revenue = facts.query().by_concept('Revenue').to_dataframe()
+balance_sheet_facts = facts.query().by_statement_type('BalanceSheet').to_dataframe()
+
+# Use predefined period views
+income_views = facts.get_available_period_views('IncomeStatement')
+annual_comparison = facts.get_facts_by_period_view('IncomeStatement', 'Annual Comparison')
+
+# Use time series analysis
+revenue_over_time = facts.time_series('Revenue')
+
+# Query dimensional data
+facts_by_segment = facts.query().by_dimension('Segment').to_dataframe()
+
+# Advanced filtering with multiple conditions
+large_income_items = facts.query() \
+    .by_statement_type('IncomeStatement') \
+    .by_value(lambda v: v > 1_000_000_000) \
+    .sort_by('numeric_value', ascending=False) \
+    .to_dataframe()
+```
+
 ## Future Enhancements
 
 - Enhanced support for non-standard financial statements
 - Interactive visualization options
-- XBRL Dimensions support for segment analysis
+- Expanded dimensional analysis capabilities
 - Automatic footnote association
 - Financial ratio calculations

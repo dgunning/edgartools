@@ -37,6 +37,7 @@ Example usage:
 from edgar.xbrl2.xbrl import XBRL
 from edgar.xbrl2.statements import Statements, Statement, StitchedStatements, StitchedStatement
 from edgar.xbrl2.standardization import StandardConcept
+from edgar.xbrl2.facts import FactsView, FactQuery
 
 # Export statement stitching functionality
 from edgar.xbrl2.stitching import (
@@ -58,5 +59,7 @@ __all__ = [
     'StatementStitcher',
     'stitch_statements',
     'render_stitched_statement',
-    'to_pandas'
+    'to_pandas',
+    'FactsView',
+    'FactQuery'
 ]
