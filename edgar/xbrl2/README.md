@@ -41,7 +41,7 @@ cash_flow = statements.cash_flow_statement()
 
 ```python
 from edgar import Company
-from edgar.xbrl2.xbrl import XBRLS
+from edgar.xbrl2 import XBRLS
 
 # Get multiple filings for trend analysis
 company = Company('AAPL')
