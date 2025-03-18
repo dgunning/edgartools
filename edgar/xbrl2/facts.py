@@ -75,10 +75,18 @@ class FactQuery:
             Self for method chaining
         """
         if exact:
-            self._filters.append(lambda f: 'label' in f and f['label'] == pattern)
+            # Try multiple label fields with exact matching
+            self._filters.append(lambda f: 
+                ('label' in f and f['label'] == pattern) or
+                ('element_label' in f and f['element_label'] == pattern)
+            )
         else:
+            # Use regex pattern matching across multiple label fields
             regex = re.compile(pattern, re.IGNORECASE)
-            self._filters.append(lambda f: 'label' in f and bool(regex.search(f['label'])))
+            self._filters.append(lambda f: 
+                ('label' in f and f['label'] is not None and bool(regex.search(str(f['label'])))) or
+                ('element_label' in f and f['element_label'] is not None and bool(regex.search(str(f['element_label']))))
+            )
         return self
     
     def by_value(self, value_filter: Union[Callable, str, int, float, list, tuple]) -> FactQuery:
@@ -281,6 +289,42 @@ class FactQuery:
             Self for method chaining
         """
         self._filters.append(filter_func)
+        return self
+        
+    def by_text(self, pattern: str) -> FactQuery:
+        """
+        Search across concept names, labels, and element names for a pattern.
+        
+        This is a flexible search that looks for the pattern in all text fields.
+        
+        Args:
+            pattern: Pattern to search for in various text fields
+            
+        Returns:
+            Self for method chaining
+        """
+        regex = re.compile(pattern, re.IGNORECASE)
+        
+        def text_filter(f):
+            # Search in concept name
+            if 'concept' in f and f['concept'] is not None and regex.search(str(f['concept'])):
+                return True
+                
+            # Search in label
+            if 'label' in f and f['label'] is not None and regex.search(str(f['label'])):
+                return True
+                
+            # Search in element_label
+            if 'element_label' in f and f['element_label'] is not None and regex.search(str(f['element_label'])):
+                return True
+                
+            # Search in element_name
+            if 'element_name' in f and f['element_name'] is not None and regex.search(str(f['element_name'])):
+                return True
+                
+            return False
+            
+        self._filters.append(text_filter)
         return self
     
     def exclude_dimensions(self) -> FactQuery:
@@ -492,7 +536,7 @@ class FactsView:
                             break
             
             # Add element information
-            element_id = fact.element_id
+            element_id = fact.element_id.replace(':', '_')
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
                 fact_dict['element_name'] = element.name
@@ -512,7 +556,7 @@ class FactsView:
             
             # Determine statement type if possible by checking presentation trees
             for role, tree in self.xbrl.presentation_trees.items():
-                if element_id.replace(':', '_') in tree.all_nodes:
+                if element_id in tree.all_nodes:
                     # Find the statement type for this role
                     statements = self.xbrl.get_all_statements()
                     for stmt in statements:
@@ -578,6 +622,21 @@ class FactsView:
         """
         return self.query().by_concept(concept_pattern, exact).to_dataframe()
     
+    def search_facts(self, text_pattern: str) -> pd.DataFrame:
+        """
+        Search for facts containing a text pattern in any text field.
+        
+        This is a flexible search that looks across concept names, labels,
+        and element names for matching text.
+        
+        Args:
+            text_pattern: Text pattern to search for
+            
+        Returns:
+            pandas DataFrame with matching facts
+        """
+        return self.query().by_text(text_pattern).to_dataframe()
+    
     def get_facts_with_dimensions(self) -> pd.DataFrame:
         """
         Get facts that have dimensional qualifiers.
@@ -585,15 +644,9 @@ class FactsView:
         Returns:
             pandas DataFrame with dimensionally-qualified facts
         """
-        facts = self.get_facts()
-        dimensional_facts = []
-        
-        for fact in facts:
-            has_dimensions = any(key.startswith('dim_') for key in fact.keys())
-            if has_dimensions:
-                dimensional_facts.append(fact)
-        
-        return pd.DataFrame(dimensional_facts)
+        return self.query().by_custom(
+            lambda f: any(key.startswith('dim_') for key in f.keys())
+        ).to_dataframe()
     
     def get_facts_by_period(self, period_key: str) -> pd.DataFrame:
         """
