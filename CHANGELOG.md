@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.13.4] - 2025-03-18
+
+### Added
+
+- Add a `facts` module to xbrl2 to provide a more user-friendly interface for querying XBRL facts
+- Add `FactQuery` and `FactsView` classes to provide a fluent interface for building fact queries
+- Add key filtering capabilities to the Facts API to filter facts by financial statement, period view, text search, value, label, and dimension
+- Add `get_available_period_views` and `get_facts_by_period_view` methods to the Facts API to provide predefined period views
+
+### Changed
+
+- Refactored the `edgar.xbrl2.rendering` module for maitainability and readability
+
 ## [3.13.3] - 2025-03-15
 
 ### Changed
