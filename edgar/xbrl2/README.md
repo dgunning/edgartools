@@ -206,22 +206,33 @@ facts = xbrl.facts_view
 revenue = facts.query().by_concept('Revenue').to_dataframe()
 balance_sheet_facts = facts.query().by_statement_type('BalanceSheet').to_dataframe()
 
-# Use predefined period views
+# Use predefined period views - returns important metadata including available periods
 income_views = facts.get_available_period_views('IncomeStatement')
+for view in income_views:
+    print(f"- {view['name']}: {view['description']} ({view['facts_count']} facts)")
+    
+# Get facts filtered by period view
 annual_comparison = facts.get_facts_by_period_view('IncomeStatement', 'Annual Comparison')
 
-# Use time series analysis
-revenue_over_time = facts.time_series('Revenue')
+# Flexible text search across all text fields (concept, label, element name)
+earnings_facts = facts.search_facts("Earnings Per Share")
+
+# Filter by period keys - useful for custom period selection
+facts.query().by_period_keys(['duration_2023-01-01_2023-12-31', 
+                             'duration_2022-01-01_2022-12-31']).to_dataframe()
 
 # Query dimensional data
 facts_by_segment = facts.query().by_dimension('Segment').to_dataframe()
 
-# Advanced filtering with multiple conditions
+# Safe numeric value filtering with proper None handling
 large_income_items = facts.query() \
     .by_statement_type('IncomeStatement') \
     .by_value(lambda v: v > 1_000_000_000) \
     .sort_by('numeric_value', ascending=False) \
     .to_dataframe()
+    
+# Time series analysis
+revenue_over_time = facts.time_series('Revenue')
 ```
 
 ## Future Enhancements
