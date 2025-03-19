@@ -59,6 +59,11 @@ The Facts API is the central interface for querying XBRL facts:
    - Fixed sorting to check that results is not empty before accessing results[0]
    - Prevents errors when no matching facts are found
 
+8. **Calculation Weight Application**
+   - Properly applies calculation weights from XBRL calculation linkbases
+   - Elements with negative weights (e.g., -1.0) are automatically negated
+   - Ensures correct presentation in financial statements (especially Cash Flow)
+
 ## Implementation Notes
 
 ### Element ID Handling
@@ -77,6 +82,44 @@ Facts are associated with contexts through their `context_ref` property. Always 
 ### Namespaces
 
 XBRL elements exist within namespaces (commonly 'us-gaap', 'ifrs', etc.). When working with element IDs, be aware of namespace prefixes and handle them consistently.
+
+### Calculation Weight Handling
+
+The XBRL2 module now properly handles calculation weights from calculation linkbases:
+
+```python
+# In _apply_calculation_weights method (called after fact extraction)
+def _apply_calculation_weights(self) -> None:
+    """
+    Apply calculation weights to facts based on calculation linkbase information.
+    
+    This method handles the application of negative weights from calculation arcs.
+    Per XBRL specification, a negative weight should flip the sign of a fact value
+    when used in calculations. This is particularly common with elements like
+    "IncreaseDecreaseInInventories" which should be negated when contributing
+    to cash flow calculations.
+    """
+    # Find elements with negative weights across all calculation trees
+    for role_uri, calc_tree in self.calculation_trees.items():
+        for element_id, node in calc_tree.all_nodes.items():
+            if node.weight < 0:
+                # Find and adjust all facts for this element
+                for key, fact in self.facts.items():
+                    if fact.element_id == element_id:
+                        # Negate numeric value if present
+                        if fact.numeric_value is not None:
+                            fact.numeric_value = -fact.numeric_value
+                        
+                        # Also update string value for consistent display
+                        if fact.value and not fact.value.startswith('-'):
+                            fact.value = f"-{fact.value}"
+```
+
+This implementation ensures:
+1. Cash flow statements present inflows and outflows with the correct sign
+2. Elements like "IncreaseDecreaseInInventories" are displayed with the proper signage
+3. Calculations like subtotals and totals in statements will sum correctly
+4. Fact values properly reflect their contextual meaning in financial statements
 
 ## Testing Considerations
 

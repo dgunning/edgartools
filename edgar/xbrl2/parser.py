@@ -49,6 +49,42 @@ class XBRLParser:
         
         # Mapping of context IDs to period identifiers for easy lookup
         self.context_period_map: Dict[str, str] = {}
+        
+    def _create_normalized_fact_key(self, element_id: str, context_ref: str) -> str:
+        """
+        Create a normalized fact key using underscore format.
+        
+        Args:
+            element_id: Element ID (with either colon or underscore)
+            context_ref: Context reference
+            
+        Returns:
+            Normalized fact key
+        """
+        # Normalize element ID to use underscore format consistently
+        normalized_element_id = element_id
+        if ':' in element_id:
+            prefix, name = element_id.split(':', 1)
+            normalized_element_id = f"{prefix}_{name}"
+        
+        # Create and return the key
+        return f"{normalized_element_id}_{context_ref}"
+    
+    def get_fact(self, element_id: str, context_ref: str) -> Optional[Fact]:
+        """
+        Get a fact by element ID and context reference.
+        Handles both colon and underscore formats transparently.
+        
+        Args:
+            element_id: Element ID (can use either colon or underscore format)
+            context_ref: Context reference
+            
+        Returns:
+            Fact if found, None otherwise
+        """
+        # Create a normalized key and look up the fact
+        normalized_key = self._create_normalized_fact_key(element_id, context_ref)
+        return self.facts.get(normalized_key)
     
     def parse_directory(self, directory_path: Union[str, Path]) -> None:
         """
@@ -1157,19 +1193,11 @@ class XBRLParser:
                     numeric_value=numeric_value
                 )
                 
-                # Try different variations of the key to maximize matches
-                variations = [
-                    f"{element_id}_{context_ref}",  # Standard format
-                ]
+                # Create a normalized key using underscore format for consistency
+                normalized_key = self._create_normalized_fact_key(element_id, context_ref)
                 
-                # If we have a namespace prefix, also create the underscore version
-                if ':' in element_id:
-                    prefix, name = element_id.split(':', 1)
-                    variations.append(f"{prefix}_{name}_{context_ref}")
-                
-                # Save the fact with all key variations
-                for key in variations:
-                    self.facts[key] = fact
+                # Store the fact once with the normalized key
+                self.facts[normalized_key] = fact
                 
                 fact_count += 1
             
@@ -1181,9 +1209,78 @@ class XBRLParser:
             # Double check that we found facts
             if fact_count == 0:
                 log.warning("WARNING: No facts were extracted from the instance document!")
+            
+            # Apply calculation weights after all facts are extracted
+            self._apply_calculation_weights()
                 
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting facts: {str(e)}")
+            
+    def _apply_calculation_weights(self) -> None:
+        """
+        Apply calculation weights to facts based on calculation linkbase information.
+        
+        This method handles the application of negative weights from calculation arcs.
+        Per XBRL specification, a negative weight should flip the sign of a fact value
+        when used in calculations. This is particularly common with elements like
+        "IncreaseDecreaseInInventories" which should be negated when contributing
+        to cash flow calculations.
+        """
+        try:
+            # Create a mapping of normalized element IDs to their calculation nodes
+            element_to_calc_node = {}
+            
+            # Populate the mapping from all calculation trees
+            for role_uri, calc_tree in self.calculation_trees.items():
+                for element_id, node in calc_tree.all_nodes.items():
+                    # Always store with normalized element ID (underscore format)
+                    normalized_element_id = element_id.replace(':', '_') if ':' in element_id else element_id
+                    element_to_calc_node[normalized_element_id] = node
+            
+            # Apply calculation weights to facts
+            adjusted_count = 0
+            
+            # Find and adjust facts with negative weights
+            for fact_key, fact in list(self.facts.items()):
+                # Normalize the element ID for lookup
+                element_id = fact.element_id
+                normalized_element_id = element_id.replace(':', '_') if ':' in element_id else element_id
+                
+                # Look up the calculation node using the normalized element ID
+                calc_node = element_to_calc_node.get(normalized_element_id)
+                
+                # Apply negative weights if found
+                if calc_node and calc_node.weight < 0:
+                    if fact.numeric_value is not None:
+                        # Store original for logging
+                        original_value = fact.numeric_value
+                        
+                        # Apply the weight (negate the value)
+                        fact.numeric_value = -fact.numeric_value
+                        
+                        # Also update the string value if present
+                        if fact.value:
+                            # Handle positive values
+                            if not fact.value.startswith('-'):
+                                fact.value = f"-{fact.value}"
+                            # Handle negative values
+                            else:
+                                fact.value = fact.value[1:]
+                        
+                        # Update fact in the dictionary
+                        self.facts[fact_key] = fact
+                        adjusted_count += 1
+                        
+                        log.debug(f"Adjusted fact {fact.element_id}: {original_value} -> {fact.numeric_value}")
+            
+            log.debug(f"Applied calculation weights to {adjusted_count} facts")
+            
+        except Exception as e:
+            # Log the error but don't fail the entire parsing process
+            log.warning(f"Warning: Error applying calculation weights: {str(e)}")
+            # Include stack trace for debugging
+            import traceback
+            log.debug(traceback.format_exc())
     
     def _extract_entity_info(self) -> None:
         """Extract entity information from contexts and DEI facts."""

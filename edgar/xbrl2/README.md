@@ -235,6 +235,31 @@ large_income_items = facts.query() \
 revenue_over_time = facts.time_series('Revenue')
 ```
 
+## XBRL Calculation Support
+
+The XBRL2 module properly handles calculation relationships from XBRL calculation linkbases:
+
+```python
+# Values are automatically adjusted according to calculation weights
+# For example, elements with negative weights (-1.0) like "IncreaseDecreaseInInventories"
+# are automatically negated to maintain proper calculation relationships
+cash_flow_statement = statements.cash_flow_statement()
+
+# The calculation trees are accessible for inspection
+for role_uri, calc_tree in xbrl.calculation_trees.items():
+    print(f"Calculation tree: {calc_tree.definition}")
+    for element_id, node in calc_tree.all_nodes.items():
+        if node.weight != 1.0:
+            print(f"- {element_id}: weight={node.weight}")
+```
+
+The parser automatically adjusts fact values based on calculation arc weights, ensuring:
+
+1. Elements with negative weights (-1.0) are displayed with the correct sign
+2. Cash flow statements present inflows and outflows with the proper signage
+3. Calculation validations use the adjusted values for proper summation
+4. Contextual interpretation of values aligns with statement presentation
+
 ## Future Enhancements
 
 - Enhanced support for non-standard financial statements
@@ -242,3 +267,4 @@ revenue_over_time = facts.time_series('Revenue')
 - Expanded dimensional analysis capabilities
 - Automatic footnote association
 - Financial ratio calculations
+- Advanced calculation validation and reconciliation

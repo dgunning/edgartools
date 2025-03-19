@@ -87,7 +87,7 @@ def test_find_balance_sheet_facts():
     print(balance_sheet)
 
 
-def test_period_views(aapl_xbrl:XBRL):
+def test_period_views_for_balance_sheet(aapl_xbrl:XBRL):
     print()
     # Get period views for balance sheet
     balance_sheet_views = aapl_xbrl.get_period_views('BalanceSheet')
@@ -96,6 +96,9 @@ def test_period_views(aapl_xbrl:XBRL):
         print(f"- {view['name']}: {view['description']}")
         print(f"  Keys: {view['period_keys']}")
     
+
+
+def test_period_views_for_income_statement(aapl_xbrl:XBRL):
     # Get period views for income statement
     income_statement_views = aapl_xbrl.get_period_views('IncomeStatement')
     print("\n[bold]Income Statement Period Views:[/bold]")

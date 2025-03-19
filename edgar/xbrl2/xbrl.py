@@ -622,38 +622,20 @@ class XBRL:
             
         relevant_facts = {}
         
-        # Exact match - check if the element name is a direct key in the facts dictionary
+        # Check each context
         for context_id in self.contexts:
-            # Try original key
-            exact_match_key = f"{element_name}_{context_id}"
+            # Use parser's get_fact method which handles normalization internally
+            fact = self.parser.get_fact(element_name, context_id)
             
-            # Also try colon/underscore substitution variations
-            alternative_keys = [exact_match_key]
-            
-            # If element name has colon, also try with underscore
-            if ':' in element_name:
-                parts = element_name.split(':', 1)
-                if len(parts) == 2 and parts[0] in ['us-gaap', 'ifrs', 'dei']:
-                    alternative_keys.append(f"{parts[0]}_{parts[1]}_{context_id}")
-            # If element name has underscore, also try with colon
-            elif '_' in element_name:
-                parts = element_name.split('_', 1)
-                if len(parts) == 2 and parts[0] in ['us-gaap', 'ifrs', 'dei']:
-                    alternative_keys.append(f"{parts[0]}:{parts[1]}_{context_id}")
-            
-            # Try all key variations
-            for key in alternative_keys:
-                if key in self.facts:
-                    fact = self.facts[key]
-                    # If period filter is specified, check if context matches period
-                    if period_filter:
-                        period_key = self.context_period_map.get(context_id)
-                        if period_key == period_filter:
-                            relevant_facts[context_id] = fact
-                    else:
+            if fact:
+                # If period filter is specified, check if context matches period
+                if period_filter:
+                    period_key = self.context_period_map.get(context_id)
+                    if period_key == period_filter:
                         relevant_facts[context_id] = fact
+                else:
+                    relevant_facts[context_id] = fact
         
-        # If we found exact matches, return them
         return relevant_facts
 
     
