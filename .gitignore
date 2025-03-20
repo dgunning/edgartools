@@ -11,3 +11,5 @@
 dist/
 .vscode/
 data/.DS_Store
+**/**/.DS_Store
+**/**/**/.DS_Store
