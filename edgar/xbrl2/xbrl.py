@@ -1216,62 +1216,93 @@ class XBRL:
                 
                 # For quarterly reports, show current quarter and same quarter previous year
                 elif fiscal_period_focus in ['Q1', 'Q2', 'Q3', 'Q4'] and duration_periods:
-                    # Current quarter
-                    current_period = duration_periods[0]
+                    # Filter duration periods to find quarterly periods (typically 80-100 days)
+                    quarterly_periods = []
+                    for period in duration_periods:
+                        try:
+                            start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
+                            end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                            duration_days = (end_date - start_date).days
+                            
+                            # Check if this is a quarterly period (between 80-100 days)
+                            if 80 <= duration_days <= 100:
+                                quarterly_periods.append(period)
+                        except (ValueError, TypeError):
+                            continue  # Skip periods with invalid dates
                     
-                    try:
-                        current_end = datetime.strptime(current_period['end_date'], '%Y-%m-%d').date()
-                        simple_label = format_date(current_end)
-                        periods_to_display.append((current_period['key'], simple_label))
-                    except (ValueError, TypeError):
-                        # Fall back to original label if date parsing fails
-                        periods_to_display.append((current_period['key'], current_period['label']))
+                    # If no quarterly periods found, log a warning and use the most recent period
+                    if not quarterly_periods and duration_periods:
+                        print(f"Warning: No quarterly periods (80-100 days) found for {fiscal_period_focus} report. Using most recent period.")
+                        quarterly_periods = [duration_periods[0]]
+                    
+                    # Use the most recent quarterly period as current quarter
+                    if quarterly_periods:
+                        current_period = quarterly_periods[0]
+                        
+                        try:
+                            current_end = datetime.strptime(current_period['end_date'], '%Y-%m-%d').date()
+                            simple_label = format_date(current_end)
+                            periods_to_display.append((current_period['key'], simple_label))
+                        except (ValueError, TypeError):
+                            # Fall back to original label if date parsing fails
+                            periods_to_display.append((current_period['key'], current_period['label']))
                     
                     # Try to find same quarter from previous years (up to 2 years back)
-                    try:
-                        current_start = datetime.strptime(current_period['start_date'], '%Y-%m-%d').date()
-                        current_end = datetime.strptime(current_period['end_date'], '%Y-%m-%d').date()
-                        current_days = (current_end - current_start).days
-                        
-                        # Periods from previous years to add (up to 2)
-                        prev_year_periods = []
-                        
-                        # Compare with other periods
-                        for period in duration_periods[1:]:
-                            try:
-                                period_start = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
-                                period_end = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
-                                period_days = (period_end - period_start).days
-                                
-                                # Similar length periods from approximately a year apart
-                                days_apart = abs((current_end - period_end).days)
-                                # Check for 1 year ago period
-                                if (abs(period_days - current_days) <= 10 and  # Similar duration
-                                    350 <= days_apart <= 380):  # About a year apart
-                                    prev_year_periods.append((days_apart, period))
-                                
-                                # Check for 2 years ago period
-                                if (abs(period_days - current_days) <= 10 and  # Similar duration
-                                    730 - 30 <= days_apart <= 730 + 30):  # About two years apart
-                                    prev_year_periods.append((days_apart, period))
-                            except (ValueError, TypeError):
-                                continue
-                        
-                        # Sort by how closely they match the expected timeframes
-                        prev_year_periods.sort()
-                        
-                        # Add up to 2 periods from previous years
-                        for i, (_, period) in enumerate(prev_year_periods[:2]):
-                            # Create a more consistent label for comparison periods
-                            try:
-                                end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
-                                simple_label = format_date(end_date)
-                                periods_to_display.append((period['key'], simple_label))
-                            except (ValueError, TypeError):
-                                # Fall back to original label if date parsing fails
-                                periods_to_display.append((period['key'], period.get('label', '')))
-                    except (ValueError, TypeError):
-                        pass
+                    if quarterly_periods:  # Only proceed if we found a valid current period
+                        try:
+                            current_start = datetime.strptime(current_period['start_date'], '%Y-%m-%d').date()
+                            current_end = datetime.strptime(current_period['end_date'], '%Y-%m-%d').date()
+                            current_days = (current_end - current_start).days
+                            
+                            # Periods from previous years to add (up to 2)
+                            prev_year_periods = []
+                            
+                            # First look in quarterly periods for best matches
+                            candidate_periods = []
+                            # Start with other quarterly periods
+                            for period in quarterly_periods[1:]:
+                                candidate_periods.append(period)
+                            # Then add other duration periods for broader search if needed
+                            for period in duration_periods:
+                                if period not in quarterly_periods:
+                                    candidate_periods.append(period)
+                            
+                            # Compare with other periods
+                            for period in candidate_periods:
+                                try:
+                                    period_start = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
+                                    period_end = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                                    period_days = (period_end - period_start).days
+                                    
+                                    # Similar length periods from approximately a year apart
+                                    days_apart = abs((current_end - period_end).days)
+                                    # Check for 1 year ago period
+                                    if (abs(period_days - current_days) <= 15 and  # Similar duration (slightly more flexible)
+                                        350 <= days_apart <= 380):  # About a year apart
+                                        prev_year_periods.append((days_apart, period))
+                                    
+                                    # Check for 2 years ago period
+                                    if (abs(period_days - current_days) <= 15 and  # Similar duration (slightly more flexible)
+                                        730 - 30 <= days_apart <= 730 + 30):  # About two years apart
+                                        prev_year_periods.append((days_apart, period))
+                                except (ValueError, TypeError):
+                                    continue
+                            
+                            # Sort by how closely they match the expected timeframes
+                            prev_year_periods.sort()
+                            
+                            # Add up to 2 periods from previous years
+                            for i, (_, period) in enumerate(prev_year_periods[:2]):
+                                # Create a more consistent label for comparison periods
+                                try:
+                                    end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                                    simple_label = format_date(end_date)
+                                    periods_to_display.append((period['key'], simple_label))
+                                except (ValueError, TypeError):
+                                    # Fall back to original label if date parsing fails
+                                    periods_to_display.append((period['key'], period.get('label', '')))
+                        except (ValueError, TypeError):
+                            pass
                 
                 # If no periods selected yet, or we have less than 3 periods for a balance sheet,
                 # use generic approach to select periods. For balance sheets, we want to show 3 columns when available
@@ -1303,7 +1334,32 @@ class XBRL:
                                 periods_to_display.append((period['key'], period.get('label', '')))
                     else:
                         # Fall back to any available duration periods with consistent labeling
-                        for period in duration_periods[:min(3, len(duration_periods))]:
+                        filtered_periods = duration_periods
+                        
+                        # For quarterly reports, prioritize proper quarterly periods (80-100 days)
+                        if fiscal_period_focus in ['Q1', 'Q2', 'Q3', 'Q4']:
+                            quarterly_candidates = []
+                            non_quarterly_candidates = []
+                            
+                            for period in duration_periods:
+                                try:
+                                    start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
+                                    end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                                    duration_days = (end_date - start_date).days
+                                    
+                                    # Check if this is a quarterly period
+                                    if 80 <= duration_days <= 100:
+                                        quarterly_candidates.append(period)
+                                    else:
+                                        non_quarterly_candidates.append(period)
+                                except (ValueError, TypeError):
+                                    non_quarterly_candidates.append(period)
+                            
+                            # Use quarterly periods first, then fall back to non-quarterly if needed
+                            if quarterly_candidates:
+                                filtered_periods = quarterly_candidates + non_quarterly_candidates
+                        
+                        for period in filtered_periods[:min(3, len(filtered_periods))]:
                             # Check if this period is already selected
                             if period['key'] in existing_period_keys:
                                 continue

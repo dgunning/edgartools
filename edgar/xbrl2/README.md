@@ -186,6 +186,29 @@ The XBRL2 module is designed with these principles:
 3. **Flexible Output Options**: Rich tables for display, DataFrames for analysis, and raw data for custom processing
 4. **Consistency Across Companies**: Standardized concepts that enable cross-company comparison
 
+## Period Selection Logic
+
+The XBRL2 module implements sophisticated period selection logic to ensure appropriate periods are displayed for financial statements:
+
+### Quarterly Statement Period Selection
+
+When rendering quarterly statements (when fiscal_period_focus is Q1, Q2, Q3, or Q4):
+
+1. The system identifies true quarterly periods by filtering duration periods to those with 80-100 day durations
+2. If quarterly periods are found, the most recent one is selected as the current quarter
+3. For comparison, the system looks for periods with similar duration from approximately 1-2 years prior
+4. If no quarterly periods are found, it falls back to the most recent period with a warning
+
+### Annual Statement Period Selection
+
+For annual reports (when fiscal_period_focus is FY):
+
+1. Annual periods are identified by looking for ~365 day durations or fiscal year markers
+2. The system prioritizes periods that align with the entity's fiscal year end
+3. Up to three most recent fiscal years are displayed in chronological order
+
+This intelligent period selection ensures appropriate periods are displayed for statements, with robust fallbacks when ideal periods aren't available.
+
 ## Enhanced Facts API
 
 The XBRL2 module includes a powerful facts query interface for direct access to individual XBRL facts:
