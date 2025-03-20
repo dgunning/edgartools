@@ -140,3 +140,17 @@ def test_cashflow_statement_totals():
 
     cash_statement = filing.statements.cash_flow_statement
     print(cash_statement.view())
+
+
+def test_get_statement_by_name_returns_correct_statement():
+    filing = Filing(company='SOUTHERN COPPER CORP/', cik=1001838, form='10-Q', filing_date='2011-08-08', accession_no='0001104659-11-044725')
+    xbrl: XBRL = XBRL.from_filing(filing)
+    statement:Statement = xbrl.statements.income_statement()
+    #assert statement.primary_concept == 'us-gaap:IncomeStatementAbstract'
+    df = statement.to_dataframe()
+    concepts = df.concept.tolist()
+    assert concepts[0] == 'us-gaap_IncomeStatementAbstract'
+
+
+
+

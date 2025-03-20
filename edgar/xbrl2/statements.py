@@ -4,12 +4,48 @@ Financial statement processing for XBRL data.
 This module provides functions for working with financial statements.
 """
 
-from typing import Dict, List, Any, Optional, Union
+from dataclasses import dataclass
+from typing import Dict, List, Any, Optional
 
 import pandas as pd
 from rich import box
 from rich.table import Table
+
 from edgar.richtools import repr_rich
+
+
+@dataclass
+class StatementInfo:
+    name: str
+    concept: str
+    title: str
+
+
+statement_to_concepts = {
+    "IncomeStatement": StatementInfo(name="IncomeStatement",
+                                     concept="us-gaap_IncomeStatementAbstract",
+                                     title="Consolidated Statement of Income"),
+    "BalanceSheet": StatementInfo(name="BalanceSheet",
+                                  concept="us-gaap_StatementOfFinancialPositionAbstract",
+                                  title="Consolidated Balance Sheets",
+                                  ),
+    "CashFlowStatement": StatementInfo(name="CashFlowStatement",
+                                       concept="us-gaap_StatementOfCashFlowsAbstract",
+                                       title="Consolidated Statement of Cash Flows"),
+    "StatementOfEquity": StatementInfo(name="StatementOfEquity",
+                                       concept="us-gaap_StatementOfStockholdersEquityAbstract",
+                                       title="Consolidated Statement of Equity"
+                                       ),
+    "ComprehensiveIncome": StatementInfo(name="ComprehensiveIncome",
+                                         concept="us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract",
+                                         title="Consolidated Statement of Comprehensive Income"
+                                         ),
+    "CoverPage": StatementInfo(name="CoverPage",
+                               concept="us-gaap_CoverPage",
+                                 title="Cover Page"
+                                 ),
+
+}
 
 
 class Statement:
@@ -19,7 +55,7 @@ class Statement:
     This class provides convenient methods for rendering and manipulating a specific
     financial statement.
     """
-    
+
     def __init__(self, xbrl, role_or_type: str):
         """
         Initialize with an XBRL object and statement identifier.
@@ -30,9 +66,9 @@ class Statement:
         """
         self.xbrl = xbrl
         self.role_or_type = role_or_type
-        
-    def render(self, period_filter: Optional[str] = None, 
-               period_view: Optional[str] = None, 
+
+    def render(self, period_filter: Optional[str] = None,
+               period_view: Optional[str] = None,
                standard: bool = True,
                show_date_range: bool = False) -> Table:
         """
@@ -47,11 +83,11 @@ class Statement:
         Returns:
             Rich Table containing the rendered statement
         """
-        return self.xbrl.render_statement(self.role_or_type, 
-                                        period_filter=period_filter,
-                                        period_view=period_view, 
-                                        standard=standard,
-                                        show_date_range=show_date_range)
+        return self.xbrl.render_statement(self.role_or_type,
+                                          period_filter=period_filter,
+                                          period_view=period_view,
+                                          standard=standard,
+                                          show_date_range=show_date_range)
 
     def __rich__(self):
         """
@@ -77,9 +113,14 @@ class Statement:
         """
         return self.xbrl.to_pandas(self.role_or_type, standard=standard)
 
+    @property
+    def primary_concept(self):
+        data = self.get_raw_data()
+        return data[0]['all_names'][0]
+
     def to_dataframe(self):
         return self._pandas_dataframes()['statement']
-    
+
     def get_raw_data(self, period_filter: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get the raw statement data.
@@ -100,7 +141,7 @@ class Statements:
     This class provides a user-friendly way to access and manipulate 
     financial statements extracted from XBRL data.
     """
-    
+
     def __init__(self, xbrl):
         """
         Initialize with an XBRL object.
@@ -110,7 +151,7 @@ class Statements:
         """
         self.xbrl = xbrl
         self.statements = xbrl.get_all_statements()
-        
+
         # Create statement type lookup for quick access
         self.statement_by_type = {}
         for stmt in self.statements:
@@ -118,7 +159,7 @@ class Statements:
                 if stmt['type'] not in self.statement_by_type:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
-    
+
     def __getitem__(self, item) -> Optional[Statement]:
         """
         Get a statement by index, type, or role.
@@ -134,12 +175,39 @@ class Statements:
                 stmt = self.statements[item]
                 return Statement(self.xbrl, stmt['role'])
         elif isinstance(item, str):
+            # Check if it's a standard statement type with a specific concept marker
+            if item in statement_to_concepts:
+                # Get information about the statement's identifying concept
+                concept_info = statement_to_concepts[item]
+                concept = concept_info.concept
+                
+                # Find all statements of the requested type
+                matching_statements = self.statement_by_type.get(item, [])
+                
+                if matching_statements:
+                    # Try to find a statement containing the specific concept
+                    for stmt in matching_statements:
+                        role = stmt['role']
+                        # Examine the presentation tree for this role
+                        if role in self.xbrl.presentation_trees:
+                            tree = self.xbrl.presentation_trees[role]
+                            # Check if the identifying concept is in this tree
+                            normalized_concept = concept.replace(':', '_')
+                            for element_id in tree.all_nodes:
+                                # Check both original and normalized form
+                                if element_id == concept or element_id == normalized_concept:
+                                    return Statement(self.xbrl, role)
+                    
+                    # If no exact concept match, fall back to the first statement of the type
+                    return Statement(self.xbrl, item)
+                    
             # If it's a statement type with multiple statements, return the first one
             if item in self.statement_by_type and self.statement_by_type[item]:
                 return Statement(self.xbrl, item)
+            
             # Otherwise, try to use it directly as a role or statement name
             return Statement(self.xbrl, item)
-    
+
     def __rich__(self):
         """
         Rich console representation.
@@ -158,7 +226,7 @@ class Statements:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
-    
+
     def balance_sheet(self) -> Statement:
         """
         Get a balance sheet.
@@ -167,7 +235,7 @@ class Statements:
             A balance sheet statement
         """
         return self["BalanceSheet"]
-    
+
     def income_statement(self) -> Statement:
         """
         Get an income statement.
@@ -176,7 +244,7 @@ class Statements:
             An income statement
         """
         return self["IncomeStatement"]
-    
+
     def cash_flow_statement(self) -> Statement:
         """
         Get a cash flow statement.
@@ -185,7 +253,7 @@ class Statements:
              The cash flow statement
         """
         return self["CashFlowStatement"]
-    
+
     def statement_of_equity(self) -> Statement:
         """
         Get a statement of equity.
@@ -206,8 +274,9 @@ class Statements:
             List of period view options
         """
         return self.xbrl.get_period_views(statement_type)
-    
-    def to_dataframe(self, statement_type: str, period_view: Optional[str] = None, standard: bool = True) -> pd.DataFrame:
+
+    def to_dataframe(self, statement_type: str, period_view: Optional[str] = None,
+                     standard: bool = True) -> pd.DataFrame:
         """
         Convert a statement to a pandas DataFrame.
         
@@ -222,40 +291,67 @@ class Statements:
         # Get the statement data with the right periods
         statement_data = None
         
-        # If period view specified, use it
-        if period_view:
-            period_views = self.xbrl.get_period_views(statement_type)
-            matching_view = next((view for view in period_views if view['name'] == period_view), None)
+        # Find the most appropriate statement role using the statement_to_concepts mapping
+        role = None
+        if statement_type in statement_to_concepts:
+            # Get information about the statement's identifying concept
+            concept_info = statement_to_concepts[statement_type]
+            concept = concept_info.concept
             
-            if matching_view:
-                role = next(
-                    (stmt['role'] for stmt in self.statements if stmt['type'] == statement_type), 
-                    None
-                )
-                if role:
-                    # Get statement data with period keys from view
-                    period_filter = matching_view['period_keys'][0] if matching_view['period_keys'] else None
-                    statement_data = self.xbrl.get_statement(role, period_filter=period_filter)
-        
-        # If no period view or it failed, just get the statement directly
-        if not statement_data:
+            # Find all statements of the requested type
+            matching_statements = self.statement_by_type.get(statement_type, [])
+            
+            if matching_statements:
+                # Try to find a statement containing the specific concept
+                for stmt in matching_statements:
+                    stmt_role = stmt['role']
+                    # Examine the presentation tree for this role
+                    if stmt_role in self.xbrl.presentation_trees:
+                        tree = self.xbrl.presentation_trees[stmt_role]
+                        # Check if the identifying concept is in this tree
+                        normalized_concept = concept.replace(':', '_')
+                        for element_id in tree.all_nodes:
+                            # Check both original and normalized form
+                            if element_id == concept or element_id == normalized_concept:
+                                role = stmt_role
+                                break
+                        if role:
+                            break
+                
+                # If no exact concept match, fall back to the first statement of the type
+                if not role and matching_statements:
+                    role = matching_statements[0]['role']
+        else:
+            # Fall back to the first statement of the type
             role = next(
-                (stmt['role'] for stmt in self.statements if stmt['type'] == statement_type), 
+                (stmt['role'] for stmt in self.statements if stmt['type'] == statement_type),
                 None
             )
-            if role:
-                statement_data = self.xbrl.get_statement(role)
-        
+
+        # If period view specified, use it with the identified role
+        if role and period_view:
+            period_views = self.xbrl.get_period_views(statement_type)
+            matching_view = next((view for view in period_views if view['name'] == period_view), None)
+
+            if matching_view:
+                # Get statement data with period keys from view
+                period_filter = matching_view['period_keys'][0] if matching_view['period_keys'] else None
+                statement_data = self.xbrl.get_statement(role, period_filter=period_filter)
+
+        # If no period view or it failed, just get the statement directly
+        if not statement_data and role:
+            statement_data = self.xbrl.get_statement(role)
+
         if not statement_data:
             return pd.DataFrame()  # Empty DataFrame if statement not found
-            
+
         # Use XBRL's to_pandas method which now supports standardization
-        dataframes = self.xbrl.to_pandas(statement_type, standard=standard)
-        
+        dataframes = self.xbrl.to_pandas(role, standard=standard)
+
         # Return the statement dataframe if available
         if 'statement' in dataframes:
             return dataframes['statement']
-            
+
         # Fallback to manual conversion if to_pandas didn't work
         rows = []
         for item in statement_data:
@@ -267,17 +363,17 @@ class Statements:
                 'is_abstract': item['is_abstract'],
                 'has_values': item.get('has_values', False),
             }
-            
+
             # Add original label if standardized
             if 'original_label' in item:
                 row['original_label'] = item['original_label']
-            
+
             # Add values for each period
             for period, value in item.get('values', {}).items():
                 row[period] = value
-            
+
             rows.append(row)
-        
+
         return pd.DataFrame(rows)
 
 
@@ -288,8 +384,9 @@ class StitchedStatement:
     This class provides convenient methods for rendering and manipulating a stitched
     financial statement from multiple filings.
     """
-    
-    def __init__(self, xbrls, statement_type: str, max_periods: int = 8, standardize: bool = True, use_optimal_periods: bool = True):
+
+    def __init__(self, xbrls, statement_type: str, max_periods: int = 8, standardize: bool = True,
+                 use_optimal_periods: bool = True):
         """
         Initialize with XBRLS object and statement parameters.
         
@@ -306,7 +403,7 @@ class StitchedStatement:
         self.standardize = standardize
         self.use_optimal_periods = use_optimal_periods
         self.show_date_range = False  # Default to not showing date ranges
-        
+
         # Statement titles
         self.statement_titles = {
             'BalanceSheet': 'CONSOLIDATED BALANCE SHEET',
@@ -316,22 +413,22 @@ class StitchedStatement:
             'ComprehensiveIncome': 'CONSOLIDATED STATEMENT OF COMPREHENSIVE INCOME'
         }
         self.title = self.statement_titles.get(statement_type, statement_type.upper())
-        
+
         # Cache statement data
         self._statement_data = None
-    
+
     @property
     def statement_data(self):
         """Get the underlying statement data, loading it if necessary."""
         if self._statement_data is None:
             self._statement_data = self.xbrls.get_statement(
-                self.statement_type, 
-                self.max_periods, 
+                self.statement_type,
+                self.max_periods,
                 self.standardize,
                 self.use_optimal_periods
             )
         return self._statement_data
-    
+
     def render(self, show_date_range: bool = False) -> Table:
         """
         Render the stitched statement as a formatted table.
@@ -343,7 +440,7 @@ class StitchedStatement:
             Rich Table containing the rendered statement
         """
         from edgar.xbrl2.stitching import render_stitched_statement
-        
+
         # Update the render_stitched_statement function call to pass the show_date_range parameter
         return render_stitched_statement(
             self.statement_data,
@@ -352,7 +449,7 @@ class StitchedStatement:
             entity_info=self.xbrls.entity_info,
             show_date_range=show_date_range
         )
-    
+
     def to_dataframe(self) -> pd.DataFrame:
         """
         Convert the stitched statement to a pandas DataFrame.
@@ -361,9 +458,9 @@ class StitchedStatement:
             pandas DataFrame with periods as columns and concepts as rows
         """
         from edgar.xbrl2.stitching import to_pandas
-        
+
         return to_pandas(self.statement_data)
-    
+
     def __rich__(self):
         """
         Rich console representation.
@@ -372,10 +469,10 @@ class StitchedStatement:
             Rich Table object
         """
         return self.render()
-    
+
     def __repr__(self):
         return repr_rich(self.__rich__())
-    
+
     def __str__(self) -> str:
         """
         String representation.
@@ -394,7 +491,7 @@ class StitchedStatements:
     statements from multiple filings, without requiring detailed knowledge of the
     underlying stitching process.
     """
-    
+
     def __init__(self, xbrls):
         """
         Initialize with an XBRLS object.
@@ -403,9 +500,9 @@ class StitchedStatements:
             xbrls: The XBRLS object to extract stitched statements from
         """
         self.xbrls = xbrls
-        
-    def balance_sheet(self, max_periods: int = 8, standardize: bool = True, 
-                     use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+
+    def balance_sheet(self, max_periods: int = 8, standardize: bool = True,
+                      use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched balance sheet across multiple time periods.
         
@@ -422,7 +519,7 @@ class StitchedStatements:
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
-    
+
     def income_statement(self, max_periods: int = 8, standardize: bool = True,
                          use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
@@ -441,9 +538,9 @@ class StitchedStatements:
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
-    
+
     def cash_flow_statement(self, max_periods: int = 8, standardize: bool = True,
-                           use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+                            use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched cash flow statement across multiple time periods.
         
@@ -460,9 +557,9 @@ class StitchedStatements:
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
-    
+
     def statement_of_equity(self, max_periods: int = 8, standardize: bool = True,
-                           use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+                            use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched statement of changes in equity across multiple time periods.
         
@@ -479,9 +576,9 @@ class StitchedStatements:
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
-    
+
     def comprehensive_income(self, max_periods: int = 8, standardize: bool = True,
-                            use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+                             use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
         """
         Get a stitched statement of comprehensive income across multiple time periods.
         
@@ -498,7 +595,7 @@ class StitchedStatements:
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
-    
+
     def __getitem__(self, statement_type: str) -> StitchedStatement:
         """
         Get a statement by type using dictionary syntax.
@@ -510,7 +607,7 @@ class StitchedStatements:
             StitchedStatement for the requested statement type
         """
         return StitchedStatement(self.xbrls, statement_type, use_optimal_periods=True)
-    
+
     def __rich__(self):
         """
         Rich console representation.
@@ -521,7 +618,7 @@ class StitchedStatements:
         table = Table(title="Available Stitched Statements", box=box.SIMPLE)
         table.add_column("Statement Type")
         table.add_column("Periods")
-        
+
         # Get information about available statements
         statement_types = set()
         for xbrl in self.xbrls.xbrl_list:
@@ -529,20 +626,20 @@ class StitchedStatements:
             for stmt in statements:
                 if stmt['type']:
                     statement_types.add(stmt['type'])
-        
+
         # Get periods
         periods = self.xbrls.get_periods()
         period_count = len(periods)
-        
+
         # Add rows for each statement type
         for stmt_type in sorted(statement_types):
             table.add_row(stmt_type, str(period_count))
-        
+
         return table
-    
+
     def __repr__(self):
         return repr_rich(self.__rich__())
-    
+
     def __str__(self) -> str:
         """
         String representation listing available statements.
@@ -557,19 +654,19 @@ class StitchedStatements:
             for stmt in statements:
                 if stmt['type']:
                     statement_types.add(stmt['type'])
-        
+
         # Get information about periods
         periods = self.xbrls.get_periods()
         period_count = len(periods)
-        
+
         # Format output
         output = [f"Stitched statements across {period_count} periods:"]
         for stmt_type in sorted(statement_types):
             output.append(f"  - {stmt_type}")
-        
+
         output.append("\nAvailable methods:")
         output.append("  - balance_sheet()")
         output.append("  - income_statement()")
         output.append("  - cash_flow_statement()")
-        
+
         return "\n".join(output)
