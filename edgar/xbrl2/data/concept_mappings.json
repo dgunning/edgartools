@@ -60,6 +60,9 @@
     "us-gaap_NetIncome",
     "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest"
   ],
+  "Accumulated Other Comprehensive Income/Loss": [
+    "us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+  ],
   "Earnings Per Share": [
     "us-gaap_EarningsPerShareBasic"
   ],
@@ -118,6 +121,9 @@
     "us-gaap_Assets",
     "us-gaap_AssetsTotal"
   ],
+  "Long-Term Investments": [
+    "us-gaap_LongTermInvestments"
+  ],
   "Accounts Payable": [
     "us-gaap_AccountsPayableCurrent",
     "us-gaap_AccountsPayableTradeCurrent"
@@ -139,6 +145,12 @@
     "us-gaap_LongTermDebtNoncurrent",
     "us-gaap_LongTermDebt",
     "us-gaap_LongTermBorrowings"
+  ],
+  "Notes Payable, Current": [
+    "us-gaap_NotesPayableCurrent"
+  ],
+  "Notes Payable, Non Current": [
+    "us-gaap_LongTermNotesAndLoans"
   ],
   "Deferred Revenue": [
     "us-gaap_DeferredRevenue",
@@ -162,6 +174,10 @@
   ],
   "Preferred Stock": [
     "us-gaap_PreferredStockValue"
+  ],
+  "Treasury Stock Common Value": [
+    "us-gaap_TreasuryStockCommonValue",
+    "us-gaap_TreasuryStockValue"
   ],
   "Retained Earnings": [
     "us-gaap_RetainedEarningsAccumulatedDeficit",
