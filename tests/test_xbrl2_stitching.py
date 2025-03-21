@@ -30,7 +30,7 @@ def amd_xbrl():
 @pytest.fixture
 def meta_xbrl():
     c = Company("META")
-    filings = c.latest("10-K", 3)
+    filings = c.get_filings(form="10-K").latest(3)
     return XBRLS.from_filings(filings)
 
 def test_init(stitcher):
