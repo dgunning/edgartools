@@ -412,9 +412,10 @@ class FactQuery:
         
         return results
     
-    def to_dataframe(self) -> pd.DataFrame:
+    def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
+            :param columns: List of columns to include in the DataFrame
         
         Returns:
             pandas DataFrame with query results
@@ -436,12 +437,16 @@ class FactQuery:
             df = df.loc[:, [col for col in df.columns if col not in context_cols]]
         
         if not self._include_element_info:
-            element_cols = ['element_name', 'element_type', 'element_period_type', 
+            element_cols = ['element_id', 'element_name', 'element_type', 'element_period_type',
                            'element_balance', 'element_label']
             df = df.loc[:, [col for col in df.columns if col not in element_cols]]
 
         # Drop empty columns
         df = df.dropna(axis=1, how='all')
+
+        # Filter columns if specified
+        if columns:
+            df = df.filter(columns)
         
         return df
 
