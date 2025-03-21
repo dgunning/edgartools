@@ -903,7 +903,7 @@ class XBRL:
     def render_statement(self, statement_type: str = "BalanceSheet", 
                          period_filter: Optional[str] = None, 
                          period_view: Optional[str] = None,
-                         standard: bool = False,
+                         standard: bool = True,
                          show_date_range: bool = False) -> RichTable:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
@@ -964,7 +964,9 @@ class XBRL:
         periods_to_display = []
         
         # Get useful entity info for period selection
-        entity_info = self.entity_info
+        entity_info = self.entity_info.copy()  # Make a copy to avoid modifying original
+        # Add a reference to the XBRL instance
+        entity_info['xbrl_instance'] = self
         doc_period_end_date = entity_info.get('document_period_end_date')
         fiscal_year_focus = entity_info.get('fiscal_year')
         fiscal_period_focus = entity_info.get('fiscal_period')
@@ -1417,7 +1419,7 @@ class XBRL:
             periods_to_display,
             statement_title,
             statement_type,
-            self.entity_info,
+            entity_info,
             standard,
             show_date_range
         )

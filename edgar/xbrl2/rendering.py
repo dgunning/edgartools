@@ -519,6 +519,35 @@ def render_statement(
         # Standardize the statement data
         statement_data = standardization.standardize_statement(statement_data, mapper)
         
+        # Update facts with standardized labels if XBRL instance is available
+        xbrl_instance = entity_info.get('xbrl_instance')
+        if xbrl_instance and hasattr(xbrl_instance, 'facts_view'):
+            facts_view = xbrl_instance.facts_view
+            facts = facts_view.get_facts()
+            
+            # Create a mapping of concept -> standardized label from statement data
+            standardization_map = {}
+            for item in statement_data:
+                if 'concept' in item and 'label' in item and 'original_label' in item:
+                    standardization_map[item['concept']] = {
+                        'label': item['label'],
+                        'original_label': item['original_label']
+                    }
+            
+            # Update facts with standardized labels
+            for fact in facts:
+                if 'concept' in fact and fact['concept'] in standardization_map:
+                    mapping = standardization_map[fact['concept']]
+                    if fact.get('label') == mapping.get('original_label'):
+                        # Store original label if not already set
+                        if 'original_label' not in fact:
+                            fact['original_label'] = fact['label']
+                        # Update with standardized label
+                        fact['label'] = mapping['label']
+            
+            # Clear the cache to ensure it's rebuilt with updated facts
+            facts_view.clear_cache()
+        
         # Indicate that standardization is being used in the title
         statement_title = f"{statement_title} (Standardized)"
     

@@ -19,10 +19,11 @@ from edgar.xbrl2.xbrl import XBRL
 
 @pytest.fixture
 def aapl_xbrl():
-    data_dir = Path("data/xbrl/datafiles/aapl")
+    return XBRL.parse_directory(Path("data/xbrl/datafiles/aapl"))
 
-    # Parse the directory
-    return XBRL.parse_directory(data_dir)
+@pytest.fixture
+def msft_xbrl():
+    return XBRL.parse_directory(Path("data/xbrl/datafiles/msft"))
 
 def test_dei_info(aapl_xbrl:XBRL):
     assert aapl_xbrl.entity_info.get('entity_name') == 'Apple Inc.'
@@ -259,21 +260,6 @@ def test_period_views_for_AAPL():
     print(values)
     statement = xbrl.render_statement("IncomeStatement",period_view="Three-Year Comparison")
     print(statement)
-
-
-def test_period_views_for_INTC():
-    filing = Filing(company='INTEL CORP', cik=50863, form='10-K', filing_date='2025-01-31',accession_no='0000050863-25-000009')
-    xbrl = XBRL.from_filing(filing)
-    print(xbrl.get_period_views("IncomeStatement"))
-
-    period_filter = "Three Recent Quarters"
-
-    revenue_facts = xbrl._find_facts_for_element('us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax')
-    #print(revenue_facts)
-
-    statement = xbrl.render_statement("IncomeStatement", period_view="Three Recent Quarters")
-    print(statement)
-
 
 
 if __name__ == "__main__":
