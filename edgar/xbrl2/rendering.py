@@ -71,6 +71,18 @@ def _format_period_labels(
     """
     Format period labels for display and determine fiscal period indicator.
     
+    This function processes period keys and labels to create human-readable period labels
+    for financial statements. When show_date_range=True, duration periods are displayed
+    with both start and end dates (e.g., "Jan 1, 2023 - Mar 31, 2023"). When 
+    show_date_range=False (default), only the end date is shown (e.g., "Mar 31, 2023").
+    
+    The function handles various input formats:
+    1. Period keys in standard format (instant_YYYY-MM-DD or duration_YYYY-MM-DD_YYYY-MM-DD)
+    2. Original labels with full or abbreviated month names
+    3. Special formatted labels with date range information
+    
+    For quarterly periods, quarter numbers (Q1-Q4) are added to provide additional context.
+    
     Args:
         periods_to_display: List of period keys and original labels
         entity_info: Entity information dictionary
@@ -163,10 +175,50 @@ def _format_period_labels(
     
     # Create formatted period columns
     for period_key, original_label in periods_to_display:
-        # If we have a date-based label, ensure it uses abbreviated months
-        # This handles both our internal date formatting and dates from XBRL data
+        # Extract start/end dates from duration periods for date range display
+        start_date = None
+        end_date = None
+        is_duration = False
+        duration_days = 0
+        q_num = None
+        
+        # Parse dates from period key for duration periods
+        if not period_key.startswith('instant_') and '_' in period_key and len(period_key.split('_')) >= 3:
+            parts = period_key.split('_')
+            try:
+                start_date_str = parts[1]
+                end_date_str = parts[2]
+                start_date = parse_date(start_date_str)
+                end_date = parse_date(end_date_str)
+                is_duration = True
+                duration_days = (end_date - start_date).days
+                
+                # Determine quarter number for quarterly periods
+                if 80 <= duration_days <= 100:  # Quarterly period
+                    month = end_date.month
+                    if month <= 3 or month == 12:
+                        q_num = "Q1"
+                    elif month <= 6:
+                        q_num = "Q2"
+                    elif month <= 9:
+                        q_num = "Q3"
+                    else:
+                        q_num = "Q4"
+            except (ValueError, TypeError, IndexError):
+                pass
+        # For instant periods, extract the date
+        elif period_key.startswith('instant_'):
+            try:
+                date_str = period_key.split('_')[1]
+                end_date = parse_date(date_str)
+            except (ValueError, TypeError, IndexError):
+                pass
+
+        # Start with the original label or an empty string
+        final_label = ""
+        
+        # Case 1: If we have a date-based label with full month names, abbreviate them
         if original_label and ',' in original_label:
-            # Check if it contains a full month name that needs to be abbreviated
             for full_month, abbr in [
                 ('January', 'Jan'), ('February', 'Feb'), ('March', 'Mar'),
                 ('April', 'Apr'), ('May', 'May'), ('June', 'Jun'),
@@ -174,25 +226,25 @@ def _format_period_labels(
                 ('October', 'Oct'), ('November', 'Nov'), ('December', 'Dec')
             ]:
                 if full_month in original_label:
-                    # Try to extract and reformat the date properly
                     try:
                         # Extract year from the original label
                         year = int(''.join(c for c in original_label.split(',')[1] if c.isdigit()))
                         # Extract day - find digits after the month
                         day_part = original_label.split(full_month)[1].strip()
                         day = int(''.join(c for c in day_part.split(',')[0] if c.isdigit()))
-                        # Create a proper date and format it
                         month_num = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
                                    'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}[abbr]
-                        date_obj = None
+                        
                         try:
                             date_obj = datetime(year, month_num, day).date()
-                            formatted_periods.append((period_key, format_date(date_obj)))
+                            final_label = format_date(date_obj)
+                            # If showing date range and we have start_date for duration, use it
+                            if show_date_range and is_duration and start_date:
+                                final_label = f"{format_date(start_date)} - {final_label}"
                             break
                         except ValueError:
-                            # Handle invalid dates (like Sep 31) by using a valid date for that month
-                            if day > 28:  # Potentially invalid day
-                                # Use last day of month instead
+                            # Handle invalid dates
+                            if day > 28:
                                 if month_num == 2:  # February
                                     day = 28 if year % 4 != 0 else 29
                                 elif month_num in [4, 6, 9, 11]:  # 30-day months
@@ -201,115 +253,104 @@ def _format_period_labels(
                                     day = 31
                                 try:
                                     date_obj = datetime(year, month_num, day).date()
-                                    formatted_periods.append((period_key, format_date(date_obj)))
+                                    final_label = format_date(date_obj)
+                                    # If showing date range and we have start_date for duration, use it
+                                    if show_date_range and is_duration and start_date:
+                                        final_label = f"{format_date(start_date)} - {final_label}"
                                     break
                                 except ValueError:
                                     pass
                     except (ValueError, IndexError):
                         pass
             
-            # If we couldn't extract and reformat, but it's already using abbreviated months, use as is
-            if len(formatted_periods) == 0 or formatted_periods[-1][0] != period_key:
+            # If we couldn't extract a date but label has abbreviated month, use the original
+            if not final_label:
                 for abbr in ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']:
                     if abbr in original_label:
-                        formatted_periods.append((period_key, original_label))
+                        final_label = original_label
                         break
-                else:
-                    # If we get here, no month abbreviation was found, use original
-                    formatted_periods.append((period_key, original_label))
-            continue
-            
-        # For better clarity, prefer to use the original labels which include fiscal year information
-        # This helps distinguish between periods like Sep 30, 2023 and Sep 24, 2022 in the rendering
-        if original_label and len(original_label) > 4:
-            # Get a cleaner version of the label if it's too verbose
-            if len(original_label) > 30 and ':' in original_label:
-                # Extract just the fiscal period and date information
-                try:
-                    if "Annual:" in original_label:
-                        # Extract fiscal year end date
-                        parts = original_label.split('to')
-                        if len(parts) > 1:
-                            end_date_str = parts[1].strip()
-                            end_date = parse_date(end_date_str)
-                            cleaner_label = format_date(end_date)
-                            formatted_periods.append((period_key, cleaner_label))
-                            continue
-                    elif "Quarterly:" in original_label:
-                        # Extract quarter end date
-                        parts = original_label.split('to')
-                        if len(parts) > 1:
-                            end_date_str = parts[1].strip()
-                            end_date = parse_date(end_date_str)
-                            cleaner_label = format_date(end_date)
-                            formatted_periods.append((period_key, cleaner_label))
-                            continue
-                except (ValueError, TypeError):
-                    pass
-                    
-            # If we couldn't extract a cleaner version, use the original
-            formatted_periods.append((period_key, original_label))
-            continue
+                
+                # If no month abbreviation was found, use original label
+                if not final_label:
+                    final_label = original_label
         
-        # If we don't have a good original label, extract and format the date
-        if period_key.startswith('instant_'):
-            date_str = period_key.split('_')[1]
-            try:
-                date = parse_date(date_str)
-                # For better comparison, use a consistent fiscal year date format
-                formatted_date = format_date(date)
-                formatted_periods.append((period_key, formatted_date))
-            except (ValueError, TypeError, IndexError):
-                # Fall back to original label if date parsing fails
-                formatted_periods.append((period_key, original_label))
-        else:  # duration
-            # For duration periods, try to extract end date to show fiscal year
-            parts = period_key.split('_')
-            if len(parts) >= 3:
+        # Case 2: Handle special formatted period labels (Annual/Quarterly with date range)
+        elif original_label and len(original_label) > 4:
+            if len(original_label) > 30 and ':' in original_label and 'to' in original_label:
+                # This might be a label with date range information already included
                 try:
-                    start_date_str = parts[1]
-                    end_date_str = parts[2]
-                    start_date = parse_date(start_date_str)
-                    end_date = parse_date(end_date_str)
-                    
-                    # Determine if we should show the full date range or just the end date
-                    if show_date_range:
-                        # Show full date range for duration periods
-                        formatted_date = f"{format_date(start_date)} - {format_date(end_date)}"
-                    else:
-                        # Use a consistent format focusing on the end date which is typically
-                        # the fiscal period end that users care about
-                        formatted_date = format_date(end_date)
-                    
-                    # For quarterly reports, include quarter information
-                    duration_days = (end_date - start_date).days
-                    if 80 <= duration_days <= 100:  # Quarterly
-                        # Determine quarter number
-                        month = end_date.month
-                        if month <= 3 or month == 12:
-                            q_num = "Q1"
-                        elif month <= 6:
-                            q_num = "Q2"
-                        elif month <= 9:
-                            q_num = "Q3"
+                    # Extract dates for range if needed
+                    parts = original_label.split('to')
+                    if len(parts) > 1:
+                        if show_date_range:
+                            # Use the full date range that's already in the label
+                            final_label = original_label
                         else:
-                            q_num = "Q4"
+                            # Extract just the end date
+                            end_date_str = parts[1].strip()
+                            end_date = parse_date(end_date_str)
+                            final_label = format_date(end_date)
                             
-                        # Only add quarter information if it adds clarity
-                        if statement_type in ['IncomeStatement', 'CashFlowStatement']:
-                            # If we're showing date range, put quarter in parentheses
-                            if show_date_range:
-                                formatted_date = f"{formatted_date} ({q_num})"
-                            else:
-                                formatted_date = f"{formatted_date} ({q_num})"
+                            # Add quarter info if available
+                            if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                                final_label = f"{final_label} ({q_num})"
+                except (ValueError, TypeError):
+                    final_label = original_label
+            
+            # If we couldn't handle special formatting, use original label
+            if not final_label:
+                final_label = original_label
+        
+        # Case 3: Either use existing final_label (possibly from Case 1/2) or extract from period key
+        # If final_label is set but we want date range for a duration period, check if we need to add the start date
+        if final_label and show_date_range and is_duration and start_date and end_date:
+            # Check if the final_label already includes a date range (contains a hyphen)
+            if "-" not in final_label:
+                # If it's not already a date range, it's likely just the end date
+                # Try to detect if the label contains the formatted end date
+                end_date_formatted = format_date(end_date)
+                if end_date_formatted in final_label:
+                    # Replace the end date with the full range
+                    full_range = f"{format_date(start_date)} - {end_date_formatted}"
+                    final_label = final_label.replace(end_date_formatted, full_range)
+                else:
+                    # If we can't detect the end date pattern, prepend the start date
+                    final_label = f"{format_date(start_date)} - {final_label}"
                     
-                    formatted_periods.append((period_key, formatted_date))
-                except (ValueError, TypeError, IndexError):
-                    # Fall back to original label if date parsing fails
-                    formatted_periods.append((period_key, original_label))
+                # If we have quarter info, ensure it's present for income/cash flow statements
+                if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement'] and f"({q_num})" not in final_label:
+                    final_label = f"{final_label} ({q_num})"
+        
+        # If we don't have a final_label yet, process based on period key
+        if not final_label:
+            if period_key.startswith('instant_'):
+                # For instant periods, just use the date
+                if end_date:
+                    final_label = format_date(end_date)
+                else:
+                    final_label = original_label
+            elif is_duration:
+                # For duration periods, format based on show_date_range
+                if show_date_range and start_date and end_date:
+                    final_label = f"{format_date(start_date)} - {format_date(end_date)}"
+                    
+                    # Add quarter info if available
+                    if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                        final_label = f"{final_label} ({q_num})"
+                elif end_date:
+                    final_label = format_date(end_date)
+                    
+                    # Add quarter info if available
+                    if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                        final_label = f"{final_label} ({q_num})"
+                else:
+                    final_label = original_label
             else:
-                # Fall back to original label for malformed period keys
-                formatted_periods.append((period_key, original_label))
+                # Fall back to original label for anything else
+                final_label = original_label
+        
+        # Add the formatted period to the result
+        formatted_periods.append((period_key, final_label))
     
     return formatted_periods, fiscal_period_indicator
 
