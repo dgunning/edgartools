@@ -11,7 +11,7 @@ from rich import print
 import pytest
 
 from edgar.xbrl2.stitching import (
-    StatementStitcher, stitch_statements, render_stitched_statement, to_pandas
+    StatementStitcher, stitch_statements, render_stitched_statement, to_pandas, determine_optimal_periods
 )
 
 
@@ -21,6 +21,17 @@ def stitcher():
     """Fixture providing a fresh StatementStitcher instance."""
     return StatementStitcher()
 
+@pytest.fixture
+def amd_xbrl():
+    c = Company("AMD")
+    filings = c.latest("10-K", 3)
+    return XBRLS.from_filings(filings)
+
+@pytest.fixture
+def meta_xbrl():
+    c = Company("META")
+    filings = c.latest("10-K", 3)
+    return XBRLS.from_filings(filings)
 
 def test_init(stitcher):
     """Test initialization of StatementStitcher."""
@@ -480,3 +491,22 @@ def test_multiple_concepts_merging():
     # Verify it has values for both periods
     assert total_assets_row['values']['instant_2024-12-31'] == 1000
     assert total_assets_row['values']['instant_2023-12-31'] == 900
+
+
+def test_get_optimal_statements(amd_xbrl, meta_xbrl):
+    """Test stitching 3 statements."""
+
+    optimal_periods = determine_optimal_periods(amd_xbrl.xbrl_list, "BalanceSheet")
+    periods = [op['period_key'] for op in optimal_periods]
+    assert periods == ['instant_2024-12-28', 'instant_2023-12-30', 'instant_2022-12-31']
+
+    optimal_periods = determine_optimal_periods(meta_xbrl.xbrl_list, "BalanceSheet")
+    periods = [op['period_key'] for op in optimal_periods]
+    print(periods)
+    balance_sheet = meta_xbrl.render_statement("BalanceSheet")
+    print(balance_sheet)
+
+def test_stitch_3_statements(amd_xbrl, meta_xbrl):
+    statement = stitch_statements(meta_xbrl.xbrl_list, statement_type='BalanceSheet')
+    print()
+    assert len(statement['periods']) == 3

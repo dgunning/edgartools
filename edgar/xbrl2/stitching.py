@@ -67,32 +67,48 @@ def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> L
             periods = [p for p in xbrl.reporting_periods if p['type'] == 'instant']
             
             # If we have a document_period_end_date, use that to find the most appropriate period
-            # (the one that matches the financial statement date, not the filing/reporting date)
+            # The optimal period for BalanceSheet should be exactly the document_period_end_date
             if doc_period_end_date:
-                # Find the period closest to document_period_end_date
-                closest_period = None
-                min_days_diff = float('inf')
+                # Find the exact match for document_period_end_date
+                exact_period = None
                 
                 for period in periods:
                     try:
                         period_date = parse_date(period['date'])
+                        # Find exact match or period with date within 3 days (accounting for minor differences)
                         days_diff = abs((period_date - doc_period_end_date).days)
-                        
-                        # Prioritize exact matches or very close dates (within 3 days)
-                        if days_diff <= 3:
-                            closest_period = period
+                        if days_diff == 0:  # Exact match
+                            exact_period = period
                             break
-                        
-                        # Otherwise, keep track of the closest one
-                        if days_diff < min_days_diff:
-                            min_days_diff = days_diff
-                            closest_period = period
+                        elif days_diff <= 3:  # Very close match (within 3 days)
+                            exact_period = period
+                            break
                     except (ValueError, TypeError):
                         continue
                 
-                # Use the closest period if found and within 30 days (to avoid completely wrong periods)
-                if closest_period and min_days_diff <= 30:
-                    appropriate_periods.append(closest_period)
+                # Use the exact period if found
+                if exact_period:
+                    appropriate_periods.append(exact_period)
+                else:
+                    # If no exact match, find the closest period that's still within 14 days
+                    # (to accommodate for slight filing date variations)
+                    closest_period = None
+                    min_days_diff = float('inf')
+                    
+                    for period in periods:
+                        try:
+                            period_date = parse_date(period['date'])
+                            days_diff = abs((period_date - doc_period_end_date).days)
+                            
+                            if days_diff < min_days_diff:
+                                min_days_diff = days_diff
+                                closest_period = period
+                        except (ValueError, TypeError):
+                            continue
+                    
+                    # Use the closest period if it's within 14 days
+                    if closest_period and min_days_diff <= 14:
+                        appropriate_periods.append(closest_period)
             
             # If we couldn't find a period based on document_period_end_date or don't have one,
             # fall back to the most recent period
@@ -104,10 +120,12 @@ def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> L
             # For income and cash flow statements, we want duration periods
             periods = [p for p in xbrl.reporting_periods if p['type'] == 'duration']
             
-            # For income statements, different types of durations are appropriate:
-            # - Fiscal year (annual report)
-            # - Quarter (quarterly report)
-            # - Year-to-date (quarterly report with cumulative data)
+            # For income statements, different types of durations are appropriate based on fiscal period:
+            # - Fiscal year (FY): ~365 day period
+            # - Q1: ~90 day period
+            # - Q2: ~90 day period (Q2 only) and ~180 day period (YTD)
+            # - Q3: ~90 day period (Q3 only) and ~270 day period (YTD)
+            # - Q4: ~90 day period (Q4 only) and ~365 day period (full year)
             
             # First, determine if this is an annual or quarterly report
             is_annual = fiscal_period == 'FY'
@@ -125,117 +143,87 @@ def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> L
                 except (ValueError, TypeError):
                     continue
             
-            # Select appropriate periods based on document type
-            if is_annual:
-                # For annual reports, prefer periods closest to 365 days
-                annual_periods = []
-                for days in range(350, 380):
-                    if days in grouped_periods:
-                        annual_periods.extend(grouped_periods[days])
-                
-                if annual_periods and doc_period_end_date:
-                    # Find the annual period that best matches document_period_end_date
-                    closest_period = None
-                    min_days_diff = float('inf')
-                    
-                    for period in annual_periods:
-                        try:
-                            end_date = parse_date(period['end_date'])
-                            days_diff = abs((end_date - doc_period_end_date).days)
-                            
-                            # Prioritize exact matches or very close dates
-                            if days_diff <= 3:
-                                closest_period = period
-                                break
-                            
-                            # Otherwise track the closest one
-                            if days_diff < min_days_diff:
-                                min_days_diff = days_diff
-                                closest_period = period
-                        except (ValueError, TypeError):
-                            continue
-                    
-                    # Use the closest period if found and within reasonable range
-                    if closest_period and min_days_diff <= 30:
-                        appropriate_periods.append(closest_period)
-                    else:
-                        # Fall back to latest if no good match
-                        annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
+            # We need durations that end exactly on the document_period_end_date (or very close)
+            matching_periods = []
+            if doc_period_end_date:
+                # First, find all periods that end on the document_period_end_date
+                for period in periods:
+                    try:
+                        end_date = parse_date(period['end_date'])
+                        days_diff = abs((end_date - doc_period_end_date).days)
+                        
+                        # Consider periods that end on or very close to document_period_end_date
+                        if days_diff <= 3:
+                            period_with_days = period.copy()
+                            start_date = parse_date(period['start_date'])
+                            period_with_days['duration_days'] = (end_date - start_date).days
+                            matching_periods.append(period_with_days)
+                    except (ValueError, TypeError):
+                        continue
+            
+            # If we found periods that end on the document_period_end_date, filter by appropriate duration
+            if matching_periods:
+                # For annual reports, we want ~365 day periods
+                if is_annual:
+                    # Look for periods with annual duration (350-380 days)
+                    annual_periods = [p for p in matching_periods if 350 <= p['duration_days'] <= 380]
+                    if annual_periods:
+                        # If multiple annual periods, take the one with duration closest to 365 days
+                        annual_periods.sort(key=lambda x: abs(x['duration_days'] - 365))
                         appropriate_periods.append(annual_periods[0])
-                elif annual_periods:
-                    # If no document_period_end_date, use the latest
-                    annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                    appropriate_periods.append(annual_periods[0])
-            else:
-                # For quarterly reports, prefer:
-                # 1. The quarter duration (~90 days)
-                # 2. The YTD (year-to-date) duration if available
-                
-                # Look for quarterly duration
-                quarterly_periods = []
-                for days in range(85, 100):
-                    if days in grouped_periods:
-                        quarterly_periods.extend(grouped_periods[days])
-                
-                if quarterly_periods and doc_period_end_date:
-                    # Find the quarterly period that best matches document_period_end_date
-                    closest_period = None
-                    min_days_diff = float('inf')
                     
-                    for period in quarterly_periods:
-                        try:
-                            end_date = parse_date(period['end_date'])
-                            days_diff = abs((end_date - doc_period_end_date).days)
-                            
-                            # Prioritize exact matches or very close dates
-                            if days_diff <= 3:
-                                closest_period = period
-                                break
-                            
-                            # Otherwise track the closest one
-                            if days_diff < min_days_diff:
-                                min_days_diff = days_diff
-                                closest_period = period
-                        except (ValueError, TypeError):
-                            continue
-                    
-                    # Use the closest period if found and within reasonable range
-                    if closest_period and min_days_diff <= 30:
-                        appropriate_periods.append(closest_period)
-                    else:
-                        # Fall back to latest if no good match
-                        quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                # For quarterly reports, select appropriate periods based on fiscal_period
+                else:
+                    # First, add the quarterly period if available
+                    quarterly_periods = [p for p in matching_periods if 80 <= p['duration_days'] <= 100]
+                    if quarterly_periods:
+                        # Sort by how close to 90 days (ideal quarter)
+                        quarterly_periods.sort(key=lambda x: abs(x['duration_days'] - 90))
                         appropriate_periods.append(quarterly_periods[0])
-                elif quarterly_periods:
-                    # If no document_period_end_date, use the latest
-                    quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                    appropriate_periods.append(quarterly_periods[0])
                     
-                # Look for YTD duration if this is not Q1
-                if fiscal_period in ['Q2', 'Q3', 'Q4']:
-                    # Q2 YTD is ~180 days, Q3 YTD is ~270 days
-                    ytd_days_range = {
-                        'Q2': range(175, 190),
-                        'Q3': range(265, 285),
-                        'Q4': range(350, 370)
-                    }.get(fiscal_period, range(0, 0))
+                    # Then, add YTD period based on fiscal_period if available
+                    if fiscal_period == 'Q2':
+                        # Look for ~180 day YTD periods
+                        ytd_periods = [p for p in matching_periods if 175 <= p['duration_days'] <= 190]
+                        if ytd_periods:
+                            ytd_periods.sort(key=lambda x: abs(x['duration_days'] - 180))
+                            appropriate_periods.append(ytd_periods[0])
                     
-                    ytd_periods = []
-                    for days in ytd_days_range:
+                    elif fiscal_period == 'Q3':
+                        # Look for ~270 day YTD periods
+                        ytd_periods = [p for p in matching_periods if 260 <= p['duration_days'] <= 285]
+                        if ytd_periods:
+                            ytd_periods.sort(key=lambda x: abs(x['duration_days'] - 270))
+                            appropriate_periods.append(ytd_periods[0])
+                    
+                    elif fiscal_period == 'Q4':
+                        # Look for annual period (same as FY)
+                        annual_periods = [p for p in matching_periods if 350 <= p['duration_days'] <= 380]
+                        if annual_periods:
+                            annual_periods.sort(key=lambda x: abs(x['duration_days'] - 365))
+                            appropriate_periods.append(annual_periods[0])
+            
+            # If we didn't find any appropriate periods that end on document_period_end_date,
+            # fall back to traditional selection logic
+            if not appropriate_periods:
+                if is_annual:
+                    # For annual reports, prefer periods closest to 365 days
+                    annual_periods = []
+                    for days in range(350, 380):
                         if days in grouped_periods:
-                            ytd_periods.extend(grouped_periods[days])
+                            annual_periods.extend(grouped_periods[days])
                     
-                    if ytd_periods and doc_period_end_date:
-                        # Find the YTD period that best matches document_period_end_date
+                    if annual_periods and doc_period_end_date:
+                        # Find the annual period that best matches document_period_end_date
                         closest_period = None
                         min_days_diff = float('inf')
                         
-                        for period in ytd_periods:
+                        for period in annual_periods:
                             try:
                                 end_date = parse_date(period['end_date'])
                                 days_diff = abs((end_date - doc_period_end_date).days)
                                 
-                                # Prioritize exact matches or very close dates
+                                # Prioritize very close dates
                                 if days_diff <= 3:
                                     closest_period = period
                                     break
@@ -248,16 +236,108 @@ def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> L
                                 continue
                         
                         # Use the closest period if found and within reasonable range
-                        if closest_period and min_days_diff <= 30:
+                        if closest_period and min_days_diff <= 14:
                             appropriate_periods.append(closest_period)
                         else:
                             # Fall back to latest if no good match
+                            annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                            appropriate_periods.append(annual_periods[0])
+                    elif annual_periods:
+                        # If no document_period_end_date, use the latest
+                        annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                        appropriate_periods.append(annual_periods[0])
+                else:
+                    # For quarterly reports, prefer:
+                    # 1. The quarter duration (~90 days)
+                    # 2. The YTD (year-to-date) duration if available
+                    
+                    # Look for quarterly duration
+                    quarterly_periods = []
+                    for days in range(85, 100):
+                        if days in grouped_periods:
+                            quarterly_periods.extend(grouped_periods[days])
+                    
+                    if quarterly_periods and doc_period_end_date:
+                        # Find the quarterly period that best matches document_period_end_date
+                        closest_period = None
+                        min_days_diff = float('inf')
+                        
+                        for period in quarterly_periods:
+                            try:
+                                end_date = parse_date(period['end_date'])
+                                days_diff = abs((end_date - doc_period_end_date).days)
+                                
+                                # Prioritize very close dates
+                                if days_diff <= 3:
+                                    closest_period = period
+                                    break
+                                
+                                # Otherwise track the closest one
+                                if days_diff < min_days_diff:
+                                    min_days_diff = days_diff
+                                    closest_period = period
+                            except (ValueError, TypeError):
+                                continue
+                        
+                        # Use the closest period if found and within reasonable range
+                        if closest_period and min_days_diff <= 14:
+                            appropriate_periods.append(closest_period)
+                        else:
+                            # Fall back to latest if no good match
+                            quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                            appropriate_periods.append(quarterly_periods[0])
+                    elif quarterly_periods:
+                        # If no document_period_end_date, use the latest
+                        quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                        appropriate_periods.append(quarterly_periods[0])
+                        
+                    # Look for YTD duration if this is not Q1
+                    if fiscal_period in ['Q2', 'Q3', 'Q4']:
+                        # Define YTD day ranges based on fiscal period
+                        ytd_days_range = {
+                            'Q2': range(175, 190),
+                            'Q3': range(260, 285),
+                            'Q4': range(350, 380)
+                        }.get(fiscal_period, range(0, 0))
+                        
+                        ytd_periods = []
+                        for days in ytd_days_range:
+                            if days in grouped_periods:
+                                ytd_periods.extend(grouped_periods[days])
+                        
+                        if ytd_periods and doc_period_end_date:
+                            # Find the YTD period that best matches document_period_end_date
+                            closest_period = None
+                            min_days_diff = float('inf')
+                            
+                            for period in ytd_periods:
+                                try:
+                                    end_date = parse_date(period['end_date'])
+                                    days_diff = abs((end_date - doc_period_end_date).days)
+                                    
+                                    # Prioritize very close dates
+                                    if days_diff <= 3:
+                                        closest_period = period
+                                        break
+                                    
+                                    # Otherwise track the closest one
+                                    if days_diff < min_days_diff:
+                                        min_days_diff = days_diff
+                                        closest_period = period
+                                except (ValueError, TypeError):
+                                    continue
+                            
+                            # Use the closest period if found and within reasonable range
+                            if closest_period and min_days_diff <= 14:
+                                appropriate_periods.append(closest_period)
+                            else:
+                                # Fall back to latest if no good match
+                                ytd_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                                appropriate_periods.append(ytd_periods[0])
+                        elif ytd_periods:
+                            # If no document_period_end_date, use the latest
                             ytd_periods.sort(key=lambda x: x['end_date'], reverse=True)
                             appropriate_periods.append(ytd_periods[0])
-                    elif ytd_periods:
-                        # If no document_period_end_date, use the latest
-                        ytd_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                        appropriate_periods.append(ytd_periods[0])
         
         # Add metadata and source XBRL index to each selected period
         for period in appropriate_periods:
@@ -408,7 +488,7 @@ class StatementStitcher:
         self.periods = selected_periods
         
         # Process each statement
-        for statement in statements:
+        for i, statement in enumerate(statements):
             # Only process statements that have periods in our selection
             statement_periods = set(statement['periods'].keys())
             relevant_periods = statement_periods.intersection(set(selected_periods))
