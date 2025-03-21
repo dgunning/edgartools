@@ -70,3 +70,22 @@ def test_numeric_sign_for_cashflow_values():
 
     assert inventory_facts[inventory_facts.period_end == '2022-12-31']['value'].values[0] == '111288000'
     assert inventory_facts[inventory_facts.period_end == '2022-12-31']['numeric_value'].values[0] == 111288000
+
+
+def test_xbrl_query(intc_xbrl: XBRL):
+
+    query = intc_xbrl.query(include_element_info=True)
+    assert query._include_element_info
+
+    query = intc_xbrl.query(include_element_info=False)
+    assert query._include_element_info is False
+
+    df = (intc_xbrl.query(include_element_info=False)
+          .by_concept("Revenue").to_dataframe())
+
+    assert not any(col in df.columns for col in ['element_id', 'element_name', 'element_type'])
+
+    df = (intc_xbrl.query(include_dimensions=False)
+          .by_concept("Revenue").to_dataframe())
+
+    assert not any('dim' in col for col in df.columns)

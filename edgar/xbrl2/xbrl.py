@@ -251,6 +251,22 @@ class XBRL:
         if not hasattr(self, '_facts_view'):
             self._facts_view = FactsView(self)
         return self._facts_view
+
+    def query(self,
+              include_dimensions: bool = True,
+              include_contexts: bool = False,
+              include_element_info:bool = False) -> 'FactQuery':
+        """
+        Start a new query for XBRL facts.
+        """
+        fact_query = self.facts_view.query()
+        if not include_dimensions:
+            fact_query = fact_query.exclude_dimensions()
+        if not include_contexts:
+            fact_query = fact_query.exclude_contexts()
+        if not include_element_info:
+            fact_query = fact_query.exclude_element_info()
+        return fact_query
     
     def get_all_statements(self) -> List[Dict[str, Any]]:
         """
