@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.13.6] - 2025-03-20
+
+### Fixed
+- Fixed bug where `show_date_range` was not being applied when rendering statements
+- Fix bug where non-quarterly periods were being selected when rendering quarterly statements
+- Make Statement selection more robust by checking for statement specific facts in each statement
+
+### Added
+
+- Add filtering by columns in the `FactsQuery.to_dataframe` method
+- Add `query` method on the `XBRl` class` to query facts using a `FactsQuery` object
+
 
 ## [3.13.5] - 2025-03-19
 
