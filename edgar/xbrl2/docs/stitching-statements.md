@@ -1,4 +1,9 @@
-Designing a feature to stitch together a list of ordered financial statements (e.g., from XBRL filings) to display data across multiple periods is a great extension of your existing system. This involves consolidating historical data into a unified view while addressing challenges like concept inconsistencies over time. Below, I’ll propose a design that handles these requirements, including how to leverage your standardized concept mappings to normalize differences in reported concepts (e.g., a company switching from `us-gaap_Revenue` to `us-gaap_SalesRevenueNet` for "Revenue"). I’ll break this down into objectives, challenges, design components, and an implementation outline.
+# Statement Stitching in XBRL: Designing a Multi-Period Financial View
+
+Statement Stitching involves consolidating historical data into a unified view while addressing challenges like concept inconsistencies over time. 
+
+This design uses standardized concept mappings to normalize differences in reported concepts (e.g., a company switching from `us-gaap_Revenue` to `us-gaap_SalesRevenueNet` for "Revenue").
+
 
 ---
 
