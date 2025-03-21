@@ -17,6 +17,54 @@ PERIOD_END_LABEL = "http://www.xbrl.org/2003/role/periodEndLabel"
 TOTAL_LABEL = "http://www.xbrl.org/2003/role/totalLabel"
 
 
+def select_display_label(
+    labels: Dict[str, str],
+    preferred_label: Optional[str] = None,
+    standard_label: Optional[str] = None,
+    element_id: Optional[str] = None,
+    element_name: Optional[str] = None
+) -> str:
+    """
+    Select the most appropriate label for display, following a consistent priority order.
+    
+    Args:
+        labels: Dictionary of available labels
+        preferred_label: Role of the preferred label (if specified in presentation linkbase)
+        standard_label: The standard label content (if available)
+        element_id: Element ID (fallback)
+        element_name: Element name (alternative fallback)
+        
+    Returns:
+        The selected label according to priority rules
+    """
+    # 1. Use preferred label if specified and available
+    if preferred_label and labels and preferred_label in labels:
+        return labels[preferred_label]
+    
+    # 2. Use terse label if available (more user-friendly)
+    if labels and TERSE_LABEL in labels:
+        return labels[TERSE_LABEL]
+    
+    # 3. Fall back to standard label
+    if standard_label:
+        return standard_label
+    
+    # 4. Try STANDARD_LABEL directly from labels dict
+    if labels and STANDARD_LABEL in labels:
+        return labels[STANDARD_LABEL]
+    
+    # 5. Take any available label
+    if labels:
+        return next(iter(labels.values()), "")
+    
+    # 6. Use element name if available
+    if element_name:
+        return element_name
+    
+    # 7. Last resort: element ID
+    return element_id or ""
+
+
 class ElementCatalog(BaseModel):
     """
     A catalog of XBRL elements with their properties.
@@ -101,20 +149,12 @@ class PresentationNode(BaseModel):
         3. Label (standard label)
         4. Element ID (fallback)
         """
-        # 1. Use preferred label if specified and available
-        if self.preferred_label and self.preferred_label in self.labels:
-            return self.labels[self.preferred_label]
-        
-        # 2. Use terse label if available (more user-friendly)
-        if TERSE_LABEL in self.labels:
-            return self.labels[TERSE_LABEL]
-        
-        # 3. Fall back to standard label
-        if self.standard_label:
-            return self.standard_label
-        
-        # 4. Last resort: element ID
-        return self.element_id
+        return select_display_label(
+            labels=self.labels,
+            preferred_label=self.preferred_label,
+            standard_label=self.standard_label,
+            element_id=self.element_id
+        )
 
 
 class PresentationTree(BaseModel):
