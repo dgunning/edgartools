@@ -97,7 +97,8 @@
     "us-gaap_PrepaidExpenseAndOtherAssetsCurrent"
   ],
   "Marketable Securities": [
-    "us-gaap_AvailableForSaleSecuritiesDebtSecuritiesCurrent"
+    "us-gaap_AvailableForSaleSecuritiesDebtSecuritiesCurrent",
+    "us-gaap_MarketableSecuritiesCurrent"
   ],
   "Total Current Assets": [
     "us-gaap_AssetsCurrent"
@@ -247,6 +248,9 @@
     "us-gaap_OtherAssets",
     "us-gaap_OtherAssetsCurrent",
     "us-gaap_OtherAssetsNoncurrent"
+  ],
+  "Deferred Tax Assets": [
+    "us-gaap_DeferredIncomeTaxAssetsNet"
   ],
   "Other Liabilities": [
     "us-gaap_OtherLiabilities",
