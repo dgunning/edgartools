@@ -57,6 +57,8 @@ path = "edgar/__about__.py"
 include = [
   "edgar/**/*.py",
   "edgar/reference/data/*",
+  "edgar/xbrl2/data/*",
+  "edgar/xbrl/data/*",
   "LICENSE.txt"
 ]
 artifacts = [

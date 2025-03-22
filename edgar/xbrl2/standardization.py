@@ -9,7 +9,6 @@ statements regardless of the filing entity.
 import json
 import os
 from enum import Enum
-from json import JSONDecodeError
 from typing import Dict, List, Optional, Set, Tuple, Any
 from difflib import SequenceMatcher
 
@@ -78,9 +77,41 @@ class MappingStore:
             source: Path to the JSON file storing the mappings. If None, uses default location.
         """
         if source is None:
-            # Default to a file in the same directory as this module
+            # Try a few different ways to locate the file, handling both development
+            # and installed package scenarios
+            self.source = None
+            
+            # Default to a file in the same directory as this module (development mode)
             module_dir = os.path.dirname(os.path.abspath(__file__))
-            self.source = os.path.join(module_dir, "data", "concept_mappings.json")
+            potential_path = os.path.join(module_dir, "data", "concept_mappings.json")
+            if os.path.exists(potential_path):
+                self.source = potential_path
+            
+            # If not found, try to load from package data (installed package)
+            if self.source is None:
+                try:
+                    import importlib.resources as pkg_resources
+                    try:
+                        # For Python 3.9+
+                        with pkg_resources.files('edgar.xbrl2.data').joinpath('concept_mappings.json').open('r') as f:
+                            # Just read the file to see if it exists, we'll load it properly later
+                            f.read(1)
+                            self.source = potential_path  # Use the same path as before
+                    except (ImportError, FileNotFoundError, AttributeError):
+                        # Fallback for older Python versions
+                        try:
+                            import pkg_resources as legacy_resources
+                            if legacy_resources.resource_exists('edgar.xbrl2.data', 'concept_mappings.json'):
+                                self.source = potential_path  # Use the same path as before
+                        except (ImportError, FileNotFoundError):
+                            pass
+                except ImportError:
+                    pass
+            
+            # If we still haven't found the file, use the default path anyway
+            # (it will fail gracefully in _load_mappings)
+            if self.source is None:
+                self.source = potential_path
         else:
             self.source = source
             
@@ -93,31 +124,53 @@ class MappingStore:
         Returns:
             Dictionary mapping standard concepts to sets of company concepts
         """
+        data = None
+        
+        # First try direct file access
         try:
             with open(self.source, 'r') as f:
                 data = json.load(f)
-                
-                # Check if the structure is flat or nested
-                if any(isinstance(value, dict) for value in data.values()):
-                    # Nested structure by statement type
-                    flattened = {}
-                    for statement_type, concepts in data.items():
-                        for standard_concept, company_concepts in concepts.items():
-                            flattened[standard_concept] = set(company_concepts)
-                    return flattened
-                else:
-                    # Flat structure
-                    return {k: set(v) for k, v in data.items()}
-
-        except JSONDecodeError as e:
-            raise
-        except FileNotFoundError:
-            # Return default mappings if file doesn't exist or is invalid
-            return {
-                "Revenue": {"us-gaap_SalesRevenueNet", "us-gaap_Revenue", "us-gaap_Revenues"},
-                "Net Income": {"us-gaap_NetIncome", "us-gaap_NetIncomeLoss", "us-gaap_ProfitLoss"},
-                "Total Assets": {"us-gaap_Assets", "us-gaap_AssetsTotal"}
-            }
+        except (FileNotFoundError, IOError, PermissionError):
+            # If direct file access fails, try package resources
+            try:
+                try:
+                    # Modern importlib.resources approach (Python 3.9+)
+                    import importlib.resources as pkg_resources
+                    try:
+                        # For Python 3.9+
+                        with pkg_resources.files('edgar.xbrl2.data').joinpath('concept_mappings.json').open('r') as f:
+                            data = json.load(f)
+                    except (ImportError, FileNotFoundError, AttributeError):
+                        # Fallback to legacy pkg_resources
+                        import pkg_resources as legacy_resources
+                        resource_string = legacy_resources.resource_string('edgar.xbrl2.data', 'concept_mappings.json')
+                        data = json.loads(resource_string)
+                except ImportError:
+                    pass
+            except Exception:
+                # If all attempts fail, use default mappings
+                pass
+        
+        # If we have data, process it based on its structure
+        if data:
+            # Check if the structure is flat or nested
+            if any(isinstance(value, dict) for value in data.values()):
+                # Nested structure by statement type
+                flattened = {}
+                for statement_type, concepts in data.items():
+                    for standard_concept, company_concepts in concepts.items():
+                        flattened[standard_concept] = set(company_concepts)
+                return flattened
+            else:
+                # Flat structure
+                return {k: set(v) for k, v in data.items()}
+        
+        # If all methods fail, return default mappings
+        return {
+            "Revenue": {"us-gaap_SalesRevenueNet", "us-gaap_Revenue", "us-gaap_Revenues"},
+            "Net Income": {"us-gaap_NetIncome", "us-gaap_NetIncomeLoss", "us-gaap_ProfitLoss"},
+            "Total Assets": {"us-gaap_Assets", "us-gaap_AssetsTotal"}
+        }
     
     def _save_mappings(self) -> None:
         """Save mappings to the JSON file."""
