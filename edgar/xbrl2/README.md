@@ -45,7 +45,7 @@ from edgar.xbrl2 import XBRLS
 
 # Get multiple filings for trend analysis
 company = Company('AAPL')
-filings = company.get("10-K", 3)  # Get the last 3 annual reports
+filings = company.get_filings(form="10-K").head(3)  # Get the last 3 annual reports
 
 # Create a stitched view across multiple filings
 xbrls = XBRLS.from_filings(filings)
@@ -56,6 +56,7 @@ stitched_statements = xbrls.statements
 # Display multi-period statements
 income_trend = stitched_statements.income_statement()
 balance_sheet_trend = stitched_statements.balance_sheet()
+cashflow_sheet_trend = stitched_statements.cash_flow_statement()
 ```
 
 ## User-Friendly Features
