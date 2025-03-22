@@ -56,7 +56,7 @@ stitched_statements = xbrls.statements
 # Display multi-period statements
 income_trend = stitched_statements.income_statement()
 balance_sheet_trend = stitched_statements.balance_sheet()
-cashflow_sheet_trend = stitched_statements.cash_flow_statement()
+cashflow_trend = stitched_statements.cash_flow_statement()
 ```
 
 ## User-Friendly Features
