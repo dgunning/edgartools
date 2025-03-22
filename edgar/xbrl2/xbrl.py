@@ -304,19 +304,6 @@ class XBRL:
                 if statement_type:
                     break
             
-            # Fallback to keyword matching in role definition if no concept match
-            if not statement_type:
-                if any(term in role_def for term in ['balance sheet', 'financial position']):
-                    statement_type = 'BalanceSheet'
-                elif any(term in role_def for term in ['income', 'profit and loss', 'operations']):
-                    statement_type = 'IncomeStatement'
-                elif any(term in role_def for term in ['cash flow']):
-                    statement_type = 'CashFlowStatement'
-                elif any(term in role_def for term in ['equity', 'stockholder', 'shareholder']):
-                    statement_type = 'StatementOfEquity'
-                elif any(term in role_def for term in ['comprehensive income']):
-                    statement_type = 'ComprehensiveIncome'
-            
             statements.append({
                 'role': role,
                 'definition': tree.definition,

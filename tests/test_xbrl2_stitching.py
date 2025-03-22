@@ -5,13 +5,14 @@ Tests for the XBRL statement stitching functionality.
 from unittest.mock import MagicMock, patch
 from edgar import *
 from edgar.xbrl2 import XBRL, XBRLS
-from edgar.xbrl2.stitching import determine_optimal_periods
 from rich import print
-
+from edgar.richtools import rich_to_text
 import pytest
 
+from edgar.xbrl2.statements import StitchedStatements
 from edgar.xbrl2.stitching import (
-    StatementStitcher, stitch_statements, render_stitched_statement, to_pandas, determine_optimal_periods
+    StatementStitcher, stitch_statements,
+    render_stitched_statement, to_pandas, determine_optimal_periods
 )
 
 
@@ -510,3 +511,16 @@ def test_stitch_3_statements(amd_xbrl, meta_xbrl):
     statement = stitch_statements(meta_xbrl.xbrl_list, statement_type='BalanceSheet')
     print()
     assert len(statement['periods']) == 3
+
+
+def test_stitch_aapl_statements_from_2019():
+    c = Company("AAPL")
+    filings = c.get_filings(form="10-K", filing_date="2019-01-01:2020-11-05").head(2)
+    xbrls = XBRLS.from_filings(filings)
+    optimal_periods = determine_optimal_periods(xbrls.xbrl_list, "IncomeStatement")
+    periods = [op['period_key'] for op in optimal_periods]
+    assert periods == ['duration_2019-09-29_2020-09-26', 'duration_2018-09-30_2019-09-28']
+
+    income_statement = xbrls.render_statement("IncomeStatement")
+    _repr = rich_to_text(income_statement)
+    assert '$(161,782)' in _repr
