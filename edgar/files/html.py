@@ -1076,7 +1076,10 @@ class SECHTMLParser:
 
         def process_cell(cell: Tag) -> List[TableCell]:
             """Process cell preserving exact colspan and positioning values correctly"""
-            colspan = int(cell.get('colspan', '1'))
+            try:
+                colspan = int(cell.get('colspan', '1'))
+            except ValueError:
+                colspan = 1
             style = parse_style(cell.get('style', ''))
 
             text = extract_cell_text(cell)

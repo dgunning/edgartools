@@ -427,3 +427,13 @@ def test_html_from_old_filings_is_none():
     assert text
     html = f.html()
     assert html
+
+def test_get_html_problem_filing():
+    filing = Filing(form='497K',
+                    filing_date='2024-12-30',
+                    company='VOYAGEUR MUTUAL FUNDS',
+                    cik=906236,
+                    accession_no='0001206774-24-001226')
+    text = filing.text()
+    assert text
+    print(text)
