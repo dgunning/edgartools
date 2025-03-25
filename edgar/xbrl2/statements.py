@@ -188,39 +188,6 @@ class Statement:
             if missing_concepts:
                 raise StatementValidationError(
                     f"Missing required concepts for {self.role_or_type}: {', '.join(missing_concepts)}")
-                    
-    def normalize(self) -> 'Statement':
-        """Normalize the statement structure for better comparability."""
-        # Get raw data
-        data = self.get_raw_data()
-        
-        # Apply normalization rules based on statement type
-        if self.role_or_type == 'BalanceSheet':
-            self._normalize_balance_sheet(data)
-        elif self.role_or_type == 'IncomeStatement':
-            self._normalize_income_statement(data)
-        elif self.role_or_type == 'CashFlowStatement':
-            self._normalize_cash_flow_statement(data)
-            
-        return self
-        
-    def _normalize_balance_sheet(self, data: List[Dict[str, Any]]) -> None:
-        """Normalize balance sheet structure."""
-        # Ensure standard ordering of sections
-        section_order = ['Assets', 'Liabilities', 'Equity']
-        # TODO: Implement reordering logic
-        
-    def _normalize_income_statement(self, data: List[Dict[str, Any]]) -> None:
-        """Normalize income statement structure."""
-        # Ensure standard ordering of sections
-        section_order = ['Revenues', 'Expenses', 'OtherIncome', 'Taxes', 'NetIncome']
-        # TODO: Implement reordering logic
-        
-    def _normalize_cash_flow_statement(self, data: List[Dict[str, Any]]) -> None:
-        """Normalize cash flow statement structure."""
-        # Ensure standard ordering of sections
-        section_order = ['Operating', 'Investing', 'Financing']
-        # TODO: Implement reordering logic
         
     def calculate_ratios(self) -> Dict[str, float]:
         """Calculate common financial ratios for this statement."""
