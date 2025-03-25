@@ -4,6 +4,7 @@ Rendering functions for XBRL data.
 This module provides functions for formatting and displaying XBRL data.
 """
 
+from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple, Union
 
 from rich import box
@@ -12,13 +13,129 @@ from rich.panel import Panel
 from rich.table import Table as RichTable
 from rich.text import Text
 
+from edgar.files.html import Document
+from edgar.richtools import rich_to_text
+from edgar.xbrl2 import standardization
 from edgar.xbrl2.core import (
     determine_dominant_scale, format_value, format_date, parse_date
 )
-from edgar.xbrl2 import standardization
-from edgar.richtools import rich_to_text
-from edgar.files.html import Document
-from datetime import datetime
+
+# Default style configuration
+DEFAULT_STYLES = {
+    'header': {
+        'top_level': {'style': 'bold', 'case': 'upper'},
+        'section': {'style': 'bold', 'case': 'title'},
+        'subsection': {'style': 'bold', 'case': 'title'}
+    },
+    'dimension': {
+        'single': {'style': 'italic', 'case': 'title'},
+        'multi': {'style': 'italic dim', 'case': 'title'}
+    },
+    'value': {
+        'positive': {'style': 'none', 'color': 'default'},
+        'negative': {'style': 'none', 'color': 'red'},
+        'zero': {'style': 'dim', 'color': 'default'},
+        'empty': {'style': 'dim', 'color': 'grey'}
+    },
+    'comparison': {
+        'increase': {'symbol': '▲', 'color': 'green'},
+        'decrease': {'symbol': '▼', 'color': 'red'},
+        'unchanged': {'symbol': '•', 'color': 'grey'}
+    }
+}
+
+# Configuration for comparative analysis
+COMPARISON_CONFIG = {
+    'threshold': 0.01,  # 1% change threshold
+    'enabled_types': ['IncomeStatement', 'CashFlowStatement'],  # Statement types to show comparisons for
+    'excluded_concepts': ['us-gaap_SharesOutstanding', 'us-gaap_CommonStockSharesOutstanding']  # Concepts to exclude
+}
+
+def _apply_style(text: str, style_config: dict) -> str:
+    """Apply rich text styling based on configuration.
+    
+    Args:
+        text: Text to style
+        style_config: Style configuration dictionary with 'style' and optional 'color' keys
+        
+    Returns:
+        str: Styled text with rich markup
+    """
+    style = style_config.get('style', 'none')
+    color = style_config.get('color', 'default')
+    case = style_config.get('case', 'none')
+    
+    # Apply text case transformation
+    if case == 'upper':
+        text = text.upper()
+    elif case == 'title':
+        text = text.title()
+    
+    # Build style tags
+    tags = []
+    if style == 'bold':
+        tags.append('bold')
+    if style == 'italic':
+        tags.append('italic')
+    if style == 'dim':
+        tags.append('dim')
+    if color != 'default':
+        tags.append(color)
+    
+    # Apply styling
+    if tags:
+        return f"[{' '.join(tags)}]{text}[/{' '.join(tags)}]"
+    return text
+
+def _calculate_comparison(current_value: Any, previous_value: Any) -> Optional[Tuple[float, str]]:
+    """Calculate the percentage change between two values.
+    
+    Args:
+        current_value: Current period value
+        previous_value: Previous period value
+        
+    Returns:
+        Tuple of (percentage_change, comparison_symbol) or None if comparison not possible
+    """
+    try:
+        if isinstance(current_value, str):
+            current_value = float(current_value.replace(',', ''))
+        if isinstance(previous_value, str):
+            previous_value = float(previous_value.replace(',', ''))
+            
+        if previous_value == 0:
+            if current_value == 0:
+                return (0.0, 'unchanged')
+            return (float('inf'), 'increase' if current_value > 0 else 'decrease')
+            
+        pct_change = (current_value - previous_value) / abs(previous_value)
+        
+        if abs(pct_change) < COMPARISON_CONFIG['threshold']:
+            return (0.0, 'unchanged')
+        return (pct_change, 'increase' if pct_change > 0 else 'decrease')
+    except (ValueError, TypeError):
+        return None
+
+def _format_comparison(pct_change: float, comparison_type: str) -> str:
+    """Format a comparison indicator with the appropriate symbol and color.
+    
+    Args:
+        pct_change: Percentage change value
+        comparison_type: Type of comparison ('increase', 'decrease', or 'unchanged')
+        
+    Returns:
+        str: Formatted comparison indicator with rich markup
+    """
+    style = DEFAULT_STYLES['comparison'][comparison_type]
+    color = style['color']
+    symbol = style['symbol']
+    
+    if comparison_type != 'unchanged':
+        pct_text = f" {abs(pct_change):.1%}"
+    else:
+        pct_text = ""
+        
+    return f"[{color}]{symbol}{pct_text}[/{color}]"
 
 share_concepts = [
     'us-gaap_CommonStockSharesOutstanding',
@@ -59,7 +176,7 @@ def html_to_text(html: str) -> str:
     # Wrap in html tag if not present
     html = f"<html>{html}</html>" if not html.startswith("<html>") else html
     document = Document.parse(html)
-    return rich_to_text(document.__str__())
+    return rich_to_text(document.__str__(), width=80)
 
 
 def _format_period_labels(
@@ -427,7 +544,8 @@ def _format_value_for_display(
     period_key: str, 
     is_monetary_statement: bool,
     dominant_scale: int,
-    shares_scale: Optional[int]
+    shares_scale: Optional[int],
+    comparison_info: Optional[Dict[str, Any]] = None
 ) -> Text:
     """
     Format a value for display in a financial statement.
@@ -444,6 +562,8 @@ def _format_value_for_display(
         Text: Formatted value as a Rich Text object
     """
     if not isinstance(value, (int, float, str)) or value == "":
+        if Text is None:
+            return ""
         return Text("", justify="right")
         
     # Extract metadata
@@ -479,19 +599,32 @@ def _format_value_for_display(
                 scale_factor = 10 ** (-fact_decimals)
                 scaled_value = value / scale_factor
                 # Always display share amounts with 0 decimal places for cleaner presentation
+                if Text is None:
+                    return f"{scaled_value:,.0f}"
                 return Text(f"{scaled_value:,.0f}", justify="right")
             else:
                 # For smaller numbers or positive decimals, use unscaled values
+                if Text is None:
+                    return f"{value:,.0f}"
                 return Text(f"{value:,.0f}", justify="right")
         else:
             # Format other values normally using the flexible format_value function
-            return Text(format_value(value, is_monetary, dominant_scale, fact_decimals), justify="right")
+            formatted = format_value(value, is_monetary, dominant_scale, fact_decimals)
+            if Text is None:
+                return formatted
+            return Text(formatted, justify="right")
     else:
         # Non-numeric values - check if it's HTML and convert if needed
         if isinstance(value, str) and _is_html(value):
-            return Text(html_to_text(value))
+            text = html_to_text(value)
+            if Text is None:
+                return text
+            return Text(text)
         else:
-            return Text(str(value), justify="right")
+            text = str(value)
+            if Text is None:
+                return text
+            return Text(text, justify="right")
 
 
 def render_statement(
@@ -499,10 +632,11 @@ def render_statement(
     periods_to_display: List[Tuple[str, str]],
     statement_title: str,
     statement_type: str,
-    entity_info: Dict[str, Any] = None,
+    entity_info: Optional[Dict[str, Any]] = None,
     standard: bool = True,
     show_date_range: bool = False,
-) -> RichTable:
+    show_comparisons: bool = True
+) -> Union[str, 'RichTable']:
     """
     Render a financial statement as a rich table.
     
@@ -518,7 +652,8 @@ def render_statement(
     Returns:
         RichTable: A formatted table representation of the statement
     """
-    entity_info = entity_info or {}
+    if entity_info is None:
+        entity_info = {}
     
     # Apply standardization if requested
     if standard:
@@ -663,9 +798,43 @@ def render_statement(
             'has_metadata': False
         })
         
-    # Calculate data density for each period
+    # Calculate data density and prepare comparison data
     period_value_counts = {period_key: 0 for period_key, _ in formatted_periods}
     period_item_counts = {period_key: 0 for period_key, _ in formatted_periods}
+    
+    # Prepare comparison data if enabled and appropriate for statement type
+    comparison_data = {}
+    if show_comparisons and statement_type in COMPARISON_CONFIG['enabled_types']:
+        # Sort periods by date for proper comparison
+        sorted_periods = sorted(
+            [m for m in period_metadatas if m['has_metadata']],
+            key=lambda x: x['end_date'],
+            reverse=True
+        )
+        
+        # For each item, calculate comparisons between consecutive periods
+        for item in statement_data:
+            if item.get('is_abstract') or not item.get('has_values'):
+                continue
+                
+            concept = item.get('concept')
+            if not concept or concept in COMPARISON_CONFIG['excluded_concepts']:
+                continue
+                
+            item_comparisons = {}
+            for i in range(len(sorted_periods) - 1):
+                current_period = sorted_periods[i]
+                prev_period = sorted_periods[i + 1]
+                
+                current_value = item['values'].get(current_period['key'])
+                prev_value = item['values'].get(prev_period['key'])
+                
+                comparison = _calculate_comparison(current_value, prev_value)
+                if comparison:
+                    item_comparisons[current_period['key']] = comparison
+            
+            if item_comparisons:
+                comparison_data[item['concept']] = item_comparisons
     
     # Count non-empty values for each period
     for item in statement_data:
@@ -736,9 +905,15 @@ def render_statement(
         period_values = []
         for period_key, _ in filtered_periods:
             value = item['values'].get(period_key, "")
+            # Get comparison info for this item and period if available
+            comparison_info = None
+            if show_comparisons and item.get('concept') in comparison_data:
+                comparison_info = comparison_data[item['concept']]
+                
             formatted_value = _format_value_for_display(
                 value, item, period_key, 
-                is_monetary_statement, dominant_scale, shares_scale
+                is_monetary_statement, dominant_scale, shares_scale,
+                comparison_info
             )
             period_values.append(formatted_value)
         
@@ -787,7 +962,7 @@ def render_statement(
     return table
 
 
-def generate_rich_representation(xbrl) -> Panel:
+def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
     """
     Generate a rich representation of the XBRL document.
     
@@ -801,6 +976,8 @@ def generate_rich_representation(xbrl) -> Panel:
     
     # Entity information
     if xbrl.entity_info:
+        if RichTable is None or box is None:
+            return "Rich rendering not available - install 'rich' package"
         entity_table = RichTable(title="Entity Information", box=box.SIMPLE)
         entity_table.add_column("Property")
         entity_table.add_column("Value")
@@ -813,6 +990,8 @@ def generate_rich_representation(xbrl) -> Panel:
     # Statements summary
     statements = xbrl.get_all_statements()
     if statements:
+        if RichTable is None or box is None:
+            return "Rich rendering not available - install 'rich' package"
         statement_table = RichTable(title="Financial Statements", box=box.SIMPLE)
         statement_table.add_column("Type")
         statement_table.add_column("Definition")
@@ -828,6 +1007,8 @@ def generate_rich_representation(xbrl) -> Panel:
         components.append(statement_table)
     
     # Facts summary
+    if RichTable is None or box is None:
+        return "Rich rendering not available - install 'rich' package"
     fact_table = RichTable(title="Facts Summary", box=box.SIMPLE)
     fact_table.add_column("Category")
     fact_table.add_column("Count")

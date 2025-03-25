@@ -12,7 +12,6 @@ organizing facts according to presentation hierarchies, validating calculations,
 and handling dimensional qualifiers.
 """
 
-from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union
 
@@ -20,17 +19,16 @@ import pandas as pd
 from rich.table import Table as RichTable
 
 from edgar.richtools import repr_rich
-# Import legacy XBRL data for compatibility
-from edgar.xbrl.instance import XBRLInstance as LegacyXbrlInstance
-from edgar.xbrl2.core import STANDARD_LABEL, format_date, parse_date
-# Import refactored components
+from edgar.xbrl2 import transformers
+from edgar.xbrl2.core import STANDARD_LABEL
+from edgar.xbrl2.facts import FactQuery
 from edgar.xbrl2.models import (
-    Fact, PresentationNode, XBRLProcessingError
+    PresentationNode, XBRLProcessingError
 )
 from edgar.xbrl2.parser import XBRLParser
+from edgar.xbrl2.periods import get_period_views, determine_periods_to_display
 from edgar.xbrl2.rendering import render_statement, generate_rich_representation
 from edgar.xbrl2.statements import statement_to_concepts
-from edgar.xbrl2.periods import get_period_views, determine_periods_to_display
 
 
 class XBRL:
@@ -45,9 +43,6 @@ class XBRL:
     def __init__(self):
         # Use the parser component
         self.parser = XBRLParser()
-        
-        # Reference to legacy XBRLInstance for compatibility
-        self.legacy_instance: Optional[LegacyXbrlInstance] = None
         
         # Cached indices for fast statement lookup
         self._statement_indices = {}
@@ -163,12 +158,6 @@ class XBRL:
             if file_path.is_file() and file_path.name.lower().endswith('.xml') and '<xbrl' in file_path.read_text()[:2000]:
                 instance_file = file_path
                 break
-                
-        try:
-            if instance_file:
-                xbrl.legacy_instance = LegacyXbrlInstance.parse(instance_file.read_text())
-        except Exception:
-            xbrl.legacy_instance = None
         
         return xbrl
     
@@ -216,14 +205,6 @@ class XBRL:
         if instance_file:
             xbrl.parser.parse_instance(instance_file)
         
-        # Try to create legacy instance for compatibility
-        try:
-            if instance_file:
-                instance_content = Path(instance_file).read_text() if isinstance(instance_file, (str, Path)) else instance_file
-                xbrl.legacy_instance = LegacyXbrlInstance.parse(instance_content)
-        except Exception:
-            xbrl.legacy_instance = None
-        
         return xbrl
     
     @classmethod
@@ -265,14 +246,7 @@ class XBRL:
         
         if xbrl_attachments.get('instance'):
             xbrl.parser.parse_instance_content(xbrl_attachments.get('instance').content)
-        
-        # Try to create legacy instance for compatibility
-        try:
-            if xbrl_attachments.get('instance'):
-                xbrl.legacy_instance = LegacyXbrlInstance.parse(xbrl_attachments.get('instance').content)
-        except Exception:
-            xbrl.legacy_instance = None
-        
+
         return xbrl
 
     @property
@@ -809,7 +783,7 @@ class XBRL:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path, should_display_dimensions)
     
     def _find_facts_for_element(self, element_name: str, period_filter: Optional[str] = None, 
-                                 dimensions: Optional[Dict[str, str]] = None) -> Dict[str, Fact]:
+                                 dimensions: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
         Find facts for a specific element, optionally filtered by period and dimensions.
         
@@ -1038,17 +1012,7 @@ class XBRL:
             standard,
             show_date_range
         )
-        
-        # Use the rendering module to render the statement
-        return render_statement(
-            statement_data,
-            periods_to_display,
-            statement_title,
-            actual_statement_type,
-            self.entity_info,
-            standard,
-            show_date_range
-        )
+
     
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
         """
@@ -1241,6 +1205,166 @@ class XBRL:
     def __repr__(self):
         return repr_rich(self)
     
+    def to_dataframe(self, statement_type: Optional[str] = None, include_metadata: bool = True,
+                    standardize_values: bool = True) -> pd.DataFrame:
+        """
+        Convert statement data to a pandas DataFrame.
+        
+        Args:
+            statement_type: Optional statement type to convert (e.g., 'BalanceSheet')
+            include_metadata: Whether to include metadata columns
+            standardize_values: Whether to standardize numeric values using scale factors
+            
+        Returns:
+            pd.DataFrame: DataFrame with statement data
+        """
+        # Get statement data
+        if statement_type:
+            statement_data = self.get_statement_by_type(statement_type)
+            if statement_data is None:
+                return pd.DataFrame()
+            if isinstance(statement_data, dict):
+                statement_data = [statement_data]
+        else:
+            all_statements = self.get_all_statements()
+            if all_statements is None:
+                return pd.DataFrame()
+            # Convert to list of statements
+            statement_data = []
+            for stmt in all_statements.values():
+                if isinstance(stmt, dict):
+                    statement_data.append(stmt)
+                elif isinstance(stmt, list):
+                    statement_data.extend(stmt)
+            
+        if not statement_data:
+            return pd.DataFrame()
+            
+        # Get periods to display
+        periods_to_display = None
+        if statement_type:
+            period_views = self.get_period_views(statement_type)
+            if period_views:
+                # Use the first available period view
+                periods_to_display = period_views[0].get('periods', [])
+        
+        return transformers.to_dataframe(
+            statement_data,
+            periods_to_display=periods_to_display,
+            include_metadata=include_metadata,
+            standardize_values=standardize_values
+        )
+    
+    def calculate_ratios(self, statement_type: Optional[str] = None) -> Dict[str, Dict[str, float]]:
+        """
+        Calculate common financial ratios.
+        
+        Args:
+            statement_type: Optional statement type to use (e.g., 'BalanceSheet')
+            
+        Returns:
+            Dict[str, Dict[str, float]]: Dictionary of ratio names to period values
+        """
+        # Get statement data
+        if statement_type:
+            statement_data = self.get_statement_by_type(statement_type)
+            if statement_data is None:
+                return {}
+            if isinstance(statement_data, dict):
+                statement_data = [statement_data]
+        else:
+            all_statements = self.get_all_statements()
+            if all_statements is None:
+                return {}
+            # Convert to list of statements
+            statement_data = []
+            for stmt in all_statements.values():
+                if isinstance(stmt, dict):
+                    statement_data.append(stmt)
+                elif isinstance(stmt, list):
+                    statement_data.extend(stmt)
+        
+        # Get periods to display
+        periods_to_display = None
+        if statement_type:
+            period_views = self.get_period_views(statement_type)
+            if period_views:
+                periods_to_display = period_views[0].get('periods', [])
+        
+        return transformers.calculate_ratios(statement_data, periods_to_display)
+    
+    def calculate_growth_rates(self, statement_type: Optional[str] = None,
+                             concepts: Optional[List[str]] = None) -> Dict[str, Dict[str, float]]:
+        """
+        Calculate period-over-period growth rates.
+        
+        Args:
+            statement_type: Optional statement type to use
+            concepts: Optional list of concepts to calculate growth rates for
+            
+        Returns:
+            Dict[str, Dict[str, float]]: Dictionary of concept names to period growth rates
+        """
+        # Get statement data
+        if statement_type:
+            statement_data = self.get_statement_by_type(statement_type)
+            if statement_data is None:
+                return {}
+            if isinstance(statement_data, dict):
+                statement_data = [statement_data]
+        else:
+            all_statements = self.get_all_statements()
+            if all_statements is None:
+                return {}
+            # Convert to list of statements
+            statement_data = []
+            for stmt in all_statements.values():
+                if isinstance(stmt, dict):
+                    statement_data.append(stmt)
+                elif isinstance(stmt, list):
+                    statement_data.extend(stmt)
+        
+        # Get periods to display
+        periods_to_display = None
+        if statement_type:
+            period_views = self.get_period_views(statement_type)
+            if period_views:
+                periods_to_display = period_views[0].get('periods', [])
+        
+        return transformers.calculate_growth_rates(
+            statement_data,
+            periods_to_display=periods_to_display,
+            concepts=concepts
+        )
+    
+    def aggregate_by_dimension(self, statement_type: str, dimension_name: str,
+                             aggregation: str = 'sum') -> Dict[str, Dict[str, Any]]:
+        """
+        Aggregate values by a specific dimension.
+        
+        Args:
+            statement_type: Statement type to aggregate
+            dimension_name: Name of the dimension to aggregate by
+            aggregation: Aggregation function ('sum' or 'average')
+            
+        Returns:
+            Dict[str, Dict[str, Any]]: Aggregated values by dimension member
+        """
+        statement_data = self.get_statement_by_type(statement_type)
+        if not statement_data:
+            return {}
+            
+        # Ensure statement_data is a list
+        if isinstance(statement_data, dict):
+            statement_data = [statement_data]
+        
+        return transformers.aggregate_by_dimension(
+            statement_data,
+            dimension_name=dimension_name,
+            aggregation=aggregation
+        )
+
+        
     def __str__(self):
         """String representation."""
         return f"XBRL Document with {len(self.facts)} facts, {len(self.contexts)} contexts, and {len(self.presentation_trees)} statements"

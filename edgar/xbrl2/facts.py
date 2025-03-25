@@ -9,6 +9,7 @@ It enables convenient retrieval of facts as pandas DataFrames for analysis.
 from __future__ import annotations
 
 import re
+from decimal import Decimal
 from typing import Dict, List, Any, Optional, Union, Set, Callable
 
 import pandas as pd
@@ -34,12 +35,15 @@ class FactQuery:
         """
         self._facts_view = facts_view
         self._filters = []
+        self._transformations = []
+        self._aggregations = []
         self._include_dimensions = True
         self._include_contexts = True
         self._include_element_info = True
         self._sort_by = None
         self._sort_ascending = True
         self._limit = None
+        self._statement_type = None
 
     def __str__(self):
         return f"FactQuery(filters={self._filters})"
@@ -399,6 +403,67 @@ class FactQuery:
         self._limit = n
         return self
 
+    def from_statement(self, statement_type: str) -> 'FactQuery':
+        """
+        Filter facts to only those from a specific statement.
+        
+        Args:
+            statement_type: Type of statement (e.g., 'BalanceSheet', 'IncomeStatement')
+            
+        Returns:
+            Self for method chaining
+        """
+        self._statement_type = statement_type
+        self._filters.append(lambda f: f.get('statement_type') == statement_type)
+        return self
+        
+    def transform(self, transform_fn: Callable[[Any], Any]) -> 'FactQuery':
+        """
+        Transform fact values using a custom function.
+        
+        Args:
+            transform_fn: Function to transform values
+            
+        Returns:
+            Self for method chaining
+        """
+        self._transformations.append(transform_fn)
+        return self
+        
+    def scale(self, scale_factor: int) -> 'FactQuery':
+        """
+        Scale numeric values by a factor.
+        
+        Args:
+            scale_factor: The scaling factor (e.g., 1000 for thousands)
+            
+        Returns:
+            Self for method chaining
+        """
+        def scale_transform(value):
+            if isinstance(value, (int, float, Decimal)):
+                return value / scale_factor
+            return value
+            
+        return self.transform(scale_transform)
+        
+    def aggregate(self, dimension: str, func: str = 'sum') -> 'FactQuery':
+        """
+        Aggregate values by a dimension.
+        
+        Args:
+            dimension: The dimension to aggregate by
+            func: Aggregation function ('sum' or 'average')
+            
+        Returns:
+            Self for method chaining
+        """
+        self._aggregations.append({
+            'dimension': dimension,
+            'function': func
+        })
+        return self
+        
     def execute(self) -> List[Dict[str, Any]]:
         """
         Execute the query and return matching facts.
@@ -410,10 +475,43 @@ class FactQuery:
 
         # Apply filters
         for filter_func in self._filters:
-            results = [f
-                       for f in results
-                       if filter_func(f)
-                       ]
+            results = [f for f in results if filter_func(f)]
+            
+        # Apply transformations
+        for transform_fn in self._transformations:
+            for fact in results:
+                if 'value' in fact and fact['value'] is not None:
+                    fact['value'] = transform_fn(fact['value'])
+                    
+        # Apply aggregations
+        if self._aggregations:
+            aggregated_results = {}
+            for agg in self._aggregations:
+                dimension = agg['dimension']
+                func = agg['function']
+                
+                # Group facts by dimension
+                groups = {}
+                for fact in results:
+                    dim_value = fact.get(f'dim_{dimension}')
+                    if dim_value and 'value' in fact and fact['value'] is not None:
+                        if dim_value not in groups:
+                            groups[dim_value] = []
+                        groups[dim_value].append(fact['value'])
+                
+                # Apply aggregation function
+                for dim_value, values in groups.items():
+                    if func == 'sum':
+                        agg_value = sum(values)
+                    elif func == 'average':
+                        agg_value = sum(values) / len(values)
+                    
+                    key = (dimension, dim_value)
+                    if key not in aggregated_results:
+                        aggregated_results[key] = {'dimension': dimension, 'value': dim_value, 'values': {}}
+                    aggregated_results[key]['values'][func] = agg_value
+            
+            results = list(aggregated_results.values())
 
         # Apply sorting if specified
         if results and self._sort_by and self._sort_by in results[0]:

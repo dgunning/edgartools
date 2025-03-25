@@ -5,7 +5,7 @@ This module provides functions for working with financial statements.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 
 import pandas as pd
 from rich import box
@@ -48,14 +48,43 @@ statement_to_concepts = {
 }
 
 
+class StatementValidationError(Exception):
+    """Raised when statement validation fails."""
+    pass
+
+
 class Statement:
     """
     A single financial statement extracted from XBRL data.
     
     This class provides convenient methods for rendering and manipulating a specific
-    financial statement.
+    financial statement. It includes validation, normalization, and analysis capabilities.
+    
+    Features:
+    - Statement structure validation
+    - Error handling for missing/malformed data
+    - Statement normalization across different companies
+    - Common financial analysis methods
+    - Ratio calculations and trend analysis
     """
 
+    # Required concepts for each statement type
+    REQUIRED_CONCEPTS = {
+        'BalanceSheet': [
+            'us-gaap_Assets',
+            'us-gaap_Liabilities',
+            'us-gaap_StockholdersEquity'
+        ],
+        'IncomeStatement': [
+            'us-gaap_Revenues',
+            'us-gaap_NetIncomeLoss'
+        ],
+        'CashFlowStatement': [
+            'us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease',
+            'us-gaap_CashAndCashEquivalentsAtCarryingValue'
+        ]
+    }
+    
     def __init__(self, xbrl, role_or_type: str):
         """
         Initialize with an XBRL object and statement identifier.
@@ -63,9 +92,13 @@ class Statement:
         Args:
             xbrl: XBRL object containing parsed data
             role_or_type: Role URI, statement type, or statement short name
+            
+        Raises:
+            StatementValidationError: If statement validation fails
         """
         self.xbrl = xbrl
         self.role_or_type = role_or_type
+        self._validate_statement()
 
     def is_segmented(self) -> bool:
         """
@@ -79,7 +112,7 @@ class Statement:
     def render(self, period_filter: Optional[str] = None,
                period_view: Optional[str] = None,
                standard: bool = True,
-               show_date_range: bool = False) -> Table:
+               show_date_range: bool = False) -> Any:
         """
         Render the statement as a formatted table.
         
@@ -98,19 +131,21 @@ class Statement:
                                           standard=standard,
                                           show_date_range=show_date_range)
 
-    def __rich__(self):
+    def __rich__(self) -> Any:
         """
         Rich console representation.
 
         Returns:
-            Rich Table object
+            Rich Table object if rich is available, else string representation
         """
+        if Table is None:
+            return str(self)
         return self.render()
 
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def _pandas_dataframes(self, standard: bool = True) -> Dict[str, pd.DataFrame]:
+    def _pandas_dataframes(self, standard: bool = True) -> Dict[str, Any]:
         """
         Convert the statement to pandas DataFrames.
         
@@ -127,9 +162,178 @@ class Statement:
         data = self.get_raw_data()
         return data[0]['all_names'][0]
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> Any:
+        """Convert statement to pandas DataFrame.
+        
+        Returns:
+            DataFrame if pandas is available, else None
+        """
+        if pd is None:
+            return None
         return self._pandas_dataframes()['statement']
 
+    def _validate_statement(self) -> None:
+        """Validate the statement structure and required concepts."""
+        data = self.get_raw_data()
+        if not data:
+            raise StatementValidationError(f"No data found for statement {self.role_or_type}")
+            
+        # Check for required concepts if this is a standard statement type
+        if self.role_or_type in self.REQUIRED_CONCEPTS:
+            missing_concepts = []
+            for concept in self.REQUIRED_CONCEPTS[self.role_or_type]:
+                if not any(concept in item.get('all_names', []) for item in data):
+                    missing_concepts.append(concept)
+                    
+            if missing_concepts:
+                raise StatementValidationError(
+                    f"Missing required concepts for {self.role_or_type}: {', '.join(missing_concepts)}")
+                    
+    def normalize(self) -> 'Statement':
+        """Normalize the statement structure for better comparability."""
+        # Get raw data
+        data = self.get_raw_data()
+        
+        # Apply normalization rules based on statement type
+        if self.role_or_type == 'BalanceSheet':
+            self._normalize_balance_sheet(data)
+        elif self.role_or_type == 'IncomeStatement':
+            self._normalize_income_statement(data)
+        elif self.role_or_type == 'CashFlowStatement':
+            self._normalize_cash_flow_statement(data)
+            
+        return self
+        
+    def _normalize_balance_sheet(self, data: List[Dict[str, Any]]) -> None:
+        """Normalize balance sheet structure."""
+        # Ensure standard ordering of sections
+        section_order = ['Assets', 'Liabilities', 'Equity']
+        # TODO: Implement reordering logic
+        
+    def _normalize_income_statement(self, data: List[Dict[str, Any]]) -> None:
+        """Normalize income statement structure."""
+        # Ensure standard ordering of sections
+        section_order = ['Revenues', 'Expenses', 'OtherIncome', 'Taxes', 'NetIncome']
+        # TODO: Implement reordering logic
+        
+    def _normalize_cash_flow_statement(self, data: List[Dict[str, Any]]) -> None:
+        """Normalize cash flow statement structure."""
+        # Ensure standard ordering of sections
+        section_order = ['Operating', 'Investing', 'Financing']
+        # TODO: Implement reordering logic
+        
+    def calculate_ratios(self) -> Dict[str, float]:
+        """Calculate common financial ratios for this statement."""
+        ratios = {}
+        data = self.get_raw_data()
+        
+        if self.role_or_type == 'BalanceSheet':
+            # Calculate balance sheet ratios
+            ratios.update(self._calculate_balance_sheet_ratios(data))
+        elif self.role_or_type == 'IncomeStatement':
+            # Calculate income statement ratios
+            ratios.update(self._calculate_income_statement_ratios(data))
+            
+        return ratios
+        
+    def _calculate_balance_sheet_ratios(self, data: List[Dict[str, Any]]) -> Dict[str, float]:
+        """Calculate balance sheet specific ratios."""
+        ratios = {}
+        
+        # Current ratio
+        current_assets = self._get_concept_value(data, 'us-gaap_CurrentAssets')
+        current_liabilities = self._get_concept_value(data, 'us-gaap_CurrentLiabilities')
+        if current_assets and current_liabilities:
+            ratios['current_ratio'] = current_assets / current_liabilities
+            
+        # Quick ratio
+        inventory = self._get_concept_value(data, 'us-gaap_Inventory')
+        if current_assets and current_liabilities and inventory:
+            ratios['quick_ratio'] = (current_assets - inventory) / current_liabilities
+            
+        return ratios
+        
+    def _calculate_income_statement_ratios(self, data: List[Dict[str, Any]]) -> Dict[str, float]:
+        """Calculate income statement specific ratios."""
+        ratios = {}
+        
+        # Gross margin
+        revenue = self._get_concept_value(data, 'us-gaap_Revenues')
+        gross_profit = self._get_concept_value(data, 'us-gaap_GrossProfit')
+        if revenue and gross_profit:
+            ratios['gross_margin'] = gross_profit / revenue
+            
+        # Net margin
+        net_income = self._get_concept_value(data, 'us-gaap_NetIncomeLoss')
+        if revenue and net_income:
+            ratios['net_margin'] = net_income / revenue
+            
+        return ratios
+        
+    def _get_concept_value(self, data: List[Dict[str, Any]], concept: str) -> Optional[float]:
+        """Get the value for a specific concept from statement data."""
+        for item in data:
+            if concept in item.get('all_names', []):
+                values = item.get('values', {})
+                if values:
+                    return float(next(iter(values.values())))
+        return None
+        
+    def analyze_trends(self, periods: int = 4) -> Dict[str, List[float]]:
+        """Analyze trends in key metrics over time."""
+        trends = {}
+        
+        # Get data for multiple periods
+        period_views = self.xbrl.get_period_views(self.role_or_type)
+        if not period_views:
+            return trends
+            
+        periods_to_analyze = period_views[0].get('periods', [])[:periods]
+        
+        for period in periods_to_analyze:
+            data = self.get_raw_data(period)
+            
+            if self.role_or_type == 'BalanceSheet':
+                self._analyze_balance_sheet_trends(data, trends, period)
+            elif self.role_or_type == 'IncomeStatement':
+                self._analyze_income_statement_trends(data, trends, period)
+                
+        return trends
+        
+    def _analyze_balance_sheet_trends(self, data: List[Dict[str, Any]], 
+                                     trends: Dict[str, List[float]], 
+                                     period: str) -> None:
+        """Analyze balance sheet trends."""
+        metrics = {
+            'total_assets': 'us-gaap_Assets',
+            'total_liabilities': 'us-gaap_Liabilities',
+            'equity': 'us-gaap_StockholdersEquity'
+        }
+        
+        for metric_name, concept in metrics.items():
+            value = self._get_concept_value(data, concept)
+            if value:
+                if metric_name not in trends:
+                    trends[metric_name] = []
+                trends[metric_name].append(value)
+                
+    def _analyze_income_statement_trends(self, data: List[Dict[str, Any]], 
+                                        trends: Dict[str, List[float]], 
+                                        period: str) -> None:
+        """Analyze income statement trends."""
+        metrics = {
+            'revenue': 'us-gaap_Revenues',
+            'gross_profit': 'us-gaap_GrossProfit',
+            'net_income': 'us-gaap_NetIncomeLoss'
+        }
+        
+        for metric_name, concept in metrics.items():
+            value = self._get_concept_value(data, concept)
+            if value:
+                if metric_name not in trends:
+                    trends[metric_name] = []
+                trends[metric_name].append(value)
+                
     def get_raw_data(self, period_filter: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get the raw statement data.
@@ -139,8 +343,14 @@ class Statement:
             
         Returns:
             List of line items with values
+            
+        Raises:
+            StatementValidationError: If data retrieval fails
         """
-        return self.xbrl.get_statement(self.role_or_type, period_filter=period_filter)
+        data = self.xbrl.get_statement(self.role_or_type, period_filter=period_filter)
+        if data is None:
+            raise StatementValidationError(f"Failed to retrieve data for statement {self.role_or_type}")
+        return data
 
 
 class Statements:
@@ -169,7 +379,7 @@ class Statements:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
 
-    def __getitem__(self, item) -> Optional[Statement]:
+    def __getitem__(self, item: Union[int, str]) -> Optional[Statement]:
         """
         Get a statement by index, type, or role.
         
@@ -217,14 +427,17 @@ class Statements:
             # Otherwise, try to use it directly as a role or statement name
             return Statement(self.xbrl, item)
 
-    def __rich__(self):
+    def __rich__(self) -> Any:
         """
         Rich console representation.
         
         Returns:
-            Rich Table object
+            Rich Table object if rich is available, else string representation
         """
-        table = Table(title="Available Statements", box=box.SIMPLE)
+        if Table is None:
+            return str(self)
+            
+        table = Table(title="Available Statements", box=box.SIMPLE if box else None)
         table.add_column("#")
         table.add_column("Statement")
         table.add_column("Type")
@@ -518,7 +731,7 @@ class StitchedStatements:
         self.xbrls = xbrls
 
     def balance_sheet(self, max_periods: int = 8, standardize: bool = True,
-                      use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+                      use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched balance sheet across multiple time periods.
         
@@ -537,7 +750,7 @@ class StitchedStatements:
         return statement
 
     def income_statement(self, max_periods: int = 8, standardize: bool = True,
-                         use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+                         use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched income statement across multiple time periods.
         
@@ -556,7 +769,7 @@ class StitchedStatements:
         return statement
 
     def cash_flow_statement(self, max_periods: int = 8, standardize: bool = True,
-                            use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+                            use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched cash flow statement across multiple time periods.
         
@@ -575,7 +788,7 @@ class StitchedStatements:
         return statement
 
     def statement_of_equity(self, max_periods: int = 8, standardize: bool = True,
-                            use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+                            use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched statement of changes in equity across multiple time periods.
         
@@ -594,7 +807,7 @@ class StitchedStatements:
         return statement
 
     def comprehensive_income(self, max_periods: int = 8, standardize: bool = True,
-                             use_optimal_periods: bool = True, show_date_range: bool = False) -> StitchedStatement:
+                             use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched statement of comprehensive income across multiple time periods.
         
