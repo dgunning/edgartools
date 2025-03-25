@@ -1141,7 +1141,7 @@ class XBRLParser:
                 if not prefix:
                     # Try to match with known namespaces
                     for std_prefix, std_uri in namespaces.items():
-                        if namespace.startswith(std_uri.split('/20')[0]):
+                        if namespace and namespace.startswith(std_uri.split('/20')[0]):
                             prefix = std_prefix
                             break
                 
