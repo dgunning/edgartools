@@ -381,12 +381,17 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
     """
     standardized_data = []
     
-    for item in statement_data:
+    for i, item in enumerate(statement_data):
         # Create a copy of the item to modify
         standardized_item = item.copy()
         
         # Skip standardization for abstract elements
         if item.get("is_abstract", False):
+            standardized_data.append(standardized_item)
+            continue
+
+        # Skip standardization for dimensions
+        if item.get("is_dimension", False):
             standardized_data.append(standardized_item)
             continue
         

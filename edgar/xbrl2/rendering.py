@@ -217,8 +217,39 @@ def _format_period_labels(
         # Start with the original label or an empty string
         final_label = ""
         
-        # Case 1: If we have a date-based label with full month names, abbreviate them
-        if original_label and ',' in original_label:
+        # First check for date range labels with "to" - prioritize this check
+        if original_label and 'to' in original_label:
+            # Handle date range labels like "Annual: September 25, 2022 to September 30, 2023"
+            try:
+                parts = original_label.split(' to ')
+                if len(parts) > 1:
+                    if show_date_range:
+                        # Use the full date range that's already in the label
+                        final_label = original_label
+                    else:
+                        # Extract just the end date when show_date_range is False
+                        end_date_str = parts[1].strip()
+                        try:
+                            end_date = parse_date(end_date_str)
+                            final_label = format_date(end_date)
+                            
+                            # If there's a prefix like "Annual:" or "Q1:", preserve it
+                            if ':' in parts[0]:
+                                prefix = parts[0].split(':')[0].strip()
+                                final_label = f"{prefix}: {final_label}"
+                            
+                            # Add quarter info if available
+                            if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                                final_label = f"{final_label} ({q_num})"
+                        except (ValueError, TypeError):
+                            # If we can't parse the end date, use the original label
+                            final_label = end_date_str
+            except (ValueError, TypeError, IndexError):
+                # If any parsing fails, leave label unchanged
+                final_label = original_label
+        
+        # Case 1: If we still don't have a final label and have a date with commas, process it
+        elif not final_label and original_label and ',' in original_label:
             for full_month, abbr in [
                 ('January', 'Jan'), ('February', 'Feb'), ('March', 'Mar'),
                 ('April', 'Apr'), ('May', 'May'), ('June', 'Jun'),
@@ -242,7 +273,7 @@ def _format_period_labels(
                             if show_date_range and is_duration and start_date:
                                 final_label = f"{format_date(start_date)} - {final_label}"
                             break
-                        except ValueError:
+                        except ValueError as e:
                             # Handle invalid dates
                             if day > 28:
                                 if month_num == 2:  # February
@@ -274,31 +305,13 @@ def _format_period_labels(
                 if not final_label:
                     final_label = original_label
         
-        # Case 2: Handle special formatted period labels (Annual/Quarterly with date range)
-        elif original_label and len(original_label) > 4:
-            if len(original_label) > 30 and ':' in original_label and 'to' in original_label:
-                # This might be a label with date range information already included
-                try:
-                    # Extract dates for range if needed
-                    parts = original_label.split('to')
-                    if len(parts) > 1:
-                        if show_date_range:
-                            # Use the full date range that's already in the label
-                            final_label = original_label
-                        else:
-                            # Extract just the end date
-                            end_date_str = parts[1].strip()
-                            end_date = parse_date(end_date_str)
-                            final_label = format_date(end_date)
-                            
-                            # Add quarter info if available
-                            if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
-                                final_label = f"{final_label} ({q_num})"
-                except (ValueError, TypeError):
-                    final_label = original_label
-            
-            # If we couldn't handle special formatting, use original label
-            if not final_label:
+        # Case 2: Handle other special formatted period labels like those with colons
+        elif original_label and len(original_label) > 4 and not final_label:
+            if ':' in original_label:
+                # Labels with prefix like "Annual:" but without "to"
+                final_label = original_label
+            else:
+                # Any other labels we couldn't handle
                 final_label = original_label
         
         # Case 3: Either use existing final_label (possibly from Case 1/2) or extract from period key
@@ -529,6 +542,8 @@ def render_statement(
             standardization_map = {}
             for item in statement_data:
                 if 'concept' in item and 'label' in item and 'original_label' in item:
+                    if item.get('is_dimension', False):
+                        continue
                     standardization_map[item['concept']] = {
                         'label': item['label'],
                         'original_label': item['original_label']
@@ -685,18 +700,22 @@ def render_statement(
         metadata['total_items'] = count
         
     # Use helper function to filter periods by data density
-    filtered_periods = [(m['key'], m['label']) for m in period_metadatas]
+    filtered_periods = [(m['key'], m['label'])
+                        for m in period_metadatas
+                        if m.get('data_density', 0) > 0
+                        ]
     
     # Add columns with right-alignment for numeric columns
-    table.add_column("Line Item", justify="left")
+    table.add_column("", justify="left")
     for _, period_label in filtered_periods:
         table.add_column(period_label)
     
     # Add rows
-    for item in statement_data:
+    for index, item in enumerate(statement_data):
         # Skip rows with no values if they're abstract (headers without data)
         # But keep abstract items with children (section headers)
-        if not item.get('has_values', False) and item.get('is_abstract') and not item.get('children'):
+        has_children = item.get('children') or item.get('has_dimension_children', False)
+        if not item.get('has_values', False) and item.get('is_abstract') and not has_children:
             continue
             
         # Skip non-abstract items without values (missing data)
@@ -723,8 +742,25 @@ def render_statement(
             )
             period_values.append(formatted_value)
         
-        # Apply different formatting based on level and abstract status
-        if item['is_abstract']:
+        # Apply different formatting based on level, abstract status and dimension status
+        if item.get('is_dimension', False):
+            # Format dimension items with the appropriate style
+            indent = "  " * level
+            
+            # Get dimension metadata if available for more nuanced formatting
+            dim_metadata = item.get('dimension_metadata')
+            
+            # If it's a dimension with just one dimension (most common case),
+            # use a cleaner format with just the member name
+            if dim_metadata and len(dim_metadata) == 1:
+                # Format for single dimension items
+                styled_label = f"{indent}[italic]{label}[/italic]"
+            else:
+                # Format for multi-dimension items (keep full dimension:member notation)
+                styled_label = f"{indent}[italic]{label}[/italic]"
+                
+            table.add_row(styled_label, *period_values)
+        elif item['is_abstract']:
             if level == 0:
                 # Top-level header - full caps, bold
                 styled_label = f"[bold]{label.upper()}[/bold]"
@@ -741,7 +777,11 @@ def render_statement(
         else:
             # Regular line items - indented based on level
             indent = "  " * level
-            styled_label = f"{indent}{label}"
+            # If this item has dimension children, make it bold and add a colon
+            if item.get('has_dimension_children', False) and item['has_values']:
+                styled_label = f"[bold]{indent}{label}:[/bold]"
+            else:
+                styled_label = f"{indent}{label}"
             table.add_row(styled_label, *period_values)
     
     return table

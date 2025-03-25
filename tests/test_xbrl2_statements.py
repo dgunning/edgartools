@@ -26,6 +26,15 @@ def aapl_xbrl():
     # Parse the directory
     return XBRL.parse_directory(data_dir)
 
+def test_dimensioned_statement(aapl_xbrl):
+    statements = aapl_xbrl.statements
+    role_definition = 'SegmentInformationandGeographicDataInformationbyReportableSegmentDetails'
+    assert aapl_xbrl._is_dimension_display_statement(None, role_definition)
+    statement = statements[role_definition]
+    print()
+    result = statement.render()
+    print(result)
+
 
 def test_get_statement_by_short_name(tsla_xbrl):
     # Get the cover statement.
@@ -116,8 +125,61 @@ def test_non_financial_statement():
     assert statement
     print(statement)
 
-    statement = xbrl.statements['DisclosureProperty']
+    statement = xbrl.render_statement('DisclosureProperty')
     print(statement)
+
+
+def test_render_segmented_statement(tsla_xbrl):
+    statements = tsla_xbrl.statements
+    statement = statements['SegmentReportingandInformationaboutGeographicAreas']
+    assert statement
+    print()
+    print(statement)
+
+    
+def test_statement_lookup_optimizations(tsla_xbrl):
+    """Test that our statement lookup optimizations work correctly"""
+    # First call to build indices
+    statements = tsla_xbrl.get_all_statements()
+    
+    # Ensure indices are properly built
+    assert hasattr(tsla_xbrl, '_statement_by_standard_name')
+    assert hasattr(tsla_xbrl, '_statement_by_primary_concept')
+    assert hasattr(tsla_xbrl, '_statement_by_role_uri')
+    assert hasattr(tsla_xbrl, '_statement_by_role_name')
+    
+    # Test lookup by standard name
+    assert 'BalanceSheet' in tsla_xbrl._statement_by_standard_name
+    
+    # Get statement by standard name
+    balance_sheet = tsla_xbrl.get_statement('BalanceSheet')
+    assert balance_sheet
+    
+    # Get statement by role name
+    for role, statement in tsla_xbrl._statement_by_role_uri.items():
+        role_name = role.split('/')[-1].lower() if '/' in role else ''
+        if role_name:
+            # Try to get statement by role name
+            stmt = tsla_xbrl.get_statement(role_name)
+            assert stmt  # Statement should be found
+    
+    # Ensure cached result is returned (for performance)
+    import time
+    
+    # Time the first call (should use cached indices)
+    start = time.time()
+    statements1 = tsla_xbrl.get_all_statements()
+    elapsed1 = time.time() - start
+    
+    # Time the second call (should return cached result)
+    start = time.time()
+    statements2 = tsla_xbrl.get_all_statements()
+    elapsed2 = time.time() - start
+    
+    # The second call should be extremely fast (effectively 0) because it's returning a cached result
+    # Either the second call is faster OR both calls are extremely fast (less than 1ms)
+    assert elapsed2 < elapsed1 or (elapsed1 < 0.001 and elapsed2 < 0.001)
+    assert statements1 == statements2  # Same result
 
 
 def test_cashflow_statement_totals():

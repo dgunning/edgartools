@@ -41,7 +41,7 @@ statement_to_concepts = {
                                          title="Consolidated Statement of Comprehensive Income"
                                          ),
     "CoverPage": StatementInfo(name="CoverPage",
-                               concept="us-gaap_CoverPage",
+                               concept="dei_CoverAbstract",
                                  title="Cover Page"
                                  ),
 
@@ -66,6 +66,15 @@ class Statement:
         """
         self.xbrl = xbrl
         self.role_or_type = role_or_type
+
+    def is_segmented(self) -> bool:
+        """
+        Check if the statement is a segmented statement.
+
+        Returns:
+            True if the statement is segmented, False otherwise
+        """
+        return self.role_or_type.startswith("Segment")
 
     def render(self, period_filter: Optional[str] = None,
                period_view: Optional[str] = None,
@@ -291,9 +300,16 @@ class Statements:
         # Get the statement data with the right periods
         statement_data = None
         
-        # Find the most appropriate statement role using the statement_to_concepts mapping
+        # Find the most appropriate statement role using more efficient lookup
         role = None
-        if statement_type in statement_to_concepts:
+        
+        # First try the optimized statement lookup in XBRL class
+        if hasattr(self.xbrl, '_statement_by_standard_name') and statement_type in self.xbrl._statement_by_standard_name:
+            statements = self.xbrl._statement_by_standard_name[statement_type]
+            if statements:
+                role = statements[0]['role']
+        # Fall back to the old method if needed
+        elif statement_type in statement_to_concepts:
             # Get information about the statement's identifying concept
             concept_info = statement_to_concepts[statement_type]
             concept = concept_info.concept

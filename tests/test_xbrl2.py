@@ -25,6 +25,10 @@ def aapl_xbrl():
 def msft_xbrl():
     return XBRL.parse_directory(Path("data/xbrl/datafiles/msft"))
 
+def test_get_all_statements(aapl_xbrl):
+    statements = aapl_xbrl.get_all_statements()
+    print(statements)
+
 def test_dei_info(aapl_xbrl:XBRL):
     assert aapl_xbrl.entity_info.get('entity_name') == 'Apple Inc.'
     assert aapl_xbrl.entity_info.get('identifier') == '320193'

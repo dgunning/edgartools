@@ -22,13 +22,14 @@ from rich.table import Table as RichTable
 from edgar.richtools import repr_rich
 # Import legacy XBRL data for compatibility
 from edgar.xbrl.instance import XBRLInstance as LegacyXbrlInstance
-from edgar.xbrl2.core import STANDARD_LABEL, format_date
+from edgar.xbrl2.core import STANDARD_LABEL, format_date, parse_date
 # Import refactored components
 from edgar.xbrl2.models import (
     Fact, PresentationNode, XBRLProcessingError
 )
 from edgar.xbrl2.parser import XBRLParser
 from edgar.xbrl2.rendering import render_statement, generate_rich_representation
+from edgar.xbrl2.statements import statement_to_concepts
 
 
 class XBRL:
@@ -46,6 +47,39 @@ class XBRL:
         
         # Reference to legacy XBRLInstance for compatibility
         self.legacy_instance: Optional[LegacyXbrlInstance] = None
+        
+        # Cached indices for fast statement lookup
+        self._statement_indices = {}
+        self._statement_by_standard_name = {}
+        self._statement_by_primary_concept = {}
+        self._statement_by_role_uri = {}
+        self._statement_by_role_name = {}
+        self._all_statements_cached = None
+    
+    def _is_dimension_display_statement(self, statement_type: str, role_definition: str) -> bool:
+        """
+        Determine if a statement should display dimensioned line items.
+        
+        Args:
+            statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+            role_definition: The definition of the statement role
+            
+        Returns:
+            bool: True if dimensions should be displayed, False otherwise
+        """
+        # Skip financial statements where dimensions would mess up the display
+        if statement_type in ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement', 
+                             'StatementOfEquity', 'ComprehensiveIncome']:
+            return False
+            
+        # Look for keywords in role definition that suggest dimensional breakdowns
+        dimension_keywords = [
+            'segment', 'geography', 'geographic', 'region', 'product', 'business',
+            'by country', 'by region', 'by product', 'by segment', 'revenues by'
+        ]
+        
+        role_def_lower = role_definition.lower() if role_definition else ""
+        return any(keyword in role_def_lower for keyword in dimension_keywords)
         
     @property
     def element_catalog(self):
@@ -275,6 +309,10 @@ class XBRL:
         Returns:
             List of statement metadata (role, definition, element count)
         """
+        # Return cached result if available
+        if self._all_statements_cached is not None:
+            return self._all_statements_cached
+            
         statements = []
         
         # Standard taxonomy concepts for statement identification
@@ -288,29 +326,73 @@ class XBRL:
                                   'us-gaap_StatementOfShareholdersEquityAbstract'],
             'ComprehensiveIncome': ['us-gaap_StatementOfComprehensiveIncomeAbstract',
                                     'us-gaap_StatementOfIncome'],
+            'CoverPage': ['dei_CoverAbstract'],
         }
+        
+        # Reset indices
+        self._statement_indices = {}
+        self._statement_by_standard_name = {}
+        self._statement_by_primary_concept = {}
+        self._statement_by_role_uri = {}
+        self._statement_by_role_name = {}
         
         for role, tree in self.presentation_trees.items():
             # Check if this role appears to be a financial statement
             role_def = tree.definition.lower()
             statement_type = None
-            
-            # First try to identify by standard taxonomy concepts
-            for stmt_type, concepts in standard_statement_concepts.items():
-                for element_id in tree.all_nodes:
-                    if any(element_id.endswith(concept) for concept in concepts):
-                        statement_type = stmt_type
-                        break
-                if statement_type:
+            primary_concept = next(iter(tree.all_nodes))
+
+            for statement_alias, statement_info in statement_to_concepts.items():
+                if primary_concept == statement_info.concept:
+                    statement_type = statement_alias
                     break
+            # Try to extract role name from URI
+            role_name = role.split('/')[-1] if '/' in role else role.split('#')[-1] if '#' in role else ''
             
-            statements.append({
+            # Create the statement metadata
+            statement = {
                 'role': role,
                 'definition': tree.definition,
                 'element_count': len(tree.all_nodes),
-                'type': statement_type
-            })
+                'type': statement_type,
+                'primary_concept': primary_concept,
+                'role_name': role_name
+            }
+            
+            statements.append(statement)
+            
+            # Build lookup indices
+            # By role URI
+            self._statement_by_role_uri[role] = statement
+            
+            # By role name (short name)
+            if role_name:
+                role_name_lower = role_name.lower()
+                if role_name_lower not in self._statement_by_role_name:
+                    self._statement_by_role_name[role_name_lower] = []
+                self._statement_by_role_name[role_name_lower].append(statement)
+            
+            # By standard name
+            if statement_type:
+                if statement_type not in self._statement_by_standard_name:
+                    self._statement_by_standard_name[statement_type] = []
+                self._statement_by_standard_name[statement_type].append(statement)
+            
+            # By primary concept
+            if primary_concept:
+                if primary_concept not in self._statement_by_primary_concept:
+                    self._statement_by_primary_concept[primary_concept] = []
+                self._statement_by_primary_concept[primary_concept].append(statement)
+                
+            # Also index by definition (without spaces, lowercase)
+            if statement['definition']:
+                def_key = statement['definition'].lower().replace(' ', '')
+                if def_key not in self._statement_indices:
+                    self._statement_indices[def_key] = []
+                self._statement_indices[def_key].append(statement)
         
+        # Cache the result
+        self._all_statements_cached = statements
         return statements
         
     def get_statement_by_type(self, statement_type: str) -> Optional[Dict[str, Any]]:
@@ -323,12 +405,15 @@ class XBRL:
         Returns:
             Statement data if found, None otherwise
         """
-        # Get all statements
-        statements = self.get_all_statements()
-        
-        # Find the first matching statement
-        for statement in statements:
-            if statement['type'] == statement_type:
+        # Ensure indices are built
+        if not self._all_statements_cached:
+            self.get_all_statements()
+            
+        # Use indexed lookup by standard name
+        if statement_type in self._statement_by_standard_name:
+            statements = self._statement_by_standard_name[statement_type]
+            if statements:
+                statement = statements[0]
                 # Get statement data
                 role = statement['role']
                 statement_data = self.get_statement(role)
@@ -396,7 +481,8 @@ class XBRL:
         from edgar.xbrl2.stitching import render_stitched_statement as _render_stitched_statement
         return _render_stitched_statement(stitched_data, statement_title, statement_type, self.entity_info)
     
-    def get_statement(self, role_or_type: str, period_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_statement(self, role_or_type: str, period_filter: Optional[str] = None,
+                    should_display_dimensions: Optional[bool] = None) -> List[Dict[str, Any]]:
         """
         Get a financial statement by role URI, statement type, or statement short name.
         
@@ -404,49 +490,56 @@ class XBRL:
             role_or_type: Can be one of:
                 - Extended link role URI (e.g. "http://apple.com/role/ConsolidatedStatementOfIncome")
                 - Statement type name (e.g. "BalanceSheet")
-                - Statement short name (e.g. "ConsolidatedStatementOfIncome")
+                - Statement short name (e.g. "ConsolidatedStatementOfIncome") 
             period_filter: Optional period key to filter facts
+            should_display_dimensions: Whether to display dimensions for this statement.
+                If None, the method will determine based on statement type and role.
             
         Returns:
             List of line items with values
         """
+        # Ensure indices are built
+        if not self._all_statements_cached:
+            self.get_all_statements()
+            
         # If requesting by full role URI, use as is
+        role_uri = None
+        
         if role_or_type.startswith('http'):
+            # Direct role URI lookup
             role_uri = role_or_type
         else:
-            # Check if it's a statement type
-            all_statements = self.get_all_statements()
+            # Try to find by standard name (e.g., "BalanceSheet")
+            if role_or_type in self._statement_by_standard_name:
+                statements = self._statement_by_standard_name[role_or_type]
+                if statements:
+                    role_uri = statements[0]['role']
             
-            # First try to match by type (e.g., "BalanceSheet")
-            matching_statements = [stmt for stmt in all_statements if stmt['type'] == role_or_type]
+            # If not found, try by role name (case-insensitive)
+            if not role_uri:
+                role_or_type_lower = role_or_type.lower()
+                if role_or_type_lower in self._statement_by_role_name:
+                    statements = self._statement_by_role_name[role_or_type_lower]
+                    if statements:
+                        role_uri = statements[0]['role']
             
-            # If not found by type, try to match by the last part of the role URI (short name)
-            if not matching_statements:
-                for stmt in all_statements:
-                    # Extract the short name from the role (last part after / or #)
-                    role = stmt['role']
-                    short_name = role.split('/')[-1] if '/' in role else role.split('#')[-1] if '#' in role else ''
-                    
-                    # Also try to extract from the definition if available
-                    definition_short_name = ''
-                    if 'definition' in stmt and stmt['definition']:
-                        # Remove spaces and standardize
-                        definition_words = ''.join(stmt['definition'].split())
-                        if definition_words:
-                            definition_short_name = definition_words
-                    
-                    # Check if either short name matches
-                    if (short_name and short_name.lower() == role_or_type.lower()) or \
-                       (definition_short_name and definition_short_name.lower() == role_or_type.lower()):
-                        matching_statements.append(stmt)
-            
-            # If found, use the role
-            if matching_statements:
-                role_uri = matching_statements[0]['role']
-            else:
-                return []  # No matching statement found
+            # If still not found, try by definition
+            if not role_uri:
+                def_key = role_or_type.lower().replace(' ', '')
+                if def_key in self._statement_indices:
+                    statements = self._statement_indices[def_key]
+                    if statements:
+                        role_uri = statements[0]['role']
+                        
+            # If still not found, try partial matching on role name
+            if not role_uri:
+                for role_name, statements in self._statement_by_role_name.items():
+                    if role_or_type.lower() in role_name:
+                        role_uri = statements[0]['role']
+                        break
         
-        if role_uri not in self.presentation_trees:
+        # If no matching statement found, return empty list
+        if not role_uri or role_uri not in self.presentation_trees:
             return []
         
         tree = self.presentation_trees[role_uri]
@@ -454,15 +547,28 @@ class XBRL:
         # Find the root element
         root_id = tree.root_element_id
         
+        # If should_display_dimensions wasn't provided, determine it from the statement type and role
+        if should_display_dimensions is None:
+            statement_type = None
+            role_definition = ""
+            # Find statement info to get type and definition
+            for stmt in self.get_all_statements():
+                if stmt['role'] == role_or_type:
+                    statement_type = stmt['type']
+                    role_definition = stmt['definition']
+                    break
+            # Determine whether to display dimensions
+            should_display_dimensions = self._is_dimension_display_statement(statement_type, role_definition)
+            
         # Generate line items recursively
         line_items = []
-        self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter)
+        self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None, should_display_dimensions)
         
         return line_items
     
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode], 
                             result: List[Dict[str, Any]], period_filter: Optional[str] = None, 
-                            path: List[str] = None) -> None:
+                            path: List[str] = None, should_display_dimensions: bool = False) -> None:
         """
         Recursively generate line items for a statement.
         
@@ -472,6 +578,7 @@ class XBRL:
             result: List to append line items to
             period_filter: Optional period key to filter facts
             path: Current path in hierarchy
+            should_display_dimensions: Whether to display dimensions for this statement
         """
         if element_id not in nodes:
             return
@@ -491,57 +598,15 @@ class XBRL:
         # Get values and decimals across periods
         values = {}
         decimals = {}  # Store decimals info for each period
-        
-        # Try to determine the actual concept name used in facts
-        # First, get the element name from node or catalog
-        element_name = None
-        concept_names = []
-        
-        # Try node's element_name
-        if node.element_name:
-            concept_names.append(node.element_name)
-            
-        # Try element catalog name
-        if element_id in self.element_catalog:
-            catalog_name = self.element_catalog[element_id].name
-            if catalog_name:
-                concept_names.append(catalog_name)
-        
-        # Try element ID itself (often used in facts)
-        concept_names.append(element_id)
-
-        # Try additional variations of element names
-        additional_names = []
-        for name in concept_names:
-            # Try with common variations
-            if ":" not in name and "_" not in name:
-                additional_names.extend([
-                    f"us-gaap:{name}",
-                    f"ifrs:{name}"
-                ])
-            # Convert underscore to colon (us-gaap_Cash -> us-gaap:Cash)
-            elif "_" in name and ":" not in name:
-                # Handle us-gaap_ElementName pattern
-                parts = name.split("_", 1)
-                if len(parts) == 2 and parts[0] in ['us-gaap', 'ifrs', 'dei']:
-                    additional_names.append(f"{parts[0]}:{parts[1]}")
-        
-        concept_names.extend(additional_names)
-        
-        # Remove duplicates
-        concept_names = list(set(concept_names))
             
         # Find facts for any of these concept names
-        all_relevant_facts = {}
-        for concept_name in concept_names:
-            relevant_facts = self._find_facts_for_element(concept_name, period_filter)
-            all_relevant_facts.update(relevant_facts)
+        all_relevant_facts =  self._find_facts_for_element(node.element_name, period_filter)
             
         # Group facts by period for better selection
         facts_by_period = {}
         
         # Process all found facts and group by period
-        for context_id, fact in all_relevant_facts.items():
+        for context_id, wrapped_fact in all_relevant_facts.items():
             # Get period key for this context
             period_key = self.context_period_map.get(context_id)
             if not period_key:
@@ -552,73 +617,208 @@ class XBRL:
                 facts_by_period[period_key] = []
                 
             # Add this fact to the period
-            facts_by_period[period_key].append((context_id, fact))
+            facts_by_period[period_key].append((context_id, wrapped_fact))
+            
+        # should_display_dimensions is now passed as a parameter from the calling method
         
-        # Process facts by period, selecting the most appropriate fact for each period
+        # Process facts by period, with different handling based on statement type
+        from collections import defaultdict
+        dimensioned_facts = defaultdict(list)  # For dimensioned statement types
+        
         for period_key, period_facts in facts_by_period.items():
-            # If only one fact, use it
-            if len(period_facts) == 1:
-                context_id, fact = period_facts[0]
-            else:
-                # Multiple facts for same period - prioritize based on dimensions
-                # Sort facts by preference: no dimensions first, then by dimension count (fewer dimensions preferred)
-                sorted_facts = []
-                for ctx_id, f in period_facts:
-                    context = self.contexts.get(ctx_id)
-                    dimension_count = len(context.dimensions) if context and hasattr(context, 'dimensions') else 999
-                    sorted_facts.append((dimension_count, ctx_id, f))
-                
-                # Sort by dimension count (no dimensions or fewer dimensions first)
-                sorted_facts.sort()
-                
-                # Use the first fact (with fewest dimensions)
-                _, context_id, fact = sorted_facts[0]
-            
-            # Store the value
-            values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
-            
-            # Store the decimals info for proper scaling
-            if fact.decimals is not None:
-                try:
-                    if fact.decimals == 'INF':
-                        decimals[period_key] = 0  # Infinite precision, no scaling
+            if should_display_dimensions:
+                # For statements that should display dimensions, group facts by dimension
+                for context_id, wrapped_fact in period_facts:
+                    fact = wrapped_fact['fact']
+                    dimension_info = wrapped_fact['dimension_info']
+                    dimension_key = wrapped_fact['dimension_key']
+                    
+                    if dimension_info:
+                        # Use the dimension_key we already generated
+                        dim_key_str = dimension_key
+                        
+                        # Store dimensioned fact with the full dimension metadata
+                        dimensioned_facts[dim_key_str].append((period_key, fact, dimension_info))
                     else:
-                        decimals[period_key] = int(fact.decimals)
-                except (ValueError, TypeError):
-                    decimals[period_key] = 0  # Default if decimals can't be converted
+                        # This is a non-dimensioned fact for this concept, use in the main item
+                        if not values.get(period_key):
+                            values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+                            
+                            # Store the decimals info for proper scaling
+                            if fact.decimals is not None:
+                                try:
+                                    if fact.decimals == 'INF':
+                                        decimals[period_key] = 0  # Infinite precision, no scaling
+                                    else:
+                                        decimals[period_key] = int(fact.decimals)
+                                except (ValueError, TypeError):
+                                    decimals[period_key] = 0  # Default
+            else:
+                # For standard financial statements, prefer non-dimensioned facts
+                # If only one fact, use it
+                if len(period_facts) == 1:
+                    context_id, wrapped_fact = period_facts[0]
+                    fact = wrapped_fact['fact']
+                else:
+                    # Multiple facts for same period - prioritize based on dimensions
+                    # Sort facts by preference: no dimensions first, then by dimension count (fewer dimensions preferred)
+                    sorted_facts = []
+                    for ctx_id, wrapped_fact in period_facts:
+                        dimension_count = len(wrapped_fact['dimension_info'])
+                        sorted_facts.append((dimension_count, ctx_id, wrapped_fact))
+                    
+                    # Sort by dimension count (no dimensions or fewer dimensions first)
+                    sorted_facts.sort()
+                    
+                    # Use the first fact (with fewest dimensions)
+                    _, context_id, wrapped_fact = sorted_facts[0]
+                    fact = wrapped_fact['fact']
+                
+                # Store the value
+                values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+                
+                # Store the decimals info for proper scaling
+                if fact.decimals is not None:
+                    try:
+                        if fact.decimals == 'INF':
+                            decimals[period_key] = 0  # Infinite precision, no scaling
+                        else:
+                            decimals[period_key] = int(fact.decimals)
+                    except (ValueError, TypeError):
+                        decimals[period_key] = 0  # Default if decimals can't be converted
         
-        # Create line item
-        line_item = {
-            'concept': element_id,
-            'name': concept_names[0] if concept_names else None,
-            'all_names': concept_names,
-            'label': label,
-            'values': values,
-            'decimals': decimals,  # Add decimals info for formatting
-            'level': node.depth,
-            'preferred_label': node.preferred_label,
-            'is_abstract': node.is_abstract,
-            'children': node.children,
-            'has_values': len(values) > 0  # Flag to indicate if we found values
-        }
+        # For dimensional statements with dimension data, handle the parent item specially
+        if should_display_dimensions and dimensioned_facts:
+            # Create parent line item as an abstract header for dimensions
+            line_item = {
+                'concept': element_id,
+                'name': node.element_name,
+                'all_names': [node.element_name],
+                'label': f"{label}:", # Add colon to indicate it's a header with dimension children
+                'values': {},  # No values for the parent header
+                'decimals': {},
+                'level': node.depth,
+                'preferred_label': node.preferred_label,
+                'is_abstract': True,  # Mark as abstract since it's just a header
+                'children': node.children,
+                'has_values': False,
+                'has_dimension_children': True  # Mark as having dimension children
+            }
+        else:
+            # Non-dimensional case: Create normal line item with values
+            line_item = {
+                'concept': element_id,
+                'name': node.element_name,
+                'all_names': [node.element_name],
+                'label': label,
+                'values': values,
+                'decimals': decimals,  # Add decimals info for formatting
+                'level': node.depth,
+                'preferred_label': node.preferred_label,
+                'is_abstract': node.is_abstract,
+                'children': node.children,
+                'has_values': len(values) > 0  # Flag to indicate if we found values
+            }
         
         # Add to result
         result.append(line_item)
         
+        # For dimensional statements, add dimensioned facts as child line items
+        if should_display_dimensions and dimensioned_facts:
+            # Add each dimension as a child line item with increased depth
+            for dim_key, facts_list in dimensioned_facts.items():
+                dim_values = {}
+                dim_decimals = {}
+                dim_metadata = None  # Store metadata from the first fact
+                
+                # Collect values for each period
+                for fact_data in facts_list:
+                    try:
+                        # Unpack with consistent 3-part tuples from our updated code
+                        period_key, fact, dimensions_info = fact_data
+                        
+                        # Store the dimension metadata from the first fact
+                        if dim_metadata is None:
+                            dim_metadata = dimensions_info
+                            
+                        # Extract value from fact
+                        dim_values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+                    except (ValueError, TypeError, IndexError) as e:
+                        # Try to handle older format (period_key, fact) tuple for backward compatibility
+                        try:
+                            if isinstance(fact_data, tuple) and len(fact_data) == 2:
+                                period_key, fact = fact_data
+                                dim_values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+                        except Exception:
+                            # Log the error and continue
+                            print(f"Error processing dimension fact data: {e}")
+                            continue
+                    
+                    # Store decimals
+                    if fact.decimals is not None:
+                        try:
+                            if fact.decimals == 'INF':
+                                dim_decimals[period_key] = 0
+                            else:
+                                dim_decimals[period_key] = int(fact.decimals)
+                        except (ValueError, TypeError):
+                            dim_decimals[period_key] = 0
+                
+                # For better display, use the member label for dimension items,
+                # but make sure we don't add the parent concept name as well
+                
+                # Default to the full dimension key (e.g., "Region: Americas")
+                display_label = dim_key
+                
+                # Try various member label formats based on dimension structure
+                if dim_metadata:
+                    if len(dim_metadata) == 1:
+                        # For single dimensions, just use the member label (e.g., "Americas")
+                        display_label = dim_metadata[0]['member_label']
+                    else:
+                        # For multiple dimensions, create a combined label with all member names
+                        # (e.g., "Americas - iPhone")
+                        member_labels = [info['member_label'] for info in dim_metadata if 'member_label' in info]
+                        if member_labels:
+                            display_label = " - ".join(member_labels)
+                
+                # Create dimension line item
+                dim_line_item = {
+                    'concept': element_id,  # Use same concept
+                    'name': node.element_name,
+                    'all_names': [node.element_name],
+                    'label': display_label,  # Use optimized dimension label
+                    'full_dimension_label': dim_key,  # Keep full dimension notation for reference
+                    'values': dim_values,
+                    'decimals': dim_decimals,
+                    'level': node.depth + 1,  # Increase depth by 1
+                    'preferred_label': node.preferred_label,
+                    'is_abstract': False,
+                    'children': [],
+                    'has_values': len(dim_values) > 0,
+                    'is_dimension': True,  # Mark as a dimension item
+                    'dimension_metadata': dim_metadata  # Store full dimension information
+                }
+                
+                # Add to result
+                result.append(dim_line_item)
+        
         # Process children
         for child_id in node.children:
-            self._generate_line_items(child_id, nodes, result, period_filter, current_path)
+            self._generate_line_items(child_id, nodes, result, period_filter, current_path, should_display_dimensions)
     
-    def _find_facts_for_element(self, element_name: str, period_filter: Optional[str] = None) -> Dict[str, Fact]:
+    def _find_facts_for_element(self, element_name: str, period_filter: Optional[str] = None, 
+                                 dimensions: Optional[Dict[str, str]] = None) -> Dict[str, Fact]:
         """
-        Find facts for a specific element, optionally filtered by period.
+        Find facts for a specific element, optionally filtered by period and dimensions.
         
         Args:
             element_name: Element name to find facts for
             period_filter: Optional period key to filter contexts
+            dimensions: Optional dictionary of dimension names to dimension values to filter by
             
         Returns:
-            Dictionary of facts by context ID
+            Dictionary of facts by context ID with dimension information attached
         """
         if not element_name:
             return {}  # No element name provided
@@ -634,10 +834,101 @@ class XBRL:
                 # If period filter is specified, check if context matches period
                 if period_filter:
                     period_key = self.context_period_map.get(context_id)
-                    if period_key == period_filter:
-                        relevant_facts[context_id] = fact
-                else:
-                    relevant_facts[context_id] = fact
+                    if period_key != period_filter:
+                        continue  # Skip if period doesn't match
+                
+                # If dimensions are specified, check if context has matching dimensions
+                if dimensions:
+                    context = self.contexts.get(context_id)
+                    if not context or not hasattr(context, 'dimensions'):
+                        continue  # Skip if context doesn't have dimensions
+                    
+                    # Check if all specified dimensions match
+                    matches_all_dimensions = True
+                    for dim_name, dim_value in dimensions.items():
+                        # Normalize dimension name if it contains a colon
+                        normalized_dim_name = dim_name.replace(':', '_')
+                        
+                        # Check if this dimension exists and matches the expected value
+                        if normalized_dim_name not in context.dimensions or context.dimensions[normalized_dim_name] != dim_value:
+                            matches_all_dimensions = False
+                            break
+                    
+                    if not matches_all_dimensions:
+                        continue  # Skip if dimensions don't match
+                
+                # Get the context and extract dimension information
+                context = self.contexts.get(context_id)
+                
+                # Create a wrapper around the fact with dimension information
+                wrapped_fact = {
+                    'fact': fact,
+                    'dimension_info': [],
+                    'dimension_key': ""
+                }
+                
+                if context and hasattr(context, 'dimensions') and context.dimensions:
+                    # Build rich dimension information with formatted labels
+                    dimension_info = []
+                    dim_keys = []
+                    
+                    for dim_name, dim_value in sorted(context.dimensions.items()):
+                        dim_value = dim_value.replace(":", "_")
+                        # Initialize with technical names
+                        dim_label = dim_name
+                        mem_label = dim_value
+                        
+                        # Get richer label information from element catalog
+                        dim_element = None
+                        mem_element = None
+                        
+                        # Try to get human-readable dimension name
+                        if dim_name in self.element_catalog:
+                            dim_element = self.element_catalog[dim_name]
+                            # Try different label roles in order of preference
+                            for role in ['http://www.xbrl.org/2003/role/terseLabel',
+                                        'http://www.xbrl.org/2003/role/label',
+                                        'http://www.xbrl.org/2003/role/verboseLabel']:
+                                if role in dim_element.labels:
+                                    dim_label = dim_element.labels[role]
+                                    break
+                        
+                        # Try to get human-readable member name
+                        if dim_value in self.element_catalog:
+                            mem_element = self.element_catalog[dim_value]
+                            # Try different label roles in order of preference
+                            for role in ['http://www.xbrl.org/2003/role/terseLabel',
+                                        'http://www.xbrl.org/2003/role/label',
+                                        'http://www.xbrl.org/2003/role/verboseLabel']:
+                                if role in mem_element.labels:
+                                    mem_label = mem_element.labels[role]
+                                    break
+                        
+                        # Clean up labels (remove [Axis], [Member], etc.)
+                        dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
+                        mem_label = mem_label.replace('[Member]', '').strip()
+                        
+                        # Format key for display
+                        format_key = f"{dim_label}: {mem_label}"
+                        dim_keys.append(format_key)
+                        
+                        # Store rich dimension information
+                        dimension_info.append({
+                            'dimension': dim_name,
+                            'member': dim_value,
+                            'dimension_label': dim_label,
+                            'member_label': mem_label,
+                            'format_key': format_key,
+                            'dimension_element': dim_element,
+                            'member_element': mem_element
+                        })
+                    
+                    # Store dimension information in the wrapper
+                    wrapped_fact['dimension_info'] = dimension_info
+                    wrapped_fact['dimension_key'] = ", ".join(sorted(dim_keys))
+                
+                # If we get here, all filters passed
+                relevant_facts[context_id] = wrapped_fact
         
         return relevant_facts
 
@@ -906,43 +1197,91 @@ class XBRL:
         Returns:
             RichTable: A formatted table representation of the statement
         """
-        # Get the statement data
-        statement_data = self.get_statement(statement_type, period_filter)
+        # Determine if this statement should display dimensions
+        matching_statements = []
+        found_role = None
+        actual_statement_type = statement_type
+        
+        # First, try to find the statement by standard name
+        if statement_type in self._statement_by_standard_name:
+            matching_statements = self._statement_by_standard_name[statement_type]
+            if matching_statements:
+                found_role = matching_statements[0]['role']
+                
+        # If not found by standard name, try by role URI
+        if not matching_statements and statement_type.startswith('http') and statement_type in self._statement_by_role_uri:
+            matching_statements = [self._statement_by_role_uri[statement_type]]
+            found_role = statement_type
+            
+        # If not found, try by role name (case-insensitive)
+        if not matching_statements:
+            role_or_type_lower = statement_type.lower()
+            if role_or_type_lower in self._statement_by_role_name:
+                matching_statements = self._statement_by_role_name[role_or_type_lower]
+                if matching_statements:
+                    found_role = matching_statements[0]['role']
+                    
+        # If still not found, try by definition
+        if not matching_statements:
+            def_key = statement_type.lower().replace(' ', '')
+            if def_key in self._statement_indices:
+                matching_statements = self._statement_indices[def_key]
+                if matching_statements:
+                    found_role = matching_statements[0]['role']
+        
+        # Get statement definition if we found a match
+        role_definition = ""
+        if matching_statements:
+            role_definition = matching_statements[0]['definition']
+            if matching_statements[0]['type']:
+                actual_statement_type = matching_statements[0]['type']
+        
+        # Determine if this statement should display dimensions
+        should_display_dimensions = self._is_dimension_display_statement(actual_statement_type, role_definition)
+        
+        # Get the statement data with dimension display flag
+        statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions)
         if not statement_data:
             return RichTable(title=f"No {statement_type} found")
         
-        # Get the statement definition and determine actual statement type (if using a role/name)
-        all_statements = self.get_all_statements()
-        matching_statements = [stmt for stmt in all_statements if stmt['type'] == statement_type]
-        
-        # If not found by type, it might be a specific statement name/role
+        # Use our optimized indices to find the statement
+        matching_statements = []
         actual_statement_type = statement_type
-        if not matching_statements:
-            # Try to find the statement by role or other matching
-            for stmt in all_statements:
-                role = stmt['role']
-                # Check if the role URI matches
-                if role == statement_type:
-                    matching_statements = [stmt]
-                    actual_statement_type = stmt['type'] or statement_type
-                    break
-                    
-                # Check if short name matches
-                short_name = role.split('/')[-1] if '/' in role else role.split('#')[-1] if '#' in role else ''
-                if short_name.lower() == statement_type.lower():
-                    matching_statements = [stmt]
-                    actual_statement_type = stmt['type'] or statement_type
-                    break
-                    
-                # Check definition
-                if 'definition' in stmt and stmt['definition']:
-                    if stmt['definition'].lower().replace(' ', '') == statement_type.lower().replace(' ', ''):
-                        matching_statements = [stmt]
-                        actual_statement_type = stmt['type'] or statement_type
-                        break
         
-        # Use the statement title from definition if available
-        statement_title = f"{matching_statements[0]['definition']}" if matching_statements else statement_type
+        # Ensure indices are built
+        if not self._all_statements_cached:
+            self.get_all_statements()
+        
+        # Try to find by standard name
+        if statement_type in self._statement_by_standard_name:
+            matching_statements = self._statement_by_standard_name[statement_type]
+            
+        # If not found by standard name, try by role (exact match)
+        if not matching_statements and statement_type.startswith('http') and statement_type in self._statement_by_role_uri:
+            matching_statements = [self._statement_by_role_uri[statement_type]]
+            actual_statement_type = matching_statements[0]['type'] or statement_type
+            
+        # If not found, try by role name (case-insensitive)
+        if not matching_statements:
+            role_or_type_lower = statement_type.lower()
+            if role_or_type_lower in self._statement_by_role_name:
+                matching_statements = self._statement_by_role_name[role_or_type_lower]
+                if matching_statements:
+                    actual_statement_type = matching_statements[0]['type'] or statement_type
+        
+        # If still not found, try by definition
+        if not matching_statements:
+            def_key = statement_type.lower().replace(' ', '')
+            if def_key in self._statement_indices:
+                matching_statements = self._statement_indices[def_key]
+                if matching_statements:
+                    actual_statement_type = matching_statements[0]['type'] or statement_type
+
+        statement_info = statement_to_concepts.get(actual_statement_type)
+        if statement_info:
+            statement_title = statement_info.title
+        else:
+            statement_title = f"{matching_statements[0]['definition']}" if matching_statements else statement_type
         
         # Use the actual statement type for period selection logic to ensure consistent formatting
         statement_type = actual_statement_type
@@ -1381,24 +1720,100 @@ class XBRL:
                                 # Fall back to original label if date parsing fails
                                 periods_to_display.append((period['key'], period.get('label', '')))
             
-            # If we still don't have any periods, use whatever is available
+            # If we still don't have any periods, use period selection logic consistent with known statement types
             if not periods_to_display and all_periods:
-                # Use first period available
-                period = all_periods[0]
-                period_key = period['key']
-                periods_to_display.append((period_key, period['label']))
-                
-                # Add a second period if available
-                if len(all_periods) > 1:
-                    period = all_periods[1]
-                    period_key = period['key']
-                    periods_to_display.append((period_key, period['label']))
-                
-                # Add a third period if available
-                if len(all_periods) > 2:
-                    period = all_periods[2]
-                    period_key = period['key']
-                    periods_to_display.append((period_key, period['label']))
+                # For balance-sheet-like statements (instant data points)
+                if statement_type in ['BalanceSheet']:
+                    # Use instant periods
+                    if instant_periods:
+                        # Take up to 3 most recent instant periods
+                        for i, period in enumerate(instant_periods[:3]):
+                            period_key = period['key']
+                            periods_to_display.append((period_key, period['label']))
+                # For income-statement-like statements and other financials (duration data points)
+                elif statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome'] or 'statement' in statement_type.lower():
+                    # Check if this is an annual or quarterly report
+                    is_annual = fiscal_period_focus == 'FY'
+                    
+                    if is_annual and duration_periods:
+                        # For annual reports, prioritize annual periods (~365 days)
+                        annual_periods = []
+                        for period in duration_periods:
+                            try:
+                                start_date = parse_date(period['start_date'])
+                                end_date = parse_date(period['end_date'])
+                                days = (end_date - start_date).days
+                                if 350 <= days <= 380:  # ~365 days
+                                    annual_periods.append(period)
+                            except (ValueError, TypeError):
+                                continue
+                                
+                        if annual_periods:
+                            # Use up to 3 most recent annual periods
+                            for i, period in enumerate(annual_periods[:3]):
+                                period_key = period['key']
+                                periods_to_display.append((period_key, period['label']))
+                        else:
+                            # Fall back to most recent duration periods
+                            for i, period in enumerate(duration_periods[:3]):
+                                period_key = period['key']
+                                periods_to_display.append((period_key, period['label']))
+                    else:
+                        # For quarterly reports or unknown, prioritize quarterly periods
+                        quarterly_periods = []
+                        for period in duration_periods:
+                            try:
+                                start_date = parse_date(period['start_date'])
+                                end_date = parse_date(period['end_date'])
+                                days = (end_date - start_date).days
+                                if 80 <= days <= 100:  # ~90 days (quarterly)
+                                    quarterly_periods.append(period)
+                            except (ValueError, TypeError):
+                                continue
+                                
+                        if quarterly_periods:
+                            # Use up to 3 most recent quarterly periods
+                            for i, period in enumerate(quarterly_periods[:3]):
+                                period_key = period['key']
+                                periods_to_display.append((period_key, period['label']))
+                        else:
+                            # Fall back to most recent duration periods
+                            for i, period in enumerate(duration_periods[:3]):
+                                period_key = period['key']
+                                periods_to_display.append((period_key, period['label']))
+                # For any other unknown statement types
+                else:
+                    # Try to find periods closest to document_period_end_date
+                    if doc_period_end_date:
+                        # Sort periods by how close they are to the document period end date
+                        periods_with_distance = []
+                        for period in all_periods:
+                            try:
+                                # For instant periods
+                                if period['type'] == 'instant':
+                                    period_date = parse_date(period['date'])
+                                    distance = abs((period_date - doc_period_end_date).days)
+                                    periods_with_distance.append((period, distance))
+                                # For duration periods
+                                else:
+                                    end_date = parse_date(period['end_date'])
+                                    distance = abs((end_date - doc_period_end_date).days)
+                                    periods_with_distance.append((period, distance))
+                            except (ValueError, TypeError):
+                                continue
+                        
+                        # Sort by distance to document_period_end_date
+                        periods_with_distance.sort(key=lambda x: x[1])
+                        
+                        # Add up to 3 closest periods
+                        for i, (period, _) in enumerate(periods_with_distance[:3]):
+                            period_key = period['key']
+                            periods_to_display.append((period_key, period['label']))
+                    else:
+                        # If no document_period_end_date, use up to 3 periods
+                        for i, period in enumerate(all_periods[:3]):
+                            period_key = period['key']
+                            periods_to_display.append((period_key, period['label']))
         
         # Use the rendering module to render the statement
         return render_statement(
