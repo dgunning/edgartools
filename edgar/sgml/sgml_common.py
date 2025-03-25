@@ -188,7 +188,6 @@ def parse_submission_text(content: str) -> Tuple[FilingHeader, DefaultDict[str, 
     return header, documents
 
 
-
 class FilingSGML:
     """
     Main class that parses and provides access to both the header and documents
@@ -230,7 +229,6 @@ class FilingSGML:
     def effective_date(self):
         return self.header.filing_metadata.get('EFFECTIVE DATE')
 
-
     def html(self):
         html_document = self.attachments.primary_html_document
         if html_document and not html_document.is_binary() and not html_document.empty:
@@ -271,7 +269,7 @@ class FilingSGML:
                 attachment = Attachment(
                     sequence_number=sequence,
                     ixbrl=False,
-                    path=f"/<SGML FILE>/{document.filename}",
+                    path=f"/Archives/edgar/data/{self.header.cik}/{self.header.accession_number.replace('-', '')}/{document.filename}",
                     document=document.filename,
                     document_type=get_document_type(filename=document.filename, declared_document_type=document.type),
                     description=document.description,
@@ -367,7 +365,7 @@ class FilingSGML:
 
         # Create FilingSGML instance
         return cls(header=header, documents=documents)
-    
+
     @classmethod
     def from_text(cls, full_text_submission: str) -> "FilingSGML":
         """

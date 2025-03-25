@@ -386,6 +386,12 @@ class FilingHeader:
                 [subject_company.filing_information.file_number for subject_company in self.subject_companies])
         return list(set(numbers))
 
+    @property
+    def cik(self) -> Optional[str]:
+        if self.filers and self.filers[0].company_information:
+            return self.filers[0].company_information.cik
+        return None
+
     @classmethod
     def parse_submission_format_header(cls, parsed_data: Dict[str, Any]):
         """Parse SUBMISSION format into same data structure"""
