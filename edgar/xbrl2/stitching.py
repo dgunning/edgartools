@@ -484,7 +484,7 @@ class StatementStitcher:
         all_periods = self._extract_periods(statements)
 
         # Set max_periods if not provided
-        max_periods = max_periods or len(statements)
+        max_periods = max_periods or len(statements) + 2 # Allow for the last statement to have 3 periods
         
         # Select appropriate periods based on period_type
         selected_periods = self._select_periods(all_periods, period_type, max_periods)
