@@ -459,7 +459,7 @@ class StatementStitcher:
         self, 
         statements: List[Dict[str, Any]], 
         period_type: Union[PeriodType, str] = PeriodType.RECENT_PERIODS,
-        max_periods: int = 8,
+        max_periods: int = None,
         standard: bool = True
     ) -> Dict[str, Any]:
         """
@@ -482,6 +482,9 @@ class StatementStitcher:
         
         # Extract and sort all periods
         all_periods = self._extract_periods(statements)
+
+        # Set max_periods if not provided
+        max_periods = max_periods or len(statements)
         
         # Select appropriate periods based on period_type
         selected_periods = self._select_periods(all_periods, period_type, max_periods)
