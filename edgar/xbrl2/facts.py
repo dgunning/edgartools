@@ -559,8 +559,17 @@ class FactQuery:
         # Filter columns if specified
         if columns:
             df = df.filter(columns)
+        # skip these columns
+        skip_columns = ['fact_key', 'original_label', 'period_key']
 
-        return df
+        # order columns
+        first_columns = [col for col in ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end']
+                         if col in df.columns]
+        columns = first_columns + [col for col in df.columns
+                                   if col not in first_columns
+                                   and col not in skip_columns]
+
+        return df[columns]
 
 
 class FactsView:
