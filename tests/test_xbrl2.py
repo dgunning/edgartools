@@ -167,9 +167,9 @@ def test_parse_directory():
     # Debug information to understand the element name / ID issue
     console.print("\n[bold]Debug: Element Catalog vs Facts[/bold]")
     # Get first 5 facts
-    fact_keys = list(xbrl.facts.keys())[:5]
+    fact_keys = list(xbrl._facts.keys())[:5]
     for key in fact_keys:
-        fact = xbrl.facts[key]
+        fact = xbrl._facts[key]
         console.print(f"Fact: element_id={fact.element_id}, context={fact.context_ref}, value={fact.value}")
     
     # Get first 5 elements from catalog

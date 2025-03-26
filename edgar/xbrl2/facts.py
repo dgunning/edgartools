@@ -579,6 +579,10 @@ class FactsView:
         self._facts_cache = None
         self._facts_df_cache = None
 
+    def __len__(self):
+        return len(self.get_facts())
+
+
     def get_facts(self) -> List[Dict[str, Any]]:
         """
         Get all facts with enriched context and element information.
@@ -594,7 +598,7 @@ class FactsView:
         enriched_facts = []
         processed_facts = set()  # Track processed facts to avoid duplicates
 
-        for fact_key, fact in self.xbrl.facts.items():
+        for fact_key, fact in self.xbrl._facts.items():
             # Skip if we've already processed this fact based on element ID and context
             fact_signature = f"{fact.element_id}__{fact.context_ref}"
             if fact_signature in processed_facts:

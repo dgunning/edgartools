@@ -1013,7 +1013,7 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
     fact_table.add_column("Category")
     fact_table.add_column("Count")
     
-    fact_table.add_row("Total Facts", str(len(xbrl.facts)))
+    fact_table.add_row("Total Facts", str(len(xbrl._facts)))
     fact_table.add_row("Contexts", str(len(xbrl.contexts)))
     fact_table.add_row("Units", str(len(xbrl.units)))
     fact_table.add_row("Elements", str(len(xbrl.element_catalog)))

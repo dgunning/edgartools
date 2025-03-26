@@ -16,7 +16,7 @@ def intc_xbrl():
 
 
 def test_get_all_facts(intc_xbrl: XBRL):
-    facts_view: FactsView = intc_xbrl.facts_view
+    facts_view: FactsView = intc_xbrl.facts
     assert facts_view
 
     # Check that each fact has a concept, a label and a value
@@ -29,7 +29,7 @@ def test_get_all_facts(intc_xbrl: XBRL):
 
 
 def test_get_facts_by_concept(intc_xbrl: XBRL):
-    facts: FactsView = intc_xbrl.facts_view
+    facts: FactsView = intc_xbrl.facts
     print()
     results = facts.query().by_concept('Revenue').to_dataframe()
     print(results)
@@ -37,7 +37,7 @@ def test_get_facts_by_concept(intc_xbrl: XBRL):
 
 
 def test_get_facts_by_statement_type(intc_xbrl: XBRL):
-    facts: FactsView = intc_xbrl.facts_view
+    facts: FactsView = intc_xbrl.facts
     print()
     results = facts.query().by_statement_type('IncomeStatement').to_dataframe()
     print(results)
@@ -45,7 +45,7 @@ def test_get_facts_by_statement_type(intc_xbrl: XBRL):
 
 
 def test_get_facts_by_label(intc_xbrl: XBRL):
-    facts: FactsView = intc_xbrl.facts_view
+    facts: FactsView = intc_xbrl.facts
     print()
     print(intc_xbrl.statements.income_statement())
     results = facts.query().by_label('Revenue').to_dataframe()
@@ -59,7 +59,6 @@ def test_numeric_sign_for_cashflow_values():
     xbrl: XBRL = XBRL.from_filing(filing)
 
     inventory_facts = (xbrl
-                       .facts_view
                        .query()
                        .by_concept("us-gaap:IncreaseDecreaseInInventories").to_dataframe()
                        .filter(['concept',  'period_end',  'value', 'numeric_value'])
@@ -148,11 +147,11 @@ def test_query_by_label_with_standardization():
 def test_integration_standardization_and_facts_query(intc_xbrl):
     """Integration test for standardization and facts query working together."""
     # Save the count of facts before standardization
-    initial_facts_count = len(intc_xbrl.facts_view.get_facts())
+    initial_facts_count = len(intc_xbrl.facts)
     
     # First, capture some of the original labels before standardization
     # Get "Revenue" related facts with the original label
-    revenue_facts_before = intc_xbrl.facts_view.query().by_concept("Revenue", exact=False).execute()
+    revenue_facts_before = intc_xbrl.query().by_concept("Revenue", exact=False).execute()
     
     # Store original labels for later comparison
     original_revenue_labels = []
@@ -182,11 +181,11 @@ def test_integration_standardization_and_facts_query(intc_xbrl):
                 possible_labels.append(label_text)
     
     # Verify facts count is the same after standardization (no duplication)
-    assert len(intc_xbrl.facts_view.get_facts()) == initial_facts_count, "Facts count changed after standardization"
+    assert len(intc_xbrl.facts) == initial_facts_count, "Facts count changed after standardization"
     
     # Now query the facts both by standardized label and original label
     # Example: Search for "Revenue" which is standardized from labels like "Net Sales" or "Total Revenue"
-    results_standard = intc_xbrl.facts_view.query().by_label("Revenue", exact=True).execute()
+    results_standard = intc_xbrl.query().by_label("Revenue", exact=True).execute()
     
     # If we have results, there should be at least one fact that matches
     if results_standard:
@@ -200,7 +199,7 @@ def test_integration_standardization_and_facts_query(intc_xbrl):
             original_label = fact['original_label']
             
             # Now query by the original label and verify we find the same fact
-            results_original = intc_xbrl.facts_view.query().by_label(original_label, exact=True).execute()
+            results_original = intc_xbrl.facts.query().by_label(original_label, exact=True).execute()
             
             # Should find at least one fact by original label
             assert len(results_original) > 0, f"Failed to find facts by original label: {original_label}"
@@ -221,7 +220,7 @@ def test_integration_standardization_and_facts_query(intc_xbrl):
     
     for test_label in test_labels:
         # Try to query by this label
-        results = intc_xbrl.facts_view.query().by_label(test_label, exact=True).execute()
+        results = intc_xbrl.facts.query().by_label(test_label, exact=True).execute()
         print(f"Testing displayed label: {test_label}, found {len(results)} facts")
         
         # We should find at least one fact with this label

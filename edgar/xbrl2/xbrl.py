@@ -86,7 +86,7 @@ class XBRL:
         return self.parser.contexts
         
     @property
-    def facts(self):
+    def _facts(self):
         return self.parser.facts
         
     @property
@@ -255,7 +255,7 @@ class XBRL:
         return Statements(self)
         
     @property
-    def facts_view(self):
+    def facts(self):
         from edgar.xbrl2.facts import FactsView
         if not hasattr(self, '_facts_view'):
             self._facts_view = FactsView(self)
@@ -268,7 +268,7 @@ class XBRL:
         """
         Start a new query for XBRL facts.
         """
-        fact_query = self.facts_view.query()
+        fact_query = self.facts.query()
         if not include_dimensions:
             fact_query = fact_query.exclude_dimensions()
         if not include_contexts:
@@ -1061,7 +1061,7 @@ class XBRL:
         
         # Convert facts to DataFrame
         fact_data = []
-        for fact_key, fact in self.facts.items():
+        for fact_key, fact in self._facts.items():
             fact_dict = fact.dict()
             fact_dict['fact_key'] = fact_key
             
@@ -1367,4 +1367,4 @@ class XBRL:
         
     def __str__(self):
         """String representation."""
-        return f"XBRL Document with {len(self.facts)} facts, {len(self.contexts)} contexts, and {len(self.presentation_trees)} statements"
+        return f"XBRL Document with {len(self._facts)} facts, {len(self.contexts)} contexts, and {len(self.presentation_trees)} statements"
