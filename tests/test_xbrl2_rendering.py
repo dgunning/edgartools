@@ -4,7 +4,6 @@ Tests for XBRL2 rendering functionality.
 from pathlib import Path
 import pytest
 from datetime import datetime, date
-from unittest.mock import MagicMock
 from edgar.xbrl2.xbrl import XBRL
 from rich import print
 from edgar.richtools import rich_to_text, repr_rich
@@ -111,9 +110,9 @@ def test_format_period_labels_with_date_range():
     
     # Verify that the formatted date shows a range (contains a hyphen)
     assert len(formatted_periods) == 1, "Should return one formatted period"
-    assert "-" in formatted_periods[0][1], "Should include date range with hyphen when show_date_range=True"
-    assert format_date(start_date) in formatted_periods[0][1], "Should include start date in range"
-    assert format_date(end_date) in formatted_periods[0][1], "Should include end date in range"
+    assert "-" in formatted_periods[0].label, "Should include date range with hyphen when show_date_range=True"
+    assert format_date(start_date) in formatted_periods[0].label, "Should include start date in range"
+    assert format_date(end_date) in formatted_periods[0].label, "Should include end date in range"
     
     # Test with show_date_range=False (default behavior)
     formatted_periods_no_range, _ = _format_period_labels(
@@ -125,6 +124,6 @@ def test_format_period_labels_with_date_range():
     
     # Verify that the formatted date only shows end date (no hyphen)
     assert len(formatted_periods_no_range) == 1, "Should return one formatted period"
-    assert "-" not in formatted_periods_no_range[0][1], "Should not include date range when show_date_range=False"
-    assert format_date(end_date) in formatted_periods_no_range[0][1], "Should include end date"
-    assert format_date(start_date) not in formatted_periods_no_range[0][1], "Should not include start date"
+    assert "-" not in formatted_periods_no_range[0].label, "Should not include date range when show_date_range=False"
+    assert format_date(end_date) in formatted_periods_no_range[0].label, "Should include end date"
+    assert format_date(start_date) not in formatted_periods_no_range[0].label, "Should not include start date"

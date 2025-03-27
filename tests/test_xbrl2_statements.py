@@ -4,6 +4,7 @@ import pytest
 from rich import print
 
 from edgar import *
+from edgar.xbrl2.rendering import RenderedStatement
 from edgar.xbrl2.statements import Statement
 from edgar.xbrl2.xbrl import XBRL
 import pandas as pd
@@ -109,13 +110,14 @@ def test_get_income_statement(tsla_xbrl):
 def test_statement_to_dataframe(aapl_xbrl):
     cashflow_statement: Statement = aapl_xbrl.statements.cash_flow_statement()
     print()
-    print(cashflow_statement)
-    df1 = cashflow_statement.render().to_dataframe()
-    df2 = aapl_xbrl.to_pandas().keys()
-    print(df2)
+    # print(cashflow_statement)
+    rendered_statement:RenderedStatement = cashflow_statement.render()
+    df1 = rendered_statement.to_dataframe()
+    print()
+    print(df1[[ '2023-09-30']])
     df = cashflow_statement.to_dataframe()
 
-    assert all(col in df.columns for col in ['2020-09-26', '2021-09-25', '2022-09-24'])
+    assert all(col in df.columns for col in ['2023-09-30', '2022-09-24', '2021-09-25'])
 
 
 def test_non_financial_statement():
@@ -188,7 +190,6 @@ def test_statement_lookup_optimizations(tsla_xbrl):
 
 
 def test_cashflow_statement_totals():
-    c = Company("CRSR")
     filing = Filing(company='Corsair Gaming, Inc.', cik=1743759, form='10-K',
                     filing_date='2025-02-26', accession_no='0000950170-25-027856')
     xbrl: XBRL = XBRL.from_filing(filing)
@@ -200,7 +201,7 @@ def test_cashflow_statement_totals():
                      "us-gaap_NetCashProvidedByUsedInInvestingActivities",
                      "us-gaap_NetCashProvidedByUsedInFinancingActivities"]
     idx = df.concept.isin(main_concepts)
-    cols = ["concept", "label", "2024-01-01_2024-12-31"]
+    cols = ["concept", "label", "2024-12-31"]
     cash_totals = df[idx][cols]
     assert len(cash_totals) == 3
     print(cash_totals)
