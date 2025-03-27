@@ -88,7 +88,8 @@ def test_aapl_balance_sheet(aapl_xbrl):
     print()
     balance_sheet = statements['BalanceSheet']
     assert balance_sheet
-    print(balance_sheet)
+    rendered_statement = balance_sheet.render()
+    assert rendered_statement
 
     balance_sheet = statements.balance_sheet()
     print(balance_sheet)
@@ -109,7 +110,11 @@ def test_statement_to_dataframe(aapl_xbrl):
     cashflow_statement: Statement = aapl_xbrl.statements.cash_flow_statement()
     print()
     print(cashflow_statement)
+    df1 = cashflow_statement.render().to_dataframe()
+    df2 = aapl_xbrl.to_pandas().keys()
+    print(df2)
     df = cashflow_statement.to_dataframe()
+
     assert all(col in df.columns for col in ['2020-09-26', '2021-09-25', '2022-09-24'])
 
 

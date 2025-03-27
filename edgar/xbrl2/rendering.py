@@ -5,6 +5,7 @@ This module provides functions for formatting and displaying XBRL data.
 """
 
 from datetime import datetime
+import pandas as pd
 from typing import Dict, List, Any, Optional, Tuple, Union
 
 from rich import box
@@ -13,12 +14,14 @@ from rich.panel import Panel
 from rich.table import Table as RichTable
 from rich.text import Text
 
+from edgar.richtools import repr_rich
 from edgar.files.html import Document
 from edgar.richtools import rich_to_text
 from edgar.xbrl2 import standardization
 from edgar.xbrl2.core import (
     determine_dominant_scale, format_value, format_date, parse_date
 )
+from dataclasses import dataclass, field
 
 # Default style configuration
 DEFAULT_STYLES = {
@@ -115,6 +118,203 @@ def _calculate_comparison(current_value: Any, previous_value: Any) -> Optional[T
         return (pct_change, 'increase' if pct_change > 0 else 'decrease')
     except (ValueError, TypeError):
         return None
+
+@dataclass
+class StatementCell:
+    """A single cell in a statement row."""
+    value: Any
+    style: Dict[str, str] = field(default_factory=dict)  # Style attributes like color, bold, etc.
+    comparison: Optional[Dict[str, Any]] = None  # Comparison info if applicable
+
+
+@dataclass
+class StatementRow:
+    """A row in a financial statement."""
+    label: str
+    level: int  # Indentation/hierarchy level
+    cells: List[StatementCell] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Additional info like concept name, type, etc.
+    is_abstract: bool = False
+    is_dimension: bool = False
+    has_dimension_children: bool = False
+
+
+@dataclass
+class StatementHeader:
+    """Header information for a financial statement."""
+    columns: List[str] = field(default_factory=list)  # Period labels
+    period_keys: List[str] = field(default_factory=list)  # Period keys for mapping to data
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Info like date ranges, fiscal periods
+
+
+@dataclass
+class RenderedStatement:
+    """Complete representation of a financial statement.
+
+    This class provides an intermediate representation of statement data
+    that can be used by different rendering backends (e.g. rich, web, etc).
+    """
+    title: str
+    header: StatementHeader
+    rows: List[StatementRow]
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Statement-level metadata like units, scales
+    statement_type: str = ""
+    fiscal_period_indicator: Optional[str] = None
+    units_note: Optional[str] = None
+
+    def __rich__(self) -> RichTable:
+        """Render as a rich table"""
+        # Create the table
+        table = RichTable(title=self.title, box=box.SIMPLE)
+        
+        # Add the fiscal period indicator and units note as a subtitle if available
+        if self.header.columns:
+            subtitles = []
+            
+            # Add fiscal period indicator if available
+            if self.fiscal_period_indicator:
+                subtitles.append(f"[bold]{self.fiscal_period_indicator}[/bold]")
+            
+            # Add units note
+            if self.units_note:
+                subtitles.append(self.units_note)
+            
+            # Apply subtitles to table title
+            if subtitles:
+                table.title = f"{self.title}\n{' '.join(subtitles)}"
+        
+        # Add columns with right-alignment for numeric columns
+        table.add_column("", justify="left")
+        for column in self.header.columns:
+            table.add_column(column)
+        
+        # Add rows
+        for row in self.rows:
+            # Format the label based on level and properties
+            if row.is_dimension:
+                # Format dimension items with the appropriate style
+                indent = "  " * row.level
+                styled_label = f"{indent}[italic]{row.label}[/italic]"
+            elif row.is_abstract:
+                if row.level == 0:
+                    # Top-level header - full caps, bold
+                    styled_label = f"[bold]{row.label.upper()}[/bold]"
+                elif row.level == 1:
+                    # Section header - bold
+                    styled_label = f"[bold]{row.label}[/bold]"
+                else:
+                    # Sub-section header - indented, bold
+                    indent = "  " * (row.level - 1)  # Less aggressive indentation
+                    styled_label = f"[bold]{indent}{row.label}[/bold]"
+            else:
+                # Regular line items - indented based on level
+                indent = "  " * row.level
+                # If this item has dimension children, make it bold and add a colon
+                if row.has_dimension_children and row.cells:
+                    styled_label = f"[bold]{indent}{row.label}:[/bold]"
+                else:
+                    styled_label = f"{indent}{row.label}"
+            
+            # Convert cells to their display representation
+            cell_values = []
+            for cell in row.cells:
+                if isinstance(cell.value, Text):
+                    cell_values.append(cell.value)
+                else:
+                    # Handle empty cells
+                    cell_values.append("" if cell.value is None else cell.value)
+            
+            table.add_row(styled_label, *cell_values)
+        
+        return table
+    
+    def to_dataframe(self) -> Any:
+        """Convert to a pandas DataFrame"""
+        try:
+            
+            # Create rows for the DataFrame
+            df_rows = []
+            for row in self.rows:
+                df_row = {
+                    'label': row.label,
+                    'level': row.level,
+                    'is_abstract': row.is_abstract,
+                    'is_dimension': row.is_dimension,
+                }
+                
+                # Add any additional metadata
+                for key, value in row.metadata.items():
+                    df_row[f'meta_{key}'] = value
+                
+                # Add cell values using column names from header
+                for i, cell in enumerate(row.cells):
+                    if i < len(self.header.columns):
+                        column_name = self.header.columns[i]
+                        df_row[column_name] = cell.value
+                
+                df_rows.append(df_row)
+            
+            return pd.DataFrame(df_rows)
+        except ImportError:
+            return "Pandas is required for DataFrame conversion"
+    
+    def to_markdown(self) -> str:
+        """Convert to a markdown table representation"""
+        lines = []
+        
+        # Add title as a header
+        lines.append(f"## {self.title}")
+        lines.append("")
+        
+        # Add subtitle info if available
+        if self.fiscal_period_indicator or self.units_note:
+            subtitle_parts = []
+            if self.fiscal_period_indicator:
+                subtitle_parts.append(f"**{self.fiscal_period_indicator}**")
+            if self.units_note:
+                # Remove rich formatting tags from units note
+                clean_units = self.units_note.replace('[italic]', '').replace('[/italic]', '')
+                subtitle_parts.append(f"*{clean_units}*")
+            
+            lines.append(" ".join(subtitle_parts))
+            lines.append("")
+        
+        # Create header row
+        header = [""] + self.header.columns
+        lines.append("| " + " | ".join(header) + " |")
+        
+        # Add separator row
+        separator = ["---"] + ["---" for _ in self.header.columns]
+        lines.append("| " + " | ".join(separator) + " |")
+        
+        # Add data rows
+        for row in self.rows:
+            # Handle indentation for row label
+            indent = "  " * row.level
+            
+            # Format row label based on properties
+            if row.is_abstract:
+                label = f"**{indent}{row.label}**"
+            elif row.is_dimension:
+                label = f"*{indent}{row.label}*"
+            else:
+                label = f"{indent}{row.label}"
+            
+            # Format cell values
+            cell_values = []
+            for cell in row.cells:
+                if cell.value is None or cell.value == "":
+                    cell_values.append("")
+                elif isinstance(cell.value, Text):
+                    cell_values.append(str(cell.value))
+                else:
+                    cell_values.append(str(cell.value))
+            
+            # Add the row
+            row_data = [label] + cell_values
+            lines.append("| " + " | ".join(row_data) + " |")
+        
+        return "\n".join(lines)
 
 def _format_comparison(pct_change: float, comparison_type: str) -> str:
     """Format a comparison indicator with the appropriate symbol and color.
@@ -538,6 +738,204 @@ def _create_units_note(
         return ""
 
 
+@dataclass
+class StatementCell:
+    """A single cell in a statement row."""
+    value: Any
+    style: Dict[str, str] = field(default_factory=dict)  # Style attributes like color, bold, etc.
+    comparison: Optional[Dict[str, Any]] = None  # Comparison info if applicable
+
+
+@dataclass
+class StatementRow:
+    """A row in a financial statement."""
+    label: str
+    level: int  # Indentation/hierarchy level
+    cells: List[StatementCell] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Additional info like concept name, type, etc.
+    is_abstract: bool = False
+    is_dimension: bool = False
+    has_dimension_children: bool = False
+
+
+@dataclass
+class StatementHeader:
+    """Header information for a financial statement."""
+    columns: List[str] = field(default_factory=list)  # Period labels
+    period_keys: List[str] = field(default_factory=list)  # Period keys for mapping to data
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Info like date ranges, fiscal periods
+
+
+@dataclass
+class RenderedStatement:
+    """Complete representation of a financial statement.
+
+    This class provides an intermediate representation of statement data
+    that can be used by different rendering backends (e.g. rich, web, etc).
+    """
+    title: str
+    header: StatementHeader
+    rows: List[StatementRow]
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Statement-level metadata like units, scales
+    statement_type: str = ""
+    fiscal_period_indicator: Optional[str] = None
+    units_note: Optional[str] = None
+
+    def __rich__(self) -> RichTable:
+        """Render as a rich table"""
+        # Create the table
+        table = RichTable(title=self.title, box=box.SIMPLE)
+        
+        # Add the fiscal period indicator and units note as a subtitle if available
+        if self.header.columns:
+            subtitles = []
+            
+            # Add fiscal period indicator if available
+            if self.fiscal_period_indicator:
+                subtitles.append(f"[bold]{self.fiscal_period_indicator}[/bold]")
+            
+            # Add units note
+            if self.units_note:
+                subtitles.append(self.units_note)
+            
+            # Apply subtitles to table title
+            if subtitles:
+                table.title = f"{self.title}\n{' '.join(subtitles)}"
+        
+        # Add columns with right-alignment for numeric columns
+        table.add_column("", justify="left")
+        for column in self.header.columns:
+            table.add_column(column)
+        
+        # Add rows
+        for row in self.rows:
+            # Format the label based on level and properties
+            if row.is_dimension:
+                # Format dimension items with the appropriate style
+                indent = "  " * row.level
+                styled_label = f"{indent}[italic]{row.label}[/italic]"
+            elif row.is_abstract:
+                if row.level == 0:
+                    # Top-level header - full caps, bold
+                    styled_label = f"[bold]{row.label.upper()}[/bold]"
+                elif row.level == 1:
+                    # Section header - bold
+                    styled_label = f"[bold]{row.label}[/bold]"
+                else:
+                    # Sub-section header - indented, bold
+                    indent = "  " * (row.level - 1)  # Less aggressive indentation
+                    styled_label = f"[bold]{indent}{row.label}[/bold]"
+            else:
+                # Regular line items - indented based on level
+                indent = "  " * row.level
+                # If this item has dimension children, make it bold and add a colon
+                if row.has_dimension_children and row.cells:
+                    styled_label = f"[bold]{indent}{row.label}:[/bold]"
+                else:
+                    styled_label = f"{indent}{row.label}"
+            
+            # Convert cells to their display representation
+            cell_values = []
+            for cell in row.cells:
+                if isinstance(cell.value, Text):
+                    cell_values.append(cell.value)
+                else:
+                    # Handle empty cells
+                    cell_values.append("" if cell.value is None else cell.value)
+            
+            table.add_row(styled_label, *cell_values)
+        
+        return table
+    
+    def to_dataframe(self) -> Any:
+        """Convert to a pandas DataFrame"""
+        try:
+            
+            # Create rows for the DataFrame
+            df_rows = []
+            for row in self.rows:
+                df_row = {
+                    'label': row.label,
+                    'level': row.level,
+                    'is_abstract': row.is_abstract,
+                    'is_dimension': row.is_dimension,
+                }
+                
+                # Add any additional metadata
+                for key, value in row.metadata.items():
+                    df_row[f'meta_{key}'] = value
+                
+                # Add cell values using column names from header
+                for i, cell in enumerate(row.cells):
+                    if i < len(self.header.columns):
+                        column_name = self.header.columns[i]
+                        df_row[column_name] = cell.value
+                
+                df_rows.append(df_row)
+            
+            return pd.DataFrame(df_rows)
+        except ImportError:
+            return "Pandas is required for DataFrame conversion"
+    
+    def to_markdown(self) -> str:
+        """Convert to a markdown table representation"""
+        lines = []
+        
+        # Add title as a header
+        lines.append(f"## {self.title}")
+        lines.append("")
+        
+        # Add subtitle info if available
+        if self.fiscal_period_indicator or self.units_note:
+            subtitle_parts = []
+            if self.fiscal_period_indicator:
+                subtitle_parts.append(f"**{self.fiscal_period_indicator}**")
+            if self.units_note:
+                # Remove rich formatting tags from units note
+                clean_units = self.units_note.replace('[italic]', '').replace('[/italic]', '')
+                subtitle_parts.append(f"*{clean_units}*")
+            
+            lines.append(" ".join(subtitle_parts))
+            lines.append("")
+        
+        # Create header row
+        header = [""] + self.header.columns
+        lines.append("| " + " | ".join(header) + " |")
+        
+        # Add separator row
+        separator = ["---"] + ["---" for _ in self.header.columns]
+        lines.append("| " + " | ".join(separator) + " |")
+        
+        # Add data rows
+        for row in self.rows:
+            # Handle indentation for row label
+            indent = "  " * row.level
+            
+            # Format row label based on properties
+            if row.is_abstract:
+                label = f"**{indent}{row.label}**"
+            elif row.is_dimension:
+                label = f"*{indent}{row.label}*"
+            else:
+                label = f"{indent}{row.label}"
+            
+            # Format cell values
+            cell_values = []
+            for cell in row.cells:
+                if cell.value is None or cell.value == "":
+                    cell_values.append("")
+                elif isinstance(cell.value, Text):
+                    cell_values.append(str(cell.value))
+                else:
+                    cell_values.append(str(cell.value))
+            
+            # Add the row
+            row_data = [label] + cell_values
+            lines.append("| " + " | ".join(row_data) + " |")
+        
+        return "\n".join(lines)
+
+
 def _format_value_for_display(
     value: Any, 
     item: Dict[str, Any], 
@@ -557,20 +955,21 @@ def _format_value_for_display(
         is_monetary_statement: Whether this is a monetary statement
         dominant_scale: The dominant scale for monetary values
         shares_scale: The scale for share values, if present
+        comparison_info: Optional comparison information for showing trends
         
     Returns:
         Text: Formatted value as a Rich Text object
     """
     if not isinstance(value, (int, float, str)) or value == "":
-        if Text is None:
-            return ""
         return Text("", justify="right")
         
     # Extract metadata
     concept = item.get('concept', '')
     label = item.get('label', '')
     label_lower = label.lower()
-    fact_decimals = item.get('decimals', {}).get(period_key, 0)
+    fact_decimals = item.get('decimals', {}).get(period_key) if period_key else 0
+    if fact_decimals is None:
+        fact_decimals = 0
     
     # Determine if this is a monetary value
     is_monetary = is_monetary_statement
@@ -599,31 +998,21 @@ def _format_value_for_display(
                 scale_factor = 10 ** (-fact_decimals)
                 scaled_value = value / scale_factor
                 # Always display share amounts with 0 decimal places for cleaner presentation
-                if Text is None:
-                    return f"{scaled_value:,.0f}"
                 return Text(f"{scaled_value:,.0f}", justify="right")
             else:
                 # For smaller numbers or positive decimals, use unscaled values
-                if Text is None:
-                    return f"{value:,.0f}"
                 return Text(f"{value:,.0f}", justify="right")
         else:
             # Format other values normally using the flexible format_value function
             formatted = format_value(value, is_monetary, dominant_scale, fact_decimals)
-            if Text is None:
-                return formatted
             return Text(formatted, justify="right")
     else:
         # Non-numeric values - check if it's HTML and convert if needed
         if isinstance(value, str) and _is_html(value):
             text = html_to_text(value)
-            if Text is None:
-                return text
             return Text(text)
         else:
             text = str(value)
-            if Text is None:
-                return text
             return Text(text, justify="right")
 
 
@@ -636,9 +1025,9 @@ def render_statement(
     standard: bool = True,
     show_date_range: bool = False,
     show_comparisons: bool = True
-) -> Union[str, 'RichTable']:
+) -> RenderedStatement:
     """
-    Render a financial statement as a rich table.
+    Render a financial statement as a structured intermediate representation.
     
     Args:
         statement_data: Statement data with items and values
@@ -648,9 +1037,11 @@ def render_statement(
         entity_info: Entity information (optional)
         standard: Whether to use standardized concept labels (default: True)
         show_date_range: Whether to show full date ranges for duration periods (default: False)
+        show_comparisons: Whether to show period-to-period comparisons (default: True)
         
     Returns:
-        RichTable: A formatted table representation of the statement
+        RenderedStatement: A structured representation of the statement that can be rendered
+                           in various formats
     """
     if entity_info is None:
         entity_info = {}
@@ -701,9 +1092,6 @@ def render_statement(
         # Indicate that standardization is being used in the title
         statement_title = f"{statement_title} (Standardized)"
     
-    # Create the table
-    table = RichTable(title=statement_title, box=box.SIMPLE)
-    
     # Determine if this is likely a monetary statement
     is_monetary_statement = statement_type in ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement']
     
@@ -732,24 +1120,10 @@ def render_statement(
                     break
             if shares_scale is not None:
                 break
-                
-    # Add the fiscal period indicator and note as a subtitle if available
-    if formatted_periods:
-        subtitles = []
-        
-        # Add fiscal period indicator if available
-        if fiscal_period_indicator:
-            subtitles.append(f"[bold]{fiscal_period_indicator}[/bold]")
-        
-        # Add units note
-        units_note = _create_units_note(is_monetary_statement, dominant_scale, shares_scale)
-        if units_note:
-            subtitles.append(units_note)
-        
-        # Apply subtitles to table title
-        if subtitles:
-            table.title = f"{statement_title}\n{' '.join(subtitles)}"
     
+    # Create the units note
+    units_note = _create_units_note(is_monetary_statement, dominant_scale, shares_scale)
+                
     # Extract period metadata for each period for better filtering
     period_metadatas = []
     for period_key, period_label in formatted_periods:
@@ -874,12 +1248,34 @@ def render_statement(
                         if m.get('data_density', 0) > 0
                         ]
     
-    # Add columns with right-alignment for numeric columns
-    table.add_column("", justify="left")
-    for _, period_label in filtered_periods:
-        table.add_column(period_label)
+    # Create the RenderedStatement and its header
+    header = StatementHeader(
+        columns=[label for _, label in filtered_periods],
+        period_keys=[key for key, _ in filtered_periods],
+        metadata={
+            'dominant_scale': dominant_scale,
+            'shares_scale': shares_scale,
+            'is_monetary_statement': is_monetary_statement,
+            'period_metadatas': period_metadatas
+        }
+    )
     
-    # Add rows
+    rendered_statement = RenderedStatement(
+        title=statement_title,
+        header=header,
+        rows=[],
+        metadata={
+            'standard': standard,
+            'show_date_range': show_date_range,
+            'entity_info': entity_info,
+            'comparison_data': comparison_data
+        },
+        statement_type=statement_type,
+        fiscal_period_indicator=fiscal_period_indicator,
+        units_note=units_note
+    )
+    
+    # Process and add rows
     for index, item in enumerate(statement_data):
         # Skip rows with no values if they're abstract (headers without data)
         # But keep abstract items with children (section headers)
@@ -895,14 +1291,27 @@ def render_statement(
         if any(bracket in item['label'] for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
             continue
             
-        # Format the label based on level and abstract status
-        level = item['level']
-
         # Remove [Abstract] from label if present
         label = item['label'].replace(' [Abstract]', '')
+        level = item['level']
         
-        # Get values for each period
-        period_values = []
+        # Create the row with metadata
+        row = StatementRow(
+            label=label,
+            level=level,
+            cells=[],
+            metadata={
+                'concept': item.get('concept', ''),
+                'has_values': item.get('has_values', False),
+                'children': item.get('children', []),
+                'dimension_metadata': item.get('dimension_metadata', {})
+            },
+            is_abstract=item.get('is_abstract', False),
+            is_dimension=item.get('is_dimension', False),
+            has_dimension_children=item.get('has_dimension_children', False)
+        )
+        
+        # Add values for each period
         for period_key, _ in filtered_periods:
             value = item['values'].get(period_key, "")
             # Get comparison info for this item and period if available
@@ -915,51 +1324,218 @@ def render_statement(
                 is_monetary_statement, dominant_scale, shares_scale,
                 comparison_info
             )
-            period_values.append(formatted_value)
+            
+            # Create a cell and add it to the row
+            cell = StatementCell(
+                value=formatted_value,
+                style={},  # Style will be handled in renderer
+                comparison=comparison_info
+            )
+            row.cells.append(cell)
         
-        # Apply different formatting based on level, abstract status and dimension status
-        if item.get('is_dimension', False):
-            # Format dimension items with the appropriate style
-            indent = "  " * level
-            
-            # Get dimension metadata if available for more nuanced formatting
-            dim_metadata = item.get('dimension_metadata')
-            
-            # If it's a dimension with just one dimension (most common case),
-            # use a cleaner format with just the member name
-            if dim_metadata and len(dim_metadata) == 1:
-                # Format for single dimension items
-                styled_label = f"{indent}[italic]{label}[/italic]"
-            else:
-                # Format for multi-dimension items (keep full dimension:member notation)
-                styled_label = f"{indent}[italic]{label}[/italic]"
-                
-            table.add_row(styled_label, *period_values)
-        elif item['is_abstract']:
-            if level == 0:
-                # Top-level header - full caps, bold
-                styled_label = f"[bold]{label.upper()}[/bold]"
-            elif level == 1:
-                # Section header - bold
-                styled_label = f"[bold]{label}[/bold]"
-            else:
-                # Sub-section header - indented, bold
-                indent = "  " * (level - 1)  # Less aggressive indentation
-                styled_label = f"[bold]{indent}{label}[/bold]"
-            
-            # Headers typically don't have values
-            table.add_row(styled_label, *["" for _ in filtered_periods])
-        else:
-            # Regular line items - indented based on level
-            indent = "  " * level
-            # If this item has dimension children, make it bold and add a colon
-            if item.get('has_dimension_children', False) and item['has_values']:
-                styled_label = f"[bold]{indent}{label}:[/bold]"
-            else:
-                styled_label = f"{indent}{label}"
-            table.add_row(styled_label, *period_values)
+        # Add the row to the statement
+        rendered_statement.rows.append(row)
     
-    return table
+    return rendered_statement
+
+
+@dataclass
+class StatementCell:
+    """A single cell in a statement row."""
+    value: Any
+    style: Dict[str, str] = field(default_factory=dict)  # Style attributes like color, bold, etc.
+    comparison: Optional[Dict[str, Any]] = None  # Comparison info if applicable
+
+
+@dataclass
+class StatementRow:
+    """A row in a financial statement."""
+    label: str
+    level: int  # Indentation/hierarchy level
+    cells: List[StatementCell] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Additional info like concept name, type, etc.
+    is_abstract: bool = False
+    is_dimension: bool = False
+    has_dimension_children: bool = False
+
+
+@dataclass
+class StatementHeader:
+    """Header information for a financial statement."""
+    columns: List[str] = field(default_factory=list)  # Period labels
+    period_keys: List[str] = field(default_factory=list)  # Period keys for mapping to data
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Info like date ranges, fiscal periods
+
+
+@dataclass
+class RenderedStatement:
+    """Complete representation of a financial statement.
+
+    This class provides an intermediate representation of statement data
+    that can be used by different rendering backends (e.g. rich, web, etc).
+    """
+    title: str
+    header: StatementHeader
+    rows: List[StatementRow]
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Statement-level metadata like units, scales
+    statement_type: str = ""
+    fiscal_period_indicator: Optional[str] = None
+    units_note: Optional[str] = None
+
+    def __rich__(self) -> RichTable:
+        """Render as a rich table"""
+        # Create the table
+        table = RichTable(title=self.title, box=box.SIMPLE)
+        
+        # Add the fiscal period indicator and units note as a subtitle if available
+        if self.header.columns:
+            subtitles = []
+            
+            # Add fiscal period indicator if available
+            if self.fiscal_period_indicator:
+                subtitles.append(f"[bold]{self.fiscal_period_indicator}[/bold]")
+            
+            # Add units note
+            if self.units_note:
+                subtitles.append(self.units_note)
+            
+            # Apply subtitles to table title
+            if subtitles:
+                table.title = f"{self.title}\n{' '.join(subtitles)}"
+        
+        # Add columns with right-alignment for numeric columns
+        table.add_column("", justify="left")
+        for column in self.header.columns:
+            table.add_column(column)
+        
+        # Add rows
+        for row in self.rows:
+            # Format the label based on level and properties
+            if row.is_dimension:
+                # Format dimension items with the appropriate style
+                indent = "  " * row.level
+                styled_label = f"{indent}[italic]{row.label}[/italic]"
+            elif row.is_abstract:
+                if row.level == 0:
+                    # Top-level header - full caps, bold
+                    styled_label = f"[bold]{row.label.upper()}[/bold]"
+                elif row.level == 1:
+                    # Section header - bold
+                    styled_label = f"[bold]{row.label}[/bold]"
+                else:
+                    # Sub-section header - indented, bold
+                    indent = "  " * (row.level - 1)  # Less aggressive indentation
+                    styled_label = f"[bold]{indent}{row.label}[/bold]"
+            else:
+                # Regular line items - indented based on level
+                indent = "  " * row.level
+                # If this item has dimension children, make it bold and add a colon
+                if row.has_dimension_children and row.cells:
+                    styled_label = f"[bold]{indent}{row.label}:[/bold]"
+                else:
+                    styled_label = f"{indent}{row.label}"
+            
+            # Convert cells to their display representation
+            cell_values = []
+            for cell in row.cells:
+                if isinstance(cell.value, Text):
+                    cell_values.append(cell.value)
+                else:
+                    # Handle empty cells
+                    cell_values.append("" if cell.value is None else cell.value)
+            
+            table.add_row(styled_label, *cell_values)
+        
+        return table
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    
+    def to_dataframe(self) -> Any:
+        """Convert to a pandas DataFrame"""
+        try:
+            # Create rows for the DataFrame
+            df_rows = []
+            for row in self.rows:
+                df_row = {
+                    'concept': row.metadata.get('concept', ''),
+                    'label': row.label
+                }
+                
+                # Add cell values using column names from header
+                for i, cell in enumerate(row.cells):
+                    if i < len(self.header.columns):
+                        column_name = self.header.columns[i]
+                        df_row[column_name] = cell.value
+
+                df_row['level'] = row.level
+                df_row['abstract'] = row.is_abstract
+                df_row['dimension'] = row.is_dimension
+                
+                df_rows.append(df_row)
+            
+            return pd.DataFrame(df_rows)
+        except ImportError:
+            return "Pandas is required for DataFrame conversion"
+    
+    def to_markdown(self) -> str:
+        """Convert to a markdown table representation"""
+        lines = []
+        
+        # Add title as a header
+        lines.append(f"## {self.title}")
+        lines.append("")
+        
+        # Add subtitle info if available
+        if self.fiscal_period_indicator or self.units_note:
+            subtitle_parts = []
+            if self.fiscal_period_indicator:
+                subtitle_parts.append(f"**{self.fiscal_period_indicator}**")
+            if self.units_note:
+                # Remove rich formatting tags from units note
+                clean_units = self.units_note.replace('[italic]', '').replace('[/italic]', '')
+                subtitle_parts.append(f"*{clean_units}*")
+            
+            lines.append(" ".join(subtitle_parts))
+            lines.append("")
+        
+        # Create header row
+        header = [""] + self.header.columns
+        lines.append("| " + " | ".join(header) + " |")
+        
+        # Add separator row
+        separator = ["---"] + ["---" for _ in self.header.columns]
+        lines.append("| " + " | ".join(separator) + " |")
+        
+        # Add data rows
+        for row in self.rows:
+            # Handle indentation for row label
+            indent = "  " * row.level
+            
+            # Format row label based on properties
+            if row.is_abstract:
+                label = f"**{indent}{row.label}**"
+            elif row.is_dimension:
+                label = f"*{indent}{row.label}*"
+            else:
+                label = f"{indent}{row.label}"
+            
+            # Format cell values
+            cell_values = []
+            for cell in row.cells:
+                if cell.value is None or cell.value == "":
+                    cell_values.append("")
+                elif isinstance(cell.value, Text):
+                    cell_values.append(str(cell.value))
+                else:
+                    cell_values.append(str(cell.value))
+            
+            # Add the row
+            row_data = [label] + cell_values
+            lines.append("| " + " | ".join(row_data) + " |")
+        
+        return "\n".join(lines)
 
 
 def generate_rich_representation(xbrl) -> Union[str, 'Panel']:

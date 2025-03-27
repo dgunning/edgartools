@@ -27,7 +27,7 @@ from edgar.xbrl2.models import (
 )
 from edgar.xbrl2.parser import XBRLParser
 from edgar.xbrl2.periods import get_period_views, determine_periods_to_display
-from edgar.xbrl2.rendering import render_statement, generate_rich_representation
+from edgar.xbrl2.rendering import render_statement, generate_rich_representation, RenderedStatement
 from edgar.xbrl2.statements import statement_to_concepts
 
 
@@ -924,7 +924,7 @@ class XBRL:
                           period_filter: Optional[str] = None, 
                           period_view: Optional[str] = None,
                           standard: bool = True,
-                          show_date_range: bool = False) -> RichTable:
+                          show_date_range: bool = False) -> RenderedStatement:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         
@@ -1204,56 +1204,6 @@ class XBRL:
 
     def __repr__(self):
         return repr_rich(self)
-    
-    def to_dataframe(self, statement_type: Optional[str] = None, include_metadata: bool = True,
-                    standardize_values: bool = True) -> pd.DataFrame:
-        """
-        Convert statement data to a pandas DataFrame.
-        
-        Args:
-            statement_type: Optional statement type to convert (e.g., 'BalanceSheet')
-            include_metadata: Whether to include metadata columns
-            standardize_values: Whether to standardize numeric values using scale factors
-            
-        Returns:
-            pd.DataFrame: DataFrame with statement data
-        """
-        # Get statement data
-        if statement_type:
-            statement_data = self.get_statement_by_type(statement_type)
-            if statement_data is None:
-                return pd.DataFrame()
-            if isinstance(statement_data, dict):
-                statement_data = [statement_data]
-        else:
-            all_statements = self.get_all_statements()
-            if all_statements is None:
-                return pd.DataFrame()
-            # Convert to list of statements
-            statement_data = []
-            for stmt in all_statements.values():
-                if isinstance(stmt, dict):
-                    statement_data.append(stmt)
-                elif isinstance(stmt, list):
-                    statement_data.extend(stmt)
-            
-        if not statement_data:
-            return pd.DataFrame()
-            
-        # Get periods to display
-        periods_to_display = None
-        if statement_type:
-            period_views = self.get_period_views(statement_type)
-            if period_views:
-                # Use the first available period view
-                periods_to_display = period_views[0].get('periods', [])
-        
-        return transformers.to_dataframe(
-            statement_data,
-            periods_to_display=periods_to_display,
-            include_metadata=include_metadata,
-            standardize_values=standardize_values
-        )
     
     def calculate_ratios(self, statement_type: Optional[str] = None) -> Dict[str, Dict[str, float]]:
         """

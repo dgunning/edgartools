@@ -62,7 +62,7 @@ def test_render_statement_with_shares():
         periods_to_display,
         'Test Statement',
         'BalanceSheet'
-    )
+    ).__rich__()
     
     # Basic check that the table was created
     assert table is not None

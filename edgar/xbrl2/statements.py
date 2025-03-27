@@ -145,32 +145,25 @@ class Statement:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def _pandas_dataframes(self, standard: bool = True) -> Dict[str, Any]:
-        """
-        Convert the statement to pandas DataFrames.
-        
-        Args:
-            standard: Whether to use standardized concept labels
-            
-        Returns:
-            Dictionary of DataFrames for different aspects of the statement
-        """
-        return self.xbrl.to_pandas(self.role_or_type, standard=standard)
-
     @property
     def primary_concept(self):
         data = self.get_raw_data()
         return data[0]['all_names'][0]
 
-    def to_dataframe(self) -> Any:
+    def to_dataframe(self,
+                     period_filter:str=None,
+                     period_view:str=None,
+                     standard:bool=True ) -> Any:
         """Convert statement to pandas DataFrame.
+            period_filter: Optional period key to filter facts
+            period_view: Optional name of a predefined period view
+            standard: Whether to use standardized concept labels
         
         Returns:
             DataFrame if pandas is available, else None
         """
-        if pd is None:
-            return None
-        return self._pandas_dataframes()['statement']
+        rendered_statement = self.render(period_filter=period_filter, period_view=period_view, standard=standard)
+        return rendered_statement.to_dataframe()
 
     def _validate_statement(self) -> None:
         """Validate the statement structure and required concepts."""
@@ -464,8 +457,10 @@ class Statements:
         """
         return self.xbrl.get_period_views(statement_type)
 
-    def to_dataframe(self, statement_type: str, period_view: Optional[str] = None,
-                     standard: bool = True) -> pd.DataFrame:
+    def to_dataframe(self,
+                     statement_type: str,
+                     period_view: Optional[str] = None,
+                     standard: bool = True) -> Optional[pd.DataFrame]:
         """
         Convert a statement to a pandas DataFrame.
         
@@ -477,100 +472,9 @@ class Statements:
         Returns:
             pandas DataFrame containing the statement data
         """
-        # Get the statement data with the right periods
-        statement_data = None
-        
-        # Find the most appropriate statement role using more efficient lookup
-        role = None
-        
-        # First try the optimized statement lookup in XBRL class
-        if hasattr(self.xbrl, '_statement_by_standard_name') and statement_type in self.xbrl._statement_by_standard_name:
-            statements = self.xbrl._statement_by_standard_name[statement_type]
-            if statements:
-                role = statements[0]['role']
-        # Fall back to the old method if needed
-        elif statement_type in statement_to_concepts:
-            # Get information about the statement's identifying concept
-            concept_info = statement_to_concepts[statement_type]
-            concept = concept_info.concept
-            
-            # Find all statements of the requested type
-            matching_statements = self.statement_by_type.get(statement_type, [])
-            
-            if matching_statements:
-                # Try to find a statement containing the specific concept
-                for stmt in matching_statements:
-                    stmt_role = stmt['role']
-                    # Examine the presentation tree for this role
-                    if stmt_role in self.xbrl.presentation_trees:
-                        tree = self.xbrl.presentation_trees[stmt_role]
-                        # Check if the identifying concept is in this tree
-                        normalized_concept = concept.replace(':', '_')
-                        for element_id in tree.all_nodes:
-                            # Check both original and normalized form
-                            if element_id == concept or element_id == normalized_concept:
-                                role = stmt_role
-                                break
-                        if role:
-                            break
-                
-                # If no exact concept match, fall back to the first statement of the type
-                if not role and matching_statements:
-                    role = matching_statements[0]['role']
-        else:
-            # Fall back to the first statement of the type
-            role = next(
-                (stmt['role'] for stmt in self.statements if stmt['type'] == statement_type),
-                None
-            )
-
-        # If period view specified, use it with the identified role
-        if role and period_view:
-            period_views = self.xbrl.get_period_views(statement_type)
-            matching_view = next((view for view in period_views if view['name'] == period_view), None)
-
-            if matching_view:
-                # Get statement data with period keys from view
-                period_filter = matching_view['period_keys'][0] if matching_view['period_keys'] else None
-                statement_data = self.xbrl.get_statement(role, period_filter=period_filter)
-
-        # If no period view or it failed, just get the statement directly
-        if not statement_data and role:
-            statement_data = self.xbrl.get_statement(role)
-
-        if not statement_data:
-            return pd.DataFrame()  # Empty DataFrame if statement not found
-
-        # Use XBRL's to_pandas method which now supports standardization
-        dataframes = self.xbrl.to_pandas(role, standard=standard)
-
-        # Return the statement dataframe if available
-        if 'statement' in dataframes:
-            return dataframes['statement']
-
-        # Fallback to manual conversion if to_pandas didn't work
-        rows = []
-        for item in statement_data:
-            # Prepare row data
-            row = {
-                'concept': item['concept'],
-                'label': item['label'],
-                'level': item['level'],
-                'is_abstract': item['is_abstract'],
-                'has_values': item.get('has_values', False),
-            }
-
-            # Add original label if standardized
-            if 'original_label' in item:
-                row['original_label'] = item['original_label']
-
-            # Add values for each period
-            for period, value in item.get('values', {}).items():
-                row[period] = value
-
-            rows.append(row)
-
-        return pd.DataFrame(rows)
+        statement = self[statement_type]
+        if standard:
+            return statement.render(period_view=period_view, standard=standard).to_dataframe()
 
 
 class StitchedStatement:
