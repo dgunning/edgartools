@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.0] - 2025-03-26
+
+### Added
+- Add transparent httpx caching using hishel
+
+### Changed
+- Improve selection and order when querying facts
+- Modified the facts query interface to be more user-friendly
+- Rename `xbrl.facts_view` property to `xbrl.facts` to make it more intuitive
+- Add facts query by statement
+- Default max_periods displayed when stitching to the number of statements plus 2
+
+
+
 ## [3.13.10] - 2025-03-25
 
 ## Added
