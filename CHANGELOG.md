@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.1] - 2025-03-27
+
+### Added
+
+- Add `RenderedStatement` class as an intermediate representation of a statement that can be rendered in different formats
+
+### Changed
+- Refactored the rendering path to use the `RenderedStatement` class
+- Change `to_dataframe` to use the `RenderedStatement` class to render statements to dataframe
+- Change the period headers of dataframe to `YYYY-MM-DD` format
+
 ## [3.14.0] - 2025-03-26
 
 ### Added
