@@ -174,6 +174,10 @@ class RenderedStatement:
     fiscal_period_indicator: Optional[str] = None
     units_note: Optional[str] = None
 
+    @property
+    def periods(self):
+        return self.header.periods
+
     def __rich__(self) -> RichTable:
         """Render as a rich table"""
         # Create the table
