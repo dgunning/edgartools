@@ -114,9 +114,7 @@ def test_get_press_release():
                     accession_no='0000066740-24-000023')
     eightk = filing.obj()
     press_releases: PressReleases = eightk.press_releases
-    print(press_releases)
     press_release: PressRelease = press_releases[0]
-    print(press_release)
     assert press_release.document == 'pressrelease3-8x24.htm'
     assert isinstance(press_release, PressRelease)
     assert "Board of Directors has approved the planned spin-off" in press_release.text()

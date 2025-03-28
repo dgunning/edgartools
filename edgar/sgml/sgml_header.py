@@ -81,6 +81,9 @@ class FilingMetadata:
                 value = datefmt(value, "%Y-%m-%d")
         return value
 
+    def update(self, property:str, value:str):
+        self.metadata[property] = value
+
     @property
     def num_documents(self):
         count = self.metadata.get("PUBLIC DOCUMENT COUNT")
@@ -343,6 +346,11 @@ class FilingHeader:
     @property
     def accession_number(self):
         return self.filing_metadata.get("ACCESSION NUMBER")
+
+    @property
+    def cik(self):
+        cik = self.filing_metadata.get("CIK")
+        return cik
 
     @property
     def form(self):

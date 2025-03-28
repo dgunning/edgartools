@@ -12,6 +12,7 @@ from edgar.sgml.sgml_header import FilingHeader
 from edgar.sgml.sgml_parser import SGMLParser, SGMLFormatType, SGMLDocument
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.tools import is_xml
+from edgar.core import sec_edgar
 
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
@@ -215,6 +216,11 @@ class FilingSGML:
         return self.header.accession_number
 
     @property
+    def cik(self):
+        if self.header.cik:
+            return self.header.cik
+
+    @property
     def form(self):
         return self.header.form
 
@@ -268,10 +274,16 @@ class FilingSGML:
 
         for sequence, document_lst in self._documents_by_sequence.items():
             for document in document_lst:
+                # Set the path for the attachment
+                if self.accession_number: # Use the accession number if available.
+                                          # This allows for downloading the file directly from the SEC website
+                    path = f"/Archives/edgar/data/{self.header.cik}/{self.accession_number.replace('-', '')}/{document.filename}"
+                else:
+                    path=f"/<SGML FILE>/{document.filename}",
                 attachment = Attachment(
                     sequence_number=sequence,
                     ixbrl=False,
-                    path=f"/<SGML FILE>/{document.filename}",
+                    path=path,
                     document=document.filename,
                     document_type=get_document_type(filename=document.filename, declared_document_type=document.type),
                     description=document.description,
@@ -409,7 +421,14 @@ class FilingSGML:
     @classmethod
     def from_filing(cls, filing: 'Filing') -> 'FilingSGML':
         """Create from a Filing object that provides text_url."""
-        return cls.from_source(filing.text_url)
+        filing_sgml = cls.from_source(filing.text_url)
+        if not filing_sgml.accession_number:
+            filing_sgml.header.filing_metadata.update('ACCESSION NUMBER', filing.accession_no)
+        if not filing_sgml.header.filing_metadata.get("CIK"):
+            filing_sgml.header.filing_metadata.update('CIK', str(filing.cik).zfill(10))
+        if not filing_sgml.header.form:
+            filing_sgml.header.filing_metadata.update("CONFORMED SUBMISSION TYPE", filing.form)
+        return filing_sgml
 
     def __str__(self) -> str:
         """String representation with basic filing info."""

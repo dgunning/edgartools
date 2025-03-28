@@ -74,7 +74,8 @@ def test_sgml_from_filing():
            accession_no='0000899681-95-000096')
     filing_sgml = FilingSGML.from_filing(filing)
     assert filing_sgml
-    assert filing_sgml.header.is_empty()
+    assert not filing_sgml.header.is_empty()
+    repr(filing_sgml.header)
 
 def test_sgml_parser_detect_content():
     parser = SGMLParser()
@@ -105,6 +106,7 @@ def test_get_attachment_content_from_sgml():
                 sgml_document = filing_sgml.get_document_by_sequence(attachment.sequence_number)
                 assert sgml_document
                 assert sgml_document.text()
+                assert attachment.url
 
 
 def test_sgml_parsing_of_headers():

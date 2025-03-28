@@ -161,7 +161,6 @@ def test_attachments():
     attachment = attachments[3]
     assert attachment
     assert attachment.document == 'blk25-20230224_def.xml'
-    assert attachment.url == 'https://www.sec.gov/<SGML FILE>/blk25-20230224_def.xml'
 
     text = attachment.download()
     assert text
