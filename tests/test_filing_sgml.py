@@ -377,3 +377,13 @@ def test_parse_header_with_double_newlines():
     assert filer.business_address.city== 'SAN FRANCISCO'
 
     assert filer.mailing_address.city == 'SAN FRANCISCO'
+
+
+def test_parse_filing_header_with_problem():
+    filing = Filing(form='424B5',
+                    filing_date='2000-03-14',
+                    company='CENTEX HOME EQUITY LOAN TRUST 2000-A',
+                    cik=1109352,
+                    accession_no='0000912057-00-011488')
+    filing_sgml = FilingSGML.from_filing(filing)
+    assert filing_sgml

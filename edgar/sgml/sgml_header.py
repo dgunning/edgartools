@@ -705,7 +705,11 @@ class FilingHeader:
                             subheader_obj = data[current_header][-1][current_subheader][-1]
                             subheader_obj[key.strip()] = value
                         else:
-                            data[current_header][-1][current_subheader][key.strip()] = value
+                            try:
+                                data[current_header][-1][current_subheader][key.strip()] = value
+                            except KeyError:
+                                # Some filings from the 2000's have an issue with malformed headers
+                                log.warning("Subheader '%s' not found in header '%s'", current_subheader, current_header)
 
         # The filer
         filers = []

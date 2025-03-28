@@ -12,7 +12,6 @@ from edgar.sgml.sgml_header import FilingHeader
 from edgar.sgml.sgml_parser import SGMLParser, SGMLFormatType, SGMLDocument
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.tools import is_xml
-from edgar.core import sec_edgar
 
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
