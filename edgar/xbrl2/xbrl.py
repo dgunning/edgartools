@@ -924,7 +924,7 @@ class XBRL:
                           period_filter: Optional[str] = None, 
                           period_view: Optional[str] = None,
                           standard: bool = True,
-                          show_date_range: bool = False) -> RenderedStatement:
+                          show_date_range: bool = False) -> Optional[RenderedStatement]:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         
@@ -984,7 +984,7 @@ class XBRL:
         # Get the statement data with dimension display flag
         statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions)
         if not statement_data:
-            return RichTable(title=f"No {statement_type} found")
+            return None
         
         # Get the statement title
         statement_info = statement_to_concepts.get(actual_statement_type)
