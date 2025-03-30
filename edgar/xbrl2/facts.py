@@ -674,10 +674,23 @@ class FactsView:
                 fact_dict['element_period_type'] = element.period_type
                 fact_dict['element_balance'] = element.balance
 
+                # First look up preferred_label from presentation trees 
+                # to ensure label consistency between rendering and facts
+                preferred_label = None
+                for role, tree in self.xbrl.presentation_trees.items():
+                    if element_id in tree.all_nodes:
+                        # Get presentation node to find preferred_label
+                        pres_node = tree.all_nodes[element_id]
+                        if pres_node.preferred_label:
+                            preferred_label = pres_node.preferred_label
+                            break  # Use the first preferred_label found
+                
                 # Add label using the same selection logic as display_label
+                # but including the preferred_label we found above
                 label = select_display_label(
                     labels=element.labels,
                     standard_label=element.labels.get(STANDARD_LABEL),
+                    preferred_label=preferred_label,  # May be None, which is handled by select_display_label
                     element_id=element_id,
                     element_name=element.name
                 )
@@ -686,9 +699,10 @@ class FactsView:
                 # Store original label (will be used for standardization comparison)
                 fact_dict['original_label'] = label
 
-            # Determine statement type if possible by checking presentation trees
+            # Determine statement type by checking presentation trees
             for role, tree in self.xbrl.presentation_trees.items():
                 if element_id in tree.all_nodes:
+                    
                     # Find the statement type for this role
                     statements = self.xbrl.get_all_statements()
                     for stmt in statements:

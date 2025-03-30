@@ -151,8 +151,8 @@ class PresentationNode(BaseModel):
         """
         return select_display_label(
             labels=self.labels,
-            preferred_label=self.preferred_label,
             standard_label=self.standard_label,
+            preferred_label=self.preferred_label,
             element_id=self.element_id
         )
 
