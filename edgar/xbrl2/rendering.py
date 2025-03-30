@@ -6,7 +6,7 @@ This module provides functions for formatting and displaying XBRL data.
 
 from datetime import datetime
 import pandas as pd
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Dict, List, Any, Optional, Tuple, Union, Callable
 
 from rich import box
 from rich.console import Group
@@ -136,6 +136,7 @@ class StatementCell:
     value: Any
     style: Dict[str, str] = field(default_factory=dict)  # Style attributes like color, bold, etc.
     comparison: Optional[Dict[str, Any]] = None  # Comparison info if applicable
+    formatter: Callable[[Any], str] = lambda x: str(x)  # Custom formatter for the cell value
 
 
 @dataclass
@@ -239,7 +240,8 @@ class RenderedStatement:
                     cell_values.append("")
                 else:
                     # Create a Rich Text object with right justification
-                    cell_values.append(Text(str(cell.value), justify="right"))
+                    cell_value = cell.formatter(cell.value)
+                    cell_values.append(Text(str(cell_value), justify="right"))
 
             table.add_row(styled_label, *cell_values)
 
@@ -251,7 +253,6 @@ class RenderedStatement:
     def to_dataframe(self) -> Any:
         """Convert to a pandas DataFrame"""
         try:
-            import pandas as pd
 
             # Create rows for the DataFrame
             df_rows = []
@@ -337,12 +338,13 @@ class RenderedStatement:
             # Format cell values
             cell_values = []
             for cell in row.cells:
-                if cell.value is None or cell.value == "":
+                cell_value = cell.formatter(cell.value)
+                if cell_value is None or cell_value == "":
                     cell_values.append("")
-                elif isinstance(cell.value, Text):
-                    cell_values.append(str(cell.value))
+                elif isinstance(cell_value, Text):
+                    cell_values.append(str(cell_value))
                 else:
-                    cell_values.append(str(cell.value))
+                    cell_values.append(cell_value)
 
             # Add the row
             row_data = [label] + cell_values
@@ -1236,17 +1238,18 @@ def render_statement(
             comparison_info = None
             if show_comparisons and item.get('concept') in comparison_data:
                 comparison_info = comparison_data[item['concept']]
-                
-            # Format the value as a string, not a Rich Text object
-            formatted_value = _format_value_for_display_as_string(
-                value, item, period_key, 
+
+            # Create a format function to use when rendering
+            format_func = lambda value: _format_value_for_display_as_string(
+                value, item, period_key,
                 is_monetary_statement, dominant_scale, shares_scale,
                 comparison_info
             )
             
             # Create a cell and add it to the row
             cell = StatementCell(
-                value=formatted_value,  # Store the plain string value
+                value=value,  # Store the plain value
+                formatter=format_func, # Set the format function to use when rendering
                 style={},  # Style will be handled in renderer
                 comparison=comparison_info
             )
@@ -1256,8 +1259,6 @@ def render_statement(
         rendered_statement.rows.append(row)
     
     return rendered_statement
-
-
 
 
 def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
