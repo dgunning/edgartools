@@ -28,7 +28,7 @@ from edgar.entities import Entity
 from edgar.ownership.core import format_amount, format_currency, safe_numeric, format_numeric
 from edgar.richtools import repr_rich, df_to_rich_table
 from edgar.xmltools import (child_text, child_value)
-
+import itertools
 __all__ = [
     'Owner',
     'Issuer',
@@ -1706,12 +1706,14 @@ class Ownership:
         if self.market_trades is not None and not self.market_trades.empty:
             for _, row in self.market_trades.iterrows():
                 transaction_type = "purchase" if row.AcquiredDisposed == 'A' else "sale"
+                row_shares = int("0" + "".join(itertools.takewhile(str.isdigit, row.Shares))) \
+                    if isinstance(row.Shares, str) else row.Shares
                 activities.append(TransactionActivity(
                     transaction_type=transaction_type,
                     code=row.Code,
-                    shares=row.Shares,
+                    shares=row_shares,
                     price_per_share=row.Price,
-                    value=row.Shares * row.Price if not pd.isna(row.Price) else 0,
+                    value=row_shares * row.Price if not pd.isna(row.Price) else 0,
                     security_type="non-derivative",
                     security_title=row.Security,
                 ))
@@ -1736,13 +1738,15 @@ class Ownership:
                 else:
                     transaction_type = "other_disposition"
 
+                row_shares = int("0" + "".join(itertools.takewhile(str.isdigit, row.Shares))) \
+                    if isinstance(row.Shares, str) else row.Shares
                 activities.append(TransactionActivity(
                     transaction_type=transaction_type,
                     code=row.Code,
-                    shares=row.Shares,
+                    shares=row_shares,
                     price_per_share=row.Price if pd.notna(row.Price) else None,  # Add price
                     # Don't calculate value for non-market transactions unless price available
-                    value=row.Shares * row.Price if pd.notna(row.Price) and row.Price > 0 else 0,
+                    value=row_shares * row.Price if pd.notna(row.Price) and row.Price > 0 else 0,
                     security_type="non-derivative",
                     security_title=row.Security,
                 ))
@@ -1755,19 +1759,20 @@ class Ownership:
                     transaction_type = "derivative_purchase" if row.AcquiredDisposed == 'A' else "derivative_sale"
                     underlying, price = safe_numeric(row.UnderlyingShares), safe_numeric(row.Price)
 
+                    row_underlying_shares = int("0" + "".join(itertools.takewhile(str.isdigit, row.UnderlyingShares))) \
+                        if isinstance(row.UnderlyingShares, str) else row.UnderlyingShares
                     activities.append(TransactionActivity(
                         transaction_type=transaction_type,
                         code=row.Code,
-                        shares=row.UnderlyingShares,
+                        shares=row_underlying_shares,
                         price_per_share=row.ExercisePrice if pd.notna(row.ExercisePrice) else None,
-                        value=row.UnderlyingShares * row.Price if price and underlying else 0,
+                        value=row_underlying_shares * row.Price if price and underlying else 0,
                         security_type="derivative",
                         security_title=row.Security,
                         underlying_security=row.Underlying,
                         exercise_date=row.ExerciseDate if pd.notna(row.ExerciseDate) else None,
                         expiration_date=row.ExpirationDate if pd.notna(row.ExpirationDate) else None,
                     ))
-
         return activities
 
     @property
