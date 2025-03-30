@@ -523,4 +523,4 @@ def test_stitch_aapl_statements_from_2019():
 
     income_statement = xbrls.render_statement("IncomeStatement")
     _repr = rich_to_text(income_statement)
-    assert '$(161,782)' in _repr
+    assert '-161,782' in _repr
