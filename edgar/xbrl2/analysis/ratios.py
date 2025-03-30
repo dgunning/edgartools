@@ -133,12 +133,13 @@ class FinancialRatios:
             is_rendered.periods + cf_rendered.periods
         ))
         
-    def _prepare_ratio_df(self, required_concepts: List[str], statement_dfs: List[Tuple[pd.DataFrame, str]]) -> Tuple[pd.DataFrame, Dict[str, str]]:
+    def _prepare_ratio_df(self, required_concepts: List[str], statement_dfs: List[Tuple[pd.DataFrame, str]], optional_concepts: List[str] = []) -> Tuple[pd.DataFrame, Dict[str, str]]:
         """Prepare DataFrame for ratio calculations.
         
         Args:
             required_concepts: List of concepts required for the ratio calculation
             statement_dfs: List of tuples containing statement DataFrames and their types
+            optional_concepts: List of concepts that are optional for the calculation
             
         Returns:
             Tuple containing:
@@ -240,8 +241,8 @@ class FinancialRatios:
                         except (KeyError, ValueError, ZeroDivisionError):
                             continue
                             
-            if not found:
-                raise KeyError(f"Could not find or calculate concept: {concept}")
+            if not found and concept not in optional_concepts:
+                raise KeyError(f"Could not find or calculate required concept: {concept}")
                     
         # Filter out None values from equivalents and ensure all values are strings
         filtered_equivalents = {k: str(v) for k, v in equivalents_used.items() if v is not None}
@@ -351,8 +352,10 @@ class FinancialRatios:
                 'concepts': [
                     StandardConcept.TOTAL_CURRENT_ASSETS,
                     StandardConcept.TOTAL_CURRENT_LIABILITIES,
-                    StandardConcept.INVENTORY,  # For quick ratio
                     StandardConcept.CASH_AND_EQUIVALENTS  # For cash ratio
+                ],
+                'optional_concepts': [
+                    StandardConcept.INVENTORY  # Optional for quick ratio
                 ],
                 'statements': [(self.balance_sheet_df, "BalanceSheet")]
             },
@@ -401,7 +404,8 @@ class FinancialRatios:
         config = ratio_configs[ratio_type]
         return self._prepare_ratio_df(
             required_concepts=config['concepts'],
-            statement_dfs=config['statements']
+            statement_dfs=config['statements'],
+            optional_concepts=config.get('optional_concepts', [])
         )
         
     def calculate_current_ratio(self) -> RatioAnalysis:
@@ -548,6 +552,11 @@ class FinancialRatios:
         
         Quick Ratio = (Current Assets - Inventory) / Current Liabilities
         Also known as the Acid Test Ratio.
+        
+        Note:
+            If inventory is not found in the financial statements, it will be treated as 0.
+            This is appropriate for service companies or companies that do not carry inventory.
+            In such cases, the quick ratio will equal the current ratio.
         """
         calc_df, equivalents = self.get_ratio_data('current')
         
@@ -558,6 +567,10 @@ class FinancialRatios:
                 StandardConcept.TOTAL_CURRENT_LIABILITIES, calc_df)
             inventory, inv_equiv = self._get_concept_value(
                 StandardConcept.INVENTORY, calc_df)
+                
+            # If inventory is not found, treat it as 0
+            if inventory is None:
+                inventory = pd.Series(0, index=current_assets.index)
                 
             quick_assets = current_assets - inventory
             
