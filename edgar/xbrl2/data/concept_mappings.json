@@ -12,7 +12,8 @@
     "us-gaap_CostOfGoodsAndServicesSold",
     "us-gaap_CostOfRevenue",
     "us-gaap_DirectOperatingCosts",
-    "us-gaap_CostOfSales"
+    "us-gaap_CostOfSales",
+    "us-gaap_CostsAndExpenses"
   ],
   "Gross Profit": [
     "us-gaap_GrossProfit"
@@ -145,7 +146,8 @@
   "Long-Term Debt": [
     "us-gaap_LongTermDebtNoncurrent",
     "us-gaap_LongTermDebt",
-    "us-gaap_LongTermBorrowings"
+    "us-gaap_LongTermBorrowings",
+    "us-gaap_LongTermDebtAndCapitalLeaseObligations"
   ],
   "Notes Payable, Current": [
     "us-gaap_NotesPayableCurrent"
