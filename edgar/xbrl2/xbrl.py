@@ -289,21 +289,7 @@ class XBRL:
             return self._all_statements_cached
             
         statements = []
-        
-        # Standard taxonomy concepts for statement identification
-        standard_statement_concepts = {
-            'BalanceSheet': ['us-gaap_StatementOfFinancialPositionAbstract', 
-                             'us-gaap_StatementOfFinancialPositionClassifiedAbstract'],
-            'IncomeStatement': ['us-gaap_IncomeStatementAbstract', 
-                                'us-gaap_StatementOfIncomeAbstract'],
-            'CashFlowStatement': ['us-gaap_StatementOfCashFlowsAbstract'],
-            'StatementOfEquity': ['us-gaap_StatementOfStockholdersEquityAbstract',
-                                  'us-gaap_StatementOfShareholdersEquityAbstract'],
-            'ComprehensiveIncome': ['us-gaap_StatementOfComprehensiveIncomeAbstract',
-                                    'us-gaap_StatementOfIncome'],
-            'CoverPage': ['dei_CoverAbstract'],
-        }
-        
+
         # Reset indices
         self._statement_indices = {}
         self._statement_by_standard_name = {}
@@ -319,8 +305,12 @@ class XBRL:
 
             for statement_alias, statement_info in statement_to_concepts.items():
                 if primary_concept == statement_info.concept:
-                    statement_type = statement_alias
-                    break
+                    if 'parenthetical' in role_def:
+                        statement_type = f"{statement_alias}Parenthetical"
+                    else:
+                        statement_type = statement_alias
+                    if not 'BalanceSheet' in statement_type:
+                        break
             # Try to extract role name from URI
             role_name = role.split('/')[-1] if '/' in role else role.split('#')[-1] if '#' in role else ''
             
@@ -456,8 +446,9 @@ class XBRL:
         from edgar.xbrl2.stitching import render_stitched_statement as _render_stitched_statement
         return _render_stitched_statement(stitched_data, statement_title, statement_type, self.entity_info)
     
-    def get_statement(self, role_or_type: str, period_filter: Optional[str] = None,
-                    should_display_dimensions: Optional[bool] = None) -> List[Dict[str, Any]]:
+    def get_statement(self, role_or_type: str,
+                      period_filter: Optional[str] = None,
+                      should_display_dimensions: Optional[bool] = None) -> List[Dict[str, Any]]:
         """
         Get a financial statement by role URI, statement type, or statement short name.
         
