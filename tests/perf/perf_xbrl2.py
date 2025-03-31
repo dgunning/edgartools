@@ -2,8 +2,7 @@ from edgar import *
 from edgar.xbrl2 import *
 from pyinstrument import Profiler
 
-def main():
-    filing = c.latest("10-K")
+def main(filing):
     xbrl = XBRL.from_filing(filing)
     income_statement = xbrl.statements['IncomeStatement']
     income_statement.to_dataframe()
@@ -14,7 +13,7 @@ def main():
 
 
 if __name__ == "__main__":
-    c = Company("AAPL")
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')
     with Profiler() as p:
-        main()
+        main(filing)
     p.print()
