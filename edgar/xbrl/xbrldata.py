@@ -1848,6 +1848,9 @@ class XBRLData():
         """
         role_matches = defaultdict(int)
         for role in self.presentation.get_roles_containing_concept(concept):
+            # Skip balance-sheet-parenthetical
+            if 'parenthetical' in role:
+                continue
             role_matches[role] += 1
 
         return max(role_matches, key=role_matches.get) if role_matches else None
