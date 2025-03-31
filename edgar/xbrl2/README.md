@@ -1,4 +1,4 @@
-R# XBRL2 Module - Enhanced XBRL Processing for EdgarTools
+from workbooks.WideTables import income_statementR# XBRL2 Module - Enhanced XBRL Processing for EdgarTools
 
 ## Overview
 
@@ -91,38 +91,13 @@ annual_comparison = statements.income_statement(period_view="Annual Comparison")
 quarter_comparison = statements.income_statement(period_view="Quarterly Comparison")
 ```
 
-### Standardized Concepts
-
-Switch between company-specific and standardized terminology:
-
-```python
-# Company-specific labels (as reported)
-original_income = statements.income_statement(standard=False)
-
-# Standardized labels (for cross-company comparison)
-standardized_income = statements.income_statement(standard=True)
-```
-
 ### Easy Conversion to DataFrames
 
 Transform any statement into a pandas DataFrame for further analysis:
 
 ```python
 # Get DataFrame of income statement
-df = statements["IncomeStatement"].to_dataframe()
-
-# Filter for revenues
-revenue_df = df[df['concept'].str.contains('Revenue')]
-
-# Plot trends
-import matplotlib.pyplot as plt
-plt.figure(figsize=(10, 6))
-for column in df.columns:
-    if column not in ['concept', 'label', 'level', 'is_abstract']:
-        plt.plot(column, df.loc[df['label'] == 'Revenue', column], label=column)
-plt.legend()
-plt.title('Revenue Trend')
-plt.show()
+df = income_statement.to_dataframe()
 ```
 
 ## Statement Stitching for Trend Analysis
