@@ -1,4 +1,4 @@
-# XBRL2 Module - Enhanced XBRL Processing for EdgarTools
+R# XBRL2 Module - Enhanced XBRL Processing for EdgarTools
 
 ## Overview
 
@@ -109,7 +109,7 @@ Transform any statement into a pandas DataFrame for further analysis:
 
 ```python
 # Get DataFrame of income statement
-df = statements.to_dataframe("IncomeStatement")
+df = statements["IncomeStatement"].to_dataframe()
 
 # Filter for revenues
 revenue_df = df[df['concept'].str.contains('Revenue')]
@@ -143,14 +143,76 @@ trend_df = income_trend.to_dataframe()
 
 ## Rendering Options
 
-Statements are rendered as rich tables with proper formatting:
+The XBRL2 module provides flexible output options for financial statements:
 
 ```python
-# Display with default styling
+# Display with default styling as Rich tables in console/notebooks
 print(statements.balance_sheet())
 
-# Convert to pandas for custom visualization
+# Show full date ranges for duration periods
+print(statements.income_statement(show_date_range=True))
+
+# Customize period view
+print(statements.income_statement(period_view="Annual Comparison"))
+
+# Convert to pandas DataFrame for analysis
 df = statements.to_dataframe("BalanceSheet")
+
+# Export the statement to markdown
+income_statement = statements.income_statement()
+markdown_text = income_statement.render().to_markdown()
+```
+
+### Statement Display Options
+
+The rendering system offers several customization options:
+
+| Option | Description |
+| ------ | ----------- |
+| `standard=True` | Use standardized labels for cross-company comparison (default) |
+| `standard=False` | Use company-specific labels as reported in the filing |
+| `show_date_range=True` | Show complete date ranges for duration periods (e.g., "Jan 1 - Mar 31, 2023") |
+| `show_date_range=False` | Show only end dates for cleaner presentation (default) |
+| `period_view="Name"` | Select a predefined period view ("Annual Comparison", "Quarterly Comparison", etc.) |
+| `period_filter="duration_..."` | Filter to a specific period by period key |
+
+### The `RenderedStatement` Class
+
+The `render_statement()` function returns a `RenderedStatement` object, which provides multiple output formats:
+
+```python
+# Get a rendered statement
+statement = xbrl.render_statement("BalanceSheet")
+
+# Display as Rich table (default)
+print(statement)
+
+# Convert to pandas DataFrame 
+df = statement.to_dataframe()
+
+# Export to markdown
+markdown = statement.to_markdown()
+```
+
+### Customizing Statement Appearance
+
+The rendering engine automatically handles:
+
+- Proper monetary formatting with scale indicators (thousands, millions, billions)
+- Appropriate indentation for statement hierarchy
+- Formatting of section headers and dimension items
+- Correct display of share counts and per-share values
+- Fiscal period indicators in statement titles
+- Unit notes (e.g., "In millions, except per share data")
+
+For stitched multi-period statements, you can control the number of periods and date formatting:
+
+```python
+# Get 3-year comparison with full date ranges
+annual_trend = stitched_statements.income_statement(
+    max_periods=3, 
+    show_date_range=True
+)
 ```
 
 ## Advanced Features
