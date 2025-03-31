@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.2] - 2025-03-31
+
+### Fixed
+
+- Fixed bug where balance sheet parenthetical was incorrectly selected as the consolidated balance sheet
+- Fixed bug in insider transaction `Ownership` when the shares contain text like footnotes
+- Patch SGML header parsing due to occasional failures due to malformed header
+- Fix bug where press release urls were not properly printed
+- Ensure raw values are placed in financial statements `to_dataframe`
+
+### Added
+
+- Add Financial Ratios module `edgar.xbrl2.ratios`
+
+
 ## [3.14.1] - 2025-03-27
 
 ### Added
