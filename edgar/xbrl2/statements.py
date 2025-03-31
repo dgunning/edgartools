@@ -339,6 +339,71 @@ class Statements:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
 
+    def find_statement_by_primary_concept(self, statement_type: str, is_parenthetical: bool = False) -> Optional[str]:
+        """
+        Find a statement by its primary concept.
+        
+        Args:
+            statement_type: Statement type (e.g., 'BalanceSheet', 'IncomeStatement')
+            is_parenthetical: Whether to look for a parenthetical statement
+                             (only applicable for BalanceSheet)
+            
+        Returns:
+            Role URI for the matching statement, or None if not found
+        """
+        if statement_type not in statement_to_concepts:
+            return None
+            
+        # Get information about the statement's identifying concept
+        concept_info = statement_to_concepts[statement_type]
+        concept = concept_info.concept
+        
+        # Find all statements of the requested type
+        matching_statements = self.statement_by_type.get(statement_type, [])
+        
+        if not matching_statements:
+            return None
+            
+        # Parenthetical check is only relevant for BalanceSheet
+        check_parenthetical = statement_type == 'BalanceSheet'
+            
+        # Try to find a statement containing the specific concept
+        for stmt in matching_statements:
+            role = stmt['role']
+            
+            # Check for parenthetical in the role name if it's a BalanceSheet
+            if check_parenthetical:
+                role_lower = role.lower()
+                is_role_parenthetical = 'parenthetical' in role_lower
+                
+                # Skip if parenthetical status doesn't match what we're looking for
+                if is_parenthetical != is_role_parenthetical:
+                    continue
+                
+            # Examine the presentation tree for this role
+            if role in self.xbrl.presentation_trees:
+                tree = self.xbrl.presentation_trees[role]
+                # Check if the identifying concept is in this tree
+                normalized_concept = concept.replace(':', '_')
+                for element_id in tree.all_nodes:
+                    # Check both original and normalized form
+                    if element_id == concept or element_id == normalized_concept:
+                        return role
+        
+        # If no exact concept match, fall back to the first statement of the type
+        # that matches the parenthetical requirement for BalanceSheet
+        if check_parenthetical:
+            for stmt in matching_statements:
+                role = stmt['role']
+                role_lower = role.lower()
+                is_role_parenthetical = 'parenthetical' in role_lower
+                
+                if is_parenthetical == is_role_parenthetical:
+                    return role
+                
+        # If still no match, return the first statement
+        return matching_statements[0]['role']
+
     def __getitem__(self, item: Union[int, str]) -> Optional[Statement]:
         """
         Get a statement by index, type, or role.
@@ -356,29 +421,13 @@ class Statements:
         elif isinstance(item, str):
             # Check if it's a standard statement type with a specific concept marker
             if item in statement_to_concepts:
-                # Get information about the statement's identifying concept
-                concept_info = statement_to_concepts[item]
-                concept = concept_info.concept
-                
-                # Find all statements of the requested type
-                matching_statements = self.statement_by_type.get(item, [])
-                
-                if matching_statements:
-                    # Try to find a statement containing the specific concept
-                    for stmt in matching_statements:
-                        role = stmt['role']
-                        # Examine the presentation tree for this role
-                        if role in self.xbrl.presentation_trees:
-                            tree = self.xbrl.presentation_trees[role]
-                            # Check if the identifying concept is in this tree
-                            normalized_concept = concept.replace(':', '_')
-                            for element_id in tree.all_nodes:
-                                # Check both original and normalized form
-                                if element_id == concept or element_id == normalized_concept:
-                                    return Statement(self.xbrl, role)
+                # Get the statement role using the primary concept
+                role = self.find_statement_by_primary_concept(item)
+                if role:
+                    return Statement(self.xbrl, role)
                     
-                    # If no exact concept match, fall back to the first statement of the type
-                    return Statement(self.xbrl, item)
+                # If no concept match, fall back to the type
+                return Statement(self.xbrl, item)
                     
             # If it's a statement type with multiple statements, return the first one
             if item in self.statement_by_type and self.statement_by_type[item]:
@@ -409,13 +458,19 @@ class Statements:
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def balance_sheet(self) -> Statement:
+    def balance_sheet(self, parenthetical: bool = False) -> Statement:
         """
         Get a balance sheet.
+        
+        Args:
+            parenthetical: Whether to get the parenthetical balance sheet
             
         Returns:
             A balance sheet statement
         """
+        role = self.find_statement_by_primary_concept("BalanceSheet", is_parenthetical=parenthetical)
+        if role:
+            return Statement(self.xbrl, role)
         return self["BalanceSheet"]
 
     def income_statement(self) -> Statement:

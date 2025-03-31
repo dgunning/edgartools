@@ -221,4 +221,9 @@ def test_get_statement_by_name_returns_correct_statement():
 
 
 
-
+def test_get_balance_sheet_with_few_concepts():
+    filing = Filing(company='M-Tron Industries Inc', cik=1902314, form='10-K', filing_date='2024-03-27', accession_no="0001437749-25-009645")
+    xbrl: XBRL = XBRL.from_filing(filing)
+    balance_sheet = xbrl.statements.balance_sheet()
+    print()
+    print(balance_sheet)
