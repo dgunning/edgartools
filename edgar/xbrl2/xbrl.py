@@ -13,7 +13,7 @@ and handling dimensional qualifiers.
 """
 
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional, Union, Tuple
 
 import pandas as pd
 from rich.table import Table as RichTable
@@ -464,67 +464,26 @@ class XBRL:
         Returns:
             List of line items with values
         """
-        # Ensure indices are built
-        if not self._all_statements_cached:
-            self.get_all_statements()
-            
-        # If requesting by full role URI, use as is
-        role_uri = None
-        
-        if role_or_type.startswith('http'):
-            # Direct role URI lookup
-            role_uri = role_or_type
-        else:
-            # Try to find by standard name (e.g., "BalanceSheet")
-            if role_or_type in self._statement_by_standard_name:
-                statements = self._statement_by_standard_name[role_or_type]
-                if statements:
-                    role_uri = statements[0]['role']
-            
-            # If not found, try by role name (case-insensitive)
-            if not role_uri:
-                role_or_type_lower = role_or_type.lower()
-                if role_or_type_lower in self._statement_by_role_name:
-                    statements = self._statement_by_role_name[role_or_type_lower]
-                    if statements:
-                        role_uri = statements[0]['role']
-            
-            # If still not found, try by definition
-            if not role_uri:
-                def_key = role_or_type.lower().replace(' ', '')
-                if def_key in self._statement_indices:
-                    statements = self._statement_indices[def_key]
-                    if statements:
-                        role_uri = statements[0]['role']
-                        
-            # If still not found, try partial matching on role name
-            if not role_uri:
-                for role_name, statements in self._statement_by_role_name.items():
-                    if role_or_type.lower() in role_name:
-                        role_uri = statements[0]['role']
-                        break
+        # Use the centralized statement finder to get statement information
+        matching_statements, found_role, actual_statement_type = self.find_statement(role_or_type)
         
         # If no matching statement found, return empty list
-        if not role_uri or role_uri not in self.presentation_trees:
+        if not found_role or found_role not in self.presentation_trees:
             return []
         
-        tree = self.presentation_trees[role_uri]
+        tree = self.presentation_trees[found_role]
         
         # Find the root element
         root_id = tree.root_element_id
         
         # If should_display_dimensions wasn't provided, determine it from the statement type and role
         if should_display_dimensions is None:
-            statement_type = None
             role_definition = ""
-            # Find statement info to get type and definition
-            for stmt in self.get_all_statements():
-                if stmt['role'] == role_or_type:
-                    statement_type = stmt['type']
-                    role_definition = stmt['definition']
-                    break
+            if matching_statements:
+                role_definition = matching_statements[0]['definition']
+            
             # Determine whether to display dimensions
-            should_display_dimensions = self._is_dimension_display_statement(statement_type, role_definition)
+            should_display_dimensions = self._is_dimension_display_statement(actual_statement_type, role_definition)
             
         # Generate line items recursively
         line_items = []
@@ -911,26 +870,23 @@ class XBRL:
         """
         return get_period_views(self, statement_type)
     
-    def render_statement(self, statement_type: str = "BalanceSheet", 
-                          period_filter: Optional[str] = None, 
-                          period_view: Optional[str] = None,
-                          standard: bool = True,
-                          show_date_range: bool = False) -> Optional[RenderedStatement]:
+    def find_statement(self, statement_type: str) -> Tuple[List[Dict[str, Any]], Optional[str], str]:
         """
-        Render a statement in a rich table format similar to how it would appear in an actual filing.
+        Find a statement by type, role, or name.
         
         Args:
-            statement_type: Type of statement to render (e.g., "BalanceSheet", "IncomeStatement")
-                           or a specific statement role/name (e.g., "CONSOLIDATEDBALANCESHEETS")
-            period_filter: Optional period key to filter by specific reporting period
-            period_view: Optional name of a predefined period view (e.g., "Quarterly: Current vs Previous")
-            standard: Whether to use standardized concept labels (default: False)
-            show_date_range: Whether to show full date ranges for duration periods (default: False)
+            statement_type: Type of statement (e.g., "BalanceSheet") or role URI or statement name
             
         Returns:
-            RichTable: A formatted table representation of the statement
+            Tuple of:
+                - List of matching statements
+                - Found role URI (or None if not found)
+                - Actual statement type (may be different from input if matched by role/name)
         """
-        # First, determine the actual statement type and role from the input
+        # Ensure indices are built
+        if not self._all_statements_cached:
+            self.get_all_statements()
+            
         matching_statements = []
         found_role = None
         actual_statement_type = statement_type
@@ -961,13 +917,47 @@ class XBRL:
                 matching_statements = self._statement_indices[def_key]
                 if matching_statements:
                     found_role = matching_statements[0]['role']
+                    
+        # If still not found and looking by get_statement, try partial matching on role name
+        if not matching_statements:
+            for role_name, statements in self._statement_by_role_name.items():
+                if statement_type.lower() in role_name:
+                    matching_statements = statements
+                    found_role = statements[0]['role']
+                    break
         
-        # Get statement definition and update actual statement type if we found a match
+        # Update actual statement type if we found a match
+        if matching_statements and matching_statements[0]['type']:
+            actual_statement_type = matching_statements[0]['type']
+            
+        return matching_statements, found_role, actual_statement_type
+        
+    def render_statement(self, statement_type: str = "BalanceSheet", 
+                          period_filter: Optional[str] = None, 
+                          period_view: Optional[str] = None,
+                          standard: bool = True,
+                          show_date_range: bool = False) -> Optional[RenderedStatement]:
+        """
+        Render a statement in a rich table format similar to how it would appear in an actual filing.
+        
+        Args:
+            statement_type: Type of statement to render (e.g., "BalanceSheet", "IncomeStatement")
+                           or a specific statement role/name (e.g., "CONSOLIDATEDBALANCESHEETS")
+            period_filter: Optional period key to filter by specific reporting period
+            period_view: Optional name of a predefined period view (e.g., "Quarterly: Current vs Previous")
+            standard: Whether to use standardized concept labels (default: False)
+            show_date_range: Whether to show full date ranges for duration periods (default: False)
+            
+        Returns:
+            RichTable: A formatted table representation of the statement
+        """
+        # Find the statement using the unified statement finder
+        matching_statements, found_role, actual_statement_type = self.find_statement(statement_type)
+        
+        # Get statement definition from matching statements
         role_definition = ""
         if matching_statements:
             role_definition = matching_statements[0]['definition']
-            if matching_statements[0]['type']:
-                actual_statement_type = matching_statements[0]['type']
         
         # Determine if this statement should display dimensions
         should_display_dimensions = self._is_dimension_display_statement(actual_statement_type, role_definition)
