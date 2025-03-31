@@ -12,6 +12,8 @@ from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_definition_linkbase
                                  XBRLInstance, XBRLPresentation, StatementDefinition, Statement)
 
 from tests.samples import SAMPLE_INSTANCE_XML, SAMPLE_PRESENTATION_XML, SAMPLE_CALCULATION_XML
+from edgar.xbrl.statements import BalanceSheet
+
 
 @pytest.fixture
 def sample_instance():
@@ -333,3 +335,10 @@ def test_get_xbrl_from_filing_with_embedded_linkbases():
     print(filing)
     xbrl = filing.xbrl()
     print(xbrl)
+
+@pytest.mark.asyncio
+async def test_find_role_by_concept_for_balance_sheet():
+    filing = Filing(form='10-K', filing_date='2025-03-27', company='M-tron Industries, Inc.', cik=1902314, accession_no='0001437749-25-009645')
+    xbrl_data:XBRLData = await XBRLData.from_filing(filing)
+    role = xbrl_data.find_role_by_concept(BalanceSheet.primary_concept)
+    assert role == 'http://www.mtronpti.com/20241231/role/statement-consolidated-balance-sheets'
