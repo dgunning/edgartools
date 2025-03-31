@@ -597,11 +597,6 @@ def _format_period_labels(
                                     end_date_str = end_date_obj.strftime('%Y-%m-%d')
                             final_label = format_date(end_date_obj)
                             
-                            # If there's a prefix like "Annual:" or "Q1:", preserve it
-                            if ':' in parts[0]:
-                                prefix = parts[0].split(':')[0].strip()
-                                final_label = f"{prefix}: {final_label}"
-                            
                             # Add quarter info if available
                             if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
                                 final_label = f"{final_label} ({q_num})"

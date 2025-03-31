@@ -227,3 +227,12 @@ def test_get_balance_sheet_with_few_concepts():
     balance_sheet = xbrl.statements.balance_sheet()
     print()
     print(balance_sheet)
+
+
+def test_quarterly_statements():
+    filing = Filing(company='Apple Inc.', cik=320193, form='10-Q', filing_date='2025-01-31', accession_no='0000320193-25-000008')
+    xbrl = XBRL.from_filing(filing)
+    income_statement = xbrl.statements.income_statement()
+    income_statement.render()
+    print()
+    print(income_statement)
