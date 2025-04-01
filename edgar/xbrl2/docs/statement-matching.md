@@ -77,14 +77,40 @@ statement_registry = {
     "BalanceSheet": {
         "primary_concepts": ["us-gaap_StatementOfFinancialPositionAbstract"],
         "alternative_concepts": ["us-gaap_BalanceSheetAbstract"],
+        "concept_patterns": [
+            r".*_StatementOfFinancialPositionAbstract$",
+            r".*_BalanceSheetAbstract$",
+            r".*_ConsolidatedBalanceSheetsAbstract$",
+            r".*_CondensedConsolidatedBalanceSheetsUnauditedAbstract$"
+        ],
         "key_concepts": ["us-gaap_Assets", "us-gaap_Liabilities", "us-gaap_StockholdersEquity"],
         "common_role_patterns": [
             r".*[Bb]alance[Ss]heet.*",
-            r".*[Ss]tatement[Oo]f[Ff]inancial[Pp]osition.*"
+            r".*[Ss]tatement[Oo]f[Ff]inancial[Pp]osition.*",
+            r".*StatementConsolidatedBalanceSheets.*"
         ],
         "title": "Consolidated Balance Sheets",
         "supports_parenthetical": True,
         "typical_weights": {"assets": 0.3, "liabilities": 0.3, "equity": 0.4}
+    },
+    "IncomeStatement": {
+        "primary_concepts": ["us-gaap_IncomeStatementAbstract"],
+        "alternative_concepts": ["us-gaap_StatementOfIncomeAbstract"],
+        "concept_patterns": [
+            r".*_IncomeStatementAbstract$",
+            r".*_StatementOfIncomeAbstract$",
+            r".*_ConsolidatedStatementsOfIncomeAbstract$", 
+            r".*_CondensedConsolidatedStatementsOfIncomeUnauditedAbstract$"
+        ],
+        "key_concepts": ["us-gaap_Revenues", "us-gaap_NetIncomeLoss"],
+        "common_role_patterns": [
+            r".*[Ii]ncome[Ss]tatement.*",
+            r".*[Ss]tatement[Oo]f[Ii]ncome.*",
+            r".*StatementConsolidatedStatementsOfIncome.*"
+        ],
+        "title": "Consolidated Statement of Income",
+        "supports_parenthetical": True,
+        "typical_weights": {"revenues": 0.4, "netIncomeLoss": 0.6}
     },
     # Additional statement types...
 }
@@ -228,9 +254,18 @@ def find_statement(self, statement_type, is_parenthetical=False):
     Returns:
         (matching_statements, found_role, confidence_score)
     """
+    # If this is an exact match to a role URI we already know, return immediately
+    if statement_type in self._statement_by_role_uri:
+        return [self._statement_by_role_uri[statement_type]], statement_type, 1.0
+    
     # Try primary concept matching first (highest confidence)
     match = self._match_by_primary_concept(statement_type, is_parenthetical)
     if match and match[2] > 0.8:  # High confidence threshold
+        return match
+    
+    # Try custom namespace matching
+    match = self._match_by_concept_pattern(statement_type, is_parenthetical)
+    if match and match[2] > 0.8:  # High confidence for concept pattern matches
         return match
         
     # Try role pattern matching
@@ -245,11 +280,69 @@ def find_statement(self, statement_type, is_parenthetical=False):
         
     # Try structure analysis as last resort
     match = self._match_by_structure(statement_type)
-    if match:
+    if match and match[2] > 0.5:  # Lower confidence but still useful
         return match
         
     # No good match found, return best attempt with low confidence
     return self._get_best_guess(statement_type), None, 0.3
+```
+
+And here's how the concept pattern matching would be implemented:
+
+```python
+def _match_by_concept_pattern(self, statement_type, is_parenthetical=False):
+    """
+    Match statements using regex patterns on concept names to handle custom company namespaces.
+    
+    Args:
+        statement_type: Statement type to match 
+        is_parenthetical: Whether to look for parenthetical version
+        
+    Returns:
+        (matching_statements, found_role, confidence_score)
+    """
+    # If we're looking for a standard statement type
+    if statement_type in self.statement_registry:
+        registry_entry = self.statement_registry[statement_type]
+        concept_patterns = registry_entry.get("concept_patterns", [])
+        
+        if not concept_patterns:
+            return None, None, 0.0
+            
+        # Get all statements to check against patterns
+        all_statements = self.get_all_statements()
+        
+        # Check each statement's primary concept against our patterns
+        matched_statements = []
+        for stmt in all_statements:
+            primary_concept = stmt.get('primary_concept', '')
+            
+            # Skip if no primary concept
+            if not primary_concept:
+                continue
+                
+            # Check if this concept matches any of our patterns
+            for pattern in concept_patterns:
+                if re.match(pattern, primary_concept):
+                    # For parenthetical statements, check the role definition
+                    if is_parenthetical:
+                        role_def = stmt.get('definition', '').lower()
+                        if 'parenthetical' not in role_def:
+                            continue
+                    # For non-parenthetical, skip if has parenthetical
+                    elif not is_parenthetical:
+                        role_def = stmt.get('definition', '').lower()
+                        if 'parenthetical' in role_def:
+                            continue
+                            
+                    matched_statements.append(stmt)
+                    break  # Found a match, no need to check other patterns
+                    
+        # If we found matching statements, return the first one with high confidence
+        if matched_statements:
+            return matched_statements, matched_statements[0]['role'], 0.85
+            
+    return None, None, 0.0
 ```
 
 This design provides a flexible, extensible framework for statement matching that will work across different companies, taxonomies, and statement variants while maintaining high performance.
