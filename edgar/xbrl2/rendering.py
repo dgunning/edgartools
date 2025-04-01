@@ -1193,7 +1193,7 @@ def render_statement(
     for index, item in enumerate(statement_data):
         # Skip rows with no values if they're abstract (headers without data)
         # But keep abstract items with children (section headers)
-        has_children = item.get('children') or item.get('has_dimension_children', False)
+        has_children = len(item.get('children', [])) > 0 or item.get('has_dimension_children', False)
         if not item.get('has_values', False) and item.get('is_abstract') and not has_children:
             continue
             
