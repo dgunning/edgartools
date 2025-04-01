@@ -283,6 +283,10 @@ def read_index_file(index_text: str, columns: List[str] = FORM_INDEX_COLUMNS) ->
     # Process data lines
     data_lines = lines[data_start:]
 
+    # Handle empty lines
+    if not data_lines:
+        return _empty_filing_index()
+
     # Split each line by 2 or more spaces
     rows = [line.split() for line in data_lines if line.strip()]
 

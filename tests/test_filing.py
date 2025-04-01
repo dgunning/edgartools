@@ -19,6 +19,7 @@ from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, c
 from edgar.company_reports import TenK
 from edgar.core import default_page_size
 from edgar.entities import Company
+from edgar._filings import read_index_file
 
 pd.options.display.max_colwidth = 200
 
@@ -997,3 +998,9 @@ def test_filing_url():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
     assert filing.filing_url == 'https://www.sec.gov/Archives/edgar/data/66740/000006674024000023/mmm-20240308.htm'
+
+def test_parse_empty_index_file():
+    text = Path('data/index_files/empty-form.idx').read_text()
+    table = read_index_file(text)
+    assert table is not None
+    assert len(table) == 0
