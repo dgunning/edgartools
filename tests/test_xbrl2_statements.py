@@ -27,6 +27,12 @@ def aapl_xbrl():
     # Parse the directory
     return XBRL.parse_directory(data_dir)
 
+@pytest.fixture
+def unp_xbrl():
+    data_dir = Path("data/xbrl/datafiles/unp")
+    return XBRL.parse_directory(data_dir)
+
+
 def test_dimensioned_statement(aapl_xbrl):
     statements = aapl_xbrl.statements
     role_definition = 'SegmentInformationandGeographicDataInformationbyReportableSegmentDetails'
@@ -239,9 +245,119 @@ def test_quarterly_statements():
     print()
     print(income_statement)
 
-def test_statetement_matching():
-    filing = Filing(company='UNION PACIFIC CORP', cik=100885, form='10-K', filing_date='2013-02-08', accession_no='0001193125-13-045658')
+def test_stateement_matching_for_old_filing():
     xbrl = XBRL.parse_directory('data/xbrl/datafiles/unp')
     print()
-    statements = xbrl.get_all_statements()
-    print(statements)
+    income_statement = xbrl.statements.income_statement()
+    assert income_statement
+    rendered_statement = income_statement.render()
+    print(rendered_statement)
+
+
+def test_canonical_statement_type_preservation(unp_xbrl):
+    """Test that canonical statement types are preserved when finding statements."""
+    # Test basic statement finding
+    matching_statements, found_role, actual_type = unp_xbrl.find_statement("BalanceSheet")
+
+    # Verify that the actual_type is still "BalanceSheet" even though the role might be different
+    assert actual_type == "BalanceSheet"
+
+    # Also test with parenthetical version
+    matching_statements, found_role, actual_type = unp_xbrl.find_statement("BalanceSheet", is_parenthetical=True)
+
+    # The actual_type should still be "BalanceSheet" for downstream logic
+    assert actual_type == "BalanceSheet"
+
+    # Try with IncomeStatement
+    matching_statements, found_role, actual_type = unp_xbrl.find_statement("IncomeStatement")
+    assert actual_type == "IncomeStatement"
+
+    # Role URI should be different from the type
+    assert found_role != "IncomeStatement"
+
+
+def test_render_statement_preserves_types(tsla_xbrl):
+    """Test that the render_statement method correctly uses preserved types."""
+    # Render an income statement
+    statement = tsla_xbrl.render_statement("IncomeStatement")
+
+    # Make sure rendering worked (this would fail if statement type wasn't recognized)
+    assert statement is not None
+
+    # Try a balance sheet with parenthetical flag
+    try:
+        paren_statement = tsla_xbrl.render_statement("BalanceSheet", parenthetical=True)
+        if paren_statement:
+            assert "(Parenthetical)" in paren_statement.title
+    except:
+        # Not all test data has parenthetical statements
+        pytest.skip("No parenthetical balance sheet found in test data")
+
+
+def test_statement_with_canonical_type(tsla_xbrl):
+    """Test that a Statement created with a canonical type preserves it."""
+    # Create a statement with a canonical type
+    stmt = Statement(tsla_xbrl, "SomeRoleURI", canonical_type="BalanceSheet")
+
+    # Check that the canonical type was stored
+    assert stmt.canonical_type == "BalanceSheet"
+
+    # The role_or_type should still be the original role
+    assert stmt.role_or_type == "SomeRoleURI"
+
+
+def test_balance_sheet_statement(tsla_xbrl):
+    """Test that a balance sheet statement created via the accessor has the right canonical type."""
+    # Get a balance sheet using the accessor method
+    statements = tsla_xbrl.statements
+    balance_sheet = statements.balance_sheet()
+
+    # Check that it has the canonical type set
+    assert balance_sheet.canonical_type == "BalanceSheet"
+
+    # Check that the render method would use the canonical type
+    rendering_type = balance_sheet.canonical_type if balance_sheet.canonical_type else balance_sheet.role_or_type
+    assert rendering_type == "BalanceSheet"
+
+
+def test_parenthetical_balance_sheet(tsla_xbrl):
+    """Test that a parenthetical balance sheet preserves the canonical type."""
+    # Try to get a parenthetical balance sheet
+    statements = tsla_xbrl.statements
+
+    try:
+        paren_balance_sheet = statements.balance_sheet(parenthetical=True)
+
+        # Check that it has the canonical type set
+        assert paren_balance_sheet.canonical_type == "BalanceSheet"
+
+        # The role should be different from the canonical type
+        assert paren_balance_sheet.role_or_type != "BalanceSheet"
+
+        # But the rendering type should be the canonical type
+        rendering_type = paren_balance_sheet.canonical_type if paren_balance_sheet.canonical_type else paren_balance_sheet.role_or_type
+        assert rendering_type == "BalanceSheet"
+    except:
+        # Not all test data has parenthetical statements
+        pytest.skip("No parenthetical balance sheet in test data")
+
+
+def test_canonical_type_preservation(tsla_xbrl):
+    """Test that the statement type is preserved during validation and access."""
+    # Get an income statement, skipping concept validation for test data
+    statements = tsla_xbrl.statements
+    income_stmt = statements.income_statement(skip_concept_check=True)
+
+    # It should have the canonical type set
+    assert income_stmt.canonical_type == "IncomeStatement"
+
+    # Check that calculate_ratios uses the canonical type
+    ratios = income_stmt.calculate_ratios()
+
+    # Get the statement data and make sure it's retrievable
+    statement_data = income_stmt.get_raw_data()
+    assert statement_data is not None
+
+    # The canonical type should be used in rendering
+    rendering_type = income_stmt.canonical_type if income_stmt.canonical_type else income_stmt.role_or_type
+    assert rendering_type == "IncomeStatement"

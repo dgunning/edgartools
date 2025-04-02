@@ -711,7 +711,12 @@ class StatementResolver:
             category_filter: Optional filter to only match statements of a specific category
             
         Returns:
-            Tuple of (matching_statements, found_role, actual_statement_type, confidence_score)
+            Tuple of (matching_statements, found_role, canonical_statement_type, confidence_score)
+            
+        Note:
+            For standard statement types like "BalanceSheet", "IncomeStatement", etc., the
+            canonical_statement_type will be the input statement_type, allowing downstream
+            code to still recognize and apply type-specific logic.
         """
         # Check cache first
         category_key = str(category_filter.value) if category_filter else "None"
@@ -742,12 +747,16 @@ class StatementResolver:
             self._cache[cache_key] = result
             return result
         
+        # Check if this is a canonical statement type from the registry
+        is_canonical_type = statement_type in statement_registry
+            
         # Try standard name matching first (exact type match)
         match = self._match_by_standard_name(statement_type)
         if match[0] and match[2] > 0.9:  # Very high confidence
             statements, role, conf = match
-            actual_type = statements[0].get('type', statement_type)
-            result = (statements, role, actual_type, conf)
+            # For canonical types, preserve the original statement_type
+            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
+            result = (statements, role, canonical_type, conf)
             self._cache[cache_key] = result
             return result
             
@@ -755,8 +764,9 @@ class StatementResolver:
         match = self._match_by_primary_concept(statement_type, is_parenthetical)
         if match[0] and match[2] > 0.8:  # High confidence
             statements, role, conf = match
-            actual_type = statements[0].get('type', statement_type)
-            result = (statements, role, actual_type, conf)
+            # For canonical types, preserve the original statement_type
+            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
+            result = (statements, role, canonical_type, conf)
             self._cache[cache_key] = result
             return result
         
@@ -764,8 +774,9 @@ class StatementResolver:
         match = self._match_by_concept_pattern(statement_type, is_parenthetical)
         if match[0] and match[2] > 0.8:  # High confidence
             statements, role, conf = match
-            actual_type = statements[0].get('type', statement_type)
-            result = (statements, role, actual_type, conf)
+            # For canonical types, preserve the original statement_type
+            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
+            result = (statements, role, canonical_type, conf)
             self._cache[cache_key] = result
             return result
             
@@ -773,8 +784,9 @@ class StatementResolver:
         match = self._match_by_role_pattern(statement_type, is_parenthetical)
         if match[0] and match[2] > 0.7:  # Good confidence
             statements, role, conf = match
-            actual_type = statements[0].get('type', statement_type)
-            result = (statements, role, actual_type, conf)
+            # For canonical types, preserve the original statement_type
+            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
+            result = (statements, role, canonical_type, conf)
             self._cache[cache_key] = result
             return result
             
@@ -782,8 +794,9 @@ class StatementResolver:
         match = self._match_by_content(statement_type)
         if match[0] and match[2] > 0.6:  # Moderate confidence
             statements, role, conf = match
-            actual_type = statements[0].get('type', statement_type)
-            result = (statements, role, actual_type, conf)
+            # For canonical types, preserve the original statement_type
+            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
+            result = (statements, role, canonical_type, conf)
             self._cache[cache_key] = result
             return result
             
@@ -791,16 +804,18 @@ class StatementResolver:
         match = self._match_by_role_definition(statement_type)
         if match[0] and match[2] > 0.5:  # Lower confidence but still useful
             statements, role, conf = match
-            actual_type = statements[0].get('type', statement_type)
-            result = (statements, role, actual_type, conf)
+            # For canonical types, preserve the original statement_type
+            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
+            result = (statements, role, canonical_type, conf)
             self._cache[cache_key] = result
             return result
             
         # No good match found, return best guess with low confidence
         statements, role, conf = self._get_best_guess(statement_type)
         if statements:
-            actual_type = statements[0].get('type', statement_type)
-            result = (statements, role, actual_type, conf)
+            # For canonical types, preserve the original statement_type
+            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
+            result = (statements, role, canonical_type, conf)
         else:
             result = ([], None, statement_type, 0.0)
             
