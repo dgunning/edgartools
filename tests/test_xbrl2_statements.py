@@ -238,3 +238,10 @@ def test_quarterly_statements():
     income_statement.render()
     print()
     print(income_statement)
+
+def test_statetement_matching():
+    filing = Filing(company='UNION PACIFIC CORP', cik=100885, form='10-K', filing_date='2013-02-08', accession_no='0001193125-13-045658')
+    xbrl = XBRL.parse_directory('data/xbrl/datafiles/unp')
+    print()
+    statements = xbrl.get_all_statements()
+    print(statements)

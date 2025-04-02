@@ -28,6 +28,7 @@ from edgar.xbrl2.models import (
 from edgar.xbrl2.parser import XBRLParser
 from edgar.xbrl2.periods import get_period_views, determine_periods_to_display
 from edgar.xbrl2.rendering import render_statement, generate_rich_representation, RenderedStatement
+from edgar.xbrl2.statement_resolver import StatementResolver
 from edgar.xbrl2.statements import statement_to_concepts
 
 
@@ -44,7 +45,10 @@ class XBRL:
         # Use the parser component
         self.parser = XBRLParser()
         
-        # Cached indices for fast statement lookup
+        # Statement resolver for matching statements
+        self._statement_resolver = None
+        
+        # Cached indices for fast statement lookup (for backward compatibility)
         self._statement_indices = {}
         self._statement_by_standard_name = {}
         self._statement_by_primary_concept = {}
@@ -302,7 +306,9 @@ class XBRL:
             role_def = tree.definition.lower()
             statement_type = None
             primary_concept = next(iter(tree.all_nodes))
+            statement_category = None
 
+            # First try to match using statement_to_concepts (for backward compatibility)
             for statement_alias, statement_info in statement_to_concepts.items():
                 if primary_concept == statement_info.concept:
                     if 'parenthetical' in role_def:
@@ -311,6 +317,21 @@ class XBRL:
                         statement_type = statement_alias
                     if not 'BalanceSheet' in statement_type:
                         break
+                        
+            # If we didn't find a match, try additional patterns for notes and disclosures
+            if not statement_type:
+                if 'us-gaap_NotesToFinancialStatementsAbstract' in primary_concept or 'note' in role_def:
+                    statement_type = "Notes"
+                    statement_category = "note"
+                elif 'us-gaap_DisclosuresAbstract' in primary_concept or 'disclosure' in role_def:
+                    statement_type = "Disclosures"
+                    statement_category = "disclosure"
+                elif 'us-gaap_AccountingPoliciesAbstract' in primary_concept or 'accounting policies' in role_def:
+                    statement_type = "AccountingPolicies"
+                    statement_category = "note"
+                elif 'us-gaap_SegmentDisclosureAbstract' in primary_concept or 'segment' in role_def:
+                    statement_type = "SegmentDisclosure"
+                    statement_category = "disclosure"
             # Try to extract role name from URI
             role_name = role.split('/')[-1] if '/' in role else role.split('#')[-1] if '#' in role else ''
             
@@ -321,7 +342,8 @@ class XBRL:
                 'element_count': len(tree.all_nodes),
                 'type': statement_type,
                 'primary_concept': primary_concept,
-                'role_name': role_name
+                'role_name': role_name,
+                'category': statement_category  # This will be None for backward compatibility unless set above
             }
             
             statements.append(statement)
@@ -365,7 +387,7 @@ class XBRL:
         Get the first statement matching the given type.
         
         Args:
-            statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+            statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', 'Notes', etc.)
             
         Returns:
             Statement data if found, None otherwise
@@ -869,13 +891,37 @@ class XBRL:
             List of period view options with name, description, and period keys
         """
         return get_period_views(self, statement_type)
+        
+    def get_statements_by_category(self, category: str) -> List[Dict[str, Any]]:
+        """
+        Get all statements matching a specific category.
+        
+        Args:
+            category: Category of statements to find ('statement', 'note', 'disclosure', 'document', or 'other')
+            
+        Returns:
+            List of statement metadata matching the category
+        """
+        # Ensure indices are built
+        if not self._all_statements_cached:
+            self.get_all_statements()
+            
+        result = []
+        
+        # Find all statements with matching category
+        for stmt in self._all_statements_cached:
+            if stmt.get('category') == category:
+                result.append(stmt)
+                
+        return result
     
-    def find_statement(self, statement_type: str) -> Tuple[List[Dict[str, Any]], Optional[str], str]:
+    def find_statement(self, statement_type: str, is_parenthetical: bool = False) -> Tuple[List[Dict[str, Any]], Optional[str], str]:
         """
         Find a statement by type, role, or name.
         
         Args:
             statement_type: Type of statement (e.g., "BalanceSheet") or role URI or statement name
+            is_parenthetical: Whether to look for a parenthetical statement
             
         Returns:
             Tuple of:
@@ -883,52 +929,64 @@ class XBRL:
                 - Found role URI (or None if not found)
                 - Actual statement type (may be different from input if matched by role/name)
         """
-        # Ensure indices are built
+        # Initialize statement resolver if not already done
+        if self._statement_resolver is None:
+            self._statement_resolver = StatementResolver(self)
+        
+        # Use the enhanced statement resolver
+        matching_statements, found_role, actual_statement_type, confidence = self._statement_resolver.find_statement(
+            statement_type, is_parenthetical
+        )
+        
+        # For backward compatibility, ensure indices are built
         if not self._all_statements_cached:
             self.get_all_statements()
-            
-        matching_statements = []
-        found_role = None
-        actual_statement_type = statement_type
         
-        # Try to find the statement by standard name first
-        if statement_type in self._statement_by_standard_name:
-            matching_statements = self._statement_by_standard_name[statement_type]
-            if matching_statements:
-                found_role = matching_statements[0]['role']
+        # If we couldn't find anything with the resolver, fall back to the old implementation
+        if not matching_statements:
+            # Original implementation (fallback)
+            matching_statements = []
+            found_role = None
+            actual_statement_type = statement_type
+            
+            # Try to find the statement by standard name first
+            if statement_type in self._statement_by_standard_name:
+                matching_statements = self._statement_by_standard_name[statement_type]
+                if matching_statements:
+                    found_role = matching_statements[0]['role']
+                    
+            # If not found by standard name, try by role URI
+            if not matching_statements and statement_type.startswith('http') and statement_type in self._statement_by_role_uri:
+                matching_statements = [self._statement_by_role_uri[statement_type]]
+                found_role = statement_type
                 
-        # If not found by standard name, try by role URI
-        if not matching_statements and statement_type.startswith('http') and statement_type in self._statement_by_role_uri:
-            matching_statements = [self._statement_by_role_uri[statement_type]]
-            found_role = statement_type
+            # If not found, try by role name (case-insensitive)
+            if not matching_statements:
+                role_or_type_lower = statement_type.lower()
+                if role_or_type_lower in self._statement_by_role_name:
+                    matching_statements = self._statement_by_role_name[role_or_type_lower]
+                    if matching_statements:
+                        found_role = matching_statements[0]['role']
+                        
+            # If still not found, try by definition
+            if not matching_statements:
+                def_key = statement_type.lower().replace(' ', '')
+                if def_key in self._statement_indices:
+                    matching_statements = self._statement_indices[def_key]
+                    if matching_statements:
+                        found_role = matching_statements[0]['role']
+                        
+            # If still not found, try partial matching on role name
+            if not matching_statements:
+                for role_name, statements in self._statement_by_role_name.items():
+                    if statement_type.lower() in role_name:
+                        matching_statements = statements
+                        found_role = statements[0]['role']
+                        break
             
-        # If not found, try by role name (case-insensitive)
-        if not matching_statements:
-            role_or_type_lower = statement_type.lower()
-            if role_or_type_lower in self._statement_by_role_name:
-                matching_statements = self._statement_by_role_name[role_or_type_lower]
-                if matching_statements:
-                    found_role = matching_statements[0]['role']
-                    
-        # If still not found, try by definition
-        if not matching_statements:
-            def_key = statement_type.lower().replace(' ', '')
-            if def_key in self._statement_indices:
-                matching_statements = self._statement_indices[def_key]
-                if matching_statements:
-                    found_role = matching_statements[0]['role']
-                    
-        # If still not found and looking by get_statement, try partial matching on role name
-        if not matching_statements:
-            for role_name, statements in self._statement_by_role_name.items():
-                if statement_type.lower() in role_name:
-                    matching_statements = statements
-                    found_role = statements[0]['role']
-                    break
-        
-        # Update actual statement type if we found a match
-        if matching_statements and matching_statements[0]['type']:
-            actual_statement_type = matching_statements[0]['type']
+            # Update actual statement type if we found a match
+            if matching_statements and matching_statements[0]['type']:
+                actual_statement_type = matching_statements[0]['type']
             
         return matching_statements, found_role, actual_statement_type
         
@@ -936,7 +994,8 @@ class XBRL:
                           period_filter: Optional[str] = None, 
                           period_view: Optional[str] = None,
                           standard: bool = True,
-                          show_date_range: bool = False) -> Optional[RenderedStatement]:
+                          show_date_range: bool = False,
+                          parenthetical: bool = False) -> Optional[RenderedStatement]:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         
@@ -945,14 +1004,15 @@ class XBRL:
                            or a specific statement role/name (e.g., "CONSOLIDATEDBALANCESHEETS")
             period_filter: Optional period key to filter by specific reporting period
             period_view: Optional name of a predefined period view (e.g., "Quarterly: Current vs Previous")
-            standard: Whether to use standardized concept labels (default: False)
+            standard: Whether to use standardized concept labels (default: True)
             show_date_range: Whether to show full date ranges for duration periods (default: False)
+            parenthetical: Whether to look for a parenthetical statement (default: False)
             
         Returns:
             RichTable: A formatted table representation of the statement
         """
-        # Find the statement using the unified statement finder
-        matching_statements, found_role, actual_statement_type = self.find_statement(statement_type)
+        # Find the statement using the unified statement finder with parenthetical support
+        matching_statements, found_role, actual_statement_type = self.find_statement(statement_type, parenthetical)
         
         # Get statement definition from matching statements
         role_definition = ""
@@ -977,6 +1037,10 @@ class XBRL:
                 statement_title = role_definition.split(' - ')[-1].strip()
             else:
                 statement_title = statement_type
+        
+        # Add "Parenthetical" to the title if appropriate
+        if parenthetical:
+            statement_title = f"{statement_title} (Parenthetical)"
         
         # Get periods to display using the new periods module
         periods_to_display = determine_periods_to_display(
