@@ -929,7 +929,8 @@ def get_filings(year: Optional[Years] = None,
             return None
         year_and_quarters = filing_date_to_year_quarters(filing_date)
     elif not year:
-        year, quarter = current_year_and_quarter()
+        # If no year specified, take the current year
+        year, _ = current_year_and_quarter()
         year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
         using_default_year = True
     else:
@@ -957,6 +958,7 @@ def get_filings(year: Optional[Years] = None,
             # Ensure at least some data is returned
             previous_quarter = [get_previous_quarter(year, quarter)]
             filing_index = get_filings_for_quarters(previous_quarter, index=index)
+            filings = Filings(filing_index)
             sorted_filing_index = sort_filings_by_priority(filings.data, priority_forms)
             return Filings(sorted_filing_index)
         return None
