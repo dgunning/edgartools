@@ -14,7 +14,12 @@ from difflib import SequenceMatcher
 
 
 class StandardConcept(str, Enum):
-    """Standardized concept names for financial statements."""
+    """
+    Standardized concept names for financial statements.
+    
+    The enum value (string) is the display label used for presentation.
+    These labels should match keys in concept_mappings.json.
+    """
     # Balance Sheet - Assets
     CASH_AND_EQUIVALENTS = "Cash and Cash Equivalents"
     ACCOUNTS_RECEIVABLE = "Accounts Receivable"
@@ -58,6 +63,32 @@ class StandardConcept(str, Enum):
     CASH_FROM_INVESTING = "Net Cash from Investing Activities"
     CASH_FROM_FINANCING = "Net Cash from Financing Activities"
     NET_CHANGE_IN_CASH = "Net Change in Cash"
+    
+    @classmethod
+    def get_from_label(cls, label: str) -> Optional['StandardConcept']:
+        """
+        Get a StandardConcept enum by its label value.
+        
+        Args:
+            label: The label string to look up
+            
+        Returns:
+            The corresponding StandardConcept or None if not found
+        """
+        for concept in cls:
+            if concept.value == label:
+                return concept
+        return None
+    
+    @classmethod
+    def get_all_values(cls) -> Set[str]:
+        """
+        Get all label values defined in the enum.
+        
+        Returns:
+            Set of all label strings
+        """
+        return {concept.value for concept in cls}
 
 
 class MappingStore:
@@ -69,12 +100,13 @@ class MappingStore:
         mappings (Dict[str, Set[str]]): Dictionary mapping standard concepts to sets of company concepts
     """
     
-    def __init__(self, source: Optional[str] = None):
+    def __init__(self, source: Optional[str] = None, validate_with_enum: bool = True):
         """
         Initialize the mapping store.
         
         Args:
             source: Path to the JSON file storing the mappings. If None, uses default location.
+            validate_with_enum: Whether to validate JSON keys against StandardConcept enum
         """
         if source is None:
             # Try a few different ways to locate the file, handling both development
@@ -116,6 +148,59 @@ class MappingStore:
             self.source = source
             
         self.mappings = self._load_mappings()
+        
+        # Validate the loaded mappings against StandardConcept enum
+        if validate_with_enum:
+            self.validate_against_enum()
+    
+    def validate_against_enum(self) -> Tuple[bool, List[str]]:
+        """
+        Validate that all keys in the mappings exist in StandardConcept enum.
+        
+        Returns:
+            Tuple of (is_valid, list_of_missing_keys)
+        """
+        standard_values = StandardConcept.get_all_values()
+        json_keys = set(self.mappings.keys())
+        
+        # Find keys in JSON that aren't in enum
+        missing_in_enum = json_keys - standard_values
+        
+        # Find enum values not in JSON (just for information)
+        missing_in_json = standard_values - json_keys
+        
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        if missing_in_enum:
+            logger.warning(f"Found {len(missing_in_enum)} keys in concept_mappings.json that don't exist in StandardConcept enum: {sorted(missing_in_enum)}")
+        
+        if missing_in_json:
+            logger.info(f"Found {len(missing_in_json)} StandardConcept values without mappings in concept_mappings.json: {sorted(missing_in_json)}")
+        
+        return len(missing_in_enum) == 0, list(missing_in_enum)
+    
+    def to_dataframe(self) -> 'pd.DataFrame':
+        """
+        Convert mappings to a pandas DataFrame for analysis and visualization.
+        
+        Returns:
+            DataFrame with columns for standard_concept and company_concept
+        """
+        try:
+            import pandas as pd
+        except ImportError:
+            raise ImportError("pandas is required for to_dataframe() but is not installed")
+        
+        rows = []
+        for standard_concept, company_concepts in self.mappings.items():
+            for company_concept in company_concepts:
+                rows.append({
+                    'standard_concept': standard_concept,
+                    'company_concept': company_concept
+                })
+        
+        return pd.DataFrame(rows)
 
     def _load_mappings(self) -> Dict[str, Set[str]]:
         """
@@ -148,8 +233,10 @@ class MappingStore:
                 except ImportError:
                     pass
             except Exception:
-                # If all attempts fail, use default mappings
-                pass
+                # If all attempts fail, log a warning
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning("Could not load concept_mappings.json. Standardization will be limited.")
         
         # If we have data, process it based on its structure
         if data:
@@ -165,12 +252,9 @@ class MappingStore:
                 # Flat structure
                 return {k: set(v) for k, v in data.items()}
         
-        # If all methods fail, return default mappings
-        return {
-            "Revenue": {"us-gaap_SalesRevenueNet", "us-gaap_Revenue", "us-gaap_Revenues"},
-            "Net Income": {"us-gaap_NetIncome", "us-gaap_NetIncomeLoss", "us-gaap_ProfitLoss"},
-            "Total Assets": {"us-gaap_Assets", "us-gaap_AssetsTotal"}
-        }
+        # If all methods fail, return empty mappings
+        # The initialize_default_mappings function will create a file if needed
+        return {}
     
     def _save_mappings(self) -> None:
         """Save mappings to the JSON file."""
@@ -416,86 +500,57 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
     return standardized_data
 
 
-# Initialize with default mappings for common concepts
+def create_default_mappings_file(file_path: str) -> None:
+    """
+    Create the initial concept_mappings.json file with default mappings.
+    This can be called during package installation or initialization.
+    
+    Args:
+        file_path: Path where to create the file
+    """
+    # Ensure directory exists
+    directory = os.path.dirname(file_path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True)
+    
+    # The file already exists, don't overwrite it
+    if os.path.exists(file_path):
+        return
+        
+    # Create a minimal set of mappings to get started
+    minimal_mappings = {
+        StandardConcept.REVENUE.value: [
+            "us-gaap_Revenue", 
+            "us-gaap_SalesRevenueNet",
+            "us-gaap_Revenues"
+        ],
+        StandardConcept.NET_INCOME.value: [
+            "us-gaap_NetIncome",
+            "us-gaap_NetIncomeLoss", 
+            "us-gaap_ProfitLoss"
+        ],
+        StandardConcept.TOTAL_ASSETS.value: [
+            "us-gaap_Assets",
+            "us-gaap_AssetsTotal"
+        ]
+    }
+    
+    # Write the file
+    with open(file_path, 'w') as f:
+        json.dump(minimal_mappings, f, indent=2)
+
+# Initialize MappingStore - only loads from JSON
 def initialize_default_mappings() -> MappingStore:
     """
-    Initialize a MappingStore with default mappings for common concepts.
-    If a mappings file exists, it will be loaded; otherwise, these defaults are used.
+    Initialize a MappingStore with mappings from the concept_mappings.json file.
     
     Returns:
-        MappingStore initialized with default mappings
+        MappingStore initialized with mappings from JSON file
     """
     store = MappingStore()
     
-    # Only add default mappings if the file doesn't exist
+    # If JSON file doesn't exist, create it with minimal default mappings
     if not os.path.exists(store.source):
-        # Common US-GAAP mappings
-        default_mappings = {
-            # Income Statement
-            StandardConcept.REVENUE.value: [
-                "us-gaap_Revenue", 
-                "us-gaap_SalesRevenueNet",
-                "us-gaap_Revenues",
-                "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
-                "us-gaap_SalesRevenueGoodsNet"
-            ],
-            StandardConcept.COST_OF_REVENUE.value: [
-                "us-gaap_CostOfRevenue",
-                "us-gaap_CostOfGoodsAndServicesSold",
-                "us-gaap_CostOfGoodsSold"
-            ],
-            StandardConcept.GROSS_PROFIT.value: [
-                "us-gaap_GrossProfit"
-            ],
-            StandardConcept.OPERATING_INCOME.value: [
-                "us-gaap_OperatingIncome",
-                "us-gaap_OperatingIncomeLoss"
-            ],
-            StandardConcept.NET_INCOME.value: [
-                "us-gaap_NetIncome",
-                "us-gaap_NetIncomeLoss",
-                "us-gaap_ProfitLoss"
-            ],
-            
-            # Balance Sheet
-            StandardConcept.CASH_AND_EQUIVALENTS.value: [
-                "us-gaap_CashAndCashEquivalentsAtCarryingValue",
-                "us-gaap_Cash",
-                "us-gaap_CashEquivalentsAtCarryingValue"
-            ],
-            StandardConcept.TOTAL_ASSETS.value: [
-                "us-gaap_Assets",
-                "us-gaap_AssetsTotal"
-            ],
-            StandardConcept.TOTAL_CURRENT_ASSETS.value: [
-                "us-gaap_AssetsCurrent"
-            ],
-            StandardConcept.TOTAL_LIABILITIES.value: [
-                "us-gaap_Liabilities",
-                "us-gaap_LiabilitiesTotal"
-            ],
-            StandardConcept.TOTAL_CURRENT_LIABILITIES.value: [
-                "us-gaap_LiabilitiesCurrent"
-            ],
-            StandardConcept.TOTAL_EQUITY.value: [
-                "us-gaap_StockholdersEquity",
-                "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
-            ],
-            
-            # Cash Flow
-            StandardConcept.CASH_FROM_OPERATIONS.value: [
-                "us-gaap_NetCashProvidedByUsedInOperatingActivities",
-                "us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperations"
-            ],
-            StandardConcept.NET_CHANGE_IN_CASH.value: [
-                "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
-                "us-gaap_IncreaseDecreaseInCashAndCashEquivalents"
-            ]
-        }
-        
-        # Add each mapping to the store
-        for standard_concept, company_concepts in default_mappings.items():
-            for company_concept in company_concepts:
-                store.add(company_concept, standard_concept)
+        create_default_mappings_file(store.source)
     
     return store
