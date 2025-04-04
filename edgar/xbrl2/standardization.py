@@ -100,7 +100,7 @@ class MappingStore:
         mappings (Dict[str, Set[str]]): Dictionary mapping standard concepts to sets of company concepts
     """
     
-    def __init__(self, source: Optional[str] = None, validate_with_enum: bool = True):
+    def __init__(self, source: Optional[str] = None, validate_with_enum: bool = False):
         """
         Initialize the mapping store.
         
