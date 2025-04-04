@@ -109,9 +109,12 @@ def test_aapl_balance_sheet(aapl_xbrl):
 def test_get_income_statement(tsla_xbrl):
     statements = tsla_xbrl.statements
     print()
-    statement = statements.income_statement()
-    assert statement
-    print(statement)
+
+    income_statement = statements.income_statement()
+    assert income_statement
+    rendered_statement = income_statement.render()
+    repr_ = repr(rendered_statement)
+    assert '$25,500' in repr_
 
 
 def test_statement_to_dataframe(aapl_xbrl):

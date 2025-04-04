@@ -138,6 +138,8 @@ class StatementCell:
     comparison: Optional[Dict[str, Any]] = None  # Comparison info if applicable
     formatter: Callable[[Any], str] = lambda x: str(x)  # Custom formatter for the cell value
 
+    def get_formatted_value(self) -> str:
+        return self.formatter(self.value)
 
 @dataclass
 class StatementRow:
@@ -1234,9 +1236,12 @@ def render_statement(
             if show_comparisons and item.get('concept') in comparison_data:
                 comparison_info = comparison_data[item['concept']]
 
-            # Create a format function to use when rendering
-            format_func = lambda value: _format_value_for_display_as_string(
-                value, item, period_key,
+            # Create a format function to use when rendering - use a proper closure to avoid variable capture issues
+            # Clone item at the time of creating this function to prevent it from changing later
+            current_item = dict(item)
+            current_period_key = period_key
+            format_func = lambda value, item=current_item, pk=current_period_key: _format_value_for_display_as_string(
+                value, item, pk,
                 is_monetary_statement, dominant_scale, shares_scale,
                 comparison_info
             )
