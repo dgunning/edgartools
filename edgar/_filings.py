@@ -147,6 +147,8 @@ def is_valid_date(date_str: str, date_format: str = "%Y-%m-%d") -> bool:
 
 
 def get_previous_quarter(year, quarter) -> Tuple[int, int]:
+    if not quarter:
+        _, quarter = current_year_and_quarter()
     # Given a year and quarter return the previous quarter
     if quarter == 1:
         return year - 1, 4
@@ -921,18 +923,24 @@ def get_filings(year: Optional[Years] = None,
     :param index The index type - "form" or "company" or "xbrl"
     :return:
     """
-    # Get the year or default to the current year
-    using_default_year = False
+    # Check if defaults were used
+    defaults_used = (year is None and
+                     quarter is None and
+                     form is None and
+                     amendments is True and
+                     filing_date is None and
+                     index == "form" and
+                     priority_forms is None)
     if filing_date:
         if not is_valid_filing_date(filing_date):
             log.warning("""Provide a valid filing date in the format YYYY-MM-DD or YYYY-MM-DD:YYYY-MM-DD""")
             return None
         year_and_quarters = filing_date_to_year_quarters(filing_date)
     elif not year:
-        # If no year specified, take the current year
-        year, _ = current_year_and_quarter()
-        year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
-        using_default_year = True
+        # If no year specified, take the current year and quarter. (We need the quarter later)
+        year, quarter = current_year_and_quarter()
+        # Expand quarters for the year to date so use expand_quarters(year, quarter=None)
+        year_and_quarters: YearAndQuarters = expand_quarters(year, quarter=None)
     else:
         year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
 
@@ -954,14 +962,15 @@ def get_filings(year: Optional[Years] = None,
         filings = filings.filter(form=form, amendments=amendments, filing_date=filing_date)
 
     if not filings:
-        if using_default_year:
+        if defaults_used:
             # Ensure at least some data is returned
             previous_quarter = [get_previous_quarter(year, quarter)]
             filing_index = get_filings_for_quarters(previous_quarter, index=index)
             filings = Filings(filing_index)
             sorted_filing_index = sort_filings_by_priority(filings.data, priority_forms)
             return Filings(sorted_filing_index)
-        return None
+        # Return an empty filings object
+        return Filings(_empty_filing_index())
 
     # Sort the filings using the separate sort function
     sorted_filing_index = sort_filings_by_priority(filings.data, priority_forms)

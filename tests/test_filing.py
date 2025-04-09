@@ -616,6 +616,11 @@ def test_get_filings_default():
     filings = get_filings(form="8-K")
     assert filings is not None
 
+    filings = get_filings(form="NONSENSE")
+    assert filings is not None
+    assert len(filings) == 0
+
+
 
 def test_filings_get_by_index_or_accession_number():
     filings = cached_filings(2022, 1)
