@@ -3,6 +3,7 @@ from edgar._filings import  read_index_file, read_form_index_file, read_company_
 import pandas as pd
 from pathlib import Path
 
+unique_forms = set(Path("data/2020QTR1_unique_forms.txt").read_text().splitlines())
 
 def test_read_index_file():
     text = Path("data/badform.idx.txt").read_text()
@@ -19,6 +20,9 @@ def test_read_form_index_file():
     united_planner_rows = df.query("cik==820694")
     assert len(united_planner_rows) == 2
 
+    # check all form types were read correctly
+    assert set(df["form"]) == unique_forms
+
 
 def test_read_company_index_file():
     text = Path("data/company.2020QTR1.idx").read_text()
@@ -26,6 +30,9 @@ def test_read_company_index_file():
     df = table.to_pandas()
     united_planner_rows = df.query("cik==820694")
     assert len(united_planner_rows) == 2
+
+    # check all form types were read correctly
+    assert set(df["form"]) == unique_forms
 
 
 def test_read_quarterly_filing_index():

@@ -108,6 +108,8 @@ form_index = "form"
 xbrl_index = "xbrl"
 company_index = "company"
 
+index_field_delimiter_re = re.compile(r" {2,}")
+
 max_concurrent_http_connections = 10
 
 accession_number_re = re.compile(r"\d{10}-\d{2}-\d{6}$")
@@ -219,8 +221,9 @@ company_specs = FileSpecs(
      ]
 )
 
-FORM_INDEX_COLUMNS = ['form', 'company', 'cik', 'filing_date', 'accession_number']
-COMPANY_INDEX_COLUMNS = ['company', 'form', 'cik', 'filing_date', 'accession_number']
+FORM_INDEX_FORM_COLUMN = 0
+COMPANY_INDEX_FORM_COLUMN = -4
+INDEX_COLUMN_NAMES = ['form', 'company', 'cik', 'filing_date', 'accession_number']
 
 
 def read_fixed_width_index(index_text: str,
@@ -268,7 +271,7 @@ def read_fixed_width_index(index_text: str,
     )
 
 
-def read_index_file(index_text: str, columns: List[str] = FORM_INDEX_COLUMNS) -> pa.Table:
+def read_index_file(index_text: str, form_column: int = FORM_INDEX_FORM_COLUMN) -> pa.Table:
     """
     Read the index text using multiple spaces as delimiter
     """
@@ -287,14 +290,13 @@ def read_index_file(index_text: str, columns: List[str] = FORM_INDEX_COLUMNS) ->
     if not data_lines:
         return _empty_filing_index()
 
-    # Split each line by 2 or more spaces
-    rows = [line.split() for line in data_lines if line.strip()]
+    # The form and company name can both contain spaces the remaining fields cannot.
+    # It is assumed that the form will only contain runs of a single space (e.g. "1-A POS")
+    # so splitting on runs of 2 spaces or more will keep form names intact.
+    rows = [re.split(index_field_delimiter_re, line.strip()) for line in data_lines if line.strip()]
 
-    # Convert to arrays
-    forms = pa.array([line[:12].strip() for line in data_lines])  # The form might contain spaces like '1-A POS'
-
-    # Company names may have single spaces within them
-    companies = pa.array([' '.join(row[1:-3]) for row in rows])
+    # Form names are in a different column depending on the index type.
+    forms = pa.array([row[form_column] for row in rows]) 
 
     # CIKs are always the third-to-last field
     ciks = pa.array([int(row[-3]) for row in rows], type=pa.int32())
@@ -306,20 +308,27 @@ def read_index_file(index_text: str, columns: List[str] = FORM_INDEX_COLUMNS) ->
     # Accession numbers are in the file path
     accession_numbers = pa.array([row[-1][-24:-4] for row in rows])
 
+    # Company names may have runs of more than one space so anything which hasn't already
+    # been extracted is concatenated to form the company name.
+    if form_column == 0:
+        companies = pa.array([" ".join(row[1:-3]) for row in rows])
+    else:
+        companies = pa.array([" ".join(row[0:form_column]) for row in rows])
+
     return pa.Table.from_arrays(
         [forms, companies, ciks, dates, accession_numbers],
-        names=columns
+        names=INDEX_COLUMN_NAMES
     )
 
 
 def read_form_index_file(index_text: str) -> pa.Table:
     """Read the form index file"""
-    return read_index_file(index_text, columns=FORM_INDEX_COLUMNS)
+    return read_index_file(index_text, form_column=FORM_INDEX_FORM_COLUMN)
 
 
 def read_company_index_file(index_text: str) -> pa.Table:
     """Read the company index file"""
-    return read_index_file(index_text, columns=COMPANY_INDEX_COLUMNS)
+    return read_index_file(index_text, form_column=COMPANY_INDEX_FORM_COLUMN)
 
 
 def read_pipe_delimited_index(index_text: str) -> pa.Table:
@@ -377,8 +386,8 @@ def fetch_filing_index_at_url(url: str,
         index_table: pa.Table = read_pipe_delimited_index(str(index_text))
     else:
         # Read as a fixed width index file
-        columns = FORM_INDEX_COLUMNS if index == "form" else COMPANY_INDEX_COLUMNS
-        index_table: pa.Table = read_index_file(index_text, columns=columns)
+        form_column = FORM_INDEX_FORM_COLUMN if index == "form" else COMPANY_INDEX_FORM_COLUMN
+        index_table: pa.Table = read_index_file(index_text, form_column=form_column)
     return index_table
 
 
