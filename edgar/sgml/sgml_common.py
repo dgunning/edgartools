@@ -235,6 +235,16 @@ class FilingSGML:
     def effective_date(self):
         return self.header.filing_metadata.get('EFFECTIVE DATE')
 
+    @property
+    def path(self):
+        """
+        Get the root path of the filing.
+        """
+        if self.accession_number:
+            return f"/Archives/edgar/data/{self.header.cik}/{self.accession_number.replace('-', '')}"
+        else:
+            return f"/<SGML FILE>"
+
 
     def html(self):
         html_document = self.attachments.primary_html_document
@@ -273,16 +283,10 @@ class FilingSGML:
 
         for sequence, document_lst in self._documents_by_sequence.items():
             for document in document_lst:
-                # Set the path for the attachment
-                if self.accession_number: # Use the accession number if available.
-                                          # This allows for downloading the file directly from the SEC website
-                    path = f"/Archives/edgar/data/{self.header.cik}/{self.accession_number.replace('-', '')}/{document.filename}"
-                else:
-                    path=f"/<SGML FILE>/{document.filename}",
                 attachment = Attachment(
                     sequence_number=sequence,
                     ixbrl=False,
-                    path=path,
+                    path=f"{self.path}/{document.filename}",
                     document=document.filename,
                     document_type=get_document_type(filename=document.filename, declared_document_type=document.type),
                     description=document.description,

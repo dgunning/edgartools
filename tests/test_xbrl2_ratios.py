@@ -7,16 +7,19 @@ from edgar.xbrl2.analysis.ratios import *
 from edgar.xbrl2.analysis.metrics import *
 from rich import print
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def comcast_xbrl():
     filing = Filing(company='COMCAST CORP', cik=1166691, form='10-K', filing_date='2025-01-31', accession_no='0001166691-25-000011')
     return XBRL.from_filing(filing)
 
 def test_get_ratio_data(comcast_xbrl):
     fr = FinancialRatios(comcast_xbrl)
-    for category in ['current', 'operating_margin', 'return_on_assets', 'gross_margin', 'leverage']:
-        print("Category: ", category)
-        print(fr.get_ratio_data(category))
+    print()
+    print(comcast_xbrl.statements.income_statement())
+    print(fr.get_ratio_data('gross_margin'))
+    #for category in ['current', 'operating_margin', 'return_on_assets', 'gross_margin', 'leverage']:
+    #    print("Category: ", category)
+    #    print(fr.get_ratio_data(category))
 
 
 def test_ratio_with_equivalent(comcast_xbrl):

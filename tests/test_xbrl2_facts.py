@@ -1,10 +1,22 @@
 import pytest
+import re
 from unittest.mock import MagicMock
 
 from edgar import Company, Filing
 from edgar.xbrl2 import XBRL, FactsView
 from edgar.xbrl2.facts import FactQuery
 from rich import print
+
+# Import fixtures from the centralized fixture module
+from tests.fixtures.xbrl2_fixtures import (
+    cached_companies,
+    aapl_10k_2023,
+    msft_10k_2024,
+    nflx_10k_2024,
+    nflx_10k_2010,
+    dimensional_statement,
+    complex_segment_statement
+)
 
 
 @pytest.fixture(scope='module')

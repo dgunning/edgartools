@@ -1,0 +1,661 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!--  EDGAR Online I-Metrix Xcelerate Taxonomy Schema, based on XBRL 2.1  http://www.edgar-online.com/  -->
+<!--  Version: 6.7.10 -->
+<!--  Round: 5c7d9d37-c7c2-4c37-b33f-58840835480c -->
+<!--  Creation date: 2010-10-27T14:42:15Z -->
+<!--  Copyright (c) 2005-2010 EDGAR Online, Inc. All Rights Reserved. -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+  xmlns:xbrli="http://www.xbrl.org/2003/instance"
+  xmlns:link="http://www.xbrl.org/2003/linkbase"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:aapl="http://www.apple.com/20100925"
+  xmlns:xbrldt="http://xbrl.org/2005/xbrldt"
+  xmlns:us-types="http://xbrl.us/us-types/2009-01-31"
+  targetNamespace="http://www.apple.com/20100925"
+  elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <annotation>
+    <appinfo>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DocumentDocumentandEntityInformation" id="DocumentDocumentandEntityInformation">
+        <link:definition>101 - Document - Document and Entity Information</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/StatementOfIncome" id="IMetrix_StatementOfIncome">
+        <link:definition>103 - Statement - CONSOLIDATED STATEMENTS OF OPERATIONS</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/StatementOfFinancialPositionClassified" id="IMetrix_StatementOfFinancialPositionClassified">
+        <link:definition>104 - Statement - CONSOLIDATED BALANCE SHEETS</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/StatementOfFinancialPositionClassifiedParenthetical" id="IMetrix_StatementOfFinancialPositionClassifiedParen">
+        <link:definition>105 - Statement - CONSOLIDATED BALANCE SHEETS (Parenthetical)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/StatementOfShareholdersEquityAndOtherComprehensiveIncome" id="Imetrix_ci-StatementOfShareholdersEquityAndOtherComprehensiveIncome">
+        <link:definition>106 - Statement - CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/StatementOfCashFlowsIndirect" id="IMetrix_StatementOfCashFlowsIndirect">
+        <link:definition>107 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsBasisOfPresentationAndSignificantAccountingPoliciesTextBlock" id="IMetrix_NotesToFinancialStatementsBasisOfPresentationAndSignificantAccountingPoliciesTextBlock">
+        <link:definition>108 - Disclosure - Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsFinancialInstrumentsTextBlock" id="IMetrix_NotesToFinancialStatementsFinancialInstrumentsTextBlock">
+        <link:definition>109 - Disclosure - Financial Instruments</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsFairValueMeasurementInputsDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsFairValueMeasurementInputsDisclosureTextBlock">
+        <link:definition>110 - Disclosure - Fair Value Measurements</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsDetailsOfCertainBalanceSheetAccountsDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsDetailsOfCertainBalanceSheetAccountsDisclosureTextBlock">
+        <link:definition>111 - Disclosure - Consolidated Financial Statement Details</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsGoodwillAndIntangibleAssetsDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsGoodwillAndIntangibleAssetsDisclosureTextBlock">
+        <link:definition>112 - Disclosure - Goodwill and Other Intangible Assets</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsIncomeTaxDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsIncomeTaxDisclosureTextBlock">
+        <link:definition>113 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsStockholdersEquityAndStockBasedCompensationDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsStockholdersEquityAndStockBasedCompensationDisclosureTextBlock">
+        <link:definition>114 - Disclosure - Shareholders' Equity and Stock-Based Compensation</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsCommitmentsAndContingenciesDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsCommitmentsAndContingenciesDisclosureTextBlock">
+        <link:definition>115 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsSegmentReportingDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsSegmentReportingDisclosureTextBlock">
+        <link:definition>116 - Disclosure - Segment Information and Geographic Data</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsRelatedPartyTransactionsDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsRelatedPartyTransactionsDisclosureTextBlock">
+        <link:definition>117 - Disclosure - Related Party Transactions and Certain Other Transactions</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsQuarterlyFinancialInformationTextBlock" id="IMetrix_NotesToFinancialStatementsQuarterlyFinancialInformationTextBlock">
+        <link:definition>118 - Disclosure - Selected Quarterly Financial Information (Unaudited)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsBasisOfPresentationAndSignificantAccountingPoliciesTextBlockPolicies" id="IMetrix_NotesToFinancialStatementsBasisOfPresentationAndSignificantAccountingPoliciesTextBlockPolicies">
+        <link:definition>119 - Disclosure - Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsBasisOfPresentationAndSignificantAccountingPoliciesTextBlockTables" id="IMetrix_NotesToFinancialStatementsBasisOfPresentationAndSignificantAccountingPoliciesTextBlockTables">
+        <link:definition>120 - Disclosure - Summary of Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsFinancialInstrumentsTextBlockTables" id="IMetrix_NotesToFinancialStatementsFinancialInstrumentsTextBlockTables">
+        <link:definition>121 - Disclosure - Financial Instruments (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsFairValueMeasurementInputsDisclosureTextBlockTables" id="IMetrix_NotesToFinancialStatementsFairValueMeasurementInputsDisclosureTextBlockTables">
+        <link:definition>122 - Disclosure - Fair Value Measurements (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsDetailsOfCertainBalanceSheetAccountsDisclosureTextBlockTables" id="IMetrix_NotesToFinancialStatementsDetailsOfCertainBalanceSheetAccountsDisclosureTextBlockTables">
+        <link:definition>123 - Disclosure - Consolidated Financial Statement Details (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsGoodwillAndIntangibleAssetsDisclosureTextBlockTables" id="IMetrix_NotesToFinancialStatementsGoodwillAndIntangibleAssetsDisclosureTextBlockTables">
+        <link:definition>124 - Disclosure - Goodwill and Other Intangible Assets (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsIncomeTaxDisclosureTextBlockTables" id="IMetrix_NotesToFinancialStatementsIncomeTaxDisclosureTextBlockTables">
+        <link:definition>125 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsStockholdersEquityAndStockBasedCompensationDisclosureTextBlockTables" id="IMetrix_NotesToFinancialStatementsStockholdersEquityAndStockBasedCompensationDisclosureTextBlockTables">
+        <link:definition>126 - Disclosure - Shareholders' Equity and Stock-Based Compensation (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsCommitmentsAndContingenciesDisclosureTextBlockTables" id="IMetrix_NotesToFinancialStatementsCommitmentsAndContingenciesDisclosureTextBlockTables">
+        <link:definition>127 - Disclosure - Commitments and Contingencies (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsSegmentReportingDisclosureTextBlockTables" id="IMetrix_NotesToFinancialStatementsSegmentReportingDisclosureTextBlockTables">
+        <link:definition>128 - Disclosure - Segment Information and Geographic Data (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/NotesToFinancialStatementsQuarterlyFinancialInformationTextBlockTables" id="IMetrix_NotesToFinancialStatementsQuarterlyFinancialInformationTextBlockTables">
+        <link:definition>129 - Disclosure - Selected Quarterly Financial Information (Unaudited) (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformation" id="DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformation">
+        <link:definition>130 - Disclosure - Summary of Significant Accounting Policies - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureComputationOfBasicAndDilutedEarningsPerCommonShare" id="DisclosureComputationOfBasicAndDilutedEarningsPerCommonShare">
+        <link:definition>131 - Disclosure - Computation of Basic and Diluted Earnings Per Common Share (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureCashAndAvailableforSaleSecuritiesHeldInItsMarketableSecuritiesInvestmentPortfolio" id="DisclosureCashAndAvailableforSaleSecuritiesHeldInItsMarketableSecuritiesInvestmentPortfolio">
+        <link:definition>132 - Disclosure - Cash and Available-for-Sale Securities Held in its Marketable Securities Investment Portfolio (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureAvailableforSaleSecuritiesAdjustedCostGrossUnrealizedGainsGrossUnrealizedLossesAndFairValueBySignificantInvestmentCategory" id="DisclosureAvailableforSaleSecuritiesAdjustedCostGrossUnrealizedGainsGrossUnrealizedLossesAndFairValueBySignificantInvestmentCategory">
+        <link:definition>133 - Disclosure - Available-for-Sale Securities' Adjusted Cost, Gross Unrealized Gains, Gross Unrealized Losses and Fair Value by Significant Investment Category (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureFinancialInstrumentsAdditionalInformation" id="DisclosureFinancialInstrumentsAdditionalInformation">
+        <link:definition>134 - Disclosure - Financial Instruments - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureGrossUnrealizedLossesAndFairValueForInvestmentsInAnUnrealizedLossPosition" id="DisclosureGrossUnrealizedLossesAndFairValueForInvestmentsInAnUnrealizedLossPosition">
+        <link:definition>135 - Disclosure - Gross Unrealized Losses and Fair Value for Investments in an Unrealized Loss Position (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureNotionalPrincipalAndCreditRiskAmountsOfDerivativeInstrumentsOutstanding" id="DisclosureNotionalPrincipalAndCreditRiskAmountsOfDerivativeInstrumentsOutstanding">
+        <link:definition>136 - Disclosure - Notional Principal and Credit Risk Amounts of Derivative Instruments Outstanding (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureDerivativeInstrumentsMeasuredAtGrossFairValueAsReflectedInTheConsolidatedBalanceSheets" id="DisclosureDerivativeInstrumentsMeasuredAtGrossFairValueAsReflectedInTheConsolidatedBalanceSheets">
+        <link:definition>137 - Disclosure - Derivative Instruments Measured at Gross Fair Value as Reflected in the Consolidated Balance Sheets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosurePreTaxEffectOfDerivativeInstrumentsDesignatedAsCashFlowAndNetInvestmentHedges" id="DisclosurePreTaxEffectOfDerivativeInstrumentsDesignatedAsCashFlowAndNetInvestmentHedges">
+        <link:definition>138 - Disclosure - Pre-Tax Effect of Derivative Instruments Designated as Cash Flow and Net Investment Hedges (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosurePreTaxEffectOfDerivativeInstrumentsDesignatedAsCashFlowAndNetInvestmentHedgesParenthetical" id="DisclosurePreTaxEffectOfDerivativeInstrumentsDesignatedAsCashFlowAndNetInvestmentHedgesParenthetical">
+        <link:definition>139 - Disclosure - Pre-Tax Effect of Derivative Instruments Designated as Cash Flow and Net Investment Hedges (Parenthetical) (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureAssetsAndLiabilitiesMeasuredAtFairValue" id="DisclosureAssetsAndLiabilitiesMeasuredAtFairValue">
+        <link:definition>140 - Disclosure - Assets and Liabilities Measured at Fair Value (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureAssetsAndLiabilitiesMeasuredAtFairValueOnARecurringBasis" id="DisclosureAssetsAndLiabilitiesMeasuredAtFairValueOnARecurringBasis">
+        <link:definition>141 - Disclosure - Assets and Liabilities Measured at Fair Value on a Recurring Basis (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureConsolidatedFinancialStatementDetails" id="DisclosureConsolidatedFinancialStatementDetails">
+        <link:definition>142 - Disclosure - Consolidated Financial Statement Details (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureComponentsOfGrossAndNetIntangibleAssetBalances" id="DisclosureComponentsOfGrossAndNetIntangibleAssetBalances">
+        <link:definition>143 - Disclosure - Components of Gross and Net Intangible Asset Balances (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureGoodwillAndOtherIntangibleAssetsAdditionalInformation" id="DisclosureGoodwillAndOtherIntangibleAssetsAdditionalInformation">
+        <link:definition>144 - Disclosure - Goodwill and Other Intangible Assets - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureExpectedAnnualAmortizationExpenseRelatedToAcquiredIntangibleAssets" id="DisclosureExpectedAnnualAmortizationExpenseRelatedToAcquiredIntangibleAssets">
+        <link:definition>145 - Disclosure - Expected Annual Amortization Expense Related to Acquired Intangible Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureProvisionForIncomeTaxes" id="DisclosureProvisionForIncomeTaxes">
+        <link:definition>146 - Disclosure - Provision for Income Taxes (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureIncomeTaxesAdditionalInformation" id="DisclosureIncomeTaxesAdditionalInformation">
+        <link:definition>147 - Disclosure - Income Taxes - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureSignificantComponentsOfDeferredTaxAssetsAndLiabilities" id="DisclosureSignificantComponentsOfDeferredTaxAssetsAndLiabilities">
+        <link:definition>148 - Disclosure - Significant Components of Deferred Tax Assets and Liabilities (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureReconciliationOfProvisionForIncomeTaxes" id="DisclosureReconciliationOfProvisionForIncomeTaxes">
+        <link:definition>149 - Disclosure - Reconciliation of Provision for Income Taxes (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureAggregateChangesInGrossUnrecognizedTaxBenefitsExcludingInterestAndPenalties" id="DisclosureAggregateChangesInGrossUnrecognizedTaxBenefitsExcludingInterestAndPenalties">
+        <link:definition>150 - Disclosure - Aggregate Changes in Gross Unrecognized Tax Benefits Excluding Interest and Penalties (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureShareholdersEquityAndStockBasedCompensationAdditionalInformation" id="DisclosureShareholdersEquityAndStockBasedCompensationAdditionalInformation">
+        <link:definition>151 - Disclosure - Shareholders' Equity and Stock-Based Compensation - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureComponentsOfAccumulatedOtherComprehensiveIncomeNetOfTaxes" id="DisclosureComponentsOfAccumulatedOtherComprehensiveIncomeNetOfTaxes">
+        <link:definition>152 - Disclosure - Components of Accumulated Other Comprehensive Income, Net of Taxes (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureOtherComprehensiveIncomeRelatedToDerivatives" id="DisclosureOtherComprehensiveIncomeRelatedToDerivatives">
+        <link:definition>153 - Disclosure - Other Comprehensive Income Related to Derivatives (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureRestrictedStockUnitsActivity" id="DisclosureRestrictedStockUnitsActivity">
+        <link:definition>154 - Disclosure - Restricted Stock Units Activity (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureStockOptionAndRSUActivityAndRelatedInformation" id="DisclosureStockOptionAndRSUActivityAndRelatedInformation">
+        <link:definition>155 - Disclosure - Stock Option and RSU Activity and Related Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureWeightedAverageAssumptionsAndResultingEstimatesOfWeightedAverageFairValuePerShareOfStockOptionsGrantedAndStockPurchaseRights" id="DisclosureWeightedAverageAssumptionsAndResultingEstimatesOfWeightedAverageFairValuePerShareOfStockOptionsGrantedAndStockPurchaseRights">
+        <link:definition>156 - Disclosure - Weighted-Average Assumptions and Resulting Estimates of Weighted-Average Fair Value Per Share of Stock Options Granted and Stock Purchase Rights (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureSummaryOfTheStockBasedCompensationExpense" id="DisclosureSummaryOfTheStockBasedCompensationExpense">
+        <link:definition>157 - Disclosure - Summary of the Stock-Based Compensation Expense (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureCommitmentsAndContingenciesAdditionalInformation" id="DisclosureCommitmentsAndContingenciesAdditionalInformation">
+        <link:definition>158 - Disclosure - Commitments and Contingencies - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureFutureMinimumLeasePaymentsUnderNoncancelableOperatingLeases" id="DisclosureFutureMinimumLeasePaymentsUnderNoncancelableOperatingLeases">
+        <link:definition>159 - Disclosure - Future Minimum Lease Payments Under Noncancelable Operating Leases (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureChangesInAccruedWarrantyAndRelatedCosts" id="DisclosureChangesInAccruedWarrantyAndRelatedCosts">
+        <link:definition>160 - Disclosure - Changes in Accrued Warranty and Related Costs (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureSegmentInformationAndGeographicDataAdditionalInformation" id="DisclosureSegmentInformationAndGeographicDataAdditionalInformation">
+        <link:definition>161 - Disclosure - Segment Information and Geographic Data - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureSummaryInformationByOperatingSegment" id="DisclosureSummaryInformationByOperatingSegment">
+        <link:definition>162 - Disclosure - Summary Information by Operating Segment (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureReconciliationOfSegmentOperatingIncomeAndAssetsToTheConsolidatedFinancialStatements" id="DisclosureReconciliationOfSegmentOperatingIncomeAndAssetsToTheConsolidatedFinancialStatements">
+        <link:definition>163 - Disclosure - Reconciliation of Segment Operating Income and Assets to the Consolidated Financial Statements (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureNetSalesAndLongLivedAssetsRelatedToUSAndInternationalOperations" id="DisclosureNetSalesAndLongLivedAssetsRelatedToUSAndInternationalOperations">
+        <link:definition>164 - Disclosure - Net Sales and Long-Lived Assets Related to U.S. and International Operations (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureNetSalesByProduct" id="DisclosureNetSalesByProduct">
+        <link:definition>165 - Disclosure - Net Sales by Product (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureRelatedPartyTransactionsAndCertainOtherTransactionsAdditionalInformation" id="DisclosureRelatedPartyTransactionsAndCertainOtherTransactionsAdditionalInformation">
+        <link:definition>166 - Disclosure - Related Party Transactions and Certain Other Transactions - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.apple.com/taxonomy/role/DisclosureSummaryOfQuarterlyFinancialInformation" id="DisclosureSummaryOfQuarterlyFinancialInformation">
+        <link:definition>167 - Disclosure - Summary of Quarterly Financial Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:linkbaseRef xlink:type="simple" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:href="aapl-20100925_cal.xml" xlink:title="Calculation Links, all"/>
+      <link:linkbaseRef xlink:type="simple" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:href="aapl-20100925_def.xml" xlink:title="Definition Links, all"/>
+      <link:linkbaseRef xlink:type="simple" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:href="aapl-20100925_lab.xml" xlink:title="Label Links, all"/>
+      <link:linkbaseRef xlink:type="simple" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:href="aapl-20100925_pre.xml" xlink:title="Presentation Links, all"/>
+    </appinfo>
+  </annotation>
+  <import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <import namespace="http://xbrl.us/us-types/2009-01-31" schemaLocation="http://taxonomies.xbrl.us/us-gaap/2009/elts/us-types-2009-01-31.xsd"/>
+  <import namespace="http://xbrl.us/us-gaap/2009-01-31" schemaLocation="http://taxonomies.xbrl.us/us-gaap/2009/elts/us-gaap-2009-01-31.xsd"/>
+  <import namespace="http://xbrl.us/dei/2009-01-31" schemaLocation="http://taxonomies.xbrl.us/us-gaap/2009/non-gaap/dei-2009-01-31.xsd"/>
+  <element name="AccruedMarketingAndDistributionCurrent" id="aapl_AccruedMarketingAndDistributionCurrent" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AccruedWarrantiesAndRelatedCostsTableDisclosureTextBlock" id="aapl_AccruedWarrantiesAndRelatedCostsTableDisclosureTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipmentAndCapitalizedSoftware" id="aapl_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipmentAndCapitalizedSoftware" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AllowanceForDoubtfulAccountsPolicyTextBlock" id="aapl_AllowanceForDoubtfulAccountsPolicyTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AmericasMember" id="aapl_AmericasMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AppleIpadMember" id="aapl_AppleIpadMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AppleIphoneMember" id="aapl_AppleIphoneMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AppleIpodTouchMember" id="aapl_AppleIpodTouchMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AppleTVMember" id="aapl_AppleTVMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AsiaPacificMember" id="aapl_AsiaPacificMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="Available-For-SaleSecuritiesDebtSecuritiesUnrealizedGainsLossesNet" id="aapl_Available-For-SaleSecuritiesDebtSecuritiesUnrealizedGainsLossesNet" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AvailableForSaleSecuritiesContinuousUnrealizedLossLessThanTwelveMonths" id="aapl_AvailableForSaleSecuritiesContinuousUnrealizedLossLessThanTwelveMonths" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AvailableForSaleSecuritiesContinuousUnrealizedLossTwelveMonthsOrLonger" id="aapl_AvailableForSaleSecuritiesContinuousUnrealizedLossTwelveMonthsOrLonger" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AvailableForSaleSecuritiesDebtSecuritiesUnrealizedGains" id="aapl_AvailableForSaleSecuritiesDebtSecuritiesUnrealizedGains" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AvailableForSaleSecuritiesDebtSecuritiesUnrealizedLosses" id="aapl_AvailableForSaleSecuritiesDebtSecuritiesUnrealizedLosses" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AvailableForSaleSecuritiesUnrealizedLosses" id="aapl_AvailableForSaleSecuritiesUnrealizedLosses" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="BasisOfPresentationAndSignificantAccountingPoliciesTextBlock" id="aapl_BasisOfPresentationAndSignificantAccountingPoliciesTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="BasisOfPresentationPolicyTextBlock" id="aapl_BasisOfPresentationPolicyTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="BusinessAcquisitionPurchasePriceAllocationIntangibleAssets" id="aapl_BusinessAcquisitionPurchasePriceAllocationIntangibleAssets" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="BusinessSegmentPolicyTextBlock" id="aapl_BusinessSegmentPolicyTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CapitalizedInternalUseSoftwareEstimatedUsefulLife" id="aapl_CapitalizedInternalUseSoftwareEstimatedUsefulLife" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CapitalizedSoftwareEstimatedUsefulLife" id="aapl_CapitalizedSoftwareEstimatedUsefulLife" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CashAndCashEquivalentsAndMarketableSecuritiesDisclosureTextBlock" id="aapl_CashAndCashEquivalentsAndMarketableSecuritiesDisclosureTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CashCashEquivalentsAndMarketableSecurities" id="aapl_CashCashEquivalentsAndMarketableSecurities" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CashCashEquivalentsAndMarketableSecuritiesHeldByForeignSubsidiaries" id="aapl_CashCashEquivalentsAndMarketableSecuritiesHeldByForeignSubsidiaries" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ChangesInGoodwillAndOtherIntangibleAssetsTableTextBlock" id="aapl_ChangesInGoodwillAndOtherIntangibleAssetsTableTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ComponentsOfAccumulatedOtherComprehensiveIncomeTextBlock" id="aapl_ComponentsOfAccumulatedOtherComprehensiveIncomeTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ComponentsOfDeferredTaxAssetsAndLiabilitiesTextBlock" id="aapl_ComponentsOfDeferredTaxAssetsAndLiabilitiesTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ComprehensiveIncomeLossPolicyTextBlock" id="aapl_ComprehensiveIncomeLossPolicyTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CorporateDepreciationAmortizationAndAccretion" id="aapl_CorporateDepreciationAmortizationAndAccretion" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CreditRiskAmountOfForeignCurrencyDerivativeInstrumentsDesignatedAsHedgingInstruments" id="aapl_CreditRiskAmountOfForeignCurrencyDerivativeInstrumentsDesignatedAsHedgingInstruments" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CreditRiskAmountOfForeignCurrencyDerivativeInstrumentsNotDesignatedAsHedgingInstruments" id="aapl_CreditRiskAmountOfForeignCurrencyDerivativeInstrumentsNotDesignatedAsHedgingInstruments" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CurrentAndDeferredTaxProvisionsBenefitsTextBlock" id="aapl_CurrentAndDeferredTaxProvisionsBenefitsTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CustomerConcentrationRevenueMember" id="aapl_CustomerConcentrationRevenueMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CustomerOneConcentrationRiskMember" id="aapl_CustomerOneConcentrationRiskMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="CustomerTwoConcentrationRiskMember" id="aapl_CustomerTwoConcentrationRiskMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DeferredTaxAssetsAccountsReceivableAndInventoryReserves" id="aapl_DeferredTaxAssetsAccountsReceivableAndInventoryReserves" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DeferredTaxAssetsBasisOfCapitalAssetsAndInvestments" id="aapl_DeferredTaxAssetsBasisOfCapitalAssetsAndInvestments" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DeferredTaxLiabilityRelatedToAmountsThatMayBeRepatriated" id="aapl_DeferredTaxLiabilityRelatedToAmountsThatMayBeRepatriated" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DefinedContributionPlanContributionRate" id="aapl_DefinedContributionPlanContributionRate" type="us-types:percentItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DefinedContributionPlanContributionRatesAsPercentageOfEmployeesEarnings" id="aapl_DefinedContributionPlanContributionRatesAsPercentageOfEmployeesEarnings" type="us-types:percentItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DefinedContributionPlanEmployeeAnnualContributionMaximum" id="aapl_DefinedContributionPlanEmployeeAnnualContributionMaximum" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DerivativeFinancialInstrumentsPolicyTextBlock" id="aapl_DerivativeFinancialInstrumentsPolicyTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DerivativesByDerivativeInstrumentContractAxis" id="aapl_DerivativesByDerivativeInstrumentContractAxis" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrldt:dimensionItem"/>
+  <element name="DerivativesByDerivativeInstrumentContractDomain" id="aapl_DerivativesByDerivativeInstrumentContractDomain" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DesktopsMember" id="aapl_DesktopsMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DetailsOfCertainBalanceSheetAccountsDisclosureTextBlock" id="aapl_DetailsOfCertainBalanceSheetAccountsDisclosureTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DirectorsPlanMember" id="aapl_DirectorsPlanMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureAggregateChangesInGrossUnrecognizedTaxBenefitsExcludingInterestAndPenaltiesAbstract" id="aapl_DisclosureAggregateChangesInGrossUnrecognizedTaxBenefitsExcludingInterestAndPenaltiesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureAssetsAndLiabilitiesMeasuredAtFairValueAbstract" id="aapl_DisclosureAssetsAndLiabilitiesMeasuredAtFairValueAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureAssetsAndLiabilitiesMeasuredAtFairValueOnARecurringBasisAbstract" id="aapl_DisclosureAssetsAndLiabilitiesMeasuredAtFairValueOnARecurringBasisAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureAvailableforSaleSecuritiesAdjustedCostGrossUnrealizedGainsGrossUnrealizedLossesAndFairValueBySignificantInvestmentCategoryAbstract" id="aapl_DisclosureAvailableforSaleSecuritiesAdjustedCostGrossUnrealizedGainsGrossUnrealizedLossesAndFairValueBySignificantInvestmentCategoryAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureCashAndAvailableforSaleSecuritiesHeldInItsMarketableSecuritiesInvestmentPortfolioAbstract" id="aapl_DisclosureCashAndAvailableforSaleSecuritiesHeldInItsMarketableSecuritiesInvestmentPortfolioAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureChangesInAccruedWarrantyAndRelatedCostsAbstract" id="aapl_DisclosureChangesInAccruedWarrantyAndRelatedCostsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureCommitmentsAndContingenciesAdditionalInformationAbstract" id="aapl_DisclosureCommitmentsAndContingenciesAdditionalInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureComponentsOfAccumulatedOtherComprehensiveIncomeNetOfTaxesAbstract" id="aapl_DisclosureComponentsOfAccumulatedOtherComprehensiveIncomeNetOfTaxesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureComponentsOfGrossAndNetIntangibleAssetBalancesAbstract" id="aapl_DisclosureComponentsOfGrossAndNetIntangibleAssetBalancesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureComputationOfBasicAndDilutedEarningsPerCommonShareAbstract" id="aapl_DisclosureComputationOfBasicAndDilutedEarningsPerCommonShareAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureConsolidatedFinancialStatementDetailsAbstract" id="aapl_DisclosureConsolidatedFinancialStatementDetailsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureDerivativeInstrumentsMeasuredAtGrossFairValueAsReflectedInTheConsolidatedBalanceSheetsAbstract" id="aapl_DisclosureDerivativeInstrumentsMeasuredAtGrossFairValueAsReflectedInTheConsolidatedBalanceSheetsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureExpectedAnnualAmortizationExpenseRelatedToAcquiredIntangibleAssetsAbstract" id="aapl_DisclosureExpectedAnnualAmortizationExpenseRelatedToAcquiredIntangibleAssetsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureFinancialInstrumentsAdditionalInformationAbstract" id="aapl_DisclosureFinancialInstrumentsAdditionalInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureFutureMinimumLeasePaymentsUnderNoncancelableOperatingLeasesAbstract" id="aapl_DisclosureFutureMinimumLeasePaymentsUnderNoncancelableOperatingLeasesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureGoodwillAndOtherIntangibleAssetsAdditionalInformationAbstract" id="aapl_DisclosureGoodwillAndOtherIntangibleAssetsAdditionalInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureGrossUnrealizedLossesAndFairValueForInvestmentsInAnUnrealizedLossPositionAbstract" id="aapl_DisclosureGrossUnrealizedLossesAndFairValueForInvestmentsInAnUnrealizedLossPositionAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureIncomeTaxesAdditionalInformationAbstract" id="aapl_DisclosureIncomeTaxesAdditionalInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureNetSalesAndLongLivedAssetsRelatedToUSAndInternationalOperationsAbstract" id="aapl_DisclosureNetSalesAndLongLivedAssetsRelatedToUSAndInternationalOperationsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureNetSalesByProductAbstract" id="aapl_DisclosureNetSalesByProductAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureNotionalPrincipalAndCreditRiskAmountsOfDerivativeInstrumentsOutstandingAbstract" id="aapl_DisclosureNotionalPrincipalAndCreditRiskAmountsOfDerivativeInstrumentsOutstandingAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureOtherComprehensiveIncomeRelatedToDerivativesAbstract" id="aapl_DisclosureOtherComprehensiveIncomeRelatedToDerivativesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosurePreTaxEffectOfDerivativeInstrumentsDesignatedAsCashFlowAndNetInvestmentHedgesAbstract" id="aapl_DisclosurePreTaxEffectOfDerivativeInstrumentsDesignatedAsCashFlowAndNetInvestmentHedgesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureProvisionForIncomeTaxesAbstract" id="aapl_DisclosureProvisionForIncomeTaxesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureReconciliationOfProvisionForIncomeTaxesAbstract" id="aapl_DisclosureReconciliationOfProvisionForIncomeTaxesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureReconciliationOfSegmentOperatingIncomeAndAssetsToTheConsolidatedFinancialStatementsAbstract" id="aapl_DisclosureReconciliationOfSegmentOperatingIncomeAndAssetsToTheConsolidatedFinancialStatementsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureRelatedPartyTransactionsAndCertainOtherTransactionsAdditionalInformationAbstract" id="aapl_DisclosureRelatedPartyTransactionsAndCertainOtherTransactionsAdditionalInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureRestrictedStockUnitsActivityAbstract" id="aapl_DisclosureRestrictedStockUnitsActivityAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureSegmentInformationAndGeographicDataAdditionalInformationAbstract" id="aapl_DisclosureSegmentInformationAndGeographicDataAdditionalInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureShareholdersEquityAndStockBasedCompensationAdditionalInformationAbstract" id="aapl_DisclosureShareholdersEquityAndStockBasedCompensationAdditionalInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureSignificantComponentsOfDeferredTaxAssetsAndLiabilitiesAbstract" id="aapl_DisclosureSignificantComponentsOfDeferredTaxAssetsAndLiabilitiesAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureStockOptionAndRSUActivityAndRelatedInformationAbstract" id="aapl_DisclosureStockOptionAndRSUActivityAndRelatedInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureSummaryInformationByOperatingSegmentAbstract" id="aapl_DisclosureSummaryInformationByOperatingSegmentAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureSummaryOfQuarterlyFinancialInformationAbstract" id="aapl_DisclosureSummaryOfQuarterlyFinancialInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformationAbstract" id="aapl_DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureSummaryOfTheStockBasedCompensationExpenseAbstract" id="aapl_DisclosureSummaryOfTheStockBasedCompensationExpenseAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DisclosureWeightedAverageAssumptionsAndResultingEstimatesOfWeightedAverageFairValuePerShareOfStockOptionsGrantedAndStockPurchaseRightsAbstract" id="aapl_DisclosureWeightedAverageAssumptionsAndResultingEstimatesOfWeightedAverageFairValuePerShareOfStockOptionsGrantedAndStockPurchaseRightsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DocumentDocumentandEntityInformationAbstract" id="aapl_DocumentDocumentandEntityInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EarningsPerShareBasicAndDilutedDenominatorAbstract" id="aapl_EarningsPerShareBasicAndDilutedDenominatorAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EarningsPerShareBasicAndDilutedNumeratorAbstract" id="aapl_EarningsPerShareBasicAndDilutedNumeratorAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EmployeeCommonStockPurchasesThroughPayrollDeductionsPriceAsPercentageOfFairMarketValue" id="aapl_EmployeeCommonStockPurchasesThroughPayrollDeductionsPriceAsPercentageOfFairMarketValue" type="us-types:percentItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EmployeeStockOptionPlan1997PlanMember" id="aapl_EmployeeStockOptionPlan1997PlanMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EmployeeStockPlan2003PlanMember" id="aapl_EmployeeStockPlan2003PlanMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EmployeeStockPurchasePlanMember" id="aapl_EmployeeStockPurchasePlanMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EntityWideDisclosureOnGeographicAreasLongLivedAssetsTotal" id="aapl_EntityWideDisclosureOnGeographicAreasLongLivedAssetsTotal" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EquityInstrumentsOtherThanOptionsSharesNetShareSettledToCoverWithholdingTaxes" id="aapl_EquityInstrumentsOtherThanOptionsSharesNetShareSettledToCoverWithholdingTaxes" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EstimatedLifeOfRelatedHardwareDevice" id="aapl_EstimatedLifeOfRelatedHardwareDevice" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EstimateOfSellingPriceForSoftwareUpgradeRight" id="aapl_EstimateOfSellingPriceForSoftwareUpgradeRight" type="us-types:perUnitItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="EuropeMember" id="aapl_EuropeMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ExpectedAnnualAmortizationExpenseRelatedToAcquiredIntangibleAssetTextBlock" id="aapl_ExpectedAnnualAmortizationExpenseRelatedToAcquiredIntangibleAssetTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueAssetsAndLiabilitiesComponentDomain" id="aapl_FairValueAssetsAndLiabilitiesComponentDomain" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueAssetsAndLiabilitiesComponentsAxis" id="aapl_FairValueAssetsAndLiabilitiesComponentsAxis" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrldt:dimensionItem"/>
+  <element name="FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisTextBlock" id="aapl_FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisUnobservableInputReconciliationByMajorTypeAxis" id="aapl_FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisUnobservableInputReconciliationByMajorTypeAxis" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrldt:dimensionItem"/>
+  <element name="FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisUnobservableInputReconciliationByMajorTypesDomain" id="aapl_FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisUnobservableInputReconciliationByMajorTypesDomain" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueAssetsMeasuredOnRecurringBasis" id="aapl_FairValueAssetsMeasuredOnRecurringBasis" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueAssetsMeasuredOnRecurringBasisAbstract" id="aapl_FairValueAssetsMeasuredOnRecurringBasisAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueAssetsMeasuredOnRecurringBasisMarketableSecuritiesCurrent" id="aapl_FairValueAssetsMeasuredOnRecurringBasisMarketableSecuritiesCurrent" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueAssetsMeasuredOnRecurringBasisMarketableSecuritiesNonCurrent" id="aapl_FairValueAssetsMeasuredOnRecurringBasisMarketableSecuritiesNonCurrent" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueAssetsMeasuredOnRecurringBasisOtherAssets" id="aapl_FairValueAssetsMeasuredOnRecurringBasisOtherAssets" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueLiabilitiesMeasuredOnRecurringBasis" id="aapl_FairValueLiabilitiesMeasuredOnRecurringBasis" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueLiabilitiesMeasuredOnRecurringBasisAbstract" id="aapl_FairValueLiabilitiesMeasuredOnRecurringBasisAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FairValueMeasurementsAndDisclosuresPolicyTextBlock" id="aapl_FairValueMeasurementsAndDisclosuresPolicyTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FinancialInstrumentsTextBlock" id="aapl_FinancialInstrumentsTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ForeignCurrencyDerivativeInstrumentsDesignatedAsHedgingInstrumentsAssetAtFairValue" id="aapl_ForeignCurrencyDerivativeInstrumentsDesignatedAsHedgingInstrumentsAssetAtFairValue" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ForeignCurrencyDerivativeInstrumentsDesignatedAsHedgingInstrumentsLiabilityAtFairValue" id="aapl_ForeignCurrencyDerivativeInstrumentsDesignatedAsHedgingInstrumentsLiabilityAtFairValue" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FutureAmortizationExpenseThereafter" id="aapl_FutureAmortizationExpenseThereafter" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FutureAmortizationExpenseTotal" id="aapl_FutureAmortizationExpenseTotal" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FutureMinimumLeasePaymentsUnderNoncancelableOperatingLeasesTextBlock" id="aapl_FutureMinimumLeasePaymentsUnderNoncancelableOperatingLeasesTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="HardwareLimitedPartsAndLaborMember" id="aapl_HardwareLimitedPartsAndLaborMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="HardwareServicePartsMember" id="aapl_HardwareServicePartsMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="IncomeTaxExaminationMinimumLikelihoodOfTaxBenefitsBeingRealizedUponSettlement" id="aapl_IncomeTaxExaminationMinimumLikelihoodOfTaxBenefitsBeingRealizedUponSettlement" type="xbrli:stringItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="IncreaseDecreaseOtherCurrentAssets" id="aapl_IncreaseDecreaseOtherCurrentAssets" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="IntangibleAssetsByMajorClassAxis" id="aapl_IntangibleAssetsByMajorClassAxis" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrldt:dimensionItem"/>
+  <element name="IntangibleAssetsMajorClassNameDomain" id="aapl_IntangibleAssetsMajorClassNameDomain" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="InternationalOperationsMember" id="aapl_InternationalOperationsMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="IpadRelatedProductsAndServicesMember" id="aapl_IpadRelatedProductsAndServicesMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="IphoneRelatedProductsAndServicesMember" id="aapl_IphoneRelatedProductsAndServicesMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="IpodMember" id="aapl_IpodMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="JapanMember" id="aapl_JapanMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="LandAndBuildingsGross" id="aapl_LandAndBuildingsGross" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="LongTermMarketableSecuritiesMaturitiesTermMaximum" id="aapl_LongTermMarketableSecuritiesMaturitiesTermMaximum" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="LongTermMarketableSecuritiesMaturitiesTermMinimum" id="aapl_LongTermMarketableSecuritiesMaturitiesTermMinimum" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="LowerLimitMember" id="aapl_LowerLimitMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="MachineryEquipmentAndInternalUseSoftwareGross" id="aapl_MachineryEquipmentAndInternalUseSoftwareGross" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="MajorFacilityLeaseTermsMaximumPeriodInYears" id="aapl_MajorFacilityLeaseTermsMaximumPeriodInYears" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="MaximumMember" id="aapl_MaximumMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="NotesToFinancialStatementsAbstract" id="aapl_NotesToFinancialStatementsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="NotionalAmountOfForeignCurrencyDerivativeInstrumentsDesignatedAsHedgingInstruments" id="aapl_NotionalAmountOfForeignCurrencyDerivativeInstrumentsDesignatedAsHedgingInstruments" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="NotionalAndCreditRiskAmountsOfOutstandingDerivativePositionsDisclosureTextBlock" id="aapl_NotionalAndCreditRiskAmountsOfOutstandingDerivativePositionsDisclosureTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="NumberOfStores" id="aapl_NumberOfStores" type="xbrli:integerItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="OperatingLeasesFutureMinimumPaymentsDueRetailSpace" id="aapl_OperatingLeasesFutureMinimumPaymentsDueRetailSpace" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="OtherCustomersMember" id="aapl_OtherCustomersMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="OtherMusicRelatedProductsAndServicesMember" id="aapl_OtherMusicRelatedProductsAndServicesMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PercentageOfTotalNonTradeReceivables" id="aapl_PercentageOfTotalNonTradeReceivables" type="us-types:percentItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PercentageOfTotalRevenuesByCountry" id="aapl_PercentageOfTotalRevenuesByCountry" type="xbrli:stringItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PercentageOfTotalTradeReceivables" id="aapl_PercentageOfTotalTradeReceivables" type="us-types:percentItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PeripheralsAndOtherHardwareMember" id="aapl_PeripheralsAndOtherHardwareMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PortablesMember" id="aapl_PortablesMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PotentialDilutiveSecuritiesThatCouldBeIncludedInComputationOfEarningsPerShareAmount" id="aapl_PotentialDilutiveSecuritiesThatCouldBeIncludedInComputationOfEarningsPerShareAmount" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PrepaidExpenseOtherCurrentNoncurrent" id="aapl_PrepaidExpenseOtherCurrentNoncurrent" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PrepaymentCommitment" id="aapl_PrepaymentCommitment" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ProductWarrantyPolicyTextBlock" id="aapl_ProductWarrantyPolicyTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ProductWarrantyTerm" id="aapl_ProductWarrantyTerm" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PropertyPlantAndEquipmentAndCapitalizedSoftwareGross" id="aapl_PropertyPlantAndEquipmentAndCapitalizedSoftwareGross" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PropertyPlantAndEquipmentAndCapitalizedSoftwareNet" id="aapl_PropertyPlantAndEquipmentAndCapitalizedSoftwareNet" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PurchaseCommitmentMaximumPeriodRequired" id="aapl_PurchaseCommitmentMaximumPeriodRequired" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PurchaseCommitmentMinimumPeriodRequired" id="aapl_PurchaseCommitmentMinimumPeriodRequired" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="QuarterlyFinancialInformationTableTextBlock" id="aapl_QuarterlyFinancialInformationTableTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="RangeAxis" id="aapl_RangeAxis" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrldt:dimensionItem"/>
+  <element name="RangeDomain" id="aapl_RangeDomain" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ReconciliationOfLongLivedAssetsAndNetSalesFromSegmentToConsolidatedTextBlock" id="aapl_ReconciliationOfLongLivedAssetsAndNetSalesFromSegmentToConsolidatedTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ReconciliationOfOperatingIncomeAssetsAndDepreciationFromSegmentsToConsolidatedTextBlock" id="aapl_ReconciliationOfOperatingIncomeAssetsAndDepreciationFromSegmentsToConsolidatedTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ReconciliationOfProvisionForIncomeTaxesTextBlock" id="aapl_ReconciliationOfProvisionForIncomeTaxesTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="RegionReportingInformationByRegionAxis" id="aapl_RegionReportingInformationByRegionAxis" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrldt:dimensionItem"/>
+  <element name="RenewalOptionTermsMaximumAdditionalPeriodInYears" id="aapl_RenewalOptionTermsMaximumAdditionalPeriodInYears" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ReportingRegionDomain" id="aapl_ReportingRegionDomain" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="RestrictedShareActivityDisclosureTextBlock" id="aapl_RestrictedShareActivityDisclosureTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="RetailLeaseTermsMajorityPeriodInYears" id="aapl_RetailLeaseTermsMajorityPeriodInYears" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="RetailLeaseTermsMaximumPeriodInYears" id="aapl_RetailLeaseTermsMaximumPeriodInYears" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="RetailLeaseTermsMinimumPeriodInYears" id="aapl_RetailLeaseTermsMinimumPeriodInYears" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="RetailMember" id="aapl_RetailMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ScheduleOfDerivativeInstrumentsEffectOnIncomeAndOtherComprehensiveIncome" id="aapl_ScheduleOfDerivativeInstrumentsEffectOnIncomeAndOtherComprehensiveIncome" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ScheduleOfDerivativeInstrumentsRecognizedInOtherComprehensiveIncomeTextBlock" id="aapl_ScheduleOfDerivativeInstrumentsRecognizedInOtherComprehensiveIncomeTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ScheduleOfShareBasedCompensationOptionsActivityTextBlock" id="aapl_ScheduleOfShareBasedCompensationOptionsActivityTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="SegmentReportingInformationCorporateExpenses" id="aapl_SegmentReportingInformationCorporateExpenses" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="SegmentReportingInformationDepreciationAmortizationAndAccretion" id="aapl_SegmentReportingInformationDepreciationAmortizationAndAccretion" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByEmployeeStockPurchasePlanNumberOfSharesAuthorized" id="aapl_ShareBasedCompensationArrangementByEmployeeStockPurchasePlanNumberOfSharesAuthorized" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByEmployeeStockPurchasePlanStockPurchasesAsPercentageOfEmployeeCompensationMaximum" id="aapl_ShareBasedCompensationArrangementByEmployeeStockPurchasePlanStockPurchasesAsPercentageOfEmployeeCompensationMaximum" type="us-types:percentItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsAggregateIntrinsicValueAbstract" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsAggregateIntrinsicValueAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsNonvestedTotalIntrinsicValue" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsNonvestedTotalIntrinsicValue" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestingPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestingPeriod" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsWeightedAverageGrantDateFairValueAbstract" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsWeightedAverageGrantDateFairValueAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardIncreaseNumberOfSharesAvailableForGrant" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardIncreaseNumberOfSharesAvailableForGrant" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantAbstract" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantAdditionalSharesAuthorizedInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantAdditionalSharesAuthorizedInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantOptionsAssumedInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantOptionsAssumedInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantOptionsCancelledInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantOptionsCancelledInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantOptionsExercisedInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantOptionsExercisedInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantOptionsGrantedInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantOptionsGrantedInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantPlanSharesExpiredInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantPlanSharesExpiredInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantRestrictedStockUnitsCancelledInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantRestrictedStockUnitsCancelledInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantRestrictedStockUnitsGrantedInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrantRestrictedStockUnitsGrantedInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsAdditionalSharesAuthorizedWeightedAverageExercisePrice" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsAdditionalSharesAuthorizedWeightedAverageExercisePrice" type="us-types:perShareItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsAggregateIntrinsicValueAbstract" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsAggregateIntrinsicValueAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsAssumedInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsAssumedInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsAssumedWeightedAverageExercisePrice" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsAssumedWeightedAverageExercisePrice" type="us-types:perShareItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpectedToVestIntrinsicValueAtPeriodEnd" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpectedToVestIntrinsicValueAtPeriodEnd" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpectedToVestWeightedAverageExercisePrice" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpectedToVestWeightedAverageExercisePrice" type="us-types:perShareItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpectedToVestWeightedAverageRemainingContractualTerm" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpectedToVestWeightedAverageRemainingContractualTerm" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpirationTerm" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExpirationTerm" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingRollforwardPlanSharesExpiredInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingRollforwardPlanSharesExpiredInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingRollForwardRestrictedStockUnitsCancelledInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingRollForwardRestrictedStockUnitsCancelledInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingRollForwardRestrictedStockUnitsGrantedInPeriod" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsOutstandingRollForwardRestrictedStockUnitsGrantedInPeriod" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsRestrictedStockUnitsCancelledWeightedAverageExercisePrice" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsRestrictedStockUnitsCancelledWeightedAverageExercisePrice" type="us-types:perShareItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsRestrictedStockUnitsGrantedWeightedAverageExercisePrice" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsRestrictedStockUnitsGrantedWeightedAverageExercisePrice" type="us-types:perShareItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsWeightedAverageRemainingContractualTermAbstract" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsWeightedAverageRemainingContractualTermAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardPeriodOfTimeOptionsBecomeExercisable" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardPeriodOfTimeOptionsBecomeExercisable" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardPlanSharesExpiredInPeriodWeightedAverageExercisePrice" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardPlanSharesExpiredInPeriodWeightedAverageExercisePrice" type="us-types:perShareItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationArrangementByShareBasedPaymentAwardStockPurchaseRightsGrantsInPeriodWeightedAverageGrantDateFairValue" id="aapl_ShareBasedCompensationArrangementByShareBasedPaymentAwardStockPurchaseRightsGrantsInPeriodWeightedAverageGrantDateFairValue" type="us-types:perShareItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ShareBasedCompensationTaxExpenseBenefit" id="aapl_ShareBasedCompensationTaxExpenseBenefit" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="SharesOfStockIssuedDuringPeriodShareBasedCompensationNetOfSharesWithheldForTaxes" id="aapl_SharesOfStockIssuedDuringPeriodShareBasedCompensationNetOfSharesWithheldForTaxes" type="xbrli:sharesItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="SoftwareServiceAndOtherNetSalesMember" id="aapl_SoftwareServiceAndOtherNetSalesMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockBasedCompensationExpenseAssociatedToCostOfSales" id="aapl_StockBasedCompensationExpenseAssociatedToCostOfSales" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockBasedCompensationExpenseAssociatedToResearchAndDevelopmentExpense" id="aapl_StockBasedCompensationExpenseAssociatedToResearchAndDevelopmentExpense" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockBasedCompensationExpenseAssociatedToSellingGeneralAndAdministrativeExpense" id="aapl_StockBasedCompensationExpenseAssociatedToSellingGeneralAndAdministrativeExpense" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockholdersEquityAndStockBasedCompensationDisclosureTextBlock" id="aapl_StockholdersEquityAndStockBasedCompensationDisclosureTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockIssuedDuringPeriodValueShareBasedCompensationNetOfSharesWithheldForTaxes" id="aapl_StockIssuedDuringPeriodValueShareBasedCompensationNetOfSharesWithheldForTaxes" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockRepurchaseProgramAuthorizedAmount" id="aapl_StockRepurchaseProgramAuthorizedAmount" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="TotalCellularNetworkCarriersMember" id="aapl_TotalCellularNetworkCarriersMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="TotalMacsMember" id="aapl_TotalMacsMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="TotalRevenuesByCustomerPercentage" id="aapl_TotalRevenuesByCustomerPercentage" type="xbrli:stringItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="TypeOfOperationsAxis" id="aapl_TypeOfOperationsAxis" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrldt:dimensionItem"/>
+  <element name="TypeOfOperationsDomain" id="aapl_TypeOfOperationsDomain" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="UndistributedEarningsOfForeignSubsidiaries" id="aapl_UndistributedEarningsOfForeignSubsidiaries" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="UnitedStatesMember" id="aapl_UnitedStatesMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="UnrealizedGainsAndLossesOnInvestmentsTextBlock" id="aapl_UnrealizedGainsAndLossesOnInvestmentsTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="UnrecognizedTaxBenefitsGross" id="aapl_UnrecognizedTaxBenefitsGross" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="UnrecognizedTaxBenefitsGrossDecreasesResultingFromPriorPeriodTaxPositions" id="aapl_UnrecognizedTaxBenefitsGrossDecreasesResultingFromPriorPeriodTaxPositions" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="UnrecognizedTaxBenefitsGrossIncreasesResultingFromCurrentPeriodTaxPositions" id="aapl_UnrecognizedTaxBenefitsGrossIncreasesResultingFromCurrentPeriodTaxPositions" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="UnrecognizedTaxBenefitsGrossIncreasesResultingFromPriorPeriodTaxPositions" id="aapl_UnrecognizedTaxBenefitsGrossIncreasesResultingFromPriorPeriodTaxPositions" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="UpperLimitMember" id="aapl_UpperLimitMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="VendorOneMember" id="aapl_VendorOneMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="VendorTwoMember" id="aapl_VendorTwoMember" type="us-types:domainItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="WeightedAverageAmortizationPeriod" id="aapl_WeightedAverageAmortizationPeriod" type="xbrli:decimalItemType" abstract="false" xbrli:periodType="instant" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="WeightedAverageAssumptionsAndResultingEstimatesOfWeightedAverageFairValueTextBlock" id="aapl_WeightedAverageAssumptionsAndResultingEstimatesOfWeightedAverageFairValueTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="WeightedAverageFairValueOfStockOptionsAssumed" id="aapl_WeightedAverageFairValueOfStockOptionsAssumed" type="us-types:perShareItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+</schema>

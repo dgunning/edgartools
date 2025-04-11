@@ -225,9 +225,12 @@ class FinancialRatios:
                     for equivalent in self._concept_equivalents[concept]:
                         try:
                             # Recursively prepare data for required concepts
+                            #rev = statement_dfs[0][0].iloc[1]['2024-12-31']
+                            print(statement_dfs[0][0][[ 'label', '2024-12-31']])
+
                             sub_df, sub_equiv = self._prepare_ratio_df(
                                 equivalent.required_concepts, statement_dfs)
-                            
+
                             # Calculate equivalent value for each period
                             for period in calc_df.columns:
                                 calc_df.loc[concept, period] = equivalent.calculation(sub_df, period)

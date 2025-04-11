@@ -1,31 +1,32 @@
 {
   "Revenue": [
+    "us-gaap_IncomeStatementAbstract",
     "us-gaap_SalesRevenueNet",
-    "us-gaap_Revenue",
     "us-gaap_Revenues",
-    "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
+    "us-gaap_OperatingRevenue",
     "us-gaap_SalesRevenueGoodsNet",
-    "us-gaap_OperatingRevenue"
+    "us-gaap_Revenue",
+    "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax"
   ],
   "Cost of Revenue": [
-    "us-gaap_CostOfGoodsSold",
-    "us-gaap_CostOfGoodsAndServicesSold",
     "us-gaap_CostOfRevenue",
-    "us-gaap_DirectOperatingCosts",
+    "us-gaap_CostsAndExpenses",
+    "us-gaap_CostOfGoodsAndServicesSold",
+    "us-gaap_CostOfGoodsSold",
     "us-gaap_CostOfSales",
-    "us-gaap_CostsAndExpenses"
+    "us-gaap_DirectOperatingCosts"
   ],
   "Gross Profit": [
     "us-gaap_GrossProfit"
   ],
   "Operating Expenses": [
-    "us-gaap_OperatingExpenses",
+    "us-gaap_NoninterestExpense",
     "us-gaap_OperatingCostsAndExpenses",
-    "us-gaap_NoninterestExpense"
+    "us-gaap_OperatingExpenses"
   ],
   "Research and Development Expense": [
-    "us-gaap_ResearchAndDevelopmentExpense",
-    "us-gaap_ResearchAndDevelopmentCosts"
+    "us-gaap_ResearchAndDevelopmentCosts",
+    "us-gaap_ResearchAndDevelopmentExpense"
   ],
   "Selling, General and Administrative Expense": [
     "us-gaap_SellingGeneralAndAdministrativeExpense",
@@ -38,28 +39,28 @@
     "us-gaap_IncomeLossFromContinuingOperationsBeforeInterestAndTaxes"
   ],
   "Nonoperating Income/Expense": [
-    "us-gaap_NonoperatingIncomeExpense",
-    "orcl_NonoperatingIncomeExpenseIncludingEliminationOfNetIncomeLossAttributableToNoncontrollingInterests"
+    "orcl_NonoperatingIncomeExpenseIncludingEliminationOfNetIncomeLossAttributableToNoncontrollingInterests",
+    "us-gaap_NonoperatingIncomeExpense"
   ],
   "Interest Expense": [
-    "us-gaap_InterestExpense",
-    "us-gaap_InterestAndDebtExpense"
+    "us-gaap_InterestAndDebtExpense",
+    "us-gaap_InterestExpense"
   ],
   "Income Before Tax": [
-    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
-    "us-gaap_IncomeLossBeforeIncomeTaxes",
     "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
-    "orcl_IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems"
+    "orcl_IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems",
+    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
+    "us-gaap_IncomeLossBeforeIncomeTaxes"
   ],
   "Income Tax Expense": [
-    "us-gaap_IncomeTaxExpenseBenefit",
-    "us-gaap_IncomeTaxesPaidNet"
+    "us-gaap_IncomeTaxesPaidNet",
+    "us-gaap_IncomeTaxExpenseBenefit"
   ],
   "Net Income": [
-    "us-gaap_NetIncomeLoss",
     "us-gaap_ProfitLoss",
-    "us-gaap_NetIncome",
-    "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest"
+    "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
+    "us-gaap_NetIncomeLoss",
+    "us-gaap_NetIncome"
   ],
   "Accumulated Other Comprehensive Income/Loss": [
     "us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax"
@@ -67,13 +68,13 @@
   "Earnings Per Share": [
     "us-gaap_EarningsPerShareBasic"
   ],
-    "Earnings Per Share (Diluted)": [
+  "Earnings Per Share (Diluted)": [
     "us-gaap_EarningsPerShareDiluted"
   ],
   "Shares Outstanding": [
     "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic"
   ],
-    "Shares Outstanding (Diluted)": [
+  "Shares Outstanding (Diluted)": [
     "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding"
   ],
   "Cash and Cash Equivalents": [
@@ -84,18 +85,18 @@
   ],
   "Accounts Receivable": [
     "us-gaap_AccountsReceivableNet",
-    "us-gaap_AccountsReceivableGross",
     "us-gaap_ReceivablesNetCurrent",
-    "us-gaap_AccountsReceivableNetCurrent"
+    "us-gaap_AccountsReceivableNetCurrent",
+    "us-gaap_AccountsReceivableGross"
   ],
   "Inventory": [
-    "us-gaap_InventoryNet",
+    "us-gaap_InventoryGross",
     "us-gaap_InventoryFinishedGoods",
-    "us-gaap_InventoryGross"
+    "us-gaap_InventoryNet"
   ],
   "Prepaid Expenses": [
-    "us-gaap_PrepaidExpenseCurrent",
-    "us-gaap_PrepaidExpenseAndOtherAssetsCurrent"
+    "us-gaap_PrepaidExpenseAndOtherAssetsCurrent",
+    "us-gaap_PrepaidExpenseCurrent"
   ],
   "Marketable Securities": [
     "us-gaap_AvailableForSaleSecuritiesDebtSecuritiesCurrent",
@@ -105,21 +106,19 @@
     "us-gaap_AssetsCurrent"
   ],
   "Property, Plant and Equipment": [
-    "us-gaap_PropertyPlantAndEquipmentNet",
     "us-gaap_PropertyPlantAndEquipmentGross",
+    "us-gaap_PropertyPlantAndEquipmentNet",
     "us-gaap_FixedAssets"
   ],
   "Goodwill": [
     "us-gaap_Goodwill"
   ],
   "Intangible Assets": [
-    "us-gaap_IntangibleAssetsNetExcludingGoodwill",
     "us-gaap_IntangibleAssetsNetIncludingGoodwill",
+    "us-gaap_IntangibleAssetsNetExcludingGoodwill",
     "us-gaap_FiniteLivedIntangibleAssetsNet"
   ],
   "Total Assets": [
-    "us-gaap_AssetsTotal",
-    "us-gaap_Assets",
     "us-gaap_Assets",
     "us-gaap_AssetsTotal"
   ],
@@ -131,23 +130,23 @@
     "us-gaap_AccountsPayableTradeCurrent"
   ],
   "Accrued Liabilities": [
-    "us-gaap_AccruedLiabilitiesCurrent",
     "us-gaap_OtherAccruedLiabilitiesCurrent",
+    "us-gaap_AccruedLiabilitiesCurrent",
     "us-gaap_EmployeeRelatedLiabilitiesCurrent"
   ],
   "Short-Term Debt": [
+    "us-gaap_DebtCurrent",
     "us-gaap_ShortTermBorrowings",
-    "us-gaap_LongTermDebtCurrent",
-    "us-gaap_DebtCurrent"
+    "us-gaap_LongTermDebtCurrent"
   ],
   "Total Current Liabilities": [
     "us-gaap_LiabilitiesCurrent"
   ],
   "Long-Term Debt": [
-    "us-gaap_LongTermDebtNoncurrent",
+    "us-gaap_LongTermDebtAndCapitalLeaseObligations",
     "us-gaap_LongTermDebt",
     "us-gaap_LongTermBorrowings",
-    "us-gaap_LongTermDebtAndCapitalLeaseObligations"
+    "us-gaap_LongTermDebtNoncurrent"
   ],
   "Notes Payable, Current": [
     "us-gaap_NotesPayableCurrent"
@@ -156,9 +155,9 @@
     "us-gaap_LongTermNotesAndLoans"
   ],
   "Deferred Revenue": [
-    "us-gaap_DeferredRevenue",
+    "us-gaap_DeferredRevenueNoncurrent",
     "us-gaap_DeferredRevenueCurrent",
-    "us-gaap_DeferredRevenueNoncurrent"
+    "us-gaap_DeferredRevenue"
   ],
   "Total Liabilities": [
     "us-gaap_LiabilitiesTotal",
@@ -167,13 +166,13 @@
   "Common Stock Shares Outstanding": [
     "us-gaap_CommonStockSharesOutstanding"
   ],
-    "Common Stock Shares Issued": [
+  "Common Stock Shares Issued": [
     "us-gaap_CommonStockSharesIssued"
   ],
   "Common Stock": [
-    "us-gaap_CommonStockValue",
+    "us-gaap_CommonStocksIncludingAdditionalPaidInCapital",
     "us-gaap_StockholdersEquityCommonStock",
-    "us-gaap_CommonStocksIncludingAdditionalPaidInCapital"
+    "us-gaap_CommonStockValue"
   ],
   "Preferred Stock": [
     "us-gaap_PreferredStockValue"
@@ -183,17 +182,17 @@
     "us-gaap_TreasuryStockValue"
   ],
   "Retained Earnings": [
-    "us-gaap_RetainedEarningsAccumulatedDeficit",
-    "us-gaap_RetainedEarnings"
+    "us-gaap_RetainedEarnings",
+    "us-gaap_RetainedEarningsAccumulatedDeficit"
   ],
   "Minority Interest": [
     "us-gaap_MinorityInterest",
     "us-gaap_NoncontrollingInterest"
   ],
   "Total Stockholders' Equity": [
+    "us-gaap_EquityAttributableToParent",
     "us-gaap_StockholdersEquity",
     "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
-    "us-gaap_EquityAttributableToParent",
     "us-gaap_StockholdersEquityAttributableToParent"
   ],
   "Total Liabilities and Stockholders' Equity": [
@@ -208,12 +207,12 @@
     "us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperations"
   ],
   "Net Cash from Financing Activities": [
-    "us-gaap_NetCashProvidedByUsedInFinancingActivities",
-    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperations"
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperations",
+    "us-gaap_NetCashProvidedByUsedInFinancingActivities"
   ],
   "Net Change in Cash": [
-    "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
     "us-gaap_IncreaseDecreaseInCashAndCashEquivalents",
+    "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
     "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
   ],
   "Payments for Property, Plant and Equipment": [
@@ -247,21 +246,21 @@
     "us-gaap_ProceedsFromRepaymentsOfCommercialPaper"
   ],
   "Other Assets": [
+    "us-gaap_OtherAssetsNoncurrent",
     "us-gaap_OtherAssets",
-    "us-gaap_OtherAssetsCurrent",
-    "us-gaap_OtherAssetsNoncurrent"
+    "us-gaap_OtherAssetsCurrent"
   ],
   "Deferred Tax Assets": [
     "us-gaap_DeferredIncomeTaxAssetsNet"
   ],
   "Other Liabilities": [
     "us-gaap_OtherLiabilities",
-    "us-gaap_OtherLiabilitiesCurrent",
-    "us-gaap_OtherLiabilitiesNoncurrent"
+    "us-gaap_OtherLiabilitiesNoncurrent",
+    "us-gaap_OtherLiabilitiesCurrent"
   ],
   "Depreciation and Amortization": [
-    "us-gaap_Depreciation",
     "us-gaap_AmortizationOfIntangibleAssets",
+    "us-gaap_Depreciation",
     "us-gaap_DepreciationAndAmortization"
   ]
 }

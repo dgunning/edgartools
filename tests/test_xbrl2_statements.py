@@ -1,15 +1,18 @@
+pytest_plugins = ["tests.fixtures.xbrl2_fixtures"]
 from pathlib import Path
+from typing import Dict, List, Any, Optional
 
 import pytest
 from rich import print
 
 from edgar import *
 from edgar.xbrl2.rendering import RenderedStatement
-from edgar.xbrl2.statements import Statement
+from edgar.xbrl2.statements import Statement, Statements
 from edgar.xbrl2.xbrl import XBRL
 import pandas as pd
 pd.options.display.max_colwidth = 200
 
+# Import new fixtures from the centralized fixture module
 
 @pytest.fixture
 def tsla_xbrl():
@@ -364,3 +367,158 @@ def test_canonical_type_preservation(tsla_xbrl):
     # The canonical type should be used in rendering
     rendering_type = income_stmt.canonical_type if income_stmt.canonical_type else income_stmt.role_or_type
     assert rendering_type == "IncomeStatement"
+
+
+# ===== Enhanced Statement Tests from Fixture-Based Testing =====
+
+def test_standard_statement_resolution(cached_companies):
+    """Test that standard financial statements are correctly resolved for multiple companies."""
+    if not cached_companies:
+        pytest.skip("No company fixtures available")
+    
+    # Standard statement types
+    standard_statements = [
+        "BalanceSheet",
+        "IncomeStatement", 
+        "CashFlowStatement",
+        "ChangesInEquity",
+        "ComprehensiveIncome"
+    ]
+    
+    # Test each company
+    results = {}
+    
+    for ticker, xbrl in cached_companies.items():
+        statement_found = []
+        
+        for stmt_type in standard_statements:
+            try:
+                statement = xbrl.get_statement(stmt_type)
+                if statement:
+                    statement_found.append(stmt_type)
+            except Exception:
+                pass
+        
+        # Store results
+        if statement_found:
+            results[ticker] = statement_found
+    
+    # Verify that we found at least some statements
+    assert results, "No standard statements found for any company"
+    
+    # Print summary
+    print("\nStandard statements found:")
+    for ticker, found_statements in results.items():
+        print(f"  {ticker}: {', '.join(found_statements)}")
+
+
+def test_statement_accessor_methods(cached_companies):
+    """Test statement accessor methods on Statements class across companies."""
+    if not cached_companies:
+        pytest.skip("No company fixtures available")
+    
+    # Statement accessor methods
+    accessors = [
+        "balance_sheet",
+        "income_statement", 
+        "cash_flow_statement",
+        "changes_in_equity",
+        "comprehensive_income"
+    ]
+    
+    # Test each company
+    results = {}
+    
+    for ticker, xbrl in cached_companies.items():
+        statement_found = []
+        
+        for accessor in accessors:
+            try:
+                # Get the method
+                method = getattr(xbrl.statements, accessor, None)
+                if method and callable(method):
+                    # Call the method
+                    statement = method()
+                    if statement:
+                        statement_found.append(accessor)
+            except Exception:
+                pass
+        
+        # Store results
+        if statement_found:
+            results[ticker] = statement_found
+    
+    # Verify that we found at least some statements
+    assert results, "No statements found via accessor methods"
+    
+    # Print summary
+    print("\nStatements found via accessor methods:")
+    for ticker, found_statements in results.items():
+        print(f"  {ticker}: {', '.join(found_statements)}")
+
+
+def test_parenthetical_statement_resolution(cached_companies):
+    """Test resolution of parenthetical statements across companies."""
+    if not cached_companies:
+        pytest.skip("No company fixtures available")
+    
+    # Test each company for parenthetical statements
+    results = {}
+    
+    for ticker, xbrl in cached_companies.items():
+        try:
+            # Try to get parenthetical balance sheet
+            statement = xbrl.statements.balance_sheet(parenthetical=True)
+            if statement:
+                results[ticker] = True
+        except Exception:
+            pass
+    
+    # Print summary - we don't assert here because not all companies have parenthetical statements
+    print("\nParenthetical statements found:")
+    for ticker in results:
+        print(f"  {ticker}")
+
+def test_historical_vs_modern_xbrl_statements(nflx_10k_2010, nflx_10k_2024):
+    """Compare statement structure between historical and modern XBRL filings."""
+    if nflx_10k_2010 is None or nflx_10k_2024 is None:
+        pytest.skip("Both historical and modern Netflix statements required")
+    
+    # Try to get balance sheets from both
+    historical_bs = nflx_10k_2010.statements.balance_sheet()
+    modern_bs = nflx_10k_2024.statements.balance_sheet()
+    
+    # Skip if either statement is missing
+    if not historical_bs or not modern_bs:
+        pytest.skip("Balance sheet not available in both historical and modern filings")
+    
+    # Convert to dataframes for comparison
+    historical_df = historical_bs.to_dataframe()
+    modern_df = modern_bs.to_dataframe()
+    
+    # Compare structure
+    assert "concept" in historical_df.columns, "Historical statement missing concept column"
+    assert "concept" in modern_df.columns, "Modern statement missing concept column"
+    
+    # Count concepts
+    historical_concepts = set(historical_df["concept"].tolist())
+    modern_concepts = set(modern_df["concept"].tolist())
+    
+    # Print summary
+    print(f"\nComparison of historical (2010) vs modern (2024) Netflix balance sheets:")
+    print(f"  Historical concepts: {len(historical_concepts)}")
+    print(f"  Modern concepts: {len(modern_concepts)}")
+    
+    # Common concepts should exist (may be a small number due to taxonomy changes)
+    common_concepts = historical_concepts.intersection(modern_concepts)
+    print(f"  Common concepts: {len(common_concepts)}")
+    
+    # Show some examples of common concepts
+    if common_concepts:
+        print("  Sample common concepts:")
+        for concept in list(common_concepts)[:5]:
+            print(f"    - {concept}")
+    
+    # Due to taxonomy changes over time, we don't enforce a specific number of common concepts
+    # but there should be at least some core concepts shared
+    assert common_concepts, "No common concepts found between historical and modern statements"
