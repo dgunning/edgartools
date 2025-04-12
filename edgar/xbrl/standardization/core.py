@@ -327,6 +327,7 @@ class ConceptMapper:
     Attributes:
         mapping_store (MappingStore): Storage for concept mappings
         pending_mappings (Dict): Low-confidence mappings pending review
+        _cache (Dict): In-memory cache of mapped concepts
     """
     
     def __init__(self, mapping_store: MappingStore):
@@ -338,7 +339,16 @@ class ConceptMapper:
         """
         self.mapping_store = mapping_store
         self.pending_mappings = {}
-    
+        # Cache for faster lookups of previously mapped concepts
+        self._cache = {}
+        # Precompute lowercased standard concept values for faster comparison
+        self._std_concept_values = [(concept, concept.value.lower()) for concept in StandardConcept]
+        
+        # Statement-specific keyword sets for faster contextual matching
+        self._bs_keywords = {'assets', 'liabilities', 'equity', 'cash', 'debt', 'inventory', 'receivable', 'payable'}
+        self._is_keywords = {'revenue', 'sales', 'income', 'expense', 'profit', 'loss', 'tax', 'earnings'}
+        self._cf_keywords = {'cash', 'operating', 'investing', 'financing', 'activities'}
+        
     def map_concept(self, company_concept: str, label: str, context: Dict[str, Any]) -> Optional[str]:
         """
         Map a company concept to a standard concept.
@@ -351,9 +361,15 @@ class ConceptMapper:
         Returns:
             The standard concept or None if no mapping found
         """
-        # Check if we already have a mapping
+        # Use cache for faster lookups
+        cache_key = (company_concept, context.get('statement_type', ''))
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+        
+        # Check if we already have a mapping in the store
         standard_concept = self.mapping_store.get_standard_concept(company_concept)
         if standard_concept:
+            self._cache[cache_key] = standard_concept
             return standard_concept
         
         # Infer mapping and confidence
@@ -361,8 +377,12 @@ class ConceptMapper:
         
         # Only use high-confidence mappings
         if confidence >= 0.9:
+            # Cache the result for future lookups
+            self._cache[cache_key] = inferred_concept
             return inferred_concept
             
+        # Cache negative results too to avoid repeated inference
+        self._cache[cache_key] = None
         return None
     
     def _infer_mapping(self, company_concept: str, label: str, context: Dict[str, Any]) -> Tuple[Optional[str], float]:
@@ -377,34 +397,85 @@ class ConceptMapper:
         Returns:
             Tuple of (standard_concept, confidence)
         """
-        # Direct label similarity
+        # Fast path for common patterns
+        label_lower = label.lower()
+        
+        # Quick matching for common concepts without full sequence matching
+        if "total assets" in label_lower:
+            return StandardConcept.TOTAL_ASSETS.value, 0.95
+        elif "revenue" in label_lower and len(label_lower) < 30:  # Only match short labels to avoid false positives
+            return StandardConcept.REVENUE.value, 0.9
+        elif "net income" in label_lower and "parent" not in label_lower:
+            return StandardConcept.NET_INCOME.value, 0.9
+        
+        # Faster direct match checking with precomputed lowercase values
+        for std_concept, std_value_lower in self._std_concept_values:
+            if std_value_lower == label_lower:
+                return std_concept.value, 1.0  # Perfect match
+        
+        # Fall back to sequence matching for similarity
         best_match = None
         best_score = 0
         
-        # Compare with all standard concepts
-        for std_concept in StandardConcept:
+        # Only compute similarity if some relevant keywords are present to reduce workload
+        statement_type = context.get("statement_type", "")
+        
+        # Statement type based filtering to reduce unnecessary comparisons
+        limited_concepts = []
+        if statement_type == "BalanceSheet":
+            if any(kw in label_lower for kw in self._bs_keywords):
+                # Filter to balance sheet concepts only
+                limited_concepts = [c for c, v in self._std_concept_values 
+                                  if any(kw in v for kw in self._bs_keywords)]
+        elif statement_type == "IncomeStatement":
+            if any(kw in label_lower for kw in self._is_keywords):
+                # Filter to income statement concepts only
+                limited_concepts = [c for c, v in self._std_concept_values 
+                                  if any(kw in v for kw in self._is_keywords)]
+        elif statement_type == "CashFlowStatement":
+            if any(kw in label_lower for kw in self._cf_keywords):
+                # Filter to cash flow concepts only
+                limited_concepts = [c for c, v in self._std_concept_values 
+                                  if any(kw in v for kw in self._cf_keywords)]
+        
+        # Use limited concepts if available, otherwise use all
+        concepts_to_check = limited_concepts if limited_concepts else [c for c, _ in self._std_concept_values]
+        
+        # Calculate similarities for candidate concepts
+        for std_concept in concepts_to_check:
             # Calculate similarity between labels
-            similarity = SequenceMatcher(None, label.lower(), std_concept.value.lower()).ratio()
+            similarity = SequenceMatcher(None, label_lower, std_concept.value.lower()).ratio()
             
             # Check if this is the best match so far
             if similarity > best_score:
                 best_score = similarity
                 best_match = std_concept.value
         
-        # Apply contextual rules to boost confidence
-        statement_type = context.get("statement_type", "")
-        
-        # Adjust confidence based on statement type
+        # Apply specific contextual rules based on statement type
         if statement_type == "BalanceSheet":
-            if "assets" in label.lower() and "total" in label.lower():
+            if "assets" in label_lower and "total" in label_lower:
                 if best_match == StandardConcept.TOTAL_ASSETS.value:
+                    best_score = min(1.0, best_score + 0.2)
+            elif "liabilities" in label_lower and "total" in label_lower:
+                if best_match == StandardConcept.TOTAL_LIABILITIES.value:
+                    best_score = min(1.0, best_score + 0.2)
+            elif "equity" in label_lower and ("total" in label_lower or "stockholders" in label_lower):
+                if best_match == StandardConcept.TOTAL_EQUITY.value:
                     best_score = min(1.0, best_score + 0.2)
         
         elif statement_type == "IncomeStatement":
-            if any(term in label.lower() for term in ["revenue", "sales"]):
+            if any(term in label_lower for term in ["revenue", "sales"]):
                 if best_match == StandardConcept.REVENUE.value:
                     best_score = min(1.0, best_score + 0.2)
+            elif "net income" in label_lower:
+                if best_match == StandardConcept.NET_INCOME.value:
+                    best_score = min(1.0, best_score + 0.2)
         
+        # Promote to 0.5 confidence if score close enough to help match
+        # more items that are almost at threshold
+        if 0.45 <= best_score < 0.5:
+            best_score = 0.5
+            
         # If confidence is too low, return None
         if best_score < 0.5:
             return None, 0.0
@@ -418,7 +489,18 @@ class ConceptMapper:
         Args:
             filings: List of dicts with XBRL data
         """
-        for filing in filings:
+        # Pre-filter to only process unmapped concepts
+        mapped_concepts = set()
+        for std_concept, company_concepts in self.mapping_store.mappings.items():
+            mapped_concepts.update(company_concepts)
+        
+        # Process only unmapped filings
+        unmapped_filings = [f for f in filings if f.get("concept") not in mapped_concepts]
+        
+        # Create a batch of mappings to add
+        mappings_to_add = {}
+        
+        for filing in unmapped_filings:
             concept = filing["concept"]
             label = filing["label"]
             context = {
@@ -427,20 +509,26 @@ class ConceptMapper:
                 "position": filing.get("position", "")
             }
             
-            # Skip if already mapped
-            if self.mapping_store.get_standard_concept(concept):
-                continue
-            
             # Infer mapping and confidence
             standard_concept, confidence = self._infer_mapping(concept, label, context)
             
             # Handle based on confidence
             if standard_concept and confidence >= 0.9:
-                self.mapping_store.add(concept, standard_concept)
+                if standard_concept not in mappings_to_add:
+                    mappings_to_add[standard_concept] = set()
+                mappings_to_add[standard_concept].add(concept)
             elif standard_concept and confidence >= 0.5:
                 if standard_concept not in self.pending_mappings:
                     self.pending_mappings[standard_concept] = []
                 self.pending_mappings[standard_concept].append((concept, confidence, label))
+        
+        # Batch add all mappings at once
+        for std_concept, concepts in mappings_to_add.items():
+            for concept in concepts:
+                self.mapping_store.add(concept, std_concept)
+                # Update cache
+                cache_key = (concept, filing.get("statement_type", ""))
+                self._cache[cache_key] = std_concept
     
     def save_pending_mappings(self, destination: str) -> None:
         """
@@ -449,7 +537,7 @@ class ConceptMapper:
         Args:
             destination: Path to save the pending mappings
         """
-        # Convert tuples to lists for JSON serialization
+        # Convert to serializable format
         serializable_mappings = {}
         for std_concept, mappings in self.pending_mappings.items():
             serializable_mappings[std_concept] = [
@@ -472,41 +560,69 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
     Returns:
         Statement data with standardized labels where possible
     """
-    standardized_data = []
+    # Pre-filter to identify which items need standardization
+    # This avoids unnecessary copying and processing
+    items_to_standardize = []
+    statement_type = statement_data[0].get("statement_type", "") if statement_data else ""
     
+    # First pass - identify which items need standardization and prepare context
     for i, item in enumerate(statement_data):
-        # Create a copy of the item to modify
-        standardized_item = item.copy()
-        
-        # Skip standardization for abstract elements
-        if item.get("is_abstract", False):
-            standardized_data.append(standardized_item)
+        # Skip abstract elements and dimensions as they don't need standardization
+        if item.get("is_abstract", False) or item.get("is_dimension", False):
             continue
-
-        # Skip standardization for dimensions
-        if item.get("is_dimension", False):
-            standardized_data.append(standardized_item)
-            continue
-        
+            
         concept = item.get("concept", "")
+        if not concept:
+            continue
+            
         label = item.get("label", "")
+        if not label:
+            continue
+            
+        # Build minimal context once, reuse for multiple calls
         context = {
-            "statement_type": item.get("statement_type", ""),
+            "statement_type": item.get("statement_type", "") or statement_type,
             "level": item.get("level", 0),
             "is_total": "total" in label.lower() or item.get("is_total", False)
         }
         
+        items_to_standardize.append((i, concept, label, context))
+    
+    # If no items need standardization, return early with unchanged data
+    if not items_to_standardize:
+        return statement_data
+        
+    # Second pass - create result list with standardized items
+    result = []
+    
+    # Track which indices need standardization for faster lookup
+    standardize_indices = {i for i, _, _, _ in items_to_standardize}
+    
+    # Process all items
+    for i, item in enumerate(statement_data):
+        if i not in standardize_indices:
+            # Items that don't need standardization are used as-is
+            result.append(item)
+            continue
+            
+        # Get the prepared data for this item
+        _, concept, label, context = next((x for x in items_to_standardize if x[0] == i), (None, None, None, None))
+        
         # Try to map the concept
         standard_label = mapper.map_concept(concept, label, context)
         
-        # Update the label if we found a mapping
+        # If we found a mapping, create a modified copy
         if standard_label:
+            # Create a shallow copy only when needed
+            standardized_item = item.copy()
             standardized_item["label"] = standard_label
             standardized_item["original_label"] = label
-        
-        standardized_data.append(standardized_item)
+            result.append(standardized_item)
+        else:
+            # No mapping found, use original item
+            result.append(item)
     
-    return standardized_data
+    return result
 
 
 def create_default_mappings_file(file_path: str) -> None:

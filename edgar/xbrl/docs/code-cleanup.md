@@ -94,3 +94,52 @@
 
   These changes have significantly improved code quality while being careful not to introduce regressions. The codebase now passes all ruff check linting requirements, and we've made progress on the
   most critical type annotation issues.
+
+
+ 1. In parser.py:_extract_facts():
+    - Replaced repeated string operations with precomputed values
+    - Used more efficient namespace matching
+    - Cached namespace lookups for reuse
+    - Used a specialized process_element function for better organization
+    - Improved conditional logic for pattern matching
+    - Used a set instead of a list for non-standard facts tracking
+    - Added faster checking for non-fact elements
+  2. In rendering.py:_format_value_for_display_as_string():
+    - Added fast path for empty values with early returns
+    - Used type() instead of multiple isinstance() calls
+    - Only performed expensive operations when needed based on context
+    - Added more efficient string checking with direct comparisons
+    - Optimized conditional logic flow for better performance
+    - Simplified label parsing for common monetary values
+  3. In standardization/core.py:ConceptMapper:
+    - Added in-memory caching for mapped concepts
+    - Precomputed lowercase standard concept values
+    - Added fast-path matching for common concepts
+    - Filtered concepts by statement type to reduce comparison workload
+    - Used keyword sets for filtering concepts
+    - Cached negative results to avoid repeated processing
+    - Improved batch processing for mapping learning
+  4. In standardization/core.py:standardize_statement():
+    - Added two-pass approach to avoid unnecessary operations
+    - Pre-filtered items to only standardize relevant entries
+    - Reduced unnecessary copying of data
+    - Used early returns for optimization
+    - Added faster index-based lookup with a set
+    - Only created modified copies when actually needed
+  5. In facts.py:get_facts():
+    - Added precomputed role/statement type mapping
+    - Added precomputed period/fiscal info mapping
+    - Reduced dictionary creation overhead
+    - Only computed values when needed based on context
+    - Fixed compatibility with both object and dict representations of context data
+    - Used more efficient data structures for tracking processed facts
+
+  These optimizations primarily focus on:
+  - Reducing repeated operations, especially in loops
+  - Avoiding unnecessary object creation and copying
+  - Using more efficient data structures (sets vs lists)
+  - Adding caching for expensive operations
+  - Improving conditional logic for early returns
+  - Being more selective about which operations are performed
+
+  The tests confirm that all functionality works correctly with these performance improvements

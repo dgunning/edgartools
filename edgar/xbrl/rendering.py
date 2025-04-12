@@ -834,57 +834,63 @@ def _format_value_for_display_as_string(
     Returns:
         str: Formatted value as a string
     """
-    if not isinstance(value, (int, float, str)) or value == "":
+    # Fast path for empty values
+    if not value or value == "":
+        return ""
+    
+    # Type check without multiple isinstance calls
+    value_type = type(value)
+    if value_type not in (int, float, str):
         return ""
         
-    # Extract metadata
+    # Extract only needed metadata
     concept = item.get('concept', '')
-    label = item.get('label', '')
-    label_lower = label.lower()
-    fact_decimals = item.get('decimals', {}).get(period_key) if period_key else 0
-    if fact_decimals is None:
-        fact_decimals = 0
     
-    # Determine if this is a monetary value
+    # Fast check for common share concepts (avoid dict lookup when possible)
+    is_share_value = concept in share_concepts
+    
+    # Only perform expensive label operations if needed for monetary determination
     is_monetary = is_monetary_statement
-    is_share_value = False
-    
-    # Check for share-related values by examining concept names
-    if concept in ['us-gaap_EarningsPerShareBasic', 'us-gaap_EarningsPerShareDiluted']:
+    if concept in ('us-gaap_EarningsPerShareBasic', 'us-gaap_EarningsPerShareDiluted'):
         is_monetary = False
-    elif concept in share_concepts:
+    elif is_share_value:
         is_monetary = False
-        is_share_value = True
+    elif not is_monetary:
+        # Skip label checks entirely if we already know it's not monetary
+        pass
+    else:
+        # Only check label for ratio-related items if we think it might be monetary
+        label = item.get('label', '').lower()
+        if any(keyword in label for keyword in ('ratio', 'percentage', 'per cent')):
+            is_monetary = False
     
-    # Ratio-related items should not be monetary
-    if any(keyword == word for keyword in ['ratio', 'percentage', 'per cent']
-           for word in label_lower.split()):
-        is_monetary = False
+    # Get decimals with a default value to avoid conditional logic later
+    fact_decimals = 0
+    if period_key:
+        decimals_dict = item.get('decimals', {})
+        if decimals_dict:
+            fact_decimals = decimals_dict.get(period_key, 0) or 0
     
-    # Format numeric values
-    if isinstance(value, (int, float)):
-        # Handle share values differently
-        if is_share_value and isinstance(fact_decimals, int):
-            # Use fact_decimals to determine the appropriate scaling for share values
-            # This ensures correct display for companies of all sizes
+    # Format numeric values efficiently
+    if value_type in (int, float):
+        # Handle share values with a specialized path
+        if is_share_value:
             if fact_decimals <= -3:
-                # Apply appropriate scaling based on the actual decimals value
+                # Efficiently apply scaling
                 scale_factor = 10 ** (-fact_decimals)
                 scaled_value = value / scale_factor
-                # Always display share amounts with 0 decimal places for cleaner presentation
                 return f"{scaled_value:,.0f}"
             else:
-                # For smaller numbers or positive decimals, use unscaled values
+                # For smaller share values, no scaling needed
                 return f"{value:,.0f}"
         else:
-            # Format other values normally using the flexible format_value function
+            # Use cached format_value function for other values
             return format_value(value, is_monetary, dominant_scale, fact_decimals)
     else:
-        # Non-numeric values - check if it's HTML and convert if needed
-        if isinstance(value, str) and _is_html(value):
+        # String values - only check HTML if it might contain tags
+        if '<' in value and '>' in value and _is_html(value):
             return html_to_text(value)
-        else:
-            return str(value)
+        return value
 
 
 def _format_value_for_display(

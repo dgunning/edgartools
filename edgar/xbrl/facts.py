@@ -611,6 +611,25 @@ class FactsView:
         if self._facts_cache is not None:
             return self._facts_cache
 
+        # Prepare a mapping of roles to statement types for faster lookup
+        # This avoids repeated calls to get_all_statements() for each fact
+        role_to_statement_type = {}
+        statements = self.xbrl.get_all_statements()
+        for stmt in statements:
+            if stmt['role'] and stmt['type']:
+                role_to_statement_type[stmt['role']] = (stmt['type'], stmt['role'])
+
+        # Prepare a mapping of period keys to fiscal info for faster lookup
+        period_to_fiscal_info = {}
+        for period in self.xbrl.reporting_periods:
+            if 'key' in period:
+                fiscal_info = {}
+                if 'fiscal_period' in period:
+                    fiscal_info['fiscal_period'] = period['fiscal_period']
+                if 'fiscal_year' in period:
+                    fiscal_info['fiscal_year'] = period['fiscal_year']
+                period_to_fiscal_info[period['key']] = fiscal_info
+
         # Build enriched facts from raw facts, contexts, and elements
         enriched_facts = []
         processed_facts = set()  # Track processed facts to avoid duplicates
@@ -623,9 +642,16 @@ class FactsView:
 
             processed_facts.add(fact_signature)
 
-            fact_dict = fact.model_dump()
-            fact_dict['fact_key'] = fact_key
-            fact_dict['concept'] = fact.element_id
+            # Create a dict with only necessary fields instead of full model_dump
+            fact_dict = {
+                'fact_key': fact_key,
+                'concept': fact.element_id,
+                'context_ref': fact.context_ref,
+                'value': fact.value,
+                'unit_ref': fact.unit_ref,
+                'decimals': fact.decimals,
+                'numeric_value': fact.numeric_value
+            }
 
             # Split element name from context for better concept display
             # Don't override if element_id already has a namespace prefix with colon
@@ -637,41 +663,63 @@ class FactsView:
             # Add context information
             if fact.context_ref in self.xbrl.contexts:
                 context = self.xbrl.contexts[fact.context_ref]
-                context_dict = context.model_dump()
+                
+                # Add period information - extract only what we need
+                if context.period:
+                    # Handle both object and dict representations of period
+                    # (Model objects are converted to dicts in some contexts)
+                    if hasattr(context.period, 'type'):
+                        # Object access
+                        period_type = context.period.type
+                        fact_dict['period_type'] = period_type
+                        if period_type == 'instant':
+                            fact_dict['period_instant'] = context.period.instant
+                        elif period_type == 'duration':
+                            fact_dict['period_start'] = context.period.startDate
+                            fact_dict['period_end'] = context.period.endDate
+                    elif isinstance(context.period, dict):
+                        # Dict access
+                        period_type = context.period.get('type')
+                        fact_dict['period_type'] = period_type
+                        if period_type == 'instant':
+                            fact_dict['period_instant'] = context.period.get('instant')
+                        elif period_type == 'duration':
+                            fact_dict['period_start'] = context.period.get('startDate')
+                            fact_dict['period_end'] = context.period.get('endDate')
 
-                # Add period information
-                if 'period' in context_dict and context_dict['period']:
-                    fact_dict['period_type'] = context_dict['period'].get('type')
-                    if fact_dict['period_type'] == 'instant':
-                        fact_dict['period_instant'] = context_dict['period'].get('instant')
-                    elif fact_dict['period_type'] == 'duration':
-                        fact_dict['period_start'] = context_dict['period'].get('startDate')
-                        fact_dict['period_end'] = context_dict['period'].get('endDate')
+                # Add entity information - extract only what we need
+                if context.entity:
+                    # Handle both object and dict representations of entity
+                    if hasattr(context.entity, 'identifier'):
+                        # Object access
+                        fact_dict['entity_identifier'] = context.entity.identifier
+                        fact_dict['entity_scheme'] = context.entity.scheme
+                    elif isinstance(context.entity, dict):
+                        # Dict access
+                        fact_dict['entity_identifier'] = context.entity.get('identifier')
+                        fact_dict['entity_scheme'] = context.entity.get('scheme')
 
-                # Add entity information
-                if 'entity' in context_dict and context_dict['entity']:
-                    fact_dict['entity_identifier'] = context_dict['entity'].get('identifier')
-                    fact_dict['entity_scheme'] = context_dict['entity'].get('scheme')
-
-                # Add dimensions
-                if 'dimensions' in context_dict and context_dict['dimensions']:
-                    for dim_name, dim_value in context_dict['dimensions'].items():
-                        dim_key = f"dim_{dim_name.replace(':', '_')}"
-                        fact_dict[dim_key] = dim_value
+                # Add dimensions - handle both object and dict representation
+                if hasattr(context, 'dimensions') and context.dimensions:
+                    # Check if dimensions is a dict or an attribute
+                    if isinstance(context.dimensions, dict):
+                        for dim_name, dim_value in context.dimensions.items():
+                            dim_key = f"dim_{dim_name.replace(':', '_')}"
+                            fact_dict[dim_key] = dim_value
+                    elif hasattr(context.dimensions, 'items'):
+                        # Handle case where dimensions has items() method but isn't a dict
+                        for dim_name, dim_value in context.dimensions.items():
+                            dim_key = f"dim_{dim_name.replace(':', '_')}"
+                            fact_dict[dim_key] = dim_value
 
                 # Get period key from context_period_map if available
                 period_key = self.xbrl.context_period_map.get(fact.context_ref)
                 if period_key:
                     fact_dict['period_key'] = period_key
-
-                    # Get fiscal period and year from entity_info if available
-                    for period in self.xbrl.reporting_periods:
-                        if period['key'] == period_key:
-                            if 'fiscal_period' in period:
-                                fact_dict['fiscal_period'] = period['fiscal_period']
-                            if 'fiscal_year' in period:
-                                fact_dict['fiscal_year'] = period['fiscal_year']
-                            break
+                    
+                    # Use precomputed fiscal period and year info
+                    if period_key in period_to_fiscal_info:
+                        fact_dict.update(period_to_fiscal_info[period_key])
 
             # Add element information
             element_id = fact.element_id.replace(':', '_')
@@ -707,20 +755,13 @@ class FactsView:
                 # Store original label (will be used for standardization comparison)
                 fact_dict['original_label'] = label
 
-            # Determine statement type by checking presentation trees
+            # Determine statement type by checking presentation trees using our precomputed mapping
             for role, tree in self.xbrl.presentation_trees.items():
-                if element_id in tree.all_nodes:
-                    
-                    # Find the statement type for this role
-                    statements = self.xbrl.get_all_statements()
-                    for stmt in statements:
-                        if stmt['role'] == role and stmt['type']:
-                            fact_dict['statement_type'] = stmt['type']
-                            fact_dict['statement_role'] = role
-                            break
-                    # Break once we've found a statement containing this element
-                    if 'statement_type' in fact_dict:
-                        break
+                if element_id in tree.all_nodes and role in role_to_statement_type:
+                    statement_type, statement_role = role_to_statement_type[role]
+                    fact_dict['statement_type'] = statement_type
+                    fact_dict['statement_role'] = statement_role
+                    break
 
             enriched_facts.append(fact_dict)
 

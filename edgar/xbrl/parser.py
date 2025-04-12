@@ -1085,135 +1085,143 @@ class XBRLParser:
     def _extract_facts(self, root: ET.Element) -> None:
         """Extract facts from instance document."""
         try:
-            # Namespace mappings to help with element identification
+            # Precompile regex patterns for namespace extraction
+            xmlns_pattern = '{http://www.w3.org/2000/xmlns/}'
+            
+            # Standard namespace mappings with base patterns to recognize versions
             namespaces = {
                 'xbrli': 'http://www.xbrl.org/2003/instance',
-                'us-gaap': 'http://fasb.org/us-gaap/2023',  # More generic pattern
-                'ifrs': 'http://xbrl.ifrs.org/taxonomy/2023',  # More generic pattern
-                'dei': 'http://xbrl.sec.gov/dei/2023',  # More generic pattern
+                'us-gaap': 'http://fasb.org/us-gaap/',  # Base pattern for any year
+                'ifrs': 'http://xbrl.ifrs.org/taxonomy/',  # Base pattern for any year
+                'dei': 'http://xbrl.sec.gov/dei/',  # Base pattern for any year
             }
             
             # Track prefixes found in the document
             prefix_map = {}
             
-            # First, detect any namespace declarations in the root element
+            # First pass: extract namespace declarations from root
             for attr_name, attr_value in root.attrib.items():
-                if attr_name.startswith('{http://www.w3.org/2000/xmlns/}') or attr_name.startswith('xmlns:'):
-                    # Extract the prefix 
-                    if attr_name.startswith('{http://www.w3.org/2000/xmlns/}'):
-                        prefix = attr_name.split('}', 1)[1]
+                if attr_name.startswith(xmlns_pattern) or attr_name.startswith('xmlns:'):
+                    # Extract the prefix more efficiently
+                    if attr_name.startswith(xmlns_pattern):
+                        prefix = attr_name[len(xmlns_pattern):]
                     else:
                         prefix = attr_name.split(':', 1)[1]
                     
                     # Map URI to prefix
                     prefix_map[attr_value] = prefix
                     
-                    # If this is one of our standard namespaces, update it
-                    for std_prefix, std_uri in namespaces.items():
-                        if attr_value.startswith(std_uri.split('/20')[0]):
+                    # Update standard namespaces if this is a version we recognize
+                    for std_prefix, std_uri_base in namespaces.items():
+                        if attr_value.startswith(std_uri_base):
                             namespaces[std_prefix] = attr_value
             
             fact_count = 0
-            nonstandard_facts = []
+            nonstandard_facts = set()  # Use a set for faster lookups
             
-            # Find all elements that might be facts (both top-level and nested)
-            all_elements = []
-            for child in root:
-                if child.tag.endswith('}context') or child.tag.endswith('}unit') or child.tag.endswith('}schemaRef'):
-                    continue
-                all_elements.append(child)
-                # Also check for nested elements that might be facts
-                for descendant in child.findall('.//*'):
-                    all_elements.append(descendant)
+            # Fast path to identify non-fact elements to skip
+            skip_tag_endings = ('}context', '}unit', '}schemaRef')
             
-            for child in all_elements:
-                # Extract fact information
+            # Process facts in batches to reduce memory usage
+            def process_element(element):
+                """Process a single element as a potential fact."""
+                nonlocal fact_count
+                
+                # Skip known non-fact elements
+                if any(element.tag.endswith(ending) for ending in skip_tag_endings):
+                    return
+                
+                # Get context reference - key check to identify facts
+                context_ref = element.get('contextRef')
+                if not context_ref:
+                    return
+                
+                # Extract element namespace and name
                 element_name = None
                 namespace = None
                 
                 # Get element namespace and name
-                if '}' in child.tag:
-                    namespace, element_name = child.tag.split('}', 1)
+                if '}' in element.tag:
+                    namespace, element_name = element.tag.split('}', 1)
                     namespace = namespace.strip('{')
                 else:
-                    element_name = child.tag
+                    element_name = element.tag
                 
-                # Get context and unit references
-                context_ref = child.get('contextRef')
-                
-                # Skip if no context reference (not a fact)
-                if not context_ref:
-                    continue
-                
-                # Get namespace prefix
+                # Get namespace prefix - cached for performance
                 prefix = prefix_map.get(namespace)
                 if not prefix:
-                    # Try to match with known namespaces
+                    # Check against standard namespace patterns
                     for std_prefix, std_uri in namespaces.items():
-                        if namespace and namespace.startswith(std_uri.split('/20')[0]):
+                        if namespace and namespace.startswith(std_uri.split('/20')[0] if '/20' in std_uri else std_uri):
                             prefix = std_prefix
+                            prefix_map[namespace] = prefix  # Cache for future lookups
                             break
                 
                 # Construct element ID with prefix if available
                 if prefix:
                     element_id = f"{prefix}:{element_name}"
                 else:
-                    # For non-standard namespaces, create a placeholder
+                    # For non-standard namespaces, just use element name
                     element_id = element_name
-                    # Track these to help with debugging
-                    if namespace not in nonstandard_facts:
-                        nonstandard_facts.append(namespace)
+                    # Track for debugging (using set for efficiency)
+                    nonstandard_facts.add(namespace)
                 
                 # Get unit reference
-                unit_ref = child.get('unitRef')
+                unit_ref = element.get('unitRef')
                 
-                # Get value
-                value = child.text
-                if value is None or value.strip() == "":
-                    # Check if there's a nested value element
-                    for sub_elem in child:
-                        if sub_elem.text and sub_elem.text.strip() != "":
+                # Get value - optimize by checking text first then children
+                value = element.text
+                if not value or not value.strip():
+                    # Only check children if text is empty
+                    for sub_elem in element:
+                        if sub_elem.text and sub_elem.text.strip():
                             value = sub_elem.text
                             break
                 
-                if value is None:
-                    value = ""
+                # Always have a string value (empty string if None)
+                value = value.strip() if value else ""
                 
                 # Get decimals attribute
-                decimals = child.get('decimals')
+                decimals = element.get('decimals')
                 
-                # Create numeric value if possible
+                # Create numeric value only for non-empty values
                 numeric_value = None
-                try:
-                    # Clean and parse the value
-                    clean_value = value.strip().replace(',', '')
-                    if clean_value:
-                        numeric_value = float(clean_value)
-                except (ValueError, TypeError):
-                    pass
+                if value:
+                    try:
+                        # Only replace commas and convert if the value is potentially numeric
+                        if any(c.isdigit() for c in value):
+                            clean_value = value.replace(',', '')
+                            numeric_value = float(clean_value)
+                    except (ValueError, TypeError):
+                        pass
                 
-                # Create fact object
-                fact = Fact(
+                # Create a normalized key using underscore format for consistency
+                normalized_key = self._create_normalized_fact_key(element_id, context_ref)
+                
+                # Create fact object directly in the facts dictionary - avoid intermediate variable
+                self.facts[normalized_key] = Fact(
                     element_id=element_id,
                     context_ref=context_ref,
-                    value=value.strip() if value else "",
+                    value=value,
                     unit_ref=unit_ref,
                     decimals=decimals,
                     numeric_value=numeric_value
                 )
                 
-                # Create a normalized key using underscore format for consistency
-                normalized_key = self._create_normalized_fact_key(element_id, context_ref)
-                
-                # Store the fact once with the normalized key
-                self.facts[normalized_key] = fact
-                
                 fact_count += 1
+            
+            # First process direct children of the root
+            for child in root:
+                process_element(child)
+                
+                # Process nested elements that might be facts
+                for descendant in child.findall('.//*'):
+                    process_element(descendant)
             
             # Debug information
             log.debug(f"Extracted {fact_count} facts")
             if nonstandard_facts:
-                log.debug(f"Found {len(nonstandard_facts)} non-standard namespaces: {nonstandard_facts[:5]}...")
+                log.debug(f"Found {len(nonstandard_facts)} non-standard namespaces: {list(nonstandard_facts)[:5]}...")
             
             # Double check that we found facts
             if fact_count == 0:
