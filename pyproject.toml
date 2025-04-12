@@ -57,8 +57,7 @@ path = "edgar/__about__.py"
 include = [
   "edgar/**/*.py",
   "edgar/reference/data/*",
-  "edgar/xbrl2/data/*",
-  "edgar/xbrl/data/*",
+  "edgar/xbrl2/standardization/*",
   "LICENSE.txt"
 ]
 artifacts = [
@@ -85,7 +84,7 @@ dependencies = [
   "mkdocs-material"
 ]
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests --ignore=tests/legacy {args}"
 no-cov = "cov --no-cov {args}"
 lint = "ruff check edgar"
 smoke-filings = "python tests/batch/batch_filings.py {args}"

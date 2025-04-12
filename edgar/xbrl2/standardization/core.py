@@ -100,14 +100,17 @@ class MappingStore:
         mappings (Dict[str, Set[str]]): Dictionary mapping standard concepts to sets of company concepts
     """
     
-    def __init__(self, source: Optional[str] = None, validate_with_enum: bool = False):
+    def __init__(self, source: Optional[str] = None, validate_with_enum: bool = False, read_only: bool = False):
         """
         Initialize the mapping store.
         
         Args:
             source: Path to the JSON file storing the mappings. If None, uses default location.
             validate_with_enum: Whether to validate JSON keys against StandardConcept enum
+            read_only: If True, never save changes back to the file (used in testing)
         """
+        self.read_only = read_only
+        
         if source is None:
             # Try a few different ways to locate the file, handling both development
             # and installed package scenarios
@@ -115,7 +118,7 @@ class MappingStore:
             
             # Default to a file in the same directory as this module (development mode)
             module_dir = os.path.dirname(os.path.abspath(__file__))
-            potential_path = os.path.join(module_dir, "data", "concept_mappings.json")
+            potential_path = os.path.join(module_dir, "concept_mappings.json")
             if os.path.exists(potential_path):
                 self.source = potential_path
             
@@ -125,7 +128,7 @@ class MappingStore:
                     import importlib.resources as pkg_resources
                     try:
                         # For Python 3.9+
-                        with pkg_resources.files('edgar.xbrl2.data').joinpath('concept_mappings.json').open('r') as f:
+                        with pkg_resources.files('edgar.xbrl2.standardization').joinpath('concept_mappings.json').open('r') as f:
                             # Just read the file to see if it exists, we'll load it properly later
                             f.read(1)
                             self.source = potential_path  # Use the same path as before
@@ -133,7 +136,7 @@ class MappingStore:
                         # Fallback for older Python versions
                         try:
                             import pkg_resources as legacy_resources
-                            if legacy_resources.resource_exists('edgar.xbrl2.data', 'concept_mappings.json'):
+                            if legacy_resources.resource_exists('edgar.xbrl2.standardization', 'concept_mappings.json'):
                                 self.source = potential_path  # Use the same path as before
                         except (ImportError, FileNotFoundError):
                             pass
@@ -223,12 +226,12 @@ class MappingStore:
                     import importlib.resources as pkg_resources
                     try:
                         # For Python 3.9+
-                        with pkg_resources.files('edgar.xbrl2.data').joinpath('concept_mappings.json').open('r') as f:
+                        with pkg_resources.files('edgar.xbrl2.standardization').joinpath('concept_mappings.json').open('r') as f:
                             data = json.load(f)
                     except (ImportError, FileNotFoundError, AttributeError):
                         # Fallback to legacy pkg_resources
                         import pkg_resources as legacy_resources
-                        resource_string = legacy_resources.resource_string('edgar.xbrl2.data', 'concept_mappings.json')
+                        resource_string = legacy_resources.resource_string('edgar.xbrl2.standardization', 'concept_mappings.json')
                         data = json.loads(resource_string)
                 except ImportError:
                     pass
@@ -257,7 +260,11 @@ class MappingStore:
         return {}
     
     def _save_mappings(self) -> None:
-        """Save mappings to the JSON file."""
+        """Save mappings to the JSON file, unless in read_only mode."""
+        # Skip saving if in read_only mode
+        if self.read_only:
+            return
+            
         # Ensure directory exists
         directory = os.path.dirname(self.source)
         if directory and not os.path.exists(directory):
@@ -540,17 +547,21 @@ def create_default_mappings_file(file_path: str) -> None:
         json.dump(minimal_mappings, f, indent=2)
 
 # Initialize MappingStore - only loads from JSON
-def initialize_default_mappings() -> MappingStore:
+def initialize_default_mappings(read_only: bool = False) -> MappingStore:
     """
     Initialize a MappingStore with mappings from the concept_mappings.json file.
+    
+    Args:
+        read_only: If True, prevent writing changes back to the file (used in testing)
     
     Returns:
         MappingStore initialized with mappings from JSON file
     """
-    store = MappingStore()
+    store = MappingStore(read_only=read_only)
     
     # If JSON file doesn't exist, create it with minimal default mappings
-    if not os.path.exists(store.source):
+    # Only do this in non-read_only mode to avoid test-initiated file creation
+    if not read_only and not os.path.exists(store.source):
         create_default_mappings_file(store.source)
     
     return store

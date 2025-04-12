@@ -34,7 +34,7 @@ def test_dimensional_data():
 @pytest.fixture
 def temp_mapping_store():
     """Fixture for creating and cleaning up a temporary MappingStore."""
-    store = MappingStore(source="test_mapping.json")
+    store = MappingStore(source="test_mapping.json", read_only=False)
     yield store
     if os.path.exists("test_mapping.json"):
         os.remove("test_mapping.json")
@@ -115,7 +115,8 @@ def test_standardize_statement():
 
 def test_initialize_default_mappings():
     """Test initializing default mappings."""
-    store = initialize_default_mappings()
+    # Use read_only mode to prevent test from modifying the file
+    store = initialize_default_mappings(read_only=True)
     
     # Verify some default mappings
     assert store.get_standard_concept("us-gaap_Revenue") == "Revenue"
@@ -132,8 +133,8 @@ def test_standardization_across_companies(test_companies):
     if not test_companies:
         pytest.skip("No company fixtures available")
     
-    # Get companies and prepare standardizer
-    store = initialize_default_mappings()
+    # Get companies and prepare standardizer with read_only=True to prevent modification
+    store = initialize_default_mappings(read_only=True)
     mapper = ConceptMapper(store)
     
     # Process income statements to test revenue standardization
@@ -161,19 +162,33 @@ def test_standardization_across_companies(test_companies):
     # Verify we found some revenue concepts
     assert len(standard_revenues) > 0, "No revenue concepts found in fixtures"
     
+    # Create a test-specific copy of mappings so we don't modify the original
+    test_store = MappingStore(source="test_revenue_mapping.json", read_only=False)
+    # Copy mappings from the read-only store
+    for standard_concept, company_concepts in store.mappings.items():
+        for concept in company_concepts:
+            test_store.add(concept, standard_concept)
+            
+    # Create a new mapper with our test-specific store
+    test_mapper = ConceptMapper(test_store)
+    
     # Verify each concept maps to "Revenue" standard concept
     for ticker, concept in standard_revenues.items():
         # For the test, we'll directly add the mapping if it doesn't exist
-        if not store.get_standard_concept(concept):
-            store.add(concept, StandardConcept.REVENUE.value)
+        if not test_store.get_standard_concept(concept):
+            test_store.add(concept, StandardConcept.REVENUE.value)
         
         # Verify mapping works
-        mapped = mapper.map_concept(
+        mapped = test_mapper.map_concept(
             concept, 
             "Revenue", 
             {"statement_type": "IncomeStatement"}
         )
         assert mapped == StandardConcept.REVENUE.value, f"Failed to map revenue concept for {ticker}"
+        
+    # Clean up test file
+    if os.path.exists("test_revenue_mapping.json"):
+        os.remove("test_revenue_mapping.json")
 
 
 def test_standardization_historical_vs_modern(test_companies):
@@ -201,8 +216,8 @@ def test_standardization_historical_vs_modern(test_companies):
     if not revenue_item:
         pytest.skip(f"Revenue concept not found for {ticker}")
     
-    # Create a mapper and add the concept
-    store = MappingStore(source="test_mapping_modern.json")
+    # Create a mapper and add the concept - explicitly set read_only=False since we control this test file
+    store = MappingStore(source="test_mapping_modern.json", read_only=False)
     store.add(revenue_item["concept"], StandardConcept.REVENUE.value)
     
     mapper = ConceptMapper(store)
@@ -233,8 +248,8 @@ def test_standardize_income_statement(test_companies):
     if not income_statement:
         pytest.skip(f"Income statement not available for {ticker}")
     
-    # Create a mapper
-    store = initialize_default_mappings()
+    # Create a mapper with read_only=True to prevent test from modifying the file
+    store = initialize_default_mappings(read_only=True)
     mapper = ConceptMapper(store)
     
     # Standardize statement
@@ -270,8 +285,8 @@ def test_dimensional_statement_standardization(test_dimensional_data):
     if not statement:
         pytest.skip("No statements found in fixture")
     
-    # Create a mapper
-    store = initialize_default_mappings()
+    # Create a mapper with read_only=True to prevent test from modifying the file
+    store = initialize_default_mappings(read_only=True)
     mapper = ConceptMapper(store)
     
     # Get raw data and standardize the statement
@@ -296,8 +311,8 @@ def test_concept_mapper_learning(test_companies):
     if not income_statement:
         pytest.skip("Income statement not available")
     
-    # Create a temporary mapping store for learning
-    store = MappingStore(source="test_learning_mapping.json")
+    # Create a temporary mapping store for learning with read_only=False for this controlled test file
+    store = MappingStore(source="test_learning_mapping.json", read_only=False)
     mapper = ConceptMapper(store)
     
     # Learn from the income statement
