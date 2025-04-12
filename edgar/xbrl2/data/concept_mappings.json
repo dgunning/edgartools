@@ -1,6 +1,5 @@
 {
   "Revenue": [
-    "us-gaap_IncomeStatementAbstract",
     "us-gaap_SalesRevenueNet",
     "us-gaap_Revenues",
     "us-gaap_OperatingRevenue",
