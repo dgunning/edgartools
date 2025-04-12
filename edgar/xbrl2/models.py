@@ -4,8 +4,6 @@ Data models for XBRL parsing.
 This module defines the core data structures used throughout the XBRL parser.
 """
 
-from __future__ import annotations
-
 from typing import Dict, List, Any, Optional, Union
 from pydantic import BaseModel, Field
 
@@ -243,3 +241,4 @@ class Table(BaseModel):
 class XBRLProcessingError(Exception):
     """Exception raised for errors during XBRL processing."""
     pass
+

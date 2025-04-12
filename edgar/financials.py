@@ -2,30 +2,36 @@ from typing import Optional
 
 from edgar.richtools import repr_rich
 from edgar.xbrl2 import XBRL, XBRLS, Statement
+from edgar.core import log
 
-__all__ = ['Financials', 'MultiFinancials']
+from edgar.xbrl2.xbrl import XBRLFilingWithNoXbrlData
 
 
 class Financials:
 
-    def __init__(self, xb: XBRL):
+    def __init__(self, xb: Optional[XBRL]):
         self.xb: XBRL = xb
 
     @classmethod
     def extract(cls, filing) -> Optional['Financials']:
-        xb = XBRL.from_filing(filing)
-        return cls(xb)
+        try:
+            xb = XBRL.from_filing(filing)
+            return Financials(xb)
+        except XBRLFilingWithNoXbrlData as e:
+            # Handle the case where the filing does not have XBRL data
+            log.warning(f"Filing {filing} does not contain XBRL data: {e}")
+            return None
 
     def balance_sheet(self):
         return self.xb.statements.balance_sheet()
 
-    def income(self):
+    def income_statement(self):
         return self.xb.statements.income_statement()
 
-    def cashflow(self):
+    def cashflow_statement(self):
         return self.xb.statements.cash_flow_statement()
 
-    def equity(self):
+    def statement_of_equity(self):
         return self.xb.statements.statement_of_equity()
 
     def comprehensive_income(self):
@@ -35,6 +41,8 @@ class Financials:
         return self.xb.statements.cover_page()
 
     def __rich__(self):
+        if self.xb is None:
+            return "No XBRL data available"
         return self.xb.__rich__()
 
     def __repr__(self):

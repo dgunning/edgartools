@@ -22,7 +22,7 @@ from edgar.richtools import repr_rich
 from edgar.xbrl2 import transformers
 from edgar.xbrl2.core import STANDARD_LABEL
 from edgar.xbrl2.facts import FactQuery
-from edgar.xbrl2.models import PresentationNode, XBRLProcessingError
+from edgar.xbrl2.models import PresentationNode
 
 from edgar.xbrl2.parser import XBRLParser
 from edgar.xbrl2.periods import get_period_views, determine_periods_to_display
@@ -32,6 +32,10 @@ from edgar.xbrl2.statements import statement_to_concepts
 from rich import box
 from rich.table import Table, Column
 
+class XBRLFilingWithNoXbrlData(Exception):
+    """Exception raised when a filing does not contain XBRL data."""
+    def __init__(self, message: str):
+        super().__init__(message)
 
 class XBRLAttachments:
     """
@@ -277,14 +281,12 @@ class XBRL:
         """
         
         xbrl = cls()
-        
-        # Get XBRL attachments from filing
+
         xbrl_attachments = XBRLAttachments(filing.attachments)
         
         if xbrl_attachments.empty:
-            raise XBRLProcessingError("No XBRL attachments found in filing")
-        
-        # Get content and parse
+            raise XBRLFilingWithNoXbrlData(f"No xbrl attachments detected in filing {filing}")
+
         if xbrl_attachments.get('schema'):
             xbrl.parser.parse_schema_content(xbrl_attachments.get('schema').content)
         
@@ -1249,9 +1251,9 @@ class XBRL:
                         item['statement_type'] = stmt_type
                     
                     # Apply standardization
-                    from edgar.xbrl2 import standardization
-                    mapper = standardization.ConceptMapper(standardization.initialize_default_mappings())
-                    statement_data = standardization.standardize_statement(statement_data, mapper)
+                    from edgar.xbrl2.standardization import ConceptMapper, standardize_statement, initialize_default_mappings
+                    mapper = ConceptMapper(initialize_default_mappings(read_only=True))
+                    statement_data = standardize_statement(statement_data, mapper)
                 
                 # Create rows for the DataFrame
                 rows = []
