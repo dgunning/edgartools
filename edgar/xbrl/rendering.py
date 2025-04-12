@@ -17,8 +17,8 @@ from rich.text import Text
 from edgar.richtools import repr_rich
 from edgar.files.html import Document
 from edgar.richtools import rich_to_text
-from edgar.xbrl2 import standardization
-from edgar.xbrl2.core import (
+from edgar.xbrl import standardization
+from edgar.xbrl.core import (
     determine_dominant_scale, format_value, format_date, parse_date
 )
 from dataclasses import dataclass, field

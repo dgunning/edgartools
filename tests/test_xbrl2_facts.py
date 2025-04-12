@@ -3,8 +3,8 @@ import re
 from unittest.mock import MagicMock
 
 from edgar import Company, Filing
-from edgar.xbrl2 import XBRL, FactsView
-from edgar.xbrl2.facts import FactQuery
+from edgar.xbrl import XBRL, FactsView
+from edgar.xbrl.facts import FactQuery
 from rich import print
 
 # Import fixtures from the centralized fixture module

@@ -98,8 +98,8 @@ The standardization system integrates with the statement rendering system via:
 ## Usage Example
 
 ```python
-from edgar.xbrl2.xbrl import XBRL
-from edgar.xbrl2.statements import Statements
+from edgar.xbrl.xbrl import XBRL
+from edgar.xbrl.statements import Statements
 
 # Parse XBRL files
 xbrl = XBRL.parse_directory('path/to/xbrl/files')

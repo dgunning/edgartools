@@ -6,7 +6,7 @@ to standardized concept names, enabling consistent presentation of financial
 statements regardless of the filing entity.
 """
 
-from edgar.xbrl2.standardization.core import (
+from edgar.xbrl.standardization.core import (
     StandardConcept, 
     MappingStore, 
     ConceptMapper, 

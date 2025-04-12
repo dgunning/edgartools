@@ -8,7 +8,7 @@ and performing calculations and aggregations on financial data.
 from typing import Dict, List, Any, Optional, Tuple
 
 import pandas as pd
-from edgar.xbrl2.core import format_value
+from edgar.xbrl.core import format_value
 
 
 def to_dataframe(

@@ -13,8 +13,8 @@ from rich import print
 from rich.console import Console
 
 from edgar import *
-from edgar.xbrl2.statements import Statements, Statement
-from edgar.xbrl2.xbrl import XBRL
+from edgar.xbrl.statements import Statements, Statement
+from edgar.xbrl.xbrl import XBRL
 
 
 @pytest.fixture

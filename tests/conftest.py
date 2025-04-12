@@ -2,7 +2,7 @@ import pytest
 from pathlib import Path
 from typing import Dict, Any
 
-from edgar.xbrl2 import XBRL
+from edgar.xbrl import XBRL
 
 # Base paths
 FIXTURE_DIR = Path("tests/fixtures/xbrl2")

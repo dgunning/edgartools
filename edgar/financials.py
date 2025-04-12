@@ -1,10 +1,10 @@
 from typing import Optional
 
 from edgar.richtools import repr_rich
-from edgar.xbrl2 import XBRL, XBRLS, Statement
+from edgar.xbrl import XBRL, XBRLS, Statement
 from edgar.core import log
 
-from edgar.xbrl2.xbrl import XBRLFilingWithNoXbrlData
+from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
 
 class Financials:

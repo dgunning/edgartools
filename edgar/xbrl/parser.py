@@ -10,11 +10,11 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional, Union, Tuple
 from edgar.core import log
 
-from edgar.xbrl2.models import (
+from edgar.xbrl.models import (
     ElementCatalog, Context, Fact, PresentationNode, PresentationTree,
     CalculationNode, CalculationTree, Axis, Domain, Table, XBRLProcessingError
 )
-from edgar.xbrl2.core import NAMESPACES, STANDARD_LABEL, extract_element_id, classify_duration
+from edgar.xbrl.core import NAMESPACES, STANDARD_LABEL, extract_element_id, classify_duration
 
 
 class XBRLParser:

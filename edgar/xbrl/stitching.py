@@ -13,8 +13,8 @@ from typing import Dict, List, Any, Optional, Union, Tuple, Set
 
 import pandas as pd
 
-from edgar.xbrl2.core import format_date, parse_date
-from edgar.xbrl2.standardization import (
+from edgar.xbrl.core import format_date, parse_date
+from edgar.xbrl.standardization import (
     ConceptMapper, standardize_statement, initialize_default_mappings
 )
 
@@ -990,7 +990,7 @@ def render_stitched_statement(
     Returns:
         RichTable: A formatted table representation of the stitched statement
     """
-    from edgar.xbrl2.rendering import render_statement
+    from edgar.xbrl.rendering import render_statement
     
     # Extract periods and statement data
     periods_to_display = stitched_data['periods']
@@ -1099,7 +1099,7 @@ class XBRLS:
         Returns:
             XBRLS object with stitched data
         """
-        from edgar.xbrl2.xbrl import XBRL
+        from edgar.xbrl.xbrl import XBRL
         
         # Sort filings by date (newest first)
         sorted_filings = sorted(filings, key=lambda f: f.filing_date, reverse=True)
@@ -1136,7 +1136,7 @@ class XBRLS:
         Returns:
             StitchedStatements object
         """
-        from edgar.xbrl2.statements import StitchedStatements
+        from edgar.xbrl.statements import StitchedStatements
         return StitchedStatements(self)
     
     def get_statement(self, statement_type: str, 
@@ -1194,7 +1194,7 @@ class XBRLS:
             RichTable: A formatted table representation of the stitched statement
         """
         # Create a StitchedStatement object and use its render method
-        from edgar.xbrl2.statements import StitchedStatement
+        from edgar.xbrl.statements import StitchedStatement
         statement = StitchedStatement(self, statement_type, max_periods, standardize, use_optimal_periods)
         return statement.render(show_date_range=show_date_range)
     
@@ -1213,7 +1213,7 @@ class XBRLS:
             DataFrame with periods as columns and concepts as index
         """
         # Create a StitchedStatement object and use its to_dataframe method
-        from edgar.xbrl2.statements import StitchedStatement
+        from edgar.xbrl.statements import StitchedStatement
         statement = StitchedStatement(self, statement_type, max_periods, standardize)
         return statement.to_dataframe()
     

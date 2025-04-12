@@ -19,7 +19,7 @@ The XBRL2 module provides a powerful yet user-friendly API for processing XBRL (
 
 ```python
 from edgar import Company
-from edgar.xbrl2.xbrl import XBRL
+from edgar.xbrl.xbrl import XBRL
 
 # Get a company's latest 10-K filing
 company = Company('AAPL')
@@ -41,7 +41,7 @@ cash_flow = statements.cash_flow_statement()
 
 ```python
 from edgar import Company
-from edgar.xbrl2 import XBRLS
+from edgar.xbrl import XBRLS
 
 # Get multiple filings for trend analysis
 company = Company('AAPL')
@@ -253,7 +253,7 @@ The XBRL2 module includes a powerful facts query interface for direct access to 
 
 ```python
 from edgar import Company
-from edgar.xbrl2 import XBRL
+from edgar.xbrl import XBRL
 
 # Parse XBRL data
 company = Company('AAPL')
@@ -271,7 +271,7 @@ balance_sheet_facts = facts.query().by_statement_type('BalanceSheet').to_datafra
 income_views = facts.get_available_period_views('IncomeStatement')
 for view in income_views:
     print(f"- {view['name']}: {view['description']} ({view['facts_count']} facts)")
-    
+
 # Get facts filtered by period view
 annual_comparison = facts.get_facts_by_period_view('IncomeStatement', 'Annual Comparison')
 
@@ -279,19 +279,19 @@ annual_comparison = facts.get_facts_by_period_view('IncomeStatement', 'Annual Co
 earnings_facts = facts.search_facts("Earnings Per Share")
 
 # Filter by period keys - useful for custom period selection
-facts.query().by_period_keys(['duration_2023-01-01_2023-12-31', 
-                             'duration_2022-01-01_2022-12-31']).to_dataframe()
+facts.query().by_period_keys(['duration_2023-01-01_2023-12-31',
+                              'duration_2022-01-01_2022-12-31']).to_dataframe()
 
 # Query dimensional data
 facts_by_segment = facts.query().by_dimension('Segment').to_dataframe()
 
 # Safe numeric value filtering with proper None handling
-large_income_items = facts.query() \
-    .by_statement_type('IncomeStatement') \
-    .by_value(lambda v: v > 1_000_000_000) \
-    .sort_by('numeric_value', ascending=False) \
+large_income_items = facts.query()
+    .by_statement_type('IncomeStatement')
+    .by_value(lambda v: v > 1_000_000_000)
+    .sort_by('numeric_value', ascending=False)
     .to_dataframe()
-    
+
 # Time series analysis
 revenue_over_time = facts.time_series('Revenue')
 ```

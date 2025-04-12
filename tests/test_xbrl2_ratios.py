@@ -1,10 +1,10 @@
 import pytest
 from edgar import *
-from edgar.xbrl2 import *
-from edgar.xbrl2.standardization import StandardConcept
-from edgar.xbrl2.rendering import RenderedStatement
-from edgar.xbrl2.analysis.ratios import *
-from edgar.xbrl2.analysis.metrics import *
+from edgar.xbrl import *
+from edgar.xbrl.standardization import StandardConcept
+from edgar.xbrl.rendering import RenderedStatement
+from edgar.xbrl.analysis.ratios import *
+from edgar.xbrl.analysis.metrics import *
 from rich import print
 
 @pytest.fixture(scope="session")

@@ -22,7 +22,8 @@ This is particularly useful for:
 ## Usage
 
 ```python
-from edgar.xbrl2.standardization import StandardConcept, initialize_default_mappings, ConceptMapper, standardize_statement
+from edgar.xbrl.standardization import StandardConcept, initialize_default_mappings, ConceptMapper,
+    standardize_statement
 
 # Get the default mappings
 store = initialize_default_mappings()

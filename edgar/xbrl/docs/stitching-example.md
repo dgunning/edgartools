@@ -37,7 +37,7 @@ display(income_table)
 
 # Convert to pandas DataFrame for analysis
 import pandas as pd
-from edgar.xbrl2.stitching import to_pandas
+from edgar.xbrl.stitching import to_pandas
 
 income_df = to_pandas(stitched_income)
 display(income_df)
@@ -48,7 +48,7 @@ display(income_df)
 The statement stitcher supports different period selection strategies to customize your multi-period view:
 
 ```python
-from edgar.xbrl2.stitching import StatementStitcher
+from edgar.xbrl.stitching import StatementStitcher
 
 # Available period types:
 # 1. For income statements and cash flow statements (duration periods)
@@ -145,7 +145,7 @@ stitched_standardized = XBRL.stitch_statements(
 For more control over period selection, you can use the `StatementStitcher` class directly:
 
 ```python
-from edgar.xbrl2.stitching import StatementStitcher
+from edgar.xbrl.stitching import StatementStitcher
 
 # Extract statements from XBRL objects
 statements = []
@@ -164,7 +164,7 @@ stitched_data = stitcher.stitch_statements(
 )
 
 # Render the stitched statement
-from edgar.xbrl2.stitching import render_stitched_statement
+from edgar.xbrl.stitching import render_stitched_statement
 
 table = render_stitched_statement(
     stitched_data,

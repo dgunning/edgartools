@@ -5,8 +5,8 @@ import re
 from pathlib import Path
 
 import pytest
-from edgar.xbrl2.xbrl import XBRL
-from edgar.xbrl2.statement_resolver import StatementResolver, statement_registry
+from edgar.xbrl.xbrl import XBRL
+from edgar.xbrl.statement_resolver import StatementResolver, statement_registry
 
 
 @pytest.fixture

@@ -3,14 +3,14 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from edgar.xbrl2.standardization import (
+from edgar.xbrl.standardization import (
     StandardConcept, MappingStore, ConceptMapper, 
     standardize_statement, initialize_default_mappings
 )
 
 # Directly import company fixtures
 from edgar import Filing
-from edgar.xbrl2 import XBRL
+from edgar.xbrl import XBRL
 
 # Setup a minimal dataset for testing
 @pytest.fixture

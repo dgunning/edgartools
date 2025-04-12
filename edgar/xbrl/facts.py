@@ -14,8 +14,8 @@ from typing import Dict, List, Any, Optional, Union, Set, Callable
 
 import pandas as pd
 
-from edgar.xbrl2.core import STANDARD_LABEL, parse_date
-from edgar.xbrl2.models import select_display_label
+from edgar.xbrl.core import STANDARD_LABEL, parse_date
+from edgar.xbrl.models import select_display_label
 
 
 class FactQuery:

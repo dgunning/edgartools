@@ -9,8 +9,8 @@ from rich.console import Console
 from rich import print
 
 from edgar import Filing, Company
-from edgar.xbrl2.xbrl import XBRL
-from edgar.xbrl2.statements import Statements
+from edgar.xbrl.xbrl import XBRL
+from edgar.xbrl.statements import Statements
 
 
 def render_financial_statements(ticker="AAPL"):

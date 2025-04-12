@@ -4,10 +4,10 @@ Tests for XBRL2 rendering functionality.
 from pathlib import Path
 import pytest
 from datetime import datetime, date
-from edgar.xbrl2.xbrl import XBRL
+from edgar.xbrl.xbrl import XBRL
 from rich import print
 from edgar.richtools import rich_to_text, repr_rich
-from edgar.xbrl2.rendering import render_statement, _format_period_labels, format_date
+from edgar.xbrl.rendering import render_statement, _format_period_labels, format_date
 
 
 @pytest.fixture

@@ -34,14 +34,14 @@ Example usage:
     df = stitched_income.to_dataframe()
 """
 
-from edgar.xbrl2.xbrl import XBRL
-from edgar.xbrl2.rendering import RenderedStatement
-from edgar.xbrl2.statements import Statements, Statement, StitchedStatements, StitchedStatement
-from edgar.xbrl2.standardization import StandardConcept
-from edgar.xbrl2.facts import FactsView, FactQuery
+from edgar.xbrl.xbrl import XBRL
+from edgar.xbrl.rendering import RenderedStatement
+from edgar.xbrl.statements import Statements, Statement, StitchedStatements, StitchedStatement
+from edgar.xbrl.standardization import StandardConcept
+from edgar.xbrl.facts import FactsView, FactQuery
 
 # Export statement stitching functionality
-from edgar.xbrl2.stitching import (
+from edgar.xbrl.stitching import (
     StatementStitcher, 
     stitch_statements, 
     render_stitched_statement, 

@@ -18,7 +18,7 @@ from rich import box
 from rich.console import Console, Group
 from edgar.richtools import repr_rich
 
-from edgar.xbrl2.standardization import MappingStore, StandardConcept
+from edgar.xbrl.standardization import MappingStore, StandardConcept
 
 @dataclass
 class ConceptEquivalent:

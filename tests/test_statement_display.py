@@ -3,7 +3,7 @@ Tests for the enhanced statement display in __rich__ and __str__ methods.
 """
 from pathlib import Path
 import pytest
-from edgar.xbrl2.xbrl import XBRL
+from edgar.xbrl.xbrl import XBRL
 
 
 @pytest.fixture

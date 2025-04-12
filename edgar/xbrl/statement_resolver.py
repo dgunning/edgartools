@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Dict, List, Any, Optional, Tuple, Set, Union
 from dataclasses import dataclass, field
 
-from edgar.xbrl2.statements import statement_to_concepts
+from edgar.xbrl.statements import statement_to_concepts
 
 
 class StatementCategory(Enum):

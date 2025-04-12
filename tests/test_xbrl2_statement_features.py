@@ -15,8 +15,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from edgar.xbrl2 import XBRL, FactQuery
-from edgar.xbrl2.rendering import RenderedStatement
+from edgar.xbrl import XBRL, FactQuery
+from edgar.xbrl.rendering import RenderedStatement
 
 
 # Setup a test fixture for companies

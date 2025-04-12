@@ -4,13 +4,13 @@ Tests for the XBRL statement stitching functionality.
 
 from unittest.mock import MagicMock, patch
 from edgar import *
-from edgar.xbrl2 import XBRL, XBRLS
+from edgar.xbrl import XBRL, XBRLS
 from rich import print
 from edgar.richtools import rich_to_text
 import pytest
 
-from edgar.xbrl2.statements import StitchedStatements
-from edgar.xbrl2.stitching import (
+from edgar.xbrl.statements import StitchedStatements
+from edgar.xbrl.stitching import (
     StatementStitcher, stitch_statements,
     render_stitched_statement, to_pandas, determine_optimal_periods
 )
@@ -173,7 +173,7 @@ def test_format_output(stitcher):
     assert result['statement_data'][0]['values']['instant_20241231'] == 1000
 
 
-@patch('edgar.xbrl2.stitching.standardize_statement')
+@patch('edgar.xbrl.stitching.standardize_statement')
 def test_standardize_statement_data(mock_standardize, stitcher):
     """Test standardizing statement data."""
     mock_standardize.return_value = [{'label': 'Standardized Label'}]

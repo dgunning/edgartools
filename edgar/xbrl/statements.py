@@ -878,7 +878,7 @@ class StitchedStatement:
         Returns:
             Rich Table containing the rendered statement
         """
-        from edgar.xbrl2.stitching import render_stitched_statement
+        from edgar.xbrl.stitching import render_stitched_statement
 
         # Update the render_stitched_statement function call to pass the show_date_range parameter
         return render_stitched_statement(
@@ -896,7 +896,7 @@ class StitchedStatement:
         Returns:
             pandas DataFrame with periods as columns and concepts as rows
         """
-        from edgar.xbrl2.stitching import to_pandas
+        from edgar.xbrl.stitching import to_pandas
 
         return to_pandas(self.statement_data)
 

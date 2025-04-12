@@ -19,16 +19,16 @@ import pandas as pd
 from rich.table import Table as RichTable
 from edgar.attachments import Attachments
 from edgar.richtools import repr_rich
-from edgar.xbrl2 import transformers
-from edgar.xbrl2.core import STANDARD_LABEL
-from edgar.xbrl2.facts import FactQuery
-from edgar.xbrl2.models import PresentationNode
+from edgar.xbrl import transformers
+from edgar.xbrl.core import STANDARD_LABEL
+from edgar.xbrl.facts import FactQuery
+from edgar.xbrl.models import PresentationNode
 
-from edgar.xbrl2.parser import XBRLParser
-from edgar.xbrl2.periods import get_period_views, determine_periods_to_display
-from edgar.xbrl2.rendering import render_statement, generate_rich_representation, RenderedStatement
-from edgar.xbrl2.statement_resolver import StatementResolver
-from edgar.xbrl2.statements import statement_to_concepts
+from edgar.xbrl.parser import XBRLParser
+from edgar.xbrl.periods import get_period_views, determine_periods_to_display
+from edgar.xbrl.rendering import render_statement, generate_rich_representation, RenderedStatement
+from edgar.xbrl.statement_resolver import StatementResolver
+from edgar.xbrl.statements import statement_to_concepts
 from rich import box
 from rich.table import Table, Column
 
@@ -309,12 +309,12 @@ class XBRL:
 
     @property
     def statements(self):
-        from edgar.xbrl2.statements import Statements
+        from edgar.xbrl.statements import Statements
         return Statements(self)
         
     @property
     def facts(self):
-        from edgar.xbrl2.facts import FactsView
+        from edgar.xbrl.facts import FactsView
         if not hasattr(self, '_facts_view'):
             self._facts_view = FactsView(self)
         return self._facts_view
@@ -502,7 +502,7 @@ class XBRL:
         Returns:
             Stitched statement data
         """
-        from edgar.xbrl2.stitching import stitch_statements as _stitch_statements
+        from edgar.xbrl.stitching import stitch_statements as _stitch_statements
         return _stitch_statements(xbrl_list, statement_type, period_type, max_periods, standard)
 
     def render_stitched_statement(self, stitched_data: Dict[str, Any],
@@ -519,7 +519,7 @@ class XBRL:
         Returns:
             RichTable: A formatted table representation of the stitched statement
         """
-        from edgar.xbrl2.stitching import render_stitched_statement as _render_stitched_statement
+        from edgar.xbrl.stitching import render_stitched_statement as _render_stitched_statement
         return _render_stitched_statement(stitched_data, statement_title, statement_type, self.entity_info)
     
     def get_statement(self, role_or_type: str,
@@ -1251,7 +1251,7 @@ class XBRL:
                         item['statement_type'] = stmt_type
                     
                     # Apply standardization
-                    from edgar.xbrl2.standardization import ConceptMapper, standardize_statement, initialize_default_mappings
+                    from edgar.xbrl.standardization import ConceptMapper, standardize_statement, initialize_default_mappings
                     mapper = ConceptMapper(initialize_default_mappings(read_only=True))
                     statement_data = standardize_statement(statement_data, mapper)
                 

@@ -14,8 +14,8 @@ pytest_plugins = ["tests.fixtures.xbrl2_fixtures"]
 import pytest
 import pandas as pd
 
-from edgar.xbrl2.statements import Statement
-from edgar.xbrl2.rendering import RenderedStatement
+from edgar.xbrl.statements import Statement
+from edgar.xbrl.rendering import RenderedStatement
 
 
 # ===== Statement Resolution Tests =====

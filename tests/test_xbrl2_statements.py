@@ -6,9 +6,9 @@ import pytest
 from rich import print
 
 from edgar import *
-from edgar.xbrl2.rendering import RenderedStatement
-from edgar.xbrl2.statements import Statement, Statements
-from edgar.xbrl2.xbrl import XBRL
+from edgar.xbrl.rendering import RenderedStatement
+from edgar.xbrl.statements import Statement, Statements
+from edgar.xbrl.xbrl import XBRL
 import pandas as pd
 pd.options.display.max_colwidth = 200
 

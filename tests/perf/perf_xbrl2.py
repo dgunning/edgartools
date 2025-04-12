@@ -1,5 +1,5 @@
 from edgar import *
-from edgar.xbrl2 import *
+from edgar.xbrl import *
 from pyinstrument import Profiler
 
 def main(filing):
