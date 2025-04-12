@@ -19,7 +19,6 @@ import pandas as pd
 from rich.table import Table as RichTable
 from edgar.attachments import Attachments
 from edgar.richtools import repr_rich
-from edgar.xbrl import transformers
 from edgar.xbrl.core import STANDARD_LABEL
 from edgar.xbrl.facts import FactQuery
 from edgar.xbrl.models import PresentationNode
@@ -1303,116 +1302,6 @@ class XBRL:
 
     def __repr__(self):
         return repr_rich(self)
-    
-    def calculate_ratios(self, statement_type: Optional[str] = None) -> Dict[str, Dict[str, float]]:
-        """
-        Calculate common financial ratios.
-        
-        Args:
-            statement_type: Optional statement type to use (e.g., 'BalanceSheet')
-            
-        Returns:
-            Dict[str, Dict[str, float]]: Dictionary of ratio names to period values
-        """
-        # Get statement data
-        if statement_type:
-            statement_data = self.get_statement_by_type(statement_type)
-            if statement_data is None:
-                return {}
-            if isinstance(statement_data, dict):
-                statement_data = [statement_data]
-        else:
-            all_statements = self.get_all_statements()
-            if all_statements is None:
-                return {}
-            # Convert to list of statements
-            statement_data = []
-            for stmt in all_statements.values():
-                if isinstance(stmt, dict):
-                    statement_data.append(stmt)
-                elif isinstance(stmt, list):
-                    statement_data.extend(stmt)
-        
-        # Get periods to display
-        periods_to_display = None
-        if statement_type:
-            period_views = self.get_period_views(statement_type)
-            if period_views:
-                periods_to_display = period_views[0].get('periods', [])
-        
-        return transformers.calculate_ratios(statement_data, periods_to_display)
-    
-    def calculate_growth_rates(self, statement_type: Optional[str] = None,
-                             concepts: Optional[List[str]] = None) -> Dict[str, Dict[str, float]]:
-        """
-        Calculate period-over-period growth rates.
-        
-        Args:
-            statement_type: Optional statement type to use
-            concepts: Optional list of concepts to calculate growth rates for
-            
-        Returns:
-            Dict[str, Dict[str, float]]: Dictionary of concept names to period growth rates
-        """
-        # Get statement data
-        if statement_type:
-            statement_data = self.get_statement_by_type(statement_type)
-            if statement_data is None:
-                return {}
-            if isinstance(statement_data, dict):
-                statement_data = [statement_data]
-        else:
-            all_statements = self.get_all_statements()
-            if all_statements is None:
-                return {}
-            # Convert to list of statements
-            statement_data = []
-            for stmt in all_statements.values():
-                if isinstance(stmt, dict):
-                    statement_data.append(stmt)
-                elif isinstance(stmt, list):
-                    statement_data.extend(stmt)
-        
-        # Get periods to display
-        periods_to_display = None
-        if statement_type:
-            period_views = self.get_period_views(statement_type)
-            if period_views:
-                periods_to_display = period_views[0].get('periods', [])
-        
-        return transformers.calculate_growth_rates(
-            statement_data,
-            periods_to_display=periods_to_display,
-            concepts=concepts
-        )
-    
-    def aggregate_by_dimension(self, statement_type: str, dimension_name: str,
-                             aggregation: str = 'sum') -> Dict[str, Dict[str, Any]]:
-        """
-        Aggregate values by a specific dimension.
-        
-        Args:
-            statement_type: Statement type to aggregate
-            dimension_name: Name of the dimension to aggregate by
-            aggregation: Aggregation function ('sum' or 'average')
-            
-        Returns:
-            Dict[str, Dict[str, Any]]: Aggregated values by dimension member
-        """
-        statement_data = self.get_statement_by_type(statement_type)
-        if not statement_data:
-            return {}
-            
-        # Ensure statement_data is a list
-        if isinstance(statement_data, dict):
-            statement_data = [statement_data]
-        
-        return transformers.aggregate_by_dimension(
-            statement_data,
-            dimension_name=dimension_name,
-            aggregation=aggregation
-        )
-
         
     def __str__(self):
         """String representation."""

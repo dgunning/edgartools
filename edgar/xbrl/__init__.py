@@ -34,7 +34,7 @@ Example usage:
     df = stitched_income.to_dataframe()
 """
 
-from edgar.xbrl.xbrl import XBRL
+from edgar.xbrl.xbrl import XBRL, XBRLFilingWithNoXbrlData
 from edgar.xbrl.rendering import RenderedStatement
 from edgar.xbrl.statements import Statements, Statement, StitchedStatements, StitchedStatement
 from edgar.xbrl.standardization import StandardConcept
@@ -51,6 +51,7 @@ from edgar.xbrl.stitching import (
 
 __all__ = [
     'XBRL',
+    'XBRLFilingWithNoXbrlData',
     'XBRLS',
     'Statements',
     'Statement',

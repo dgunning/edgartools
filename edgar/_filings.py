@@ -68,8 +68,8 @@ from edgar.richtools import repr_rich, print_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingSGML, Reports, Statements, FilingHeader
 from edgar.storage import local_filing_path, is_using_local_storage
-from edgar.legacy.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
+from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -1434,12 +1434,15 @@ class Filing:
         else:
             print(self.text())
 
-    def xbrl(self) -> Optional[Union[XBRLData, XBRLInstance]]:
+    def xbrl(self) -> Optional[XBRL]:
         """
         Get the XBRL document for the filing, parsed and as a FilingXbrl object
         :return: Get the XBRL document for the filing, parsed and as a FilingXbrl object, or None
         """
-        return get_xbrl_object(self)
+        try:
+            return XBRL.from_filing(self)
+        except XBRLFilingWithNoXbrlData:
+            return None
 
     def serve(self, port: int = 8000) -> AttachmentServer:
         """Serve the filings on a local server
