@@ -68,7 +68,7 @@ from edgar.richtools import repr_rich, print_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingSGML, Reports, Statements, FilingHeader
 from edgar.storage import local_filing_path, is_using_local_storage
-from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
+from edgar.legacy.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
 
 """ Contain functionality for working with SEC filing indexes and filings

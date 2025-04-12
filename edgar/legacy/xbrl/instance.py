@@ -12,7 +12,7 @@ from rich.text import Text
 
 from edgar.core import datefmt
 from edgar.richtools import repr_rich
-from edgar.xbrl.dimensions import Dimensions
+from edgar.legacy.xbrl.dimensions import Dimensions
 from edgar.xmltools import child_text
 
 

@@ -1,8 +1,8 @@
 import pytest
 import asyncio
 from edgar import Filing
-from edgar.xbrl.xbrldata import XBRLData, XBRLInstance
-from edgar.xbrl.dimensions import Dimensions, Member, Axis
+from edgar.legacy.xbrl import XBRLData, XBRLInstance
+from edgar.legacy.xbrl.dimensions import Dimensions, Member, Axis
 
 
 @pytest.fixture(scope='module')

@@ -17,19 +17,72 @@ from typing import Dict, List, Any, Optional, Union, Tuple
 
 import pandas as pd
 from rich.table import Table as RichTable
-
+from edgar.attachments import Attachments
 from edgar.richtools import repr_rich
 from edgar.xbrl2 import transformers
 from edgar.xbrl2.core import STANDARD_LABEL
 from edgar.xbrl2.facts import FactQuery
-from edgar.xbrl2.models import (
-    PresentationNode, XBRLProcessingError
-)
+from edgar.xbrl2.models import PresentationNode, XBRLProcessingError
+
 from edgar.xbrl2.parser import XBRLParser
 from edgar.xbrl2.periods import get_period_views, determine_periods_to_display
 from edgar.xbrl2.rendering import render_statement, generate_rich_representation, RenderedStatement
 from edgar.xbrl2.statement_resolver import StatementResolver
 from edgar.xbrl2.statements import statement_to_concepts
+from rich import box
+from rich.table import Table, Column
+
+
+class XBRLAttachments:
+    """
+    An adapter for the Attachments class that provides easy access to the XBRL documents.
+    """
+
+    def __init__(self, attachments: Attachments):
+        self._documents = dict()
+        if attachments.data_files:
+            for attachment in attachments.data_files:
+                if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(('.xml', '.XML')):
+                    content = attachment.content
+                    if '<xbrl' in content[:2000]:
+                        self._documents['instance'] = attachment
+                elif attachment.document_type == 'EX-101.SCH':
+                    self._documents['schema'] = attachment
+                elif attachment.document_type == 'EX-101.DEF':
+                    self._documents['definition'] = attachment
+                elif attachment.document_type == 'EX-101.CAL':
+                    self._documents['calculation'] = attachment
+                elif attachment.document_type == 'EX-101.LAB':
+                    self._documents['label'] = attachment
+                elif attachment.document_type == 'EX-101.PRE':
+                    self._documents['presentation'] = attachment
+
+    @property
+    def empty(self):
+        return not self._documents
+
+    @property
+    def has_instance_document(self):
+        return 'instance' in self._documents
+
+    @property
+    def instance_only(self):
+        return len(self._documents) == 1 and 'instance' in self._documents
+
+    def get(self, doc_type: str):
+        return self._documents.get(doc_type)
+
+    def __rich__(self):
+        table = Table(Column("Type"),
+                      Column("Document"),
+                      title="XBRL Documents",
+                      box=box.SIMPLE)
+        for doc_type, attachment in self._documents.items():
+            table.add_row(doc_type, attachment.description)
+        return table
+
+    def __repr__(self):
+        return repr_rich(self)
 
 
 class XBRL:
@@ -222,7 +275,6 @@ class XBRL:
         Returns:
             XBRL object with parsed data
         """
-        from edgar.xbrl.xbrldata import XBRLAttachments
         
         xbrl = cls()
         

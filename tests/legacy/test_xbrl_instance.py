@@ -1,4 +1,4 @@
-from edgar.xbrl.instance import XBRLInstance
+from edgar.legacy.xbrl.instance import XBRLInstance
 from rich import print
 from pathlib import Path
 import pytest

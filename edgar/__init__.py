@@ -43,7 +43,7 @@ from edgar.fundreports import FundReport, NPORT_FORMS
 from edgar.funds import Fund, FundSeries, get_fund, FundClass
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 from edgar.files.html import Document
-from edgar.xbrl import XBRLData
+from edgar.legacy.xbrl import XBRLData
 from edgar.financials import Financials, MultiFinancials
 from edgar.storage import use_local_storage, is_using_local_storage, download_edgar_data, download_filings
 

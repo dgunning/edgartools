@@ -7,16 +7,14 @@ Usage:
     python tests/fixtures/generate_xbrl2_fixtures.py
 """
 
-import os
 import shutil
 from pathlib import Path
 import logging
-from typing import List, Tuple, Optional
+from typing import Optional
 from edgar import get_filings, Filings
 
-from edgar import Company, Filing
-from edgar.xbrl2 import XBRL
-from edgar.xbrl import XBRLAttachments
+from edgar import Filing
+from legacy.xbrl import XBRLAttachments
 
 # Configure logging
 logging.basicConfig(

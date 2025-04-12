@@ -1,5 +1,5 @@
 from edgar import *
-from edgar.xbrl import get_xbrl_object
+from edgar.legacy.xbrl import get_xbrl_object
 from financials import Financials
 import time
 from rich import print as rprint

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from edgar.xbrl.calculations import CalculationLinkbase
+from edgar.legacy.xbrl.calculations import CalculationLinkbase
 
 
 

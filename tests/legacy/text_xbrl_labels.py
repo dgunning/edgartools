@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from edgar.xbrl.concepts import concept_to_label
-from edgar.xbrl.labels import parse_label_linkbase
+from legacy.xbrl import concept_to_label
+from legacy.xbrl import parse_label_linkbase
 
 
 def test_parse_labels_with_namespace():

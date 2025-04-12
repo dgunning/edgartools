@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from edgar import Filing
 
-from edgar.xbrl.xbrldata import XBRLData, XBRLAttachments, XBRLInstance,  Statement, Statements, StatementDefinition
-from edgar.xbrl.presentation import XBRLPresentation
+from edgar.legacy.xbrl.xbrldata import XBRLData, XBRLAttachments, XBRLInstance,  Statement, Statements, StatementDefinition
+from edgar.legacy.xbrl.presentation import XBRLPresentation
 from typing import Optional, Union
 
 

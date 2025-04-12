@@ -5,9 +5,9 @@ import pandas as pd
 import pytest
 from rich import print
 
-from edgar import Financials
-from edgar.xbrl import XBRLData, Statement
-from edgar.xbrl.xbrldata import StatementDefinition
+from edgar.financials import Financials
+from edgar.legacy.xbrl import XBRLData, Statement
+from edgar.legacy.xbrl.xbrldata import StatementDefinition
 
 
 @pytest.fixture

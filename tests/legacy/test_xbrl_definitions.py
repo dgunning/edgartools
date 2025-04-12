@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from edgar.xbrl.definitions import parse_definition_linkbase
-from edgar.xbrl.labels import parse_label_linkbase
+from edgar.legacy.xbrl.definitions import parse_definition_linkbase
+from edgar.legacy.xbrl.labels import parse_label_linkbase
 
 
 def test_parse_labels_with_namespace():

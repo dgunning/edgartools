@@ -3,12 +3,12 @@ from pathlib import Path
 import pytest
 from rich import print, tree
 
-from edgar.xbrl import XBRLData, StatementDefinition
-from edgar.xbrl.calculations import CalculationLinkbase
+from edgar.legacy.xbrl import XBRLData, StatementDefinition
+from edgar.legacy.xbrl.calculations import CalculationLinkbase
 
-from edgar.xbrl.presentation import XBRLPresentation, PresentationElement, get_root_element, get_members_for_axis
+from edgar.legacy.xbrl.presentation import XBRLPresentation, PresentationElement, get_root_element
 from tests.samples import SAMPLE_PRESENTATION_XML, SAMPLE_INSTANCE_XML, SAMPLE_CALCULATION_XML
-from edgar.xbrl.presentation import get_axes_for_role
+from edgar.legacy.xbrl.presentation import get_axes_for_role
 
 
 @pytest.fixture

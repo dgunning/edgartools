@@ -4,15 +4,15 @@ import pytest
 from rich import print
 
 from edgar import *
-from edgar.xbrl import get_xbrl_object
-from edgar.xbrl.calculations import CalculationLinkbase
-from edgar.xbrl.xbrldata import format_xbrl_value
-from edgar.xbrl.xbrldata import (parse_label_linkbase, parse_definition_linkbase,
-                                 XBRLAttachments,
-                                 XBRLInstance, XBRLPresentation, StatementDefinition, Statement)
+from edgar.legacy.xbrl import get_xbrl_object
+from edgar.legacy.xbrl.calculations import CalculationLinkbase
+from edgar.legacy.xbrl.xbrldata import (parse_label_linkbase, parse_definition_linkbase,
+                         XBRLAttachments,format_xbrl_value, XBRLData,
+                         XBRLInstance, XBRLPresentation, StatementDefinition, Statement)
 
 from tests.samples import SAMPLE_INSTANCE_XML, SAMPLE_PRESENTATION_XML, SAMPLE_CALCULATION_XML
-from edgar.xbrl.statements import BalanceSheet
+from edgar.legacy.xbrl.statements import BalanceSheet
+from edgar.financials import Financials
 
 
 @pytest.fixture

@@ -2,7 +2,6 @@ import pytest
 from pathlib import Path
 from typing import Dict, Any
 
-from edgar import Company, Filing
 from edgar.xbrl2 import XBRL
 
 # Base paths

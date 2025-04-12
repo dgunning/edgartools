@@ -27,14 +27,14 @@ from edgar.richtools import repr_rich, colorize_words
 from edgar.attachments import Attachments, Attachment
 from edgar.core import log, split_camel_case, run_async_or_sync
 from edgar.httprequests import download_file_async
-from edgar.xbrl.calculations import CalculationLinkbase
-from edgar.xbrl.concepts import Concept, concept_to_label
-from edgar.xbrl.definitions import parse_definition_linkbase
-from edgar.xbrl.instance import XBRLInstance
-from edgar.xbrl.labels import parse_label_linkbase
-from edgar.xbrl.statements import BalanceSheet, IncomeStatement, CashFlowStatement, StatementOfChangesInEquity,StatementOfComprehensiveIncome, StandardStatement
-from edgar.xbrl.presentation import (XBRLPresentation, PresentationElement, get_root_element, get_axes_for_role,
-    get_members_for_axis)
+from edgar.legacy.xbrl.calculations import CalculationLinkbase
+from edgar.legacy.xbrl.concepts import Concept, concept_to_label
+from edgar.legacy.xbrl.definitions import parse_definition_linkbase
+from edgar.legacy.xbrl.instance import XBRLInstance
+from edgar.legacy.xbrl.labels import parse_label_linkbase
+from edgar.legacy.xbrl.statements import BalanceSheet, IncomeStatement, CashFlowStatement, StatementOfChangesInEquity,StatementOfComprehensiveIncome, StandardStatement
+from edgar.legacy.xbrl.presentation import (XBRLPresentation, PresentationElement, get_root_element, get_axes_for_role,
+                                      get_members_for_axis)
 from pathlib import Path
 
 
