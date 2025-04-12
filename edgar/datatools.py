@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import pyarrow as pa
-import pyarrow.compute as pc
 from lxml import html as lxml_html
 
 __all__ = ["compress_dataframe",

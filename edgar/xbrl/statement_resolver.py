@@ -7,7 +7,7 @@ notes, and disclosures regardless of taxonomy variations and company-specific cu
 
 import re
 from enum import Enum
-from typing import Dict, List, Any, Optional, Tuple, Set, Union
+from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
 
 from edgar.xbrl.statements import statement_to_concepts
@@ -575,7 +575,7 @@ class StatementResolver:
         
         for stmt in all_statements:
             role = stmt.get('role', '')
-            if not role in self.xbrl.presentation_trees:
+            if role not in self.xbrl.presentation_trees:
                 continue
                 
             # Get concept nodes for this role

@@ -1327,7 +1327,7 @@ class InitialOwnershipSummary(OwnershipSummary):
         # Combine all elements
         return Panel(
             Group(*elements),
-            title=f"[bold]Initial Beneficial Ownership[/bold]",
+            title="[bold]Initial Beneficial Ownership[/bold]",
             expand=False
         )
 

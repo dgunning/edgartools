@@ -7,7 +7,7 @@ This module provides functions for parsing XBRL files and extracting data.
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
+from typing import Dict, List, Any, Optional, Union
 from edgar.core import log
 
 from edgar.xbrl.models import (
@@ -1472,7 +1472,7 @@ class XBRLParser:
             
             # Extract reporting end date from context end dates
             for context in self.contexts.values():
-                if 'period' in context.dict() and context.period.get('type') == 'instant':
+                if 'period' in context.model_dump() and context.period.get('type') == 'instant':
                     date_str = context.period.get('instant')
                     if date_str:
                         try:
@@ -1503,7 +1503,7 @@ class XBRLParser:
             duration_periods = {}
             
             for context_id, context in self.contexts.items():
-                if 'period' in context.dict() and 'type' in context.period:
+                if 'period' in context.model_dump() and 'type' in context.period:
                     period_type = context.period.get('type')
                     
                     if period_type == 'instant':

@@ -615,7 +615,7 @@ class FactsView:
 
             processed_facts.add(fact_signature)
 
-            fact_dict = fact.dict()
+            fact_dict = fact.model_dump()
             fact_dict['fact_key'] = fact_key
             fact_dict['concept'] = fact.element_id
 
@@ -629,7 +629,7 @@ class FactsView:
             # Add context information
             if fact.context_ref in self.xbrl.contexts:
                 context = self.xbrl.contexts[fact.context_ref]
-                context_dict = context.dict()
+                context_dict = context.model_dump()
 
                 # Add period information
                 if 'period' in context_dict and context_dict['period']:

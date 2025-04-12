@@ -9,10 +9,9 @@ This module provides tools for detecting potential financial fraud and anomalies
 
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, List
-import numpy as np
 from collections import Counter
 import math
-from .metrics import AltmanZScore, BeneishMScore, PiotroskiFScore, MetricResult
+from .metrics import AltmanZScore, BeneishMScore, PiotroskiFScore
 from ..standardization import StandardConcept
 
 @dataclass

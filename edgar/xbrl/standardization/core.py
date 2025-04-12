@@ -8,6 +8,7 @@ statements regardless of the filing entity.
 
 import json
 import os
+import pandas as pd
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Any
 from difflib import SequenceMatcher
@@ -183,7 +184,7 @@ class MappingStore:
         
         return len(missing_in_enum) == 0, list(missing_in_enum)
     
-    def to_dataframe(self) -> 'pd.DataFrame':
+    def to_dataframe(self) -> pd.DataFrame:
         """
         Convert mappings to a pandas DataFrame for analysis and visualization.
         

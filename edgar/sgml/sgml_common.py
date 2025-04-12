@@ -177,7 +177,7 @@ def parse_submission_text(content: str) -> Tuple[FilingHeader, DefaultDict[str, 
         # specialized header parser since we need additional processing
         try:
             header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
-        except Exception as e:
+        except Exception:
             header = FilingHeader.parse_from_sgml_text(parsed_data['header'], preprocess=True)
 
     # Create document dictionary
@@ -243,7 +243,7 @@ class FilingSGML:
         if self.accession_number:
             return f"/Archives/edgar/data/{self.header.cik}/{self.accession_number.replace('-', '')}"
         else:
-            return f"/<SGML FILE>"
+            return "/<SGML FILE>"
 
 
     def html(self):

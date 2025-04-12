@@ -452,8 +452,8 @@ def _format_period_labels(
     formatted_periods = []
     fiscal_period_indicator = None
     
-    # Get document_period_end_date from entity_info
-    doc_period_end_date = entity_info.get('document_period_end_date')
+    # We get entity_info but don't currently use document_period_end_date
+    # Uncomment if needed: doc_period_end_date = entity_info.get('document_period_end_date')
     
     # First, determine the fiscal period type (annual, quarterly, etc.) based on the first period
     if periods_to_display:
@@ -649,7 +649,7 @@ def _format_period_labels(
                             if show_date_range and is_duration and start_date_obj:
                                 final_label = f"{format_date(start_date_obj)} - {final_label}"
                             break
-                        except ValueError as e:
+                        except ValueError:
                             # Handle invalid dates
                             if day > 28:
                                 if month_num == 2:  # February
@@ -1240,11 +1240,13 @@ def render_statement(
             # Clone item at the time of creating this function to prevent it from changing later
             current_item = dict(item)
             current_period_key = period_key
-            format_func = lambda value, item=current_item, pk=current_period_key: _format_value_for_display_as_string(
-                value, item, pk,
-                is_monetary_statement, dominant_scale, shares_scale,
-                comparison_info
-            )
+            
+            def format_func(value, item=current_item, pk=current_period_key):
+                return _format_value_for_display_as_string(
+                    value, item, pk,
+                    is_monetary_statement, dominant_scale, shares_scale,
+                    comparison_info
+                )
             
             # Create a cell and add it to the row
             cell = StatementCell(

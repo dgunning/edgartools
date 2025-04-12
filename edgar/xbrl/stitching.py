@@ -55,8 +55,6 @@ def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> L
                 pass
         
         # Get fiscal information if available
-        fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
-        fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
         fiscal_period = entity_info.get('fiscal_period')
         fiscal_year = entity_info.get('fiscal_year')
         
@@ -976,7 +974,7 @@ def render_stitched_statement(
     statement_type: str,
     entity_info: Dict[str, Any] = None,
     show_date_range: bool = False
-) -> 'RichTable':
+):
     """
     Render a stitched statement using the same rendering logic as individual statements.
     
@@ -1024,7 +1022,6 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
         DataFrame with periods as columns and concepts as index
     """
     # Extract periods and statement data
-    periods = [label for _, label in stitched_data['periods']]
     statement_data = stitched_data['statement_data']
     
     # Create a dictionary for the DataFrame
@@ -1179,7 +1176,7 @@ class XBRLS:
                         max_periods: int = 8, 
                         standardize: bool = True,
                         use_optimal_periods: bool = True,
-                        show_date_range: bool = False) -> 'RichTable':
+                        show_date_range: bool = False):
         """
         Render a stitched statement in a rich table format.
         
@@ -1258,18 +1255,15 @@ class XBRLS:
         Returns:
             Rich console representation
         """
-        from rich.console import Console
         from rich.panel import Panel
         from rich.text import Text
-        
-        console = Console(record=True)
         
         # Get information about the XBRLS object
         filing_count = len(self.xbrl_list)
         periods = self.get_periods()
         
         # Create a panel with the information
-        content = Text.from_markup(f"[bold]XBRLS Object[/bold]\n")
+        content = Text.from_markup("[bold]XBRLS Object[/bold]\n")
         content.append(f"Filings: {filing_count}\n")
         content.append(f"Unique Periods: {len(periods)}\n")
         

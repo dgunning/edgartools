@@ -213,10 +213,8 @@ class XBRL:
         
         # Try to create legacy instance as well for compatibility
         directory = Path(directory_path)
-        instance_file = None
         for file_path in directory.glob("*"):
             if file_path.is_file() and file_path.name.lower().endswith('.xml') and '<xbrl' in file_path.read_text()[:2000]:
-                instance_file = file_path
                 break
         
         return xbrl
@@ -368,7 +366,7 @@ class XBRL:
                         statement_type = f"{statement_alias}Parenthetical"
                     else:
                         statement_type = statement_alias
-                    if not 'BalanceSheet' in statement_type:
+                    if 'BalanceSheet' not in statement_type:
                         break
                         
             # If we didn't find a match, try additional patterns for notes and disclosures
@@ -1129,7 +1127,7 @@ class XBRL:
         # Convert contexts to DataFrame
         context_data = []
         for context_id, context in self.contexts.items():
-            ctx_dict = context.dict()
+            ctx_dict = context.model_dump()
             ctx_dict['context_id'] = context_id
             
             # Extract entity info
@@ -1160,7 +1158,7 @@ class XBRL:
         # Convert facts to DataFrame
         fact_data = []
         for fact_key, fact in self._facts.items():
-            fact_dict = fact.dict()
+            fact_dict = fact.model_dump()
             fact_dict['fact_key'] = fact_key
             
             # Try to get additional information
@@ -1168,7 +1166,7 @@ class XBRL:
                 context = self.contexts[fact.context_ref]
                 
                 # Add period information
-                if 'period' in context.dict() and context.period:
+                if 'period' in context.model_dump() and context.period:
                     fact_dict['period_type'] = context.period.get('type')
                     if fact_dict['period_type'] == 'instant':
                         fact_dict['period_instant'] = context.period.get('instant')
@@ -1177,11 +1175,11 @@ class XBRL:
                         fact_dict['period_end'] = context.period.get('endDate')
                 
                 # Add entity information
-                if 'entity' in context.dict() and context.entity:
+                if 'entity' in context.model_dump() and context.entity:
                     fact_dict['entity_identifier'] = context.entity.get('identifier')
                 
                 # Add dimensions
-                if 'dimensions' in context.dict() and context.dimensions:
+                if 'dimensions' in context.model_dump() and context.dimensions:
                     for dim_name, dim_value in context.dimensions.items():
                         dim_key = f"dim_{dim_name.replace(':', '_')}"
                         fact_dict[dim_key] = dim_value

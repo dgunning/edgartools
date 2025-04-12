@@ -294,7 +294,6 @@ def determine_periods_to_display(
         fiscal_year_focus = entity_info.get('fiscal_year')
         fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
         fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
-        doc_period_end_date = entity_info.get('document_period_end_date')
         
         if instant_periods:
             # Take latest instant period that is not later than document_period_end_date

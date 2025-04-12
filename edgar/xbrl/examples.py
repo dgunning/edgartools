@@ -219,8 +219,6 @@ def standardized_statements_example():
     # Create a Statements object for easier access
     statements = Statements(xbrl)
     
-    console = Console()
-    
     # Display original income statement
     print("\n[bold]Income Statement (Original Labels):[/bold]")
     income_statement = statements.income_statement()

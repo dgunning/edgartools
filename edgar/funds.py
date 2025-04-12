@@ -384,7 +384,7 @@ def get_fund_with_filings(contract_or_series_id: str):
         return None
     base_url = fund_class_or_series_search_url.format(contract_or_series_id)
     # Start at 0 and download 100
-    search_url = base_url + f"&start=0&count=100"
+    search_url = base_url + "&start=0&count=100"
 
     fund_text = download_text(search_url)
 

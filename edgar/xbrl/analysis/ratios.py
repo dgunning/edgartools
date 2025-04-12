@@ -7,18 +7,19 @@ DataFrame operations for handling multiple periods efficiently.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Callable, Union, Sequence
+from typing import Dict, List, Optional, Tuple, Callable, Union, Mapping
 
 import pandas as pd
 from pandas import Index
+from rich import box
+from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from rich import box
-from rich.console import Console, Group
-from edgar.richtools import repr_rich
 
+from edgar.richtools import repr_rich
 from edgar.xbrl.standardization import MappingStore, StandardConcept
+
 
 @dataclass
 class ConceptEquivalent:
@@ -28,7 +29,6 @@ class ConceptEquivalent:
     calculation: Callable[[pd.DataFrame, str], float]
     description: str
 
-from typing import Mapping
 
 @dataclass
 class RatioAnalysisGroup:
@@ -42,25 +42,26 @@ class RatioAnalysisGroup:
     name: str
     description: str
     ratios: Dict[str, 'RatioAnalysis']
-    
+
     def __rich__(self):
         headers = [""] + next(iter(self.ratios.values())).results.columns.tolist()
         table = Table(*headers, box=box.SIMPLE)
         renderables = [table]
-        
+
         for ratio in self.ratios.values():
             for record in ratio.results.itertuples():
                 values = [Text(f"{v:.2f}", justify="right") for v in record[1:]]
                 row = [ratio.name] + values
                 table.add_row(*row)
-        
+
         panel = Panel(Group(*renderables),
                       title=self.name,
                       expand=False)
         return panel
-    
+
     def __repr__(self) -> str:
         return repr_rich(self.__rich__())
+
 
 @dataclass
 class RatioAnalysis:
@@ -94,13 +95,14 @@ class RatioAnalysis:
                       title=self.name,
                       expand=False)
         return panel
-    
+
     def __repr__(self) -> str:
         return repr_rich(self.__rich__())
 
+
 class FinancialRatios:
     """Calculate and analyze financial ratios from XBRL data using DataFrame operations."""
-    
+
     def __init__(self, xbrl):
         """Initialize with an XBRL instance.
         
@@ -108,32 +110,33 @@ class FinancialRatios:
             xbrl: XBRL instance containing financial statements
         """
         self.xbrl = xbrl
-        
+
         # Initialize concept mappings and equivalents
         self._mapping_store = MappingStore()
         self._concept_equivalents = self._initialize_concept_equivalents()
-        
+
         # Get rendered statements
         bs = self.xbrl.statements.balance_sheet()
         is_ = self.xbrl.statements.income_statement()
         cf = self.xbrl.statements.cash_flow_statement()
-        
+
         # Convert to DataFrames with consistent periods
         bs_rendered = bs.render()
         is_rendered = is_.render()
         cf_rendered = cf.render()
-        
+
         self.balance_sheet_df = bs_rendered.to_dataframe()
         self.income_stmt_df = is_rendered.to_dataframe()
         self.cash_flow_df = cf_rendered.to_dataframe()
-        
+
         # Get all unique periods across statements
         self.periods = sorted(set(
-            str(p.end_date) for p in bs_rendered.periods + 
+            str(p.end_date) for p in bs_rendered.periods +
             is_rendered.periods + cf_rendered.periods
         ))
-        
-    def _prepare_ratio_df(self, required_concepts: List[str], statement_dfs: List[Tuple[pd.DataFrame, str]], optional_concepts: List[str] = []) -> Tuple[pd.DataFrame, Dict[str, str]]:
+
+    def _prepare_ratio_df(self, required_concepts: List[str], statement_dfs: List[Tuple[pd.DataFrame, str]],
+                          optional_concepts: List[str] = []) -> Tuple[pd.DataFrame, Dict[str, str]]:
         """Prepare DataFrame for ratio calculations.
         
         Args:
@@ -166,16 +169,16 @@ class FinancialRatios:
                 available_periods = set(period_cols)
             else:
                 available_periods &= set(period_cols)
-        
+
         if not available_periods:
             raise ValueError("No common periods found across required statements")
-            
+
         # Create empty DataFrame with only the common periods
         calc_df = pd.DataFrame(index=required_concepts, columns=Index(sorted(available_periods)))
-        
+
         # Track which concepts used equivalents
         equivalents_used = {}
-        
+
         # Fill values from each statement
         for concept in required_concepts:
             found = False
@@ -194,7 +197,7 @@ class FinancialRatios:
                             break
                     if found:
                         break
-            
+
             # If not found via mappings, try direct concept match
             if not found:
                 for df, statement_type in statement_dfs:
@@ -205,7 +208,7 @@ class FinancialRatios:
                         calc_df.loc[concept] = matching_row[calc_df.columns]
                         found = True
                         break
-            
+
             # If still not found, try matching by label
             if not found:
                 for df, statement_type in statement_dfs:
@@ -218,15 +221,15 @@ class FinancialRatios:
                             calc_df.loc[concept] = matching_row[calc_df.columns]
                             found = True
                             break
-            
+
             # If still not found or all NaN, try concept equivalents
             if not found or calc_df.loc[concept].isna().all():
                 if concept in self._concept_equivalents:
                     for equivalent in self._concept_equivalents[concept]:
                         try:
                             # Recursively prepare data for required concepts
-                            #rev = statement_dfs[0][0].iloc[1]['2024-12-31']
-                            print(statement_dfs[0][0][[ 'label', '2024-12-31']])
+                            # rev = statement_dfs[0][0].iloc[1]['2024-12-31']
+                            print(statement_dfs[0][0][['label', '2024-12-31']])
 
                             sub_df, sub_equiv = self._prepare_ratio_df(
                                 equivalent.required_concepts, statement_dfs)
@@ -234,7 +237,7 @@ class FinancialRatios:
                             # Calculate equivalent value for each period
                             for period in calc_df.columns:
                                 calc_df.loc[concept, period] = equivalent.calculation(sub_df, period)
-                                
+
                             # Track that we used this equivalent
                             equivalents_used[concept] = equivalent.description
                             # Also include any equivalents used by subconcepts
@@ -243,16 +246,16 @@ class FinancialRatios:
                             break
                         except (KeyError, ValueError, ZeroDivisionError):
                             continue
-                            
+
             if not found and concept not in optional_concepts:
                 raise KeyError(f"Could not find or calculate required concept: {concept}")
-                    
+
         # Filter out None values from equivalents and ensure all values are strings
         filtered_equivalents = {k: str(v) for k, v in equivalents_used.items() if v is not None}
-        
+
         # Return the prepared DataFrame and filtered equivalents
         return calc_df, filtered_equivalents
-        
+
     def _initialize_concept_equivalents(self) -> Dict[str, List[ConceptEquivalent]]:
         """Initialize the concept equivalents mapping.
         
@@ -268,8 +271,8 @@ class FinancialRatios:
                         StandardConcept.COST_OF_REVENUE
                     ],
                     calculation=lambda df, period: (
-                        df.loc[StandardConcept.REVENUE, period] -
-                        df.loc[StandardConcept.COST_OF_REVENUE, period]
+                            df.loc[StandardConcept.REVENUE, period] -
+                            df.loc[StandardConcept.COST_OF_REVENUE, period]
                     ),
                     description="Revenue - Cost of Revenue"
                 )
@@ -282,14 +285,14 @@ class FinancialRatios:
                         StandardConcept.OPERATING_EXPENSES
                     ],
                     calculation=lambda df, period: (
-                        df.loc[StandardConcept.GROSS_PROFIT, period] -
-                        df.loc[StandardConcept.OPERATING_EXPENSES, period]
+                            df.loc[StandardConcept.GROSS_PROFIT, period] -
+                            df.loc[StandardConcept.OPERATING_EXPENSES, period]
                     ),
                     description="Gross Profit - Operating Expenses"
                 )
             ]
         }
-        
+
     def _get_concept_value(self, concept: str, calc_df: pd.DataFrame) -> Tuple[pd.Series, Optional[str]]:
         """Get a concept value from the calculation DataFrame.
         
@@ -313,7 +316,7 @@ class FinancialRatios:
                 return value, None
         except KeyError:
             pass
-            
+
         # If we get here, either the concept wasn't found or was all NaN
         # Try to use concept equivalents
         if concept in self._concept_equivalents:
@@ -323,19 +326,19 @@ class FinancialRatios:
                     for req in equivalent.required_concepts:
                         if req not in calc_df.index:
                             continue
-                            
+
                     # Calculate equivalent value for each period
                     values = pd.Series(index=calc_df.columns)
                     for period in calc_df.columns:
                         values[period] = equivalent.calculation(calc_df, period)
-                        
+
                     return values, equivalent.description
                 except (KeyError, ZeroDivisionError):
                     continue
-        
+
         # If we get here, no valid concept or equivalent was found
         raise KeyError(f"Concept {concept} not found and no valid equivalents available")
-            
+
     def get_ratio_data(self, ratio_type: str) -> Tuple[pd.DataFrame, Dict[str, str]]:
         """Get the prepared DataFrame for a specific ratio calculation.
         
@@ -400,36 +403,36 @@ class FinancialRatios:
                 ]
             }
         }
-        
+
         if ratio_type not in ratio_configs:
             raise ValueError(f"Unknown ratio type: {ratio_type}. Valid types are: {list(ratio_configs.keys())}")
-            
+
         config = ratio_configs[ratio_type]
         return self._prepare_ratio_df(
             required_concepts=config['concepts'],
             statement_dfs=config['statements'],
             optional_concepts=config.get('optional_concepts', [])
         )
-        
+
     def calculate_current_ratio(self) -> RatioAnalysis:
         """Calculate current ratio for all periods.
         
         Current Ratio = Current Assets / Current Liabilities
         """
         calc_df, equivalents = self.get_ratio_data('current')
-        
+
         try:
             current_assets, assets_equiv = self._get_concept_value(
                 StandardConcept.TOTAL_CURRENT_ASSETS, calc_df)
             current_liab, liab_equiv = self._get_concept_value(
                 StandardConcept.TOTAL_CURRENT_LIABILITIES, calc_df)
-            
+
             equivalents_used = {}
             if assets_equiv:
                 equivalents_used['current_assets'] = assets_equiv
             if liab_equiv:
                 equivalents_used['current_liabilities'] = liab_equiv
-            
+
             return RatioAnalysis(
                 name="Current Ratio",
                 description="Measures ability to pay short-term obligations",
@@ -443,30 +446,30 @@ class FinancialRatios:
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate current ratio: {str(e)}")
-            
+
     def calculate_return_on_assets(self) -> RatioAnalysis:
         """Calculate return on assets for all periods.
         
         ROA = Net Income / Average Total Assets
         """
         calc_df, equivalents = self.get_ratio_data('return_on_assets')
-        
+
         try:
             net_income, income_equiv = self._get_concept_value(
                 StandardConcept.NET_INCOME, calc_df)
             total_assets, assets_equiv = self._get_concept_value(
                 StandardConcept.TOTAL_ASSETS, calc_df)
-            
+
             # Calculate average total assets using shift
             prev_assets = total_assets.shift(1)
             avg_assets = (total_assets + prev_assets.fillna(total_assets)) / 2
-            
+
             equivalents_used = {}
             if income_equiv:
                 equivalents_used['net_income'] = income_equiv
             if assets_equiv:
                 equivalents_used['total_assets'] = assets_equiv
-            
+
             return RatioAnalysis(
                 name="Return on Assets",
                 description="Measures how efficiently company uses its assets to generate earnings",
@@ -480,26 +483,26 @@ class FinancialRatios:
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate return on assets: {str(e)}")
-            
+
     def calculate_operating_margin(self) -> RatioAnalysis:
         """Calculate operating margin for all periods.
         
         Operating Margin = Operating Income / Revenue
         """
         calc_df, equivalents = self.get_ratio_data('operating_margin')
-        
+
         try:
             operating_income, income_equiv = self._get_concept_value(
                 StandardConcept.OPERATING_INCOME, calc_df)
             revenue, revenue_equiv = self._get_concept_value(
                 StandardConcept.REVENUE, calc_df)
-            
+
             equivalents_used = {}
             if income_equiv:
                 equivalents_used['operating_income'] = income_equiv
             if revenue_equiv:
                 equivalents_used['revenue'] = revenue_equiv
-            
+
             return RatioAnalysis(
                 name="Operating Margin",
                 description="Measures operating efficiency and pricing strategy",
@@ -513,7 +516,7 @@ class FinancialRatios:
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate operating margin: {str(e)}")
-            
+
     def calculate_gross_margin(self) -> RatioAnalysis:
         """Calculate gross margin for all periods.
         
@@ -523,19 +526,19 @@ class FinancialRatios:
         Revenue - Cost of Revenue.
         """
         calc_df, equivalents = self.get_ratio_data('gross_margin')
-        
+
         try:
             gross_profit, profit_equiv = self._get_concept_value(
                 StandardConcept.GROSS_PROFIT, calc_df)
             revenue, revenue_equiv = self._get_concept_value(
                 StandardConcept.REVENUE, calc_df)
-            
+
             equivalents_used = {}
             if profit_equiv:
                 equivalents_used['gross_profit'] = profit_equiv
             if revenue_equiv:
                 equivalents_used['revenue'] = revenue_equiv
-            
+
             return RatioAnalysis(
                 name="Gross Margin",
                 description="Measures basic profitability from core business activities",
@@ -549,7 +552,7 @@ class FinancialRatios:
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate gross margin: {str(e)}")
-            
+
     def calculate_quick_ratio(self) -> RatioAnalysis:
         """Calculate quick ratio for all periods.
         
@@ -562,7 +565,7 @@ class FinancialRatios:
             In such cases, the quick ratio will equal the current ratio.
         """
         calc_df, equivalents = self.get_ratio_data('current')
-        
+
         try:
             current_assets, assets_equiv = self._get_concept_value(
                 StandardConcept.TOTAL_CURRENT_ASSETS, calc_df)
@@ -570,13 +573,13 @@ class FinancialRatios:
                 StandardConcept.TOTAL_CURRENT_LIABILITIES, calc_df)
             inventory, inv_equiv = self._get_concept_value(
                 StandardConcept.INVENTORY, calc_df)
-                
+
             # If inventory is not found, treat it as 0
             if inventory is None:
                 inventory = pd.Series(0, index=current_assets.index)
-                
+
             quick_assets = current_assets - inventory
-            
+
             equivalents_used = {}
             if assets_equiv:
                 equivalents_used['current_assets'] = assets_equiv
@@ -584,7 +587,7 @@ class FinancialRatios:
                 equivalents_used['current_liabilities'] = liab_equiv
             if inv_equiv:
                 equivalents_used['inventory'] = inv_equiv
-            
+
             return RatioAnalysis(
                 name="Quick Ratio",
                 description="Measures ability to pay short-term obligations using only highly liquid assets",
@@ -599,7 +602,7 @@ class FinancialRatios:
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate quick ratio: {str(e)}")
-            
+
     def calculate_cash_ratio(self) -> RatioAnalysis:
         """Calculate cash ratio for all periods.
         
@@ -607,19 +610,19 @@ class FinancialRatios:
         Measures ability to pay short-term obligations using only cash.
         """
         calc_df, equivalents = self.get_ratio_data('current')
-        
+
         try:
             cash, cash_equiv = self._get_concept_value(
                 StandardConcept.CASH, calc_df)
             current_liab, liab_equiv = self._get_concept_value(
                 StandardConcept.TOTAL_CURRENT_LIABILITIES, calc_df)
-                
+
             equivalents_used = {}
             if cash_equiv:
                 equivalents_used['cash'] = cash_equiv
             if liab_equiv:
                 equivalents_used['current_liabilities'] = liab_equiv
-                
+
             return RatioAnalysis(
                 name="Cash Ratio",
                 description="Measures ability to pay short-term obligations using only cash",
@@ -633,7 +636,7 @@ class FinancialRatios:
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate cash ratio: {str(e)}")
-            
+
     def calculate_working_capital(self) -> RatioAnalysis:
         """Calculate working capital for all periods.
         
@@ -641,21 +644,21 @@ class FinancialRatios:
         Measures short-term financial health.
         """
         calc_df, equivalents = self.get_ratio_data('current')
-        
+
         try:
             current_assets, assets_equiv = self._get_concept_value(
                 StandardConcept.TOTAL_CURRENT_ASSETS, calc_df)
             current_liab, liab_equiv = self._get_concept_value(
                 StandardConcept.TOTAL_CURRENT_LIABILITIES, calc_df)
-                
+
             equivalents_used = {}
             if assets_equiv:
                 equivalents_used['current_assets'] = assets_equiv
             if liab_equiv:
                 equivalents_used['current_liabilities'] = liab_equiv
-                
+
             working_capital = current_assets - current_liab
-                
+
             return RatioAnalysis(
                 name="Working Capital",
                 description="Measures short-term financial health",
@@ -669,7 +672,7 @@ class FinancialRatios:
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate working capital: {str(e)}")
-        
+
     def calculate_profitability_ratios(self) -> RatioAnalysisGroup:
         """Calculate profitability ratios.
         
@@ -682,7 +685,7 @@ class FinancialRatios:
             - return_on_equity
         """
         calc_df, equivalents = self.get_ratio_data('profitability')
-        
+
         try:
             revenue, revenue_equiv = self._get_concept_value(StandardConcept.REVENUE, calc_df)
             gross_profit, profit_equiv = self._get_concept_value(StandardConcept.GROSS_PROFIT, calc_df)
@@ -690,9 +693,9 @@ class FinancialRatios:
             net_income, net_equiv = self._get_concept_value(StandardConcept.NET_INCOME, calc_df)
             total_assets, assets_equiv = self._get_concept_value(StandardConcept.TOTAL_ASSETS, calc_df)
             total_equity, equity_equiv = self._get_concept_value(StandardConcept.TOTAL_EQUITY, calc_df)
-            
+
             results = {}
-            
+
             # Margin Ratios
             if gross_profit is not None:
                 results['gross_margin'] = RatioAnalysis(
@@ -706,7 +709,7 @@ class FinancialRatios:
                     },
                     equivalents_used={k: str(v) for k, v in {'gross_profit': profit_equiv}.items() if v is not None}
                 )
-                
+
             if operating_income is not None:
                 results['operating_margin'] = RatioAnalysis(
                     name="Operating Margin",
@@ -719,7 +722,7 @@ class FinancialRatios:
                     },
                     equivalents_used={k: str(v) for k, v in {'operating_income': income_equiv}.items() if v is not None}
                 )
-                
+
             if net_income is not None:
                 results['net_margin'] = RatioAnalysis(
                     name="Net Margin",
@@ -732,7 +735,7 @@ class FinancialRatios:
                     },
                     equivalents_used={k: str(v) for k, v in {'net_income': net_equiv}.items() if v is not None}
                 )
-                
+
                 # Return on Assets
                 if total_assets is not None:
                     results['return_on_assets'] = RatioAnalysis(
@@ -749,7 +752,7 @@ class FinancialRatios:
                             'total_assets': assets_equiv
                         }.items() if v is not None}
                     )
-                    
+
                 # Return on Equity
                 if total_equity is not None:
                     results['return_on_equity'] = RatioAnalysis(
@@ -766,16 +769,16 @@ class FinancialRatios:
                             'total_equity': equity_equiv
                         }.items() if v is not None}
                     )
-            
+
             return RatioAnalysisGroup(
                 name="Profitability Ratios",
                 description="Measures of company's ability to generate profits and returns",
                 ratios=results
             )
-            
+
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate profitability ratios: {str(e)}")
-        
+
     def calculate_efficiency_ratios(self) -> RatioAnalysisGroup:
         """Calculate efficiency ratios.
         
@@ -787,16 +790,16 @@ class FinancialRatios:
             - days_sales_outstanding
         """
         calc_df, equivalents = self.get_ratio_data('efficiency')
-        
+
         try:
             revenue, revenue_equiv = self._get_concept_value(StandardConcept.REVENUE, calc_df)
             total_assets, assets_equiv = self._get_concept_value(StandardConcept.TOTAL_ASSETS, calc_df)
             inventory, inventory_equiv = self._get_concept_value(StandardConcept.INVENTORY, calc_df)
             cogs, cogs_equiv = self._get_concept_value(StandardConcept.COST_OF_REVENUE, calc_df)
             receivables, receivables_equiv = self._get_concept_value(StandardConcept.ACCOUNTS_RECEIVABLE, calc_df)
-            
+
             results = {}
-            
+
             # Asset Turnover
             if total_assets is not None:
                 results['asset_turnover'] = RatioAnalysis(
@@ -813,7 +816,7 @@ class FinancialRatios:
                         'total_assets': assets_equiv
                     }.items() if v is not None}
                 )
-            
+
             # Inventory Turnover
             if inventory is not None and cogs is not None:
                 results['inventory_turnover'] = RatioAnalysis(
@@ -830,7 +833,7 @@ class FinancialRatios:
                         'inventory': inventory_equiv
                     }.items() if v is not None}
                 )
-            
+
             # Receivables Turnover
             if receivables is not None:
                 turnover = revenue / receivables
@@ -848,7 +851,7 @@ class FinancialRatios:
                         'receivables': receivables_equiv
                     }.items() if v is not None}
                 )
-                
+
                 # Days Sales Outstanding
                 results['days_sales_outstanding'] = RatioAnalysis(
                     name="Days Sales Outstanding",
@@ -860,16 +863,16 @@ class FinancialRatios:
                     },
                     equivalents_used={}
                 )
-            
+
             return RatioAnalysisGroup(
                 name="Efficiency Ratios",
                 description="Measures of company's operational efficiency",
                 ratios=results
             )
-            
+
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate efficiency ratios: {str(e)}")
-        
+
     def calculate_leverage_ratios(self) -> RatioAnalysisGroup:
         """Calculate leverage ratios.
         
@@ -881,16 +884,16 @@ class FinancialRatios:
             - equity_multiplier
         """
         calc_df, equivalents = self.get_ratio_data('leverage')
-        
+
         try:
             total_debt, debt_equiv = self._get_concept_value(StandardConcept.LONG_TERM_DEBT, calc_df)
             total_equity, equity_equiv = self._get_concept_value(StandardConcept.TOTAL_EQUITY, calc_df)
             total_assets, assets_equiv = self._get_concept_value(StandardConcept.TOTAL_ASSETS, calc_df)
             operating_income, income_equiv = self._get_concept_value(StandardConcept.OPERATING_INCOME, calc_df)
             interest_expense, interest_equiv = self._get_concept_value(StandardConcept.INTEREST_EXPENSE, calc_df)
-            
+
             results = {}
-            
+
             # Debt to Equity
             if total_debt is not None and total_equity is not None:
                 results['debt_to_equity'] = RatioAnalysis(
@@ -907,7 +910,7 @@ class FinancialRatios:
                         'total_equity': equity_equiv
                     }.items() if v is not None}
                 )
-                
+
             # Debt to Assets
             if total_debt is not None and total_assets is not None:
                 results['debt_to_assets'] = RatioAnalysis(
@@ -924,7 +927,7 @@ class FinancialRatios:
                         'total_assets': assets_equiv
                     }.items() if v is not None}
                 )
-                
+
             # Interest Coverage
             if operating_income is not None and interest_expense is not None:
                 results['interest_coverage'] = RatioAnalysis(
@@ -941,7 +944,7 @@ class FinancialRatios:
                         'interest_expense': interest_equiv
                     }.items() if v is not None}
                 )
-                
+
             # Equity Multiplier
             if total_assets is not None and total_equity is not None:
                 results['equity_multiplier'] = RatioAnalysis(
@@ -958,16 +961,16 @@ class FinancialRatios:
                         'total_equity': equity_equiv
                     }.items() if v is not None}
                 )
-                
+
             return RatioAnalysisGroup(
                 name="Leverage Ratios",
                 description="Measures of company's financial leverage and solvency",
                 ratios=results
             )
-            
+
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate leverage ratios: {str(e)}")
-        
+
     def calculate_liquidity_ratios(self) -> RatioAnalysisGroup:
         """Calculate all liquidity ratios.
 
@@ -980,7 +983,7 @@ class FinancialRatios:
             ratios['quick'] = self.calculate_quick_ratio()
             ratios['cash'] = self.calculate_cash_ratio()
             ratios['working_capital'] = self.calculate_working_capital()
-            
+
             return RatioAnalysisGroup(
                 name="Liquidity Ratios",
                 description="Measures of a company's ability to pay short-term obligations",

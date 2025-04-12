@@ -481,7 +481,6 @@ class Statements:
             return str(self)
         
         from rich.console import Group
-        from rich.panel import Panel
         from rich.text import Text
         
         # Group statements by category
