@@ -5,7 +5,7 @@ This module provides functions for working with financial statements.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 from rich import box

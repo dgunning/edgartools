@@ -7,16 +7,18 @@ consistency issues and normalizing data representation.
 """
 
 from collections import defaultdict
-from datetime import datetime, date
+from datetime import date, datetime
 from enum import Enum
-from typing import Dict, List, Any, Optional, Union, Tuple, Set
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, TYPE_CHECKING
 
 import pandas as pd
 
 from edgar.xbrl.core import format_date, parse_date
-from edgar.xbrl.standardization import (
-    ConceptMapper, standardize_statement, initialize_default_mappings
-)
+from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, standardize_statement
+
+if TYPE_CHECKING:
+    from edgar.xbrl.xbrl import XBRL
+    from edgar.xbrl.statements import StitchedStatements
 
 
 def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> List[Dict[str, Any]]:
@@ -529,6 +531,9 @@ class StatementStitcher:
             for period_id, period_info in statement['periods'].items():
                 # Extract end date for sorting
                 try:
+                    # Initialize normalized_key to silence the type checker
+                    normalized_key = ""
+                    
                     if period_id.startswith('instant_'):
                         date_str = period_id.split('_')[1]
                         # Format the date consistently with single statements
@@ -539,6 +544,8 @@ class StatementStitcher:
                             # Fall back to original label if parsing fails
                             display_date = period_info['label']
                         period_type = 'instant'
+                        # For instant periods, create a normalized key with just the date
+                        normalized_key = f"{period_type}_{date_str}"
                     else:  # duration
                         # For durations, extract both start and end dates
                         parts = period_id.split('_')
@@ -558,10 +565,6 @@ class StatementStitcher:
                         else:
                             # Skip malformed period IDs
                             continue
-                    
-                    # For instant periods, create a normalized key with just the date
-                    if period_type == 'instant':
-                        normalized_key = f"{period_type}_{date_str}"
                     
                     # Parse the end date for sorting
                     end_date = parse_date(date_str)
@@ -590,7 +593,7 @@ class StatementStitcher:
     
     def _select_periods(
         self, 
-        all_periods: List[Tuple[str, datetime]], 
+        all_periods: List[Tuple[str, Union[str,datetime]]],
         period_type: Union[PeriodType, str],
         max_periods: int
     ) -> List[str]:

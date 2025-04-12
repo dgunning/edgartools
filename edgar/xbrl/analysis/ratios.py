@@ -7,7 +7,7 @@ DataFrame operations for handling multiple periods efficiently.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Callable, Union, Mapping
+from typing import Callable, Dict, List, Mapping, Optional, Tuple, Union
 
 import pandas as pd
 from pandas import Index

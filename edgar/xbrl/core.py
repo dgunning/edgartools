@@ -5,7 +5,7 @@ This module provides common functions used throughout the XBRL parser.
 """
 
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Constants for label roles
 STANDARD_LABEL = "http://www.xbrl.org/2003/role/label"

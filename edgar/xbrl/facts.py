@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 from decimal import Decimal
-from typing import Dict, List, Any, Optional, Union, Set, Callable
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import pandas as pd
 
@@ -116,18 +116,24 @@ class FactQuery:
             Self for method chaining
         """
         if callable(value_filter):
-            self._filters.append(lambda f: 'numeric_value' in f and
-                                           f['numeric_value'] is not None and
-                                           value_filter(f['numeric_value']))
+            def numeric_value_filter(f):
+                return ('numeric_value' in f and
+                        f['numeric_value'] is not None and
+                        value_filter(f['numeric_value']))
+            self._filters.append(numeric_value_filter)
         elif isinstance(value_filter, (list, tuple)) and len(value_filter) == 2:
             min_val, max_val = value_filter
-            self._filters.append(lambda f: 'numeric_value' in f and
-                                           f['numeric_value'] is not None and
-                                           min_val <= f['numeric_value'] <= max_val)
+            def numeric_range_filter(f):
+                return ('numeric_value' in f and
+                        f['numeric_value'] is not None and
+                        min_val <= f['numeric_value'] <= max_val)
+            self._filters.append(numeric_range_filter)
         else:
-            self._filters.append(lambda f: 'numeric_value' in f and
-                                           f['numeric_value'] is not None and
-                                           f['numeric_value'] == value_filter)
+            def numeric_equality_filter(f):
+                return ('numeric_value' in f and
+                        f['numeric_value'] is not None and
+                        f['numeric_value'] == value_filter)
+            self._filters.append(numeric_equality_filter)
         return self
 
     def by_period_type(self, period_type: str) -> FactQuery:
@@ -140,7 +146,9 @@ class FactQuery:
         Returns:
             Self for method chaining
         """
-        self._filters.append(lambda f: 'period_type' in f and f['period_type'] == period_type)
+        def period_type_filter(f):
+            return 'period_type' in f and f['period_type'] == period_type
+        self._filters.append(period_type_filter)
         return self
 
     def by_period_key(self, period_key: str) -> FactQuery:

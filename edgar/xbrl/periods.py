@@ -8,7 +8,7 @@ This module provides functions for handling periods in XBRL statements, includin
 """
 
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]:

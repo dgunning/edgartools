@@ -9,7 +9,9 @@ This module provides various financial metrics and analysis tools including:
 
 from dataclasses import dataclass
 from typing import Dict, Optional
-from ..standardization import StandardConcept, MappingStore
+
+from ..standardization import MappingStore, StandardConcept
+
 
 @dataclass
 class MetricResult:

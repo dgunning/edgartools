@@ -7,14 +7,23 @@ This module provides functions for parsing XBRL files and extracting data.
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
-from edgar.core import log
+from typing import Any, Dict, List, Optional, Union
 
+from edgar.core import log
+from edgar.xbrl.core import NAMESPACES, STANDARD_LABEL, classify_duration, extract_element_id
 from edgar.xbrl.models import (
-    ElementCatalog, Context, Fact, PresentationNode, PresentationTree,
-    CalculationNode, CalculationTree, Axis, Domain, Table, XBRLProcessingError
+    Axis,
+    CalculationNode,
+    CalculationTree,
+    Context,
+    Domain,
+    ElementCatalog,
+    Fact,
+    PresentationNode,
+    PresentationTree,
+    Table,
+    XBRLProcessingError,
 )
-from edgar.xbrl.core import NAMESPACES, STANDARD_LABEL, extract_element_id, classify_duration
 
 
 class XBRLParser:

@@ -6,13 +6,7 @@ to standardized concept names, enabling consistent presentation of financial
 statements regardless of the filing entity.
 """
 
-from edgar.xbrl.standardization.core import (
-    StandardConcept, 
-    MappingStore, 
-    ConceptMapper, 
-    standardize_statement, 
-    initialize_default_mappings
-)
+from edgar.xbrl.standardization.core import ConceptMapper, MappingStore, StandardConcept, initialize_default_mappings, standardize_statement
 
 __all__ = [
     'StandardConcept',

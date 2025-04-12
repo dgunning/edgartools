@@ -4,24 +4,21 @@ Rendering functions for XBRL data.
 This module provides functions for formatting and displaying XBRL data.
 """
 
+from dataclasses import dataclass, field
 from datetime import datetime
-import pandas as pd
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import pandas as pd
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table as RichTable
 from rich.text import Text
 
-from edgar.richtools import repr_rich
 from edgar.files.html import Document
-from edgar.richtools import rich_to_text
+from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
-from edgar.xbrl.core import (
-    determine_dominant_scale, format_value, format_date, parse_date
-)
-from dataclasses import dataclass, field
+from edgar.xbrl.core import determine_dominant_scale, format_date, format_value, parse_date
 
 # Default style configuration
 DEFAULT_STYLES = {
@@ -136,7 +133,8 @@ class StatementCell:
     value: Any
     style: Dict[str, str] = field(default_factory=dict)  # Style attributes like color, bold, etc.
     comparison: Optional[Dict[str, Any]] = None  # Comparison info if applicable
-    formatter: Callable[[Any], str] = lambda x: str(x)  # Custom formatter for the cell value
+    # Custom formatter for the cell value
+    formatter: Callable[[Any], str] = str  # Using built-in str function directly
 
     def get_formatted_value(self) -> str:
         return self.formatter(self.value)

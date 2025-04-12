@@ -8,10 +8,11 @@ statements regardless of the filing entity.
 
 import json
 import os
-import pandas as pd
-from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple, Any
 from difflib import SequenceMatcher
+from enum import Enum
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+import pandas as pd
 
 
 class StandardConcept(str, Enum):

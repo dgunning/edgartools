@@ -4,7 +4,8 @@ Data models for XBRL parsing.
 This module defines the core data structures used throughout the XBRL parser.
 """
 
-from typing import Dict, List, Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+
 from pydantic import BaseModel, Field
 
 # Constants for label roles

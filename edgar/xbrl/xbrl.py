@@ -13,23 +13,24 @@ and handling dimensional qualifiers.
 """
 
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
+from rich import box
+from rich.table import Column, Table
 from rich.table import Table as RichTable
+
 from edgar.attachments import Attachments
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL
 from edgar.xbrl.facts import FactQuery
 from edgar.xbrl.models import PresentationNode
-
 from edgar.xbrl.parser import XBRLParser
-from edgar.xbrl.periods import get_period_views, determine_periods_to_display
-from edgar.xbrl.rendering import render_statement, generate_rich_representation, RenderedStatement
+from edgar.xbrl.periods import determine_periods_to_display, get_period_views
+from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import statement_to_concepts
-from rich import box
-from rich.table import Table, Column
+
 
 class XBRLFilingWithNoXbrlData(Exception):
     """Exception raised when a filing does not contain XBRL data."""
@@ -1248,7 +1249,7 @@ class XBRL:
                         item['statement_type'] = stmt_type
                     
                     # Apply standardization
-                    from edgar.xbrl.standardization import ConceptMapper, standardize_statement, initialize_default_mappings
+                    from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, standardize_statement
                     mapper = ConceptMapper(initialize_default_mappings(read_only=True))
                     statement_data = standardize_statement(statement_data, mapper)
                 

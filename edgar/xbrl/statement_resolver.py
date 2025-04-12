@@ -6,9 +6,9 @@ notes, and disclosures regardless of taxonomy variations and company-specific cu
 """
 
 import re
-from enum import Enum
-from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 from edgar.xbrl.statements import statement_to_concepts
 

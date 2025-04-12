@@ -5,12 +5,13 @@ This module provides multiple examples demonstrating different ways to use the X
 """
 
 from pathlib import Path
-from rich.console import Console
-from rich import print
 
-from edgar import Filing, Company
-from edgar.xbrl.xbrl import XBRL
+from rich import print
+from rich.console import Console
+
+from edgar import Company, Filing
 from edgar.xbrl.statements import Statements
+from edgar.xbrl.xbrl import XBRL
 
 
 def render_financial_statements(ticker="AAPL"):
@@ -170,7 +171,7 @@ def example_with_real_filing():
     Example using a real filing from SEC.
     Note: This requires internet access.
     """
-    console = Console()
+    # Using print directly with rich formatting instead of console
     print("[bold]Example with Real Filing[/bold]")
     
     try:

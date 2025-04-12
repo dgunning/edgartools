@@ -7,12 +7,14 @@ This module provides tools for detecting potential financial fraud and anomalies
 - Piotroski F-Score for financial strength
 """
 
-from dataclasses import dataclass
-from typing import Dict, Any, Optional, List
-from collections import Counter
 import math
-from .metrics import AltmanZScore, BeneishMScore, PiotroskiFScore
+from collections import Counter
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
 from ..standardization import StandardConcept
+from .metrics import AltmanZScore, BeneishMScore, PiotroskiFScore
+
 
 @dataclass
 class BenfordResult:
