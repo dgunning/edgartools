@@ -1,13 +1,15 @@
 # EdgarTools Entity Package
 
-The `edgar.entity` package provides a clean, intuitive API for working with SEC entities like companies and funds.
+The `edgar.entity` package provides a comprehensive, intuitive API for working with SEC entities like companies, funds, and individuals that file with the SEC.
 
 ## Key Features
 
-- **Hierarchical Design**: Clear class structure that matches the domain model
-- **Specialized Classes**: Classes tailored for specific entity types
+- **Hierarchical Design**: Clear class hierarchy that matches the real-world domain model
+- **Specialized Classes**: Tailored implementations for companies, funds, and other SEC filers
 - **Type Annotations**: Strong typing for better IDE support and validation
 - **Factory Functions**: Convenient creation methods for common use cases
+- **Lazy Loading**: Efficient data retrieval with automatic pagination
+- **Rich Display**: Beautiful terminal output with detailed entity information
 
 ## Class Hierarchy
 
@@ -17,67 +19,223 @@ The `edgar.entity` package provides a clean, intuitive API for working with SEC 
     - `Fund` (specialized for investment funds)
       - `FundClass` (for specific fund share classes)
 
-## Usage Examples
+## Getting Started
 
 ### Working with Companies
+
+Companies can be created using their ticker symbol or CIK number:
 
 ```python
 from edgar.entity import Company
 
-# Create a company by ticker
+# Create by ticker symbol
 apple = Company("AAPL")
 
-# Get basic information
+# Create by CIK number
+microsoft = Company("0000789019")
+
+# Access basic information
 print(f"Name: {apple.data.name}")
 print(f"CIK: {apple.cik}")
 print(f"Ticker: {apple.get_ticker()}")
+print(f"Industry: {apple.data.sic_description}")
+```
 
-# Get financial statements
-financials = apple.get_financials()
+### Getting Company Filings
 
-# Get latest 10-K and 10-Q
+The entity package makes it easy to retrieve and filter filings:
+
+```python
+# Get all filings for a company
+all_filings = apple.get_filings()
+
+# Filter by form type
+annual_reports = apple.get_filings(form="10-K")
+quarterly_reports = apple.get_filings(form=["10-Q"])
+
+# Filter by date
+recent_filings = apple.get_filings(filing_date="2022-01-01:")
+specific_period = apple.get_filings(filing_date="2020-01-01:2020-12-31")
+
+# Get the latest filing of a specific type
+latest_10k = apple.get_filings(form="10-K").latest()
+
+# Shortcut for latest filings
 latest_10k = apple.latest_tenk
 latest_10q = apple.latest_tenq
 
-# Get and filter filings
-filings = apple.get_filings(form=["10-K", "10-Q"], filing_date="2020-01-01:")
-for filing in filings:
-    print(f"{filing.form} filed on {filing.filing_date}")
+# Pagination is available for large result sets
+filings_page = all_filings.head(10)
+next_page = filings_page.next()
+previous_page = next_page.previous()
+```
+
+### Accessing Financial Data
+
+Financial information is easily accessible through specialized methods:
+
+```python
+# Get all financial statements from the latest 10-K
+financials = apple.get_financials()
+
+# Get quarterly financials from the latest 10-Q
+quarterly = apple.get_quarterly_financials()
+
+# Access specific financial statements
+balance_sheet = financials.balance_sheet
+income_statement = financials.income_statement
+cash_flow = financials.cashflow_statement
+
+# Convert to pandas DataFrame for analysis
+income_df = income_statement.to_dataframe()
 ```
 
 ### Working with Generic Entities
 
+For cases where the entity type is unknown or when working with non-company filers:
+
 ```python
-from edgar.entity import Entity
+from edgar.entity import Entity, get_entity
 
 # Create an entity by CIK
 entity = Entity("0000320193")
 
-# Get entity type
-if entity.data.is_company:
+# Use factory function for automatic type detection
+entity = get_entity("0000320193")
+
+# Check entity type
+if entity.is_company:
     print(f"{entity.data.name} is a company")
-elif entity.data.is_individual:
+elif entity.is_individual():
     print(f"{entity.data.name} is an individual")
 
 # Get the latest filings
-latest = entity.get_filings().latest(5)
+latest_filings = entity.get_filings().latest(5)
 ```
 
-### Using Factory Functions
+### Working with Investment Funds
+
+Specialized classes are available for working with investment funds:
+
+```python
+from edgar.entity import Fund, get_fund
+
+# Create a fund by CIK
+vanguard_index = Fund("0000036405")
+
+# Get fund by ticker (returns either Fund or FundClass)
+fund_or_class = get_fund("VFINX")
+
+# Get fund classes
+if hasattr(fund_or_class, 'fund'):
+    # It's a fund class
+    parent_fund = fund_or_class.fund
+    all_classes = parent_fund.get_classes()
+else:
+    # It's a fund
+    all_classes = fund_or_class.get_classes()
+```
+
+## Factory Functions
+
+The package provides convenient factory functions for creating entities:
 
 ```python
 from edgar.entity import get_entity, get_company, get_fund
 
-# Get any entity (company, individual, fund, etc.)
+# Get any entity type (auto-detection)
 entity = get_entity("0000320193")
 
 # Get specifically a company
 company = get_company("AAPL")
 
 # Get a fund or fund class
-fund_or_class = get_fund("KINCX")
+fund_or_class = get_fund("VFINX")
 ```
 
-## API Reference
+## Search Functionality
 
-See the full API documentation for details on classes, methods, and parameters.
+Search for entities by name or ticker:
+
+```python
+from edgar.entity import find_company
+
+# Search for companies
+results = find_company("Apple")
+
+# Access search results
+if not results.empty:
+    first_match = results[0]  # Returns a Company object
+    print(f"Found: {first_match.data.name} ({first_match.get_ticker()})")
+    
+    # Display all matches
+    print(results)  # Uses rich formatting in terminals
+```
+
+## XBRL Facts and Concepts
+
+Access structured XBRL data for companies:
+
+```python
+# Get all XBRL facts for a company
+facts = company.get_facts()
+
+# Get a specific concept
+from edgar.entity.facts import get_concept
+revenue = get_concept(company.cik, "us-gaap", "RevenueFromContractWithCustomerExcludingAssessedTax")
+
+# Get the latest value
+latest_revenue = revenue.latest()
+```
+
+## Migration from Previous API
+
+If you're migrating from the old API, simply update your imports from:
+
+```python
+from edgar.entities import Entity, Company
+```
+
+To:
+
+```python
+from edgar.entity import Entity, Company
+```
+
+Most method signatures remain unchanged, but specialized methods are now available on the appropriate classes.
+
+## Advanced Usage
+
+### Creating Entities from Local Files
+
+For testing or offline use, entities can be created from local JSON files:
+
+```python
+from edgar.entity.submissions import create_entity_from_file, create_company_from_file
+
+# Create a generic entity
+entity = create_entity_from_file("path/to/submissions.json")
+
+# Create specifically a company
+company = create_company_from_file("path/to/submissions.json")
+```
+
+### Working with Local Storage
+
+Configure the library to use local storage for improved performance:
+
+```python
+import os
+os.environ["EDGAR_USE_LOCAL_DATA"] = "true"
+
+# Now all API calls will use local storage when available
+company = Company("AAPL")
+```
+
+## Performance Considerations
+
+- Entity data is lazily loaded upon first access
+- Filing history follows a special lazy-loading pattern:
+  - Initially, only the most recent filings are loaded
+  - When `get_filings()` is called with `trigger_full_load=True` (default), additional historical filings are loaded
+  - Subsequent calls use the cached data
