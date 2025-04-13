@@ -132,7 +132,7 @@ def using_statements_api(ticker="TSLA"):
     
     # Display cash flow statement
     print("\n[bold]Cash Flow Statement:[/bold]")
-    cash_flow = statements.cash_flow_statement()
+    cash_flow = statements.cashflow_statement()
     print(cash_flow)
     
     # Get available period views

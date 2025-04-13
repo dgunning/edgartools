@@ -381,9 +381,9 @@ def cash_flow_statements(cached_companies) -> Dict[str, Any]:
     Returns a dictionary mapping company tickers to their cash flow statements.
     """
     return {
-        ticker: xbrl.statements.cash_flow_statement()
+        ticker: xbrl.statements.cashflow_statement()
         for ticker, xbrl in cached_companies.items()
-        if xbrl.statements.cash_flow_statement() is not None
+        if xbrl.statements.cashflow_statement() is not None
     }
 
 

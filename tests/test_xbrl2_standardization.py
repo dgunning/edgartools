@@ -280,7 +280,7 @@ def test_dimensional_statement_standardization(test_dimensional_data):
     if not statement:
         statement = test_dimensional_data.statements.income_statement()
     if not statement:
-        statement = test_dimensional_data.statements.cash_flow_statement()
+        statement = test_dimensional_data.statements.cashflow_statement()
     
     if not statement:
         pytest.skip("No statements found in fixture")

@@ -121,7 +121,7 @@ def test_get_income_statement(tsla_xbrl):
 
 
 def test_statement_to_dataframe(aapl_xbrl):
-    cashflow_statement: Statement = aapl_xbrl.statements.cash_flow_statement()
+    cashflow_statement: Statement = aapl_xbrl.statements.cashflow_statement()
     print()
     # print(cashflow_statement)
     rendered_statement:RenderedStatement = cashflow_statement.render()
@@ -206,7 +206,7 @@ def test_cashflow_statement_totals():
     filing = Filing(company='Corsair Gaming, Inc.', cik=1743759, form='10-K',
                     filing_date='2025-02-26', accession_no='0000950170-25-027856')
     xbrl: XBRL = XBRL.from_filing(filing)
-    cashflow_statement = xbrl.statements.cash_flow_statement()
+    cashflow_statement = xbrl.statements.cashflow_statement()
     print()
     print(cashflow_statement)
     df = cashflow_statement.to_dataframe()

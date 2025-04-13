@@ -710,7 +710,7 @@ class Statements:
         
         return self["IncomeStatement"]
 
-    def cash_flow_statement(self, parenthetical: bool = False) -> Statement:
+    def cashflow_statement(self, parenthetical: bool = False) -> Statement:
         """
         Get a cash flow statement.
         

@@ -48,7 +48,7 @@ def test_statement_resolution(cached_companies):
         
         # Try to get cash flow statement
         try:
-            cash_flow = xbrl.statements.cash_flow_statement()
+            cash_flow = xbrl.statements.cashflow_statement()
             if cash_flow:
                 assert isinstance(cash_flow, Statement), f"{ticker} cash flow statement is not a Statement"
         except Exception as e:

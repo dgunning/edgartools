@@ -118,7 +118,7 @@ class FinancialRatios:
         # Get rendered statements
         bs = self.xbrl.statements.balance_sheet()
         is_ = self.xbrl.statements.income_statement()
-        cf = self.xbrl.statements.cash_flow_statement()
+        cf = self.xbrl.statements.cashflow_statement()
 
         # Convert to DataFrames with consistent periods
         bs_rendered = bs.render()

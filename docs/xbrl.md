@@ -34,7 +34,7 @@ statements = xbrl.statements
 # Display financial statements
 balance_sheet = statements.balance_sheet()
 income_statement = statements.income_statement()
-cash_flow = statements.cash_flow_statement()
+cash_flow = statements.cashflow_statement()
 ```
 
 ### Multi-Period Analysis with XBRLS
@@ -69,7 +69,7 @@ Access common financial statements with intuitive methods:
 # Get basic statements
 balance_sheet = statements.balance_sheet()
 income_statement = statements.income_statement()
-cash_flow = statements.cash_flow_statement()
+cash_flow = statements.cashflow_statement()
 statement_of_equity = statements.statement_of_equity()
 
 # Access any statement by type
@@ -304,7 +304,7 @@ The XBRL2 module properly handles calculation relationships from XBRL calculatio
 # Values are automatically adjusted according to calculation weights
 # For example, elements with negative weights (-1.0) like "IncreaseDecreaseInInventories"
 # are automatically negated to maintain proper calculation relationships
-cash_flow_statement = statements.cash_flow_statement()
+cash_flow_statement = statements.cashflow_statement()
 
 # The calculation trees are accessible for inspection
 for role_uri, calc_tree in xbrl.calculation_trees.items():

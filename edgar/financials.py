@@ -29,7 +29,7 @@ class Financials:
         return self.xb.statements.income_statement()
 
     def cashflow_statement(self):
-        return self.xb.statements.cash_flow_statement()
+        return self.xb.statements.cashflow_statement()
 
     def statement_of_equity(self):
         return self.xb.statements.statement_of_equity()

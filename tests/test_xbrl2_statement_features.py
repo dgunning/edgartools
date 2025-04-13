@@ -60,7 +60,7 @@ def test_cash_flow_statements(test_companies):
     """Get cash flow statements from test companies."""
     result = {}
     for ticker, xbrl in test_companies.items():
-        cash_flow = xbrl.statements.cash_flow_statement()
+        cash_flow = xbrl.statements.cashflow_statement()
         if cash_flow:
             result[ticker] = cash_flow
     return result

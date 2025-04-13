@@ -143,3 +143,43 @@
   - Being more selective about which operations are performed
 
   The tests confirm that all functionality works correctly with these performance improvements
+  
+
+ Let's compare the performance metrics:
+
+  1. Before optimizations (from perf.txt):
+    - Duration: 0.961 seconds
+    - XML Parsing (label parsing): 0.252 seconds
+    - Total XBRL.from_filing: 0.892 seconds
+  2. After optimizations:
+    - Duration: 0.882 seconds
+    - Total XBRL.from_filing: 0.748 seconds
+
+  This represents an overall performance improvement of approximately 8.2% (0.961 → 0.882 seconds). The XBRL.from_filing method, which includes the XML parsing operations, has improved by about 16.1%
+  (0.892 → 0.748 seconds).
+
+  Let's summarize the optimizations we've made to the XBRL parser:
+
+  1. Switched from ElementTree to lxml:
+    - Replaced xml.etree.ElementTree with lxml.etree for much faster XML parsing
+    - Implemented proper handling of encoding declarations in XML documents
+    - Created a reusable _safe_parse_xml helper method
+  2. Optimized XPath Operations:
+    - Used native lxml XPath with namespaces for faster element lookups
+    - Implemented more direct element path expressions to avoid unnecessary traversal
+    - Created namespace maps for more efficient querying
+  3. Improved Data Structure Handling:
+    - Used sets for faster membership testing (skip_tag_endings)
+    - Implemented efficient caching of namespace lookups
+    - Used local function references for frequently called methods
+  4. Optimized File Processing:
+    - Added efficient byte conversion for XML parsing
+    - Used lxml-specific optimizations like remove_blank_text and recover
+    - Implemented robust error handling with descriptive messages
+  5. Enhanced Element Traversal:
+    - Used lxml's optimized iterchildren and iterdescendants when available
+    - Created specialized traversal strategies based on document structure
+    - Implemented more efficient fact extraction with early returns
+
+  These optimizations have made the parsing process more efficient while maintaining compatibility with the existing codebase. The parser is now more robust, handles edge cases better, and should
+  perform significantly better with larger XBRL documents.
