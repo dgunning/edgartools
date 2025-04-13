@@ -16,7 +16,7 @@ from rich.table import Table, Column
 from edgar._filings import FilingHeader, Filings
 from edgar.core import log
 from edgar.datatools import drop_duplicates_pyarrow
-from edgar.entities import Company
+from edgar.entity import Company
 from edgar.httprequests import download_text
 from edgar.richtools import repr_rich, df_to_rich_table
 

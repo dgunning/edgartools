@@ -3,7 +3,7 @@ import pytest
 from edgar import obj, matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
 from edgar.company_reports import TenK
 from edgar.effect import Effect
-from edgar.entities import EntityData
+from edgar.entity import Entity, Company
 from edgar.offerings import FormD
 from edgar.ownership import Ownership
 import httpx
@@ -77,7 +77,7 @@ def test_obj():
 
 def test_find():
     assert find("0001493152-23-008348").accession_no == "0001493152-23-008348"
-    assert isinstance(find(1905495), EntityData)
+    assert isinstance(find(1905495), Entity)
     assert find("1905495").name == 'CancerVAX, Inc.'
     assert isinstance(find("CancerVAX, Inc."), CompanySearchResults)
 

@@ -8,14 +8,14 @@ def test_get_current_entries():
     filings = get_current_filings()
     print(filings)
     # previous should be None
-    assert filings.previous() is None
+    assert filings.prev() is None
 
     next_filings = filings.next()
     assert next_filings is not None
     print(next_filings)
-    previous_filings = next_filings.previous()
+    previous_filings = next_filings.prev()
     print(previous_filings)
-    assert previous_filings.previous() is None
+    assert previous_filings.prev() is None
 
 
 def test_get_current_filings_by_form():
@@ -76,7 +76,8 @@ def test_current_filings_get_by_index_on_page2():
 
 
 def test_current_filings_get_accession_number():
-    filings:CurrentFilings = get_current_filings().next()
+    filings:CurrentFilings = get_current_filings()
+    filings = filings.next()
     accession_number = filings.data['accession_number'].to_pylist()[0]
     print(accession_number)
     filings = filings.prev()

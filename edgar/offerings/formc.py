@@ -15,7 +15,7 @@ from edgar._party import Address
 from edgar.richtools import repr_rich
 from edgar.xmltools import child_text
 from edgar.core import get_bool, yes_no
-from edgar.entities import Company
+from edgar.entity import Company
 from edgar.reference import states
 
 __all__ = ['FormC', 'Signer', 'FundingPortal']

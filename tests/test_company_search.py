@@ -1,7 +1,5 @@
 import pytest
-
-from edgar.entities import CompanySearchIndex, CompanySearchResults
-
+from edgar.entity import CompanySearchIndex, CompanySearchResults
 
 @pytest.fixture(scope="module")
 def company_search_index():

@@ -1,22 +1,23 @@
 from functools import lru_cache
 from pathlib import Path
-
+import pytest
 import humanize
 import orjson as json
 import pyarrow.compute as pc
 from rich import print
 
-from edgar._filings import Filing, get_filings
+from edgar._filings import Filing, Filings, get_filings
 from edgar.core import default_page_size
-from edgar.company import public_companies
-from edgar.entities import *
-from edgar.entities import (parse_entity_submissions, CompanyConcept, CompanyFiling, preprocess_company,
-                            _parse_cik_lookup_data)
+from edgar.entity import public_companies
+from edgar.entity import *
+from edgar.entity.core import parse_entity_submissions
+from edgar.entity.data import preprocess_company
+from edgar.search.datasearch import preprocess_company_name
 
 
 @lru_cache(maxsize=16)
 def get_test_company(company_identifier):
-    return get_entity(company_identifier)
+    return Company(company_identifier)
 
 
 def test_company_repr():
@@ -56,14 +57,14 @@ def test_get_company_submissions():
 
 def test_no_company_for_cik():
     company = Company(-1)
-    assert company is None
+    assert company.not_found
 
 
 def test_get_company_with_no_filings():
     company = Company("0000350001")
+    assert company.get_filings() is not None
+    assert len(company.get_filings()) == 0
     assert company.name == "Company Name Three `!#$(),:;=.-;\\|@/{}&'\\WA\\"
-    assert company.filings is not None
-    assert len(company.filings) == 0
 
 
 def test_get_company_facts():
@@ -87,19 +88,6 @@ def test_company_get_facts_repr():
     assert 'Tesla' in facts_repr
 
 
-def test_company_for_cik():
-    company: CompanyData = CompanyData.for_cik(1318605)
-    assert company
-    assert company.cik == 1318605
-
-
-def test_company_for_ticker():
-    company: CompanyData = CompanyData.for_ticker("EXPE")
-    assert company
-    assert company.cik == 1324424
-    assert company.tickers == ['EXPE']
-
-
 def test_get_company_tickers():
     company_tickers = get_company_tickers()
     assert company_tickers is not None
@@ -110,38 +98,17 @@ def test_get_cik_lookup_data():
     assert cik_lookup[cik_lookup.cik == 1448632].name.item() == 'ZZIF 2008 INVESTMENT LLC'
 
 
-def test_parse_cik_lookup_data():
-    with Path('data/cik_lookup_data.txt').open(
-            "r",
-            encoding="utf-8",
-            errors="surrogateescape"
-    ) as f:
-        content = f.read()
-    cik_lookups = _parse_cik_lookup_data(content)
-    company = cik_lookups[1000]
-    print(company)
-    assert company
-    assert company['cik'] == 1463262
-    assert company['name'] == '11:11 CAPITAL CORP.'
-
-
-def test_company_get_filings():
-    company: CompanyData = CompanyData.for_ticker("EXPE")
-    company_filings = company.get_filings()
-    assert len(company_filings) == len(company.filings)
-
-
 def test_company_filings_filter_by_date():
-    expe = get_test_company("EXPE")
-    filings = expe.filings
+    expe = Company("EXPE")
+    filings = expe.get_filings()
     filtered_filings = filings.filter(filing_date="2023-01-04:")
     assert not filtered_filings.empty
-    assert len(filtered_filings) < len(expe.filings)
+    assert len(filtered_filings) < len(expe.get_filings())
 
 
 def test_company_filter_with_no_results_returns_filings():
     expe = get_test_company("EXPE")
-    filings = expe.filings.filter(form="NOTHING")
+    filings = expe.get_filings().filter(form="NOTHING")
     assert filings is not None
     assert len(filings) == 0
     latest = filings.latest()
@@ -149,8 +116,8 @@ def test_company_filter_with_no_results_returns_filings():
 
 
 def test_company_get_filings_for_form():
-    company: CompanyData = CompanyData.for_ticker("EXPE")
-    tenk_filings: CompanyFilings = company.get_filings(form='10-K')
+    company: Company = Company("EXPE")
+    tenk_filings: Filings = company.get_filings(form='10-K')
     assert pc.all(pc.equal(tenk_filings.data['form'], '10-K'))
     filing: CompanyFiling = tenk_filings[0]
     assert filing
@@ -160,7 +127,7 @@ def test_company_get_filings_for_form():
 
 
 def test_company_get_form_by_date():
-    company: CompanyData = CompanyData.for_ticker("EXPE")
+    company: Company = Company("EXPE")
     filings = company.get_filings(filing_date="2022-11-01:2023-01-20")
     assert not filings.empty
     assert len(filings) < len(company.get_filings())
@@ -170,14 +137,14 @@ def test_company_get_form_by_date():
 
 
 def test_company_get_filings_for_multiple_forms():
-    company: CompanyData = CompanyData.for_ticker("EXPE")
+    company: Company = Company("EXPE")
     company_filings = company.get_filings(form=['10-K', '10-Q', '8-K'])
     form_list = pc.unique(company_filings.data['form']).tolist()
     assert sorted(form_list) == ['10-K', '10-Q', '8-K']
 
 
 def test_get_company_for_ticker_lowercase():
-    company: CompanyData = Company("expe")
+    company: Company = Company("expe")
     assert company
     assert company.tickers == ["EXPE"]
 
@@ -238,14 +205,14 @@ def test_get_filings_xbrl():
 
 
 def test_get_filings_inline_xbrl():
-    company = CompanyData.for_ticker("SNOW")
+    company = Company("SNOW")
     xbrl_filings = company.get_filings(is_inline_xbrl=True)
     assert xbrl_filings.to_pandas("isInlineXBRL").isInlineXBRL.all()
     assert company.get_filings(is_xbrl=False).to_pandas().isInlineXBRL.drop_duplicates().tolist() == [False]
 
 
 def test_get_filings_multiple_filters():
-    company = CompanyData.for_ticker("SNOW")
+    company = Company("SNOW")
     filings = company.get_filings(form=["10-Q", "10-K"], is_inline_xbrl=True)
     filings_df = filings.to_pandas("form", "filingDate", 'isXBRL', "isInlineXBRL")
     assert filings_df.isInlineXBRL.all()
@@ -253,7 +220,7 @@ def test_get_filings_multiple_filters():
 
 
 def test_company_filing_get_related_filings():
-    company = CompanyData.for_cik(1841925)
+    company = Company(1841925)
     filings = company.get_filings(form=["S-1", "S-1/A"], is_inline_xbrl=True)
     filing = filings[0]
     print(filing)
@@ -263,19 +230,6 @@ def test_company_filing_get_related_filings():
     file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))
     assert len(file_numbers) == 1
     assert file_numbers[0] == filing.file_number
-
-
-def test_get_company_by_cik():
-    company = get_entity(1554646)
-    assert company.name == 'NEXPOINT SECURITIES, INC.'
-
-    company = Company(1554646)
-    assert company.cik == 1554646
-
-
-def test_get_company_by_ticker():
-    company = Company("SNOW")
-    assert company.cik == 1640147
 
 
 def test_get_company_concept():
@@ -330,7 +284,7 @@ def test_read_company_filing_index_year_and_quarter():
 
 def test_filings_get_by_index_or_accession_number():
     expe = get_test_company("EXPE")
-    filings = expe.filings
+    filings = expe.get_filings()
 
     filing: Filing = filings.get("0001225208-23-000231")
 
@@ -401,7 +355,7 @@ def test_preprocess_company():
 
 def test_company_financials():
     company = Company('AAPL')
-    financials = company.financials
+    financials = company.get_financials()
     assert financials
     assert financials.balance_sheet()
     assert financials.income_statement()
@@ -411,7 +365,7 @@ def test_company_financials():
 
 def test_company_with_no_latest_10k_has_no_financials():
     company = Company('TD')
-    financials = company.financials
+    financials = company.get_financials()
     assert financials is None
 
 
@@ -430,19 +384,6 @@ def test_iterate_company_filings():
 
     for filing in filings:
         assert filing
-
-
-def test_company_to_dict():
-    company = Company(1012605)
-    company_dict = company.to_dict()
-    print(type(company_dict))
-    assert company_dict.get('cik') == 1012605
-    assert company_dict.get('name') == 'INTEGRINAUTICS'
-    assert company_dict.get('display_name') == 'Integrinautics'
-    assert 'filings' not in company_dict
-    print(company_dict)
-
-    assert 'filings' in company.to_dict(include_filings=True)
 
 def test_iterate_companies():
 

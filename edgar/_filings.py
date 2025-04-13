@@ -523,7 +523,7 @@ class Filings:
                cik: Union[IntString, List[IntString]] = None,
                exchange: Union[str, List[str], Exchange, List[Exchange]] = None,
                ticker: Union[str, List[str]] = None,
-               accession_number: Union[str, List[str]] = None) -> Optional['Filings']:
+               accession_number: Union[str, List[str]] = None) -> 'Filings':
         """
         Get some filings
 
@@ -574,7 +574,7 @@ class Filings:
                 filing_index = filter_by_date(filing_index, filing_date, 'filing_date')
             except InvalidDateException as e:
                 log.error(e)
-                return None
+                return Filings(_empty_filing_index())
 
         # Filter by cik
         if cik:
@@ -639,7 +639,7 @@ class Filings:
         filings_state = PagingState(page_start=start_index, num_records=len(self))
         return Filings(data_page, original_state=filings_state)
 
-    def previous(self):
+    def prev(self):
         """
         Show the previous page of the data
         :return:
@@ -651,10 +651,6 @@ class Filings:
         start_index, _ = self.data_pager._current_range
         filings_state = PagingState(page_start=start_index, num_records=len(self))
         return Filings(data_page, original_state=filings_state)
-
-    def prev(self):
-        """Alias for self.previous()"""
-        return self.previous()
 
     def _get_by_accession_number(self, accession_number: str):
         mask = pc.equal(self.data['accession_number'], accession_number)
@@ -691,7 +687,7 @@ class Filings:
 
     def find(self,
              company_search_str: str):
-        from edgar.entities import find_company
+        from edgar.entity import find_company
 
         # Search for the company
         search_results = find_company(company_search_str)
@@ -1127,7 +1123,7 @@ class CurrentFilings(Filings):
             self._start = start
             return self
 
-    def previous(self):
+    def prev(self):
         # If start = 1 then there are no previous entries
         if self._start == 1:
             return None
@@ -1653,8 +1649,8 @@ class Filing:
     def get_entity(self):
         """Get the company to which this filing belongs"""
         "Get the company for cik. Cache for performance"
-        from edgar.entities import CompanyData
-        return CompanyData.for_cik(self.cik)
+        from edgar.entity import Company
+        return Company(self.cik)
 
     @lru_cache(maxsize=1)
     def as_company_filing(self):
@@ -1683,7 +1679,7 @@ class Filing:
             if is_using_local_storage():
                 # In this case the local storage is missing the filing so we have to download it
                 log.warning(f"Filing {self.accession_no} not found in local storage. Downloading from SEC ...")
-                from edgar.entities import download_entity_submissions_from_sec, parse_entity_submissions
+                from edgar.entity import download_entity_submissions_from_sec, parse_entity_submissions
                 submissions_json = download_entity_submissions_from_sec(self.cik)
                 c_from_sec = parse_entity_submissions(submissions_json)
                 filings = c_from_sec.get_filings(accession_number=self.accession_no)

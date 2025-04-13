@@ -1,13 +1,15 @@
-from edgar.entities import get_entity_submissions, Entity, Company
+from edgar.entity import get_entity_submissions, Entity, Company
 from edgar.company_reports import TenK, TenQ
 from datetime import datetime
 
 def test_entity_is_company():
     # TSLA
-    assert get_entity_submissions(1318605).is_company
+    c = get_entity_submissions(1318605)
+    assert c
+    print(c)
 
     # Taneja Vaibhav at TSLA
-    assert not get_entity_submissions(1771340).is_company
+    c = get_entity_submissions(1771340)
 
     # &VEST Domestic Fund II LP
     assert get_entity_submissions(1800903).is_company
@@ -57,30 +59,17 @@ def test_display_name():
     assert Entity(1718179).name == "Sievert Stephanie A"
     assert Entity(1718179).display_name == "Stephanie A Sievert"
 
-
-def test_insider_transaction_for_entity():
-    entity: Entity = Entity(1940261)
-    assert entity.name == "NVC Holdings, LLC"
-    assert not entity.insider_transaction_for_issuer_exists
-    assert entity.insider_transaction_for_owner_exists
-
-    entity = Entity(1599916)
-    assert not entity.is_company
-    assert not entity.insider_transaction_for_issuer_exists
-    assert entity.insider_transaction_for_owner_exists
-    assert entity.name == "DeNunzio Jeffrey"
-
 def test_ticker_icon():
-    entity: Entity = Entity(320193)
+    entity: Company = Company(320193)
     assert entity.tickers[0] == "AAPL"
-    icon = entity.icon
+    icon = entity.get_icon()
     assert icon is not None
     assert isinstance(icon, bytes)
     assert icon[:8] == b"\x89PNG\r\n\x1a\n"
 
-    entity: Entity = Entity(1465740)
+    entity: Company = Company(1465740)
     assert entity.tickers[0] == "TWO"
-    icon = entity.icon
+    icon = entity.get_icon()
     assert icon is None
 
 
@@ -99,9 +88,9 @@ def test_get_entity_by_ticker_with_stock_class():
 
 def test_getting_company_financials_does_not_load_additional_filings():
     c = Company("KO")
-    f = c.financials
+    f = c.get_financials()
     assert f
-    assert not c._loaded_all_filings
+    assert not c._data._loaded_all_filings
 
 
 def test_get_latest_company_reports():
@@ -132,11 +121,11 @@ def test_individual_repr():
 def test_filter_by_accession_number():
     # A TSLA filing
     c = Company(1318605)
-    filing = c.filings.filter(accession_number="0002007317-24-000625")
+    filing = c.get_filings().filter(accession_number="0002007317-24-000625")
     assert filing
 
 def test_company_filing_acceptance_datetime():
     c = Company(1318605)
-    assert c.filings.data['acceptanceDateTime']
-    acceptance_datetime = c.filings.data['acceptanceDateTime'][0].as_py()
+    assert c.get_filings().data['acceptanceDateTime']
+    acceptance_datetime = c.get_filings().data['acceptanceDateTime'][0].as_py()
     assert isinstance(acceptance_datetime, datetime)

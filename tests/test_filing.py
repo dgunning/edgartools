@@ -18,7 +18,7 @@ from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, c
     get_current_filings, filing_date_to_year_quarters, get_filing_by_accession
 from edgar.company_reports import TenK
 from edgar.core import default_page_size
-from edgar.entities import Company
+from edgar.entity import Company
 from edgar._filings import read_index_file
 
 pd.options.display.max_colwidth = 200
@@ -596,12 +596,12 @@ def test_filings_next_and_previous():
     print(page2)
     page3 = filings.next()
     print(page3)
-    page2_again = filings.previous()
+    page2_again = filings.prev()
     print(page2_again)
 
     assert page2[0].accession_no == page2_again[0].accession_no
-    assert filings.previous()
-    assert not filings.previous()
+    assert filings.prev()
+    assert not filings.prev()
 
 
 def test_get_filings_for_future_period(capsys):
