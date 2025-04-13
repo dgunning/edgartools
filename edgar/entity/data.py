@@ -4,13 +4,42 @@ Data classes for the Entity package.
 This module contains classes for working with entity data, including
 addresses, facts, and other structured data from SEC filings.
 """
-from typing import List, Dict, Optional, Union, Tuple, Any
+from typing import List, Dict, Optional, Union, Tuple, Any, Callable
+from functools import cached_property
 
 import pyarrow as pa
 import pyarrow.compute as pc
 import re
 
 from edgar.entity.filings import EntityFilings
+
+# Module-level import cache for lazy imports
+_IMPORT_CACHE = {}
+
+def lazy_import(module_path):
+    """
+    Lazily import a module or attribute and cache the result to avoid repeated imports.
+    
+    Args:
+        module_path: String path to the module or attribute
+        
+    Returns:
+        The imported module or attribute
+    """
+    if module_path not in _IMPORT_CACHE:
+        parts = module_path.split('.')
+        if len(parts) == 1:
+            # Simple module import
+            _IMPORT_CACHE[module_path] = __import__(module_path)
+        else:
+            # Import from module (potentially nested)
+            module_name = '.'.join(parts[:-1])
+            attr_name = parts[-1]
+            
+            module = __import__(module_name, fromlist=[attr_name])
+            _IMPORT_CACHE[module_path] = getattr(module, attr_name)
+    
+    return _IMPORT_CACHE[module_path]
 
 __all__ = [
     'Address',
@@ -165,7 +194,12 @@ def parse_entity_submissions(cjson: Dict[str, Any]) -> 'CompanyData':
 
 
 class Address:
-    """Represents a physical address."""
+    """
+    Represents a physical address.
+    
+    This class is optimized for memory usage and performance.
+    """
+    __slots__ = ('street1', 'street2', 'city', 'state_or_country', 'zipcode', 'state_or_country_desc', '_str_cache')
     
     def __init__(self,
                  street1: str,
@@ -175,41 +209,69 @@ class Address:
                  zipcode: str,
                  state_or_country_desc: str
                  ):
-        self.street1: str = street1
-        self.street2: Optional[str] = street2
-        self.city: str = city
-        self.state_or_country: str = state_or_country
-        self.zipcode: str = zipcode
-        self.state_or_country_desc: str = state_or_country_desc
+        """
+        Initialize an Address object.
+        
+        Args:
+            street1: First line of street address
+            street2: Second line of street address (optional)
+            city: City name
+            state_or_country: State or country code
+            zipcode: Postal/ZIP code
+            state_or_country_desc: Human-readable state or country name
+        """
+        # Store empty strings instead of None to avoid type checks later
+        self.street1: str = street1 or ""
+        self.street2: Optional[str] = street2 or ""
+        self.city: str = city or ""
+        self.state_or_country: str = state_or_country or ""
+        self.zipcode: str = zipcode or ""
+        self.state_or_country_desc: str = state_or_country_desc or ""
+        self._str_cache = None
 
     @property
     def empty(self) -> bool:
-        """Check if the address is empty."""
-        return not self.street1 and not self.street2 and not self.city and not self.state_or_country and not self.zipcode
+        """Check if the address is empty. Optimized to avoid multiple attribute checks when possible."""
+        # Short-circuit on common empty case
+        if not self.street1:
+            if not self.city and not self.zipcode:
+                return True
+                
+        # Full check
+        return not (self.street1 or self.street2 or self.city or self.state_or_country or self.zipcode)
 
     def __str__(self):
+        """
+        Generate a formatted string representation of the address.
+        Caches result for repeated calls.
+        """
+        if self._str_cache is not None:
+            return self._str_cache
+            
         if not self.street1:
+            self._str_cache = ""
             return ""
-        address_format = "{street1}\n"
+            
+        # Build string only once and cache it
+        parts = []
+        parts.append(self.street1)
+        
         if self.street2:
-            address_format += "{street2}\n"
-        address_format += "{city}, {state_or_country} {zipcode}"
-
-        return address_format.format(
-            street1=self.street1,
-            street2=self.street2,
-            city=self.city,
-            state_or_country=self.state_or_country_desc,
-            zipcode=self.zipcode
-        )
+            parts.append(self.street2)
+            
+        parts.append(f"{self.city}, {self.state_or_country_desc} {self.zipcode}")
+        
+        self._str_cache = "\n".join(parts)
+        return self._str_cache
 
     def __repr__(self):
-        return (f'Address(street1="{self.street1 or ""}", street2="{self.street2 or ""}", city="{self.city or ""}",'
-                f'zipcode="{self.zipcode or ""}", state_or_country="{self.state_or_country}")'
-                )
+        """Generate a string representation suitable for debugging."""
+        # Simplified representation that avoids unnecessary string operations
+        return f'Address(street1="{self.street1}", street2="{self.street2}", city="{self.city}", zipcode="{self.zipcode}")'
 
     def to_json(self) -> Dict[str, str]:
         """Convert the address to a JSON-serializable dict."""
+        # Direct dictionary creation is faster than multiple assignments
         return {
             'street1': self.street1,
             'street2': self.street2,
@@ -278,9 +340,8 @@ class EntityData:
         if not self._files:
             return
             
-        # Import locally to avoid circular imports
-        from edgar.httprequests import download_json
-        import pyarrow as pa
+        # Import locally to avoid circular imports using the lazy import cache
+        download_json = lazy_import('edgar.httprequests.download_json')
         
         # Load additional filings from the SEC
         filing_tables = [self.filings.data]
@@ -293,7 +354,7 @@ class EntityData:
         combined_tables = pa.concat_tables(filing_tables)
         
         # Update filings
-        from edgar.entity.filings import EntityFilings
+        EntityFilings = lazy_import('edgar.entity.filings.EntityFilings')
         self.filings = EntityFilings(combined_tables, cik=self.cik, company_name=self.name)
         
     def get_filings(self, 
@@ -324,9 +385,13 @@ class EntityData:
         Returns:
             Filtered filings
         """
-        from edgar.storage import is_using_local_storage
-        import pyarrow.compute as pc
-        from edgar.core import listify, filter_by_date, InvalidDateException, log
+        # Import using lazy import cache
+        is_using_local_storage = lazy_import('edgar.storage.is_using_local_storage')
+        listify = lazy_import('edgar.core.listify')
+        filter_by_date = lazy_import('edgar.core.filter_by_date')
+        InvalidDateException = lazy_import('edgar.core.InvalidDateException')
+        log = lazy_import('edgar.core.log')
+        EntityFilings = lazy_import('edgar.entity.filings.EntityFilings')
         
         # Lazy loading behavior
         if not self._loaded_all_filings and not is_using_local_storage() and trigger_full_load:
@@ -342,7 +407,6 @@ class EntityData:
                 pc.is_in(company_filings['accession_number'], pa.array(listify(accession_number))))
             if len(company_filings) >= 1:
                 # We found the filing(s)
-                from edgar.entity.filings import EntityFilings
                 return EntityFilings(company_filings, cik=self.cik, company_name=self.name)
         
         # Filter by form
@@ -377,7 +441,6 @@ class EntityData:
             company_filings = company_filings.sort_by(sort_by)
         
         # Return filtered filings
-        from edgar.entity.filings import EntityFilings
         return EntityFilings(company_filings, cik=self.cik, company_name=self.name)
     
     @property
@@ -385,7 +448,7 @@ class EntityData:
         """Determine if this entity is a company."""
         return not self.is_individual
     
-    @property
+    @cached_property
     def is_individual(self) -> bool:
         """
         Determine if this entity is an individual.
@@ -395,8 +458,8 @@ class EntityData:
         There may be other edge cases.
         If you have a ticker or exchange you are a company.
         """
-        # Import locally to avoid circular imports
-        from edgar.entity.core import has_company_filings
+        # Import locally using the lazy import cache
+        has_company_filings = lazy_import('edgar.entity.core.has_company_filings')
         
         if len(self.tickers) > 0 or len(self.exchanges) > 0:
             return False
@@ -417,21 +480,23 @@ class EntityData:
         return f"EntityData({self.name} [{self.cik}])"
     
     def __repr__(self):
-        from edgar.richtools import repr_rich
+        repr_rich = lazy_import('edgar.richtools.repr_rich')
         return repr_rich(self.__rich__())
         
     def __rich__(self):
         """Creates a rich representation of the entity with clear information hierarchy."""
-        from rich import box
-        from rich.console import Group
-        from rich.columns import Columns
-        from rich.padding import Padding
-        from rich.panel import Panel
-        from rich.table import Table
-        from rich.text import Text
-        from edgar.reference.tickers import find_ticker
-        from itertools import zip_longest
-        from edgar.core import datefmt, reverse_name
+        # Use lazy imports for rich components
+        box = lazy_import('rich.box')
+        Group = lazy_import('rich.console.Group')
+        Columns = lazy_import('rich.columns.Columns')
+        Padding = lazy_import('rich.padding.Padding')
+        Panel = lazy_import('rich.panel.Panel')
+        Table = lazy_import('rich.table.Table')
+        Text = lazy_import('rich.text.Text')
+        find_ticker = lazy_import('edgar.reference.tickers.find_ticker')
+        zip_longest = lazy_import('itertools.zip_longest')
+        datefmt = lazy_import('edgar.core.datefmt')
+        reverse_name = lazy_import('edgar.core.reverse_name')
         
         # Primary entity identification section
         if self.is_company:
@@ -592,9 +657,10 @@ class EntityData:
     @property
     def display_name(self) -> str:
         """Reverse the name if it is a company"""
-        from edgar.core import reverse_name
         if self.is_company:
             return self.name
+        
+        reverse_name = lazy_import('edgar.core.reverse_name')
         return reverse_name(self.name)
         
     @staticmethod
@@ -690,13 +756,14 @@ class CompanyData(EntityData):
         ticker_str = f" - {ticker}" if ticker else ""
         return f"CompanyData({self.name} [{self.cik}]{ticker_str})"
 
-company_types_re = r"(L\.?L\.?C\.?|Inc\.?|Ltd\.?|L\.?P\.?|/[A-Za-z]{2,3}/?| CORP(ORATION)?|PLC| AG)$"
-
+# Compile regex patterns for better performance
+_COMPANY_TYPES_PATTERN = re.compile(r"(L\.?L\.?C\.?|Inc\.?|Ltd\.?|L\.?P\.?|/[A-Za-z]{2,3}/?| CORP(ORATION)?|PLC| AG)$", re.IGNORECASE)
+_PUNCTUATION_PATTERN = re.compile(r"\.|,")
 
 def preprocess_company(company: str) -> str:
     """preprocess the company name for storing in the search index"""
-    comp = re.sub(company_types_re, "", company.lower(), flags=re.IGNORECASE)
-    comp = re.sub(r"\.|,", "", comp)
+    comp = _COMPANY_TYPES_PATTERN.sub("", company.lower())
+    comp = _PUNCTUATION_PATTERN.sub("", comp)
     return comp.strip()
 
 
@@ -720,8 +787,8 @@ def create_default_entity_data(cik: int) -> 'EntityData':
         state_or_country_desc=""
     )
     
-    # Import locally to avoid circular imports
-    from edgar.entity.filings import empty_company_filings
+    # Import using lazy import cache
+    empty_company_filings = lazy_import('edgar.entity.filings.empty_company_filings')
     
     # Use the CIK as the name since we don't know the real name
     name = f"Entity {cik}"

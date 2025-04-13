@@ -777,7 +777,8 @@ def public_companies() -> Iterable[Company]:
     
     df = get_cik_tickers()
     for _, row in df.iterrows():
-        yield Company(row.cik)
+        c = Company(row.cik)
+        yield c
 
 
 def get_fund(fund_identifier: str) -> Union[Fund, FundClass]:
