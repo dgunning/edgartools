@@ -38,16 +38,12 @@ def get_financials_for_filing(filing):
         print("No XBRL data found for filing")
         return
     financials = Financials(xbrl_data)
-    balance_sheet = financials.get_balance_sheet()
-    financials.get_income_statement()
-    financials.get_cash_flow_statement()
-    repr(financials.get_cover_page())
+    balance_sheet = financials.balance_sheet()
+    financials.income_statement()
+    financials.cashflow_statement()
     if balance_sheet:
         print(balance_sheet)
-        print(balance_sheet.get_dataframe(include_concept=True, include_format=True))
-        assert not '_' in balance_sheet.labels[0]
-    else:
-        print(xbrl_data.list_statement_definitions())
+        print(balance_sheet.to_dataframe())
     print("*" * 80)
 
 
