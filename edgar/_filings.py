@@ -463,6 +463,21 @@ class Filings:
     def save(self, location: str):
         """Save the filing index as parquet"""
         self.save_parquet(location)
+        
+    def download(self, data_directory: Optional[str] = None):
+        """
+        Download the filings based on the accession numbers in this Filings object.
+        
+        This is a convenience method that calls `download_filings` with this object
+        as the `filings` parameter.
+        
+        Args:
+            data_directory: Directory to save the downloaded files. Defaults to the Edgar data directory.
+        """
+        from edgar.storage import download_filings
+        download_filings(data_directory=data_directory, 
+                         overwrite_existing=True,
+                         filings=self)
 
     def get_filing_at(self, item: int):
         """Get the filing at the specified index"""
