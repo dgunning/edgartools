@@ -4,10 +4,11 @@ XBRL file parsing functionality.
 This module provides functions for parsing XBRL files and extracting data.
 """
 
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
+import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Set, Tuple, Callable
 
 from edgar.core import log
 from edgar.xbrl.core import NAMESPACES, STANDARD_LABEL, classify_duration, extract_element_id
@@ -189,8 +190,8 @@ class XBRLParser:
     def parse_schema_content(self, content: str) -> None:
         """Parse schema content and extract element information."""
         try:
-            # Register namespaces
-            root = ET.fromstring(content)
+            # Use the safe XML parsing helper
+            root = self._safe_parse_xml(content)
             
             # Extract element declarations
             for element in root.findall('.//{http://www.w3.org/2001/XMLSchema}element'):
@@ -265,48 +266,62 @@ class XBRLParser:
         }
 
         try:
-            # Register namespaces
-            for prefix, uri in NAMESPACES.items():
-                ET.register_namespace(prefix, uri)
+            # Use the safe XML parsing helper
+            root = self._safe_parse_xml(schema_content)
+            
+            # Create namespace map for use with XPath
+            nsmap = {
+                'xsd': 'http://www.w3.org/2001/XMLSchema',
+                'link': 'http://www.xbrl.org/2003/linkbase'
+            }
 
-            # Parse the schema content
-            root = ET.fromstring(schema_content)
-
-            # Find all appinfo elements
-            for appinfo in root.findall('.//xsd:appinfo', NAMESPACES):
+            # Find all appinfo elements using optimized XPath
+            for appinfo in root.xpath('.//xsd:appinfo', namespaces=nsmap):
                 # Extract role types
-                for role_type in appinfo.findall('link:roleType', NAMESPACES):
+                for role_type in appinfo.xpath('./link:roleType', namespaces=nsmap):
                     role_uri = role_type.get('roleURI')
                     role_id = role_type.get('id')
-                    definition = role_type.find('link:definition', NAMESPACES)
+                    
+                    # Use optimized XPath to find definition
+                    definition = role_type.find('./link:definition', nsmap)
                     definition_text = definition.text if definition is not None else ""
-                    used_on = [elem.text for elem in role_type.findall('link:usedOn', NAMESPACES)]
+                    
+                    # Use optimized XPath to find usedOn elements
+                    used_on = [elem.text for elem in role_type.xpath('./link:usedOn', namespaces=nsmap) if elem.text]
 
-                    embedded_data['role_types'][role_uri] = {
-                        'id': role_id,
-                        'definition': definition_text,
-                        'used_on': used_on
-                    }
+                    if role_uri:
+                        embedded_data['role_types'][role_uri] = {
+                            'id': role_id,
+                            'definition': definition_text,
+                            'used_on': used_on
+                        }
 
-                # Find the linkbase element
-                linkbase = appinfo.find('link:linkbase', NAMESPACES)
+                # Find the linkbase element with optimized XPath
+                linkbase = appinfo.find('./link:linkbase', nsmap)
                 if linkbase is not None:
-                    # Extract the entire linkbase element as a string
+                    # Extract the entire linkbase element as a string - with proper encoding
                     linkbase_string = ET.tostring(linkbase, encoding='unicode', method='xml')
 
-                    # Extract each type of linkbase
+                    # Extract each type of linkbase with optimized XPath
                     for linkbase_type in ['presentation', 'label', 'calculation', 'definition']:
-                        linkbase_elements = linkbase.findall(f'link:{linkbase_type}Link', NAMESPACES)
+                        # Use direct child XPath for better performance
+                        xpath_expr = f'./link:{linkbase_type}Link'
+                        linkbase_elements = linkbase.xpath(xpath_expr, namespaces=nsmap)
 
                         if linkbase_elements:
                             # Convert all linkbase elements of this type to strings
-                            linkbase_strings = [ET.tostring(elem, encoding='unicode', method='xml') for elem in
-                                              linkbase_elements]
+                            linkbase_strings = [
+                                ET.tostring(elem, encoding='unicode', method='xml') 
+                                for elem in linkbase_elements
+                            ]
 
-                            # Join multiple linkbase elements if there are more than one, and wrap them in the linkbase tags
-                            embedded_data['linkbases'][linkbase_type] = f"{linkbase_string.split('>', 1)[0]}>\n" + \
-                                                                      '\n'.join(linkbase_strings) + \
-                                                                      "\n</link:linkbase>"
+                            # Join multiple linkbase elements efficiently
+                            linkbase_header = linkbase_string.split('>', 1)[0] + '>'
+                            embedded_data['linkbases'][linkbase_type] = (
+                                f"{linkbase_header}\n" + 
+                                '\n'.join(linkbase_strings) + 
+                                "\n</link:linkbase>"
+                            )
             
             return embedded_data
         except Exception as e:
@@ -325,58 +340,92 @@ class XBRLParser:
     def parse_labels_content(self, content: str) -> None:
         """Parse label linkbase content and extract label information."""
         try:
-            root = ET.fromstring(content)
+            # Optimize: Register namespaces for faster XPath lookups
+            nsmap = {
+                'link': 'http://www.xbrl.org/2003/linkbase',
+                'xlink': 'http://www.w3.org/1999/xlink',
+                'xml': 'http://www.w3.org/XML/1998/namespace'
+            }
             
-            # Extract label arcs and labels
-            label_arcs = root.findall('.//{http://www.xbrl.org/2003/linkbase}labelArc')
-            labels = root.findall('.//{http://www.xbrl.org/2003/linkbase}label')
+            # Optimize: Use lxml parser with smart string handling
+            parser = ET.XMLParser(remove_blank_text=True, recover=True)
+            root = ET.XML(content.encode('utf-8'), parser)
             
-            # Create label lookup by id
+            # Optimize: Use specific XPath expressions with namespaces for faster lookups
+            # This is much faster than using findall with '//' in element tree
+            label_arcs = root.xpath('//link:labelArc', namespaces=nsmap)
+            labels = root.xpath('//link:label', namespaces=nsmap)
+            
+            # Optimize: Pre-allocate dictionary with expected size
+            label_count = len(labels)
             label_lookup = {}
+            
+            # Optimize: Cache attribute lookups
+            xlink_label = '{http://www.w3.org/1999/xlink}label'
+            xlink_role = '{http://www.w3.org/1999/xlink}role'
+            xml_lang = '{http://www.w3.org/XML/1998/namespace}lang'
+            default_role = 'http://www.xbrl.org/2003/role/label'
+            
+            # Optimize: Process labels in a single pass with direct attribute access
             for label in labels:
-                label_id = label.get('{http://www.w3.org/1999/xlink}label')
+                label_id = label.get(xlink_label)
                 if not label_id:
                     continue
                 
-                role = label.get('{http://www.w3.org/1999/xlink}role', 'http://www.xbrl.org/2003/role/label')
-                lang = label.get('{http://www.w3.org/XML/1998/namespace}lang', 'en-US')
+                # Get text first - if empty, skip further processing
+                text = label.text
+                if text is None:
+                    continue
                 
-                if label.text is not None:
-                    if label_id not in label_lookup:
-                        label_lookup[label_id] = {}
-                    
-                    if lang not in label_lookup[label_id]:
-                        label_lookup[label_id][lang] = {}
-                    
-                    label_lookup[label_id][lang][role] = label.text
+                # Get attributes - direct lookup is faster than method calls
+                role = label.get(xlink_role, default_role)
+                lang = label.get(xml_lang, 'en-US')
+                
+                # Create nested dictionaries only when needed
+                if label_id not in label_lookup:
+                    label_lookup[label_id] = {}
+                
+                if lang not in label_lookup[label_id]:
+                    label_lookup[label_id][lang] = {}
+                
+                label_lookup[label_id][lang][role] = text
             
-            # Connect labels to elements using arcs
+            # Optimize: Cache attribute lookups for arcs
+            xlink_from = '{http://www.w3.org/1999/xlink}from'
+            xlink_to = '{http://www.w3.org/1999/xlink}to'
+            xlink_href = '{http://www.w3.org/1999/xlink}href'
+            
+            # Optimize: Create a lookup table for locators by label for faster access
+            loc_by_label = {}
+            for loc in root.xpath('//link:loc', namespaces=nsmap):
+                loc_label = loc.get(xlink_label)
+                if loc_label:
+                    loc_by_label[loc_label] = loc.get(xlink_href)
+            
+            # Connect labels to elements using arcs - with optimized lookups
             for arc in label_arcs:
-                from_ref = arc.get('{http://www.w3.org/1999/xlink}from')
-                to_ref = arc.get('{http://www.w3.org/1999/xlink}to')
+                from_ref = arc.get(xlink_from)
+                to_ref = arc.get(xlink_to)
                 
-                if not from_ref or not to_ref:
+                if not from_ref or not to_ref or to_ref not in label_lookup:
                     continue
                 
-                # Find the element being connected to the label
-                element_loc = root.find(f'.//*[@{{{NAMESPACES["xlink"]}}}label="{from_ref}"]')
-                if element_loc is None:
-                    continue
-                
-                href = element_loc.get('{http://www.w3.org/1999/xlink}href')
+                # Use cached locator lookup instead of expensive XPath
+                href = loc_by_label.get(from_ref)
                 if not href:
                     continue
                 
                 # Extract element ID from href
                 element_id = extract_element_id(href)
                 
-                # Find labels for this element
-                if to_ref in label_lookup and 'en-US' in label_lookup[to_ref]:
+                # Find labels for this element - check most likely case first
+                if 'en-US' in label_lookup[to_ref]:
                     element_labels = label_lookup[to_ref]['en-US']
                     
-                    # Add labels to element catalog
-                    if element_id in self.element_catalog:
-                        self.element_catalog[element_id].labels.update(element_labels)
+                    # Optimize: Update catalog with minimal overhead
+                    catalog_entry = self.element_catalog.get(element_id)
+                    if catalog_entry:
+                        catalog_entry.labels.update(element_labels)
                     else:
                         # Create placeholder in catalog
                         self.element_catalog[element_id] = ElementCatalog(
@@ -400,13 +449,28 @@ class XBRLParser:
     def parse_presentation_content(self, content: str) -> None:
         """Parse presentation linkbase content and build presentation trees."""
         try:
-            root = ET.fromstring(content)
+            # Optimize: Register namespaces for faster XPath lookups
+            nsmap = {
+                'link': 'http://www.xbrl.org/2003/linkbase',
+                'xlink': 'http://www.w3.org/1999/xlink'
+            }
             
-            # Extract presentation links
-            presentation_links = root.findall('.//{http://www.xbrl.org/2003/linkbase}presentationLink')
+            # Optimize: Use lxml parser with smart string handling
+            parser = ET.XMLParser(remove_blank_text=True, recover=True)
+            root = ET.XML(content.encode('utf-8'), parser)
+            
+            # Optimize: Use XPath with namespaces for faster extraction
+            presentation_links = root.xpath('//link:presentationLink', namespaces=nsmap)
+            
+            # Optimize: Cache attribute paths
+            xlink_role = '{http://www.w3.org/1999/xlink}role'
+            xlink_from = '{http://www.w3.org/1999/xlink}from'
+            xlink_to = '{http://www.w3.org/1999/xlink}to'
+            xlink_label = '{http://www.w3.org/1999/xlink}label'
+            xlink_href = '{http://www.w3.org/1999/xlink}href'
             
             for link in presentation_links:
-                role = link.get('{http://www.w3.org/1999/xlink}role')
+                role = link.get(xlink_role)
                 if not role:
                     continue
                 
@@ -420,47 +484,57 @@ class XBRLParser:
                     'roleId': role_id
                 }
                 
-                # Extract arcs
-                arcs = link.findall('.//{http://www.xbrl.org/2003/linkbase}presentationArc')
+                # Optimize: Pre-build locator map to avoid repeated XPath lookups
+                loc_map = {}
+                for loc in link.xpath('.//link:loc', namespaces=nsmap):
+                    label = loc.get(xlink_label)
+                    if label:
+                        loc_map[label] = loc.get(xlink_href)
                 
-                # Create relationships map
+                # Optimize: Extract arcs using direct xpath with context
+                arcs = link.xpath('.//link:presentationArc', namespaces=nsmap)
+                
+                # Create relationships map - pre-allocate with known size
+                arc_count = len(arcs)
                 relationships = []
+                relationships_append = relationships.append  # Local function reference for speed
                 
+                # Process arcs with optimized locator lookups
                 for arc in arcs:
-                    from_ref = arc.get('{http://www.w3.org/1999/xlink}from')
-                    to_ref = arc.get('{http://www.w3.org/1999/xlink}to')
-                    order = float(arc.get('order', '1.0'))
-                    preferred_label = arc.get('preferredLabel')
+                    from_ref = arc.get(xlink_from)
+                    to_ref = arc.get(xlink_to)
                     
                     if not from_ref or not to_ref:
                         continue
                     
-                    # Find locators for from/to references
-                    from_loc = link.find(f'.//*[@{{{NAMESPACES["xlink"]}}}label="{from_ref}"]')
-                    to_loc = link.find(f'.//*[@{{{NAMESPACES["xlink"]}}}label="{to_ref}"]')
-                    
-                    if from_loc is None or to_loc is None:
-                        continue
-                    
-                    from_href = from_loc.get('{http://www.w3.org/1999/xlink}href')
-                    to_href = to_loc.get('{http://www.w3.org/1999/xlink}href')
+                    # Optimize: Use cached locator references instead of expensive XPath lookups
+                    from_href = loc_map.get(from_ref)
+                    to_href = loc_map.get(to_ref)
                     
                     if not from_href or not to_href:
                         continue
                     
-                    # Extract element IDs
+                    # Optimize order extraction with direct try/except
+                    try:
+                        order = float(arc.get('order', '1.0'))
+                    except (ValueError, TypeError):
+                        order = 1.0
+                    
+                    preferred_label = arc.get('preferredLabel')
+                    
+                    # Extract element IDs from hrefs
                     from_element = extract_element_id(from_href)
                     to_element = extract_element_id(to_href)
                     
-                    # Add relationship
-                    relationships.append({
+                    # Add relationship using local function reference
+                    relationships_append({
                         'from_element': from_element,
                         'to_element': to_element,
                         'order': order,
                         'preferred_label': preferred_label
                     })
                 
-                # Build presentation tree for this role
+                # Build presentation tree for this role if we have relationships
                 if relationships:
                     self._build_presentation_tree(role, relationships)
         
@@ -575,10 +649,32 @@ class XBRLParser:
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing calculation file {file_path}: {str(e)}")
     
+    def _safe_parse_xml(self, content: str) -> ET.Element:
+        """
+        Safely parse XML content with lxml, handling encoding declarations properly.
+        
+        Args:
+            content: XML content as string or bytes
+            
+        Returns:
+            parsed XML root element
+        """
+        parser = ET.XMLParser(remove_blank_text=True, recover=True)
+        
+        # Convert to bytes for safer parsing if needed
+        if isinstance(content, str):
+            content_bytes = content.encode('utf-8')
+        else:
+            content_bytes = content
+            
+        # Parse with lxml
+        return ET.XML(content_bytes, parser)
+
     def parse_calculation_content(self, content: str) -> None:
         """Parse calculation linkbase content and build calculation trees."""
         try:
-            root = ET.fromstring(content)
+            # Use safe XML parsing method
+            root = self._safe_parse_xml(content)
             
             # Extract calculation links
             calculation_links = root.findall('.//{http://www.xbrl.org/2003/linkbase}calculationLink')
@@ -752,7 +848,7 @@ class XBRLParser:
     def parse_definition_content(self, content: str) -> None:
         """Parse definition linkbase content and build dimensional structures."""
         try:
-            root = ET.fromstring(content)
+            root = self._safe_parse_xml(content)
             
             # Extract definition links
             definition_links = root.findall('.//{http://www.xbrl.org/2003/linkbase}definitionLink')
@@ -945,21 +1041,26 @@ class XBRLParser:
     def parse_instance_content(self, content: str) -> None:
         """Parse instance document content and extract contexts, facts, and units."""
         try:
-            root = ET.fromstring(content)
+            # Use lxml's optimized parser with smart string handling and recovery mode
+            parser = ET.XMLParser(remove_blank_text=True, recover=True, huge_tree=True)
             
-            # Extract contexts
+            # Convert to bytes for faster parsing if not already
+            if isinstance(content, str):
+                content_bytes = content.encode('utf-8')
+            else:
+                content_bytes = content
+                
+            # Parse content with optimized settings
+            root = ET.XML(content_bytes, parser)
+            
+            # Extract data in optimal order (contexts first, then units, then facts)
+            # This ensures dependencies are resolved before they're needed
             self._extract_contexts(root)
-            
-            # Extract units
             self._extract_units(root)
-            
-            # Extract facts
             self._extract_facts(root)
             
-            # Extract entity information
+            # Post-processing steps after all raw data is extracted
             self._extract_entity_info()
-            
-            # Build reporting periods
             self._build_reporting_periods()
         
         except Exception as e:
@@ -1085,8 +1186,26 @@ class XBRLParser:
     def _extract_facts(self, root: ET.Element) -> None:
         """Extract facts from instance document."""
         try:
-            # Precompile regex patterns for namespace extraction
-            xmlns_pattern = '{http://www.w3.org/2000/xmlns/}'
+            # Get direct access to nsmap if using lxml (much faster than regex extraction)
+            if hasattr(root, 'nsmap'):
+                # Leverage lxml's native nsmap functionality
+                prefix_map = {uri: prefix for prefix, uri in root.nsmap.items() if prefix is not None}
+            else:
+                # Fallback for ElementTree - precompile regex patterns for namespace extraction
+                xmlns_pattern = '{http://www.w3.org/2000/xmlns/}'
+                prefix_map = {}
+                
+                # Extract namespace declarations from root
+                for attr_name, attr_value in root.attrib.items():
+                    if attr_name.startswith(xmlns_pattern) or attr_name.startswith('xmlns:'):
+                        # Extract the prefix more efficiently
+                        if attr_name.startswith(xmlns_pattern):
+                            prefix = attr_name[len(xmlns_pattern):]
+                        else:
+                            prefix = attr_name.split(':', 1)[1]
+                        
+                        # Map URI to prefix
+                        prefix_map[attr_value] = prefix
             
             # Standard namespace mappings with base patterns to recognize versions
             namespaces = {
@@ -1096,110 +1215,114 @@ class XBRLParser:
                 'dei': 'http://xbrl.sec.gov/dei/',  # Base pattern for any year
             }
             
-            # Track prefixes found in the document
-            prefix_map = {}
+            # Update standard namespaces if we have specific versions in this document
+            for uri, prefix in prefix_map.items():
+                for std_prefix, std_uri_base in namespaces.items():
+                    if uri.startswith(std_uri_base):
+                        namespaces[std_prefix] = uri
             
-            # First pass: extract namespace declarations from root
-            for attr_name, attr_value in root.attrib.items():
-                if attr_name.startswith(xmlns_pattern) or attr_name.startswith('xmlns:'):
-                    # Extract the prefix more efficiently
-                    if attr_name.startswith(xmlns_pattern):
-                        prefix = attr_name[len(xmlns_pattern):]
-                    else:
-                        prefix = attr_name.split(':', 1)[1]
-                    
-                    # Map URI to prefix
-                    prefix_map[attr_value] = prefix
-                    
-                    # Update standard namespaces if this is a version we recognize
-                    for std_prefix, std_uri_base in namespaces.items():
-                        if attr_value.startswith(std_uri_base):
-                            namespaces[std_prefix] = attr_value
-            
+            # Initialize counters and tracking
             fact_count = 0
             nonstandard_facts = set()  # Use a set for faster lookups
             
-            # Fast path to identify non-fact elements to skip
-            skip_tag_endings = ('}context', '}unit', '}schemaRef')
+            # Fast path to identify non-fact elements to skip - compile as set for O(1) lookup
+            skip_tag_endings = {'}context', '}unit', '}schemaRef'}
             
-            # Process facts in batches to reduce memory usage
+            # Cache facts dictionary append method for faster operation
+            facts_dict = self.facts
+            create_key = self._create_normalized_fact_key
+            
+            # Define optimized processor function
             def process_element(element):
                 """Process a single element as a potential fact."""
                 nonlocal fact_count
                 
-                # Skip known non-fact elements
-                if any(element.tag.endswith(ending) for ending in skip_tag_endings):
-                    return
+                # Skip known non-fact elements - faster check with set membership
+                tag = element.tag
+                for ending in skip_tag_endings:
+                    if tag.endswith(ending):
+                        return
                 
                 # Get context reference - key check to identify facts
                 context_ref = element.get('contextRef')
                 if not context_ref:
                     return
                 
-                # Extract element namespace and name
-                element_name = None
-                namespace = None
-                
-                # Get element namespace and name
-                if '}' in element.tag:
-                    namespace, element_name = element.tag.split('}', 1)
-                    namespace = namespace.strip('{')
+                # Extract element namespace and name - optimized split
+                if '}' in tag:
+                    namespace, element_name = tag.split('}', 1)
+                    namespace = namespace[1:]  # Faster than strip('{')
                 else:
-                    element_name = element.tag
+                    element_name = tag
+                    namespace = None
                 
                 # Get namespace prefix - cached for performance
                 prefix = prefix_map.get(namespace)
-                if not prefix:
-                    # Check against standard namespace patterns
+                if not prefix and namespace:
+                    # Check against standard namespace patterns with optimized base extraction
                     for std_prefix, std_uri in namespaces.items():
-                        if namespace and namespace.startswith(std_uri.split('/20')[0] if '/20' in std_uri else std_uri):
+                        # Optimize splitting - only split if needed
+                        base_uri = std_uri
+                        if '/20' in std_uri:
+                            base_uri = std_uri.split('/20')[0]
+                            
+                        if namespace.startswith(base_uri):
                             prefix = std_prefix
                             prefix_map[namespace] = prefix  # Cache for future lookups
                             break
                 
-                # Construct element ID with prefix if available
+                # Construct element ID with optimized string concatenation
                 if prefix:
                     element_id = f"{prefix}:{element_name}"
                 else:
-                    # For non-standard namespaces, just use element name
                     element_id = element_name
-                    # Track for debugging (using set for efficiency)
-                    nonstandard_facts.add(namespace)
+                    if namespace:
+                        nonstandard_facts.add(namespace)
                 
-                # Get unit reference
+                # Get unit reference - direct attribute access
                 unit_ref = element.get('unitRef')
                 
-                # Get value - optimize by checking text first then children
+                # Get value with optimized text extraction
                 value = element.text
                 if not value or not value.strip():
-                    # Only check children if text is empty
+                    # Only check children if text is empty - use direct iteration for speed
                     for sub_elem in element:
-                        if sub_elem.text and sub_elem.text.strip():
-                            value = sub_elem.text
+                        sub_text = sub_elem.text
+                        if sub_text and sub_text.strip():
+                            value = sub_text
                             break
                 
-                # Always have a string value (empty string if None)
+                # Optimize string handling - inline conditional
                 value = value.strip() if value else ""
                 
-                # Get decimals attribute
+                # Get decimals attribute - direct access
                 decimals = element.get('decimals')
                 
-                # Create numeric value only for non-empty values
+                # Optimize numeric conversion with fast path for common cases
                 numeric_value = None
                 if value:
-                    try:
-                        # Only replace commas and convert if the value is potentially numeric
-                        if any(c.isdigit() for c in value):
-                            clean_value = value.replace(',', '')
-                            numeric_value = float(clean_value)
-                    except (ValueError, TypeError):
-                        pass
+                    # Fast check for digit before attempting conversion
+                    has_digit = False
+                    for c in value:
+                        if c.isdigit():
+                            has_digit = True
+                            break
+                            
+                    if has_digit:
+                        try:
+                            # Handle common numeric formats
+                            if ',' in value:
+                                numeric_value = float(value.replace(',', ''))
+                            else:
+                                numeric_value = float(value)
+                        except (ValueError, TypeError):
+                            pass
                 
                 # Create a normalized key using underscore format for consistency
-                normalized_key = self._create_normalized_fact_key(element_id, context_ref)
+                normalized_key = create_key(element_id, context_ref)
                 
                 # Create fact object directly in the facts dictionary - avoid intermediate variable
-                self.facts[normalized_key] = Fact(
+                facts_dict[normalized_key] = Fact(
                     element_id=element_id,
                     context_ref=context_ref,
                     value=value,
@@ -1210,18 +1333,25 @@ class XBRLParser:
                 
                 fact_count += 1
             
-            # First process direct children of the root
-            for child in root:
-                process_element(child)
-                
-                # Process nested elements that might be facts
-                for descendant in child.findall('.//*'):
-                    process_element(descendant)
+            # Optimize traversal using lxml's iterchildren and iterdescendants if available
+            if hasattr(root, 'iterchildren'):
+                # Use lxml's optimized traversal methods
+                for child in root.iterchildren():
+                    process_element(child)
+                    # Process nested elements with optimized iteration
+                    for descendant in child.iterdescendants():
+                        process_element(descendant)
+            else:
+                # Fallback for ElementTree
+                for child in root:
+                    process_element(child)
+                    for descendant in child.findall('.//*'):
+                        process_element(descendant)
             
             # Debug information
             log.debug(f"Extracted {fact_count} facts")
             if nonstandard_facts:
-                log.debug(f"Found {len(nonstandard_facts)} non-standard namespaces: {list(nonstandard_facts)[:5]}...")
+                log.debug(f"Found {len(nonstandard_facts)} non-standard namespaces: {', '.join(list(nonstandard_facts)[:5])}...")
             
             # Double check that we found facts
             if fact_count == 0:
