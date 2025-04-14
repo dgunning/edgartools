@@ -8,10 +8,17 @@ This module provides the main classes used to interact with investment funds:
 """
 import logging
 from typing import List, Optional, Union, Dict, Any, TYPE_CHECKING
-
+from edgar.richtools import repr_rich
 import pandas as pd
+import re
 from functools import cached_property
-
+from rich import box
+from rich.console import Group
+from rich.columns import Columns
+from rich.padding import Padding
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 from edgar.entity.core import Entity
 
 if TYPE_CHECKING:
@@ -36,7 +43,7 @@ class Fund(Entity):
         super().__init__(resolve_fund_identifier(cik_or_identifier))
         self._series_id = None
         self._cached_classes = None
-        self._cached_series = None
+        self._cached_series = None  # Will be initialized as list in get_series()
         self._cached_portfolio = None
     
     @property
@@ -67,16 +74,17 @@ class Fund(Entity):
             
         return self._cached_classes
         
-    def get_series(self) -> Optional['FundSeries']:
+    def get_series(self) -> List['FundSeries']:
         """
-        Get the fund series information.
+        Get all fund series offered by this fund company.
         
         Returns:
-            FundSeries instance or None if not found
+            List of FundSeries instances representing the fund series offered
         """
         # Import locally to avoid circular imports
         from edgar.funds.data import get_fund_series
-        
+
+        series = get_fund_series(self)
         if self._cached_series is None:
             self._cached_series = get_fund_series(self)
             
@@ -123,72 +131,118 @@ class Fund(Entity):
         if hasattr(self, 'data'):
             return f"Fund({self.data.name} [{self.cik}]{ticker_str})"
         return f"Fund(CIK={self.cik}{ticker_str})"
-    
-    def __repr__(self):
-        return self.__str__()
+
     
     def __rich__(self):
         """Creates a rich representation of the fund with detailed information."""
-        try:
-            # Import rich components locally to prevent circular imports
-            from rich import box
-            from rich.console import Group
-            from rich.columns import Columns
-            from rich.padding import Padding
-            from rich.panel import Panel
-            from rich.table import Table
-            from rich.text import Text
-            
-            # The title of the panel
-            ticker = self.get_ticker()
-            entity_title = Text.assemble("🏦 ",
+        # The title of the panel
+        ticker = self.get_ticker()
+        entity_title = Text.assemble("🏦 ",
                                  (self.data.name, "bold green"),
                                  " ",
                                  (f"[{self.cik}] ", "dim"),
                                  (ticker if ticker else "", "bold yellow")
                                  )
             
-            # Primary Information Table
-            main_info = Table(box=box.SIMPLE_HEAVY, show_header=False, padding=(0, 1))
-            main_info.add_column("Row", style="")  # Single column for the entire row
+        # Primary Information Table
+        main_info = Table(box=box.SIMPLE_HEAVY, show_header=False, padding=(0, 1))
+        main_info.add_column("Row", style="")  # Single column for the entire row
             
-            row_parts = []
-            row_parts.extend([Text("CIK", style="grey60"), Text(str(self.cik), style="bold deep_sky_blue3")])
-            row_parts.extend([
-                Text("Type", style="grey60"),
+        row_parts = []
+        row_parts.extend([Text("CIK", style="dim"), Text(str(self.cik), style="bold blue")])
+        row_parts.extend([
+                Text("Type", style="dim"),
                 Text("Investment Fund", style="bold yellow"),
                 Text("$", style="bold yellow")
-            ])
-            main_info.add_row(*row_parts)
+        ])
+        main_info.add_row(*row_parts)
+        
+        # Additional fund information
+        fund_info = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
+        fund_info.add_column("Key", style="dim")
+        fund_info.add_column("Value", style="bold")
+        
+        # Add any additional fund company information
+        if hasattr(self.data, 'category'):
+            fund_info.add_row("Category", self.data.category or "-")
+        if hasattr(self.data, 'sic'):
+            fund_info.add_row("SIC", self.data.sic or "-")
+        
+        # Get all series for this fund
+        all_series = self.get_series()
+        all_classes = self.get_classes()
+        
+        # Series panels to display
+        series_panels = []
+        
+        # Create a table for each series showing its classes
+        for series in all_series:
+            # Create a table for this series
+            series_table = Table(box=box.SIMPLE, padding=(0, 1))
+            series_table.add_column("Class ID", style="dim")
+            series_table.add_column("Class Name", style="bold")
+            series_table.add_column("Ticker", style="bold yellow")
             
-            # Detailed Information Table
-            details = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-            details.add_column("Category")
-            details.add_column("Series ID")
+            # Find classes that belong to this series
+            series_classes = [cls for cls in all_classes 
+                             if hasattr(cls, 'series_id') and cls.series_id == series.series_id]
             
-            series = self.get_series()
-            series_id = series.series_id if series else "-"
+            # If we don't have explicit series associations, just add all classes for single series funds
+            if not series_classes and len(all_series) == 1:
+                series_classes = all_classes
+                
+            # Add each class to the table
+            if series_classes:
+                for cls in series_classes:
+                    series_table.add_row(
+                        cls.class_id,
+                        cls.name,
+                        cls.ticker or "-"
+                    )
+            else:
+                # No classes found for this series
+                series_table.add_row("-", "No share classes found", "-")
             
-            details.add_row(
-                getattr(self.data, 'category', '-') or "-",
-                series_id
+            # Create a panel for this series
+            series_panel = Panel(
+                series_table,
+                title=f"[cyan bold]{series.name}[/] [dim]({series.series_id})[/]",
+                border_style="cyan"
             )
             
-            # Fund Classes Table
-            classes = self.get_classes()
-            if classes:
+            series_panels.append(series_panel)
+        
+        # If we have series, create a panel with all series
+        if series_panels:
+            # Create a group with all series panels
+            series_group = Group(*series_panels)
+            series_section = Panel(
+                series_group,
+                title="📈 Fund Series",
+                border_style="grey50"
+            )
+            
+            # Add the series section to content
+            content_renderables = [
+                Padding("", (1, 0, 0, 0)),
+                Panel(Group(main_info, fund_info), title="📋 Fund Information", border_style="grey50"),
+                series_section
+            ]
+        else:
+            # No series found, just show classes directly
+            if all_classes:
                 classes_table = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
                 classes_table.add_column("Class ID")
                 classes_table.add_column("Class Name")
                 classes_table.add_column("Ticker", style="bold yellow")
-                
-                for class_obj in classes:
+                    
+                for class_obj in all_classes:
                     classes_table.add_row(
                         class_obj.class_id,
                         class_obj.name,
                         class_obj.ticker or "-"
                     )
-                
+                    
                 classes_panel = Panel(
                     classes_table,
                     title="📊 Share Classes",
@@ -197,44 +251,48 @@ class Fund(Entity):
                 
                 # Combine all sections
                 content_renderables = [
-                    Padding("", (1, 0, 0, 0)), 
-                    Panel(Group(main_info, details), title="📋 Fund Information", border_style="grey50"),
+                    Padding("", (1, 0, 0, 0)),
+                    Panel(Group(main_info, fund_info), title="📋 Fund Information", border_style="grey50"),
                     classes_panel
                 ]
             else:
-                # Combine sections without classes
+                # No series or classes
                 content_renderables = [
-                    Padding("", (1, 0, 0, 0)), 
-                    Panel(Group(main_info, details), title="📋 Fund Information", border_style="grey50")
+                    Padding("", (1, 0, 0, 0)),
+                    Panel(Group(main_info, fund_info), title="📋 Fund Information", border_style="grey50"),
+                    Panel(Text("No series or classes found for this fund."), title="⚠️ Note", border_style="yellow")
                 ]
+        
+        # Create the content group
+        content = Group(*content_renderables)
             
-            content = Group(*content_renderables)
-            
-            # Create the main panel
-            return Panel(
-                content,
-                title=entity_title,
-                subtitle="SEC Fund Data",
-                border_style="grey50"
-            )
-        except ImportError:
-            # If rich is not available, fall back to string representation
-            return self.__str__()
+        # Create the main panel
+        return Panel(
+            content,
+            title=entity_title,
+            subtitle="SEC Fund Data",
+            border_style="grey50"
+        )
 
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 class FundClass:
     """
     Represents a specific class of an investment fund.
     
     Fund classes typically have their own ticker symbols and fee structures,
-    but belong to the same underlying fund.
+    but belong to the same underlying fund. Each class belongs to a specific
+    fund series.
     """
     
-    def __init__(self, class_id: str, fund: Fund, name: Optional[str] = None, ticker: Optional[str] = None):
+    def __init__(self, class_id: str, fund: Fund, name: Optional[str] = None, 
+                ticker: Optional[str] = None, series_id: Optional[str] = None):
         self.class_id = class_id
         self.fund = fund
         self._name = name
         self._ticker = ticker
+        self.series_id = series_id  # The series ID this class belongs to
         
     @property
     def ticker(self) -> Optional[str]:
@@ -340,9 +398,15 @@ class FundClass:
             
             table.add_column("Fund", style="bold")
             table.add_column("Class ID", style="bold")
+            table.add_column("Series ID", style="bold cyan")
             table.add_column("Ticker", style="bold yellow")
             
-            table.add_row(self.fund.name, self.class_id, self.ticker or "")
+            table.add_row(
+                self.fund.name, 
+                self.class_id, 
+                self.series_id or "Unknown", 
+                self.ticker or ""
+            )
             
             return Panel(
                 table,
@@ -363,8 +427,27 @@ class FundSeries:
         self.fund = fund
         
     def get_classes(self) -> List[FundClass]:
-        """Get all share classes in this series."""
-        return self.fund.get_classes()
+        """
+        Get all share classes in this series.
+        
+        Returns:
+            List of FundClass instances belonging to this specific series
+        """
+        # Get all classes for the fund
+        all_classes = self.fund.get_classes()
+        
+        # Filter to get only classes for this series
+        series_classes = [
+            cls for cls in all_classes 
+            if hasattr(cls, 'series_id') and cls.series_id == self.series_id
+        ]
+        
+        # If we didn't find any classes specifically marked with this series_id,
+        # and this is the only series for the fund, return all classes
+        if not series_classes and len(self.fund.get_series()) == 1:
+            return all_classes
+            
+        return series_classes
     
     def get_filings(self, **kwargs) -> 'Filings':
         """
@@ -466,18 +549,29 @@ def get_fund(fund_identifier: str) -> Union[Fund, FundClass]:
             # based on the class name in the fund_info
             class_name = f"{fund_info.class_contract_name}"
             
+            # Get series ID if available
+            series_id = fund_info.series if hasattr(fund_info, 'series') else None
+            
             # Create a fund class with this information
             return FundClass(
                 class_id=class_id,
                 fund=fund,
                 name=class_name,
-                ticker=fund_identifier
+                ticker=fund_identifier,
+                series_id=series_id
             )
         
         # Fallback to the old way
         fund = Fund(get_fund_for_class_ticker(fund_identifier))
         class_id = get_class_id_for_ticker(fund_identifier)
-        return FundClass(class_id, fund, ticker=fund_identifier)
+        
+        # Try to find a series ID for this class by checking the fund's series
+        series_id = None
+        if fund.get_series() and len(fund.get_series()) == 1:
+            # If there's only one series, assume the class belongs to it
+            series_id = fund.get_series()[0].series_id
+            
+        return FundClass(class_id, fund, ticker=fund_identifier, series_id=series_id)
     
     # Check if this is a Class ID (C000XXXXX)
     if isinstance(fund_identifier, str) and fund_identifier.upper().startswith('C') and fund_identifier[1:].isdigit():
@@ -490,7 +584,16 @@ def get_fund(fund_identifier: str) -> Union[Fund, FundClass]:
             fund_info = direct_get_fund_with_filings(fund_identifier)
             if fund_info and hasattr(fund_info, 'fund_cik') and hasattr(fund_info, 'name'):
                 fund = Fund(fund_info.fund_cik)
-                return FundClass(fund_identifier, fund, name=fund_info.name)
+                # Try to get the series ID if available
+                series_id = None
+                if hasattr(fund_info, 'fund') and hasattr(fund_info.fund, 'ident_info'):
+                    series_str = fund_info.fund.ident_info.get('Series', '')
+                    if series_str and series_str.startswith('S'):
+                        series_match = re.match(r'([S]\d+)', series_str)
+                        if series_match:
+                            series_id = series_match.group(1)
+                
+                return FundClass(fund_identifier, fund, name=fund_info.name, series_id=series_id)
         except Exception as e:
             # Fall back to the legacy implementation if needed
             try:
@@ -500,7 +603,16 @@ def get_fund(fund_identifier: str) -> Union[Fund, FundClass]:
                 if fund_info and hasattr(fund_info, 'fund_cik'):
                     fund = Fund(fund_info.fund_cik)
                     name = fund_info.name if hasattr(fund_info, 'name') else None
-                    return FundClass(fund_identifier, fund, name=name)
+                    # Try to get the series ID
+                    series_id = None
+                    if hasattr(fund_info, 'fund') and hasattr(fund_info.fund, 'ident_info'):
+                        series_str = fund_info.fund.ident_info.get('Series', '')
+                        if series_str and series_str.startswith('S'):
+                            series_match = re.match(r'([S]\d+)', series_str)
+                            if series_match:
+                                series_id = series_match.group(1)
+                    
+                    return FundClass(fund_identifier, fund, name=name, series_id=series_id)
             except Exception as inner_e:
                 log.warning(f"Error resolving fund class {fund_identifier}: {e} / {inner_e}")
     
