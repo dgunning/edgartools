@@ -652,6 +652,7 @@ def get_fund_classes(fund: 'Fund') -> List['FundClass']:
     
     classes = []
     class_ids_found = set()  # To track unique class IDs
+    class_to_series_map = {}  # Map of class_id to series_id for inference
     
     # First try the direct SEC series listing URL - this is the most efficient method
     try:
@@ -659,24 +660,101 @@ def get_fund_classes(fund: 'Fund') -> List['FundClass']:
         if series_data:
             # Create FundClass objects from the parsed data
             for series_info in series_data:
+                series_id = series_info.get('series_id')
+                if not series_id:
+                    continue
+                
+                # Process classes specifically listed under this series
                 for class_info in series_info.get('classes', []):
                     class_id = class_info.get('class_id')
                     if class_id and class_id not in class_ids_found:
                         class_ids_found.add(class_id)
+                        class_to_series_map[class_id] = series_id
                         classes.append(FundClass(
                             class_id=class_id,
                             fund=fund,
                             name=class_info.get('class_name'),
                             ticker=class_info.get('ticker'),
-                            series_id=series_info.get('series_id')
+                            series_id=series_id
                         ))
-                        
+            
             # If we found classes through this method, return them directly
             if classes:
                 return classes
     except Exception as e:
         log.debug(f"Error using direct series listing URL for classes, CIK {fund.cik}: {e}")
-
+    
+    # Fallback approach: Try to get classes through other methods and infer series relationships
+    try:
+        # Check recent filings for class information
+        # Get a limited number of relevant filings (faster than checking all filings)
+        filings = fund.get_filings(form=['N-CEN', 'N-PORT', 'N-1A', '485BPOS', '485APOS'])
+        
+        # Process the first few filings to find class information
+        # Limit to 10 filings for performance
+        for filing in filings.data.slice(0, 10):
+            try:
+                from edgar._filings import Filing
+                filing_obj = Filing.from_record(filing)
+                fund_info = get_fund_information(filing_obj.header())
+                
+                if fund_info and hasattr(fund_info, 'data') and not fund_info.data.empty:
+                    # Try to extract class information and match with series
+                    df = fund_info.data
+                    for _, row in df.iterrows():
+                        class_id = row.get('ContractID')
+                        series_id = row.get('SeriesID')
+                        
+                        # Only add if we have a class ID and it's not already found
+                        if class_id and class_id not in class_ids_found:
+                            class_ids_found.add(class_id)
+                            
+                            # If we have a series ID, map this class to it for future reference
+                            if series_id:
+                                class_to_series_map[class_id] = series_id
+                            
+                            classes.append(FundClass(
+                                class_id=class_id,
+                                fund=fund,
+                                name=row.get('Class'),
+                                ticker=row.get('Ticker'),
+                                series_id=series_id
+                            ))
+            except Exception as inner_e:
+                log.debug(f"Error processing filing {filing} for class data: {inner_e}")
+    except Exception as e:
+        log.debug(f"Error processing filings for fund classes {fund.cik}: {e}")
+    
+    # If we have any classes without series IDs but we've built a map from other sources,
+    # try to infer the series ID based on naming patterns or other classes
+    for cls in classes:
+        if not cls.series_id:
+            # Attempt #1: Check our class-to-series map
+            if cls.class_id in class_to_series_map:
+                cls.series_id = class_to_series_map[cls.class_id]
+                continue
+                
+            # Attempt #2: Try to infer from class name prefixes that match series names
+            # This relies on the convention that classes often have names like
+            # "Series Name Class A", "Series Name Class I", etc.
+            if cls.name:
+                all_series = fund.get_series()
+                for series in all_series:
+                    # Check if the class name starts with the series name
+                    if series.name and cls.name.startswith(series.name):
+                        cls.series_id = series.series_id
+                        break
+                        
+            # Attempt #3: Infer from ticker symbol patterns
+            # Some fund families use consistent ticker prefixes for all classes in a series
+            if cls.ticker and len(cls.ticker) >= 4:
+                ticker_prefix = cls.ticker[:3]  # First three letters often identify the series
+                for other_cls in classes:
+                    if (other_cls.series_id and other_cls.ticker and 
+                        other_cls.ticker.startswith(ticker_prefix)):
+                        cls.series_id = other_cls.series_id
+                        break
+    
     return classes
 
 
@@ -891,6 +969,7 @@ def get_fund_series(fund: 'Fund') -> List['FundSeries']:
     
     series_list = []
     series_ids_found = set()  # To track unique series IDs
+    series_name_map = {}      # Map series_id to name for consistent naming
     
     # First try the direct SEC series listing URL - this is the most efficient method
     try:
@@ -901,9 +980,11 @@ def get_fund_series(fund: 'Fund') -> List['FundSeries']:
                 series_id = series_info['series_id']
                 if series_id and series_id not in series_ids_found:
                     series_ids_found.add(series_id)
+                    series_name = series_info['series_name']
+                    series_name_map[series_id] = series_name
                     series_list.append(FundSeries(
                         series_id=series_id,
-                        name=series_info['series_name'],
+                        name=series_name,
                         fund=fund
                     ))
                     
@@ -920,12 +1001,16 @@ def get_fund_series(fund: 'Fund') -> List['FundSeries']:
         if fund_info:
             # Check if this already is a series
             if hasattr(fund_info, 'id') and fund_info.id and fund_info.id.startswith('S'):
-                series_ids_found.add(fund_info.id)
-                series_list.append(FundSeries(
-                    series_id=fund_info.id, 
-                    name=fund_info.name,
-                    fund=fund
-                ))
+                series_id = fund_info.id
+                if series_id not in series_ids_found:
+                    series_ids_found.add(series_id)
+                    series_name = fund_info.name or fund.data.name
+                    series_name_map[series_id] = series_name
+                    series_list.append(FundSeries(
+                        series_id=series_id, 
+                        name=series_name,
+                        fund=fund
+                    ))
             
             # Check if we can find a series in the fund info
             if hasattr(fund_info, 'fund') and hasattr(fund_info.fund, 'ident_info'):
@@ -938,6 +1023,7 @@ def get_fund_series(fund: 'Fund') -> List['FundSeries']:
                         if series_id not in series_ids_found:
                             series_ids_found.add(series_id)
                             series_name = series_match.group(2) if len(series_match.groups()) > 1 else fund.data.name
+                            series_name_map[series_id] = series_name
                             series_list.append(FundSeries(
                                 series_id=series_id, 
                                 name=series_name,
@@ -965,15 +1051,57 @@ def get_fund_series(fund: 'Fund') -> List['FundSeries']:
                         series_id = row.get('SeriesID')
                         if series_id and series_id not in series_ids_found:
                             series_ids_found.add(series_id)
+                            fund_name = row.get('Fund')
+                            if fund_name:
+                                series_name_map[series_id] = fund_name
                             series_list.append(FundSeries(
                                 series_id=series_id,
-                                name=row.get('Fund', fund.data.name),
+                                name=fund_name or fund.data.name,
                                 fund=fund
                             ))
             except Exception as inner_e:
                 log.debug(f"Error processing filing {filing}: {inner_e}")
     except Exception as e:
         log.debug(f"Error processing filings for fund {fund.cik}: {e}")
+    
+    # Try to infer series from class information
+    # Some funds have classes listed without explicit series, but we can derive the series
+    try:
+        # Get class information that might contain series hints
+        all_classes = fund.get_classes()
+        
+        # Look for classes with series IDs 
+        for cls in all_classes:
+            if hasattr(cls, 'series_id') and cls.series_id and cls.series_id not in series_ids_found:
+                series_id = cls.series_id
+                series_ids_found.add(series_id)
+                
+                # Try to infer a good series name from class name
+                series_name = None
+                if hasattr(cls, 'name') and cls.name:
+                    # Many class names follow pattern "Series Name Class X"
+                    # Try to extract series name by removing common class suffixes
+                    class_name = cls.name
+                    for suffix in [' Class A', ' Class B', ' Class C', ' Class I', ' Class R', 
+                                  ' Investor Class', ' Institutional Class', ' Retail Class']:
+                        if class_name.endswith(suffix):
+                            series_name = class_name[:-len(suffix)]
+                            break
+                
+                if not series_name:
+                    # If we couldn't derive a name, use fund name or existing mapping
+                    series_name = series_name_map.get(series_id) or fund.data.name
+                else:
+                    # Store the derived name for consistency
+                    series_name_map[series_id] = series_name
+                
+                series_list.append(FundSeries(
+                    series_id=series_id,
+                    name=series_name,
+                    fund=fund
+                ))
+    except Exception as e:
+        log.debug(f"Error inferring series from classes for fund {fund.cik}: {e}")
     
     # If we still haven't found any series, look for an embedded series ID in the name
     if not series_list and hasattr(fund.data, 'name'):
@@ -989,11 +1117,17 @@ def get_fund_series(fund: 'Fund') -> List['FundSeries']:
     
     # As a last resort, if we couldn't find any series, create a synthetic one
     if not series_list:
+        synthetic_series_id = f"S{fund.cik}"
         series_list.append(FundSeries(
-            series_id=f"S{fund.cik}",
+            series_id=synthetic_series_id,
             name=fund.data.name if hasattr(fund.data, 'name') else f"Fund {fund.cik}",
             fund=fund
         ))
+    
+    # Ensure consistent naming across all series
+    for series in series_list:
+        if series.series_id in series_name_map:
+            series.name = series_name_map[series.series_id]
     
     return series_list
 

@@ -7,19 +7,19 @@ This module provides the main classes used to interact with investment funds:
 - FundSeries: Represents a fund series
 """
 import logging
-from typing import List, Optional, Union, Dict, Any, TYPE_CHECKING
-from edgar.richtools import repr_rich
-import pandas as pd
 import re
-from functools import cached_property
+from typing import List, Optional, Union, TYPE_CHECKING
+
+import pandas as pd
 from rich import box
 from rich.console import Group
-from rich.columns import Columns
 from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
 from edgar.entity.core import Entity
+from edgar.richtools import repr_rich
 
 if TYPE_CHECKING:
     from edgar._filings import Filings
@@ -84,7 +84,6 @@ class Fund(Entity):
         # Import locally to avoid circular imports
         from edgar.funds.data import get_fund_series
 
-        series = get_fund_series(self)
         if self._cached_series is None:
             self._cached_series = get_fund_series(self)
             
@@ -382,41 +381,29 @@ class FundClass:
         
     def __rich__(self):
         """Creates a rich representation of the fund class."""
-        try:
-            # Import rich components locally to prevent circular imports
-            from rich import box
-            from rich.console import Group
-            from rich.panel import Panel
-            from rich.table import Table
-            from rich.text import Text
+        table = Table(
+            title=None,
+            box=box.ROUNDED,
+            show_header=True
+        )
             
-            table = Table(
-                title=None,
-                box=box.ROUNDED,
-                show_header=True,
-            )
+        table.add_column("Fund", style="bold")
+        table.add_column("Class ID", style="bold")
+        table.add_column("Series ID", style="bold cyan")
+        table.add_column("Ticker", style="bold yellow")
             
-            table.add_column("Fund", style="bold")
-            table.add_column("Class ID", style="bold")
-            table.add_column("Series ID", style="bold cyan")
-            table.add_column("Ticker", style="bold yellow")
-            
-            table.add_row(
+        table.add_row(
                 self.fund.name, 
                 self.class_id, 
                 self.series_id or "Unknown", 
                 self.ticker or ""
-            )
+        )
             
-            return Panel(
+        return Panel(
                 table,
                 title=f"🏦 {self.name}",
-                subtitle=f"Fund Class"
-            )
-        except ImportError:
-            # If rich is not available, fall back to string representation
-            return self.__str__()
-
+                subtitle="Fund Class"
+        )
 
 class FundSeries:
     """Represents a fund series with multiple share classes."""
@@ -469,54 +456,47 @@ class FundSeries:
     
     def __rich__(self):
         """Creates a rich representation of the fund series."""
-        try:
-            # Import rich components locally to prevent circular imports
-            from rich import box
-            from rich.console import Group
-            from rich.panel import Panel
-            from rich.table import Table
-            from rich.text import Text
+
+        # Import rich components locally to prevent circular imports
+
             
-            # Primary information
-            main_info = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-            main_info.add_column("Fund", style="bold")
-            main_info.add_column("Series ID", style="bold")
+        # Primary information
+        main_info = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+        main_info.add_column("Fund", style="bold")
+        main_info.add_column("Series ID", style="bold")
             
-            main_info.add_row(self.fund.name, self.series_id)
+        main_info.add_row(self.fund.name, self.series_id)
             
-            # Classes information
-            classes = self.get_classes()
-            if classes:
-                classes_table = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-                classes_table.add_column("Class ID")
-                classes_table.add_column("Class Name")
-                classes_table.add_column("Ticker", style="bold yellow")
+        # Classes information
+        classes = self.get_classes()
+        if classes:
+            classes_table = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+            classes_table.add_column("Class ID")
+            classes_table.add_column("Class Name")
+            classes_table.add_column("Ticker", style="bold yellow")
                 
-                for class_obj in classes:
-                    classes_table.add_row(
+            for class_obj in classes:
+                classes_table.add_row(
                         class_obj.class_id,
-                        class_obj.name,
-                        class_obj.ticker or "-"
-                    )
-                
-                classes_panel = Panel(
-                    classes_table,
-                    title="📊 Share Classes",
-                    border_style="grey50"
+                    class_obj.name,
+                    class_obj.ticker or "-"
                 )
                 
-                content = Group(main_info, classes_panel)
-            else:
-                content = Group(main_info)
-            
-            return Panel(
-                content,
-                title=f"🏦 {self.name}",
-                subtitle=f"Fund Series"
+            classes_panel = Panel(
+                classes_table,
+                title="📊 Share Classes",
+                border_style="grey50"
             )
-        except ImportError:
-            # If rich is not available, fall back to string representation
-            return self.__str__()
+                
+            content = Group(main_info, classes_panel)
+        else:
+            content = Group(main_info)
+            
+        return Panel(
+            content,
+            title=f"🏦 {self.name}",
+            subtitle="Fund Series"
+        )
 
 
 def get_fund(fund_identifier: str) -> Union[Fund, FundClass]:

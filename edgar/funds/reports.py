@@ -4,7 +4,6 @@ Fund reporting module for NPORT and other fund reports.
 This module provides classes and functions for working with fund reports like N-PORT.
 """
 import logging
-import re
 from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
@@ -16,7 +15,7 @@ from pydantic import BaseModel
 from rich import box
 from rich.console import Group, Text
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Table
 
 from edgar.core import moneyfmt, get_bool
 from edgar.reference import cusip_ticker_mapping
@@ -339,7 +338,7 @@ class FundReport:
             Fund object representing the specific fund product
         """
         # Import locally to avoid circular imports
-        from edgar.funds.core import get_fund, Fund
+        from edgar.funds.core import get_fund
         
         # Get the basic fund entity (the fund company)
         fund_obj = get_fund(self.general_info.series_id)

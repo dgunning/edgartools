@@ -73,7 +73,7 @@ def get_fund_with_filings(identifier: str):
     # Create a minimal object with the expected interface as a last resort
     class MinimalFundInfo:
         def __init__(self, identifier):
-            self.id = f"C000000"
+            self.id = "C000000"
             self.name = f"Unknown Fund {identifier}"
             self.fund_cik = 0
             

@@ -5,7 +5,6 @@ This module provides classes and functions for working with 13F filings
 that report investment fund portfolio holdings.
 """
 import logging
-from typing import Optional
 
 import pandas as pd
 
