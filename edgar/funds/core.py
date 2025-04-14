@@ -1,0 +1,572 @@
+"""
+Core classes for working with investment funds.
+
+This module provides the main classes used to interact with investment funds:
+- Fund: Represents an investment fund entity
+- FundClass: Represents a specific share class of a fund
+- FundSeries: Represents a fund series
+"""
+import logging
+from typing import List, Optional, Union, Dict, Any, TYPE_CHECKING
+
+import pandas as pd
+from functools import cached_property
+
+from edgar.entity.core import Entity
+
+if TYPE_CHECKING:
+    from edgar._filings import Filings
+
+log = logging.getLogger(__name__)
+
+
+class Fund(Entity):
+    """
+    Represents an investment fund that files with the SEC.
+    
+    Provides fund-specific functionality like share classes, series information,
+    portfolio holdings, etc.
+    """
+    
+    def __init__(self, cik_or_identifier: Union[str, int]):
+        # Import locally to avoid circular imports
+        from edgar.funds.data import resolve_fund_identifier
+        
+        # Handle fund-specific identifiers
+        super().__init__(resolve_fund_identifier(cik_or_identifier))
+        self._series_id = None
+        self._cached_classes = None
+        self._cached_series = None
+        self._cached_portfolio = None
+    
+    @property
+    def data(self) -> 'EntityData':
+        """Get detailed data for this fund."""
+        base_data = super().data
+        
+        # If we already have fund-specific data, return it
+        if hasattr(base_data, 'is_fund') and base_data.is_fund:
+            return base_data
+            
+        # Otherwise, try to convert to fund-specific data
+        # This could be enhanced in the future
+        return base_data
+        
+    def get_classes(self) -> List['FundClass']:
+        """
+        Get all share classes of this fund.
+        
+        Returns:
+            List of FundClass instances representing the share classes
+        """
+        # Import locally to avoid circular imports
+        from edgar.funds.data import get_fund_classes
+        
+        if self._cached_classes is None:
+            self._cached_classes = get_fund_classes(self)
+            
+        return self._cached_classes
+        
+    def get_series(self) -> Optional['FundSeries']:
+        """
+        Get the fund series information.
+        
+        Returns:
+            FundSeries instance or None if not found
+        """
+        # Import locally to avoid circular imports
+        from edgar.funds.data import get_fund_series
+        
+        if self._cached_series is None:
+            self._cached_series = get_fund_series(self)
+            
+        return self._cached_series
+        
+    def get_portfolio(self) -> pd.DataFrame:
+        """
+        Get the most recent portfolio holdings.
+        
+        Returns:
+            DataFrame containing portfolio holdings data
+        """
+        # Import locally to avoid circular imports
+        from edgar.funds.data import get_fund_portfolio
+        
+        if self._cached_portfolio is None:
+            self._cached_portfolio = get_fund_portfolio(self)
+            
+        return self._cached_portfolio
+    
+    def get_ticker(self) -> Optional[str]:
+        """
+        Get the primary ticker for this fund.
+        
+        Returns:
+            Primary ticker symbol or None if not available
+        """
+        # Look for tickers in data first
+        if hasattr(self.data, 'tickers') and self.data.tickers:
+            return self.data.tickers[0]
+            
+        # Otherwise look for ticker in fund classes
+        classes = self.get_classes()
+        for cls in classes:
+            if cls.ticker:
+                return cls.ticker
+                
+        return None
+    
+    def __str__(self):
+        ticker = self.get_ticker()
+        ticker_str = f" - {ticker}" if ticker else ""
+        
+        if hasattr(self, 'data'):
+            return f"Fund({self.data.name} [{self.cik}]{ticker_str})"
+        return f"Fund(CIK={self.cik}{ticker_str})"
+    
+    def __repr__(self):
+        return self.__str__()
+    
+    def __rich__(self):
+        """Creates a rich representation of the fund with detailed information."""
+        try:
+            # Import rich components locally to prevent circular imports
+            from rich import box
+            from rich.console import Group
+            from rich.columns import Columns
+            from rich.padding import Padding
+            from rich.panel import Panel
+            from rich.table import Table
+            from rich.text import Text
+            
+            # The title of the panel
+            ticker = self.get_ticker()
+            entity_title = Text.assemble("🏦 ",
+                                 (self.data.name, "bold green"),
+                                 " ",
+                                 (f"[{self.cik}] ", "dim"),
+                                 (ticker if ticker else "", "bold yellow")
+                                 )
+            
+            # Primary Information Table
+            main_info = Table(box=box.SIMPLE_HEAVY, show_header=False, padding=(0, 1))
+            main_info.add_column("Row", style="")  # Single column for the entire row
+            
+            row_parts = []
+            row_parts.extend([Text("CIK", style="grey60"), Text(str(self.cik), style="bold deep_sky_blue3")])
+            row_parts.extend([
+                Text("Type", style="grey60"),
+                Text("Investment Fund", style="bold yellow"),
+                Text("$", style="bold yellow")
+            ])
+            main_info.add_row(*row_parts)
+            
+            # Detailed Information Table
+            details = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+            details.add_column("Category")
+            details.add_column("Series ID")
+            
+            series = self.get_series()
+            series_id = series.series_id if series else "-"
+            
+            details.add_row(
+                getattr(self.data, 'category', '-') or "-",
+                series_id
+            )
+            
+            # Fund Classes Table
+            classes = self.get_classes()
+            if classes:
+                classes_table = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+                classes_table.add_column("Class ID")
+                classes_table.add_column("Class Name")
+                classes_table.add_column("Ticker", style="bold yellow")
+                
+                for class_obj in classes:
+                    classes_table.add_row(
+                        class_obj.class_id,
+                        class_obj.name,
+                        class_obj.ticker or "-"
+                    )
+                
+                classes_panel = Panel(
+                    classes_table,
+                    title="📊 Share Classes",
+                    border_style="grey50"
+                )
+                
+                # Combine all sections
+                content_renderables = [
+                    Padding("", (1, 0, 0, 0)), 
+                    Panel(Group(main_info, details), title="📋 Fund Information", border_style="grey50"),
+                    classes_panel
+                ]
+            else:
+                # Combine sections without classes
+                content_renderables = [
+                    Padding("", (1, 0, 0, 0)), 
+                    Panel(Group(main_info, details), title="📋 Fund Information", border_style="grey50")
+                ]
+            
+            content = Group(*content_renderables)
+            
+            # Create the main panel
+            return Panel(
+                content,
+                title=entity_title,
+                subtitle="SEC Fund Data",
+                border_style="grey50"
+            )
+        except ImportError:
+            # If rich is not available, fall back to string representation
+            return self.__str__()
+
+
+class FundClass:
+    """
+    Represents a specific class of an investment fund.
+    
+    Fund classes typically have their own ticker symbols and fee structures,
+    but belong to the same underlying fund.
+    """
+    
+    def __init__(self, class_id: str, fund: Fund, name: Optional[str] = None, ticker: Optional[str] = None):
+        self.class_id = class_id
+        self.fund = fund
+        self._name = name
+        self._ticker = ticker
+        
+    @property
+    def ticker(self) -> Optional[str]:
+        """
+        Get the ticker for this fund class.
+        
+        Returns:
+            Ticker symbol or None if not available
+        """
+        if self._ticker:
+            return self._ticker
+            
+        # Try to get ticker from current implementation
+        try:
+            # Import inside the function to avoid circular imports
+            from edgar.funds import get_fund_with_filings
+            fund_class = get_fund_with_filings(self.class_id)
+            if fund_class and hasattr(fund_class, 'ticker'):
+                self._ticker = fund_class.ticker
+                return self._ticker
+        except Exception:
+            pass
+            
+        return None
+        
+    @property
+    def name(self) -> str:
+        """
+        Get the name of this fund class.
+        
+        Returns:
+            Name of the fund class
+        """
+        if self._name:
+            return self._name
+            
+        # Try to get name from the current implementation
+        try:
+            # Import inside the function to avoid circular imports
+            from edgar.funds import get_fund_with_filings
+            fund_class = get_fund_with_filings(self.class_id)
+            if fund_class and hasattr(fund_class, 'name'):
+                self._name = fund_class.name
+                return self._name
+        except Exception:
+            pass
+            
+        # Fallback to default name
+        return f"{self.fund.data.name} - Class {self.class_id[-1]}"
+        
+    def get_performance(self) -> pd.DataFrame:
+        """
+        Get performance data for this fund class.
+        
+        Returns:
+            DataFrame containing performance data
+        """
+        # Look for N-CSR filings (shareholder reports) which contain performance data
+        filings = self.fund.get_filings(form=['N-CSR'])
+        if filings:
+            latest_ncsr = filings.latest()
+            if latest_ncsr:
+                # Parse N-CSR for performance data
+                # This would be implemented in a future version
+                pass
+                
+        return pd.DataFrame()
+        
+    def get_filings(self, **kwargs) -> 'Filings':
+        """
+        Get filings for this specific fund class.
+        
+        Args:
+            **kwargs: Filtering parameters passed to get_filings
+            
+        Returns:
+            Filings object with filtered filings
+        """
+        return self.fund.get_filings(**kwargs)
+    
+    def __str__(self):
+        ticker_str = f" - {self.ticker}" if self.ticker else ""
+        return f"FundClass({self.name} [{self.class_id}]{ticker_str})"
+        
+    def __repr__(self):
+        return self.__str__()
+        
+    def __rich__(self):
+        """Creates a rich representation of the fund class."""
+        try:
+            # Import rich components locally to prevent circular imports
+            from rich import box
+            from rich.console import Group
+            from rich.panel import Panel
+            from rich.table import Table
+            from rich.text import Text
+            
+            table = Table(
+                title=None,
+                box=box.ROUNDED,
+                show_header=True,
+            )
+            
+            table.add_column("Fund", style="bold")
+            table.add_column("Class ID", style="bold")
+            table.add_column("Ticker", style="bold yellow")
+            
+            table.add_row(self.fund.name, self.class_id, self.ticker or "")
+            
+            return Panel(
+                table,
+                title=f"🏦 {self.name}",
+                subtitle=f"Fund Class"
+            )
+        except ImportError:
+            # If rich is not available, fall back to string representation
+            return self.__str__()
+
+
+class FundSeries:
+    """Represents a fund series with multiple share classes."""
+    
+    def __init__(self, series_id: str, name: str, fund: Fund):
+        self.series_id = series_id
+        self.name = name
+        self.fund = fund
+        
+    def get_classes(self) -> List[FundClass]:
+        """Get all share classes in this series."""
+        return self.fund.get_classes()
+    
+    def get_filings(self, **kwargs) -> 'Filings':
+        """
+        Get filings for this fund series.
+        
+        Args:
+            **kwargs: Filtering parameters passed to get_filings
+            
+        Returns:
+            Filings object with filtered filings
+        """
+        return self.fund.get_filings(**kwargs)
+        
+    def __str__(self):
+        return f"FundSeries({self.name} [{self.series_id}])"
+    
+    def __repr__(self):
+        return self.__str__()
+    
+    def __rich__(self):
+        """Creates a rich representation of the fund series."""
+        try:
+            # Import rich components locally to prevent circular imports
+            from rich import box
+            from rich.console import Group
+            from rich.panel import Panel
+            from rich.table import Table
+            from rich.text import Text
+            
+            # Primary information
+            main_info = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+            main_info.add_column("Fund", style="bold")
+            main_info.add_column("Series ID", style="bold")
+            
+            main_info.add_row(self.fund.name, self.series_id)
+            
+            # Classes information
+            classes = self.get_classes()
+            if classes:
+                classes_table = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+                classes_table.add_column("Class ID")
+                classes_table.add_column("Class Name")
+                classes_table.add_column("Ticker", style="bold yellow")
+                
+                for class_obj in classes:
+                    classes_table.add_row(
+                        class_obj.class_id,
+                        class_obj.name,
+                        class_obj.ticker or "-"
+                    )
+                
+                classes_panel = Panel(
+                    classes_table,
+                    title="📊 Share Classes",
+                    border_style="grey50"
+                )
+                
+                content = Group(main_info, classes_panel)
+            else:
+                content = Group(main_info)
+            
+            return Panel(
+                content,
+                title=f"🏦 {self.name}",
+                subtitle=f"Fund Series"
+            )
+        except ImportError:
+            # If rich is not available, fall back to string representation
+            return self.__str__()
+
+
+def get_fund(fund_identifier: str) -> Union[Fund, FundClass]:
+    """
+    Get a fund or fund class by identifier.
+    
+    This function provides a smart factory that returns either a Fund or FundClass
+    depending on the type of identifier provided.
+    
+    Args:
+        fund_identifier: Fund ticker (e.g., 'VFINX'), Series ID (e.g., 'S000001234'), 
+                        Class ID (e.g., 'C000012345'), or CIK number
+                        
+    Returns:
+        Fund object if the identifier refers to a fund, or
+        FundClass object if the identifier refers to a specific share class
+    """
+    # Determine if this is a fund class ticker like 'VFINX'
+    if is_fund_class_ticker(fund_identifier):
+        # Import data functions
+        from edgar.funds.data import direct_get_fund
+        
+        # Try our direct implementation
+        fund_info = direct_get_fund(fund_identifier)
+        if fund_info and hasattr(fund_info, 'company_cik'):
+            fund = Fund(fund_info.company_cik)
+            # Get the class ID
+            class_id = fund_info.class_contract_id
+            # For fund tickers, we'll construct a standardized class name
+            # based on the class name in the fund_info
+            class_name = f"{fund_info.class_contract_name}"
+            
+            # Create a fund class with this information
+            return FundClass(
+                class_id=class_id,
+                fund=fund,
+                name=class_name,
+                ticker=fund_identifier
+            )
+        
+        # Fallback to the old way
+        fund = Fund(get_fund_for_class_ticker(fund_identifier))
+        class_id = get_class_id_for_ticker(fund_identifier)
+        return FundClass(class_id, fund, ticker=fund_identifier)
+    
+    # Check if this is a Class ID (C000XXXXX)
+    if isinstance(fund_identifier, str) and fund_identifier.upper().startswith('C') and fund_identifier[1:].isdigit():
+        # For class IDs, we need to get the parent fund first
+        try:
+            # Import data functions
+            from edgar.funds.data import direct_get_fund_with_filings
+            
+            # Try our direct implementation first
+            fund_info = direct_get_fund_with_filings(fund_identifier)
+            if fund_info and hasattr(fund_info, 'fund_cik') and hasattr(fund_info, 'name'):
+                fund = Fund(fund_info.fund_cik)
+                return FundClass(fund_identifier, fund, name=fund_info.name)
+        except Exception as e:
+            # Fall back to the legacy implementation if needed
+            try:
+                # Import locally from the package
+                from edgar.funds import get_fund_with_filings
+                fund_info = get_fund_with_filings(fund_identifier)
+                if fund_info and hasattr(fund_info, 'fund_cik'):
+                    fund = Fund(fund_info.fund_cik)
+                    name = fund_info.name if hasattr(fund_info, 'name') else None
+                    return FundClass(fund_identifier, fund, name=name)
+            except Exception as inner_e:
+                log.warning(f"Error resolving fund class {fund_identifier}: {e} / {inner_e}")
+    
+    # Otherwise return a Fund
+    return Fund(fund_identifier)
+
+
+# Helper functions for fund ticker resolution
+
+def is_fund_class_ticker(identifier: str) -> bool:
+    """
+    Determine if the given identifier is a fund class ticker.
+    
+    Args:
+        identifier: The identifier to check
+        
+    Returns:
+        True if it's a fund class ticker, False otherwise
+    """
+    from edgar.funds.data import is_fund_ticker
+    return is_fund_ticker(identifier)
+
+
+def get_fund_for_class_ticker(ticker: str) -> int:
+    """
+    Get the fund CIK associated with a class ticker.
+    
+    Args:
+        ticker: The class ticker
+        
+    Returns:
+        Fund CIK as integer
+    """
+    from edgar.funds.data import direct_get_fund
+    
+    try:
+        fund_info = direct_get_fund(ticker)
+        if fund_info and hasattr(fund_info, 'company_cik'):
+            return int(fund_info.company_cik)
+    except Exception as e:
+        log.warning(f"Error getting fund for ticker {ticker}: {e}")
+    
+    return -1  # Invalid CIK
+
+
+def get_class_id_for_ticker(ticker: str) -> str:
+    """
+    Get the class ID for a fund class ticker.
+    
+    Args:
+        ticker: The class ticker
+        
+    Returns:
+        Class ID string
+    """
+    from edgar.funds.data import direct_get_fund
+    
+    try:
+        fund_info = direct_get_fund(ticker)
+        if fund_info and hasattr(fund_info, 'class_contract_id'):
+            return fund_info.class_contract_id
+    except Exception as e:
+        log.warning(f"Error getting class ID for ticker {ticker}: {e}")
+    
+    # Fallback - create a synthetic class ID
+    # Many fund tickers use last character as class designator
+    if len(ticker) > 0:
+        return f"C000000{ticker[-1].upper()}"
+    return "C0000000"

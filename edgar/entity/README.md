@@ -118,7 +118,7 @@ latest_filings = entity.get_filings().latest(5)
 Specialized classes are available for working with investment funds:
 
 ```python
-from edgar.entity import Fund, get_fund
+from edgar.entity import Fund, FundClass, FundSeries, get_fund
 
 # Create a fund by CIK
 vanguard_index = Fund("0000036405")
@@ -127,13 +127,47 @@ vanguard_index = Fund("0000036405")
 fund_or_class = get_fund("VFINX")
 
 # Get fund classes
-if hasattr(fund_or_class, 'fund'):
+if isinstance(fund_or_class, FundClass):
     # It's a fund class
     parent_fund = fund_or_class.fund
     all_classes = parent_fund.get_classes()
 else:
     # It's a fund
     all_classes = fund_or_class.get_classes()
+
+# Get fund series information
+series = vanguard_index.get_series()
+if series:
+    print(f"Series: {series.name} [{series.series_id}]")
+    
+# Get portfolio holdings
+portfolio = vanguard_index.get_portfolio()
+if not portfolio.empty:
+    print(portfolio.head())
+```
+
+### Fund Class and Series Information
+
+Access detailed fund structure information:
+
+```python
+from edgar.entity import get_fund
+
+# Get a fund by CIK or ticker
+fund = get_fund("0000036405")  # Vanguard fund
+
+# Get fund series information
+series = fund.get_series()
+if series:
+    # Get classes within this series
+    classes = series.get_classes()
+    for cls in classes:
+        print(f"Class: {cls.name} - {cls.ticker}")
+        
+# Get filings for a specific fund class
+if classes:
+    class_filings = classes[0].get_filings(form="N-CSR")
+    latest_report = class_filings.latest()
 ```
 
 ## Factory Functions
@@ -190,7 +224,9 @@ latest_revenue = revenue.latest()
 
 ## Migration from Previous API
 
-If you're migrating from the old API, simply update your imports from:
+### From entities.py to entity package
+
+If you're migrating from the old `entities.py` API, simply update your imports from:
 
 ```python
 from edgar.entities import Entity, Company
@@ -203,6 +239,48 @@ from edgar.entity import Entity, Company
 ```
 
 Most method signatures remain unchanged, but specialized methods are now available on the appropriate classes.
+
+### From funds.py to entity package
+
+If you're migrating from using the `funds.py` module, here's how to update your code:
+
+```python
+# Old code using funds.py:
+from edgar.funds import get_fund
+
+fund_info = get_fund("VFINX")
+company_cik = fund_info.company_cik
+fund_name = fund_info.name
+fund_ticker = fund_info.ticker
+```
+
+```python
+# New code using entity package:
+from edgar.entity import get_fund
+
+fund_or_class = get_fund("VFINX")
+
+# Check if we got a fund or fund class
+if hasattr(fund_or_class, 'fund'):
+    # It's a fund class
+    fund_class = fund_or_class
+    fund = fund_class.fund
+    fund_name = fund_class.name
+    fund_ticker = fund_class.ticker
+else:
+    # It's a fund
+    fund = fund_or_class
+    fund_name = fund.data.name
+    fund_ticker = fund.get_ticker()
+
+company_cik = fund.cik
+```
+
+Key differences:
+1. `get_fund()` now returns either a `Fund` or `FundClass` object depending on the input
+2. Fund identifiers (CIK, ticker, series ID, class ID) are handled transparently 
+3. More object-oriented API with proper type information
+4. Better integration with the rest of the entity package
 
 ## Advanced Usage
 

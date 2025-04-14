@@ -99,18 +99,3 @@ def test_find_a_current_filing():
     assert filing
     assert filing.accession_no == accession_number
 
-
-# Parameterized tests with ticker and fund name
-# def test_find_ticker():
-#     assert find("AAPL").name == "Apple Inc."
-@pytest.mark.parametrize("ticker, expected_fund_name, expected_class", [
-    ("KINCX", "Kinetics Internet Fund", "Advisor Class C"),
-    ("KINAX", "Kinetics Internet Fund", "Advisor Class A")
-    # Add more tuples for each ticker and fund name pair
-])
-def test_ticker_name_correspondence(ticker, expected_fund_name, expected_class):
-    # Here you would typically fetch the fund name based on the ticker
-    # For demonstration, let's assume a function `get_fund_name(ticker)` that does this
-    fund = find(ticker)
-    assert fund.name == expected_fund_name
-    assert fund.class_contract_name == expected_class

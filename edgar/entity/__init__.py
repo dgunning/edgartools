@@ -21,6 +21,12 @@ from edgar.entity.data import (
     CompanyData
 )
 
+# Import from the funds package instead of entity.funds
+from edgar.funds import (
+    FundData,
+    FundSeries
+)
+
 from edgar.entity.filings import (
     EntityFiling,
     EntityFilings
@@ -74,10 +80,12 @@ __all__ = [
     'Company',
     'Fund',
     'FundClass',
+    'FundSeries',
     
     # Data classes
     'EntityData',
     'CompanyData',
+    'FundData',
     'Address',
     
     # Filing classes
