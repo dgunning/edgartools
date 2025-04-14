@@ -4,10 +4,12 @@ Tests for the edgar.funds package.
 import pytest
 from unittest.mock import patch, MagicMock
 from rich import print
-from edgar.funds import (
+from edgar.funds.core import (
     Fund, 
     FundClass, 
     FundSeries, 
+)
+from edgar.funds import (
     get_fund,
     FundData,
 )

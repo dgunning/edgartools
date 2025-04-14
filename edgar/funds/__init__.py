@@ -4,21 +4,38 @@ Investment funds package for EdgarTools.
 This package provides comprehensive tools for working with investment funds,
 fund classes, series information, and portfolio holdings from SEC filings.
 
-The primary classes follow the entity model design:
-- Fund: Represents the fund company (e.g., "PRUDENTIAL SECTOR FUNDS, INC.")
-- FundClass: Represents a specific share class within a fund
-- FundSeries: Represents a specific fund product/series offered by the company
+The primary classes follow the domain model design:
+- FundCompany: Represents the legal entity that manages funds (e.g., "Vanguard")
+- FundSeries: Represents a specific investment product/strategy (e.g., "Vanguard 500 Index Fund")
+- FundClass: Represents a specific share class with its own ticker (e.g., "Vanguard 500 Index Admiral Shares")
 
-This package replaces the legacy funds.py module with a more organized structure:
-- core.py: Defines the main fund-related classes and factory functions
+Key functions:
+- find_fund(): Smart factory that returns the appropriate entity based on any identifier
+- get_fund_company(): Get a fund company by CIK
+- get_fund_series(): Get a fund series by series ID
+- get_fund_class(): Get a fund class by ticker or class ID
+
+This package provides a more organized, intuitive API for working with fund entities:
+- fund_entities.py: Defines the domain entities and access functions
 - data.py: Provides data access functions and implementations
 - reports.py: Handles fund reports like N-PORT filings
 """
-# Import core classes without bringing in dependencies
+# Import new entity classes and functions
+from edgar.funds.fund_entities import (
+    FundCompany,
+    FundSeries,
+    FundClass,
+    find_fund,
+    get_fund_company,
+    get_fund_series,
+    get_fund_class,
+    get_series_by_name,
+    get_class_by_ticker
+)
+
+# Keep backward compatibility for now
 from edgar.funds.core import (
     Fund,
-    FundClass,
-    FundSeries,
     get_fund
 )
 
@@ -121,16 +138,27 @@ class FundSeriesAndContracts:
         self.data = data if data is not None else pd.DataFrame()
 
 __all__ = [
-    # Core classes
-    'Fund',
-    'FundClass',
+    # New domain entity classes
+    'FundCompany',
     'FundSeries',
+    'FundClass',
+    
+    # New access functions
+    'find_fund',
+    'get_fund_company',
+    'get_fund_series',
+    'get_fund_class',
+    'get_series_by_name',
+    'get_class_by_ticker',
+    
+    # Old core classes (for backward compatibility)
+    'Fund',
     
     # Data classes
     'FundData',
     
     # Factory functions
-    'get_fund',
+    'get_fund',  # old method, but still available for backward compatibility
     'resolve_fund_identifier',
     
     # Functions now implemented directly in the package
