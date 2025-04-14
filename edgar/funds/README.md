@@ -122,20 +122,6 @@ print(fund)  # Displays a rich panel with detailed fund information
 
 The package currently implements ~75% of the planned user journeys. See [fund_domain_model.md](./fund_domain_model.md) for a detailed status assessment and roadmap.
 
-## Backward Compatibility
-
-The package maintains backward compatibility with the previous API:
-
-```python
-# Old API (still works)
-from edgar.funds import get_fund, Fund
-
-# Get fund using the legacy function
-fund_class = get_fund("FCNTX")
-
-# Legacy Fund class (now representing a FundCompany)
-fund_company = Fund("0000315700")
-```
 
 ## Future Enhancements
 
