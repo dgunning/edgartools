@@ -118,15 +118,18 @@ From a product management viewpoint, the key considerations are:
 
 In our `edgar.funds` package:
 
-- `Fund` class represents a fund company (top-level entity)
+- `FundCompany` class represents a fund company (top-level entity)
 - `FundSeries` represents a specific fund product/strategy
 - `FundClass` represents a specific share class of a fund
 
-### Implementation Gaps
+The package provides a smart finder function `find_fund()` that returns the appropriate entity type based on the identifier provided (ticker, series ID, class ID, or CIK).
 
-1. **Terminology Mismatch**
-   - The name "Fund" for the company-level entity can be confusing
-   - Users typically think of a "fund" as the investment product (series), not the company
+### Previous Implementation Gaps (Now Addressed)
+
+1. **Terminology Mismatch (RESOLVED)**
+   - We've renamed the `Fund` class to `FundCompany` to better reflect its role
+   - This change aligns with how users typically think of a "fund" as the investment product (series), not the company
+   - The old `Fund` class is still available for backward compatibility
 
 2. **Entity Resolution Challenges**
    - SEC filings don't always clearly distinguish between series and classes
@@ -173,17 +176,20 @@ This fund domain model gives us a solid foundation for working with investment f
 ### User Journey Assessment
 
 #### 1. Discovery Journey
-**Progress: 80% Complete**
+**Progress: 90% Complete**
 
 ✓ **Implemented:**
-- Ticker symbol lookup (via `get_fund`)
+- Smart entity lookup (via `find_fund()`) that returns appropriate entity type
+- Specialized getters for each entity type: `get_fund_company()`, `get_fund_series()`, `get_fund_class()`
+- Series lookup by name within a company (`get_series_by_name()`)
+- Clear entity type distinction with renamed `FundCompany` class
+- Ticker symbol lookup (via `get_class_by_ticker()` or `find_fund()`)
 - Fund Series and Share Class identification
 - Series-class association to connect the hierarchy
 - Robust mechanisms for retrieving all series for a fund company
 - Inference for associating classes with series even with incomplete data
 
 ⚠️ **Gaps:**
-- Fund name search (partial - could be improved with better normalization)
 - Fund company search by name (could be enhanced)
 - Handling of fund name variations and aliases
 
@@ -254,8 +260,10 @@ This fund domain model gives us a solid foundation for working with investment f
 
 ### Overall Assessment
 
-Recent improvements have significantly enhanced the **Discovery Journey** by ensuring proper series-class associations, which is a critical foundation for all the user journeys. The enhanced inference logic in entity relationships directly supports key user scenarios like "I want to see all share classes of a fund".
+Recent improvements have significantly enhanced the **Discovery Journey** by introducing a more intuitive API with clearer entity naming. The new `find_fund()` smart factory function and specialized getters like `get_fund_company()`, `get_fund_series()`, and `get_fund_class()` greatly improve the user experience. Renaming the top-level entity from `Fund` to `FundCompany` addresses a major terminology mismatch that was previously confusing.
 
-**Current State: ~70% Complete Across All Journeys**
+The enhanced inference logic in entity relationships directly supports key user scenarios like "I want to see all share classes of a fund" and the improved navigation between entities makes it easier to explore the fund hierarchy.
 
-The core relationships between entities are now robust, providing a solid foundation for building more advanced features to fulfill these user journeys completely.
+**Current State: ~75% Complete Across All Journeys**
+
+The core relationships between entities are now robust and intuitive, providing a solid foundation for building more advanced features to fulfill these user journeys completely. The API is now more predictable and better aligned with user expectations.
