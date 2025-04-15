@@ -171,7 +171,7 @@ You can get financials for a company using the `financials` property. For exampl
 
 ```python
 financials = c.financials
-financials.income_statement 
+financials.income
 ```
 
 ## Viewing unpublished filings
