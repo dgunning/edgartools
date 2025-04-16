@@ -8,14 +8,14 @@ def test_get_current_entries():
     filings = get_current_filings()
     print(filings)
     # previous should be None
-    assert filings.prev() is None
+    assert filings.previous() is None
 
     next_filings = filings.next()
     assert next_filings is not None
     print(next_filings)
-    previous_filings = next_filings.prev()
+    previous_filings = next_filings.previous()
     print(previous_filings)
-    assert previous_filings.prev() is None
+    assert previous_filings.previous() is None
 
 
 def test_get_current_filings_by_form():
@@ -80,7 +80,7 @@ def test_current_filings_get_accession_number():
     filings = filings.next()
     accession_number = filings.data['accession_number'].to_pylist()[0]
     print(accession_number)
-    filings = filings.prev()
+    filings = filings.previous()
     filing = filings.get(accession_number)
     assert filing
     assert filing.accession_no == accession_number
@@ -89,7 +89,7 @@ def test_current_filings_get_accession_number():
 def test_current_filings_get_accession_number_not_found():
     filings:CurrentFilings = get_current_filings().next()
     accession_number = '0000000900-24-000000'
-    filings = filings.prev()
+    filings = filings.previous()
     filing = filings.get(accession_number)
     assert not filing
 

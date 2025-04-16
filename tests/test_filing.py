@@ -596,12 +596,12 @@ def test_filings_next_and_previous():
     print(page2)
     page3 = filings.next()
     print(page3)
-    page2_again = filings.prev()
+    page2_again = filings.previous()
     print(page2_again)
 
     assert page2[0].accession_no == page2_again[0].accession_no
-    assert filings.prev()
-    assert not filings.prev()
+    assert filings.previous()
+    assert not filings.previous()
 
 
 def test_get_filings_for_future_period(capsys):

@@ -8,7 +8,7 @@ To change the page, you can paginate filings using the `next` and `prev` methods
 ```python
 filings = get_filings()
 filings.next()
-filings.prev()
+filings.previous()
 ```
 
 ## Looping through filings

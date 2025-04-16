@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     # Next and previous
     print(filings.next())
-    print(filings.prev())
+    print(filings.previous())
 
     # Get a company
     ge = Company("GE")

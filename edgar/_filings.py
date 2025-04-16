@@ -633,13 +633,13 @@ class Filings:
         """Show the next page"""
         data_page = self.data_pager.next()
         if data_page is None:
-            log.warning("End of data .. use prev() \u2190 ")
+            log.warning("End of data .. use previous() \u2190 ")
             return None
         start_index, _ = self.data_pager._current_range
         filings_state = PagingState(page_start=start_index, num_records=len(self))
         return Filings(data_page, original_state=filings_state)
 
-    def prev(self):
+    def previous(self):
         """
         Show the previous page of the data
         :return:
@@ -1123,7 +1123,7 @@ class CurrentFilings(Filings):
             self._start = start
             return self
 
-    def prev(self):
+    def previous(self):
         # If start = 1 then there are no previous entries
         if self._start == 1:
             return None
