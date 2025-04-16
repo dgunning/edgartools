@@ -1,32 +1,25 @@
 """
 Tests for the edgar.funds package.
 """
-import pytest
 from unittest.mock import patch, MagicMock
+
+import pytest
 from rich import print
-from edgar.funds.core import (
-    Fund, 
-    FundClass, 
-    FundSeries, 
-)
+
 from edgar.funds import (
     get_fund,
     FundData,
 )
-
-from edgar.funds.data import (get_fund_classes, get_fund_series, parse_series_and_classes_from_html)
-
+from edgar.funds.core import Fund, FundClass, FundSeries
+from edgar.funds.data import (get_fund_classes, parse_series_and_classes_from_html)
 from edgar.funds.reports import (
     FundReport,
     NPORT_FORMS,
 )
-
 from edgar.funds.thirteenf import (
     ThirteenF,
     THIRTEENF_FORMS,
 )
-from unittest.mock import patch
-import os
 
 
 class TestFundPackage:
@@ -432,7 +425,6 @@ def test_parse_kinetics_fund_series_html():
     This test uses the actual HTML file from the Kinetics fund to ensure
     we correctly extract all series and classes.
     """
-    import os
     from edgar.funds.data import parse_series_and_classes_from_html
     from edgar.funds.core import Fund
     
@@ -465,7 +457,7 @@ def test_integration_get_fund_series():
     Test the integration of get_fund_series with the new direct series URL approach.
     This test mocks at a higher level to ensure proper integration.
     """
-    from edgar.funds.data import get_fund_series, get_series_and_classes_from_sec
+    from edgar.funds.data import get_fund_series
     from edgar.funds.core import Fund, FundSeries
     
     # Create a simplified mock return value for get_series_and_classes_from_sec
@@ -509,7 +501,6 @@ def test_series_class_association_inference():
     This test verifies that classes without explicit series_id can be associated
     with the correct series through various inference techniques.
     """
-    from edgar.funds.data import get_fund_classes
     from edgar.funds.core import Fund, FundSeries, FundClass
     
     # Create a mock fund directly instead of trying to patch properties
