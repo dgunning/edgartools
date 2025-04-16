@@ -1321,6 +1321,7 @@ class Filing:
         self.filing_date = filing_date
         self.accession_no = accession_no
         self._filing_homepage = None
+        self._sgml = None
 
     @property
     def accession_number(self):
@@ -1493,16 +1494,38 @@ class Filing:
         """
         return local_filing_path(str(self.filing_date), self.accession_no)
 
-    @lru_cache()
+    @classmethod
+    def from_sgml(cls, source: Union[str, Path]):
+        """
+        Read the filing from the SGML string
+        """
+        filing_sgml = FilingSGML.from_source(source)
+        filers = filing_sgml.header.filers
+        if filers and len(filers) > 0:
+             company = filers[0].company_information.name if filers[0].company_information else ""
+        else:
+            company = ""
+
+        return cls(cik=filing_sgml.cik,
+                   accession_no=filing_sgml.accession_number,
+                   form=filing_sgml.form,
+                   company=company,
+                   filing_date=filing_sgml.filing_date)
+
     def sgml(self) -> FilingSGML:
         """
         Read the filing from the local storage path if it exists
         """
+        if self._sgml:
+            return self._sgml
         if is_using_local_storage():
             local_path = local_filing_path(str(self.filing_date), self.accession_no)
             if local_path.exists():
-                return FilingSGML.from_source(local_path)
-        return FilingSGML.from_filing(self)
+                self._sgml = FilingSGML.from_source(local_path)
+
+        if self._sgml is None:
+            self._sgml = FilingSGML.from_filing(self)
+        return self._sgml
 
     @cached_property
     def reports(self)  -> Optional[Reports]:

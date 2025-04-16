@@ -13,6 +13,7 @@ from edgar.sgml.sgml_parser import SGMLParser, SGMLFormatType, SGMLDocument
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.tools import is_xml
 
+
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
 
@@ -216,8 +217,14 @@ class FilingSGML:
 
     @property
     def cik(self):
-        if self.header.cik:
-            return self.header.cik
+        return self.header.cik
+
+    @cached_property
+    def entity(self):
+        from edgar.entity import Entity
+        cik = self.cik
+        if cik:
+            return Entity(cik)
 
     @property
     def form(self):

@@ -350,6 +350,13 @@ class FilingHeader:
     @property
     def cik(self):
         cik = self.filing_metadata.get("CIK")
+        if cik:
+            return int(cik)
+        # Get from the filers
+        if self.filers and len(self.filers) > 0:
+            company = self.filers[0].company_information
+            if company and company.cik:
+                return int(company.cik)
         return cik
 
     @property
