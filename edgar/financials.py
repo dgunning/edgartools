@@ -23,21 +23,33 @@ class Financials:
             return None
 
     def balance_sheet(self):
+        if self.xb is None:
+            return None
         return self.xb.statements.balance_sheet()
 
     def income_statement(self):
+        if self.xb is None:
+            return None
         return self.xb.statements.income_statement()
 
     def cashflow_statement(self):
+        if self.xb is None:
+            return None
         return self.xb.statements.cashflow_statement()
 
     def statement_of_equity(self):
+        if self.xb is None:
+            return None
         return self.xb.statements.statement_of_equity()
 
     def comprehensive_income(self):
+        if self.xb is None:
+            return None
         return self.xb.statements.comprehensive_income()
 
     def cover(self):
+        if self.xb is None:
+            return None
         return self.xb.statements.cover_page()
 
     def __rich__(self):
