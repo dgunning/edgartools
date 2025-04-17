@@ -1,6 +1,7 @@
 from datetime import datetime
 from functools import lru_cache, partial
 from typing import Dict, List, Optional
+import re
 
 from rich import box
 from rich import print
@@ -678,8 +679,10 @@ class CurrentReport():
             exhibit_content = self._get_exhibit_content(exhibit)
 
             if exhibit_content:
+                # Remove text like [/she] and replace with (she) to prevent it being treated as rich markup
+                cleaned_content = re.sub(r'\[(/[^]]*)]', r'(\1)',exhibit_content)
                 title = Text.assemble(("Exhibit ", "bold gray54"), (exhibit.document_type, "bold green"))
-                renderables.append(Panel(exhibit_content,
+                renderables.append(Panel(cleaned_content,
                                          title=title,
                                          subtitle=Text(exhibit.description, style="gray54"),
                                          box=box.SIMPLE))
