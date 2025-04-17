@@ -20,6 +20,7 @@ from rich import box
 from rich.table import Column, Table
 from rich.table import Table as RichTable
 
+from edgar.core import log
 from edgar.attachments import Attachments
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL
@@ -267,7 +268,7 @@ class XBRL:
         return xbrl
     
     @classmethod
-    def from_filing(cls, filing) -> 'XBRL':
+    def from_filing(cls, filing) -> Optional['XBRL']:
         """
         Create an XBRL object from a Filing object.
         
@@ -283,7 +284,8 @@ class XBRL:
         xbrl_attachments = XBRLAttachments(filing.attachments)
         
         if xbrl_attachments.empty:
-            raise XBRLFilingWithNoXbrlData(f"No xbrl attachments detected in filing {filing}")
+            log.warning(f"No XBRL attachments found in filing {filing}")
+            return None
 
         if xbrl_attachments.get('schema'):
             xbrl.parser.parse_schema_content(xbrl_attachments.get('schema').content)

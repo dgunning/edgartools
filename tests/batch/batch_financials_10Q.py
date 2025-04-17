@@ -1,19 +1,14 @@
 from edgar import *
-from edgar.legacy.xbrl import get_xbrl_object
-from financials import Financials
-import time
-from rich import print as rprint
+from edgar.xbrl import XBRL
 
 def run_tenq_financials(num):
     filings = get_filings(form='10-Q')
     for filing in filings.sample(min(num, len(filings))):
-        print(str(filing))
-        xbrl_data = get_xbrl_object(filing)
-        if xbrl_data:
-            financials = Financials(xbrl_data)
-            income_statement = financials.get_income_statement()
-            rprint(income_statement)
-            time.sleep(3)
+        xbrl = XBRL.from_filing(filing)
+        if xbrl:
+            income_statement = xbrl.statements.income_statement()
+            balance_sheet = xbrl.statements.balance_sheet()
+            cashflow_statement = xbrl.statements.cashflow_statement()
 
 
 if __name__ == '__main__':

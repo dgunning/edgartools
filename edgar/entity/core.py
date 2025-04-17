@@ -241,7 +241,7 @@ class Entity(SecFiler):
                 self._data._not_found = False
             else:
                 # Instead of raising an error, create a default EntityData
-                log.warning(f"Could not find entity data for CIK {self.cik}, using placeholder data")
+                #log.warning(f"Could not find entity data for CIK {self.cik}, using placeholder data")
                 from edgar.entity.data import create_default_entity_data
                 self._data = create_default_entity_data(self.cik)
                 self._data._not_found = True
