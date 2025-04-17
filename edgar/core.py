@@ -8,11 +8,12 @@ import sys
 import threading
 import warnings
 from _thread import interrupt_main
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from decimal import Decimal
-from functools import lru_cache
+from functools import lru_cache, partial
 from functools import wraps
-from typing import Union, Optional, Tuple, List
+from typing import Union, Optional, Tuple, List, TypeVar, Callable, Iterable, Any
 from pathlib import Path
 from datetime import date
 import pytz
@@ -84,6 +85,7 @@ __all__ = [
     'YearAndQuarter',
     'YearAndQuarters',
     'quarters_in_year',
+    'parallel_thread_map',
 ]
 
 IntString = Union[str, int]
@@ -919,6 +921,43 @@ def has_html_content(content: str) -> bool:
         return True
 
     return False
+
+
+T = TypeVar('T')
+R = TypeVar('R')
+
+def parallel_thread_map(func: Callable[[T], R], 
+                        items: Iterable[T], 
+                        **kwargs) -> List[R]:
+    """
+    Run a function in parallel across multiple items using ThreadPoolExecutor.
+    
+    This is a replacement for fastcore's parallel function, supporting only the threadpool
+    execution mode. It does not include progress bars.
+    
+    Args:
+        func: The function to apply to each item
+        items: The items to process
+        **kwargs: Additional keyword arguments to pass to func
+        
+    Returns:
+        List of results from applying func to each item
+    """
+    # Default to min(32, cores+4) which is a good balance for I/O-bound tasks
+    max_workers = kwargs.pop('n_workers', None) or min(32, (os.cpu_count() or 1) + 4)
+    
+    # Convert items to a list for easier handling
+    items_list = list(items)
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        if kwargs:
+            # If there are kwargs, create a partial function
+            partial_func = partial(func, **kwargs)
+            results = list(executor.map(partial_func, items_list))
+        else:
+            results = list(executor.map(func, items_list))
+    
+    return results
 
 
 def initialize_rich_logging():

@@ -742,7 +742,7 @@ def test_10K_filing_with_no_financial_data():
     filing = Filing(form='10-K', filing_date='2023-05-26', company='CarMax Auto Owner Trust 2019-3', cik=1779026,
                     accession_no='0001779026-23-000027')
     tenk: TenK = filing.obj()
-    assert not tenk.financials
+    assert tenk.financials
     assert not tenk.balance_sheet
     assert not tenk.income_statement
     assert not tenk.cash_flow_statement

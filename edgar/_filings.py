@@ -20,7 +20,6 @@ import pyarrow.compute as pc
 import pyarrow.csv as pa_csv
 import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
-from fastcore.parallel import parallel
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
@@ -53,7 +52,8 @@ from edgar.core import (log, display_size, sec_edgar,
                         quarters_in_year,
                         filing_date_to_year_quarters,
                         DataPager,
-                        PagingState)
+                        PagingState,
+                        parallel_thread_map)
 from edgar.files.html import Document
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
@@ -425,12 +425,10 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
         _, final_index_table = fetch_filing_index(year_and_quarter=year_and_quarters[0],
                                                   index=index)
     else:
-        quarters_and_indexes = parallel(fetch_filing_index,
-                                        items=year_and_quarters,
-                                        index=index,
-                                        threadpool=True,
-                                        progress=True
-                                        )
+        quarters_and_indexes = parallel_thread_map(
+            lambda yq: fetch_filing_index(year_and_quarter=yq, index=index),
+            year_and_quarters
+        )
         quarter_and_indexes_sorted = sorted(quarters_and_indexes, key=lambda d: d[0])
         index_tables = [fd[1] for fd in quarter_and_indexes_sorted]
         final_index_table: pa.Table = pa.concat_tables(index_tables, mode="default")
