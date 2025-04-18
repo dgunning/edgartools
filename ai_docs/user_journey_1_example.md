@@ -32,12 +32,13 @@ for filing in recent_10ks:
 
 
 ### 3. Extract financial statements
+
 ```python
 # Convert the filing to a data object and access XBRL statements
 xbrl = latest_10k.obj()  # Returns an XBRL object for 10-K
 balance_sheet = xbrl.balance_sheet
 income_statement = xbrl.income_statement
-cash_flow = xbrl.cash_flow_statement
+cash_flow = xbrl.cashflow_statement
 
 print(balance_sheet.head())
 print(income_statement.head())
