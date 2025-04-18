@@ -1031,25 +1031,22 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
     data = {}
     index = []
 
-    # Initialize the concept column
+    # Initialize columns
+    data['label'] = [None] * len(statement_data)
     data['concept'] = [None] * len(statement_data)
     
     for i, item in enumerate(statement_data):
         # Skip abstract items without values
         if item['is_abstract'] and not item['has_values']:
             continue
-            
-        # Format the label with indentation based on level
-        level = item['level']
-        indent = "  " * level
-        label = f"{indent}{item['label']}"
-        index.append(label)
 
+        data['label'][i] = item['label']
         data['concept'][i] = item['concept']
         
         # Add values for each period
         for j, (period_id, period_label) in enumerate(stitched_data['periods']):
-            col = period_label
+            # Use the end_date in YYYY-MM-DD format as the column name
+            col = period_id[-10:]
             if col not in data:
                 data[col] = [None] * len(statement_data)
             
@@ -1058,7 +1055,7 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
             data[col][i] = value
     
     # Create the DataFrame
-    df = pd.DataFrame(data, index=index)
+    df = pd.DataFrame(data)
     
     return df
 

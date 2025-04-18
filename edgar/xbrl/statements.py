@@ -6,6 +6,7 @@ This module provides functions for working with financial statements.
 
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
+from edgar.xbrl.rendering import RenderedStatement
 
 import pandas as pd
 from rich import box
@@ -169,7 +170,7 @@ class Statement:
         Returns:
             DataFrame if pandas is available, else None
         """
-        rendered_statement = self.render(period_filter=period_filter, period_view=period_view, standard=standard)
+        rendered_statement:RenderedStatement = self.render(period_filter=period_filter, period_view=period_view, standard=standard)
         return rendered_statement.to_dataframe()
 
     def _validate_statement(self, skip_concept_check: bool = False) -> None:
@@ -856,6 +857,12 @@ class StitchedStatement:
         self._statement_data = None
 
     @property
+    def periods(self):
+        return [
+            period_id[-10:] for period_id, _ in self.statement_data['periods']
+        ]
+
+    @property
     def statement_data(self):
         """Get the underlying statement data, loading it if necessary."""
         if self._statement_data is None:
@@ -977,8 +984,8 @@ class StitchedStatements:
             statement.show_date_range = show_date_range
         return statement
 
-    def cash_flow_statement(self, max_periods: int = 8, standardize: bool = True,
-                            use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
+    def cashflow_statement(self, max_periods: int = 8, standardize: bool = True,
+                           use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched cash flow statement across multiple time periods.
         

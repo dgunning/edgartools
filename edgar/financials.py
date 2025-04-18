@@ -80,7 +80,7 @@ class MultiFinancials:
         return self.xbs.statements.income_statement()
 
     def cashflow_statement(self) -> Optional[Statement]:
-        return self.xbs.statements.cash_flow_statement()
+        return self.xbs.statements.cashflow_statement()
 
     def __rich__(self):
         self.xbs.__rich__()

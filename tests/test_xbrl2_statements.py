@@ -8,7 +8,7 @@ from rich import print
 from edgar import *
 from edgar.xbrl.rendering import RenderedStatement
 from edgar.xbrl.statements import Statement, Statements
-from edgar.xbrl.xbrl import XBRL
+from edgar.xbrl import XBRL, XBRLS
 import pandas as pd
 pd.options.display.max_colwidth = 200
 
@@ -25,9 +25,12 @@ def tsla_xbrl():
 
 @pytest.fixture
 def aapl_xbrl():
-    data_dir = Path("data/xbrl/datafiles/aapl")
+    data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2023")
+    return XBRL.parse_directory(data_dir)
 
-    # Parse the directory
+@pytest.fixture
+def aapl_xbrl_2022():
+    data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2022")
     return XBRL.parse_directory(data_dir)
 
 @pytest.fixture
@@ -125,12 +128,46 @@ def test_statement_to_dataframe(aapl_xbrl):
     print()
     # print(cashflow_statement)
     rendered_statement:RenderedStatement = cashflow_statement.render()
-    df1 = rendered_statement.to_dataframe()
-    print()
-    print(df1[[ '2023-09-30']])
-    df = cashflow_statement.to_dataframe()
+    df = rendered_statement.to_dataframe()
+    assert df.columns.tolist() ==['concept', 'label', '2023-09-30', '2022-09-24', '2021-09-25',
+                                  'level','abstract', 'dimension']
+
+    assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2023-09-30'].item() == 96995000000.0
+    assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2022-09-24'].item() == 99803000000.0
+    assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2021-09-25'].item() == 94680000000.0
+
+    #Labels
+    labels = df.label.tolist()
+    assert labels[0] == 'Cash, cash equivalents and restricted cash, ending balances'
+    assert labels[1] == 'Operating activities:'
+    assert labels[2] == 'Net Income'
+    print(df[['label', '2023-09-30']])
 
     assert all(col in df.columns for col in ['2023-09-30', '2022-09-24', '2021-09-25'])
+
+
+def test_xbrls_cashflow_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
+    xbs = XBRLS([aapl_xbrl, aapl_xbrl_2022])
+    cashflow = xbs.statements.cashflow_statement()
+    assert cashflow.periods == ['2023-09-30', '2022-09-24']
+    df = cashflow.to_dataframe()
+    columns = df.columns.tolist()
+    print(columns)
+    labels = df.label.tolist()
+    assert 'Net Change in Cash' in labels
+    assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2023-09-30'].item() == 96995000000.0
+    assert df[(df.label == 'Net Income')]['2023-09-30'].item() == 96995000000.0
+
+def test_xbrls_balancesheet_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
+    xbs = XBRLS([aapl_xbrl, aapl_xbrl_2022])
+    balance_sheet = xbs.statements.balance_sheet()
+    assert balance_sheet.periods == ['2023-09-30', '2022-09-24']
+    df = balance_sheet.to_dataframe()
+    columns = df.columns.tolist()
+    assert columns == ['label', 'concept', '2023-09-30', '2022-09-24']
+    labels = df.label.tolist()
+    print(labels)
+    assert 'Total Assets' in labels
 
 
 def test_non_financial_statement():
