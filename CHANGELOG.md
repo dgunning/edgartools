@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-alpha] - 2025-04-19
+
+### Changed
+- Remove `fastcore` dependency 
+- Refactor `entities` to dedicated `entity` module
+- Remove `filing.prev` - use `filing.previous()` instead
+- `XBRL` and `Financials` completely rewritten
+- `Fund` completely rewritten
+
+### Added
+- Create `Filing` from SGML file
+- `Filings` can now be used to filter downloads
+
+
 ## [3.15.0] - 2025-04-04
 
 ### Fixed
