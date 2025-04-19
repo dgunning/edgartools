@@ -34,18 +34,25 @@
 | ✅ LLM-ready text extraction for AI pipelines  | ❌ Extra processing for AI/LLM compatibility |
 | ✅ Automatic throttling to avoid blocks        | ❌ Rate limiting headaches                   |
 
+
+## Apple's income statement in 1 line of code
+
+```python
+balance_sheet = Company("AAPL").get_financials().balance_sheet()         
+```
+
 ## 🔍 Key Features
 
-- **Comprehensive Coverage**: Access any SEC filing since 1994
+- **Comprehensive Coverage**: Retrieve **any** SEC filing (10-K, 10-Q, 8-K, 13F, S-1 etc.) since 1994.
 - **Intuitive API**: Simple, consistent interface for all SEC data
 - **Smart Data Objects**: Automatic parsing of filings into structured objects
 - **Clean Text Extraction**: One-line conversion from HTML to clean, readable text
 - **AI/LLM Ready**: Text formatting and chunking optimized for AI pipelines
 - **Financial Statements**: Extract balance sheets, income statements, and cash flows
-- **Performance Optimized**: Uses PyArrow for efficient data handling
+- **Fund Holdings Analysis**: Extract and analyze 13F holdings data for investment managers.
 - **Beautiful Output**: Rich terminal displays and visualization helpers
 - **Insider Transactions**: Track Form 3, 4, and 5 filings
-- **Investment Funds**: Analyze fund structures, classes, and holdings
+- **Investment Funds & ETFS**: Analyze fund structures, classes, and holdings
 - **XBRL Support**: Extract and analyze XBRL-tagged data
 - **Automatic Throttling**: Respectful of SEC.gov rate limits
 
@@ -110,15 +117,14 @@ use_local_storage()
 [See full code](docs/examples.md#company_financial_analysis)
 
 
-</details>
-
 
 ## 📚 Documentation
 
+
+- [User Journeys / Examples](https://edgartools.readthedocs.io/en/latest/examples/)
+- [Technical Guides](https://edgartools.readthedocs.io/en/latest/guides/)
 - [Full API Documentation](https://edgartools.readthedocs.io/)
-- [User Guides](https://edgartools.readthedocs.io/en/latest/guides/)
-- [Examples Gallery](https://edgartools.readthedocs.io/en/latest/examples/)
-- [Blog & Tutorials](https://www.edgartools.io)
+- [EdgarTools Blog](https://www.edgartools.io)
 
 ## 👥 Community & Support
 
@@ -146,9 +152,18 @@ See our [Contributing Guide](CONTRIBUTING.md) for details.
 
 If you find EdgarTools valuable, please consider supporting its development:
 
-<a href="https://buy.polar.sh/polar_cl_4URWus0XT8CtHrbOEP4FfDTAbVFkp0RiZqgwd1tNIdg" data-polar-checkout data-polar-checkout-theme="dark">**Donate to EdgarTools**</a>
+## 🔍 Key Features
 
-## 📜 License
+- **Comprehensive Filing Access**: Retrieve **any** SEC filing (10-K, 10-Q, 8-K, 13F, S-1, Form 4, etc.) since 1994.
+- **Intuitive API**: Simple, consistent interface for all data types.
+- **Smart Data Objects**: Automatic parsing of filings into structured Python objects.
+- **Financial Statement Extraction**: Easily access **Balance Sheets, Income Statements, Cash Flows**, and individual line items using XBRL tags or common names.
+- **Fund Holdings Analysis**: Extract and analyze **13F holdings** data for investment managers.
+- **Insider Transaction Monitoring**: Get structured data from **Form 3, 4, 5** filings.
+- **Clean Text Extraction**: One-line conversion from filing HTML to clean, readable text suitable for NLP.
+- **Targeted Section Extraction**: Pull specific sections like **Risk Factors (Item 1A)** or **MD&A (Item 7)**.
+- **AI/LLM Ready**: Text formatting and chunking optimized for AI pipelines.
+- **Performance Optimized**: Leverages libraries like `lxml` and potentially `PyArrow` for efficient data handling.
 
 EdgarTools is distributed under the [MIT License](LICENSE).
 
