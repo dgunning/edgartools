@@ -19,21 +19,20 @@
   <b>Extract financial data from SEC filings in 3 lines of code instead of 100+</b>
 </p>
 
-<!-- MEDIA PLACEHOLDER: Hero Video Demo (30-second overview of key capabilities) -->
 ![Edgartools Demo](docs/images/edgartools-demo.gif)
 
 ## Why Financial Professionals Choose EdgarTools
 
 
-| Without EdgarTools | With EdgarTools |
-|---|---|
-| ❌ Hours spent navigating SEC.gov | ✅ Instant access to any filing since 1994 |
-| ❌ Complex web scraping code | ✅ Clean Python API with intuitive methods |
-| ❌ Manual extraction of financial data | ✅ Automatic parsing into pandas DataFrames |
-| ❌ Custom code for each filing type | ✅ Specialized data objects for each form type |
-| ❌ Messy HTML parsing for text extraction | ✅ One-line conversion to clean, readable text |
-| ❌ Extra processing for AI/LLM compatibility | ✅ LLM-ready text extraction for AI pipelines |
-| ❌ Rate limiting headaches | ✅ Automatic throttling to avoid blocks |
+| With EdgarTools                               | Without EdgarTools                          |
+|-----------------------------------------------|---------------------------------------------|
+| ✅ Instant access to any filing since 1994     | ❌ Hours spent navigating SEC.gov            |
+| ✅ Clean Python API with intuitive methods     | ❌ Complex web scraping code                 |
+| ✅ Automatic parsing into pandas DataFrames    | ❌ Manual extraction of financial data       |
+| ✅ Specialized data objects for each form type | ❌ Custom code for each filing type          |
+| ✅ One-line conversion to clean, readable text | ❌ Messy HTML parsing for text extraction    |
+| ✅ LLM-ready text extraction for AI pipelines  | ❌ Extra processing for AI/LLM compatibility |
+| ✅ Automatic throttling to avoid blocks        | ❌ Rate limiting headaches                   |
 
 ## 🔍 Key Features
 
