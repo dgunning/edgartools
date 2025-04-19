@@ -20,6 +20,7 @@
 </p>
 
 <!-- MEDIA PLACEHOLDER: Hero Video Demo (30-second overview of key capabilities) -->
+![Edgartools Demo](docs/images/edgartools-demo.gif)
 
 ## Why Financial Professionals Choose EdgarTools
 
@@ -34,17 +35,20 @@
 | ❌ Extra processing for AI/LLM compatibility | ✅ LLM-ready text extraction for AI pipelines |
 | ❌ Rate limiting headaches | ✅ Automatic throttling to avoid blocks |
 
+## 🔍 Key Features
 
-```python
-# Get Apple's latest annual report and extract the balance sheet in 3 lines:
-from edgar import *
-
-filing = Company("AAPL").latest("10-K")      # Get the latest 10-K
-xb = filing.xbrl()                           # Create the data object
-balance_sheet = xb.statements.balance_sheet  # Extract the balance sheet
-```
-
-
+- **Comprehensive Coverage**: Access any SEC filing since 1994
+- **Intuitive API**: Simple, consistent interface for all SEC data
+- **Smart Data Objects**: Automatic parsing of filings into structured objects
+- **Clean Text Extraction**: One-line conversion from HTML to clean, readable text
+- **AI/LLM Ready**: Text formatting and chunking optimized for AI pipelines
+- **Financial Statements**: Extract balance sheets, income statements, and cash flows
+- **Performance Optimized**: Uses PyArrow for efficient data handling
+- **Beautiful Output**: Rich terminal displays and visualization helpers
+- **Insider Transactions**: Track Form 3, 4, and 5 filings
+- **Investment Funds**: Analyze fund structures, classes, and holdings
+- **XBRL Support**: Extract and analyze XBRL-tagged data
+- **Automatic Throttling**: Respectful of SEC.gov rate limits
 
 ## 📦 Installation
 
@@ -64,122 +68,21 @@ set_identity("your.name@example.com")  # Replace with your email
 # 3. Find a company
 company = Company("MSFT")  # Microsoft
 
-# 4. Get recent filings
-filings = company.get_filings().latest(5)  # Get the latest 5 filings
-filings
+# 4. Get company filings
+filings = company.get_filings() 
+
+# 5. Filter by form 
+insider_filings = filings.filter(form="4")  # Insider transactions
+
+# 6. Get the latest filing
+insider_filing = insider_filings[0]
+
+# 7. Convert to a data object
+ownership = insider_filing.obj()
 ```
 
-## 🔍 Key Features
+![Apple Insider Transaction](docs/images/aapl-insider.png)
 
-- **Comprehensive Coverage**: Access any SEC filing since 1994
-- **Intuitive API**: Simple, consistent interface for all SEC data
-- **Smart Data Objects**: Automatic parsing of filings into structured objects
-- **Clean Text Extraction**: One-line conversion from HTML to clean, readable text
-- **AI/LLM Ready**: Text formatting and chunking optimized for AI pipelines
-- **Financial Statements**: Extract balance sheets, income statements, and cash flows
-- **Performance Optimized**: Uses PyArrow for efficient data handling
-- **Beautiful Output**: Rich terminal displays and visualization helpers
-- **Insider Transactions**: Track Form 3, 4, and 5 filings
-- **Investment Funds**: Analyze fund structures, classes, and holdings
-- **XBRL Support**: Extract and analyze XBRL-tagged data
-- **Automatic Throttling**: Respectful of SEC.gov rate limits
-
-## 🧭 User Journeys: Solve Real Problems
-
-<details>
-<summary><H3>1. Company Financial Analysis</H3> - Analyze a company's financial health across multiple periods</summary>
-
-**Problem:** Need to analyze a company's financial health across multiple periods.
-
-```python
-def plot_revenue(ticker:str):
-    c = Company(ticker)
-    filings = c.get_filings(form="10-K").latest(5)
-    xbs = XBRLS.from_filings(filings)
-    income_statement = xbs.statements.income_statement()
-    income_df = income_statement.to_dataframe()
-    
-    # Extract financial metrics
-    net_income = income_df[income_df.concept == "us-gaap_NetIncomeLoss"][income_statement.periods].iloc[0]
-    gross_profit = income_df[income_df.concept == "us-gaap_GrossProfit"][income_statement.periods].iloc[0]
-    revenue = income_df[income_df.label == "Revenue"][income_statement.periods].iloc[0]
-    
-    # Convert periods to fiscal years for better readability
-    periods = [pd.to_datetime(period).strftime('FY%y') for period in income_statement.periods]
-    
-    # Reverse the order so most recent years are last (oldest to newest)
-    periods = periods[::-1]
-    revenue_values = revenue.values[::-1]
-    gross_profit_values = gross_profit.values[::-1]
-    net_income_values = net_income.values[::-1]
-    
-    # Create a DataFrame for plotting
-    plot_data = pd.DataFrame({
-        'Revenue': revenue_values,
-        'Gross Profit': gross_profit_values,
-        'Net Income': net_income_values
-    }, index=periods)
-    
-    # Convert to billions for better readability
-    plot_data = plot_data / 1e9
-    
-    # Create the figure
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    # Plot the data as lines with markers
-    plot_data.plot(kind='line', marker='o', ax=ax, linewidth=2.5)
-    
-    # Format the y-axis to show billions with 1 decimal place
-    ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda x, _: f'${x:.1f}B'))
-    
-    # Add labels and title
-    ax.set_xlabel('Fiscal Year')
-    ax.set_ylabel('Billions USD')
-    ax.set_title(f'{c.name} ({ticker}) Financial Performance')
-    
-    # Add a grid for better readability
-    ax.grid(True, linestyle='--', alpha=0.7)
-    
-    # Add a source note
-    plt.figtext(0.5, 0.01, 'Source: SEC EDGAR via edgartools', ha='center', fontsize=9)
-    
-    # Improve layout
-    plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-    
-    return fig
-```
-
-![Microsoft Revenue Trend](docs/images/MSFT_financial_simple.png)
-</details>
-
-
-## 📊 Data Objects
-
-EdgarTools automatically converts filings into specialized data objects based on form type:
-
-| Form | Data Object | Description |
-|------|-------------|-------------|
-| 10-K | `TenK` | Annual reports with financials, business description, risk factors |
-| 10-Q | `TenQ` | Quarterly reports with financials |
-| 8-K | `EightK` | Current reports for material events |
-| 13F-HR | `ThirteenF` | Investment manager holdings |
-| 3, 4, 5 | `Form3`, `Form4`, `Form5` | Insider ownership and transactions |
-| NPORT-P | `FundReport` | Fund portfolio reports |
-
-```python
-from edgar import find, obj
-
-# Get a filing by accession number
-filing = find("0001326801-23-000006")  # Tesla 10-K
-
-# Convert to appropriate data object
-data_object = obj(filing)  # Returns a TenK object
-
-# Access specialized properties
-print(f"Filing Type: {type(data_object).__name__}")
-print(f"Risk Factors: {len(data_object.risk_factors)} characters")
-print(f"Business Description: {len(data_object.business_description)} characters")
-```
 
 ## 🛠️ Advanced Usage
 
@@ -197,6 +100,18 @@ download_edgar_data()
 use_local_storage()
 ```
 
+## 🧭 Solve Real Problems
+
+### Company Financial Analysis
+
+**Problem:** Need to analyze a company's financial health across multiple periods.
+
+![Microsoft Revenue Trend](docs/images/MSFT_financial_complex.png)
+
+[See full code](docs/examples.md#company_financial_analysis)
+
+
+</details>
 
 
 ## 📚 Documentation
@@ -210,7 +125,6 @@ use_local_storage()
 
 - [GitHub Issues](https://github.com/dgunning/edgartools/issues) - Bug reports and feature requests
 - [Discussions](https://github.com/dgunning/edgartools/discussions) - Questions and community discussions
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/edgartools) - Technical Q&A
 
 ## 🔮 Roadmap
 

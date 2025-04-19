@@ -23,7 +23,7 @@ except ImportError:
     VISUALIZATION_AVAILABLE = False
 
 # Make sure output directory exists
-image_dir = Path('docs/images')
+image_dir = Path('../images')
 if not image_dir.exists():
     image_dir.mkdir(parents=True)
 
