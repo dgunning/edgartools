@@ -56,6 +56,9 @@ def test_get_statement_by_short_name(tsla_xbrl):
     assert statement_lst
     assert statement_lst[0]['concept'] == 'dei_CoverAbstract'
 
+    cover = tsla_xbrl.statements.cover_page()
+    assert cover
+
     # Use the Statements class to get the statement
     statements = tsla_xbrl.statements
     statement: Statement = statements['Cover']

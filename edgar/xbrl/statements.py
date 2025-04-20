@@ -669,6 +669,25 @@ class Statements:
             
         return "\n".join(lines)
 
+    def cover_page(self) -> Statement:
+        """
+        Get the cover page statement.
+
+        Returns:
+            A cover page statement
+        """
+        role = self.find_statement_by_primary_concept("CoverPage")
+        if role:
+            return Statement(self.xbrl, role, canonical_type="CoverPage")
+
+        # Try using the xbrl.render_statement with parenthetical parameter
+        if hasattr(self.xbrl, 'find_statement'):
+            matching_statements, found_role, _ = self.xbrl.find_statement("CoverPage")
+            if found_role:
+                return Statement(self.xbrl, found_role, canonical_type="CoverPage")
+
+        return self["CoverPage"]
+
     def balance_sheet(self, parenthetical: bool = False) -> Statement:
         """
         Get a balance sheet.
