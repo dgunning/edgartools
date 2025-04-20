@@ -24,32 +24,32 @@
 
 #### 📄 Filtering Filings
 
-|                                   | Code                                                             |
-|-----------------------------------|------------------------------------------------------------------|
-| 📝 Filter by form type            | `filings.filter(form="10-K")`                                    |
-| 📑 Filter by multiple forms       | `filings.filter(form=["10-K", "10-Q"])`                          |
-| 🔄 Include form amendments        | `filings.filter(form="10-K", amendments=True)`                   |
-| 🏢 Filter by CIK                  | `filings.filter(cik="0000320193")`                               |
-| 🏙️ Filter by multiple CIKs       | `filings.filter(cik=["0000320193", "1018724"])`                  |
-| 🏷️ Filter by ticker              | `filings.filter(ticker="AAPL")`                                  |
-| 🏷️🏷️ Filter by multiple tickers | `filings.filter(ticker=["AAPL", "MSFT"])`                        |
-| 📅 Filter on a specific date      | `filings.filter(date="2020-01-01")`                              |
-| 📅↔️📅 Filter between dates       | `filings.filter(date="2020-01-01:2020-03-01")`                   |
-| 📅⬅️ Filter before a date         | `filings.filter(date=":2020-03-01")`                             |
-| 📅➡️ Filter after a date          | `filings.filter(date="2020-03-01:")`                             |
-| 🔀 Combine multiple filters       | `filings.filter(form="10-K", date="2020-01-01:", ticker="AAPL")` |
+|                                     | Code                                                             |
+|-------------------------------------|------------------------------------------------------------------|
+| 📝 Filter by form type              | `filings.filter(form="10-K")`                                    |
+| 📑 Filter by multiple forms         | `filings.filter(form=["10-K", "10-Q"])`                          |
+| 🔄 Include form amendments          | `filings.filter(form="10-K", amendments=True)`                   |
+| 🏢 Filter by CIK                    | `filings.filter(cik="0000320193")`                               |
+| 🏙️ Filter by multiple CIKs         | `filings.filter(cik=["0000320193", "1018724"])`                  |
+| 🏷️ Filter by ticker                | `filings.filter(ticker="AAPL")`                                  |
+| 🏷️🏷️ Filter by multiple tickers   | `filings.filter(ticker=["AAPL", "MSFT"])`                        |
+| 📅 Filter on a specific date        | `filings.filter(date="2020-01-01")`                              |
+| 📅↔️📅 Filter between dates         | `filings.filter(date="2020-01-01:2020-03-01")`                   |
+| 📅⬅️ Filter before a date           | `filings.filter(date=":2020-03-01")`                             |
+| 📅➡️ Filter after a date            | `filings.filter(date="2020-03-01:")`                             |
+| 🔀 Combine multiple filters         | `filings.filter(form="10-K", date="2020-01-01:", ticker="AAPL")` |
 
 #### 📊 Viewing and Manipulating Filings
 
-|                                      | Code                     |
-|--------------------------------------|--------------------------|
-| ⏭️ Show the next page of filings     | `filings.next()`         |
-| ⏮️ Show the previous page of filings | `filings.prev()`       |
-| 🔝 Get the first n filings           | `filings.head(20)`       |
-| 🔚 Get the last n filings            | `filings.tail(20)`       |
-| 🕒 Get the latest n filings by date  | `filings.latest(20)`    |
-| 🎲 Get a random sample of filings    | `filings.sample(20)`     |
-| 🐼 Get filings as a pandas dataframe | `filings.to_pandas()`  |
+|                                      | Code                  |
+|--------------------------------------|-----------------------|
+| ⏭️ Show the next page of filings     | `filings.next()`      |
+| ⏮️ Show the previous page of filings | `filings.previous()`  |
+| 🔝 Get the first n filings           | `filings.head(20)`    |
+| 🔚 Get the last n filings            | `filings.tail(20)`    |
+| 🕒 Get the latest n filings by date  | `filings.latest(20)`  |
+| 🎲 Get a random sample of filings    | `filings.sample(20)`  |
+| 🐼 Get filings as a pandas dataframe | `filings.to_pandas()` |
 
 ### Working with a filing 📄
 
@@ -85,12 +85,12 @@
 
 #### 📎 Working with Attachments
 
-|                               | Code                               |
-|-------------------------------|-----------------------------------|
-| 📁 Get all filing attachments | `filing.attachments`              |
+|                               | Code                                 |
+|-------------------------------|--------------------------------------|
+| 📁 Get all filing attachments | `filing.attachments`                 |
 | 📄 Get a single attachment    | `attachment = filing.attachments[0]` |
-| 🌐 Open attachment in browser | `attachment.open()`               |
-| ⬇️ Download an attachment     | `content = attachment.download()` |
+| 🌐 Open attachment in browser | `attachment.open()`                  |
+| ⬇️ Download an attachment     | `content = attachment.download()`    |
 
 ### Working with a company
 
@@ -106,6 +106,6 @@
 | Get the last 5 10-Q's                    | `company.get_filings(form="10-Q", 5)`                         |
 | Get a company filing by accession_number | `company.get_filing(accession_number="0000320193-21-000139")` |
 | Get the company's financials             | `company.financials`                                          |
-| Get the company's balance sheet          | `company.financials.get_balance_sheet`                        |
-| Get the company's income statement       | `company.financials.get_income_statement`                     |
-| Get the company's cash flow statement    | `company.financials.get_cash_flow_statement`                  |
+| Get the company's balance sheet          | `company.financials.balance_sheet()`                          |
+| Get the company's income statement       | `company.financials.income_statement()`                       |
+| Get the company's cash flow statement    | `company.financials.cashflow_statement()`                     |

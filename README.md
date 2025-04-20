@@ -122,7 +122,7 @@ use_local_storage()
 
 
 - [User Journeys / Examples](https://edgartools.readthedocs.io/en/latest/examples/)
-- [Technical Guides](https://edgartools.readthedocs.io/en/latest/guides/)
+- [Quick Guide](https://edgartools.readthedocs.io/en/latest/quick-guide/)
 - [Full API Documentation](https://edgartools.readthedocs.io/)
 - [EdgarTools Blog](https://www.edgartools.io)
 

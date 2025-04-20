@@ -6,7 +6,7 @@ This document showcases common workflows and tasks that financial professionals,
 
 **Problem:** Need to analyze a company's financial health across multiple periods.
 
-![Microsoft Revenue Trend](../docs/images/MSFT_financial_complex.png)
+![Microsoft Revenue Trend](images/MSFT_financial_complex.png)
 
 ```python
 
