@@ -1,15 +1,32 @@
+import pytest
+
 from edgar.entity import get_entity_submissions, Entity, Company
+from edgar.entity.data import parse_entity_submissions, CompanyData
 from edgar.company_reports import TenK, TenQ
 from datetime import datetime
+from pathlib import Path
+import json
+
+
+@pytest.fixture
+def tsla():
+    return Company(1771340)
+
+
+def test_parse_entity_submissions():
+    with Path("data/company_submission.json").open('r') as f:
+        tsla_submissions = json.load(f)
+    data:CompanyData = parse_entity_submissions(tsla_submissions)
+    assert data
+    assert data.industry == 'Motor Vehicles & Passenger Car Bodies'
+    assert data.sic == '3711'
+    assert data.fiscal_year_end == '1231'
+
 
 def test_entity_is_company():
-    # TSLA
-    c = get_entity_submissions(1318605)
-    assert c
-    print(c)
 
     # Taneja Vaibhav at TSLA
-    c = get_entity_submissions(1771340)
+    assert get_entity_submissions(1771340).is_individual
 
     # &VEST Domestic Fund II LP
     assert get_entity_submissions(1800903).is_company
@@ -102,13 +119,13 @@ def test_get_latest_company_reports():
     assert tenq
     assert isinstance(tenq, TenQ)
 
-
 def test_company_repr():
     c= Company(789019)
     c_repr = repr(c)
     print()
     print(c_repr)
     assert "MICROSOFT CORP" in c_repr
+    assert 'Operating' in c_repr
 
 def test_individual_repr():
     i = Entity(1771340)

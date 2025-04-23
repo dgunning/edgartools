@@ -5,23 +5,22 @@ This module provides the main classes for interacting with SEC entities,
 including companies, funds, and individuals.
 """
 from abc import ABC, abstractmethod
+from functools import cached_property
 from functools import lru_cache
 from typing import List, Dict, Optional, Union, Tuple, Any, TypeVar, Iterable
 
 import pandas as pd
-import logging
-from functools import cached_property
+
 from edgar._filings import Filings
 from edgar.company_reports import TenK, TenQ
+from edgar.core import log, reverse_name
+from edgar.entity.data import Address, EntityData, CompanyData
+# Import from our new modules
+from edgar.entity.filings import EntityFacts
+from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.reference.tickers import find_cik
-from edgar.reference.tickers import get_cik_tickers
-from edgar.core import log, reverse_name
-from edgar.entity.tickers import get_icon_from_ticker
-
-# Import from our new modules
-from edgar.entity.filings import EntityFiling, EntityFilings, EntityFacts
-from edgar.entity.data import Address, EntityData, CompanyData
+from edgar.richtools import repr_rich
 
 # Performance optimization: use set for O(1) lookups
 COMPANY_FORMS = {
@@ -68,8 +67,7 @@ def has_company_filings(filings_form_array: 'pyarrow.ChunkedArray', max_filings:
     Returns:
         True if any form matches a company form, False otherwise
     """
-    import pyarrow as pa
-    
+
     # Early exit for empty arrays
     if filings_form_array.null_count == filings_form_array.length:
         return False
@@ -246,6 +244,17 @@ class Entity(SecFiler):
                 self._data = create_default_entity_data(self.cik)
                 self._data._not_found = True
         return self._data
+
+    def mailing_address(self) -> Optional[Address]:
+        """Get the mailing address of the entity."""
+        if hasattr(self.data, 'mailing_address') and self.data.mailing_address:
+            return self.data.mailing_address
+
+    def business_address(self) -> Optional[Address]:
+        """Get the business address of the entity."""
+        if hasattr(self.data, 'business_address') and self.data.business_address:
+            return self.data.business_address
+
     
     @property
     def not_found(self) -> bool:
@@ -343,9 +352,12 @@ class Entity(SecFiler):
         if hasattr(self, 'data'):
             return f"Entity({self.data.name} [{self.cik}])"
         return f"Entity(CIK={self.cik})"
+
+    def __rich__(self):
+        return self.data.__rich__()
     
     def __repr__(self):
-        return self.__str__()
+        return repr_rich(self.__rich__())
 
 
 class Company(Entity):
@@ -373,6 +385,18 @@ class Company(Entity):
         """Get all ticker symbols for this company."""
         if hasattr(self.data, 'tickers'):
             return self.data.tickers
+        return []
+
+    def get_ticker(self) -> Optional[str]:
+        """Get the primary ticker symbol for this company."""
+        if self.data and self.data.tickers and len(self.data.tickers) > 0:
+            return self.data.tickers[0]
+        return None
+
+    def get_exchanges(self ):
+        """Get all exchanges for this company."""
+        if hasattr(self.data, 'exchanges'):
+            return self.data.exchanges
         return []
     
     def get_financials(self) -> Optional[Financials]:
@@ -403,12 +427,6 @@ class Company(Entity):
         latest_10q = self.get_filings(form='10-Q', trigger_full_load=False).latest()
         if latest_10q is not None:
             return latest_10q.obj()
-        return None
-    
-    def get_ticker(self) -> Optional[str]:
-        """Get the primary ticker symbol for this company."""
-        if self.data and self.data.tickers and len(self.data.tickers) > 0:
-            return self.data.tickers[0]
         return None
 
     def get_icon(self):

@@ -294,6 +294,8 @@ class EntityData:
                 name: str,
                 tickers: List[str],
                 exchanges: List[str],
+                sic: str,
+                fiscal_year_end: str,
                 filings: EntityFilings,
                 business_address: Address,
                 mailing_address: Address,
@@ -304,6 +306,8 @@ class EntityData:
         Args:
             cik: The CIK number
             name: The entity name
+            sic: The Standard Industrial Classification code
+            fiscal_year_end: The fiscal year end date
             tickers: List of ticker symbols
             exchanges: List of exchanges
             filings: The entity's filings
@@ -313,6 +317,8 @@ class EntityData:
         """
         self.cik: int = cik
         self.name: str = name
+        self.sic = sic
+        self.fiscal_year_end: str = fiscal_year_end
         self.tickers: List[str] = tickers
         self.exchanges: List[str] = exchanges
         self.filings: EntityFilings = filings
