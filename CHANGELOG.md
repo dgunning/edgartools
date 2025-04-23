@@ -12,11 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor `entities` to dedicated `entity` module
 - Remove `filing.prev` - use `filing.previous()` instead
 - `XBRL` and `Financials` completely rewritten
+- Rewrote XBRL concept standardization
 - `Fund` completely rewritten
 
 ### Added
 - Create `Filing` from SGML file
 - `Filings` can now be used to filter downloads
+- Add financial ratio calculation
+
+### Fixed
+- Fixed issue with optional ratio concepts causing ratio calculations to fail
 
 
 ## [3.15.0] - 2025-04-04
