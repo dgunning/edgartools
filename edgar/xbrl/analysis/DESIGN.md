@@ -60,27 +60,74 @@ graph TD
     E --> F[Create RatioAnalysis]
 ```
 
+## Design Components
+
+### 1. RatioData
+
+A structured class that encapsulates the data needed for ratio calculations:
+
+```python
+@dataclass
+class RatioData:
+    calculation_df: pd.DataFrame         # Raw data for calculation
+    periods: List[str]                   # Available reporting periods
+    equivalents_used: Dict[str, str]     # Concept equivalents used
+    required_concepts: List[str]         # Required concepts for the ratio
+    optional_concepts: Dict[str, float]  # Optional concepts with default values
+    
+    def has_concept(self, concept: str) -> bool: ...
+    def get_concept(self, concept: str, default_value: Optional[float] = None) -> pd.Series: ...
+    def get_concepts(self, concepts: List[str]) -> Dict[str, pd.Series]: ...
+```
+
+### 2. RatioAnalysis
+
+A dataclass that encapsulates the results of a ratio calculation:
+
+```python
+@dataclass
+class RatioAnalysis:
+    name: str                      # Name of the ratio
+    description: str               # Description of what the ratio measures
+    calculation_df: pd.DataFrame   # DataFrame used in calculation
+    results: pd.Series             # Final ratio value(s)
+    components: Dict[str, pd.Series] # Individual components used
+    equivalents_used: Dict[str, str] # Equivalent calculations used
+```
+
 ## Key Features
 
-1. **Multi-Period Support**
+1. **Structured Data Management**
+   - Uses dedicated data classes for ratio calculation and results
+   - Clear separation between data preparation and calculation logic
+   - Consistent interface for accessing concepts and their values
+
+2. **Multi-Period Support**
    - Calculates ratios across all available periods
    - Handles period-to-period comparisons
    - Supports rolling averages (e.g., average total assets)
 
-2. **Transparency**
+3. **Transparency**
    - Preserves calculation DataFrame
    - Records all components used
    - Clear documentation of ratio formulas
 
-3. **Error Handling**
+4. **Error Handling**
    - Graceful handling of missing data
    - Protection against zero division
    - Period-by-period calculation resilience
+   - Proper handling of optional concepts (e.g., treating inventory as 0 for companies without inventory)
 
-4. **Extensibility**
+5. **Extensibility**
    - Consistent pattern for adding new ratios
    - Reusable data preparation logic
    - Standardized result format
+
+6. **Optional Concepts Management**
+   - Explicit declaration of optional concepts with default values
+   - Configurable fallback values for missing concepts
+   - Consistent handling across all ratio calculations
+   - Clear documentation of assumptions when optional concepts are missing
 
 ## Usage Example
 
@@ -109,18 +156,30 @@ for ratio in current_ratios:
    - Formula: Current Assets / Current Liabilities
    - Measures: Company's ability to pay short-term obligations
 
-2. **Return on Assets (ROA)**
+2. **Quick Ratio**
+   - Formula: (Current Assets - Inventory) / Current Liabilities
+   - Measures: Company's ability to pay short-term obligations with liquid assets
+   - Note: Handles missing inventory data by treating it as 0
+
+3. **Return on Assets (ROA)**
    - Formula: Net Income / Average Total Assets
    - Measures: Asset utilization efficiency
 
-3. **Operating Margin**
+4. **Operating Margin**
    - Formula: Operating Income / Revenue
    - Measures: Operating efficiency and pricing strategy
+
+5. **Cash Ratio**
+   - Formula: Cash / Current Liabilities
+   - Measures: Company's ability to cover liabilities with cash only
+
+6. **Working Capital**
+   - Formula: Current Assets - Current Liabilities
+   - Measures: Short-term financial health
 
 ## Future Extensions
 
 1. **Additional Ratios**
-   - Quick Ratio
    - Debt-to-Equity
    - Asset Turnover
    - Inventory Turnover

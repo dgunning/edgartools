@@ -64,6 +64,81 @@ class RatioAnalysisGroup:
 
 
 @dataclass
+class RatioData:
+    """Container for financial ratio calculation data.
+    
+    Attributes:
+        calculation_df: DataFrame containing the raw data for calculation
+        periods: List of available reporting periods
+        equivalents_used: Dictionary mapping concepts to their equivalent descriptions
+        required_concepts: List of concepts required for the ratio
+        optional_concepts: Dictionary mapping optional concepts to their default values
+    """
+    calculation_df: pd.DataFrame
+    periods: List[str]
+    equivalents_used: Dict[str, str]
+    required_concepts: List[str]
+    optional_concepts: Dict[str, float]
+    
+    def has_concept(self, concept: str) -> bool:
+        """Check if a concept is available in the calculation DataFrame.
+        
+        Args:
+            concept: The concept to check
+            
+        Returns:
+            True if the concept exists and has at least one non-NaN value
+        """
+        if concept not in self.calculation_df.index:
+            return False
+        return not self.calculation_df.loc[concept].isna().all()
+    
+    def get_concept(self, concept: str, default_value: Optional[float] = None) -> pd.Series:
+        """Get a concept's values for all periods.
+        
+        Args:
+            concept: The concept to retrieve
+            default_value: Default value to use if concept is not found (only for optional concepts)
+            
+        Returns:
+            Series containing the concept values indexed by period
+            
+        Raises:
+            KeyError: If concept is required but not found and no default is provided
+        """
+        if self.has_concept(concept):
+            return self.calculation_df.loc[concept]
+            
+        # Concept not found or all NaN
+        if concept in self.required_concepts and default_value is None:
+            raise KeyError(f"Required concept {concept} not found")
+            
+        # Optional concept with default value or required concept with default override
+        if default_value is not None:
+            # Create Series of default values for all periods
+            return pd.Series(default_value, index=self.periods)
+            
+        # Check if we have a predefined default for this optional concept
+        if concept in self.optional_concepts:
+            return pd.Series(self.optional_concepts[concept], index=self.periods)
+            
+        raise KeyError(f"Concept {concept} not found and no default value provided")
+        
+    def get_concepts(self, concepts: List[str]) -> Dict[str, pd.Series]:
+        """Get multiple concepts at once.
+        
+        Args:
+            concepts: List of concepts to retrieve
+            
+        Returns:
+            Dictionary mapping concepts to their value Series
+            
+        Raises:
+            KeyError: If any required concept is not found
+        """
+        return {concept: self.get_concept(concept) for concept in concepts}
+
+@dataclass
 class RatioAnalysis:
     """Container for ratio calculation results with metadata.
     
@@ -173,14 +248,15 @@ class FinancialRatios:
         if not available_periods:
             raise ValueError("No common periods found across required statements")
 
+        all_concepts = required_concepts + optional_concepts
         # Create empty DataFrame with only the common periods
-        calc_df = pd.DataFrame(index=required_concepts, columns=Index(sorted(available_periods)))
+        calc_df = pd.DataFrame(index=pd.Index(all_concepts), columns=Index(sorted(available_periods)))
 
         # Track which concepts used equivalents
         equivalents_used = {}
 
         # Fill values from each statement
-        for concept in required_concepts:
+        for concept in all_concepts:
             found = False
             # First try to find matching company concepts from the mapping store
             if concept in self._mapping_store.mappings:
@@ -228,9 +304,6 @@ class FinancialRatios:
                     for equivalent in self._concept_equivalents[concept]:
                         try:
                             # Recursively prepare data for required concepts
-                            # rev = statement_dfs[0][0].iloc[1]['2024-12-31']
-                            print(statement_dfs[0][0][['label', '2024-12-31']])
-
                             sub_df, sub_equiv = self._prepare_ratio_df(
                                 equivalent.required_concepts, statement_dfs)
 
@@ -339,20 +412,23 @@ class FinancialRatios:
         # If we get here, no valid concept or equivalent was found
         raise KeyError(f"Concept {concept} not found and no valid equivalents available")
 
-    def get_ratio_data(self, ratio_type: str) -> Tuple[pd.DataFrame, Dict[str, str]]:
-        """Get the prepared DataFrame for a specific ratio calculation.
+    def get_ratio_data(self, ratio_type: str) -> RatioData:
+        """Get the prepared ratio data for a specific ratio calculation.
         
         This allows inspection of the raw data before ratio calculation.
         
         Args:
             ratio_type: Type of ratio to get data for ('current', 'operating_margin', 
-                       'return_on_assets', 'gross_margin')
+                       'return_on_assets', 'gross_margin', 'leverage')
                        
         Returns:
-            Tuple containing:
-            - DataFrame containing the required concepts for the ratio calculation
-            - Dictionary mapping concepts to their equivalent descriptions if used
+            RatioData object containing calculation data and helper methods for accessing concepts
         """
+        # Default values for optional concepts (used when concept is not found)
+        default_values = {
+            StandardConcept.INVENTORY: 0.0,  # For quick ratio when inventory not found
+        }
+        
         ratio_configs = {
             'current': {
                 'concepts': [
@@ -360,9 +436,9 @@ class FinancialRatios:
                     StandardConcept.TOTAL_CURRENT_LIABILITIES,
                     StandardConcept.CASH_AND_EQUIVALENTS  # For cash ratio
                 ],
-                'optional_concepts': [
-                    StandardConcept.INVENTORY  # Optional for quick ratio
-                ],
+                'optional_concepts': {
+                    StandardConcept.INVENTORY: 0.0  # Optional for quick ratio
+                },
                 'statements': [(self.balance_sheet_df, "BalanceSheet")]
             },
             'operating_margin': {
@@ -370,6 +446,7 @@ class FinancialRatios:
                     StandardConcept.OPERATING_INCOME,
                     StandardConcept.REVENUE
                 ],
+                'optional_concepts': {},
                 'statements': [(self.income_stmt_df, "IncomeStatement")]
             },
             'return_on_assets': {
@@ -377,6 +454,7 @@ class FinancialRatios:
                     StandardConcept.NET_INCOME,
                     StandardConcept.TOTAL_ASSETS
                 ],
+                'optional_concepts': {},
                 'statements': [
                     (self.income_stmt_df, "IncomeStatement"),
                     (self.balance_sheet_df, "BalanceSheet")
@@ -387,6 +465,7 @@ class FinancialRatios:
                     StandardConcept.GROSS_PROFIT,
                     StandardConcept.REVENUE
                 ],
+                'optional_concepts': {},
                 'statements': [(self.income_stmt_df, "IncomeStatement")]
             },
             'leverage': {
@@ -397,6 +476,7 @@ class FinancialRatios:
                     StandardConcept.OPERATING_INCOME,
                     StandardConcept.INTEREST_EXPENSE
                 ],
+                'optional_concepts': {},
                 'statements': [
                     (self.balance_sheet_df, "BalanceSheet"),
                     (self.income_stmt_df, "IncomeStatement")
@@ -408,10 +488,29 @@ class FinancialRatios:
             raise ValueError(f"Unknown ratio type: {ratio_type}. Valid types are: {list(ratio_configs.keys())}")
 
         config = ratio_configs[ratio_type]
-        return self._prepare_ratio_df(
+        # Convert optional_concepts from list to dict if it's still in the old format
+        optional_concepts_dict = config.get('optional_concepts', {})
+        if isinstance(optional_concepts_dict, list):
+            # Convert list to dict using default values
+            optional_concepts_dict = {
+                concept: default_values.get(concept, 0.0) 
+                for concept in optional_concepts_dict
+            }
+            
+        # Get the concepts and equivalents using the old method
+        calc_df, equivalents = self._prepare_ratio_df(
             required_concepts=config['concepts'],
             statement_dfs=config['statements'],
-            optional_concepts=config.get('optional_concepts', [])
+            optional_concepts=list(optional_concepts_dict.keys())
+        )
+        
+        # Create and return the RatioData object
+        return RatioData(
+            calculation_df=calc_df,
+            periods=calc_df.columns.tolist(),
+            equivalents_used=equivalents,
+            required_concepts=config['concepts'],
+            optional_concepts=optional_concepts_dict
         )
 
     def calculate_current_ratio(self) -> RatioAnalysis:
@@ -419,30 +518,30 @@ class FinancialRatios:
         
         Current Ratio = Current Assets / Current Liabilities
         """
-        calc_df, equivalents = self.get_ratio_data('current')
+        ratio_data = self.get_ratio_data('current')
 
         try:
-            current_assets, assets_equiv = self._get_concept_value(
-                StandardConcept.TOTAL_CURRENT_ASSETS, calc_df)
-            current_liab, liab_equiv = self._get_concept_value(
-                StandardConcept.TOTAL_CURRENT_LIABILITIES, calc_df)
+            # Get required concepts directly from RatioData
+            current_assets = ratio_data.get_concept(StandardConcept.TOTAL_CURRENT_ASSETS)
+            current_liab = ratio_data.get_concept(StandardConcept.TOTAL_CURRENT_LIABILITIES)
 
+            # Collect equivalent descriptions if any were used
             equivalents_used = {}
-            if assets_equiv:
-                equivalents_used['current_assets'] = assets_equiv
-            if liab_equiv:
-                equivalents_used['current_liabilities'] = liab_equiv
+            if StandardConcept.TOTAL_CURRENT_ASSETS in ratio_data.equivalents_used:
+                equivalents_used['current_assets'] = ratio_data.equivalents_used[StandardConcept.TOTAL_CURRENT_ASSETS]
+            if StandardConcept.TOTAL_CURRENT_LIABILITIES in ratio_data.equivalents_used:
+                equivalents_used['current_liabilities'] = ratio_data.equivalents_used[StandardConcept.TOTAL_CURRENT_LIABILITIES]
 
             return RatioAnalysis(
                 name="Current Ratio",
                 description="Measures ability to pay short-term obligations",
-                calculation_df=calc_df,
+                calculation_df=ratio_data.calculation_df,
                 results=(current_assets / current_liab).to_frame().T,
                 components={
                     'current_assets': current_assets,
                     'current_liabilities': current_liab
                 },
-                equivalents_used={k: str(v) for k, v in (equivalents_used or {}).items() if v is not None}
+                equivalents_used={k: str(v) for k, v in equivalents_used.items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate current ratio: {str(e)}")
@@ -564,41 +663,42 @@ class FinancialRatios:
             This is appropriate for service companies or companies that do not carry inventory.
             In such cases, the quick ratio will equal the current ratio.
         """
-        calc_df, equivalents = self.get_ratio_data('current')
+        ratio_data = self.get_ratio_data('current')
 
         try:
-            current_assets, assets_equiv = self._get_concept_value(
-                StandardConcept.TOTAL_CURRENT_ASSETS, calc_df)
-            current_liab, liab_equiv = self._get_concept_value(
-                StandardConcept.TOTAL_CURRENT_LIABILITIES, calc_df)
-            inventory, inv_equiv = self._get_concept_value(
-                StandardConcept.INVENTORY, calc_df)
-
-            # If inventory is not found, treat it as 0
-            if inventory is None:
-                inventory = pd.Series(0, index=current_assets.index)
-
+            # Get concepts with defaults handling
+            current_assets = ratio_data.get_concept(StandardConcept.TOTAL_CURRENT_ASSETS)
+            current_liab = ratio_data.get_concept(StandardConcept.TOTAL_CURRENT_LIABILITIES)
+            
+            # Get inventory with default 0 - the RatioData class handles missing inventory
+            inventory = ratio_data.get_concept(StandardConcept.INVENTORY)
+            
+            # Calculate quick assets
             quick_assets = current_assets - inventory
 
+            # Collect equivalent descriptions for used concepts
             equivalents_used = {}
-            if assets_equiv:
-                equivalents_used['current_assets'] = assets_equiv
-            if liab_equiv:
-                equivalents_used['current_liabilities'] = liab_equiv
-            if inv_equiv:
-                equivalents_used['inventory'] = inv_equiv
+            if StandardConcept.TOTAL_CURRENT_ASSETS in ratio_data.equivalents_used:
+                equivalents_used['current_assets'] = ratio_data.equivalents_used[StandardConcept.TOTAL_CURRENT_ASSETS]
+            if StandardConcept.TOTAL_CURRENT_LIABILITIES in ratio_data.equivalents_used:
+                equivalents_used['current_liabilities'] = ratio_data.equivalents_used[StandardConcept.TOTAL_CURRENT_LIABILITIES]
+            if StandardConcept.INVENTORY in ratio_data.equivalents_used:
+                equivalents_used['inventory'] = ratio_data.equivalents_used[StandardConcept.INVENTORY]
+            elif not ratio_data.has_concept(StandardConcept.INVENTORY):
+                # If inventory was using the default and wasn't in equivalents
+                equivalents_used['inventory'] = "Treated as 0 (not found in statements)"
 
             return RatioAnalysis(
                 name="Quick Ratio",
                 description="Measures ability to pay short-term obligations using only highly liquid assets",
-                calculation_df=calc_df,
+                calculation_df=ratio_data.calculation_df,
                 results=(quick_assets / current_liab).to_frame().T,
                 components={
                     'quick_assets': quick_assets,
                     'current_liabilities': current_liab,
                     'inventory': inventory
                 },
-                equivalents_used={k: str(v) for k, v in (equivalents_used or {}).items() if v is not None}
+                equivalents_used={k: str(v) for k, v in equivalents_used.items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
             raise ValueError(f"Failed to calculate quick ratio: {str(e)}")
