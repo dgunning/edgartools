@@ -247,7 +247,7 @@ c.latest_tenk
 
 ### Getting 10-K Items
 
-You can get the text of individual sections of the 10-K filing using tge bracket `[]` operator.
+You can get the text of individual sections of the 10-K filing using the bracket `[]` operator.
 
 ```python
 tenk['Item 1']
