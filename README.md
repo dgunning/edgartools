@@ -115,6 +115,8 @@ See our [Contributing Guide](CONTRIBUTING.md) for details.
 
 If you find EdgarTools valuable, please consider supporting its development:
 
+[Buy me a coffee](https://buymeacoffee.com/edgartools)
+
 ## Key Features for SEC Data Extraction and Analysis
 
 - **Comprehensive Filing Access**: Retrieve **any** SEC filing (10-K, 10-Q, 8-K, 13F, S-1, Form 4, etc.) since 1994.
