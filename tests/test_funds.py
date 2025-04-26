@@ -1,28 +1,17 @@
 """
 Tests for the edgar.funds package.
 """
-from unittest.mock import patch, MagicMock
 
 import pytest
 from rich import print
 
 from edgar.funds import (
+    get_fund_series,
+    get_fund_class,
     find_fund,
-get_fund_series,
-get_fund_class,
-find_fund,
-    FundData,
 )
 from edgar.funds.core import FundCompany, FundClass, FundSeries
-from edgar.funds.data import (get_fund_object, parse_series_and_classes_from_html)
-from edgar.funds.reports import (
-    FundReport,
-    NPORT_FORMS,
-)
-from edgar.funds.thirteenf import (
-    ThirteenF,
-    THIRTEENF_FORMS,
-)
+from edgar.funds.data import (get_fund_object)
 
 
 class TestFundDataAccess:
@@ -83,7 +72,7 @@ def test_parse_kinetics_fund_series_html():
     from edgar.funds.core import FundCompany
     
     # Load the HTML file
-    html_path = '/Users/dwight/PycharmProjects/edgartools/data/funds/kinetics-fund-series.html'
+    html_path = 'data/funds/kinetics-fund-series.html'
     with open(html_path, 'r') as f:
         html_content = f.read()
 
