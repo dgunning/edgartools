@@ -120,8 +120,8 @@ class SalesCompensationRecipient:
         # Name and Crd can be "None"
         name = re.sub("None", "", child_text(recipient_tag, "recipientName") or "")
         crd = re.sub("None", "", child_text(recipient_tag, "recipientCRDNumber") or "")
-        associated_bd_name = re.sub("None", "", child_text(recipient_tag, "associatedBDName") or "", re.IGNORECASE)
-        associated_bd_crd = re.sub("None", "", child_text(recipient_tag, "associatedBDCRDNumber") or "", re.IGNORECASE)
+        associated_bd_name = re.sub("None", "", child_text(recipient_tag, "associatedBDName") or "", flags=re.IGNORECASE)
+        associated_bd_crd = re.sub("None", "", child_text(recipient_tag, "associatedBDCRDNumber") or "", flags=re.IGNORECASE)
 
         address_tag = recipient_tag.find("recipientAddress")
         address = Address(
