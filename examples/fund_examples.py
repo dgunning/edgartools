@@ -16,11 +16,6 @@ from edgar.funds import (
     get_fund_company,
     get_fund_series,
     get_fund_class,
-    get_series_by_name,
-    get_class_by_ticker,
-    FundCompany,
-    FundSeries,
-    FundClass
 )
 
 
@@ -62,28 +57,24 @@ def demonstrate_specialized_getters():
     print(f"Fund Class by ID: {admiral_class}")
     
     # Get a fund class by ticker
-    investor_class = get_class_by_ticker("VFINX")
+    investor_class = get_fund_class("VFINX")
     print(f"Fund Class by ticker: {investor_class}")
-    
-    # Get a series by name
-    series = get_series_by_name(102909, "500 Index")
-    print(f"Fund Series by name: {series}")
 
 
 def demonstrate_entity_navigation():
     """Demonstrate navigation between related entities."""
     print("\n=== Entity Navigation Examples ===")
-    
+
     # Start with a fund class
-    vfinx = get_class_by_ticker("VFINX")
+    vfinx = get_fund_class("VFINX")
     print(f"Starting with fund class: {vfinx}")
-    
+
     # Navigate to the parent fund series
     series = vfinx.series
     print(f"Parent fund series: {series}")
     
     # Navigate to the parent fund company
-    company = vfinx.company
+    company = vfinx.series.fund_company
     print(f"Parent fund company: {company}")
     
     # Get all classes in this series
@@ -91,7 +82,7 @@ def demonstrate_entity_navigation():
     print(f"All classes in this series: {[cls.ticker for cls in classes if cls.ticker]}")
     
     # Get all series offered by this company
-    all_series = company.get_series()
+    all_series = company.list_series()
     print(f"Number of series offered by this company: {len(all_series)}")
     print(f"First few series: {[s.name for s in all_series[:3]]}")
 
