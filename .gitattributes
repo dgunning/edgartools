@@ -1,6 +1,6 @@
 data/** -linguist-detectable
-notebooks/** -linguist-detectable
 workbooks/** -linguist-detectable
+notebooks/** -linguist-detectable
 docs/* linguist-documentation
 *.html linguist-vendored
 
