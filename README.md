@@ -39,8 +39,6 @@
 balance_sheet = Company("AAPL").get_financials().balance_sheet()         
 ```
 
-## SEC Filing Analysis Made Simple
-
 ## 🚀 Quick Start (2-minute tutorial)
 
 ```python
