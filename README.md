@@ -1,10 +1,10 @@
 <p align="center">
 <a href="https://github.com/dgunning/edgartools">
-    <img src="docs/images/edgartools-logo.png" alt="edgar-tools-logo" height="80">
+    <img src="docs/images/edgartools-logo.png" alt="EdgarTools Python SEC EDGAR library logo" height="80">
 </a>
 </p>
 
-<h3 align="center">Unlock SEC data in seconds, not hours</h3>
+<h3 align="center">Python Library for SEC EDGAR Data Extraction and Analysis</h3>
 
 <p align="center">
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/v/edgartools.svg" alt="PyPI - Version"></a>
@@ -16,13 +16,12 @@
 </p>
 
 <p align="center">
-  <b>Extract financial data from SEC filings in 3 lines of code instead of 100+</b>
+  <b>Extract financial data from SEC EDGAR filings in 3 lines of Python code instead of 100+. Access company financials, insider trades, fund holdings, and XBRL data with an intuitive API designed for financial analysis.</b>
 </p>
 
-![Edgartools Demo](docs/images/edgartools-demo.gif)
+![EdgarTools SEC filing data extraction demo](docs/images/edgartools-demo.gif)
 
-## Why Financial Professionals Choose EdgarTools
-
+## SEC Filing Data Extraction with Python
 
 | With EdgarTools                               | Without EdgarTools                          |
 |-----------------------------------------------|---------------------------------------------|
@@ -34,33 +33,13 @@
 | ✅ LLM-ready text extraction for AI pipelines  | ❌ Extra processing for AI/LLM compatibility |
 | ✅ Automatic throttling to avoid blocks        | ❌ Rate limiting headaches                   |
 
-
 ## Apple's income statement in 1 line of code
 
 ```python
 balance_sheet = Company("AAPL").get_financials().balance_sheet()         
 ```
 
-## 🔍 Key Features
-
-- **Comprehensive Coverage**: Retrieve **any** SEC filing (10-K, 10-Q, 8-K, 13F, S-1 etc.) since 1994.
-- **Intuitive API**: Simple, consistent interface for all SEC data
-- **Smart Data Objects**: Automatic parsing of filings into structured objects
-- **Clean Text Extraction**: One-line conversion from HTML to clean, readable text
-- **AI/LLM Ready**: Text formatting and chunking optimized for AI pipelines
-- **Financial Statements**: Extract balance sheets, income statements, and cash flows
-- **Fund Holdings Analysis**: Extract and analyze 13F holdings data for investment managers.
-- **Beautiful Output**: Rich terminal displays and visualization helpers
-- **Insider Transactions**: Track Form 3, 4, and 5 filings
-- **Investment Funds & ETFs**: Analyze fund structures (`FundCompany`, `FundSeries`, `FundClass`) using `find_fund()`, and extract portfolio holdings from N-PORT filings.
-- **XBRL Support**: Extract and analyze XBRL-tagged data
-- **Automatic Throttling**: Respectful of SEC.gov rate limits
-
-## 📦 Installation
-
-```bash
-pip install edgartools
-```
+## SEC Filing Analysis Made Simple
 
 ## 🚀 Quick Start (2-minute tutorial)
 
@@ -87,32 +66,16 @@ insider_filing = insider_filings[0]
 ownership = insider_filing.obj()
 ```
 
-![Apple Insider Transaction](docs/images/aapl-insider.png)
+![Apple SEC Form 4 insider transaction data extraction with Python](docs/images/aapl-insider.png)
 
 
-## 🛠️ Advanced Usage
-
-### Bulk Data Downloads
-
-For faster processing or offline use, download bulk data:
-
-```python
-from edgar import download_edgar_data, use_local_storage
-
-# Download all company data (one-time operation)
-download_edgar_data()
-
-# Use local data for all subsequent operations
-use_local_storage()
-```
-
-## 🧭 Solve Real Problems
+## SEC Filing Analysis: Real-World Solutions
 
 ### Company Financial Analysis
 
 **Problem:** Need to analyze a company's financial health across multiple periods.
 
-![Microsoft Revenue Trend](docs/images/MSFT_financial_complex.png)
+![Microsoft SEC 10-K financial data analysis with EdgarTools](docs/images/MSFT_financial_complex.png)
 
 [See full code](docs/examples.md#company_financial_analysis)
 
@@ -152,18 +115,20 @@ See our [Contributing Guide](CONTRIBUTING.md) for details.
 
 If you find EdgarTools valuable, please consider supporting its development:
 
-## 🔍 Key Features
+## Key Features for SEC Data Extraction and Analysis
 
 - **Comprehensive Filing Access**: Retrieve **any** SEC filing (10-K, 10-Q, 8-K, 13F, S-1, Form 4, etc.) since 1994.
-- **Intuitive API**: Simple, consistent interface for all data types.
-- **Smart Data Objects**: Automatic parsing of filings into structured Python objects.
 - **Financial Statement Extraction**: Easily access **Balance Sheets, Income Statements, Cash Flows**, and individual line items using XBRL tags or common names.
+- **SEC EDGAR API**: Programmatic access to the complete SEC database.
+- **Smart Data Objects**: Automatic parsing of filings into structured Python objects.
 - **Fund Holdings Analysis**: Extract and analyze **13F holdings** data for investment managers.
 - **Insider Transaction Monitoring**: Get structured data from **Form 3, 4, 5** filings.
 - **Clean Text Extraction**: One-line conversion from filing HTML to clean, readable text suitable for NLP.
 - **Targeted Section Extraction**: Pull specific sections like **Risk Factors (Item 1A)** or **MD&A (Item 7)**.
 - **AI/LLM Ready**: Text formatting and chunking optimized for AI pipelines.
 - **Performance Optimized**: Leverages libraries like `lxml` and potentially `PyArrow` for efficient data handling.
+- **XBRL Support**: Extract and analyze XBRL-tagged data.
+- **Intuitive API**: Simple, consistent interface for all data types.
 
 EdgarTools is distributed under the [MIT License](LICENSE).
 
