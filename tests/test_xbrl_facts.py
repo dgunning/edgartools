@@ -12,14 +12,8 @@ from rich import print
 @pytest.fixture(scope='module')
 def intc_xbrl():
     filing = Filing(company='INTEL CORP', cik=50863, form='10-K', filing_date='2025-01-31', accession_no='0000050863-25-000009')
-    filing.home.open()
     xbrl = XBRL.from_filing(filing)
     return xbrl
-
-
-def test_total_number_of_facts():
-    filing = find("0001756125-25-000627")
-    xb = XBRL.from_filing(filing)
 
 
 def test_get_all_facts(intc_xbrl: XBRL):
