@@ -7,12 +7,9 @@ for working with SEC filers.
 from edgar.entity.core import (
     SecFiler,
     Entity, 
-    Company, 
-    Fund, 
-    FundClass,
+    Company,
     get_entity, 
-    get_company, 
-    get_fund
+    get_company,
 )
 
 from edgar.entity.data import (
@@ -78,8 +75,6 @@ __all__ = [
     'SecFiler',
     'Entity',
     'Company',
-    'Fund',
-    'FundClass',
     'FundSeries',
     
     # Data classes
@@ -101,7 +96,6 @@ __all__ = [
     # Factory functions
     'get_entity',
     'get_company',
-    'get_fund',
     'public_companies',
     
     # Search functions
