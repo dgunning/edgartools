@@ -52,7 +52,7 @@ balance_sheet = Company("AAPL").get_financials().balance_sheet()
 - **Fund Holdings Analysis**: Extract and analyze 13F holdings data for investment managers.
 - **Beautiful Output**: Rich terminal displays and visualization helpers
 - **Insider Transactions**: Track Form 3, 4, and 5 filings
-- **Investment Funds & ETFS**: Analyze fund structures, classes, and holdings
+- **Investment Funds & ETFs**: Analyze fund structures (`FundCompany`, `FundSeries`, `FundClass`) using `find_fund()`, and extract portfolio holdings from N-PORT filings.
 - **XBRL Support**: Extract and analyze XBRL-tagged data
 - **Automatic Throttling**: Respectful of SEC.gov rate limits
 

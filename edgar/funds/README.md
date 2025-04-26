@@ -4,9 +4,18 @@ The `edgar.funds` package provides a comprehensive suite of tools for working wi
 
 - **Fund Company** → **Fund Series** → **Share Classes**
 
+The package offers both a simple unified interface via the `Fund` class and direct access to the underlying domain model classes for advanced use cases.
+
 ## Key Components
 
-### Core Classes
+### Primary User Interface
+
+- **`Fund`**: Unified wrapper class that provides a consistent interface regardless of identifier type
+  - Works with any identifier (ticker, series ID, class ID, or CIK)
+  - Provides access to the full hierarchy (company, series, share class)
+  - Delegates operations to the appropriate underlying entity
+
+### Domain Model Classes
 
 - **`FundCompany`**: Represents an investment fund company that may offer multiple fund series
 - **`FundSeries`**: Represents a specific fund product/strategy
@@ -34,10 +43,30 @@ The `edgar.funds` package provides a comprehensive suite of tools for working wi
 
 ## Usage Examples
 
-### Lookup by Identifier
+### Unified Interface (Recommended)
 
 ```python
-from edgar.funds import find_fund, get_class_by_ticker
+from edgar.funds import Fund
+
+# Create a Fund object from any identifier
+fund = Fund("VFINX")         # From ticker
+fund = Fund("S000002277")    # From series ID
+fund = Fund("0000102909")    # From CIK
+
+# Access the hierarchy
+print(fund.name)              # Name of the entity
+print(fund.company.name)      # Name of the fund company
+print(fund.series.name)       # Name of the fund series
+print(fund.share_class.ticker) # Ticker of the share class
+
+# Access filings and data
+filings = fund.get_filings()
+```
+
+### Direct Entity Access (Advanced)
+
+```python
+from edgar.funds import find_fund, get_fund_class
 
 # Get fund entity by ticker (returns a FundClass)
 fund_class = find_fund("FCNTX")  # Fidelity Contrafund

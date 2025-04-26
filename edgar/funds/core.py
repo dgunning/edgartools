@@ -9,7 +9,6 @@ This module provides the main classes used to interact with investment funds:
 import logging
 from typing import List, Optional, Union, TYPE_CHECKING
 
-import pandas as pd
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -23,7 +22,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-__all__ = ['FundCompany', 'FundClass', 'FundSeries', 'get_fund_company', 'get_fund_class', 'get_fund_series']
+__all__ = ['Fund', 'FundCompany', 'FundClass', 'FundSeries', 'get_fund_company', 'get_fund_class', 'get_fund_series', 'find_fund']
 
 
 class FundCompany(Entity):
@@ -303,3 +302,165 @@ def is_fund_class_ticker(identifier: str) -> bool:
     """
     from edgar.funds.data import is_fund_ticker
     return is_fund_ticker(identifier)
+
+
+class Fund:
+    """
+    Unified wrapper for fund entities that provides a consistent interface
+    regardless of the identifier type (ticker, series ID, class ID, or CIK).
+    
+    This class serves as a user-friendly entry point to the fund domain model.
+    It internally resolves the appropriate entity type and provides access to
+    the full hierarchy.
+    
+    Examples:
+        ```python
+        # Create a Fund object from any identifier
+        fund = Fund("VFINX")         # From ticker
+        fund = Fund("S000002277")    # From series ID
+        fund = Fund("0000102909")    # From CIK
+        
+        # Access the hierarchy
+        print(fund.name)              # Name of the entity
+        print(fund.company.name)      # Name of the fund company
+        print(fund.series.name)       # Name of the fund series
+        print(fund.share_class.ticker) # Ticker of the share class
+        ```
+    """
+    
+    def __init__(self, identifier: Union[str, int]):
+        """
+        Initialize a Fund object from any identifier.
+        
+        Args:
+            identifier: Any fund identifier (ticker, series ID, class ID, or CIK)
+        """
+        # Use existing find_fund to get the appropriate entity
+        self._entity = find_fund(identifier)
+        
+        # Set up references to the full hierarchy
+        if isinstance(self._entity, FundClass):
+            self._class = self._entity
+            self._series = self._class.series
+            self._company = self._series.fund_company if self._series else None
+        elif isinstance(self._entity, FundSeries):
+            self._class = None
+            self._series = self._entity
+            self._company = self._series.fund_company
+        elif isinstance(self._entity, FundCompany):
+            self._class = None
+            self._series = None
+            self._company = self._entity
+    
+    @property
+    def company(self) -> Optional[FundCompany]:
+        """Get the fund company (may be None if not resolved)"""
+        return self._company
+    
+    @property
+    def series(self) -> Optional[FundSeries]:
+        """Get the fund series (may be None if only company was identified)"""
+        return self._series
+    
+    @property
+    def share_class(self) -> Optional[FundClass]:
+        """Get the share class (may be None if only series or company was identified)"""
+        return self._class
+    
+    @property
+    def name(self) -> str:
+        """Get the name of the fund entity"""
+        return self._entity.name
+    
+    @property
+    def identifier(self) -> str:
+        """Get the primary identifier of the fund entity"""
+        if isinstance(self._entity, FundClass):
+            return self._entity.class_id
+        elif isinstance(self._entity, FundSeries):
+            return self._entity.series_id
+        elif isinstance(self._entity, FundCompany):
+            return str(self._entity.cik)
+        return ""
+    
+    @property
+    def ticker(self) -> Optional[str]:
+        """Get the ticker symbol (only available for share classes)"""
+        if self._class:
+            return self._class.ticker
+        return None
+    
+    def get_filings(self, **kwargs) -> 'Filings':
+        """
+        Get filings for this fund entity.
+        
+        This delegates to the appropriate entity's get_filings method.
+        
+        Args:
+            **kwargs: Filtering parameters passed to get_filings
+            
+        Returns:
+            Filings object with filtered filings
+        """
+        if hasattr(self._entity, 'get_filings'):
+            return self._entity.get_filings(**kwargs)
+        
+        # If the entity doesn't have get_filings, try to find a parent that does
+        if self._series and hasattr(self._series, 'get_filings'):
+            return self._series.get_filings(**kwargs)
+        
+        if self._company and hasattr(self._company, 'get_filings'):
+            return self._company.get_filings(**kwargs)
+        
+        # Import here to avoid circular imports
+        from edgar._filings import Filings
+        return Filings([])
+    
+    def list_series(self) -> List[FundSeries]:
+        """
+        List all fund series associated with this fund.
+        
+        If this is a FundCompany, returns all series.
+        If this is a FundSeries, returns a list with just this series.
+        If this is a FundClass, returns a list with its parent series.
+        
+        Returns:
+            List of FundSeries instances
+        """
+        if self._company and hasattr(self._company, 'list_series'):
+            return self._company.list_series()
+        
+        if self._series:
+            return [self._series]
+        
+        return []
+    
+    def list_classes(self) -> List[FundClass]:
+        """
+        List all share classes associated with this fund.
+        
+        If this is a FundSeries, returns all classes in the series.
+        If this is a FundClass, returns a list with just this class.
+        
+        Returns:
+            List of FundClass instances
+        """
+        if self._series and hasattr(self._series, 'get_classes'):
+            return self._series.get_classes()
+        
+        if self._class:
+            return [self._class]
+        
+        return []
+    
+    def __str__(self) -> str:
+        return str(self._entity)
+    
+    def __repr__(self) -> str:
+        return repr(self._entity)
+    
+    def __rich__(self):
+        """Creates a rich representation of the fund"""
+        if hasattr(self._entity, '__rich__'):
+            return self._entity.__rich__()
+        return str(self)

@@ -169,9 +169,7 @@ The package provides a smart finder function `find_fund()` that returns the appr
    - Create a unified "Fund" interface that hides complexity
    - Present the right level of detail based on user needs
 
-This fund domain model gives us a solid foundation for working with investment fund data while acknowledging areas where the model could be enhanced to better serve user needs.
-
-## Implementation Status (as of April 2025)
+### Implementation Status (as of April 2025)
 
 ### User Journey Assessment
 
@@ -181,9 +179,8 @@ This fund domain model gives us a solid foundation for working with investment f
 ✓ **Implemented:**
 - Smart entity lookup (via `find_fund()`) that returns appropriate entity type
 - Specialized getters for each entity type: `get_fund_company()`, `get_fund_series()`, `get_fund_class()`
-- Series lookup by name within a company (`get_series_by_name()`)
 - Clear entity type distinction with renamed `FundCompany` class
-- Ticker symbol lookup (via `get_class_by_ticker()` or `find_fund()`)
+- Ticker symbol lookup (via `find_fund(ticker)` or `get_fund_class(ticker)`. Internal reference data uses `get_class_by_ticker()`)
 - Fund Series and Share Class identification
 - Series-class association to connect the hierarchy
 - Robust mechanisms for retrieving all series for a fund company
@@ -207,18 +204,17 @@ This fund domain model gives us a solid foundation for working with investment f
 - No direct class-to-class comparison features
 - Missing comparison metrics (expense ratios, minimums, performance)
 
-#### 3. Analysis Journey
-**Progress: 60% Complete**
+#### 3. Portfolio Holdings (N-PORT)
+**Progress: 80% Complete**
 
 ✓ **Implemented:**
-- Portfolio holdings retrieval via `get_fund_portfolio`
-- Connection between fund series and portfolio data
-- Access to underlying filings for detailed analysis
+- `FundReport` class for parsing N-PORT filings
+- Extraction of detailed portfolio holdings into a pandas DataFrame via `FundReport.investment_data()`
+- Access to general fund information, metrics, and returns from the report
 
 ⚠️ **Gaps:**
-- Limited performance history data
-- No time-series analysis of changing holdings
-- Missing standardized metrics and ratios
+- Full mapping of all N-PORT XML fields
+- Comparison capabilities between different N-PORT filings
 
 ### Feature Status
 

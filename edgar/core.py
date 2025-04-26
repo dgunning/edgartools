@@ -10,18 +10,19 @@ import warnings
 from _thread import interrupt_main
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
 from functools import lru_cache, partial
 from functools import wraps
-from typing import Union, Optional, Tuple, List, TypeVar, Callable, Iterable, Any
 from pathlib import Path
-from datetime import date
-import pytz
+from typing import Union, Optional, Tuple, List, TypeVar, Callable, Iterable
+
 import httpx
 import humanize
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
+import pytz
 from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
 from rich.prompt import Prompt

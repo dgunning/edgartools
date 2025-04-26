@@ -23,6 +23,7 @@ This package provides a more organized, intuitive API for working with fund enti
 
 # Keep backward compatibility for now
 from edgar.funds.core import (
+    Fund,
     FundCompany,
     FundSeries,
     FundClass,
@@ -106,12 +107,15 @@ class FundSeriesAndContracts:
         self.data = data if data is not None else pd.DataFrame()
 
 __all__ = [
-    # New domain entity classes
+    # Primary user-facing class
+    'Fund',
+    
+    # Domain entity classes
     'FundCompany',
     'FundSeries',
     'FundClass',
     
-    # New access functions
+    # Access functions
     'find_fund',
     'get_fund_company',
     'get_fund_series',
