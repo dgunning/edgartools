@@ -10,7 +10,7 @@ from edgar.funds import Fund, FundCompany, FundSeries, FundClass
 class TestFundWrapper(unittest.TestCase):
     """Test the Fund wrapper class."""
     
-    @patch('edgar.funds.fund.find_fund')
+    @patch('edgar.funds.core.find_fund')
     def test_fund_from_ticker(self, mock_find_fund):
         # Mock a FundClass returned by find_fund
         mock_series = MagicMock(spec=FundSeries)
@@ -40,7 +40,7 @@ class TestFundWrapper(unittest.TestCase):
         self.assertEqual(fund.series.name, "Vanguard 500 Index Fund")
         self.assertEqual(fund.company.name, "Vanguard")
     
-    @patch('edgar.funds.fund.find_fund')
+    @patch('edgar.funds.core.find_fund')
     def test_fund_from_series_id(self, mock_find_fund):
         # Mock a FundSeries returned by find_fund
         mock_company = MagicMock(spec=FundCompany)
@@ -63,7 +63,7 @@ class TestFundWrapper(unittest.TestCase):
         self.assertEqual(fund.series.name, "Vanguard 500 Index Fund")
         self.assertEqual(fund.company.name, "Vanguard")
     
-    @patch('edgar.funds.fund.find_fund')
+    @patch('edgar.funds.core.find_fund')
     def test_fund_from_company_cik(self, mock_find_fund):
         # Mock a FundCompany returned by find_fund
         mock_company = MagicMock(spec=FundCompany)
