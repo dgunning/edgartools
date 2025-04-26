@@ -4,11 +4,11 @@ XBRL file parsing functionality.
 This module provides functions for parsing XBRL files and extracting data.
 """
 
-from lxml import etree as ET
-import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, Set, Tuple, Callable
+from typing import Any, Dict, List, Optional, Union
+
+from lxml import etree as ET
 
 from edgar.core import log
 from edgar.xbrl.core import NAMESPACES, STANDARD_LABEL, classify_duration, extract_element_id
@@ -357,7 +357,6 @@ class XBRLParser:
             labels = root.xpath('//link:label', namespaces=nsmap)
             
             # Optimize: Pre-allocate dictionary with expected size
-            label_count = len(labels)
             label_lookup = {}
             
             # Optimize: Cache attribute lookups
@@ -495,7 +494,6 @@ class XBRLParser:
                 arcs = link.xpath('.//link:presentationArc', namespaces=nsmap)
                 
                 # Create relationships map - pre-allocate with known size
-                arc_count = len(arcs)
                 relationships = []
                 relationships_append = relationships.append  # Local function reference for speed
                 

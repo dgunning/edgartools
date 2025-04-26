@@ -4,16 +4,15 @@ Filings-related classes for the Entity package.
 This module contains classes related to SEC filings for entities, including
 collections of filings and filing facts.
 """
-from typing import List, Dict, Optional, Union, Tuple, Any
+from typing import List, Union
 
 import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 from rich.box import SIMPLE
-from rich.columns import Columns
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Table
 from rich.text import Text
 
 from edgar._filings import Filing, Filings, PagingState

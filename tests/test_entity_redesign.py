@@ -1,18 +1,9 @@
-import pytest
-from rich import print
-
 from edgar.entity import (
     SecFiler,
     Entity, 
-    Company, 
-    Fund, 
-    FundClass,
-    EntityData,
-    CompanyData,
-    get_entity, 
-    get_company, 
-    get_fund,
-    NoCompanyFactsFound
+    Company,
+    get_entity,
+    get_company
 )
 
 class TestEntityRedesign:

@@ -2,19 +2,20 @@
 Company facts functionality for the entity package.
 """
 import logging
-import os
 from functools import lru_cache
 from typing import Dict, Any, Optional
 
 import httpx
+import numpy as np
 import pandas as pd
 import pyarrow as pa
-import numpy as np
+from rich.panel import Panel
+
 from edgar.core import log
 from edgar.httprequests import download_json
-from edgar.storage import get_edgar_data_directory, is_using_local_storage
 from edgar.richtools import df_to_rich_table, repr_rich
-from rich.panel import Panel
+from edgar.storage import get_edgar_data_directory, is_using_local_storage
+
 try:
     from rich.group import Group
 except ImportError:

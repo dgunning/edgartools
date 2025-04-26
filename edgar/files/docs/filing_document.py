@@ -7,8 +7,7 @@ rich support for extracting items, tables, and table of contents.
 
 import re
 from dataclasses import dataclass
-from functools import lru_cache
-from typing import Dict, List, Optional, Union, Iterator, Any, Tuple, Set, Pattern
+from typing import Dict, List, Optional, Iterator, Any, Pattern
 
 import pandas as pd
 

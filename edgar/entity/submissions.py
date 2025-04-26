@@ -2,16 +2,15 @@
 Functions for retrieving entity submission data from the SEC.
 """
 import json
-import os
 from functools import lru_cache
 from typing import Optional, Dict, Any
 
 import httpx
 
 from edgar.core import log
+from edgar.entity.data import parse_entity_submissions
 from edgar.httprequests import download_json
 from edgar.storage import get_edgar_data_directory, is_using_local_storage
-from edgar.entity.data import parse_entity_submissions
 
 __all__ = [
     'get_entity_submissions',

@@ -2,11 +2,9 @@ import pytest
 from edgar.entity import (
     Entity,
     Company,
-    Fund,
     SecFiler,
     get_entity,
     get_company,
-    get_fund,
     find_company,
     get_company_tickers,
     get_icon_from_ticker,
@@ -36,7 +34,6 @@ def test_functions_exist():
     # Test that the functions exist
     assert callable(get_entity)
     assert callable(get_company)
-    assert callable(get_fund)
     assert callable(find_company)
     assert callable(get_company_tickers)
     assert callable(get_icon_from_ticker)

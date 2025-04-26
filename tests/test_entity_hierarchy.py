@@ -4,13 +4,10 @@ from rich import print
 from edgar.entity import (
     SecFiler,
     Entity, 
-    Company, 
-    Fund, 
-    FundClass,
+    Company,
     EntityData,
     get_entity, 
-    get_company, 
-    get_fund,
+    get_company,
     NoCompanyFactsFound
 )
 

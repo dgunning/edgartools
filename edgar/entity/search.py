@@ -2,9 +2,8 @@
 Search functionality for SEC entities.
 This module provides functions and classes for searching for SEC entities.
 """
-import re
 from functools import lru_cache
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 
 import pandas as pd
 from rich import box
@@ -12,8 +11,8 @@ from rich.table import Table, Column
 
 from edgar.entity import Company
 from edgar.entity.tickers import get_company_tickers
-from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
 from edgar.richtools import repr_rich
+from edgar.search.datasearch import FastSearch, company_ticker_preprocess, company_ticker_score
 
 __all__ = [
     'find_company',

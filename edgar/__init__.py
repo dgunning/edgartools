@@ -42,7 +42,7 @@ from edgar.core import (edgar_mode,
                         set_identity,
                         listify)
 from edgar.funds.reports import FundReport, NPORT_FORMS
-from edgar.funds import Fund, FundSeries, get_fund, FundClass
+from edgar.funds import FundCompany, FundSeries,  FundClass, find_fund
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 from edgar.xbrl import XBRL
 from edgar.files.html import Document
@@ -68,7 +68,7 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 
 
 @lru_cache(maxsize=16)
-def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySearchResults, Fund, FundClass, FundSeries]]:
+def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySearchResults, FundCompany, FundClass, FundSeries]]:
     """This is an uber search function that can take a variety of search ids and return the appropriate object
         - accession number -> returns a Filing
         - CIK -> returns an Entity
@@ -88,9 +88,9 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
     elif re.match(r"^[A-WYZ]{1,5}([.-][A-Z])?$", search_id):  # Ticker (including dot or hyphenated)
         return Entity(search_id)
     elif re.match(r"^[A-Z]{4}X$", search_id):  # Mutual Fund Ticker
-        return get_fund(search_id)
+        return find_fund(search_id)
     elif re.match(r"^[CS]\d+$", search_id):
-        return get_fund(search_id)
+        return find_fund(search_id)
     else:
         return find_company(search_id)
 

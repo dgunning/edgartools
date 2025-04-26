@@ -4,7 +4,7 @@ Data classes for the Entity package.
 This module contains classes for working with entity data, including
 addresses, facts, and other structured data from SEC filings.
 """
-from typing import List, Dict, Optional, Union, Tuple, Any, Callable
+from typing import List, Dict, Optional, Union, Tuple, Any
 from functools import cached_property
 
 import pyarrow as pa
@@ -295,10 +295,13 @@ class EntityData:
                 tickers: List[str],
                 exchanges: List[str],
                 sic: str,
+                ein:str,
+                entity_type: str,
                 fiscal_year_end: str,
                 filings: EntityFilings,
                 business_address: Address,
                 mailing_address: Address,
+                state_of_incorporation:str,
                 **kwargs):
         """
         Initialize a new EntityData instance.
@@ -307,23 +310,29 @@ class EntityData:
             cik: The CIK number
             name: The entity name
             sic: The Standard Industrial Classification code
+            ein: The Employer Identification Number
             fiscal_year_end: The fiscal year end date
             tickers: List of ticker symbols
             exchanges: List of exchanges
+            entity_type: The entity type
             filings: The entity's filings
             business_address: The business address
             mailing_address: The mailing address
+            state_of_incorporation: The state of incorporation
             **kwargs: Additional attributes
         """
         self.cik: int = cik
         self.name: str = name
         self.sic = sic
+        self.ein: str = ein
         self.fiscal_year_end: str = fiscal_year_end
         self.tickers: List[str] = tickers
         self.exchanges: List[str] = exchanges
         self.filings: EntityFilings = filings
+        self.entity_type = entity_type
         self.business_address: Address = business_address
         self.mailing_address: Address = mailing_address
+        self.state_of_incorporation: str = state_of_incorporation
         
         # Store all other attributes
         for key, value in kwargs.items():

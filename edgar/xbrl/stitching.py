@@ -1029,7 +1029,6 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
     
     # Create a dictionary for the DataFrame
     data = {}
-    index = []
 
     # Initialize columns
     data['label'] = [None] * len(statement_data)
