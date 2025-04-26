@@ -20,23 +20,17 @@ This package provides a more organized, intuitive API for working with fund enti
 - data.py: Provides data access functions and implementations
 - reports.py: Handles fund reports like N-PORT filings
 """
-# Import new entity classes and functions
-from edgar.funds.fund_entities import (
+
+# Keep backward compatibility for now
+from edgar.funds.core import (
     FundCompany,
     FundSeries,
     FundClass,
     find_fund,
+
     get_fund_company,
     get_fund_series,
     get_fund_class,
-    get_series_by_name,
-    get_class_by_ticker
-)
-
-# Keep backward compatibility for now
-from edgar.funds.core import (
-    Fund,
-    get_fund
 )
 
 from edgar.funds.data import (
@@ -96,40 +90,14 @@ def get_fund_with_filings(identifier: str):
             
     return MinimalFundInfo(identifier or "Unknown")
 
-def legacy_get_fund(identifier: str):
-    """
-    Get fund using the direct implementation for backward compatibility.
-    
-    This function is maintained for backward compatibility with the
-    legacy funds.py module. New code should use the get_fund() factory 
-    function from edgar.funds.core instead.
-    
-    Args:
-        identifier: Fund identifier (ticker, class ID, series ID, or CIK)
-        
-    Returns:
-        Fund information object or None if not found
-    """
-    from edgar.funds.data import direct_get_fund
-    import logging
-    
-    if not identifier:
-        return None
-        
-    try:
-        return direct_get_fund(identifier)
-    except Exception as e:
-        logging.warning(f"Error in legacy_get_fund: {e}")
-        return None
-
-# Define FundSeriesAndContracts for backward compatibility 
+# Define FundSeriesAndContracts for backward compatibility
 class FundSeriesAndContracts:
     """
     Legacy series and contracts object that provides data on fund and classes.
-    
+
     This class is maintained for backward compatibility with the legacy funds.py module.
     It stores fund series and class information parsed from SEC filings in a DataFrame.
-    
+
     New code should use the Fund, FundClass, and FundSeries classes from edgar.funds.core
     which provide a more robust object model.
     """
@@ -148,17 +116,10 @@ __all__ = [
     'get_fund_company',
     'get_fund_series',
     'get_fund_class',
-    'get_series_by_name',
-    'get_class_by_ticker',
-    
-    # Old core classes (for backward compatibility)
-    'Fund',
+
     
     # Data classes
     'FundData',
-    
-    # Factory functions
-    'get_fund',  # old method, but still available for backward compatibility
     'resolve_fund_identifier',
     
     # Functions now implemented directly in the package
@@ -174,6 +135,5 @@ __all__ = [
     
     # Legacy compatibility
     'get_fund_with_filings',
-    'legacy_get_fund',
     'FundSeriesAndContracts',
 ]

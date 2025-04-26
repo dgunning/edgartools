@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
-from typing import Union, List, Dict, Any, Optional, TYPE_CHECKING
+from typing import Union, List, Dict, Any, Optional
 
 import pandas as pd
 from bs4 import Tag
@@ -18,13 +18,10 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar.core import moneyfmt, get_bool
+from edgar.funds import FundSeries, FundCompany
 from edgar.reference import cusip_ticker_mapping
 from edgar.richtools import repr_rich, df_to_rich_table
 from edgar.xmltools import find_element, child_text, optional_decimal
-
-if TYPE_CHECKING:
-    from edgar.funds.core import Fund
-    from edgar.funds import FundSeriesAndContracts
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +42,7 @@ class SeriesClassInfo(BaseModel):
     def from_xml(cls, tag):
         if tag and tag.name == "seriesClassInfo":
             return cls(series_id=child_text(tag, "seriesId"),
-                      class_id=child_text(tag, "classId"))
+                       class_id=child_text(tag, "classId"))
 
 
 class FilerInfo(BaseModel):
@@ -100,11 +97,11 @@ class PeriodType(BaseModel):
     def from_xml(cls, tag: Tag = None):
         if tag:
             return cls(period1Yr=Decimal(tag.attrs.get("period1Yr")),
-                      period3Mon=Decimal(tag.attrs.get("period3Mon")),
-                      period5Yr=Decimal(tag.attrs.get("period5Yr")),
-                      period10Yr=Decimal(tag.attrs.get("period10Yr")),
-                      period30Yr=Decimal(tag.attrs.get("period30Yr"))
-                     )
+                       period3Mon=Decimal(tag.attrs.get("period3Mon")),
+                       period5Yr=Decimal(tag.attrs.get("period5Yr")),
+                       period10Yr=Decimal(tag.attrs.get("period10Yr")),
+                       period30Yr=Decimal(tag.attrs.get("period30Yr"))
+                       )
 
 
 class CurrentMetric(BaseModel):
@@ -312,49 +309,23 @@ class FundReport:
         self.fund_info: FundInfo = fund_info
         self.investments: List[InvestmentOrSecurity] = investments
         self.series_and_contracts: 'FundSeriesAndContracts' = series_and_contracts
+        self.fund_company = FundCompany(cik_or_identifier=self.general_info.cik, fund_name=self.general_info.name)
 
     def __str__(self):
         return (f"{self.name} {self.general_info.rep_period_date} - {self.general_info.fiscal_year_end}"
                 )
 
+    def get_fund_series(self) -> FundSeries:
+        return FundSeries(series_id=self.general_info.series_id,
+                          name=self.general_info.series_name,
+                          fund_company=self.fund_company)
+    @property
+    def reporting_period(self):
+        return self.general_info.rep_period_date
+
     @property
     def name(self):
         return f"{self.general_info.name} - {self.general_info.series_name}"
-
-    @property
-    @lru_cache(maxsize=2)
-    def fund(self) -> 'Fund':
-        """
-        Get the fund associated with this report.
-        
-        In the entity model:
-        - Fund(Entity) represents the fund company 
-        - The actual fund product name comes from the series_name in the filing
-        
-        This property returns the Fund entity but with the name properly set to the specific 
-        fund product name from the series information.
-        
-        Returns:
-            Fund object representing the specific fund product
-        """
-        # Import locally to avoid circular imports
-        from edgar.funds.core import get_fund
-        
-        # Get the basic fund entity (the fund company)
-        fund_obj = get_fund(self.general_info.series_id)
-        
-        # Use the series name from the filing which typically represents the actual fund name
-        # rather than the fund company name
-        if hasattr(fund_obj, 'data') and self.general_info.series_name:
-            if hasattr(fund_obj.data, 'name'):
-                # Preserve the original value for reference if needed
-                if not hasattr(fund_obj.data, '_original_name'):
-                    fund_obj.data._original_name = fund_obj.data.name
-                
-                # Update the name to use the more specific series name
-                fund_obj.data.name = self.general_info.series_name
-                
-        return fund_obj
 
     @property
     def has_investments(self):
@@ -416,12 +387,12 @@ class FundReport:
         if not xml:
             return None
         fund_report_dict = FundReport.parse_fund_xml(xml)
-        
+
         # Parse ticker, fund, series information from the filing header
         # Import here to avoid circular imports
         from edgar.funds import get_fund_information
         fund_report_dict['series_and_contracts'] = get_fund_information(filing.header)
-        
+
         return cls(**fund_report_dict)
 
     @classmethod
@@ -708,7 +679,7 @@ def get_fund_portfolio_from_filing(filing) -> pd.DataFrame:
             return fund_report.investment_data()
     except Exception as e:
         log.warning(f"Error extracting portfolio from NPORT filing: {e}")
-    
+
     # Return empty DataFrame if extraction failed
     return pd.DataFrame()
 

@@ -7,7 +7,7 @@ accessing and manipulating fund data.
 import logging
 import re
 from functools import lru_cache
-from typing import List, Dict, Optional, Union, Tuple, TYPE_CHECKING
+from typing import List, Dict, Optional, Union, Tuple
 
 import pandas as pd
 import pyarrow as pa
@@ -16,10 +16,10 @@ from edgar.entity.data import EntityData
 from edgar._filings import Filings
 from edgar.httprequests import download_text
 from edgar.datatools import drop_duplicates_pyarrow
+
 from bs4 import BeautifulSoup
 
-if TYPE_CHECKING:
-    from edgar.funds.core import Fund, FundClass, FundSeries
+from edgar.funds.core import FundCompany, FundClass, FundSeries
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ fund_series_direct_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}&scd=se
 class _FundDTO:
     """
     Data Transfer Object for fund information.
-    
+
     Internal class used to return fund data from direct implementations.
     This is not part of the public API and should not be used directly.
     
@@ -399,89 +399,74 @@ def direct_get_fund_with_filings(contract_or_series_id: str):
         return None
 
 @lru_cache(maxsize=16)
-def direct_get_fund(identifier: str):
+def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, FundCompany]]:
     """
-    Get fund information from the ticker or identifier.
+    Get a Fund related object by it's identifier.
     
     Args:
-        identifier: Fund ticker (e.g. 'VFINX') or series/class ID (e.g. 'S000001234')
+        identifier: A CIK, a series  id (e.g. 'S000001234') or class id or Fund ticker (e.g. 'VFINX')
         
     Returns:
-        Fund object with fund details or None if not found
+        A FundCompany or FundSeries or FundClass
     """
-    from edgar.httprequests import download_text
-    from bs4 import BeautifulSoup
-    
+
     if re.match(r'^[CS]\d+$', identifier):
+        identifier_type = 'Series' if identifier.startswith('S') else 'Class'
         fund_search_url = fund_series_search_url + f"&CIK={identifier}"
     elif re.match(r"^[A-Z]{4}X$", identifier):
+        identifier_type = 'Class'
         fund_search_url = fund_series_search_url + f"&ticker={identifier}"
+    elif re.match(r"^0\d{9}$", identifier):
+        identifier_type = 'FundCompany'
+        fund_search_url = fund_series_search_url + f"&CIK={identifier}"
     else:
         log.warning(f"Invalid fund identifier {identifier}")
         return None
 
-    try:
-        # Download the fund page
-        fund_text = download_text(fund_search_url)
+    # Download the fund page
+    fund_text = download_text(fund_search_url)
 
-        soup = BeautifulSoup(fund_text, "html.parser")
-        if 'To retrieve filings, click on the CIK' not in soup.text:
-            return None
-
-        tables = soup.find_all("table")
-        
-        # The fund table is the 6th table on the page
-        if len(tables) < 6:
-            log.warning(f"Expected fund table not found for {identifier}")
-            return None
-            
-        fund_table = tables[5]
-
-        # Initialize empty list to store the rows data
-        data = []
-
-        # Loop through each row in the table
-        for tr in fund_table.find_all('tr')[4:]:  # Skip the first 4 rows as they contain headers
-            row_data = []
-            for td in tr.find_all('td'):  # Loop through each cell in the row
-                if td.a:  # Check if there is an 'a' (anchor) tag in the cell
-                    if 'CIK' in td.a.get('href', ''):
-                        row_data.append(td.a.string.strip())  # Append CIK if present
-                    else:
-                        row_data.append(
-                            td.a.string.strip() if td.a.string else '')  # Append series or class/contract info
-                else:
-                    row_data.append(td.get_text(strip=True))  # Otherwise just get the cell text
-
-            # Only append non-empty row data to prevent adding header or line rows
-            if any(row_data):
-                data.append(row_data)
-
-        # Creating DataFrame from the extracted data
-        df = pd.DataFrame(data)
-        
-        if df.empty or df.shape[1] < 5:
-            log.warning(f"Invalid fund data format for {identifier}")
-            return None
-
-        # Create the fund object from DataFrame
-        try:
-            return _FundDTO(
-                company_cik=df.iloc[0, 0],
-                company_name=df.iloc[0, 1],
-                name=df.iloc[1, 2],
-                series=df.iloc[1, 1],
-                ticker=df.iloc[-1, -1],
-                class_contract_id=df.iloc[-1, -3],
-                class_contract_name=df.iloc[-1, -2]
-            )
-        except (IndexError, KeyError) as e:
-            log.warning(f"Error creating fund from data for {identifier}: {e}")
-            return None
-            
-    except Exception as e:
-        log.warning(f"Error retrieving fund information for {identifier}: {e}")
+    soup = BeautifulSoup(fund_text, "html.parser")
+    if 'To retrieve filings, click on the CIK' not in soup.text:
         return None
+
+    tables = soup.find_all("table")
+        
+     # The fund table is the 6th table on the page
+    if len(tables) < 6:
+        log.warning(f"Expected fund table not found for {identifier}")
+        return None
+            
+    fund_table = tables[5]
+
+    all_series = []
+    fund_company:Optional[FundCompany] = None
+
+    current_series:Optional[FundSeries] = None
+    current_class:Optional[FundClass] = None
+    for tr in fund_table.find_all('tr')[4:]:  # Skip the first 4 rows as they contain headers
+        row_data = [td.get_text().strip() for td in tr.find_all('td') if td.get_text().strip()]
+
+        if not row_data:
+            continue
+        if re.match(r'^0\d{9}$', row_data[0]):
+            fund_company = FundCompany(cik_or_identifier=row_data[0], fund_name=row_data[1], all_series=all_series)
+        elif re.match(r'^S\d+$', row_data[0]):
+            current_series = FundSeries(series_id=row_data[0], name=row_data[1], fund_company=fund_company)
+            fund_company.all_series.append(current_series)
+        elif re.match(r'^C\d+$', row_data[0]):
+            class_id, class_name = row_data[0], row_data[1]
+            ticker = row_data[2] if len(row_data) > 2 else None
+            current_class = FundClass(class_id=class_id, name=class_name, ticker=ticker)
+            current_class.series = current_series
+            current_series.fund_classes.append(current_class)
+
+    if identifier_type == "FundCompany":
+        return fund_company
+    elif identifier_type == "Series":
+        return current_series
+    elif identifier_type == "Class":
+        return current_class
 
 
 def is_fund_ticker(identifier: str) -> bool:
@@ -553,7 +538,7 @@ def resolve_fund_identifier(identifier):
         if is_fund_ticker(identifier):
             try:
                 # Use our direct implementation for tickers
-                fund_info = direct_get_fund(identifier)
+                fund_info = (identifier)
                 if fund_info and hasattr(fund_info, 'company_cik'):
                     return int(fund_info.company_cik)
             except Exception as e:
@@ -633,132 +618,7 @@ def get_fund_information(header):
     return FundSeriesAndContracts()
 
 
-def get_fund_classes(fund: 'Fund') -> List['FundClass']:
-    """
-    Get all share classes associated with a fund company.
-    
-    The Fund entity represents a fund company that may have multiple fund series
-    and classes. This function efficiently retrieves all classes offered by the fund
-    company using direct API access and filing information.
-    
-    Args:
-        fund: The Fund entity (fund company)
-        
-    Returns:
-        List of FundClass instances for all classes offered by this fund company
-    """
-    # Import the proper FundClass from core
-    from edgar.funds.core import FundClass
-    
-    classes = []
-    class_ids_found = set()  # To track unique class IDs
-    class_to_series_map = {}  # Map of class_id to series_id for inference
-    
-    # First try the direct SEC series listing URL - this is the most efficient method
-    try:
-        series_data = get_series_and_classes_from_sec(fund.cik)
-        if series_data:
-            # Create FundClass objects from the parsed data
-            for series_info in series_data:
-                series_id = series_info.get('series_id')
-                if not series_id:
-                    continue
-                
-                # Process classes specifically listed under this series
-                for class_info in series_info.get('classes', []):
-                    class_id = class_info.get('class_id')
-                    if class_id and class_id not in class_ids_found:
-                        class_ids_found.add(class_id)
-                        class_to_series_map[class_id] = series_id
-                        classes.append(FundClass(
-                            class_id=class_id,
-                            fund=fund,
-                            name=class_info.get('class_name'),
-                            ticker=class_info.get('ticker'),
-                            series_id=series_id
-                        ))
-            
-            # If we found classes through this method, return them directly
-            if classes:
-                return classes
-    except Exception as e:
-        log.debug(f"Error using direct series listing URL for classes, CIK {fund.cik}: {e}")
-    
-    # Fallback approach: Try to get classes through other methods and infer series relationships
-    try:
-        # Check recent filings for class information
-        # Get a limited number of relevant filings (faster than checking all filings)
-        filings = fund.get_filings(form=['N-CEN', 'N-PORT', 'N-1A', '485BPOS', '485APOS'])
-        
-        # Process the first few filings to find class information
-        # Limit to 10 filings for performance
-        for filing in filings.data.slice(0, 10):
-            try:
-                from edgar._filings import Filing
-                filing_obj = Filing.from_record(filing)
-                fund_info = get_fund_information(filing_obj.header())
-                
-                if fund_info and hasattr(fund_info, 'data') and not fund_info.data.empty:
-                    # Try to extract class information and match with series
-                    df = fund_info.data
-                    for _, row in df.iterrows():
-                        class_id = row.get('ContractID')
-                        series_id = row.get('SeriesID')
-                        
-                        # Only add if we have a class ID and it's not already found
-                        if class_id and class_id not in class_ids_found:
-                            class_ids_found.add(class_id)
-                            
-                            # If we have a series ID, map this class to it for future reference
-                            if series_id:
-                                class_to_series_map[class_id] = series_id
-                            
-                            classes.append(FundClass(
-                                class_id=class_id,
-                                fund=fund,
-                                name=row.get('Class'),
-                                ticker=row.get('Ticker'),
-                                series_id=series_id
-                            ))
-            except Exception as inner_e:
-                log.debug(f"Error processing filing {filing} for class data: {inner_e}")
-    except Exception as e:
-        log.debug(f"Error processing filings for fund classes {fund.cik}: {e}")
-    
-    # If we have any classes without series IDs but we've built a map from other sources,
-    # try to infer the series ID based on naming patterns or other classes
-    for cls in classes:
-        if not cls.series_id:
-            # Attempt #1: Check our class-to-series map
-            if cls.class_id in class_to_series_map:
-                cls.series_id = class_to_series_map[cls.class_id]
-                continue
-                
-            # Attempt #2: Try to infer from class name prefixes that match series names
-            # This relies on the convention that classes often have names like
-            # "Series Name Class A", "Series Name Class I", etc.
-            if cls.name:
-                all_series = fund.get_series()
-                for series in all_series:
-                    # Check if the class name starts with the series name
-                    if series.name and cls.name.startswith(series.name):
-                        cls.series_id = series.series_id
-                        break
-                        
-            # Attempt #3: Infer from ticker symbol patterns
-            # Some fund families use consistent ticker prefixes for all classes in a series
-            if cls.ticker and len(cls.ticker) >= 4:
-                ticker_prefix = cls.ticker[:3]  # First three letters often identify the series
-                for other_cls in classes:
-                    if (other_cls.series_id and other_cls.ticker and 
-                        other_cls.ticker.startswith(ticker_prefix)):
-                        cls.series_id = other_cls.series_id
-                        break
-    
-    return classes
-
-
-def parse_series_and_classes_from_html(html_content: str, fund: 'Fund') -> List[Dict]:
+def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]:
     """
     Parse series and class information from the SEC series listing HTML page.
     
@@ -779,7 +639,7 @@ def parse_series_and_classes_from_html(html_content: str, fund: 'Fund') -> List[
     series_data = []
     
     # Debug information
-    log.debug(f"Parsing series HTML content for fund {fund.cik}")
+    log.debug(f"Parsing series HTML content for fund {cik}")
     
     # The table structure in this specific page has series and classes
     # organized in a specific way with indentation levels
@@ -925,250 +785,17 @@ def get_series_and_classes_from_sec(cik: Union[str, int]) -> List[Dict]:
     Returns:
         List of dictionaries containing parsed series and class information
     """
-    from edgar.httprequests import download_text
     
-    try:
-        # Format CIK properly for URL
-        cik_str = str(cik).zfill(10)
-        url = fund_series_direct_url.format(cik_str)
+    # Format CIK properly for URL
+    cik_str = str(cik).zfill(10)
+    url = fund_series_direct_url.format(cik_str)
         
-        # Download the HTML content
-        html_content = download_text(url)
+    # Download the HTML content
+    html_content = download_text(url)
         
-        # Check if we received valid content
-        if 'No matching' in html_content or 'series for cik' not in html_content.lower():
-            log.debug(f"No series information found for CIK {cik}")
-            return []
-            
-        # Parse the HTML content
-        from edgar.funds.core import Fund
-        dummy_fund = Fund(cik)  # Create temporary fund object for parsing
-        return parse_series_and_classes_from_html(html_content, dummy_fund)
-        
-    except Exception as e:
-        log.warning(f"Error fetching series information for CIK {cik}: {e}")
+    # Check if we received valid content
+    if 'No matching' in html_content or 'series for cik' not in html_content.lower():
+        log.debug(f"No series information found for CIK {cik}")
         return []
 
-
-def get_fund_series(fund: 'Fund') -> List['FundSeries']:
-    """
-    Get all fund series associated with a fund company.
-    
-    The Fund entity represents a fund company that may offer multiple fund series.
-    This function efficiently retrieves all series offered by the fund company
-    using direct API access and filing information.
-    
-    Args:
-        fund: The Fund entity (fund company)
-        
-    Returns:
-        List of FundSeries instances representing all fund series offered by the company
-    """
-    # Import the proper FundSeries from core
-    from edgar.funds.core import FundSeries
-    
-    series_list = []
-    series_ids_found = set()  # To track unique series IDs
-    series_name_map = {}      # Map series_id to name for consistent naming
-    
-    # First try the direct SEC series listing URL - this is the most efficient method
-    try:
-        series_data = get_series_and_classes_from_sec(fund.cik)
-        if series_data:
-            # Create FundSeries objects from the parsed data
-            for series_info in series_data:
-                series_id = series_info['series_id']
-                if series_id and series_id not in series_ids_found:
-                    series_ids_found.add(series_id)
-                    series_name = series_info['series_name']
-                    series_name_map[series_id] = series_name
-                    series_list.append(FundSeries(
-                        series_id=series_id,
-                        name=series_name,
-                        fund=fund
-                    ))
-                    
-            # If we found series through this method, return them directly
-            if series_list:
-                return series_list
-    except Exception as e:
-        log.debug(f"Error using direct series listing URL for CIK {fund.cik}: {e}")
-    
-    # Fallback: Try direct SEC website access 
-    try:
-        # Try to use direct_get_fund_with_filings with the company CIK
-        fund_info = direct_get_fund_with_filings(f"CIK={fund.cik}")
-        if fund_info:
-            # Check if this already is a series
-            if hasattr(fund_info, 'id') and fund_info.id and fund_info.id.startswith('S'):
-                series_id = fund_info.id
-                if series_id not in series_ids_found:
-                    series_ids_found.add(series_id)
-                    series_name = fund_info.name or fund.data.name
-                    series_name_map[series_id] = series_name
-                    series_list.append(FundSeries(
-                        series_id=series_id, 
-                        name=series_name,
-                        fund=fund
-                    ))
-            
-            # Check if we can find a series in the fund info
-            if hasattr(fund_info, 'fund') and hasattr(fund_info.fund, 'ident_info'):
-                series_info = fund_info.fund.ident_info.get('Series')
-                if series_info and series_info.startswith('S'):
-                    # Extract series ID and name if available
-                    series_match = re.match(r'([S]\d+)(?:\s(.*))?', series_info)
-                    if series_match:
-                        series_id = series_match.group(1)
-                        if series_id not in series_ids_found:
-                            series_ids_found.add(series_id)
-                            series_name = series_match.group(2) if len(series_match.groups()) > 1 else fund.data.name
-                            series_name_map[series_id] = series_name
-                            series_list.append(FundSeries(
-                                series_id=series_id, 
-                                name=series_name,
-                                fund=fund
-                            ))
-    except Exception as e:
-        log.debug(f"Error retrieving fund series from SEC website: {e}")
-    
-    # Also check recent filings for series information
-    try:
-        # Get a limited number of relevant filings (faster than checking all filings)
-        filings = fund.get_filings(form=['N-CEN', 'N-PORT', 'N-1A', '485BPOS', '485APOS'])
-        
-        # Process the first few filings to find series information
-        # Limit to 10 filings for performance
-        for filing in filings.data.slice(0, 10):
-            try:
-                from edgar._filings import Filing
-                filing_obj = Filing.from_record(filing)
-                fund_info = get_fund_information(filing_obj.header())
-                
-                if fund_info and hasattr(fund_info, 'data') and not fund_info.data.empty:
-                    # Extract all series IDs from the DataFrame
-                    for _, row in fund_info.data.iterrows():
-                        series_id = row.get('SeriesID')
-                        if series_id and series_id not in series_ids_found:
-                            series_ids_found.add(series_id)
-                            fund_name = row.get('Fund')
-                            if fund_name:
-                                series_name_map[series_id] = fund_name
-                            series_list.append(FundSeries(
-                                series_id=series_id,
-                                name=fund_name or fund.data.name,
-                                fund=fund
-                            ))
-            except Exception as inner_e:
-                log.debug(f"Error processing filing {filing}: {inner_e}")
-    except Exception as e:
-        log.debug(f"Error processing filings for fund {fund.cik}: {e}")
-    
-    # Try to infer series from class information
-    # Some funds have classes listed without explicit series, but we can derive the series
-    try:
-        # Get class information that might contain series hints
-        all_classes = fund.get_classes()
-        
-        # Look for classes with series IDs 
-        for cls in all_classes:
-            if hasattr(cls, 'series_id') and cls.series_id and cls.series_id not in series_ids_found:
-                series_id = cls.series_id
-                series_ids_found.add(series_id)
-                
-                # Try to infer a good series name from class name
-                series_name = None
-                if hasattr(cls, 'name') and cls.name:
-                    # Many class names follow pattern "Series Name Class X"
-                    # Try to extract series name by removing common class suffixes
-                    class_name = cls.name
-                    for suffix in [' Class A', ' Class B', ' Class C', ' Class I', ' Class R', 
-                                  ' Investor Class', ' Institutional Class', ' Retail Class']:
-                        if class_name.endswith(suffix):
-                            series_name = class_name[:-len(suffix)]
-                            break
-                
-                if not series_name:
-                    # If we couldn't derive a name, use fund name or existing mapping
-                    series_name = series_name_map.get(series_id) or fund.data.name
-                else:
-                    # Store the derived name for consistency
-                    series_name_map[series_id] = series_name
-                
-                series_list.append(FundSeries(
-                    series_id=series_id,
-                    name=series_name,
-                    fund=fund
-                ))
-    except Exception as e:
-        log.debug(f"Error inferring series from classes for fund {fund.cik}: {e}")
-    
-    # If we still haven't found any series, look for an embedded series ID in the name
-    if not series_list and hasattr(fund.data, 'name'):
-        series_match = re.search(r'[S]\d{6,}', fund.data.name)
-        if series_match:
-            series_id = series_match.group(0)
-            if series_id not in series_ids_found:
-                series_list.append(FundSeries(
-                    series_id=series_id,
-                    name=fund.data.name,
-                    fund=fund
-                ))
-    
-    # As a last resort, if we couldn't find any series, create a synthetic one
-    if not series_list:
-        synthetic_series_id = f"S{fund.cik}"
-        series_list.append(FundSeries(
-            series_id=synthetic_series_id,
-            name=fund.data.name if hasattr(fund.data, 'name') else f"Fund {fund.cik}",
-            fund=fund
-        ))
-    
-    # Ensure consistent naming across all series
-    for series in series_list:
-        if series.series_id in series_name_map:
-            series.name = series_name_map[series.series_id]
-    
-    return series_list
-
-
-def get_fund_portfolio(fund: 'Fund') -> pd.DataFrame:
-    """
-    Get the portfolio holdings for the fund company.
-    
-    The Fund entity represents a fund company that may have multiple fund series
-    and classes, each with their own portfolios. This function finds the latest
-    portfolio filing (typically N-PORT or 13F) and extracts the holdings.
-    
-    Args:
-        fund: The Fund entity (fund company)
-        
-    Returns:
-        DataFrame containing portfolio holdings from the most recent filing
-    """
-    # Look for N-PORT filings first
-    nport_filings = fund.get_filings(form=['N-PORT', 'N-PORT/A'])
-    if nport_filings:
-        latest_nport = nport_filings.latest()
-        if latest_nport:
-            try:
-                # Import here to avoid circular imports
-                from edgar.funds.reports import get_fund_portfolio_from_filing
-                return get_fund_portfolio_from_filing(latest_nport)
-            except Exception as e:
-                log.warning(f"Error parsing N-PORT filing: {e}")
-    
-    # Or look for 13F filings (some funds file these)
-    thirteenf_filings = fund.get_filings(form=['13F-HR', '13F-HR/A'])
-    if thirteenf_filings:
-        latest_13f = thirteenf_filings.latest()
-        if latest_13f:
-            try:
-                # Import here to avoid circular imports
-                from edgar.funds.thirteenf import get_thirteenf_portfolio
-                return get_thirteenf_portfolio(latest_13f)
-            except Exception as e:
-                log.warning(f"Error parsing 13F filing: {e}")
-    
-    # Return empty DataFrame if no portfolio data found
-    return pd.DataFrame()
+    return parse_series_and_classes_from_html(html_content, cik)

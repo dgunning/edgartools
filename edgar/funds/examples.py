@@ -5,15 +5,11 @@ This module demonstrates how to use the improved fund entity API
 to work with fund companies, series, and classes.
 """
 
-from edgar.funds.fund_entities import (
+from edgar.funds import (
     find_fund,
     get_fund_company,
     get_fund_series,
     get_fund_class,
-    get_class_by_ticker,
-    FundCompany,
-    FundSeries,
-    FundClass
 )
 
 
@@ -55,7 +51,7 @@ def demonstrate_specialized_getters():
     print(f"Got class by ID: {class_by_id}")
     
     # Get a fund class by ticker
-    class_by_ticker = get_class_by_ticker("KINCX")  # Should be the same as above
+    class_by_ticker = get_fund_class("KINCX")  # Should be the same as above
     print(f"Got class by ticker: {class_by_ticker}")
 
 
@@ -64,7 +60,7 @@ def demonstrate_entity_navigation():
     print("\n=== Navigating between related entities ===")
     
     # Start with a fund class
-    fund_class = get_class_by_ticker("KINCX")
+    fund_class = get_fund_class("KINCX")
     print(f"Starting with class: {fund_class}")
     
     # Navigate to its series
@@ -72,11 +68,11 @@ def demonstrate_entity_navigation():
     print(f"Parent series: {series}")
     
     # Navigate to the fund company
-    company = fund_class.company
+    company = fund_class.series.fund_company
     print(f"Parent company: {company}")
     
     # Get all series for the company
-    all_series = company.get_series()
+    all_series = company.all_series
     print(f"Company has {len(all_series)} series:")
     for s in all_series[:3]:  # Show first 3
         print(f"  - {s}")
