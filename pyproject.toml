@@ -27,11 +27,10 @@ dependencies = [
   "httpx>=0.25.0",
   "pandas>=2.0.0",
   "tabulate>=0.9.0",
-  "pyarrow>=14.0.0",
+  "pyarrow>=17.0.0",
   "beautifulsoup4>=4.10.0",
   "lxml>=4.4",
-  "rich>=13.0.0",
-  "fastcore>=1.5.29",
+  "rich>=13.8.0",
   "humanize>=4.0.0",
   "stamina>=24.2.0",
   "orjson>=3.6.0",
@@ -57,8 +56,7 @@ path = "edgar/__about__.py"
 include = [
   "edgar/**/*.py",
   "edgar/reference/data/*",
-  "edgar/xbrl2/data/*",
-  "edgar/xbrl/data/*",
+  "edgar/xbrl2/standardization/*",
   "LICENSE.txt"
 ]
 artifacts = [
@@ -85,7 +83,7 @@ dependencies = [
   "mkdocs-material"
 ]
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests --ignore=tests/legacy {args}"
 no-cov = "cov --no-cov {args}"
 lint = "ruff check edgar"
 smoke-filings = "python tests/batch/batch_filings.py {args}"

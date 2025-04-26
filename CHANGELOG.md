@@ -5,11 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-alpha] - 2025-04-19
+
+### Changed
+- Remove `fastcore` dependency 
+- Refactor `entities` to dedicated `entity` module
+- Remove `filing.prev` - use `filing.previous()` instead
+- `XBRL` and `Financials` completely rewritten
+- Rewrote XBRL concept standardization
+- `Fund` completely rewritten
+
+### Added
+- Create `Filing` from SGML file
+- `Filings` can now be used to filter downloads
+- Add financial ratio calculation
+
+### Fixed
+- Fixed issue with optional ratio concepts causing ratio calculations to fail
+
+
 ## [3.15.1] - 2025-04-15
 
 ### Added
 
 - Add `cover_page()` accessor to `xbrl.statements` to get the cover page of the Statements
+
 
 ## [3.15.0] - 2025-04-04
 

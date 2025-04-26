@@ -74,8 +74,18 @@ def test_sgml_from_filing():
            accession_no='0000899681-95-000096')
     filing_sgml = FilingSGML.from_filing(filing)
     assert filing_sgml
+    assert filing_sgml.accession_number == '0000899681-95-000096'
+    assert filing_sgml.cik == 311048
     assert not filing_sgml.header.is_empty()
     repr(filing_sgml.header)
+
+def test_filing_from_sgml():
+    filing = Filing.from_sgml('data/sgml/0000320193-24-000123.txt')
+    assert filing.form == '10-K'
+    assert filing.filing_date == '2024-11-01'
+    assert filing.company == 'Apple Inc.'
+    assert filing.accession_no == '0000320193-24-000123'
+    assert filing.cik == 320193
 
 def test_sgml_parser_detect_content():
     parser = SGMLParser()

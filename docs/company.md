@@ -1,10 +1,35 @@
-# Companies
+# Company API
 
 With the company API you find a company using the **cik** or **ticker**. 
 From the company you can access all their historical **filings**,
 and a dataset of the company **facts**.
 The SEC's company API also supplies a lot more details about a company including industry, the SEC filer type,
 the mailing and business address and much more.
+
+## Find by Ticker
+
+```python
+c = Company("AAPL")
+```
+Tickers are case-insensitive so you can use `Company("aapl")` or `Company("AAPL")`
+
+
+## Find by CIK
+The **cik** uniquely identifies a company or entity at the SEC.
+
+```python
+c = Company(320193)
+```
+CIKS can also be strings which may or may not be zero padded to 10 places.
+```python
+c = Company("0000320193") 
+# OR 
+c = Company("320193")
+```
+
+
+
+
 
 ## Find a company using the cik
 The **cik** is the id that uniquely identifies a company at the SEC.

@@ -1,6 +1,5 @@
 from decimal import Decimal
 import re
-from decimal import Decimal
 from typing import Union, Any, Optional
 
 import numpy as np

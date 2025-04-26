@@ -1,4 +1,5 @@
 import datetime
+import time
 from datetime import datetime
 
 import pandas as pd
@@ -27,7 +28,8 @@ from edgar.core import (decode_content,
                         is_start_of_quarter,
                         split_camel_case,
                         has_html_content,
-                        filter_by_ticker)
+                        filter_by_ticker,
+                        parallel_thread_map)
 from edgar.richtools import *
 
 
@@ -462,3 +464,83 @@ def test_has_html_content():
         xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:srt="http://fasb.org/srt/2024" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" 
         """
     )
+
+
+def test_parallel_thread_map_basic():
+    """Test basic functionality of parallel_thread_map"""
+    # Simple squaring function
+    def square(x):
+        return x * x
+    
+    # Test with a list of integers
+    numbers = [1, 2, 3, 4, 5]
+    result = parallel_thread_map(square, numbers)
+    
+    # Check results
+    assert result == [1, 4, 9, 16, 25]
+
+
+def test_parallel_thread_map_with_kwargs():
+    """Test parallel_thread_map with keyword arguments"""
+    # Function that multiplies by a factor
+    def multiply(x, factor=1):
+        return x * factor
+    
+    # Test with a list and a keyword argument
+    numbers = [1, 2, 3, 4, 5]
+    result = parallel_thread_map(multiply, numbers, factor=2)
+    
+    # Check results
+    assert result == [2, 4, 6, 8, 10]
+
+
+def test_parallel_thread_map_empty_list():
+    """Test parallel_thread_map with an empty list"""
+    # Should return an empty list
+    result = parallel_thread_map(lambda x: x * 2, [])
+    assert result == []
+
+
+def test_parallel_thread_map_with_io_bound_task():
+    """Test parallel_thread_map with an I/O-bound task"""
+    # Function that simulates I/O with sleep
+    def slow_operation(x, delay=0.01):
+        time.sleep(delay)  # Simulate I/O delay
+        return x * 2
+    
+    # Generate a list of test items
+    items = list(range(10))
+    
+    # Time the parallel execution
+    start_time = time.time()
+    parallel_result = parallel_thread_map(slow_operation, items)
+    parallel_time = time.time() - start_time
+    
+    # Time the sequential execution for comparison
+    start_time = time.time()
+    sequential_result = [slow_operation(x) for x in items]
+    sequential_time = time.time() - start_time
+    
+    # Verify results are the same
+    assert parallel_result == sequential_result
+    
+    # In properly working ThreadPoolExecutor, parallel should be faster
+    # but don't assert on timing as it could be inconsistent in CI environments
+    print(f"Parallel: {parallel_time:.4f}s, Sequential: {sequential_time:.4f}s")
+
+
+def test_parallel_thread_map_with_n_workers():
+    """Test parallel_thread_map with a specific number of workers"""
+    # Function that returns the current thread name
+    def get_thread_info(x):
+        import threading
+        time.sleep(0.01)  # Small delay to ensure thread creation
+        return threading.current_thread().name
+    
+    # Run with just 2 workers
+    items = list(range(10))
+    results = parallel_thread_map(get_thread_info, items, n_workers=2)
+    
+    # Count unique thread names (should be at most 2 + main thread)
+    unique_threads = set(results)
+    assert len(unique_threads) <= 3  # Main thread + 2 workers

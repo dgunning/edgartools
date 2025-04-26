@@ -350,6 +350,13 @@ class FilingHeader:
     @property
     def cik(self):
         cik = self.filing_metadata.get("CIK")
+        if cik:
+            return int(cik)
+        # Get from the filers
+        if self.filers and len(self.filers) > 0:
+            company = self.filers[0].company_information
+            if company and company.cik:
+                return int(company.cik)
         return cik
 
     @property
@@ -780,9 +787,9 @@ class FilingHeader:
                     name = reporting_owner_values['COMPANY DATA'].get('COMPANY CONFORMED NAME')
                     cik = reporting_owner_values['COMPANY DATA'].get('CENTRAL INDEX KEY')
                 if cik:
-                    from edgar.entities import Entity, EntityData
-                    entity: EntityData = Entity(cik)
-                    if entity and not entity.is_company:
+                    from edgar.entity import Entity
+                    entity: Entity = Entity(cik)
+                    if entity and not entity.data.is_company:
                         name = reverse_name(name)
                     owner = Owner(name=name, cik=cik)
 

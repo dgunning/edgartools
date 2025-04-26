@@ -52,15 +52,15 @@ class CompanyReport:
 
     @property
     def income_statement(self):
-        return self.financials.get_income_statement() if self.financials else None
+        return self.financials.income_statement() if self.financials else None
 
     @property
     def balance_sheet(self):
-        return self.financials.get_balance_sheet() if self.financials else None
+        return self.financials.balance_sheet() if self.financials else None
 
     @property
     def cash_flow_statement(self):
-        return self.financials.get_cash_flow_statement() if self.financials else None
+        return self.financials.cashflow_statement() if self.financials else None
 
     @property
     @lru_cache(1)

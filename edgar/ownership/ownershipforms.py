@@ -24,7 +24,7 @@ from rich.table import Table, Column
 from edgar._party import Address
 from edgar.core import IntString, get_bool, reverse_name, yes_no
 from edgar.datatools import convert_to_numeric
-from edgar.entities import Entity
+from edgar.entity import Entity
 from edgar.ownership.core import format_amount, format_currency, safe_numeric, format_numeric
 from edgar.richtools import repr_rich, df_to_rich_table
 from edgar.xmltools import (child_text, child_value)
@@ -972,7 +972,7 @@ class ReportingOwners():
             entity = Entity(int(cik))
 
             # Check if the entity is a company or an individual
-            is_company = entity and entity.is_company
+            is_company = entity and entity.data.is_company
             if not is_company:
                 owner_name = reverse_name(owner_name)
 
@@ -1327,7 +1327,7 @@ class InitialOwnershipSummary(OwnershipSummary):
         # Combine all elements
         return Panel(
             Group(*elements),
-            title=f"[bold]Initial Beneficial Ownership[/bold]",
+            title="[bold]Initial Beneficial Ownership[/bold]",
             expand=False
         )
 

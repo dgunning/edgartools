@@ -2,7 +2,7 @@ from rich import print
 from tqdm.auto import tqdm
 
 from edgar import *
-from edgar.xbrl.xbrldata import XBRLAttachments
+from edgar.legacy.xbrl import XBRLAttachments
 
 
 def examine_filing_xbrl(filing: Filing):

@@ -57,7 +57,7 @@ md_and_a = tenk.management_discussion
 # Access financial statements
 balance_sheet = tenk.balance_sheet
 income_stmt = tenk.income_statement
-cash_flow = tenk.cash_flow_statement
+cash_flow = tenk.cashflow_statement
 
 # Convert to DataFrame
 df = tenk.balance_sheet.to_dataframe()

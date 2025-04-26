@@ -48,14 +48,14 @@ df = filings.to_pandas()
 ## Navigating filings
 
 The Filings object allows you to navigate through filings using `filings.next()` and `filings.prev()`. 
-This shows you pages of the data - the page size is about 50. 
+This shows you pages of the data - the page size is about 50.
 
 ```python
 # To see the next page of data
 filings.next()
 
 # To see the previous page
-filings.prev()
+filings.previous()
 
 # To see the current page
 filings.current()

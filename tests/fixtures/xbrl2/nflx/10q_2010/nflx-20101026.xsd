@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!--  EDGAR Online I-Metrix Xcelerate Taxonomy Schema, based on XBRL 2.1  http://www.edgar-online.com/  -->
+<!--  Version: 6.7.10 -->
+<!--  Round: 1ac9f7b1-1dd8-4540-afd1-9692f552bd04 -->
+<!--  Creation date: 2010-10-25T14:06:52Z -->
+<!--  Copyright (c) 2005-2010 EDGAR Online, Inc. All Rights Reserved. -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+  xmlns:xbrli="http://www.xbrl.org/2003/instance"
+  xmlns:link="http://www.xbrl.org/2003/linkbase"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:nflx="http://www.netflix.com/20100930"
+  xmlns:xbrldt="http://xbrl.org/2005/xbrldt"
+  xmlns:us-types="http://xbrl.us/us-types/2009-01-31"
+  targetNamespace="http://www.netflix.com/20100930"
+  elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <annotation>
+    <appinfo>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/DocumentDocumentandEntityInformation" id="DocumentDocumentandEntityInformation">
+        <link:definition>101 - Document - Document and Entity Information</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/StatementOfIncome" id="IMetrix_StatementOfIncome">
+        <link:definition>103 - Statement - Consolidated Statements of Operations</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/StatementOfIncomeParenthetical" id="IMetrix_StatementOfIncomeParen">
+        <link:definition>104 - Statement - Consolidated Statements of Operations (Parenthetical)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/StatementOfFinancialPositionClassified" id="IMetrix_StatementOfFinancialPositionClassified">
+        <link:definition>105 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/StatementOfFinancialPositionClassifiedParenthetical" id="IMetrix_StatementOfFinancialPositionClassifiedParen">
+        <link:definition>106 - Statement - Consolidated Balance Sheets (Parenthetical)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/StatementOfCashFlowsIndirect" id="IMetrix_StatementOfCashFlowsIndirect">
+        <link:definition>107 - Statement - Consolidated Statements of Cash Flows</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsBusinessDescriptionAndSignificantAccountingPoliciesTextBlock" id="IMetrix_NotesToFinancialStatementsBusinessDescriptionAndSignificantAccountingPoliciesTextBlock">
+        <link:definition>108 - Disclosure - Basis of Presentation and Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsEarningsPerShareTextBlock" id="IMetrix_NotesToFinancialStatementsEarningsPerShareTextBlock">
+        <link:definition>109 - Disclosure - Net Income Per Share</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsFairValueDisclosuresTextBlock" id="IMetrix_NotesToFinancialStatementsFairValueDisclosuresTextBlock">
+        <link:definition>110 - Disclosure - Short-Term Investments and Fair Value Measurement</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsLongTermDebtTextBlock" id="IMetrix_NotesToFinancialStatementsLongTermDebtTextBlock">
+        <link:definition>111 - Disclosure - Long-term Debt</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsDetailsOfCertainBalanceSheetAccountsDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsDetailsOfCertainBalanceSheetAccountsDisclosureTextBlock">
+        <link:definition>112 - Disclosure - Balance Sheet Components</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsComprehensiveIncomeNoteTextBlock" id="IMetrix_NotesToFinancialStatementsComprehensiveIncomeNoteTextBlock">
+        <link:definition>113 - Disclosure - Other Comprehensive Income</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsStockholdersEquityNoteDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsStockholdersEquityNoteDisclosureTextBlock">
+        <link:definition>114 - Disclosure - Stockholders' Equity</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsIncomeTaxDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsIncomeTaxDisclosureTextBlock">
+        <link:definition>115 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.netflix.com/taxonomy/role/NotesToFinancialStatementsCommitmentsAndContingenciesDisclosureTextBlock" id="IMetrix_NotesToFinancialStatementsCommitmentsAndContingenciesDisclosureTextBlock">
+        <link:definition>116 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:linkbaseRef xlink:type="simple" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:href="nflx-20100930_cal.xml" xlink:title="Calculation Links, all"/>
+      <link:linkbaseRef xlink:type="simple" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:href="nflx-20100930_def.xml" xlink:title="Definition Links, all"/>
+      <link:linkbaseRef xlink:type="simple" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:href="nflx-20100930_lab.xml" xlink:title="Label Links, all"/>
+      <link:linkbaseRef xlink:type="simple" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:href="nflx-20100930_pre.xml" xlink:title="Presentation Links, all"/>
+    </appinfo>
+  </annotation>
+  <import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <import namespace="http://xbrl.us/us-types/2009-01-31" schemaLocation="http://taxonomies.xbrl.us/us-gaap/2009/elts/us-types-2009-01-31.xsd"/>
+  <import namespace="http://xbrl.us/us-gaap/2009-01-31" schemaLocation="http://taxonomies.xbrl.us/us-gaap/2009/elts/us-gaap-2009-01-31.xsd"/>
+  <import namespace="http://xbrl.us/dei/2009-01-31" schemaLocation="http://taxonomies.xbrl.us/us-gaap/2009/non-gaap/dei-2009-01-31.xsd"/>
+  <element name="AcquisitionOfStreamingContentLibrary" id="nflx_AcquisitionOfStreamingContentLibrary" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="AmortizationOfContentLibrary" id="nflx_AmortizationOfContentLibrary" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="BusinessDescriptionAndSignificantAccountingPoliciesTextBlock" id="nflx_BusinessDescriptionAndSignificantAccountingPoliciesTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ContentLibraryNetCurrent" id="nflx_ContentLibraryNetCurrent" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="ContentLibraryNetNoncurrent" id="nflx_ContentLibraryNetNoncurrent" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="instant" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DetailsOfCertainBalanceSheetAccountsDisclosureTextBlock" id="nflx_DetailsOfCertainBalanceSheetAccountsDisclosureTextBlock" type="us-types:textBlockItemType" abstract="false" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="DocumentDocumentandEntityInformationAbstract" id="nflx_DocumentDocumentandEntityInformationAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="FulfillmentExpense" id="nflx_FulfillmentExpense" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="NotesToFinancialStatementsAbstract" id="nflx_NotesToFinancialStatementsAbstract" type="xbrli:stringItemType" abstract="true" xbrli:periodType="duration" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PaymentsForAcquisitionsOfContentLibrary" id="nflx_PaymentsForAcquisitionsOfContentLibrary" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="PaymentsForProceedsFromOtherAssets" id="nflx_PaymentsForProceedsFromOtherAssets" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="debit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockBasedCompensationExpenseAssociatedWithFulfillmentExpense" id="nflx_StockBasedCompensationExpenseAssociatedWithFulfillmentExpense" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockBasedCompensationExpenseAssociatedWithGeneralAndAdministrativeExpense" id="nflx_StockBasedCompensationExpenseAssociatedWithGeneralAndAdministrativeExpense" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockBasedCompensationExpenseAssociatedWithMarketingExpense" id="nflx_StockBasedCompensationExpenseAssociatedWithMarketingExpense" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+  <element name="StockBasedCompensationExpenseAssociatedWithTechnologyAndDevelopmentExpense" id="nflx_StockBasedCompensationExpenseAssociatedWithTechnologyAndDevelopmentExpense" type="xbrli:monetaryItemType" abstract="false" xbrli:periodType="duration" xbrli:balance="credit" nillable="true" substitutionGroup="xbrli:item"/>
+</schema>

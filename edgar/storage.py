@@ -3,7 +3,7 @@ import os
 import re
 from datetime import datetime, date
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -22,7 +22,8 @@ __all__ = ['download_edgar_data',
            'use_local_storage',
            'is_using_local_storage',
            'download_filings',
-           'local_filing_path']
+           'local_filing_path',
+           '_filter_extracted_files']
 
 def use_local_storage(use_local: bool = True):
     """
@@ -107,35 +108,59 @@ def download_edgar_data(submissions: bool = True,
 
 def download_filings(filing_date: Optional[str] = None,
                      data_directory: Optional[str] = None,
-                     overwrite_existing:bool=False):
+                     overwrite_existing:bool=False,
+                     filings: Optional['Filings'] = None):
     """
-    Download feed files for the specified date or date range.
+    Download feed files for the specified date or date range, or for specific filings.
 
     Examples
 
     download_filings('2025-01-03:')
     download_filings('2025-01-03', overwrite_existing=False)
     download_filings('2024-01-01:2025-01-05', overwrite_existing=True)
+    download_filings(filings=my_filings_object)
 
     Args:
         filing_date: String in format 'YYYY-MM-DD', 'YYYY-MM-DD:', ':YYYY-MM-DD',
-                    or 'YYYY-MM-DD:YYYY-MM-DD'
+                    or 'YYYY-MM-DD:YYYY-MM-DD'. If both filing_date and filings are provided,
+                    filing_date takes precedence for determining which feed files to download.
         data_directory: Directory to save the downloaded files. Defaults to the Edgar data directory.
         overwrite_existing: If True, overwrite existing files. Default is False.
+        filings: Optional Filings object. If provided, will download only filings with matching accession numbers.
     """
-    if not filing_date:
-        filing_date = latest_filing_date()
-        log.info('No filing date specified. Using latest filing date: %s', filing_date)
-
     if not data_directory:
         data_directory = get_edgar_data_directory() / 'filings'
         log.info('Using data directory: %s', data_directory)
+
+    # If filings object is provided, extract accession numbers
+    accession_numbers = None
+    if filings is not None:
+        log.info('Using provided Filings object with %d filings', len(filings))
+        accession_numbers = filings.data['accession_number'].to_pylist()
+        
+        # If both filing_date and filings are provided, let the user know which takes precedence
+        if filing_date:
+            log.info('Both filing_date and filings parameters provided. Using filing_date %s for determining feed files to download.', filing_date)
+        # Use the date range from the filings object if no filing_date specified
+        else:
+            start_date, end_date = filings.date_range
+            filing_date = f"{start_date}:{end_date}"
+            log.info('Using date range from filings: %s', filing_date)
+
+    # Use default date if not specified
+    if not filing_date:
+        filing_date = latest_filing_date()
+        log.info('No filing date specified. Using latest filing date: %s', filing_date)
 
     # Get start and end dates for filtering
     start_date_tm, end_date_tm, is_range = extract_dates(filing_date)
 
     # Get quarters to process
     year_and_quarters = filing_date_to_year_quarters(filing_date)
+    
+    # Track statistics
+    total_feed_files_downloaded = 0
+    total_filings_kept = 0
 
     for year, quarter in year_and_quarters:
         log.info('Downloading feed files for %d Q%d', year, quarter)
@@ -163,8 +188,55 @@ def download_filings(filing_date: Optional[str] = None,
                         continue
                 path = asyncio.run(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory))
                 log.info('Downloaded feed file to %s', path)
+                total_feed_files_downloaded += 1
+                
+                # If we have specific accession numbers, filter the extracted files
+                if accession_numbers and path.exists():
+                    log.info('Filtering extracted files to keep only specified accession numbers')
+                    filings_kept = _filter_extracted_files(path, accession_numbers)
+                    total_filings_kept += filings_kept
         else:
             log.info('No feed files found for %d Q%d in date range %s', year, quarter, filing_date)
+    
+    # Log summary statistics
+    log.info('Download complete. Downloaded %d feed files.', total_feed_files_downloaded)
+    if accession_numbers:
+        log.info('Kept %d filings out of %d requested.', total_filings_kept, len(accession_numbers))
+
+
+def _filter_extracted_files(directory_path: Path, accession_numbers: List[str]) -> int:
+    """
+    Filter files in the extracted directory to keep only those matching the specified accession numbers.
+    
+    Args:
+        directory_path: Path to the directory containing extracted files
+        accession_numbers: List of accession numbers to keep
+        
+    Returns:
+        int: Number of filings kept
+    """
+    if not directory_path.is_dir():
+        return 0
+    
+    # Convert accession numbers to the format used in filenames (removing dashes)
+    normalized_accession_numbers = [an.replace('-', '') for an in accession_numbers]
+    
+    # Keep track of which filings were found
+    filings_kept = 0
+    
+    # Find all .nc files in the directory
+    for file_path in directory_path.glob('*.nc'):
+        # Extract accession number from filename
+        file_accession = file_path.stem
+        undashed_accession = file_accession.replace('-', '')
+        
+        # If this file doesn't match any of our accession numbers, remove it
+        if undashed_accession not in normalized_accession_numbers and file_accession not in accession_numbers:
+            file_path.unlink()
+        else:
+            filings_kept += 1
+    
+    return filings_kept
 
 
 def is_feed_file_in_date_range(filename: str,

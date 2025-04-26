@@ -6,8 +6,8 @@ import pyarrow.compute as pc
 from rich import print
 
 from edgar import get_fund_portfolio_filings, Filings, Filing
-from edgar.fundreports import FundReport, CurrentMetric
-from edgar.funds import get_fund_information, Fund
+from edgar.funds.reports import FundReport, CurrentMetric
+from edgar.funds import get_fund_information
 
 dupree_fund_xml = Path('data/NPORT.Dupree.xml').read_text()
 
@@ -200,15 +200,17 @@ def test_display_of_fund_report():
                     company='PRUDENTIAL SECTOR FUNDS, INC.',
                     cik=352665,
                     accession_no='0001752724-23-238209')
-    fund_report = filing.obj()
+    fund_report:FundReport = filing.obj()
 
     # What is the fund?
-    fund: Fund = fund_report.fund
-    assert fund.name == 'PGIM Jennison Health Sciences Fund'
-    assert fund.ticker == "PHSZX"
-    assert fund.class_contract_id == "C000012124"
-    assert fund.series == 'S000004380'
-    # assert fund_report.name == 'PRUDENTIAL SECTOR FUNDS, INC.'
+    fund_series = fund_report.get_fund_series()
+    assert fund_series
+    assert fund_series.name == 'PGIM Jennison Health Sciences Fund'
+    assert fund_series.series_id == 'S000004380'
+
+    fund_company = fund_series.fund_company
+    assert fund_company.cik == 352665
+    assert fund_company.name == 'Prudential Sector Funds, Inc.'
 
 
 def test_print_fund_report():

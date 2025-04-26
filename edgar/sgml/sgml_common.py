@@ -13,6 +13,7 @@ from edgar.sgml.sgml_parser import SGMLParser, SGMLFormatType, SGMLDocument
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.tools import is_xml
 
+
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
 
@@ -177,7 +178,7 @@ def parse_submission_text(content: str) -> Tuple[FilingHeader, DefaultDict[str, 
         # specialized header parser since we need additional processing
         try:
             header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
-        except Exception as e:
+        except Exception:
             header = FilingHeader.parse_from_sgml_text(parsed_data['header'], preprocess=True)
 
     # Create document dictionary
@@ -216,8 +217,14 @@ class FilingSGML:
 
     @property
     def cik(self):
-        if self.header.cik:
-            return self.header.cik
+        return self.header.cik
+
+    @cached_property
+    def entity(self):
+        from edgar.entity import Entity
+        cik = self.cik
+        if cik:
+            return Entity(cik)
 
     @property
     def form(self):
@@ -234,6 +241,16 @@ class FilingSGML:
     @property
     def effective_date(self):
         return self.header.filing_metadata.get('EFFECTIVE DATE')
+
+    @property
+    def path(self):
+        """
+        Get the root path of the filing.
+        """
+        if self.accession_number:
+            return f"/Archives/edgar/data/{self.header.cik}/{self.accession_number.replace('-', '')}"
+        else:
+            return "/<SGML FILE>"
 
 
     def html(self):
@@ -273,16 +290,10 @@ class FilingSGML:
 
         for sequence, document_lst in self._documents_by_sequence.items():
             for document in document_lst:
-                # Set the path for the attachment
-                if self.accession_number: # Use the accession number if available.
-                                          # This allows for downloading the file directly from the SEC website
-                    path = f"/Archives/edgar/data/{self.header.cik}/{self.accession_number.replace('-', '')}/{document.filename}"
-                else:
-                    path=f"/<SGML FILE>/{document.filename}",
                 attachment = Attachment(
                     sequence_number=sequence,
                     ixbrl=False,
-                    path=path,
+                    path=f"{self.path}/{document.filename}",
                     document=document.filename,
                     document_type=get_document_type(filename=document.filename, declared_document_type=document.type),
                     description=document.description,

@@ -1,4 +1,4 @@
-from edgar.xbrl import XBRLInstance
+from edgar.legacy.xbrl import XBRLInstance
 from pathlib import Path
 
 from edgar import *

@@ -20,7 +20,6 @@ import pyarrow.compute as pc
 import pyarrow.csv as pa_csv
 import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
-from fastcore.parallel import parallel
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
@@ -53,7 +52,8 @@ from edgar.core import (log, display_size, sec_edgar,
                         quarters_in_year,
                         filing_date_to_year_quarters,
                         DataPager,
-                        PagingState)
+                        PagingState,
+                        parallel_thread_map)
 from edgar.files.html import Document
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
@@ -68,8 +68,8 @@ from edgar.richtools import repr_rich, print_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingSGML, Reports, Statements, FilingHeader
 from edgar.storage import local_filing_path, is_using_local_storage
-from edgar.xbrl import XBRLData, XBRLInstance, get_xbrl_object
 from edgar.xmltools import child_text
+from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -425,12 +425,10 @@ def get_filings_for_quarters(year_and_quarters: YearAndQuarters,
         _, final_index_table = fetch_filing_index(year_and_quarter=year_and_quarters[0],
                                                   index=index)
     else:
-        quarters_and_indexes = parallel(fetch_filing_index,
-                                        items=year_and_quarters,
-                                        index=index,
-                                        threadpool=True,
-                                        progress=True
-                                        )
+        quarters_and_indexes = parallel_thread_map(
+            lambda yq: fetch_filing_index(year_and_quarter=yq, index=index),
+            year_and_quarters
+        )
         quarter_and_indexes_sorted = sorted(quarters_and_indexes, key=lambda d: d[0])
         index_tables = [fd[1] for fd in quarter_and_indexes_sorted]
         final_index_table: pa.Table = pa.concat_tables(index_tables, mode="default")
@@ -463,6 +461,21 @@ class Filings:
     def save(self, location: str):
         """Save the filing index as parquet"""
         self.save_parquet(location)
+        
+    def download(self, data_directory: Optional[str] = None):
+        """
+        Download the filings based on the accession numbers in this Filings object.
+        
+        This is a convenience method that calls `download_filings` with this object
+        as the `filings` parameter.
+        
+        Args:
+            data_directory: Directory to save the downloaded files. Defaults to the Edgar data directory.
+        """
+        from edgar.storage import download_filings
+        download_filings(data_directory=data_directory, 
+                         overwrite_existing=True,
+                         filings=self)
 
     def get_filing_at(self, item: int):
         """Get the filing at the specified index"""
@@ -508,7 +521,7 @@ class Filings:
                cik: Union[IntString, List[IntString]] = None,
                exchange: Union[str, List[str], Exchange, List[Exchange]] = None,
                ticker: Union[str, List[str]] = None,
-               accession_number: Union[str, List[str]] = None) -> Optional['Filings']:
+               accession_number: Union[str, List[str]] = None) -> 'Filings':
         """
         Get some filings
 
@@ -559,7 +572,7 @@ class Filings:
                 filing_index = filter_by_date(filing_index, filing_date, 'filing_date')
             except InvalidDateException as e:
                 log.error(e)
-                return None
+                return Filings(_empty_filing_index())
 
         # Filter by cik
         if cik:
@@ -618,7 +631,7 @@ class Filings:
         """Show the next page"""
         data_page = self.data_pager.next()
         if data_page is None:
-            log.warning("End of data .. use prev() \u2190 ")
+            log.warning("End of data .. use previous() \u2190 ")
             return None
         start_index, _ = self.data_pager._current_range
         filings_state = PagingState(page_start=start_index, num_records=len(self))
@@ -636,10 +649,6 @@ class Filings:
         start_index, _ = self.data_pager._current_range
         filings_state = PagingState(page_start=start_index, num_records=len(self))
         return Filings(data_page, original_state=filings_state)
-
-    def prev(self):
-        """Alias for self.previous()"""
-        return self.previous()
 
     def _get_by_accession_number(self, accession_number: str):
         mask = pc.equal(self.data['accession_number'], accession_number)
@@ -676,7 +685,7 @@ class Filings:
 
     def find(self,
              company_search_str: str):
-        from edgar.entities import find_company
+        from edgar.entity import find_company
 
         # Search for the company
         search_results = find_company(company_search_str)
@@ -1310,6 +1319,7 @@ class Filing:
         self.filing_date = filing_date
         self.accession_no = accession_no
         self._filing_homepage = None
+        self._sgml = None
 
     @property
     def accession_number(self):
@@ -1434,12 +1444,15 @@ class Filing:
         else:
             print(self.text())
 
-    def xbrl(self) -> Optional[Union[XBRLData, XBRLInstance]]:
+    def xbrl(self) -> Optional[XBRL]:
         """
         Get the XBRL document for the filing, parsed and as a FilingXbrl object
         :return: Get the XBRL document for the filing, parsed and as a FilingXbrl object, or None
         """
-        return get_xbrl_object(self)
+        try:
+            return XBRL.from_filing(self)
+        except XBRLFilingWithNoXbrlData:
+            return None
 
     def serve(self, port: int = 8000) -> AttachmentServer:
         """Serve the filings on a local server
@@ -1479,16 +1492,38 @@ class Filing:
         """
         return local_filing_path(str(self.filing_date), self.accession_no)
 
-    @lru_cache()
+    @classmethod
+    def from_sgml(cls, source: Union[str, Path]):
+        """
+        Read the filing from the SGML string
+        """
+        filing_sgml = FilingSGML.from_source(source)
+        filers = filing_sgml.header.filers
+        if filers and len(filers) > 0:
+             company = filers[0].company_information.name if filers[0].company_information else ""
+        else:
+            company = ""
+
+        return cls(cik=filing_sgml.cik,
+                   accession_no=filing_sgml.accession_number,
+                   form=filing_sgml.form,
+                   company=company,
+                   filing_date=filing_sgml.filing_date)
+
     def sgml(self) -> FilingSGML:
         """
         Read the filing from the local storage path if it exists
         """
+        if self._sgml:
+            return self._sgml
         if is_using_local_storage():
             local_path = local_filing_path(str(self.filing_date), self.accession_no)
             if local_path.exists():
-                return FilingSGML.from_source(local_path)
-        return FilingSGML.from_filing(self)
+                self._sgml = FilingSGML.from_source(local_path)
+
+        if self._sgml is None:
+            self._sgml = FilingSGML.from_filing(self)
+        return self._sgml
 
     @cached_property
     def reports(self)  -> Optional[Reports]:
@@ -1635,8 +1670,8 @@ class Filing:
     def get_entity(self):
         """Get the company to which this filing belongs"""
         "Get the company for cik. Cache for performance"
-        from edgar.entities import CompanyData
-        return CompanyData.for_cik(self.cik)
+        from edgar.entity import Company
+        return Company(self.cik)
 
     @lru_cache(maxsize=1)
     def as_company_filing(self):
@@ -1665,7 +1700,7 @@ class Filing:
             if is_using_local_storage():
                 # In this case the local storage is missing the filing so we have to download it
                 log.warning(f"Filing {self.accession_no} not found in local storage. Downloading from SEC ...")
-                from edgar.entities import download_entity_submissions_from_sec, parse_entity_submissions
+                from edgar.entity import download_entity_submissions_from_sec, parse_entity_submissions
                 submissions_json = download_entity_submissions_from_sec(self.cik)
                 c_from_sec = parse_entity_submissions(submissions_json)
                 filings = c_from_sec.get_filings(accession_number=self.accession_no)

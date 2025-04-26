@@ -3,8 +3,8 @@ Tests for the new statement categorization functionality.
 """
 from pathlib import Path
 import pytest
-from edgar.xbrl2.xbrl import XBRL
-from edgar.xbrl2.statement_resolver import StatementCategory
+from edgar.xbrl.xbrl import XBRL
+from edgar.xbrl.statement_resolver import StatementCategory
 
 
 @pytest.fixture

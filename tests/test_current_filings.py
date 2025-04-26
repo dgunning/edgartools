@@ -76,10 +76,11 @@ def test_current_filings_get_by_index_on_page2():
 
 
 def test_current_filings_get_accession_number():
-    filings:CurrentFilings = get_current_filings().next()
+    filings:CurrentFilings = get_current_filings()
+    filings = filings.next()
     accession_number = filings.data['accession_number'].to_pylist()[0]
     print(accession_number)
-    filings = filings.prev()
+    filings = filings.previous()
     filing = filings.get(accession_number)
     assert filing
     assert filing.accession_no == accession_number
@@ -88,7 +89,7 @@ def test_current_filings_get_accession_number():
 def test_current_filings_get_accession_number_not_found():
     filings:CurrentFilings = get_current_filings().next()
     accession_number = '0000000900-24-000000'
-    filings = filings.prev()
+    filings = filings.previous()
     filing = filings.get(accession_number)
     assert not filing
 

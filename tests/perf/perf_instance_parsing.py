@@ -1,6 +1,6 @@
 import timeit
 from pathlib import Path
-from edgar.xbrl import XBRLInstance
+from legacy.xbrl import XBRLInstance
 
 instance_xml = None
 

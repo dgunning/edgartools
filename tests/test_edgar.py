@@ -3,7 +3,7 @@ import pytest
 from edgar import obj, matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
 from edgar.company_reports import TenK
 from edgar.effect import Effect
-from edgar.entities import EntityData
+from edgar.entity import Entity, Company
 from edgar.offerings import FormD
 from edgar.ownership import Ownership
 import httpx
@@ -70,8 +70,6 @@ def test_obj():
     tenk = filing_10k.data_object()
     assert isinstance(tenk, TenK)
 
-    assert ['2022', '2021', '2020'] == tenk.cash_flow_statement.periods
-
     filing = Filing(form='1-A/A', filing_date='2023-03-21', company='CancerVAX, Inc.', cik=1905495,
                     accession_no='0001493152-23-008348')
     assert filing.obj() is None
@@ -79,7 +77,7 @@ def test_obj():
 
 def test_find():
     assert find("0001493152-23-008348").accession_no == "0001493152-23-008348"
-    assert isinstance(find(1905495), EntityData)
+    assert isinstance(find(1905495), Entity)
     assert find("1905495").name == 'CancerVAX, Inc.'
     assert isinstance(find("CancerVAX, Inc."), CompanySearchResults)
 
@@ -101,18 +99,3 @@ def test_find_a_current_filing():
     assert filing
     assert filing.accession_no == accession_number
 
-
-# Parameterized tests with ticker and fund name
-# def test_find_ticker():
-#     assert find("AAPL").name == "Apple Inc."
-@pytest.mark.parametrize("ticker, expected_fund_name, expected_class", [
-    ("KINCX", "Kinetics Internet Fund", "Advisor Class C"),
-    ("KINAX", "Kinetics Internet Fund", "Advisor Class A")
-    # Add more tuples for each ticker and fund name pair
-])
-def test_ticker_name_correspondence(ticker, expected_fund_name, expected_class):
-    # Here you would typically fetch the fund name based on the ticker
-    # For demonstration, let's assume a function `get_fund_name(ticker)` that does this
-    fund = find(ticker)
-    assert fund.name == expected_fund_name
-    assert fund.class_contract_name == expected_class
