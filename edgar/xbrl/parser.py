@@ -1063,6 +1063,102 @@ class XBRLParser:
         
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing instance content: {str(e)}")
+
+    def count_facts(self, content:str) -> tuple:
+        """Count the number of facts in the instance document
+        This function counts both unique facts and total fact instances in the XBRL document.
+        
+        Returns:
+            tuple: (unique_facts_count, total_fact_instances)
+        """
+
+        # Use lxml's optimized parser with smart string handling and recovery mode
+        parser = ET.XMLParser(remove_blank_text=True, recover=True, huge_tree=True)
+
+        # Convert to bytes for faster parsing if not already
+        if isinstance(content, str):
+            content_bytes = content.encode('utf-8')
+        else:
+            content_bytes = content
+
+        # Parse content with optimized settings
+        root = ET.XML(content_bytes, parser)
+        
+        # Fast path to identify non-fact elements to skip
+        skip_tag_endings = {'}context', '}unit', '}schemaRef'}
+        
+        # Track both total instances and unique facts
+        total_fact_instances = 0  # Total number of fact references in the document
+        unique_facts = set()      # Set of unique element_id + context_ref combinations
+        create_key = self._create_normalized_fact_key
+        
+        # Define counting function
+        def count_element(element):
+            nonlocal total_fact_instances
+            
+            # Skip known non-fact elements
+            tag = element.tag
+            for ending in skip_tag_endings:
+                if tag.endswith(ending):
+                    return
+            
+            # Get context reference - key check to identify facts
+            context_ref = element.get('contextRef')
+            if context_ref is None:
+                return
+                
+            # Extract element namespace and name - optimized split
+            if '}' in tag:
+                namespace, element_name = tag.split('}', 1)
+                namespace = namespace[1:]  # Faster than strip('{')
+            else:
+                element_name = tag
+                namespace = None
+            
+            # Construct element ID (using the same approach as _extract_facts)
+            if namespace:
+                prefix = None
+                for std_prefix, std_uri_base in NAMESPACES.items():
+                    if namespace.startswith(std_uri_base):
+                        prefix = std_prefix
+                        break
+                        
+                if prefix is None:
+                    # Try to extract prefix from the namespace
+                    parts = namespace.split('/')
+                    prefix = parts[-1] if parts else ''
+                    
+                element_id = f"{prefix}:{element_name}" if prefix else element_name
+            else:
+                element_id = element_name
+            
+            # Create a normalized key using underscore format for consistency
+            normalized_key = create_key(element_id, context_ref)
+            
+            # Track unique facts
+            unique_facts.add(normalized_key)
+                
+            # Increment total instances count
+            total_fact_instances += 1
+        
+        # Optimize traversal using lxml's iterchildren and iterdescendants if available
+        if hasattr(root, 'iterchildren'):
+            # Use lxml's optimized traversal methods
+            for child in root.iterchildren():
+                count_element(child)
+                # Process nested elements with optimized iteration
+                for descendant in child.iterdescendants():
+                    count_element(descendant)
+        else:
+            # Fallback for ElementTree
+            for child in root:
+                count_element(child)
+                for descendant in child.findall('.//*'):
+                    count_element(descendant)
+        
+        # Return tuple of counts (unique_facts_count, total_fact_instances)
+        return len(unique_facts), total_fact_instances
+
     
     def _extract_contexts(self, root: ET.Element) -> None:
         """Extract contexts from instance document."""

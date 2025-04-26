@@ -38,10 +38,9 @@ def test_dei_info(aapl_xbrl:XBRL):
 
 def test_get_coverpage(aapl_xbrl:XBRL):
     print()
-    #print(aapl_xbrl)
     cover_page = aapl_xbrl.render_statement('BalanceSheet')
     print(cover_page)
-    #print(aapl_xbrl.get_all_statements())
+    assert cover_page
 
 def test_xbrl_statements(aapl_xbrl:XBRL):
     print()

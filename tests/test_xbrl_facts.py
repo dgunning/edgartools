@@ -1,5 +1,5 @@
 import pytest
-import re
+from edgar import *
 from unittest.mock import MagicMock
 
 from edgar import Company, Filing
@@ -7,24 +7,19 @@ from edgar.xbrl import XBRL, FactsView
 from edgar.xbrl.facts import FactQuery
 from rich import print
 
-# Import fixtures from the centralized fixture module
-from tests.fixtures.xbrl2_fixtures import (
-    cached_companies,
-    aapl_10k_2023,
-    msft_10k_2024,
-    nflx_10k_2024,
-    nflx_10k_2010,
-    dimensional_statement,
-    complex_segment_statement
-)
 
 
 @pytest.fixture(scope='module')
 def intc_xbrl():
-    c = Company("INTC")
-    filing = c.latest("10-K")
+    filing = Filing(company='INTEL CORP', cik=50863, form='10-K', filing_date='2025-01-31', accession_no='0000050863-25-000009')
+    filing.home.open()
     xbrl = XBRL.from_filing(filing)
     return xbrl
+
+
+def test_total_number_of_facts():
+    filing = find("0001756125-25-000627")
+    xb = XBRL.from_filing(filing)
 
 
 def test_get_all_facts(intc_xbrl: XBRL):
