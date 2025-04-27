@@ -295,6 +295,7 @@ class EntityData:
                 tickers: List[str],
                 exchanges: List[str],
                 sic: str,
+                sic_description: str,
                 ein:str,
                 entity_type: str,
                 fiscal_year_end: str,
@@ -324,6 +325,7 @@ class EntityData:
         self.cik: int = cik
         self.name: str = name
         self.sic = sic
+        self.sic_description: str = sic_description
         self.ein: str = ein
         self.fiscal_year_end: str = fiscal_year_end
         self.tickers: List[str] = tickers
