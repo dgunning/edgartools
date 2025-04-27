@@ -53,6 +53,7 @@ class XBRLParser:
         
         # Entity information
         self.entity_info: Dict[str, Any] = {}
+        self.dei_facts: Dict[str, Fact] = {}
         
         # Reporting periods
         self.reporting_periods: List[Dict[str, Any]] = []
@@ -1094,6 +1095,7 @@ class XBRLParser:
         
         # Define counting function
         def count_element(element):
+            """Process a single element as a potential fact."""
             nonlocal total_fact_instances
             
             # Skip known non-fact elements
@@ -1115,19 +1117,20 @@ class XBRLParser:
                 element_name = tag
                 namespace = None
             
-            # Construct element ID (using the same approach as _extract_facts)
-            if namespace:
-                prefix = None
-                for std_prefix, std_uri_base in NAMESPACES.items():
-                    if namespace.startswith(std_uri_base):
-                        prefix = std_prefix
-                        break
+            # Get namespace prefix - cached for performance
+            prefix = None
+            for std_prefix, std_uri_base in NAMESPACES.items():
+                if namespace.startswith(std_uri_base):
+                    prefix = std_prefix
+                    break
                         
-                if prefix is None:
-                    # Try to extract prefix from the namespace
-                    parts = namespace.split('/')
-                    prefix = parts[-1] if parts else ''
+            if not prefix and namespace:
+                # Try to extract prefix from the namespace
+                parts = namespace.split('/')
+                prefix = parts[-1] if parts else ''
                     
+            # Construct element ID with optimized string concatenation
+            if prefix:
                 element_id = f"{prefix}:{element_name}" if prefix else element_name
             else:
                 element_id = element_name
@@ -1168,10 +1171,10 @@ class XBRLParser:
                 context_id = context_elem.get('id')
                 if not context_id:
                     continue
-                
+
                 # Create context object
                 context = Context(context_id=context_id)
-                
+
                 # Extract entity information
                 entity_elem = context_elem.find('.//{http://www.xbrl.org/2003/instance}entity')
                 if entity_elem is not None:
@@ -1184,7 +1187,7 @@ class XBRLParser:
                             'scheme': scheme,
                             'identifier': identifier
                         }
-                    
+
                     # Get segment dimensions if present
                     segment_elem = entity_elem.find('.//{http://www.xbrl.org/2003/instance}segment')
                     if segment_elem is not None:
@@ -1194,7 +1197,7 @@ class XBRLParser:
                             value = dim_elem.text
                             if dimension and value:
                                 context.dimensions[dimension] = value
-                        
+
                         # Extract typed dimensions
                         for dim_elem in segment_elem.findall('.//{http://xbrl.org/2006/xbrldi}typedMember'):
                             dimension = dim_elem.get('dimension')
@@ -1203,7 +1206,7 @@ class XBRLParser:
                                 for child in dim_elem:
                                     context.dimensions[dimension] = child.tag
                                     break
-                
+
                 # Extract period information
                 period_elem = context_elem.find('.//{http://www.xbrl.org/2003/instance}period')
                 if period_elem is not None:
@@ -1214,7 +1217,7 @@ class XBRLParser:
                             'type': 'instant',
                             'instant': instant_elem.text
                         }
-                    
+
                     # Check for duration period
                     start_elem = period_elem.find('.//{http://www.xbrl.org/2003/instance}startDate')
                     end_elem = period_elem.find('.//{http://www.xbrl.org/2003/instance}endDate')
@@ -1224,20 +1227,20 @@ class XBRLParser:
                             'startDate': start_elem.text,
                             'endDate': end_elem.text
                         }
-                    
+
                     # Check for forever period
                     forever_elem = period_elem.find('.//{http://www.xbrl.org/2003/instance}forever')
                     if forever_elem is not None:
                         context.period = {
                             'type': 'forever'
                         }
-                
+
                 # Add context to registry
                 self.contexts[context_id] = context
-        
+
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting contexts: {str(e)}")
-    
+
     def _extract_units(self, root: ET.Element) -> None:
         """Extract units from instance document."""
         try:
@@ -1246,7 +1249,7 @@ class XBRLParser:
                 unit_id = unit_elem.get('id')
                 if not unit_id:
                     continue
-                
+
                 # Check for measure
                 measure_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}measure')
                 if measure_elem is not None and measure_elem.text:
@@ -1255,28 +1258,28 @@ class XBRLParser:
                         'measure': measure_elem.text
                     }
                     continue
-                
+
                 # Check for divide
                 divide_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}divide')
                 if divide_elem is not None:
                     # Get numerator
                     numerator_elem = divide_elem.find('.//{http://www.xbrl.org/2003/instance}unitNumerator')
                     denominator_elem = divide_elem.find('.//{http://www.xbrl.org/2003/instance}unitDenominator')
-                    
+
                     if numerator_elem is not None and denominator_elem is not None:
                         # Get measures
                         numerator_measures = [elem.text for elem in numerator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text]
                         denominator_measures = [elem.text for elem in denominator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text]
-                        
+
                         self.units[unit_id] = {
                             'type': 'divide',
                             'numerator': numerator_measures,
                             'denominator': denominator_measures
                         }
-        
+
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting units: {str(e)}")
-    
+
     def _extract_facts(self, root: ET.Element) -> None:
         """Extract facts from instance document."""
         try:
@@ -1288,7 +1291,7 @@ class XBRLParser:
                 # Fallback for ElementTree - precompile regex patterns for namespace extraction
                 xmlns_pattern = '{http://www.w3.org/2000/xmlns/}'
                 prefix_map = {}
-                
+
                 # Extract namespace declarations from root
                 for attr_name, attr_value in root.attrib.items():
                     if attr_name.startswith(xmlns_pattern) or attr_name.startswith('xmlns:'):
@@ -1297,10 +1300,10 @@ class XBRLParser:
                             prefix = attr_name[len(xmlns_pattern):]
                         else:
                             prefix = attr_name.split(':', 1)[1]
-                        
+
                         # Map URI to prefix
                         prefix_map[attr_value] = prefix
-            
+
             # Standard namespace mappings with base patterns to recognize versions
             namespaces = {
                 'xbrli': 'http://www.xbrl.org/2003/instance',
@@ -1308,40 +1311,40 @@ class XBRLParser:
                 'ifrs': 'http://xbrl.ifrs.org/taxonomy/',  # Base pattern for any year
                 'dei': 'http://xbrl.sec.gov/dei/',  # Base pattern for any year
             }
-            
+
             # Update standard namespaces if we have specific versions in this document
             for uri, prefix in prefix_map.items():
                 for std_prefix, std_uri_base in namespaces.items():
                     if uri.startswith(std_uri_base):
                         namespaces[std_prefix] = uri
-            
+
             # Initialize counters and tracking
             fact_count = 0
             nonstandard_facts = set()  # Use a set for faster lookups
-            
+
             # Fast path to identify non-fact elements to skip - compile as set for O(1) lookup
             skip_tag_endings = {'}context', '}unit', '}schemaRef'}
-            
+
             # Cache facts dictionary append method for faster operation
             facts_dict = self.facts
             create_key = self._create_normalized_fact_key
-            
+
             # Define optimized processor function
             def process_element(element):
                 """Process a single element as a potential fact."""
                 nonlocal fact_count
-                
+
                 # Skip known non-fact elements - faster check with set membership
                 tag = element.tag
                 for ending in skip_tag_endings:
                     if tag.endswith(ending):
                         return
-                
+
                 # Get context reference - key check to identify facts
                 context_ref = element.get('contextRef')
                 if not context_ref:
                     return
-                
+
                 # Extract element namespace and name - optimized split
                 if '}' in tag:
                     namespace, element_name = tag.split('}', 1)
@@ -1349,7 +1352,7 @@ class XBRLParser:
                 else:
                     element_name = tag
                     namespace = None
-                
+
                 # Get namespace prefix - cached for performance
                 prefix = prefix_map.get(namespace)
                 if not prefix and namespace:
@@ -1359,12 +1362,12 @@ class XBRLParser:
                         base_uri = std_uri
                         if '/20' in std_uri:
                             base_uri = std_uri.split('/20')[0]
-                            
+
                         if namespace.startswith(base_uri):
                             prefix = std_prefix
                             prefix_map[namespace] = prefix  # Cache for future lookups
                             break
-                
+
                 # Construct element ID with optimized string concatenation
                 if prefix:
                     element_id = f"{prefix}:{element_name}"
@@ -1372,10 +1375,10 @@ class XBRLParser:
                     element_id = element_name
                     if namespace:
                         nonstandard_facts.add(namespace)
-                
+
                 # Get unit reference - direct attribute access
                 unit_ref = element.get('unitRef')
-                
+
                 # Get value with optimized text extraction
                 value = element.text
                 if not value or not value.strip():
@@ -1385,13 +1388,13 @@ class XBRLParser:
                         if sub_text and sub_text.strip():
                             value = sub_text
                             break
-                
+
                 # Optimize string handling - inline conditional
                 value = value.strip() if value else ""
-                
+
                 # Get decimals attribute - direct access
                 decimals = element.get('decimals')
-                
+
                 # Optimize numeric conversion with fast path for common cases
                 numeric_value = None
                 if value:
@@ -1401,7 +1404,7 @@ class XBRLParser:
                         if c.isdigit():
                             has_digit = True
                             break
-                            
+
                     if has_digit:
                         try:
                             # Handle common numeric formats
@@ -1411,10 +1414,10 @@ class XBRLParser:
                                 numeric_value = float(value)
                         except (ValueError, TypeError):
                             pass
-                
+
                 # Create a normalized key using underscore format for consistency
                 normalized_key = create_key(element_id, context_ref)
-                
+
                 # Create fact object directly in the facts dictionary - avoid intermediate variable
                 facts_dict[normalized_key] = Fact(
                     element_id=element_id,
@@ -1424,9 +1427,9 @@ class XBRLParser:
                     decimals=decimals,
                     numeric_value=numeric_value
                 )
-                
+
                 fact_count += 1
-            
+
             # Optimize traversal using lxml's iterchildren and iterdescendants if available
             if hasattr(root, 'iterchildren'):
                 # Use lxml's optimized traversal methods
@@ -1441,26 +1444,26 @@ class XBRLParser:
                     process_element(child)
                     for descendant in child.findall('.//*'):
                         process_element(descendant)
-            
+
             # Debug information
             log.debug(f"Extracted {fact_count} facts")
             if nonstandard_facts:
                 log.debug(f"Found {len(nonstandard_facts)} non-standard namespaces: {', '.join(list(nonstandard_facts)[:5])}...")
-            
+
             # Double check that we found facts
             if fact_count == 0:
                 log.warning("WARNING: No facts were extracted from the instance document!")
-            
+
             # Apply calculation weights after all facts are extracted
             self._apply_calculation_weights()
-                
+
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting facts: {str(e)}")
-            
+
     def _apply_calculation_weights(self) -> None:
         """
         Apply calculation weights to facts based on calculation linkbase information.
-        
+
         This method handles the application of negative weights from calculation arcs.
         Per XBRL specification, a negative weight should flip the sign of a fact value
         when used in calculations. This is particularly common with elements like
@@ -1470,35 +1473,35 @@ class XBRLParser:
         try:
             # Create a mapping of normalized element IDs to their calculation nodes
             element_to_calc_node = {}
-            
+
             # Populate the mapping from all calculation trees
             for role_uri, calc_tree in self.calculation_trees.items():
                 for element_id, node in calc_tree.all_nodes.items():
                     # Always store with normalized element ID (underscore format)
                     normalized_element_id = element_id.replace(':', '_') if ':' in element_id else element_id
                     element_to_calc_node[normalized_element_id] = node
-            
+
             # Apply calculation weights to facts
             adjusted_count = 0
-            
+
             # Find and adjust facts with negative weights
             for fact_key, fact in list(self.facts.items()):
                 # Normalize the element ID for lookup
                 element_id = fact.element_id
                 normalized_element_id = element_id.replace(':', '_') if ':' in element_id else element_id
-                
+
                 # Look up the calculation node using the normalized element ID
                 calc_node = element_to_calc_node.get(normalized_element_id)
-                
+
                 # Apply negative weights if found
                 if calc_node and calc_node.weight < 0:
                     if fact.numeric_value is not None:
                         # Store original for logging
                         original_value = fact.numeric_value
-                        
+
                         # Apply the weight (negate the value)
                         fact.numeric_value = -fact.numeric_value
-                        
+
                         # Also update the string value if present
                         if fact.value:
                             # Handle positive values
@@ -1507,231 +1510,110 @@ class XBRLParser:
                             # Handle negative values
                             else:
                                 fact.value = fact.value[1:]
-                        
+
                         # Update fact in the dictionary
                         self.facts[fact_key] = fact
                         adjusted_count += 1
-                        
+
                         log.debug(f"Adjusted fact {fact.element_id}: {original_value} -> {fact.numeric_value}")
-            
+
             log.debug(f"Applied calculation weights to {adjusted_count} facts")
-            
+
         except Exception as e:
             # Log the error but don't fail the entire parsing process
             log.warning(f"Warning: Error applying calculation weights: {str(e)}")
             # Include stack trace for debugging
             import traceback
             log.debug(traceback.format_exc())
-    
+
     def _extract_entity_info(self) -> None:
         """Extract entity information from contexts and DEI facts."""
         try:
-            # Initialize entity info
-            self.entity_info = {
-                'entity_name': None,
-                'ticker': None,
-                'identifier': None,
-                'document_type': None,
-                'reporting_end_date': None,
-                'document_period_end_date': None,
-                'fiscal_year': None,
-                'fiscal_period': None,
-                'fiscal_year_end_month': None,
-                'fiscal_year_end_day': None,
-                'annual_report': False,
-                'quarterly_report': False,
-                'amendment': False
-            }
-            
-            # Get CIK from first context
+            # Extract CIK/identifier from first context
+            identifier = None
             if self.contexts:
-                first_context = next(iter(self.contexts.values()))
-                if 'identifier' in first_context.entity:
-                    identifier = first_context.entity['identifier']
-                    # Clean up CIK (remove leading zeros)
-                    if identifier and identifier.isdigit():
-                        self.entity_info['identifier'] = identifier.lstrip('0')
-            
-            # Define DEI fact names we're looking for based on xbrl.py.bak
-            dei_fact_names = {
-                'fiscal_year': ['DocumentFiscalYearFocus', 'FiscalYearFocus', 'FiscalYear'],
-                'fiscal_period': ['DocumentFiscalPeriodFocus', 'FiscalPeriodFocus'],
-                'current_fiscal_year_end_date': ['CurrentFiscalYearEndDate'],
-                'fiscal_year_end': ['FiscalYearEnd', 'CurrentFiscalYearEndDate'],
-                'document_type': ['DocumentType'],
-                'document_period_end_date': ['DocumentPeriodEndDate'],
-                'entity_name': ['EntityRegistrantName'],
-                'ticker': ['TradingSymbol'],
-                'quarterly_report': ['DocumentQuarterlyReport'],
-                'annual_report': ['DocumentAnnualReport'],
+                first = next(iter(self.contexts.values()))
+                ident = first.entity.get('identifier')
+                if ident and ident.isdigit():
+                    identifier = ident.lstrip('0')
+
+            # Collect all DEI facts into a dict: concept -> Fact
+            self.dei_facts: Dict[str, Fact] = {}
+            for fact in self.facts.values():
+                eid = fact.element_id
+                if eid.startswith('dei:'):
+                    concept = eid.split(':', 1)[1]
+                elif eid.startswith('dei_'):
+                    concept = eid.split('_', 1)[1]
+                else:
+                    continue
+                self.dei_facts[concept] = fact
+
+            # Helper: get the first available DEI fact value
+            def get_dei(*names):
+                for n in names:
+                    f = self.dei_facts.get(n)
+                    if f:
+                        return f.value
+                return None
+
+            # Build entity_info preserving existing keys
+            self.entity_info = {
+                'entity_name':             get_dei('EntityRegistrantName'),
+                'ticker':                  get_dei('TradingSymbol'),
+                'identifier':              identifier,
+                'document_type':           get_dei('DocumentType'),
+                'reporting_end_date':      None,
+                'document_period_end_date':get_dei('DocumentPeriodEndDate'),
+                'fiscal_year':             get_dei('DocumentFiscalYearFocus','FiscalYearFocus','FiscalYear'),
+                'fiscal_period':           get_dei('DocumentFiscalPeriodFocus','FiscalPeriodFocus'),
+                'fiscal_year_end_month':   None,
+                'fiscal_year_end_day':     None,
+                'annual_report':           False,
+                'quarterly_report':        False,
+                'amendment':               False,
             }
-            
-            # Search for DEI facts
-            dei_facts = {}
-            
-            # Look for DEI facts with different namespace patterns
-            dei_prefixes = ['dei:', 'dei_']
-            
-            for key, fact in self.facts.items():
-                is_dei_fact = False
-                
-                # Check if the fact has a DEI prefix
-                if any(fact.element_id.startswith(prefix) for prefix in dei_prefixes) or any(prefix in key.lower() for prefix in dei_prefixes):
-                    is_dei_fact = True
-                
-                if is_dei_fact:
-                    # Extract the concept name without the prefix
-                    concept = fact.element_id
-                    if ':' in concept:
-                        concept = concept.split(':', 1)[1]
-                    elif '_' in concept:
-                        parts = concept.split('_', 1)
-                        if parts[0].lower() == 'dei':
-                            concept = parts[1]
-                    
-                    # Store the fact by its concept name (case-insensitive)
-                    dei_facts[concept.lower()] = fact
-                    
-                    # Also check if the fact matches any of our specific target names
-                    for info_key, possible_names in dei_fact_names.items():
-                        for name in possible_names:
-                            if concept.lower() == name.lower():
-                                dei_facts[info_key] = fact
-            
-            # Debug output
-            log.debug(f"Found {len(dei_facts)} DEI facts")
-            
-            # Extract entity name
-            if 'entity_name' in dei_facts:
-                self.entity_info['entity_name'] = dei_facts['entity_name'].value
-            elif 'entityregistrantname' in dei_facts:
-                self.entity_info['entity_name'] = dei_facts['entityregistrantname'].value
-            
-            # Extract ticker
-            if 'ticker' in dei_facts:
-                self.entity_info['ticker'] = dei_facts['ticker'].value
-            elif 'tradingsymbol' in dei_facts:
-                self.entity_info['ticker'] = dei_facts['tradingsymbol'].value
-            
-            # Extract document type
-            if 'document_type' in dei_facts:
-                doc_type = dei_facts['document_type'].value
-                self.entity_info['document_type'] = doc_type
-            elif 'documenttype' in dei_facts:
-                doc_type = dei_facts['documenttype'].value
-                self.entity_info['document_type'] = doc_type
-                
-            # Set flags based on document type if available
-            if self.entity_info['document_type']:
-                doc_type = self.entity_info['document_type']
-                if doc_type == '10-K':
-                    self.entity_info['annual_report'] = True
-                elif doc_type == '10-Q':
-                    self.entity_info['quarterly_report'] = True
-                
-                # Check for amendment
-                if '/A' in doc_type:
-                    self.entity_info['amendment'] = True
-            else:
-                # Also check explicit annual/quarterly flags
-                if 'annual_report' in dei_facts:
-                    try:
-                        # Handle boolean values in text form
-                        annual_report_value = dei_facts['annual_report'].value.lower()
-                        self.entity_info['annual_report'] = (annual_report_value == 'true' or annual_report_value == '1')
-                    except (AttributeError, ValueError):
-                        pass
-                
-                if 'quarterly_report' in dei_facts:
-                    try:
-                        quarterly_report_value = dei_facts['quarterly_report'].value.lower()
-                        self.entity_info['quarterly_report'] = (quarterly_report_value == 'true' or quarterly_report_value == '1')
-                    except (AttributeError, ValueError):
-                        pass
-            
-            # Extract document period end date
-            if 'document_period_end_date' in dei_facts:
-                date_str = dei_facts['document_period_end_date'].value
-                try:
-                    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-                    self.entity_info['document_period_end_date'] = date_obj
-                except (ValueError, TypeError):
-                    pass
-            elif 'documentperiodenddate' in dei_facts:
-                date_str = dei_facts['documentperiodenddate'].value
-                try:
-                    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-                    self.entity_info['document_period_end_date'] = date_obj
-                except (ValueError, TypeError):
-                    pass
-            
-            # Extract fiscal year
-            if 'fiscal_year' in dei_facts:
-                try:
-                    self.entity_info['fiscal_year'] = int(dei_facts['fiscal_year'].value)
-                except (ValueError, TypeError):
-                    pass
-            elif 'fiscalyear' in dei_facts:
-                try:
-                    self.entity_info['fiscal_year'] = int(dei_facts['fiscalyear'].value)
-                except (ValueError, TypeError):
-                    pass
-            
-            # Extract fiscal period
-            if 'fiscal_period' in dei_facts:
-                self.entity_info['fiscal_period'] = dei_facts['fiscal_period'].value
-            elif 'fiscalperiod' in dei_facts:
-                self.entity_info['fiscal_period'] = dei_facts['fiscalperiod'].value
-            
-            # Extract fiscal year end date
-            if 'fiscal_year_end' in dei_facts:
-                fiscal_end = dei_facts['fiscal_year_end'].value
-                try:
-                    # Format is typically --MM-DD
-                    if fiscal_end.startswith('--'):
-                        fiscal_end = fiscal_end[2:]  # Remove --
-                    if fiscal_end.count('-') == 1:
-                        month_str, day_str = fiscal_end.split('-')
-                        if month_str.isdigit() and day_str.isdigit():
-                            self.entity_info['fiscal_year_end_month'] = int(month_str)
-                            self.entity_info['fiscal_year_end_day'] = int(day_str)
-                except (ValueError, TypeError, IndexError):
-                    pass
-            elif 'fiscalyearend' in dei_facts:
-                fiscal_end = dei_facts['fiscalyearend'].value
-                try:
-                    # Format is typically --MM-DD
-                    if fiscal_end.startswith('--'):
-                        fiscal_end = fiscal_end[2:]  # Remove --
-                    if fiscal_end.count('-') == 1:
-                        month_str, day_str = fiscal_end.split('-')
-                        if month_str.isdigit() and day_str.isdigit():
-                            self.entity_info['fiscal_year_end_month'] = int(month_str)
-                            self.entity_info['fiscal_year_end_day'] = int(day_str)
-                except (ValueError, TypeError, IndexError):
-                    pass
-            
-            # Extract reporting end date from context end dates
-            for context in self.contexts.values():
-                if 'period' in context.model_dump() and context.period.get('type') == 'instant':
-                    date_str = context.period.get('instant')
-                    if date_str:
+
+            # Determine reporting_end_date from contexts
+            for ctx in self.contexts.values():
+                period = getattr(ctx, 'period', {})
+                if period.get('type') == 'instant':
+                    ds = period.get('instant')
+                    if ds:
                         try:
-                            date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-                            # Update if this is later than current value
-                            current_date = self.entity_info.get('reporting_end_date')
-                            if current_date is None or date_obj > current_date:
-                                self.entity_info['reporting_end_date'] = date_obj
-                        except (ValueError, TypeError):
+                            dt_obj = datetime.strptime(ds, '%Y-%m-%d').date()
+                            curr = self.entity_info['reporting_end_date']
+                            if curr is None or dt_obj > curr:
+                                self.entity_info['reporting_end_date'] = dt_obj
+                        except Exception:
                             pass
-            
-            # Debug output
+
+            # Parse fiscal year end date into month/day
+            fye = get_dei('CurrentFiscalYearEndDate','FiscalYearEnd')
+            if fye:
+                try:
+                    s = fye
+                    if s.startswith('--'):
+                        s = s[2:]
+                    if '-' in s:
+                        m, d = s.split('-', 1)
+                        if m.isdigit() and d.isdigit():
+                            self.entity_info['fiscal_year_end_month'] = int(m)
+                            self.entity_info['fiscal_year_end_day'] = int(d)
+                except Exception:
+                    pass
+
+            # Flags based on document_type
+            dt_val = self.entity_info['document_type'] or ''
+            self.entity_info['annual_report']    = (dt_val == '10-K')
+            self.entity_info['quarterly_report'] = (dt_val == '10-Q')
+            self.entity_info['amendment']        = ('/A' in dt_val)
+
             log.debug(f"Entity info: {self.entity_info}")
-            
         except Exception as e:
-            # Log error but don't fail
             log.warning(f"Warning: Error extracting entity info: {str(e)}")
-    
+
+
     def _build_reporting_periods(self) -> None:
         """Build reporting periods from contexts."""
         try:

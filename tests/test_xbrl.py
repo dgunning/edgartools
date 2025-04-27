@@ -27,13 +27,17 @@ def msft_xbrl():
 
 def test_get_all_statements(aapl_xbrl):
     statements = aapl_xbrl.get_all_statements()
-    print(statements)
+    assert statements
+    assert len(statements) == 78
+
+def test_get_entity_data(aapl_xbrl):
+    assert aapl_xbrl.period_of_report == '2023-09-30'
 
 def test_dei_info(aapl_xbrl:XBRL):
     assert aapl_xbrl.entity_info.get('entity_name') == 'Apple Inc.'
     assert aapl_xbrl.entity_info.get('identifier') == '320193'
     assert aapl_xbrl.entity_info.get('reporting_end_date') == datetime.date(2023, 10, 20)
-    assert aapl_xbrl.entity_info.get('fiscal_year') == 2023
+    assert aapl_xbrl.entity_info.get('fiscal_year') == '2023'
     assert aapl_xbrl.entity_info.get('fiscal_period') == 'FY'
 
 def test_get_coverpage(aapl_xbrl:XBRL):

@@ -1,6 +1,5 @@
 pytest_plugins = ["tests.fixtures.xbrl2_fixtures"]
 from pathlib import Path
-from typing import Dict, List, Any, Optional
 
 import pytest
 from rich import print
@@ -37,7 +36,6 @@ def aapl_xbrl_2022():
 def unp_xbrl():
     data_dir = Path("data/xbrl/datafiles/unp")
     return XBRL.parse_directory(data_dir)
-
 
 def test_dimensioned_statement(aapl_xbrl):
     statements = aapl_xbrl.statements

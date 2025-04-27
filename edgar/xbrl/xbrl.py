@@ -11,7 +11,7 @@ The XBRL class provides a unified interface for working with XBRL data,
 organizing facts according to presentation hierarchies, validating calculations,
 and handling dimensional qualifiers.
 """
-
+import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -194,6 +194,13 @@ class XBRL:
     @property
     def reporting_periods(self):
         return self.parser.reporting_periods
+
+    @property
+    def period_of_report(self) -> Optional[str]:
+        if 'document_period_end_date' in self.entity_info:
+            period = self.entity_info['document_period_end_date']
+            return period.strftime('%Y-%m-%d') if isinstance(period, datetime.date) else period
+        return None
         
     @property
     def context_period_map(self):
