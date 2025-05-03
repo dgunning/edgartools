@@ -408,19 +408,22 @@ class Company(Entity):
             return tenq_filing.financials
         return None
 
-    def get_fiscal_year_end(self):
+    @property
+    def fiscal_year_end(self):
         """Get the fiscal year end date for this company."""
         if hasattr(self.data, 'fiscal_year_end'):
             return self.data.fiscal_year_end
         return None
 
-    def get_sic(self):
+    @property
+    def sic(self):
         """Get the SIC code for this company."""
         if hasattr(self.data, 'sic'):
             return self.data.sic
         return None
 
-    def get_industry(self):
+    @property
+    def industry(self):
         """Get the industry description for this company."""
         if hasattr(self.data, 'sic_description'):
             return self.data.sic_description
