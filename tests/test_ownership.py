@@ -8,10 +8,11 @@ from rich import print
 from edgar._filings import Filing
 from edgar.ownership import *
 from edgar.ownership.core import compute_average_price, compute_total_value, format_amount, is_numeric, safe_numeric
+from edgar.ownership.html_render import ownership_to_html
 
 pd.options.display.max_columns = None
 
-snow_form3 = Ownership.from_xml(Path('data/form3.snow.xml').read_text())
+snow_form3 = Ownership.from_xml(Path('data/ownership/form3.snow.xml').read_text())
 snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
 snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
 aapl_form4: Ownership = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
@@ -40,7 +41,7 @@ def test_translate():
 
 
 def test_derivative_table_repr():
-    form3_content = Path('data/form3.snow.xml').read_text()
+    form3_content = Path('data/ownership/form3.snow.xml').read_text()
     ownership = Ownership.from_xml(form3_content)
     print()
     print(ownership)
@@ -61,7 +62,7 @@ def test_non_derivatives_repr():
 
 
 def test_ownership_repr():
-    form3_content = Path('data/form3.snow.xml').read_text()
+    form3_content = Path('data/ownership/form3.snow.xml').read_text()
     print()
     ownership = Ownership.from_xml(form3_content)
     print(ownership)
@@ -70,7 +71,7 @@ def test_ownership_repr():
 
 
 def test_parse_form3_with_derivatives():
-    form3_content = Path('data/form3.snow.xml').read_text()
+    form3_content = Path('data/ownership/form3.snow.xml').read_text()
     ownership = Ownership.from_xml(form3_content)
     print(ownership)
 
@@ -242,7 +243,7 @@ def test_parse_reporting_owners_from_xml():
 
 
 def test_parse_form5():
-    ownership = Ownership.from_xml(Path('data/form5.snow.xml').read_text())
+    ownership = Ownership.from_xml(Path('data/ownership/form5.snow.xml').read_text())
     print()
     print(ownership)
     # Test that there are no derivative transactions
@@ -520,6 +521,8 @@ def test_ownership_with_remarks():
     assert form4.reporting_owners[
                0].officer_title == 'Executive Vice Chairperson of the Board and Chief Operating Officer'
     assert form4.remarks == 'Executive Vice Chairperson of the Board and Chief Operating Officer'
+    html = form4.to_html()
+    assert html
 
 
 def test_insider_transaction_sell():
@@ -577,3 +580,28 @@ def test_ownership_with_no_company():
     filing = Filing(form='4', filing_date='2024-08-23', company='Hut 8 Corp.', cik=1964789, accession_no='0001127602-24-022866')
     form4: Ownership = filing.obj()
     assert form4
+
+
+def test_form4_xml2html():
+    from edgar.ownership import Form4
+    form4 = Form4.parse_xml(Path('data/ownership/374WaterForm4.xml').read_text())
+    html = form4.to_html()
+    assert "SCWO" in html
+    assert "374Water" in html
+    assert "757,576" in html
+
+
+def test_form3_xml2html():
+    from edgar.ownership import Form3
+    form3 = Form3.parse_xml(Path('data/ownership/form3.snow.xml').read_text())
+    html = form3.to_html()
+    Path('data/ownership/form3.snow_generated.html').write_text(html)
+
+
+def test_form5_xml2html():
+    from edgar.ownership import Form3
+    form3 = Form3.parse_xml(Path('data/ownership/form5.snow.xml').read_text())
+    html = form3.to_html()
+    Path('data/ownership/form5.snow_generated.html').write_text(html)
+
+

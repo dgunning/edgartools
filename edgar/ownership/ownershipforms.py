@@ -29,6 +29,8 @@ from edgar.ownership.core import format_amount, format_currency, safe_numeric, f
 from edgar.richtools import repr_rich, df_to_rich_table
 from edgar.xmltools import (child_text, child_value)
 import itertools
+import logging
+from edgar.ownership.html_render import ownership_to_html
 __all__ = [
     'Owner',
     'Issuer',
@@ -1946,6 +1948,14 @@ class Ownership:
             'no_securities': no_securities
         }
         return ownership_document
+
+    def to_html(self) -> str:
+        """Return the HTML representation of this ownership form."""
+        return ownership_to_html(self)
+
+    def _repr_html_(self):
+        """Return the HTML representation for display in Jupyter"""
+        return self.to_html()
 
     def __rich__(self):
         ownership_summary = self.get_ownership_summary()

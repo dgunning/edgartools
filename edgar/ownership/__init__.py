@@ -23,3 +23,7 @@ from edgar.ownership.ownershipforms import (
     NonDerivativeTransactions,
     TransactionSummary
 )
+
+from edgar.ownership.html_render import (
+    ownership_to_html
+)

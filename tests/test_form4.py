@@ -1,7 +1,5 @@
-from edgar.ownership import Ownership, Form4, TransactionSummary
-from edgar.ownership.core import safe_numeric
-
 from edgar import *
+from edgar.ownership import Form4
 
 
 def test_form4_with_derivatives():
