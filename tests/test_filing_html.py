@@ -42,3 +42,13 @@ def test_get_html_from_filing_with_plain_text():
     html = filing.html()
     assert html
     assert is_probably_html(html)
+
+
+def test_get_text_from_filing_with_pre_tag():
+    filing = Filing(form='8-K', filing_date='2024-12-20',
+                    company='Liaoning Shuiyun Qinghe Rice Industry Co., Ltd.',
+                    cik=710782, accession_no='0000710782-24-000005')
+    html = filing.html()
+    assert html
+    text = filing.text()
+    assert text

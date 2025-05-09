@@ -438,3 +438,8 @@ def test_get_html_problem_filing():
     assert text
     print(text)
 
+
+def test_parse_html_document_with_pre():
+    content = Path('data/html/document-with-pre.html').read_text()
+    document = Document.parse(content)
+    assert document

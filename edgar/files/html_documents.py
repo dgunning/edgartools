@@ -762,6 +762,15 @@ def fixup_soup(soup):
     for comment in comments:
         comment.extract()
 
+    # Find all pre tags
+    for pre in soup.find_all('pre'):
+        # Create a new div tag
+        div = soup.new_tag('div')
+        # Copy the content from pre to div
+        div.string = pre.string
+        # Replace pre with div
+        pre.replace_with(div)
+
 
 # List of words that are commonly not capitalized in titles
 common_words = {'and', 'or', 'but', 'the', 'a', 'an', 'in', 'with', 'for', 'on', 'at', 'to', 'of', 'by', 'as'}
