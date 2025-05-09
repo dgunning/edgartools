@@ -352,7 +352,7 @@ def test_document_parsed_from_plain_text_returns_plain_text():
 def test_document_from_filing_with_plain_text_filing_document():
     f = Filing(form='SC 13G/A', filing_date='2024-11-25', company='Bridgeline Digital, Inc.', cik=1378590, accession_no='0001968076-24-000022')
     html = f.html()
-    assert not html
+    assert html
 
 def test_text_in_spans():
     html="""<p id="part_ii_or_information"><span>PART II. OTHE</span><span>R INFORMATION</span></p>"""
@@ -421,13 +421,12 @@ def test_parse_and_identify_headings():
     print(document)
 
 
-
 def test_html_from_old_filings_is_none():
     f = Filing(form='8-K', filing_date='1998-01-05', company='YAHOO INC', cik=1011006, accession_no='0001047469-98-000122')
     text = f.text()
     assert text
     html = f.html()
-    assert html
+    assert not html
 
 def test_get_html_problem_filing():
     filing = Filing(form='497K',

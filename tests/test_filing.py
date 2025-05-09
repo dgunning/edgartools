@@ -417,7 +417,8 @@ def test_filing_html_is_xhtml_for_xml_filing():
 def test_filing_html_for_pdf_only_filing():
     filing = Filing(form='40-17G', filing_date='2024-02-27', company='FIDELITY CAPITAL TRUST', cik=275309,
                     accession_no='0000880195-24-000030')
-    assert not filing.html()
+    html = filing.html()
+    assert not html
 
 
 def test_filing_homepage_primary_documents():
@@ -878,7 +879,7 @@ def test_get_text_from_old_filing():
                     accession_no='0000912057-00-023442')
     assert filing.document.empty
     html = filing.html()
-    assert html
+    assert not html
     text = filing.text()
     assert text
 

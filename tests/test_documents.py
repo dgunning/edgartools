@@ -6,7 +6,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from rich import print
 
-from edgar import Filing, find
+from edgar import Filing
 from edgar.datatools import dataframe_to_text
 from edgar.files.html_documents import *
 from edgar.files.html_documents import fixup
@@ -470,9 +470,10 @@ def test_get_clean_html():
 def test_get_text_for_paper_filing():
     filing = Filing(form='FOCUSN', filing_date='2024-02-28', company='JACKSON NATIONAL LIFE DISTRIBUTORS LLC',
                     cik=1006323, accession_no='9999999997-24-001009')
-
+    html = filing.html()
     text = filing.text()
     assert text
+
 
 
 def test_get_table_blocks():
@@ -590,6 +591,9 @@ def test_document_get_markdown():
 def test_filing_text_for_file_with_fil_extension():
     filing = Filing(form='NSAR-A', filing_date='2016-06-28',
                     company='AMERICAN FUNDS GLOBAL BALANCED FUND', cik=1505612, accession_no='0000051931-16-002553')
+    html = filing.html()
+    assert "American Funds Global Balanced Fund" in html
+    text = filing.text()
     assert "American Funds Global Balanced Fund" in filing.text()
     #assert "American Funds Global Balanced Fund" in filing.markdown()
 
@@ -613,7 +617,7 @@ def test_get_clean_html_from_unusual_filing():
     filing =  Filing(form='NSAR-B', filing_date='2016-12-29', company='Thrivent Cash Management Trust', cik=1300087,
                      accession_no='0001193125-16-805810')
     html = filing.html()
-    assert not html
+    assert html
     markdown = filing.markdown()
     assert markdown
 

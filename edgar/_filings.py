@@ -1370,7 +1370,10 @@ class Filing:
         sgml = self.sgml()
         html = sgml.html()
         if not html:
-            return None
+            document:Attachment = self.homepage.primary_html_document
+            if document.empty or document.is_binary():
+                return None
+            return self.homepage.primary_html_document.download()
         if html.endswith("</PDF>"):
             return None
         if html.startswith("<?xml"):
@@ -1388,7 +1391,8 @@ class Filing:
         if is_probably_html(html):
             return html
         else:
-            return f"<html><body>{html}</body></html>"
+            html = html.replace("<PAGE>", "")
+            return f"<html><body><div>{html}</div></body></html>"
 
     @lru_cache(maxsize=4)
     def xml(self) -> Optional[str]:
