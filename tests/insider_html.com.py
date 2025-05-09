@@ -1,5 +1,6 @@
 from edgar import *
 from pathlib import Path
+from tqdm.auto import tqdm
 
 
 def sample_and_test(form:str='3'):
@@ -11,6 +12,15 @@ def sample_and_test(form:str='3'):
     filing.open()
     print(str(filing))
     Path(f'data/ownership/generatedForm{form}.html').write_text(html)
+
+def batch_check_for_no_html_in_filing():
+    filings = get_filings(year=2024).sample(1000)
+    for filing in tqdm(filings):
+        html = filing.html()
+        if not html:
+            print(str(filing))
+            filing.home.open()
+            #break
 
 
 if __name__ == '__main__':
