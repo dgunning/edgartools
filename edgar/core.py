@@ -891,7 +891,7 @@ def is_probably_html(content: str) -> bool:
         content = content.decode('utf-8', errors='ignore')
 
     # Check for common HTML tags
-    html_tags = ['<html', '<body', '<head', '<title', '<div', '<span', '<p']
+    html_tags = ['<html>', '<body>', '<head>', '<title>', '<div', '<span', '<p>']
     return any(tag in content.lower() for tag in html_tags)
 
 def has_html_content(content: str) -> bool:
