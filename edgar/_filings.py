@@ -41,7 +41,7 @@ from edgar.core import (log, display_size, sec_edgar,
                         listify,
                         cache_except_none,
                         is_start_of_quarter,
-                        has_html_content,
+                        is_probably_html,
                         InvalidDateException,
                         IntString,
                         current_year_and_quarter,
@@ -1369,21 +1369,26 @@ class Filing:
         """Returns the html contents of the primary document if it is html"""
         sgml = self.sgml()
         html = sgml.html()
-        if html and not html.startswith("<?xml"):
-            # skip PDF (for now)
-            if html.endswith("</PDF>"):
-                return None
-            if has_html_content(html):
-                return html
+        if not html:
             return None
-        # If the html document is not in the SGML then we have to go to the homepage
-        html = self.homepage.primary_html_document.download()
+        if html.endswith("</PDF>"):
+            return None
+        if html.startswith("<?xml"):
+            if self.form in ['3','3/A', '4', '4/A', '5', '5/A']:
+                from edgar.ownership import Ownership
+                ownership:Ownership = self.obj()
+                html = ownership.to_html()
+            else:
+                html = self.homepage.primary_html_document.download()
         if isinstance(html, bytes):
             try:
                 return html.decode("utf-8")
             except UnicodeDecodeError:
                 return None
-        return html
+        if is_probably_html(html):
+            return html
+        else:
+            return f"<html><body>{html}</body></html>"
 
     @lru_cache(maxsize=4)
     def xml(self) -> Optional[str]:
@@ -1395,7 +1400,7 @@ class Filing:
     def text(self) -> str:
         """Convert the html of the main filing document to text"""
         html_content = self.html()
-        if html_content and has_html_content(html_content):
+        if html_content and is_probably_html(html_content):
             document = Document.parse(html_content)
             return rich_to_text(document)
         else:
