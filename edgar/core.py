@@ -76,6 +76,7 @@ __all__ = [
     'is_start_of_quarter',
     'run_async_or_sync',
     'get_edgar_data_directory',
+    'is_probably_html',
     'has_html_content',
     'default_page_size',
     'parse_acceptance_datetime',
@@ -884,6 +885,14 @@ def cache_except_none(maxsize=128):
 
     return decorator
 
+def is_probably_html(content: str) -> bool:
+    """Does it have html tags"""
+    if isinstance(content, bytes):
+        content = content.decode('utf-8', errors='ignore')
+
+    # Check for common HTML tags
+    html_tags = ['<html', '<body', '<head', '<title', '<div', '<span', '<p']
+    return any(tag in content.lower() for tag in html_tags)
 
 def has_html_content(content: str) -> bool:
     """
