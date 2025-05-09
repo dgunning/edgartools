@@ -4,11 +4,11 @@ from pathlib import Path
 import pandas as pd
 from bs4 import BeautifulSoup
 from rich import print
-
+import pytest
 from edgar._filings import Filing
 from edgar.ownership import *
 from edgar.ownership.core import compute_average_price, compute_total_value, format_amount, is_numeric, safe_numeric
-from edgar.ownership.html_render import ownership_to_html
+from edgar.core import has_html_content
 
 pd.options.display.max_columns = None
 
@@ -17,6 +17,16 @@ snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').re
 snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
 aapl_form4: Ownership = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
                                accession_no='0000320193-23-000089').obj()
+
+@pytest.fixture
+def dayone_filing():
+    filing = Filing(company='Day One Biopharmaceuticals, Inc.', cik=1845337, form='4', filing_date='2023-10-20',
+                    accession_no='0001209191-23-053235')
+    return filing
+
+@pytest.fixture
+def dayone_form4(dayone_filing):
+    return dayone_filing.obj()
 
 def test_safe_numeric():
     assert safe_numeric('7500 [F1]') == 7500
@@ -333,16 +343,42 @@ def test_aapl_form4():
     print(ownership)
 
 
-def test_correct_number_of_transactions_for_form4(capsys):
-    filing = Filing(company='Day One Biopharmaceuticals, Inc.', cik=1845337, form='4', filing_date='2023-10-20',
-                    accession_no='0001209191-23-053235')
-    ownership = filing.obj()
+def test_correct_number_of_transactions_for_form4(dayone_form4, capsys):
+    ownership = dayone_form4
     assert len(ownership.non_derivative_table.transactions) == 3
     print()
     print(ownership)
     out, err = capsys.readouterr()
     with capsys.disabled():
         assert "Day One Biopharmaceuticals" in out
+
+def test_form4_common_trades(dayone_form4):
+    form4: Form4 = dayone_form4
+    print()
+
+    # Common stock transactions
+    common_stock_trades = form4.market_trades
+    assert not common_stock_trades.empty
+    assert len(common_stock_trades) == 3
+    assert common_stock_trades.iloc[2].Shares == 111387
+    assert common_stock_trades.iloc[2].Code == 'P'
+    print(form4)
+
+    # Shares trades
+    assert form4.shares_traded == 1475454.0
+
+    # Common stock transactions
+    common_trades = aapl_form4.market_trades
+    assert len(common_trades) == 3
+    print()
+    print(common_trades[['Date', 'Security', 'Shares', 'Remaining', 'Price', 'Code', 'TransactionType']])
+
+    # This filing has lots of common and derivative trades and some missing prices
+    filing = Filing(form='4', filing_date='2023-10-25', company='210 Capital, LLC', cik=1694780,
+                    accession_no='0000899243-23-020039')
+    form4 = filing.obj()
+    # The common trades should be empty because there are no Sales (S) or Purchases (P)
+    assert form4.market_trades.empty
 
 
 def test_form3_shows_holdings(capsys):
@@ -381,35 +417,7 @@ def test_form5_common_transactions():
     print(ownership)
 
 
-def test_form4_common_trades():
-    filing = Filing(company='Day One Biopharmaceuticals, Inc.', cik=1845337, form='4', filing_date='2023-10-20',
-                    accession_no='0001209191-23-053235')
-    form4: Form4 = filing.obj()
-    print()
 
-    # Common stock transactions
-    common_stock_trades = form4.market_trades
-    assert not common_stock_trades.empty
-    assert len(common_stock_trades) == 3
-    assert common_stock_trades.iloc[2].Shares == 111387
-    assert common_stock_trades.iloc[2].Code == 'P'
-    print(form4)
-
-    # Shares trades
-    assert form4.shares_traded == 1475454.0
-
-    # Common stock transactions
-    common_trades = aapl_form4.market_trades
-    assert len(common_trades) == 3
-    print()
-    print(common_trades[['Date', 'Security', 'Shares', 'Remaining', 'Price', 'Code', 'TransactionType']])
-
-    # This filing has lots of common and derivative trades and some missing prices
-    filing = Filing(form='4', filing_date='2023-10-25', company='210 Capital, LLC', cik=1694780,
-                    accession_no='0000899243-23-020039')
-    form4 = filing.obj()
-    # The common trades should be empty because there are no Sales (S) or Purchases (P)
-    assert form4.market_trades.empty
 
 
 def test_form4_derivative_trades():
@@ -603,5 +611,11 @@ def test_form5_xml2html():
     form3 = Form3.parse_xml(Path('data/ownership/form5.snow.xml').read_text())
     html = form3.to_html()
     Path('data/ownership/form5.snow_generated.html').write_text(html)
+    assert has_html_content(html)
+
+def test_get_html_from_insider_filing(dayone_filing):
+    html = dayone_filing.html()
+    assert html
+    assert has_html_content(html)
 
 
