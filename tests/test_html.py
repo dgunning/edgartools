@@ -386,7 +386,8 @@ def test_render_paragraph():
     print(paragraph.content)
 
 def test_get_text_from_filing_with_no_body_tag():
-    filing = Filing(form='TA-1/A', filing_date='2024-04-17', company='PEAR TREE ADVISORS INC /TA', cik=949738, accession_no='0000949738-24-000005')
+    filing = Filing(form='TA-1/A', filing_date='2024-04-17', company='PEAR TREE ADVISORS INC /TA',
+                    cik=949738, accession_no='0000949738-24-000005')
     html = filing.html()
     assert html
     text = filing.text()
@@ -437,3 +438,4 @@ def test_get_html_problem_filing():
     text = filing.text()
     assert text
     print(text)
+
