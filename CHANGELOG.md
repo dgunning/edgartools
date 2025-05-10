@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.2] - 2025-05-09
+
+### Fixed
+
+- Fixed bug where Document parsing returns empty text for certain filings with `<pre>` tags
+- Fixed bug where text extracts ignore SGML local content when available
+
+### Added
+- Add `to_html` to Ownership forms to generate html from insider forms
+- Handle searches for invalid accession numbers
+
+### Changed
+
+- Changed `Filing.html` to generate html from plain text if html is not available. 
+- Changed `Filing.html` to generate HTML for Insider forms instead of downloading from the SEC
+- Relaxed the detection of html in filing documents to allow the code to work with more form types
+
 ## [4.0.1] - 2025-05-03
 
 ### Added
