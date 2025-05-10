@@ -10,6 +10,7 @@ if __name__ == '__main__':
             df2 = ownership.to_dataframe(detailed=False)
             print()
             print(ownership)
+            ownership.to_html()
         except Exception as e:
             print(f"Failed to create Ownership {filing}")
             filing.open()

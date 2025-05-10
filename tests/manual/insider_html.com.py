@@ -24,4 +24,5 @@ def batch_check_for_no_html_in_filing():
 
 
 if __name__ == '__main__':
-    sample_and_test('5')
+    #sample_and_test('4')
+    batch_check_for_no_html_in_filing()
