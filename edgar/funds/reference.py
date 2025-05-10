@@ -536,7 +536,7 @@ if __name__ == "__main__":
         fund_ref_data = get_fund_reference_data()
         
         # Print summary statistics
-        print(f"Successfully loaded fund reference data:")
+        print("Successfully loaded fund reference data:")
         print(f"Companies: {fund_ref_data.companies_count}")
         print(f"Series: {fund_ref_data.series_count}")
         print(f"Classes: {fund_ref_data.classes_count}")

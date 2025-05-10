@@ -1,9 +1,10 @@
 # html_render.py - HTML rendering module for ownership forms
 
 import os
-import pandas as pd
 import re
-from typing import Optional, Dict, List, Any, Union
+from typing import Optional, Any
+
+import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 
 from edgar.ownership.core import format_numeric, format_price
@@ -35,13 +36,18 @@ def format_owner_name(owner_name: Optional[str]) -> str:
 def format_address(street1: Optional[str], street2: Optional[str], city: Optional[str], state: Optional[str], zip_code: Optional[str]) -> str:
     """Format address components into a HTML address string."""
     parts = []
-    if street1: parts.append(_escape_html(street1))
-    if street2: parts.append(_escape_html(street2))
+    if street1:
+        parts.append(_escape_html(street1))
+    if street2:
+        parts.append(_escape_html(street2))
     
     city_state_zip_line_parts = []
-    if city: city_state_zip_line_parts.append(_escape_html(city))
-    if state: city_state_zip_line_parts.append(_escape_html(state))
-    if zip_code: city_state_zip_line_parts.append(_escape_html(zip_code))
+    if city:
+        city_state_zip_line_parts.append(_escape_html(city))
+    if state:
+        city_state_zip_line_parts.append(_escape_html(state))
+    if zip_code:
+        city_state_zip_line_parts.append(_escape_html(zip_code))
     
     if city_state_zip_line_parts:
         parts.append(" ".join(city_state_zip_line_parts).strip())
@@ -207,13 +213,13 @@ def ownership_to_html(ownership: 'Ownership') -> str:
                     
                     row = [
                         f'<td class="TableCell">{security_title_clean}</td>',
-                        f'<td class="TableCell"></td>',  # Transaction Date
-                        f'<td class="TableCell"></td>',  # Deemed Execution Date
-                        f'<td class="TableCell"></td>',  # Transaction Code
-                        f'<td class="TableCell"></td>',  # V
-                        f'<td class="TableCell"></td>',  # Amount
-                        f'<td class="TableCell"></td>',  # A/D
-                        f'<td class="TableCell"></td>',  # Price
+                        '<td class="TableCell"></td>',  # Transaction Date
+                        '<td class="TableCell"></td>',  # Deemed Execution Date
+                        '<td class="TableCell"></td>',  # Transaction Code
+                        '<td class="TableCell"></td>',  # V
+                        '<td class="TableCell"></td>',  # Amount
+                        '<td class="TableCell"></td>',  # A/D
+                        '<td class="TableCell"></td>',  # Price
                         f'<td class="TableCell Right">{shares_owned}</td>',
                         f'<td class="TableCell Centered">{direct_indirect_code}</td>',
                         f'<td class="TableCell">{nature_of_ownership}</td>'
@@ -253,16 +259,16 @@ def ownership_to_html(ownership: 'Ownership') -> str:
                 row = [
                     f'<td class="TableCell">{security_title_clean}</td>',
                     f'<td class="TableCell Right">{conversion_price}</td>',
-                    f'<td class="TableCell">N/A</td>',  # Transaction Date (blank for F3 initial holding)
-                    f'<td class="TableCell">N/A</td>',  # Deemed Execution Date (blank for F3 initial holding)
-                    f'<td class="TableCell">N/A</td>',  # Transaction Code (blank for F3 initial holding)
-                    f'<td class="TableCell">N/A</td>',  # V (blank for F3 initial holding)
-                    f'<td class="TableCell">N/A</td>',  # Shares in transaction (blank for F3 initial holding)
-                    f'<td class="TableCell">N/A</td>',  # A/D (blank for F3 initial holding)
+                    '<td class="TableCell">N/A</td>',  # Transaction Date (blank for F3 initial holding)
+                    '<td class="TableCell">N/A</td>',  # Deemed Execution Date (blank for F3 initial holding)
+                    '<td class="TableCell">N/A</td>',  # Transaction Code (blank for F3 initial holding)
+                    '<td class="TableCell">N/A</td>',  # V (blank for F3 initial holding)
+                    '<td class="TableCell">N/A</td>',  # Shares in transaction (blank for F3 initial holding)
+                    '<td class="TableCell">N/A</td>',  # A/D (blank for F3 initial holding)
                     f'<td class="TableCell">{exercisable_expiration_clean}</td>',
                     f'<td class="TableCell">{title_amount_underlying_clean}</td>',
-                    f'<td class="TableCell">N/A</td>',  # Price (blank for F3 initial holding)
-                    f'<td class="TableCell">N/A</td>',  # Amount owned after transaction (blank for F3 initial holding)
+                    '<td class="TableCell">N/A</td>',  # Price (blank for F3 initial holding)
+                    '<td class="TableCell">N/A</td>',  # Amount owned after transaction (blank for F3 initial holding)
                     f'<td class="TableCell Centered">{direct_indirect_code}</td>',
                     f'<td class="TableCell">{nature_of_ownership}</td>'
                 ]
@@ -344,15 +350,15 @@ def ownership_to_html(ownership: 'Ownership') -> str:
                     row = [
                         f'<td class="TableCell">{security_title_clean}</td>',
                         f'<td class="TableCell Right">{conversion_price}</td>',
-                        f'<td class="TableCell"></td>',  # Transaction Date
-                        f'<td class="TableCell"></td>',  # Deemed Execution Date
-                        f'<td class="TableCell"></td>',  # Transaction Code
-                        f'<td class="TableCell"></td>',  # V
-                        f'<td class="TableCell"></td>',  # Shares in transaction
-                        f'<td class="TableCell"></td>',  # A/D
+                        '<td class="TableCell"></td>',  # Transaction Date
+                        '<td class="TableCell"></td>',  # Deemed Execution Date
+                        '<td class="TableCell"></td>',  # Transaction Code
+                        '<td class="TableCell"></td>',  # V
+                        '<td class="TableCell"></td>',  # Shares in transaction
+                        '<td class="TableCell"></td>',  # A/D
                         f'<td class="TableCell">{exercisable_expiration_clean}</td>',
                         f'<td class="TableCell">{title_amount_underlying_clean}</td>',
-                        f'<td class="TableCell"></td>',  # Price
+                        '<td class="TableCell"></td>',  # Price
                         f'<td class="TableCell Right">{owned_after_transaction}</td>',
                         f'<td class="TableCell Centered">{direct_indirect_code}</td>',
                         f'<td class="TableCell">{nature_of_ownership}</td>'

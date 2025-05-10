@@ -29,7 +29,6 @@ from edgar.ownership.core import format_amount, format_currency, safe_numeric, f
 from edgar.richtools import repr_rich, df_to_rich_table
 from edgar.xmltools import (child_text, child_value)
 import itertools
-import logging
 from edgar.ownership.html_render import ownership_to_html
 __all__ = [
     'Owner',
