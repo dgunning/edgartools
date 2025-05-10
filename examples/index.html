@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>User Journeys - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "User Journeys";
+        var mkdocs_page_input_path = "examples.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">User Journeys</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-company-financial-analysis">1. Company Financial Analysis</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-investment-fund-research">2. Investment Fund Research</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">User Journeys</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="solve-real-problems-with-edgartools">Solve Real Problems with EdgarTools</h1>
+<p>This document showcases common workflows and tasks that financial professionals, developers, and researchers can accomplish using EdgarTools. Each journey addresses a specific problem and provides a concise code example.</p>
+<h2 id="1-company-financial-analysis">1. Company Financial Analysis</h2>
+<p><strong>Problem:</strong> Need to analyze a company's financial health across multiple periods.</p>
+<p><img alt="Microsoft Revenue Trend" src="../images/MSFT_financial_complex.png" /></p>
+<pre><code class="language-python">
+def get_income_dataframe(ticker:str):
+    c = Company(ticker)
+    filings = c.get_filings(form=&quot;10-K&quot;).latest(5)
+    xbs = XBRLS.from_filings(filings)
+    income_statement = xbs.statements.income_statement()
+    income_df = income_statement.to_dataframe()
+    return income_df
+
+
+def plot_revenue(ticker:str):
+    income_df = get_income_dataframe(ticker)
+
+    # Extract financial metrics
+    net_income = income_df[income_df.concept == &quot;us-gaap_NetIncomeLoss&quot;][income_statement.periods].iloc[0]
+    gross_profit = income_df[income_df.concept == &quot;us-gaap_GrossProfit&quot;][income_statement.periods].iloc[0]
+    revenue = income_df[income_df.label == &quot;Revenue&quot;][income_statement.periods].iloc[0]
+
+    # Convert periods to fiscal years for better readability
+    periods = [pd.to_datetime(period).strftime('FY%y') for period in income_statement.periods]
+
+    # Reverse the order so most recent years are last (oldest to newest)
+    periods = periods[::-1]
+    revenue_values = revenue.values[::-1]
+    gross_profit_values = gross_profit.values[::-1]
+    net_income_values = net_income.values[::-1]
+
+    # Create a DataFrame for plotting
+    plot_data = pd.DataFrame({
+        'Revenue': revenue_values,
+        'Gross Profit': gross_profit_values,
+        'Net Income': net_income_values
+    }, index=periods)
+
+    # Convert to billions for better readability
+    plot_data = plot_data / 1e9
+
+    # Create the figure
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot the data as lines with markers
+    plot_data.plot(kind='line', marker='o', ax=ax, linewidth=2.5)
+
+    # Format the y-axis to show billions with 1 decimal place
+    ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda x, _: f'${x:.1f}B'))
+
+    # Add labels and title
+    ax.set_xlabel('Fiscal Year')
+    ax.set_ylabel('Billions USD')
+    ax.set_title(f'{c.name} ({ticker}) Financial Performance')
+
+    # Add a grid for better readability
+    ax.grid(True, linestyle='--', alpha=0.7)
+
+    # Add a source note
+    plt.figtext(0.5, 0.01, 'Source: SEC EDGAR via edgartools', ha='center', fontsize=9)
+
+    # Improve layout
+    plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+
+    return fig
+</code></pre>
+<h2 id="2-investment-fund-research">2. Investment Fund Research</h2>
+<p><strong>Problem:</strong> Need to analyze fund holdings and compare share classes.</p>
+<pre><code class="language-python">from edgar import find
+
+# Find a fund by ticker
+fund = find(&quot;VFIAX&quot;)  # Vanguard 500 Index Fund
+
+# Get the fund's structure
+classes = fund.get_classes()
+print(f&quot;Fund has {len(classes)} share classes&quot;)
+
+# Get the latest portfolio holdings
+portfolio = fund.get_portfolio()
+
+# Show top 10 holdings by value
+top_holdings = portfolio.sort_values('value', ascending=False).head(10)
+top_holdings
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../quick-guide/" class="btn btn-neutral float-left" title="Quick Guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../quick-guide/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

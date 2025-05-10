@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Filtering - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Filtering";
+        var mkdocs_page_input_path = "filtering-filings.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Filtering</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#filtering-using-parameters-of-get_filings">Filtering using parameters of get_filings</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#get-filings-by-form">Get filings by form</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#filtering-by-date">Filtering by date</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#more-filtering-examples">More filtering examples</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#filtering-by-cik">Filtering by CIK</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#filtering-by-ticker">Filtering by ticker</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#filtering-by-exchange">Filtering by exchange</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#filtering-using-filingsfilter">Filtering using Filings.filter</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#using-head-tail-and-sample">Using head, tail, and sample</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Filtering</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="filtering-filings">Filtering filings</h1>
+<p>Filings can be filtered in many different ways like by <code>form</code>, <code>date</code>, <code>CIK</code>, <code>ticker</code>, and <strong>accession number</strong>.
+You also filter while getting filings using the <code>get_filings</code> function or after getting filings using the <code>filter</code> method.</p>
+<p>For the most part these approaches will give identical results, except that with get_filings you are filtering from all available filings in the SEC, while with <code>filter</code> you are reducing the nu,ber of filings in a <code>Filings</code> object.</p>
+<h2 id="filtering-using-parameters-of-get_filings">Filtering using parameters of <code>get_filings</code></h2>
+<p>You can filter using parameters of the <code>get_filings</code> function. </p>
+<h3 id="get-filings-by-form">Get filings by form</h3>
+<p>To get filings of a specific form type like 10-K, you can use the <code>form</code> parameter. For example:</p>
+<pre><code class="language-python">filings = get_filings(form='10-K')
+</code></pre>
+<p>The <code>form</code> can also be a list of forms. For example:</p>
+<pre><code class="language-python">filings = get_filings(form=['10-K', '10-Q'])
+</code></pre>
+<p>By default the <code>amendments</code> parameter is set to <code>True</code> so that amended filings are included. You can set it to <code>False</code> to exclude amended filings. For example:</p>
+<pre><code class="language-python">filings = get_filings(form='10-K', amendments=False)
+</code></pre>
+<h3 id="filtering-by-date">Filtering by date</h3>
+<p>You can filter filings by date using the <code>filing_date</code> parameter. For example:</p>
+<pre><code class="language-python">filings = get_filings(filing_date='2022-01-01')
+</code></pre>
+<p>You can also filter by a range of dates. For example:</p>
+<pre><code class="language-python">filings = get_filings(filing_date='2022-01-01:2022-01-10')
+</code></pre>
+<p>You can filter up to a date. For example:</p>
+<pre><code class="language-python">filings = get_filings(filing_date=':2022-01-10')
+</code></pre>
+<p>as well as after a date. For example:</p>
+<pre><code class="language-python">filings = get_filings(filing_date='2022-01-10:')
+</code></pre>
+<h4 id="more-filtering-examples">More filtering examples</h4>
+<pre><code class="language-python">
+from edgar import get_filings
+
+# Get filings for 2021
+filings_ = get_filings(2021) 
+
+# Get filings for 2021 Q4
+filings_ = get_filings(2021, 4) 
+
+# Get filings for 2021 Q3 and Q4
+filings_ = get_filings(2021, [3,4]) 
+
+# Get filings for 2020 and 2021
+filings_ = get_filings([2020, 2021]) 
+
+# Get filings for Q4 of 2020 and 2021
+filings_ = get_filings([2020, 2021], 4) 
+
+# Get filings between 2010 and 2021 - does not include 2021
+filings_ = get_filings(range(2010, 2021)) 
+
+# Get filings for 2021 Q4 for form D
+filings_ = get_filings(2021, 4, form=&quot;D&quot;) 
+
+# Get filings for 2021 Q4 on &quot;2021-10-01&quot;
+filings_ = get_filings(2021, 4, filing_date=&quot;2021-10-01&quot;) 
+
+# Get filings for 2021 Q4 between &quot;2021-10-01&quot; and &quot;2021-10-10&quot;
+filings_ = get_filings(2021, 4, filing_date=&quot;2021-10-01:2021-10-10&quot;) 
+
+</code></pre>
+<h3 id="filtering-by-cik">Filtering by CIK</h3>
+<p>You can filter filings by CIK using the <code>cik</code> parameter to get all filings for a company. For example:</p>
+<pre><code class="language-python">filings = get_filings(cik='0000320193')
+</code></pre>
+<h3 id="filtering-by-ticker">Filtering by ticker</h3>
+<p>You can filter filings by ticker using the <code>ticker</code> parameter. For example:</p>
+<pre><code class="language-python">filings = get_filings(ticker='AAPL')
+</code></pre>
+<p>Note that this first does a lookup of the CIK for the ticker and then gets filings for the CIK.
+So if you know the CIK, it is better to use that directly.</p>
+<h3 id="filtering-by-exchange">Filtering by exchange</h3>
+<p>You can filter companies using the <code>exchange</code> parameter. </p>
+<pre><code class="language-python">filings = get_filings(exchange='NASDAQ')
+</code></pre>
+<p>There are the following exchanges available:</p>
+<table>
+<thead>
+<tr>
+<th>Exchange</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nasdaq</td>
+</tr>
+<tr>
+<td>NYSE</td>
+</tr>
+<tr>
+<td>CBOE</td>
+</tr>
+<tr>
+<td>OTC</td>
+</tr>
+</tbody>
+</table>
+<h2 id="filtering-using-filingsfilter">Filtering using <code>Filings.filter</code></h2>
+<p>You can filter filings using the <code>filter</code> method after getting filings. This work mostly identically to filtering using <code>get_filings</code>.
+The difference is that <code>filter</code> reduces from an existing <code>Filings</code> object rather that the entire SEC.</p>
+<p>Example:</p>
+<pre><code class="language-python">filings().filter(form='10-K')
+</code></pre>
+<pre><code class="language-python">    def filter(self, *,
+        form: Optional[Union[str, List[IntString]]] = None,
+        amendments: bool = None,
+        filing_date: Optional[str] = None,
+        date: Optional[str] = None,
+        cik: Union[IntString, List[IntString]] = None,
+        exchange: Union[str, List[str], Exchange, List[Exchange]] = None,
+        ticker: Union[str, List[str]] = None,
+        accession_number: Union[str, List[str]] = None) -&gt; Optional['Filings']:
+
+        :param form: The form or list of forms to filter by
+        :param amendments: Whether to include amendments to the forms e.g. include &quot;10-K/A&quot;
+        :param filing_date: The filing date
+        :param date: An alias for the filing date
+        :param cik: The CIK or list of CIKs to filter by
+        :param exchange: The exchange or list of exchanges to filter by
+        :param ticker: The ticker or list of tickers to filter by
+        :param accession_number: The accession number or list of accession numbers to filter by
+</code></pre>
+<h2 id="using-head-tail-and-sample">Using <code>head</code>, <code>tail</code>, and <code>sample</code></h2>
+<p>You can subset filings using the <code>head</code> and <code>tail</code> and <code>sample</code> methods. For example:</p>
+<pre><code class="language-python">filings = get_filings()
+filings.head(10)
+filings.tail(10)
+filings.sample(10)
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../working-with-filings/" class="btn btn-neutral float-right" title="Filings">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../working-with-filings/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

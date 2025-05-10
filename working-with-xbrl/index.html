@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Working with XBRL in edgartools - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Working with XBRL in edgartools";
+        var mkdocs_page_input_path = "working-with-xbrl.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Working with XBRL in edgartools</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="working-with-xbrl-in-edgartools">Working with XBRL in edgartools</h1>
+<p>XBRL is an data format used by companies, mainly for financial reporting in their 10-Q and 10-K filings.
+EdgarTools can parse and extract data from XBRL files into dataframes as well as rich objects that allow you to manipulate and visualize the data inside.</p>
+<p>While the primary usage of XBRL is for reporting financial data, particularly for 10K and 10Q filings, it is also used to report for other non-financial filings such as 424B offerings.
+The <strong>EdgarTools</strong> data model is flexible enough to accommodate a wide variation of data across companies and filings when it comes to XBRL.</p>
+<h2 id="the-data-model">The Data Model</h2>
+<p>Looking at the data model, it is worth starting at the top. When searching for filings, you can limit the results to xbrl filings by using <code>index="xbrl"</code>.</p>
+<pre><code class="language-python">filings = get_filings(index=&quot;xbrl&quot;)
+</code></pre>
+<p><img alt="XBL Filings" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/xbrl-filings.jpg" /></p>
+<p>Each <code>Filing</code> has <code>xbrl()</code> function that will download and parse the XBRL attached to the filing or <code>None</code> if it does not. </p>
+<pre><code class="language-python">filing = filings[0]
+filing.xbrl()
+</code></pre>
+<p>The <code>xbrl()</code> function will return an <code>XBRLInstance</code> object in simple cases, or an <code>XbrlData</code> object in more complicated cases.</p>
+<p><img alt="Apple XBRL" src="../images/aapl-xbrl.png" />
+Here you can see the <code>XbrlData</code> object for Apple Inc. 10-K filing. It contains the <code>XBRLInstance</code> object, which holds the primary facts reported in the filings, as well as a list of statement.
+Each statement is a container for a group of facts, such as a balance sheet or income statement.</p>
+<p>For simpler filings there might only be an <code>XBRLInstance</code> document attached to the filing in which cases <code>.xbrl()</code> will return an <code>XbrlInstance</code> object, and there will be no statements.</p>
+<h3 id="xbrlinstance">XbrlInstance</h3>
+<p>The main XBRL container for data is called XBRL instance. It contains the primary data reported for that filing.
+The data is in a very well-structured XML format, but the EdgarTools XBRL parser unrolls that into a data frame.
+For simple XBRL, the data inside an XBRL instance is self-contained, so it is straightforward to parse into data structures like data frames. </p>
+<h3 id="xbrldata">XbrlData</h3>
+<p>For more complicated XBRL, some aspects of the data will have to be resolved against the other XBRL files for that filing, such as the presentation and calculation files.
+In this case, the parser will return an XBRLData container containing the XBRLInstance and the other XBRL files.</p>
+<p>These files can include</p>
+<ul>
+<li>presentation: This file describes how the XBRL data is presented in the filing. It is used to resolve the hierarchy of the data.</li>
+<li>calculation: This file describes how the XBRL data is calculated. It is used to resolve the calculations of the data.</li>
+<li>definition: This file describes the definitions of the XBRL data. It is used to resolve the meaning of the data.</li>
+<li>label: This file describes the labels of the XBRL data. It is used to resolve the labels of the data.</li>
+</ul>
+<h2 id="statements">Statements</h2>
+<p>But those are the data that go into the XbrlData data object - the output is more interesting. Within the data are usually financial statements like the balance sheet and income statement, or other non-financial statements such as auditor information or firm disclosures.</p>
+<p><img alt="Statements" src="../images/xbrlstatements.png" /></p>
+<p>These can be accessed using the XbrlData <code>get_statement()</code> function.</p>
+<p>To see the statements that are included in the XBRL data, use <code>XbrlData.statements</code>. This is useful and often necessary since firms will use their own specific names for statements.</p>
+<pre><code class="language-python">statements = xbrl_data.statements
+</code></pre>
+<p>You can access a specific statement using the bracket notation or loop over all the statements</p>
+<pre><code class="language-python">statements['CONSOLIDATEDBALANCESHEETS']
+</code></pre>
+<p><img alt="Statements" src="../images/consolidatedbalancesheet.png" /></p>
+<p>This is equivalent to</p>
+<pre><code class="language-python">xbrl_data.get_statement('CONSOLIDATEDBALANCESHEETS')
+</code></pre>
+<h3 id="statement">Statement</h3>
+<p>Inside each statement is a data frame which you can access using <code>statement.data</code>. </p>
+<pre><code class="language-python">statement.data
+</code></pre>
+<p>This will also contain metadata columns that you may or may not need to see it's preferable to use <code>statement.get_dataframe()</code>
+<img alt="Statements Get Dataframe" src="../images/statement_getdataframe.png" /></p>
+<h2 id="financials">Financials</h2>
+<p>Experts' data can contain both financial and non-financial statements. Mostly you will be interested in financial statements, so the <code>Financials</code> class
+Is a convenient wrapper over the most common financial statements.</p>
+<pre><code class="language-python">financials = Financials(xbrl_data)
+</code></pre>
+<p><img alt="Apple Financials" src="../images/apple_financials.png" /></p>
+<h1 id="summary">Summary</h1>
+<p>Hopefully this gives you a good overview of working with XBRL data using <strong>edgartools</strong>. 
+It's very complicated and a lot of work has gone into XBRL parsing in Edgar tools, and there may still be enhancements to be made. 
+If you have any questions or suggestions, please feel free to reach out to us on the <a href="https://github.com/dgunning/edgartools">Edgartools GitHub repository</a>   </p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

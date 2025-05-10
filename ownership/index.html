@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Ownership Documents - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Ownership Documents";
+        var mkdocs_page_input_path = "ownership.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Ownership Documents</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="ownership-documents">Ownership Documents</h1>
+<p>Ownership documents are SEC forms that contain information about ownership of securities.</p>
+<h3 id="ownership-forms">Ownership Forms</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Form</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;"><strong>3</strong></td>
+<td style="text-align: left;">Initial statement of beneficial ownership of securities</td>
+</tr>
+<tr>
+<td style="text-align: right;"><strong>4</strong></td>
+<td style="text-align: left;">Statement of changes of beneficial ownership of securities</td>
+</tr>
+<tr>
+<td style="text-align: right;"><strong>5</strong></td>
+<td style="text-align: left;">Annual statement of changes in beneficial ownership of securities</td>
+</tr>
+</tbody>
+</table>
+<p>The module <code>edgar.ownership</code> module parses XML into an <code>OwnershipDocument</code> instance, 
+containing data about transactions and holdings.</p>
+<h2 id="getting-ownership-documents">Getting Ownership Documents</h2>
+<ul>
+<li>get a form <strong>3</strong>, <strong>4</strong>, or <strong>5</strong> filing</li>
+<li>get the xml document</li>
+<li>call <code>OwnershipDocument.from_xml()</code></li>
+</ul>
+<pre><code class="language-python">from edgar import CompanyData
+from edgar.ownership import Ownership
+
+# Get Snowflake
+company = CompanyData.for_ticker(&quot;SNOW&quot;)
+
+# Get Form 4 filings for Snowflake
+filings = company.get_filings(form=&quot;4&quot;)
+
+# Get the first filing
+filing = filings[0]
+
+# Get the filing xml
+xml = filing.xml()
+
+# Now get the OwnershipDocument
+ownership = Ownership.from_xml(xml)
+</code></pre>
+<h2 id="derivative-table">Derivative Table</h2>
+<p>This contains data on derivative holdings and transactions. To access it call
+<code>ownership_document.derivatives</code>.</p>
+<h3 id="derivative-holdings">Derivative Holdings</h3>
+<p>To access derivative transactions use <code>ownership.derivatives.holdings</code></p>
+<h3 id="derivative-transactions">Derivative Transactions</h3>
+<p>To access derivative transactions use <code>ownership.derivatives.transactions</code></p>
+<p>You can access individual transaction using the <code>[]</code> notation.</p>
+<pre><code class="language-python">ownership.derivative_table.transactions[0]
+</code></pre>
+<p><img alt="Derivative Transaction" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/derivative_transaction.png" /></p>
+<h2 id="non-derivative-table">Non Derivative Table</h2>
+<p>This contains data on non-derivative holdings and transactions. To access it call
+<code>ownership_document.non_
+derivatives</code>.</p>
+<h3 id="non-derivative-holdings">Non Derivative Holdings</h3>
+<p>To access derivative holdings use <code>ownership.non_derivatives.holdings</code></p>
+<p>You can access individual holdings using the <code>[]</code> notation.</p>
+<pre><code class="language-python">holding = ownership.non_derivative_table.holdings[0]
+holding
+</code></pre>
+<p><img alt="Non Derivative Holding" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/non_derivative_holding.png" /></p>
+<h3 id="non-derivative-transactions">Non Derivative Transactions</h3>
+<p>To access derivative transactions use <code>ownership.non_derivatives.transactions</code></p>
+<p>You can access individual transactions using the <code>[]</code> notation.</p>
+<pre><code class="language-python">transaction = ownership.non_derivative_table.transactions[0]
+transaction
+</code></pre>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
