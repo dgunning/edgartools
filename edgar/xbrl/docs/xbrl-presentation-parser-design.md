@@ -1,4 +1,4 @@
-![img.png](img.png)# XBRL Presentation Linkbase Parser Design (Python)
+# XBRL Presentation Linkbase Parser Design (Python)
 
 ## 1. Overview
 
