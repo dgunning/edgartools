@@ -83,6 +83,9 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
         return Entity(search_id)
     elif re.match(r"\d{10}-\d{2}-\d{6}", search_id):
         return get_by_accession_number(search_id)
+    elif re.match(r"^\d{18}$", search_id): # accession number with no dashes
+        accession_number = search_id[:10] + "-" + search_id[10:12] + "-" + search_id[12:]
+        return get_by_accession_number(accession_number)
     elif re.match(r"\d{4,10}$", search_id):
         return Entity(search_id)
     elif re.match(r"^[A-WYZ]{1,5}([.-][A-Z])?$", search_id):  # Ticker (including dot or hyphenated)
