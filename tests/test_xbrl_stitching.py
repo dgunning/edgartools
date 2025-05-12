@@ -525,3 +525,11 @@ def test_stitch_aapl_statements_from_2019():
     _repr = rich_to_text(income_statement)
     print(_repr)
     assert '$(161,782)' in _repr
+
+
+def test_stitch_statements_using_max_periods():
+    c = Company("AAPL")
+    filings = c.latest("10-K", 10)
+    xb = XBRLS.from_filings(filings)
+    income_statement = xb.statements.income_statement(max_periods=10)
+    assert len(income_statement.periods) == 10

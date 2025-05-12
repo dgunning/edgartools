@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from edgar.xbrl.statements import StitchedStatements
 
 
-def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> List[Dict[str, Any]]:
+def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str, max_periods:int=8) -> List[Dict[str, Any]]:
     """
     Determine the optimal periods to display for stitched statements from a list of XBRL objects.
     
@@ -32,6 +32,7 @@ def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> L
     Args:
         xbrl_list: List of XBRL objects ordered chronologically
         statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+        max_periods: Maximum number of periods to return (default is 8)
         
     Returns:
         List of period metadata dictionaries containing information for display
@@ -405,9 +406,8 @@ def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str) -> L
             filtered_periods.append(period)
     
     # Limit to a reasonable number of periods (8 is usually sufficient)
-    MAX_PERIODS = 8
-    if len(filtered_periods) > MAX_PERIODS:
-        filtered_periods = filtered_periods[:MAX_PERIODS]
+    if len(filtered_periods) > max_periods:
+        filtered_periods = filtered_periods[:max_periods]
     
     return filtered_periods
 
@@ -895,6 +895,7 @@ def stitch_statements(
     Returns:
         Stitched statement data
     """
+    print("Stitching statements...")
     # Initialize the stitcher
     stitcher = StatementStitcher()
     
@@ -904,7 +905,7 @@ def stitch_statements(
     # If using optimal periods based on entity info
     if use_optimal_periods:
         # Use our utility function to determine the best periods
-        optimal_periods = determine_optimal_periods(xbrl_list, statement_type)
+        optimal_periods = determine_optimal_periods(xbrl_list, statement_type, max_periods=max_periods)
         
         # Limit to max_periods if needed
         if len(optimal_periods) > max_periods:
@@ -1152,6 +1153,7 @@ class XBRLS:
             Dictionary with stitched statement data
         """
         # Check cache first
+
         cache_key = f"{statement_type}_{max_periods}_{standardize}_{use_optimal_periods}"
         if cache_key in self._statement_cache:
             return self._statement_cache[cache_key]
