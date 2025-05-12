@@ -77,6 +77,7 @@ def test_obj():
 
 def test_find():
     assert find("0001493152-23-008348").accession_no == "0001493152-23-008348"
+    assert find("000149315223008348").accession_no == "0001493152-23-008348"
     assert isinstance(find(1905495), Entity)
     assert find("1905495").name == 'CancerVAX, Inc.'
     assert isinstance(find("CancerVAX, Inc."), CompanySearchResults)
