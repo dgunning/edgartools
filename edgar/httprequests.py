@@ -20,6 +20,9 @@ from tqdm import tqdm
 from edgar.core import text_extensions, get_edgar_data_directory
 from edgar.httpclient import http_client, async_http_client
 
+"""
+This module provides functions to handle HTTP requests with retry logic, throttling, and identity management.
+"""
 __all__ = ["get_with_retry", "get_with_retry_async", "stream_with_retry", "post_with_retry", "post_with_retry_async",
            "download_file", "download_file_async", "download_json", "download_json_async", "stream_file",
            "download_text", "download_text_between_tags", "download_bulk_data", "download_datafile",
