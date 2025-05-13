@@ -675,7 +675,16 @@ async def download_bulk_data(url: str,
         try:
             if filename.endswith(".zip"):
                 with zipfile.ZipFile(download_filename, 'r') as z:
-                    z.extractall(download_path)
+                    # Calculate total size for progress bar
+                    total_size = sum(info.file_size for info in z.filelist)
+                    extracted_size = 0
+                    
+                    with tqdm(total=total_size, unit='B', unit_scale=True, desc="Extracting") as pbar:
+                        for info in z.filelist:
+                            z.extract(info, download_path)
+                            extracted_size += info.file_size
+                            pbar.update(info.file_size)
+                            
             elif any(filename.endswith(ext) for ext in (".tar.gz", ".tgz")):
                 with tarfile.open(download_filename, 'r:gz') as tar:
                     # Security check for tar files to prevent path traversal
@@ -685,14 +694,19 @@ async def download_bulk_data(url: str,
                         except ValueError:
                             return False
 
-                    def safe_extract(tar: tarfile.TarFile, path: str) -> None:
-                        for member in tar.getmembers():
-                            member_path = os.path.join(path, member.name)
-                            if not is_within_directory(Path(path), Path(member_path)):
+                    members = tar.getmembers()
+                    total_size = sum(member.size for member in members)
+                    
+                    with tqdm(total=total_size, unit='B', unit_scale=True, desc="Extracting") as pbar:
+                        for member in members:
+                            # Check for path traversal
+                            member_path = os.path.join(str(download_path), member.name)
+                            if not is_within_directory(Path(str(download_path)), Path(member_path)):
                                 raise ValueError(f"Attempted path traversal in tar file: {member.name}")
-                        tar.extractall(path)
-
-                    safe_extract(tar, str(download_path))
+                            
+                            # Extract file and update progress
+                            tar.extract(member, str(download_path))
+                            pbar.update(member.size)
             else:
                 raise ValueError(f"Unsupported file format: {filename}")
 
