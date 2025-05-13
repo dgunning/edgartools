@@ -105,7 +105,8 @@ def create_entity_from_submissions_json(
     """
     # Import locally to avoid circular imports
     from edgar.entity.data import parse_entity_submissions
-    from edgar.entity.core import Entity, Company, Fund
+    from edgar.entity.core import Entity, Company
+    from edgar.funds import FundCompany
     
     # First, parse the submissions JSON to get the entity data
     entity_data = parse_entity_submissions(submissions_json)
@@ -124,7 +125,7 @@ def create_entity_from_submissions_json(
     if entity_type.lower() == 'company':
         entity = Company(entity_data.cik)
     elif entity_type.lower() == 'fund':
-        entity = Fund(entity_data.cik)
+        entity = FundCompany(entity_data.cik)
     else:
         entity = Entity(entity_data.cik)
     
