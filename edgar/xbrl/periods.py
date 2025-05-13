@@ -10,6 +10,185 @@ This module provides functions for handling periods in XBRL statements, includin
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
+# Configuration for different statement types
+STATEMENT_TYPE_CONFIG = {
+    'BalanceSheet': {
+        'period_type': 'instant',
+        'max_periods': 3,
+        'allow_annual_comparison': True,
+        'views': [
+            {
+                'name': 'Three Recent Periods',
+                'description': 'Shows three most recent reporting periods',
+                'max_periods': 3,
+                'requires_min_periods': 3
+            },
+            {
+                'name': 'Current vs. Previous Period',
+                'description': 'Shows the current period and the previous period',
+                'max_periods': 2,
+                'requires_min_periods': 1
+            },
+            {
+                'name': 'Three-Year Annual Comparison',
+                'description': 'Shows three fiscal years for comparison',
+                'max_periods': 3,
+                'requires_min_periods': 3,
+                'annual_only': True
+            }
+        ]
+    },
+    'IncomeStatement': {
+        'period_type': 'duration',
+        'max_periods': 3,
+        'allow_annual_comparison': True,
+        'views': [
+            {
+                'name': 'Three Recent Periods',
+                'description': 'Shows three most recent reporting periods',
+                'max_periods': 3,
+                'requires_min_periods': 3
+            },
+            {
+                'name': 'YTD and Quarterly Breakdown',
+                'description': 'Shows YTD figures and quarterly breakdown',
+                'max_periods': 5,
+                'requires_min_periods': 2,
+                'mixed_view': True
+            }
+        ]
+    },
+    'StatementOfEquity': {
+        'period_type': 'duration',
+        'max_periods': 3,
+        'views': [
+            {
+                'name': 'Three Recent Periods',
+                'description': 'Shows three most recent reporting periods',
+                'max_periods': 3,
+                'requires_min_periods': 1
+            }
+        ]
+    },
+    'ComprehensiveIncome': {
+        'period_type': 'duration',
+        'max_periods': 3,
+        'views': [
+            {
+                'name': 'Three Recent Periods',
+                'description': 'Shows three most recent reporting periods',
+                'max_periods': 3,
+                'requires_min_periods': 1
+            }
+        ]
+    },
+    'CoverPage': {
+        'period_type': 'instant',
+        'max_periods': 1,
+        'views': [
+            {
+                'name': 'Current Period',
+                'description': 'Shows the current reporting period',
+                'max_periods': 1,
+                'requires_min_periods': 1
+            }
+        ]
+    },
+    'Notes': {
+        'period_type': 'instant',
+        'max_periods': 1,
+        'views': [
+            {
+                'name': 'Current Period',
+                'description': 'Shows the current reporting period',
+                'max_periods': 1,
+                'requires_min_periods': 1
+            }
+        ]
+    }
+}
+
+def sort_periods(periods: List[Dict], period_type: str) -> List[Dict]:
+    """Sort periods by date, with most recent first."""
+    if period_type == 'instant':
+        return sorted(periods, key=lambda x: x['date'], reverse=True)
+    return sorted(periods, key=lambda x: (x['end_date'], x['start_date']), reverse=True)
+
+def filter_periods_by_type(periods: List[Dict], period_type: str) -> List[Dict]:
+    """Filter periods by their type (instant or duration)."""
+    return [p for p in periods if p['type'] == period_type]
+
+def calculate_fiscal_alignment_score(end_date: datetime.date, fiscal_month: int, fiscal_day: int) -> int:
+    """Calculate how well a date aligns with fiscal year end."""
+    if end_date.month == fiscal_month and end_date.day == fiscal_day:
+        return 100
+    if end_date.month == fiscal_month and abs(end_date.day - fiscal_day) <= 15:
+        return 75
+    if abs(end_date.month - fiscal_month) <= 1 and abs(end_date.day - fiscal_day) <= 15:
+        return 50
+    return 0
+
+
+def generate_period_view(view_config: Dict[str, Any], periods: List[Dict], is_annual: bool = False) -> Optional[Dict[str, Any]]:
+    """Generate a period view based on configuration and available periods.
+    
+    Args:
+        view_config: Configuration for the view (from STATEMENT_TYPE_CONFIG)
+        periods: List of periods to choose from
+        is_annual: Whether this is an annual report
+        
+    Returns:
+        Dictionary with view name, description, and period keys if view is valid,
+        None if view cannot be generated with available periods
+    """
+    if len(periods) < view_config['requires_min_periods']:
+        return None
+        
+    if view_config.get('annual_only', False) and not is_annual:
+        return None
+        
+    max_periods = min(view_config['max_periods'], len(periods))
+    return {
+        'name': view_config['name'],
+        'description': view_config['description'],
+        'period_keys': [p['key'] for p in periods[:max_periods]]
+    }
+
+
+def generate_mixed_view(view_config: Dict[str, Any], ytd_periods: List[Dict], 
+                       quarterly_periods: List[Dict]) -> Optional[Dict[str, Any]]:
+    """Generate a mixed view combining YTD and quarterly periods.
+    
+    Args:
+        view_config: Configuration for the view
+        ytd_periods: List of year-to-date periods
+        quarterly_periods: List of quarterly periods
+        
+    Returns:
+        Dictionary with view configuration if valid, None otherwise
+    """
+    if not ytd_periods or not quarterly_periods:
+        return None
+        
+    mixed_keys = []
+    
+    # Add current YTD
+    mixed_keys.append(ytd_periods[0]['key'])
+    
+    # Add recent quarters
+    for q in quarterly_periods[:min(4, len(quarterly_periods))]:
+        if q['key'] not in mixed_keys:
+            mixed_keys.append(q['key'])
+    
+    if len(mixed_keys) >= view_config['requires_min_periods']:
+        return {
+            'name': view_config['name'],
+            'description': view_config['description'],
+            'period_keys': mixed_keys[:view_config['max_periods']]
+        }
+    
+    return None
+
 
 def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]:
     """
@@ -24,6 +203,11 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
     """
     period_views = []
     
+    # Get statement configuration
+    config = STATEMENT_TYPE_CONFIG.get(statement_type)
+    if not config:
+        return period_views
+        
     # Get useful entity info for period selection
     entity_info = xbrl_instance.entity_info
     fiscal_period_focus = entity_info.get('fiscal_period')
@@ -32,204 +216,50 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
     # Get all periods
     all_periods = xbrl_instance.reporting_periods
     
-    # Sort periods by type
-    instant_periods = sorted(
-        [p for p in all_periods if p['type'] == 'instant'],
-        key=lambda x: x['date'],
-        reverse=True  # Latest first
+    # Filter and sort periods by type
+    period_type = config['period_type']
+    periods = sort_periods(
+        filter_periods_by_type(all_periods, period_type),
+        period_type
     )
     
-    duration_periods = sorted(
-        [p for p in all_periods if p['type'] == 'duration'],
-        key=lambda x: (x['end_date'], x['start_date']),
-        reverse=True  # Latest first
-    )
+    # If this statement type allows annual comparison and this is an annual report,
+    # filter for annual periods
+    annual_periods = []
+    if config.get('allow_annual_comparison') and annual_report:
+        fiscal_month = entity_info.get('fiscal_year_end_month')
+        fiscal_day = entity_info.get('fiscal_year_end_day')
+        
+        if fiscal_month is not None and fiscal_day is not None:
+            for period in periods:
+                try:
+                    date_field = 'date' if period_type == 'instant' else 'end_date'
+                    end_date = datetime.strptime(period[date_field], '%Y-%m-%d').date()
+                    score = calculate_fiscal_alignment_score(end_date, fiscal_month, fiscal_day)
+                    if score > 0:  # Any alignment is good enough for a view
+                        annual_periods.append(period)
+                except (ValueError, TypeError):
+                    continue
     
-    # Generate views based on statement type
-    if statement_type == 'BalanceSheet':
-        if instant_periods:
-            # For balance sheets, we want to show appropriate comparison periods
-            if len(instant_periods) >= 3:
-                period_views.append({
-                    'name': 'Three Recent Periods',
-                    'description': 'Shows three most recent reporting periods',
-                    'period_keys': [p['key'] for p in instant_periods[:3]]
-                })
-            else:
-                period_views.append({
-                    'name': 'Current vs. Previous Period',
-                    'description': 'Shows the current period and the previous period',
-                    'period_keys': [p['key'] for p in instant_periods[:min(2, len(instant_periods))]]
-                })
+    # Generate views based on configuration
+    for view_config in config.get('views', []):
+        if view_config.get('mixed_view'):
+            # Special handling for mixed YTD/quarterly views
+            ytd_periods = [p for p in periods if p.get('ytd')]
+            quarterly_periods = [p for p in periods if p.get('quarterly')]
+            view = generate_mixed_view(view_config, ytd_periods, quarterly_periods)
+        elif view_config.get('annual_only'):
+            # Views that should only show annual periods
+            view = generate_period_view(view_config, annual_periods, annual_report)
+        else:
+            # Standard views using all periods
+            view = generate_period_view(view_config, periods, annual_report)
             
-            # If we have more periods, show annual comparisons
-            annual_periods = []
-            for period in instant_periods:
-                if annual_report and ('fiscal_year_end_month' in entity_info and 
-                                    'fiscal_year_end_day' in entity_info):
-                    # Check if this is an annual period (close to fiscal year end)
-                    try:
-                        period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
-                        fiscal_month = entity_info.get('fiscal_year_end_month')
-                        fiscal_day = entity_info.get('fiscal_year_end_day')
-                        
-                        # Check if this date is close to fiscal year end
-                        if (abs(period_date.month - fiscal_month) <= 1 and 
-                            abs(period_date.day - fiscal_day) <= 15):
-                            annual_periods.append(period)
-                    except (ValueError, TypeError):
-                        pass
-                else:
-                    # Without fiscal info, just use the period
-                    annual_periods.append(period)
-            
-            if len(annual_periods) >= 2:
-                if len(annual_periods) >= 3:
-                    period_views.append({
-                        'name': 'Three-Year Annual Comparison',
-                        'description': 'Shows three fiscal years for comparison',
-                        'period_keys': [p['key'] for p in annual_periods[:3]]
-                    })
-                
-                period_views.append({
-                    'name': 'Annual Comparison',
-                    'description': 'Shows two fiscal years for comparison',
-                    'period_keys': [p['key'] for p in annual_periods[:min(2, len(annual_periods))]]
-                })
-                
-    elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
-        # For Income Statement and Cash Flow, we need to consider duration periods
-        annual_periods = []
-        quarterly_periods = []
-        ytd_periods = []
-        
-        for period in duration_periods:
-            try:
-                start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
-                end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
-                days = (end_date - start_date).days
-                
-                # Determine period type by duration
-                if 350 <= days <= 380:  # Annual: 350-380 days
-                    annual_periods.append(period)
-                elif 85 <= days <= 95:  # Quarterly: 85-95 days
-                    quarterly_periods.append(period)
-                elif 175 <= days <= 190:  # Year-to-date (6 months): 175-190 days
-                    ytd_periods.append(period)
-                elif 265 <= days <= 285:  # Year-to-date (9 months): 265-285 days
-                    ytd_periods.append(period)
-            except (ValueError, TypeError):
-                # Skip periods with invalid dates
-                pass
-        
-        # Generate views based on available periods
-        
-        # Annual comparisons
-        if len(annual_periods) >= 2:
-            # Three-year view if available
-            if len(annual_periods) >= 3:
-                period_views.append({
-                    'name': 'Three-Year Comparison',
-                    'description': 'Compares three fiscal years',
-                    'period_keys': [p['key'] for p in annual_periods[:3]]
-                })
-            
-            # Default two-year view
-            period_views.append({
-                'name': 'Annual Comparison',
-                'description': 'Compares recent fiscal years',
-                'period_keys': [p['key'] for p in annual_periods[:min(2, len(annual_periods))]]
-            })
-        
-        # Quarterly comparisons
-        if len(quarterly_periods) >= 2:
-            # Current quarter vs. same quarter previous year
-            if len(quarterly_periods) >= 4:
-                current_q = quarterly_periods[0]
-                # Try to find same quarter from previous year
-                prev_year_q = None
-                for q in quarterly_periods[1:]:
-                    try:
-                        current_end = datetime.strptime(current_q['end_date'], '%Y-%m-%d').date()
-                        q_end = datetime.strptime(q['end_date'], '%Y-%m-%d').date()
-                        
-                        # Check if the quarters are approximately 1 year apart
-                        days_diff = abs((current_end - q_end).days - 365)
-                        if days_diff <= 15:  # Within 15 days of being exactly 1 year apart
-                            prev_year_q = q
-                            break
-                    except (ValueError, TypeError):
-                        continue
-                
-                if prev_year_q:
-                    period_views.append({
-                        'name': 'Current Quarter vs. Prior Year Quarter',
-                        'description': 'Compares the current quarter with the same quarter last year',
-                        'period_keys': [current_q['key'], prev_year_q['key']]
-                    })
-            
-            # Sequential quarters
-            period_views.append({
-                'name': 'Three Recent Quarters',
-                'description': 'Shows three most recent quarters in sequence',
-                'period_keys': [p['key'] for p in quarterly_periods[:min(3, len(quarterly_periods))]]
-            })
-        
-        # YTD comparisons
-        if len(ytd_periods) >= 2:
-            if len(ytd_periods) >= 3:
-                period_views.append({
-                    'name': 'Three-Year YTD Comparison',
-                    'description': 'Compares year-to-date figures across three years',
-                    'period_keys': [p['key'] for p in ytd_periods[:3]]
-                })
-            
-            period_views.append({
-                'name': 'Year-to-Date Comparison',
-                'description': 'Compares year-to-date figures across years',
-                'period_keys': [p['key'] for p in ytd_periods[:min(2, len(ytd_periods))]]
-            })
-        
-        # Mixed view - current YTD + quarterly breakdown
-        if quarterly_periods and ytd_periods:
-            mixed_keys = []
-            if ytd_periods:
-                mixed_keys.append(ytd_periods[0]['key'])  # Current YTD
-                
-            # Add recent quarters
-            for q in quarterly_periods[:min(4, len(quarterly_periods))]:
-                if q['key'] not in mixed_keys:
-                    mixed_keys.append(q['key'])
-            
-            if len(mixed_keys) >= 2:
-                period_views.append({
-                    'name': 'YTD and Quarterly Breakdown',
-                    'description': 'Shows YTD figures and quarterly breakdown',
-                    'period_keys': mixed_keys[:5]  # Limit to 5 columns
-                })
-    
-    # For all statement types, if no views have been created yet, add generic ones
-    if not period_views and all_periods:
-        if statement_type in ['BalanceSheet'] and instant_periods:
-            # Use most recent instant periods for balance sheet
-            period_keys = [p['key'] for p in instant_periods[:min(3, len(instant_periods))]]
-            period_views.append({
-                'name': 'Most Recent Periods',
-                'description': 'Shows the most recent reporting periods',
-                'period_keys': period_keys
-            })
-        elif statement_type in ['IncomeStatement', 'CashFlowStatement'] and duration_periods:
-            # Use most recent duration periods for income/cash flow
-            period_keys = [p['key'] for p in duration_periods[:min(3, len(duration_periods))]]
-            period_views.append({
-                'name': 'Most Recent Periods',
-                'description': 'Shows the most recent reporting periods',
-                'period_keys': period_keys
-            })
+        if view:
+            period_views.append(view)
     
     return period_views
-
-
+                
 def determine_periods_to_display(
     xbrl_instance,
     statement_type: str,
@@ -265,15 +295,10 @@ def determine_periods_to_display(
         
         if matching_view:
             for period_key in matching_view['period_keys']:
-                period_match = None
-                # Find the period in our reporting periods
                 for period in xbrl_instance.reporting_periods:
                     if period['key'] == period_key:
-                        period_match = period
+                        periods_to_display.append((period_key, period['label']))
                         break
-                
-                if period_match:
-                    periods_to_display.append((period_key, period_match['label']))
             return periods_to_display
     
     # If no specific periods requested, use default logic based on statement type
@@ -415,19 +440,54 @@ def determine_periods_to_display(
         if duration_periods:
             # For annual reports, prioritize annual periods
             if fiscal_period_focus == 'FY':
-                annual_periods = []
+                # Get fiscal year end information if available
+                fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
+                fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
+                
+                # First pass: Find all periods that are approximately a year long
+                candidate_annual_periods = []
                 for period in duration_periods:
                     try:
                         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
                         end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
                         days = (end_date - start_date).days
                         if 350 <= days <= 380:  # ~365 days
-                            annual_periods.append(period)
+                            # Add a score to each period for later sorting
+                            # Default score is 0 (will be increased for fiscal year matches)
+                            period_with_score = period.copy()
+                            period_with_score['fiscal_alignment_score'] = 0
+                            candidate_annual_periods.append(period_with_score)
                     except (ValueError, TypeError):
                         continue
                 
+                # Second pass: Score periods based on alignment with fiscal year pattern
+                if fiscal_year_end_month is not None and fiscal_year_end_day is not None:
+                    for period in candidate_annual_periods:
+                        try:
+                            # Check how closely the end date aligns with fiscal year end
+                            end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                            
+                            # Perfect match: Same month and day as fiscal year end
+                            if end_date.month == fiscal_year_end_month and end_date.day == fiscal_year_end_day:
+                                period['fiscal_alignment_score'] = 100
+                            # Strong match: Same month and within 15 days
+                            elif end_date.month == fiscal_year_end_month and abs(end_date.day - fiscal_year_end_day) <= 15:
+                                period['fiscal_alignment_score'] = 75
+                            # Moderate match: Month before/after and close to the day
+                            elif abs(end_date.month - fiscal_year_end_month) <= 1 and abs(end_date.day - fiscal_year_end_day) <= 15:
+                                period['fiscal_alignment_score'] = 50
+                        except (ValueError, TypeError):
+                            continue
+                
+                # Sort periods by fiscal alignment (higher score first) and then by recency (end date)
+                annual_periods = sorted(
+                    candidate_annual_periods,
+                    key=lambda x: (x['fiscal_alignment_score'], x['end_date']),
+                    reverse=True  # Highest score and most recent first
+                )
+                
                 if annual_periods:
-                    # Take up to 3 most recent annual periods
+                    # Take up to 3 best matching annual periods (prioritizing fiscal year alignment)
                     for period in annual_periods[:3]:
                         periods_to_display.append((period['key'], period['label']))
                     return periods_to_display
@@ -438,50 +498,45 @@ def determine_periods_to_display(
     
     # For other statement types (not covered by specific logic above)
     else:
-        # First attempt: Try to determine if this statement typically uses instant or duration periods
-        statement_info = {}
+        # Get configuration for this statement type, or use defaults
+        statement_info = STATEMENT_TYPE_CONFIG.get(statement_type, {})
         
-        # Some statements have known period preferences
-        known_statement_types = {
-            'StatementOfEquity': {'period_type': 'duration', 'max_periods': 3},
-            'ComprehensiveIncome': {'period_type': 'duration', 'max_periods': 3},
-            'CoverPage': {'period_type': 'instant', 'max_periods': 1},  # Usually just current period
-            'Notes': {'period_type': 'instant', 'max_periods': 1},      # Usually just current period 
-        }
-        
-        if statement_type in known_statement_types:
-            statement_info = known_statement_types[statement_type]
-        else:
+        if not statement_info:
             # For unknown statement types, use heuristics based on available periods
             
-            # 1. Check if entity_info suggests a period type
+            # For unknown statement types, determine preferences based on fiscal period
             if fiscal_period_focus == 'FY':
-                # For annual reports, prefer duration periods for most statements
-                statement_info = {'period_type': 'duration', 'max_periods': 2}
+                # For annual reports, prefer duration periods and show comparisons
+                statement_info = {
+                    'period_type': 'duration',
+                    'max_periods': 3,
+                    'allow_annual_comparison': True
+                }
             else:
-                # For interim reports, it depends on the statement
-                # Default to current period only for unknown statement types
-                statement_info = {'period_type': 'either', 'max_periods': 1}
+                # For interim reports, accept either type but limit to current period
+                statement_info = {
+                    'period_type': 'either',
+                    'max_periods': 1,
+                    'allow_annual_comparison': False
+                }
         
         # Select periods based on determined preferences
         period_type = statement_info.get('period_type', 'either')
         max_periods = statement_info.get('max_periods', 1)
         
         if period_type == 'instant' or period_type == 'either':
-            instant_periods = sorted(
-                [p for p in all_periods if p['type'] == 'instant'],
-                key=lambda x: x['date'],
-                reverse=True
+            instant_periods = sort_periods(
+                filter_periods_by_type(all_periods, 'instant'),
+                'instant'
             )
             if instant_periods:
                 for period in instant_periods[:max_periods]:
                     periods_to_display.append((period['key'], period['label']))
                     
         if (period_type == 'duration' or (period_type == 'either' and not periods_to_display)):
-            duration_periods = sorted(
-                [p for p in all_periods if p['type'] == 'duration'],
-                key=lambda x: (x['end_date'], x['start_date']),
-                reverse=True
+            duration_periods = sort_periods(
+                filter_periods_by_type(all_periods, 'duration'),
+                'duration'
             )
             if duration_periods:
                 for period in duration_periods[:max_periods]:

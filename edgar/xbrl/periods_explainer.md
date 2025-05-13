@@ -35,11 +35,14 @@ Balance sheets use **instant periods** (specific dates) rather than duration per
 
 These statements use **duration periods** (spans of time). The selection logic is:
 
-1. **Annual Reports** (fiscal_period_focus = 'FY'): The system prioritizes periods covering a full fiscal year (~350-380 days)
-   - The code specifically looks for periods with durations between 350-380 days (approximately one year)
-   - Up to 3 most recent annual periods are displayed in chronological order
-   - **Common scenario 1**: If only 2 annual periods exist in the XBRL data, only 2 will be displayed
-   - **Common scenario 2**: Many filings only include 2 years of comparative data by design
+1. **Annual Reports** (fiscal_period_focus = 'FY'): The system uses a sophisticated approach to find the most appropriate annual periods:
+   - **First pass**: Identifies all periods with durations between 350-380 days (approximately one year)
+   - **Second pass**: Scores these periods based on how well they align with the company's fiscal year end
+     * Perfect match (score 100): Same month and day as fiscal year end
+     * Strong match (score 75): Same month and within 15 days of fiscal year end
+     * Moderate match (score 50): Month before/after and close to fiscal year end day
+   - **Selection**: Takes up to 3 periods with the highest fiscal alignment scores
+   - **Key improvement**: This ensures that periods like `duration_2013-07-01_2014-06-30` are preferred over `duration_2013-01-01_2013-12-31` when the company's fiscal year ends in June
    - If no annual periods are found that match the 350-380 day criteria, it falls back to showing the 3 most recent duration periods
 
 2. **Quarterly Reports** (fiscal_period_focus = Q1, Q2, Q3, Q4): When processing non-annual filings
@@ -90,10 +93,11 @@ Here are the most common reasons why an Income Statement might render with only 
    - SEC regulations only require 2 years of comparative data for Income Statements
    - Companies often provide just the minimum required data
 
-2. **Specific Annual Period Criteria**: When processing annual reports
-   - The system looks specifically for periods with 350-380 day durations
-   - If only 2 periods match this criteria, only 2 will be shown
-   - Other duration periods (if present) are ignored unless no annual periods are found
+2. **Fiscal Year Alignment**: When processing annual reports
+   - The system now scores periods based on how well they match the company's fiscal year end
+   - Periods that don't align with the company's fiscal year pattern (even if they're 365 days long) receive lower scores
+   - Example: For a company with June fiscal year end, a July-June period will be preferred over a January-December period
+   - This prevents mixing of different fiscal patterns in the same statement
 
 3. **Quarterly Report Structure**: For quarterly reports
    - Many quarterly filings include only 2 duration periods by design:
