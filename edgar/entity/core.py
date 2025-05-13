@@ -353,6 +353,16 @@ class Entity(SecFiler):
     
     def __repr__(self):
         return repr_rich(self.__rich__())
+        
+    def __bool__(self):
+        """
+        Allow truthiness check for entities.
+        
+        Returns False if the entity doesn't exist (has a sentinel CIK value or not_found is True).
+        This enables code patterns like: `if company: do_something()`
+        """
+        # Check for sentinel CIK value (-999999999) or not_found flag
+        return self.cik != -999999999 and not self.not_found
 
 
 class Company(Entity):
