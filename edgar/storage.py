@@ -23,7 +23,11 @@ __all__ = ['download_edgar_data',
            'is_using_local_storage',
            'download_filings',
            'local_filing_path',
-           '_filter_extracted_files']
+           '_filter_extracted_files',
+           'compress_filing',
+           'decompress_filing',
+           'compress_all_filings',
+           'is_compressed_file']
 
 def use_local_storage(use_local: bool = True):
     """
@@ -109,9 +113,12 @@ def download_edgar_data(submissions: bool = True,
 def download_filings(filing_date: Optional[str] = None,
                      data_directory: Optional[str] = None,
                      overwrite_existing:bool=False,
-                     filings: Optional['Filings'] = None):
+                     filings: Optional['Filings'] = None,
+                     compress: bool = True,
+                     compression_level: int = 6):
     """
     Download feed files for the specified date or date range, or for specific filings.
+    Optionally compresses the extracted files to save disk space.
 
     Examples
 
@@ -119,6 +126,7 @@ def download_filings(filing_date: Optional[str] = None,
     download_filings('2025-01-03', overwrite_existing=False)
     download_filings('2024-01-01:2025-01-05', overwrite_existing=True)
     download_filings(filings=my_filings_object)
+    download_filings('2025-01-03', compress=True, compression_level=9)  # Maximum compression
 
     Args:
         filing_date: String in format 'YYYY-MM-DD', 'YYYY-MM-DD:', ':YYYY-MM-DD',
@@ -127,6 +135,8 @@ def download_filings(filing_date: Optional[str] = None,
         data_directory: Directory to save the downloaded files. Defaults to the Edgar data directory.
         overwrite_existing: If True, overwrite existing files. Default is False.
         filings: Optional Filings object. If provided, will download only filings with matching accession numbers.
+        compress: Whether to compress the extracted files to save disk space. Default is True.
+        compression_level: Compression level for gzip (1-9, with 9 being highest compression). Default is 6.
     """
     if not data_directory:
         data_directory = get_edgar_data_directory() / 'filings'
@@ -193,8 +203,17 @@ def download_filings(filing_date: Optional[str] = None,
                 # If we have specific accession numbers, filter the extracted files
                 if accession_numbers and path.exists():
                     log.info('Filtering extracted files to keep only specified accession numbers')
-                    filings_kept = _filter_extracted_files(path, accession_numbers)
+                    filings_kept = _filter_extracted_files(path, accession_numbers, compress=compress, compression_level=compression_level)
                     total_filings_kept += filings_kept
+                # If we don't have specific accession numbers but compression is enabled, compress all files
+                elif compress and path.exists():
+                    log.info('Compressing all extracted files')
+                    for file_path in path.glob('*.nc'):
+                        if not is_compressed_file(file_path):
+                            try:
+                                compress_filing(file_path, compression_level=compression_level)
+                            except Exception as e:
+                                log.warning(f"Failed to compress {file_path}: {e}")
         else:
             log.info('No feed files found for %d Q%d in date range %s', year, quarter, filing_date)
     
@@ -204,13 +223,16 @@ def download_filings(filing_date: Optional[str] = None,
         log.info('Kept %d filings out of %d requested.', total_filings_kept, len(accession_numbers))
 
 
-def _filter_extracted_files(directory_path: Path, accession_numbers: List[str]) -> int:
+def _filter_extracted_files(directory_path: Path, accession_numbers: List[str], compress: bool = True, compression_level: int = 6) -> int:
     """
     Filter files in the extracted directory to keep only those matching the specified accession numbers.
+    Optionally compresses the kept files to save disk space.
     
     Args:
         directory_path: Path to the directory containing extracted files
         accession_numbers: List of accession numbers to keep
+        compress: Whether to compress the kept files (default: True)
+        compression_level: Compression level for gzip (1-9, with 9 being highest compression)
         
     Returns:
         int: Number of filings kept
@@ -235,6 +257,13 @@ def _filter_extracted_files(directory_path: Path, accession_numbers: List[str]) 
             file_path.unlink()
         else:
             filings_kept += 1
+            # Compress the file if requested
+            if compress and not is_compressed_file(file_path):
+                try:
+                    compress_filing(file_path, compression_level=compression_level)
+                    log.debug(f"Compressed {file_path}")
+                except Exception as e:
+                    log.warning(f"Failed to compress {file_path}: {e}")
     
     return filings_kept
 
@@ -391,15 +420,149 @@ def latest_filing_date():
     from edgar import get_filings
     return get_filings().end_date
 
+
+def is_compressed_file(file_path: Path) -> bool:
+    """
+    Check if a file is gzip-compressed by examining its extension.
+    
+    Args:
+        file_path: Path to the file
+        
+    Returns:
+        bool: True if the file has a .gz extension, False otherwise
+    """
+    return str(file_path).endswith('.gz')
+
+
+def compress_filing(file_path: Path, compression_level: int = 6, delete_original: bool = True) -> Path:
+    """
+    Compress a filing file using gzip and optionally delete the original.
+    
+    Args:
+        file_path: Path to the file to compress
+        compression_level: Compression level (1-9, with 9 being highest compression)
+        delete_original: Whether to delete the original file after compression
+        
+    Returns:
+        Path to the compressed file
+    
+    Raises:
+        FileNotFoundError: If the file does not exist
+        ValueError: If the file is already compressed
+    """
+    import gzip
+    import shutil
+    
+    if not file_path.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
+    if is_compressed_file(file_path):
+        raise ValueError(f"File is already compressed: {file_path}")
+    
+    compressed_path = Path(f"{file_path}.gz")
+    
+    # Compress the file
+    with file_path.open('rb') as f_in:
+        with gzip.open(compressed_path, 'wb', compresslevel=compression_level) as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    
+    # Delete the original file if requested
+    if delete_original:
+        file_path.unlink()
+    
+    return compressed_path
+
+
+def decompress_filing(file_path: Path, output_path: Optional[Path] = None, delete_original: bool = False) -> Path:
+    """
+    Decompress a gzip-compressed filing file.
+    
+    Args:
+        file_path: Path to the compressed file
+        output_path: Path to save the decompressed file (if None, use the original path without .gz)
+        delete_original: Whether to delete the original compressed file
+        
+    Returns:
+        Path to the decompressed file
+    
+    Raises:
+        FileNotFoundError: If the file does not exist
+        ValueError: If the file is not compressed
+        gzip.BadGzipFile: If the file is not a valid gzip file
+    """
+    import gzip
+    import shutil
+    
+    if not file_path.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
+    if not is_compressed_file(file_path):
+        raise ValueError(f"File is not compressed: {file_path}")
+    
+    # Determine output path if not provided
+    if output_path is None:
+        # Remove .gz extension
+        output_path = Path(str(file_path)[:-3])
+    
+    # Decompress the file
+    with gzip.open(file_path, 'rb') as f_in:
+        with output_path.open('wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    
+    # Delete the original compressed file if requested
+    if delete_original:
+        file_path.unlink()
+    
+    return output_path
+
+
+def compress_all_filings(data_directory: Optional[Path] = None, compression_level: int = 6) -> int:
+    """
+    Compress all uncompressed filing files in the data directory.
+    
+    Args:
+        data_directory: Path to the data directory (defaults to the Edgar data directory)
+        compression_level: Compression level (1-9, with 9 being highest compression)
+        
+    Returns:
+        Number of files compressed
+    """
+    if data_directory is None:
+        data_directory = get_edgar_data_directory() / 'filings'
+    
+    # Find all .nc files (not already compressed)
+    files_compressed = 0
+    for file_path in tqdm(list(data_directory.glob('**/*.nc')), desc="Compressing files"):
+        if not is_compressed_file(file_path) and file_path.is_file():
+            try:
+                compress_filing(file_path, compression_level=compression_level)
+                files_compressed += 1
+            except Exception as e:
+                log.warning(f"Failed to compress {file_path}: {e}")
+    
+    return files_compressed
+
 def local_filing_path(filing_date:Union[str, date],
                       accession_number:str,
                       correction:bool=False) -> Path:
     """
     Get the local path for a filing
     If correction is True, will look for the corrected filing with extension 'corr'
+    
+    Returns the compressed version (.gz) if it exists, otherwise returns the uncompressed path.
     """
     ext = 'corr' if correction else 'nc'
     if isinstance(filing_date, date):
         filing_date = filing_date.strftime('%Y-%m-%d')
     filing_date = filing_date.replace('-', '')
-    return get_edgar_data_directory() / 'filings' / filing_date / f"{accession_number}.{ext}"
+    
+    # Base path without compression extension
+    base_path = get_edgar_data_directory() / 'filings' / filing_date / f"{accession_number}.{ext}"
+    
+    # Check for compressed version first
+    compressed_path = Path(f"{base_path}.gz")
+    if compressed_path.exists():
+        return compressed_path
+    
+    # Fall back to uncompressed version
+    return base_path

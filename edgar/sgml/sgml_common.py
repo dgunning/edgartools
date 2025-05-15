@@ -39,6 +39,7 @@ def parse_document(document_str: str) -> SGMLDocument:
 def read_content(source: Union[str, Path]) -> Iterator[str]:
     """
     Read content from either a URL or file path, yielding lines as strings.
+    Automatically handles gzip-compressed files with .gz extension.
 
     Args:
         source: Either a URL string or a file path
@@ -49,6 +50,7 @@ def read_content(source: Union[str, Path]) -> Iterator[str]:
     Raises:
         TooManyRequestsError: If the server returns a 429 response
         FileNotFoundError: If the file path doesn't exist
+        gzip.BadGzipFile: If the file is not a valid gzip file
     """
     if isinstance(source, str) and (source.startswith('http://') or source.startswith('https://')):
         # Handle URL using stream_with_retry
@@ -60,8 +62,16 @@ def read_content(source: Union[str, Path]) -> Iterator[str]:
     else:
         # Handle file path
         path = Path(source)
-        with path.open('r', encoding='utf-8') as file:
-            yield from file
+        
+        # Check if the file is gzip-compressed
+        if str(path).endswith('.gz'):
+            import gzip
+            with gzip.open(path, 'rt', encoding='utf-8', errors='replace') as file:
+                yield from file
+        else:
+            # Regular file handling
+            with path.open('r', encoding='utf-8', errors='replace') as file:
+                yield from file
 
 
 def read_content_as_string(source: Union[str, Path]) -> str:
