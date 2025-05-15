@@ -120,30 +120,19 @@ You can start by getting a company by CIK or Ticker with `Company()`. For exampl
 
 ```python
 c = Company("AAPL")
-filings = c.filings
 ```
 
 You can also get a company by CIK. For example:
 
 ```python
 c = Company("0000320193")
-filings = c.filings
 ```
 
 To get a Company by ticker, the library first does a lookup of the CIK for the ticker and then gets filings for the CIK. So if you know the CIK, it is faster to use that directly.
 
 ### Company Filings
 
-You can get the filings for a company by using the `filings` property. For example:
-
-```python
-filings = c.filings     
-```
-
-This property returns a `Filings` object that you can use to filter and manipulate the filings.
-Initially the `filings` property lists around 1000 filings for the company that were returned from the API call to the SEC.
-Normally this is OK since these are the 1000 most recent filings. However, some companies have more than 1000 filings, and you might need to get older filings.
-To trigger the retrieval of older filings you can use the `get_filings()` method. For example:
+You can get the filings for a company by using the `get_filings()` function. For example:
 
 ```python
 filings = c.get_filings()
@@ -167,11 +156,11 @@ facts_df = facts.to_pandas()
 
 ### Getting Company Financials
 
-You can get financials for a company using the `financials` property. For example:
+You can get financials for a company using the `get_financials` function. For example:
 
 ```python
-financials = c.financials
-financials.income
+financials = c.get_financials()
+financials.income_statement()
 ```
 
 ## Viewing unpublished filings

@@ -83,37 +83,6 @@ filings_ = get_filings(2021, 4, filing_date="2021-10-01")
 filings_ = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") 
                                                                        
 ```
-### Filtering by CIK
-
-You can filter filings by CIK using the `cik` parameter to get all filings for a company. For example:
-```python 
-filings = get_filings(cik='0000320193')
-```
-
-### Filtering by ticker
-
-You can filter filings by ticker using the `ticker` parameter. For example:
-```python
-filings = get_filings(ticker='AAPL')
-```
-Note that this first does a lookup of the CIK for the ticker and then gets filings for the CIK.
-So if you know the CIK, it is better to use that directly.
-
-### Filtering by exchange
-
-You can filter companies using the `exchange` parameter. 
-
-```python
-filings = get_filings(exchange='NASDAQ')
-```
-There are the following exchanges available:
-
-| Exchange |
-|----------|
-| Nasdaq   | 
-| NYSE     | 
-| CBOE     | 
-| OTC      | 
 
 
 ## Filtering using `Filings.filter`
@@ -125,7 +94,6 @@ Example:
 ```python
 filings().filter(form='10-K')
 ```
-
 
 ```python
     def filter(self, *,
@@ -148,6 +116,40 @@ filings().filter(form='10-K')
         :param accession_number: The accession number or list of accession numbers to filter by
 ```
 
+
+### Filtering by CIK
+
+You can filter filings by CIK by using the `filter` function with the `cik` parameter to get all filings for a company. For example:
+```python 
+filings = get_filings.filter(cik='0000320193')
+```
+
+### Filtering by ticker
+
+You can filter filings by ticker  by using the `filter` function with the `ticker` parameter. For example:
+```python
+filings = get_filings.filter(ticker='AAPL')
+```
+Note that this first does a lookup of the CIK for the ticker and then gets filings for the CIK.
+So if you know the CIK, it is better to use that directly.
+
+Note that you can also get use `Company(<ticker>)` OR  `Company(<cik>)` and then use the `get_filings` method to get filings for the company. For example:
+
+### Filtering by exchange
+
+You can filter filings by `exchange`. 
+
+```python
+filings = get_filings().filter(exchange='NASDAQ')
+```
+There are the following exchanges available:
+
+| Exchange |
+|----------|
+| Nasdaq   | 
+| NYSE     | 
+| CBOE     | 
+| OTC      | 
 
 
 ## Using `head`, `tail`, and `sample`
