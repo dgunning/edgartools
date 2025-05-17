@@ -571,7 +571,7 @@ class FactQuery:
         skip_columns = ['fact_key', 'original_label', 'period_key']
 
         # order columns
-        first_columns = [col for col in ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end']
+        first_columns = [col for col in ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'decimals']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns
                                    if col not in first_columns
