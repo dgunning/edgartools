@@ -149,3 +149,25 @@ The system incorporates fiscal year information when available to ensure meaning
 3. When looking for comparison periods, it matches periods from similar fiscal positions
 
 This approach ensures that statements display periods that make logical sense for financial analysis, such as comparing Q3 2023 with Q3 2022 rather than with Q2 2023.
+
+## Edge Case: Fiscal Year Changes
+
+When a company changes its fiscal year end, our period selection logic may encounter challenges:
+
+1. **Transition Period Anomalies**: 
+   - The transition year often has a non-standard duration (shorter or longer than 12 months)
+   - This period may be misclassified by duration-based identification (350-380 days)
+
+2. **Fiscal Alignment Score Issues**:
+   - Historical periods that aligned with the previous fiscal year end receive artificially low scores
+   - This may exclude relevant comparison periods that were correctly aligned under the previous fiscal calendar
+
+3. **Year-over-Year Comparison Problems**:
+   - Annual comparison views may include periods that aren't truly comparable
+   - The "Three-Year Annual Comparison" might mix different fiscal calendars, reducing analytical value
+
+4. **Limited Metadata**:
+   - XBRL filings typically only reflect current fiscal year end dates
+   - Historical fiscal year end information may not be accessible within the filing
+
+The current implementation uses the most recent fiscal year end information available, which may lead to sub-optimal period selection when a company has recently changed its fiscal year. Users should be aware of this limitation when analyzing companies that have undergone fiscal year changes and may need to manually select appropriate periods using the `period_filter` parameter.
