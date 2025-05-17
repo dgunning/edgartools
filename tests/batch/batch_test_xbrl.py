@@ -10,10 +10,11 @@ popular_tickers = pd.read_csv('data/popular_us_stocks.csv')
 
 def get_financials_for_popular_stocks(num_stocks: int = 100, sleep_time: int = None):
     for ticker in tqdm(popular_tickers.tail(num_stocks).Ticker.tolist()):
+
         print()
         company: Company = Company(ticker)
         if company:
-            #print(company)
+            print(company)
             tenk_filing = company.get_filings(form="10-K").latest(1)
             print(str(tenk_filing))
             if tenk_filing:
@@ -39,11 +40,11 @@ def get_financials_for_filing(filing):
         return
     financials = Financials(xbrl_data)
     balance_sheet = financials.balance_sheet()
-    financials.income_statement()
+    income_statement = financials.income_statement()
     financials.cashflow_statement()
-    if balance_sheet:
-        print(balance_sheet)
-        print(balance_sheet.to_dataframe())
+    if income_statement:
+        print(income_statement)
+        print(income_statement.to_dataframe())
     print("*" * 80)
 
 

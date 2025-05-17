@@ -545,7 +545,7 @@ class FactQuery:
         if not results:
             return pd.DataFrame()
 
-        df = pd.DataFrame(results)
+        df = pd.DataFrame(results).rename(columns={'period_instant': 'period_end'})
 
         # Filter columns based on inclusion flags
         if not self._include_dimensions:
@@ -553,7 +553,7 @@ class FactQuery:
 
         if not self._include_contexts:
             context_cols = ['context_ref', 'entity_identifier', 'entity_scheme',
-                            'period_type', 'period_instant']
+                            'period_type']
             df = df.loc[:, [col for col in df.columns if col not in context_cols]]
 
         if not self._include_element_info:
@@ -632,16 +632,8 @@ class FactsView:
 
         # Build enriched facts from raw facts, contexts, and elements
         enriched_facts = []
-        processed_facts = set()  # Track processed facts to avoid duplicates
 
         for fact_key, fact in self.xbrl._facts.items():
-            # Skip if we've already processed this fact based on element ID and context
-            fact_signature = f"{fact.element_id}__{fact.context_ref}"
-            if fact_signature in processed_facts:
-                continue
-
-            processed_facts.add(fact_signature)
-
             # Create a dict with only necessary fields instead of full model_dump
             fact_dict = {
                 'fact_key': fact_key,
@@ -716,19 +708,15 @@ class FactsView:
                 period_key = self.xbrl.context_period_map.get(fact.context_ref)
                 if period_key:
                     fact_dict['period_key'] = period_key
-                    
-                    # Use precomputed fiscal period and year info
+                    # Add fiscal info if available
                     if period_key in period_to_fiscal_info:
                         fact_dict.update(period_to_fiscal_info[period_key])
 
-            # Add element information
+            # Add element information and statement type
+            # Normalize element_id to match catalog keys (replace ':' with '_')
             element_id = fact.element_id.replace(':', '_')
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
-                fact_dict['element_name'] = element.name
-                fact_dict['element_type'] = element.data_type
-                fact_dict['element_period_type'] = element.period_type
-                fact_dict['element_balance'] = element.balance
 
                 # First look up preferred_label from presentation trees 
                 # to ensure label consistency between rendering and facts
@@ -740,7 +728,7 @@ class FactsView:
                         if pres_node.preferred_label:
                             preferred_label = pres_node.preferred_label
                             break  # Use the first preferred_label found
-                
+
                 # Add label using the same selection logic as display_label
                 # but including the preferred_label we found above
                 label = select_display_label(
@@ -750,23 +738,24 @@ class FactsView:
                     element_id=element_id,
                     element_name=element.name
                 )
-                
+
                 fact_dict['label'] = label
                 # Store original label (will be used for standardization comparison)
                 fact_dict['original_label'] = label
 
-            # Determine statement type by checking presentation trees using our precomputed mapping
-            for role, tree in self.xbrl.presentation_trees.items():
-                if element_id in tree.all_nodes and role in role_to_statement_type:
-                    statement_type, statement_role = role_to_statement_type[role]
-                    fact_dict['statement_type'] = statement_type
-                    fact_dict['statement_role'] = statement_role
-                    break
+                # Determine statement type by checking presentation trees using our precomputed mapping
+                for role, tree in self.xbrl.presentation_trees.items():
+                    if element_id in tree.all_nodes and role in role_to_statement_type:
+                        statement_type, statement_role = role_to_statement_type[role]
+                        fact_dict['statement_type'] = statement_type
+                        fact_dict['statement_role'] = statement_role
+                        break
 
             enriched_facts.append(fact_dict)
 
+        # Cache the enriched facts
         self._facts_cache = enriched_facts
-        return enriched_facts
+        return self._facts_cache
 
     def query(self) -> FactQuery:
         """

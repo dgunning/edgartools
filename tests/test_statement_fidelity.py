@@ -6,12 +6,13 @@ def test_balance_sheet_matches_online():
                company='AEON Biopharma, Inc.',
                cik=1837607, accession_no='0001558370-23-018706')
     print(str(f))
-    xb = XBRL.from_filing(f)
+    xb = XBRL.parse_directory("data/xbrl/datafiles/aeon")
+    #xb = XBRL.from_filing(f)
     bs = xb.statements.balance_sheet()
     print(bs)
     df = (xb.query()
         .by_concept("CashAndCashEquivalentsAtCarryingValue")
-     ).to_dataframe("concept", "value", "statement_type")
+     ).to_dataframe("concept", "value", "period_end")
     print(df)
 
     """

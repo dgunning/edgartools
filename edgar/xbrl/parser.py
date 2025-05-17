@@ -61,41 +61,73 @@ class XBRLParser:
         # Mapping of context IDs to period identifiers for easy lookup
         self.context_period_map: Dict[str, str] = {}
         
-    def _create_normalized_fact_key(self, element_id: str, context_ref: str) -> str:
+    def _create_normalized_fact_key(self, element_id: str, context_ref: str, instance_id: Optional[int] = None) -> str:
         """
         Create a normalized fact key using underscore format.
         
         Args:
-            element_id: Element ID (with either colon or underscore)
-            context_ref: Context reference
-            
+            element_id: The element ID
+            context_ref: The context reference
+            instance_id: Optional instance ID for duplicate facts
+        
         Returns:
-            Normalized fact key
+            Normalized key in format: element_id_context_ref[_instance_id]
         """
-        # Normalize element ID to use underscore format consistently
         normalized_element_id = element_id
         if ':' in element_id:
             prefix, name = element_id.split(':', 1)
             normalized_element_id = f"{prefix}_{name}"
-        
-        # Create and return the key
+        if instance_id is not None:
+            return f"{normalized_element_id}_{context_ref}_{instance_id}"
         return f"{normalized_element_id}_{context_ref}"
+
+    def get_facts_by_key(self, element_id: str, context_ref: str) -> List[Fact]:
+        """Get all facts matching the given element ID and context reference.
+        
+        This method handles both single facts and duplicate facts using the hybrid storage approach.
+        For single facts, it returns a list with one fact. For duplicates, it returns all instances.
+        
+        Args:
+            element_id: The element ID to look up
+            context_ref: The context reference
+        
+        Returns:
+            List of matching facts
+        """
+        base_key = self._create_normalized_fact_key(element_id, context_ref)
+        
+        # First try direct lookup for single fact
+        if base_key in self.facts:
+            return [self.facts[base_key]]
+        
+        # Look for facts with instance IDs
+        facts = []
+        i = 0
+        while True:
+            key = self._create_normalized_fact_key(element_id, context_ref, i)
+            if key not in self.facts:
+                break
+            facts.append(self.facts[key])
+            i += 1
+        
+        return facts
     
     def get_fact(self, element_id: str, context_ref: str) -> Optional[Fact]:
         """
         Get a fact by element ID and context reference.
         Handles both colon and underscore formats transparently.
+        If there are duplicate facts, returns the first instance.
+        Use get_facts_by_key to get all instances.
         
         Args:
             element_id: Element ID (can use either colon or underscore format)
             context_ref: Context reference
             
         Returns:
-            Fact if found, None otherwise
+            First matching fact if found, None otherwise
         """
-        # Create a normalized key and look up the fact
-        normalized_key = self._create_normalized_fact_key(element_id, context_ref)
-        return self.facts.get(normalized_key)
+        facts = self.get_facts_by_key(element_id, context_ref)
+        return facts[0] if facts else None
     
     def parse_directory(self, directory_path: Union[str, Path]) -> None:
         """
@@ -1300,36 +1332,23 @@ class XBRLParser:
                             prefix = attr_name[len(xmlns_pattern):]
                         else:
                             prefix = attr_name.split(':', 1)[1]
-
-                        # Map URI to prefix
                         prefix_map[attr_value] = prefix
-
-            # Standard namespace mappings with base patterns to recognize versions
-            namespaces = {
-                'xbrli': 'http://www.xbrl.org/2003/instance',
-                'us-gaap': 'http://fasb.org/us-gaap/',  # Base pattern for any year
-                'ifrs': 'http://xbrl.ifrs.org/taxonomy/',  # Base pattern for any year
-                'dei': 'http://xbrl.sec.gov/dei/',  # Base pattern for any year
-            }
-
-            # Update standard namespaces if we have specific versions in this document
-            for uri, prefix in prefix_map.items():
-                for std_prefix, std_uri_base in namespaces.items():
-                    if uri.startswith(std_uri_base):
-                        namespaces[std_prefix] = uri
 
             # Initialize counters and tracking
             fact_count = 0
-            nonstandard_facts = set()  # Use a set for faster lookups
+            facts_dict = {}
+            base_keys = {}
 
             # Fast path to identify non-fact elements to skip - compile as set for O(1) lookup
-            skip_tag_endings = {'}context', '}unit', '}schemaRef'}
+            skip_tag_endings = {
+                'schemaRef',
+                'roleRef',
+                'arcroleRef',
+                'linkbaseRef',
+                'context',
+                'unit'
+            }
 
-            # Cache facts dictionary append method for faster operation
-            facts_dict = self.facts
-            create_key = self._create_normalized_fact_key
-
-            # Define optimized processor function
             def process_element(element):
                 """Process a single element as a potential fact."""
                 nonlocal fact_count
@@ -1349,37 +1368,23 @@ class XBRLParser:
                 if '}' in tag:
                     namespace, element_name = tag.split('}', 1)
                     namespace = namespace[1:]  # Faster than strip('{')
+
+                    # Try to extract prefix from the namespace
+                    prefix = prefix_map.get(namespace)
+                    if not prefix:
+                        parts = namespace.split('/')
+                        prefix = parts[-1] if parts else ''
                 else:
                     element_name = tag
-                    namespace = None
-
-                # Get namespace prefix - cached for performance
-                prefix = prefix_map.get(namespace)
-                if not prefix and namespace:
-                    # Check against standard namespace patterns with optimized base extraction
-                    for std_prefix, std_uri in namespaces.items():
-                        # Optimize splitting - only split if needed
-                        base_uri = std_uri
-                        if '/20' in std_uri:
-                            base_uri = std_uri.split('/20')[0]
-
-                        if namespace.startswith(base_uri):
-                            prefix = std_prefix
-                            prefix_map[namespace] = prefix  # Cache for future lookups
-                            break
+                    prefix = ''
 
                 # Construct element ID with optimized string concatenation
-                if prefix:
-                    element_id = f"{prefix}:{element_name}"
-                else:
-                    element_id = element_name
-                    if namespace:
-                        nonstandard_facts.add(namespace)
+                element_id = f"{prefix}:{element_name}" if prefix else element_name
 
-                # Get unit reference - direct attribute access
+                # Get unit reference
                 unit_ref = element.get('unitRef')
 
-                # Get value with optimized text extraction
+                # Get value - optimize string handling
                 value = element.text
                 if not value or not value.strip():
                     # Only check children if text is empty - use direct iteration for speed
@@ -1395,42 +1400,51 @@ class XBRLParser:
                 # Get decimals attribute - direct access
                 decimals = element.get('decimals')
 
-                # Optimize numeric conversion with fast path for common cases
+                # Optimize numeric conversion with faster try/except
                 numeric_value = None
                 if value:
-                    # Fast check for digit before attempting conversion
-                    has_digit = False
-                    for c in value:
-                        if c.isdigit():
-                            has_digit = True
-                            break
+                    try:
+                        numeric_value = float(value)
+                    except (ValueError, TypeError):
+                        pass
 
-                    if has_digit:
-                        try:
-                            # Handle common numeric formats
-                            if ',' in value:
-                                numeric_value = float(value.replace(',', ''))
-                            else:
-                                numeric_value = float(value)
-                        except (ValueError, TypeError):
-                            pass
+                # Create base key for duplicate detection
+                base_key = self._create_normalized_fact_key(element_id, context_ref)
+                
+                # Handle duplicates
+                instance_id = None
+                if base_key in base_keys:
+                    # This is a duplicate - convert existing fact to use instance_id if needed
+                    if base_key in facts_dict:
+                        existing_fact = facts_dict[base_key]
+                        # Move existing fact to new key with instance_id=0
+                        del facts_dict[base_key]
+                        existing_fact.instance_id = 0
+                        facts_dict[self._create_normalized_fact_key(element_id, context_ref, 0)] = existing_fact
+                    # Add new fact with next instance_id
+                    instance_id = len(base_keys[base_key])
+                    base_keys[base_key].append(True)
+                else:
+                    # First instance of this fact
+                    base_keys[base_key] = [True]
 
-                # Create a normalized key using underscore format for consistency
-                normalized_key = create_key(element_id, context_ref)
-
-                # Create fact object directly in the facts dictionary - avoid intermediate variable
-                facts_dict[normalized_key] = Fact(
+                # Create fact object
+                fact = Fact(
                     element_id=element_id,
                     context_ref=context_ref,
                     value=value,
                     unit_ref=unit_ref,
                     decimals=decimals,
-                    numeric_value=numeric_value
+                    numeric_value=numeric_value,
+                    instance_id=instance_id
                 )
-
+                
+                # Store fact with appropriate key
+                key = self._create_normalized_fact_key(element_id, context_ref, instance_id)
+                facts_dict[key] = fact
                 fact_count += 1
 
-            # Optimize traversal using lxml's iterchildren and iterdescendants if available
+            # Use lxml's optimized traversal methods
             if hasattr(root, 'iterchildren'):
                 # Use lxml's optimized traversal methods
                 for child in root.iterchildren():
@@ -1445,20 +1459,17 @@ class XBRLParser:
                     for descendant in child.findall('.//*'):
                         process_element(descendant)
 
-            # Debug information
-            log.debug(f"Extracted {fact_count} facts")
-            if nonstandard_facts:
-                log.debug(f"Found {len(nonstandard_facts)} non-standard namespaces: {', '.join(list(nonstandard_facts)[:5])}...")
+            # Update instance facts
+            self.facts = facts_dict
 
-            # Double check that we found facts
-            if fact_count == 0:
-                log.warning("WARNING: No facts were extracted from the instance document!")
+            log.debug(f"Extracted {fact_count} facts ({len(base_keys)} unique fact identifiers)")
 
             # Apply calculation weights after all facts are extracted
             self._apply_calculation_weights()
 
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting facts: {str(e)}")
+
 
     def _apply_calculation_weights(self) -> None:
         """

@@ -108,6 +108,10 @@ class Fact(BaseModel):
     An XBRL fact with value and references to context, unit, and element.
     
     This corresponds to the Fact Database in the design document.
+    
+    The instance_id field is used to differentiate between duplicate facts
+    that share the same element_id and context_ref. When a fact has no
+    duplicates, instance_id will be None.
     """
     element_id: str
     context_ref: str
@@ -116,6 +120,7 @@ class Fact(BaseModel):
     decimals: Optional[Union[int, str]] = None  # int or "INF"
     numeric_value: Optional[float] = None
     footnotes: List[str] = Field(default_factory=list)
+    instance_id: Optional[int] = None
 
 
 class PresentationNode(BaseModel):

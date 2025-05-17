@@ -14,7 +14,7 @@ def test_parse_instance_content():
     unique_count, total_instances = parser.count_facts(instance_content)
     
     # Verify we have the right number of unique facts
-    assert len(facts) == unique_count
+    assert len(facts) == total_instances
     
     # Verify total instances matches the SEC site count (899)
     assert total_instances == 899  # This is the count shown on the SEC site
