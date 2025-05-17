@@ -12,7 +12,7 @@ def test_balance_sheet_matches_online():
     print(bs)
     df = (xb.query()
         .by_concept("CashAndCashEquivalentsAtCarryingValue")
-     ).to_dataframe("concept", "value", "period_end")
+     ).to_dataframe("concept", "value", "period_end", "decimals")
     print(df)
 
     """
