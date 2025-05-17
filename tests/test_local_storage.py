@@ -1,7 +1,11 @@
 
 from datetime import datetime
+
+import pytest
+from edgar.httprequests import download_file, download_text
 from edgar import *
-from edgar.storage import list_filing_feed_files, list_filing_feed_files_for_quarter, is_feed_file_in_date_range
+from edgar.storage import list_filing_feed_files, list_filing_feed_files_for_quarter, is_feed_file_in_date_range, \
+    DirectoryBrowsingNotAllowed
 
 
 def test_local_storage_env_variable(monkeypatch):
@@ -62,6 +66,11 @@ def test_list_feed_files_for_quarter():
 def test_list_bulk_filing_not_found():
     files = list_filing_feed_files("https://www.sec.gov/Archives/edgar/Feed/2024/QTR5/")
     assert files.empty
+
+def test_list_bulk_filing_no_listing_allowed():
+    # The SEC does not allow listing of files in this directory since 2025
+    with pytest.raises(DirectoryBrowsingNotAllowed):
+        files = list_filing_feed_files("https://www.sec.gov/Archives/edgar/Feed/2025/QTR2/")
 
 def test_is_feed_file_in_date_range():
     def parse_date(d):

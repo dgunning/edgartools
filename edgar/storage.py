@@ -9,6 +9,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from httpx import HTTPStatusError, AsyncClient
 from tqdm.auto import tqdm
+from textwrap import dedent
 
 from edgar.core import log, get_edgar_data_directory, filing_date_to_year_quarters, extract_dates, strtobool
 from edgar.httprequests import download_bulk_data, download_datafile, download_text, throttle_requests
@@ -28,6 +29,12 @@ __all__ = ['download_edgar_data',
            'decompress_filing',
            'compress_all_filings',
            'is_compressed_file']
+
+class DirectoryBrowsingNotAllowed(Exception):
+
+    def __init__(self, url: str, message: str = "Directory browsing is not allowed for this URL."):
+        super().__init__(f"{message} \nurl: {url}")
+        self.url = url
 
 def use_local_storage(use_local: bool = True):
     """
@@ -333,6 +340,13 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
         elif e.response.status_code == 404:
             raise FileNotFoundError(f"Page not found: {url}")
         raise ConnectionError(f"Failed to download page: {str(e)}")
+
+    if "Directory Browsing Not Allowed" in html:
+        log.warning(f"Directory browsing is not allowed for {url}")
+        raise DirectoryBrowsingNotAllowed("""
+        Directory browsing is not allowed for here.
+        This is unexpected and the SEC likely has changed their policy for viewing the bulk filing files.
+        """)
 
     soup = BeautifulSoup(html, 'html.parser')
     table = soup.find('table')
