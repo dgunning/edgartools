@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>XBRL - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "XBRL";
+        var mkdocs_page_input_path = "xbrl.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">XBRL</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">XBRL</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <p>from workbooks.WideTables import income_statementR# XBRL2 Module - Enhanced XBRL Processing for EdgarTools</p>
+<h2 id="overview">Overview</h2>
+<p>The XBRL2 module provides a powerful yet user-friendly API for processing XBRL (eXtensible Business Reporting Language) financial data from SEC filings. It simplifies the complex task of parsing, analyzing, and displaying financial statements with an intuitive interface designed for both casual users and financial analysts.</p>
+<h2 id="key-features">Key Features</h2>
+<ul>
+<li><strong>Intuitive API</strong>: Access financial statements with simple, readable method calls</li>
+<li><strong>Multi-period Analysis</strong>: Compare financial data across quarters and years with statement stitching</li>
+<li><strong>Standardized Concepts</strong>: View company-specific terms or standardized labels for cross-company comparison</li>
+<li><strong>Rich Rendering</strong>: Display beautifully formatted financial statements in console or notebooks</li>
+<li><strong>Smart Period Selection</strong>: Automatically identify and select relevant periods for meaningful comparisons</li>
+<li><strong>DataFrame Export</strong>: Convert any statement to pandas DataFrames for further analysis</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="from-a-single-filing">From a Single Filing</h3>
+<pre><code class="language-python">from edgar import Company
+from edgar.xbrl.xbrl import XBRL
+
+# Get a company's latest 10-K filing
+company = Company('AAPL')
+filing = company.latest(&quot;10-K&quot;)
+
+# Parse XBRL data
+xbrl = XBRL.from_filing(filing)
+
+# Access statements through the user-friendly API
+statements = xbrl.statements
+
+# Display financial statements
+balance_sheet = statements.balance_sheet()
+income_statement = statements.income_statement()
+cash_flow = statements.cashflow_statement()
+</code></pre>
+<h3 id="multi-period-analysis-with-xbrls">Multi-Period Analysis with XBRLS</h3>
+<pre><code class="language-python">from edgar import Company
+from edgar.xbrl import XBRLS
+
+# Get multiple filings for trend analysis
+company = Company('AAPL')
+filings = company.get_filings(form=&quot;10-K&quot;).head(3)  # Get the last 3 annual reports
+
+# Create a stitched view across multiple filings
+xbrls = XBRLS.from_filings(filings)
+
+# Access stitched statements
+stitched_statements = xbrls.statements
+
+# Display multi-period statements
+income_trend = stitched_statements.income_statement()
+balance_sheet_trend = stitched_statements.balance_sheet()
+cashflow_trend = stitched_statements.cashflow_statement()
+</code></pre>
+<h2 id="user-friendly-features">User-Friendly Features</h2>
+<h3 id="simple-statement-access">Simple Statement Access</h3>
+<p>Access common financial statements with intuitive methods:</p>
+<pre><code class="language-python"># Get basic statements
+balance_sheet = statements.balance_sheet()
+income_statement = statements.income_statement()
+cash_flow = statements.cashflow_statement()
+statement_of_equity = statements.statement_of_equity()
+
+# Access any statement by type
+comprehensive_income = statements[&quot;ComprehensiveIncome&quot;]
+</code></pre>
+<h3 id="smart-period-views">Smart Period Views</h3>
+<p>Choose from intelligent period selection views:</p>
+<pre><code class="language-python"># See available period views
+period_views = statements.get_period_views(&quot;IncomeStatement&quot;)
+for view in period_views:
+    print(f&quot;- {view['name']}: {view['description']}&quot;)
+
+# Render with specific view
+annual_comparison = statements.income_statement(period_view=&quot;Annual Comparison&quot;)
+quarter_comparison = statements.income_statement(period_view=&quot;Quarterly Comparison&quot;)
+</code></pre>
+<h3 id="easy-conversion-to-dataframes">Easy Conversion to DataFrames</h3>
+<p>Transform any statement into a pandas DataFrame for further analysis:</p>
+<pre><code class="language-python"># Get DataFrame of income statement
+df = income_statement.to_dataframe()
+</code></pre>
+<h2 id="statement-stitching-for-trend-analysis">Statement Stitching for Trend Analysis</h2>
+<p>The XBRLS class combines data from multiple periods with intelligent handling of concept changes:</p>
+<pre><code class="language-python"># Create stitched statements across multiple filings
+xbrls = XBRLS.from_filings(filings)
+stitched = xbrls.statements
+
+# Get a three-year comparison of income statements
+income_trend = stitched.income_statement(max_periods=3)
+
+# Convert to DataFrame for time series analysis
+trend_df = income_trend.to_dataframe()
+</code></pre>
+<h2 id="rendering-options">Rendering Options</h2>
+<p>The XBRL2 module provides flexible output options for financial statements:</p>
+<pre><code class="language-python"># Display with default styling as Rich tables in console/notebooks
+print(statements.balance_sheet())
+
+# Show full date ranges for duration periods
+print(statements.income_statement(show_date_range=True))
+
+# Customize period view
+print(statements.income_statement(period_view=&quot;Annual Comparison&quot;))
+
+# Convert to pandas DataFrame for analysis
+df = statements.to_dataframe(&quot;BalanceSheet&quot;)
+
+# Export the statement to markdown
+income_statement = statements.income_statement()
+markdown_text = income_statement.render().to_markdown()
+</code></pre>
+<h3 id="statement-display-options">Statement Display Options</h3>
+<p>The rendering system offers several customization options:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>standard=True</code></td>
+<td>Use standardized labels for cross-company comparison (default)</td>
+</tr>
+<tr>
+<td><code>standard=False</code></td>
+<td>Use company-specific labels as reported in the filing</td>
+</tr>
+<tr>
+<td><code>show_date_range=True</code></td>
+<td>Show complete date ranges for duration periods (e.g., "Jan 1 - Mar 31, 2023")</td>
+</tr>
+<tr>
+<td><code>show_date_range=False</code></td>
+<td>Show only end dates for cleaner presentation (default)</td>
+</tr>
+<tr>
+<td><code>period_view="Name"</code></td>
+<td>Select a predefined period view ("Annual Comparison", "Quarterly Comparison", etc.)</td>
+</tr>
+<tr>
+<td><code>period_filter="duration_..."</code></td>
+<td>Filter to a specific period by period key</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-renderedstatement-class">The <code>RenderedStatement</code> Class</h3>
+<p>The <code>render_statement()</code> function returns a <code>RenderedStatement</code> object, which provides multiple output formats:</p>
+<pre><code class="language-python"># Get a rendered statement
+statement = xbrl.render_statement(&quot;BalanceSheet&quot;)
+
+# Display as Rich table (default)
+print(statement)
+
+# Convert to pandas DataFrame 
+df = statement.to_dataframe()
+
+# Export to markdown
+markdown = statement.to_markdown()
+</code></pre>
+<h3 id="customizing-statement-appearance">Customizing Statement Appearance</h3>
+<p>The rendering engine automatically handles:</p>
+<ul>
+<li>Proper monetary formatting with scale indicators (thousands, millions, billions)</li>
+<li>Appropriate indentation for statement hierarchy</li>
+<li>Formatting of section headers and dimension items</li>
+<li>Correct display of share counts and per-share values</li>
+<li>Fiscal period indicators in statement titles</li>
+<li>Unit notes (e.g., "In millions, except per share data")</li>
+</ul>
+<p>For stitched multi-period statements, you can control the number of periods and date formatting:</p>
+<pre><code class="language-python"># Get 3-year comparison with full date ranges
+annual_trend = stitched_statements.income_statement(
+    max_periods=3, 
+    show_date_range=True
+)
+</code></pre>
+<h2 id="advanced-features">Advanced Features</h2>
+<h3 id="custom-period-selection">Custom Period Selection</h3>
+<pre><code class="language-python"># Get specific periods from available options
+available_periods = xbrl.reporting_periods
+latest_period = available_periods[0]
+
+# Render with specific period
+if latest_period['type'] == 'instant':
+    period_filter = f&quot;instant_{latest_period['date']}&quot;
+    latest_balance_sheet = statements.balance_sheet().render(period_filter=period_filter)
+</code></pre>
+<h3 id="statement-data-exploration">Statement Data Exploration</h3>
+<pre><code class="language-python"># Get raw statement data for custom processing
+raw_data = statements.balance_sheet().get_raw_data()
+
+# Extract specific information
+assets = [item for item in raw_data if 'assets' in item['label'].lower()]
+</code></pre>
+<h2 id="design-philosophy">Design Philosophy</h2>
+<p>The XBRL2 module is designed with these principles:</p>
+<ol>
+<li><strong>User-First API</strong>: Simple methods that match how financial analysts think about statements</li>
+<li><strong>Intelligent Defaults</strong>: Smart period selection and formatting that "just works" out of the box</li>
+<li><strong>Flexible Output Options</strong>: Rich tables for display, DataFrames for analysis, and raw data for custom processing</li>
+<li><strong>Consistency Across Companies</strong>: Standardized concepts that enable cross-company comparison</li>
+</ol>
+<h2 id="period-selection-logic">Period Selection Logic</h2>
+<p>The XBRL2 module implements sophisticated period selection logic to ensure appropriate periods are displayed for financial statements:</p>
+<h3 id="quarterly-statement-period-selection">Quarterly Statement Period Selection</h3>
+<p>When rendering quarterly statements (when fiscal_period_focus is Q1, Q2, Q3, or Q4):</p>
+<ol>
+<li>The system identifies true quarterly periods by filtering duration periods to those with 80-100 day durations</li>
+<li>If quarterly periods are found, the most recent one is selected as the current quarter</li>
+<li>For comparison, the system looks for periods with similar duration from approximately 1-2 years prior</li>
+<li>If no quarterly periods are found, it falls back to the most recent period with a warning</li>
+</ol>
+<h3 id="annual-statement-period-selection">Annual Statement Period Selection</h3>
+<p>For annual reports (when fiscal_period_focus is FY):</p>
+<ol>
+<li>Annual periods are identified by looking for ~365 day durations or fiscal year markers</li>
+<li>The system prioritizes periods that align with the entity's fiscal year end</li>
+<li>Up to three most recent fiscal years are displayed in chronological order</li>
+</ol>
+<p>This intelligent period selection ensures appropriate periods are displayed for statements, with robust fallbacks when ideal periods aren't available.</p>
+<h2 id="enhanced-facts-api">Enhanced Facts API</h2>
+<p>The XBRL2 module includes a powerful facts query interface for direct access to individual XBRL facts:</p>
+<pre><code class="language-python">from edgar import Company
+from edgar.xbrl import XBRL
+
+# Parse XBRL data
+company = Company('AAPL')
+filing = company.latest_10k()
+xbrl = XBRL.from_filing(filing)
+
+# Access the facts view
+facts = xbrl.facts_view
+
+# Query facts by various attributes
+revenue = facts.query().by_concept('Revenue').to_dataframe()
+balance_sheet_facts = facts.query().by_statement_type('BalanceSheet').to_dataframe()
+
+# Use predefined period views - returns important metadata including available periods
+income_views = facts.get_available_period_views('IncomeStatement')
+for view in income_views:
+    print(f&quot;- {view['name']}: {view['description']} ({view['facts_count']} facts)&quot;)
+
+# Get facts filtered by period view
+annual_comparison = facts.get_facts_by_period_view('IncomeStatement', 'Annual Comparison')
+
+# Flexible text search across all text fields (concept, label, element name)
+earnings_facts = facts.search_facts(&quot;Earnings Per Share&quot;)
+
+# Filter by period keys - useful for custom period selection
+facts.query().by_period_keys(['duration_2023-01-01_2023-12-31',
+                              'duration_2022-01-01_2022-12-31']).to_dataframe()
+
+# Query dimensional data
+facts_by_segment = facts.query().by_dimension('Segment').to_dataframe()
+
+# Safe numeric value filtering with proper None handling
+large_income_items = facts.query()
+    .by_statement_type('IncomeStatement')
+    .by_value(lambda v: v &gt; 1_000_000_000)
+    .sort_by('numeric_value', ascending=False)
+    .to_dataframe()
+
+# Time series analysis
+revenue_over_time = facts.time_series('Revenue')
+</code></pre>
+<h2 id="xbrl-calculation-support">XBRL Calculation Support</h2>
+<p>The XBRL2 module properly handles calculation relationships from XBRL calculation linkbases:</p>
+<pre><code class="language-python"># Values are automatically adjusted according to calculation weights
+# For example, elements with negative weights (-1.0) like &quot;IncreaseDecreaseInInventories&quot;
+# are automatically negated to maintain proper calculation relationships
+cash_flow_statement = statements.cashflow_statement()
+
+# The calculation trees are accessible for inspection
+for role_uri, calc_tree in xbrl.calculation_trees.items():
+    print(f&quot;Calculation tree: {calc_tree.definition}&quot;)
+    for element_id, node in calc_tree.all_nodes.items():
+        if node.weight != 1.0:
+            print(f&quot;- {element_id}: weight={node.weight}&quot;)
+</code></pre>
+<p>The parser automatically adjusts fact values based on calculation arc weights, ensuring:</p>
+<ol>
+<li>Elements with negative weights (-1.0) are displayed with the correct sign</li>
+<li>Cash flow statements present inflows and outflows with the proper signage</li>
+<li>Calculation validations use the adjusted values for proper summation</li>
+<li>Contextual interpretation of values aligns with statement presentation</li>
+</ol>
+<h2 id="future-enhancements">Future Enhancements</h2>
+<ul>
+<li>Enhanced support for non-standard financial statements</li>
+<li>Interactive visualization options</li>
+<li>Expanded dimensional analysis capabilities</li>
+<li>Automatic footnote association</li>
+<li>Financial ratio calculations</li>
+<li>Advanced calculation validation and reconciliation</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../insider-filings/" class="btn btn-neutral float-left" title="Insider Filings"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../sgml/" class="btn btn-neutral float-right" title="SGML">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../insider-filings/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../sgml/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

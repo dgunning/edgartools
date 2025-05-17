@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Local Storage - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Local Storage";
+        var mkdocs_page_input_path = "local-data.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Local Storage</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#local-data-directory">Local Data Directory</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#using-local-storage">Using local storage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#downloading-data-to-local-storage">Downloading data to local storage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#downloading-complete-filings">Downloading Complete Filings</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#downloading-by-dates">Downloading by dates</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#accessing-the-downloaded-filings">Accessing the downloaded filings</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Local Storage</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="downloading-to-local-storage">Downloading to Local Storage</h1>
+<p>When you use <strong>edgartools</strong> to get Company, or the html content of a filing, this usually results in one of more requests to the SEC. However, you can download data in bulk to local storage to minimize these requests and speed up processing. </p>
+<p>This includes the following data</p>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Descriptionn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Company Submissions</strong></td>
+<td>Company metadata, their 1000 most recent filings</td>
+</tr>
+<tr>
+<td><strong>Company Facts</strong></td>
+<td>Company facts</td>
+</tr>
+<tr>
+<td><strong>Filing Attachments</strong></td>
+<td>Filing attachments</td>
+</tr>
+<tr>
+<td><strong>Reference data</strong></td>
+<td>Reference data like company and mutual fund tickers, exchanges etc</td>
+</tr>
+</tbody>
+</table>
+<h2 id="local-data-directory">Local Data Directory</h2>
+<p>The local data directory is the directory where the data is stored. The default directory is</p>
+<p><code>&lt;USER_HOME&gt;/.edgar</code></p>
+<p>You can change this directory by setting the <code>EDGAR_LOCAL_DATA_DIR</code> environment variable.</p>
+<pre><code class="language-bash">export EDGAR_LOCAL_DATA_DIR=&quot;/path/to/local/data&quot;
+</code></pre>
+<h2 id="using-local-storage">Using local storage</h2>
+<p>By default local storage is not used and the library will access the data from the SEC website. 
+To use local storage you have to </p>
+<ol>
+<li>Download data using <code>download_edgar_data()</code></li>
+<li>Turn on local storage using the environment variable <code>EDGAR_USE_LOCAL_DATA</code> or by calling <code>use_local_storage()</code></li>
+</ol>
+<h2 id="downloading-data-to-local-storage">Downloading data to local storage</h2>
+<p>You can download data to local storage by calling the <code>download_edgar_data()</code> function. 
+The function takes the following parameters so you have the option to download only the data you need.</p>
+<pre><code class="language-python">def download_edgar_data(submissions: bool = True,
+                        facts: bool = True,
+                        reference: bool = True):
+</code></pre>
+<h2 id="downloading-complete-filings">Downloading Complete Filings</h2>
+<p>You can download filings to local storage by calling the <code>download_filings()</code> function.
+This will download for each filing a complete SGML text file that contains all the attachments for that filing.
+These will be placed in the directory <code>EDGAR_LOCAL_DATA_DIR/filings/YYYYMMDD</code>. </p>
+<p>If local storage is enabled, edgartools will first check if the filing is available in local storage before making a request to the SEC.
+This will speed up processing and for the most part calls like <code>html()</code> and <code>text()</code> will behave transparently.</p>
+<p>Note that there are some differences between local attachments and attachments when doownloaded from the SEC.</p>
+<h3 id="downloading-by-dates">Downloading by dates</h3>
+<p>The <code>download_filings(filing_date)</code> function accepts a filing date that can be a single date or a range of dates.
+The date format must be <code>YYYY-MM-DD</code> or <code>YYYY-MM-DD:YYYY-MM-DD</code>. You can also use open ended ranges like <code>YYYY-MM-DD:</code><br />
+or <code>:YYYY-MM-DD</code>. </p>
+<p>Note that downloading filing attachment files can take a long time so be prepared when downloading for a range of dates.</p>
+<h2 id="accessing-the-downloaded-filings">Accessing the downloaded filings</h2>
+<p>When you call <code>filing.attachments</code> on a locally downloaded filing, you will have access to the attachments that were downloaded.
+If you want to have each file independently you can use <code>attachments.download()</code>.</p>
+<pre><code class="language-python">    def download(self, path: Union[str, Path], archive: bool = False):
+        &quot;&quot;&quot;
+        Download all the attachments to a specified path.
+        If the path is a directory, the file is saved with its original name in that directory.
+        If the path is a file, the file is saved with the given path name.
+        If archive is True, the attachments are saved in a zip file.
+        path: str or Path - The path to save the attachments
+        archive: bool (default False) - If True, save the attachments in a zip file
+        &quot;&quot;&quot;
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../data-objects/" class="btn btn-neutral float-left" title="Data Objects"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../quick-guide/" class="btn btn-neutral float-right" title="Quick Guide">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../data-objects/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../quick-guide/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
