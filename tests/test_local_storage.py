@@ -60,8 +60,6 @@ def test_list_feed_files_for_quarter():
     assert data.iloc[0].File == 'https://www.sec.gov/Archives/edgar/Feed/2024/QTR1/20240102.nc.tar.gz'
     assert len(data) == 62
 
-    data = list_filing_feed_files_for_quarter(2025, 2)
-    print(data.File.tolist())
 
 def test_list_bulk_filing_not_found():
     files = list_filing_feed_files("https://www.sec.gov/Archives/edgar/Feed/2024/QTR5/")
