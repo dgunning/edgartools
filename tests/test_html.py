@@ -1,5 +1,6 @@
 
 from edgar.files.html import *
+from edgar.files.html_documents import fixup_soup
 from edgar.files.tables import TableProcessor
 from pathlib import Path
 from edgar import Filing
@@ -443,3 +444,56 @@ def test_parse_html_document_with_pre():
     content = Path('data/html/document-with-pre.html').read_text()
     document = Document.parse(content)
     assert document
+
+def test_pre_tag_handling():
+    # Test case 1: Pre with plain text
+    html1 = "<pre>Simple text content</pre>"
+    soup1 = BeautifulSoup(html1, 'html.parser')
+    fixup_soup(soup1)
+    div1 = soup1.find('div')
+    assert div1 is not None
+    assert div1.get_text().strip() == 'Simple text content'
+    
+    # Test case 2: Pre with mixed content
+    html2 = "<pre>Text before <b>bold text</b> and after</pre>"
+    soup2 = BeautifulSoup(html2, 'html.parser')
+    fixup_soup(soup2)
+    div2 = soup2.find('div')
+    assert div2 is not None
+    assert div2.find('b') is not None, "Bold tag was lost"
+    assert div2.find('b').get_text() == 'bold text'
+    assert div2.get_text().strip() == 'Text before bold text and after'
+    
+    # Test case 3: Pre with single styled div
+    html3 = '''<pre><div style="TEXT-ALIGN: right"><font style="FONT-SIZE: 9pt; FONT-FAMILY: Times New Roman">to Form 8-K dated 1/7/08</font></div></pre>'''
+    soup3 = BeautifulSoup(html3, 'html.parser')
+    fixup_soup(soup3)
+    div3 = soup3.find('div')
+    assert div3 is not None
+    # Get the styled div (either the outer div if style was moved up, or inner div)
+    styled_div = div3.find('div', style='TEXT-ALIGN: right') or div3
+    assert styled_div.get('style') == 'TEXT-ALIGN: right'
+    font = styled_div.find('font')
+    assert font.get('style') == 'FONT-SIZE: 9pt; FONT-FAMILY: Times New Roman'
+    
+    # Test case 4: Pre with multiple divs
+    html4 = '''<pre><div>First div</div><div>Second div</div></pre>'''
+    soup4 = BeautifulSoup(html4, 'html.parser')
+    fixup_soup(soup4)
+    outer_div = soup4.find('div')
+    assert outer_div is not None
+    # Get direct child divs of the outer div
+    inner_divs = outer_div.find_all('div', recursive=False)
+    assert len(inner_divs) == 2
+    assert inner_divs[0].get_text() == 'First div'
+    assert inner_divs[1].get_text() == 'Second div'
+    
+    # Test case 5: Pre with other HTML elements
+    html5 = '''<pre><p>A paragraph</p><span>A span</span><b>Bold text</b></pre>'''
+    soup5 = BeautifulSoup(html5, 'html.parser')
+    fixup_soup(soup5)
+    div5 = soup5.find('div')
+    assert div5 is not None
+    assert div5.find('p').get_text() == 'A paragraph'
+    assert div5.find('span').get_text() == 'A span'
+    assert div5.find('b').get_text() == 'Bold text'

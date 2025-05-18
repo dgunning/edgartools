@@ -764,12 +764,18 @@ def fixup_soup(soup):
 
     # Find all pre tags
     for pre in soup.find_all('pre'):
-        # Create a new div tag
-        div = soup.new_tag('div')
-        # Copy the content from pre to div
-        div.string = pre.string
-        # Replace pre with div
-        pre.replace_with(div)
+        # Check if there's a single div with all content
+        divs = pre.find_all('div', recursive=False)
+        if len(divs) == 1 and len(pre.contents) == 1:
+            # If there's a single div, use it directly
+            pre.replace_with(divs[0])
+            continue
+            
+        # Otherwise create a new div and preserve all content
+        raw_content = str(pre)
+        content = raw_content.replace('<pre>', '').replace('</pre>', '')
+        new_soup = BeautifulSoup(f'<div>{content}</div>', 'html.parser')
+        pre.replace_with(new_soup.div)
 
 
 # List of words that are commonly not capitalized in titles
