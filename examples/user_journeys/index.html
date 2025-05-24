@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>User Journeys: Solve Real Problems with EdgarTools - edgartools</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "User Journeys: Solve Real Problems with EdgarTools";
+        var mkdocs_page_input_path = "examples/user_journeys.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">User Journeys: Solve Real Problems with EdgarTools</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="user-journeys-solve-real-problems-with-edgartools">User Journeys: Solve Real Problems with EdgarTools</h1>
+<p>This document showcases common workflows and tasks that financial professionals, developers, and researchers can accomplish using EdgarTools. Each journey addresses a specific problem and provides a concise code example.</p>
+<details>
+<summary><H3>1. Company Financial Analysis</H3> - Analyze a company's financial health across multiple periods</summary>
+
+**Problem:** Need to analyze a company's financial health across multiple periods.
+
+
+<pre><code class="language-python">from edgar import find
+
+# Get Microsoft's financial data for the last 3 years
+company = find(&quot;MSFT&quot;)
+financials = company.financials()
+
+# Compare key metrics across years
+revenue = financials.extract(&quot;Revenues&quot;)
+net_income = financials.extract(&quot;NetIncomeLoss&quot;)
+
+# Create a financial dashboard
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(10, 6))
+revenue.plot(kind='bar', ax=ax, position=1, width=0.3, color='blue', alpha=0.7)
+net_income.plot(kind='bar', ax=ax, position=0, width=0.3, color='green', alpha=0.7)
+
+ax.set_title('Microsoft Financial Performance')
+ax.legend(['Revenue', 'Net Income'])
+ax.set_ylabel('USD (millions)')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+</code></pre>
+
+
+<!-- MEDIA PLACEHOLDER: Financial dashboard visualization -->
+</details>
+
+<details>
+<summary><H3>2. Investment Fund Research</H3> - Analyze fund holdings and compare share classes</summary>
+
+**Problem:** Need to analyze fund holdings and compare share classes.
+
+
+<pre><code class="language-python">from edgar import find
+
+# Find a fund by ticker
+fund = find(&quot;VFIAX&quot;)  # Vanguard 500 Index Fund
+
+# Get the fund's structure
+classes = fund.get_classes()
+print(f&quot;Fund has {len(classes)} share classes&quot;)
+
+# Get the latest portfolio holdings
+portfolio = fund.get_portfolio()
+
+# Show top 10 holdings by value
+top_holdings = portfolio.sort_values('value', ascending=False).head(10)
+top_holdings
+</code></pre>
+
+
+<!-- MEDIA PLACEHOLDER: Fund portfolio visualization -->
+</details>
+
+<details>
+<summary><H3>3. Insider Trading Analysis</H3> - Monitor insider transactions for investment signals</summary>
+
+**Problem:** Monitor insider transactions for investment signals.
+
+
+<pre><code class="language-python">from edgar import find, get_insider_transaction_filings
+
+# Get recent insider transactions for Tesla
+company = find(&quot;TSLA&quot;)
+insider_filings = company.get_filings(form=[3, 4, 5], limit=20)
+
+# Extract and analyze the transactions
+transactions = []
+for filing in insider_filings:
+    form = obj(filing)
+    if hasattr(form, 'transactions') and form.transactions is not None:
+        for t in form.transactions:
+            transactions.append({
+                'date': t.transaction_date,
+                'name': form.reporting_owner.name,
+                'title': form.reporting_owner.title or 'Unknown',
+                'type': t.transaction_code,
+                'shares': t.shares,
+                'price': t.price_per_share,
+                'value': t.shares * t.price_per_share if t.price_per_share else None
+            })
+
+# Convert to DataFrame and analyze
+import pandas as pd
+tx_df = pd.DataFrame(transactions)
+
+# Summarize by transaction type
+tx_df.groupby('type').agg({
+    'shares': 'sum',
+    'value': 'sum'
+}).sort_values('value', ascending=False)
+</code></pre>
+
+
+<!-- MEDIA PLACEHOLDER: Insider trading visualization -->
+</details>
+
+<details>
+<summary><H3>4. SEC Filing Discovery</H3> - Find specific types of filings across companies or time periods</summary>
+
+**Problem:** Find specific types of filings across companies or time periods.
+
+
+<pre><code class="language-python">from edgar import get_filings
+
+# Get all 8-K filings (material events) from the last week
+recent_8ks = get_filings(form=&quot;8-K&quot;, limit=50)
+
+# Filter to find filings mentioning &quot;acquisition&quot;
+acquisition_filings = []
+for filing in recent_8ks:
+    text = filing.text()
+    if text and &quot;acquisition&quot; in text.lower():
+        acquisition_filings.append({
+            'company': filing.company_name,
+            'date': filing.filing_date,
+            'accession_no': filing.accession_no,
+            'items': filing.items if hasattr(filing, 'items') else None
+        })
+
+# Convert to DataFrame
+import pandas as pd
+pd.DataFrame(acquisition_filings)
+</code></pre>
+
+
+<!-- MEDIA PLACEHOLDER: Filing discovery results -->
+</details>
+
+<details>
+<summary><H3>5. Financial Data Extraction</H3> - Extract structured financial data for analysis or modeling</summary>
+
+**Problem:** Extract structured financial data for analysis or modeling.
+
+
+<pre><code class="language-python">from edgar import find, obj
+
+# Get the latest 10-Q for Amazon
+company = find(&quot;AMZN&quot;)
+latest_10q = company.get_filings(form=&quot;10-Q&quot;)[0]
+tenq = obj(latest_10q)
+
+# Extract all financial statements
+balance_sheet = tenq.financials.balance_sheet
+income_statement = tenq.financials.income_statement
+cash_flow = tenq.financials.cash_flow
+
+# Calculate key financial ratios
+current_ratio = balance_sheet.loc['AssetsCurrent'] / balance_sheet.loc['LiabilitiesCurrent']
+debt_to_equity = balance_sheet.loc['Liabilities'] / balance_sheet.loc['StockholdersEquity']
+net_margin = income_statement.loc['NetIncomeLoss'] / income_statement.loc['Revenues']
+
+print(f&quot;Current Ratio: {current_ratio.iloc[0]:.2f}&quot;)
+print(f&quot;Debt-to-Equity: {debt_to_equity.iloc[0]:.2f}&quot;)
+print(f&quot;Net Margin: {net_margin.iloc[0]:.2%}&quot;)
+</code></pre>
+
+
+<!-- MEDIA PLACEHOLDER: Financial ratios dashboard -->
+</details>
+
+<details>
+<summary><H3>6. Fund Holdings Analysis</H3> - Analyze what stocks funds are holding and track changes</summary>
+
+**Problem:** Analyze what stocks funds are holding and track changes.
+
+
+<pre><code class="language-python">from edgar import find
+
+# Find a major investment manager
+blackrock = find(&quot;BLK&quot;)
+
+# Get their recent 13F filings
+filings_13f = blackrock.get_filings(form=&quot;13F-HR&quot;, limit=2)
+
+# Extract holdings from the two most recent quarters
+current_quarter = obj(filings_13f[0])
+previous_quarter = obj(filings_13f[1])
+
+# Compare holdings between quarters
+current_holdings = current_quarter.holdings
+previous_holdings = previous_quarter.holdings
+
+# Merge to compare
+import pandas as pd
+merged = pd.merge(current_holdings, previous_holdings, 
+                   on='nameOfIssuer', suffixes=('_current', '_previous'))
+
+# Calculate changes
+merged['value_change'] = merged['value_current'] - merged['value_previous']
+merged['value_change_pct'] = (merged['value_change'] / merged['value_previous']) * 100
+
+# Show biggest position increases
+merged.sort_values('value_change', ascending=False).head(10)
+</code></pre>
+
+
+<!-- MEDIA PLACEHOLDER: Holdings change visualization -->
+</details>
+
+<details>
+<summary><H3>7. Regulatory Filing Monitoring</H3> - Stay updated on new filings from watched companies</summary>
+
+**Problem:** Stay updated on new filings from watched companies.
+
+
+<pre><code class="language-python">from edgar import find, get_current_filings
+
+# Define a watchlist of companies
+watchlist = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META']
+watchlist_ciks = [find(ticker).cik for ticker in watchlist]
+
+# Get today's filings
+today_filings = get_current_filings()
+
+# Filter to only show filings from companies on our watchlist
+watchlist_filings = today_filings[today_filings.cik.isin(watchlist_ciks)]
+
+# Display the filings
+watchlist_filings[['company_name', 'form', 'filing_date', 'html_link']]
+</code></pre>
+
+
+<!-- MEDIA PLACEHOLDER: Filing monitoring dashboard -->
+</details>
+
+<details>
+<summary><H3>8. AI/LLM Integration</H3> - Clean, structured text from SEC filings for AI analysis or LLM processing</summary>
+
+**Problem:** Need clean, structured text from SEC filings for AI analysis or LLM processing.
+
+
+<pre><code class="language-python">from edgar import find
+
+# Get a 10-K filing
+company = find(&quot;NVDA&quot;)  # NVIDIA
+filing = company.get_filings(form=&quot;10-K&quot;)[0]
+
+# Extract clean, readable text (not raw HTML)
+clean_text = filing.text()
+
+# View the formatted text in a notebook or terminal
+filing.view()
+
+# Extract specific sections for targeted analysis
+risk_factors = filing.get_section(&quot;Item 1A&quot;, &quot;Risk Factors&quot;)
+
+# Chunk text for LLM context windows
+chunks = filing.chunk_text(chunk_size=4000, overlap=200)
+
+# Process with your favorite LLM library
+from langchain.llms import OpenAI
+
+llm = OpenAI()
+for i, chunk in enumerate(chunks[:3]):  # Process first 3 chunks as example
+    print(f&quot;Analysis of chunk {i+1}:
+&quot;)
+    response = llm.generate([f&quot;Summarize the key points in this SEC filing text: {chunk}&quot;])
+    print(response.generations[0][0].text)
+    print(&quot;\n---\n&quot;)
+</code></pre>
+
+
+<!-- MEDIA PLACEHOLDER: AI/LLM integration visualization -->
+</details>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Insider Filings - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Insider Filings";
+        var mkdocs_page_input_path = "insider-filings.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Insider Filings</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#getting-insider-filings">Getting Insider Filings</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-ownership-data-object">The Ownership data object</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#converting-ownership-to-a-dataframe">Converting Ownership to a dataframe</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#form-3-initial-beneficial-ownership">Form 3 - Initial Beneficial Ownership</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#form-4-changes-in-beneficial-ownership">Form 4 - Changes in Beneficial Ownership</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#form-5-annual-changes-in-beneficial-ownership">Form 5 - Annual Changes in Beneficial Ownership</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ownership-summary">Ownership Summary</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#initial-ownership-summary">Initial Ownership Summary</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#transaction-summary">Transaction Summary</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Insider Filings</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="insider-filings">Insider Filings</h1>
+<p>Insider filings are reports filed by company insiders (such as officers, directors, and employees) when they buy or sell shares in their own companies. </p>
+<p>There are several types of insider filings that investors should be aware of:</p>
+<ol>
+<li><strong>Form 3</strong>: Filed by insiders to report their initial ownership of company stock - typically filed when an insider joins a company or becomes an officer or director.</li>
+<li><strong>Form 4</strong>: Filed to report any changes in ownership of company stock - typically filed when an insider buys or sells company stock.</li>
+<li><strong>Form 5</strong>: Includes any transactions that were not reported on Form 4 - typically filed at the end of the fiscal year.</li>
+</ol>
+<h2 id="getting-insider-filings">Getting Insider Filings</h2>
+<p>You can access insider filings using the <code>get_filings</code> method of the <code>Company</code> class.</p>
+<pre><code class="language-python">c = Company(&quot;VRTX&quot;)
+filings = c.get_filings(form=[3,4,5])
+</code></pre>
+<p>You can use either the string or numeric value for the form e.g. "3" or 3.</p>
+<pre><code class="language-python">filings = c.get_filings(form=4)
+</code></pre>
+<p>If you are more interested in insider filings non-specific to a particular company, you can use the <code>get_insider_filings</code> method of the <code>Filing</code> class.</p>
+<pre><code class="language-python">filings = get_filings(form=[3,4,5])
+</code></pre>
+<h2 id="the-ownership-data-object">The Ownership data object</h2>
+<p>The <code>Ownership</code> object is a data object that represents the basic information contained in an insider filing. It is created by parsing the 
+XML attachment with the data about the insider transactions in the filing. </p>
+<p>The <code>Ownership</code> is subclassed into <code>Form3</code>, <code>Form4</code>, and <code>Form5</code> objects that contain additional information specific to the type of filing.
+So if you have a <strong>Form 3</strong> filing you can convert the <code>Ownership</code> object to a <code>Form3</code> object to get the additional information.</p>
+<pre><code class="language-python">form3 = filing.obj()
+</code></pre>
+<h3 id="converting-ownership-to-a-dataframe">Converting Ownership to a dataframe</h3>
+<p>You can convert the <code>Ownership</code> object to a pandas dataframe using the <code>to_dataframe()</code> method.</p>
+<pre><code class="language-python">df = form4.to_dataframe()
+</code></pre>
+<p><img alt="Form3 Filing" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/form4-dataframe.png" /></p>
+<p>By default this will show each of the trades made in that filing. If you want to see the aggregated summary of the trades you can set <code>detailed=False</code></p>
+<pre><code class="language-python">df = form4.to_dataframe(detailed=False)
+</code></pre>
+<p><img alt="Form3 Filing" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/form4-dataframe-summary.png" /></p>
+<p>By default the dataframe will include metadata about the filing. If you want to exclude the metadata you can set <code>include_metadata=False</code></p>
+<pre><code class="language-python">df = form4.to_dataframe(include_metadata=False)
+</code></pre>
+<p><img alt="Form3 Filing No metadata " src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/form4-dataframe-nometadata.png" /></p>
+<p>The specifics of the data in the dataframe will depend on the type of filing and the information contained in the filing.</p>
+<h2 id="form-3-initial-beneficial-ownership">Form 3 - Initial Beneficial Ownership</h2>
+<p>The <code>Form3</code> data object is created from a form 3 filing as follows</p>
+<pre><code class="language-python">form3 = filing.obj()
+</code></pre>
+<p><img alt="Form3 Filing" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/form3.png" /></p>
+<h2 id="form-4-changes-in-beneficial-ownership">Form 4 - Changes in Beneficial Ownership</h2>
+<p>In November 2020 Bruce Sachs, an independent director of Vertex Pharmaceuticals, filed a Form 4 to report the purchase of <strong>15,000</strong> shares of Vertex Pharmaceuticals (VRTX) at an average price of <strong>$217.36</strong> per share.</p>
+<p><img alt="Vertex Form4 Filing" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/vertex-form4-filing.png" /></p>
+<p>The filing object shows basic information but none of the details of the transaction.
+To get the details of the transaction you can use the <code>obj()</code> method to convert the filing to a <code>Form4</code> object.</p>
+<pre><code class="language-python">form4 = filing.obj()
+</code></pre>
+<p><img alt="Vertex Form4 Filing" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/vertex-form4.png" /></p>
+<p>The form 4 shows the individual transactions that make up the total transaction. In this case, the total transaction was the purchase of 15,000 shares of Vertex Pharmaceuticals.</p>
+<p>Additional information about the transaction can be found in the <code>TransactionSummary</code> object.</p>
+<pre><code class="language-python">ownership_summary = form4.get_ownership_summary()
+</code></pre>
+<p><img alt="Vertex Ownership Summary" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/ownership_summary.png" /></p>
+<h2 id="form-5-annual-changes-in-beneficial-ownership">Form 5 - Annual Changes in Beneficial Ownership</h2>
+<p>Form 5 filings are essentially the same as Form 4 filings but are filed at the end of the fiscal year to report any transactions that were not reported on Form 4.
+So the data in a Form 5 filing will be similar to that in a Form 4 filing.</p>
+<h2 id="ownership-summary">Ownership Summary</h2>
+<p>The <code>Ownership</code> object has a <code>get_ownership_summary()</code> method that returns either an <code>InitialOwnershipSummary</code> for Form 3 filings or a <code>TransactionSummary</code> object for Forms 4 and 5. These object contain more specific details about the ownership filing.</p>
+<pre><code class="language-python">ownership_summary = form4.get_ownership_summary()
+</code></pre>
+<h4 id="initial-ownership-summary">Initial Ownership Summary</h4>
+<p>The <code>InitialOwnershipSummary</code> object contains the following fields:</p>
+<ul>
+<li><code>total_shares</code> - the total number of shares owned by the insider</li>
+<li><code>has_derivatives</code> - a boolean indicating whether the insider owns any derivatives</li>
+<li><code>no_securities</code> - a boolean indicating whether the insider owns any securities</li>
+<li><code>holdings</code>: List[SecurityHolding] - a list of SecurityHolding objects representing the insider's holdings</li>
+</ul>
+<p>The <code>SecurityHolding</code> object is defined as follows:</p>
+<pre><code class="language-python">@dataclass
+class SecurityHolding:
+    &quot;&quot;&quot;Represents a security holding (for Form 3)&quot;&quot;&quot;
+    security_type: str  # &quot;non-derivative&quot; or &quot;derivative&quot;
+    security_title: str
+    shares: int
+    direct_ownership: bool
+    ownership_nature: str = &quot;&quot;
+    underlying_security: str = &quot;&quot;
+    underlying_shares: int = 0
+    exercise_price: Optional[float] = None
+    exercise_date: str = &quot;&quot;
+    expiration_date: str = &quot;&quot;
+</code></pre>
+<p><code>SecurityHolding</code> also has these properties</p>
+<ul>
+<li><code>ownership_description</code> - a human-readable description of the type of ownership "Direct/Indirect"</li>
+<li><code>is_derivative</code> - a boolean indicating whether the holding is a derivative</li>
+</ul>
+<h3 id="transaction-summary">Transaction Summary</h3>
+<p>The <code>TransactionSummary</code> object is defined as follows:</p>
+<pre><code class="language-python">@dataclass
+class TransactionActivity:
+    &quot;&quot;&quot;Represents a specific transaction activity type&quot;&quot;&quot;
+    transaction_type: str
+    code: str
+    shares: Any = 0  # Handle footnote references
+    value: Any = 0
+    price_per_share: Any = None  # Add explicit price per share field
+    description: str = &quot;&quot;
+</code></pre>
+<p>It also has these properties as a convenience in case any of the expected numeric values are not in fact numeric.</p>
+<ul>
+<li><code>shares_numeric</code> - the number of shares involved in the transaction</li>
+<li><code>value_numeric</code> - the value of the transaction</li>
+<li><code>price_numeric</code> - the price per share of the transaction</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../company-financials/" class="btn btn-neutral float-left" title="Financials"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../xbrl/" class="btn btn-neutral float-right" title="XBRL">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../company-financials/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../xbrl/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
