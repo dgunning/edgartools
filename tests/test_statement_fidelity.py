@@ -6,7 +6,7 @@ def test_balance_sheet_matches_online():
                company='AEON Biopharma, Inc.',
                cik=1837607, accession_no='0001558370-23-018706')
     print(str(f))
-    xb = XBRL.parse_directory("data/xbrl/datafiles/aeon")
+    xb = XBRL.from_directory("data/xbrl/datafiles/aeon")
     #xb = XBRL.from_filing(f)
     bs = xb.statements.balance_sheet()
     print(bs)
@@ -29,3 +29,9 @@ def test_balance_sheet_matches_online():
     line_items = df['Sep 30, 2023']
     print(line_items)
     """
+
+def test_sign_of_cashflow_values():
+    xb = XBRL.from_directory("tests/fixtures/xbrl2/ibm/10k_2024")
+    ic = xb.statements.income_statement()
+    print()
+    print(ic)

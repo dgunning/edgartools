@@ -11,7 +11,7 @@ from edgar.xbrl.statement_resolver import StatementCategory
 def nflx_xbrl():
     # Netflix XBRL from 2010 has notes sections
     data_dir = Path("data/xbrl/datafiles/nflx/2010")
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 
 def test_get_statements_by_category(nflx_xbrl):

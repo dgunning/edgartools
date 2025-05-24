@@ -28,9 +28,9 @@ def test_companies():
     # Define fixture paths
     fixture_dir = Path("tests/fixtures/xbrl2")
 
-    result['aapl'] = XBRL.parse_directory(fixture_dir / "aapl/10k_2023")
-    result['msft'] = XBRL.parse_directory(fixture_dir / "msft/10k_2024")
-    result['nflx'] = XBRL.parse_directory(fixture_dir / "nflx/10k_2024")
+    result['aapl'] = XBRL.from_directory(fixture_dir / "aapl/10k_2023")
+    result['msft'] = XBRL.from_directory(fixture_dir / "msft/10k_2024")
+    result['nflx'] = XBRL.from_directory(fixture_dir / "nflx/10k_2024")
 
     return result
 
@@ -71,7 +71,7 @@ def test_dimensional_data():
     fixture_dir = Path("tests/fixtures/xbrl2/special_cases/dimensional/ko")
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
         try:
-            return XBRL.parse_directory(fixture_dir)
+            return XBRL.from_directory(fixture_dir)
         except Exception:
             pass
     return None

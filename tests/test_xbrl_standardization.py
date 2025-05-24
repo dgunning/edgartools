@@ -17,10 +17,10 @@ from edgar.xbrl import XBRL
 def test_companies():
     """Create basic test companies for use in tests."""
     result = {}
-    aapl_xbrl = XBRL.parse_directory("tests/fixtures/xbrl2/aapl/10k_2023")
+    aapl_xbrl = XBRL.from_directory("tests/fixtures/xbrl2/aapl/10k_2023")
     result['aapl'] = aapl_xbrl
     
-    nflx_xbrl = XBRL.parse_directory("tests/fixtures/xbrl2/nflx/10k_2024")
+    nflx_xbrl = XBRL.from_directory("tests/fixtures/xbrl2/nflx/10k_2024")
     result['nflx'] = nflx_xbrl
     return result
 
@@ -28,7 +28,7 @@ def test_companies():
 @pytest.fixture
 def test_dimensional_data():
     """Create a test company with dimensional data."""
-    return XBRL.parse_directory("tests/fixtures/xbrl2/ko/10k_2024")
+    return XBRL.from_directory("tests/fixtures/xbrl2/ko/10k_2024")
 
 
 @pytest.fixture

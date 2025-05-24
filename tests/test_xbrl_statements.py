@@ -19,23 +19,23 @@ def tsla_xbrl():
     data_dir = Path("data/xbrl/datafiles/tsla")
 
     # Parse the directory
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 
 @pytest.fixture
 def aapl_xbrl():
     data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2023")
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 @pytest.fixture
 def aapl_xbrl_2022():
     data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2022")
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 @pytest.fixture
 def unp_xbrl():
     data_dir = Path("data/xbrl/datafiles/unp")
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 def test_dimensioned_statement(aapl_xbrl):
     statements = aapl_xbrl.statements
@@ -290,7 +290,7 @@ def test_quarterly_statements():
     print(income_statement)
 
 def test_stateement_matching_for_old_filing():
-    xbrl = XBRL.parse_directory('data/xbrl/datafiles/unp')
+    xbrl = XBRL.from_directory('data/xbrl/datafiles/unp')
     print()
     income_statement = xbrl.statements.income_statement()
     assert income_statement

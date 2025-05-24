@@ -201,13 +201,21 @@ class XBRL:
             period = self.entity_info['document_period_end_date']
             return period.strftime('%Y-%m-%d') if isinstance(period, datetime.date) else period
         return None
+
+    @property
+    def entity_name(self):
+        return self.entity_info.get('entity_name')
+
+    @property
+    def document_type(self):
+        return self.entity_info.get('document_type')
         
     @property
     def context_period_map(self):
         return self.parser.context_period_map
     
     @classmethod
-    def parse_directory(cls, directory_path: Union[str, Path]) -> 'XBRL':
+    def from_directory(cls, directory_path: Union[str, Path]) -> 'XBRL':
         """
         Parse all XBRL files in a directory.
         

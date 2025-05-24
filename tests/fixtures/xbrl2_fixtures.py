@@ -26,12 +26,12 @@ def aapl_10k_2023():
     # Try data directory first (existing tests may expect this)
     data_dir = DATA_DIR / "aapl"
     if data_dir.exists():
-        return XBRL.parse_directory(data_dir)
+        return XBRL.from_directory(data_dir)
     
     # Then try fixture directory
     fixture_dir = FIXTURE_DIR / "aapl/10k_2023"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     # Fallback to original Apple files if available
     alternate_dir = FIXTURE_DIR / "aapl"
@@ -39,7 +39,7 @@ def aapl_10k_2023():
         # Look for XSD file at the top level
         xsd_files = list(alternate_dir.glob("*.xsd"))
         if xsd_files:
-            return XBRL.parse_directory(alternate_dir)
+            return XBRL.from_directory(alternate_dir)
     
     # If nothing else works, skip the test
     pytest.skip("Apple 2023 10-K fixture not available")
@@ -51,7 +51,7 @@ def aapl_10k_2010():
     """Historical annual report for Apple (2010)."""
     fixture_dir = FIXTURE_DIR / "aapl/10k_2010"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Apple 2010 10-K fixture not available")
     return None
@@ -62,7 +62,7 @@ def aapl_10q_2023():
     """Latest quarterly report for Apple (2023)."""
     fixture_dir = FIXTURE_DIR / "aapl/10q_2023"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Apple 2023 10-Q fixture not available")
     return None
@@ -74,7 +74,7 @@ def msft_10k_2024():
     # Then try fixture directory
     fixture_dir = FIXTURE_DIR / "msft/10k_2024" 
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        xb = XBRL.parse_directory(fixture_dir)
+        xb = XBRL.from_directory(fixture_dir)
         return xb
 
 
@@ -83,7 +83,7 @@ def msft_10k_2015():
     """Historical Microsoft filing from 2015."""
     fixture_dir = FIXTURE_DIR / "msft/10k_2015"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Microsoft 2015 10-K fixture not available")
     return None
@@ -95,12 +95,12 @@ def nflx_10k_2010():
     # Try data directory first
     data_dir = DATA_DIR / "nflx/2010"
     if data_dir.exists():
-        return XBRL.parse_directory(data_dir)
+        return XBRL.from_directory(data_dir)
     
     # Then try fixture directory
     fixture_dir = FIXTURE_DIR / "nflx/10k_2010"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Netflix 2010 10-K fixture not available")
     return None
@@ -112,12 +112,12 @@ def nflx_10k_2024():
     # Try data directory first
     data_dir = DATA_DIR / "nflx/2024"
     if data_dir.exists():
-        return XBRL.parse_directory(data_dir)
+        return XBRL.from_directory(data_dir)
     
     # Then try fixture directory
     fixture_dir = FIXTURE_DIR / "nflx/10k_2024"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Netflix 2024 10-K fixture not available")
     return None
@@ -128,7 +128,7 @@ def nflx_10q_2024():
     """Recent Netflix quarterly filing from 2024."""
     fixture_dir = FIXTURE_DIR / "nflx/10q_2024"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Netflix 2024 10-Q fixture not available")
     return None
@@ -140,7 +140,7 @@ def jpm_10k_2024():
 
     fixture_dir = FIXTURE_DIR / "jpm/10k_2024"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
 
 
 @pytest.fixture(scope="session")
@@ -148,7 +148,7 @@ def jpm_10k_2013():
     """Historical JPMorgan 10-K from 2013."""
     fixture_dir = FIXTURE_DIR / "jpm/10k_2013"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("JPMorgan 2013 10-K fixture not available")
     return None
@@ -159,7 +159,7 @@ def ko_10k_2024():
     """Coca-Cola 10-K from 2024."""
     fixture_dir = FIXTURE_DIR / "ko/10k_2024"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Coca-Cola 2024 10-K fixture not available")
     return None
@@ -170,7 +170,7 @@ def ko_10k_2012():
     """Historical Coca-Cola 10-K from 2012."""
     fixture_dir = FIXTURE_DIR / "ko/10k_2012"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Coca-Cola 2012 10-K fixture not available")
     return None
@@ -182,12 +182,12 @@ def unp_10k_2012():
     # Try data directory first
     data_dir = DATA_DIR / "unp"
     if data_dir.exists():
-        return XBRL.parse_directory(data_dir)
+        return XBRL.from_directory(data_dir)
     
     # Then try fixture directory
     fixture_dir = FIXTURE_DIR / "unp"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Union Pacific 2012 10-K fixture not available")
     return None
@@ -199,12 +199,12 @@ def tsla_10k_2024():
     # Try data directory first
     data_dir = DATA_DIR / "tsla"
     if data_dir.exists():
-        return XBRL.parse_directory(data_dir)
+        return XBRL.from_directory(data_dir)
     
     # Then try fixture directory
     fixture_dir = FIXTURE_DIR / "tsla"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Tesla 2024 10-K fixture not available")
     return None
@@ -236,7 +236,7 @@ def complex_segment_statement():
     # If we've downloaded the special case fixture
     fixture_dir = FIXTURE_DIR / "special_cases/segments/amzn"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     # If fixture not available, skip the test
     pytest.skip("Amazon segment reporting fixture not available")
@@ -249,7 +249,7 @@ def dimensional_statement():
     # If we've downloaded the special case fixture
     fixture_dir = FIXTURE_DIR / "special_cases/dimensional/ko"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     # If fixture not available, skip the test
     pytest.skip("Coca-Cola dimensional reporting fixture not available")
@@ -261,7 +261,7 @@ def custom_taxonomy_example():
     """Company using extensive custom taxonomy."""
     fixture_dir = FIXTURE_DIR / "special_cases/custom_taxonomy/ba"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     # If fixture not available, skip the test
     pytest.skip("Boeing custom taxonomy fixture not available")
@@ -293,7 +293,7 @@ def energy_company():
     """Energy industry company (Exxon)."""
     fixture_dir = FIXTURE_DIR / "xom/10k_2023"
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
-        return XBRL.parse_directory(fixture_dir)
+        return XBRL.from_directory(fixture_dir)
     
     pytest.skip("Exxon 2023 10-K fixture not available")
     return None

@@ -19,11 +19,11 @@ from edgar.xbrl.xbrl import XBRL
 
 @pytest.fixture
 def aapl_xbrl():
-    return XBRL.parse_directory(Path("data/xbrl/datafiles/aapl"))
+    return XBRL.from_directory(Path("data/xbrl/datafiles/aapl"))
 
 @pytest.fixture
 def msft_xbrl():
-    return XBRL.parse_directory(Path("data/xbrl/datafiles/msft"))
+    return XBRL.from_directory(Path("data/xbrl/datafiles/msft"))
 
 def test_get_all_statements(aapl_xbrl):
     statements = aapl_xbrl.get_all_statements()
@@ -155,7 +155,7 @@ def test_parse_directory():
     data_dir = Path("data/xbrl/datafiles/aapl")
     
     # Parse the directory
-    xbrl = XBRL.parse_directory(data_dir)
+    xbrl = XBRL.from_directory(data_dir)
     print()
     # Print information about the parsed XBRL
     console = Console()

@@ -10,7 +10,7 @@ from edgar.xbrl.xbrl import XBRL
 def nflx_xbrl():
     # Netflix XBRL from 2010 has notes sections
     data_dir = Path("data/xbrl/datafiles/nflx/2010")
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 
 def test_rich_display(nflx_xbrl, capsys):

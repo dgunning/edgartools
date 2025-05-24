@@ -13,18 +13,18 @@ from edgar.xbrl.statement_resolver import StatementResolver, statement_registry
 def tsla_xbrl():
     # Quarterly statements
     data_dir = Path("data/xbrl/datafiles/tsla")
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 
 @pytest.fixture
 def aapl_xbrl():
     data_dir = Path("data/xbrl/datafiles/aapl")
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 @pytest.fixture
 def unp_xbrl():
     data_dir = Path("data/xbrl/datafiles/unp")
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 
 @pytest.fixture

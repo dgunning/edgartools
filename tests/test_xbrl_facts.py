@@ -226,3 +226,11 @@ def test_integration_standardization_and_facts_query(intc_xbrl):
         
         # We should find at least one fact with this label
         assert len(results) > 0, f"Failed to find facts by statement label: {test_label}"
+
+
+def test_xbrl_facts_repr(intc_xbrl):
+    query = intc_xbrl.query().by_concept("us-gaap:Assets")
+    print()
+    query_repr = repr(query)
+    print(query_repr)
+    #assert "us-gaap:Assets" in query_repr

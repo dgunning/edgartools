@@ -102,7 +102,7 @@ from edgar.xbrl.xbrl import XBRL
 from edgar.xbrl.statements import Statements
 
 # Parse XBRL files
-xbrl = XBRL.parse_directory('path/to/xbrl/files')
+xbrl = XBRL.from_directory('path/to/xbrl/files')
 statements = Statements(xbrl)
 
 # Display with company-specific labels

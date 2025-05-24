@@ -15,7 +15,7 @@ def aapl_xbrl():
     data_dir = Path("data/xbrl/datafiles/aapl")
 
     # Parse the directory
-    return XBRL.parse_directory(data_dir)
+    return XBRL.from_directory(data_dir)
 
 def test_render_statement_with_shares():
     """Test rendering a statement with share values."""
