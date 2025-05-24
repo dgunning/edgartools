@@ -10,12 +10,20 @@ from __future__ import annotations
 
 import re
 from decimal import Decimal
+from functools import lru_cache
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import pandas as pd
-
+from rich import box
+from rich.table import Table
+from rich.text import Text
+from rich.console import Group
+from rich.markdown import Markdown
+from rich.panel import Panel
+from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, parse_date
 from edgar.xbrl.models import select_display_label
+from textwrap import dedent
 
 
 class FactQuery:
@@ -94,10 +102,10 @@ class FactQuery:
             regex = re.compile(pattern, re.IGNORECASE)
             self._filters.append(lambda f:
                                  ('label' in f and f['label'] is not None and bool(regex.search(str(f['label'])))) or
-                                 ('element_label' in f and f['element_label'] is not None and 
+                                 ('element_label' in f and f['element_label'] is not None and
                                   bool(regex.search(str(f['element_label'])))) or
                                  # Also check original_label with regex
-                                 ('original_label' in f and f['original_label'] is not None and 
+                                 ('original_label' in f and f['original_label'] is not None and
                                   bool(regex.search(str(f['original_label']))))
                                  )
         return self
@@ -120,19 +128,23 @@ class FactQuery:
                 return ('numeric_value' in f and
                         f['numeric_value'] is not None and
                         value_filter(f['numeric_value']))
+
             self._filters.append(numeric_value_filter)
         elif isinstance(value_filter, (list, tuple)) and len(value_filter) == 2:
             min_val, max_val = value_filter
+
             def numeric_range_filter(f):
                 return ('numeric_value' in f and
                         f['numeric_value'] is not None and
                         min_val <= f['numeric_value'] <= max_val)
+
             self._filters.append(numeric_range_filter)
         else:
             def numeric_equality_filter(f):
                 return ('numeric_value' in f and
                         f['numeric_value'] is not None and
                         f['numeric_value'] == value_filter)
+
             self._filters.append(numeric_equality_filter)
         return self
 
@@ -146,8 +158,10 @@ class FactQuery:
         Returns:
             Self for method chaining
         """
+
         def period_type_filter(f):
             return 'period_type' in f and f['period_type'] == period_type
+
         self._filters.append(period_type_filter)
         return self
 
@@ -343,7 +357,7 @@ class FactQuery:
             # Search in element_name
             if 'element_name' in f and f['element_name'] is not None and regex.search(str(f['element_name'])):
                 return True
-                
+
             # Search in original_label (present when standardization has been applied)
             if 'original_label' in f and f['original_label'] is not None and regex.search(str(f['original_label'])):
                 return True
@@ -424,7 +438,7 @@ class FactQuery:
         self._statement_type = statement_type
         self._filters.append(lambda f: f.get('statement_type') == statement_type)
         return self
-        
+
     def transform(self, transform_fn: Callable[[Any], Any]) -> 'FactQuery':
         """
         Transform fact values using a custom function.
@@ -437,7 +451,7 @@ class FactQuery:
         """
         self._transformations.append(transform_fn)
         return self
-        
+
     def scale(self, scale_factor: int) -> 'FactQuery':
         """
         Scale numeric values by a factor.
@@ -448,13 +462,14 @@ class FactQuery:
         Returns:
             Self for method chaining
         """
+
         def scale_transform(value):
             if isinstance(value, (int, float, Decimal)):
                 return value / scale_factor
             return value
-            
+
         return self.transform(scale_transform)
-        
+
     def aggregate(self, dimension: str, func: str = 'sum') -> 'FactQuery':
         """
         Aggregate values by a dimension.
@@ -471,7 +486,7 @@ class FactQuery:
             'function': func
         })
         return self
-        
+
     def execute(self) -> List[Dict[str, Any]]:
         """
         Execute the query and return matching facts.
@@ -484,20 +499,20 @@ class FactQuery:
         # Apply filters
         for filter_func in self._filters:
             results = [f for f in results if filter_func(f)]
-            
+
         # Apply transformations
         for transform_fn in self._transformations:
             for fact in results:
                 if 'value' in fact and fact['value'] is not None:
                     fact['value'] = transform_fn(fact['value'])
-                    
+
         # Apply aggregations
         if self._aggregations:
             aggregated_results = {}
             for agg in self._aggregations:
                 dimension = agg['dimension']
                 func = agg['function']
-                
+
                 # Group facts by dimension
                 groups = {}
                 for fact in results:
@@ -506,19 +521,19 @@ class FactQuery:
                         if dim_value not in groups:
                             groups[dim_value] = []
                         groups[dim_value].append(fact['value'])
-                
+
                 # Apply aggregation function
                 for dim_value, values in groups.items():
                     if func == 'sum':
                         agg_value = sum(values)
                     elif func == 'average':
                         agg_value = sum(values) / len(values)
-                    
+
                     key = (dimension, dim_value)
                     if key not in aggregated_results:
                         aggregated_results[key] = {'dimension': dimension, 'value': dim_value, 'values': {}}
                     aggregated_results[key]['values'][func] = agg_value
-            
+
             results = list(aggregated_results.values())
 
         # Apply sorting if specified
@@ -532,6 +547,7 @@ class FactQuery:
 
         return results
 
+    @lru_cache(maxsize=8)
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
@@ -571,13 +587,52 @@ class FactQuery:
         skip_columns = ['fact_key', 'original_label', 'period_key']
 
         # order columns
-        first_columns = [col for col in ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'decimals']
+        first_columns = [col for col in
+                         ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'decimals']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns
                                    if col not in first_columns
                                    and col not in skip_columns]
 
         return df[columns]
+
+    def __rich__(self):
+
+        title = Text.assemble(("Facts Query"),
+                              )
+        subtitle = Text.assemble((self._facts_view.entity_name, "bold deep_sky_blue1"),
+                                 " - ",
+                                 (self._facts_view.document_type)
+                                )
+        df = self.to_dataframe().fillna('')
+        columns = df.columns.tolist()
+        description = Markdown(
+            dedent(f"""
+            Use *to_dataframe(columns)* to get a DataFrame of the results.
+            
+            e.g. `query.to_dataframe('concept', 'value', 'period_end')`
+            
+            Available columns:
+            '{', '.join(columns)}'
+            """)
+        )
+
+
+        display_columns = [col for col in ['label', 'concept', 'value', 'period_start', 'period_end', 'statement_type']
+                           if col in columns]
+        df = df[display_columns]
+        table = Table(*display_columns, show_header=True, header_style="bold", box=box.SIMPLE)
+        for t in df.itertuples(index=False):
+            row = []
+            for i in t:
+                row.append(str(i))
+            table.add_row(*row)
+
+        panel = Panel(Group(description, table), title=title, subtitle=subtitle, box=box.ROUNDED)
+        return panel
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 
 class FactsView:
@@ -599,6 +654,13 @@ class FactsView:
     def __len__(self):
         return len(self.get_facts())
 
+    @property
+    def entity_name(self):
+        return self.xbrl.entity_name
+
+    @property
+    def document_type(self):
+        return self.xbrl.document_type
 
     def get_facts(self) -> List[Dict[str, Any]]:
         """
@@ -655,7 +717,7 @@ class FactsView:
             # Add context information
             if fact.context_ref in self.xbrl.contexts:
                 context = self.xbrl.contexts[fact.context_ref]
-                
+
                 # Add period information - extract only what we need
                 if context.period:
                     # Handle both object and dict representations of period
@@ -1208,6 +1270,13 @@ class FactsView:
 
     def __str__(self):
         return f"Facts for {self.xbrl}"
+
+    @property
+    def _title_text(self):
+        return Text.assemble(("XBRL Facts for ", "bold white"),
+                             (self.xbrl.entity_name, "bold deep_sky_blue1"),
+                             (" - ", "bold magenta"),
+                             (self.xbrl.document_type, "bold white"))
 
 
 def add_facts_view(xbrl):
