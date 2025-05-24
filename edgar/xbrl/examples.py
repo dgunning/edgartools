@@ -215,7 +215,7 @@ def standardized_statements_example():
     sample_dir = Path(__file__).parent / "aapl"
     
     # Create an XBRL object by parsing the directory
-    xbrl = XBRL.parse_directory(sample_dir)
+    xbrl = XBRL.from_directory(sample_dir)
     
     # Create a Statements object for easier access
     statements = Statements(xbrl)
