@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2025-05-25
+
+### Added
+- Add `Docs` class to represent the documentation of an object in the library
+- Add `docs` property to `Filing`, 'Filings` and 'EntityFilings` to display the documentation using e.g. `filing.docs`
+- Add rich rendering to XBRL query class
+
+### Changed
+- Rename `XBRL.parse_directory` to `XBRL.from_directory` to be more consistent with the rest of the library
+- Minor display changes for `Filing` class
+
 ## [4.0.4] - 2025-05-18
 
 ### Changed
