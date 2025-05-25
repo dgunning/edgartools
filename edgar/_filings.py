@@ -1787,7 +1787,7 @@ class Filing:
             title=title,
             subtitle=subtitle,
             box=box.ROUNDED,
-            height=10,
+            height=8,
             expand=False
         )
 
