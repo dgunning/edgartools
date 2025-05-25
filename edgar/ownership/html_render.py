@@ -73,21 +73,17 @@ def ownership_to_html(ownership: 'Ownership') -> str:
     form_type = ownership.form
     
     # Prepare context dictionary for template rendering
-    context = {
-        'form_type': form_type,
-        'html_title': f"SEC Form {form_type}",
-        'form_name_display': f"FORM {form_type}",
-        'form_title_display': {
-            '3': "INITIAL STATEMENT OF BENEFICIAL OWNERSHIP OF SECURITIES",
-            '4': "STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP",
-            '5': "ANNUAL STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP"
-        }.get(form_type, "STATEMENT OF OWNERSHIP")
-    }
+    context = {'form_type': form_type, 'html_title': f"SEC Form {form_type}", 'form_name_display': f"FORM {form_type}",
+               'form_title_display': {
+                   '3': "INITIAL STATEMENT OF BENEFICIAL OWNERSHIP OF SECURITIES",
+                   '4': "STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP",
+                   '5': "ANNUAL STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP"
+               }.get(form_type, "STATEMENT OF OWNERSHIP"),
+               'issuer_name': _escape_html(ownership.issuer.name if ownership.issuer else "N/A"),
+               'ticker': _escape_html(ownership.issuer.ticker if ownership.issuer else "N/A"),
+               'reporting_period': _format_date(ownership.reporting_period) if ownership.reporting_period else ''}
     
     # Issuer information
-    context['issuer_name'] = _escape_html(ownership.issuer.name if ownership.issuer else "N/A")
-    context['ticker'] = _escape_html(ownership.issuer.ticker if ownership.issuer else "N/A")
-    context['reporting_period'] = _format_date(ownership.reporting_period) if ownership.reporting_period else ''
 
     # Reporting owner information
     reporting_owner = ownership.reporting_owners.owners[0] if ownership.reporting_owners.owners else None
