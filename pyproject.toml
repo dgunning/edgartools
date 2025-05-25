@@ -57,6 +57,7 @@ path = "edgar/__about__.py"
 include = [
   "edgar/**/*.py",
   "edgar/**/templates/*.html",
+  "edgar/**/docs/*.md",
   "edgar/reference/data/*",
   "edgar/xbrl2/standardization/*",
   "LICENSE.txt"

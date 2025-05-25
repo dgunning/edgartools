@@ -18,7 +18,7 @@ from rich.text import Text
 from edgar._filings import Filing, Filings, PagingState
 from edgar.core import (display_size, log, IntString)
 from edgar.reference.forms import describe_form
-from edgar.richtools import df_to_rich_table, repr_rich
+from edgar.richtools import df_to_rich_table, repr_rich, Docs
 
 __all__ = [
     'EntityFiling',
@@ -88,6 +88,10 @@ class EntityFilings(Filings):
         super().__init__(data, original_state=original_state)
         self.cik = cik
         self.company_name = company_name
+
+    @property
+    def docs(self):
+        return Docs(self)
 
     def __getitem__(self, item):
         return self.get_filing_at(item)
