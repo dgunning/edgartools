@@ -376,6 +376,7 @@ class Attachments:
             reports = self.sgml.filing_summary.reports
             if reports:
                 return reports.get_by_filename(filename)
+        return None
 
 
     @property
@@ -391,6 +392,7 @@ class Attachments:
         """
         if len(self.primary_documents) > 0:
             return self.primary_documents[0]
+        return None
 
 
     @property
@@ -399,6 +401,7 @@ class Attachments:
         for doc in self.primary_documents:
             if doc.display_extension == ".xml":
                 return doc
+        return None
 
     @property
     def text_document(self):
@@ -581,12 +584,12 @@ class Attachments:
 
         # Document files
         document_table = Table(Column('Seq', header_style="dim"),
-                                        Column('Document', header_style="dim"),
-                                        Column('Description', header_style="dim", min_width=60),
-                                        Column('Type', header_style="dim", min_width=16),
+                               Column('Document', header_style="dim"),
+                               Column('Description', header_style="dim", min_width=60),
+                               Column('Type', header_style="dim", min_width=16),
                                title='Attachments',
                                row_styles=["", "bold"],
-                               box=box.ROUNDED)
+                               box=box.SIMPLE_HEAD)
         all_attachments = sorted(self.documents + (self.data_files or []), key=sequence_sort_key)
 
 
