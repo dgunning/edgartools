@@ -355,7 +355,8 @@ class EntityFilings(Filings):
             Group(*elements),
             title=title,
             subtitle=subtitle,
-            border_style="bold grey54"
+            border_style="bold grey54",
+            expand=False
         )
 
 
