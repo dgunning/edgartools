@@ -1700,6 +1700,7 @@ class Filing:
         filings = company.get_filings(accession_number=self.accession_no)
         if filings and not filings.empty:
             return filings[0]
+        return None
 
     @lru_cache(maxsize=1)
     def related_filings(self):
