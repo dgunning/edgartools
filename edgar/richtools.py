@@ -387,7 +387,6 @@ class Docs:
         obj_name = getattr(self.obj, '__name__', None) or type(self.obj).__name__
         
         # Create the title
-        title = Text(f"{obj_name} Documentation", style="bold blue")
         title = Text.assemble((obj_name, "bold white"))
         
         # Try to render as markdown if it looks like markdown, otherwise as plain text
