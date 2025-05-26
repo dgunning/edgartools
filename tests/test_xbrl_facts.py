@@ -33,15 +33,26 @@ def test_get_facts_by_concept(intc_xbrl: XBRL):
     facts: FactsView = intc_xbrl.facts
     print()
     results = facts.query().by_concept('Revenue').to_dataframe()
-    print(results)
-    print(results.columns)
+    assert len(results) == 51
+
+    # Test with full concept name
+    results_full = facts.query().by_concept('us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax').to_dataframe()
+    assert len(results_full) == 48
+    assert results_full.concept.drop_duplicates().to_list()[0] == 'us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax'
+
+    # Test with a concept with '_' in the name instead of ':'
+    results_underscore = facts.query().by_concept('us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax').to_dataframe()
+    assert len(results_underscore) == 48
+    assert results_underscore.concept.drop_duplicates().to_list()[0] == 'us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax'
+
 
 
 def test_get_facts_by_statement_type(intc_xbrl: XBRL):
     facts: FactsView = intc_xbrl.facts
     print()
     results = facts.query().by_statement_type('IncomeStatement').to_dataframe()
-    print(results)
+    #print(results)
+    print(results.columns)
     assert not results.empty
 
 

@@ -67,6 +67,7 @@ class FactQuery:
         Returns:
             Self for method chaining
         """
+        pattern = pattern.replace('_', ':')  # Normalize underscores to colons for concept names
         if exact:
             self._filters.append(lambda f: f['concept'] == pattern)
         else:
@@ -588,7 +589,7 @@ class FactQuery:
 
         # order columns
         first_columns = [col for col in
-                         ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'decimals']
+                         ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'decimals', 'statement_type', 'statement_role']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns
                                    if col not in first_columns
