@@ -1791,7 +1791,7 @@ class Filing:
         filing_info_table = Table("Accession Number", "Filing Date", "Period of Report", "Documents",
                                   header_style="dim",
                                   box=box.SIMPLE_HEAD)
-        filing_info_table.add_row(Text(self.accession_no, "bold deep_sky_blue1"),
+        filing_info_table.add_row(accession_number_text(self.accession_no),
                                   Text(str(self.filing_date), "bold"),
                                   Text(self.period_of_report or "-", "bold"),
                                   f"{len(attachments)}")
