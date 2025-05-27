@@ -22,7 +22,8 @@ from rich.panel import Panel
 from rich.table import Table, Column
 
 from edgar._party import Address
-from edgar.core import IntString, get_bool, reverse_name, yes_no
+from edgar.core import (IntString, get_bool)
+from edgar.formatting import reverse_name, yes_no
 from edgar.datatools import convert_to_numeric
 from edgar.entity import Entity
 from edgar.ownership.core import format_amount, format_currency, safe_numeric, format_numeric

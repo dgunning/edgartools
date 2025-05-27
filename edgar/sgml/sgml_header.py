@@ -11,7 +11,8 @@ from rich.table import Table, Column
 from rich.text import Text
 
 from edgar._party import Address, get_addresses_as_columns
-from edgar.core import datefmt, reverse_name, log
+from edgar.core import log
+from edgar.formatting import datefmt, reverse_name
 from edgar.reference import describe_form, states
 from edgar.richtools import repr_rich
 

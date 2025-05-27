@@ -11,7 +11,7 @@ from typing import List, Dict, Optional, Union, Tuple, Any, TypeVar, Iterable
 
 from edgar._filings import Filings
 from edgar.company_reports import TenK, TenQ
-from edgar.core import reverse_name
+from edgar.formatting import reverse_name, datefmt
 from edgar.entity.data import Address, EntityData, CompanyData
 # Import from our new modules
 from edgar.entity.filings import EntityFacts
@@ -595,7 +595,7 @@ class Company(Entity):
         # Former Names Table (if any exist)
         former_names_panel = None
         if hasattr(self.data, 'former_names') and self.data.former_names:
-            from edgar.core import datefmt
+
             
             former_names_table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
             former_names_table.add_column("Previous Company Names")

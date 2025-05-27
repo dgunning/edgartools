@@ -2,19 +2,26 @@ import pandas as pd
 import numpy as np
 import pyarrow as pa
 from lxml import html as lxml_html
+from typing import Union
+from dataclasses import dataclass
 
-__all__ = ["compress_dataframe",
-           "table_html_to_dataframe",
-           "table_tag_to_dataframe",
-           "markdown_to_dataframe",
-           "dataframe_to_text",
-           "clean_column_text",
-           'convert_to_numeric',
-           'describe_dataframe',
-           'na_value',
-           'replace_all_na_with_empty',
-           'convert_to_pyarrow_backend',
-           'drop_duplicates_pyarrow',]
+__all__ = [
+    "compress_dataframe",
+    "table_html_to_dataframe",
+    "table_tag_to_dataframe",
+    "markdown_to_dataframe",
+    "dataframe_to_text",
+    "clean_column_text",
+    'convert_to_numeric',
+    'describe_dataframe',
+    'na_value',
+    'replace_all_na_with_empty',
+    'convert_to_pyarrow_backend',
+    'drop_duplicates_pyarrow',
+    'repr_df',
+    'DataPager',
+    'PagingState',
+]
 
 
 def clean_column_text(text: str):
@@ -28,7 +35,15 @@ def clean_column_text(text: str):
     return text
 
 
-def compress_dataframe(df: pd.DataFrame):
+def compress_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """Remove empty rows and columns from a DataFrame.
+    
+    Args:
+        df: DataFrame to compress
+        
+    Returns:
+        Compressed DataFrame with empty rows and columns removed
+    """
     # Remove empty rows and columns
     df = (df.replace('', pd.NA)
           .dropna(axis=1, how="all")
@@ -37,6 +52,68 @@ def compress_dataframe(df: pd.DataFrame):
     df = df.fillna('')
     return df
 
+
+def repr_df(df: pd.DataFrame, hide_index: bool = True) -> str:
+    """Return a string representation of a DataFrame.
+    
+    Args:
+        df: DataFrame to represent as string
+        hide_index: Whether to hide the index in the output
+        
+    Returns:
+        String representation of the DataFrame
+    """
+    if hide_index:
+        return df.to_string(index=False)
+    return df.to_string()
+
+
+@dataclass
+class PagingState:
+    """State for paginating through data."""
+    page: int = 1
+    page_size: int = 50
+    total_items: int = 0
+    
+    @property
+    def start_idx(self) -> int:
+        """Get the start index for the current page."""
+        return (self.page - 1) * self.page_size
+    
+    @property
+    def end_idx(self) -> int:
+        """Get the end index for the current page."""
+        return min(self.start_idx + self.page_size, self.total_items)
+    
+    @property
+    def has_more(self) -> bool:
+        """Check if there are more pages."""
+        return self.end_idx < self.total_items
+
+
+class DataPager:
+    """Class for paginating through data."""
+    def __init__(self, data: Union[pd.DataFrame, pa.Table], page_size: int = 50):
+        """Initialize the pager.
+        
+        Args:
+            data: Data to paginate through
+            page_size: Number of items per page
+        """
+        self.data = data
+        self.state = PagingState(page_size=page_size, total_items=len(data))
+    
+    def get_page(self, page: int = 1) -> Union[pd.DataFrame, pa.Table]:
+        """Get a specific page of data.
+        
+        Args:
+            page: Page number to get (1-based)
+            
+        Returns:
+            Slice of data for the requested page
+        """
+        self.state.page = page
+        return self.data[self.state.start_idx:self.state.end_idx]
 
 def adjust_column_headers(df: pd.DataFrame):
     """ Replace numeric column headers with blank strings. """

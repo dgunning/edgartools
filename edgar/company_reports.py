@@ -13,7 +13,7 @@ from rich.tree import Tree
 
 from edgar._filings import Attachments, Attachment
 from edgar._markdown import MarkdownContent
-from edgar.core import datefmt
+from edgar.formatting import datefmt
 from edgar.files.html import Document
 from edgar.files.html_documents import HtmlDocument
 from edgar.files.htmltools import ChunkedDocument, chunks2df, detect_decimal_items, adjust_for_empty_items

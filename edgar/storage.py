@@ -10,8 +10,8 @@ from bs4 import BeautifulSoup
 from httpx import HTTPStatusError, AsyncClient
 from tqdm.auto import tqdm
 from textwrap import dedent
-
-from edgar.core import log, get_edgar_data_directory, filing_date_to_year_quarters, extract_dates, strtobool
+from edgar.dates import extract_dates
+from edgar.core import log, get_edgar_data_directory, filing_date_to_year_quarters, strtobool
 from edgar.httprequests import download_bulk_data, download_datafile, download_text, throttle_requests
 from edgar.reference.tickers import (ticker_txt_url,
                                      company_tickers_json_url,

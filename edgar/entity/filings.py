@@ -16,7 +16,9 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar._filings import Filing, Filings, PagingState
-from edgar.core import (display_size, log, IntString)
+from edgar.core import (log, IntString)
+from edgar.formatting import display_size
+from edgar.formatting import accession_number_text
 from edgar.reference.forms import describe_form
 from edgar.richtools import df_to_rich_table, repr_rich, Docs
 
@@ -292,7 +294,7 @@ class EntityFilings(Filings):
         table.add_column("Form", width=8, style="bold yellow")
         table.add_column("Description", width=50, style="bold blue"),
         table.add_column("Filing Date", width=11)
-        table.add_column("Accession Number", style="dim", width=20)
+        table.add_column("Accession Number", width=20)
 
         # Get current page from data pager
         current_page = self.data_pager.current()
@@ -310,7 +312,7 @@ class EntityFilings(Filings):
                 form,
                 description,
                 str(current_page['filing_date'][i].as_py()),
-                current_page['accession_number'][i].as_py()
+                accession_number_text(current_page['accession_number'][i].as_py())
             ]
             table.add_row(*row)
 

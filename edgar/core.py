@@ -6,26 +6,26 @@ import random
 import re
 import sys
 import threading
-import warnings
 from _thread import interrupt_main
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal
 from functools import lru_cache, partial
 from functools import wraps
 from pathlib import Path
 from typing import Union, Optional, Tuple, List, TypeVar, Callable, Iterable
 
 import httpx
-import humanize
 import pandas as pd
 import pyarrow as pa
-import pyarrow.compute as pc
 import pytz
 from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
 from rich.prompt import Prompt
+
+from edgar.datatools import (
+    PagingState
+)
 
 log = logging.getLogger(__name__)
 
@@ -38,23 +38,14 @@ python_version = tuple(map(int, sys.version.split()[0].split('.')))
 __all__ = [
     'log',
     'Result',
-    'repr_df',
     'get_bool',
-    'datefmt',
-    'moneyfmt',
     'edgar_mode',
     'NORMAL',
     'CRAWL',
     'CAUTION',
     'sec_edgar',
     'IntString',
-    'DataPager',
-    'yes_no',
     'sec_dot_gov',
-    'display_size',
-    'reverse_name',
-    'extract_dates',
-    'get_resource',
     'get_identity',
     'pandas_version',
     'python_version',
@@ -62,13 +53,6 @@ __all__ = [
     'strtobool',
     'listify',
     'decode_content',
-    'filter_by_date',
-    'filter_by_form',
-    'filter_by_cik',
-    'filter_by_ticker',
-    'filter_by_exchange',
-    'filter_by_accession_number',
-    'split_camel_case',
     'cache_except_none',
     'text_extensions',
     'binary_extensions',
@@ -80,7 +64,6 @@ __all__ = [
     'has_html_content',
     'default_page_size',
     'parse_acceptance_datetime',
-    'InvalidDateException',
     'PagingState',
     'Years',
     'Quarters',
@@ -260,7 +243,78 @@ def get_identity() -> str:
     return identity
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1)
+def client_headers():
+    return {'User-Agent': get_identity()}
+
+def decode_content(content: bytes):
+    try:
+        return content.decode('utf-8')
+    except UnicodeDecodeError:
+        return content.decode('latin-1')
+
+
+text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
+binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
+                     ".apng")
+
+
+
+def get_bool(value: str = None) -> Optional[bool]:
+    """Convert the value to a boolean"""
+    return value in [1, "1", "Y", "true", "True", "TRUE"]
+
+
+class Result:
+    """
+    This class represents the result of an operation which can succeed or fail.
+    It allows for handling the failures more gracefully that using error handling
+    """
+
+    def __init__(self,
+                 success: bool,
+                 error: Optional[str] = None,
+                 value: Optional[object] = None):
+        self.success = success
+        self.error = error
+        self.value = value
+
+    @property
+    def failure(self) -> bool:
+        """:return True if the operation failed"""
+        return not self.success
+
+    def __str__(self):
+        if self.success:
+            return '[Success]'
+        else:
+            return f'[Failure] "{self.error}"'
+
+    def __repr__(self):
+        if self.success:
+            return f"Result (success={self.success})"
+        else:
+            return f'Result (success={self.success}, message="{self.error}")'
+
+    @classmethod
+    def Fail(cls,
+             error: str):
+        """Create a Result for a failed operation"""
+        return cls(False, error=error, value=None)
+
+    @classmethod
+    def Ok(cls,
+           value: object):
+        """Create a Result for a successful operation"""
+        return cls(success=True, value=value, error=None)
+
+
+def get_resource(file: str):
+    import importlib
+    import edgar
+    return importlib.resources.path(edgar, file)
+
+
 def get_edgar_data_directory() -> Path:
     """Get the edgar data directory"""
     default_local_data_dir = Path(os.path.join(os.path.expanduser("~"), ".edgar"))
@@ -269,81 +323,10 @@ def get_edgar_data_directory() -> Path:
     return edgar_data_dir
 
 
-class InvalidDateException(Exception):
-
-    def __init__(self, message: str):
-        super().__init__(message)
-
-
 class TooManyRequestsException(Exception):
 
     def __init__(self, message: str):
         super().__init__(message)
-
-
-def extract_dates(date_str: str) -> Tuple[Optional[datetime.datetime], Optional[datetime.datetime], bool]:
-    """
-    Split a date or a date range into start_date and end_date
-    Examples:
-        extract_dates("2022-03-04") -> 2022-03-04, None, False
-        extract_dates("2022-03-04:2022-04-05") -> 2022-03-04, 2022-04-05, True
-        extract_dates("2022-03-04:") -> 2022-03-04, <current_date>, True
-        extract_dates(":2022-03-04") -> 1994-07-01, 2022-03-04, True
-
-    Args:
-        date_str: Date string in YYYY-MM-DD format, optionally with a range separator ':'
-
-    Returns:
-        Tuple of (start_date, end_date, is_range) where dates are datetime objects
-        and is_range indicates if this was a date range query
-
-    Raises:
-        InvalidDateException: If the date string cannot be parsed
-    """
-    if not date_str:
-        raise InvalidDateException("Empty date string provided")
-
-    try:
-        # Split on colon, handling the single date case
-        has_colon = ':' in date_str
-        parts = date_str.split(':') if has_colon else [date_str]
-
-        # Handle invalid formats
-        if len(parts) != (2 if has_colon else 1):
-            raise InvalidDateException("Invalid date range format")
-
-        # Parse start date
-        if not has_colon or parts[0]:
-            start_date = datetime.datetime.strptime(parts[0], "%Y-%m-%d")
-        else:
-            start_date = datetime.datetime.strptime('1994-07-01', '%Y-%m-%d')
-
-        # Parse end date
-        if has_colon and parts[1]:
-            end_date = datetime.datetime.strptime(parts[1], "%Y-%m-%d")
-        elif has_colon:
-            end_date = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        else:
-            end_date = None
-
-        # Validate date order if both dates are present
-        if has_colon and end_date and start_date > end_date:
-            raise InvalidDateException(
-                f"Invalid date range: start date ({start_date.date()}) "
-                f"cannot be after end date ({end_date.date()})"
-            )
-
-        return start_date, end_date, has_colon
-
-    except ValueError as e:
-        raise InvalidDateException(f"""
-        Cannot extract a date or date range from string {date_str}
-        Provide either 
-            1. A date in the format "YYYY-MM-DD" e.g. "2022-10-27"
-            2. A date range in the format "YYYY-MM-DD:YYYY-MM-DD" e.g. "2022-10-01:2022-10-27"
-            3. A partial date range "YYYY-MM-DD:" to specify dates after the value e.g.  "2022-10-01:"
-            4. A partial date range ":YYYY-MM-DD" to specify dates before the value  e.g. ":2022-10-27"
-        """) from e
 
 
 def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
@@ -403,75 +386,7 @@ def filter_by_date(data: pa.Table,
     if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
         date = date.strftime('%Y-%m-%d')
 
-    # Extract the date parts ... this should raise an exception if we cannot
-    date_parts = extract_dates(date)
-    start_date, end_date, is_range = date_parts
-    if is_range:
-        filtered_data = data
-        if start_date:
-            filtered_data = filtered_data.filter(pc.field(date_col) >= pc.scalar(start_date))
-        if end_date:
-            filtered_data = filtered_data.filter(pc.field(date_col) <= pc.scalar(end_date))
-    else:
-        # filter by filings on date
-        filtered_data = data.filter(pc.field(date_col) == pc.scalar(start_date))
-    return filtered_data
 
-
-def filter_by_accession_number(data: pa.Table,
-                               accession_number: Union[IntString, List[IntString]]) -> pa.Table:
-    """Return the data filtered by accession number"""
-    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
-    accession_numbers = [str(el) for el in listify(accession_number)]
-    data = data.filter(pc.is_in(data['accession_number'], pa.array(accession_numbers)))
-    return data
-
-
-def filter_by_form(data: pa.Table,
-                   form: Union[str, List[str]],
-                   amendments: bool = True) -> pa.Table:
-    """Return the data filtered by form"""
-    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
-    forms = [str(el) for el in listify(form)]
-    if amendments:
-        forms = list(set(forms + [f"{val}/A" for val in forms]))
-    else:
-        forms = list(set([val.replace("/A", "") for val in forms]))
-    data = data.filter(pc.is_in(data['form'], pa.array(forms)))
-    return data
-
-
-def filter_by_cik(data: pa.Table,
-                  cik: Union[IntString, List[IntString]]) -> pa.Table:
-    """Return the data filtered by form"""
-    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
-    ciks = [int(el) for el in listify(cik)]
-    data = data.filter(pc.is_in(data['cik'], pa.array(ciks)))
-    return data
-
-def filter_by_exchange(data: pa.Table, exchange: Union[str, List[str]]) -> pa.Table:
-    """Return the data filtered by exchange"""
-    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
-    from edgar.reference.tickers import get_company_ticker_name_exchange
-    exchanges = [str(el).upper() for el in listify(exchange)]
-    exchange_df = get_company_ticker_name_exchange()
-    exchange_df = exchange_df[exchange_df.exchange.str.upper().isin(exchanges)]
-    return filter_by_cik(data, exchange_df.cik.tolist())
-
-
-
-def filter_by_ticker(data: pa.Table,
-                     ticker: Union[str, List[str]]) -> pa.Table:
-    """Return the data filtered by form"""
-    # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
-    from edgar.reference.tickers import get_cik_tickers
-    company_tickers = get_cik_tickers()
-    tickers = listify(ticker)
-    filtered_tickers = company_tickers[company_tickers.ticker.isin(tickers)]
-    ciks = filtered_tickers.cik.tolist()
-    return filter_by_cik(data, cik=ciks)
-
-    # return data
 
 
 @lru_cache(maxsize=1)
@@ -488,86 +403,6 @@ def decode_content(content: bytes):
 text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
 binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
                      ".apng")
-
-
-
-
-def repr_df(df, hide_index: bool = True):
-    disp = df.style
-    if hide_index:
-        # TODO
-        # Note this is deprecated in pandas 1.4.0 but needed to support python 3.7/pandas 1.3.5
-        # Should be instead
-        # disp = disp.hide(axis="index")
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            disp = disp.hide_index()
-    return disp._repr_html_()
-
-
-def get_bool(value: str = None) -> Optional[bool]:
-    """Convert the value to a boolean"""
-    return value in [1, "1", "Y", "true", "True", "TRUE"]
-
-
-class Result:
-    """
-    This class represents the result of an operation which can succeed or fail.
-    It allows for handling the failures more gracefully that using error handling
-    """
-
-    def __init__(self,
-                 success: bool,
-                 error: Optional[str] = None,
-                 value: Optional[object] = None):
-        self.success = success
-        self.error = error
-        self.value = value
-
-    @property
-    def failure(self) -> bool:
-        """:return True if the operation failed"""
-        return not self.success
-
-    def __str__(self):
-        if self.success:
-            return '[Success]'
-        else:
-            return f'[Failure] "{self.error}"'
-
-    def __repr__(self):
-        if self.success:
-            return f"Result (success={self.success})"
-        else:
-            return f'Result (success={self.success}, message="{self.error}")'
-
-    @classmethod
-    def Fail(cls,
-             error: str):
-        """Create a Result for a failed operation"""
-        return cls(False, error=error, value=None)
-
-    @classmethod
-    def Ok(cls,
-           value: object):
-        """Create a Result for a successful operation"""
-        return cls(success=True, value=value, error=None)
-
-
-def get_resource(file: str):
-    import importlib
-    import edgar
-    return importlib.resources.path(edgar, file)
-
-
-def display_size(size: Optional[Union[int, str]]) -> str:
-    """
-    :return the size in KB or MB as a string
-    """
-    if size:
-        if isinstance(size, int) or size.isdigit():
-            return humanize.naturalsize(int(size), binary=True).replace("i", "")
-    return ""
 
 
 class DataPager:
@@ -634,77 +469,8 @@ class PagingState:
     page_start: int
     num_records: int
 
-
-
-def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
-             pos='', neg='-', trailneg=''):
-    """Convert Decimal to a money formatted string.
-
-    places:  required number of places after the decimal point
-    curr:    optional currency symbol before the sign (may be blank)
-    sep:     optional grouping separator (comma, period, space, or blank)
-    dp:      decimal point indicator (comma or period)
-             only specify as blank when places is zero
-    pos:     optional sign for positive numbers: '+', space or blank
-    neg:     optional sign for negative numbers: '-', '(', space or blank
-    trailneg:optional trailing minus indicator:  '-', ')', space or blank
-
-    >>> d = Decimal('-1234567.8901')
-    >>> moneyfmt(d, curr='$')
-    '-$1,234,567.89'
-    >>> moneyfmt(d, places=0, sep='.', dp='', neg='', trailneg='-')
-    '1.234.568-'
-    >>> moneyfmt(d, curr='$', neg='(', trailneg=')')
-    '($1,234,567.89)'
-    >>> moneyfmt(Decimal(123456789), sep=' ')
-    '123 456 789.00'
-    >>> moneyfmt(Decimal('-0.02'), neg='<', trailneg='>')
-    '<0.02>'
-
-    """
-    q = Decimal(10) ** -places  # 2 places --> '0.01'
-    sign, digits, exp = value.quantize(q).as_tuple()
-    result = []
-    digits = list(map(str, digits))
-    build, next = result.append, digits.pop
-    if sign:
-        build(trailneg)
-    for i in range(places):
-        build(next() if digits else '0')
-    if places:
-        build(dp)
-    if not digits:
-        build('0')
-    i = 0
-    while digits:
-        build(next())
-        i += 1
-        if i == 3 and digits:
-            i = 0
-            build(sep)
-    build(curr)
-    build(neg if sign else pos)
-    return ''.join(reversed(result))
-
-
-def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
-    """Format a date as a string"""
-    if isinstance(value, str):
-        # if value matches %Y%m%d, then parse it
-        if re.match(r"^\d{8}$", value):
-            value = datetime.datetime.strptime(value, "%Y%m%d")
-        # If value matches %Y%m%d%H%M%s, then parse it
-        elif re.match(r"^\d{14}$", value):
-            value = datetime.datetime.strptime(value, "%Y%m%d%H%M%S")
-        elif re.match(r"^\d{4}-\d{2}-\d{2}$", value):
-            value = datetime.datetime.strptime(value, "%Y-%m-%d")
-        return value.strftime(fmt)
-    else:
-        return value.strftime(fmt)
-
 def parse_acceptance_datetime(acceptance_datetime: str) -> datetime.datetime:
     return datetime.datetime.fromisoformat(acceptance_datetime.replace('Z', '+00:00'))
-
 
 def sample_table(table, n=None, frac=None, replace=False, random_state=None):
     """Take a sample from a pyarrow Table"""
@@ -723,63 +489,6 @@ def sample_table(table, n=None, frac=None, replace=False, random_state=None):
         indices = random.sample(range(len(table)), len(table))
 
     return table.take(indices)
-
-
-def reverse_name(name):
-    # Split the name into parts
-    parts = name.split()
-
-    # Return immediately if there's only one name part
-    if len(parts) == 1:
-        return parts[0].title()
-
-    # Handle the cases where there's a 'Jr', 'Sr', 'II', 'III', 'MD', etc., or 'ET AL'
-    special_parts = ['Jr', 'JR', 'Sr', 'SR', 'II', 'III', 'MD', 'ET', 'AL', 'et', 'al']
-    special_parts_with_period = [part + '.' for part in special_parts if part not in ['II', 'III']] + special_parts
-    special_part_indices = [i for i, part in enumerate(parts) if part in special_parts_with_period or (
-            i > 0 and parts[i - 1].rstrip('.') + ' ' + part.rstrip('.') == 'ET AL')]
-
-    # Extract the special parts and the main name parts
-    special_parts_list = [parts[i] for i in special_part_indices]
-    main_name_parts = [part for i, part in enumerate(parts) if i not in special_part_indices]
-
-    # Handle initials in the name
-    if len(main_name_parts) > 2 and (('.' in main_name_parts[-2] or len(main_name_parts[-2]) == 1)):
-        main_name_parts = [' '.join(main_name_parts[:-2]).title()] + [
-            f"{main_name_parts[-1].title()} {main_name_parts[-2]}"]
-    else:
-        main_name_parts = [part.title() if len(part) > 2 else part for part in main_name_parts]
-
-    # Reverse the main name parts
-    reversed_main_parts = [part for part in main_name_parts[1:]] + [main_name_parts[0]]
-    reversed_name = " ".join(reversed_main_parts)
-
-    # Append the special parts to the reversed name, maintaining their original case
-    if special_parts_list:
-        reversed_name += " " + " ".join(special_parts_list)
-
-    return reversed_name
-
-
-def yes_no(value: bool) -> str:
-    return "Yes" if value else "No"
-
-
-def split_camel_case(item):
-    # Check if the string is all uppercase or all lowercase
-    if item.isupper() or item.islower():
-        return item
-    else:
-        # Split at the boundary between uppercase and lowercase, and between lowercase and uppercase
-        words = re.findall(r'[A-Z]+(?=[A-Z][a-z]|\d|\W|$)|\d+|[A-Z]?[a-z]+|\W+', item)
-        # Join the words, preserving consecutive uppercase words
-        result = []
-        for i, word in enumerate(words):
-            if i > 0 and word.isupper() and words[i - 1].isupper():
-                result[-1] += word
-            else:
-                result.append(word)
-        return ' '.join(result)
 
 
 def run_async_or_sync(coroutine):
@@ -844,19 +553,6 @@ def is_start_of_quarter():
             return True
 
     return False
-
-
-def format_date(date: Union[str, datetime.datetime], fmt: str = "%Y-%m-%d") -> str:
-    """
-    Format a date as a string
-    :param date: The date to format
-    :param fmt: The format to use
-    :return: The formatted date
-    """
-    if isinstance(date, str):
-        return date
-    else:
-        return date.strftime(fmt)
 
 
 def cache_except_none(maxsize=128):

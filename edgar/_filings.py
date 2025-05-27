@@ -31,18 +31,21 @@ from rich.text import Text
 from edgar._markdown import text_to_markdown
 from edgar._party import Address
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
-from edgar.core import (log, display_size, sec_edgar,
-                        filter_by_date,
-                        filter_by_form,
-                        filter_by_cik,
-                        filter_by_exchange,
-                        filter_by_ticker,
-                        filter_by_accession_number,
+from edgar.filters import (
+    filter_by_date,
+    filter_by_form,
+    filter_by_cik,
+    filter_by_exchange,
+    filter_by_ticker,
+    filter_by_accession_number
+)
+from edgar.dates import InvalidDateException
+from edgar.formatting import display_size
+from edgar.core import (log, sec_edgar,
                         listify,
                         cache_except_none,
                         is_start_of_quarter,
                         is_probably_html,
-                        InvalidDateException,
                         IntString,
                         current_year_and_quarter,
                         Years,
@@ -54,6 +57,7 @@ from edgar.core import (log, display_size, sec_edgar,
                         DataPager,
                         PagingState,
                         parallel_thread_map)
+from edgar.formatting import accession_number_text
 from edgar.files.html import Document
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
@@ -792,7 +796,7 @@ class Filings:
         table.add_column("Ticker", width=6, style="yellow")
         table.add_column("Company", style="bold green", width=38, no_wrap=True)
         table.add_column("Filing Date", width=11)
-        table.add_column("Accession Number", style="dim", width=20)
+        table.add_column("Accession Number", width=20)
 
         # Get current page from data pager
         current_page = self.data_pager.current()
@@ -812,7 +816,7 @@ class Filings:
                 ticker,
                 current_page['company'][i].as_py(),
                 str(current_page['filing_date'][i].as_py()),
-                current_page['accession_number'][i].as_py()
+                accession_number_text(current_page['accession_number'][i].as_py())
             ]
             table.add_row(*row)
 

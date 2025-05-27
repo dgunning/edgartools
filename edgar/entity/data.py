@@ -10,6 +10,7 @@ from functools import cached_property
 import pyarrow as pa
 import pyarrow.compute as pc
 import re
+from edgar.formatting import reverse_name
 
 from edgar.entity.filings import EntityFilings
 
@@ -405,8 +406,8 @@ class EntityData:
         # Import using lazy import cache
         is_using_local_storage = lazy_import('edgar.storage.is_using_local_storage')
         listify = lazy_import('edgar.core.listify')
-        filter_by_date = lazy_import('edgar.core.filter_by_date')
-        InvalidDateException = lazy_import('edgar.core.InvalidDateException')
+        filter_by_date = lazy_import('edgar.filters.filter_by_date')
+        InvalidDateException = lazy_import('edgar.dates.InvalidDateException')
         log = lazy_import('edgar.core.log')
         EntityFilings = lazy_import('edgar.entity.filings.EntityFilings')
         
@@ -512,8 +513,8 @@ class EntityData:
         Text = lazy_import('rich.text.Text')
         find_ticker = lazy_import('edgar.reference.tickers.find_ticker')
         zip_longest = lazy_import('itertools.zip_longest')
-        datefmt = lazy_import('edgar.core.datefmt')
-        reverse_name = lazy_import('edgar.core.reverse_name')
+        datefmt = lazy_import('edgar.formatting.datefmt')
+        reverse_name = lazy_import('edgar.formatting.reverse_name')
         
         # Primary entity identification section
         if self.is_company:
@@ -676,8 +677,7 @@ class EntityData:
         """Reverse the name if it is a company"""
         if self.is_company:
             return self.name
-        
-        reverse_name = lazy_import('edgar.core.reverse_name')
+
         return reverse_name(self.name)
         
     @staticmethod

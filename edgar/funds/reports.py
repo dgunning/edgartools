@@ -17,7 +17,8 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.core import moneyfmt, get_bool
+from edgar.core import get_bool
+from edgar.formatting import moneyfmt
 from edgar.funds import FundSeries, FundCompany
 from edgar.reference import cusip_ticker_mapping
 from edgar.richtools import repr_rich, df_to_rich_table
