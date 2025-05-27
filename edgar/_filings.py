@@ -31,7 +31,7 @@ from rich.text import Text
 from edgar._markdown import text_to_markdown
 from edgar._party import Address
 from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
-from edgar.filters import (
+from edgar.filtering import (
     filter_by_date,
     filter_by_form,
     filter_by_cik,

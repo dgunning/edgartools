@@ -24,7 +24,7 @@ from edgar.core import (decode_content,
                         has_html_content,
 
                         parallel_thread_map)
-from edgar.filters import (
+from edgar.filtering import (
     filter_by_form,
     filter_by_cik,
     filter_by_accession_number,
