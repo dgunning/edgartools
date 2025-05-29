@@ -257,11 +257,12 @@ from edgar.xbrl import XBRL
 
 # Parse XBRL data
 company = Company('AAPL')
-filing = company.latest_10k()
+filing = company.get_filings(form='10-K').latest()
+
 xbrl = XBRL.from_filing(filing)
 
 # Access the facts view
-facts = xbrl.facts_view
+facts = xbrl.facts
 
 # Query facts by various attributes
 revenue = facts.query().by_concept('Revenue').to_dataframe()

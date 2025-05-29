@@ -39,7 +39,7 @@ You can download data to local storage by calling the `download_edgar_data()` fu
 The function takes the following parameters so you have the option to download only the data you need.
 
 ```python
-def download_edgar_data(submissions: bool = True,
+download_edgar_data(submissions: bool = True,
                         facts: bool = True,
                         reference: bool = True):
 ```
