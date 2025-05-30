@@ -140,7 +140,7 @@ def test_company_get_filings_for_multiple_forms():
     company: Company = Company("EXPE")
     company_filings = company.get_filings(form=['10-K', '10-Q', '8-K'])
     form_list = pc.unique(company_filings.data['form']).tolist()
-    assert sorted(form_list) == ['10-K', '10-Q', '8-K']
+    assert sorted(form_list) == ['10-K', '10-K/A', '10-Q', '10-Q/A', '8-K', '8-K/A']
 
 
 def test_get_company_for_ticker_lowercase():

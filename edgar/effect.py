@@ -92,6 +92,7 @@ class Effect:
                                           form=self.effectiveness_data.form)
             if len(filings) > 0:
                 return filings[0]
+        return None
 
     @lru_cache(maxsize=1)
     def summary(self) -> pd.DataFrame:

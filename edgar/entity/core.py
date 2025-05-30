@@ -288,11 +288,14 @@ class Entity(SecFiler):
     
     def get_filings(self, 
                    *,
+                   year: Union[int, List[int]] = None,
+                   quarter: Union[int, List[int]] = None,
                    form: Union[str, List] = None,
                    accession_number: Union[str, List] = None,
                    file_number: Union[str, List] = None,
                    filing_date: Union[str, Tuple[str, str]] = None,
                    date: Union[str, Tuple[str, str]] = None,
+                   amendments: bool = True,
                    is_xbrl: bool = None,
                    is_inline_xbrl: bool = None,
                    sort_by: Union[str, List[Tuple[str, str]]] = None,
@@ -306,11 +309,14 @@ class Entity(SecFiler):
         multiple API calls) as needed.
         
         Args:
+            year: The year or list of years to filter by (e.g. 2023, [2022, 2023])
+            quarter: The quarter or list of quarters to filter by (1-4, e.g. 4, [3, 4])
             form: The form as a string e.g. '10-K' or List of strings ['10-Q', '10-K']
             accession_number: The accession number that identifies a filing
             file_number: The file number e.g. 001-39504
             filing_date: Filter by filing date (YYYY-MM-DD or range)
             date: Alias for filing_date
+            amendments: Whether to include amendments (default: True)
             is_xbrl: Whether the filing is XBRL
             is_inline_xbrl: Whether the filing is Inline XBRL
             sort_by: Sort criteria
@@ -322,10 +328,13 @@ class Entity(SecFiler):
         # Simply delegate to the EntityData implementation
         # This preserves the lazy-loading behavior while keeping the API clean
         return self.data.get_filings(
+            year=year,
+            quarter=quarter,
             form=form,
             accession_number=accession_number,
             file_number=file_number,
             filing_date=filing_date or date,
+            amendments=amendments,
             is_xbrl=is_xbrl,
             is_inline_xbrl=is_inline_xbrl,
             sort_by=sort_by,

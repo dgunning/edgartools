@@ -10,7 +10,7 @@ import json
 
 @pytest.fixture
 def tsla():
-    return Company(1771340)
+    return Company("TSLA")
 
 
 def test_parse_entity_submissions():
@@ -150,3 +150,13 @@ def test_company_filing_acceptance_datetime():
     assert c.get_filings().data['acceptanceDateTime']
     acceptance_datetime = c.get_filings().data['acceptanceDateTime'][0].as_py()
     assert isinstance(acceptance_datetime, datetime)
+
+def test_filter_by_year(tsla):
+    filings = tsla.get_filings(year=2024)
+    assert len(filings) > 0
+    assert all(filing.filing_date.year == 2024 for filing in filings)
+
+def test_filter_by_quarter(tsla):
+    filings = tsla.get_filings(year=2024, quarter=1)
+    assert len(filings) > 0
+    assert all(filing.filing_date.year == 2024 and filing.filing_date.month in [1, 2, 3] for filing in filings)

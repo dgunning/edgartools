@@ -74,7 +74,7 @@ def test_effect_filing_source_filing():
 def test_effect_get_source_filing_by_file_number():
     edgar_submission: Effect = Effect.from_xml(effect_xml_2)
     source_filing = edgar_submission.get_source_filing()
-    assert source_filing.form == "S-1"
+    assert source_filing.form in ["S-1", "S-1/A"]
 
 
 def test_effect_repr():

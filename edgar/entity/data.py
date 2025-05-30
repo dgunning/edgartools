@@ -12,9 +12,13 @@ import pyarrow as pa
 import pyarrow.compute as pc
 
 from edgar.dates import InvalidDateException
-from edgar.entity.filings import EntityFilings
 from edgar.filtering import filter_by_date
 from edgar.formatting import reverse_name
+from edgar.core import listify
+from edgar.filtering import filter_by_year_quarter, filter_by_form
+from edgar.entity.filings import EntityFilings
+from edgar.core import log
+from edgar.storage import is_using_local_storage
 
 # Module-level import cache for lazy imports
 _IMPORT_CACHE = {}
@@ -380,11 +384,14 @@ class EntityData:
         self.filings = EntityFilings(combined_tables, cik=self.cik, company_name=self.name)
 
     def get_filings(self,
+                    year: Union[int, List[int]] = None,
+                    quarter: Union[int, List[int]] = None,
                     form: Union[str, List] = None,
                     accession_number: Union[str, List] = None,
                     file_number: Union[str, List] = None,
                     filing_date: Union[str, Tuple[str, str]] = None,
                     date: Union[str, Tuple[str, str]] = None,
+                    amendments: bool = True,
                     is_xbrl: bool = None,
                     is_inline_xbrl: bool = None,
                     sort_by: Union[str, List[Tuple[str, str]]] = None,
@@ -394,11 +401,14 @@ class EntityData:
         Get entity filings with lazy loading behavior.
         
         Args:
+            year: Filter by year(s) (e.g. 2023, [2022, 2023])
+            quarter: Filter by quarter(s) (1-4, e.g. 4, [3, 4])
             form: Filter by form type(s)
             accession_number: Filter by accession number(s)
             file_number: Filter by file number(s)
             filing_date: Filter by filing date (YYYY-MM-DD or range)
             date: Alias for filing_date
+            amendments: Whether to include amendments (default: True)
             is_xbrl: Filter by XBRL status
             is_inline_xbrl: Filter by inline XBRL status
             sort_by: Sort criteria
@@ -407,12 +417,6 @@ class EntityData:
         Returns:
             Filtered filings
         """
-        # Import using lazy import cache
-        is_using_local_storage = lazy_import('edgar.storage.is_using_local_storage')
-        listify = lazy_import('edgar.core.listify')
-
-        log = lazy_import('edgar.core.log')
-        EntityFilings = lazy_import('edgar.entity.filings.EntityFilings')
 
         # Lazy loading behavior
         if not self._loaded_all_filings and not is_using_local_storage() and trigger_full_load:
@@ -422,6 +426,10 @@ class EntityData:
         # Get filings data
         company_filings = self.filings.data
 
+        # Filter by year/quarter first (most selective)
+        if year is not None:
+            company_filings = filter_by_year_quarter(company_filings, year, quarter)
+
         # Filter by accession number
         if accession_number:
             company_filings = company_filings.filter(
@@ -430,10 +438,9 @@ class EntityData:
                 # We found the filing(s)
                 return EntityFilings(company_filings, cik=self.cik, company_name=self.name)
 
-        # Filter by form
+        # Filter by form (with amendments support)
         if form:
-            forms = pa.array([str(f) for f in listify(form)])
-            company_filings = company_filings.filter(pc.is_in(company_filings['form'], forms))
+            company_filings = filter_by_form(company_filings, form, amendments)
 
         # Filter by file number
         if file_number:
