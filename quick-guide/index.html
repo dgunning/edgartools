@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Quick Guide - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quick Guide";
+        var mkdocs_page_input_path = "quick-guide.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Quick Guide</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#working-with-filings">Working with filings 📁</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#getting-filings">🔍 Getting Filings</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#filtering-filings">📄 Filtering Filings</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#viewing-and-manipulating-filings">📊 Viewing and Manipulating Filings</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#working-with-a-filing">Working with a filing 📄</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#accessing-and-viewing-a-filing">🔍 Accessing and viewing a Filing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#extracting-filing-content">📊 Extracting Filing Content</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#searching-inside-a-filing">🔎 Searching inside a Filing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#working-with-attachments">📎 Working with Attachments</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#working-with-a-company">Working with a company</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Quick Guide</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="quick-guide">Quick Guide</h1>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Set your EDGAR identity in Linux/Mac</td>
+<td><code>export EDGAR_IDENTITY="email@domain.com"</code></td>
+</tr>
+<tr>
+<td>Set your EDGAR identity in Windows</td>
+<td><code>set EDGAR_IDENTITY="email@domain.com"</code></td>
+</tr>
+<tr>
+<td>Set identity in Windows Powershell</td>
+<td><code>$env:EDGAR_IDENTITY="email@domain.com"</code></td>
+</tr>
+<tr>
+<td>Set identity in Python</td>
+<td><code>set_identity("email@domain.com")</code></td>
+</tr>
+<tr>
+<td>Importing the library</td>
+<td><code>from edgar import *</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="working-with-filings">Working with filings 📁</h3>
+<h4 id="getting-filings">🔍 Getting Filings</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>📅 Get filings for the year to date</td>
+<td><code>filings = get_filings()</code></td>
+</tr>
+<tr>
+<td>📊 Get only XBRL filings</td>
+<td><code>filings = get_filings(index="xbrl")</code></td>
+</tr>
+<tr>
+<td>📆 Get filings for a specific year</td>
+<td><code>filings = get_filings(2020)</code></td>
+</tr>
+<tr>
+<td>🗓️ Get filings for a specific quarter</td>
+<td><code>filings = get_filings(2020, 1)</code></td>
+</tr>
+<tr>
+<td>📚 Get filings for multiple years</td>
+<td><code>filings = get_filings([2020, 2021])</code></td>
+</tr>
+<tr>
+<td>📈 Get filings for a range of years</td>
+<td><code>filings = get_filings(year=range(2010, 2020))</code></td>
+</tr>
+<tr>
+<td>📈 Get filings released just now</td>
+<td><code>filings = get_latest_filings()</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="filtering-filings">📄 Filtering Filings</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>📝 Filter by form type</td>
+<td><code>filings.filter(form="10-K")</code></td>
+</tr>
+<tr>
+<td>📑 Filter by multiple forms</td>
+<td><code>filings.filter(form=["10-K", "10-Q"])</code></td>
+</tr>
+<tr>
+<td>🔄 Include form amendments</td>
+<td><code>filings.filter(form="10-K", amendments=True)</code></td>
+</tr>
+<tr>
+<td>🏢 Filter by CIK</td>
+<td><code>filings.filter(cik="0000320193")</code></td>
+</tr>
+<tr>
+<td>🏙️ Filter by multiple CIKs</td>
+<td><code>filings.filter(cik=["0000320193", "1018724"])</code></td>
+</tr>
+<tr>
+<td>🏷️ Filter by ticker</td>
+<td><code>filings.filter(ticker="AAPL")</code></td>
+</tr>
+<tr>
+<td>🏷️🏷️ Filter by multiple tickers</td>
+<td><code>filings.filter(ticker=["AAPL", "MSFT"])</code></td>
+</tr>
+<tr>
+<td>📅 Filter on a specific date</td>
+<td><code>filings.filter(date="2020-01-01")</code></td>
+</tr>
+<tr>
+<td>📅↔️📅 Filter between dates</td>
+<td><code>filings.filter(date="2020-01-01:2020-03-01")</code></td>
+</tr>
+<tr>
+<td>📅⬅️ Filter before a date</td>
+<td><code>filings.filter(date=":2020-03-01")</code></td>
+</tr>
+<tr>
+<td>📅➡️ Filter after a date</td>
+<td><code>filings.filter(date="2020-03-01:")</code></td>
+</tr>
+<tr>
+<td>🔀 Combine multiple filters</td>
+<td><code>filings.filter(form="10-K", date="2020-01-01:", ticker="AAPL")</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="viewing-and-manipulating-filings">📊 Viewing and Manipulating Filings</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏭️ Show the next page of filings</td>
+<td><code>filings.next()</code></td>
+</tr>
+<tr>
+<td>⏮️ Show the previous page of filings</td>
+<td><code>filings.previous()</code></td>
+</tr>
+<tr>
+<td>🔝 Get the first n filings</td>
+<td><code>filings.head(20)</code></td>
+</tr>
+<tr>
+<td>🔚 Get the last n filings</td>
+<td><code>filings.tail(20)</code></td>
+</tr>
+<tr>
+<td>🕒 Get the latest n filings by date</td>
+<td><code>filings.latest(20)</code></td>
+</tr>
+<tr>
+<td>🎲 Get a random sample of filings</td>
+<td><code>filings.sample(20)</code></td>
+</tr>
+<tr>
+<td>🐼 Get filings as a pandas dataframe</td>
+<td><code>filings.to_pandas()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="working-with-a-filing">Working with a filing 📄</h3>
+<h4 id="accessing-and-viewing-a-filing">🔍 Accessing and viewing a Filing</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>📌 Get a single filing</td>
+<td><code>filing = filings[3]</code></td>
+</tr>
+<tr>
+<td>🔢 Get a filing by accession number</td>
+<td><code>filing = get_by_accession_number("0000320193-20-34576")</code></td>
+</tr>
+<tr>
+<td>🏠 Get the filing homepage</td>
+<td><code>filing.homepage</code></td>
+</tr>
+<tr>
+<td>🌐 Open a filing in the browser</td>
+<td><code>filing.open()</code></td>
+</tr>
+<tr>
+<td>🏠 Open homepage in the browser</td>
+<td><code>filing.homepage.open()</code></td>
+</tr>
+<tr>
+<td>💻 View the filing in the terminal</td>
+<td><code>filing.view()</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="extracting-filing-content">📊 Extracting Filing Content</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🌐 Get the HTML of the filing</td>
+<td><code>filing.html()</code></td>
+</tr>
+<tr>
+<td>📊 Get the XBRL of the filing</td>
+<td><code>filing.xbrl()</code></td>
+</tr>
+<tr>
+<td>📝 Get the filing as markdown</td>
+<td><code>filing.markdown()</code></td>
+</tr>
+<tr>
+<td>📄 Get the full submission text</td>
+<td><code>filing.full_text_submission()</code></td>
+</tr>
+<tr>
+<td>🔢 Get and parse filing data object</td>
+<td><code>filing.obj()</code></td>
+</tr>
+<tr>
+<td>📑 Get filing header</td>
+<td><code>filing.header</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="searching-inside-a-filing">🔎 Searching inside a Filing</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔍 Search within the filing</td>
+<td><code>filing.search("query")</code></td>
+</tr>
+<tr>
+<td>🔍 Search with regex</td>
+<td><code>filing.search("pattern", regex=True)</code></td>
+</tr>
+<tr>
+<td>📊 Get filing sections</td>
+<td><code>filing.sections()</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="working-with-attachments">📎 Working with Attachments</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>📁 Get all filing attachments</td>
+<td><code>filing.attachments</code></td>
+</tr>
+<tr>
+<td>📄 Get a single attachment</td>
+<td><code>attachment = filing.attachments[0]</code></td>
+</tr>
+<tr>
+<td>🌐 Open attachment in browser</td>
+<td><code>attachment.open()</code></td>
+</tr>
+<tr>
+<td>⬇️ Download an attachment</td>
+<td><code>content = attachment.download()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="working-with-a-company">Working with a company</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Get a company by ticker</td>
+<td><code>company = Company("AAPL")</code></td>
+</tr>
+<tr>
+<td>Get a company by CIK</td>
+<td><code>company = Company("0000320193")</code></td>
+</tr>
+<tr>
+<td>Get company facts</td>
+<td><code>company.get_facts()</code></td>
+</tr>
+<tr>
+<td>Get company facts as a pandas dataframe</td>
+<td><code>company.get_facts().to_pandas()</code></td>
+</tr>
+<tr>
+<td>Get company filings</td>
+<td><code>company.get_filings()</code></td>
+</tr>
+<tr>
+<td>Get company filings by form</td>
+<td><code>company.get_filings(form="10-K")</code></td>
+</tr>
+<tr>
+<td>Get the latest 10-Q</td>
+<td><code>company.latest("10-Q")</code></td>
+</tr>
+<tr>
+<td>Get the last 5 10-Q's</td>
+<td><code>company.get_filings(form="10-Q", 5)</code></td>
+</tr>
+<tr>
+<td>Get a company filing by accession_number</td>
+<td><code>company.get_filing(accession_number="0000320193-21-000139")</code></td>
+</tr>
+<tr>
+<td>Get the company's financials</td>
+<td><code>company.financials</code></td>
+</tr>
+<tr>
+<td>Get the company's balance sheet</td>
+<td><code>company.financials.balance_sheet()</code></td>
+</tr>
+<tr>
+<td>Get the company's income statement</td>
+<td><code>company.financials.income_statement()</code></td>
+</tr>
+<tr>
+<td>Get the company's cash flow statement</td>
+<td><code>company.financials.cashflow_statement()</code></td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../local-data/" class="btn btn-neutral float-left" title="Local Storage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../examples/" class="btn btn-neutral float-right" title="User Journeys">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../local-data/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../examples/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
