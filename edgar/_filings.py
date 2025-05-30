@@ -910,7 +910,7 @@ def get_filings(year: Optional[Years] = None,
                 amendments: bool = True,
                 filing_date: Optional[str] = None,
                 index="form",
-                priority_forms: Optional[List[str]] = None) -> Optional[Filings]:
+                priority_sorted_forms: Optional[List[str]] = None) -> Optional[Filings]:
     """
     Downloads the filing index for a given year or list of years, and a quarter or list of quarters.
 
@@ -947,6 +947,7 @@ def get_filings(year: Optional[Years] = None,
     :param filing_date The filing date to filter by in YYYY-MM-DD format
                 e.g. filing_date="2022-01-17" or filing_date="2022-01-17:2022-02-28"
     :param index The index type - "form" or "company" or "xbrl"
+    :param priority_sorted_forms: A list of forms to sort by priority. This presents these forms first for each day.
     :return:
     """
     # Check if defaults were used
@@ -956,7 +957,7 @@ def get_filings(year: Optional[Years] = None,
                      amendments is True and
                      filing_date is None and
                      index == "form" and
-                     priority_forms is None)
+                     priority_sorted_forms is None)
     if filing_date:
         if not is_valid_filing_date(filing_date):
             log.warning("""Provide a valid filing date in the format YYYY-MM-DD or YYYY-MM-DD:YYYY-MM-DD""")
@@ -993,13 +994,13 @@ def get_filings(year: Optional[Years] = None,
             previous_quarter = [get_previous_quarter(year, quarter)]
             filing_index = get_filings_for_quarters(previous_quarter, index=index)
             filings = Filings(filing_index)
-            sorted_filing_index = sort_filings_by_priority(filings.data, priority_forms)
+            sorted_filing_index = sort_filings_by_priority(filings.data, priority_sorted_forms)
             return Filings(sorted_filing_index)
         # Return an empty filings object
         return Filings(_empty_filing_index())
 
     # Sort the filings using the separate sort function
-    sorted_filing_index = sort_filings_by_priority(filings.data, priority_forms)
+    sorted_filing_index = sort_filings_by_priority(filings.data, priority_sorted_forms)
 
     return Filings(sorted_filing_index)
 
