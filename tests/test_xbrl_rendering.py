@@ -4,6 +4,7 @@ Tests for XBRL2 rendering functionality.
 from pathlib import Path
 import pytest
 from datetime import datetime, date
+import calendar
 from edgar.xbrl.xbrl import XBRL
 from rich import print
 from edgar.richtools import rich_to_text, repr_rich
@@ -86,9 +87,20 @@ def test_format_period_labels_with_date_range():
     
     # Create a quarterly period (90 days)
     end_date = today
-    start_date = date(end_date.year, end_date.month - 3 if end_date.month > 3 else end_date.month + 9, end_date.day)
-    if start_date > end_date:  # Handle year boundary
-        start_date = date(start_date.year - 1, start_date.month, start_date.day)
+    # Calculate target year and month for start_date (3 months prior)
+    start_year = end_date.year
+    start_month = end_date.month - 3
+    if start_month <= 0:
+        start_month += 12
+        start_year -= 1
+    
+    # Get the last day of the target month
+    last_day_of_start_month = calendar.monthrange(start_year, start_month)[1]
+    
+    # Set the day for start_date, ensuring it's not out of range for the month
+    start_day = min(end_date.day, last_day_of_start_month)
+    
+    start_date = date(start_year, start_month, start_day)
     
     # Create period keys and labels
     quarterly_key = f"duration_{start_date.isoformat()}_{end_date.isoformat()}"
