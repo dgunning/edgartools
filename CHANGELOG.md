@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.1.1 - 2025-05-29
+
+### Added
+- Add filter by year and quarter to `Company.get_filings` to make it consistent with `get_filings`
+
+### Changed
+- Rename `priority_forms` to `priority_sorted_forms` in `get_filings` to clarify that it sorts the forms by priority
+- Small enhancement to `EntityFiling` rich display
+- Enhance rich styling of `accession_number` to show its constituent parts
+- Simplify query facts by making "-" and ":" interchangeable in the concept name
+- Rename the `edgar.filters` to `edgar.filtering`
+
 ## [4.1.0] - 2025-05-25
 
 ### Added
