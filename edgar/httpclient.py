@@ -16,7 +16,9 @@ def get_edgar_verify_ssl():
     """
     Returns True if using SSL verification on http requests
     """
-    return os.environ.get("EDGAR_VERIFY_SSL", "true").lower() != "false"
+    falsy = {"0", "false", "no", "n", "off"}
+    value = os.environ.get("EDGAR_VERIFY_SSL", "true").lower()
+    return value not in falsy
 
 
 DEFAULT_PARAMS = {
