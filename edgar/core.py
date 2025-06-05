@@ -259,7 +259,6 @@ binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".
                      ".apng")
 
 
-
 def get_bool(value: str = None) -> Optional[bool]:
     """Convert the value to a boolean"""
     return value in [1, "1", "Y", "true", "True", "TRUE"]
