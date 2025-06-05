@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>SGML - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "SGML";
+        var mkdocs_page_input_path = "sgml.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">SGML</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#understanding-sgml-container-formats">Understanding SGML Container Formats</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#complete-submission-text-file-txt">Complete Submission Text File (.txt)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#non-public-complete-file-nc">Non-Public Complete File (.nc)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#understanding-the-sec-processing-pipeline">Understanding the SEC Processing Pipeline</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#how-edgartools-uses-sgml">How edgartools uses SGML</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#the-filingsgml-class">The FilingSGML class</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parsing-sgml-from-a-file-or-a-url">Parsing SGML from a file or a URL</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#getting-the-attachments">Getting the attachments</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#getting-the-content-of-a-file">Getting the content of a file</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#getting-html">Getting html</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#getting-xml">Getting xml</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">SGML</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="sgml">SGML</h1>
+<p>The SEC EDGAR system uses a specialized subset of SGML (Standard Generalized Markup Language) for regulatory filings. 
+While commonly referred to as SGML, it implements a simplified version with SEC-specific tags and structures. 
+This format has been the backbone of SEC filings since the 1990s, chosen for its ability to maintain consistent document structure while supporting both structured data and free-form text.</p>
+<h2 id="understanding-sgml-container-formats">Understanding SGML Container Formats</h2>
+<p>You might be familiar with SGML from having seeing the <strong>Full Text File (.txt)</strong> or the <strong>(.nc)</strong> formats in SEC filings.</p>
+<p>The SEC EDGAR system actually utilizes two distinct SGML container formats, each serving different purposes in the filing process:</p>
+<h3 id="complete-submission-text-file-txt">Complete Submission Text File (.txt)</h3>
+<p>The .txt format contains the complete submission as received by EDGAR, including all documents, headers, and content. This is the primary public-facing format that preserves the exact submission. A typical .txt container begins with:</p>
+<pre><code>&lt;SEC-DOCUMENT&gt;0000320193-24-000123.txt : 20241101
+&lt;SEC-HEADER&gt;0000320193-24-000123.hdr.sgml : 20241101
+&lt;ACCEPTANCE-DATETIME&gt;20241101060136
+ACCESSION NUMBER:      0000320193-24-000123
+</code></pre>
+<p>The .txt container includes:
+- Full document content
+- SEC headers
+- Metadata
+- All exhibits and attachments
+- Processing timestamps</p>
+<h3 id="non-public-complete-file-nc">Non-Public Complete File (.nc)</h3>
+<p>The .nc format serves as a submission manifest or index file, containing metadata about the filing without the full content. This format is used for processing, validation, and internal SEC workflows. A typical .nc container starts with:</p>
+<pre><code>&lt;SUBMISSION&gt;
+&lt;ACCESSION-NUMBER&gt;0002002260-24-000001
+&lt;TYPE&gt;D
+&lt;PUBLIC-DOCUMENT-COUNT&gt;1
+&lt;ITEMS&gt;06b
+&lt;ITEMS&gt;3C
+</code></pre>
+<p>The .nc container tracks:
+- Submission type and status
+- Document counts
+- Reporting items
+- Cross-reference information
+- Processing instructions
+- Special handling requirements</p>
+<h3 id="understanding-the-sec-processing-pipeline">Understanding the SEC Processing Pipeline</h3>
+<p>Understanding the relationship between these formats is crucial for processing SEC filings:</p>
+<ol>
+<li>Initial submission includes both formats</li>
+<li>.nc file is processed first for validation</li>
+<li>.txt file is processed for content extraction</li>
+<li>Both files are archived for record-keeping</li>
+<li>Public access is primarily to the .txt content</li>
+</ol>
+<p>This dual-format system enables the SEC to maintain separate processing pipelines for submission handling and public access while ensuring comprehensive record-keeping and validation.</p>
+<h2 id="how-edgartools-uses-sgml">How edgartools uses SGML</h2>
+<p>The library uses the SGML to get the attachments and important metadata about the filing.</p>
+<pre><code class="language-python">filing.attachments
+</code></pre>
+<p>the library will get the SGML file and parse it to get the attachments. You will mostly work with the objects and attributes of the <code>Filing</code> class, rather than directly with the SGML file.</p>
+<pre><code class="language-python">    @property
+    def attachments(self):
+        # Return all the attachments on the filing
+        sgml_filing: FilingSGML = self.sgml()
+        return sgml_filing.attachments
+</code></pre>
+<p>The <code>sgml()</code> function will download the SGML file, or read from a file if using <strong>LocalStorage</strong>.</p>
+<h2 id="the-filingsgml-class">The FilingSGML class</h2>
+<p>The <code>FilingSGML</code> class is used to parse the SGML file. It has a few methods to get the attachments, and the text of the filing.</p>
+<h3 id="parsing-sgml-from-a-file-or-a-url">Parsing SGML from a file or a URL</h3>
+<p>The function <code>from_source</code> is used to create a <code>FilingSGML</code> object from a source. The source can be a string representing a file name or a URL, or it can be a <code>Path</code></p>
+<pre><code class="language-python">sgml = FilingSGML.from_source(&quot;https://www.sec.gov/Archives/edgar/data/320193/000032019321000139/0000320193-21-000139.txt&quot;)
+
+# OR
+
+sgml = FilingSGML.from_source(Path(&quot;path/to/0001398344-24-000491.nc&quot;))
+</code></pre>
+<p>This will parse either SGML format and return a <code>FilingSGML</code> object.</p>
+<h3 id="getting-the-attachments">Getting the attachments</h3>
+<p>The <code>attachments</code> property will return an <code>Attachments</code> class that contains the <code>Attachment</code>.</p>
+<pre><code class="language-python">attachments = sgml.attachments
+</code></pre>
+<h3 id="getting-the-content-of-a-file">Getting the content of a file</h3>
+<p>You can get the content of a file using the <code>get_content</code> method.</p>
+<pre><code class="language-python">sgml.get_content(&quot;EX-101.INS&quot;)
+</code></pre>
+<h3 id="getting-html">Getting html</h3>
+<p>You can get the html for the filing using the <code>html</code> method. This will find the primary HTML document in the <code>FilingSGML:</code> attachments, find the html and return it.</p>
+<pre><code class="language-python">html = sgml.html()
+</code></pre>
+<h3 id="getting-xml">Getting xml</h3>
+<p>You can get the xml for the filing using the <code>xml</code> method. This will find the primary XML document in the <code>FilingSGML:</code> attachments, find the xml and return it.
+This function will return None if no XML document is found.</p>
+<pre><code class="language-python">sgml.xml()
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../xbrl/" class="btn btn-neutral float-left" title="XBRL"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../data-objects/" class="btn btn-neutral float-right" title="Data Objects">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../xbrl/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../data-objects/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

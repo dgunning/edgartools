@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>High-Level Design for XBRL Parser for SEC Filings - edgartools</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "High-Level Design for XBRL Parser for SEC Filings";
+        var mkdocs_page_input_path = "xbrl-development/xbrl-parser-design.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../company/">Companies</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">High-Level Design for XBRL Parser for SEC Filings</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="high-level-design-for-xbrl-parser-for-sec-filings">High-Level Design for XBRL Parser for SEC Filings</h1>
+<h2 id="1-system-architecture-overview">1. System Architecture Overview</h2>
+<pre><code>┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  XBRL File      │────▶│  XBRL Parser    │────▶│  Data Model     │
+│  Collection     │     │                 │     │                 │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+                                              ┌─────────────────┐
+                                              │                 │
+                                              │  Statement      │
+                                              │  Generator      │
+                                              │                 │
+                                              └─────────────────┘
+</code></pre>
+<h2 id="2-xbrl-file-parser-component">2. XBRL File Parser Component</h2>
+<h3 id="21-parse-instance-document">2.1 Parse Instance Document</h3>
+<ul>
+<li><strong>Parse XML Structure</strong>: Use an XML parser to read the XBRL instance file</li>
+<li><strong>Extract Entity Information</strong>: Company identifier, reporting period, etc.</li>
+<li><strong>Extract Contexts</strong>:</li>
+<li>Map context IDs to their associated entity, period, and scenario/segment information</li>
+<li>Create a lookup table for period contexts (e.g., "2023-12-31", "2023-01-01 to 2023-12-31")</li>
+<li><strong>Extract Facts</strong>: </li>
+<li>Each fact includes value, unit, decimals, context reference, and element reference</li>
+<li>Store facts in a collection mapped by element ID and context</li>
+<li><strong>Extract Units</strong>: Create mapping of unit IDs to their actual units (USD, shares, etc.)</li>
+<li><strong>Extract Footnotes</strong>: If present, extract and map them to facts</li>
+</ul>
+<h3 id="22-parse-taxonomy-schema-xsd">2.2 Parse Taxonomy Schema (.xsd)</h3>
+<ul>
+<li><strong>Parse Element Declarations</strong>:</li>
+<li>Extract element IDs, names, data types (monetary, string, etc.)</li>
+<li>Identify period types (instant or duration)</li>
+<li>Identify balance types (debit or credit)</li>
+<li>Identify abstract elements (cannot contain values)</li>
+<li><strong>Map Namespaces</strong>: Create namespace mappings for resolving element references</li>
+</ul>
+<h3 id="23-parse-presentation-linkbase">2.3 Parse Presentation Linkbase</h3>
+<ul>
+<li><strong>Create Hierarchical Structure</strong>:</li>
+<li>Parse parent-child relationships</li>
+<li>Maintain ordering information (order attribute)</li>
+<li>Group by extended link roles (ELRs) which define statement sections</li>
+<li><strong>Capture Preferred Labels</strong>: Identify special label roles for presentation</li>
+<li><strong>Build Presentation Tree</strong>: Create a tree structure for each statement/disclosure</li>
+</ul>
+<h3 id="24-parse-label-linkbase">2.4 Parse Label Linkbase</h3>
+<ul>
+<li><strong>Map Elements to Labels</strong>:</li>
+<li>Standard labels (default display)</li>
+<li>Period start/end labels</li>
+<li>Total labels</li>
+<li>Negated labels</li>
+<li>Terse labels</li>
+<li>Documentation labels (definitions)</li>
+<li><strong>Handle Multiple Languages</strong>: Support labels in different languages if present</li>
+</ul>
+<h3 id="25-parse-calculation-linkbase">2.5 Parse Calculation Linkbase</h3>
+<ul>
+<li><strong>Extract Calculation Relationships</strong>:</li>
+<li>Parent-child calculation hierarchies</li>
+<li>Weights (+1/-1) for addition/subtraction</li>
+<li>Group by extended link roles</li>
+<li><strong>Build Calculation Trees</strong>: Create calculation trees for validation and display</li>
+</ul>
+<h3 id="26-parse-definition-linkbase">2.6 Parse Definition Linkbase</h3>
+<ul>
+<li><strong>Parse Dimensional Relationships</strong>:</li>
+<li>Hypercubes (tables)</li>
+<li>Dimensions (axes)</li>
+<li>Domains and domain members</li>
+<li>Default members</li>
+<li><strong>Build Dimensional Structure</strong>: Create dimensional structure for complex tables</li>
+</ul>
+<h2 id="3-data-model-construction">3. Data Model Construction</h2>
+<h3 id="31-core-data-structures">3.1 Core Data Structures</h3>
+<ul>
+<li>
+<p><strong>Element Catalog</strong>:
+  <code>{
+    "elementId": {
+      "name": string,
+      "dataType": string,
+      "periodType": "instant"|"duration",
+      "balance": "debit"|"credit"|null,
+      "abstract": boolean,
+      "labels": {
+        "standard": string,
+        "periodStart": string,
+        "periodEnd": string,
+        "negated": string,
+        "documentation": string,
+        ...
+      }
+    }
+  }</code></p>
+</li>
+<li>
+<p><strong>Context Registry</strong>:
+  <code>{
+    "contextId": {
+      "entity": {
+        "identifier": string,
+        "scheme": string
+      },
+      "period": {
+        "type": "instant"|"duration",
+        "instant": date|null,
+        "startDate": date|null,
+        "endDate": date|null
+      },
+      "dimensions": {
+        "dimensionName": "memberName",
+        ...
+      }
+    }
+  }</code></p>
+</li>
+<li>
+<p><strong>Fact Database</strong>:
+  <code>{
+    "elementId_contextId": {
+      "value": string,
+      "decimals": number|"INF",
+      "unitRef": string,
+      "footnotes": [string]
+    }
+  }</code></p>
+</li>
+</ul>
+<h3 id="32-relationship-structures">3.2 Relationship Structures</h3>
+<ul>
+<li>
+<p><strong>Presentation Hierarchy</strong>:
+  <code>{
+    "roleUri": {
+      "title": string,
+      "root": {
+        "elementId": string,
+        "children": [
+          {
+            "elementId": string,
+            "preferredLabel": string,
+            "order": number,
+            "children": [...]
+          }
+        ]
+      }
+    }
+  }</code></p>
+</li>
+<li>
+<p><strong>Calculation Network</strong>:
+  <code>{
+    "roleUri": {
+      "title": string,
+      "calculations": [
+        {
+          "parent": "elementId",
+          "children": [
+            {
+              "elementId": string,
+              "weight": 1|-1,
+              "order": number
+            }
+          ]
+        }
+      ]
+    }
+  }</code></p>
+</li>
+<li>
+<p><strong>Dimensional Structure</strong>:
+  <code>{
+    "roleUri": {
+      "tables": [
+        {
+          "tableId": string,
+          "axes": [
+            {
+              "axisId": string,
+              "domain": string,
+              "members": [string],
+              "defaultMember": string
+            }
+          ],
+          "lineItems": [string]
+        }
+      ]
+    }
+  }</code></p>
+</li>
+</ul>
+<h2 id="4-statement-construction-process">4. Statement Construction Process</h2>
+<h3 id="41-identify-statement-structure">4.1 Identify Statement Structure</h3>
+<ul>
+<li><strong>Locate Appropriate Presentation Network</strong>:</li>
+<li>Find presentation role URIs that correspond to desired statement</li>
+<li>For example: "http://xbrl.abc.com/role/StatementOfFinancialPosition" for balance sheet</li>
+</ul>
+<h3 id="42-select-time-period">4.2 Select Time Period</h3>
+<ul>
+<li><strong>Identify Relevant Contexts</strong>:</li>
+<li>For balance sheet: find contexts with instant periods for desired dates</li>
+<li>For income statement: find contexts with duration periods for desired date ranges</li>
+</ul>
+<h3 id="43-traverse-presentation-hierarchy">4.3 Traverse Presentation Hierarchy</h3>
+<ul>
+<li><strong>Walk the Presentation Tree</strong>:</li>
+<li>Start at the root element of the relevant presentation network</li>
+<li>Process each element in the tree according to its presentation order</li>
+<li>Handle abstract elements as headers/sections</li>
+<li>Apply preferred labels (e.g., negated, period start/end, total)</li>
+</ul>
+<h3 id="44-retrieve-facts-for-elements">4.4 Retrieve Facts for Elements</h3>
+<ul>
+<li><strong>Map Elements to Facts</strong>:</li>
+<li>For each non-abstract element in the presentation hierarchy</li>
+<li>Lookup facts using element ID and relevant context ID</li>
+<li>Apply appropriate unit and decimal formatting</li>
+</ul>
+<h3 id="45-apply-dimensional-filters">4.5 Apply Dimensional Filters</h3>
+<ul>
+<li><strong>Handle Dimension-Qualified Facts</strong>:</li>
+<li>For tables with dimensions (axes and members)</li>
+<li>Filter facts by dimensional qualifiers</li>
+<li>Group related dimensional facts for display</li>
+</ul>
+<h3 id="46-format-statement">4.6 Format Statement</h3>
+<ul>
+<li><strong>Apply Styling and Indentation</strong>:</li>
+<li>Use presentation hierarchy to determine indentation levels</li>
+<li>Format numeric values based on decimals attribute</li>
+<li>Apply appropriate signage (based on balance type and negated labels)</li>
+<li>Add totals and subtotals as indicated by calculation relationships</li>
+</ul>
+<h2 id="5-specific-example-reconstructing-a-balance-sheet">5. Specific Example: Reconstructing a Balance Sheet</h2>
+<h3 id="51-identify-balance-sheet-network">5.1 Identify Balance Sheet Network</h3>
+<ul>
+<li>Find presentation linkbase role that represents balance sheet</li>
+<li>Example: "http://xbrl.abc.com/role/BalanceSheet"</li>
+</ul>
+<h3 id="52-select-contexts-for-desired-dates">5.2 Select Contexts for Desired Dates</h3>
+<ul>
+<li>Filter contexts to find those with:</li>
+<li>Period type = "instant"</li>
+<li>Period end date = desired reporting date (e.g., "2023-12-31")</li>
+<li>No dimension qualifiers (for base statement)</li>
+</ul>
+<h3 id="53-build-statement-structure">5.3 Build Statement Structure</h3>
+<pre><code>Statement of Financial Position
+│
+├── Assets [Abstract]
+│   ├── Current Assets [Abstract]
+│   │   ├── Cash and Cash Equivalents
+│   │   ├── Accounts Receivable, Net
+│   │   ├── Inventory, Net
+│   │   └── Total Current Assets
+│   │
+│   ├── Non-current Assets [Abstract]
+│   │   ├── Property, Plant and Equipment, Net
+│   │   ├── Goodwill
+│   │   └── Total Non-current Assets
+│   │
+│   └── Total Assets
+│
+└── Liabilities and Stockholders' Equity [Abstract]
+    ├── Liabilities [Abstract]
+    │   ├── Current Liabilities [Abstract]
+    │   │   ├── Accounts Payable
+    │   │   ├── Short-term Debt
+    │   │   └── Total Current Liabilities
+    │   │
+    │   ├── Non-current Liabilities [Abstract]
+    │   │   ├── Long-term Debt
+    │   │   ├── Deferred Tax Liabilities
+    │   │   └── Total Non-current Liabilities
+    │   │
+    │   └── Total Liabilities
+    │
+    ├── Stockholders' Equity [Abstract]
+    │   ├── Common Stock
+    │   ├── Additional Paid-in Capital
+    │   ├── Retained Earnings
+    │   └── Total Stockholders' Equity
+    │
+    └── Total Liabilities and Stockholders' Equity
+</code></pre>
+<h3 id="54-populate-statement-with-facts">5.4 Populate Statement with Facts</h3>
+<ul>
+<li>For each non-abstract element in the hierarchy:</li>
+<li>Look up element in Element Catalog to get its properties</li>
+<li>Find the fact in the Fact Database using element ID and context ID</li>
+<li>Format value using unit and decimals information</li>
+<li>Apply appropriate sign based on element's balance type</li>
+</ul>
+<h3 id="55-validate-totals-using-calculation-relationships">5.5 Validate Totals Using Calculation Relationships</h3>
+<ul>
+<li>Use calculation relationships to check that totals match their components</li>
+<li>Highlight any calculation inconsistencies</li>
+</ul>
+<h3 id="56-generate-final-statement">5.6 Generate Final Statement</h3>
+<ul>
+<li>Output formatted balance sheet with:</li>
+<li>Proper hierarchy/indentation</li>
+<li>Correctly formatted values</li>
+<li>Column(s) for each period</li>
+<li>Appropriate signage</li>
+<li>Computed subtotals and totals</li>
+</ul>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
