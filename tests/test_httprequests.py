@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock
 import httpx
 import pytest
 
-from edgar.httpclient import async_http_client
+from edgar.httpclient import async_http_client, get_edgar_verify_ssl
 
 from edgar.httprequests import (
     get_with_retry,
@@ -16,7 +16,7 @@ from edgar.httprequests import (
     TooManyRequestsError,
     IdentityNotSetException,
     download_file,
-    download_text_between_tags
+    download_text_between_tags,
 )
 
 
@@ -48,16 +48,17 @@ def test_get_with_retry_for_redirect(status_code, monkeypatch):
     with patch("httpx.Client.get", return_value=mock_response):
         with patch("edgar.httprequests.get_with_retry") as mock_retry:
             get_with_retry(url="http://example.com")
-            mock_retry.assert_called_once_with(url="http://example.com/redirected",
-                                               identity=os.environ['EDGAR_IDENTITY'],
-                                               headers={'User-Agent': 'Dev Gunning developer-gunning@gmail.com'},
-                                               identity_callable=None)
+            mock_retry.assert_called_once_with(
+                url="http://example.com/redirected",
+                identity=os.environ["EDGAR_IDENTITY"],
+                headers={"User-Agent": "Dev Gunning developer-gunning@gmail.com"},
+                identity_callable=None,
+            )
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("status_code", [200, 429])
 async def test_get_with_retry_async(status_code):
-
     async with async_http_client() as client:
         mock_response = httpx.Response(status_code=status_code)
         with patch("httpx.AsyncClient.get", return_value=mock_response):
@@ -84,10 +85,13 @@ async def test_get_with_retry_async_for_redirect(status_code):
     with patch("httpx.Client.get", return_value=mock_response):
         with patch("edgar.httprequests.get_with_retry") as mock_retry:
             get_with_retry(url="http://example.com")
-            mock_retry.assert_called_once_with(url="http://example.com/redirected",
-                                            identity=os.environ['EDGAR_IDENTITY'],
-                                            headers={'User-Agent': 'Dev Gunning developer-gunning@gmail.com'},
-                                            identity_callable=None)
+            mock_retry.assert_called_once_with(
+                url="http://example.com/redirected",
+                identity=os.environ["EDGAR_IDENTITY"],
+                headers={"User-Agent": "Dev Gunning developer-gunning@gmail.com"},
+                identity_callable=None,
+            )
+
 
 def test_post_with_retry():
     mock_response = httpx.Response(status_code=200)
@@ -139,9 +143,10 @@ def test_identity_from_environment_variable(monkeypatch):
 @pytest.mark.asyncio
 async def test_get_daily_index_url_async():
     async with async_http_client() as client:
-
-        urls = ['https://www.sec.gov/Archives/edgar/daily-index/2024/QTR2/form.20240502.idx',
-                'https://www.sec.gov/Archives/edgar/daily-index/2024/QTR2/form.20240502.idx']
+        urls = [
+            "https://www.sec.gov/Archives/edgar/daily-index/2024/QTR2/form.20240502.idx",
+            "https://www.sec.gov/Archives/edgar/daily-index/2024/QTR2/form.20240502.idx",
+        ]
         # Use asyncio to run get_with_retry_async
         tasks = [get_with_retry_async(client=client, url=url) for url in urls]
         results = await asyncio.gather(*tasks)
@@ -150,18 +155,33 @@ async def test_get_daily_index_url_async():
 
 
 def test_download_index_file():
-    xbrl_gz = download_file('https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.gz')
+    xbrl_gz = download_file("https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.gz")
     assert isinstance(xbrl_gz, bytes)
     assert len(xbrl_gz) > 10000
 
-    xbrl_idx = download_file('https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.idx')
+    xbrl_idx = download_file("https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.idx")
     assert isinstance(xbrl_idx, str)
 
 
 def test_get_text_between_tags():
-    text = download_text_between_tags(
-        'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt',
-        'SEC-HEADER')
-    assert 'ACCESSION NUMBER:		0001564590-18-004771' in text
+    text = download_text_between_tags("https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt", "SEC-HEADER")
+    assert "ACCESSION NUMBER:		0001564590-18-004771" in text
     assert text.strip().endswith("77079")
 
+
+def test_edgar_verify_ssl(monkeypatch):
+    # True when env variable doesn't exist
+    monkeypatch.delenv("EDGAR_VERIFY_SSL", raising=False)
+    assert get_edgar_verify_ssl()
+
+    # True when env variable set to true
+    monkeypatch.setenv("EDGAR_VERIFY_SSL", "true")
+    assert get_edgar_verify_ssl()
+
+    # True when env variable set to undefined value
+    monkeypatch.setenv("EDGAR_VERIFY_SSL", "unknown")
+    assert get_edgar_verify_ssl()
+
+    # False when env variable set to false
+    monkeypatch.setenv("EDGAR_VERIFY_SSL", "false")
+    assert not get_edgar_verify_ssl()
