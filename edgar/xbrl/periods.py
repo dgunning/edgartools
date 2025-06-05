@@ -7,7 +7,7 @@ This module provides functions for handling periods in XBRL statements, includin
 - Handling fiscal year and quarter information
 """
 
-from datetime import datetime
+from datetime import datetime, date
 from typing import Any, Dict, List, Optional, Tuple
 
 # Configuration for different statement types
@@ -114,6 +114,34 @@ def sort_periods(periods: List[Dict], period_type: str) -> List[Dict]:
         return sorted(periods, key=lambda x: x['date'], reverse=True)
     return sorted(periods, key=lambda x: (x['end_date'], x['start_date']), reverse=True)
 
+def filter_periods_by_document_end_date(periods: List[Dict], document_period_end_date: str, period_type: str) -> List[Dict]:
+    """Filter periods to only include those that end on or before the document period end date."""
+    if not document_period_end_date:
+        return periods
+        
+    try:
+        doc_end_date = datetime.strptime(document_period_end_date, '%Y-%m-%d').date()
+    except (ValueError, TypeError):
+        # If we can't parse the document end date, return all periods
+        return periods
+    
+    filtered_periods = []
+    for period in periods:
+        try:
+            if period_type == 'instant':
+                period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
+                if period_date <= doc_end_date:
+                    filtered_periods.append(period)
+            else:  # duration
+                period_end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                if period_end_date <= doc_end_date:
+                    filtered_periods.append(period)
+        except (ValueError, TypeError):
+            # If we can't parse the period date, include it to be safe
+            filtered_periods.append(period)
+    
+    return filtered_periods
+
 def filter_periods_by_type(periods: List[Dict], period_type: str) -> List[Dict]:
     """Filter periods by their type (instant or duration)."""
     return [p for p in periods if p['type'] == period_type]
@@ -215,13 +243,14 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
     
     # Get all periods
     all_periods = xbrl_instance.reporting_periods
+    document_period_end_date = xbrl_instance.period_of_report
     
     # Filter and sort periods by type
     period_type = config['period_type']
-    periods = sort_periods(
-        filter_periods_by_type(all_periods, period_type),
-        period_type
-    )
+    periods = filter_periods_by_type(all_periods, period_type)
+    # Filter by document period end date to exclude periods after the reporting period
+    periods = filter_periods_by_document_end_date(periods, document_period_end_date, period_type)
+    periods = sort_periods(periods, period_type)
     
     # If this statement type allows annual comparison and this is an annual report,
     # filter for annual periods
@@ -305,14 +334,14 @@ def determine_periods_to_display(
     all_periods = xbrl_instance.reporting_periods
     entity_info = xbrl_instance.entity_info
     fiscal_period_focus = entity_info.get('fiscal_period')
+    document_period_end_date = xbrl_instance.period_of_report
     
     # Filter periods by statement type
     if statement_type == 'BalanceSheet':
-        instant_periods = sorted(
-            [p for p in all_periods if p['type'] == 'instant'],
-            key=lambda x: x['date'],
-            reverse=True
-        )
+        instant_periods = filter_periods_by_type(all_periods, 'instant')
+        # Filter by document period end date to exclude periods after the reporting period
+        instant_periods = filter_periods_by_document_end_date(instant_periods, document_period_end_date, 'instant')
+        instant_periods = sort_periods(instant_periods, 'instant')
         
         # Get fiscal information for better period matching
         fiscal_period_focus = entity_info.get('fiscal_period')
@@ -432,11 +461,10 @@ def determine_periods_to_display(
                     added_count += 1
     
     elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
-        duration_periods = sorted(
-            [p for p in all_periods if p['type'] == 'duration'],
-            key=lambda x: (x['end_date'], x['start_date']),
-            reverse=True
-        )
+        duration_periods = filter_periods_by_type(all_periods, 'duration')
+        # Filter by document period end date to exclude periods after the reporting period
+        duration_periods = filter_periods_by_document_end_date(duration_periods, document_period_end_date, 'duration')
+        duration_periods = sort_periods(duration_periods, 'duration')
         if duration_periods:
             # For annual reports, prioritize annual periods
             if fiscal_period_focus == 'FY':
@@ -525,19 +553,17 @@ def determine_periods_to_display(
         max_periods = statement_info.get('max_periods', 1)
         
         if period_type == 'instant' or period_type == 'either':
-            instant_periods = sort_periods(
-                filter_periods_by_type(all_periods, 'instant'),
-                'instant'
-            )
+            instant_periods = filter_periods_by_type(all_periods, 'instant')
+            instant_periods = filter_periods_by_document_end_date(instant_periods, document_period_end_date, 'instant')
+            instant_periods = sort_periods(instant_periods, 'instant')
             if instant_periods:
                 for period in instant_periods[:max_periods]:
                     periods_to_display.append((period['key'], period['label']))
                     
         if (period_type == 'duration' or (period_type == 'either' and not periods_to_display)):
-            duration_periods = sort_periods(
-                filter_periods_by_type(all_periods, 'duration'),
-                'duration'
-            )
+            duration_periods = filter_periods_by_type(all_periods, 'duration')
+            duration_periods = filter_periods_by_document_end_date(duration_periods, document_period_end_date, 'duration')
+            duration_periods = sort_periods(duration_periods, 'duration')
             if duration_periods:
                 for period in duration_periods[:max_periods]:
                     periods_to_display.append((period['key'], period['label']))

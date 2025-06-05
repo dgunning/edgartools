@@ -1164,7 +1164,7 @@ def render_statement(
     for period_obj in formatted_period_objects:
         # Find matching metadata
         metadata = next((m for m in period_metadatas if m['key'] == period_obj.key), None)
-        if metadata and metadata.get('data_density', 0) > 0:
+        if metadata and metadata.get('data_density', 0) > 0.3:
             filtered_periods.append(period_obj)
     
     # Create the RenderedStatement and its header

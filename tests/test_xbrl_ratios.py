@@ -13,6 +13,7 @@ def comcast_xbrl():
 
 def test_get_ratio_data(comcast_xbrl):
     fr = FinancialRatios(comcast_xbrl)
+    print(comcast_xbrl.statements.balance_sheet())
     
     # Test each ratio category
     for category in ['current', 'operating_margin', 'return_on_assets', 'gross_margin', 'leverage']:
