@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.1.2 - 2025-06-05
+
+### Added
+- Allow SSL verification to be disabled by setting `EDGAR_VERIFY_SSL` to `False`. This is useful for testing purposes or when using self-signed certificates or sometimes in a corporate environment.
+
+### Fixed
+- Fixed bug in selecting periods for quarterly statements 
+
 ## 4.1.1 - 2025-05-29
 
 ### Added
