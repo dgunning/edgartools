@@ -39,7 +39,7 @@ def get_content_between_tags(content: str, outer_tag: str = None) -> str:
     Returns:
         str: Content between the specified tags, or innermost content if no tag specified
     """
-    known_tags = ["XBRL", "XML", "TEXT"]  # Ordered from most nested to least nested
+    known_tags = ["PDF", "XBRL", "XML", "TEXT"]  # Ordered from most nested to least nested
 
     if outer_tag:
         # Extract content for specific tag
