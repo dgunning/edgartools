@@ -1352,9 +1352,22 @@ class XBRLParser:
             def process_element(element):
                 """Process a single element as a potential fact."""
                 nonlocal fact_count
-
+                # Skip annotation nodes and other non element nodes
+                if not ET.iselement(element):
+                    # logger('Skipping non-element: %s', element)
+                    return
                 # Skip known non-fact elements - faster check with set membership
-                tag = element.tag
+                # If the tag is not a string, try calling () to get the string value (in rare cases)
+                if callable(element.tag):
+                    if isinstance(element, ET._Comment):
+                        # logger ('Skipping Comment: %s', element)
+                        return
+                    if not element.values():
+                        # logger ('Skipping non-values: %s', element)
+                        return
+                else:
+                    tag = element.tag
+
                 for ending in skip_tag_endings:
                     if tag.endswith(ending):
                         return
