@@ -14,7 +14,7 @@ from functools import lru_cache, partial
 from functools import wraps
 from pathlib import Path
 from typing import Union, Optional, Tuple, List, TypeVar, Callable, Iterable
-
+from packaging import version
 import httpx
 import pandas as pd
 import pyarrow as pa
@@ -28,9 +28,6 @@ from edgar.datatools import (
 )
 
 log = logging.getLogger(__name__)
-
-# Pandas version
-pandas_version = tuple(map(int, pd.__version__.split('.')))
 
 # sys version
 python_version = tuple(map(int, sys.version.split()[0].split('.')))
@@ -47,7 +44,6 @@ __all__ = [
     'IntString',
     'sec_dot_gov',
     'get_identity',
-    'pandas_version',
     'python_version',
     'set_identity',
     'strtobool',
