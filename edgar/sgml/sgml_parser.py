@@ -49,7 +49,7 @@ class SGMLDocument:
                 output_stream = BytesIO()
 
                 # Decode the UU content
-                uu.decode(input_stream, output_stream)
+                uu.decode(input_stream, output_stream, quiet=True)
 
                 # Get the decoded bytes
                 return output_stream.getvalue()
