@@ -562,7 +562,8 @@ class FactQuery:
         if not results:
             return pd.DataFrame()
 
-        df = pd.DataFrame(results).rename(columns={'period_instant': 'period_end'})
+        results_df = pd.DataFrame(results)
+        df = results_df.rename(columns={'period_instant': 'period_end'})
 
         # Filter columns based on inclusion flags
         if not self._include_dimensions:
@@ -583,7 +584,7 @@ class FactQuery:
 
         # Filter columns if specified
         if columns:
-            df = df.filter(columns)
+            df = df[list(columns)]
         # skip these columns
         skip_columns = ['fact_key', 'original_label', 'period_key']
 
