@@ -29,6 +29,10 @@ from edgar.datatools import (
 
 log = logging.getLogger(__name__)
 
+pandas_version_raw = version.parse(pd.__version__)
+major, minor, patch = pandas_version_raw.major, pandas_version_raw.minor, pandas_version_raw.micro
+pandas_version = (major, minor, patch)
+
 # sys version
 python_version = tuple(map(int, sys.version.split()[0].split('.')))
 
@@ -67,6 +71,7 @@ __all__ = [
     'YearAndQuarters',
     'quarters_in_year',
     'parallel_thread_map',
+    'pandas_version'
 ]
 
 IntString = Union[str, int]

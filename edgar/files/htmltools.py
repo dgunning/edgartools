@@ -11,6 +11,7 @@ import pandas as pd
 from rich import box
 from rich.panel import Panel
 from rich.table import Table
+from edgar.core import pandas_version
 
 from edgar.datatools import compress_dataframe
 from edgar.files.html_documents import HtmlDocument, Block, TableBlock, table_to_markdown
@@ -266,7 +267,6 @@ def chunks2df(chunks: List[List[Block]],
 
     # Foward fill item and parts
     # Handle deprecation warning in fillna(method='ffill')
-    pandas_version = tuple(map(int, pd.__version__.split('.')))
     if pandas_version >= (2, 1, 0):
         chunk_df.Item = chunk_df.Item.ffill().infer_objects(copy=False)
     else:
