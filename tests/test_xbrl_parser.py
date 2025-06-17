@@ -26,3 +26,7 @@ def test_number_of_facts_in_xbrl():
     xb = filing.xbrl()
     num_facts = len(xb.facts)
     print(num_facts)
+
+def test_instance_parsing_xoxo():
+    filing = Filing(form='10-Q', filing_date='2020-05-11', company='ATLANTIC AMERICAN CORP', cik=8177, accession_no='0001140361-20-011243')
+    xb = filing.xbrl()
