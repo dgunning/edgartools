@@ -352,6 +352,7 @@ class ChunkedDocument:
         return result
 
     def list_items(self):
+        # TODO: remove Signature or add to pytest function
         return [item for item in self._chunked_data.Item.drop_duplicates().tolist() if item]
 
     def _chunks_for(self, item_or_part: str, col: str = 'Item'):
@@ -394,7 +395,7 @@ class ChunkedDocument:
         current_segment = [index_list[0]]
         
         for i in range(1, len(index_list)):
-            if index_list[i] == current_segment[-1] + 1:
+            if index_list[i] <= current_segment[-1] + 5:
                 current_segment.append(index_list[i])
             else:
                 continuous_segments.append(current_segment)
