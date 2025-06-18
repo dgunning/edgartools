@@ -385,6 +385,78 @@ class TenQ(CompanyReport):
 
     def __str__(self):
         return f"""TenQ('{self.company}')"""
+    
+    def __getitem__(self, item_or_part: str):
+        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+        item_text = self.chunked_document[item_or_part]
+        return item_text
+    
+    def get_item_with_part(self, part: str, item: str):
+        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+        item_text = self.chunked_document.get_item_with_part(part, item)
+        # remove first line or last line (redundant part information)
+        return item_text
+    
+    def get_structure(self):
+        # Create the main tree
+        tree = Tree("📄 ")
+
+        # Get the actual items from the filing
+        actual_items = self.items
+
+        # Create a mapping of uppercase to actual case items
+        case_mapping = {item.upper(): item for item in actual_items}
+
+        # Process each part in the structure
+        for part, items in self.structure.structure.items():
+            # Create a branch for each part
+            part_tree = tree.add(f"[bold blue]{part}[/]")
+
+            # Add items under each part
+            for item_key, item_data in items.items():
+                # Check if this item exists in the actual filing
+                if item_key in case_mapping:
+                    # Use the actual case from the filing
+                    actual_item = case_mapping[item_key]
+                    item_text = Text.assemble(
+                        (f"{actual_item:<7} ", "bold green"),
+                        (f"{item_data['Title']}", "bold"),
+                    )
+                else:
+                    # Item doesn't exist - show in grey with original structure case
+                    item_text = Text.assemble(
+                        (f"{item_key}: ", "dim"),
+                        (f"{item_data['Title']}", "dim"),
+                    )
+
+                part_tree.add(item_text)
+
+        return tree
+
+    def __rich__(self):
+        title = Text.assemble(
+            (f"{self.company}", "bold deep_sky_blue1"),
+            (" ", ""),
+            (f"{self.form}", "bold"),
+        )
+        periods = Text.assemble(
+            ("Period ending ", "grey70"),
+            (f"{datefmt(self.period_of_report, '%B %d, %Y')}", "bold"),
+            (" filed on ", "grey70"),
+            (f"{datefmt(self.filing_date, '%B %d, %Y')}", "bold"),
+        )
+        panel = Panel(
+            Group(
+                periods,
+                Padding(" ", (1, 0, 0, 0)),
+                self.get_structure(),
+                Padding(" ", (1, 0, 0, 0)),
+                self.financials or Text("No financial data available", style="italic")
+            ),
+            title=title,
+            box=box.ROUNDED,
+        )
+        return panel
 
 
 class TwentyF(CompanyReport):

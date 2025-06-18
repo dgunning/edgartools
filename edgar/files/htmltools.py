@@ -1,4 +1,5 @@
 import re
+import warnings
 from dataclasses import dataclass
 from functools import lru_cache
 from functools import partial
@@ -119,6 +120,25 @@ def detect_signature(text: str) -> bool:
 def detect_int_items(text: pd.Series):
     return text.str.extract(int_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
 
+def detect_part(text: pd.Series) -> pd.Series:
+    """
+    Detect and extract 'Part' sections such as 'PART I', 'Part II', etc., from the given text Series.
+
+    Handles various formats found in SEC filings, including:
+        - 'PART I. Financial Information'
+        - 'Part II'
+        - 'PART III — Executive Overview'
+        - 'This section is PART IV'
+
+    Returns:
+        pd.Series: A series containing the extracted 'Part X' values (uppercase), or NaN if not found.
+    """
+    # Match patterns like 'PART I', 'Part II', 'PART III.', etc.
+    part_pattern = r'^\b(PART\s+[IVXLC]+)\b'
+    # Extract using case-insensitive matching and convert result to uppercase
+    extracted = text.str.extract(part_pattern, flags=re.IGNORECASE | re.MULTILINE, expand=False)
+    # Normalize to uppercase for consistency (e.g., 'Part I' → 'PART I')
+    return extracted.str.upper()
 
 def detect_decimal_items(text: pd.Series):
     return text.str.extract(decimal_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
@@ -258,6 +278,7 @@ def chunks2df(chunks: List[List[Block]],
                                                                           flags=re.IGNORECASE | re.MULTILINE),
                                      Toc=lambda df: df.Text.head(100).apply(detect_table_of_contents),
                                      Empty=lambda df: df.Text.str.contains('^$', na=True),
+                                     Part=lambda df: detect_part(df.Text),
                                      Item=lambda df: item_detector(df.Text)
                                      )
     # If the row is 'toc' then set the item and part to empty
@@ -269,24 +290,30 @@ def chunks2df(chunks: List[List[Block]],
     # Handle deprecation warning in fillna(method='ffill')
     if pandas_version >= (2, 1, 0):
         chunk_df.Item = chunk_df.Item.ffill().infer_objects(copy=False)
+        chunk_df.Part = chunk_df.Part.ffill().infer_objects(copy=False)
     else:
         chunk_df.Item = chunk_df.Item.fillna(method='ffill')
+        chunk_df.Part = chunk_df.Part.fillna(method='ffill')
 
     # After forward fill handle the signature at the bottom
     signature_rows = chunk_df[chunk_df.Signature]
     if len(signature_rows) > 0:
         signature_loc = signature_rows.index[0]
-        chunk_df.loc[signature_loc:, 'Item'] = pd.NA
+        chunk_df.loc[signature_loc:, 'Item'] = "Signature"
+        chunk_df.loc[signature_loc:, 'Part'] = "Signature"
         chunk_df.Signature = chunk_df.Signature.fillna("")
 
     # Fill the Item column with "" then set to title case
     chunk_df.Item = chunk_df.Item.fillna("").str.title()
+    chunk_df.Part = chunk_df.Part.fillna("").str.title()
 
     # Normalize spaces in item
     chunk_df.Item = chunk_df.Item.apply(lambda item: re.sub(r'\s+', ' ', item))
+    chunk_df.Part = chunk_df.Part.apply(lambda part: re.sub(r'\s+', ' ', part).strip())
 
     # Finalize the colums
-    chunk_df = chunk_df[['Text', 'Table', 'Chars', 'Signature', 'TocLink', 'Toc', 'Empty', 'Item']]
+    chunk_df = chunk_df[['Text', 'Table', 'Chars', 'Signature', 'TocLink', 'Toc', 'Empty', 'Part', 'Item']]
+
     return chunk_df
 
 
@@ -343,7 +370,67 @@ class ChunkedDocument:
         for i in mask[mask].index:
             yield self.chunks[i]
 
+    def _chunks_mul_for(self, part: str, item: str):
+        chunk_df = self._chunked_data
+
+        # Handle cases where the item has the decimal point e.g. 5.02
+        part = part.replace('.', r'\.')
+        item = item.replace('.', r'\.')
+        pattern_part = re.compile(rf'^{part}$', flags=re.IGNORECASE)
+        pattern_item = re.compile(rf'^{item}$', flags=re.IGNORECASE)
+
+        item_mask = chunk_df["Item"].str.match(pattern_item)
+        part_mask = chunk_df["Part"].str.match(pattern_part)
+        toc_mask = ~(~chunk_df.Toc.notnull() & chunk_df.Toc)
+        empty_mask = ~chunk_df.Empty
+        mask = part_mask & item_mask & toc_mask & empty_mask
+
+        # Process to keep only consecutive indices, discard non-consecutive head/tail indices with warning
+        index_list = mask[mask].index.to_list()
+        if not index_list:
+            return
+        
+        continuous_segments = []
+        current_segment = [index_list[0]]
+        
+        for i in range(1, len(index_list)):
+            if index_list[i] == current_segment[-1] + 1:
+                current_segment.append(index_list[i])
+            else:
+                continuous_segments.append(current_segment)
+                current_segment = [index_list[i]]
+        
+        continuous_segments.append(current_segment)
+        
+        # retain only the longest continuous segment
+        longest_segment = max(continuous_segments, key=len)
+        
+        # warning dity content
+        if len(continuous_segments) > 1:
+            discarded_indices = []
+            for segment in continuous_segments:
+                if segment != longest_segment:
+                    discarded_indices.extend(segment)
+            warnings.warn(
+                f"Discarded non-continuous indices: {discarded_indices}. "
+                f"""content: {''.join([
+                        ''.join(block.get_text() for block in self.chunks[idx])
+                        for idx in discarded_indices
+                    ])}"""
+            )
+        for i in longest_segment:
+            yield self.chunks[i]
+
     def chunks_for_item(self, item: str):
+        """
+        Returns chunks of text for a given item from the document.
+        
+        Args:
+            item (str): The item name to retrieve chunks for.
+        
+        Returns:
+            List[str]: List of text chunks corresponding to the specified item.
+        """
         return self._chunks_for(item, col='Item')
 
     def chunks_for_part(self, part: str):
@@ -358,9 +445,61 @@ class ChunkedDocument:
                 if isinstance(block, TableBlock):
                     yield block
 
+    def get_item_with_part(self, part: str, item: str):
+        if isinstance(part, str):
+            chunks = list(self._chunks_mul_for(part, item))
+            return "".join(["".join(block.get_text()
+                                for block in chunk)
+                        for chunk in chunks])
+        return ""
+    
+    def get_signature(self):
+        res = self.get_item_with_part("Signature", "Signature")
+        last_line = res.split("\n")[-1]
+        if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
+            res = res.rstrip(last_line)
+        return res
+    
+    def get_introduction(self):
+        """
+        Extract and return the introduction section of the filing document.
+        
+        The introduction is defined as all content before the first valid Part or Item.
+
+        Returns:
+            str: The extracted introduction text, or an empty string if none found.
+        """
+        # Find the first index where Part or Item appears
+        part_indices = self._chunked_data[self._chunked_data.Part != ""].index
+        item_indices = self._chunked_data[self._chunked_data.Item != ""].index
+
+        if len(part_indices) == 0 and len(item_indices) == 0:
+            return ""
+
+        # Use the last one
+        intro_index = max(
+            part_indices[0] if len(part_indices) else float('inf'),
+            item_indices[0] if len(item_indices) else float('inf')
+        )
+
+        if intro_index == 0:
+            return ""
+
+        # Reuse __getitem__ to extract chunks up to min_index
+        res = "".join([
+                "".join(block.get_text() for block in self.chunks[idx])
+                for idx in range(intro_index)
+            ])
+        # clean last line dity data, example 'PART I — FINANCIAL INFORMATION'
+        res = res.rstrip("\n")
+        last_line = res.split("\n")[-1]
+        if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
+            res = res.rstrip(last_line)
+        return res
+        
     def __len__(self):
         return len(self.chunks)
-
+    
     def __getitem__(self, item):
         if isinstance(item, int):
             chunks = [self.chunks[item]]

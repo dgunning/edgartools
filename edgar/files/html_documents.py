@@ -226,7 +226,7 @@ class Block:
     def to_markdown(self) -> str:
         return self.text
 
-    def get_text(self):
+    def get_text(self) -> List[str]:
         return self.text
 
     def is_empty(self):
@@ -303,7 +303,7 @@ class TableBlock(Block):
 
 
 item_pattern = r"(?:ITEM|Item)\s+(?:[0-9]{1,2}[A-Z]?\.?|[0-9]{1,2}\.[0-9]{2})"
-
+part_pattern = r"^\b(PART\s+[IVXLC]+)\b"
 
 class HtmlDocument:
 
@@ -485,9 +485,23 @@ class HtmlDocument:
 
                 # Check if the block is an "Item" header
                 is_item_header = bool(re.match(item_pattern, block.text))
+                is_part_header = bool(re.match(part_pattern, block.text))
 
                 if is_item_header:
                     # Yield the current chunk before starting a new one with the "Item" header
+                    if current_chunk:
+                        if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
+                            yield current_chunk
+
+                    # Initialize the new chunk with the "Item" header
+                    current_chunk = [block]
+
+                    # Update flags accordingly
+                    item_header_detected = True
+                    header_detected = True  # "Item" headers are considered regular headers for flag purposes
+                    accumulating_regular_text = False  # Reset since we're starting a new section
+                elif is_part_header:
+                     # Yield the current chunk before starting a new one with the "Item" header
                     if current_chunk:
                         if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
                             yield current_chunk
@@ -627,11 +641,24 @@ def decompose_toc_links(start_element: Tag):
 
 def decompose_page_numbers(start_element: Tag):
     span_tags_with_numbers = start_element.find_all('span', string=re.compile(r'^\d{1,3}$'))
+    '''
+    <span style="color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%">
+    <a href="#i7bfbfbe54b9647b1b4ba4ff4e0aba09d_73" style="color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%;text-decoration:none">
+    17</a></span>
+    '''
     sequences = []  # To store the sequences of tags for potential review
     current_sequence = []
     previous_number = None
 
     for tag in span_tags_with_numbers:
+        '''
+        some page link need keep
+        <span style="color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%">
+        <a href="#i7bfbfbe54b9647b1b4ba4ff4e0aba09d_73" style="color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%;text-decoration:none">
+        17</a></span>
+        '''
+        if tag.find("a"):
+            continue
         if not tag.text:
             continue
         number = int(tag.text)
