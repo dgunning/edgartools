@@ -1,5 +1,9 @@
 """
-Implements a Hishel cache controller.
+Implements a Hishel cache controller over the HTTPX connections in httpclient. 
+
+Implementation Notes:
+- When the cache is implemented, the rate limiting is controlled by httpclient_cache.LIMITER and throttle_requests in httprequests is disabled. This disabling is intended to be a temporary change: long-term, the httprequests throttling could be removed and all throttling done as decorators to httpx, as implemented here.
+- The LIMITER global 
 
 cache_directory defaults to `Path(core.edgar_data_dir) / "requestcache"`
 
@@ -27,6 +31,8 @@ To enable logging:
 import logging
 logging.getLogger("hishel.controller").setLevel(logging.INFO)
 ```
+
+Alternate rate limiters
 """
 from edgar import httpclient, core, httprequests
 import logging
@@ -35,11 +41,9 @@ import httpcore
 from pathlib import Path
 from functools import partial
 from contextlib import asynccontextmanager
-from limiter import Limiter 
+from typing import Callable
 
 logger = logging.getLogger(__name__)
-
-LIMITER = Limiter(rate=10, capacity=10, units=1)
 
 def custom_key_generator(request: httpcore.Request, body: bytes | None) -> str:
     """ Generates a stable, readable key for a given request.
@@ -52,7 +56,6 @@ def custom_key_generator(request: httpcore.Request, body: bytes | None) -> str:
         str: Persistent key for the request
     """
 
-    
     host = request.url.host.decode()
     url = request.url.target.decode()
 
@@ -71,7 +74,7 @@ def _get_cache_controller(**kwargs):
 
     return controller
 
-def cached_factory(cache_directory: Path | None = None, controller_args: dict | None = None, **kwargs):
+def cached_factory(limiter: Callable, cache_directory: Path | None = None, controller_args: dict | None = None, **kwargs):
     params = httpclient.DEFAULT_PARAMS.copy()
     params["headers"] = httpclient.client_headers()
     params.update(**kwargs)
@@ -86,8 +89,8 @@ def cached_factory(cache_directory: Path | None = None, controller_args: dict | 
     )
 
     handler = client._transport.handle_request
-
-    @LIMITER
+    
+    @limiter
     def decorated_request(req):
         return handler(req)
     client._transport.handle_request = decorated_request
@@ -95,7 +98,7 @@ def cached_factory(cache_directory: Path | None = None, controller_args: dict | 
     return client
 
 @asynccontextmanager
-async def asynccached_factory(cache_directory: Path | None = None, controller_args: dict | None = None, **kwargs):
+async def asynccached_factory(limiter: Callable, cache_directory: Path | None = None, controller_args: dict | None = None, **kwargs):
     params = httpclient.DEFAULT_PARAMS.copy()
     params["headers"] = httpclient.client_headers()
     params.update(**kwargs)
@@ -110,7 +113,8 @@ async def asynccached_factory(cache_directory: Path | None = None, controller_ar
     )
         
     handler = client._transport.handle_async_request
-    @LIMITER
+
+    @limiter
     async def decorated_async_request(req):
         return await handler(req)
     client._transport.handle_async_request = decorated_async_request
@@ -119,14 +123,21 @@ async def asynccached_factory(cache_directory: Path | None = None, controller_ar
         yield client
 
 
+def _init_pyrate_limiter(limit_per_sec: int = 10):
+    from pyrate_limiter import Limiter, Rate, Duration
+    rate = Rate(limit_per_sec, Duration.SECOND)
+    limiter = Limiter(rate, raise_when_fail=False, max_delay=3600)
+    return limiter.as_decorator()(lambda *_: ('constant-key', 1))
 
-
-def install_cached_client(cache_directory: Path | None, controller_args: dict | None = None):
+def install_cached_client(cache_directory: Path | None, controller_args: dict | None = None, limiter: Callable | None = None):
     if cache_directory is None:
         cache_directory = core.get_edgar_data_directory() / "requestcache"
 
+    if limiter is None:
+        limiter = _init_pyrate_limiter()
+
     httprequests.throttle_disabled = True  # Use the RateLimiterTransport
-    httpclient.client_factory_class = partial(cached_factory, cache_directory=cache_directory, controller_args=controller_args)
-    httpclient.asyncclient_factory_class = partial(asynccached_factory, cache_directory=cache_directory, controller_args=controller_args)
+    httpclient.client_factory_class = partial(cached_factory, limiter=limiter, cache_directory=cache_directory, controller_args=controller_args)
+    httpclient.asyncclient_factory_class = partial(asynccached_factory, limiter=limiter, cache_directory=cache_directory, controller_args=controller_args)
 
     httpclient.close_clients()
