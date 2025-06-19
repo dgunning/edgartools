@@ -40,7 +40,7 @@ from edgar.xbrl.standardization import StandardConcept
 from edgar.xbrl.statements import Statement, Statements, StitchedStatement, StitchedStatements
 
 # Export statement stitching functionality
-from edgar.xbrl.stitching import XBRLS, StatementStitcher, render_stitched_statement, stitch_statements, to_pandas
+from edgar.xbrl.stitching import XBRLS, StatementStitcher, render_stitched_statement, stitch_statements, to_pandas, StitchedFactsView, StitchedFactQuery
 from edgar.xbrl.xbrl import XBRL, XBRLFilingWithNoXbrlData
 
 __all__ = [
@@ -58,5 +58,7 @@ __all__ = [
     'RenderedStatement',
     'to_pandas',
     'FactsView',
-    'FactQuery'
+    'FactQuery',
+    'StitchedFactsView',
+    'StitchedFactQuery'
 ]

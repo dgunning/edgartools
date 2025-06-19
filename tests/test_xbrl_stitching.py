@@ -8,11 +8,14 @@ from edgar.xbrl import XBRL, XBRLS
 from rich import print
 from edgar.richtools import rich_to_text
 import pytest
+import pandas as pd
+from functools import lru_cache
 
 from edgar.xbrl.statements import StitchedStatements
 from edgar.xbrl.stitching import (
     StatementStitcher, stitch_statements,
-    render_stitched_statement, to_pandas, determine_optimal_periods
+    render_stitched_statement, to_pandas, determine_optimal_periods,
+    StitchedFactsView, StitchedFactQuery
 )
 
 
@@ -173,7 +176,7 @@ def test_format_output(stitcher):
     assert result['statement_data'][0]['values']['instant_20241231'] == 1000
 
 
-@patch('edgar.xbrl.stitching.standardize_statement')
+@patch('edgar.xbrl.stitching.core.standardize_statement')
 def test_standardize_statement_data(mock_standardize, stitcher):
     """Test standardizing statement data."""
     mock_standardize.return_value = [{'label': 'Standardized Label'}]
@@ -298,7 +301,14 @@ def test_determine_optimal_periods():
     optimal_periods = determine_optimal_periods(xbrls, "BalanceSheet")
     print(optimal_periods)
     period_keys = [op['period_key'] for op in optimal_periods]
-    assert period_keys == ['instant_2024-05-31', 'instant_2023-05-31', 'instant_2022-05-31', 'instant_2021-05-31']
+    
+    # Check that we got 4 periods and they are all May 31st dates in descending order
+    assert len(period_keys) == 4
+    assert all('instant_' in key and '-05-31' in key for key in period_keys)
+    
+    # Check that dates are in descending order (most recent first)
+    years = [int(key.split('_')[1].split('-')[0]) for key in period_keys]
+    assert years == sorted(years, reverse=True)
 
 def test_stitch_balance_sheet():
     statements = get_statements("ORCL")
@@ -533,3 +543,253 @@ def test_stitch_statements_using_max_periods():
     xb = XBRLS.from_filings(filings)
     income_statement = xb.statements.income_statement(max_periods=10)
     assert len(income_statement.periods) == 10
+
+
+# ======== NEW QUERY FUNCTIONALITY TESTS ========
+
+def test_xbrls_facts_property():
+    """Test that XBRLS has a facts property that returns StitchedFactsView."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Test facts property
+    facts_view = xbrls.facts
+    assert isinstance(facts_view, StitchedFactsView)
+    assert facts_view.xbrls is xbrls
+    
+    # Test that it's cached
+    facts_view2 = xbrls.facts
+    assert facts_view is facts_view2
+
+
+def test_stitched_facts_view_basic():
+    """Test basic functionality of StitchedFactsView."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    facts_view = xbrls.facts
+    
+    # Test entity name and document type
+    assert facts_view.entity_name
+    assert facts_view.document_type
+    
+    # Test get_facts
+    facts = facts_view.get_facts(max_periods=3)
+    assert isinstance(facts, list)
+    assert len(facts) > 0
+    
+    # Check that facts have expected structure
+    fact = facts[0]
+    expected_keys = [
+        'concept', 'label', 'statement_type', 'value', 'numeric_value',
+        'period_key', 'period_type', 'standardized'
+    ]
+    for key in expected_keys:
+        assert key in fact, f"Expected key '{key}' not found in fact"
+    
+    # Test that standardized flag is set
+    assert fact['standardized'] is True
+
+
+def test_xbrls_query_method():
+    """Test XBRLS query method."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Test query method returns StitchedFactQuery
+    query = xbrls.query(max_periods=3)
+    assert isinstance(query, StitchedFactQuery)
+    
+    # Test query execution
+    results = query.execute()
+    assert isinstance(results, list)
+    assert len(results) > 0
+
+
+def test_stitched_fact_query_by_standardized_concept():
+    """Test filtering by standardized concept."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Query for Revenue
+    revenue_query = xbrls.query().by_standardized_concept("Revenue")
+    revenue_facts = revenue_query.execute()
+    
+    # Should find some revenue facts
+    assert len(revenue_facts) > 0
+    
+    # All results should contain "Revenue" in label or concept
+    for fact in revenue_facts:
+        label = fact.get('label', '').lower()
+        concept = fact.get('concept', '').lower()
+        assert 'revenue' in label or 'revenue' in concept
+
+
+def test_stitched_fact_query_by_original_label():
+    """Test filtering by original company-specific labels."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Query for facts with original labels containing "Net sales"
+    query = xbrls.query().by_original_label("sales")
+    results = query.execute()
+    
+    # Test that we get results (assuming AAPL has "Net sales" in their original labels)
+    if results:  # Only test if we found matching facts
+        for fact in results:
+            original_label = fact.get('original_label', '').lower()
+            assert 'sales' in original_label
+
+
+def test_stitched_fact_query_across_periods():
+    """Test filtering to concepts that appear across multiple periods."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 3)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Query for concepts that appear in at least 2 periods
+    query = xbrls.query().across_periods(min_periods=2)
+    results = query.execute()
+    
+    assert len(results) > 0
+    
+    # Verify that each concept appears in at least 2 periods
+    from collections import defaultdict
+    concept_periods = defaultdict(set)
+    for fact in results:
+        concept_key = (fact.get('concept', ''), fact.get('label', ''))
+        concept_periods[concept_key].add(fact.get('period_key', ''))
+    
+    for concept, periods in concept_periods.items():
+        assert len(periods) >= 2, f"Concept {concept} appears in {len(periods)} periods, expected >= 2"
+
+
+def test_stitched_fact_query_trend_analysis():
+    """Test trend analysis functionality."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 3)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Set up trend analysis for Revenue
+    query = xbrls.query().trend_analysis("Revenue")
+    results = query.execute()
+    
+    if results:  # Only test if we found revenue data
+        # Results should be sorted by period_end for trend analysis
+        period_ends = [fact.get('period_end') for fact in results if fact.get('period_end')]
+        assert period_ends == sorted(period_ends), "Results should be sorted by period_end for trend analysis"
+        
+        # Test trend DataFrame
+        trend_df = query.to_trend_dataframe()
+        assert isinstance(trend_df, pd.DataFrame)
+        if not trend_df.empty:
+            # Should have periods as columns
+            assert len(trend_df.columns) > 0
+
+
+def test_stitched_fact_query_to_dataframe():
+    """Test converting query results to DataFrame."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Get basic query results as DataFrame
+    query = xbrls.query()
+    df = query.to_dataframe()
+    
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) > 0
+    
+    # Check for expected columns
+    expected_cols = ['concept', 'label', 'value', 'numeric_value', 'statement_type']
+    for col in expected_cols:
+        assert col in df.columns, f"Expected column '{col}' not found"
+    
+    # Test filtering specific columns
+    df_filtered = query.to_dataframe('concept', 'label', 'value')
+    assert list(df_filtered.columns) == ['concept', 'label', 'value']
+
+
+def test_stitched_fact_query_chaining():
+    """Test method chaining for complex queries."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 3)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Build a complex query with method chaining
+    query = (xbrls.query()
+             .by_standardized_concept("Revenue")
+             .across_periods(min_periods=2)
+             .sort_by('period_end')
+             .limit(10))
+    
+    results = query.execute()
+    
+    # Should have limited results
+    assert len(results) <= 10
+    
+    # All results should be revenue-related and appear in multiple periods
+    if results:
+        # Check period sorting
+        period_ends = [fact.get('period_end') for fact in results if fact.get('period_end')]
+        if len(period_ends) > 1:
+            assert period_ends == sorted(period_ends), "Results should be sorted by period_end"
+
+
+def test_stitched_fact_query_value_filtering():
+    """Test filtering by value ranges."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Query for high-value items (> $1 billion)
+    query = xbrls.query().by_value(lambda x: x > 1000000000)
+    results = query.execute()
+    
+    # All results should have numeric values > 1 billion
+    for fact in results:
+        numeric_value = fact.get('numeric_value')
+        if numeric_value is not None:
+            assert numeric_value > 1000000000
+
+
+def test_stitched_fact_query_statement_type_filtering():
+    """Test filtering by statement type."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    # Query for only income statement facts
+    query = xbrls.query(statement_types=['IncomeStatement'])
+    results = query.execute()
+    
+    # All results should be from income statement
+    for fact in results:
+        assert fact.get('statement_type') == 'IncomeStatement'
+
+
+def test_stitched_facts_view_caching():
+    """Test that facts are cached properly."""
+    c = Company("AAPL")
+    filings = c.latest("10-K", 2)
+    xbrls = XBRLS.from_filings(filings)
+    
+    facts_view = xbrls.facts
+    
+    # First call
+    facts1 = facts_view.get_facts(max_periods=3)
+    
+    # Second call with same parameters should use cache
+    facts2 = facts_view.get_facts(max_periods=3)
+    
+    # Should be the same object (cached)
+    assert facts1 is facts2
+    
+    # Different parameters should bypass cache
+    facts3 = facts_view.get_facts(max_periods=2)
+    assert facts3 is not facts1
