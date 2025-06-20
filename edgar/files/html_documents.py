@@ -242,6 +242,30 @@ class Block:
     def __repr__(self):
         return self.text
 
+class LinkBlock(Block):
+    
+    def __init__(self, text: str, tag:str, alt:str, src:str, **tags):
+        super().__init__(text, **tags)
+        self.tag = tag
+        self.alt = alt
+        self.src = src
+        self.inline: bool = True
+
+    def get_text(self):    
+        return f'<{self.tag} alt="{self.alt}" src="{self.src}">'
+        # return ''
+
+    def to_markdown(self, prefix_src:str=""):
+        return f"![alt  {self.alt}]({prefix_src}/{self.src})\n"
+    
+    def get_complete_text(self, prefix_src:str):
+        return f'<{self.tag} alt="{self.alt}" src="{prefix_src}/{self.src}">\n'
+
+    def __str__(self):
+        return "LinkBlock"
+
+    def __repr__(self):
+        return self.text
 
 class TextBlock(Block):
 
@@ -487,8 +511,8 @@ class HtmlDocument:
                 is_item_header = bool(re.match(item_pattern, block.text))
                 is_part_header = bool(re.match(part_pattern, block.text))
 
-                if is_item_header:
-                    # Yield the current chunk before starting a new one with the "Item" header
+                if is_part_header:
+                     # Yield the current chunk before starting a new one with the "Part" header
                     if current_chunk:
                         if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
                             yield current_chunk
@@ -497,11 +521,11 @@ class HtmlDocument:
                     current_chunk = [block]
 
                     # Update flags accordingly
-                    item_header_detected = True
+                    item_header_detected = False
                     header_detected = True  # "Item" headers are considered regular headers for flag purposes
                     accumulating_regular_text = False  # Reset since we're starting a new section
-                elif is_part_header:
-                     # Yield the current chunk before starting a new one with the "Item" header
+                elif is_item_header:
+                    # Yield the current chunk before starting a new one with the "Item" header
                     if current_chunk:
                         if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
                             yield current_chunk
@@ -535,6 +559,11 @@ class HtmlDocument:
                         header_detected = False
                         item_header_detected = False
                     current_chunk.append(block)
+            elif isinstance(block, LinkBlock):
+                analysis = False
+                is_regular_text = False
+                is_item_header = False
+                yield [block]
 
             # Check to yield the remaining chunk if it's the last block
             if i == len(self.blocks) - 1 and current_chunk:
@@ -547,12 +576,20 @@ def extract_and_format_content(element) -> List[Block]:
     Recursively extract and format content from an element,
     applying special formatting to tables and concatenating text for other elements.
     """
-
     if element.name == 'table':
         table_block = TableBlock(table_element=element, rows=len(element.find_all("tr")))
         return [table_block]
     elif element.name in ['ul', 'ol']:
         return [TextBlock(text=fixup(element.text), element=element.name, text_type='list')]
+    elif element.name in ["img", ]:
+        return [
+                LinkBlock(text=str(element),
+                          tag=element.name,
+                          element=element.name, 
+                          alt=element.get('alt'),
+                          src=element.get('src'),
+                          text_type='string')
+                ]
     else:
         inline = is_inline(element)
         blocks: List[Block] = []

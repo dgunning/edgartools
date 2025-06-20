@@ -15,7 +15,7 @@ from rich.table import Table
 from edgar.core import pandas_version
 
 from edgar.datatools import compress_dataframe
-from edgar.files.html_documents import HtmlDocument, Block, TableBlock, table_to_markdown
+from edgar.files.html_documents import HtmlDocument, Block, TableBlock, LinkBlock, table_to_markdown
 from edgar.richtools import repr_rich
 
 __all__ = [
@@ -285,7 +285,6 @@ def chunks2df(chunks: List[List[Block]],
     chunk_df.loc[chunk_df.Toc.notnull() & chunk_df.Toc, 'Item'] = ""
     # if item_adjuster:
     # chunk_df = item_adjuster(chunk_df, **{'item_structure': item_structure, 'item_detector': item_detector})
-
     # Foward fill item and parts
     # Handle deprecation warning in fillna(method='ffill')
     if pandas_version >= (2, 1, 0):
@@ -330,14 +329,17 @@ class ChunkedDocument:
 
     def __init__(self,
                  html: str,
-                 chunk_fn: Callable[[List], pd.DataFrame] = chunks2df):
+                 chunk_fn: Callable[[List], pd.DataFrame] = chunks2df,
+                 prefix_src: str = ""):
         """
         :param html: The filing html
         :param chunk_fn: A function that converts the chunks to a dataframe
+        :param file_path: The path to the filing
         """
         self.chunks = chunk(html)
         self._chunked_data = chunk_fn(self.chunks)
         self.chunk_fn = chunk_fn
+        self.prefix_src = prefix_src
 
     @lru_cache(maxsize=4)
     def as_dataframe(self):
@@ -445,21 +447,42 @@ class ChunkedDocument:
             for block in chunk:
                 if isinstance(block, TableBlock):
                     yield block
+    
+    def assemble_block_text(self, chunks: List[Block]):
+
+        if self.prefix_src:
+            for chunk in chunks:
+                for block in chunk:
+                    if isinstance(block, LinkBlock):
+                        yield block.to_markdown(prefix_src=self.prefix_src)
+                    else:
+                        yield block.get_text()
+        else:
+            for chunk in chunks:
+                yield "".join([block.get_text() for block in chunk])
 
     def get_item_with_part(self, part: str, item: str):
         if isinstance(part, str):
             chunks = list(self._chunks_mul_for(part, item))
-            return "".join(["".join(block.get_text()
-                                for block in chunk)
-                        for chunk in chunks])
+            return self.clean_part_line("".join([text for text in self.assemble_block_text(chunks)]))
         return ""
+    
+    @staticmethod
+    def clean_part_line(text:str):
+        # clean last line dity data, example 'PART I — FINANCIAL INFORMATION'
+        res = text.rstrip("\n")
+        last_line = res.split("\n")[-1]
+        if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
+            res = res.rstrip(last_line)
+        return res
     
     def get_signature(self):
         res = self.get_item_with_part("Signature", "Signature")
         last_line = res.split("\n")[-1]
         if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
             res = res.rstrip(last_line)
-        return res
+        return self.clean_part_line(res)
+
     
     def get_introduction(self):
         """
@@ -487,16 +510,12 @@ class ChunkedDocument:
             return ""
 
         # Reuse __getitem__ to extract chunks up to min_index
-        res = "".join([
-                "".join(block.get_text() for block in self.chunks[idx])
-                for idx in range(intro_index)
-            ])
-        # clean last line dity data, example 'PART I — FINANCIAL INFORMATION'
-        res = res.rstrip("\n")
-        last_line = res.split("\n")[-1]
-        if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
-            res = res.rstrip(last_line)
-        return res
+        res = "".join(
+            [text for text in
+                self.assemble_block_text(
+                    [self.chunks[idx] for idx in range(intro_index)]
+            )])
+        return self.clean_part_line(res)
         
     def __len__(self):
         return len(self.chunks)
@@ -511,9 +530,7 @@ class ChunkedDocument:
         if len(chunks) == 0:
             return None
         # render the nested List of List [str]
-        return "".join(["".join(block.get_text()
-                                for block in chunk)
-                        for chunk in chunks])
+        return "".join([text for text in self.assemble_block_text(chunks)])
 
     def __iter__(self):
         return iter(self.chunks)

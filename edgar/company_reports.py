@@ -259,10 +259,31 @@ class TenK(CompanyReport):
     @property
     def directors_officers_and_governance(self):
         return self['Item 10']
+    
+    @property
+    @lru_cache(maxsize=1)
+    def chunked_document(self):
+        return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
     def __str__(self):
         return f"""TenK('{self.company}')"""
 
+    def __getitem__(self, item_or_part: str):
+        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+        item_text = self.chunked_document[item_or_part]
+        if item_text:
+            item_text = item_text.rstrip()
+            last_line = item_text.split("\n")[-1]
+            if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
+                item_text = item_text.rstrip(last_line)
+        return item_text
+
+    def get_item_with_part(self, part: str, item: str):
+        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+        item_text = self.chunked_document.get_item_with_part(part, item)
+        # remove first line or last line (redundant part information)
+        return item_text
+    
     def get_structure(self):
         # Create the main tree
         tree = Tree("📄 ")
@@ -396,6 +417,11 @@ class TenQ(CompanyReport):
         item_text = self.chunked_document.get_item_with_part(part, item)
         # remove first line or last line (redundant part information)
         return item_text
+    
+    @property
+    @lru_cache(maxsize=1)
+    def chunked_document(self):
+        return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
     
     def get_structure(self):
         # Create the main tree
