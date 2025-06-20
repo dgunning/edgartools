@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import pandas as pd
 from rich import box
-from rich.table import Table
+from rich.table import Table, Column
 from rich.text import Text
 from rich.console import Group
 from rich.markdown import Markdown
@@ -52,9 +52,6 @@ class FactQuery:
         self._sort_ascending = True
         self._limit = None
         self._statement_type = None
-
-    def __str__(self):
-        return f"FactQuery(filters={self._filters})"
 
     def by_concept(self, pattern: str, exact: bool = False) -> FactQuery:
         """
@@ -562,8 +559,8 @@ class FactQuery:
         if not results:
             return pd.DataFrame()
 
-        results_df = pd.DataFrame(results)
-        df = results_df.rename(columns={'period_instant': 'period_end'})
+        df = pd.DataFrame(results)
+        #df = results_df.rename(columns={'period_instant': 'period_end'})
 
         # Filter columns based on inclusion flags
         if not self._include_dimensions:
@@ -584,13 +581,15 @@ class FactQuery:
 
         # Filter columns if specified
         if columns:
+            columns = [col for col in columns if col in df.columns]
             df = df[list(columns)]
         # skip these columns
         skip_columns = ['fact_key', 'original_label', 'period_key']
 
         # order columns
         first_columns = [col for col in
-                         ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'decimals', 'statement_type', 'statement_role']
+                         ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'period_instant',
+                          'decimals', 'statement_type', 'statement_role']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns
                                    if col not in first_columns
@@ -620,10 +619,13 @@ class FactQuery:
         )
 
 
-        display_columns = [col for col in ['label', 'concept', 'value', 'period_start', 'period_end', 'statement_type']
+        display_columns = [col for col in ['concept','label', 'value', 'period_start', 'period_end']
                            if col in columns]
+        # What is the maximum width of the concept column?
+        max_width = df.concept.apply(len).max()
+        rich_columns = [Column('concept', width=max_width)] + display_columns[1:]
         df = df[display_columns]
-        table = Table(*display_columns, show_header=True, header_style="bold", box=box.SIMPLE)
+        table = Table(*rich_columns, show_header=True, header_style="bold", box=box.SIMPLE)
         for t in df.itertuples(index=False):
             row = []
             for i in t:

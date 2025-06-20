@@ -15,6 +15,12 @@ def intc_xbrl():
     xbrl = XBRL.from_filing(filing)
     return xbrl
 
+@pytest.fixture(scope='module')
+def aapl_xbrl():
+    f = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01',
+               accession_no='0000320193-24-000123')
+    return f.xbrl()
+
 
 def test_get_all_facts(intc_xbrl: XBRL):
     facts_view: FactsView = intc_xbrl.facts
@@ -245,3 +251,10 @@ def test_xbrl_facts_repr(intc_xbrl):
     query_repr = repr(query)
     print(query_repr)
     #assert "us-gaap:Assets" in query_repr
+
+def test_facts_to_dataframe_has_correct_columns(aapl_xbrl):
+    revenue_query = aapl_xbrl.query().by_concept("us-gaap:Revenues")
+    df = revenue_query.to_dataframe()
+    columns = df.columns.tolist()
+    # Assert that the columns are unique and not duplicated
+    assert len(columns) == len(set(columns)), "Columns are duplicated in the DataFrame"
