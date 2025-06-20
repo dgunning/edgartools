@@ -622,7 +622,7 @@ class FactQuery:
         display_columns = [col for col in ['concept','label', 'value', 'period_start', 'period_end']
                            if col in columns]
         # What is the maximum width of the concept column?
-        max_width = df.concept.apply(len).max()
+        max_width = df.concept.apply(len).max() if 'concept' in df.columns else 20
         rich_columns = [Column('concept', width=max_width)] + display_columns[1:]
         df = df[display_columns]
         table = Table(*rich_columns, show_header=True, header_style="bold", box=box.SIMPLE)
