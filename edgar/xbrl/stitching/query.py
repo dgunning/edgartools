@@ -554,8 +554,8 @@ class StitchedFactQuery(FactQuery):
         if not results:
             return pd.DataFrame()
         
-        results_df = pd.DataFrame(results)
-        df = results_df.rename(columns={'period_instant': 'period_end'})
+        df = pd.DataFrame(results)
+        df['value'] = df['value'].astype(str)  # Ensure value is string for display
         
         # Filter columns based on inclusion flags
         if not self._include_dimensions:

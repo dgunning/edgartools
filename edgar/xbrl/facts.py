@@ -560,7 +560,6 @@ class FactQuery:
             return pd.DataFrame()
 
         df = pd.DataFrame(results)
-        #df = results_df.rename(columns={'period_instant': 'period_end'})
 
         # Filter columns based on inclusion flags
         if not self._include_dimensions:
