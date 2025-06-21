@@ -97,9 +97,12 @@
     "us-gaap_PrepaidExpenseAndOtherAssetsCurrent",
     "us-gaap_PrepaidExpenseCurrent"
   ],
-  "Marketable Securities": [
+  "Current Marketable Securities": [
     "us-gaap_AvailableForSaleSecuritiesDebtSecuritiesCurrent",
     "us-gaap_MarketableSecuritiesCurrent"
+  ],
+    "Non Current Marketable Securities": [
+    "us-gaap_MarketableSecuritiesNoncurrent"
   ],
   "Total Current Assets": [
     "us-gaap_AssetsCurrent"
