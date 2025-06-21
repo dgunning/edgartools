@@ -5,7 +5,7 @@ This module contains the XBRLS class which represents multiple XBRL filings
 stitched together for multi-period analysis.
 """
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 
 import pandas as pd
 
@@ -45,9 +45,10 @@ class XBRLS:
         self._stitched_facts_view = None
     
     @classmethod
-    def from_filings(cls, filings: List[Any]) -> 'XBRLS':
+    def from_filings(cls, filings: Union['Filings', List[Any]]) -> 'XBRLS':
         """
-        Create an XBRLS object from a list of Filing objects.
+        Create an XBRLS object from a list of Filing objects or a Filings object containing multiple filings.
+        Each filing should be the same form (e.g., 10-K, 10-Q) and from the same company.
         
         Args:
             filings: List of Filing objects, should be from the same company
