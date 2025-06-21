@@ -242,18 +242,21 @@ class FactQuery:
                                   parse_date(f['period_end']) <= end_obj))
         return self
 
-    def by_dimension(self, dimension: str, value: Optional[str] = None) -> FactQuery:
+    def by_dimension(self, dimension: Optional[str], value: Optional[str] = None) -> FactQuery:
         """
         Filter facts by dimension.
         
         Args:
-            dimension: Dimension name
+            dimension: Dimension name, or None to filter for facts with no dimensions
             value: Optional dimension value to filter by
             
         Returns:
             Self for method chaining
         """
-        if value:
+        if dimension is None:
+            # Filter for facts with no dimensions
+            self._filters.append(lambda f: not any(key.startswith('dim_') for key in f.keys()))
+        elif value:
             self._filters.append(lambda f: f'dim_{dimension}' in f and f[f'dim_{dimension}'] == value)
         else:
             self._filters.append(lambda f: f'dim_{dimension}' in f)
@@ -585,10 +588,17 @@ class FactQuery:
         # skip these columns
         skip_columns = ['fact_key', 'original_label', 'period_key']
 
+        if 'statement_role' in df.columns:
+            # Change the statement_role to statement name
+            df['statement_name'] = df.statement_role.fillna('').apply(lambda s: s.split('/')[-1] if s else None)
+            # Remove statement_role column if it exists
+            if 'statement_role' in df.columns:
+                df = df.drop(columns=['statement_role'])
+
         # order columns
         first_columns = [col for col in
                          ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'period_instant',
-                          'decimals', 'statement_type', 'statement_role']
+                          'decimals', 'statement_type', 'statement_name']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns
                                    if col not in first_columns

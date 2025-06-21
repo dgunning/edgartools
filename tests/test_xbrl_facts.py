@@ -6,7 +6,9 @@ from edgar import Company, Filing
 from edgar.xbrl import XBRL, FactsView
 from edgar.xbrl.facts import FactQuery
 from rich import print
+import pandas as pd
 
+pd.options.display.max_rows = 1000
 
 
 @pytest.fixture(scope='module')
@@ -258,3 +260,30 @@ def test_facts_to_dataframe_has_correct_columns(aapl_xbrl):
     columns = df.columns.tolist()
     # Assert that the columns are unique and not duplicated
     assert len(columns) == len(set(columns)), "Columns are duplicated in the DataFrame"
+
+
+def test_query_by_dimension(aapl_xbrl):
+    # Test querying by dimension
+    facts = (aapl_xbrl
+             .query()
+             .by_text("Revenue")
+             .by_dimension(dimension='us-gaap_StatementBusinessSegmentsAxis', value='aapl:AmericasSegmentMember')
+             )
+    df = facts.to_dataframe('concept', 'label', 'value', 'dim_us-gaap_StatementBusinessSegmentsAxis')
+    print(df)
+    assert len(df) == 3
+
+def test_query_by_dimension_none(aapl_xbrl):
+    # Test querying by dimension
+    facts = (aapl_xbrl
+             .query()
+             .by_text("Revenue")
+             )
+    assert any('dim' in col for col in facts.to_dataframe().columns)
+    facts = (aapl_xbrl
+             .query()
+             .by_text("Revenue")
+             .by_dimension(None)
+             )
+    print(facts.to_dataframe().columns.tolist())
+    assert not any('dim' in col for col in facts.to_dataframe().columns)
