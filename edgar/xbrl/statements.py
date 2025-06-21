@@ -831,8 +831,7 @@ class Statements:
             pandas DataFrame containing the statement data
         """
         statement = self[statement_type]
-        if standard:
-            return statement.render(period_view=period_view, standard=standard).to_dataframe()
+        return statement.render(period_view=period_view, standard=standard).to_dataframe()
 
 
 class StitchedStatement:
@@ -936,15 +935,6 @@ class StitchedStatement:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
-
-    def __str__(self) -> str:
-        """
-        String representation.
-        
-        Returns:
-            String representation
-        """
-        return f"StitchedStatement({self.statement_type}, periods={len(self.statement_data['periods'])})"
 
 
 class StitchedStatements:
