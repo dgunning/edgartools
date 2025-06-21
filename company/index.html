@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Companies - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Companies";
+        var mkdocs_page_input_path = "company.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Filings</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Companies</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#find-by-ticker">Find by Ticker</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#find-by-cik">Find by CIK</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#find-a-company-using-the-cik">Find a company using the cik</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#find-a-company-using-ticker">Find a company using ticker</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#get-filings-for-a-company">Get filings for a company</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#filtering-filings">Filtering filings</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#the-companyfilings-class">The CompanyFilings class</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-a-filing-by-index">Get a filing by index</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#get-the-latest-filing">Get the latest filing</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#get-company-facts">Get company facts</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#getting-facts-for-a-company">Getting facts for a company</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../company-financials/">Financials</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../xbrl/">XBRL</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../sgml/">SGML</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Companies</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="company-api">Company API</h1>
+<p>With the company API you find a company using the <strong>cik</strong> or <strong>ticker</strong>. 
+From the company you can access all their historical <strong>filings</strong>,
+and a dataset of the company <strong>facts</strong>.
+The SEC's company API also supplies a lot more details about a company including industry, the SEC filer type,
+the mailing and business address and much more.</p>
+<h2 id="find-by-ticker">Find by Ticker</h2>
+<pre><code class="language-python">c = Company(&quot;AAPL&quot;)
+</code></pre>
+<p>Tickers are case-insensitive so you can use <code>Company("aapl")</code> or <code>Company("AAPL")</code></p>
+<h2 id="find-by-cik">Find by CIK</h2>
+<p>The <strong>cik</strong> uniquely identifies a company or entity at the SEC.</p>
+<pre><code class="language-python">c = Company(320193)
+</code></pre>
+<p>CIKS can also be strings which may or may not be zero padded to 10 places.</p>
+<pre><code class="language-python">c = Company(&quot;0000320193&quot;) 
+# OR 
+c = Company(&quot;320193&quot;)
+</code></pre>
+<h2 id="find-a-company-using-the-cik">Find a company using the cik</h2>
+<p>The <strong>cik</strong> is the id that uniquely identifies a company at the SEC.
+It is a number, but is sometimes shown in SEC Edgar resources as a string padded with leading zero's.
+For the edgar client API, just use the numbers and omit the leading zeroes.</p>
+<pre><code class="language-python">company = Company(1318605)
+</code></pre>
+<p><img alt="expe" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/expe.png" /></p>
+<h2 id="find-a-company-using-ticker">Find a company using ticker</h2>
+<p>You can get a company using a ticker e.g. <strong>SNOW</strong>. This will do a lookup for the company cik using the ticker, then load the company using the cik.
+This makes it two calls versus one for the cik company lookup, but is sometimes more convenient since tickers are easier to remember that ciks.</p>
+<p>Note that some companies have multiple tickers, so you technically cannot get SEC filings for a ticker.
+You instead get the SEC filings for the company to which the ticker belongs.</p>
+<p>The ticker is case-insensitive so you can use <code>Company("snow")</code>
+or <code>Company("SNOW")</code></p>
+<pre><code class="language-python">snow = Company(&quot;snow&quot;)
+</code></pre>
+<p><img alt="snow" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/snow.png" /></p>
+<pre><code class="language-python">Company(1832950)
+</code></pre>
+<h2 id="get-filings-for-a-company">Get filings for a company</h2>
+<p>To get the company's filings use <code>get_filings()</code>. This gets all the company's filings that are available from the Edgar submissions endpoint.</p>
+<pre><code class="language-python">company.get_filings()
+</code></pre>
+<h2 id="filtering-filings">Filtering filings</h2>
+<p>You can filter the company filings using a number of different parameters.</p>
+<pre><code class="language-python">class CompanyFilings:
+
+    ...
+
+    def get_filings(self,
+                    *,
+                    form: str | List = None,
+                    accession_number: str | List = None,
+                    file_number: str | List = None,
+                    is_xbrl: bool = None,
+                    is_inline_xbrl: bool = None
+                    ):
+        &quot;&quot;&quot;
+        Get the company's filings and optionally filter by multiple criteria
+        :param form: The form as a string e.g. '10-K' or List of strings ['10-Q', '10-K']
+        :param accession_number: The accession number that uniquely identifies an SEC filing e.g. 0001640147-22-000100
+        :param file_number: The file number e.g. 001-39504
+        :param is_xbrl: Whether the filing is xbrl
+        :param is_inline_xbrl: Whether the filing is inline_xbrl
+        :return: The CompanyFiling instance with the filings that match the filters
+        &quot;&quot;&quot;
+</code></pre>
+<h3 id="the-companyfilings-class">The CompanyFilings class</h3>
+<p>The result of <code>get_filings()</code> is a <code>CompanyFilings</code> class. This class contains a pyarrow table with the filings
+and provides convenient functions for working with filings.
+You can access the underlying pyarrow <code>Table</code> using the <code>.data</code> property</p>
+<pre><code class="language-python">filings = company.get_filings()
+
+# Get the underlying Table
+data: pa.Table = filings.data
+</code></pre>
+<h3 id="get-a-filing-by-index">Get a filing by index</h3>
+<p>To access a filing in the CompanyFilings use the bracket <code>[]</code> notation e.g. <code>filings[2]</code></p>
+<pre><code class="language-python">filings[2]
+</code></pre>
+<h3 id="get-the-latest-filing">Get the latest filing</h3>
+<p>The <code>CompanyFilings</code> class has a <code>latest</code> function that will return the latest <code>Filing</code>. 
+So, to get the latest <strong>10-Q</strong> filing, you do the following</p>
+<pre><code class="language-python"># Latest filing makes sense if you filter by form  type e.g. 10-Q
+snow_10Qs = snow.get_filings(form='10-Q')
+latest_10Q = snow_10Qs.latest()
+
+# Or chain the function calls
+snow.get_filings(form='10-Q').latest()
+</code></pre>
+<h2 id="get-company-facts">Get company facts</h2>
+<p>Facts are an interesting and important dataset about a company accumlated from data the company provides to the SEC.
+Company facts are available for a company on the Company Facts<code>f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010}.json"</code>
+It is a JSON endpoint and <code>edgartools</code> parses the JSON into a structured dataset - a <code>pyarrow.Table</code>.</p>
+<h3 id="getting-facts-for-a-company">Getting facts for a company</h3>
+<p>To get company facts, first get the company, then call <code>company.get_facts()</code></p>
+<pre><code class="language-python">company = Company(&quot;SNOW&quot;)
+company_facts = company.get_facts_for_namespace()
+</code></pre>
+<p>The result is a <code>CompanyFacts</code> object which wraps the underlying facts and provides convenient ways of working
+with the facts data. To get access to the underyling data use the <code>facts</code> property.</p>
+<p>You can get the facts as a pandas dataframe by calling <code>to_pandas</code></p>
+<pre><code class="language-python">df = company_facts.to_pandas()
+</code></pre>
+<p>Facts differ among companies. To see what facts are available you can use the <code>facts_meta</code> property.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../working-with-filings/" class="btn btn-neutral float-left" title="Filings"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../attachments/" class="btn btn-neutral float-right" title="Attachments">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../working-with-filings/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../attachments/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
