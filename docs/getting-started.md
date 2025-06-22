@@ -1,6 +1,7 @@
-# Edgartools Documentation
+# Edgartools
 
-**edgartools** is a Python library for navigating SEC filings. 
+Welcome to **edgartools**, the easiest way to work with SEC filings in Python
+
 
 
 # Getting Started

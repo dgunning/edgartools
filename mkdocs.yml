@@ -3,17 +3,24 @@ theme:
   name: "readthedocs"
 
 nav:
-  - Overview: index.md
-  - Filtering: filtering-filings.md
-  - Filings: working-with-filings.md
-  - Companies: company.md
-  - Attachments: attachments.md
-  - Insider Filings: insider-filings.md
+  - Overview: getting-started.md
+  - Initial Steps: initial-steps.md
+  - Quick Guide: quick-guide.md
+  - User Journeys: examples.md
+  - Working with Filings:
+    - Working with Filings: working-with-filings.md
+    - Filtering filings: filtering-filings.md
+    - Attachments: attachments.md
+  - Working with Companies:
+    - Companies: company.md
   - XBRL and Financials:
     - Getting XBRL from Filings: getting-xbrl.md
     - Querying XBRL Facts: xbrl-querying.md
-  - SGML: sgml.md
-  - Data Objects: data-objects.md
-  - Local Storage: local-data.md
-  - Quick Guide: quick-guide.md
-  - User Journeys: examples.md
+  - Data Objects:
+    - Data Objects: data-objects.md
+    - Insider Filings: insider-filings.md
+  - Advanced Topics:
+    - Local Storage: local-data.md
+    - Parsing SGML: sgml.md
+
+
