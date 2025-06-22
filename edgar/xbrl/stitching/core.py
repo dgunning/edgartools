@@ -499,7 +499,6 @@ def stitch_statements(
     Returns:
         Stitched statement data
     """
-    print("Stitching statements...")
     # Initialize the stitcher
     stitcher = StatementStitcher()
     
