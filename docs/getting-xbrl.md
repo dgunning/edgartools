@@ -1,8 +1,7 @@
-from workbooks.WideTables import income_statementR# XBRL2 Module - Enhanced XBRL Processing for EdgarTools
-
 ## Overview
 
-The XBRL2 module provides a powerful yet user-friendly API for processing XBRL (eXtensible Business Reporting Language) financial data from SEC filings. It simplifies the complex task of parsing, analyzing, and displaying financial statements with an intuitive interface designed for both casual users and financial analysts.
+The `edgar.xbrl` module provides a powerful yet user-friendly API for processing **XBRL (eXtensible Business Reporting Language)** financial data from SEC filings. 
+
 
 ## Key Features
 
@@ -15,7 +14,11 @@ The XBRL2 module provides a powerful yet user-friendly API for processing XBRL (
 
 ## Getting Started
 
-### From a Single Filing
+You can get the XBRL from a single filing, or stitch together multiple filings.
+
+### Getting XBRL from a single filing
+
+For a single filing you can use `filing.xbrl()` to get the XBRL data, and then access the financial and other statements.
 
 ```python
 from edgar import Company
@@ -26,10 +29,10 @@ company = Company('AAPL')
 filing = company.latest("10-K")
 
 # Parse XBRL data
-xbrl = XBRL.from_filing(filing)
+xb = filing.xbrl()
 
 # Access statements through the user-friendly API
-statements = xbrl.statements
+statements = xb.statements
 
 # Display financial statements
 balance_sheet = statements.balance_sheet()
@@ -37,7 +40,10 @@ income_statement = statements.income_statement()
 cash_flow = statements.cashflow_statement()
 ```
 
-### Multi-Period Analysis with XBRLS
+### Getting XBRL from multiple filings
+
+You can also stitch together multiple filings to create a multi-period view of financial statements. This uses the `edgar.XBRLS` class to combine data across multiple filings.
+Each filing should be of the same type (e.g., all 10-Ks or all 10-Qs) and from the same company.
 
 ```python
 from edgar import Company

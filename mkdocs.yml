@@ -8,9 +8,10 @@ nav:
   - Filings: working-with-filings.md
   - Companies: company.md
   - Attachments: attachments.md
-  - Financials: company-financials.md
   - Insider Filings: insider-filings.md
-  - XBRL: xbrl.md
+  - XBRL and Financials:
+    - Getting XBRL from Filings: getting-xbrl.md
+    - Querying XBRL Facts: xbrl-querying.md
   - SGML: sgml.md
   - Data Objects: data-objects.md
   - Local Storage: local-data.md
