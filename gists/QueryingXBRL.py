@@ -11,20 +11,28 @@ print(len(xb.facts))
 # Query by concept
 results = xb.query().by_concept("us-gaap:PaymentsToAcquireAvailableForSaleSecuritiesDebt")
 print(results)
-print(type(results))
+
+results = xb.query().by_concept("PaymentsToAcquireAvailableForSaleSecuritiesDebt")
+print(results)
+
+results = xb.query().by_concept("us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt")
+print(results)
+
+results = xb.query().by_concept("RevenueFrom")
+print(results)
 
 #
 revenue_query = xb.query().by_label("Revenue")
 print(revenue_query)
 
-revenue_query = xb.query().by_label("Revenue", exact=True)
+revenue_query = xb.query().by_label("Total deferred revenue")
 print(revenue_query)
 
+""" 
 income_facts = xb.query().by_statement_type("IncomeStatement")
 
 print(income_facts)
 
 sorted_query = xb.query().sort_by('value', ascending=False)
 print(sorted_query.limit(10))
-
-stats = xb.query().by_statement_type("IncomeStatement").stats()
+"""

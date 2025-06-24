@@ -379,7 +379,17 @@ share_concepts = [
     'us-gaap_WeightedAverageNumberOfSharesOutstandingBasic',
     'us-gaap_WeightedAverageNumberOfSharesOutstandingDiluted',
     'us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding',
-    'us-gaap_CommonStockSharesIssued'
+    'us-gaap_CommonStockSharesIssued',
+]
+
+eps_concepts = [
+    'us-gaap_EarningsPerShareBasic',
+    'us-gaap_EarningsPerShareDiluted',
+    'us-gaap_EarningsPerShareBasicAndDiluted',
+    'us-gaap_IncomeLossFromContinuingOperationsPerBasicShare',
+    'us-gaap_IncomeLossFromContinuingOperationsPerDilutedShare',
+    'us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerBasicShare',
+    'us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerDilutedShare'
 ]
 
 
@@ -803,9 +813,9 @@ def _create_units_note(
     
     # Construct appropriate units note
     if monetary_scale_text and shares_scale_text and shares_scale != dominant_scale:
-        return f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text})[/italic]"
+        return f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text} and per share data)[/italic]"
     elif monetary_scale_text:
-        return f"[italic](In {monetary_scale_text}, except per share data)[/italic]"
+        return f"[italic](In {monetary_scale_text}, except shares and per share data)[/italic]"
     else:
         return ""
 
@@ -846,14 +856,13 @@ def _format_value_for_display_as_string(
     # Extract only needed metadata
     concept = item.get('concept', '')
     
-    # Fast check for common share concepts (avoid dict lookup when possible)
+    # Fast check for common share and EPS concepts
     is_share_value = concept in share_concepts
+    is_eps_value = concept in eps_concepts
     
     # Only perform expensive label operations if needed for monetary determination
     is_monetary = is_monetary_statement
-    if concept in ('us-gaap_EarningsPerShareBasic', 'us-gaap_EarningsPerShareDiluted'):
-        is_monetary = False
-    elif is_share_value:
+    if is_eps_value or is_share_value:
         is_monetary = False
     elif not is_monetary:
         # Skip label checks entirely if we already know it's not monetary
@@ -873,8 +882,24 @@ def _format_value_for_display_as_string(
     
     # Format numeric values efficiently
     if value_type in (int, float):
+        # Handle EPS values with decimal precision
+        if is_eps_value:
+            # EPS values should show 2-3 decimal places and not be scaled
+            if abs(value) >= 1000:
+                # For very large EPS values, use thousands separator
+                return f"{value:,.2f}"
+            elif abs(value) >= 10:
+                # For EPS values >= 10, use 2 decimal places
+                return f"{value:.2f}"
+            else:
+                # For typical EPS values < 10, use up to 3 decimal places but remove trailing zeros
+                formatted = f"{value:.3f}".rstrip('0').rstrip('.')
+                # Ensure at least 2 decimal places for EPS
+                if '.' not in formatted or len(formatted.split('.')[1]) < 2:
+                    return f"{value:.2f}"
+                return formatted
         # Handle share values with a specialized path
-        if is_share_value:
+        elif is_share_value:
             if fact_decimals <= -3:
                 # Efficiently apply scaling
                 scale_factor = 10 ** (-fact_decimals)
