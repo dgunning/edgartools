@@ -55,12 +55,20 @@ df = results.to_dataframe('concept', 'label', 'value', 'period_end')
 
 ### By Concept
 
+You can filter facts by their concept names, which are unique identifiers for financial data items in XBRL.
+
 ```python
 # Find revenue-related facts
 revenue_query = xb.query().by_concept("us-gaap:Revenues")
-revenue_facts = revenue_query.execute()
-
 ```
+The namespace e.g. `us-gaap:` is optional, so you can use just the concept name like `Revenues`.
+
+Querying by concept does a partial regex match on the concept name
+
+`by_concept('RevenueFrom')` matches `us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax` and `us-gaap:RevenueFromContractWithCustomerTextBlock`
+
+Use `exact=True` to match the full concept name exactly.
+
 
 ### By Label
 
