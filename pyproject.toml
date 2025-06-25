@@ -59,7 +59,7 @@ include = [
   "edgar/**/templates/*.html",
   "edgar/**/docs/*.md",
   "edgar/reference/data/*",
-  "edgar/xbrl2/standardization/*",
+  "edgar/xbrl/standardization/*",
   "LICENSE.txt"
 ]
 artifacts = [
