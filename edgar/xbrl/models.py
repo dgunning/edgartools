@@ -25,6 +25,7 @@ def select_display_label(
 ) -> str:
     """
     Select the most appropriate label for display, following a consistent priority order.
+    Includes standardization mapping to provide consistent labels across companies.
     
     Args:
         labels: Dictionary of available labels
@@ -34,34 +35,62 @@ def select_display_label(
         element_name: Element name (alternative fallback)
         
     Returns:
-        The selected label according to priority rules
+        The selected label according to priority rules, with standardization applied if available
     """
+    # First, select the best available label using existing priority logic
+    selected_label = None
+    
     # 1. Use preferred label if specified and available
     if preferred_label and labels and preferred_label in labels:
-        return labels[preferred_label]
+        selected_label = labels[preferred_label]
     
     # 2. Use terse label if available (more user-friendly)
-    if labels and TERSE_LABEL in labels:
-        return labels[TERSE_LABEL]
+    elif labels and TERSE_LABEL in labels:
+        selected_label = labels[TERSE_LABEL]
     
     # 3. Fall back to standard label
-    if standard_label:
-        return standard_label
+    elif standard_label:
+        selected_label = standard_label
     
     # 4. Try STANDARD_LABEL directly from labels dict
-    if labels and STANDARD_LABEL in labels:
-        return labels[STANDARD_LABEL]
+    elif labels and STANDARD_LABEL in labels:
+        selected_label = labels[STANDARD_LABEL]
     
     # 5. Take any available label
-    if labels:
-        return next(iter(labels.values()), "")
+    elif labels:
+        selected_label = next(iter(labels.values()), "")
     
     # 6. Use element name if available
-    if element_name:
-        return element_name
+    elif element_name:
+        selected_label = element_name
     
     # 7. Last resort: element ID
-    return element_id or ""
+    else:
+        selected_label = element_id or ""
+    
+    # Apply standardization if we have an element_id (concept)
+    if element_id and selected_label:
+        try:
+            from edgar.xbrl.standardization.core import initialize_default_mappings
+            
+            # Initialize mapping store (cached after first call)
+            if not hasattr(select_display_label, '_mapping_store'):
+                select_display_label._mapping_store = initialize_default_mappings(read_only=True)
+            
+            # Try to get standardized concept
+            standardized_label = select_display_label._mapping_store.get_standard_concept(element_id)
+            
+            if standardized_label:
+                return standardized_label
+                
+        except ImportError:
+            # Standardization not available, continue with selected label
+            pass
+        except Exception:
+            # Any other error in standardization, continue with selected label
+            pass
+    
+    return selected_label
 
 
 class ElementCatalog(BaseModel):

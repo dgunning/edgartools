@@ -7,7 +7,7 @@ with support for statement standardization and multi-period statement stitching.
 Example usage:
 
     from edgar import Company
-    from edgar.xbrl2 import XBRL, XBRLS
+    from edgar.xbrl import XBRL, XBRLS
 
     # Parse a single filing
     company = Company("AAPL")

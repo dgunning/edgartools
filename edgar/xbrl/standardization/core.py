@@ -47,13 +47,35 @@ class StandardConcept(str, Enum):
     RETAINED_EARNINGS = "Retained Earnings"
     TOTAL_EQUITY = "Total Stockholders' Equity"
     
-    # Income Statement
+    # Income Statement - Revenue Hierarchy
     REVENUE = "Revenue"
+    PRODUCT_REVENUE = "Product Revenue"
+    SERVICE_REVENUE = "Service Revenue"
+    SUBSCRIPTION_REVENUE = "Subscription Revenue"
+    LEASING_REVENUE = "Leasing Revenue"
+    
+    # Industry-Specific Revenue Concepts
+    AUTOMOTIVE_REVENUE = "Automotive Revenue"
+    AUTOMOTIVE_LEASING_REVENUE = "Automotive Leasing Revenue"
+    ENERGY_REVENUE = "Energy Revenue"
+    SOFTWARE_REVENUE = "Software Revenue"
+    HARDWARE_REVENUE = "Hardware Revenue"
+    PLATFORM_REVENUE = "Platform Revenue"
+    
+    # Income Statement - Expenses
     COST_OF_REVENUE = "Cost of Revenue"
     GROSS_PROFIT = "Gross Profit"
     OPERATING_EXPENSES = "Operating Expenses"
     RESEARCH_AND_DEVELOPMENT = "Research and Development Expense"
+    
+    # Enhanced Expense Hierarchy
     SELLING_GENERAL_ADMIN = "Selling, General and Administrative Expense"
+    SELLING_EXPENSE = "Selling Expense"
+    GENERAL_ADMIN_EXPENSE = "General and Administrative Expense"
+    MARKETING_EXPENSE = "Marketing Expense"
+    SALES_EXPENSE = "Sales Expense"
+    
+    # Other Income Statement
     OPERATING_INCOME = "Operating Income"
     INTEREST_EXPENSE = "Interest Expense"
     INCOME_BEFORE_TAX = "Income Before Tax"
@@ -100,6 +122,8 @@ class MappingStore:
     Attributes:
         source (str): Path to the JSON file storing the mappings
         mappings (Dict[str, Set[str]]): Dictionary mapping standard concepts to sets of company concepts
+        company_mappings (Dict[str, Dict]): Company-specific mappings loaded from company_mappings/
+        merged_mappings (Dict[str, List[Tuple]]): Merged mappings with priority scoring
     """
     
     def __init__(self, source: Optional[str] = None, validate_with_enum: bool = False, read_only: bool = False):
@@ -112,6 +136,7 @@ class MappingStore:
             read_only: If True, never save changes back to the file (used in testing)
         """
         self.read_only = read_only
+        
         
         if source is None:
             # Try a few different ways to locate the file, handling both development
@@ -130,7 +155,7 @@ class MappingStore:
                     import importlib.resources as pkg_resources
                     try:
                         # For Python 3.9+
-                        with pkg_resources.files('edgar.xbrl2.standardization').joinpath('concept_mappings.json').open('r') as f:
+                        with pkg_resources.files('edgar.xbrl.standardization').joinpath('concept_mappings.json').open('r') as f:
                             # Just read the file to see if it exists, we'll load it properly later
                             f.read(1)
                             self.source = potential_path  # Use the same path as before
@@ -138,7 +163,7 @@ class MappingStore:
                         # Fallback for older Python versions
                         try:
                             import pkg_resources as legacy_resources
-                            if legacy_resources.resource_exists('edgar.xbrl2.standardization', 'concept_mappings.json'):
+                            if legacy_resources.resource_exists('edgar.xbrl.standardization', 'concept_mappings.json'):
                                 self.source = potential_path  # Use the same path as before
                         except (ImportError, FileNotFoundError):
                             pass
@@ -153,6 +178,11 @@ class MappingStore:
             self.source = source
             
         self.mappings = self._load_mappings()
+        
+        # Load company-specific mappings (always enabled)
+        self.company_mappings = self._load_all_company_mappings()
+        self.merged_mappings = self._create_merged_mappings()
+        self.hierarchy_rules = self._load_hierarchy_rules()
         
         # Validate the loaded mappings against StandardConcept enum
         if validate_with_enum:
@@ -207,6 +237,79 @@ class MappingStore:
         
         return pd.DataFrame(rows)
 
+
+    def _load_all_company_mappings(self) -> Dict[str, Dict]:
+        """Load all company-specific mapping files from company_mappings/ directory."""
+        mappings = {}
+        company_dir = os.path.join(os.path.dirname(self.source or __file__), "company_mappings")
+        
+        if os.path.exists(company_dir):
+            for file in os.listdir(company_dir):
+                if file.endswith("_mappings.json"):
+                    entity_id = file.replace("_mappings.json", "")
+                    try:
+                        with open(os.path.join(company_dir, file), 'r') as f:
+                            company_data = json.load(f)
+                            mappings[entity_id] = company_data
+                    except (FileNotFoundError, json.JSONDecodeError) as e:
+                        import logging
+                        logger = logging.getLogger(__name__)
+                        logger.warning(f"Failed to load {file}: {e}")
+        
+        return mappings
+    
+    def _create_merged_mappings(self) -> Dict[str, List[Tuple[str, str, int]]]:
+        """Create merged mappings with priority scoring.
+        
+        Priority levels:
+        1. Core mappings (lowest)
+        2. Company mappings (higher)
+        3. Company-specific matches (highest when company detected)
+        
+        Returns:
+            Dict mapping standard concepts to list of (company_concept, source, priority) tuples
+        """
+        merged = {}
+        
+        # Add core mappings (priority 1 - lowest)
+        for std_concept, company_concepts in self.mappings.items():
+            merged[std_concept] = []
+            for concept in company_concepts:
+                merged[std_concept].append((concept, "core", 1))
+        
+        # Add company mappings (priority 2 - higher)
+        for entity_id, company_data in self.company_mappings.items():
+            concept_mappings = company_data.get("concept_mappings", {})
+            priority_level = 2
+            
+            for std_concept, company_concepts in concept_mappings.items():
+                if std_concept not in merged:
+                    merged[std_concept] = []
+                for concept in company_concepts:
+                    merged[std_concept].append((concept, entity_id, priority_level))
+        
+        return merged
+    
+    def _load_hierarchy_rules(self) -> Dict[str, Dict]:
+        """Load hierarchy rules from company mappings."""
+        all_rules = {}
+        
+        # Add company hierarchy rules
+        for entity_id, company_data in self.company_mappings.items():
+            hierarchy_rules = company_data.get("hierarchy_rules", {})
+            all_rules.update(hierarchy_rules)
+        
+        return all_rules
+    
+    def _detect_entity_from_concept(self, concept: str) -> Optional[str]:
+        """Detect entity identifier from concept name prefix."""
+        if ':' in concept:
+            prefix = concept.split(':')[0].lower()
+            # Check if this prefix corresponds to a known company
+            if prefix in self.company_mappings:
+                return prefix
+        return None
+
     def _load_mappings(self) -> Dict[str, Set[str]]:
         """
         Load mappings from the JSON file.
@@ -228,12 +331,12 @@ class MappingStore:
                     import importlib.resources as pkg_resources
                     try:
                         # For Python 3.9+
-                        with pkg_resources.files('edgar.xbrl2.standardization').joinpath('concept_mappings.json').open('r') as f:
+                        with pkg_resources.files('edgar.xbrl.standardization').joinpath('concept_mappings.json').open('r') as f:
                             data = json.load(f)
                     except (ImportError, FileNotFoundError, AttributeError):
                         # Fallback to legacy pkg_resources
                         import pkg_resources as legacy_resources
-                        resource_string = legacy_resources.resource_string('edgar.xbrl2.standardization', 'concept_mappings.json')
+                        resource_string = legacy_resources.resource_string('edgar.xbrl.standardization', 'concept_mappings.json')
                         data = json.loads(resource_string)
                 except ImportError:
                     pass
@@ -292,16 +395,44 @@ class MappingStore:
         self.mappings[standard_concept].add(company_concept)
         self._save_mappings()
     
-    def get_standard_concept(self, company_concept: str) -> Optional[str]:
+    def get_standard_concept(self, company_concept: str, context: Dict = None) -> Optional[str]:
         """
-        Get the standard concept for a given company concept.
+        Get the standard concept for a given company concept with priority-based resolution.
         
         Args:
             company_concept: The company-specific concept
+            context: Optional context information (not used in current implementation)
             
         Returns:
             The standard concept or None if not found
         """
+        # Use merged mappings with priority-based resolution
+        if self.merged_mappings:
+            # Detect company from concept prefix (e.g., 'tsla:Revenue' -> 'tsla')
+            detected_entity = self._detect_entity_from_concept(company_concept)
+            
+            # Search through merged mappings with priority
+            candidates = []
+            
+            for std_concept, mapping_list in self.merged_mappings.items():
+                for concept, source, priority in mapping_list:
+                    if concept == company_concept:
+                        # Boost priority if it matches detected entity
+                        effective_priority = priority
+                        if detected_entity and source == detected_entity:
+                            effective_priority = 4  # Highest priority for exact company match
+                        
+                        candidates.append((std_concept, effective_priority, source))
+            
+            # Return highest priority match
+            if candidates:
+                best_match = max(candidates, key=lambda x: x[1])
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.debug(f"Mapping applied: {company_concept} -> {best_match[0]} (source: {best_match[2]}, priority: {best_match[1]})")
+                return best_match[0]
+        
+        # Fallback to core mappings
         for standard_concept, company_concepts in self.mappings.items():
             if company_concept in company_concepts:
                 return standard_concept

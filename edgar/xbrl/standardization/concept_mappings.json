@@ -27,10 +27,21 @@
     "us-gaap_ResearchAndDevelopmentCosts",
     "us-gaap_ResearchAndDevelopmentExpense"
   ],
+  "_comment_sga_hierarchy": "SG&A HIERARCHY FIX: Separated total SG&A from components to prevent duplicate labels. Previously all three concepts below mapped to 'Selling, General and Administrative Expense' causing confusion when companies report both total and components.",
   "Selling, General and Administrative Expense": [
-    "us-gaap_SellingGeneralAndAdministrativeExpense",
+    "us-gaap_SellingGeneralAndAdministrativeExpense"
+  ],
+  "General and Administrative Expense": [
     "us-gaap_GeneralAndAdministrativeExpense",
-    "us-gaap_SellingAndMarketingExpense"
+    "us-gaap_AdministrativeExpense"
+  ],
+  "Selling Expense": [
+    "us-gaap_SellingAndMarketingExpense",
+    "us-gaap_SellingExpense"
+  ],
+  "Marketing Expense": [
+    "us-gaap_MarketingExpense",
+    "us-gaap_AdvertisingExpense"
   ],
   "Operating Income": [
     "us-gaap_OperatingIncomeLoss",
