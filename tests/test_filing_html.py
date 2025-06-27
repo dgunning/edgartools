@@ -20,15 +20,10 @@ def test_get_plaintext_from_document_tags():
     text = extract_text_between_tags(content, "TEXT")
     assert not is_probably_html(text)
 
-    root = HtmlDocument.get_root(text)
-    print("HtmlDocument root:")
-    print(root)
-    soup = BeautifulSoup(text, features='lxml')
-    print("BeautifulSoup output:")
-    print(soup)
+
     document = Document.parse(text)
-    assert document
-    print(document)
+    assert document is not None
+
 
 def test_get_html_inside_document_tags():
     filing = Filing(form='SC 13G',

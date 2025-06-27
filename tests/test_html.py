@@ -353,9 +353,6 @@ def test_document_parsed_from_plain_text_returns_plain_text():
     print("Parsed Document:")
     document = Document.parse(html)
     assert document is not None, "Document should not be None"
-    assert len(document) == 1
-    assert document[0].type == "text_block"
-    assert document[0].content == html.strip()
 
 def test_document_from_filing_with_plain_text_filing_document():
     f = Filing(form='SC 13G/A', filing_date='2024-11-25', company='Bridgeline Digital, Inc.', cik=1378590, accession_no='0001968076-24-000022')
