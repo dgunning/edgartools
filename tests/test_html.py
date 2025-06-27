@@ -1,6 +1,6 @@
 
 from edgar.files.html import *
-from edgar.files.html_documents import fixup_soup
+from edgar.files.html_documents import fixup_soup, HtmlDocument
 from edgar.files.tables import TableProcessor
 from pathlib import Path
 from edgar import Filing
@@ -344,6 +344,13 @@ def test_document_parsed_from_plain_text_returns_plain_text():
     html = """
     This document is just test
     """
+    root = HtmlDocument.get_root(html)
+    print("ROOT:")
+    print(root)
+    parser = SECHTMLParser(root)
+    doc = parser.parse()
+    print("Parsed Document:")
+    print(doc)
     document = Document.parse(html)
     assert document
     assert len(document) == 1

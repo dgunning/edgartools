@@ -19,7 +19,6 @@ def test_get_plaintext_from_document_tags():
     content = Path('data/html/SG-13G-DOCUMENT-WITH-TEXT.html').read_text()
     text = extract_text_between_tags(content, "TEXT")
     assert not is_probably_html(text)
-    print(text)
 
     root = HtmlDocument.get_root(text)
     print("HtmlDocument root:")
