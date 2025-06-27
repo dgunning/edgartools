@@ -2,6 +2,7 @@ from edgar import *
 from edgar.files.html import Document, HtmlDocument
 from edgar.sgml.tools import extract_text_between_tags
 from edgar.core import is_probably_html
+from bs4 import BeautifulSoup
 from pathlib import Path
 
 def test_get_html_from_document_tags():
@@ -21,7 +22,11 @@ def test_get_plaintext_from_document_tags():
     print(text)
 
     root = HtmlDocument.get_root(text)
+    print("HtmlDocument root:")
     print(root)
+    soup = BeautifulSoup(text, features='lxml')
+    print("BeautifulSoup output:")
+    print(soup)
     document = Document.parse(text)
     assert document
     print(document)
