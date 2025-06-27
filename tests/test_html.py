@@ -351,9 +351,8 @@ def test_document_parsed_from_plain_text_returns_plain_text():
     parser = SECHTMLParser(root)
     doc = parser.parse()
     print("Parsed Document:")
-    print('[' + doc + ']' + doc is None)
     document = Document.parse(html)
-    assert document
+    assert document is not None, "Document should not be None"
     assert len(document) == 1
     assert document[0].type == "text_block"
     assert document[0].content == html.strip()
