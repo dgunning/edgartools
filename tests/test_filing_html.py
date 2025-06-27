@@ -1,5 +1,5 @@
 from edgar import *
-from edgar.files.html import Document
+from edgar.files.html import Document, HtmlDocument
 from edgar.sgml.tools import extract_text_between_tags
 from edgar.core import is_probably_html
 from pathlib import Path
@@ -18,7 +18,10 @@ def test_get_plaintext_from_document_tags():
     content = Path('data/html/SG-13G-DOCUMENT-WITH-TEXT.html').read_text()
     text = extract_text_between_tags(content, "TEXT")
     assert not is_probably_html(text)
-    #print(text)
+    print(text)
+
+    root = HtmlDocument.get_root(text)
+    print(root)
     document = Document.parse(text)
     assert document
     print(document)
