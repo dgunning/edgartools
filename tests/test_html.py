@@ -347,10 +347,11 @@ def test_document_parsed_from_plain_text_returns_plain_text():
     root = HtmlDocument.get_root(html)
     print("ROOT:")
     print(root)
+    print('Body: ', root.find('body'))
     parser = SECHTMLParser(root)
     doc = parser.parse()
     print("Parsed Document:")
-    print(doc)
+    print('[' + doc + ']' + doc is None)
     document = Document.parse(html)
     assert document
     assert len(document) == 1
