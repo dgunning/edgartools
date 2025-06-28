@@ -49,6 +49,7 @@ class StandardConcept(str, Enum):
     
     # Income Statement - Revenue Hierarchy
     REVENUE = "Revenue"
+    CONTRACT_REVENUE = "Contract Revenue"
     PRODUCT_REVENUE = "Product Revenue"
     SERVICE_REVENUE = "Service Revenue"
     SUBSCRIPTION_REVENUE = "Subscription Revenue"
@@ -64,6 +65,11 @@ class StandardConcept(str, Enum):
     
     # Income Statement - Expenses
     COST_OF_REVENUE = "Cost of Revenue"
+    COST_OF_GOODS_SOLD = "Cost of Goods Sold"
+    COST_OF_GOODS_AND_SERVICES_SOLD = "Cost of Goods and Services Sold"
+    COST_OF_SALES = "Cost of Sales"
+    COSTS_AND_EXPENSES = "Costs and Expenses"
+    DIRECT_OPERATING_COSTS = "Direct Operating Costs"
     GROSS_PROFIT = "Gross Profit"
     OPERATING_EXPENSES = "Operating Expenses"
     RESEARCH_AND_DEVELOPMENT = "Research and Development Expense"
@@ -79,8 +85,12 @@ class StandardConcept(str, Enum):
     OPERATING_INCOME = "Operating Income"
     INTEREST_EXPENSE = "Interest Expense"
     INCOME_BEFORE_TAX = "Income Before Tax"
+    INCOME_BEFORE_TAX_CONTINUING_OPS = "Income Before Tax from Continuing Operations"
     INCOME_TAX_EXPENSE = "Income Tax Expense"
     NET_INCOME = "Net Income"
+    NET_INCOME_CONTINUING_OPS = "Net Income from Continuing Operations"
+    NET_INCOME_NONCONTROLLING = "Net Income Attributable to Noncontrolling Interest"
+    PROFIT_OR_LOSS = "Profit or Loss"
     
     # Cash Flow Statement
     CASH_FROM_OPERATIONS = "Net Cash from Operating Activities"

@@ -1,19 +1,40 @@
 {
+  "_comment_revenue_hierarchy": "REVENUE HIERARCHY FIX: Separated total revenue from component revenue types to prevent duplicate labels. Contract and product revenue are components that should have distinct labels from total revenue.",
   "Revenue": [
-    "us-gaap_SalesRevenueNet",
-    "us-gaap_Revenues",
-    "us-gaap_OperatingRevenue",
-    "us-gaap_SalesRevenueGoodsNet",
     "us-gaap_Revenue",
-    "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax"
+    "us-gaap_Revenues",
+    "us-gaap_SalesRevenueNet",
+    "us-gaap_OperatingRevenue"
   ],
+  "Contract Revenue": [
+    "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
+    "us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax"
+  ],
+  "Product Revenue": [
+    "us-gaap_SalesRevenueGoodsNet",
+    "us-gaap_ProductSales"
+  ],
+  "_comment_cost_of_revenue_hierarchy": "COST OF REVENUE HIERARCHY FIX: Separated different cost types to prevent duplicate labels. Different business models (manufacturing, service, mixed) use different cost concepts that should have distinct labels for clarity.",
   "Cost of Revenue": [
-    "us-gaap_CostOfRevenue",
-    "us-gaap_CostsAndExpenses",
-    "us-gaap_CostOfGoodsAndServicesSold",
-    "us-gaap_CostOfGoodsSold",
-    "us-gaap_CostOfSales",
+    "us-gaap_CostOfRevenueAbstract"
+  ],
+  "Total Cost of Revenue": [
+    "us-gaap_CostOfRevenue"
+  ],
+  "Cost of Goods Sold": [
+    "us-gaap_CostOfGoodsSold"
+  ],
+  "Cost of Goods and Services Sold": [
+    "us-gaap_CostOfGoodsAndServicesSold"
+  ],
+  "Cost of Sales": [
+    "us-gaap_CostOfSales"
+  ],
+  "Direct Operating Costs": [
     "us-gaap_DirectOperatingCosts"
+  ],
+  "Costs and Expenses": [
+    "us-gaap_CostsAndExpenses"
   ],
   "Gross Profit": [
     "us-gaap_GrossProfit"
@@ -56,32 +77,50 @@
     "us-gaap_InterestAndDebtExpense",
     "us-gaap_InterestExpense"
   ],
+  "_comment_income_before_tax_hierarchy": "INCOME BEFORE TAX HIERARCHY FIX: Separated total income before tax from component types to prevent duplicate labels. Continuing operations and extraordinary items are components that should have distinct labels.",
   "Income Before Tax": [
-    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
-    "orcl_IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems",
-    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
     "us-gaap_IncomeLossBeforeIncomeTaxes"
+  ],
+  "Income Before Tax from Continuing Operations": [
+    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
+    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+    "orcl_IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems"
   ],
   "Income Tax Expense": [
     "us-gaap_IncomeTaxesPaidNet",
     "us-gaap_IncomeTaxExpenseBenefit"
   ],
+  "_comment_net_income_hierarchy": "NET INCOME HIERARCHY FIX: Separated total net income from component income types to prevent duplicate labels. Continuing operations income and profit/loss are components that should have distinct labels from total net income.",
   "Net Income": [
-    "us-gaap_ProfitLoss",
+    "us-gaap_NetIncome",
+    "us-gaap_NetIncomeLoss"
+  ],
+  "Net Income from Continuing Operations": [
     "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
-    "us-gaap_NetIncomeLoss",
-    "us-gaap_NetIncome"
+    "us-gaap_IncomeLossFromContinuingOperations"
+  ],
+  "Profit or Loss": [
+    "us-gaap_ProfitLoss"
+  ],
+  "Net Income Attributable to Noncontrolling Interest": [
+    "us-gaap_NetIncomeLossAttributableToNoncontrollingInterest"
   ],
   "Accumulated Other Comprehensive Income/Loss": [
     "us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax"
   ],
   "Earnings Per Share": [
+    "us-gaap_EarningsPerShareAbstract"
+  ],
+  "Earnings Per Share (Basic)": [
     "us-gaap_EarningsPerShareBasic"
   ],
   "Earnings Per Share (Diluted)": [
     "us-gaap_EarningsPerShareDiluted"
   ],
-  "Shares Outstanding": [
+    "Shares Outstanding": [
+        "us-gaap_WeightedAverageNumberOfSharesOutstandingAbstract"
+    ],
+  "Shares Outstanding (Basic)": [
     "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic"
   ],
   "Shares Outstanding (Diluted)": [

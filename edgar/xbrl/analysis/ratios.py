@@ -332,10 +332,14 @@ class FinancialRatios:
     def _initialize_concept_equivalents(self) -> Dict[str, List[ConceptEquivalent]]:
         """Initialize the concept equivalents mapping.
         
+        Enhanced to work with the new standardization hierarchy that separates
+        different revenue and cost types into distinct concepts.
+        
         Returns:
             Dictionary mapping concepts to their possible equivalent calculations.
         """
         return {
+            # Gross Profit calculation with enhanced cost fallbacks
             StandardConcept.GROSS_PROFIT: [
                 ConceptEquivalent(
                     target_concept=StandardConcept.GROSS_PROFIT,
@@ -348,8 +352,49 @@ class FinancialRatios:
                             df.loc[StandardConcept.COST_OF_REVENUE, period]
                     ),
                     description="Revenue - Cost of Revenue"
+                ),
+                # Fallback for manufacturing companies using Cost of Goods Sold
+                ConceptEquivalent(
+                    target_concept=StandardConcept.GROSS_PROFIT,
+                    required_concepts=[
+                        StandardConcept.REVENUE,
+                        StandardConcept.COST_OF_GOODS_SOLD
+                    ],
+                    calculation=lambda df, period: (
+                            df.loc[StandardConcept.REVENUE, period] -
+                            df.loc[StandardConcept.COST_OF_GOODS_SOLD, period]
+                    ),
+                    description="Revenue - Cost of Goods Sold (manufacturing)"
+                ),
+                # Fallback for retail companies using Cost of Sales
+                ConceptEquivalent(
+                    target_concept=StandardConcept.GROSS_PROFIT,
+                    required_concepts=[
+                        StandardConcept.REVENUE,
+                        StandardConcept.COST_OF_SALES
+                    ],
+                    calculation=lambda df, period: (
+                            df.loc[StandardConcept.REVENUE, period] -
+                            df.loc[StandardConcept.COST_OF_SALES, period]
+                    ),
+                    description="Revenue - Cost of Sales (retail)"
+                ),
+                # Fallback for some telecom or service companies using Cost of Goods and Services Sold
+                ConceptEquivalent(
+                    target_concept=StandardConcept.GROSS_PROFIT,
+                    required_concepts=[
+                        StandardConcept.REVENUE,
+                        StandardConcept.COSTS_AND_EXPENSES
+                    ],
+                    calculation=lambda df, period: (
+                            df.loc[StandardConcept.REVENUE, period] -
+                            df.loc[StandardConcept.COSTS_AND_EXPENSES, period]
+                    ),
+                    description="Revenue - Cost and Expenses (telecom/service companies)"
                 )
             ],
+            
+            # Operating Income calculation 
             StandardConcept.OPERATING_INCOME: [
                 ConceptEquivalent(
                     target_concept=StandardConcept.OPERATING_INCOME,
@@ -362,6 +407,62 @@ class FinancialRatios:
                             df.loc[StandardConcept.OPERATING_EXPENSES, period]
                     ),
                     description="Gross Profit - Operating Expenses"
+                )
+            ],
+            
+            # Revenue equivalents with enhanced hierarchy support
+            StandardConcept.REVENUE: [
+                # Mixed companies: Product + Service revenue
+                ConceptEquivalent(
+                    target_concept=StandardConcept.REVENUE,
+                    required_concepts=[
+                        StandardConcept.PRODUCT_REVENUE,
+                        StandardConcept.SERVICE_REVENUE
+                    ],
+                    calculation=lambda df, period: (
+                            df.loc[StandardConcept.PRODUCT_REVENUE, period] +
+                            df.loc[StandardConcept.SERVICE_REVENUE, period]
+                    ),
+                    description="Product Revenue + Service Revenue (mixed companies)"
+                ),
+                # Service companies: Contract revenue fallback
+                ConceptEquivalent(
+                    target_concept=StandardConcept.REVENUE,
+                    required_concepts=[StandardConcept.CONTRACT_REVENUE],
+                    calculation=lambda df, period: df.loc[StandardConcept.CONTRACT_REVENUE, period],
+                    description="Contract Revenue (service companies)"
+                ),
+                # Product companies: Product revenue fallback
+                ConceptEquivalent(
+                    target_concept=StandardConcept.REVENUE,
+                    required_concepts=[StandardConcept.PRODUCT_REVENUE],
+                    calculation=lambda df, period: df.loc[StandardConcept.PRODUCT_REVENUE, period],
+                    description="Product Revenue (manufacturing companies)"
+                )
+            ],
+            
+            # Cost of Revenue fallbacks for different business models
+            StandardConcept.COST_OF_REVENUE: [
+                # Manufacturing companies fallback
+                ConceptEquivalent(
+                    target_concept=StandardConcept.COST_OF_REVENUE,
+                    required_concepts=[StandardConcept.COST_OF_GOODS_SOLD],
+                    calculation=lambda df, period: df.loc[StandardConcept.COST_OF_GOODS_SOLD, period],
+                    description="Cost of Goods Sold (manufacturing companies)"
+                ),
+                # Retail companies fallback
+                ConceptEquivalent(
+                    target_concept=StandardConcept.COST_OF_REVENUE,
+                    required_concepts=[StandardConcept.COST_OF_SALES],
+                    calculation=lambda df, period: df.loc[StandardConcept.COST_OF_SALES, period],
+                    description="Cost of Sales (retail companies)"
+                ),
+                # Mixed companies fallback
+                ConceptEquivalent(
+                    target_concept=StandardConcept.COST_OF_REVENUE,
+                    required_concepts=[StandardConcept.COST_OF_GOODS_AND_SERVICES_SOLD],
+                    calculation=lambda df, period: df.loc[StandardConcept.COST_OF_GOODS_AND_SERVICES_SOLD, period],
+                    description="Cost of Goods and Services Sold (mixed companies)"
                 )
             ]
         }

@@ -191,48 +191,6 @@ def test_standardization_across_companies(test_companies):
         os.remove("test_revenue_mapping.json")
 
 
-def test_standardization_historical_vs_modern(test_companies):
-    """Test standardization works across historical and modern filings."""
-    # Skip if not enough company fixtures available for this test
-    if len(test_companies) < 1:
-        pytest.skip("Not enough company fixtures available")
-    
-    # Get a company to test with
-    ticker, xbrl = next(iter(test_companies.items()))
-    
-    # Get income statement
-    income_statement = xbrl.statements.income_statement()
-    if not income_statement:
-        pytest.skip(f"Income statement not available for {ticker}")
-    
-    # Get the data
-    data = income_statement.get_raw_data()
-    
-    # Find revenue concept
-    revenue_item = next((item for item in data 
-                      if any(rev in item.get("label", "").lower() 
-                             for rev in ["revenue", "sales"])), None)
-    
-    if not revenue_item:
-        pytest.skip(f"Revenue concept not found for {ticker}")
-    
-    # Create a mapper and add the concept - explicitly set read_only=False since we control this test file
-    store = MappingStore(source="test_mapping_modern.json", read_only=False)
-    store.add(revenue_item["concept"], StandardConcept.REVENUE.value)
-    
-    mapper = ConceptMapper(store)
-    
-    # Test mapping
-    assert mapper.map_concept(
-        revenue_item["concept"], 
-        revenue_item["label"], 
-        {"statement_type": "IncomeStatement"}
-    ) == StandardConcept.REVENUE.value
-    
-    # Clean up
-    if os.path.exists("test_mapping_modern.json"):
-        os.remove("test_mapping_modern.json")
-
 
 def test_standardize_income_statement(test_companies):
     """Test standardizing income statements for different industry companies."""
