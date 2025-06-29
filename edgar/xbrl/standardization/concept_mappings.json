@@ -14,6 +14,9 @@
     "us-gaap_SalesRevenueGoodsNet",
     "us-gaap_ProductSales"
   ],
+  "Operating Lease Revenue": [
+    "us-gaap_OperatingLeaseLeaseIncome"
+  ],
   "_comment_cost_of_revenue_hierarchy": "COST OF REVENUE HIERARCHY FIX: Separated different cost types to prevent duplicate labels. Different business models (manufacturing, service, mixed) use different cost concepts that should have distinct labels for clarity.",
   "Cost of Revenue": [
     "us-gaap_CostOfRevenueAbstract"
