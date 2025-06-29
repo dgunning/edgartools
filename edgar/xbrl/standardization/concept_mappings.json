@@ -103,6 +103,7 @@
     "us-gaap_ProfitLoss"
   ],
   "Net Income Attributable to Noncontrolling Interest": [
+    "us-gaap_NetIncomeLossAttributableToNonredeemableNoncontrollingInterest",
     "us-gaap_NetIncomeLossAttributableToNoncontrollingInterest"
   ],
   "Accumulated Other Comprehensive Income/Loss": [
