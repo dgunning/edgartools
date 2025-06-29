@@ -100,7 +100,7 @@ def test_company_detection_from_concept_prefix(temp_standardization_dir):
     store = MappingStore(source=core_mappings_path, read_only=True)
         
     # Test entity detection
-    assert store._detect_entity_from_concept("tsla:AutomotiveRevenue") == "tsla"
+    assert store._detect_entity_from_concept("tsla_AutomotiveRevenue") == "tsla"
     assert store._detect_entity_from_concept("us-gaap_Revenue") is None
     assert store._detect_entity_from_concept("unknown:Concept") is None
 

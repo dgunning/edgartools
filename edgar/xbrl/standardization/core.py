@@ -313,8 +313,8 @@ class MappingStore:
     
     def _detect_entity_from_concept(self, concept: str) -> Optional[str]:
         """Detect entity identifier from concept name prefix."""
-        if ':' in concept:
-            prefix = concept.split(':')[0].lower()
+        if '_' in concept:
+            prefix = concept.split('_')[0].lower()
             # Check if this prefix corresponds to a known company
             if prefix in self.company_mappings:
                 return prefix

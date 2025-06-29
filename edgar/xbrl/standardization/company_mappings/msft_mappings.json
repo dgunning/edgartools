@@ -10,39 +10,39 @@
     "_comment_msft_revenue": "Microsoft uses specific revenue categorization that differs from standard tech companies",
     
     "Product Revenue": [
-      "msft:ProductRevenue",
-      "msft:WindowsCommercialRevenue",
-      "msft:WindowsConsumerRevenue",
-      "msft:OfficeCommercialRevenue"
+      "msft_ProductRevenue",
+      "msft_WindowsCommercialRevenue",
+      "msft_WindowsConsumerRevenue",
+      "msft_OfficeCommercialRevenue"
     ],
     
     "Service Revenue": [
-      "msft:ServiceRevenue", 
-      "msft:CloudServicesRevenue",
-      "msft:ConsultingServicesRevenue"
+      "msft_ServiceRevenue", 
+      "msft_CloudServicesRevenue",
+      "msft_ConsultingServicesRevenue"
     ],
     
     "Subscription Revenue": [
-      "msft:Office365CommercialRevenue",
-      "msft:Office365ConsumerRevenue",
-      "msft:DynamicsRevenue"
+      "msft_Office365CommercialRevenue",
+      "msft_Office365ConsumerRevenue",
+      "msft_DynamicsRevenue"
     ],
     
     "Platform Revenue": [
-      "msft:AzureRevenue",
-      "msft:XboxContentAndServicesRevenue"
+      "msft_AzureRevenue",
+      "msft_XboxContentAndServicesRevenue"
     ],
     
     "_comment_msft_expenses": "Microsoft has unique expense categorizations for sales and marketing vs G&A",
     
     "Sales and Marketing Expense": [
-      "msft:SalesAndMarketingExpense",
-      "msft:AdvertisingAndPromotionExpense"
+      "msft_SalesAndMarketingExpense",
+      "msft_AdvertisingAndPromotionExpense"
     ],
     
     "Technical Support Expense": [
-      "msft:TechnicalSupportExpense",
-      "msft:CustomerSupportExpense"
+      "msft_TechnicalSupportExpense",
+      "msft_CustomerSupportExpense"
     ]
   },
   

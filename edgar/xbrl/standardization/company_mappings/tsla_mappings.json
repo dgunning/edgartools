@@ -10,25 +10,25 @@
   },
   "concept_mappings": {
     "Automotive Revenue": [
-      "tsla:AutomotiveRevenue",
-      "tsla:AutomotiveSales",
-      "tsla:VehicleRevenue"
+      "tsla_AutomotiveRevenue",
+      "tsla_AutomotiveSales", 
+      "tsla_VehicleRevenue"
     ],
     "Automotive Leasing Revenue": [
-      "tsla:AutomotiveLeasing",
-      "tsla:AutomotiveLeasingRevenue",
-      "tsla:VehicleLeasingRevenue"
+      "tsla_AutomotiveLeasing",
+      "tsla_AutomotiveLeasingRevenue",
+      "tsla_VehicleLeasingRevenue"
     ],
     "Energy Revenue": [
-      "tsla:EnergyGenerationAndStorageRevenue",
-      "tsla:EnergyRevenue",
-      "tsla:SolarRevenue",
-      "tsla:EnergyStorageRevenue"
+      "tsla_EnergyGenerationAndStorageRevenue",
+      "tsla_EnergyRevenue",
+      "tsla_SolarRevenue",
+      "tsla_EnergyStorageRevenue"
     ],
     "Service Revenue": [
-      "tsla:ServicesAndOtherRevenue",
-      "tsla:ServiceRevenue",
-      "tsla:SuperchargerRevenue"
+      "tsla_ServicesAndOtherRevenue",
+      "tsla_ServiceRevenue",
+      "tsla_SuperchargerRevenue"
     ]
   },
   "hierarchy_rules": {
