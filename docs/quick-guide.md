@@ -105,7 +105,7 @@
 | Get the latest 10-Q                      | `company.latest("10-Q")`                                      |
 | Get the last 5 10-Q's                    | `company.get_filings(form="10-Q", 5)`                         |
 | Get a company filing by accession_number | `company.get_filing(accession_number="0000320193-21-000139")` |
-| Get the company's financials             | `company.financials`                                          |
+| Get the company's financials             | `company.get_financials()`                                    |
 | Get the company's balance sheet          | `company.financials.balance_sheet()`                          |
 | Get the company's income statement       | `company.financials.income_statement()`                       |
 | Get the company's cash flow statement    | `company.financials.cashflow_statement()`                     |
