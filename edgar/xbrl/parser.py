@@ -255,7 +255,7 @@ class XBRLParser:
                 
                 # Create element catalog entry
                 self.element_catalog[element_id] = ElementCatalog(
-                    name=name,
+                    name=element_id,
                     data_type=data_type,
                     period_type=period_type or "duration",  # Default to duration
                     balance=balance_type,

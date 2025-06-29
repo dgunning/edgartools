@@ -17,11 +17,11 @@ TOTAL_LABEL = "http://www.xbrl.org/2003/role/totalLabel"
 
 
 def select_display_label(
-    labels: Dict[str, str],
-    preferred_label: Optional[str] = None,
-    standard_label: Optional[str] = None,
-    element_id: Optional[str] = None,
-    element_name: Optional[str] = None
+        labels: Dict[str, str],
+        preferred_label: Optional[str] = None,
+        standard_label: Optional[str] = None,
+        element_id: Optional[str] = None,
+        element_name: Optional[str] = None
 ) -> str:
     """
     Select the most appropriate label for display, following a consistent priority order.
@@ -39,73 +39,90 @@ def select_display_label(
     """
     # First, select the best available label using existing priority logic
     selected_label = None
-    
+
     # 1. Use preferred label if specified and available
     if preferred_label and labels and preferred_label in labels:
         selected_label = labels[preferred_label]
-    
+
     # 2. Use terse label if available (more user-friendly)
     elif labels and TERSE_LABEL in labels:
         selected_label = labels[TERSE_LABEL]
-    
+
     # 3. Fall back to standard label
     elif standard_label:
         selected_label = standard_label
-    
+
     # 4. Try STANDARD_LABEL directly from labels dict
     elif labels and STANDARD_LABEL in labels:
         selected_label = labels[STANDARD_LABEL]
-    
+
     # 5. Take any available label
     elif labels:
         selected_label = next(iter(labels.values()), "")
-    
+
     # 6. Use element name if available
     elif element_name:
         selected_label = element_name
-    
+
     # 7. Last resort: element ID
     else:
         selected_label = element_id or ""
-    
+
     # Apply standardization if we have an element_id (concept)
     if element_id and selected_label:
         try:
             from edgar.xbrl.standardization.core import initialize_default_mappings
-            
+
             # Initialize mapping store (cached after first call)
             if not hasattr(select_display_label, '_mapping_store'):
                 select_display_label._mapping_store = initialize_default_mappings(read_only=True)
-            
+
             # Try to get standardized concept
             standardized_label = select_display_label._mapping_store.get_standard_concept(element_id)
-            
+
             if standardized_label:
                 return standardized_label
-                
+
         except ImportError:
             # Standardization not available, continue with selected label
             pass
         except Exception:
             # Any other error in standardization, continue with selected label
             pass
-    
+
     return selected_label
 
 
-class ElementCatalog(BaseModel):
+class ElementCatalog:
     """
     A catalog of XBRL elements with their properties.
     
     This is the base data structure for element metadata as described in the design document.
+
+    Attributes:
+        name: The name of the element (e.g., "us-gaap_NetIncome")
+        data_type: The data type of the element (e.g., "monetary", "string", etc.)
+        period_type: The period type of the element (e.g., "instant", "duration")
+        balance: The balance type of the element (e.g., "debit", "credit", or None)
+        abstract: Whether the element is abstract (True/False)
+        labels: A dictionary of labels for the element, keyed by role URI
     """
-    name: str
-    data_type: str
-    period_type: str  # "instant" or "duration"
-    balance: Optional[str] = None  # "debit", "credit", or None
-    abstract: bool = False
-    labels: Dict[str, str] = Field(default_factory=dict)
-    
+
+    def __init__(self,
+                 name: str,
+                 data_type: str,
+                 period_type: str,
+                 balance: Optional[str] = None,
+                 abstract: bool = False,
+                 labels: Optional[Dict[str, str]] = None
+                 ):
+        self.name = name
+        self.data_type = data_type
+        self.period_type = period_type
+        self.balance = balance
+        self.abstract = abstract
+        self.labels = labels if labels is not None else {}
+
     def __str__(self) -> str:
         return self.name
 
@@ -120,7 +137,7 @@ class Context(BaseModel):
     entity: Dict[str, Any] = Field(default_factory=dict)
     period: Dict[str, Any] = Field(default_factory=dict)
     dimensions: Dict[str, str] = Field(default_factory=dict)
-    
+
     @property
     def period_string(self) -> str:
         """Return a human-readable string representation of the period."""
@@ -164,13 +181,13 @@ class PresentationNode(BaseModel):
     order: float = 0.0
     preferred_label: Optional[str] = None
     depth: int = 0
-    
+
     # Additional information linked from element catalog
     element_name: Optional[str] = None
     standard_label: Optional[str] = None
     is_abstract: bool = False
     labels: Dict[str, str] = Field(default_factory=dict)
-    
+
     @property
     def display_label(self) -> str:
         """
@@ -214,7 +231,7 @@ class CalculationNode(BaseModel):
     parent: Optional[str] = None
     weight: float = 1.0
     order: float = 0.0
-    
+
     # Information linked from schema
     balance_type: Optional[str] = None  # "debit", "credit", or None
     period_type: Optional[str] = None  # "instant" or "duration"
@@ -276,4 +293,3 @@ class Table(BaseModel):
 class XBRLProcessingError(Exception):
     """Exception raised for errors during XBRL processing."""
     pass
-
