@@ -9,6 +9,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
+from edgar.core import log
 
 from edgar.xbrl.statements import statement_to_concepts
 
@@ -812,6 +813,16 @@ class StatementResolver:
             
         # No good match found, return best guess with low confidence
         statements, role, conf = self._get_best_guess(statement_type)
+        if conf < 0.4:
+
+            if len(statements) == 0:
+                raise ValueError(f"No matching statements found for type '{statement_type}' with low confidence {conf:.2f}.")
+            elif conf < 0.3:
+                found_statements = [s['definition'] for s in statements]
+                raise ValueError(f"Low confidence match for type '{statement_type}': {conf:.2f}. Found statements: {found_statements}")
+            else:
+                log.warn(
+                    f"No good match found for statement type '{statement_type}'. The best guess has low confidence: {conf:.2f}")
         if statements:
             # For canonical types, preserve the original statement_type
             canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
