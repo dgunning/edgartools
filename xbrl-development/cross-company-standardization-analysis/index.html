@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Cross-Company Standardization Analysis: NVIDIA vs Apple 10-K Filings - edgartools</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Cross-Company Standardization Analysis: NVIDIA vs Apple 10-K Filings";
+        var mkdocs_page_input_path = "xbrl-development/cross-company-standardization-analysis.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../getting-started/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../initial-steps/">Initial Steps</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../examples/">User Journeys</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Filings</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../working-with-filings/">Working with Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../filtering-filings/">Filtering filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../attachments/">Attachments</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Companies</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../company/">Companies</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">XBRL and Financials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-xbrl/">Getting XBRL from Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../xbrl-querying/">Querying XBRL Facts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data Objects</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data-objects/">Data Objects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../insider-filings/">Insider Filings</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../local-data/">Local Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sgml/">Parsing SGML</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Cross-Company Standardization Analysis: NVIDIA vs Apple 10-K Filings</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="cross-company-standardization-analysis-nvidia-vs-apple-10-k-filings">Cross-Company Standardization Analysis: NVIDIA vs Apple 10-K Filings</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This analysis compares attachment and XBRL statement naming patterns between NVIDIA and Apple 10-K filings to identify standardization opportunities and develop a common framework. While both companies follow SEC XBRL requirements, there are significant differences in naming conventions, statement organization, and disclosure granularity that present both challenges and opportunities for creating standardized access patterns.</p>
+<h2 id="company-comparison-overview">Company Comparison Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>NVIDIA (2023)</th>
+<th>Apple (2024)</th>
+<th>Standardization Opportunity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total Attachments</strong></td>
+<td>115</td>
+<td>106</td>
+<td>Similar scale, common framework viable</td>
+</tr>
+<tr>
+<td><strong>Core Financial Statements</strong></td>
+<td>6</td>
+<td>5</td>
+<td>Standard GAAP statements, high standardization potential</td>
+</tr>
+<tr>
+<td><strong>R-file HTML Renderings</strong></td>
+<td>R1-R89 (89 files)</td>
+<td>R1-R73 (73 files)</td>
+<td>Common R-file pattern, different granularity</td>
+</tr>
+<tr>
+<td><strong>XBRL Statement Count</strong></td>
+<td>88+</td>
+<td>74+</td>
+<td>Similar structure, different detail levels</td>
+</tr>
+<tr>
+<td><strong>Exhibit Pattern</strong></td>
+<td>EX-4.6 to EX-32.2</td>
+<td>EX-4.1 to EX-97.1</td>
+<td>Standard SEC exhibit numbers</td>
+</tr>
+</tbody>
+</table>
+<h2 id="naming-pattern-analysis">Naming Pattern Analysis</h2>
+<h3 id="1-core-financial-statements-high-standardization-potential">1. Core Financial Statements - HIGH STANDARDIZATION POTENTIAL</h3>
+<table>
+<thead>
+<tr>
+<th>Statement Type</th>
+<th>NVIDIA</th>
+<th>Apple</th>
+<th>Standard Name Proposal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Income Statement</strong></td>
+<td>CONSOLIDATEDSTATEMENTSOFINCOME</td>
+<td>CONSOLIDATEDSTATEMENTSOFOPERATIONS</td>
+<td><code>ConsolidatedIncomeStatement</code></td>
+</tr>
+<tr>
+<td><strong>Balance Sheet</strong></td>
+<td>CONSOLIDATEDBALANCESHEETS</td>
+<td>CONSOLIDATEDBALANCESHEETS</td>
+<td><code>ConsolidatedBalanceSheet</code> ✓</td>
+</tr>
+<tr>
+<td><strong>Cash Flow</strong></td>
+<td>CONSOLIDATEDSTATEMENTSOFCASHFLOWS</td>
+<td>CONSOLIDATEDSTATEMENTSOFCASHFLOWS</td>
+<td><code>ConsolidatedCashFlowStatement</code> ✓</td>
+</tr>
+<tr>
+<td><strong>Comprehensive Income</strong></td>
+<td>CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME</td>
+<td>CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME</td>
+<td><code>ConsolidatedComprehensiveIncomeStatement</code> ✓</td>
+</tr>
+<tr>
+<td><strong>Equity Statement</strong></td>
+<td>CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY</td>
+<td>CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY</td>
+<td><code>ConsolidatedShareholdersEquityStatement</code> ✓</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Findings</strong>: 80% naming consistency across core statements. Only income statement varies (INCOME vs OPERATIONS).</p>
+<h3 id="2-r-file-html-attachment-patterns-medium-standardization-potential">2. R-File HTML Attachment Patterns - MEDIUM STANDARDIZATION POTENTIAL</h3>
+<h4 id="core-statement-r-files-perfect-match">Core Statement R-Files (Perfect Match)</h4>
+<table>
+<thead>
+<tr>
+<th>R-File</th>
+<th>NVIDIA Description</th>
+<th>Apple Description</th>
+<th>Standardizable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R1.htm</strong></td>
+<td>Cover Page</td>
+<td>Cover Page</td>
+<td>✓ <strong>Perfect Match</strong></td>
+</tr>
+<tr>
+<td><strong>R2.htm</strong></td>
+<td>Audit Information</td>
+<td>Auditor Information</td>
+<td>✓ <strong>Close Match</strong></td>
+</tr>
+<tr>
+<td><strong>R3.htm</strong></td>
+<td>CONSOLIDATED STATEMENTS OF INCOME</td>
+<td>CONSOLIDATED STATEMENTS OF OPERATIONS</td>
+<td>✓ <strong>Core Statement</strong></td>
+</tr>
+<tr>
+<td><strong>R4.htm</strong></td>
+<td>CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME</td>
+<td>CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME</td>
+<td>✓ <strong>Perfect Match</strong></td>
+</tr>
+<tr>
+<td><strong>R5.htm</strong></td>
+<td>CONSOLIDATED BALANCE SHEETS</td>
+<td>CONSOLIDATED BALANCE SHEETS</td>
+<td>✓ <strong>Perfect Match</strong></td>
+</tr>
+<tr>
+<td><strong>R6.htm</strong></td>
+<td>CONSOLIDATED BALANCE SHEETS (Parenthetical)</td>
+<td>CONSOLIDATED BALANCE SHEETS (Parenthetical)</td>
+<td>✓ <strong>Perfect Match</strong></td>
+</tr>
+<tr>
+<td><strong>R7.htm</strong></td>
+<td>CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY</td>
+<td>CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY</td>
+<td>✓ <strong>Perfect Match</strong></td>
+</tr>
+<tr>
+<td><strong>R8.htm</strong></td>
+<td>CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY (Parenthetical)</td>
+<td>CONSOLIDATED STATEMENTS OF CASH FLOWS</td>
+<td>❌ <strong>Different Content</strong></td>
+</tr>
+<tr>
+<td><strong>R9.htm</strong></td>
+<td>CONSOLIDATED STATEMENTS OF CASH FLOWS</td>
+<td>Summary of Significant Accounting Policies</td>
+<td>❌ <strong>Different Content</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Finding</strong>: R1-R7 show high consistency, but R8+ diverge significantly between companies.</p>
+<h3 id="3-business-section-organization-differences">3. Business Section Organization Differences</h3>
+<h4 id="nvidia-approach-detailed-granularity">NVIDIA Approach: Detailed Granularity</h4>
+<ul>
+<li><strong>Business Combination</strong>: 6 detailed sections (R11, R29, R43-R47)</li>
+<li><strong>Stock Compensation</strong>: 4 sections (R13, R31, R51-R54)  </li>
+<li><strong>Leases</strong>: 3 sections (R12, R30, R48-R50)</li>
+<li><strong>Segment Information</strong>: 7 sections (R26, R41, R84-R88)</li>
+</ul>
+<h4 id="apple-approach-streamlined-organization">Apple Approach: Streamlined Organization</h4>
+<ul>
+<li><strong>Revenue</strong>: 4 sections (R10, R26, R38-R40)</li>
+<li><strong>Share-Based Compensation</strong>: 4 sections (R19, R35, R66-R68)</li>
+<li><strong>Leases</strong>: 4 sections (R16, R32, R57-R59)</li>
+<li><strong>Segment Information</strong>: 6 sections (R21, R37, R70-R73)</li>
+</ul>
+<h3 id="4-company-specific-disclosure-patterns">4. Company-Specific Disclosure Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Disclosure Area</th>
+<th>NVIDIA Unique</th>
+<th>Apple Unique</th>
+<th>Standardization Challenge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Business Combinations</strong></td>
+<td>Mellanox acquisition details</td>
+<td>Not applicable</td>
+<td>Company-specific events</td>
+</tr>
+<tr>
+<td><strong>Revenue Recognition</strong></td>
+<td>Basic disclosure</td>
+<td>Detailed product/service breakdown</td>
+<td>Business model differences</td>
+</tr>
+<tr>
+<td><strong>Geographic Segments</strong></td>
+<td>Market-based segmentation</td>
+<td>Country-based segmentation</td>
+<td>Different segment strategies</td>
+</tr>
+<tr>
+<td><strong>Executive Compensation</strong></td>
+<td>Standard disclosure</td>
+<td>Pay vs Performance + Insider Trading</td>
+<td>Apple has enhanced disclosures</td>
+</tr>
+</tbody>
+</table>
+<h2 id="framework-standardization-opportunities">Framework Standardization Opportunities</h2>
+<h3 id="1-universal-r-file-mapping-high-confidence">1. Universal R-File Mapping (HIGH CONFIDENCE)</h3>
+<pre><code class="language-python"># Proposed Standard R-File Framework
+STANDARD_R_FILES = {
+    'R1.htm': 'cover_page',
+    'R2.htm': 'auditor_information', 
+    'R3.htm': 'income_statement',
+    'R4.htm': 'comprehensive_income_statement',
+    'R5.htm': 'balance_sheet',
+    'R6.htm': 'balance_sheet_parenthetical',
+    'R7.htm': 'shareholders_equity_statement',
+    'R8.htm': 'cash_flow_statement',  # Apple pattern
+    'R9.htm': 'accounting_policies'   # Apple pattern
+}
+</code></pre>
+<h3 id="2-business-section-pattern-recognition-medium-confidence">2. Business Section Pattern Recognition (MEDIUM CONFIDENCE)</h3>
+<pre><code class="language-python"># Standardizable Business Sections
+STANDARD_BUSINESS_SECTIONS = {
+    'leases': {
+        'main': r'R\d+\.htm.*Leases(?!\s*\()',
+        'tables': r'R\d+\.htm.*Leases.*\(Tables\)',
+        'details': r'R\d+\.htm.*Leases.*Details',
+        'schedules': r'R\d+\.htm.*Lease.*Schedule'
+    },
+    'stock_compensation': {
+        'main': r'R\d+\.htm.*(Stock-Based|Share-Based)\s*Compensation(?!\s*\()',
+        'tables': r'R\d+\.htm.*(Stock-Based|Share-Based).*\(Tables\)',
+        'details': r'R\d+\.htm.*(Stock-Based|Share-Based).*Details'
+    },
+    'segment_information': {
+        'main': r'R\d+\.htm.*Segment\s*Information(?!\s*\()',
+        'tables': r'R\d+\.htm.*Segment.*\(Tables\)',
+        'geographic': r'R\d+\.htm.*Geographic',
+        'reconciliation': r'R\d+\.htm.*Reconcil'
+    }
+}
+</code></pre>
+<h3 id="3-xbrl-statement-standardization-high-confidence">3. XBRL Statement Standardization (HIGH CONFIDENCE)</h3>
+<pre><code class="language-python"># Core XBRL Statements - Universal
+UNIVERSAL_XBRL_STATEMENTS = {
+    'balance_sheet': [
+        'CONSOLIDATEDBALANCESHEETS',
+        'CONSOLIDATEDBALANCESHEETSParenthetical'
+    ],
+    'income_statement': [
+        'CONSOLIDATEDSTATEMENTSOFINCOME',      # NVIDIA
+        'CONSOLIDATEDSTATEMENTSOFOPERATIONS'   # Apple
+    ],
+    'cash_flow': ['CONSOLIDATEDSTATEMENTSOFCASHFLOWS'],
+    'comprehensive_income': ['CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME'],
+    'equity': ['CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY']
+}
+</code></pre>
+<h2 id="proposed-common-framework-architecture">Proposed Common Framework Architecture</h2>
+<h3 id="1-adaptive-r-file-discovery">1. Adaptive R-File Discovery</h3>
+<pre><code class="language-python">class StandardizedAttachmentMapper:
+    def __init__(self, filing):
+        self.filing = filing
+        self.r_file_map = self._build_r_file_map()
+
+    def _build_r_file_map(self):
+        &quot;&quot;&quot;Build adaptive mapping based on content patterns&quot;&quot;&quot;
+        attachments = self.filing.attachments
+        mapping = {}
+
+        # Find core statements using content analysis
+        for attachment in attachments:
+            if 'Cover Page' in attachment.description:
+                mapping['cover_page'] = attachment
+            elif 'STATEMENTS OF OPERATIONS' in attachment.description:
+                mapping['income_statement'] = attachment
+            elif 'STATEMENTS OF INCOME' in attachment.description:
+                mapping['income_statement'] = attachment
+            # ... continue pattern matching
+
+        return mapping
+
+    def get_lease_details(self):
+        &quot;&quot;&quot;Get all lease-related attachments&quot;&quot;&quot;
+        lease_files = []
+        for attachment in self.filing.attachments:
+            if re.search(r'Lease.*Details|Lease.*Schedule', attachment.description):
+                lease_files.append(attachment)
+        return lease_files
+</code></pre>
+<h3 id="2-universal-business-section-access">2. Universal Business Section Access</h3>
+<pre><code class="language-python">class StandardizedBusinessSections:
+    def __init__(self, filing):
+        self.filing = filing
+        self.mapper = StandardizedAttachmentMapper(filing)
+
+    def get_lease_schedule(self):
+        &quot;&quot;&quot;Get lease payment schedule regardless of company&quot;&quot;&quot;
+        # Try common patterns
+        patterns = [
+            r'Future.*Lease.*Payment',
+            r'Lease.*Liability.*Maturities', 
+            r'Minimum.*Lease.*Payment'
+        ]
+
+        for pattern in patterns:
+            matches = self._find_by_pattern(pattern)
+            if matches:
+                return matches[0]  # Return first match
+        return None
+
+    def get_stock_compensation_details(self):
+        &quot;&quot;&quot;Get detailed stock compensation data&quot;&quot;&quot;
+        patterns = [
+            r'Stock.*Compensation.*Expense.*Details',
+            r'Share.*Based.*Compensation.*Details',
+            r'Equity.*Awards.*Details'
+        ]
+
+        return self._find_by_patterns(patterns)
+</code></pre>
+<h2 id="implementation-recommendations">Implementation Recommendations</h2>
+<h3 id="1-multi-tier-standardization-strategy">1. Multi-Tier Standardization Strategy</h3>
+<p><strong>Tier 1: Universal Elements (Implement First)</strong>
+- Core financial statements (R1-R7)
+- Standard XBRL statements<br />
+- Common exhibits (21.1, 23.1, 31.1, 31.2, 32.1)</p>
+<p><strong>Tier 2: Pattern-Based Elements (Implement Second)</strong><br />
+- Business section discovery using regex patterns
+- Common disclosure types (leases, stock compensation, segments)
+- Table vs Detail vs Narrative classification</p>
+<p><strong>Tier 3: Company-Specific Elements (Handle as Exceptions)</strong>
+- Unique business combinations
+- Industry-specific disclosures
+- Non-standard segment definitions</p>
+<h3 id="2-flexible-framework-design">2. Flexible Framework Design</h3>
+<pre><code class="language-python">class UniversalFilingParser:
+    def __init__(self, filing):
+        self.filing = filing
+        self.company_profile = self._detect_company_patterns()
+        self.standardizer = self._get_standardizer()
+
+    def _detect_company_patterns(self):
+        &quot;&quot;&quot;Detect company-specific patterns&quot;&quot;&quot;
+        # Analyze attachment descriptions, XBRL structure
+        # Return profile: 'nvidia_style', 'apple_style', 'generic'
+        pass
+
+    def _get_standardizer(self):
+        &quot;&quot;&quot;Return appropriate standardizer for detected pattern&quot;&quot;&quot;
+        if self.company_profile == 'nvidia_style':
+            return NvidiaStyleStandardizer(self.filing)
+        elif self.company_profile == 'apple_style':
+            return AppleStyleStandardizer(self.filing)
+        else:
+            return GenericStandardizer(self.filing)
+</code></pre>
+<h3 id="3-progressive-enhancement-strategy">3. Progressive Enhancement Strategy</h3>
+<p><strong>Phase 1</strong>: Implement core statement standardization (high confidence, immediate value)
+<strong>Phase 2</strong>: Add pattern-based business section discovery<br />
+<strong>Phase 3</strong>: Build company-specific adapters as needed
+<strong>Phase 4</strong>: Add AI-powered content classification for edge cases</p>
+<h2 id="key-standardization-challenges">Key Standardization Challenges</h2>
+<h3 id="1-business-model-differences">1. Business Model Differences</h3>
+<ul>
+<li><strong>Apple</strong>: Product-focused revenue breakdown</li>
+<li><strong>NVIDIA</strong>: Technology platform segmentation  </li>
+<li><strong>Solution</strong>: Abstract common patterns, handle specifics via adapters</li>
+</ul>
+<h3 id="2-disclosure-granularity-variations">2. Disclosure Granularity Variations</h3>
+<ul>
+<li><strong>NVIDIA</strong>: 89 R-files, highly detailed</li>
+<li><strong>Apple</strong>: 73 R-files, more consolidated</li>
+<li><strong>Solution</strong>: Multi-level access APIs (summary + detail levels)</li>
+</ul>
+<h3 id="3-temporal-filing-format-evolution">3. Temporal Filing Format Evolution</h3>
+<ul>
+<li>Companies change disclosure patterns over time</li>
+<li>SEC requirements evolve</li>
+<li><strong>Solution</strong>: Version-aware standardization with fallback patterns</li>
+</ul>
+<h2 id="conclusion-and-next-steps">Conclusion and Next Steps</h2>
+<p>The analysis reveals <strong>high standardization potential</strong> for core financial statements and basic business sections, with <strong>medium potential</strong> for advanced disclosures. The recommended approach is a <strong>multi-tier adaptive framework</strong> that:</p>
+<ol>
+<li><strong>Standardizes common elements</strong> (80% of use cases)</li>
+<li><strong>Pattern-matches business sections</strong> (15% of use cases)  </li>
+<li><strong>Handles edge cases gracefully</strong> (5% of use cases)</li>
+</ol>
+<p><strong>Immediate Implementation Priority</strong>:
+1. Universal R-file mapping for R1-R9
+2. Standard XBRL statement access<br />
+3. Pattern-based lease and stock compensation discovery
+4. Generic business section classification framework</p>
+<p>This framework would provide consistent access to financial data while preserving the ability to access company-specific details when needed.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

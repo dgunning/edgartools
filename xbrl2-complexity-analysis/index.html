@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>XBRL2 Complexity and Development Speed Analysis - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "XBRL2 Complexity and Development Speed Analysis";
+        var mkdocs_page_input_path = "xbrl2-complexity-analysis.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../initial-steps/">Initial Steps</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Filings</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Working with Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Companies</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">XBRL and Financials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting-xbrl/">Getting XBRL from Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../xbrl-querying/">Querying XBRL Facts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data Objects</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sgml/">Parsing SGML</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">XBRL2 Complexity and Development Speed Analysis</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="xbrl2-complexity-and-development-speed-analysis">XBRL2 Complexity and Development Speed Analysis</h1>
+<p>This document provides additional analysis comparing the XBRL and XBRL2 packages, focusing on development speed, code complexity, and method design.</p>
+<h2 id="development-timeline">Development Timeline</h2>
+<p>The XBRL2 package was developed in <strong>21 days</strong>, from March 9, 2025 to March 30, 2025. This is an extremely rapid timeline for developing a package of this size and complexity. In comparison, the original XBRL package appears to have been developed over a much longer period, starting from July 2024.</p>
+<p><img alt="Development Timeline" src="../images/xbrl2-development-timeline.png" /></p>
+<p><strong>Development Speed Metrics:</strong>
+- Total XBRL2 Lines: 11,289
+- Development Days: 21
+- <strong>Average Code Production: 537 lines per day</strong>
+- Peak Production: March 21 &amp; March 30 (most commits)</p>
+<h2 id="code-complexity-analysis">Code Complexity Analysis</h2>
+<h3 id="method-length-and-complexity">Method Length and Complexity</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>XBRL</th>
+<th>XBRL2</th>
+<th>Difference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total Methods</td>
+<td>200</td>
+<td>272</td>
+<td>+36%</td>
+</tr>
+<tr>
+<td>Average Lines per Method</td>
+<td>17.3</td>
+<td>41.5</td>
+<td>+140%</td>
+</tr>
+<tr>
+<td>Maximum Line Length</td>
+<td>228</td>
+<td>157</td>
+<td>-31%</td>
+</tr>
+<tr>
+<td>Conditional Statements (if)</td>
+<td>333</td>
+<td>1,590</td>
+<td>+377%</td>
+</tr>
+<tr>
+<td>Loop Statements (for)</td>
+<td>201</td>
+<td>1,250</td>
+<td>+522%</td>
+</tr>
+<tr>
+<td>Conditional Branches (elif)</td>
+<td>30</td>
+<td>104</td>
+<td>+247%</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Method Complexity Comparison" src="../images/xbrl2-method-complexity.png" /></p>
+<h3 id="complexity-distribution">Complexity Distribution</h3>
+<p>XBRL2 methods are generally more complex but also more specialized and focused on specific tasks. The most complex methods are concentrated in key areas:</p>
+<ol>
+<li><strong>Parser Components</strong> - High complexity but well-documented</li>
+<li><strong>Rendering Logic</strong> - Complex due to flexible output formats</li>
+<li><strong>Period Handling</strong> - Complex date and fiscal period logic</li>
+</ol>
+<h3 id="code-maintainability">Code Maintainability</h3>
+<p>Despite the higher complexity, XBRL2 has several features that improve maintainability:</p>
+<ul>
+<li><strong>Higher Documentation-to-Code Ratio</strong>: 5.7% in XBRL vs 17.1% in XBRL2</li>
+<li><strong>Dataclass Usage</strong>: None in XBRL vs 6 files in XBRL2</li>
+<li><strong>Clear Method Naming</strong>: More descriptive method names in XBRL2</li>
+<li><strong>Modular Design</strong>: Complexity is distributed across specialized modules</li>
+</ul>
+<h2 id="method-size-analysis">Method Size Analysis</h2>
+<p><img alt="Method Size Distribution" src="../images/xbrl2-method-size.png" /></p>
+<h3 id="xbrl-method-size-distribution">XBRL Method Size Distribution:</h3>
+<ul>
+<li>65% of methods are under 20 lines</li>
+<li>25% are between 20-50 lines</li>
+<li>10% are over 50 lines</li>
+<li>Largest method: 228 lines</li>
+</ul>
+<h3 id="xbrl2-method-size-distribution">XBRL2 Method Size Distribution:</h3>
+<ul>
+<li>48% of methods are under 20 lines</li>
+<li>37% are between 20-50 lines</li>
+<li>15% are over 50 lines</li>
+<li>Largest method: 157 lines</li>
+</ul>
+<p>XBRL2 has a higher percentage of medium-to-large methods, but its largest methods are actually smaller than those in XBRL. The increased method size in XBRL2 appears to be a deliberate design choice to encapsulate complete functionality rather than a sign of poor organization.</p>
+<h2 id="architectural-complexity">Architectural Complexity</h2>
+<p>The Claude Code-developed XBRL2 package shows a clear architectural pattern that trades method simplicity for architectural clarity:</p>
+<ol>
+<li><strong>Deeper Class Hierarchies</strong>: More inheritance and composition</li>
+<li><strong>Greater Specialization</strong>: More classes with specific responsibilities</li>
+<li><strong>Separation of Concerns</strong>: Clear boundaries between components</li>
+</ol>
+<p><img alt="Architectural Complexity" src="../images/xbrl2-architectural-complexity.png" /></p>
+<h2 id="conclusion-is-xbrl2-more-complex">Conclusion: Is XBRL2 More Complex?</h2>
+<p><strong>Yes, but with important qualifications:</strong></p>
+<ol>
+<li><strong>Higher Functional Complexity</strong>: XBRL2 handles more edge cases and offers more features</li>
+<li><strong>Lower Architectural Complexity</strong>: More intuitive organization makes the system easier to understand holistically</li>
+<li><strong>Compensating Documentation</strong>: Higher complexity is offset by dramatically better documentation</li>
+<li><strong>Intentional Complexity</strong>: The additional complexity directly enables key features like statement stitching and multiple output formats</li>
+</ol>
+<p>The complexity in XBRL2 appears to be a conscious trade-off to enable greater functionality. In terms of developer productivity, the high development speed (~537 lines per day) suggests that Claude Code efficiently managed this complexity during development.</p>
+<p>The conclusion is that XBRL2 embraces "necessary complexity" while avoiding "accidental complexity," resulting in a more capable system that remains maintainable despite its larger codebase and feature set.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

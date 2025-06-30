@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Querying XBRL Facts - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Querying XBRL Facts";
+        var mkdocs_page_input_path = "xbrl-querying.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../initial-steps/">Initial Steps</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Filings</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Working with Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Companies</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">XBRL and Financials</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../getting-xbrl/">Getting XBRL from Filings</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Querying XBRL Facts</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#accessing-facts">Accessing Facts</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#access-the-facts-view">Access the facts view</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#querying-facts">Querying Facts</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#filtering-facts">Filtering Facts</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#by-concept">By Concept</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#by-label">By Label</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#by-value">By Value</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#by-statement-type">By Statement Type</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#method-chaining">Method Chaining</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#data-transformations">Data Transformations</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sorting">Sorting</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#limiting-results">Limiting Results</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#working-with-results">Working with Results</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#dataframe-output">DataFrame Output</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fact-structure">Fact Structure</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#advanced-filtering">Advanced Filtering</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#dimensions">Dimensions</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#performance-tips">Performance Tips</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#finding-revenue-information">Finding Revenue Information</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#comparing-quarterly-data">Comparing Quarterly Data</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#balance-sheet-analysis">Balance Sheet Analysis</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data Objects</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sgml/">Parsing SGML</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">XBRL and Financials</li>
+      <li class="breadcrumb-item active">Querying XBRL Facts</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="xbrl-query-functionality">XBRL Query Functionality</h1>
+<p>You can query the facts inside an XBRL instance using the XBRL query API. This allows you to get access to specific financial data, filter results and perform analysis on the financial facts contained within a single XBRL filing.</p>
+<h2 id="overview">Overview</h2>
+<p>XBRL query functionality is built around two main classes:
+- <code>FactsView</code> - Provides access to raw XBRL facts from a single filing
+- <code>FactQuery</code> - Enables complex filtering and analysis of those facts</p>
+<h2 id="basic-usage">Basic Usage</h2>
+<h3 id="accessing-facts">Accessing Facts</h3>
+<pre><code class="language-python">from edgar import *
+from edgar.xbrl import XBRL
+
+# Get an XBRL filing
+company = Company(&quot;AAPL&quot;)
+filing = company.latest(&quot;10-K&quot;)
+xb = filing.xbrl()
+</code></pre>
+<h3 id="access-the-facts-view">Access the facts view</h3>
+<p>The <code>FactsView</code> provides direct access to the facts in the XBRL instance:</p>
+<pre><code class="language-python">facts = xb.facts
+print(f&quot;Total facts: {len(facts)}&quot;)
+</code></pre>
+<h2 id="querying-facts">Querying Facts</h2>
+<p>To query facts use the <code>query()</code> method on the <code>XBRL</code> instance and one of the <code>by_</code> functions e.g. <code>by_text()</code>. This returns a <code>FactQuery</code> object that allows you to filter and manipulate the facts.</p>
+<pre><code class="language-python"># Start a query
+results = (xb.query()
+            .by_concept(&quot;us-gaap:PaymentsToAcquireAvailableForSaleSecuritiesDebt&quot;)
+           )
+</code></pre>
+<p><img alt="Query AAPL Debt" src="../images/query-aapl-debt.png" /></p>
+<p>The result is an <code>edgar.xbrl.facts.FactQuery</code> object that contains the filtered facts. You can see from the rich display the available columns of whichg a few are selected by default.</p>
+<p>You can also convert the results to a DataFrame for easier manipulation including selecting which columns you want to view:</p>
+<pre><code class="language-python">df = results.to_dataframe('concept', 'label', 'value', 'period_end')
+</code></pre>
+<h2 id="filtering-facts">Filtering Facts</h2>
+<h3 id="by-concept">By Concept</h3>
+<p>You can filter facts by their concept names, which are unique identifiers for financial data items in XBRL.</p>
+<pre><code class="language-python"># Find revenue-related facts
+revenue_query = xb.query().by_concept(&quot;us-gaap:Revenues&quot;)
+</code></pre>
+<p>The namespace e.g. <code>us-gaap:</code> is optional, so you can use just the concept name like <code>Revenues</code>.</p>
+<p>Querying by concept does a partial regex match on the concept name</p>
+<p><code>by_concept('RevenueFrom')</code> matches <code>us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax</code> and <code>us-gaap:RevenueFromContractWithCustomerTextBlock</code></p>
+<p>Use <code>exact=True</code> to match the full concept name exactly.</p>
+<h3 id="by-label">By Label</h3>
+<p>You can filter facts by their labels, which are human-readable names associated with the concepts.</p>
+<pre><code class="language-python"># Search by label text
+revenue_query = xb.query().by_label(&quot;Revenue&quot;)
+</code></pre>
+<p>To specify exact matches or partial matches, use the <code>exact</code> parameter:</p>
+<pre><code class="language-python">sales_query = xb.query().by_label(&quot;Revenue&quot;, exact=False)
+</code></pre>
+<h3 id="by-value">By Value</h3>
+<pre><code class="language-python"># Facts with values above $1 billion
+large_values = xb.query().by_value(lambda x: x &gt; 1_000_000_000)
+
+# Facts within a range
+range_query = xb.query().by_value(lambda x: 100_000 &lt;= x &lt;= 1_000_000)
+</code></pre>
+<h3 id="by-statement-type">By Statement Type</h3>
+<pre><code class="language-python"># Facts from specific statements
+income_facts = xb.query().by_statement_type(&quot;IncomeStatement&quot;)
+balance_facts = xb.query().by_statement_type(&quot;BalanceSheet&quot;)
+</code></pre>
+<h2 id="method-chaining">Method Chaining</h2>
+<p>Combine multiple filters using method chaining:</p>
+<pre><code class="language-python"># Complex query with multiple filters
+complex_query = (xbrl.query()
+                 .by_statement(&quot;IncomeStatement&quot;)
+                 .by_label(&quot;Revenue&quot;)
+                 .by_value(lambda x: x &gt; 1_000_000)
+                 .sort_by('value', ascending=False)
+                 .limit(10))
+
+results = complex_query.execute()
+</code></pre>
+<h2 id="data-transformations">Data Transformations</h2>
+<h3 id="sorting">Sorting</h3>
+<pre><code class="language-python"># Sort by value (descending)
+sorted_query = xbrl.query().sort_by('value', ascending=False)
+
+# Sort by concept name
+concept_sorted = xbrl.query().sort_by('concept')
+</code></pre>
+<h3 id="limiting-results">Limiting Results</h3>
+<pre><code class="language-python"># Get top 10 results
+top_10 = xbrl.query().limit(10)
+
+# Pagination
+page_1 = xbrl.query().limit(20)
+page_2 = xbrl.query().offset(20).limit(20)
+</code></pre>
+<h2 id="working-with-results">Working with Results</h2>
+<h3 id="dataframe-output">DataFrame Output</h3>
+<pre><code class="language-python"># Get specific columns
+df = query.to_dataframe('concept', 'label', 'value', 'period_end')
+
+# All available columns
+full_df = query.to_dataframe()
+
+# Column information
+print(&quot;Available columns:&quot;, df.columns.tolist())
+</code></pre>
+<h3 id="fact-structure">Fact Structure</h3>
+<p>Each fact contains the following key information:</p>
+<pre><code class="language-python">fact = results[0]
+print(f&quot;Concept: {fact['concept']}&quot;)
+print(f&quot;Label: {fact['label']}&quot;)
+print(f&quot;Value: {fact['value']}&quot;)
+print(f&quot;Period: {fact['period_end']}&quot;)
+print(f&quot;Units: {fact['units']}&quot;)
+print(f&quot;Decimals: {fact['decimals']}&quot;)
+</code></pre>
+<h2 id="advanced-filtering">Advanced Filtering</h2>
+<h3 id="dimensions">Dimensions</h3>
+<pre><code class="language-python"># Facts with specific dimensions
+dimensional_query = xbrl.query().by_dimension(&quot;ProductOrServiceAxis&quot;, &quot;ProductMember&quot;)
+
+# Facts with any value for a dimension
+any_product_dim = xbrl.query().by_dimension(&quot;ProductOrServiceAxis&quot;)
+
+# Facts with NO dimensions (undimensioned facts)
+undimensioned_facts = xbrl.query().by_dimension(None)
+
+# Multiple dimensions
+multi_dim = xbrl.query().by_dimensions({
+    &quot;ProductOrServiceAxis&quot;: &quot;ProductMember&quot;,
+    &quot;GeographyAxis&quot;: &quot;USMember&quot;
+})
+</code></pre>
+<h2 id="performance-tips">Performance Tips</h2>
+<ol>
+<li><strong>Use specific filters</strong>: Filter early to reduce data processing</li>
+<li><strong>Limit results</strong>: Use <code>.limit()</code> for large datasets</li>
+<li><strong>Cache queries</strong>: Store frequently used queries</li>
+<li><strong>Select columns</strong>: Use <code>to_dataframe()</code> with specific columns</li>
+</ol>
+<pre><code class="language-python"># Efficient query pattern
+efficient_query = (xb.query()
+                   .by_statement(&quot;IncomeStatement&quot;)  # Filter first
+                   .by_value(lambda x: x &gt; 0)        # Remove zeros
+                   .limit(100)                       # Limit results
+                   .to_dataframe('concept', 'value')) # Select columns
+</code></pre>
+<h2 id="examples">Examples</h2>
+<h3 id="finding-revenue-information">Finding Revenue Information</h3>
+<pre><code class="language-python"># All revenue-related facts
+revenue_facts = (xb.query()
+                 .by_label(&quot;revenue&quot;, exact=False)
+                 .sort_by('value', ascending=False)
+                 .execute())
+
+for fact in revenue_facts:
+    print(f&quot;{fact['label']}: ${fact['value']:,}&quot;)
+</code></pre>
+<h3 id="comparing-quarterly-data">Comparing Quarterly Data</h3>
+<pre><code class="language-python"># Get quarterly revenue data
+quarterly_revenue = (xb.query()
+                     .by_concept(&quot;us-gaap:Revenues&quot;)
+                     .by_period_type(&quot;duration&quot;)
+                     .sort_by('period_end')
+                     .to_dataframe('period_end', 'value'))
+
+print(quarterly_revenue)
+</code></pre>
+<h3 id="balance-sheet-analysis">Balance Sheet Analysis</h3>
+<pre><code class="language-python"># Major balance sheet items
+balance_items = (xb.query()
+                 .by_statement(&quot;BalanceSheet&quot;)
+                 .by_value(lambda x: x &gt; 1_000_000_000)  # &gt; $1B
+                 .sort_by('value', ascending=False)
+                 .to_dataframe('label', 'value'))
+
+print(&quot;Major Balance Sheet Items (&gt; $1B):&quot;)
+print(balance_items)
+</code></pre>
+<p>This query system provides a flexible and powerful way to explore XBRL data, enabling detailed financial analysis and data extraction from individual filings.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../getting-xbrl/" class="btn btn-neutral float-left" title="Getting XBRL from Filings"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../data-objects/" class="btn btn-neutral float-right" title="Data Objects">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../getting-xbrl/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../data-objects/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

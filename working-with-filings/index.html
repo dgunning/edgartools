@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Working with Filings - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Working with Filings";
+        var mkdocs_page_input_path = "working-with-filings.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../initial-steps/">Initial Steps</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Filings</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Working with Filings</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#getting-a-filing">Getting a Filing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#open-a-filing-in-your-browser">Open a Filing in your browser</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#open-the-filing-homepage">Open the Filing homepage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#view-the-filing">View the Filing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#get-the-html-of-a-filing">Get the HTML of a Filing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#getting-the-text-of-a-filing">Getting the text of a Filing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#working-with-attachments">Working with Attachments</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#looping-through-attachments">Looping through Attachments</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#getting-an-attachment">Getting an Attachment</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#viewing-an-attachment">Viewing an Attachment</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#downloading-attachments">Downloading Attachments</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Companies</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">XBRL and Financials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting-xbrl/">Getting XBRL from Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../xbrl-querying/">Querying XBRL Facts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data Objects</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sgml/">Parsing SGML</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Working with Filings</li>
+      <li class="breadcrumb-item active">Working with Filings</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="working-with-a-filing">Working with a Filing</h1>
+<p>A filing is a handle to a single SEC EDGAR filing. With it you can access all the documents and datafiles on the filing.</p>
+<h3 id="getting-a-filing">Getting a Filing</h3>
+<p>You can get a filing using the <code>[]</code> operator. For example:</p>
+<pre><code class="language-python">filings = get_filings()
+filing = filings[0]
+</code></pre>
+<h3 id="open-a-filing-in-your-browser">Open a Filing in your browser</h3>
+<p>The <code>open</code> method opens the main document of a filing in your browser</p>
+<pre><code class="language-python">filing.open()
+</code></pre>
+<h3 id="open-the-filing-homepage">Open the Filing homepage</h3>
+<p>The filing homepage is the landing page for a filing. It links to all the documents and datafiles on the filing.</p>
+<pre><code class="language-python">filing.open_homepage()
+</code></pre>
+<h3 id="view-the-filing">View the Filing</h3>
+<p>This downloads the filing's HTML content, parses it and displays it as close to the original as is possible in the console or in a Jupyter notebook. This is a good way to preview a filing, but won't be perfect so if you need a perfect copy of the filing, you should use the <code>open</code> method to view it in the browser.</p>
+<pre><code class="language-python">filing.view()
+</code></pre>
+<h3 id="get-the-html-of-a-filing">Get the HTML of a Filing</h3>
+<p>This downloads the filing's HTML content and returns it as a string.</p>
+<pre><code class="language-python">html = filing.html()
+</code></pre>
+<h3 id="getting-the-text-of-a-filing">Getting the text of a Filing</h3>
+<p>The <code>text</code> method returns the text of a filing</p>
+<pre><code class="language-python">text = filing.text()
+</code></pre>
+<h2 id="working-with-attachments">Working with Attachments</h2>
+<p>The <code>attachments</code> attribute returns a list of the attachments on a filing</p>
+<pre><code class="language-python">attachments = filing.attachments
+</code></pre>
+<h3 id="looping-through-attachments">Looping through Attachments</h3>
+<p>You can loop through attachments using the <code>for</code> loop.</p>
+<pre><code class="language-python">for attachment in filings.attachments:
+    print(attachment)
+</code></pre>
+<h3 id="getting-an-attachment">Getting an Attachment</h3>
+<p>The <code>[]</code> operator returns an attachment by index</p>
+<pre><code class="language-python">attachment = filing.attachments[0]
+</code></pre>
+<h3 id="viewing-an-attachment">Viewing an Attachment</h3>
+<p>The <code>view</code> method displays the text of an attachment in the console. This works for text and html attachments</p>
+<pre><code class="language-python">attachment.view()
+</code></pre>
+<h3 id="downloading-attachments">Downloading Attachments</h3>
+<p>The <code>download</code> method downloads all the attachments to a folder of your choice.
+```python
+filing.attachments.download(path)</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../examples/" class="btn btn-neutral float-left" title="User Journeys"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../filtering-filings/" class="btn btn-neutral float-right" title="Filtering filings">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../examples/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../filtering-filings/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

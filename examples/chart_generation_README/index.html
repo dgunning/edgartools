@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>XBRL vs XBRL2 Chart Generation - edgartools</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "XBRL vs XBRL2 Chart Generation";
+        var mkdocs_page_input_path = "examples/chart_generation_README.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../getting-started/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../initial-steps/">Initial Steps</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../">User Journeys</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Filings</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../working-with-filings/">Working with Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../filtering-filings/">Filtering filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../attachments/">Attachments</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Companies</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../company/">Companies</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">XBRL and Financials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-xbrl/">Getting XBRL from Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../xbrl-querying/">Querying XBRL Facts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data Objects</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data-objects/">Data Objects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../insider-filings/">Insider Filings</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../local-data/">Local Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sgml/">Parsing SGML</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">XBRL vs XBRL2 Chart Generation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="xbrl-vs-xbrl2-chart-generation">XBRL vs XBRL2 Chart Generation</h1>
+<p>This directory contains scripts and documentation for analyzing the XBRL2 rewrite compared to the original XBRL package.</p>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li><code>docs/xbrl2-rewrite-analysis.md</code>: Main analysis comparing XBRL vs XBRL2 features and structure</li>
+<li><code>docs/xbrl2-complexity-analysis.md</code>: Focused analysis of complexity, method size, and development speed</li>
+</ul>
+<h2 id="chart-generation-script">Chart Generation Script</h2>
+<p>The <code>generate_xbrl2_charts.py</code> script creates visualizations for both markdown files.</p>
+<h3 id="installation-requirements">Installation Requirements</h3>
+<p>To generate the charts, you need the following Python packages:</p>
+<pre><code class="language-bash">pip install matplotlib numpy pandas seaborn
+</code></pre>
+<h3 id="usage">Usage</h3>
+<p>Run the script from the project root directory:</p>
+<pre><code class="language-bash">python generate_xbrl2_charts.py
+</code></pre>
+<p>This will generate the following charts in the <code>docs/images/</code> directory:</p>
+<ol>
+<li><strong>Basic Comparison Charts:</strong></li>
+<li><code>xbrl2-code-metrics.png</code> - Code size and structure metrics</li>
+<li><code>xbrl2-code-distribution.png</code> - Distribution of code across files</li>
+<li><code>xbrl2-api-functionality.png</code> - API functionality comparison</li>
+<li><code>xbrl2-feature-comparison.png</code> - Feature availability comparison</li>
+<li>
+<p><code>xbrl2-code-quality.png</code> - Code quality metrics</p>
+</li>
+<li>
+<p><strong>Complexity Analysis Charts:</strong></p>
+</li>
+<li><code>xbrl2-development-timeline.png</code> - Development speed over time</li>
+<li><code>xbrl2-method-complexity.png</code> - Method-level complexity metrics</li>
+<li><code>xbrl2-method-size.png</code> - Method size distribution</li>
+<li><code>xbrl2-architectural-complexity.png</code> - Architectural design patterns</li>
+</ol>
+<h3 id="manual-chart-creation">Manual Chart Creation</h3>
+<p>If you're unable to run the script, you can manually create visualizations for the markdown files:</p>
+<ol>
+<li>Use any visualization tool (Excel, Google Sheets, etc.) to create charts with the data</li>
+<li>Save the charts in PNG format in <code>docs/images/</code> with the names listed above</li>
+<li>The markdown files will automatically display these charts</li>
+</ol>
+<h2 id="data-sources">Data Sources</h2>
+<p>The statistics and metrics in this analysis were derived from:</p>
+<ul>
+<li>Git logs for commit statistics</li>
+<li>Line counts from <code>wc -l</code> command</li>
+<li>Code analysis using <code>grep</code> and other Unix tools</li>
+<li>Manual code analysis for architectural and design patterns</li>
+</ul>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

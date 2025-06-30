@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Enhanced Statement Access Design for Cross-Company Standardization - edgartools</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Enhanced Statement Access Design for Cross-Company Standardization";
+        var mkdocs_page_input_path = "xbrl-development/enhanced-statement-access-design.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../getting-started/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../initial-steps/">Initial Steps</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../examples/">User Journeys</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Filings</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../working-with-filings/">Working with Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../filtering-filings/">Filtering filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../attachments/">Attachments</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Companies</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../company/">Companies</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">XBRL and Financials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../getting-xbrl/">Getting XBRL from Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../xbrl-querying/">Querying XBRL Facts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data Objects</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../data-objects/">Data Objects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../insider-filings/">Insider Filings</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../local-data/">Local Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sgml/">Parsing SGML</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Enhanced Statement Access Design for Cross-Company Standardization</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="enhanced-statement-access-design-for-cross-company-standardization">Enhanced Statement Access Design for Cross-Company Standardization</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This design document outlines improvements to the XBRL statements system to enable standardized access across different companies' filing patterns. Based on analysis of NVIDIA vs Apple 10-K filings, the current system has limitations in handling naming variations and accessing detailed business sections. The proposed enhancements will provide universal statement resolution, business section discovery, and attachment integration while maintaining backward compatibility.</p>
+<h2 id="current-system-analysis">Current System Analysis</h2>
+<h3 id="existing-architecture-edgarxbrlstatementspy">Existing Architecture (edgar/xbrl/statements.py)</h3>
+<p><strong>Core Classes:</strong>
+- <code>Statement</code>: Individual statement wrapper with rendering and analysis
+- <code>Statements</code>: High-level interface for statement collections
+- <code>StitchedStatement</code>/<code>StitchedStatements</code>: Multi-period statement handling</p>
+<p><strong>Current Strengths:</strong>
+- Well-structured OOP design
+- Rich console output with categorization
+- Period filtering and rendering capabilities
+- Basic statement type mapping via <code>statement_to_concepts</code>
+- Ratio calculation and trend analysis</p>
+<h3 id="identified-limitations">Identified Limitations</h3>
+<ol>
+<li><strong>Rigid Statement Type Mapping</strong></li>
+<li>Hard-coded <code>statement_to_concepts</code> dictionary</li>
+<li>Fails on NVIDIA's "CONSOLIDATEDSTATEMENTSOFINCOME" vs Apple's "CONSOLIDATEDSTATEMENTSOFOPERATIONS"</li>
+<li>
+<p>No fuzzy matching for statement name variations</p>
+</li>
+<li>
+<p><strong>Basic Indexing System</strong></p>
+</li>
+<li>Simple string matching in <code>__getitem__</code> method</li>
+<li>Limited fallback logic when exact matches fail</li>
+<li>
+<p>No confidence scoring for multiple matches</p>
+</li>
+<li>
+<p><strong>No Business Section Discovery</strong></p>
+</li>
+<li>Cannot find detailed schedules like lease payment tables</li>
+<li>No pattern-based section identification</li>
+<li>
+<p>Missing connection between summary statements and detailed breakdowns</p>
+</li>
+<li>
+<p><strong>Limited Pattern Recognition</strong></p>
+</li>
+<li>No regex-based matching for statement variations</li>
+<li>Inflexible to company-specific naming conventions</li>
+<li>
+<p>Poor handling of parenthetical vs non-parenthetical statements</p>
+</li>
+<li>
+<p><strong>Missing Attachment Integration</strong></p>
+</li>
+<li>No connection to R-file detailed schedules</li>
+<li>Cannot access granular data from HTML attachments</li>
+<li>Missed opportunity for comprehensive financial analysis</li>
+</ol>
+<h2 id="proposed-design-improvements">Proposed Design Improvements</h2>
+<h3 id="1-universal-statement-type-resolution-system">1. Universal Statement Type Resolution System</h3>
+<p><strong>Objective</strong>: Handle cross-company variations in statement naming</p>
+<p><strong>Design</strong>: Multi-tier pattern matching with confidence scoring</p>
+<pre><code class="language-python">UNIVERSAL_STATEMENT_PATTERNS = {
+    &quot;IncomeStatement&quot;: [
+        r&quot;CONSOLIDATEDSTATEMENTSOFINCOME&quot;,        # NVIDIA pattern
+        r&quot;CONSOLIDATEDSTATEMENTSOFOPERATIONS&quot;,    # Apple pattern
+        r&quot;STATEMENTSOFINCOME&quot;,
+        r&quot;STATEMENTSOFOPERATIONS&quot;,
+        r&quot;INCOMESTATEMENT&quot;
+    ],
+    &quot;BalanceSheet&quot;: [
+        r&quot;CONSOLIDATEDBALANCESHEETS?&quot;,
+        r&quot;BALANCESHEETS?&quot;,
+        r&quot;STATEMENTOFFINANCIALPOSITION&quot;
+    ],
+    &quot;CashFlowStatement&quot;: [
+        r&quot;CONSOLIDATEDSTATEMENTSOFCASHFLOWS?&quot;,
+        r&quot;STATEMENTSOFCASHFLOWS?&quot;,
+        r&quot;CASHFLOWSTATEMENTS?&quot;
+    ],
+    &quot;StatementOfEquity&quot;: [
+        r&quot;CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY&quot;,
+        r&quot;CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSEQUITY&quot;,
+        r&quot;STATEMENTSOFSHAREHOLDERSEQUITY&quot;,
+        r&quot;STATEMENTSOFSTOCKHOLDERSEQUITY&quot;
+    ],
+    &quot;ComprehensiveIncome&quot;: [
+        r&quot;CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME&quot;,
+        r&quot;STATEMENTSOFCOMPREHENSIVEINCOME&quot;
+    ]
+}
+</code></pre>
+<p><strong>New Class</strong>: <code>StatementResolver</code>
+- Fuzzy matching with confidence scores
+- Multiple pattern matching strategies
+- Graceful fallback logic
+- Cross-reference validation using multiple criteria</p>
+<h3 id="2-business-section-discovery-system">2. Business Section Discovery System</h3>
+<p><strong>Objective</strong>: Enable discovery of detailed business sections across companies</p>
+<p><strong>Design</strong>: Pattern-based section categorization with standardized access</p>
+<pre><code class="language-python">BUSINESS_SECTION_PATTERNS = {
+    &quot;leases&quot;: {
+        &quot;main&quot;: [r&quot;Leases(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Leases.*\(Tables\)&quot;],
+        &quot;payment_schedule&quot;: [
+            r&quot;Lease.*(?:Schedule|Payment|Maturities).*Details&quot;,
+            r&quot;Future.*Lease.*Payment.*Details&quot;,
+            r&quot;Lease.*Liability.*Maturities.*Details&quot;
+        ],
+        &quot;narrative&quot;: [r&quot;Lease.*Narrative.*Details&quot;],
+        &quot;rou_assets&quot;: [r&quot;ROU.*Assets.*Lease.*Details&quot;]
+    },
+    &quot;stock_compensation&quot;: {
+        &quot;main&quot;: [r&quot;(?:Stock.?Based|Share.?Based)\s*Compensation(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;(?:Stock.?Based|Share.?Based).*Compensation.*\(Tables\)&quot;],
+        &quot;expense_details&quot;: [r&quot;(?:Stock.?Based|Share.?Based).*Compensation.*Expense.*Details&quot;],
+        &quot;award_details&quot;: [
+            r&quot;(?:Stock.?Based|Share.?Based).*(?:Equity|Awards?).*Details&quot;,
+            r&quot;Restricted.*Stock.*Unit.*Activity.*Details&quot;
+        ],
+        &quot;plan_details&quot;: [r&quot;(?:Stock.?Based|Share.?Based).*(?:Incentive|Plans?).*Details&quot;]
+    },
+    &quot;segments&quot;: {
+        &quot;main&quot;: [r&quot;Segment\s*Information(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Segment.*Information.*\(Tables\)&quot;],
+        &quot;geographic&quot;: [
+            r&quot;(?:Geographic|Region).*Details&quot;,
+            r&quot;Revenue.*Region.*Details&quot;,
+            r&quot;Long.?lived.*Assets.*Region.*Details&quot;
+        ],
+        &quot;reconciliation&quot;: [r&quot;.*Reconcil.*Segment.*Details&quot;],
+        &quot;reportable&quot;: [r&quot;Reportable.*Segment.*Details&quot;]
+    },
+    &quot;debt&quot;: {
+        &quot;main&quot;: [r&quot;Debt(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Debt.*\(Tables\)&quot;],
+        &quot;schedule&quot;: [
+            r&quot;Debt.*(?:Schedule|Payment|Future).*Details&quot;,
+            r&quot;Future.*Principal.*Payment.*Details&quot;
+        ],
+        &quot;term_debt&quot;: [r&quot;Term\s*Debt.*Details&quot;],
+        &quot;commercial_paper&quot;: [r&quot;Commercial.*Paper.*Details&quot;]
+    },
+    &quot;income_taxes&quot;: {
+        &quot;main&quot;: [r&quot;Income\s*Taxes(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Income\s*Taxes.*\(Tables\)&quot;],
+        &quot;reconciliation&quot;: [r&quot;Income\s*Tax.*Reconciliation.*Details&quot;],
+        &quot;deferred&quot;: [r&quot;Deferred\s*Tax.*Details&quot;],
+        &quot;components&quot;: [r&quot;Components.*Income.*Tax.*Details&quot;],
+        &quot;unrecognized&quot;: [r&quot;Unrecognized.*Tax.*Benefits.*Details&quot;]
+    },
+    &quot;financial_instruments&quot;: {
+        &quot;main&quot;: [r&quot;Financial\s*Instruments(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Financial\s*Instruments.*\(Tables\)&quot;],
+        &quot;fair_value&quot;: [r&quot;Fair.*Value.*Financial.*Details&quot;],
+        &quot;derivatives&quot;: [r&quot;Derivative.*Instruments.*Details&quot;],
+        &quot;marketable_securities&quot;: [r&quot;Marketable.*Securities.*Details&quot;]
+    }
+}
+</code></pre>
+<p><strong>New Methods</strong>:
+- <code>statements.get_lease_schedule()</code> → detailed lease payment schedules
+- <code>statements.get_stock_compensation_details()</code> → equity award breakdowns
+- <code>statements.get_segment_geographic_breakdown()</code> → regional revenue data
+- <code>statements.get_business_section(category, detail_type)</code> → generic section finder</p>
+<h3 id="3-enhanced-statement-categorization">3. Enhanced Statement Categorization</h3>
+<p><strong>Current</strong>: Basic 5-category system (statement, note, disclosure, document, other)</p>
+<p><strong>Enhanced</strong>: Hierarchical categorization with business context</p>
+<pre><code class="language-python">ENHANCED_CATEGORIES = {
+    'financial_statements': {
+        'core': ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement'],
+        'supplementary': ['ComprehensiveIncome', 'StatementOfEquity'],
+        'parenthetical': ['BalanceSheetParenthetical', 'IncomeStatementParenthetical']
+    },
+    'business_disclosures': {
+        'operational': ['leases', 'stock_compensation', 'segments', 'revenue'],
+        'financial': ['debt', 'derivatives', 'fair_value', 'financial_instruments'],
+        'regulatory': ['income_taxes', 'commitments', 'contingencies'],
+        'strategic': ['business_combinations', 'goodwill', 'intangibles']
+    },
+    'supporting_schedules': {
+        'payment_schedules': ['lease_payments', 'debt_maturities', 'future_commitments'],
+        'detailed_breakdowns': ['segment_details', 'geographic_revenue', 'product_revenue'],
+        'reconciliations': ['tax_reconciliation', 'segment_reconciliation', 'eps_reconciliation']
+    }
+}
+</code></pre>
+<h3 id="4-smart-statement-resolution-engine">4. Smart Statement Resolution Engine</h3>
+<p><strong>New Class</strong>: <code>StatementResolver</code></p>
+<pre><code class="language-python">class StatementResolver:
+    def resolve_statement_type(self, statement_name: str) -&gt; ResolvedStatement:
+        &quot;&quot;&quot;Resolve statement with confidence scoring and multiple matches&quot;&quot;&quot;
+
+    def find_best_match(self, patterns: List[str], candidates: List[str]) -&gt; MatchResult:
+        &quot;&quot;&quot;Find best pattern match with confidence score&quot;&quot;&quot;
+
+    def cross_validate_match(self, resolved_statement: ResolvedStatement) -&gt; bool:
+        &quot;&quot;&quot;Validate match using multiple criteria (concepts, structure, etc.)&quot;&quot;&quot;
+
+    def get_fallback_options(self, failed_match: str) -&gt; List[ResolvedStatement]:
+        &quot;&quot;&quot;Provide alternative matches when primary resolution fails&quot;&quot;&quot;
+</code></pre>
+<p><strong>Features</strong>:
+- Fuzzy string matching for typos and variations
+- Confidence scoring (0.0 to 1.0) for ranking matches
+- Multiple validation criteria (name, concepts, structure)
+- Graceful degradation with suggested alternatives
+- Learning capability to improve matching over time</p>
+<h3 id="5-attachment-integration-framework">5. Attachment Integration Framework</h3>
+<p><strong>Objective</strong>: Connect XBRL statements with detailed attachment schedules</p>
+<p><strong>Design</strong>: Bidirectional linking between statements and attachments</p>
+<pre><code class="language-python">class StatementWithAttachments(Statement):
+    def get_supporting_attachments(self) -&gt; List[Attachment]:
+        &quot;&quot;&quot;Find R-files that provide detailed breakdowns for this statement&quot;&quot;&quot;
+
+    def get_detailed_schedules(self) -&gt; Dict[str, Attachment]:
+        &quot;&quot;&quot;Get specific detailed schedules (payment schedules, breakdowns, etc.)&quot;&quot;&quot;
+
+    def get_lease_payment_schedule(self) -&gt; Optional[Attachment]:
+        &quot;&quot;&quot;Get detailed lease payment schedule from attachments&quot;&quot;&quot;
+
+    def get_stock_compensation_breakdown(self) -&gt; Optional[Attachment]:
+        &quot;&quot;&quot;Get detailed equity award information from attachments&quot;&quot;&quot;
+
+    def get_segment_geographic_data(self) -&gt; Optional[Attachment]:
+        &quot;&quot;&quot;Get geographic revenue breakdown from attachments&quot;&quot;&quot;
+
+    def get_reconciliation_schedules(self) -&gt; List[Attachment]:
+        &quot;&quot;&quot;Get reconciliation schedules related to this statement&quot;&quot;&quot;
+</code></pre>
+<p><strong>Attachment Discovery Logic</strong>:
+- Pattern matching between XBRL statement names and R-file descriptions
+- Content analysis to identify supporting schedules
+- Cross-reference validation using common data elements
+- Hierarchical relationship mapping (summary → details)</p>
+<h3 id="6-period-view-enhancement">6. Period View Enhancement</h3>
+<p><strong>Current</strong>: Basic period filtering
+<strong>Enhanced</strong>: Context-aware period selection</p>
+<pre><code class="language-python">class SmartPeriodManager:
+    def get_optimal_periods(self, statement_type: str, context: str = &quot;quarterly&quot;) -&gt; List[str]:
+        &quot;&quot;&quot;Return best periods based on statement type and analysis context&quot;&quot;&quot;
+
+    def align_periods_across_statements(self, statement_types: List[str]) -&gt; Dict[str, List[str]]:
+        &quot;&quot;&quot;Ensure consistent period alignment for multi-statement analysis&quot;&quot;&quot;
+
+    def detect_period_patterns(self, statements: List[Statement]) -&gt; PeriodPattern:
+        &quot;&quot;&quot;Analyze and categorize period patterns (quarterly, annual, interim)&quot;&quot;&quot;
+
+    def suggest_comparison_periods(self, base_period: str, statement_type: str) -&gt; List[str]:
+        &quot;&quot;&quot;Suggest meaningful comparison periods for trend analysis&quot;&quot;&quot;
+</code></pre>
+<h2 id="new-api-design">New API Design</h2>
+<h3 id="enhanced-statements-class">Enhanced Statements Class</h3>
+<pre><code class="language-python">class Statements:
+    # Existing methods remain unchanged for backward compatibility
+
+    # Universal access with intelligent resolution
+    def get_statement(self, statement_identifier: str, confidence_threshold: float = 0.8) -&gt; Statement:
+        &quot;&quot;&quot;Get statement with fuzzy matching and confidence scoring&quot;&quot;&quot;
+
+    def find_statements(self, pattern: str) -&gt; List[Tuple[Statement, float]]:
+        &quot;&quot;&quot;Find all statements matching pattern with confidence scores&quot;&quot;&quot;
+
+    # Business section discovery
+    def get_lease_details(self) -&gt; BusinessSectionGroup:
+        &quot;&quot;&quot;Get all lease-related sections organized by detail level&quot;&quot;&quot;
+
+    def get_lease_payment_schedule(self) -&gt; Optional[Statement]:
+        &quot;&quot;&quot;Get specific lease payment schedule section&quot;&quot;&quot;
+
+    def get_stock_compensation_breakdown(self) -&gt; BusinessSectionGroup:
+        &quot;&quot;&quot;Get detailed stock compensation data&quot;&quot;&quot;
+
+    def get_segment_analysis(self) -&gt; BusinessSectionGroup:
+        &quot;&quot;&quot;Get comprehensive segment information&quot;&quot;&quot;
+
+    def get_business_section(self, category: str, detail_type: str = None) -&gt; BusinessSectionGroup:
+        &quot;&quot;&quot;Generic business section finder with category and detail type&quot;&quot;&quot;
+
+    # Enhanced categorization
+    def get_operational_disclosures(self) -&gt; List[Statement]:
+        &quot;&quot;&quot;Get all operational business disclosures&quot;&quot;&quot;
+
+    def get_financial_disclosures(self) -&gt; List[Statement]:
+        &quot;&quot;&quot;Get all financial instrument and debt disclosures&quot;&quot;&quot;
+
+    def get_supporting_schedules(self) -&gt; List[Statement]:
+        &quot;&quot;&quot;Get all detailed supporting schedules&quot;&quot;&quot;
+
+    def get_by_business_category(self, category: str) -&gt; List[Statement]:
+        &quot;&quot;&quot;Get statements by enhanced business category&quot;&quot;&quot;
+
+    # Cross-statement analysis
+    def get_related_sections(self, statement_type: str) -&gt; List[Statement]:
+        &quot;&quot;&quot;Find all sections that provide supporting detail for a statement&quot;&quot;&quot;
+
+    def build_statement_hierarchy(self) -&gt; StatementHierarchy:
+        &quot;&quot;&quot;Build hierarchical view showing relationships between statements&quot;&quot;&quot;
+</code></pre>
+<h3 id="enhanced-statement-class">Enhanced Statement Class</h3>
+<pre><code class="language-python">class Statement:
+    # Existing methods remain unchanged
+
+    # Enhanced data access
+    def get_concept_trends(self, concept_name: str, periods: int = 4) -&gt; Dict[str, List[float]]:
+        &quot;&quot;&quot;Get trends for specific concepts across periods&quot;&quot;&quot;
+
+    def find_related_disclosures(self) -&gt; List[Statement]:
+        &quot;&quot;&quot;Find disclosure sections that provide detail for this statement&quot;&quot;&quot;
+
+    def get_detailed_breakdowns(self) -&gt; List[Attachment]:
+        &quot;&quot;&quot;Get attachment files that provide detailed breakdowns&quot;&quot;&quot;
+
+    def get_supporting_attachments(self) -&gt; List[Attachment]:
+        &quot;&quot;&quot;Get all attachments that support this statement&quot;&quot;&quot;
+
+    # Smart period handling
+    def render_optimal_periods(self, context: str = &quot;quarterly&quot;) -&gt; Any:
+        &quot;&quot;&quot;Render with automatically selected optimal periods&quot;&quot;&quot;
+
+    def align_with_statement(self, other_statement: Statement) -&gt; Tuple[Any, Any]:
+        &quot;&quot;&quot;Render both statements with aligned periods for comparison&quot;&quot;&quot;
+
+    # Enhanced validation and quality checks
+    def validate_completeness(self) -&gt; ValidationResult:
+        &quot;&quot;&quot;Check statement completeness and data quality&quot;&quot;&quot;
+
+    def suggest_related_analysis(self) -&gt; List[AnalysisSuggestion]:
+        &quot;&quot;&quot;Suggest related analyses based on statement type and available data&quot;&quot;&quot;
+</code></pre>
+<h3 id="new-supporting-classes">New Supporting Classes</h3>
+<pre><code class="language-python">@dataclass
+class ResolvedStatement:
+    statement: Statement
+    confidence: float
+    match_method: str
+    alternatives: List[Tuple[Statement, float]]
+
+@dataclass 
+class BusinessSectionGroup:
+    category: str
+    main_section: Statement
+    tables: List[Statement]
+    details: List[Statement]
+    schedules: List[Statement]
+    attachments: List[Attachment]
+
+@dataclass
+class MatchResult:
+    matched_item: Any
+    confidence: float
+    match_type: str  # 'exact', 'fuzzy', 'pattern', 'fallback'
+    explanation: str
+
+class StatementHierarchy:
+    def get_summary_statements(self) -&gt; List[Statement]
+    def get_supporting_details(self, statement: Statement) -&gt; List[Statement]
+    def get_detailed_schedules(self, statement: Statement) -&gt; List[Statement]
+    def visualize(self) -&gt; str  # ASCII tree representation
+</code></pre>
+<h2 id="implementation-strategy">Implementation Strategy</h2>
+<h3 id="phase-1-universal-statement-resolution-2-3-weeks">Phase 1: Universal Statement Resolution (2-3 weeks)</h3>
+<p><strong>Priority</strong>: High - Fixes immediate cross-company compatibility issues</p>
+<ol>
+<li><strong>Add Pattern Matching System</strong></li>
+<li>Define <code>UNIVERSAL_STATEMENT_PATTERNS</code> dictionary</li>
+<li>Implement regex-based matching logic</li>
+<li>
+<p>Add confidence scoring algorithm</p>
+</li>
+<li>
+<p><strong>Enhance <code>__getitem__</code> Method</strong></p>
+</li>
+<li>Add fuzzy matching fallback</li>
+<li>Implement confidence thresholding</li>
+<li>
+<p>Provide alternative suggestions for failed matches</p>
+</li>
+<li>
+<p><strong>Create <code>StatementResolver</code> Class</strong></p>
+</li>
+<li>Centralize resolution logic</li>
+<li>Add cross-validation methods</li>
+<li>
+<p>Implement match explanation system</p>
+</li>
+<li>
+<p><strong>Backward Compatibility</strong></p>
+</li>
+<li>Ensure existing code continues to work</li>
+<li>Add deprecation warnings for old patterns</li>
+<li>Provide migration guide</li>
+</ol>
+<h3 id="phase-2-business-section-discovery-3-4-weeks">Phase 2: Business Section Discovery (3-4 weeks)</h3>
+<p><strong>Priority</strong>: High - Enables access to detailed financial data</p>
+<ol>
+<li><strong>Define Business Section Patterns</strong></li>
+<li>Create <code>BUSINESS_SECTION_PATTERNS</code> dictionary</li>
+<li>Test patterns against NVIDIA and Apple filings</li>
+<li>
+<p>Validate pattern coverage across multiple companies</p>
+</li>
+<li>
+<p><strong>Implement Section Discovery Engine</strong></p>
+</li>
+<li>Create <code>BusinessSectionGroup</code> class</li>
+<li>Implement pattern matching logic</li>
+<li>
+<p>Add section relationship mapping</p>
+</li>
+<li>
+<p><strong>Add Convenience Methods</strong></p>
+</li>
+<li><code>get_lease_schedule()</code>, <code>get_stock_compensation_details()</code></li>
+<li>Generic <code>get_business_section()</code> method</li>
+<li>
+<p>Section-specific rendering and analysis</p>
+</li>
+<li>
+<p><strong>Testing and Validation</strong></p>
+</li>
+<li>Test against multiple company filings</li>
+<li>Validate data accuracy and completeness</li>
+<li>Performance optimization for large statement sets</li>
+</ol>
+<h3 id="phase-3-enhanced-categorization-2-3-weeks">Phase 3: Enhanced Categorization (2-3 weeks)</h3>
+<p><strong>Priority</strong>: Medium - Improves usability and organization</p>
+<ol>
+<li><strong>Implement Enhanced Category System</strong></li>
+<li>Define <code>ENHANCED_CATEGORIES</code> hierarchy</li>
+<li>Create category detection logic</li>
+<li>
+<p>Add business context awareness</p>
+</li>
+<li>
+<p><strong>Add Category-Based Access Methods</strong></p>
+</li>
+<li><code>get_operational_disclosures()</code>, <code>get_financial_disclosures()</code></li>
+<li>Category-filtered display methods</li>
+<li>
+<p>Smart grouping and organization</p>
+</li>
+<li>
+<p><strong>Improve Display and Navigation</strong></p>
+</li>
+<li>Enhanced Rich console output</li>
+<li>Hierarchical statement trees</li>
+<li>Interactive navigation helpers</li>
+</ol>
+<h3 id="phase-4-attachment-integration-4-5-weeks">Phase 4: Attachment Integration (4-5 weeks)</h3>
+<p><strong>Priority</strong>: Medium - Provides comprehensive data access</p>
+<ol>
+<li><strong>Design Attachment-Statement Linking</strong></li>
+<li>Create attachment discovery algorithms</li>
+<li>Implement relationship mapping</li>
+<li>
+<p>Add content validation logic</p>
+</li>
+<li>
+<p><strong>Implement <code>StatementWithAttachments</code></strong></p>
+</li>
+<li>Add attachment access methods</li>
+<li>Create unified data views</li>
+<li>
+<p>Implement cross-reference validation</p>
+</li>
+<li>
+<p><strong>Add Detailed Schedule Access</strong></p>
+</li>
+<li>Specific methods for common schedules</li>
+<li>Generic attachment discovery</li>
+<li>
+<p>Data consistency validation</p>
+</li>
+<li>
+<p><strong>Integration Testing</strong></p>
+</li>
+<li>Test with multiple filing types</li>
+<li>Validate data accuracy</li>
+<li>Performance optimization</li>
+</ol>
+<h3 id="phase-5-period-management-enhancement-2-3-weeks">Phase 5: Period Management Enhancement (2-3 weeks)</h3>
+<p><strong>Priority</strong>: Low - Nice-to-have for advanced analysis</p>
+<ol>
+<li><strong>Implement <code>SmartPeriodManager</code></strong></li>
+<li>Context-aware period selection</li>
+<li>Period alignment algorithms</li>
+<li>
+<p>Pattern detection and analysis</p>
+</li>
+<li>
+<p><strong>Add Period Optimization</strong></p>
+</li>
+<li>Optimal period selection for different analyses</li>
+<li>Automatic period alignment</li>
+<li>
+<p>Trend analysis enhancements</p>
+</li>
+<li>
+<p><strong>Enhanced Rendering Options</strong></p>
+</li>
+<li>Context-sensitive period views</li>
+<li>Comparative rendering</li>
+<li>Period-aware formatting</li>
+</ol>
+<h2 id="benefits-and-impact">Benefits and Impact</h2>
+<h3 id="immediate-benefits">Immediate Benefits</h3>
+<ol>
+<li><strong>Cross-Company Compatibility</strong>: Single API works across NVIDIA, Apple, and other companies</li>
+<li><strong>Enhanced Data Discovery</strong>: Easy access to detailed business sections and schedules</li>
+<li><strong>Improved Usability</strong>: Intelligent resolution reduces user friction</li>
+<li><strong>Better Error Handling</strong>: Confidence scoring and alternatives for failed matches</li>
+</ol>
+<h3 id="long-term-benefits">Long-term Benefits</h3>
+<ol>
+<li><strong>Scalability</strong>: Pattern-based approach adapts to new companies and filing variations</li>
+<li><strong>Comprehensive Analysis</strong>: Integration with attachments provides complete financial picture</li>
+<li><strong>Future-Proof Design</strong>: Flexible architecture accommodates SEC reporting changes</li>
+<li><strong>Enhanced Analytics</strong>: Deeper data access enables more sophisticated financial analysis</li>
+</ol>
+<h3 id="backward-compatibility">Backward Compatibility</h3>
+<ul>
+<li>All existing code continues to work unchanged</li>
+<li>Gradual migration path with deprecation warnings</li>
+<li>Enhanced functionality available through new methods</li>
+<li>No breaking changes to core APIs</li>
+</ul>
+<h2 id="success-metrics">Success Metrics</h2>
+<ol>
+<li><strong>Coverage</strong>: Successfully handle 95%+ of S&amp;P 500 company statement variations</li>
+<li><strong>Performance</strong>: Statement resolution within 100ms for 95th percentile</li>
+<li><strong>Accuracy</strong>: 98%+ correct statement type identification with confidence &gt; 0.8</li>
+<li><strong>Usability</strong>: 80% reduction in failed statement access attempts</li>
+<li><strong>Adoption</strong>: New business section discovery methods used in 50%+ of financial analyses</li>
+</ol>
+<h2 id="risk-mitigation">Risk Mitigation</h2>
+<ol>
+<li><strong>Performance Impact</strong>: Implement caching and lazy loading for pattern matching</li>
+<li><strong>False Positives</strong>: Require minimum confidence thresholds and validation</li>
+<li><strong>Complexity</strong>: Maintain simple primary APIs while adding advanced features</li>
+<li><strong>Maintenance</strong>: Create automated tests against multiple company filings</li>
+<li><strong>User Adoption</strong>: Provide comprehensive documentation and migration guides</li>
+</ol>
+<p>This design provides a robust foundation for standardized financial statement access across companies while maintaining the flexibility to handle unique variations and provide deep analytical capabilities.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

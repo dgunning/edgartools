@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Filings - edgartools</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Filings";
+        var mkdocs_page_input_path = "using-the-filings-api.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> edgartools
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../initial-steps/">Initial Steps</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quick-guide/">Quick Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">User Journeys</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Filings</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../working-with-filings/">Working with Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../filtering-filings/">Filtering filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../attachments/">Attachments</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Working with Companies</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../company/">Companies</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">XBRL and Financials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../getting-xbrl/">Getting XBRL from Filings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../xbrl-querying/">Querying XBRL Facts</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Data Objects</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../data-objects/">Data Objects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../insider-filings/">Insider Filings</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced Topics</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../local-data/">Local Storage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sgml/">Parsing SGML</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">edgartools</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Filings</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="filings">Filings</h1>
+<p>To get started import from edgar and use the <code>get_filings</code> function.</p>
+<pre><code class="language-python">from edgar import *
+
+filings = get_filings()
+</code></pre>
+<p>This gets the list of filings for the current year and quarter into a <code>Filings</code> object. </p>
+<p><img alt="Get Filings" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/get_filings.jpg" /></p>
+<p>If you need a different date range you can specify a year or years and a quarter or quarters.
+These are valid ways to specify the date range or filter by form or by filing date.</p>
+<pre><code class="language-python">
+    &gt;&gt;&gt; filings = get_filings(2021) # Get filings for 2021
+
+    &gt;&gt;&gt; filings = get_filings(2021, 4) # Get filings for 2021 Q4
+
+    &gt;&gt;&gt; filings = get_filings(2021, [3,4]) # Get filings for 2021 Q3 and Q4
+
+    &gt;&gt;&gt; filings = get_filings([2020, 2021]) # Get filings for 2020 and 2021
+
+    &gt;&gt;&gt; filings = get_filings([2020, 2021], 4) # Get filings for Q4 of 2020 and 2021
+
+    &gt;&gt;&gt; filings = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021
+
+    &gt;&gt;&gt; filings = get_filings(2021, 4, form=&quot;D&quot;) # Get filings for 2021 Q4 for form D
+
+    &gt;&gt;&gt; filings = get_filings(2021, 4, filing_date=&quot;2021-10-01&quot;) # Get filings for 2021 Q4 on &quot;2021-10-01&quot;
+
+    &gt;&gt;&gt; filings = get_filings(2021, 4, filing_date=&quot;2021-10-01:2021-10-10&quot;) # Get filings for 2021 Q4 between
+                                                                            # &quot;2021-10-01&quot; and &quot;2021-10-10&quot;
+</code></pre>
+<h3 id="convert-the-filings-to-a-pandas-dataframe">Convert the filings to a pandas dataframe</h3>
+<p>The filings data is stored in the <code>Filings</code> class as a <code>pyarrow.Table</code>. You can get the data as a pandas dataframe using
+<code>to_pandas</code></p>
+<pre><code class="language-python">df = filings.to_pandas()
+</code></pre>
+<h2 id="navigating-filings">Navigating filings</h2>
+<p>The Filings object allows you to navigate through filings using <code>filings.next()</code> and <code>filings.prev()</code>. 
+This shows you pages of the data - the page size is about 50.</p>
+<pre><code class="language-python"># To see the next page of data
+filings.next()
+
+# To see the previous page
+filings.previous()
+
+# To see the current page
+filings.current()
+</code></pre>
+<p><img alt="Get next filings" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filings_next.jpg" /></p>
+<h2 id="getting-the-latest-filings">Getting the latest filings</h2>
+<p>You can get the latest <strong>n</strong> filings by filing_date from a filings using <code>filings.latest()</code>.</p>
+<p>If you provide the parameter <code>n</code> it will return the latest <code>n</code> filings.</p>
+<pre><code class="language-python">filing = filings.latest(n=5)
+filing
+</code></pre>
+<p><img alt="Latest filings" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_filings.jpg" /></p>
+<p>If you omit this parameter, or set <code>n=1</code> it will return a single `Filings object.</p>
+<pre><code class="language-python">filing = filings.latest()
+filing
+</code></pre>
+<p><img alt="Latest filing" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/latest_filing.jpg" /></p>
+<h2 id="filtering-filings">Filtering filings</h2>
+<p>You can filter the filings object using te <code>filter()</code> function. This allows you to filter
+by filing date, or by form.</p>
+<h3 id="filtering-filings-by-date">Filtering filings by date</h3>
+<p>To filter by filing date specify the filing date in <strong>YYYY-MM-DD</strong> format e.g. <strong>2022-01-24</strong>
+(Note the parameters <code>date</code> and <code>filing_date</code> are equivalent aliases for each other)</p>
+<pre><code class="language-python">filings.filter(date=&quot;2021-01-24&quot;) # or filings.filter(filing_date=&quot;2021-01-24&quot;)
+</code></pre>
+<p>You can specify a filing date range using the colon</p>
+<pre><code class="language-python">filings.filter(date=&quot;2021-01-12:2021-02-28&quot;) 
+</code></pre>
+<p>To filter by dates before a specified date use `:YYYY-MM-DD'</p>
+<pre><code class="language-python">filings.filter(date=&quot;:2021-02-28&quot;) 
+</code></pre>
+<p>To filter by dates after a specified date use `YYYY-MM-DD:'</p>
+<pre><code class="language-python">filings.filter(date=&quot;2021-02-28:&quot;) 
+</code></pre>
+<h3 id="filtering-filings-by-form">Filtering filings by form</h3>
+<p>You can filter filings by form using the <code>form</code> parameter. </p>
+<pre><code class="language-python">filings.filter(form=&quot;10-K&quot;) 
+</code></pre>
+<p>To filter by form e.g. <strong>10-K</strong> and include form amendments use <code>amendments = True</code>. </p>
+<pre><code class="language-python">filings.filter(form=&quot;10-K&quot;, amendments=True) 
+</code></pre>
+<p><img alt="Filter with amendments" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filter_amendments.jpg" /></p>
+<h2 id="getting-a-single-filing">Getting a single filing</h2>
+<p>You can get a single filing from the filings using the bracket operator <code>[]</code>, 
+specifying the index of the filing. The index is the value displayed in the leftmost
+position in the filings table. For example, to get the <strong>10-Q</strong> for <strong>Costco</strong> in the table above
+use <code>filings[3]</code></p>
+<pre><code class="language-python">filing = filings[3]
+</code></pre>
+<p><img alt="Costco 10Q filing" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/costco_10Q.jpg" /></p>
+<h3 id="view-the-filing-homepage">View the filing homepage</h3>
+<p>You can view the filing homepage in the terminal using <code>filing.homepage</code></p>
+<p>This gives you access to the <code>FilingHomepage</code> class that you can use to list all the documents
+and datafiles on the filing.</p>
+<pre><code class="language-python">filing.homepage
+</code></pre>
+<p><img alt="Filing homepage" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/filing_homepage.jpg" /></p>
+<h3 id="open-a-filing">Open a filing</h3>
+<p>You can open the filing in your browser using <code>filing.open()</code>. This will work on environments with access to the browser, 
+will probably not work on a remote server.</p>
+<pre><code class="language-python">filing.open()
+</code></pre>
+<h3 id="open-the-filing-homepage">Open the Filing Homepage</h3>
+<p>You can open the filing homepage in the browser using <code>filing.homepage.open()</code>.</p>
+<pre><code class="language-python">filing.homepage.open()
+</code></pre>
+<h3 id="view-the-filing-as-markdown">View the filing as Markdown</h3>
+<p>You can view the filing's HTML content as markdown in the console using <code>view()</code>. It works for all filing types
+but can be a little slow for filings with large HTML files</p>
+<pre><code class="language-python">filing.view()
+</code></pre>
+<h3 id="get-the-filings-html">Get the filing's html</h3>
+<p>You can get the html content of the filing using<code>.html()</code></p>
+<pre><code class="language-python">filing.html()
+</code></pre>
+<h3 id="get-the-filings-html-as-markdown">Get the filing's html as Markdown</h3>
+<p>You can get the html content as markdown using<code>.markdown()</code></p>
+<pre><code class="language-python">filing.markdown()
+</code></pre>
+<h3 id="working-with-xbrl-filings">Working with XBRL filings</h3>
+<p>Some filings are in <strong>XBRL (eXtensible Business Markup Language)</strong> format. 
+These are mainly the newer filings, as the SEC has started requiring this for newer filings.</p>
+<p>If a filing is in XBRL format then it opens up a lot more ways to get structured data about that specific filing and also 
+about the company referred to in that filing.</p>
+<p>The <code>Filing</code> class has an <code>xbrl</code> function that will download, parse and structure the filing's XBRL document if one exists.
+If it does not exist, then <code>filing.xbrl()</code> will return <code>None</code>.</p>
+<p>The function <code>filing.xbrl()</code> returns a <code>FilingXbrl</code> instance, which wraps the data, and provides convenient
+ways of working with the xbrl data.</p>
+<pre><code class="language-python">filing_xbrl = filing.xbrl()
+</code></pre>
+<p><img alt="Filing homapage" src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/10Q_xbrl.jpg" /></p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
