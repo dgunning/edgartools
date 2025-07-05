@@ -42,6 +42,56 @@ print(text)
 
 This will print the text content of the attachment.
 
+### Converting HTML attachments to markdown
+
+You can convert HTML attachments to markdown format using the `markdown()` method.
+
+```python
+# Convert a single HTML attachment to markdown
+attachment = filing.attachments[1]  # Get the primary document
+if attachment.is_html():
+    markdown_content = attachment.markdown()
+    print(markdown_content)
+```
+
+The `markdown()` method returns `None` for non-HTML attachments, so you can safely call it on any attachment.
+
+### Batch markdown conversion
+
+You can convert all HTML attachments in a filing to markdown at once:
+
+```python
+# Convert all HTML attachments to markdown
+markdown_dict = filing.attachments.markdown()
+
+# This returns a dictionary mapping document names to markdown content
+for doc_name, markdown_content in markdown_dict.items():
+    print(f"Document: {doc_name}")
+    print(f"Markdown length: {len(markdown_content)} characters")
+    print("---")
+```
+
+### Saving markdown content
+
+You can save the markdown content to files:
+
+```python
+# Save individual attachment markdown
+attachment = filing.attachments[1]
+markdown_content = attachment.markdown()
+if markdown_content:
+    with open(f"{attachment.document}.md", "w") as f:
+        f.write(markdown_content)
+
+# Save all HTML attachments as markdown files
+markdown_dict = filing.attachments.markdown()
+for doc_name, markdown_content in markdown_dict.items():
+    # Remove extension and add .md
+    base_name = doc_name.rsplit('.', 1)[0]
+    with open(f"{base_name}.md", "w") as f:
+        f.write(markdown_content)
+```
+
 
 ### Downloading an attachment
 

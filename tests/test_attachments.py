@@ -276,4 +276,67 @@ def test_get_report_attachments():
     assert 'CONSOLIDATED BALANCE SHEETS' in text
 
 
+def test_attachment_markdown_conversion():
+    """Test that HTML attachments can be converted to markdown"""
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    attachments = filing.attachments
+    
+    # Get the HTML attachment (sequence 1)
+    html_attachment = attachments.get_by_sequence(1)
+    assert html_attachment.document == "cyber_10k.htm"
+    assert html_attachment.is_html()
+    
+    # Test markdown conversion
+    markdown_content = html_attachment.markdown()
+    assert markdown_content is not None
+    assert isinstance(markdown_content, str)
+    assert len(markdown_content) > 0
+    
+    # Test that non-HTML attachments return None
+    if len(attachments) > 1:
+        for attachment in attachments:
+            if not attachment.is_html():
+                assert attachment.markdown() is None
+
+
+def test_attachments_markdown_batch_conversion():
+    """Test batch markdown conversion for all HTML attachments"""
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    attachments = filing.attachments
+    
+    # Get markdown for all HTML attachments
+    markdown_dict = attachments.markdown()
+    assert isinstance(markdown_dict, dict)
+    
+    # Should have at least the main HTML document
+    assert len(markdown_dict) > 0
+    
+    # Check that the main HTML document is included
+    assert "cyber_10k.htm" in markdown_dict
+    
+    # Verify all entries are strings
+    for doc_name, markdown_content in markdown_dict.items():
+        assert isinstance(doc_name, str)
+        assert isinstance(markdown_content, str)
+        assert len(markdown_content) > 0
+
+
+def test_attachment_markdown_with_non_html_filing():
+    """Test markdown conversion with a filing that has non-HTML primary document"""
+    filing = Filing(form='4', filing_date='2024-05-24', company='t Hart Cees', cik=1983327,
+                    accession_no='0000950170-24-064537')
+    attachments = filing.attachments
+    
+    # Test markdown conversion - should handle gracefully
+    markdown_dict = attachments.markdown()
+    assert isinstance(markdown_dict, dict)
+    
+    # May be empty if no HTML attachments
+    for doc_name, markdown_content in markdown_dict.items():
+        assert isinstance(doc_name, str)
+        assert isinstance(markdown_content, str)
+
+
 
