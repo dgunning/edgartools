@@ -302,10 +302,15 @@ class Attachment:
                 return content
         return None
 
-    def markdown(self) -> Optional[str]:
+    def markdown(self, include_page_breaks: bool = False) -> Optional[str]:
         """
         Convert the attachment to markdown format if it's HTML content.
-        Returns None if the attachment is not HTML or cannot be converted.
+        
+        Args:
+            include_page_breaks: If True, include page break delimiters in the markdown
+            
+        Returns:
+            None if the attachment is not HTML or cannot be converted.
         """
         if not self.is_html():
             return None
@@ -318,13 +323,12 @@ class Attachment:
         if not has_html_content(content):
             return None
             
-        # Use the same approach as Filing.markdown()
+        # Use the same approach as Filing.markdown() but with page break support
         clean_html = get_clean_html(content)
         if clean_html:
-            return to_markdown(clean_html)
+            return to_markdown(clean_html, include_page_breaks=include_page_breaks)
             
-        # Fallback to text conversion
-        return text_to_markdown(content)
+        return None
 
     def __rich__(self):
         icon = get_file_icon(self.document_type, self.sequence_number, self.document)
@@ -589,17 +593,22 @@ class Attachments:
 
             return thread, httpd, url
 
-    def markdown(self) -> Dict[str, str]:
+    def markdown(self, include_page_breaks: bool = False) -> Dict[str, str]:
         """
         Convert all HTML attachments to markdown format.
-        Returns a dictionary mapping attachment document names to their markdown content.
-        Only includes attachments that can be successfully converted to markdown.
+        
+        Args:
+            include_page_breaks: If True, include page break delimiters in the markdown
+            
+        Returns:
+            A dictionary mapping attachment document names to their markdown content.
+            Only includes attachments that can be successfully converted to markdown.
         """
         markdown_attachments = {}
         
         for attachment in self._attachments:
             if attachment.is_html():
-                md_content = attachment.markdown()
+                md_content = attachment.markdown(include_page_breaks=include_page_breaks)
                 if md_content:
                     markdown_attachments[attachment.document] = md_content
                     

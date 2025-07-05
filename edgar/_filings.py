@@ -1447,13 +1447,18 @@ class Filing:
         assert downloaded is not None
         return str(downloaded)
 
-    def markdown(self) -> str:
-        """return the markdown version of this filing html"""
+    def markdown(self, include_page_breaks: bool = False) -> str:
+        """
+        Return the markdown version of this filing html
+        
+        Args:
+            include_page_breaks: If True, include page break delimiters in the markdown
+        """
         html = self.html()
         if html:
             clean_html = get_clean_html(html)
             if clean_html:
-                return to_markdown(clean_html)
+                return to_markdown(clean_html, include_page_breaks=include_page_breaks)
         text_content = self.text()
         return text_to_markdown(text_content)
 

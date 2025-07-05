@@ -56,19 +56,40 @@ if attachment.is_html():
 
 The `markdown()` method returns `None` for non-HTML attachments, so you can safely call it on any attachment.
 
+#### Page Break Delimiter Support
+
+The `markdown()` method supports optional page break delimiters to help you understand document structure:
+
+```python
+# Convert with page break delimiters
+attachment = filing.attachments[1]
+markdown_with_breaks = attachment.markdown(include_page_breaks=True)
+
+# Page breaks appear as: {1}------------------------------------------------
+# Where the number indicates the page number
+```
+
+When `include_page_breaks=True`, the markdown will include delimiters at page boundaries in the format:
+- `{0}------------------------------------------------` at the start of the document
+- `{1}------------------------------------------------` before the second page content
+- `{2}------------------------------------------------` before the third page content
+- And so on...
+
 ### Batch markdown conversion
 
 You can convert all HTML attachments in a filing to markdown at once:
 
 ```python
-# Convert all HTML attachments to markdown
+# Convert all HTML attachments (without page breaks)
 markdown_dict = filing.attachments.markdown()
 
-# This returns a dictionary mapping document names to markdown content
-for doc_name, markdown_content in markdown_dict.items():
-    print(f"Document: {doc_name}")
-    print(f"Markdown length: {len(markdown_content)} characters")
-    print("---")
+# Convert all HTML attachments with page breaks
+markdown_dict = filing.attachments.markdown(include_page_breaks=True)
+
+# Result is a dictionary: {"filename.htm": "markdown content", ...}
+for filename, content in markdown_dict.items():
+    print(f"--- {filename} ---")
+    print(content[:500])  # Show first 500 characters
 ```
 
 ### Saving markdown content

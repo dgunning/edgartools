@@ -310,12 +310,28 @@ class TableNode(BaseNode):
         return table
 
 
+@dataclass
+class PageBreakNode(BaseNode):
+    """Represents a page break in the document"""
+    page_number: int
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def type(self) -> str:
+        return 'page_break'
+
+    def render(self, console_width: int) -> RenderResult:
+        """Render page break with page number"""
+        return Text(f"--- Page {self.page_number} ---", style="dim")
+
+
 def create_node(
         type_: str,
         content: Union[str, List[TableRow]],
         style: StyleInfo,
         level: int = 1,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        page_number: Optional[int] = None
 ) -> BaseNode:
     """Create a node with optional metadata"""
     metadata = metadata or {}
@@ -326,12 +342,14 @@ def create_node(
         return TextBlockNode(content=content, style=style, metadata=metadata)
     elif type_ == 'table':
         return TableNode(content=content, style=style, metadata=metadata)
+    elif type_ == 'page_break':
+        return PageBreakNode(page_number=page_number, metadata=metadata)
     else:
         raise ValueError(f"Unknown node type: {type_}")
 
 
 # 1. Add type literals and type guards
-NodeType = Literal['heading', 'text_block', 'table']
+NodeType = Literal['heading', 'text_block', 'table', 'page_break']
 ContentType = Union[str, Dict[str, Any], List[TableRow]]
 
 def is_table_content(content: ContentType) -> bool:
@@ -485,10 +503,10 @@ class Document:
         return [node for node in self.nodes if node.type == 'heading']
 
     @classmethod
-    def parse(cls, html: str) -> Optional['Document']:
+    def parse(cls, html: str, include_page_breaks: bool = False) -> Optional['Document']:
         root = HtmlDocument.get_root(html)
         if root:
-            parser = SECHTMLParser(root)
+            parser = SECHTMLParser(root, include_page_breaks=include_page_breaks)
             return parser.parse()
 
     def to_markdown(self) -> str:
@@ -521,12 +539,14 @@ class StyledText:
 
 
 class SECHTMLParser:
-    def __init__(self, root: Tag, extract_data: bool = True):
+    def __init__(self, root: Tag, extract_data: bool = True, include_page_breaks: bool = False):
         self.data:DocumentData = HtmlDocument.extract_data(root) if extract_data else None
         self.root:Tag = root
         self.base_font_size = 10.0  # Default base font size in pt
         self.style_stack: List[StyleInfo] = []
         self.ix_tracker = IXTagTracker()  # Add IX tag tracker
+        self.include_page_breaks = include_page_breaks
+        self.current_page = 0
 
     def parse(self) -> Optional[Document]:
         body = self.root.find('body')
@@ -534,8 +554,40 @@ class SECHTMLParser:
             log.warning("No body tag found in HTML")
             return None
 
+        # If page breaks are enabled, detect them first
+        if self.include_page_breaks:
+            self._mark_page_breaks(body)
+
         nodes = self._parse_element(body)
+        
+        # If page breaks are enabled, add a {0} page break at the beginning
+        if self.include_page_breaks and nodes:
+            initial_page_break = create_node(
+                type_='page_break',
+                content=None,
+                style=StyleInfo(),
+                page_number=0,
+                metadata={'source_element': 'document_start'}
+            )
+            nodes.insert(0, initial_page_break)
+        
         return Document(nodes=nodes)
+
+    def _mark_page_breaks(self, element: Tag) -> None:
+        """Mark page break elements for detection during parsing"""
+        # Find page break markers and add a special attribute
+        page_break_selectors = [
+            'p[style*="page-break-before:always"]',
+            'p[style*="page-break-after:always"]', 
+            'hr[style*="page-break-after:always"]',
+            'div[style*="page-break-before:always"]',
+            'div[style*="page-break-after:always"]'
+        ]
+        
+        for selector in page_break_selectors:
+            page_breaks = element.select(selector)
+            for pb in page_breaks:
+                pb['_is_page_break'] = 'true'
 
     def _parse_element(self, element: Tag) -> List[BaseNode]:
         nodes = []
@@ -672,6 +724,17 @@ class SECHTMLParser:
 
     def _process_element(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
         """Process an element into one or more nodes with inherited styles and ix metadata"""
+        # Check if this is a page break element
+        if self.include_page_breaks and element.get('_is_page_break') == 'true':
+            self.current_page += 1
+            return create_node(
+                type_='page_break',
+                content=None,
+                style=StyleInfo(),
+                page_number=self.current_page,
+                metadata={'source_element': element.name}
+            )
+        
         # Phase 1: Mark all ancestors of tables
         tables = element.find_all('table', recursive=True)
         for table in tables:
@@ -1422,7 +1485,7 @@ class SECHTMLParser:
                 # If units differ, prefer the larger width's unit
                 if style1.width.unit != style2.width.unit:
                     # Convert both to pixels for comparison
-                    # This is a simplified conversion - you might want to use the existing
+                                        # This is a simplified conversion - you might want to use the existing
                     # Width.to_chars method for more accurate conversion
                     w1_px = _to_pixels(style1.width)
                     w2_px = _to_pixels(style2.width)

@@ -27,6 +27,8 @@ class MarkdownRenderer:
                 rendered = self._render_table(processed_table) if processed_table else ""
             elif node.type == 'heading':
                 rendered = self._render_heading(node)
+            elif node.type == 'page_break':
+                rendered = self._render_page_break(node)
 
             if rendered:
                 rendered_parts.append(rendered.rstrip())  # Remove trailing whitespace
@@ -172,11 +174,14 @@ class MarkdownRenderer:
 
         return '\n'.join(formatted_lines)
 
+    def _render_page_break(self, node: BaseNode) -> str:
+        """Render page break as delimiter"""
+        return f"{{{node.page_number}}}------------------------------------------------"
 
 
-def to_markdown(html_content: str) -> Optional[str]:
-    """Convert HTML content to markdown"""
-    document = Document.parse(html_content)
+def to_markdown(html_content: str, include_page_breaks: bool = False) -> Optional[str]:
+    """Convert HTML content to markdown with optional page breaks"""
+    document = Document.parse(html_content, include_page_breaks=include_page_breaks)
     if document:
         return document.to_markdown()
     return None
