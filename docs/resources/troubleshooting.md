@@ -27,24 +27,25 @@ This guide addresses the most common issues users encounter when working with ed
 **Solutions**:
 
 1. **Set proper identity information**:
+
+Use `set_identity` to provide your identity as required by the SEC.
+This requires your **name** and **email**, or just your **email**.
+
 ```python
-   from edgar import set_identity
+from edgar import set_identity
    
-   set_identity(
-       name="Your Name",
-       email="your.email@example.com",
-       organization="Your Organization"
-   )
+set_identity("Mike McCalum mcallum@gmail.com")
+
 ```
 
 2. **Implement rate limiting**:
 ```python
-   import time
+import time
    
-   # Add delay between requests
-   for filing in filings:
-       # Process filing
-       time.sleep(0.1)  # 100ms delay
+# Add delay between requests
+for filing in filings:
+    # Process filing
+    time.sleep(0.1)  # 100ms delay
 ```
 
 3. **Use a different network** if your IP has been temporarily blocked.

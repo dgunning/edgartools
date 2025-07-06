@@ -52,7 +52,7 @@ print("EdgarTools installed successfully!")
 ```
 
 Expected output:
-```
+```plaintext
 EdgarTools installed successfully!
 ```
 

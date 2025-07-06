@@ -237,7 +237,7 @@ The SEC has rate limits for EDGAR access:
 from edgar import set_identity, enable_cache
 
 # Set your identity for SEC access
-set_identity("Your Name", "your.email@example.com", "Your Company")
+set_identity("your.email@example.com")
 
 ```
 

@@ -102,8 +102,6 @@ Use descriptive branch names like:
 
 ### 2. Make Changes
 
-Write your code following the project guidelines in [CLAUDE.md](/CLAUDE.md):
-
 - Max line length: 150 characters
 - Use type annotations
 - Include docstrings for public functions

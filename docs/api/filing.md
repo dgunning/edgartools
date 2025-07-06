@@ -23,8 +23,7 @@ Filing(
     company: str, 
     form: str,
     filing_date: str,
-    accession_no: str
-)
+    accession_no: str)
 ```
 
 **Parameters:**
@@ -52,7 +51,8 @@ filing = Filing(
 #### cik
 ```python
 @property
-def cik(self) -> int
+def cik(self) -> int:
+    ...
 ```
 Central Index Key of the filing entity.
 
@@ -63,7 +63,8 @@ print(filing.cik)  # 320193
 #### company
 ```python
 @property  
-def company(self) -> str
+def company(self) -> str:
+    ...
 ```
 Name of the company that filed the document.
 
@@ -74,7 +75,8 @@ print(filing.company)  # "Apple Inc."
 #### form
 ```python
 @property
-def form(self) -> str
+def form(self) -> str:
+    ...
 ```
 SEC form type.
 
@@ -85,7 +87,8 @@ print(filing.form)  # "10-K"
 #### filing_date
 ```python
 @property
-def filing_date(self) -> str
+def filing_date(self) -> str:
+    ...
 ```
 Date the filing was submitted to the SEC.
 
@@ -96,10 +99,12 @@ print(filing.filing_date)  # "2023-11-03"
 #### accession_no / accession_number
 ```python
 @property
-def accession_no(self) -> str
+def accession_no(self) -> str:
+    ...
 
 @property
-def accession_number(self) -> str  # Alias
+def accession_number(self) -> str:  # Alias
+    ...
 ```
 SEC accession number - unique identifier for the filing.
 
@@ -110,7 +115,8 @@ print(filing.accession_no)  # "0000320193-23-000106"
 #### period_of_report
 ```python
 @property
-def period_of_report(self) -> str
+def period_of_report(self) -> str:
+    ...
 ```
 The reporting period for the filing.
 
@@ -123,7 +129,8 @@ print(filing.period_of_report)  # "2023-09-30"
 #### document
 ```python
 @property
-def document(self) -> Attachment
+def document(self) -> Attachment:
+    ...
 ```
 Primary display document (usually the main HTML filing).
 
@@ -135,7 +142,8 @@ print(primary_doc.document_type)  # "10-K"
 #### primary_documents
 ```python
 @property
-def primary_documents(self) -> List[Attachment]
+def primary_documents(self) -> List[Attachment]:
+    ...
 ```
 All primary documents in the filing.
 
@@ -147,7 +155,8 @@ for doc in filing.primary_documents:
 #### attachments
 ```python
 @property
-def attachments(self) -> Attachments
+def attachments(self) -> Attachments:
+    ...
 ```
 All attachments and documents in the filing.
 

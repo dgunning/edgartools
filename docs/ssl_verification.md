@@ -38,6 +38,7 @@ from edgar import httpclient
 # Disable SSL verification for specific client
 with httpclient.http_client(verify=False) as client:
     # Make requests...
+    ...
 ```
 
 ## Security Considerations

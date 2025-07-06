@@ -24,7 +24,7 @@ for filing in recent_filings[:5]:
 ```
 
 **Output:**
-```
+```plaintext
 10-Q: Apple Inc. (2024-05-02)
 8-K: Microsoft Corporation (2024-05-01)
 10-K: Amazon.com Inc (2024-04-30)

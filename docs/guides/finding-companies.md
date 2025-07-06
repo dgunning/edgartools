@@ -16,7 +16,7 @@ print(apple)
 ```
 
 **Output:**
-```
+```plaintext
 Company(AAPL - Apple Inc.)
   CIK: 0000320193
   Industry: ELECTRONIC COMPUTERS
@@ -64,7 +64,7 @@ for company in results:
 ```
 
 **Output:**
-```
+```plaintext
 Found 3 companies:
   AAPL: Apple Inc.
   APPL: Apple Hospitality REIT Inc
@@ -102,7 +102,7 @@ print(f"Exchange: {company.exchange}")
 ```
 
 **Output:**
-```
+```plaintext
 Name: Microsoft Corporation
 CIK: 0000789019
 Ticker: MSFT

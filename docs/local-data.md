@@ -40,8 +40,9 @@ The function takes the following parameters so you have the option to download o
 
 ```python
 download_edgar_data(submissions: bool = True,
-                        facts: bool = True,
-                        reference: bool = True):
+                    facts: bool = True,
+                    reference: bool = True):
+    ...
 ```
 
 ## Downloading Complete Filings

@@ -53,7 +53,7 @@ The Data Objects system is built on several key principles:
 
 Data Objects follow a hierarchical structure:
 
-```
+```plaintext
 Filing (base class)
 ├── CompanyFiling
 │   ├── TenK (10-K Annual Report)

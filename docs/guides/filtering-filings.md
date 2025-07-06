@@ -96,24 +96,24 @@ filings().filter(form='10-K')
 ```
 
 ```python
-    def filter(self, *,
-        form: Optional[Union[str, List[IntString]]] = None,
-        amendments: bool = None,
-        filing_date: Optional[str] = None,
-        date: Optional[str] = None,
-        cik: Union[IntString, List[IntString]] = None,
-        exchange: Union[str, List[str], Exchange, List[Exchange]] = None,
-        ticker: Union[str, List[str]] = None,
-        accession_number: Union[str, List[str]] = None) -> Optional['Filings']:
+def filter(self, *,
+    form: Optional[Union[str, List[IntString]]] = None,
+    amendments: bool = None,
+    filing_date: Optional[str] = None,
+    date: Optional[str] = None,
+    cik: Union[IntString, List[IntString]] = None,
+    exchange: Union[str, List[str], Exchange, List[Exchange]] = None,
+    ticker: Union[str, List[str]] = None,
+    accession_number: Union[str, List[str]] = None) -> Optional['Filings']:
 
-        :param form: The form or list of forms to filter by
-        :param amendments: Whether to include amendments to the forms e.g. include "10-K/A"
-        :param filing_date: The filing date
-        :param date: An alias for the filing date
-        :param cik: The CIK or list of CIKs to filter by
-        :param exchange: The exchange or list of exchanges to filter by
-        :param ticker: The ticker or list of tickers to filter by
-        :param accession_number: The accession number or list of accession numbers to filter by
+    :param form: The form or list of forms to filter by
+    :param amendments: Whether to include amendments to the forms e.g. include "10-K/A"
+    :param filing_date: The filing date
+    :param date: An alias for the filing date
+    :param cik: The CIK or list of CIKs to filter by
+    :param exchange: The exchange or list of exchanges to filter by
+    :param ticker: The ticker or list of tickers to filter by
+    :param accession_number: The accession number or list of accession numbers to filter by
 ```
 
 

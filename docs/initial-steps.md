@@ -48,6 +48,7 @@ You can loop through filings using the `for` loop. For example:
 filings = get_filings()
 for filing in filings:
     # Do something with the filing
+    ...
 ```
 
 ### Getting Related Filings

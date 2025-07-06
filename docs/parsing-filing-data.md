@@ -7,10 +7,10 @@ In **edgartools** each **Filing** has a `.obj()` function that converts the fili
 For example, the following code converts the filing for the 10-K for Apple Inc. to a `TenK` object containing the data from the filing:
 
 ```python
-    from edgar import get_filings 
-    filings = get_filings(form="10-K")
-    filing = filings[0]
-    tenk = filing.obj()
+from edgar import get_filings 
+filings = get_filings(form="10-K")
+filing = filings[0]
+tenk = filing.obj()
 ```
 
 Under the hood, the `.obj()` function gets the data file for the filing, which is usually the filing's XML, parses it, and converts it to the approaptate data object.

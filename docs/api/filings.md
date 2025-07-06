@@ -22,8 +22,7 @@ Create a Filings collection from a PyArrow table.
 ```python
 Filings(
     filing_index: pa.Table,
-    original_state: Optional[PagingState] = None
-)
+    original_state: Optional[PagingState] = None)
 ```
 
 **Parameters:**
@@ -48,7 +47,7 @@ print(type(filings))  # <class 'edgar._filings.Filings'>
 #### empty
 ```python
 @property
-def empty(self) -> bool
+def empty(self) -> bool:
 ```
 Whether the collection contains any filings.
 
@@ -61,7 +60,7 @@ if filings.empty:
 #### date_range
 ```python
 @property
-def date_range(self) -> Tuple[str, str]
+def date_range(self) -> Tuple[str, str]:
 ```
 Start and end dates for filings in the collection.
 
@@ -73,10 +72,12 @@ print(f"Filings from {start_date} to {end_date}")
 #### start_date / end_date
 ```python
 @property
-def start_date(self) -> str
+def start_date(self) -> str:
+    ...
 
 @property  
-def end_date(self) -> str
+def end_date(self) -> str:
+    ...
 ```
 Individual start and end dates.
 
@@ -87,7 +88,7 @@ print(f"Collection spans from {filings.start_date} to {filings.end_date}")
 #### summary
 ```python
 @property
-def summary(self) -> str
+def summary(self) -> str:
 ```
 Summary string describing the current page/collection.
 
@@ -102,7 +103,7 @@ print(filings.summary)
 
 #### len() / count
 ```python
-def __len__(self) -> int
+def __len__(self) -> int:
 ```
 Number of filings in the current collection/page.
 
@@ -112,8 +113,10 @@ print(f"Collection contains {len(filings)} filings")
 
 #### Indexing and Iteration
 ```python
-def __getitem__(self, item: int) -> Filing
-def __iter__(self) -> Iterator[Filing]
+def __getitem__(self, item: int) -> Filing:
+    ...
+def __iter__(self) -> Iterator[Filing]:
+    ...
 ```
 Access individual filings by index or iterate through collection.
 
