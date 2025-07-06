@@ -1,26 +1,56 @@
-site_name: edgartools
+site_name: EdgarTools - Python Library for SEC Data Analysis
+site_description: Access and analyze SEC filings, financial statements, insider trading, and investment fund data
 theme:
-  name: "readthedocs"
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+    - content.code.copy
 
 nav:
-  - Overview: getting-started.md
-  - Initial Steps: initial-steps.md
-  - Quick Guide: quick-guide.md
-  - User Journeys: examples.md
-  - Working with Filings:
-    - Working with Filings: working-with-filings.md
-    - Filtering filings: filtering-filings.md
-    - Attachments: attachments.md
-  - Working with Companies:
-    - Companies: company.md
+  - Home:
+    - Overview: index.md
+    - Installation: installation.md
+    - Configuration: configuration.md
+    - Quick Start: quickstart.md
+  - How to Guides:
+    - Filings:
+      - "Working with a Filing": guides/working-with-filing.md
+      - "Search for Specific Filings": guides/searching-filings.md
+      - "Filter Filings by Date/Type": guides/filtering-filings.md
+      - "Access Filing Attachments": guides/filing-attachments.md
+    - Companies:
+      - "Working with a company": guides/finding-companies.md
+    - Financial Analysis:
+      - "Extract Financial Statements": guides/extract-statements.md
+  - Concepts:
+    - "Understanding SEC Filings": concepts/sec-filings.md
+    - "Understanding Data Objects": concepts/data-objects.md
   - XBRL and Financials:
     - Getting XBRL from Filings: getting-xbrl.md
     - Querying XBRL Facts: xbrl-querying.md
   - Data Objects:
     - Data Objects: data-objects.md
     - Insider Filings: insider-filings.md
+  - API Reference:
+    - Core Objects:
+      - Company: api/company.md
+      - Filing: api/filing.md
+      - Filings: api/filings.md
+      - XBRL: api/xbrl.md
+  - Resources:
+    - "Common Issues & Solutions": resources/troubleshooting.md
+    - "Performance Best Practices": resources/performance.md
+    - "SEC Rate Limits & Compliance": resources/sec-compliance.md
   - Advanced Topics:
     - Local Storage: local-data.md
     - Parsing SGML: sgml.md
+    - User Journeys: examples.md
+  - Contributing: contributing.md
 
 

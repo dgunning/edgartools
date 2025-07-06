@@ -69,15 +69,15 @@ When you call `filing.attachments` on a locally downloaded filing, you will have
 If you want to have each file independently you can use `attachments.download()`.
 
 ```python
-    def download(self, path: Union[str, Path], archive: bool = False):
-        """
-        Download all the attachments to a specified path.
-        If the path is a directory, the file is saved with its original name in that directory.
-        If the path is a file, the file is saved with the given path name.
-        If archive is True, the attachments are saved in a zip file.
-        path: str or Path - The path to save the attachments
-        archive: bool (default False) - If True, save the attachments in a zip file
-        """
+def download(self, path: Union[str, Path], archive: bool = False):
+    """
+     Download all the attachments to a specified path.
+    If the path is a directory, the file is saved with its original name in that directory.
+    If the path is a file, the file is saved with the given path name.
+    If archive is True, the attachments are saved in a zip file.
+    path: str or Path - The path to save the attachments
+    archive: bool (default False) - If True, save the attachments in a zip file
+    """
 ```
 
 
