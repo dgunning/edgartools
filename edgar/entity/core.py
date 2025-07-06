@@ -18,6 +18,13 @@ from edgar.entity.filings import EntityFacts
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.reference.tickers import find_cik
+from rich import box
+from rich.console import Group
+from rich.columns import Columns
+from rich.padding import Padding
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 from edgar.richtools import repr_rich
 
 # Performance optimization: use set for O(1) lookups
@@ -476,27 +483,17 @@ class Company(Entity):
         
     def __repr__(self):
         # Delegate to the rich representation for consistency with the old implementation
-        from edgar.richtools import repr_rich
         return repr_rich(self.__rich__())
         
     def __rich__(self):
         """Creates a rich representation of the company with detailed information."""
-        # Import rich components locally to prevent circular imports
-        from rich import box
-        from rich.console import Group
-        from rich.columns import Columns
-        from rich.padding import Padding
-        from rich.panel import Panel
-        from rich.table import Table
-        from rich.text import Text
-        
+
         # The title of the panel
         ticker = self.get_ticker()
         if self.data.is_company:
             entity_title = Text.assemble("🏢 ",
                                   (self.data.name, "bold green"),
                                   " ",
-                                  (f"[{self.cik}] ", "dim"),
                                   (ticker if ticker else "", "bold yellow")
                                   )
         else:
