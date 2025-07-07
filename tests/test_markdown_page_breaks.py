@@ -287,5 +287,55 @@ class TestMarkdownPageBreaks:
         assert 'Final content' in markdown
         
 
+    def test_brpf_page_break_detection(self):
+        """Test that BRPFPageBreak elements (nested page breaks) are detected correctly"""
+        html_content = """
+        <html>
+        <body>
+            <div>Content before page break</div>
+            <div class="BRPFPageBreakArea" style="clear: both; margin-top: 10pt; margin-bottom: 10pt;">
+                <div class="BRPFPageBreak" style="page-break-after: always;">
+                    <hr style="border-width: 0px; clear: both; margin: 4px 0px; width: 100%; height: 2px; color: #000000; background-color: #000000;">
+                </div>
+            </div>
+            <div>Content after first page break</div>
+            <div class="BRPFPageBreakArea" style="clear: both; margin-top: 10pt; margin-bottom: 10pt;">
+                <div class="BRPFPageBreak" style="page-break-after: always;">
+                    <hr style="border-width: 0px; clear: both; margin: 4px 0px; width: 100%; height: 2px; color: #000000; background-color: #000000;">
+                </div>
+            </div>
+            <div>Content after second page break</div>
+        </body>
+        </html>
+        """
+        
+        document = Document.parse(html_content, include_page_breaks=True)
+        assert document is not None
+        
+        # Check that we have page breaks and content
+        page_break_nodes = [node for node in document.nodes if node.type == 'page_break']
+        text_nodes = [node for node in document.nodes if node.type == 'text_block']
+        
+        # Should detect: document_start (page 0) + 2 BRPFPageBreak elements = 3 page breaks
+        assert len(page_break_nodes) == 3
+        assert len(text_nodes) >= 3  # Should have content nodes
+        
+        # Check page numbering
+        page_numbers = [node.page_number for node in page_break_nodes]
+        assert page_numbers == [0, 1, 2]
+        
+        # Test markdown conversion
+        markdown = document.to_markdown()
+        assert markdown is not None
+        
+        # Should have 3 page break markers
+        page_break_count = markdown.count('{')
+        assert page_break_count == 3
+        
+        # Verify content is preserved
+        assert 'Content before page break' in markdown
+        assert 'Content after first page break' in markdown
+        assert 'Content after second page break' in markdown
+
 
  

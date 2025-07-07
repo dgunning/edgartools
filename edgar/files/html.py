@@ -626,13 +626,38 @@ class SECHTMLParser:
             'p[style*="page-break-after:always"]', 
             'hr[style*="page-break-after:always"]',
             'div[style*="page-break-before:always"]',
-            'div[style*="page-break-after:always"]'
+            'div[style*="page-break-after:always"]',
+            # Handle variations with spaces in CSS
+            'p[style*="page-break-before: always"]',
+            'p[style*="page-break-after: always"]',
+            'hr[style*="page-break-after: always"]',
+            'div[style*="page-break-before: always"]',
+            'div[style*="page-break-after: always"]'
         ]
         
         for selector in page_break_selectors:
             page_breaks = element.select(selector)
             for pb in page_breaks:
                 pb['_is_page_break'] = 'true'
+        
+        # Handle class-based page breaks (like BRPFPageBreak)
+        class_based_selectors = [
+            'div.BRPFPageBreak',
+            'div.pagebreak',
+            'div.page-break',
+            'div[class*="pagebreak"]',
+            'div[class*="page-break"]'
+        ]
+        
+        for selector in class_based_selectors:
+            page_breaks = element.select(selector)
+            for pb in page_breaks:
+                pb['_is_page_break'] = 'true'
+                # Also mark parent containers that contain page breaks
+                if pb.parent and pb.parent.name == 'div':
+                    parent_classes = pb.parent.get('class', [])
+                    if any('pagebreak' in cls.lower() for cls in parent_classes):
+                        pb.parent['_is_page_break'] = 'true'
         
         # Also detect div elements with page-like dimensions
         self._mark_page_divs(element)
@@ -924,6 +949,31 @@ class SECHTMLParser:
         else:
             if hasattr(nodes, 'metadata'):
                 nodes.metadata.update(metadata)
+    
+    def _process_element_with_page_breaks(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process an element that contains page break descendants"""
+        nodes = []
+        
+        for child in element.children:
+            if isinstance(child, Tag):
+                # Check if this child is a page break or contains page breaks
+                if child.get('_is_page_break') == 'true':
+                    page_break_result = self._handle_page_break_element(child)
+                    if page_break_result:
+                        if isinstance(page_break_result, list):
+                            nodes.extend(page_break_result)
+                        else:
+                            nodes.append(page_break_result)
+                else:
+                    # Process child normally
+                    child_result = self._process_element(child)
+                    if child_result:
+                        if isinstance(child_result, list):
+                            nodes.extend(child_result)
+                        else:
+                            nodes.append(child_result)
+        
+        return nodes[0] if len(nodes) == 1 else nodes if nodes else None
 
     def _dispatch_element_processing(self, element: Tag, current_style: StyleInfo, ix_metadata: Dict[str, Any]) -> Optional[Union[BaseNode, List[BaseNode]]]:
         """Dispatch element processing based on element type"""
@@ -1034,6 +1084,11 @@ class SECHTMLParser:
         # Handle page break elements first
         if self.include_page_breaks and element.get('_is_page_break') == 'true':
             return self._handle_page_break_element(element)
+        
+        # Also check if this element contains page break descendants
+        if self.include_page_breaks and element.select('[_is_page_break="true"]'):
+            # This element contains page breaks, process them individually
+            return self._process_element_with_page_breaks(element)
         
         # Phase 1: Mark all ancestors of tables
         tables = element.find_all('table', recursive=True)
@@ -1354,7 +1409,7 @@ class SECHTMLParser:
         def process_row(row: Tag) -> TableRow:
             """Process row preserving cell structure"""
             cells = []
-            # Make non-recursive in case of nested tables
+            # Find direct child cells only to avoid nested table conflicts
             for td in row.find_all(['td', 'th'], recursive=False):
                 # Check if cell contains a nested table
                 nested_table = td.find('table')
@@ -1374,9 +1429,9 @@ class SECHTMLParser:
 
             return TableRow(cells=cells, is_header=row.find_parent('thead') is not None)
 
-        # Process all rows
+        # Process all rows (including those nested in tbody, thead, tfoot)
         rows = []
-        for tr in element.find_all('tr', recursive=False):
+        for tr in element.find_all('tr'):  # Remove recursive=False to find all tr descendants
             row = process_row(tr)
             if row.cells:
                 rows.append(row)
