@@ -1431,10 +1431,22 @@ class SECHTMLParser:
 
         # Process all rows (including those nested in tbody, thead, tfoot)
         rows = []
-        for tr in element.find_all('tr'):  # Remove recursive=False to find all tr descendants
-            row = process_row(tr)
-            if row.cells:
-                rows.append(row)
+        
+        # First, try to find direct child tr elements
+        direct_trs = element.find_all('tr', recursive=False)
+        if direct_trs:
+            # If we found direct tr elements, use them
+            for tr in direct_trs:
+                row = process_row(tr)
+                if row.cells:
+                    rows.append(row)
+        else:
+            # If no direct tr elements, look in tbody, thead, tfoot children
+            for section in element.find_all(['tbody', 'thead', 'tfoot'], recursive=False):
+                for tr in section.find_all('tr', recursive=False):
+                    row = process_row(tr)
+                    if row.cells:
+                        rows.append(row)
 
         if rows:
             # Create metadata from table attributes
