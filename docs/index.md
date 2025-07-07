@@ -1,52 +1,184 @@
-# Edgartools Documentation
 
-**edgartools** is a Python library for navigating SEC filings. 
+# EdgarTools
 
+**Powerful Python library for SEC data analysis and financial research**
 
-# Getting Started
+EdgarTools makes it simple to access, analyze, and extract insights from SEC filings. Whether you're analyzing company financials, tracking insider trading, or researching investment funds, edgartools provides the tools you need.
 
 ---
 
-## 1. Install
+## What You Can Do
+
+**Analyze Company Financials**
+
+Extract financial statements, calculate ratios, and track performance over time.
+
+```python
+company = Company("AAPL")
+financials = company.get_financials()
+income_statement = financials.income_statement()
+```
+
+**Track Insider Trading**
+
+Monitor insider transactions from Forms 3, 4, and 5 with structured data objects.
+
+```python
+filings = company.get_filings(form="4").head(10)
+transactions = pd.concat([f.obj()
+                         .to_dataframe()
+                         .fillna('')
+                for f in filings])
+```
+
+**Research Investment Funds**
+
+Analyze 13F holdings, track portfolio changes, and compare fund strategies.
+
+```python
+fund = Company("BRK-A")
+holdings = fund.get_filings(form="13F-HR").latest().obj()
+```
+
+**Extract Filing Data**
+
+Access any SEC filing since 1994 with clean, structured data extraction.
+
+```python
+filing = company.get_filings(form="10-K").latest()
+text = filing.text()  # Clean, readable text
+```
+
+## Key Features
+
+### 🚀 **Easy to Use**
+- Simple, intuitive API designed for both beginners and experts
+- Comprehensive documentation with real-world examples
+- Smart defaults that handle edge cases automatically
+
+### 📊 **Complete SEC Data Access**
+- **All filing types**: 10-K, 10-Q, 8-K, 13F, Form 4, S-1, and more
+- **Historical data**: Access filings back to 1994
+- **Real-time data**: Get the latest filings as they're published
+
+### 🔍 **Advanced XBRL Support**
+- Extract structured financial data from XBRL filings
+- Query individual financial line items with standardized concepts
+- Handle complex financial statement hierarchies automatically
+
+### ⚡ **Performance Optimized**
+- Efficient data handling for large datasets
+- Local caching to minimize API calls
+- Batch processing capabilities for bulk analysis
+
+### 🛠 **Developer Friendly**
+- Type hints and comprehensive error handling
+- Jupyter notebook integration with rich display
+- Pandas DataFrames for seamless data analysis
+
+## Installation
+
+Install edgartools with pip:
+
 ```bash
 pip install edgartools
 ```
-There are frequent releases so it is a good idea to use `pip install -U edgartools` to get new features and bug fixes.
-That being said we try to keep the API stable and backwards compatible.
 
-If you prefer **uv** instead of **pip** you can use the following command:
+Or use uv for faster installation:
 
 ```bash
 uv pip install edgartools
 ```
 
-## 2. Import edgar
+## Get Started in 2 Minutes
 
-The main way to use the library is to import everything with `from edgar import *`. This will give you access to most of the functions and classes you need.
-
-```
-from edgar import *
-```
-
-If you prefer a minimal import you can use the following:
-
-
-## 3. Set your identity
-
-Before you can access the SEC Edgar API you need to set the identity that you will use to access Edgar.
-This is usually your **name** and **email**, but you can also just use an email.
-
-You can set your identity in Python before you start using the library. 
-
-### Setting your identity in Python
+1. **Install and set your identity** (required by SEC):
 ```python
 from edgar import *
-set_identity("mike.mccalum@indigo.com")
+set_identity("your.name@email.com")
 ```
 
-### Setting your identity using an environment variable
-You can also set your identity using an environment variable. This is useful if you are using the library in a script or notebook.
+2. **Find a company and get their latest financial data**:
 
-```bash 
-export EDGAR_IDENTITY="mike.mccalum@indigo.com"
+```python
+company = Company("TSLA")
+latest_10k = company.get_filings(form="10-K").latest()
+financials = latest_10k.obj().financials()
 ```
+`
+
+## Popular Use Cases
+
+### Financial Analysis
+- Compare companies across industries
+- Track financial performance over time
+- Calculate and analyze financial ratios
+- Build custom financial dashboards
+
+### Investment Research
+- Analyze fund holdings and strategy changes
+- Track insider buying and selling activity
+- Monitor material events through 8-K filings
+- Research IPOs and new offerings
+
+### Academic Research
+- Large-scale financial data analysis
+- Corporate governance studies
+- Market efficiency research
+- Regulatory compliance analysis
+
+### AI/ML Applications
+- Extract clean text for natural language processing
+- Build predictive models with financial data
+- Automate document analysis workflows
+- Create training datasets for financial AI
+
+## Why Choose EdgarTools?
+
+| Feature | EdgarTools | Alternative Solutions |
+|---------|------------|----------------------|
+| **Ease of Use** | ✅ Simple, Pythonic API | ❌ Complex setup required |
+| **Data Quality** | ✅ Clean, standardized data | ⚠️ Raw data needs processing |
+| **Performance** | ✅ Optimized for large datasets | ❌ Slow for bulk operations |
+| **Documentation** | ✅ Comprehensive with examples | ⚠️ Limited examples |
+| **Active Development** | ✅ Regular updates and features | ❌ Infrequent updates |
+| **Community** | ✅ Growing user base | ⚠️ Limited community |
+
+## Community & Support
+
+- **📖 Documentation**: Comprehensive guides and API reference
+- **💬 GitHub Discussions**: Ask questions and share insights
+- **🐛 Issue Tracker**: Report bugs and request features
+- **📧 Email Support**: Direct support for enterprise users
+
+### Support the Project
+
+If you find EdgarTools useful, please consider supporting its development:
+
+<a href="https://www.buymeacoffee.com/edgartools" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 144px !important;" >
+</a>
+
+Your support helps maintain and improve EdgarTools for the entire community!
+
+## What's Next?
+
+**[Installation Guide](installation.md)**
+
+Complete setup instructions and troubleshooting
+
+**[Quick Start Tutorial](quick-guide.md)**
+
+Your first analysis in 5 minutes
+
+**[API Reference](company.md)**
+
+Complete documentation of all classes and methods
+
+**[Examples & Recipes](examples.md)**
+
+Real-world analysis patterns and code templates
+
+---
+
+**Ready to start analyzing SEC data?** [Install EdgarTools](installation.md) and begin your first analysis today.

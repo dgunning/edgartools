@@ -293,11 +293,11 @@ facts.query().by_period_keys(['duration_2023-01-01_2023-12-31',
 facts_by_segment = facts.query().by_dimension('Segment').to_dataframe()
 
 # Safe numeric value filtering with proper None handling
-large_income_items = facts.query()
+large_income_items = (facts.query()
     .by_statement_type('IncomeStatement')
     .by_value(lambda v: v > 1_000_000_000)
     .sort_by('numeric_value', ascending=False)
-    .to_dataframe()
+    .to_dataframe())
 
 # Time series analysis
 revenue_over_time = facts.time_series('Revenue')

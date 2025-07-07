@@ -269,16 +269,20 @@ class XBRLParser:
             # If embedded linkbases were found, parse them
             if embedded_linkbases and 'linkbases' in embedded_linkbases:
                 if 'label' in embedded_linkbases['linkbases']:
-                    self.parse_labels_content(embedded_linkbases['linkbases']['label'])
+                    label_content = embedded_linkbases['linkbases']['label']
+                    self.parse_labels_content(label_content)
                 
                 if 'presentation' in embedded_linkbases['linkbases']:
-                    self.parse_presentation_content(embedded_linkbases['linkbases']['presentation'])
+                    presentation_content = embedded_linkbases['linkbases']['presentation']
+                    self.parse_presentation_content(presentation_content)
                 
                 if 'calculation' in embedded_linkbases['linkbases']:
-                    self.parse_calculation_content(embedded_linkbases['linkbases']['calculation'])
+                    calculation_content = embedded_linkbases['linkbases']['calculation']
+                    self.parse_calculation_content(calculation_content)
                 
                 if 'definition' in embedded_linkbases['linkbases']:
-                    self.parse_definition_content(embedded_linkbases['linkbases']['definition'])
+                    definition_content = embedded_linkbases['linkbases']['definition']
+                    self.parse_definition_content(definition_content)
         
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing schema content: {str(e)}")
