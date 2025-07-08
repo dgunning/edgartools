@@ -340,6 +340,7 @@ class ChunkedDocument:
         self._chunked_data = chunk_fn(self.chunks)
         self.chunk_fn = chunk_fn
         self.prefix_src = prefix_src
+        self.document_id_parse:Dict = {}
 
     @lru_cache(maxsize=4)
     def as_dataframe(self):
@@ -461,30 +462,43 @@ class ChunkedDocument:
             for chunk in chunks:
                 yield "".join([block.get_text() for block in chunk])
 
-    def get_item_with_part(self, part: str, item: str):
+    def assemble_block_markdown(self, chunks: List[Block]):
+        if self.prefix_src:
+            for chunk in chunks:
+                for block in chunk:
+                    if isinstance(block, LinkBlock):
+                        yield block.to_markdown(prefix_src=self.prefix_src)
+                    else:
+                        yield block.to_markdown()
+        else:
+            for chunk in chunks:
+                yield "".join([block.to_markdown() for block in chunk])
+
+    def get_item_with_part(self, part: str, item: str, markdown:bool=False):
         if isinstance(part, str):
             chunks = list(self._chunks_mul_for(part, item))
-            return self.clean_part_line("".join([text for text in self.assemble_block_text(chunks)]))
-        return ""
-    
+            if markdown:
+                return self.clean_part_line("".join([text for text in self.assemble_block_markdown(chunks)]))
+            else:
+                return self.clean_part_line("".join([text for text in self.assemble_block_text(chunks)]))
+
     @staticmethod
     def clean_part_line(text:str):
-        # clean last line dity data, example 'PART I — FINANCIAL INFORMATION'
         res = text.rstrip("\n")
         last_line = res.split("\n")[-1]
         if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
-            res = res.rstrip(last_line)
+            res = res.rstrip(last_line).rstrip()
         return res
     
-    def get_signature(self):
-        res = self.get_item_with_part("Signature", "Signature")
+    def get_signature(self, markdown:bool=False):
+        res = self.get_item_with_part("Signature", "Signature", markdown=markdown)
         last_line = res.split("\n")[-1]
         if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
             res = res.rstrip(last_line)
         return self.clean_part_line(res)
 
     
-    def get_introduction(self):
+    def get_introduction(self, markdown:bool=False):
         """
         Extract and return the introduction section of the filing document.
         
@@ -510,17 +524,24 @@ class ChunkedDocument:
             return ""
 
         # Reuse __getitem__ to extract chunks up to min_index
-        res = "".join(
+        if markdown:
+            res = "".join(
             [text for text in
-                self.assemble_block_text(
+                self.assemble_block_markdown(
                     [self.chunks[idx] for idx in range(intro_index)]
             )])
+        else:
+            res = "".join(
+                [text for text in
+                    self.assemble_block_text(
+                        [self.chunks[idx] for idx in range(intro_index)]
+                )])
         return self.clean_part_line(res)
         
     def __len__(self):
         return len(self.chunks)
     
-    def __getitem__(self, item):
+    def __getitem__(self, item, markdown:bool=False):
         if isinstance(item, int):
             chunks = [self.chunks[item]]
         elif isinstance(item, str):
@@ -530,7 +551,10 @@ class ChunkedDocument:
         if len(chunks) == 0:
             return None
         # render the nested List of List [str]
-        return "".join([text for text in self.assemble_block_text(chunks)])
+        if markdown:
+            return "".join([text for text in self.assemble_block_markdown(chunks)])
+        else:
+            return "".join([text for text in self.assemble_block_text(chunks)])
 
     def __iter__(self):
         return iter(self.chunks)

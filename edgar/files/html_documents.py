@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import Optional, Union, Dict, List, Any, Tuple
 
 import pandas as pd
-from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning
+from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning, NavigableString
 from rich import box
 from rich.table import Table
 
@@ -251,9 +251,8 @@ class LinkBlock(Block):
         self.src = src
         self.inline: bool = True
 
-    def get_text(self):    
-        return f'<{self.tag} alt="{self.alt}" src="{self.src}">'
-        # return ''
+    def get_text(self) -> str:    
+        return '<{self.tag} alt="{self.alt}" src="{self.src}">'
 
     def to_markdown(self, prefix_src:str=""):
         return f"![alt  {self.alt}]({prefix_src}/{self.src})\n"
@@ -327,7 +326,8 @@ class TableBlock(Block):
 
 
 item_pattern = r"(?:ITEM|Item)\s+(?:[0-9]{1,2}[A-Z]?\.?|[0-9]{1,2}\.[0-9]{2})"
-part_pattern = r"^\b(PART\s+[IVXLC]+)\b"
+# part_pattern = r"^\b(PART\s+[IVXLC]+)\b"
+part_pattern = re.compile(r"^\b(PART\s+[IVXLC]+)\b", re.IGNORECASE)
 
 class HtmlDocument:
 
@@ -509,7 +509,7 @@ class HtmlDocument:
 
                 # Check if the block is an "Item" header
                 is_item_header = bool(re.match(item_pattern, block.text))
-                is_part_header = bool(re.match(part_pattern, block.text))
+                is_part_header = bool(part_pattern.match(block.text))
 
                 if is_part_header:
                      # Yield the current chunk before starting a new one with the "Part" header
@@ -521,7 +521,7 @@ class HtmlDocument:
                     current_chunk = [block]
 
                     # Update flags accordingly
-                    item_header_detected = False
+                    item_header_detected = True
                     header_detected = True  # "Item" headers are considered regular headers for flag purposes
                     accumulating_regular_text = False  # Reset since we're starting a new section
                 elif is_item_header:
@@ -590,6 +590,8 @@ def extract_and_format_content(element) -> List[Block]:
                           src=element.get('src'),
                           text_type='string')
                 ]
+    elif isinstance(element, NavigableString):
+        return [TextBlock(text=fixup(element.text), element=element.name, text_type='string')]
     else:
         inline = is_inline(element)
         blocks: List[Block] = []

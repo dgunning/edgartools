@@ -143,6 +143,8 @@ class ItemOnlyFilingStructure(FilingStructure):
 class TenK(CompanyReport):
     structure = FilingStructure({
         "PART I": {
+            # special case for 10-K
+            # Items 1 and 2. Business and Properties
             "ITEM 1": {
                 "Title": "Business",
                 "Description": "Overview of the company's business operations, products, services, and market environment."
@@ -206,6 +208,10 @@ class TenK(CompanyReport):
             "ITEM 9B": {
                 "Title": "Other Information",
                 "Description": "Any other relevant information not covered in other sections."
+            },
+            "ITEM 9C": {
+                "Title": "Disclosure Regarding Foreign Jurisdictions That Prevent Inspections",
+                "Description": "Disclosure Regarding Foreign Jurisdictions That Prevent Inspections."
             }
         },
         "PART III": {
@@ -236,6 +242,10 @@ class TenK(CompanyReport):
                 "Title": "Exhibits, Financial Statement Schedules",
                 "Description": "Legal documents and financial schedules that support the financial statements " +
                                "and disclosures."
+            },
+            "ITEM 16": {
+                "Title": "Form 10-K Summary",
+                "Description": "Form 10-K Summary"
             }
         }
     })
@@ -264,7 +274,12 @@ class TenK(CompanyReport):
     @lru_cache(maxsize=1)
     def chunked_document(self):
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
-
+    
+    @lru_cache(maxsize=1)
+    def id_parse_document(self, markdown:bool=False):
+        from edgar.files.html_documents_id_parser import ParsedHtml10K
+        return ParsedHtml10K().extract_html(self._filing.html(), self.structure, markdown=markdown)
+            
     def __str__(self):
         return f"""TenK('{self.company}')"""
 
@@ -278,10 +293,14 @@ class TenK(CompanyReport):
                 item_text = item_text.rstrip(last_line)
         return item_text
 
-    def get_item_with_part(self, part: str, item: str):
+    def get_item_with_part(self, part: str, item: str, markdown:bool=True):
+        if not part:
+            return self.id_parse_document(markdown).get(item.lower())
         # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
-        item_text = self.chunked_document.get_item_with_part(part, item)
+        item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
         # remove first line or last line (redundant part information)
+        if not item_text or not item_text.strip():
+            return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
         return item_text
     
     def get_structure(self):
@@ -412,12 +431,21 @@ class TenQ(CompanyReport):
         item_text = self.chunked_document[item_or_part]
         return item_text
     
-    def get_item_with_part(self, part: str, item: str):
+    def get_item_with_part(self, part: str, item: str, markdown:bool=True):
+        if not part:
+            return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
         # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
-        item_text = self.chunked_document.get_item_with_part(part, item)
+        item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
         # remove first line or last line (redundant part information)
+        if not item_text or not item_text.strip():
+            return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
         return item_text
     
+    @lru_cache(maxsize=1)
+    def id_parse_document(self, markdown:bool=True):
+        from edgar.files.html_documents_id_parser import ParsedHtml10Q
+        return ParsedHtml10Q().extract_html(self._filing.html(), self.structure, markdown=markdown)
+            
     @property
     @lru_cache(maxsize=1)
     def chunked_document(self):
