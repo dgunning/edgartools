@@ -516,10 +516,7 @@ class HtmlDocument:
                     if current_chunk:
                         if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
                             yield current_chunk
-
-                    # Initialize the new chunk with the "Item" header
-                    current_chunk = [block]
-
+                        current_chunk = []
                     # Update flags accordingly
                     item_header_detected = True
                     header_detected = True  # "Item" headers are considered regular headers for flag purposes
