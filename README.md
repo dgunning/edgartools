@@ -113,7 +113,11 @@ See our [Contributing Guide](CONTRIBUTING.md) for details.
 
 If you find EdgarTools valuable, please consider supporting its development:
 
-[Buy me a coffee](https://buymeacoffee.com/edgartools)
+<a href="https://www.buymeacoffee.com/edgartools" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 144px !important;" >
+</a>
+
+Your support helps maintain and improve EdgarTools for the entire community!
 
 ## Key Features for SEC Data Extraction and Analysis
 
