@@ -78,7 +78,6 @@ class AssembleText:
             parent = parent.parent
         return parent if parent and parent.name in block_tags else None
 
-
     @staticmethod
     def assemble_items(
         html_content: str, item_links: List, markdown: bool = False
@@ -92,21 +91,14 @@ class AssembleText:
             link_ids = [item_id for item_name, item_id in item_links]
             items = {}
 
-            # Step 1: Extract intro (from start of document to first item)
-            first_item_id = item_links[0][1] if item_links else None
-            intro_content = []
-            if first_item_id:
+            # Helper method to extract content up to a specific element
+            def get_intro_content(first_item_id: str) -> List[Tag]:
+                intro_content = []
                 current = soup.find(id=first_item_id) or soup.find(
                     "a", attrs={"name": first_item_id}
                 )
-                if not current:
-                    raise Exception(f"link id error. item_name:intro, item_id:{first_item_id}")
-     
                 if current:
                     container = AssembleText.find_block_level_parent(current)
-                    # container = current.find_parent("div")
-                    # if not container:
-                    #     container = current.find_parent("p")
                     if container:
                         for sibling in container.previous_siblings:
                             if isinstance(sibling, Tag):
@@ -116,8 +108,13 @@ class AssembleText:
                         if isinstance(sibling, Tag):
                             intro_content.append(sibling)
                         sibling = sibling.previous_sibling
-
                     intro_content.reverse()
+                return intro_content
+
+            # Step 1: Extract intro (from start of document to first item)
+            first_item_id = item_links[0][1] if item_links else None
+            if first_item_id:
+                intro_content = get_intro_content(first_item_id)
                 items["Item 0"] = AssembleText.assemble_html_document(
                     intro_content, markdown=markdown
                 )
@@ -158,26 +155,21 @@ class AssembleText:
                     items[item_name] = id_to_content[item_id]
 
             # Step 3: Handle Signatures
-            if "Signature" not in items:
-                if item_links:
-                    last_item_name, last_item_id = item_links[-1]
-                    last_content = items.get(last_item_name, "")
-                    sig_key = ["SIGNATURES", "SIGNATURE"]
-                    content_lines = last_content.split("\n")
-                    signature_line_index = None
-                    for i, line in enumerate(content_lines):
-                        if line.strip().upper() in sig_key:
-                            signature_line_index = i
-                            break
-                    if signature_line_index is not None:
-                        before_sig = "\n".join(
-                            content_lines[:signature_line_index]
-                        )
-                        sig_start_pos = len(before_sig) + 1
-                        items["Signature"] = last_content[sig_start_pos:].strip()
-                        items[last_item_name] = before_sig.strip()
-                    else:
-                        items["Signature"] = ""
+            if "Signature" not in items and item_links:
+                last_item_name, last_item_id = item_links[-1]
+                last_content = items.get(last_item_name, "")
+                sig_key = ["SIGNATURES", "SIGNATURE"]
+                content_lines = last_content.split("\n")
+                signature_line_index = None
+                for i, line in enumerate(content_lines):
+                    if line.strip().upper() in sig_key:
+                        signature_line_index = i
+                        break
+                if signature_line_index is not None:
+                    before_sig = "\n".join(content_lines[:signature_line_index])
+                    sig_start_pos = len(before_sig) + 1
+                    items["Signature"] = last_content[sig_start_pos:].strip()
+                    items[last_item_name] = before_sig.strip()
                 else:
                     items["Signature"] = ""
 
