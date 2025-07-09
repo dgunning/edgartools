@@ -138,7 +138,7 @@ def detect_part(text: pd.Series) -> pd.Series:
     # Extract using case-insensitive matching and convert result to uppercase
     extracted = text.str.extract(part_pattern, flags=re.IGNORECASE | re.MULTILINE, expand=False)
     # Normalize to uppercase for consistency (e.g., 'Part I' → 'PART I')
-    return extracted.str.upper()
+    return extracted.str.upper().str.replace(r'\s+', ' ', regex=True)
 
 def detect_decimal_items(text: pd.Series):
     return text.str.extract(decimal_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
@@ -298,8 +298,7 @@ def chunks2df(chunks: List[List[Block]],
     signature_rows = chunk_df[chunk_df.Signature]
     if len(signature_rows) > 0:
         signature_loc = signature_rows.index[0]
-        chunk_df.loc[signature_loc:, 'Item'] = "Signature"
-        chunk_df.loc[signature_loc:, 'Part'] = "Signature"
+        chunk_df.loc[signature_loc:, 'Item'] = pd.NA
         chunk_df.Signature = chunk_df.Signature.fillna("")
 
     # Fill the Item column with "" then set to title case
@@ -355,7 +354,6 @@ class ChunkedDocument:
         return result
 
     def list_items(self):
-        # TODO: remove Signature or add to pytest function
         return [item for item in self._chunked_data.Item.drop_duplicates().tolist() if item]
 
     def _chunks_for(self, item_or_part: str, col: str = 'Item'):
@@ -491,10 +489,19 @@ class ChunkedDocument:
         return res
     
     def get_signature(self, markdown:bool=False):
-        res = self.get_item_with_part("Signature", "Signature", markdown=markdown)
-        last_line = res.split("\n")[-1]
-        if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
-            res = res.rstrip(last_line)
+        sig_index = self._chunked_data[self._chunked_data.Signature].index
+        if markdown:
+            res = "".join(
+            [text for text in
+                self.assemble_block_markdown(
+                    [self.chunks[idx] for idx in sig_index]
+            )])
+        else:
+            res = "".join(
+                [text for text in
+                    self.assemble_block_text(
+                        [self.chunks[idx] for idx in sig_index]
+                )])
         return self.clean_part_line(res)
 
     

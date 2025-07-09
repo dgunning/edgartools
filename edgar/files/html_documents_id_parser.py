@@ -162,11 +162,11 @@ class AssembleText:
                 if item_links:
                     last_item_name, last_item_id = item_links[-1]
                     last_content = items.get(last_item_name, "")
-                    sig_key = "SIGNATURES"
+                    sig_key = ["SIGNATURES", "SIGNATURE"]
                     content_lines = last_content.split("\n")
                     signature_line_index = None
                     for i, line in enumerate(content_lines):
-                        if line.strip() == sig_key:
+                        if line.strip().upper() in sig_key:
                             signature_line_index = i
                             break
                     if signature_line_index is not None:
@@ -301,7 +301,7 @@ class ParsedHtml10K:
             "Item 14": "Item 14.",
             "Item 15": "Item 15.",
             "Item 16": "Item 16.",
-            "Signatures": "Signatures.",
+            "Signatures": "Signature",
         }
         items_match_0 = {key: key for key in items_match_1}
 
@@ -329,6 +329,7 @@ class ParsedHtml10K:
             "Item 14": "Part III, Item 14",
             "Item 15": "Part IV, Item 15",
             "Item 16": "Part IV, Item 16",
+            "Signatures": "Signature",
         }
         items_match_2_1 = {
             "Item 1": "Item No. 1",
@@ -524,7 +525,7 @@ class ParsedHtml10Q:
                 row_text = row.get_text().strip()
                 part_match = part_regex.match(row_text)
                 if part_match:
-                    part = part_match.group(1).lower()
+                    part = re.sub(r'\s+', ' ', part_match.group(1).lower())
                 cells = row.find_all("td", recursive=False)
                 exist_page_num = False
                 if cells:
@@ -586,7 +587,7 @@ class ParsedHtml10Q:
                 "Item 5": "Item 5.",
                 "Item 6": "Item 6.",
             },
-            "Extarect": {"Signatures": "	Signature"},
+            "Extarect": {"Signatures": "Signature"},
         }
 
         items_match_2 = {  # Part-prefixed items
