@@ -74,7 +74,7 @@ def _get_cache_controller(**kwargs):
 
     return controller
 
-def cached_factory(limiter: Callable, cache_directory: Path | None = None, controller_args: dict | None = None, **kwargs):
+def cached_factory(limiter: Callable, cache_directory: Path | None = None, controller_args: dict | None = None, storage: hishel.BaseStorage | None = None, **kwargs):
     params = httpclient.DEFAULT_PARAMS.copy()
     params["headers"] = httpclient.client_headers()
     params.update(**kwargs)
@@ -82,9 +82,13 @@ def cached_factory(limiter: Callable, cache_directory: Path | None = None, contr
         controller_args = {}
 
     controller = _get_cache_controller(**controller_args)
+
+    if storage is None:
+        storage = hishel.FileStorage(base_path = cache_directory)
+        
     client = hishel.CacheClient(
         controller=controller,
-        storage=hishel.FileStorage(base_path = cache_directory),
+        storage=storage,
         **params
     )
 
@@ -98,17 +102,20 @@ def cached_factory(limiter: Callable, cache_directory: Path | None = None, contr
     return client
 
 @asynccontextmanager
-async def asynccached_factory(limiter: Callable, cache_directory: Path | None = None, controller_args: dict | None = None, **kwargs):
+async def asynccached_factory(limiter: Callable, cache_directory: Path | None = None, controller_args: dict | None = None, async_storage: hishel.AsyncBaseStorage | None = None, **kwargs):
     params = httpclient.DEFAULT_PARAMS.copy()
     params["headers"] = httpclient.client_headers()
     params.update(**kwargs)
     if controller_args is None:
         controller_args = {}
+    
+    if async_storage is None:
+        async_storage = hishel.AsyncFileStorage(base_path = cache_directory)
 
     controller = _get_cache_controller(**controller_args)
     client = hishel.AsyncCacheClient(
         controller=controller,
-        storage=hishel.AsyncFileStorage(base_path = cache_directory),
+        storage=async_storage,
         **params
     )
         
