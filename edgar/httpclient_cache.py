@@ -39,6 +39,8 @@ httpclient_cache.install_cached_client(cache_directory = Path(r"."), controller_
 
 filings = Company('MS').get_filings(form="10-Q")
 ```
+
+Alternate rate limiters
 """
 from edgar import httpclient, core, httprequests
 import logging
@@ -196,6 +198,7 @@ def _init_pyrate_limiter(limit_per_sec: int = 10):
     return limiter.as_decorator()(lambda *_: ('constant-key', 1))
 
 def install_cached_client(cache_directory: Path | None, controller_args: dict | None = None, limiter: Callable | None = None, async_storage: hishel.AsyncBaseStorage | None = None, storage: hishel.BaseStorage | None = None):
+
     if cache_directory is None:
         cache_directory = core.get_edgar_data_directory() / "requestcache"
 
