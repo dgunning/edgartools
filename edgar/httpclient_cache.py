@@ -38,6 +38,7 @@ httpclient_cache.install_cached_client(cache_directory = Path(r"."), controller_
 # set_identity("your@email.com")
 
 filings = Company('MS').get_filings(form="10-Q")
+```
 """
 from edgar import httpclient, core, httprequests
 import logging
