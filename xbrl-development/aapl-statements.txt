@@ -1,0 +1,99 @@
+Financial Statements
+
+  #     Name                                           Type                  Parenthetical
+ ───────────────────────────────────────────────────────────────────────────────────────────
+  4     CONSOLIDATEDBALANCESHEETS                      BalanceSheet
+  7     CONSOLIDATEDSTATEMENTSOFCASHFLOWS              CashFlowStatement
+  3     CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME    ComprehensiveIncome
+  2     CONSOLIDATEDSTATEMENTSOFOPERATIONS             IncomeStatement
+  6     CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY     StatementOfEquity
+  61    ShareholdersEquitySharesofCommonStockDetails   StatementOfEquity
+
+Notes to Financial Statements
+
+  #     Name                                             Type                 Parenthetical
+ ────────────────────────────────────────────────────────────────────────────────────────────
+  8     SummaryofSignificantAccountingPolicies           AccountingPolicies
+  21    SummaryofSignificantAccountingPoliciesPolicies   AccountingPolicies
+
+Disclosures
+
+  #     Name                                                                   Type                Parenthetical
+ ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  70    AwardTimingDisclosure                                                  Disclosures
+  71    ErrCompDisclosure                                                      Disclosures
+  72    PvpDisclosure                                                          Disclosures
+  20    SegmentInformationandGeographicData                                    SegmentDisclosure
+  66    SegmentInformationandGeographicDataInformationbyReportableSegmentDe…   SegmentDisclosure
+  69    SegmentInformationandGeographicDataLongLivedAssetsforCountriesthatI…   SegmentDisclosure
+  68    SegmentInformationandGeographicDataNetSalesforCountriesthatIndividu…   SegmentDisclosure
+  67    SegmentInformationandGeographicDataReconciliationofSegmentOperating…   SegmentDisclosure
+  33    SegmentInformationandGeographicDataTables                              SegmentDisclosure
+
+Document Sections
+
+  #     Name        Type        Parenthetical
+ ──────────────────────────────────────────────
+  0     CoverPage   CoverPage
+
+Other Sections
+
+  #     Name                                                           Type                        Parenthetical
+ ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  1     AuditorInformation
+  19    CommitmentsContingenciesandSupplyConcentrations
+  65    CommitmentsContingenciesandSupplyConcentrationsFuturePaymen…
+  32    CommitmentsContingenciesandSupplyConcentrationsTables
+  13    ConsolidatedFinancialStatementDetails
+  46    ConsolidatedFinancialStatementDetailsOtherCurrentLiabilitie…
+  45    ConsolidatedFinancialStatementDetailsOtherNonCurrentAssetsD…
+  47    ConsolidatedFinancialStatementDetailsOtherNonCurrentLiabili…
+  26    ConsolidatedFinancialStatementDetailsTables
+  16    Debt
+  56    DebtAdditionalInformationDetails
+  59    DebtFuturePrincipalPaymentsforTermDebtDetails
+  57    DebtSummaryofCashFlowsAssociatedwithCommercialPaperDetails
+  58    DebtSummaryofTermDebtDetails
+  29    DebtTables
+  10    EarningsPerShare
+  38    EarningsPerShareAdditionalInformationDetails
+  37    EarningsPerShareComputationofBasicandDilutedEarningsPerShar…
+  23    EarningsPerShareTables
+  11    FinancialInstruments
+  40    FinancialInstrumentsAdditionalInformationDetails
+  39    FinancialInstrumentsCashCashEquivalentsandMarketableSecurit…
+  42    FinancialInstrumentsDerivativeInstrumentsDesignatedasFairVa…
+  41    FinancialInstrumentsNotionalAmountsAssociatedwithDerivative…
+  24    FinancialInstrumentsTables
+  14    IncomeTaxes
+  48    IncomeTaxesAdditionalInformationDetails
+  52    IncomeTaxesAggregateChangesinGrossUnrecognizedTaxBenefitsDe…
+  49    IncomeTaxesProvisionforIncomeTaxesDetails
+  50    IncomeTaxesReconciliationofProvisionforIncomeTaxestoAmountC…
+  51    IncomeTaxesSignificantComponentsofDeferredTaxAssetsandLiabi…
+  27    IncomeTaxesTables
+  73    InsiderTradingArrangements
+  74    InsiderTradingPoliciesProc
+  15    Leases
+  53    LeasesAdditionalInformationDetails
+  55    LeasesLeaseLiabilityMaturitiesDetails
+  54    LeasesROUAssetsandLeaseLiabilitiesDetails
+  28    LeasesTables
+  12    PropertyPlantandEquipment
+  44    PropertyPlantandEquipmentAdditionalInformationDetails
+  43    PropertyPlantandEquipmentGrossPropertyPlantandEquipmentbyMa…
+  25    PropertyPlantandEquipmentTables
+  9     Revenue
+  34    RevenueAdditionalInformationDetails
+  36    RevenueDeferredRevenueExpectedTimingofRealizationDetails
+  35    RevenueNetSalesDisaggregatedbySignificantProductsandService…
+  22    RevenueTables
+  18    ShareBasedCompensation
+  62    ShareBasedCompensationAdditionalInformationDetails
+  63    ShareBasedCompensationRestrictedStockUnitActivityandRelated…
+  64    ShareBasedCompensationSummaryofShareBasedCompensationExpens…
+  31    ShareBasedCompensationTables
+  17    ShareholdersEquity
+  60    ShareholdersEquityAdditionalInformationDetails
+  30    ShareholdersEquityTables
+  5     CONSOLIDATEDBALANCESHEETSParenthetical                         BalanceSheetParenthetical   ✓

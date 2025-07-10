@@ -1,0 +1,2644 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>Enhanced Statement Access Design for Cross-Company Standardization - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#enhanced-statement-access-design-for-cross-company-standardization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Enhanced Statement Access Design for Cross-Company Standardization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../local-data/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Advanced Topics
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How to Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Filings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Search for Specific Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filter Filings by Date/Type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Access Filing Attachments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Companies
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Companies
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Financial Analysis
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Financial Analysis
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extract Financial Statements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding SEC Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    XBRL and Financials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            XBRL and Financials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting XBRL from Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Querying XBRL Facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Data Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Insider Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Resources
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Common Issues & Solutions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Performance Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SEC Rate Limits & Compliance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Topics
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../local-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Local Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parsing SGML
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    User Journeys
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executive Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-system-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current System Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Current System Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#existing-architecture-edgarxbrlstatementspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Existing Architecture (edgar/xbrl/statements.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identified-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Identified Limitations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proposed-design-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Proposed Design Improvements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Proposed Design Improvements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-universal-statement-type-resolution-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Universal Statement Type Resolution System
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-business-section-discovery-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Business Section Discovery System
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-enhanced-statement-categorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Enhanced Statement Categorization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-smart-statement-resolution-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Smart Statement Resolution Engine
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-attachment-integration-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Attachment Integration Framework
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-period-view-enhancement" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Period View Enhancement
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-api-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      New API Design
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="New API Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhanced-statements-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enhanced Statements Class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enhanced-statement-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enhanced Statement Class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-supporting-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      New Supporting Classes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-universal-statement-resolution-2-3-weeks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1: Universal Statement Resolution (2-3 weeks)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-business-section-discovery-3-4-weeks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2: Business Section Discovery (3-4 weeks)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-enhanced-categorization-2-3-weeks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3: Enhanced Categorization (2-3 weeks)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-attachment-integration-4-5-weeks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 4: Attachment Integration (4-5 weeks)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-period-management-enhancement-2-3-weeks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 5: Period Management Enhancement (2-3 weeks)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benefits-and-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benefits and Impact
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Benefits and Impact">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediate-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Immediate Benefits
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-term-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Long-term Benefits
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backward-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backward Compatibility
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success Metrics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#risk-mitigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Risk Mitigation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="enhanced-statement-access-design-for-cross-company-standardization">Enhanced Statement Access Design for Cross-Company Standardization</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This design document outlines improvements to the XBRL statements system to enable standardized access across different companies' filing patterns. Based on analysis of NVIDIA vs Apple 10-K filings, the current system has limitations in handling naming variations and accessing detailed business sections. The proposed enhancements will provide universal statement resolution, business section discovery, and attachment integration while maintaining backward compatibility.</p>
+<h2 id="current-system-analysis">Current System Analysis</h2>
+<h3 id="existing-architecture-edgarxbrlstatementspy">Existing Architecture (edgar/xbrl/statements.py)</h3>
+<p><strong>Core Classes:</strong>
+- <code>Statement</code>: Individual statement wrapper with rendering and analysis
+- <code>Statements</code>: High-level interface for statement collections
+- <code>StitchedStatement</code>/<code>StitchedStatements</code>: Multi-period statement handling</p>
+<p><strong>Current Strengths:</strong>
+- Well-structured OOP design
+- Rich console output with categorization
+- Period filtering and rendering capabilities
+- Basic statement type mapping via <code>statement_to_concepts</code>
+- Ratio calculation and trend analysis</p>
+<h3 id="identified-limitations">Identified Limitations</h3>
+<ol>
+<li><strong>Rigid Statement Type Mapping</strong></li>
+<li>Hard-coded <code>statement_to_concepts</code> dictionary</li>
+<li>Fails on NVIDIA's "CONSOLIDATEDSTATEMENTSOFINCOME" vs Apple's "CONSOLIDATEDSTATEMENTSOFOPERATIONS"</li>
+<li>
+<p>No fuzzy matching for statement name variations</p>
+</li>
+<li>
+<p><strong>Basic Indexing System</strong></p>
+</li>
+<li>Simple string matching in <code>__getitem__</code> method</li>
+<li>Limited fallback logic when exact matches fail</li>
+<li>
+<p>No confidence scoring for multiple matches</p>
+</li>
+<li>
+<p><strong>No Business Section Discovery</strong></p>
+</li>
+<li>Cannot find detailed schedules like lease payment tables</li>
+<li>No pattern-based section identification</li>
+<li>
+<p>Missing connection between summary statements and detailed breakdowns</p>
+</li>
+<li>
+<p><strong>Limited Pattern Recognition</strong></p>
+</li>
+<li>No regex-based matching for statement variations</li>
+<li>Inflexible to company-specific naming conventions</li>
+<li>
+<p>Poor handling of parenthetical vs non-parenthetical statements</p>
+</li>
+<li>
+<p><strong>Missing Attachment Integration</strong></p>
+</li>
+<li>No connection to R-file detailed schedules</li>
+<li>Cannot access granular data from HTML attachments</li>
+<li>Missed opportunity for comprehensive financial analysis</li>
+</ol>
+<h2 id="proposed-design-improvements">Proposed Design Improvements</h2>
+<h3 id="1-universal-statement-type-resolution-system">1. Universal Statement Type Resolution System</h3>
+<p><strong>Objective</strong>: Handle cross-company variations in statement naming</p>
+<p><strong>Design</strong>: Multi-tier pattern matching with confidence scoring</p>
+<pre><code class="language-python">UNIVERSAL_STATEMENT_PATTERNS = {
+    &quot;IncomeStatement&quot;: [
+        r&quot;CONSOLIDATEDSTATEMENTSOFINCOME&quot;,        # NVIDIA pattern
+        r&quot;CONSOLIDATEDSTATEMENTSOFOPERATIONS&quot;,    # Apple pattern
+        r&quot;STATEMENTSOFINCOME&quot;,
+        r&quot;STATEMENTSOFOPERATIONS&quot;,
+        r&quot;INCOMESTATEMENT&quot;
+    ],
+    &quot;BalanceSheet&quot;: [
+        r&quot;CONSOLIDATEDBALANCESHEETS?&quot;,
+        r&quot;BALANCESHEETS?&quot;,
+        r&quot;STATEMENTOFFINANCIALPOSITION&quot;
+    ],
+    &quot;CashFlowStatement&quot;: [
+        r&quot;CONSOLIDATEDSTATEMENTSOFCASHFLOWS?&quot;,
+        r&quot;STATEMENTSOFCASHFLOWS?&quot;,
+        r&quot;CASHFLOWSTATEMENTS?&quot;
+    ],
+    &quot;StatementOfEquity&quot;: [
+        r&quot;CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY&quot;,
+        r&quot;CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSEQUITY&quot;,
+        r&quot;STATEMENTSOFSHAREHOLDERSEQUITY&quot;,
+        r&quot;STATEMENTSOFSTOCKHOLDERSEQUITY&quot;
+    ],
+    &quot;ComprehensiveIncome&quot;: [
+        r&quot;CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME&quot;,
+        r&quot;STATEMENTSOFCOMPREHENSIVEINCOME&quot;
+    ]
+}
+</code></pre>
+<p><strong>New Class</strong>: <code>StatementResolver</code>
+- Fuzzy matching with confidence scores
+- Multiple pattern matching strategies
+- Graceful fallback logic
+- Cross-reference validation using multiple criteria</p>
+<h3 id="2-business-section-discovery-system">2. Business Section Discovery System</h3>
+<p><strong>Objective</strong>: Enable discovery of detailed business sections across companies</p>
+<p><strong>Design</strong>: Pattern-based section categorization with standardized access</p>
+<pre><code class="language-python">BUSINESS_SECTION_PATTERNS = {
+    &quot;leases&quot;: {
+        &quot;main&quot;: [r&quot;Leases(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Leases.*\(Tables\)&quot;],
+        &quot;payment_schedule&quot;: [
+            r&quot;Lease.*(?:Schedule|Payment|Maturities).*Details&quot;,
+            r&quot;Future.*Lease.*Payment.*Details&quot;,
+            r&quot;Lease.*Liability.*Maturities.*Details&quot;
+        ],
+        &quot;narrative&quot;: [r&quot;Lease.*Narrative.*Details&quot;],
+        &quot;rou_assets&quot;: [r&quot;ROU.*Assets.*Lease.*Details&quot;]
+    },
+    &quot;stock_compensation&quot;: {
+        &quot;main&quot;: [r&quot;(?:Stock.?Based|Share.?Based)\s*Compensation(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;(?:Stock.?Based|Share.?Based).*Compensation.*\(Tables\)&quot;],
+        &quot;expense_details&quot;: [r&quot;(?:Stock.?Based|Share.?Based).*Compensation.*Expense.*Details&quot;],
+        &quot;award_details&quot;: [
+            r&quot;(?:Stock.?Based|Share.?Based).*(?:Equity|Awards?).*Details&quot;,
+            r&quot;Restricted.*Stock.*Unit.*Activity.*Details&quot;
+        ],
+        &quot;plan_details&quot;: [r&quot;(?:Stock.?Based|Share.?Based).*(?:Incentive|Plans?).*Details&quot;]
+    },
+    &quot;segments&quot;: {
+        &quot;main&quot;: [r&quot;Segment\s*Information(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Segment.*Information.*\(Tables\)&quot;],
+        &quot;geographic&quot;: [
+            r&quot;(?:Geographic|Region).*Details&quot;,
+            r&quot;Revenue.*Region.*Details&quot;,
+            r&quot;Long.?lived.*Assets.*Region.*Details&quot;
+        ],
+        &quot;reconciliation&quot;: [r&quot;.*Reconcil.*Segment.*Details&quot;],
+        &quot;reportable&quot;: [r&quot;Reportable.*Segment.*Details&quot;]
+    },
+    &quot;debt&quot;: {
+        &quot;main&quot;: [r&quot;Debt(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Debt.*\(Tables\)&quot;],
+        &quot;schedule&quot;: [
+            r&quot;Debt.*(?:Schedule|Payment|Future).*Details&quot;,
+            r&quot;Future.*Principal.*Payment.*Details&quot;
+        ],
+        &quot;term_debt&quot;: [r&quot;Term\s*Debt.*Details&quot;],
+        &quot;commercial_paper&quot;: [r&quot;Commercial.*Paper.*Details&quot;]
+    },
+    &quot;income_taxes&quot;: {
+        &quot;main&quot;: [r&quot;Income\s*Taxes(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Income\s*Taxes.*\(Tables\)&quot;],
+        &quot;reconciliation&quot;: [r&quot;Income\s*Tax.*Reconciliation.*Details&quot;],
+        &quot;deferred&quot;: [r&quot;Deferred\s*Tax.*Details&quot;],
+        &quot;components&quot;: [r&quot;Components.*Income.*Tax.*Details&quot;],
+        &quot;unrecognized&quot;: [r&quot;Unrecognized.*Tax.*Benefits.*Details&quot;]
+    },
+    &quot;financial_instruments&quot;: {
+        &quot;main&quot;: [r&quot;Financial\s*Instruments(?!.*\(Tables\)|.*Details)&quot;],
+        &quot;tables&quot;: [r&quot;Financial\s*Instruments.*\(Tables\)&quot;],
+        &quot;fair_value&quot;: [r&quot;Fair.*Value.*Financial.*Details&quot;],
+        &quot;derivatives&quot;: [r&quot;Derivative.*Instruments.*Details&quot;],
+        &quot;marketable_securities&quot;: [r&quot;Marketable.*Securities.*Details&quot;]
+    }
+}
+</code></pre>
+<p><strong>New Methods</strong>:
+- <code>statements.get_lease_schedule()</code> → detailed lease payment schedules
+- <code>statements.get_stock_compensation_details()</code> → equity award breakdowns
+- <code>statements.get_segment_geographic_breakdown()</code> → regional revenue data
+- <code>statements.get_business_section(category, detail_type)</code> → generic section finder</p>
+<h3 id="3-enhanced-statement-categorization">3. Enhanced Statement Categorization</h3>
+<p><strong>Current</strong>: Basic 5-category system (statement, note, disclosure, document, other)</p>
+<p><strong>Enhanced</strong>: Hierarchical categorization with business context</p>
+<pre><code class="language-python">ENHANCED_CATEGORIES = {
+    'financial_statements': {
+        'core': ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement'],
+        'supplementary': ['ComprehensiveIncome', 'StatementOfEquity'],
+        'parenthetical': ['BalanceSheetParenthetical', 'IncomeStatementParenthetical']
+    },
+    'business_disclosures': {
+        'operational': ['leases', 'stock_compensation', 'segments', 'revenue'],
+        'financial': ['debt', 'derivatives', 'fair_value', 'financial_instruments'],
+        'regulatory': ['income_taxes', 'commitments', 'contingencies'],
+        'strategic': ['business_combinations', 'goodwill', 'intangibles']
+    },
+    'supporting_schedules': {
+        'payment_schedules': ['lease_payments', 'debt_maturities', 'future_commitments'],
+        'detailed_breakdowns': ['segment_details', 'geographic_revenue', 'product_revenue'],
+        'reconciliations': ['tax_reconciliation', 'segment_reconciliation', 'eps_reconciliation']
+    }
+}
+</code></pre>
+<h3 id="4-smart-statement-resolution-engine">4. Smart Statement Resolution Engine</h3>
+<p><strong>New Class</strong>: <code>StatementResolver</code></p>
+<pre><code class="language-python">class StatementResolver:
+    def resolve_statement_type(self, statement_name: str) -&gt; ResolvedStatement:
+        &quot;&quot;&quot;Resolve statement with confidence scoring and multiple matches&quot;&quot;&quot;
+
+    def find_best_match(self, patterns: List[str], candidates: List[str]) -&gt; MatchResult:
+        &quot;&quot;&quot;Find best pattern match with confidence score&quot;&quot;&quot;
+
+    def cross_validate_match(self, resolved_statement: ResolvedStatement) -&gt; bool:
+        &quot;&quot;&quot;Validate match using multiple criteria (concepts, structure, etc.)&quot;&quot;&quot;
+
+    def get_fallback_options(self, failed_match: str) -&gt; List[ResolvedStatement]:
+        &quot;&quot;&quot;Provide alternative matches when primary resolution fails&quot;&quot;&quot;
+</code></pre>
+<p><strong>Features</strong>:
+- Fuzzy string matching for typos and variations
+- Confidence scoring (0.0 to 1.0) for ranking matches
+- Multiple validation criteria (name, concepts, structure)
+- Graceful degradation with suggested alternatives
+- Learning capability to improve matching over time</p>
+<h3 id="5-attachment-integration-framework">5. Attachment Integration Framework</h3>
+<p><strong>Objective</strong>: Connect XBRL statements with detailed attachment schedules</p>
+<p><strong>Design</strong>: Bidirectional linking between statements and attachments</p>
+<pre><code class="language-python">class StatementWithAttachments(Statement):
+    def get_supporting_attachments(self) -&gt; List[Attachment]:
+        &quot;&quot;&quot;Find R-files that provide detailed breakdowns for this statement&quot;&quot;&quot;
+
+    def get_detailed_schedules(self) -&gt; Dict[str, Attachment]:
+        &quot;&quot;&quot;Get specific detailed schedules (payment schedules, breakdowns, etc.)&quot;&quot;&quot;
+
+    def get_lease_payment_schedule(self) -&gt; Optional[Attachment]:
+        &quot;&quot;&quot;Get detailed lease payment schedule from attachments&quot;&quot;&quot;
+
+    def get_stock_compensation_breakdown(self) -&gt; Optional[Attachment]:
+        &quot;&quot;&quot;Get detailed equity award information from attachments&quot;&quot;&quot;
+
+    def get_segment_geographic_data(self) -&gt; Optional[Attachment]:
+        &quot;&quot;&quot;Get geographic revenue breakdown from attachments&quot;&quot;&quot;
+
+    def get_reconciliation_schedules(self) -&gt; List[Attachment]:
+        &quot;&quot;&quot;Get reconciliation schedules related to this statement&quot;&quot;&quot;
+</code></pre>
+<p><strong>Attachment Discovery Logic</strong>:
+- Pattern matching between XBRL statement names and R-file descriptions
+- Content analysis to identify supporting schedules
+- Cross-reference validation using common data elements
+- Hierarchical relationship mapping (summary → details)</p>
+<h3 id="6-period-view-enhancement">6. Period View Enhancement</h3>
+<p><strong>Current</strong>: Basic period filtering
+<strong>Enhanced</strong>: Context-aware period selection</p>
+<pre><code class="language-python">class SmartPeriodManager:
+    def get_optimal_periods(self, statement_type: str, context: str = &quot;quarterly&quot;) -&gt; List[str]:
+        &quot;&quot;&quot;Return best periods based on statement type and analysis context&quot;&quot;&quot;
+
+    def align_periods_across_statements(self, statement_types: List[str]) -&gt; Dict[str, List[str]]:
+        &quot;&quot;&quot;Ensure consistent period alignment for multi-statement analysis&quot;&quot;&quot;
+
+    def detect_period_patterns(self, statements: List[Statement]) -&gt; PeriodPattern:
+        &quot;&quot;&quot;Analyze and categorize period patterns (quarterly, annual, interim)&quot;&quot;&quot;
+
+    def suggest_comparison_periods(self, base_period: str, statement_type: str) -&gt; List[str]:
+        &quot;&quot;&quot;Suggest meaningful comparison periods for trend analysis&quot;&quot;&quot;
+</code></pre>
+<h2 id="new-api-design">New API Design</h2>
+<h3 id="enhanced-statements-class">Enhanced Statements Class</h3>
+<pre><code class="language-python">class Statements:
+    # Existing methods remain unchanged for backward compatibility
+
+    # Universal access with intelligent resolution
+    def get_statement(self, statement_identifier: str, confidence_threshold: float = 0.8) -&gt; Statement:
+        &quot;&quot;&quot;Get statement with fuzzy matching and confidence scoring&quot;&quot;&quot;
+
+    def find_statements(self, pattern: str) -&gt; List[Tuple[Statement, float]]:
+        &quot;&quot;&quot;Find all statements matching pattern with confidence scores&quot;&quot;&quot;
+
+    # Business section discovery
+    def get_lease_details(self) -&gt; BusinessSectionGroup:
+        &quot;&quot;&quot;Get all lease-related sections organized by detail level&quot;&quot;&quot;
+
+    def get_lease_payment_schedule(self) -&gt; Optional[Statement]:
+        &quot;&quot;&quot;Get specific lease payment schedule section&quot;&quot;&quot;
+
+    def get_stock_compensation_breakdown(self) -&gt; BusinessSectionGroup:
+        &quot;&quot;&quot;Get detailed stock compensation data&quot;&quot;&quot;
+
+    def get_segment_analysis(self) -&gt; BusinessSectionGroup:
+        &quot;&quot;&quot;Get comprehensive segment information&quot;&quot;&quot;
+
+    def get_business_section(self, category: str, detail_type: str = None) -&gt; BusinessSectionGroup:
+        &quot;&quot;&quot;Generic business section finder with category and detail type&quot;&quot;&quot;
+
+    # Enhanced categorization
+    def get_operational_disclosures(self) -&gt; List[Statement]:
+        &quot;&quot;&quot;Get all operational business disclosures&quot;&quot;&quot;
+
+    def get_financial_disclosures(self) -&gt; List[Statement]:
+        &quot;&quot;&quot;Get all financial instrument and debt disclosures&quot;&quot;&quot;
+
+    def get_supporting_schedules(self) -&gt; List[Statement]:
+        &quot;&quot;&quot;Get all detailed supporting schedules&quot;&quot;&quot;
+
+    def get_by_business_category(self, category: str) -&gt; List[Statement]:
+        &quot;&quot;&quot;Get statements by enhanced business category&quot;&quot;&quot;
+
+    # Cross-statement analysis
+    def get_related_sections(self, statement_type: str) -&gt; List[Statement]:
+        &quot;&quot;&quot;Find all sections that provide supporting detail for a statement&quot;&quot;&quot;
+
+    def build_statement_hierarchy(self) -&gt; StatementHierarchy:
+        &quot;&quot;&quot;Build hierarchical view showing relationships between statements&quot;&quot;&quot;
+</code></pre>
+<h3 id="enhanced-statement-class">Enhanced Statement Class</h3>
+<pre><code class="language-python">class Statement:
+    # Existing methods remain unchanged
+
+    # Enhanced data access
+    def get_concept_trends(self, concept_name: str, periods: int = 4) -&gt; Dict[str, List[float]]:
+        &quot;&quot;&quot;Get trends for specific concepts across periods&quot;&quot;&quot;
+
+    def find_related_disclosures(self) -&gt; List[Statement]:
+        &quot;&quot;&quot;Find disclosure sections that provide detail for this statement&quot;&quot;&quot;
+
+    def get_detailed_breakdowns(self) -&gt; List[Attachment]:
+        &quot;&quot;&quot;Get attachment files that provide detailed breakdowns&quot;&quot;&quot;
+
+    def get_supporting_attachments(self) -&gt; List[Attachment]:
+        &quot;&quot;&quot;Get all attachments that support this statement&quot;&quot;&quot;
+
+    # Smart period handling
+    def render_optimal_periods(self, context: str = &quot;quarterly&quot;) -&gt; Any:
+        &quot;&quot;&quot;Render with automatically selected optimal periods&quot;&quot;&quot;
+
+    def align_with_statement(self, other_statement: Statement) -&gt; Tuple[Any, Any]:
+        &quot;&quot;&quot;Render both statements with aligned periods for comparison&quot;&quot;&quot;
+
+    # Enhanced validation and quality checks
+    def validate_completeness(self) -&gt; ValidationResult:
+        &quot;&quot;&quot;Check statement completeness and data quality&quot;&quot;&quot;
+
+    def suggest_related_analysis(self) -&gt; List[AnalysisSuggestion]:
+        &quot;&quot;&quot;Suggest related analyses based on statement type and available data&quot;&quot;&quot;
+</code></pre>
+<h3 id="new-supporting-classes">New Supporting Classes</h3>
+<pre><code class="language-python">@dataclass
+class ResolvedStatement:
+    statement: Statement
+    confidence: float
+    match_method: str
+    alternatives: List[Tuple[Statement, float]]
+
+@dataclass 
+class BusinessSectionGroup:
+    category: str
+    main_section: Statement
+    tables: List[Statement]
+    details: List[Statement]
+    schedules: List[Statement]
+    attachments: List[Attachment]
+
+@dataclass
+class MatchResult:
+    matched_item: Any
+    confidence: float
+    match_type: str  # 'exact', 'fuzzy', 'pattern', 'fallback'
+    explanation: str
+
+class StatementHierarchy:
+    def get_summary_statements(self) -&gt; List[Statement]
+    def get_supporting_details(self, statement: Statement) -&gt; List[Statement]
+    def get_detailed_schedules(self, statement: Statement) -&gt; List[Statement]
+    def visualize(self) -&gt; str  # ASCII tree representation
+</code></pre>
+<h2 id="implementation-strategy">Implementation Strategy</h2>
+<h3 id="phase-1-universal-statement-resolution-2-3-weeks">Phase 1: Universal Statement Resolution (2-3 weeks)</h3>
+<p><strong>Priority</strong>: High - Fixes immediate cross-company compatibility issues</p>
+<ol>
+<li><strong>Add Pattern Matching System</strong></li>
+<li>Define <code>UNIVERSAL_STATEMENT_PATTERNS</code> dictionary</li>
+<li>Implement regex-based matching logic</li>
+<li>
+<p>Add confidence scoring algorithm</p>
+</li>
+<li>
+<p><strong>Enhance <code>__getitem__</code> Method</strong></p>
+</li>
+<li>Add fuzzy matching fallback</li>
+<li>Implement confidence thresholding</li>
+<li>
+<p>Provide alternative suggestions for failed matches</p>
+</li>
+<li>
+<p><strong>Create <code>StatementResolver</code> Class</strong></p>
+</li>
+<li>Centralize resolution logic</li>
+<li>Add cross-validation methods</li>
+<li>
+<p>Implement match explanation system</p>
+</li>
+<li>
+<p><strong>Backward Compatibility</strong></p>
+</li>
+<li>Ensure existing code continues to work</li>
+<li>Add deprecation warnings for old patterns</li>
+<li>Provide migration guide</li>
+</ol>
+<h3 id="phase-2-business-section-discovery-3-4-weeks">Phase 2: Business Section Discovery (3-4 weeks)</h3>
+<p><strong>Priority</strong>: High - Enables access to detailed financial data</p>
+<ol>
+<li><strong>Define Business Section Patterns</strong></li>
+<li>Create <code>BUSINESS_SECTION_PATTERNS</code> dictionary</li>
+<li>Test patterns against NVIDIA and Apple filings</li>
+<li>
+<p>Validate pattern coverage across multiple companies</p>
+</li>
+<li>
+<p><strong>Implement Section Discovery Engine</strong></p>
+</li>
+<li>Create <code>BusinessSectionGroup</code> class</li>
+<li>Implement pattern matching logic</li>
+<li>
+<p>Add section relationship mapping</p>
+</li>
+<li>
+<p><strong>Add Convenience Methods</strong></p>
+</li>
+<li><code>get_lease_schedule()</code>, <code>get_stock_compensation_details()</code></li>
+<li>Generic <code>get_business_section()</code> method</li>
+<li>
+<p>Section-specific rendering and analysis</p>
+</li>
+<li>
+<p><strong>Testing and Validation</strong></p>
+</li>
+<li>Test against multiple company filings</li>
+<li>Validate data accuracy and completeness</li>
+<li>Performance optimization for large statement sets</li>
+</ol>
+<h3 id="phase-3-enhanced-categorization-2-3-weeks">Phase 3: Enhanced Categorization (2-3 weeks)</h3>
+<p><strong>Priority</strong>: Medium - Improves usability and organization</p>
+<ol>
+<li><strong>Implement Enhanced Category System</strong></li>
+<li>Define <code>ENHANCED_CATEGORIES</code> hierarchy</li>
+<li>Create category detection logic</li>
+<li>
+<p>Add business context awareness</p>
+</li>
+<li>
+<p><strong>Add Category-Based Access Methods</strong></p>
+</li>
+<li><code>get_operational_disclosures()</code>, <code>get_financial_disclosures()</code></li>
+<li>Category-filtered display methods</li>
+<li>
+<p>Smart grouping and organization</p>
+</li>
+<li>
+<p><strong>Improve Display and Navigation</strong></p>
+</li>
+<li>Enhanced Rich console output</li>
+<li>Hierarchical statement trees</li>
+<li>Interactive navigation helpers</li>
+</ol>
+<h3 id="phase-4-attachment-integration-4-5-weeks">Phase 4: Attachment Integration (4-5 weeks)</h3>
+<p><strong>Priority</strong>: Medium - Provides comprehensive data access</p>
+<ol>
+<li><strong>Design Attachment-Statement Linking</strong></li>
+<li>Create attachment discovery algorithms</li>
+<li>Implement relationship mapping</li>
+<li>
+<p>Add content validation logic</p>
+</li>
+<li>
+<p><strong>Implement <code>StatementWithAttachments</code></strong></p>
+</li>
+<li>Add attachment access methods</li>
+<li>Create unified data views</li>
+<li>
+<p>Implement cross-reference validation</p>
+</li>
+<li>
+<p><strong>Add Detailed Schedule Access</strong></p>
+</li>
+<li>Specific methods for common schedules</li>
+<li>Generic attachment discovery</li>
+<li>
+<p>Data consistency validation</p>
+</li>
+<li>
+<p><strong>Integration Testing</strong></p>
+</li>
+<li>Test with multiple filing types</li>
+<li>Validate data accuracy</li>
+<li>Performance optimization</li>
+</ol>
+<h3 id="phase-5-period-management-enhancement-2-3-weeks">Phase 5: Period Management Enhancement (2-3 weeks)</h3>
+<p><strong>Priority</strong>: Low - Nice-to-have for advanced analysis</p>
+<ol>
+<li><strong>Implement <code>SmartPeriodManager</code></strong></li>
+<li>Context-aware period selection</li>
+<li>Period alignment algorithms</li>
+<li>
+<p>Pattern detection and analysis</p>
+</li>
+<li>
+<p><strong>Add Period Optimization</strong></p>
+</li>
+<li>Optimal period selection for different analyses</li>
+<li>Automatic period alignment</li>
+<li>
+<p>Trend analysis enhancements</p>
+</li>
+<li>
+<p><strong>Enhanced Rendering Options</strong></p>
+</li>
+<li>Context-sensitive period views</li>
+<li>Comparative rendering</li>
+<li>Period-aware formatting</li>
+</ol>
+<h2 id="benefits-and-impact">Benefits and Impact</h2>
+<h3 id="immediate-benefits">Immediate Benefits</h3>
+<ol>
+<li><strong>Cross-Company Compatibility</strong>: Single API works across NVIDIA, Apple, and other companies</li>
+<li><strong>Enhanced Data Discovery</strong>: Easy access to detailed business sections and schedules</li>
+<li><strong>Improved Usability</strong>: Intelligent resolution reduces user friction</li>
+<li><strong>Better Error Handling</strong>: Confidence scoring and alternatives for failed matches</li>
+</ol>
+<h3 id="long-term-benefits">Long-term Benefits</h3>
+<ol>
+<li><strong>Scalability</strong>: Pattern-based approach adapts to new companies and filing variations</li>
+<li><strong>Comprehensive Analysis</strong>: Integration with attachments provides complete financial picture</li>
+<li><strong>Future-Proof Design</strong>: Flexible architecture accommodates SEC reporting changes</li>
+<li><strong>Enhanced Analytics</strong>: Deeper data access enables more sophisticated financial analysis</li>
+</ol>
+<h3 id="backward-compatibility">Backward Compatibility</h3>
+<ul>
+<li>All existing code continues to work unchanged</li>
+<li>Gradual migration path with deprecation warnings</li>
+<li>Enhanced functionality available through new methods</li>
+<li>No breaking changes to core APIs</li>
+</ul>
+<h2 id="success-metrics">Success Metrics</h2>
+<ol>
+<li><strong>Coverage</strong>: Successfully handle 95%+ of S&amp;P 500 company statement variations</li>
+<li><strong>Performance</strong>: Statement resolution within 100ms for 95th percentile</li>
+<li><strong>Accuracy</strong>: 98%+ correct statement type identification with confidence &gt; 0.8</li>
+<li><strong>Usability</strong>: 80% reduction in failed statement access attempts</li>
+<li><strong>Adoption</strong>: New business section discovery methods used in 50%+ of financial analyses</li>
+</ol>
+<h2 id="risk-mitigation">Risk Mitigation</h2>
+<ol>
+<li><strong>Performance Impact</strong>: Implement caching and lazy loading for pattern matching</li>
+<li><strong>False Positives</strong>: Require minimum confidence thresholds and validation</li>
+<li><strong>Complexity</strong>: Maintain simple primary APIs while adding advanced features</li>
+<li><strong>Maintenance</strong>: Create automated tests against multiple company filings</li>
+<li><strong>User Adoption</strong>: Provide comprehensive documentation and migration guides</li>
+</ol>
+<p>This design provides a robust foundation for standardized financial statement access across companies while maintaining the flexibility to handle unique variations and provide deep analytical capabilities.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2393 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>High-Level Design for XBRL Parser for SEC Filings - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#high-level-design-for-xbrl-parser-for-sec-filings" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              High-Level Design for XBRL Parser for SEC Filings
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../local-data/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Advanced Topics
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How to Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Filings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Search for Specific Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filter Filings by Date/Type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Access Filing Attachments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Companies
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Companies
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Financial Analysis
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Financial Analysis
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extract Financial Statements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding SEC Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    XBRL and Financials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            XBRL and Financials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting XBRL from Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Querying XBRL Facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Data Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Insider Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Resources
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Common Issues & Solutions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Performance Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SEC Rate Limits & Compliance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Topics
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Topics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../local-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Local Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parsing SGML
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    User Journeys
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-system-architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. System Architecture Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-xbrl-file-parser-component" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. XBRL File Parser Component
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. XBRL File Parser Component">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-parse-instance-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1 Parse Instance Document
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-parse-taxonomy-schema-xsd" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2 Parse Taxonomy Schema (.xsd)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-parse-presentation-linkbase" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3 Parse Presentation Linkbase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-parse-label-linkbase" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.4 Parse Label Linkbase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-parse-calculation-linkbase" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.5 Parse Calculation Linkbase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-parse-definition-linkbase" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.6 Parse Definition Linkbase
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-data-model-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Data Model Construction
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Data Model Construction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-core-data-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1 Core Data Structures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-relationship-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2 Relationship Structures
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-statement-construction-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Statement Construction Process
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Statement Construction Process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-identify-statement-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1 Identify Statement Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-select-time-period" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2 Select Time Period
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-traverse-presentation-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3 Traverse Presentation Hierarchy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-retrieve-facts-for-elements" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.4 Retrieve Facts for Elements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-apply-dimensional-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.5 Apply Dimensional Filters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-format-statement" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.6 Format Statement
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-specific-example-reconstructing-a-balance-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Specific Example: Reconstructing a Balance Sheet
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Specific Example: Reconstructing a Balance Sheet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-identify-balance-sheet-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.1 Identify Balance Sheet Network
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-select-contexts-for-desired-dates" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2 Select Contexts for Desired Dates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-build-statement-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.3 Build Statement Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-populate-statement-with-facts" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.4 Populate Statement with Facts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-validate-totals-using-calculation-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.5 Validate Totals Using Calculation Relationships
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-generate-final-statement" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.6 Generate Final Statement
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="high-level-design-for-xbrl-parser-for-sec-filings">High-Level Design for XBRL Parser for SEC Filings</h1>
+<h2 id="1-system-architecture-overview">1. System Architecture Overview</h2>
+<pre><code>┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  XBRL File      │────▶│  XBRL Parser    │────▶│  Data Model     │
+│  Collection     │     │                 │     │                 │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+                                              ┌─────────────────┐
+                                              │                 │
+                                              │  Statement      │
+                                              │  Generator      │
+                                              │                 │
+                                              └─────────────────┘
+</code></pre>
+<h2 id="2-xbrl-file-parser-component">2. XBRL File Parser Component</h2>
+<h3 id="21-parse-instance-document">2.1 Parse Instance Document</h3>
+<ul>
+<li><strong>Parse XML Structure</strong>: Use an XML parser to read the XBRL instance file</li>
+<li><strong>Extract Entity Information</strong>: Company identifier, reporting period, etc.</li>
+<li><strong>Extract Contexts</strong>:</li>
+<li>Map context IDs to their associated entity, period, and scenario/segment information</li>
+<li>Create a lookup table for period contexts (e.g., "2023-12-31", "2023-01-01 to 2023-12-31")</li>
+<li><strong>Extract Facts</strong>: </li>
+<li>Each fact includes value, unit, decimals, context reference, and element reference</li>
+<li>Store facts in a collection mapped by element ID and context</li>
+<li><strong>Extract Units</strong>: Create mapping of unit IDs to their actual units (USD, shares, etc.)</li>
+<li><strong>Extract Footnotes</strong>: If present, extract and map them to facts</li>
+</ul>
+<h3 id="22-parse-taxonomy-schema-xsd">2.2 Parse Taxonomy Schema (.xsd)</h3>
+<ul>
+<li><strong>Parse Element Declarations</strong>:</li>
+<li>Extract element IDs, names, data types (monetary, string, etc.)</li>
+<li>Identify period types (instant or duration)</li>
+<li>Identify balance types (debit or credit)</li>
+<li>Identify abstract elements (cannot contain values)</li>
+<li><strong>Map Namespaces</strong>: Create namespace mappings for resolving element references</li>
+</ul>
+<h3 id="23-parse-presentation-linkbase">2.3 Parse Presentation Linkbase</h3>
+<ul>
+<li><strong>Create Hierarchical Structure</strong>:</li>
+<li>Parse parent-child relationships</li>
+<li>Maintain ordering information (order attribute)</li>
+<li>Group by extended link roles (ELRs) which define statement sections</li>
+<li><strong>Capture Preferred Labels</strong>: Identify special label roles for presentation</li>
+<li><strong>Build Presentation Tree</strong>: Create a tree structure for each statement/disclosure</li>
+</ul>
+<h3 id="24-parse-label-linkbase">2.4 Parse Label Linkbase</h3>
+<ul>
+<li><strong>Map Elements to Labels</strong>:</li>
+<li>Standard labels (default display)</li>
+<li>Period start/end labels</li>
+<li>Total labels</li>
+<li>Negated labels</li>
+<li>Terse labels</li>
+<li>Documentation labels (definitions)</li>
+<li><strong>Handle Multiple Languages</strong>: Support labels in different languages if present</li>
+</ul>
+<h3 id="25-parse-calculation-linkbase">2.5 Parse Calculation Linkbase</h3>
+<ul>
+<li><strong>Extract Calculation Relationships</strong>:</li>
+<li>Parent-child calculation hierarchies</li>
+<li>Weights (+1/-1) for addition/subtraction</li>
+<li>Group by extended link roles</li>
+<li><strong>Build Calculation Trees</strong>: Create calculation trees for validation and display</li>
+</ul>
+<h3 id="26-parse-definition-linkbase">2.6 Parse Definition Linkbase</h3>
+<ul>
+<li><strong>Parse Dimensional Relationships</strong>:</li>
+<li>Hypercubes (tables)</li>
+<li>Dimensions (axes)</li>
+<li>Domains and domain members</li>
+<li>Default members</li>
+<li><strong>Build Dimensional Structure</strong>: Create dimensional structure for complex tables</li>
+</ul>
+<h2 id="3-data-model-construction">3. Data Model Construction</h2>
+<h3 id="31-core-data-structures">3.1 Core Data Structures</h3>
+<ul>
+<li>
+<p><strong>Element Catalog</strong>:
+  <code>{
+    "elementId": {
+      "name": string,
+      "dataType": string,
+      "periodType": "instant"|"duration",
+      "balance": "debit"|"credit"|null,
+      "abstract": boolean,
+      "labels": {
+        "standard": string,
+        "periodStart": string,
+        "periodEnd": string,
+        "negated": string,
+        "documentation": string,
+        ...
+      }
+    }
+  }</code></p>
+</li>
+<li>
+<p><strong>Context Registry</strong>:
+  <code>{
+    "contextId": {
+      "entity": {
+        "identifier": string,
+        "scheme": string
+      },
+      "period": {
+        "type": "instant"|"duration",
+        "instant": date|null,
+        "startDate": date|null,
+        "endDate": date|null
+      },
+      "dimensions": {
+        "dimensionName": "memberName",
+        ...
+      }
+    }
+  }</code></p>
+</li>
+<li>
+<p><strong>Fact Database</strong>:
+  <code>{
+    "elementId_contextId": {
+      "value": string,
+      "decimals": number|"INF",
+      "unitRef": string,
+      "footnotes": [string]
+    }
+  }</code></p>
+</li>
+</ul>
+<h3 id="32-relationship-structures">3.2 Relationship Structures</h3>
+<ul>
+<li>
+<p><strong>Presentation Hierarchy</strong>:
+  <code>{
+    "roleUri": {
+      "title": string,
+      "root": {
+        "elementId": string,
+        "children": [
+          {
+            "elementId": string,
+            "preferredLabel": string,
+            "order": number,
+            "children": [...]
+          }
+        ]
+      }
+    }
+  }</code></p>
+</li>
+<li>
+<p><strong>Calculation Network</strong>:
+  <code>{
+    "roleUri": {
+      "title": string,
+      "calculations": [
+        {
+          "parent": "elementId",
+          "children": [
+            {
+              "elementId": string,
+              "weight": 1|-1,
+              "order": number
+            }
+          ]
+        }
+      ]
+    }
+  }</code></p>
+</li>
+<li>
+<p><strong>Dimensional Structure</strong>:
+  <code>{
+    "roleUri": {
+      "tables": [
+        {
+          "tableId": string,
+          "axes": [
+            {
+              "axisId": string,
+              "domain": string,
+              "members": [string],
+              "defaultMember": string
+            }
+          ],
+          "lineItems": [string]
+        }
+      ]
+    }
+  }</code></p>
+</li>
+</ul>
+<h2 id="4-statement-construction-process">4. Statement Construction Process</h2>
+<h3 id="41-identify-statement-structure">4.1 Identify Statement Structure</h3>
+<ul>
+<li><strong>Locate Appropriate Presentation Network</strong>:</li>
+<li>Find presentation role URIs that correspond to desired statement</li>
+<li>For example: "http://xbrl.abc.com/role/StatementOfFinancialPosition" for balance sheet</li>
+</ul>
+<h3 id="42-select-time-period">4.2 Select Time Period</h3>
+<ul>
+<li><strong>Identify Relevant Contexts</strong>:</li>
+<li>For balance sheet: find contexts with instant periods for desired dates</li>
+<li>For income statement: find contexts with duration periods for desired date ranges</li>
+</ul>
+<h3 id="43-traverse-presentation-hierarchy">4.3 Traverse Presentation Hierarchy</h3>
+<ul>
+<li><strong>Walk the Presentation Tree</strong>:</li>
+<li>Start at the root element of the relevant presentation network</li>
+<li>Process each element in the tree according to its presentation order</li>
+<li>Handle abstract elements as headers/sections</li>
+<li>Apply preferred labels (e.g., negated, period start/end, total)</li>
+</ul>
+<h3 id="44-retrieve-facts-for-elements">4.4 Retrieve Facts for Elements</h3>
+<ul>
+<li><strong>Map Elements to Facts</strong>:</li>
+<li>For each non-abstract element in the presentation hierarchy</li>
+<li>Lookup facts using element ID and relevant context ID</li>
+<li>Apply appropriate unit and decimal formatting</li>
+</ul>
+<h3 id="45-apply-dimensional-filters">4.5 Apply Dimensional Filters</h3>
+<ul>
+<li><strong>Handle Dimension-Qualified Facts</strong>:</li>
+<li>For tables with dimensions (axes and members)</li>
+<li>Filter facts by dimensional qualifiers</li>
+<li>Group related dimensional facts for display</li>
+</ul>
+<h3 id="46-format-statement">4.6 Format Statement</h3>
+<ul>
+<li><strong>Apply Styling and Indentation</strong>:</li>
+<li>Use presentation hierarchy to determine indentation levels</li>
+<li>Format numeric values based on decimals attribute</li>
+<li>Apply appropriate signage (based on balance type and negated labels)</li>
+<li>Add totals and subtotals as indicated by calculation relationships</li>
+</ul>
+<h2 id="5-specific-example-reconstructing-a-balance-sheet">5. Specific Example: Reconstructing a Balance Sheet</h2>
+<h3 id="51-identify-balance-sheet-network">5.1 Identify Balance Sheet Network</h3>
+<ul>
+<li>Find presentation linkbase role that represents balance sheet</li>
+<li>Example: "http://xbrl.abc.com/role/BalanceSheet"</li>
+</ul>
+<h3 id="52-select-contexts-for-desired-dates">5.2 Select Contexts for Desired Dates</h3>
+<ul>
+<li>Filter contexts to find those with:</li>
+<li>Period type = "instant"</li>
+<li>Period end date = desired reporting date (e.g., "2023-12-31")</li>
+<li>No dimension qualifiers (for base statement)</li>
+</ul>
+<h3 id="53-build-statement-structure">5.3 Build Statement Structure</h3>
+<pre><code>Statement of Financial Position
+│
+├── Assets [Abstract]
+│   ├── Current Assets [Abstract]
+│   │   ├── Cash and Cash Equivalents
+│   │   ├── Accounts Receivable, Net
+│   │   ├── Inventory, Net
+│   │   └── Total Current Assets
+│   │
+│   ├── Non-current Assets [Abstract]
+│   │   ├── Property, Plant and Equipment, Net
+│   │   ├── Goodwill
+│   │   └── Total Non-current Assets
+│   │
+│   └── Total Assets
+│
+└── Liabilities and Stockholders' Equity [Abstract]
+    ├── Liabilities [Abstract]
+    │   ├── Current Liabilities [Abstract]
+    │   │   ├── Accounts Payable
+    │   │   ├── Short-term Debt
+    │   │   └── Total Current Liabilities
+    │   │
+    │   ├── Non-current Liabilities [Abstract]
+    │   │   ├── Long-term Debt
+    │   │   ├── Deferred Tax Liabilities
+    │   │   └── Total Non-current Liabilities
+    │   │
+    │   └── Total Liabilities
+    │
+    ├── Stockholders' Equity [Abstract]
+    │   ├── Common Stock
+    │   ├── Additional Paid-in Capital
+    │   ├── Retained Earnings
+    │   └── Total Stockholders' Equity
+    │
+    └── Total Liabilities and Stockholders' Equity
+</code></pre>
+<h3 id="54-populate-statement-with-facts">5.4 Populate Statement with Facts</h3>
+<ul>
+<li>For each non-abstract element in the hierarchy:</li>
+<li>Look up element in Element Catalog to get its properties</li>
+<li>Find the fact in the Fact Database using element ID and context ID</li>
+<li>Format value using unit and decimals information</li>
+<li>Apply appropriate sign based on element's balance type</li>
+</ul>
+<h3 id="55-validate-totals-using-calculation-relationships">5.5 Validate Totals Using Calculation Relationships</h3>
+<ul>
+<li>Use calculation relationships to check that totals match their components</li>
+<li>Highlight any calculation inconsistencies</li>
+</ul>
+<h3 id="56-generate-final-statement">5.6 Generate Final Statement</h3>
+<ul>
+<li>Output formatted balance sheet with:</li>
+<li>Proper hierarchy/indentation</li>
+<li>Correctly formatted values</li>
+<li>Column(s) for each period</li>
+<li>Appropriate signage</li>
+<li>Computed subtotals and totals</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+    
+  </body>
+</html>
