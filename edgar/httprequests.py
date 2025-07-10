@@ -4,6 +4,7 @@ import os
 import shutil
 import tarfile
 import time
+import uuid
 import zipfile
 from collections import deque
 from functools import wraps
@@ -568,6 +569,7 @@ async def download_file_async(
 
 
 CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
+MEM_DWLD_LIMIT = 2 * 1024 * 1024 * 1024  # 2GB
 
 
 @retry(
@@ -623,24 +625,71 @@ async def stream_file(
                     desc=f"Downloading {os.path.basename(url)}",
                     ascii=False,
                 )
+                is_gzip = response.headers.get("Content-Encoding") == "gzip"
                 downloaded = 0
-                async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
-                    content += chunk
-                    downloaded += len(chunk)
-                    progress_bar.update(len(chunk) / (1024 * 1024))  # Update in MB
-                progress_bar.close()
 
-                # Check if the content is gzip-compressed
-                if response.headers.get("Content-Encoding") == "gzip":
-                    content = gzip.decompress(content)
+                if path is None or total_size <= MEM_DWLD_LIMIT:
+                    # download in memory
+                    if total_size > MEM_DWLD_LIMIT:
+                        logger.warning(
+                            "File size is large and no saving path has been provided"
+                        )
 
-            if path:
-                if isinstance(path, str):
-                    path = Path(path)
-                if path.is_dir():
-                    path = path / os.path.basename(url)
+                    async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
+                        content += chunk
+                        downloaded += len(chunk)
+                        progress_bar.update(len(chunk) / (1024 * 1024))  # Update in MB
+                    progress_bar.close()
 
-            return save_or_return_content(content, path)
+                    # Check if the content is gzip-compressed
+                    if is_gzip:
+                        content = gzip.decompress(content)
+
+                    if path:
+                        if isinstance(path, str):
+                            path = Path(path)
+                        if path.is_dir():
+                            path = path / os.path.basename(url)
+
+                    return save_or_return_content(content, path)
+
+                else:
+                    # download on disk
+                    logger.warning("downloading to file, not memory")
+                    tmp_dir = Path("/tmp/edgar")
+                    tmp_dir.mkdir(parents=True, exist_ok=True)
+                    tmp_fn = tmp_dir / str(uuid.uuid1())
+
+                    try:
+                        with open(tmp_fn, "wb") as f:
+                            async for chunk in response.aiter_bytes(
+                                chunk_size=CHUNK_SIZE
+                            ):
+                                if is_gzip:
+                                    try:
+                                        chunk = gzip.decompress(chunk)
+                                    except gzip.BadGzipFile:
+                                        raise ValueError(
+                                            "Invalid gzip-compressed content"
+                                        )
+                                f.write(chunk)
+                                progress_bar.update(len(chunk) / (1024 * 1024))
+                    except Exception as e:
+                        if tmp_fn.exists():
+                            tmp_fn.unlink(missing_ok=True)
+                        raise e
+                    finally:
+                        progress_bar.close()
+
+                    if path:
+                        if isinstance(path, str):
+                            path = Path(path)
+                        if path.is_dir():
+                            file_name = os.path.basename(url)
+                            path = path / file_name
+
+                        tmp_fn.rename(path)
+                        return None
 
 
 def download_json(data_url: str) -> dict:
