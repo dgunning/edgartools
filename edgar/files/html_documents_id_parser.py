@@ -71,13 +71,22 @@ class AssembleText:
         )
     
     @staticmethod
-    def find_block_level_parent(tag):
-        block_tags = { "p", "h1", "h2", "h3", "h4", "h5", "h6", "div","section", "article", "header", "footer", "li", "tr"}
-        parent = tag.parent
-        while parent and parent.name not in block_tags:
-            parent = parent.parent
-        return parent if parent and parent.name in block_tags else None
-
+    def find_block_level_parent(tag, all_link_tag: list):
+        ori_tag = tag
+        while tag and tag.parent is not None:
+            parent = tag.parent
+            link_count = 0
+            for link in all_link_tag:
+                matched = parent.find(id=link) or parent.find(
+                    "a", attrs={"name": link}
+                )
+                if matched:
+                    link_count += 1
+            if link_count > 1:
+                return tag
+            tag = parent
+        return tag if tag else ori_tag
+    
     @staticmethod
     def assemble_items(
         html_content: str, item_links: List, markdown: bool = False
@@ -90,7 +99,7 @@ class AssembleText:
 
             link_ids = [item_id for item_name, item_id in item_links]
             items = {}
-
+            
             # Helper method to extract content up to a specific element
             def get_intro_content(first_item_id: str) -> List[Tag]:
                 intro_content = []
@@ -98,7 +107,8 @@ class AssembleText:
                     "a", attrs={"name": first_item_id}
                 )
                 if current:
-                    container = AssembleText.find_block_level_parent(current)
+                    container = AssembleText.find_block_level_parent(current, link_ids)
+                    
                     if container:
                         for sibling in container.previous_siblings:
                             if isinstance(sibling, Tag):
@@ -121,15 +131,20 @@ class AssembleText:
 
             # Step 2: Extract items
             id_to_content = {}
-            for item_name, item_id in item_links:
+            for idx, (item_name, item_id) in enumerate(item_links):
+                
+                if idx < len(item_links)-1:
+                    n_item_id = item_links[idx+1][1]
+                else:
+                    n_item_id = None
                 # Try both id and name attributes
                 target = soup.find(id=item_id) or soup.find(
                     "a", attrs={"name": item_id}
                 )
                 if not target:
                     raise Exception(f"link id error. item_name:{item_name}, item_id:{item_id}")
-                if target.name == "a":
-                    target = AssembleText.find_block_level_parent(target)
+
+                target = AssembleText.find_block_level_parent(target, link_ids)
                 if target:
                     content = []
                     current = target
@@ -137,9 +152,10 @@ class AssembleText:
                         if (
                             current
                             and not isinstance(current, (str, NavigableString))
-                            and current.attrs
-                            and current.attrs.get("id") != item_id
-                            and current.attrs.get("id") in link_ids
+                            and n_item_id
+                            and current.find(id=n_item_id) or soup.find(
+                                "a", attrs={"name": n_item_id}
+                            )
                         ):
                             break
                         if current.name is not None or (
@@ -468,6 +484,7 @@ class ParsedHtml10K:
         item_result = AssembleText.assemble_items(
             html_content, item_links, markdown=markdown
         )
+
         item_to_part = {}
         for part_name in structure.structure:
             part_items = structure.get_part(part_name)

@@ -523,8 +523,8 @@ class ChunkedDocument:
 
         # Use the last one
         intro_index = max(
-            part_indices[0] if len(part_indices) else float('inf'),
-            item_indices[0] if len(item_indices) else float('inf')
+            part_indices[0] if len(part_indices) else 0,
+            item_indices[0] if len(item_indices) else 0
         )
 
         if intro_index == 0:
