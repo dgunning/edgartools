@@ -75,6 +75,25 @@ When `include_page_breaks=True`, the markdown will include delimiters at page bo
 - `{2}------------------------------------------------` before the third page content
 - And so on...
 
+##### Customizing Page Numbering
+
+You can control the starting page number for page break markers using the `start_page_number` parameter:
+
+```python
+# Start page numbering at 1 (instead of 0)
+attachment = filing.attachments[1]
+markdown_with_breaks = attachment.markdown(include_page_breaks=True, start_page_number=1)
+
+# This will produce: {1}------------------------------------------------, {2}------------------------------------------------, etc.
+
+# Start page numbering at 5
+markdown_with_breaks = attachment.markdown(include_page_breaks=True, start_page_number=5)
+
+# This will produce: {5}------------------------------------------------, {6}------------------------------------------------, etc.
+```
+
+This is particularly useful when you want to align page numbers with external document numbering or when processing documents that are part of a larger collection.
+
 ### Batch markdown conversion
 
 You can convert all HTML attachments in a filing to markdown at once:
@@ -85,6 +104,9 @@ markdown_dict = filing.attachments.markdown()
 
 # Convert all HTML attachments with page breaks
 markdown_dict = filing.attachments.markdown(include_page_breaks=True)
+
+# Convert all HTML attachments with page breaks starting at page 1
+markdown_dict = filing.attachments.markdown(include_page_breaks=True, start_page_number=1)
 
 # Result is a dictionary: {"filename.htm": "markdown content", ...}
 for filename, content in markdown_dict.items():

@@ -302,12 +302,13 @@ class Attachment:
                 return content
         return None
 
-    def markdown(self, include_page_breaks: bool = False) -> Optional[str]:
+    def markdown(self, include_page_breaks: bool = False, start_page_number: int = 0) -> Optional[str]:
         """
         Convert the attachment to markdown format if it's HTML content.
         
         Args:
             include_page_breaks: If True, include page break delimiters in the markdown
+            start_page_number: Starting page number for page break markers (default: 0)
             
         Returns:
             None if the attachment is not HTML or cannot be converted.
@@ -326,7 +327,7 @@ class Attachment:
         # Use the same approach as Filing.markdown() but with page break support
         clean_html = get_clean_html(content)
         if clean_html:
-            return to_markdown(clean_html, include_page_breaks=include_page_breaks)
+            return to_markdown(clean_html, include_page_breaks=include_page_breaks, start_page_number=start_page_number)
             
         return None
 
@@ -593,12 +594,13 @@ class Attachments:
 
             return thread, httpd, url
 
-    def markdown(self, include_page_breaks: bool = False) -> Dict[str, str]:
+    def markdown(self, include_page_breaks: bool = False, start_page_number: int = 0) -> Dict[str, str]:
         """
         Convert all HTML attachments to markdown format.
         
         Args:
             include_page_breaks: If True, include page break delimiters in the markdown
+            start_page_number: Starting page number for page break markers (default: 0)
             
         Returns:
             A dictionary mapping attachment document names to their markdown content.
@@ -608,7 +610,7 @@ class Attachments:
         
         for attachment in self._attachments:
             if attachment.is_html():
-                md_content = attachment.markdown(include_page_breaks=include_page_breaks)
+                md_content = attachment.markdown(include_page_breaks=include_page_breaks, start_page_number=start_page_number)
                 if md_content:
                     markdown_attachments[attachment.document] = md_content
                     

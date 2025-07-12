@@ -46,6 +46,7 @@ from edgar.funds import FundCompany, FundSeries,  FundClass, find_fund
 from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 from edgar.xbrl import XBRL
 from edgar.files.html import Document
+from edgar.files import detect_page_breaks, mark_page_breaks
 from edgar.financials import Financials, MultiFinancials
 from edgar.storage import use_local_storage, is_using_local_storage, download_edgar_data, download_filings
 

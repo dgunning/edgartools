@@ -8,8 +8,9 @@ __all__ = ['to_markdown', 'MarkdownRenderer']
 
 
 class MarkdownRenderer:
-    def __init__(self, document: Document):
+    def __init__(self, document: Document, start_page_number: int = 0):
         self.document = document
+        self.start_page_number = start_page_number
         self.toc_entries: List[Tuple[int, str, str]] = []  # level, text, anchor
         self.reference_links: Dict[str, str] = {}
         self.current_section = ""
@@ -176,12 +177,22 @@ class MarkdownRenderer:
 
     def _render_page_break(self, node: BaseNode) -> str:
         """Render page break as delimiter"""
-        return f"{{{node.page_number}}}------------------------------------------------"
+        adjusted_page_number = node.page_number + self.start_page_number
+        return f"{{{adjusted_page_number}}}------------------------------------------------"
 
 
-def to_markdown(html_content: str, include_page_breaks: bool = False) -> Optional[str]:
-    """Convert HTML content to markdown with optional page breaks"""
+def to_markdown(html_content: str, include_page_breaks: bool = False, start_page_number: int = 0) -> Optional[str]:
+    """Convert HTML content to markdown with optional page breaks
+    
+    Args:
+        html_content: HTML string to convert
+        include_page_breaks: Whether to include page break markers
+        start_page_number: Starting page number for page break markers (default: 0)
+        
+    Returns:
+        Markdown string or None if parsing failed
+    """
     document = Document.parse(html_content, include_page_breaks=include_page_breaks)
     if document:
-        return document.to_markdown()
+        return document.to_markdown(start_page_number=start_page_number)
     return None

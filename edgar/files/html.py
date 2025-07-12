@@ -523,9 +523,9 @@ class Document:
             parser = SECHTMLParser(root, include_page_breaks=include_page_breaks)
             return parser.parse()
 
-    def to_markdown(self) -> str:
+    def to_markdown(self, start_page_number: int = 0) -> str:
         from edgar.files.markdown import MarkdownRenderer
-        return MarkdownRenderer(self).render()
+        return MarkdownRenderer(self, start_page_number=start_page_number).render()
 
     def __rich__(self) -> RenderResult:
         """Rich console protocol for rendering document"""
@@ -620,91 +620,20 @@ class SECHTMLParser:
 
     def _mark_page_breaks(self, element: Tag) -> None:
         """Mark page break elements for detection during parsing"""
-        # Find page break markers and add a special attribute
-        page_break_selectors = [
-            'p[style*="page-break-before:always"]',
-            'p[style*="page-break-after:always"]', 
-            'hr[style*="page-break-after:always"]',
-            'div[style*="page-break-before:always"]',
-            'div[style*="page-break-after:always"]',
-            # Handle variations with spaces in CSS
-            'p[style*="page-break-before: always"]',
-            'p[style*="page-break-after: always"]',
-            'hr[style*="page-break-after: always"]',
-            'div[style*="page-break-before: always"]',
-            'div[style*="page-break-after: always"]'
-        ]
-        
-        for selector in page_break_selectors:
-            page_breaks = element.select(selector)
-            for pb in page_breaks:
-                pb['_is_page_break'] = 'true'
-        
-        # Handle class-based page breaks (like BRPFPageBreak)
-        class_based_selectors = [
-            'div.BRPFPageBreak',
-            'div.pagebreak',
-            'div.page-break',
-            'div[class*="pagebreak"]',
-            'div[class*="page-break"]'
-        ]
-        
-        for selector in class_based_selectors:
-            page_breaks = element.select(selector)
-            for pb in page_breaks:
-                pb['_is_page_break'] = 'true'
-                # Also mark parent containers that contain page breaks
-                if pb.parent and pb.parent.name == 'div':
-                    parent_classes = pb.parent.get('class', [])
-                    if any('pagebreak' in cls.lower() for cls in parent_classes):
-                        pb.parent['_is_page_break'] = 'true'
-        
-        # Also detect div elements with page-like dimensions
-        self._mark_page_divs(element)
+        from .page_breaks import PageBreakDetector
+        PageBreakDetector.mark_page_breaks(element)
 
     def _mark_page_divs(self, element: Tag) -> None:
         """Mark div elements with page-like dimensions as page breaks"""
-        # Find all divs
-        divs = element.find_all('div')
-        
-        for div in divs:
-            style = div.get('style', '')
-            if not style:
-                continue
-                
-            # Check if this div has page-like dimensions
-            if self._is_page_like_div(style):
-                div['_is_page_break'] = 'true'
+        from .page_breaks import PageBreakDetector
+        # This is now handled by PageBreakDetector.mark_page_breaks()
+        # Keeping this method for backward compatibility
+        pass
 
     def _is_page_like_div(self, style: str) -> bool:
         """Check if a div has page-like dimensions based on its style"""
-        # Parse the style string to extract key properties
-        style_props = {}
-        for prop in style.split(';'):
-            if ':' in prop:
-                key, value = prop.split(':', 1)
-                style_props[key.strip().lower()] = value.strip().lower()
-        
-        # Check for page-like dimensions
-        height = style_props.get('height', '')
-        width = style_props.get('width', '')
-        position = style_props.get('position', '')
-        overflow = style_props.get('overflow', '')
-        
-        # Look for typical page dimensions
-        # Common page heights: 842.4pt (A4), 792pt (Letter), 1008pt (Legal)
-        # Common page widths: 597.6pt (A4), 612pt (Letter), 612pt (Legal)
-        page_heights = ['842.4pt', '792pt', '1008pt']
-        page_widths = ['597.6pt', '612pt']
-        
-        has_page_height = any(ph in height for ph in page_heights)
-        has_page_width = any(pw in width for pw in page_widths)
-        has_position = position in ['relative', 'absolute']
-        has_overflow = 'hidden' in overflow
-        
-        # Consider it a page div if it has both page-like dimensions
-        # and typical page styling properties
-        return has_page_height and has_page_width and (has_position or has_overflow)
+        from .page_breaks import PageBreakDetector
+        return PageBreakDetector._is_page_like_div(style)
 
     def _process_div_content(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
         """Process the content inside a page div without treating the div itself as a page break"""
