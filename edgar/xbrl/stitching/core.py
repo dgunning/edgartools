@@ -13,6 +13,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from edgar.xbrl.core import format_date, parse_date
 from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, standardize_statement
 from edgar.xbrl.stitching.periods import determine_optimal_periods
+from edgar.xbrl.stitching.ordering import StatementOrderingManager
+from edgar.xbrl.stitching.presentation import VirtualPresentationTree
 
 
 
@@ -58,6 +60,8 @@ class StatementStitcher:
         self.period_dates = {}  # Maps period ID to display dates
         self.data = defaultdict(dict)  # {concept: {period: value}}
         self.concept_metadata = {}  # Metadata for each concept (level, etc.)
+        self.ordering_manager = None  # Will be initialized during stitching
+        self.original_statement_order = []  # Track original order for hierarchy context
         
     def stitch_statements(
         self, 
@@ -83,6 +87,23 @@ class StatementStitcher:
         self.period_dates = {}
         self.data = defaultdict(dict)
         self.concept_metadata = {}
+        self.original_statement_order = []
+        
+        # Initialize ordering manager for this statement type
+        statement_type = statements[0].get('statement_type', 'IncomeStatement') if statements else 'IncomeStatement'
+        self.ordering_manager = StatementOrderingManager(statement_type)
+        
+        # Capture original statement order from the most recent (first) statement for hierarchy context
+        if statements:
+            reference_statement = statements[0]
+            self.original_statement_order = []
+            for item in reference_statement.get('data', []):
+                concept = item.get('concept')
+                label = item.get('label')
+                if concept:
+                    self.original_statement_order.append(concept)
+                if label and label not in self.original_statement_order:
+                    self.original_statement_order.append(label)
         
         # Extract and sort all periods
         all_periods = self._extract_periods(statements)
@@ -113,7 +134,7 @@ class StatementStitcher:
             self._integrate_statement_data(processed_data, statement['periods'], relevant_periods)
         
         # Format the stitched data
-        return self._format_output()
+        return self._format_output_with_ordering(statements)
     
     def _extract_periods(self, statements: List[Dict[str, Any]]) -> List[Tuple[str, datetime]]:
         """
@@ -429,18 +450,31 @@ class StatementStitcher:
                             'decimals': item.get('decimals', {}).get(period_id, 0)
                         }
     
-    def _format_output(self) -> Dict[str, Any]:
+    def _format_output_with_ordering(self, statements: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Format the stitched data for rendering.
+        Format the stitched data for rendering with intelligent ordering using virtual presentation tree.
         
+        Args:
+            statements: Original statements for ordering reference
+            
         Returns:
             Stitched statement data in the expected format
         """
-        # Create a hierarchical structure preserving ordering and relationships
-        ordered_concepts = sorted(
-            self.concept_metadata.items(),
-            key=lambda x: (x[1]['level'], x[0])
+        # Get unified ordering for all concepts using the ordering manager
+        concept_ordering = {}
+        if self.ordering_manager:
+            concept_ordering = self.ordering_manager.determine_ordering(statements)
+        
+        # Build virtual presentation tree to preserve hierarchy while applying semantic ordering
+        presentation_tree = VirtualPresentationTree(self.ordering_manager)
+        ordered_nodes = presentation_tree.build_tree(
+            concept_metadata=self.concept_metadata,
+            concept_ordering=concept_ordering,
+            original_statement_order=self.original_statement_order
         )
+        
+        # Convert nodes back to the expected format
+        ordered_concepts = [(node.concept, node.metadata) for node in ordered_nodes]
         
         # Build the output structure
         result = {
@@ -475,6 +509,17 @@ class StatementStitcher:
                 result['statement_data'].append(item)
         
         return result
+    
+    def _format_output(self) -> Dict[str, Any]:
+        """
+        Backward compatibility method - calls the new ordering-aware method.
+        
+        Returns:
+            Stitched statement data in the expected format
+        """
+        # For backward compatibility, call the new method with empty statements
+        # This will use alphabetical ordering as before
+        return self._format_output_with_ordering([])
 
 
 def stitch_statements(
