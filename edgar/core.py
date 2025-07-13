@@ -594,6 +594,9 @@ def has_html_content(content: str) -> bool:
     """
     Check if the content is HTML or inline XBRL HTML
     """
+    if content is None:
+        return False
+        
     if isinstance(content, bytes):
         content = content.decode('utf-8', errors='ignore')
 
@@ -621,6 +624,10 @@ def has_html_content(content: str) -> bool:
                 'xmlns:ix' in first_1000 or
                 'xmlns:html' in first_1000):
             return True
+        
+        # If we have an <html> tag, it's likely HTML content
+        # This catches cases like <html style="..."> that don't have XBRL namespaces
+        return True
 
     # Just check for straightforward HTML
     if first_200_lower.startswith('<html>') and content[-7:].lower().startswith('</html>'):
