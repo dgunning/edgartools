@@ -13,21 +13,6 @@ import re
 class PageBreakDetector:
     """Detects page breaks in SEC HTML documents."""
     
-    # CSS page break selectors
-    PAGE_BREAK_SELECTORS = [
-        'p[style*="page-break-before:always"]',
-        'p[style*="page-break-after:always"]', 
-        'hr[style*="page-break-after:always"]',
-        'div[style*="page-break-before:always"]',
-        'div[style*="page-break-after:always"]',
-        # Handle variations with spaces in CSS
-        'p[style*="page-break-before: always"]',
-        'p[style*="page-break-after: always"]',
-        'hr[style*="page-break-after: always"]',
-        'div[style*="page-break-before: always"]',
-        'div[style*="page-break-after: always"]'
-    ]
-    
     # Class-based page break selectors
     CLASS_BASED_SELECTORS = [
         'div.BRPFPageBreak',
@@ -40,65 +25,6 @@ class PageBreakDetector:
         'hr[style*="height:3px"]',
         'hr[style*="height: 3px"]'
     ]
-    
-    @staticmethod
-    def find_page_breaks(element: Tag) -> List[Dict[str, Any]]:
-        """Find all page break elements in the document.
-        
-        Args:
-            element: BeautifulSoup Tag element to search for page breaks
-            
-        Returns:
-            List of dictionaries containing page break information:
-            - element: Tag name of the page break element
-            - selector: CSS selector that matched this element
-            - style: Style attributes of the element
-            - classes: CSS classes of the element
-            - is_page_div: Whether this is a page-like div
-        """
-        page_breaks = []
-        
-        # Find CSS page break elements
-        for selector in PageBreakDetector.PAGE_BREAK_SELECTORS:
-            elements = element.select(selector)
-            for el in elements:
-                page_breaks.append({
-                    'element': el.name,
-                    'selector': selector,
-                    'style': el.get('style', ''),
-                    'classes': el.get('class', []),
-                    'is_page_div': False
-                })
-        
-        # Find class-based page breaks
-        for selector in PageBreakDetector.CLASS_BASED_SELECTORS:
-            elements = element.select(selector)
-            for el in elements:
-                page_breaks.append({
-                    'element': el.name,
-                    'selector': selector,
-                    'style': el.get('style', ''),
-                    'classes': el.get('class', []),
-                    'is_page_div': False
-                })
-        
-        # Find HR page breaks
-        for selector in PageBreakDetector.HR_PAGE_BREAK_SELECTORS:
-            elements = element.select(selector)
-            for el in elements:
-                page_breaks.append({
-                    'element': el.name,
-                    'selector': selector,
-                    'style': el.get('style', ''),
-                    'classes': el.get('class', []),
-                    'is_page_div': False
-                })
-        
-        # Find page-like divs
-        page_divs = PageBreakDetector._find_page_like_divs(element)
-        page_breaks.extend(page_divs)
-        
-        return page_breaks
     
     @staticmethod
     def _find_page_like_divs(element: Tag) -> List[Dict[str, Any]]:
@@ -160,8 +86,6 @@ class PageBreakDetector:
         # and typical page styling properties
         return has_page_height and has_page_width and (has_position or has_overflow)
     
-
-    
     @staticmethod
     def mark_page_breaks(element: Tag) -> None:
         """Mark page break elements with a special attribute for detection.
@@ -172,11 +96,8 @@ class PageBreakDetector:
         Args:
             element: BeautifulSoup Tag element to mark
         """
-        # Mark CSS page break elements
-        for selector in PageBreakDetector.PAGE_BREAK_SELECTORS:
-            page_breaks = element.select(selector)
-            for pb in page_breaks:
-                pb['_is_page_break'] = 'true'
+        # Mark CSS page break elements using case-insensitive detection
+        PageBreakDetector._mark_css_page_breaks(element)
         
         # Mark class-based page breaks
         for selector in PageBreakDetector.CLASS_BASED_SELECTORS:
@@ -201,6 +122,32 @@ class PageBreakDetector:
             style = div.get('style', '')
             if style and PageBreakDetector._is_page_like_div(style):
                 div['_is_page_break'] = 'true'
+    
+    @staticmethod
+    def _mark_css_page_breaks(element: Tag) -> None:
+        """Mark CSS page break elements using case-insensitive detection."""
+        # Define the page break patterns we're looking for (case insensitive)
+        page_break_patterns = [
+            r'page-break-before\s*:\s*always',
+            r'page-break-after\s*:\s*always'
+        ]
+        
+        # Compile case-insensitive regex patterns
+        compiled_patterns = [re.compile(pattern, re.IGNORECASE) for pattern in page_break_patterns]
+        
+        # Find all elements that could have page break styles
+        for tag_name in ['p', 'div', 'hr']:
+            elements = element.find_all(tag_name)
+            for el in elements:
+                style = el.get('style', '')
+                if not style:
+                    continue
+                
+                # Check if any page break pattern matches
+                for pattern in compiled_patterns:
+                    if pattern.search(style):
+                        el['_is_page_break'] = 'true'
+                        break  # Only mark each element once
 
 
 def detect_page_breaks(html_content: str) -> List[Dict[str, Any]]:
@@ -217,7 +164,65 @@ def detect_page_breaks(html_content: str) -> List[Dict[str, Any]]:
     from bs4 import BeautifulSoup
     
     soup = BeautifulSoup(html_content, 'html.parser')
-    return PageBreakDetector.find_page_breaks(soup)
+    
+    # For the public API, we need to collect info about page breaks
+    # This is mainly used for testing and external analysis
+    page_breaks = []
+    
+    # Find CSS page break elements using case-insensitive detection
+    page_break_patterns = [
+        r'page-break-before\s*:\s*always',
+        r'page-break-after\s*:\s*always'
+    ]
+    compiled_patterns = [re.compile(pattern, re.IGNORECASE) for pattern in page_break_patterns]
+    
+    for tag_name in ['p', 'div', 'hr']:
+        elements = soup.find_all(tag_name)
+        for el in elements:
+            style = el.get('style', '')
+            if not style:
+                continue
+            
+            for pattern in compiled_patterns:
+                if pattern.search(style):
+                    page_breaks.append({
+                        'element': el.name,
+                        'selector': f'{tag_name}[style*="page-break"]',
+                        'style': style,
+                        'classes': el.get('class', []),
+                        'is_page_div': False
+                    })
+                    break
+    
+    # Find class-based page breaks
+    for selector in PageBreakDetector.CLASS_BASED_SELECTORS:
+        elements = soup.select(selector)
+        for el in elements:
+            page_breaks.append({
+                'element': el.name,
+                'selector': selector,
+                'style': el.get('style', ''),
+                'classes': el.get('class', []),
+                'is_page_div': False
+            })
+    
+    # Find HR page breaks
+    for selector in PageBreakDetector.HR_PAGE_BREAK_SELECTORS:
+        elements = soup.select(selector)
+        for el in elements:
+            page_breaks.append({
+                'element': el.name,
+                'selector': selector,
+                'style': el.get('style', ''),
+                'classes': el.get('class', []),
+                'is_page_div': False
+            })
+    
+    # Find page-like divs
+    page_divs = PageBreakDetector._find_page_like_divs(soup)
+    page_breaks.extend(page_divs)
+    
+    return page_breaks
 
 
 def mark_page_breaks(html_content: str) -> str:
