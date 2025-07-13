@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import Optional, Union, Dict, List, Any, Tuple
 
 import pandas as pd
-from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning
+from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning, NavigableString
 from rich import box
 from rich.table import Table
 
@@ -226,7 +226,7 @@ class Block:
     def to_markdown(self) -> str:
         return self.text
 
-    def get_text(self):
+    def get_text(self) -> List[str]:
         return self.text
 
     def is_empty(self):
@@ -242,6 +242,29 @@ class Block:
     def __repr__(self):
         return self.text
 
+class LinkBlock(Block):
+    
+    def __init__(self, text: str, tag:str, alt:str, src:str, **tags):
+        super().__init__(text, **tags)
+        self.tag = tag
+        self.alt = alt
+        self.src = src
+        self.inline: bool = True
+
+    def get_text(self) -> str:    
+        return '<{self.tag} alt="{self.alt}" src="{self.src}">'
+
+    def to_markdown(self, prefix_src:str=""):
+        return f"![alt  {self.alt}]({prefix_src}/{self.src})\n"
+    
+    def get_complete_text(self, prefix_src:str):
+        return f'<{self.tag} alt="{self.alt}" src="{prefix_src}/{self.src}">\n'
+
+    def __str__(self):
+        return "LinkBlock"
+
+    def __repr__(self):
+        return self.text
 
 class TextBlock(Block):
 
@@ -303,7 +326,8 @@ class TableBlock(Block):
 
 
 item_pattern = r"(?:ITEM|Item)\s+(?:[0-9]{1,2}[A-Z]?\.?|[0-9]{1,2}\.[0-9]{2})"
-
+# part_pattern = r"^\b(PART\s+[IVXLC]+)\b"
+part_pattern = re.compile(r"^\b(PART\s+[IVXLC]+)\b", re.IGNORECASE)
 
 class HtmlDocument:
 
@@ -485,8 +509,19 @@ class HtmlDocument:
 
                 # Check if the block is an "Item" header
                 is_item_header = bool(re.match(item_pattern, block.text))
+                is_part_header = bool(part_pattern.match(block.text))
 
-                if is_item_header:
+                if is_part_header:
+                     # Yield the current chunk before starting a new one with the "Part" header
+                    if current_chunk:
+                        if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
+                            yield current_chunk
+                        current_chunk = []
+                    # Update flags accordingly
+                    item_header_detected = True
+                    header_detected = True  # "Item" headers are considered regular headers for flag purposes
+                    accumulating_regular_text = False  # Reset since we're starting a new section
+                elif is_item_header:
                     # Yield the current chunk before starting a new one with the "Item" header
                     if current_chunk:
                         if any(block.text.strip() for block in current_chunk):  # Avoid emitting empty chunks
@@ -521,6 +556,11 @@ class HtmlDocument:
                         header_detected = False
                         item_header_detected = False
                     current_chunk.append(block)
+            elif isinstance(block, LinkBlock):
+                analysis = False
+                is_regular_text = False
+                is_item_header = False
+                yield [block]
 
             # Check to yield the remaining chunk if it's the last block
             if i == len(self.blocks) - 1 and current_chunk:
@@ -533,12 +573,22 @@ def extract_and_format_content(element) -> List[Block]:
     Recursively extract and format content from an element,
     applying special formatting to tables and concatenating text for other elements.
     """
-
     if element.name == 'table':
         table_block = TableBlock(table_element=element, rows=len(element.find_all("tr")))
         return [table_block]
     elif element.name in ['ul', 'ol']:
         return [TextBlock(text=fixup(element.text), element=element.name, text_type='list')]
+    elif element.name in ["img", ]:
+        return [
+                LinkBlock(text=str(element),
+                          tag=element.name,
+                          element=element.name, 
+                          alt=element.get('alt'),
+                          src=element.get('src'),
+                          text_type='string')
+                ]
+    elif isinstance(element, NavigableString):
+        return [TextBlock(text=fixup(element.text), element=element.name, text_type='string')]
     else:
         inline = is_inline(element)
         blocks: List[Block] = []
@@ -632,6 +682,14 @@ def decompose_page_numbers(start_element: Tag):
     previous_number = None
 
     for tag in span_tags_with_numbers:
+        '''
+        some page link need keep
+        <span style="color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%">
+        <a href="#i7bfbfbe54b9647b1b4ba4ff4e0aba09d_73" style="color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%;text-decoration:none">
+        17</a></span>
+        '''
+        if tag.find("a"):
+            continue
         if not tag.text:
             continue
         number = int(tag.text)

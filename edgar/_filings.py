@@ -1346,6 +1346,13 @@ class Filing:
         document = self.sgml().attachments.primary_html_document
         # If the document is not in the SGML then we have to go to the homepage
         if document:
+            if document.extension == '.paper':
+                # If the document is a paper filing, we return the scanned document if it exists
+                attachments = self.homepage.attachments
+                scanned_documents = attachments.query("document == 'scanned.pdf'")
+                if len(scanned_documents) > 0:
+                    return scanned_documents.get_by_index(0)
+                return self.homepage.primary_html_document
             return document
         return self.homepage.primary_html_document
 
