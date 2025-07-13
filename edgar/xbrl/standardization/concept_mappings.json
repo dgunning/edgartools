@@ -33,6 +33,9 @@
   "Cost of Sales": [
     "us-gaap_CostOfSales"
   ],
+  "Cost of Goods and Services Excluding Depreciation": [
+    "us-gaap_CostOfGoodsAndServiceExcludingDepreciationDepletionAndAmortization"
+  ],
   "Direct Operating Costs": [
     "us-gaap_DirectOperatingCosts"
   ],
@@ -78,7 +81,14 @@
   ],
   "Interest Expense": [
     "us-gaap_InterestAndDebtExpense",
-    "us-gaap_InterestExpense"
+    "us-gaap_InterestExpense",
+    "us-gaap_InterestIncomeExpenseNet"
+  ],
+    "Interest Expense (operating)": [
+    "us-gaap_InterestExpenseOperating"
+  ],
+  "Interest Expense (non-operating)": [
+    "us-gaap_InterestExpenseNonoperating"
   ],
   "_comment_income_before_tax_hierarchy": "INCOME BEFORE TAX HIERARCHY FIX: Separated total income before tax from component types to prevent duplicate labels. Continuing operations and extraordinary items are components that should have distinct labels.",
   "Income Before Tax": [
@@ -109,6 +119,12 @@
     "us-gaap_NetIncomeLossAttributableToNonredeemableNoncontrollingInterest",
     "us-gaap_NetIncomeLossAttributableToNoncontrollingInterest"
   ],
+  "Basic Net Income Available to Common Shareholders": [
+    "us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic"
+  ],
+    "Diluted Net Income Available to Common Shareholders": [
+    "us-gaap_NetIncomeLossAvailableToCommonStockholdersDiluted"
+  ],
   "Accumulated Other Comprehensive Income/Loss": [
     "us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax"
   ],
@@ -121,9 +137,9 @@
   "Earnings Per Share (Diluted)": [
     "us-gaap_EarningsPerShareDiluted"
   ],
-    "Shares Outstanding": [
-        "us-gaap_WeightedAverageNumberOfSharesOutstandingAbstract"
-    ],
+  "Shares Outstanding": [
+    "us-gaap_WeightedAverageNumberOfSharesOutstandingAbstract"
+  ],
   "Shares Outstanding (Basic)": [
     "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic"
   ],
@@ -155,7 +171,7 @@
     "us-gaap_AvailableForSaleSecuritiesDebtSecuritiesCurrent",
     "us-gaap_MarketableSecuritiesCurrent"
   ],
-    "Non Current Marketable Securities": [
+  "Non Current Marketable Securities": [
     "us-gaap_MarketableSecuritiesNoncurrent"
   ],
   "Total Current Assets": [
