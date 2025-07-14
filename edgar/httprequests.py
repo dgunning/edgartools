@@ -3,6 +3,7 @@ import logging
 import os
 import shutil
 import tarfile
+import tempfile
 import time
 import uuid
 import zipfile
@@ -95,9 +96,9 @@ class Throttler:
 
             # Remove timestamps older than the time window
             while (
-                self.request_timestamps
-                and self.request_timestamps[0]
-                <= current_time - self.request_rate.time_window
+                    self.request_timestamps
+                    and self.request_timestamps[0]
+                    <= current_time - self.request_rate.time_window
             ):
                 self.request_timestamps.popleft()
 
@@ -114,7 +115,7 @@ class Throttler:
     def update_metrics(self):
         self.total_calls += 1
         current_call_rate: float = (
-            len(self.request_timestamps) / self.request_rate.time_window
+                len(self.request_timestamps) / self.request_rate.time_window
         )
         self.peak_call_rate = max(self.peak_call_rate, current_call_rate)
 
@@ -271,7 +272,7 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
 @async_with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 async def get_with_retry_async(
-    client: AsyncClient, url, identity=None, identity_callable=None, **kwargs
+        client: AsyncClient, url, identity=None, identity_callable=None, **kwargs
 ):
     """
     Sends an asynchronous GET request with retry functionality and identity handling.
@@ -345,7 +346,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 def post_with_retry(
-    url, data=None, json=None, identity=None, identity_callable=None, **kwargs
+        url, data=None, json=None, identity=None, identity_callable=None, **kwargs
 ):
     """
     Sends a POST request with retry functionality and identity handling.
@@ -386,13 +387,13 @@ def post_with_retry(
 @async_with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 async def post_with_retry_async(
-    client: AsyncClient,
-    url,
-    data=None,
-    json=None,
-    identity=None,
-    identity_callable=None,
-    **kwargs,
+        client: AsyncClient,
+        url,
+        data=None,
+        json=None,
+        identity=None,
+        identity_callable=None,
+        **kwargs,
 ):
     """
     Sends an asynchronous POST request with retry functionality and identity handling.
@@ -446,7 +447,7 @@ def decode_content(content: bytes) -> str:
 
 
 def save_or_return_content(
-    content: Union[str, bytes], path: Optional[Union[str, Path]]
+        content: Union[str, bytes], path: Optional[Union[str, Path]]
 ) -> Union[str, bytes, None]:
     """
     Save the content to a specified path or return the content.
@@ -480,7 +481,7 @@ def save_or_return_content(
 
 
 def download_file(
-    url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None
+        url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None
 ) -> Union[str, bytes, None]:
     """
     Download a file from a URL.
@@ -527,10 +528,10 @@ def download_file(
 
 
 async def download_file_async(
-    client: AsyncClient,
-    url: str,
-    as_text: bool = None,
-    path: Optional[Union[str, Path]] = None,
+        client: AsyncClient,
+        url: str,
+        as_text: bool = None,
+        path: Optional[Union[str, Path]] = None,
 ) -> Union[str, bytes, None]:
     """
     Download a file from a URL asynchronously.
@@ -569,7 +570,6 @@ async def download_file_async(
 
 
 CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
-MEM_DWLD_LIMIT = 2 * 1024 * 1024 * 1024  # 2GB
 
 
 @retry(
@@ -578,118 +578,94 @@ MEM_DWLD_LIMIT = 2 * 1024 * 1024 * 1024  # 2GB
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
 async def stream_file(
-    url: str,
-    as_text: bool = None,
-    path: Optional[Union[str, Path]] = None,
-    client: Optional[AsyncClient] = None,
-    **kwargs,
+        url: str,
+        path: Optional[Union[str, Path]] = None,
+        client: Optional[AsyncClient] = None,
+        **kwargs,
 ) -> Union[str, bytes, None]:
     """
     Download a file from a URL asynchronously with progress bar using httpx.
+    
+    Always streams to disk to avoid memory accumulation, then provides atomic 
+    file operations for reliability with large files.
 
     Args:
         url (str): The URL of the file to download.
-        as_text (bool, optional): Whether to download the file as text or binary.
+        as_text (bool, optional): Whether to return the file content as text or binary.
             If None, the default is determined based on the file extension. Defaults to None.
         path (str or Path, optional): The path where the file should be saved.
+            If None, returns the content instead of saving.
         client: The httpx.AsyncClient instance
 
     Returns:
-        str or bytes: The content of the downloaded file, either as text or binary data.
+        str or bytes or None: The content of the downloaded file if path is None,
+        otherwise None after saving to path.
     """
-    if as_text is None:
-        # Set the default based on the file extension
-        as_text = url.endswith(text_extensions)
 
-    async with async_http_client(client) as async_client:
-        async with async_client.stream("GET", url) as response:
-            inspect_response(response)
-            total_size = int(response.headers.get("Content-Length", 0))
+    # Create temporary directory for atomic downloads
+    temp_dir = tempfile.mkdtemp(prefix="edgar_")
+    temp_file = Path(temp_dir) / f"download_{uuid.uuid1()}"
 
-            if as_text:
-                # Download as text
-                content = await response.text()
-                return content
-            else:
-                # Download as binary
-                content = b""
+    try:
+        async with async_http_client(client) as async_client:
+            async with async_client.stream("GET", url) as response:
+                inspect_response(response)
+                total_size = int(response.headers.get("Content-Length", 0))
+
+                # Setup progress bar
+                total_mb = total_size / (1024 * 1024) if total_size > 0 else None
                 progress_bar = tqdm(
-                    total=total_size / (1024 * 1024),
+                    total=total_mb,
                     unit="MB",
                     unit_scale=True,
                     unit_divisor=1024,
-                    leave=False,  # Force horizontal display
-                    position=0,  # Lock the position
-                    dynamic_ncols=True,  # Adapt to terminal width
-                    bar_format="{l_bar}{bar}| {n:.2f}/{total:.2f}MB [{elapsed}<{remaining}, {rate_fmt}]",
+                    leave=False,
+                    position=0,
+                    dynamic_ncols=True,
+                    bar_format="{l_bar}{bar}| {n:.2f}/{total:.2f}MB [{elapsed}<{remaining}, {rate_fmt}]" if total_mb else "{desc}: {n:.2f}MB [{elapsed}, {rate_fmt}]",
                     desc=f"Downloading {os.path.basename(url)}",
                     ascii=False,
                 )
-                is_gzip = response.headers.get("Content-Encoding") == "gzip"
-                downloaded = 0
 
-                if path is None or total_size <= MEM_DWLD_LIMIT:
-                    # download in memory
-                    if total_size > MEM_DWLD_LIMIT:
-                        logger.warning(
-                            "File size is large and no saving path has been provided"
-                        )
+                # Always stream to temporary file
+                try:
+                    with open(temp_file, "wb") as f:
+                        async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
+                            f.write(chunk)
+                            progress_bar.update(len(chunk) / (1024 * 1024))
 
-                    async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
-                        content += chunk
-                        downloaded += len(chunk)
-                        progress_bar.update(len(chunk) / (1024 * 1024))  # Update in MB
+                finally:
                     progress_bar.close()
 
-                    # Check if the content is gzip-compressed
-                    if is_gzip:
-                        content = gzip.decompress(content)
+                # Handle the result based on whether path was provided
+                if path is not None:
+                    # Atomic move to final destination
+                    final_path = Path(path)
+                    if final_path.is_dir():
+                        final_path = final_path / os.path.basename(url)
 
-                    if path:
-                        if isinstance(path, str):
-                            path = Path(path)
-                        if path.is_dir():
-                            path = path / os.path.basename(url)
+                    # Ensure parent directory exists
+                    final_path.parent.mkdir(parents=True, exist_ok=True)
 
-                    return save_or_return_content(content, path)
-
+                    # Atomic move from temp to final location
+                    shutil.move(str(temp_file), str(final_path))
+                    return None
                 else:
-                    # download on disk
-                    logger.warning("downloading to file, not memory")
-                    tmp_dir = Path("/tmp/edgar")
-                    tmp_dir.mkdir(parents=True, exist_ok=True)
-                    tmp_fn = tmp_dir / str(uuid.uuid1())
+                    # Return content for in-memory use
+                    if as_text:
+                        with open(temp_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                    else:
+                        with open(temp_file, 'rb') as f:
+                            content = f.read()
+                    return content
 
-                    try:
-                        with open(tmp_fn, "wb") as f:
-                            async for chunk in response.aiter_bytes(
-                                chunk_size=CHUNK_SIZE
-                            ):
-                                if is_gzip:
-                                    try:
-                                        chunk = gzip.decompress(chunk)
-                                    except gzip.BadGzipFile:
-                                        raise ValueError(
-                                            "Invalid gzip-compressed content"
-                                        )
-                                f.write(chunk)
-                                progress_bar.update(len(chunk) / (1024 * 1024))
-                    except Exception as e:
-                        if tmp_fn.exists():
-                            tmp_fn.unlink(missing_ok=True)
-                        raise e
-                    finally:
-                        progress_bar.close()
-
-                    if path:
-                        if isinstance(path, str):
-                            path = Path(path)
-                        if path.is_dir():
-                            file_name = os.path.basename(url)
-                            path = path / file_name
-
-                        tmp_fn.rename(path)
-                        return None
+    finally:
+        # Clean up temporary directory
+        try:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+        except Exception as e:
+            logger.warning(f"Failed to clean up temporary directory {temp_dir}: {e}")
 
 
 def download_json(data_url: str) -> dict:
@@ -753,7 +729,7 @@ def download_text_between_tags(url: str, tag: str):
                 # If within header lines, add to header_content
                 elif is_header:
                     content += (
-                        line + "\n"
+                            line + "\n"
                     )  # Add a newline to preserve original line breaks
     return content
 
@@ -765,9 +741,9 @@ logger = logging.getLogger(__name__)
     on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial
 )
 async def download_bulk_data(
-    url: str,
-    data_directory: Path = get_edgar_data_directory(),
-    client: Optional[AsyncClient] = None,
+        url: str,
+        data_directory: Path = get_edgar_data_directory(),
+        client: Optional[AsyncClient] = None,
 ) -> Path:
     """
     Download and extract bulk data from zip or tar.gz archives
@@ -801,7 +777,7 @@ async def download_bulk_data(
         # Create the directory with parents=True and exist_ok=True to avoid race conditions
         download_path.mkdir(parents=True, exist_ok=True)
 
-        # Download the file
+        # Download the file (don't decompress archives)
         try:
             await stream_file(url, client=client, path=download_path)
         except Exception as e:
@@ -816,7 +792,7 @@ async def download_bulk_data(
                     extracted_size = 0
 
                     with tqdm(
-                        total=total_size, unit="B", unit_scale=True, desc="Extracting"
+                            total=total_size, unit="B", unit_scale=True, desc="Extracting"
                     ) as pbar:
                         for info in z.filelist:
                             z.extract(info, download_path)
@@ -838,13 +814,13 @@ async def download_bulk_data(
                     total_size = sum(member.size for member in members)
 
                     with tqdm(
-                        total=total_size, unit="B", unit_scale=True, desc="Extracting"
+                            total=total_size, unit="B", unit_scale=True, desc="Extracting"
                     ) as pbar:
                         for member in members:
                             # Check for path traversal
                             member_path = os.path.join(str(download_path), member.name)
                             if not is_within_directory(
-                                Path(str(download_path)), Path(member_path)
+                                    Path(str(download_path)), Path(member_path)
                             ):
                                 raise ValueError(
                                     f"Attempted path traversal in tar file: {member.name}"
