@@ -177,6 +177,9 @@
   "Total Current Assets": [
     "us-gaap_AssetsCurrent"
   ],
+    "Total Non-Current Assets": [
+    "us-gaap_AssetsNoncurrent"
+  ],
   "Property, Plant and Equipment": [
     "us-gaap_PropertyPlantAndEquipmentGross",
     "us-gaap_PropertyPlantAndEquipmentNet",
@@ -213,6 +216,9 @@
   ],
   "Total Current Liabilities": [
     "us-gaap_LiabilitiesCurrent"
+  ],
+    "Total Non-Current Liabilities": [
+    "us-gaap_LiabilitiesNoncurrent"
   ],
   "Long-Term Debt": [
     "us-gaap_LongTermDebtAndCapitalLeaseObligations",
