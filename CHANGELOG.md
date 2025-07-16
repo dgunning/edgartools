@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.4.0 - 2025-07-16
+
+## Fixed
+- Improved ordering of line items when stitching statements
+
+## Changed
+
+- Early July Cusip ticker mappings added
+- Several improvements to HTML parsing and item selection and rendering - Thanks to [zhangchmeng](https://github.com/zhangchmeng)
+- Switch from the `limiter` package to `pyrate_limiter` for HTTP caching and rate limiting. 
+- Used the scanned PDF as the main filing document for filings with `.paper` as the primary attachment type
+- Use disk when streaming large files such as in `download_filings`
+- Additional standardization mappings for financial concepts in the Income Statement
+
 ## 4.3.1 - 2025-06-29
 
 ### Fixed
