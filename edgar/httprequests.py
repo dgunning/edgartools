@@ -569,7 +569,11 @@ async def download_file_async(
     return save_or_return_content(content, path)
 
 
-CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
+# Optimized chunk sizes for different file sizes
+CHUNK_SIZE_SMALL = 1 * 1024 * 1024      # 1MB for files < 100MB
+CHUNK_SIZE_MEDIUM = 8 * 1024 * 1024     # 8MB for files 100MB - 500MB  
+CHUNK_SIZE_LARGE = 32 * 1024 * 1024     # 32MB for files > 500MB
+CHUNK_SIZE_DEFAULT = 4 * 1024 * 1024    # 4MB default (backward compatibility)
 
 
 @retry(
@@ -627,12 +631,38 @@ async def stream_file(
                     ascii=False,
                 )
 
+                # Select optimal chunk size based on file size
+                if total_size > 0:
+                    if total_size > 500 * 1024 * 1024:  # > 500MB
+                        chunk_size = CHUNK_SIZE_LARGE
+                    elif total_size > 100 * 1024 * 1024:  # > 100MB
+                        chunk_size = CHUNK_SIZE_MEDIUM
+                    else:  # <= 100MB
+                        chunk_size = CHUNK_SIZE_SMALL
+                else:
+                    # Unknown size, use default
+                    chunk_size = CHUNK_SIZE_DEFAULT
+
                 # Always stream to temporary file
                 try:
                     with open(temp_file, "wb") as f:
-                        async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
+                        # For large files, update progress less frequently to reduce overhead
+                        update_threshold = 1.0 if total_size > 500 * 1024 * 1024 else 0.1  # MB
+                        accumulated_mb = 0.0
+                        
+                        async for chunk in response.aiter_bytes(chunk_size=chunk_size):
                             f.write(chunk)
-                            progress_bar.update(len(chunk) / (1024 * 1024))
+                            chunk_mb = len(chunk) / (1024 * 1024)
+                            accumulated_mb += chunk_mb
+                            
+                            # Update progress bar only when threshold is reached
+                            if accumulated_mb >= update_threshold:
+                                progress_bar.update(accumulated_mb)
+                                accumulated_mb = 0.0
+                        
+                        # Update any remaining progress
+                        if accumulated_mb > 0:
+                            progress_bar.update(accumulated_mb)
 
                 finally:
                     progress_bar.close()
