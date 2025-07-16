@@ -177,7 +177,7 @@
   "Total Current Assets": [
     "us-gaap_AssetsCurrent"
   ],
-    "Total Non-Current Assets": [
+    "Total Non Current Assets": [
     "us-gaap_AssetsNoncurrent"
   ],
   "Property, Plant and Equipment": [
@@ -209,7 +209,7 @@
     "us-gaap_AccruedLiabilitiesCurrent",
     "us-gaap_EmployeeRelatedLiabilitiesCurrent"
   ],
-  "Short-Term Debt": [
+  "Short Term Debt": [
     "us-gaap_DebtCurrent",
     "us-gaap_ShortTermBorrowings",
     "us-gaap_LongTermDebtCurrent"
@@ -217,10 +217,10 @@
   "Total Current Liabilities": [
     "us-gaap_LiabilitiesCurrent"
   ],
-    "Total Non-Current Liabilities": [
+    "Total Non Current Liabilities": [
     "us-gaap_LiabilitiesNoncurrent"
   ],
-  "Long-Term Debt": [
+  "Long Term Debt": [
     "us-gaap_LongTermDebtAndCapitalLeaseObligations",
     "us-gaap_LongTermDebt",
     "us-gaap_LongTermBorrowings",
@@ -324,17 +324,26 @@
     "us-gaap_ProceedsFromRepaymentsOfCommercialPaper"
   ],
   "Other Assets": [
-    "us-gaap_OtherAssetsNoncurrent",
-    "us-gaap_OtherAssets",
+    "us-gaap_OtherAssets"
+  ],
+  "Other Current Assets": [
     "us-gaap_OtherAssetsCurrent"
+  ],
+  "Other Non Current Assets": [
+    "us-gaap_OtherAssetsNoncurrent"
   ],
   "Deferred Tax Assets": [
     "us-gaap_DeferredIncomeTaxAssetsNet"
   ],
   "Other Liabilities": [
-    "us-gaap_OtherLiabilities",
-    "us-gaap_OtherLiabilitiesNoncurrent",
+    "us-gaap_OtherLiabilities"
+
+  ],
+    "Other Current Liabilities": [
     "us-gaap_OtherLiabilitiesCurrent"
+  ],
+  "Other Non Current Liabilities": [
+    "us-gaap_OtherLiabilitiesNoncurrent"
   ],
   "Depreciation and Amortization": [
     "us-gaap_AmortizationOfIntangibleAssets",
