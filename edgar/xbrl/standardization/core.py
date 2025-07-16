@@ -38,7 +38,7 @@ class StandardConcept(str, Enum):
     ACCRUED_LIABILITIES = "Accrued Liabilities"
     SHORT_TERM_DEBT = "Short-Term Debt"
     TOTAL_CURRENT_LIABILITIES = "Total Current Liabilities"
-    LONG_TERM_DEBT = "Long-Term Debt"
+    LONG_TERM_DEBT = "Long Term Debt"
     DEFERRED_REVENUE = "Deferred Revenue"
     TOTAL_LIABILITIES = "Total Liabilities"
     
