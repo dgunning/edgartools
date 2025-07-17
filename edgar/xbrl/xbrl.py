@@ -461,40 +461,36 @@ class XBRL:
         Returns:
             Statement data if found, None otherwise
         """
-        # Ensure indices are built
-        if not self._all_statements_cached:
-            self.get_all_statements()
+        # Use find_statement instead of the flawed index-based lookup
+        matching_statements, found_role, actual_statement_type = self.find_statement(statement_type)
+        
+        if not found_role or not matching_statements:
+            return None
+        
+        # Get statement data using the found role
+        statement_data = self.get_statement(found_role)
+        
+        if statement_data:
+            # Extract periods from the statement data
+            periods = {}
+            for item in statement_data:
+                for period_id, value in item.get('values', {}).items():
+                    if period_id not in periods:
+                        # Get period label from reporting_periods
+                        period_label = period_id
+                        for period in self.reporting_periods:
+                            if period['key'] == period_id:
+                                period_label = period['label']
+                                break
+                        periods[period_id] = {'label': period_label}
             
-        # Use indexed lookup by standard name
-        if statement_type in self._statement_by_standard_name:
-            statements = self._statement_by_standard_name[statement_type]
-            if statements:
-                statement = statements[0]
-                # Get statement data
-                role = statement['role']
-                statement_data = self.get_statement(role)
-                
-                if statement_data:
-                    # Extract periods from the statement data
-                    periods = {}
-                    for item in statement_data:
-                        for period_id, value in item.get('values', {}).items():
-                            if period_id not in periods:
-                                # Get period label from reporting_periods
-                                period_label = period_id
-                                for period in self.reporting_periods:
-                                    if period['key'] == period_id:
-                                        period_label = period['label']
-                                        break
-                                periods[period_id] = {'label': period_label}
-                    
-                    return {
-                        'role': role,
-                        'definition': statement['definition'],
-                        'statement_type': statement_type,
-                        'periods': periods,
-                        'data': statement_data
-                    }
+            return {
+                'role': found_role,
+                'definition': matching_statements[0]['definition'],
+                'statement_type': actual_statement_type,
+                'periods': periods,
+                'data': statement_data
+            }
         
         return None
 

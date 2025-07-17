@@ -612,7 +612,7 @@ def stitch_statements(
     else:
         for xbrl in xbrl_list:
             # Get statement data for the specified type
-            statement = xbrl.get_statement_by_type(statement_type)
+            statement = xbrl.find_statement(statement_type)
             if statement:
                 statements.append(statement)
     
