@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.4.1 - 2025-07-17
+
+### Fixed
+- Fix incorrect labels for **Total Current Assets** and **Total Current Liabilities** in the standardization mappings
+- Fix bug in finding statement data for some companies when stitching statements
+
+### Changed
+- Don't infer concept labels during standardization. This allows for the original label to be shown if no standardization mapping is found. 
+
+
 ## 4.4.0 - 2025-07-16
 
 ## Fixed
