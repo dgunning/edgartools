@@ -1,3 +1,15 @@
+"""
+Exposes two function for creating HTTP Clients:
+- http_client: Returns a global (technically a local in a closure) httpx.Client for synchronous use. 
+- async_http_client: Creates and destroys an HTTP client for each async caller. For best results, create once per group of operations
+
+To close the global connection, call `close_client()`
+
+Implementation notes:
+- New "kwargs" and changes to DEFAULT_PARAMS to http_client are ignored after the first creation, until close_client.
+- Any additional HTTPX parameters may be added to DEFAULT_PARAMS. Preferably before the first connection is made. For example, one might want to use http2 connections by adding 'httpx': True.
+"""
+
 import logging
 import os
 import threading
@@ -9,8 +21,9 @@ from edgar.core import client_headers, edgar_mode
 
 log = logging.getLogger(__name__)
 
-PERSISTENT_CLIENT = True  # When enabled, httpclient reuses httpx clients rather than creating a single request per client
-
+DEFAULT_PARAMS = {"timeout": edgar_mode.http_timeout,
+        "limits": edgar_mode.limits,
+        "default_encoding": "utf-8"}
 
 def get_edgar_verify_ssl():
     """
@@ -21,48 +34,50 @@ def get_edgar_verify_ssl():
     return value not in falsy
 
 
-DEFAULT_PARAMS = {
-    "timeout": edgar_mode.http_timeout,
-    "limits": edgar_mode.limits,
-    "default_encoding": "utf-8",
-    "verify": get_edgar_verify_ssl(),
-}
 
-client_factory_class = httpx.Client
-asyncclient_factory_class = httpx.AsyncClient
+def get_default_params():
+    return {
+        **DEFAULT_PARAMS,
+        "verify": get_edgar_verify_ssl(),
+    }
 
-
-def _client_factory(**kwargs) -> httpx.Client:
-    params = DEFAULT_PARAMS.copy()
+def edgar_client_factory(**kwargs) -> httpx.Client:
+    params = get_default_params()
     params["headers"] = client_headers()
 
     params.update(**kwargs)
+    return httpx.Client(**params)
 
-    return client_factory_class(**params)
+def edgar_client_factory_async(**kwargs) -> httpx.AsyncClient:
+    params = get_default_params()
+    params["headers"] = client_headers()
 
+    params.update(**kwargs)
+    return httpx.AsyncClient(**params)
 
 def _http_client_manager():
-    """When PERSISTENT_CLIENT, creates and reuses a single client. Otherwise, creates a new client per invocation."""
+    """
+    Creates and reuses an HTTPX Client.
+     
+    This function is used for all synchronous requests. 
+    """
     client = None
     lock = threading.Lock()
 
     @contextmanager
     def _get_client(**kwargs):
-        if PERSISTENT_CLIENT:
-            nonlocal client
+        nonlocal client
 
-            if client is None:
-                with lock:
-                    if client is None:
-                        client = _client_factory(**kwargs)
-                        log.info("Creating new HTTPX Client")
+        if client is None:
+            with lock: 
+                # Locking: not super critical, since worst case might be extra httpx clients created, 
+                # but future proofing against TOCTOU races in free-threading world
+                if client is None:
+                    client = edgar_client_factory(**kwargs)
+                    log.info("Creating new HTTPX Client")
 
-            yield client
-        else:
-            # Create a new client per request
-            with _client_factory(**kwargs) as _client:
-                yield _client
-
+        yield client
+       
     def _close_client():
         nonlocal client
 
@@ -85,20 +100,16 @@ async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs
     """
     Async callers should create a single client for a group of tasks, rather than creating a single client per task.
 
-    Client: Optional parameter to allow code paths that accept optional clients: if a client is passed, this is a no-op and the client isn't closed.
+    If a null client is passed, then this is a no-op and the client isn't closed. This (passing a client) occurs when a higher level async task creates the client to be used by child calls.
     """
 
     if client is not None:
-        yield nullcontext(client)  # Caller is responsible for closing
+        yield nullcontext(client) # type: ignore # Caller is responsible for closing
 
-    params = DEFAULT_PARAMS.copy()
-    params["headers"] = client_headers()
-
-    params.update(**kwargs)
-    async with asyncclient_factory_class(**params) as client:
+    async with edgar_client_factory_async(**kwargs) as client:
         yield client
 
 
 def close_clients():
-    """Closes and invalidates existing client sessions."""
+    """Closes and invalidates existing client session, if created."""
     _close_client()
