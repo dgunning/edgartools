@@ -118,7 +118,10 @@ def test_company_filter_with_no_results_returns_filings():
 def test_company_get_filings_for_form():
     company: Company = Company("EXPE")
     tenk_filings: Filings = company.get_filings(form='10-K')
-    assert pc.all(pc.equal(tenk_filings.data['form'], '10-K'))
+
+    forms = tenk_filings.to_pandas("form").form.drop_duplicates().tolist()
+    print(forms)
+    assert forms == ['10-K', '10-K/A']
     filing: CompanyFiling = tenk_filings[0]
     assert filing
     assert filing.form == '10-K'
