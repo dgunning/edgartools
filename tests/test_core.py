@@ -35,7 +35,7 @@ from edgar.richtools import *
 from edgar.httpclient import get_http_params
 
 def client_headers():
-    return get_http_params["headers"]
+    return get_http_params()["headers"]
 
 def test_decode_content():
     text = "Kyle Walker vs Mbappe"
