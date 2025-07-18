@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.4.2 - 2025-07-18
+
+### Fixed
+- Fixed bug where `NultiFinancials` class returned None 
+- Fixed bug in `get_current_filings` where it did not return the last page of current filings
+
+### Added
+- Added `get_all_current_filings` to accumulate all current (most recent unpublished) filings 
+- 
 ## 4.4.1 - 2025-07-17
 
 ### Fixed
