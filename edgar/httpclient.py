@@ -6,7 +6,7 @@ Exposes two function for creating HTTP Clients:
 To close the global connection, call `close_client()`
 
 Implementation notes:
-- New "kwargs" and changes to DEFAULT_PARAMS to http_client are ignored after the first creation, until close_client.
+- New "kwargs" and changes to HTTPX_PARAMS to http_client are ignored after the first creation, until close_client.
 - Any additional HTTPX parameters may be added to DEFAULT_PARAMS. Preferably before the first connection is made. For example, one might want to use http2 connections by adding 'httpx': True.
 """
 
@@ -21,7 +21,7 @@ from edgar.core import client_headers, edgar_mode
 
 log = logging.getLogger(__name__)
 
-DEFAULT_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
+HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
 
 
 def get_edgar_verify_ssl():
@@ -35,7 +35,7 @@ def get_edgar_verify_ssl():
 
 def get_default_params():
     return {
-        **DEFAULT_PARAMS,
+        **HTTPX_PARAMS,
         "verify": get_edgar_verify_ssl(),
     }
 
