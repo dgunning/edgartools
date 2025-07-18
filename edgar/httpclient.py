@@ -25,7 +25,7 @@ from contextlib import asynccontextmanager, contextmanager, nullcontext
 import httpx
 from typing import AsyncGenerator, Optional
 from pyrate_limiter import Limiter, Rate, Duration
-from edgar.core import get_identity, edgar_mode
+from edgar.core import get_identity, edgar_mode, strtobool
 
 log = logging.getLogger(__name__)
 
@@ -42,12 +42,10 @@ def get_edgar_verify_ssl():
     """
     Returns True if using SSL verification on http requests
     """
-    falsy = {"0", "false", "no", "n", "off"}
-    value = os.environ.get("EDGAR_VERIFY_SSL", "true").lower()
-    return value not in falsy
+    value = os.environ.get("EDGAR_VERIFY_SSL", "true")
+    return strtobool(value)
 
-
-def get_default_params():
+def get_http_params():
     return {
         **HTTPX_PARAMS,
         'User-Agent': get_identity(),
@@ -56,13 +54,13 @@ def get_default_params():
 
 
 def edgar_client_factory(**kwargs) -> httpx.Client:
-    params = get_default_params()
+    params = get_http_params()
     params.update(**kwargs)
     return httpx.Client(**params)
 
 
 def edgar_client_factory_async(**kwargs) -> httpx.AsyncClient:
-    params = get_default_params()
+    params = get_http_params()
     params.update(**kwargs)
     return httpx.AsyncClient(**params)
 
