@@ -1,6 +1,6 @@
 """
 Exposes two function for creating HTTP Clients:
-- http_client: Returns a global (technically a local in a closure) httpx.Client for synchronous use. 
+- http_client: Returns a global (technically a local in a closure) httpx.Client for synchronous use.
 - async_http_client: Creates and destroys an HTTP client for each async caller. For best results, create once per group of operations
 
 To close the global connection, call `close_client()`
@@ -21,9 +21,8 @@ from edgar.core import client_headers, edgar_mode
 
 log = logging.getLogger(__name__)
 
-DEFAULT_PARAMS = {"timeout": edgar_mode.http_timeout,
-        "limits": edgar_mode.limits,
-        "default_encoding": "utf-8"}
+DEFAULT_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
+
 
 def get_edgar_verify_ssl():
     """
@@ -34,12 +33,12 @@ def get_edgar_verify_ssl():
     return value not in falsy
 
 
-
 def get_default_params():
     return {
         **DEFAULT_PARAMS,
         "verify": get_edgar_verify_ssl(),
     }
+
 
 def edgar_client_factory(**kwargs) -> httpx.Client:
     params = get_default_params()
@@ -48,6 +47,7 @@ def edgar_client_factory(**kwargs) -> httpx.Client:
     params.update(**kwargs)
     return httpx.Client(**params)
 
+
 def edgar_client_factory_async(**kwargs) -> httpx.AsyncClient:
     params = get_default_params()
     params["headers"] = client_headers()
@@ -55,11 +55,12 @@ def edgar_client_factory_async(**kwargs) -> httpx.AsyncClient:
     params.update(**kwargs)
     return httpx.AsyncClient(**params)
 
+
 def _http_client_manager():
     """
     Creates and reuses an HTTPX Client.
-     
-    This function is used for all synchronous requests. 
+
+    This function is used for all synchronous requests.
     """
     client = None
     lock = threading.Lock()
@@ -69,15 +70,15 @@ def _http_client_manager():
         nonlocal client
 
         if client is None:
-            with lock: 
-                # Locking: not super critical, since worst case might be extra httpx clients created, 
+            with lock:
+                # Locking: not super critical, since worst case might be extra httpx clients created,
                 # but future proofing against TOCTOU races in free-threading world
                 if client is None:
                     client = edgar_client_factory(**kwargs)
                     log.info("Creating new HTTPX Client")
 
         yield client
-       
+
     def _close_client():
         nonlocal client
 
@@ -104,7 +105,7 @@ async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs
     """
 
     if client is not None:
-        yield nullcontext(client) # type: ignore # Caller is responsible for closing
+        yield nullcontext(client)  # type: ignore # Caller is responsible for closing
 
     async with edgar_client_factory_async(**kwargs) as client:
         yield client
