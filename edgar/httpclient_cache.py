@@ -12,10 +12,11 @@ This cache controller caches, by default:
 import logging
 import hishel
 import httpcore
+from typing import Optional, Union
 
 log = logging.getLogger(__name__)
 
-def custom_key_generator(request: httpcore.Request, body: bytes | None) -> str:
+def custom_key_generator(request: httpcore.Request, body: Optional[bytes]) -> str:
     """ Generates a stable, readable key for a given request.
 
     Args:
@@ -60,7 +61,7 @@ def get_cache_controller(**kwargs):
 
         def construct_response_from_cache(
             self, request: httpcore.Request, response: httpcore.Response, original_request: httpcore.Request
-        ) -> httpcore.Request | httpcore.Response | None:
+        ) -> Union[httpcore.Request, httpcore.Response, None]:
             target = request.url.target.decode()
 
             if request.url.host.decode().endswith("sec.gov"):
