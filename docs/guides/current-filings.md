@@ -1,16 +1,5 @@
 # Working with Current Filings
 
----
-title: "Working with Current Filings"
-description: "Access and monitor the most recent SEC filings as they are published in real-time"
-category: "filings"
-difficulty: "beginner"
-time_required: "10 minutes"
-prerequisites: ["installation", "quickstart"]
-related: ["working-with-filings", "filtering-filings", "filing-monitor"]
-keywords: ["current filings", "real-time", "monitoring", "SEC", "recent filings", "pagination"]
----
-
 ## Overview
 
 Current filings represent the most recently submitted documents to the SEC, updated in real-time as companies file their reports. This guide shows you how to access, filter, and efficiently process current filings using edgartools.
