@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 from edgar.xbrl import XBRL
+from edgar import httpclient
 
 # Base paths
 FIXTURE_DIR = Path("tests/fixtures/xbrl2")
