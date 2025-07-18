@@ -24,6 +24,7 @@ nav:
       - "Search for Specific Filings": guides/searching-filings.md
       - "Filter Filings by Date/Type": guides/filtering-filings.md
       - "Access Filing Attachments": guides/filing-attachments.md
+      - "Finding the most recent filings": guides/current-filings.md
     - Companies:
       - "Working with a company": guides/finding-companies.md
     - Financial Analysis:
@@ -49,6 +50,7 @@ nav:
     - "SEC Rate Limits & Compliance": resources/sec-compliance.md
   - Advanced Topics:
     - Local Storage: local-data.md
+    - SSL Issues and Configuration: ssl_verification.md
     - Parsing SGML: sgml.md
     - User Journeys: examples.md
   - Contributing: contributing.md
