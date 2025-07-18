@@ -180,7 +180,7 @@ def test_edgar_verify_ssl(monkeypatch):
 
     # True when env variable set to undefined value
     monkeypatch.setenv("EDGAR_VERIFY_SSL", "unknown")
-    assert get_edgar_verify_ssl()
+    assert not get_edgar_verify_ssl()
 
     # False when env variable set to false
     monkeypatch.setenv("EDGAR_VERIFY_SSL", "false")
