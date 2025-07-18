@@ -32,6 +32,8 @@ from edgar._filings import (Filing,
                             Attachments,
                             get_filings,
                             get_current_filings,
+                            get_all_current_filings,
+                            iter_current_filings_pages,
                             get_by_accession_number,
                             FilingHomepage)
 from edgar.core import (edgar_mode,

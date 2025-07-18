@@ -95,6 +95,8 @@ __all__ = [
     'CurrentFilings',
     'available_quarters',
     'get_current_filings',
+    'iter_current_filings_pages',
+    'get_all_current_filings',
     'get_by_accession_number',
     'filing_date_to_year_quarters'
 ]
@@ -1091,13 +1093,71 @@ def get_current_filings(form: str = '',
     :return: The current filings from the SEC
     """
     owner = owner if owner in ['include', 'exclude', 'only'] else 'include'
-    page_size = page_size if page_size in [10, 20, 40, 80, 100] else 40
+    page_size = page_size if page_size in [10, 20, 40, 80, 100] else 100
     start = 0
 
     entries = get_current_entries_on_page(count=page_size, start=start, form=form, owner=owner)
     if not entries:
         return CurrentFilings(filing_index=_empty_filing_index(), owner=owner, form=form, page_size=page_size)
     return CurrentFilings(filing_index=pa.Table.from_pylist(entries), owner=owner, form=form, page_size=page_size)
+
+
+def iter_current_filings_pages(form: str = '',
+                              owner: str = 'include', 
+                              page_size: int = 100):
+    """
+    Iterator that yields CurrentFilings pages until exhausted.
+    
+    Args:
+        form: Form type to filter by (e.g., "10-K", "8-K")
+        owner: Owner filter ('include', 'exclude', 'only')
+        page_size: Number of filings per page (10, 20, 40, 80, 100)
+    
+    Yields:
+        CurrentFilings: Each page of current filings until no more pages
+        
+    Example:
+        >>> for page in iter_current_filings_pages(form="10-K"):
+        ...     print(f"Processing {len(page)} filings")
+        ...     # Process each page
+    """
+    current_page = get_current_filings(form=form, owner=owner, page_size=page_size)
+    
+    while current_page is not None:
+        yield current_page
+        current_page = current_page.next()
+
+
+def get_all_current_filings(form: str = '', 
+                           owner: str = 'include', 
+                           page_size: int = 100) -> Filings:
+    """
+    Get ALL current filings by iterating through all pages.
+    
+    Args:
+        form: Form type to filter by (e.g., "10-K", "8-K")
+        owner: Owner filter ('include', 'exclude', 'only')
+        page_size: Number of filings per page (10, 20, 40, 80, 100)
+    
+    Returns:
+        Filings: A regular Filings object containing all current filings
+        
+    Example:
+        >>> all_filings = get_all_current_filings(form="10-K")
+        >>> print(f"Found {len(all_filings)} total current 10-K filings")
+    """
+    all_entries = []
+    
+    for page in iter_current_filings_pages(form=form, owner=owner, page_size=page_size):
+        # Convert PyArrow table to list and extend
+        page_entries = page.data.to_pylist()
+        all_entries.extend(page_entries)
+    
+    if not all_entries:
+        return Filings(_empty_filing_index())
+    
+    # Return as regular Filings object (not CurrentFilings)
+    return Filings(pa.Table.from_pylist(all_entries))
 
 
 class CurrentFilings(Filings):
@@ -1123,7 +1183,7 @@ class CurrentFilings(Filings):
         if len(self.data) < self._page_size:
             return None
         start = self._start + len(self.data)
-        next_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form)
+        next_entries = get_current_entries_on_page(start=start-1, count=self._page_size, form=self.form)
         if next_entries:
             # Copy the values to this Filings object and return it
             self.data = pa.Table.from_pylist(next_entries)

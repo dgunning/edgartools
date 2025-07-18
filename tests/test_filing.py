@@ -717,20 +717,6 @@ def test_find_old_filing():
     assert filing
 
 
-def test_get_current_filing_by_accession_number():
-    current_filings = get_current_filings()
-    print()
-    print(current_filings)
-    filing = current_filings[0]
-    # Now find the filing
-    filing = get_by_accession_number(filing.accession_no)
-    assert filing
-    assert filing.accession_no == current_filings[0].accession_no
-
-    # Now find a filing that is on the next page
-    current_filings = current_filings.next()
-    filing_on_next_page = current_filings[40]
-    print(filing_on_next_page)
 
 
 

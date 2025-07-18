@@ -1,7 +1,9 @@
 
-from edgar._filings import get_current_filings, parse_summary, CurrentFilings
+from edgar._filings import get_current_filings, parse_summary, CurrentFilings, get_all_current_filings
+from edgar import get_all_current_filings, Filings, iter_current_filings_pages
 import datetime
 import pytest
+from edgar import get_by_accession_number
 
 def test_get_current_entries():
     print()
@@ -110,3 +112,27 @@ def test_current_filings_with_no_results():
     assert isinstance(filings, CurrentFilings)
     assert filings.start_date is None
     assert filings.end_date is None
+
+def test_get_current_filing_by_accession_number():
+    current_filings = get_current_filings()
+    print()
+    print(current_filings)
+    filing = current_filings[0]
+    # Now find the filing
+    filing = get_by_accession_number(filing.accession_no)
+    assert filing
+    assert filing.accession_no == current_filings[0].accession_no
+
+    # Now find a filing that is on the next page
+    current_filings = current_filings.next()
+    filing_on_next_page = current_filings[40]
+    print(filing_on_next_page)
+
+def test_get_all_current_filings():
+    all_filings = get_all_current_filings()
+    assert isinstance(all_filings, Filings)
+    assert len(all_filings) > 100
+
+def test_iter_current_filings_pages():
+    filings = next(iter_current_filings_pages())
+    assert filings
