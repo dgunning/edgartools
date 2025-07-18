@@ -25,14 +25,11 @@ This module provides functions to handle HTTP requests with retry logic, throttl
 """
 __all__ = ["get_with_retry", "get_with_retry_async", "stream_with_retry", "post_with_retry", "post_with_retry_async",
            "download_file", "download_file_async", "download_json", "download_json_async", "stream_file",
-           "download_text", "download_text_between_tags", "download_bulk_data", "download_datafile",
-           "throttle_requests"]
+           "download_text", "download_text_between_tags", "download_bulk_data", "download_datafile"]
 
 attempts = 6
 retry_timeout = 40
 wait_initial = 0.1
-max_requests_per_second = 8
-throttle_disabled = False
 
 class TooManyRequestsError(Exception):
     def __init__(self, url, message="Too Many Requests"):
@@ -43,117 +40,6 @@ class TooManyRequestsError(Exception):
 
 class IdentityNotSetException(Exception):
     pass
-
-
-class RequestRate:
-    """
-    A simple class to represent a request rate, i.e., the maximum number of requests for a given time window
-    """
-
-    def __init__(self, max_requests: int, time_window: int):
-        if max_requests <= 0:
-            raise ValueError("max_requests must be a positive integer")
-        if time_window <= 0:
-            raise ValueError("time_window must be a positive integer")
-
-        self.max_requests: int = max_requests
-        self.time_window: int = time_window
-
-
-class Throttler:
-    """
-    A simple throttler that limits the number of requests per time window
-    """
-
-    def __init__(self, request_rate: RequestRate, sleep_interval=0.1):
-        self.request_rate = request_rate
-        self.sleep_interval = sleep_interval
-        self.request_timestamps = deque()
-        self.lock = Lock()
-        self.decorated_functions = None
-        self.total_calls = 0
-        self.peak_call_rate: float = 0.0
-
-    def get_ticket(self):
-        with self.lock:
-            current_time = time.monotonic()
-
-            # Remove timestamps older than the time window
-            while self.request_timestamps and self.request_timestamps[
-                0] <= current_time - self.request_rate.time_window:
-                self.request_timestamps.popleft()
-
-            if len(self.request_timestamps) < self.request_rate.max_requests:
-                self.request_timestamps.append(current_time)
-                return True
-            else:
-                return False
-
-    def wait_for_ticket(self):
-        while not self.get_ticket():
-            time.sleep(self.sleep_interval)
-
-    def update_metrics(self):
-        self.total_calls += 1
-        current_call_rate: float = len(self.request_timestamps) / self.request_rate.time_window
-        self.peak_call_rate = max(self.peak_call_rate, current_call_rate)
-
-    def get_metrics(self):
-        return {
-            "decorated_functions": self.decorated_functions,  # Now it's a list
-            "total_calls": self.total_calls,
-            "peak_call_rate": self.peak_call_rate,
-            "request_rate_limit": self.request_rate.max_requests,
-        }
-
-    def print_metrics(self):
-        metrics = self.get_metrics()
-        print(f"Metrics for decorated functions: {', '.join(metrics['decorated_functions'])}")
-        print(f"Total calls: {metrics['total_calls']}")
-        print(f"Peak call rate: {metrics['peak_call_rate']:.2f} calls per second")
-
-
-_throttler_instances = {}  # Singleton instance for throttler
-
-
-def throttle_requests(request_rate=None, requests_per_second=None, **kwargs):
-    """
-    Decorator to throttle the number of requests per second.
-    """
-
-    if requests_per_second is not None:
-        request_rate = RequestRate(max_requests=requests_per_second, time_window=1)
-    elif request_rate is None:
-        raise ValueError("Either request_rate or requests_per_second must be provided")
-
-    # Use a single key for all instances to create a global throttler
-    key = "global_throttler"
-
-    if key not in _throttler_instances:
-        _throttler_instances[key] = Throttler(request_rate, **kwargs)
-
-    throttler = _throttler_instances[key]
-
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            if throttle_disabled:
-                return func(*args, **kwargs)
-            else:
-                throttler.wait_for_ticket()
-                result = func(*args, **kwargs)
-                throttler.update_metrics()
-                return result
-
-        # Store the decorated function name
-        if throttler.decorated_functions is None:
-            throttler.decorated_functions = []
-        throttler.decorated_functions.append(func.__name__)
-
-        return wrapper
-
-    return decorator
-
 
 def is_redirect(response):
     return response.status_code in [301, 302]
@@ -202,7 +88,6 @@ def async_with_identity(func):
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
-@throttle_requests(requests_per_second=max_requests_per_second)
 def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
     """
     Sends a GET request with retry functionality and identity handling.
@@ -231,7 +116,6 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @async_with_identity
-@throttle_requests(requests_per_second=max_requests_per_second)
 async def get_with_retry_async(client: AsyncClient, url, identity=None, identity_callable=None, **kwargs):
     """
     Sends an asynchronous GET request with retry functionality and identity handling.
@@ -259,7 +143,6 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
-@throttle_requests(requests_per_second=max_requests_per_second)
 def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
     """
     Sends a streaming GET request with retry functionality and identity handling.
@@ -291,7 +174,6 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
-@throttle_requests(requests_per_second=max_requests_per_second)
 def post_with_retry(url, data=None, json=None, identity=None, identity_callable=None,
                     **kwargs):
     """
@@ -323,7 +205,6 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @async_with_identity
-@throttle_requests(requests_per_second=max_requests_per_second)
 async def post_with_retry_async(client: AsyncClient, 
                                 url,
                                 data=None,
@@ -495,7 +376,6 @@ CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
 
 @retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
 @with_identity
-@throttle_requests(requests_per_second=max_requests_per_second)
 async def stream_file(url: str,
                       as_text: bool = None,
                       path: Optional[Union[str, Path]] = None,
