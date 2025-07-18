@@ -1,9 +1,17 @@
 """
+
 Exposes two function for creating HTTP Clients:
 - http_client: Returns a global (technically a local in a closure) httpx.Client for synchronous use.
 - async_http_client: Creates and destroys an HTTP client for each async caller. For best results, create once per group of operations
 
 To close the global connection, call `close_client()`
+
+HTTPX Parameters are assembled from three sources:
+- edgar.httpclient.HTTPX_PARAMS
+- get_edgar_verify_ssl: checks EDGAR_VERIFY_SSL environment variable
+- edgar.core.get_identity: user_agent
+- any kwargs passed to http_client or async_http_client
+
 
 Implementation notes:
 - New "kwargs" and changes to HTTPX_PARAMS to http_client are ignored after the first creation, until close_client.
@@ -16,13 +24,19 @@ import threading
 from contextlib import asynccontextmanager, contextmanager, nullcontext
 import httpx
 from typing import AsyncGenerator, Optional
-
-from edgar.core import client_headers, edgar_mode
+from pyrate_limiter import Limiter, Rate, Duration
+from edgar.core import get_identity, edgar_mode
 
 log = logging.getLogger(__name__)
 
+
+
 HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
 
+REQUEST_PER_MIN_LIMIT = 9 # 9 per minute
+MAX_DELAY = 1000 * 60 # 1 minute
+
+RATE_LIMITER = Limiter(Rate(REQUEST_PER_MIN_LIMIT, Duration.MINUTE), raise_when_fail=False, max_delay=MAX_DELAY)
 
 def get_edgar_verify_ssl():
     """
@@ -36,22 +50,19 @@ def get_edgar_verify_ssl():
 def get_default_params():
     return {
         **HTTPX_PARAMS,
+        'User-Agent': get_identity(),
         "verify": get_edgar_verify_ssl(),
     }
 
 
 def edgar_client_factory(**kwargs) -> httpx.Client:
     params = get_default_params()
-    params["headers"] = client_headers()
-
     params.update(**kwargs)
     return httpx.Client(**params)
 
 
 def edgar_client_factory_async(**kwargs) -> httpx.AsyncClient:
     params = get_default_params()
-    params["headers"] = client_headers()
-
     params.update(**kwargs)
     return httpx.AsyncClient(**params)
 
