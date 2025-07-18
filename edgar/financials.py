@@ -8,12 +8,11 @@ from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
 
 class Financials:
-
     def __init__(self, xb: Optional[XBRL]):
         self.xb: XBRL = xb
 
     @classmethod
-    def extract(cls, filing) -> Optional['Financials']:
+    def extract(cls, filing) -> Optional["Financials"]:
         try:
             xb = XBRL.from_filing(filing)
             return Financials(xb)
@@ -66,11 +65,11 @@ class MultiFinancials:
     Merges the financial statements from multiple periods into a single financials.
     """
 
-    def __init__(self, xbs:XBRLS):
+    def __init__(self, xbs: XBRLS):
         self.xbs = xbs
 
     @classmethod
-    def extract(cls, filings) -> 'MultiFinancials':
+    def extract(cls, filings) -> "MultiFinancials":
         return cls(XBRLS.from_filings(filings))
 
     def balance_sheet(self) -> Optional[Statement]:
@@ -83,7 +82,7 @@ class MultiFinancials:
         return self.xbs.statements.cashflow_statement()
 
     def __rich__(self):
-        self.xbs.__rich__()
+        return self.xbs.__rich__()
 
     def __repr__(self):
         return repr_rich(self.__rich__())

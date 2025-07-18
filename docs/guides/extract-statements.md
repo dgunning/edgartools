@@ -66,7 +66,7 @@ company = Company("AAPL")
 filings = company.get_filings(form="10-K").head(3)  # Last 3 annual reports
 
 # Create multi-period financials
-multi_financials = MultiFinancials(filings)
+multi_financials = MultiFinancials.extract(filings)
 
 # Access statements spanning multiple years
 balance_sheet = multi_financials.balance_sheet()
@@ -375,7 +375,7 @@ import seaborn as sns
 
 # Get multi-period data
 filings = company.get_filings(form="10-K").head(5)
-multi_financials = MultiFinancials(filings)
+multi_financials = MultiFinancials.extract(filings)
 income_df = multi_financials.income.to_dataframe()
 
 # Extract revenue data for plotting

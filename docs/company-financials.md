@@ -29,7 +29,7 @@ The `MultiFinancials` class can be used to get financials for multiple years. To
 from edgar import MultiFinancials
 
 filings = company.latest("10-K", 5)
-financials = MultiFinancials(filings)
+financials = MultiFinancials.extract(filings)
 ```
 
 The `financials` property returns a `MultiFinancials` instance.
