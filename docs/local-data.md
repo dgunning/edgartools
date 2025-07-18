@@ -1,6 +1,15 @@
 # Downloading to Local Storage
 
-When you use **edgartools** to get Company, or the html content of a filing, this usually results in one of more requests to the SEC. However, you can download data in bulk to local storage to minimize these requests and speed up processing. 
+**edgartools** is designed for interactive query against **SEC Edgar** which means in normal operation it will make HTTP requests to the SEC website to retrieve data.
+For example, when you call `company.submissions` or `filing.attachments`, it will make a request to the SEC to retrieve the data.
+
+There are times when you want to minimize or even eliminate these requests.
+
+1. You already have the data downloaded and want to use it locally
+2. You want to speed up processing by avoiding network requests
+3. You want to work offline or in an environment with limited internet access
+
+For these cases, **edgartools** provides a way to download data to local storage and use it without making requests to the SEC.
 
 This includes the following data
 
@@ -54,7 +63,7 @@ These will be placed in the directory `EDGAR_LOCAL_DATA_DIR/filings/YYYYMMDD`.
 If local storage is enabled, edgartools will first check if the filing is available in local storage before making a request to the SEC.
 This will speed up processing and for the most part calls like `html()` and `text()` will behave transparently.
 
-Note that there are some differences between local attachments and attachments when doownloaded from the SEC.
+Note that there are some differences between local attachments and attachments when downloaded from the SEC.
 
 ### Downloading by dates
 
@@ -64,22 +73,21 @@ or `:YYYY-MM-DD`.
 
 Note that downloading filing attachment files can take a long time so be prepared when downloading for a range of dates.
 
-## Accessing the downloaded filings
 
-When you call `filing.attachments` on a locally downloaded filing, you will have access to the attachments that were downloaded.
-If you want to have each file independently you can use `attachments.download()`.
+## Using Filings to filter which filings to download
 
+Normal usage of the `download_filings()` function will download all filings for the given date range.
+If you want to filter which filings to download, you can use the `Filings` class to create a query that filters the filings based on various criteria like form type, company name, etc.
+
+For example, to download all 10-K filings for companies on the **NYSE** you can use the following code:
 ```python
-def download(self, path: Union[str, Path], archive: bool = False):
-    """
-     Download all the attachments to a specified path.
-    If the path is a directory, the file is saved with its original name in that directory.
-    If the path is a file, the file is saved with the given path name.
-    If archive is True, the attachments are saved in a zip file.
-    path: str or Path - The path to save the attachments
-    archive: bool (default False) - If True, save the attachments in a zip file
-    """
+from edgar import Filings
+filings = get_filings(form="10-K").filter(exchange="NYSE")
+filings.download()
 ```
+
+Note that this will still download the bulk filing files but on save it will filter and save only the filings that match the query.
+This means that there will be no difference in time saved but it will save disk space as only the relevant filings will be saved.
 
 
 
