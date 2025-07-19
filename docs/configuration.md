@@ -141,7 +141,53 @@ export EDGAR_VERIFY_SSL="true"
 - Development environments with self-signed certificates
 - Network environments with SSL inspection
 
-### Advanced Options
+### HTTP Rate Limiting
+Rate limiting is implemented in `httpclient_ratelimiting`. 
+
+The default rate limit is 9 requests per second. SEC has a maximum of 10 requests per second. To change the rate limit, call: `httpclient.update_rate_limiter(requests_per_second: int)`.
+
+### Advanced: Distributed Rate Limiting
+Distributed Rate Limiting: rate limiting is implemented using [pyrate_limiter](https://pypi.org/project/pyrate-limiter/). To use a distributed rate limiter, such as for multiprocessing, define an httpclient._RATE_LIMITER. Note that _, meaning this is likely to change in the future. 
+
+For example, to use a Postgres rate limiter: 
+```bash
+docker run --name pg-limiter \
+    -e POSTGRES_PASSWORD=pass \
+    -e POSTGRES_DB=ratelimit \
+    -p 5432:5432 \
+    -d postgres \
+    -c max_connections=200
+```
+
+In your code: 
+```py
+from pyrate_limiter import PostgresBucket, Rate, PostgresClock, Limiter, Duration
+from psycopg_pool import ConnectionPool
+
+rates = [Rate(requests_per_second, Duration.SECOND)]
+connection_pool = ConnectionPool('postgresql://postgres:pass@localhost:5432/ratelimit')
+clock = PostgresClock(connection_pool)
+bucket = PostgresBucket(connection_pool, table_name, rates)
+httpclient._RATE_LIMITER = Limiter(bucket, raise_when_fail=False, max_delay=max_delay, clock=clock)
+```
+
+### HTTP Caching 
+Web requests are cached by default, according to the rules defined in httpclient_cache. 
+
+#### Cache Directory
+
+The cache directory is set in `httpclient.CACHE_DIRECTORY`, set to `_cache` by default. Set CACHE_DIRECTORY=None to disable cache. Call `httpclient.close_client()` after any changes to the CACHE_DIRECTORY variable. 
+
+#### Caching Rules
+The SEC marks all requests as either NO-STORE or NO-CACHE, therefore a custom cache controller was implemented with the following rules: 
+- `/submissions` URLs for up to 10 minutes by default, set in `MAX_SUBMISSIONS_AGE_SECONDS`
+- `.*index/.*` URLs for up to 30 minutes by default, set in `MAX_INDEX_AGE_SECONDS`
+- `/Archives/edgar/data` URLs indefinitely (forever)
+
+See `httpclient_cache` for implementation. 
+
+#### Advanced: Alternative Storage Caches
+- The underlying cache is a FileStorage cache. While not implemented, it's feasible to replace this with a S3Storage cache by overriding get_transport and get_async_storage. See S3Storage and AsyncS3Storage at https://hishel.com/ for details.
 
 #### EDGAR_USE_RICH_LOGGING
 Enables enhanced console logging with rich formatting.
