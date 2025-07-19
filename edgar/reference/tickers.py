@@ -16,7 +16,7 @@ from edgar.reference.data.common import read_parquet_from_package, read_csv_from
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange', 'popular_us_stocks',
-           'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers', 'find_ticker', 'get_cik_ticker_lookup',
+           'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers', 'find_ticker', 'find_ticker_safe', 'get_cik_ticker_lookup',
            'get_company_cik_lookup', 'get_cik_tickers_from_ticker_txt', 'get_cik_tickers', 'get_company_tickers',
            'ticker_txt_url', 'company_tickers_json_url', 'mutual_fund_tickers_url', 'company_tickers_exchange_url',
            'Exchange'
@@ -246,6 +246,43 @@ def find_ticker(cik: Union[int, str]) -> str:
         return get_cik_ticker_lookup().get(cik, "")
     except (ValueError, TypeError):
         return ""
+
+
+def find_ticker_safe(cik: Union[int, str]) -> Optional[str]:
+    """Find the ticker symbol for a given CIK without making network calls.
+    Returns None if data is not already cached and would require a network call.
+    Returns empty string if CIK is found but has no ticker.
+
+    This function is designed for use cases where network calls should be avoided,
+    such as in rich display methods that should be fast and not block on I/O.
+
+    Args:
+        cik: Central Index Key (CIK) as integer or string
+
+    Returns:
+        Optional[str]: Ticker symbol, empty string if no ticker found, or None if network call would be required
+    """
+    try:
+        # Simple approach: check if all required cache functions have data
+        # Only proceed if all the underlying data is already cached
+        if (get_cik_ticker_lookup.cache_info().currsize > 0 and
+            get_company_cik_lookup.cache_info().currsize > 0 and
+            get_cik_tickers.cache_info().currsize > 0):
+            
+            # If we have cached data, try to use it
+            cik = int(str(cik).lstrip('0'))
+            
+            # This should be fast since data is cached
+            lookup_dict = get_cik_ticker_lookup()
+            return lookup_dict.get(cik, "")
+        else:
+            # Not all required data is cached, return None to avoid network calls
+            return None
+        
+    except Exception:
+        # Any error (including potential network errors) returns None
+        # This ensures we never trigger network calls
+        return None
 
 @lru_cache(maxsize=None)
 def get_company_ticker_name_exchange():
