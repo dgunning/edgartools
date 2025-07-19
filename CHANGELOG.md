@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.4.3 - 2025-07-19
+
+### Added
+- Add a function `set_local_storage_path` to set the local storage path for the EDGAR library
+
+### Changed
+- Simplify how local storage can be turned on by combining setting the local storage path and turning on local storage 
+- Remove unnecessary network calls when displaying a filing
+- The `Filing.period_of_report` now comes from the SGML rather than the Filing Home page. This eliminates a network call when displaying a filing
+
 ## 4.4.2 - 2025-07-18
 
 ### Fixed
