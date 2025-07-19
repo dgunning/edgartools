@@ -21,6 +21,7 @@ __all__ = ['download_edgar_data',
            'get_edgar_data_directory',
            'use_local_storage',
            'is_using_local_storage',
+           'set_local_storage_path',
            'download_filings',
            'local_filing_path',
            '_filter_extracted_files',
@@ -35,11 +36,61 @@ class DirectoryBrowsingNotAllowed(Exception):
         super().__init__(f"{message} \nurl: {url}")
         self.url = url
 
-def use_local_storage(use_local: bool = True):
+def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_local: Optional[bool] = None):
     """
-    Will use local data if set to True
+    Enable or disable local storage, optionally setting the storage path.
+    
+    This function supports multiple calling patterns for convenience:
+    
+    Args:
+        path_or_enable: Can be:
+            - bool: Enable (True) or disable (False) local storage
+            - str/Path: Path to storage directory (enables local storage)
+            - None: Use default behavior
+        use_local: Optional boolean to explicitly set enable/disable state.
+                  Only used when path_or_enable is a path.
+              
+    Raises:
+        FileNotFoundError: If path is provided but does not exist.
+        NotADirectoryError: If path exists but is not a directory.
+        
+    Examples:
+        >>> # Simple enable/disable (backward compatible)
+        >>> use_local_storage(True)
+        >>> use_local_storage(False)
+        >>> use_local_storage()  # defaults to True
+        
+        >>> # Set path and enable (new intuitive syntax)
+        >>> use_local_storage("~/Documents/edgar")
+        >>> use_local_storage("/tmp/edgar_data")
+        >>> use_local_storage(Path.home() / "edgar")
+        
+        >>> # Set path and explicitly control enable/disable
+        >>> use_local_storage("/tmp/edgar", True)   # enable
+        >>> use_local_storage("/tmp/edgar", False)  # set path but disable
     """
-    os.environ['EDGAR_USE_LOCAL_DATA'] = "1" if use_local else "0"
+    # Determine the actual values based on parameter types
+    if isinstance(path_or_enable, bool):
+        # Backward compatible: use_local_storage(True/False)
+        enable = path_or_enable
+        path = None
+    elif isinstance(path_or_enable, (str, Path)):
+        # New syntax: use_local_storage("/path/to/storage")
+        path = path_or_enable
+        enable = use_local if use_local is not None else True
+    elif path_or_enable is None:
+        # use_local_storage() - default behavior
+        enable = True
+        path = None
+    else:
+        raise TypeError(f"First parameter must be bool, str, Path, or None, got {type(path_or_enable)}")
+    
+    # If a path is provided and we're enabling local storage, set the path first
+    if path is not None and enable:
+        set_local_storage_path(path)
+    
+    # Set the local storage flag
+    os.environ['EDGAR_USE_LOCAL_DATA'] = "1" if enable else "0"
 
 
 def is_using_local_storage() -> bool:
@@ -47,6 +98,46 @@ def is_using_local_storage() -> bool:
     Returns True if using local storage
     """
     return strtobool(os.getenv('EDGAR_USE_LOCAL_DATA', "False"))
+
+
+def set_local_storage_path(path: Union[str, Path]) -> None:
+    """
+    Set the local storage path for Edgar data.
+    
+    This function provides a programmatic way to set the local storage directory,
+    equivalent to setting the EDGAR_LOCAL_DATA_DIR environment variable.
+    
+    Args:
+        path: Path to the directory where Edgar data should be stored.
+              Can be a string or Path object. The directory must already exist.
+              
+    Raises:
+        FileNotFoundError: If the specified directory does not exist.
+        NotADirectoryError: If the path exists but is not a directory.
+              
+    Example:
+        >>> # First create the directory
+        >>> os.makedirs("/tmp/edgar_data", exist_ok=True)
+        >>> set_local_storage_path("/tmp/edgar_data")
+        >>> 
+        >>> # Or use an existing directory
+        >>> set_local_storage_path(Path.home() / "Documents")
+    """
+    from pathlib import Path
+    
+    # Convert to Path object and resolve to absolute path
+    storage_path = Path(path).expanduser().resolve()
+    
+    # Validate that the directory exists
+    if not storage_path.exists():
+        raise FileNotFoundError(f"Directory does not exist: {storage_path}")
+    
+    # Validate that it's actually a directory
+    if not storage_path.is_dir():
+        raise NotADirectoryError(f"Path exists but is not a directory: {storage_path}")
+    
+    # Set the environment variable
+    os.environ['EDGAR_LOCAL_DATA_DIR'] = str(storage_path)
 
 
 async def download_facts_async(client: Optional[AsyncClient]) -> Path:

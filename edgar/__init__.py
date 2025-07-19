@@ -49,7 +49,7 @@ from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
 from edgar.xbrl import XBRL
 from edgar.files.html import Document
 from edgar.financials import Financials, MultiFinancials
-from edgar.storage import use_local_storage, is_using_local_storage, download_edgar_data, download_filings
+from edgar.storage import use_local_storage, is_using_local_storage, set_local_storage_path, download_edgar_data, download_filings
 
 # Another name for get_current_filings
 get_latest_filings = get_current_filings
