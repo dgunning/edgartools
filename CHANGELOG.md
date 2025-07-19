@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 4.4.2 - 2025-07-18
 
 ### Fixed
-- Fixed bug where `NultiFinancials` class returned None 
+- Fixed bug where `MultiFinancials` class returned None 
 - Fixed bug in `get_current_filings` where it did not return the last page of current filings
 
 ### Added
 - Added `get_all_current_filings` to accumulate all current (most recent unpublished) filings 
-- 
+
+
 ## 4.4.1 - 2025-07-17
 
 ### Fixed
