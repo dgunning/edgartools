@@ -15,7 +15,8 @@ from threading import Lock
 from typing import Optional, Union
 
 import orjson as json
-from httpx import AsyncClient, RequestError, Response, TimeoutException, ConnectError, HTTPError, Timeout
+from httpx import AsyncClient, RequestError, Response, TimeoutException, ConnectError, HTTPError, Timeout, ReadTimeout
+import httpcore
 from stamina import retry
 from tqdm import tqdm
 
@@ -58,6 +59,16 @@ QUICK_WAIT_MAX = 16  # max 16s delay
 BULK_RETRY_ATTEMPTS = 8
 BULK_RETRY_TIMEOUT = None  # unlimited
 BULK_WAIT_MAX = 120  # max 2min delay
+
+# Exception types to retry on - includes both httpx and httpcore exceptions
+RETRYABLE_EXCEPTIONS = (
+    # HTTPX exceptions
+    RequestError, HTTPError, TimeoutException, ConnectError, ReadTimeout,
+    # HTTPCORE exceptions that can slip through
+    httpcore.ReadTimeout, httpcore.WriteTimeout, httpcore.ConnectTimeout, 
+    httpcore.PoolTimeout, httpcore.ConnectError, httpcore.NetworkError,
+    httpcore.TimeoutException
+)
 
 
 class TooManyRequestsError(Exception):
@@ -242,7 +253,7 @@ def async_with_identity(func):
 
 
 @retry(
-    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    on=RETRYABLE_EXCEPTIONS,
     attempts=QUICK_RETRY_ATTEMPTS,
     wait_initial=RETRY_WAIT_INITIAL,
     wait_max=QUICK_WAIT_MAX,
@@ -282,7 +293,7 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
 
 @retry(
-    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    on=RETRYABLE_EXCEPTIONS,
     attempts=QUICK_RETRY_ATTEMPTS,
     wait_initial=RETRY_WAIT_INITIAL,
     wait_max=QUICK_WAIT_MAX,
@@ -324,7 +335,7 @@ async def get_with_retry_async(
 
 
 @retry(
-    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    on=RETRYABLE_EXCEPTIONS,
     attempts=BULK_RETRY_ATTEMPTS,
     timeout=BULK_RETRY_TIMEOUT,
     wait_initial=RETRY_WAIT_INITIAL,
@@ -367,7 +378,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
 
 @retry(
-    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    on=RETRYABLE_EXCEPTIONS,
     attempts=QUICK_RETRY_ATTEMPTS,
     wait_initial=RETRY_WAIT_INITIAL,
     wait_max=QUICK_WAIT_MAX,
@@ -413,7 +424,7 @@ def post_with_retry(
 
 
 @retry(
-    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    on=RETRYABLE_EXCEPTIONS,
     attempts=QUICK_RETRY_ATTEMPTS,
     wait_initial=RETRY_WAIT_INITIAL,
     wait_max=QUICK_WAIT_MAX,
@@ -613,7 +624,7 @@ CHUNK_SIZE_DEFAULT = 4 * 1024 * 1024    # 4MB default (backward compatibility)
 
 
 @retry(
-    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    on=RETRYABLE_EXCEPTIONS,
     attempts=BULK_RETRY_ATTEMPTS,
     timeout=BULK_RETRY_TIMEOUT,
     wait_initial=RETRY_WAIT_INITIAL,
@@ -805,7 +816,7 @@ logger = logging.getLogger(__name__)
 
 
 @retry(
-    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    on=RETRYABLE_EXCEPTIONS,
     attempts=BULK_RETRY_ATTEMPTS,
     timeout=BULK_RETRY_TIMEOUT,
     wait_initial=RETRY_WAIT_INITIAL,
