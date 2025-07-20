@@ -15,7 +15,7 @@ from threading import Lock
 from typing import Optional, Union
 
 import orjson as json
-from httpx import AsyncClient, RequestError, Response
+from httpx import AsyncClient, RequestError, Response, TimeoutException, ConnectError, HTTPError, Timeout
 from stamina import retry
 from tqdm import tqdm
 
@@ -44,10 +44,20 @@ __all__ = [
 ]
 
 attempts = 6
-retry_timeout = 40
-wait_initial = 0.1
 max_requests_per_second = 8
 throttle_disabled = False
+TIMEOUT = Timeout(30.0, connect=10.0)
+RETRY_WAIT_INITIAL = 1  # Initial retry delay (seconds)
+RETRY_WAIT_MAX = 60  # Max retry delay (seconds)
+
+# Quick API requests - fail fast for responsive UX
+QUICK_RETRY_ATTEMPTS = 5
+QUICK_WAIT_MAX = 16  # max 16s delay
+
+# Bulk downloads - very persistent for large files
+BULK_RETRY_ATTEMPTS = 8
+BULK_RETRY_TIMEOUT = None  # unlimited
+BULK_WAIT_MAX = 120  # max 2min delay
 
 
 class TooManyRequestsError(Exception):
@@ -232,7 +242,12 @@ def async_with_identity(func):
 
 
 @retry(
-    on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial
+    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
 )
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
@@ -267,7 +282,12 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
 
 @retry(
-    on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial
+    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
 )
 @async_with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
@@ -304,7 +324,13 @@ async def get_with_retry_async(
 
 
 @retry(
-    on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial
+    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    attempts=BULK_RETRY_ATTEMPTS,
+    timeout=BULK_RETRY_TIMEOUT,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=BULK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
 )
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
@@ -341,7 +367,12 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
 
 @retry(
-    on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial
+    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
 )
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
@@ -382,7 +413,12 @@ def post_with_retry(
 
 
 @retry(
-    on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial
+    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
 )
 @async_with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
@@ -577,7 +613,13 @@ CHUNK_SIZE_DEFAULT = 4 * 1024 * 1024    # 4MB default (backward compatibility)
 
 
 @retry(
-    on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial
+    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    attempts=BULK_RETRY_ATTEMPTS,
+    timeout=BULK_RETRY_TIMEOUT,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=BULK_WAIT_MAX,
+    wait_jitter=0.5,  # Add jitter to avoid synchronized retries
+    wait_exp_base=2  # Exponential backoff (doubles delay each retry)
 )
 @with_identity
 @throttle_requests(requests_per_second=max_requests_per_second)
@@ -611,7 +653,7 @@ async def stream_file(
     temp_file = Path(temp_dir) / f"download_{uuid.uuid1()}"
 
     try:
-        async with async_http_client(client) as async_client:
+        async with async_http_client(client, timeout=TIMEOUT) as async_client:
             async with async_client.stream("GET", url) as response:
                 inspect_response(response)
                 total_size = int(response.headers.get("Content-Length", 0))
@@ -681,13 +723,8 @@ async def stream_file(
                     shutil.move(str(temp_file), str(final_path))
                     return None
                 else:
-                    # Return content for in-memory use
-                    if as_text:
-                        with open(temp_file, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                    else:
-                        with open(temp_file, 'rb') as f:
-                            content = f.read()
+                    with open(temp_file, 'rb') as f:
+                        content = f.read()
                     return content
 
     finally:
@@ -768,7 +805,13 @@ logger = logging.getLogger(__name__)
 
 
 @retry(
-    on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial
+    on=(RequestError, HTTPError, TimeoutException, ConnectError),
+    attempts=BULK_RETRY_ATTEMPTS,
+    timeout=BULK_RETRY_TIMEOUT,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=BULK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
 )
 async def download_bulk_data(
         url: str,
