@@ -24,6 +24,7 @@ __all__ = ['download_edgar_data',
            'set_local_storage_path',
            'download_filings',
            'local_filing_path',
+           'check_filings_exist_locally',
            '_filter_extracted_files',
            'compress_filing',
            'decompress_filing',
@@ -289,19 +290,48 @@ def download_filings(filing_date: Optional[str] = None,
             for _, row in tqdm(filtered_files.iterrows(), desc='Downloading feed file(s)'):
                 bulk_filing_file = row['File']
                 bulk_file_directory = data_directory / row['Name'][:8]
+                filing_date_str = row['Name'][:8]  # Extract YYYYMMDD from filename
+                
                 if not overwrite_existing:
                     if bulk_file_directory.exists():
                         log.info('Skipping %s. Already exists', bulk_file_directory)
                         continue
+                
+                # Optimization: If we have specific accession numbers, check if all the ones 
+                # for this specific filing date already exist locally
+                if accession_numbers and filings is not None:
+                    # Convert YYYYMMDD to YYYY-MM-DD format 
+                    formatted_date = f"{filing_date_str[:4]}-{filing_date_str[4:6]}-{filing_date_str[6:8]}"
+                    
+                    # Filter accession numbers to only those for this specific filing date
+                    date_filtered_filings = filings.filter(filing_date=formatted_date)
+                    if not date_filtered_filings.empty:
+                        date_accession_numbers = date_filtered_filings.data['accession_number'].to_pylist()
+                        if check_filings_exist_locally(formatted_date, date_accession_numbers):
+                            log.info('Skipping %s. All required filings for this date already exist locally (%d filings)', 
+                                   bulk_file_directory, len(date_accession_numbers))
+                            continue
+                
+                # Track existing files before extraction to preserve them during filtering
+                existing_files = set()
+                if accession_numbers and bulk_file_directory.exists():
+                    existing_files = {str(f) for f in bulk_file_directory.glob('*.nc')}
+                
                 path = asyncio.run(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory))
                 log.info('Downloaded feed file to %s', path)
                 total_feed_files_downloaded += 1
                 
                 # If we have specific accession numbers, filter the extracted files
                 if accession_numbers and path.exists():
+                    _filter_extracted_files._existing_files = existing_files
+                    
                     log.info('Filtering extracted files to keep only specified accession numbers')
                     filings_kept = _filter_extracted_files(path, accession_numbers, compress=compress, compression_level=compression_level)
                     total_filings_kept += filings_kept
+                    
+                    # Clean up the tracking
+                    if hasattr(_filter_extracted_files, '_existing_files'):
+                        delattr(_filter_extracted_files, '_existing_files')
                 # If we don't have specific accession numbers but compression is enabled, compress all files
                 elif compress and path.exists():
                     log.info('Compressing all extracted files')
@@ -323,7 +353,8 @@ def download_filings(filing_date: Optional[str] = None,
 def _filter_extracted_files(directory_path: Path, accession_numbers: List[str], compress: bool = True, compression_level: int = 6) -> int:
     """
     Filter files in the extracted directory to keep only those matching the specified accession numbers.
-    Optionally compresses the kept files to save disk space.
+    Files from the current extraction that don't match are removed to save disk space.
+    Files that existed before this extraction (from previous downloads) are preserved.
     
     Args:
         directory_path: Path to the directory containing extracted files
@@ -343,16 +374,24 @@ def _filter_extracted_files(directory_path: Path, accession_numbers: List[str], 
     # Keep track of which filings were found
     filings_kept = 0
     
+    # Get list of files that existed before this extraction
+    # We'll preserve these even if they don't match our filter
+    existing_files = getattr(_filter_extracted_files, '_existing_files', set())
+    
     # Find all .nc files in the directory
     for file_path in directory_path.glob('*.nc'):
         # Extract accession number from filename
         file_accession = file_path.stem
         undashed_accession = file_accession.replace('-', '')
         
-        # If this file doesn't match any of our accession numbers, remove it
-        if undashed_accession not in normalized_accession_numbers and file_accession not in accession_numbers:
-            file_path.unlink()
-        else:
+        # Check if this file matches our filter
+        matches_filter = (undashed_accession in normalized_accession_numbers or 
+                         file_accession in accession_numbers)
+        
+        # Check if this file existed before this extraction
+        was_preexisting = str(file_path) in existing_files
+        
+        if matches_filter:
             filings_kept += 1
             # Compress the file if requested
             if compress and not is_compressed_file(file_path):
@@ -361,6 +400,14 @@ def _filter_extracted_files(directory_path: Path, accession_numbers: List[str], 
                     log.debug(f"Compressed {file_path}")
                 except Exception as e:
                     log.warning(f"Failed to compress {file_path}: {e}")
+        elif not was_preexisting:
+            # Remove files from current extraction that don't match filter
+            # But preserve files that existed before this extraction
+            try:
+                file_path.unlink()
+                log.debug(f"Removed non-matching file from current extraction: {file_path}")
+            except Exception as e:
+                log.warning(f"Failed to remove {file_path}: {e}")
     
     return filings_kept
 
@@ -645,6 +692,29 @@ def compress_all_filings(data_directory: Optional[Path] = None, compression_leve
                 log.warning(f"Failed to compress {file_path}: {e}")
     
     return files_compressed
+
+def check_filings_exist_locally(filing_date: Union[str, date], accession_numbers: List[str]) -> bool:
+    """
+    Check if all specified accession numbers already exist locally for a given filing date.
+    
+    Args:
+        filing_date: The filing date (YYYY-MM-DD format)
+        accession_numbers: List of accession numbers to check
+        
+    Returns:
+        bool: True if all filings exist locally, False otherwise
+    """
+    if not accession_numbers:
+        return False
+        
+    for accession_number in accession_numbers:
+        # Check both compressed and uncompressed versions
+        filing_path = local_filing_path(filing_date, accession_number)
+        if not filing_path.exists():
+            return False
+    
+    return True
+
 
 def local_filing_path(filing_date:Union[str, date],
                       accession_number:str,
