@@ -294,7 +294,7 @@ def download_filings(filing_date: Optional[str] = None,
                 
                 if not overwrite_existing:
                     if bulk_file_directory.exists():
-                        log.info('Skipping %s. Already exists', bulk_file_directory)
+                        log.warning('Skipping %s. Already exists', bulk_file_directory)
                         continue
                 
                 # Optimization: If we have specific accession numbers, check if all the ones 
@@ -308,8 +308,8 @@ def download_filings(filing_date: Optional[str] = None,
                     if not date_filtered_filings.empty:
                         date_accession_numbers = date_filtered_filings.data['accession_number'].to_pylist()
                         if check_filings_exist_locally(formatted_date, date_accession_numbers):
-                            log.info('Skipping %s. All required filings for this date already exist locally (%d filings)', 
-                                   bulk_file_directory, len(date_accession_numbers))
+                            log.warning('Not downloading for %s. All %d filings for this date already exist in local %s',
+                                   formatted_date, len(date_accession_numbers), bulk_file_directory)
                             continue
                 
                 # Track existing files before extraction to preserve them during filtering
