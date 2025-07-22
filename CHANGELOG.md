@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.4.4 - 2025-07-22
+
+### Changed
+- Late July Cusip ticker mappings added
+- Minor fix to is_company check
+- Add `owner_name` and `position` properties to `OwnershipForm` parent class of `Form3`, `Form4`, `Form5`
+- Increase logging in `edgar.storage` module
+- More robust handling of errors when getting storage
+- Improvements to downloading of filings to local storage making it easier to incrementally add filings
+
 ## 4.4.3 - 2025-07-19
 
 ### Added
