@@ -14,4 +14,4 @@ def pytest_configure(config):
     - Disables caching for testing
     """
 
-    httpclient.CACHE_DIRECTORY = None
+    httpclient.CACHE_ENABLED = False

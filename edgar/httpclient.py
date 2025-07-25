@@ -11,7 +11,7 @@ To change the rate limit, call `update_rate_limiter(requests_per_second)`
 ## Caching
 Caching is enabled by default, using the controller rules defined in httpclient_cache. 
 
-To disable the cache, set CACHE_DIRECTORY to None.
+To disable the cache, set CACHE_ENABLED to False.
 
 ## HTTPX Parameters 
 
@@ -39,12 +39,18 @@ from edgar.core import get_identity, edgar_mode, strtobool
 from edgar.httpclient_cache import get_cache_controller
 from edgar.httpclient_ratelimiter import RateLimitingTransport, AsyncRateLimitingTransport, create_rate_limiter
 from pathlib import Path
+from core import edgar_data_dir
 log = logging.getLogger(__name__)
 
 HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
 
-CACHE_DIRECTORY = "_cache"
+CACHE_ENABLED = True
 
+def get_cache_directory():
+    if CACHE_ENABLED:
+        return os.path.join(edgar_data_dir, "_cache")
+    else:
+        return None
 
 _DEFAULT_REQUEST_PER_SEC_LIMIT = 9
 _MAX_DELAY = 1000 * 60  # 1 minute
@@ -150,9 +156,11 @@ async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs
 
 
 def get_transport() -> httpx.BaseTransport:
-    if CACHE_DIRECTORY:
-        log.info(f"Cache is ENABLED, writing to {CACHE_DIRECTORY}")
-        storage = hishel.FileStorage(base_path=Path(CACHE_DIRECTORY))
+
+    cache_dir = get_cache_directory()
+    if cache_dir:
+        log.info(f"Cache is ENABLED, writing to {cache_dir}")
+        storage = hishel.FileStorage(base_path=Path(cache_dir))
         controller = get_cache_controller()
         rate_limit_transport = RateLimitingTransport(_RATE_LIMITER)
         return hishel.CacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
@@ -161,9 +169,10 @@ def get_transport() -> httpx.BaseTransport:
         return RateLimitingTransport(_RATE_LIMITER)
 
 def get_async_transport() -> httpx.AsyncBaseTransport:
-    if CACHE_DIRECTORY:
-        log.info(f"Cache is ENABLED, writing to {CACHE_DIRECTORY}")
-        storage = hishel.AsyncFileStorage(base_path=Path(CACHE_DIRECTORY))
+    cache_dir = get_cache_directory()
+    if cache_dir:
+        log.info(f"Cache is ENABLED, writing to {cache_dir}")
+        storage = hishel.AsyncFileStorage(base_path=Path(cache_dir))
         controller = get_cache_controller()
         rate_limit_transport = AsyncRateLimitingTransport(_RATE_LIMITER)
         return hishel.AsyncCacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
