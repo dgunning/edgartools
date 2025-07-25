@@ -24,11 +24,11 @@ __all__ = ['SECHTMLParser', 'Document', 'DocumentNode']
 
 
 class BaseNode(ABC):
-
     """Abstract base class for all document nodes with metadata support"""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def __init__(self):
+        self.metadata: Dict[str, Any] = {}
 
-    """Abstract base class for all document nodes"""
     @abstractmethod
     def render(self, console_width: int) -> RenderResult:
         """Render the node for display"""
@@ -59,7 +59,9 @@ class HeadingNode(BaseNode):
     content: str
     style: StyleInfo
     level: int = 1
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def __post_init__(self):
+        super().__init__()
 
     @property
     def type(self) -> str:
@@ -125,7 +127,9 @@ class HeadingNode(BaseNode):
 class TextBlockNode(BaseNode):
     content: str
     style: StyleInfo
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def __post_init__(self):
+        super().__init__()
 
     @property
     def type(self) -> str:
@@ -222,8 +226,10 @@ class TableRow:
 class TableNode(BaseNode):
     content: List[TableRow]
     style: StyleInfo
-    metadata: Dict[str, Any] = field(default_factory=dict)
     _processed_table: Optional[ProcessedTable] = None
+    
+    def __post_init__(self):
+        super().__init__()
 
     @property
     def type(self) -> str:
@@ -310,28 +316,54 @@ class TableNode(BaseNode):
         return table
 
 
+@dataclass
+class PageBreakNode(BaseNode):
+    """Represents a page break in the document"""
+    page_number: int
+    
+    def __post_init__(self):
+        super().__init__()
+
+    @property
+    def type(self) -> str:
+        return 'page_break'
+
+    def render(self, console_width: int) -> RenderResult:
+        """Render page break with page number"""
+        return Text(f"--- Page {self.page_number} ---", style="dim")
+
+
 def create_node(
         type_: str,
         content: Union[str, List[TableRow]],
         style: StyleInfo,
         level: int = 1,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        page_number: Optional[int] = None
 ) -> BaseNode:
     """Create a node with optional metadata"""
     metadata = metadata or {}
 
     if type_ == 'heading':
-        return HeadingNode(content=content, style=style, level=level, metadata=metadata)
+        node = HeadingNode(content=content, style=style, level=level)
     elif type_ == 'text_block':
-        return TextBlockNode(content=content, style=style, metadata=metadata)
+        node = TextBlockNode(content=content, style=style)
     elif type_ == 'table':
-        return TableNode(content=content, style=style, metadata=metadata)
+        node = TableNode(content=content, style=style)
+    elif type_ == 'page_break':
+        node = PageBreakNode(page_number=page_number)
     else:
         raise ValueError(f"Unknown node type: {type_}")
+    
+    # Apply metadata after creation
+    if metadata:
+        node.metadata.update(metadata)
+    
+    return node
 
 
 # 1. Add type literals and type guards
-NodeType = Literal['heading', 'text_block', 'table']
+NodeType = Literal['heading', 'text_block', 'table', 'page_break']
 ContentType = Union[str, Dict[str, Any], List[TableRow]]
 
 def is_table_content(content: ContentType) -> bool:
@@ -485,15 +517,15 @@ class Document:
         return [node for node in self.nodes if node.type == 'heading']
 
     @classmethod
-    def parse(cls, html: str) -> Optional['Document']:
+    def parse(cls, html: str, include_page_breaks: bool = False) -> Optional['Document']:
         root = HtmlDocument.get_root(html)
         if root:
-            parser = SECHTMLParser(root)
+            parser = SECHTMLParser(root, include_page_breaks=include_page_breaks)
             return parser.parse()
 
-    def to_markdown(self) -> str:
+    def to_markdown(self, start_page_number: int = 0) -> str:
         from edgar.files.markdown import MarkdownRenderer
-        return MarkdownRenderer(self).render()
+        return MarkdownRenderer(self, start_page_number=start_page_number).render()
 
     def __rich__(self) -> RenderResult:
         """Rich console protocol for rendering document"""
@@ -521,12 +553,14 @@ class StyledText:
 
 
 class SECHTMLParser:
-    def __init__(self, root: Tag, extract_data: bool = True):
+    def __init__(self, root: Tag, extract_data: bool = True, include_page_breaks: bool = False):
         self.data:DocumentData = HtmlDocument.extract_data(root) if extract_data else None
         self.root:Tag = root
         self.base_font_size = 10.0  # Default base font size in pt
         self.style_stack: List[StyleInfo] = []
         self.ix_tracker = IXTagTracker()  # Add IX tag tracker
+        self.include_page_breaks = include_page_breaks
+        self.current_page = -1  # Start at -1 so first page div becomes page 0
 
     def parse(self) -> Optional[Document]:
         body = self.root.find('body')
@@ -534,8 +568,118 @@ class SECHTMLParser:
             log.warning("No body tag found in HTML")
             return None
 
+        # If page breaks are enabled, detect them first
+        if self.include_page_breaks:
+            self._mark_page_breaks(body)
+
         nodes = self._parse_element(body)
+        
+        # If page breaks are enabled, ensure proper page numbering
+        if self.include_page_breaks and nodes:
+            # Find the first page break node
+            first_page_break_idx = None
+            for i, node in enumerate(nodes):
+                if node.type == 'page_break':
+                    first_page_break_idx = i
+                    break
+            
+            if first_page_break_idx is None:
+                # No page breaks found, this shouldn't happen if include_page_breaks is True
+                # but add a document start page break just in case
+                initial_page_break = create_node(
+                    type_='page_break',
+                    content=None,
+                    style=StyleInfo(),
+                    page_number=0,
+                    metadata={'source_element': 'document_start'}
+                )
+                nodes.insert(0, initial_page_break)
+            elif first_page_break_idx > 0:
+                # There's content before the first page break, add document start page break
+                initial_page_break = create_node(
+                    type_='page_break',
+                    content=None,
+                    style=StyleInfo(),
+                    page_number=0,
+                    metadata={'source_element': 'document_start'}
+                )
+                nodes.insert(0, initial_page_break)
+                # Re-number subsequent page breaks
+                for i in range(1, len(nodes)):
+                    if nodes[i].type == 'page_break':
+                        nodes[i].page_number = i // 2  # Rough estimate, will be fixed in next loop
+            
+            # Final pass: renumber all page breaks sequentially
+            page_counter = 0
+            for node in nodes:
+                if node.type == 'page_break':
+                    node.page_number = page_counter
+                    page_counter += 1
+        
         return Document(nodes=nodes)
+
+    def _mark_page_breaks(self, element: Tag) -> None:
+        """Mark page break elements for detection during parsing"""
+        from .page_breaks import PageBreakDetector
+        PageBreakDetector.mark_page_breaks(element)
+
+    def _mark_page_divs(self, element: Tag) -> None:
+        """Mark div elements with page-like dimensions as page breaks"""
+        from .page_breaks import PageBreakDetector
+        # This is now handled by PageBreakDetector.mark_page_breaks()
+        # Keeping this method for backward compatibility
+        pass
+
+    def _is_page_like_div(self, style: str) -> bool:
+        """Check if a div has page-like dimensions based on its style"""
+        from .page_breaks import PageBreakDetector
+        return PageBreakDetector._is_page_like_div(style)
+
+    def _process_div_content(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process the content inside a page div without treating the div itself as a page break"""
+        # Parse current element's style
+        current_style = parse_style(element.get('style', ''))
+        
+        # Merge with parent style if there is one
+        if self.style_stack:
+            current_style = current_style.merge(self.style_stack[-1])
+        
+        # Track entering ix tags and get metadata
+        self.ix_tracker.enter_tag(element)
+        ix_metadata = self.ix_tracker.get_current_context(element)
+        
+        try:
+            # Push current style to stack before processing children
+            self.style_stack.append(current_style)
+            
+            try:
+                # Check if this div contains tables
+                if element.get('has_table'):
+                    # Structure-preserving mode for divs with tables
+                    result = self._process_structured_content(element, current_style)
+                else:
+                    # Content-combining mode for divs without tables
+                    result = self._process_inline_content(element, current_style)
+                
+                # Apply ix metadata if available
+                if result and ix_metadata:
+                    if isinstance(result, list):
+                        for node in result:
+                            if hasattr(node, 'metadata'):
+                                node.metadata.update(ix_metadata)
+                    else:
+                        if hasattr(result, 'metadata'):
+                            result.metadata.update(ix_metadata)
+                
+                return result
+                
+            finally:
+                # Always pop the style from stack when done
+                self.style_stack.pop()
+                
+        finally:
+            # Track exiting ix tags
+            self.ix_tracker.exit_tag(element)
 
     def _parse_element(self, element: Tag) -> List[BaseNode]:
         nodes = []
@@ -670,8 +814,211 @@ class SECHTMLParser:
         text = re.sub(r' +', ' ', text)
         return text.strip()
 
+    def _handle_page_break_element(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Handle elements marked as page breaks"""
+        # For the first page break, don't increment if we're at -1 (start)
+        if self.current_page == -1:
+            self.current_page = 0
+        else:
+            self.current_page += 1
+            
+        page_break_node = create_node(
+            type_='page_break',
+            content=None,
+            style=StyleInfo(),
+            page_number=self.current_page,
+            metadata={'source_element': element.name}
+        )
+        
+        # Check if this is a container page break or content-bearing page break
+        if element.name == 'div' and self._is_page_like_div(element.get('style', '')):
+            # This is a page div - return page break AND process content inside
+            nodes = [page_break_node]
+            content_nodes = self._process_div_content(element)
+            if content_nodes:
+                if isinstance(content_nodes, list):
+                    nodes.extend(content_nodes)
+                else:
+                    nodes.append(content_nodes)
+            return nodes
+            
+        elif element.name in ['p', 'div'] and element.get_text(strip=True):
+            # This is a content-bearing element with page break style - return page break AND content
+            nodes = [page_break_node]
+            
+            if element.name == 'p':
+                current_style = parse_style(element.get('style', ''))
+                if self.style_stack:
+                    current_style = current_style.merge(self.style_stack[-1])
+                content_node = self._process_paragraph(element, current_style)
+                if content_node:
+                    nodes.append(content_node)
+            elif element.name == 'div':
+                content_nodes = self._process_div_content(element)
+                if content_nodes:
+                    if isinstance(content_nodes, list):
+                        nodes.extend(content_nodes)
+                    else:
+                        nodes.append(content_nodes)
+            return nodes
+            
+        else:
+            # This is a marker-only page break (hr, empty elements) - return just the page break
+            return page_break_node
+
+    def _apply_metadata_to_nodes(self, nodes: Union[BaseNode, List[BaseNode]], metadata: Dict[str, Any]) -> None:
+        """Apply metadata to a node or list of nodes"""
+        if not metadata:
+            return
+            
+        if isinstance(nodes, list):
+            for node in nodes:
+                if hasattr(node, 'metadata'):
+                    node.metadata.update(metadata)
+        else:
+            if hasattr(nodes, 'metadata'):
+                nodes.metadata.update(metadata)
+    
+    def _process_element_with_page_breaks(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process an element that contains page break descendants"""
+        nodes = []
+        
+        for child in element.children:
+            if isinstance(child, Tag):
+                # Check if this child is a page break or contains page breaks
+                if child.get('_is_page_break') == 'true':
+                    page_break_result = self._handle_page_break_element(child)
+                    if page_break_result:
+                        if isinstance(page_break_result, list):
+                            nodes.extend(page_break_result)
+                        else:
+                            nodes.append(page_break_result)
+                else:
+                    # Process child normally
+                    child_result = self._process_element(child)
+                    if child_result:
+                        if isinstance(child_result, list):
+                            nodes.extend(child_result)
+                        else:
+                            nodes.append(child_result)
+        
+        return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
+    def _dispatch_element_processing(self, element: Tag, current_style: StyleInfo, ix_metadata: Dict[str, Any]) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Dispatch element processing based on element type"""
+        # Handle ix: tags by processing their content sequentially
+        if element.name.startswith('ix:'):
+            return self._process_ix_element(element, current_style, ix_metadata)
+        
+        # Process table elements directly
+        if element.name == 'table':
+            table_node = self._process_table(element)
+            self._apply_metadata_to_nodes(table_node, ix_metadata)
+            return table_node
+
+        elif element.name == 'p':
+            return self._process_paragraph_element(element, current_style, ix_metadata)
+
+        elif element.name == 'div':
+            return self._process_div_element(element, current_style, ix_metadata)
+
+        # For other elements, process children
+        return self._process_generic_element(element, ix_metadata)
+
+    def _process_ix_element(self, element: Tag, current_style: StyleInfo, ix_metadata: Dict[str, Any]) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process ix: tagged elements"""
+        nodes = []
+        children = list(element.children)  # Convert to list to avoid iterator modification
+
+        for child in children:
+            if isinstance(child, Tag):
+                if child.name == 'table':
+                    table_node = self._process_table(child)
+                    if table_node:
+                        self._apply_metadata_to_nodes(table_node, ix_metadata)
+                        nodes.append(table_node)
+                elif child.name == 'p':
+                    para_node = self._process_paragraph(child, current_style)
+                    if para_node:
+                        self._apply_metadata_to_nodes(para_node, ix_metadata)
+                        nodes.append(para_node)
+                elif child.name == 'div':
+                    div_style = parse_style(child.get('style', '')).merge(current_style)
+                    div_result = self._process_structured_content(child, div_style)
+                    if div_result:
+                        self._apply_metadata_to_nodes(div_result, ix_metadata)
+                        if isinstance(div_result, list):
+                            nodes.extend(div_result)
+                        else:
+                            nodes.append(div_result)
+                else:
+                    child_result = self._process_element(child)
+                    if child_result:
+                        self._apply_metadata_to_nodes(child_result, ix_metadata)
+                        if isinstance(child_result, list):
+                            nodes.extend(child_result)
+                        else:
+                            nodes.append(child_result)
+
+        return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
+    def _process_paragraph_element(self, element: Tag, current_style: StyleInfo, ix_metadata: Dict[str, Any]) -> Optional[BaseNode]:
+        """Process paragraph elements, checking for headings first"""
+        para_text = element.get_text(strip=True)
+        if para_text:
+            heading_level = get_heading_level(element, current_style, para_text)
+            if heading_level is not None:
+                node = create_node(
+                    type_='heading',
+                    content=para_text,
+                    style=current_style,
+                    level=heading_level
+                )
+                self._apply_metadata_to_nodes(node, ix_metadata)
+                return node
+        
+        para_node = self._process_paragraph(element, current_style)
+        self._apply_metadata_to_nodes(para_node, ix_metadata)
+        return para_node
+
+    def _process_div_element(self, element: Tag, current_style: StyleInfo, ix_metadata: Dict[str, Any]) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process div elements based on whether they contain tables"""
+        if element.get('has_table'):
+            # Structure-preserving mode for divs with tables
+            block_result = self._process_structured_content(element, current_style)
+        else:
+            # Content-combining mode for divs without tables
+            block_result = self._process_inline_content(element, current_style)
+        
+        self._apply_metadata_to_nodes(block_result, ix_metadata)
+        return block_result
+
+    def _process_generic_element(self, element: Tag, ix_metadata: Dict[str, Any]) -> Optional[Union[BaseNode, List[BaseNode]]]:
+        """Process generic elements by processing their children"""
+        nodes = []
+        for child in element.children:
+            if isinstance(child, Tag):
+                child_result = self._process_element(child)
+                if child_result:
+                    self._apply_metadata_to_nodes(child_result, ix_metadata)
+                    if isinstance(child_result, list):
+                        nodes.extend(child_result)
+                    else:
+                        nodes.append(child_result)
+
+        return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+
     def _process_element(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
         """Process an element into one or more nodes with inherited styles and ix metadata"""
+        # Handle page break elements first
+        if self.include_page_breaks and element.get('_is_page_break') == 'true':
+            return self._handle_page_break_element(element)
+        
+        # Also check if this element contains page break descendants
+        if self.include_page_breaks and element.select('[_is_page_break="true"]'):
+            # This element contains page breaks, process them individually
+            return self._process_element_with_page_breaks(element)
+        
         # Phase 1: Mark all ancestors of tables
         tables = element.find_all('table', recursive=True)
         for table in tables:
@@ -711,129 +1058,8 @@ class SECHTMLParser:
                             node.metadata.update(ix_metadata)
                         return node
 
-                # Handle ix: tags by processing their content sequentially
-                if element.name.startswith('ix:'):
-                    nodes = []
-                    children = list(element.children)  # Convert to list to avoid iterator modification
-
-                    for i, child in enumerate(children):
-                        if isinstance(child, Tag):
-                            if child.name == 'table':
-                                # Process table
-                                table_node = self._process_table(child)
-                                if table_node:
-                                    if ix_metadata:
-                                        table_node.metadata.update(ix_metadata)
-                                    nodes.append(table_node)
-                            elif child.name == 'p':
-                                # Process paragraph
-                                para_node = self._process_paragraph(child, current_style)
-                                if para_node:
-                                    if ix_metadata:
-                                        para_node.metadata.update(ix_metadata)
-                                    nodes.append(para_node)
-                            elif child.name == 'div':
-                                # Process div with its own style
-                                div_style = parse_style(child.get('style', '')).merge(current_style)
-                                div_result = self._process_structured_content(child, div_style)
-                                if div_result:
-                                    if isinstance(div_result, list):
-                                        for node in div_result:
-                                            if ix_metadata:
-                                                node.metadata.update(ix_metadata)
-                                        nodes.extend(div_result)
-                                    else:
-                                        if ix_metadata:
-                                            div_result.metadata.update(ix_metadata)
-                                        nodes.append(div_result)
-                            else:
-                                # Process other elements recursively
-                                child_result = self._process_element(child)
-                                if child_result:
-                                    if isinstance(child_result, list):
-                                        for node in child_result:
-                                            if ix_metadata:
-                                                node.metadata.update(ix_metadata)
-                                        nodes.extend(child_result)
-                                    else:
-                                        if ix_metadata:
-                                            child_result.metadata.update(ix_metadata)
-                                        nodes.append(child_result)
-
-                    # Return the collected nodes
-                    return nodes[0] if len(nodes) == 1 else nodes if nodes else None
-
-                # Process table elements directly
-                if element.name == 'table':
-                    table_node = self._process_table(element)
-                    if table_node and ix_metadata:
-                        table_node.metadata.update(ix_metadata)
-                    return table_node
-
-                elif element.name == 'p':
-                    # Check for heading in paragraph first
-                    para_text = element.get_text(strip=True)
-                    if para_text:
-                        heading_level = get_heading_level(element, current_style, para_text)
-                        if heading_level is not None:
-                            node = create_node(
-                                type_='heading',
-                                content=para_text,
-                                style=current_style,
-                                level=heading_level
-                            )
-                            if ix_metadata:
-                                node.metadata.update(ix_metadata)
-                            return node
-                    para_node = self._process_paragraph(element, current_style)
-                    if para_node and ix_metadata:
-                        para_node.metadata.update(ix_metadata)
-                    return para_node
-
-                elif element.name == 'div':
-                    # Phase 2: Process content based on whether this div contains tables
-                    if element.get('has_table'):
-                        # Structure-preserving mode for divs with tables
-                        block_result = self._process_structured_content(element, current_style)
-                        if block_result:
-                            if isinstance(block_result, list):
-                                for node in block_result:
-                                    if ix_metadata:
-                                        node.metadata.update(ix_metadata)
-                            else:
-                                if ix_metadata:
-                                    block_result.metadata.update(ix_metadata)
-                        return block_result
-                    else:
-                        # Content-combining mode for divs without tables
-                        block_result = self._process_inline_content(element, current_style)
-                        if block_result:
-                            if isinstance(block_result, list):
-                                for node in block_result:
-                                    if ix_metadata:
-                                        node.metadata.update(ix_metadata)
-                            else:
-                                if ix_metadata:
-                                    block_result.metadata.update(ix_metadata)
-                        return block_result
-
-                # For other elements, process children
-                nodes = []
-                for child in element.children:
-                    if isinstance(child, Tag):
-                        child_result = self._process_element(child)
-                        if child_result:
-                            if isinstance(child_result, list):
-                                for node in child_result:
-                                    if ix_metadata:
-                                        node.metadata.update(ix_metadata)
-                                nodes.extend(child_result)
-                            else:
-                                if ix_metadata:
-                                    child_result.metadata.update(ix_metadata)
-                                nodes.append(child_result)
-
-                return nodes[0] if len(nodes) == 1 else nodes if nodes else None
+                # Dispatch to appropriate element handler
+                return self._dispatch_element_processing(element, current_style, ix_metadata)
 
             finally:
                 # Always pop the style from stack when done
@@ -932,7 +1158,7 @@ class SECHTMLParser:
         for child in element.children:
             if isinstance(child, NavigableString):
                 text = str(child).strip()
-                if text and text != '​':  # Skip zero-width spaces
+                if text and text != '\u200B':  # Skip zero-width spaces
                     text_parts.append(text)
             elif isinstance(child, Tag):
                 if child.name == 'br':
@@ -1112,7 +1338,7 @@ class SECHTMLParser:
         def process_row(row: Tag) -> TableRow:
             """Process row preserving cell structure"""
             cells = []
-            # Make non-recursive in case of nested tables
+            # Find direct child cells only to avoid nested table conflicts
             for td in row.find_all(['td', 'th'], recursive=False):
                 # Check if cell contains a nested table
                 nested_table = td.find('table')
@@ -1132,12 +1358,24 @@ class SECHTMLParser:
 
             return TableRow(cells=cells, is_header=row.find_parent('thead') is not None)
 
-        # Process all rows
+        # Process all rows (including those nested in tbody, thead, tfoot)
         rows = []
-        for tr in element.find_all('tr', recursive=False):
-            row = process_row(tr)
-            if row.cells:
-                rows.append(row)
+        
+        # First, try to find direct child tr elements
+        direct_trs = element.find_all('tr', recursive=False)
+        if direct_trs:
+            # If we found direct tr elements, use them
+            for tr in direct_trs:
+                row = process_row(tr)
+                if row.cells:
+                    rows.append(row)
+        else:
+            # If no direct tr elements, look in tbody, thead, tfoot children
+            for section in element.find_all(['tbody', 'thead', 'tfoot'], recursive=False):
+                for tr in section.find_all('tr', recursive=False):
+                    row = process_row(tr)
+                    if row.cells:
+                        rows.append(row)
 
         if rows:
             # Create metadata from table attributes
@@ -1422,7 +1660,7 @@ class SECHTMLParser:
                 # If units differ, prefer the larger width's unit
                 if style1.width.unit != style2.width.unit:
                     # Convert both to pixels for comparison
-                    # This is a simplified conversion - you might want to use the existing
+                                        # This is a simplified conversion - you might want to use the existing
                     # Width.to_chars method for more accurate conversion
                     w1_px = _to_pixels(style1.width)
                     w2_px = _to_pixels(style2.width)
