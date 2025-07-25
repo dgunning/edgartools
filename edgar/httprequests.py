@@ -11,6 +11,9 @@ from typing import Union, Optional
 
 from httpx import RequestError, Response, AsyncClient
 import orjson as json
+
+from httpx import AsyncClient, RequestError, Response, TimeoutException, ConnectError, HTTPError, Timeout, ReadTimeout
+import httpcore
 from stamina import retry
 from tqdm import tqdm
 
@@ -38,8 +41,31 @@ __all__ = [
 ]
 
 attempts = 6
-retry_timeout = 40
-wait_initial = 0.1
+
+max_requests_per_second = 8
+throttle_disabled = False
+TIMEOUT = Timeout(30.0, connect=10.0)
+RETRY_WAIT_INITIAL = 1  # Initial retry delay (seconds)
+RETRY_WAIT_MAX = 60  # Max retry delay (seconds)
+
+# Quick API requests - fail fast for responsive UX
+QUICK_RETRY_ATTEMPTS = 5
+QUICK_WAIT_MAX = 16  # max 16s delay
+
+# Bulk downloads - very persistent for large files
+BULK_RETRY_ATTEMPTS = 8
+BULK_RETRY_TIMEOUT = None  # unlimited
+BULK_WAIT_MAX = 120  # max 2min delay
+
+# Exception types to retry on - includes both httpx and httpcore exceptions
+RETRYABLE_EXCEPTIONS = (
+    # HTTPX exceptions
+    RequestError, HTTPError, TimeoutException, ConnectError, ReadTimeout,
+    # HTTPCORE exceptions that can slip through
+    httpcore.ReadTimeout, httpcore.WriteTimeout, httpcore.ConnectTimeout, 
+    httpcore.PoolTimeout, httpcore.ConnectError, httpcore.NetworkError,
+    httpcore.TimeoutException
+)
 
 
 class TooManyRequestsError(Exception):
@@ -97,7 +123,14 @@ def async_with_identity(func):
     return wrapper
 
 
-@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(
+    on=RETRYABLE_EXCEPTIONS,
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
+)
 @with_identity
 def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
     """
@@ -123,8 +156,15 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
             return get_with_retry(url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
         return response
 
-
-@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+      
+@retry(
+    on=RETRYABLE_EXCEPTIONS,
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
+)
 @async_with_identity
 async def get_with_retry_async(client: AsyncClient, url, identity=None, identity_callable=None, **kwargs):
     """
@@ -152,7 +192,15 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
     return response
 
 
-@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(
+    on=RETRYABLE_EXCEPTIONS,
+    attempts=BULK_RETRY_ATTEMPTS,
+    timeout=BULK_RETRY_TIMEOUT,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=BULK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
+)
 @with_identity
 def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
     """
@@ -181,7 +229,14 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
                 yield response
 
 
-@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(
+    on=RETRYABLE_EXCEPTIONS,
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
+)
 @with_identity
 def post_with_retry(url, data=None, json=None, identity=None, identity_callable=None, **kwargs):
     """
@@ -212,7 +267,14 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
         return response
 
 
-@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(
+    on=RETRYABLE_EXCEPTIONS,
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
+)
 @async_with_identity
 async def post_with_retry_async(client: AsyncClient, url, data=None, json=None, identity=None, identity_callable=None, **kwargs):
     """
@@ -379,7 +441,15 @@ async def download_file_async(
 CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
 
 
-@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
+@retry(
+    on=RETRYABLE_EXCEPTIONS,
+    attempts=BULK_RETRY_ATTEMPTS,
+    timeout=BULK_RETRY_TIMEOUT,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=BULK_WAIT_MAX,
+    wait_jitter=0.5,  # Add jitter to avoid synchronized retries
+    wait_exp_base=2  # Exponential backoff (doubles delay each retry)
+)
 @with_identity
 async def stream_file(
     url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, client: Optional[AsyncClient] = None, **kwargs
@@ -401,10 +471,15 @@ async def stream_file(
         # Set the default based on the file extension
         as_text = url.endswith(text_extensions)
 
-    async with async_http_client(client) as async_client:
-        async with async_client.stream("GET", url) as response:
-            inspect_response(response)
-            total_size = int(response.headers.get("Content-Length", 0))
+    # Create temporary directory for atomic downloads
+    temp_dir = tempfile.mkdtemp(prefix="edgar_")
+    temp_file = Path(temp_dir) / f"download_{uuid.uuid1()}"
+
+    try:
+        async with async_http_client(client, timeout=TIMEOUT) as async_client:
+            async with async_client.stream("GET", url) as response:
+                inspect_response(response)
+                total_size = int(response.headers.get("Content-Length", 0))
 
             if as_text:
                 # Download as text
@@ -432,17 +507,66 @@ async def stream_file(
                     progress_bar.update(len(chunk) / (1024 * 1024))  # Update in MB
                 progress_bar.close()
 
-                # Check if the content is gzip-compressed
-                if response.headers.get("Content-Encoding") == "gzip":
-                    content = gzip.decompress(content)
+                # Select optimal chunk size based on file size
+                if total_size > 0:
+                    if total_size > 500 * 1024 * 1024:  # > 500MB
+                        chunk_size = CHUNK_SIZE_LARGE
+                    elif total_size > 100 * 1024 * 1024:  # > 100MB
+                        chunk_size = CHUNK_SIZE_MEDIUM
+                    else:  # <= 100MB
+                        chunk_size = CHUNK_SIZE_SMALL
+                else:
+                    # Unknown size, use default
+                    chunk_size = CHUNK_SIZE_DEFAULT
 
-            if path:
-                if isinstance(path, str):
-                    path = Path(path)
-                if path.is_dir():
-                    path = path / os.path.basename(url)
+                # Always stream to temporary file
+                try:
+                    with open(temp_file, "wb") as f:
+                        # For large files, update progress less frequently to reduce overhead
+                        update_threshold = 1.0 if total_size > 500 * 1024 * 1024 else 0.1  # MB
+                        accumulated_mb = 0.0
+                        
+                        async for chunk in response.aiter_bytes(chunk_size=chunk_size):
+                            f.write(chunk)
+                            chunk_mb = len(chunk) / (1024 * 1024)
+                            accumulated_mb += chunk_mb
+                            
+                            # Update progress bar only when threshold is reached
+                            if accumulated_mb >= update_threshold:
+                                progress_bar.update(accumulated_mb)
+                                accumulated_mb = 0.0
+                        
+                        # Update any remaining progress
+                        if accumulated_mb > 0:
+                            progress_bar.update(accumulated_mb)
 
-            return save_or_return_content(content, path)
+                finally:
+                    progress_bar.close()
+
+                # Handle the result based on whether path was provided
+                if path is not None:
+                    # Atomic move to final destination
+                    final_path = Path(path)
+                    if final_path.is_dir():
+                        final_path = final_path / os.path.basename(url)
+
+                    # Ensure parent directory exists
+                    final_path.parent.mkdir(parents=True, exist_ok=True)
+
+                    # Atomic move from temp to final location
+                    shutil.move(str(temp_file), str(final_path))
+                    return None
+                else:
+                    with open(temp_file, 'rb') as f:
+                        content = f.read()
+                    return content
+
+    finally:
+        # Clean up temporary directory
+        try:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+        except Exception as e:
+            logger.warning(f"Failed to clean up temporary directory {temp_dir}: {e}")
 
 
 def download_json(data_url: str) -> dict:
@@ -512,8 +636,20 @@ def download_text_between_tags(url: str, tag: str):
 logger = logging.getLogger(__name__)
 
 
-@retry(on=RequestError, attempts=attempts, timeout=retry_timeout, wait_initial=wait_initial)
-async def download_bulk_data(url: str, data_directory: Path = get_edgar_data_directory(), client: Optional[AsyncClient] = None) -> Path:
+@retry(
+    on=RETRYABLE_EXCEPTIONS,
+    attempts=BULK_RETRY_ATTEMPTS,
+    timeout=BULK_RETRY_TIMEOUT,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=BULK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
+)
+async def download_bulk_data(
+        url: str,
+        data_directory: Path = get_edgar_data_directory(),
+        client: Optional[AsyncClient] = None,
+) -> Path:
     """
     Download and extract bulk data from zip or tar.gz archives
 

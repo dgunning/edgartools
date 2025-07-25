@@ -24,19 +24,25 @@ nav:
       - "Search for Specific Filings": guides/searching-filings.md
       - "Filter Filings by Date/Type": guides/filtering-filings.md
       - "Access Filing Attachments": guides/filing-attachments.md
+      - "Finding the most recent filings": guides/current-filings.md
     - Companies:
       - "Working with a company": guides/finding-companies.md
+      - Getting a list of company insiders: guides/company-insiders.md
     - Financial Analysis:
       - "Extract Financial Statements": guides/extract-statements.md
-  - Concepts:
-    - "Understanding SEC Filings": concepts/sec-filings.md
-    - "Understanding Data Objects": concepts/data-objects.md
+    - Advanced:
+        - "Using Local Data Storage": guides/local-storage.md
+        - SSL Issues and Configuration: guides/ssl_verification.md
+        - Parsing SGML: guides/sgml.md
   - XBRL and Financials:
     - Getting XBRL from Filings: getting-xbrl.md
     - Querying XBRL Facts: xbrl-querying.md
   - Data Objects:
     - Data Objects: data-objects.md
     - Insider Filings: insider-filings.md
+  - Concepts:
+    - "Understanding SEC Filings": concepts/sec-filings.md
+    - "Understanding Data Objects": concepts/data-objects.md
   - API Reference:
     - Core Objects:
       - Company: api/company.md
@@ -47,10 +53,7 @@ nav:
     - "Common Issues & Solutions": resources/troubleshooting.md
     - "Performance Best Practices": resources/performance.md
     - "SEC Rate Limits & Compliance": resources/sec-compliance.md
-  - Advanced Topics:
-    - Local Storage: local-data.md
-    - Parsing SGML: sgml.md
-    - User Journeys: examples.md
+
   - Contributing: contributing.md
 
 

@@ -26,19 +26,19 @@ def test_parse_entity_submissions():
 def test_entity_is_company():
 
     # Taneja Vaibhav at TSLA
-    assert get_entity_submissions(1771340).is_individual
+    assert Entity(1771340).is_individual
 
     # &VEST Domestic Fund II LP
-    assert get_entity_submissions(1800903).is_company
+    assert Entity(1800903).is_company
 
     # Siemens AG
-    assert get_entity_submissions(940418).is_company
+    assert Entity(940418).is_company
 
     # SIEMENS ENERGY AG/ADR
-    assert get_entity_submissions(1830056).is_company
+    assert Entity(1830056).is_company
 
     # SIEVERT STEPHANIE A
-    assert not get_entity_submissions(1718179).is_company
+    assert not Entity(1718179).is_company
 
     assert Entity(1911716).is_company
 
@@ -65,6 +65,11 @@ def test_warren_buffett():
     # Warren Buffett
     warren_buffet = Entity(315090)
     assert warren_buffet.is_individual
+
+def test_reed_hastings():
+    # Reed Hastings
+    reed_hastings = Entity('1033331')
+    assert reed_hastings.is_individual
 
 
 def test_display_name():

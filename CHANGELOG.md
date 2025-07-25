@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.4.5 - 2025-07-25
+
+## Fixed
+- Fix bug in period selection for `XBRLS` (multiple period financials) that caused some statements to be missing for some companies
+- Fix for some missing functions in Fund classes
+
+## 4.4.4 - 2025-07-22
+
+### Changed
+- Late July Cusip ticker mappings added
+- Minor fix to is_company check
+- Add `owner_name` and `position` properties to `OwnershipForm` parent class of `Form3`, `Form4`, `Form5`
+- Increase logging in `edgar.storage` module
+- More robust handling of errors when getting storage
+- Improvements to downloading of filings to local storage making it easier to incrementally add filings
+
+## 4.4.3 - 2025-07-19
+
+### Added
+- Add a function `set_local_storage_path` to set the local storage path for the EDGAR library
+
+### Changed
+- Simplify how local storage can be turned on by combining setting the local storage path and turning on local storage 
+- Remove unnecessary network calls when displaying a filing
+- The `Filing.period_of_report` now comes from the SGML rather than the Filing Home page. This eliminates a network call when displaying a filing
+
+## 4.4.2 - 2025-07-18
+
+### Fixed
+- Fixed bug where `MultiFinancials` class returned None 
+- Fixed bug in `get_current_filings` where it did not return the last page of current filings
+
+### Added
+- Added `get_all_current_filings` to accumulate all current (most recent unpublished) filings 
+
+
 ## 4.4.1 - 2025-07-17
 
 ### Fixed

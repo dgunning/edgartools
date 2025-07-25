@@ -67,7 +67,7 @@ from edgar.httprequests import download_file, download_text, download_text_betwe
 from edgar.httprequests import get_with_retry
 from edgar.reference import describe_form
 from edgar.reference.tickers import Exchange
-from edgar.reference.tickers import find_ticker
+from edgar.reference.tickers import find_ticker, find_ticker_safe
 from edgar.richtools import repr_rich, print_rich, rich_to_text, Docs
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingSGML, Reports, Statements, FilingHeader
@@ -1431,7 +1431,7 @@ class Filing:
         """
         Get the period of report for the filing
         """
-        return self.homepage.period_of_report
+        return self.sgml().period_of_report
 
     @property
     def attachments(self):
@@ -1593,11 +1593,13 @@ class Filing:
         else:
             company = ""
 
-        return cls(cik=filing_sgml.cik,
+        filing = cls(cik=filing_sgml.cik,
                    accession_no=filing_sgml.accession_number,
                    form=filing_sgml.form,
                    company=company,
                    filing_date=filing_sgml.filing_date)
+        filing._sgml = filing_sgml
+        return filing
 
     def sgml(self) -> FilingSGML:
         """
@@ -1841,7 +1843,7 @@ class Filing:
         └──────────────────────┴──────┴────────────┴────────────────────┴─────────┘
         :return: a rich table version of this filing
         """
-        ticker = find_ticker(self.cik)
+        ticker = find_ticker_safe(self.cik)
         ticker = f"{ticker}" if ticker else ""
 
         # The title of the panel

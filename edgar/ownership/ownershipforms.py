@@ -7,6 +7,7 @@ Ownership contains the domain model for forms
 The top level object is Ownership
 
 """
+import itertools
 from dataclasses import dataclass, field
 from datetime import date
 from functools import lru_cache
@@ -23,14 +24,14 @@ from rich.table import Table, Column
 
 from edgar._party import Address
 from edgar.core import (IntString, get_bool)
-from edgar.formatting import reverse_name, yes_no
 from edgar.datatools import convert_to_numeric
 from edgar.entity import Entity
+from edgar.formatting import reverse_name, yes_no
 from edgar.ownership.core import format_amount, format_currency, safe_numeric, format_numeric
+from edgar.ownership.html_render import ownership_to_html
 from edgar.richtools import repr_rich, df_to_rich_table
 from edgar.xmltools import (child_text, child_value)
-import itertools
-from edgar.ownership.html_render import ownership_to_html
+
 __all__ = [
     'Owner',
     'Issuer',
@@ -1306,7 +1307,7 @@ class InitialOwnershipSummary(OwnershipSummary):
                 deriv_table.add_column("Underlying", style="italic")
                 deriv_table.add_column("Shares", justify="right")
                 deriv_table.add_column("Exercise Price", justify="right", style="green")  # Highlight exercise price
-                deriv_table.add_column("Expiration",  style="dim")
+                deriv_table.add_column("Expiration", style="dim")
                 deriv_table.add_column("Ownership")
 
                 for holding in derivative:
@@ -1666,6 +1667,14 @@ class Ownership:
         self.reporting_period: str = reporting_period
         self.remarks: str = remarks
         self.no_securities = no_securities
+
+    @property
+    def insider_name(self):
+        return self._get_owner()
+
+    @property
+    def position(self):
+        return "/ ".join([o.position for o in self.reporting_owners.owners])
 
     def extract_form3_holdings(self) -> List[SecurityHolding]:
         """Extract all holdings from Form 3"""

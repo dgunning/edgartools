@@ -53,18 +53,3 @@ with httpclient.http_client(verify=False) as client:
 2. **Configuration Scope**: The SSL verification setting applies globally to all HTTP requests made by the library.
 3. **Documentation**: Always document when and why SSL verification is disabled in your code.
 4. **Security Review**: Have your security team review any permanent SSL verification disablement.
-
-## Technical Details
-
-The implementation is integrated into the `DEFAULT_PARAMS` in `httpclient.py`:
-
-```python
-DEFAULT_PARAMS = {
-    "timeout": edgar_mode.http_timeout,
-    "limits": edgar_mode.limits,
-    "default_encoding": "utf-8",
-    "verify": os.environ.get("EDGAR_VERIFY_SSL", "true").lower() != "false",
-}
-```
-
-This configuration affects both synchronous and asynchronous clients through the `_client_factory` and `async_http_client` functions.

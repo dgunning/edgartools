@@ -34,14 +34,23 @@ def get_financials_for_recent_filings(num_filings: int = 100, sleep_time: int = 
 
 def get_financials_for_filing(filings):
     xbs = XBRLS.from_filings(filings)
-    balance_sheet = xbs.statements.balance_sheet()
     income_statement = xbs.statements.income_statement()
-    cashflow_statement = xbs.statements.cashflow_statement()
+
     if income_statement:
         print(income_statement)
+    balance_sheet  = xbs.statements.balance_sheet()
+    if balance_sheet:
+        print(balance_sheet)
+    assert len(balance_sheet.periods) == len(xbs.xbrl_list)
+
+    cashflow_statement = xbs.statements.cashflow_statement()
+    if cashflow_statement:
+        print(cashflow_statement)
+    assert len(cashflow_statement.periods) == len(xbs.xbrl_list)
+
     print("*" * 80)
 
 
 if __name__ == '__main__':
-    get_financials_for_popular_stocks(sleep_time=4)
+    get_financials_for_popular_stocks(sleep_time=1)
     #get_financials_for_recent_filings(sleep_time=1)

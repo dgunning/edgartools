@@ -216,8 +216,6 @@ class EntityFilings(Filings):
         selection = self._sample(n)
         return EntityFilings(data=selection, cik=self.cik, company_name=self.company_name)
 
-    def __str__(self):
-        return f"{self.company_name} {self.cik} {super().__repr__()}"
 
     @staticmethod
     def summarize(data) -> pd.DataFrame:

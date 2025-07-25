@@ -1,21 +1,530 @@
 """
-XBRL Statement Stitching - Period Optimization
+XBRL Statement Stitching - Period Optimization (Refactored)
 
 This module provides functionality to determine optimal periods for stitching
 statements across multiple XBRL filings, handling period selection and
 fiscal period matching.
+
+Refactored to use a clean class-based architecture for better maintainability,
+testability, and extensibility.
 """
 
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import date
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
+import logging
 
 from edgar.xbrl.core import format_date, parse_date
-
 from edgar.xbrl.xbrl import XBRL
 
+logger = logging.getLogger(__name__)
 
-def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str, max_periods:int=8) -> List[Dict[str, Any]]:
+
+@dataclass
+class PeriodSelectionConfig:
+    """Configuration for period selection behavior"""
+    
+    # Duration ranges for different period types
+    annual_duration_range: Tuple[int, int] = (350, 380)
+    quarterly_duration_range: Tuple[int, int] = (80, 100)
+    q2_ytd_range: Tuple[int, int] = (175, 190)
+    q3_ytd_range: Tuple[int, int] = (260, 285)
+    q4_annual_range: Tuple[int, int] = (350, 380)
+    
+    # Target durations for optimization
+    target_annual_days: int = 365
+    target_quarterly_days: int = 90
+    target_q2_ytd_days: int = 180
+    target_q3_ytd_days: int = 270
+    
+    # Behavior flags
+    require_exact_matches: bool = True
+    allow_fallback_when_no_doc_date: bool = True
+    max_periods_default: int = 8
+
+
+class PeriodMatcher:
+    """Handles exact period matching logic"""
+    
+    def __init__(self, config: PeriodSelectionConfig):
+        self.config = config
+    
+    def find_exact_instant_match(self, periods: List[Dict], target_date: date) -> Optional[Dict]:
+        """Find instant period that exactly matches target date"""
+        for period in periods:
+            try:
+                period_date = parse_date(period['date'])
+                if period_date == target_date:
+                    return period
+            except (ValueError, TypeError) as e:
+                logger.warning(f"Failed to parse period date '{period.get('date')}': {e}")
+                continue
+        return None
+    
+    def find_exact_duration_match(self, periods: List[Dict], target_date: date) -> Optional[Dict]:
+        """Find duration period that ends exactly on target date"""
+        for period in periods:
+            try:
+                end_date = parse_date(period['end_date'])
+                if end_date == target_date:
+                    return period
+            except (ValueError, TypeError) as e:
+                logger.warning(f"Failed to parse period end date '{period.get('end_date')}': {e}")
+                continue
+        return None
+    
+    def filter_by_duration_range(self, periods: List[Dict], min_days: int, max_days: int, target_days: int) -> List[Dict]:
+        """Filter periods by duration and sort by proximity to target"""
+        filtered_periods = []
+        
+        for period in periods:
+            duration_days = period.get('duration_days')
+            if duration_days is None:
+                try:
+                    start_date = parse_date(period['start_date'])
+                    end_date = parse_date(period['end_date'])
+                    duration_days = (end_date - start_date).days
+                    period = period.copy()
+                    period['duration_days'] = duration_days
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Failed to calculate duration for period: {e}")
+                    continue
+            
+            if min_days <= duration_days <= max_days:
+                filtered_periods.append(period)
+        
+        # Sort by proximity to target duration
+        filtered_periods.sort(key=lambda x: abs(x['duration_days'] - target_days))
+        return filtered_periods
+
+
+class FiscalPeriodClassifier:
+    """Classifies and filters periods based on fiscal information"""
+    
+    def __init__(self, config: PeriodSelectionConfig):
+        self.config = config
+    
+    def classify_annual_periods(self, periods: List[Dict]) -> List[Dict]:
+        """Identify annual periods (350-380 days)"""
+        min_days, max_days = self.config.annual_duration_range
+        target_days = self.config.target_annual_days
+        
+        annual_periods = []
+        for period in periods:
+            duration_days = period.get('duration_days', 0)
+            if min_days <= duration_days <= max_days:
+                annual_periods.append(period)
+        
+        # Sort by proximity to target annual duration
+        annual_periods.sort(key=lambda x: abs(x.get('duration_days', 0) - target_days))
+        return annual_periods
+    
+    def classify_quarterly_periods(self, periods: List[Dict]) -> List[Dict]:
+        """Identify quarterly periods (80-100 days)"""
+        min_days, max_days = self.config.quarterly_duration_range
+        target_days = self.config.target_quarterly_days
+        
+        quarterly_periods = []
+        for period in periods:
+            duration_days = period.get('duration_days', 0)
+            if min_days <= duration_days <= max_days:
+                quarterly_periods.append(period)
+        
+        # Sort by proximity to target quarterly duration
+        quarterly_periods.sort(key=lambda x: abs(x.get('duration_days', 0) - target_days))
+        return quarterly_periods
+    
+    def classify_ytd_periods(self, periods: List[Dict], fiscal_period: str) -> List[Dict]:
+        """Identify YTD periods based on fiscal quarter"""
+        if fiscal_period not in ['Q2', 'Q3', 'Q4']:
+            return []
+        
+        # Get expected duration range for this fiscal period
+        duration_ranges = {
+            'Q2': self.config.q2_ytd_range,
+            'Q3': self.config.q3_ytd_range,
+            'Q4': self.config.q4_annual_range
+        }
+        
+        target_durations = {
+            'Q2': self.config.target_q2_ytd_days,
+            'Q3': self.config.target_q3_ytd_days,
+            'Q4': self.config.target_annual_days
+        }
+        
+        min_days, max_days = duration_ranges[fiscal_period]
+        target_days = target_durations[fiscal_period]
+        
+        ytd_periods = []
+        for period in periods:
+            duration_days = period.get('duration_days', 0)
+            if min_days <= duration_days <= max_days:
+                ytd_periods.append(period)
+        
+        # Sort by proximity to target duration
+        ytd_periods.sort(key=lambda x: abs(x.get('duration_days', 0) - target_days))
+        return ytd_periods
+    
+    def get_expected_durations(self, fiscal_period: str) -> Dict[str, Tuple[int, int]]:
+        """Get expected duration ranges for fiscal period"""
+        if fiscal_period == 'FY':
+            return {'annual': self.config.annual_duration_range}
+        elif fiscal_period in ['Q1', 'Q2', 'Q3', 'Q4']:
+            durations = {'quarterly': self.config.quarterly_duration_range}
+            if fiscal_period == 'Q2':
+                durations['ytd'] = self.config.q2_ytd_range
+            elif fiscal_period == 'Q3':
+                durations['ytd'] = self.config.q3_ytd_range
+            elif fiscal_period == 'Q4':
+                durations['ytd'] = self.config.q4_annual_range
+            return durations
+        else:
+            return {}
+
+
+class StatementTypeSelector:
+    """Handles statement-specific period selection logic"""
+    
+    def __init__(self, matcher: PeriodMatcher, classifier: FiscalPeriodClassifier):
+        self.matcher = matcher
+        self.classifier = classifier
+    
+    def select_balance_sheet_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date]) -> List[Dict]:
+        """Select instant periods for balance sheets"""
+        # Filter for instant periods only
+        instant_periods = [p for p in xbrl.reporting_periods if p['type'] == 'instant']
+        
+        if not instant_periods:
+            return []
+        
+        # If we have document_period_end_date, find exact match
+        if doc_period_end_date:
+            exact_match = self.matcher.find_exact_instant_match(instant_periods, doc_period_end_date)
+            if exact_match:
+                return [exact_match]
+            else:
+                # No exact match found - don't use fallback to prevent fiscal year boundary issues
+                logger.info(f"No exact instant period match found for {doc_period_end_date}")
+                return []
+        
+        # No document_period_end_date available - use most recent period
+        instant_periods.sort(key=lambda x: x['date'], reverse=True)
+        return [instant_periods[0]]
+    
+    def select_income_statement_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date], 
+                                      fiscal_period: str) -> List[Dict]:
+        """Select duration periods for income statements"""
+        return self._select_duration_periods(xbrl, doc_period_end_date, fiscal_period)
+    
+    def select_cash_flow_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date], 
+                               fiscal_period: str) -> List[Dict]:
+        """Select duration periods for cash flow statements"""
+        return self._select_duration_periods(xbrl, doc_period_end_date, fiscal_period)
+    
+    def _select_duration_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date], 
+                               fiscal_period: str) -> List[Dict]:
+        """Common logic for selecting duration periods"""
+        # Filter for duration periods only
+        duration_periods = [p for p in xbrl.reporting_periods if p['type'] == 'duration']
+        
+        if not duration_periods:
+            return []
+        
+        # Add duration_days to all periods
+        enriched_periods = []
+        for period in duration_periods:
+            try:
+                start_date = parse_date(period['start_date'])
+                end_date = parse_date(period['end_date'])
+                period_copy = period.copy()
+                period_copy['duration_days'] = (end_date - start_date).days
+                enriched_periods.append(period_copy)
+            except (ValueError, TypeError) as e:
+                logger.warning(f"Failed to parse period dates: {e}")
+                continue
+        
+        if not enriched_periods:
+            return []
+        
+        # If we have document_period_end_date, find periods that end exactly on that date
+        if doc_period_end_date:
+            matching_periods = []
+            for period in enriched_periods:
+                try:
+                    end_date = parse_date(period['end_date'])
+                    if end_date == doc_period_end_date:
+                        matching_periods.append(period)
+                except (ValueError, TypeError):
+                    continue
+            
+            if matching_periods:
+                return self._select_appropriate_durations(matching_periods, fiscal_period)
+            else:
+                # No exact match found - don't use fallback
+                logger.info(f"No exact duration period match found for {doc_period_end_date}")
+                return []
+        
+        # No document_period_end_date - use fallback logic
+        return self._select_fallback_periods(enriched_periods, fiscal_period)
+    
+    def _select_appropriate_durations(self, periods: List[Dict], fiscal_period: str) -> List[Dict]:
+        """Select appropriate duration periods based on fiscal period"""
+        selected_periods = []
+        
+        is_annual = fiscal_period == 'FY'
+        
+        if is_annual:
+            # For annual reports, select annual periods
+            annual_periods = self.classifier.classify_annual_periods(periods)
+            if annual_periods:
+                selected_periods.append(annual_periods[0])
+        else:
+            # For quarterly reports, select quarterly period
+            quarterly_periods = self.classifier.classify_quarterly_periods(periods)
+            if quarterly_periods:
+                selected_periods.append(quarterly_periods[0])
+            
+            # Also select YTD period if appropriate
+            ytd_periods = self.classifier.classify_ytd_periods(periods, fiscal_period)
+            if ytd_periods:
+                selected_periods.append(ytd_periods[0])
+        
+        return selected_periods
+    
+    def _select_fallback_periods(self, periods: List[Dict], fiscal_period: str) -> List[Dict]:
+        """Fallback period selection when no document_period_end_date is available"""
+        is_annual = fiscal_period == 'FY'
+        
+        if is_annual:
+            # For annual reports, prefer periods closest to 365 days
+            annual_periods = self.classifier.classify_annual_periods(periods)
+            if annual_periods:
+                # Sort by end date and take the most recent
+                annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                return [annual_periods[0]]
+        else:
+            # For quarterly reports, prefer quarterly duration
+            quarterly_periods = self.classifier.classify_quarterly_periods(periods)
+            selected_periods = []
+            
+            if quarterly_periods:
+                quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                selected_periods.append(quarterly_periods[0])
+            
+            # Add YTD period if available
+            ytd_periods = self.classifier.classify_ytd_periods(periods, fiscal_period)
+            if ytd_periods:
+                ytd_periods.sort(key=lambda x: x['end_date'], reverse=True)
+                selected_periods.append(ytd_periods[0])
+            
+            return selected_periods
+        
+        # If no appropriate periods found, return the most recent period
+        periods.sort(key=lambda x: x['end_date'], reverse=True)
+        return [periods[0]]
+
+
+class PeriodMetadataEnricher:
+    """Handles period metadata enrichment"""
+    
+    def enrich_period_metadata(self, period: Dict, xbrl_index: int, entity_info: Dict, 
+                              doc_period_end_date: Optional[date], fiscal_period: str, 
+                              fiscal_year: str) -> Dict[str, Any]:
+        """Add comprehensive metadata to period"""
+        period_metadata = {
+            'xbrl_index': xbrl_index,
+            'period_key': period['key'],
+            'period_label': period['label'],
+            'period_type': period['type'],
+            'entity_info': entity_info,
+            'doc_period_end_date': doc_period_end_date,
+            'fiscal_period': fiscal_period,
+            'fiscal_year': fiscal_year
+        }
+        
+        # Add date information
+        if period['type'] == 'instant':
+            period_metadata['date'] = parse_date(period['date'])
+            period_metadata['display_date'] = format_date(period_metadata['date'])
+        else:  # duration
+            period_metadata['start_date'] = parse_date(period['start_date'])
+            period_metadata['end_date'] = parse_date(period['end_date'])
+            period_metadata['duration_days'] = period.get('duration_days', 
+                (period_metadata['end_date'] - period_metadata['start_date']).days)
+            period_metadata['display_date'] = format_date(period_metadata['end_date'])
+        
+        return period_metadata
+
+
+class PeriodDeduplicator:
+    """Handles period deduplication and sorting"""
+    
+    def deduplicate_periods(self, periods: List[Dict], statement_type: str) -> List[Dict]:
+        """Remove duplicate periods using exact date matching"""
+        filtered_periods = []
+        
+        for period in periods:
+            too_close = False
+            for included_period in filtered_periods:
+                # Skip if period types don't match
+                if period['period_type'] != included_period['period_type']:
+                    continue
+                
+                # Calculate date difference
+                if period['period_type'] == 'instant':
+                    date1 = period['date']
+                    date2 = included_period['date']
+                else:  # duration
+                    date1 = period['end_date']
+                    date2 = included_period['end_date']
+                
+                # Periods are duplicates if they have exactly the same date
+                if date1 == date2:
+                    too_close = True
+                    break
+            
+            if not too_close:
+                filtered_periods.append(period)
+        
+        return filtered_periods
+    
+    def sort_periods_chronologically(self, periods: List[Dict], statement_type: str) -> List[Dict]:
+        """Sort periods by appropriate date field"""
+        if statement_type == 'BalanceSheet':
+            return sorted(periods, key=lambda x: x['date'], reverse=True)
+        else:
+            return sorted(periods, key=lambda x: x['end_date'], reverse=True)
+    
+    def limit_periods(self, periods: List[Dict], max_periods: int) -> List[Dict]:
+        """Limit to maximum number of periods"""
+        return periods[:max_periods] if len(periods) > max_periods else periods
+
+
+class PeriodOptimizer:
+    """Main orchestrator for period optimization"""
+    
+    def __init__(self, config: Optional[PeriodSelectionConfig] = None):
+        self.config = config or PeriodSelectionConfig()
+        self.matcher = PeriodMatcher(self.config)
+        self.classifier = FiscalPeriodClassifier(self.config)
+        self.selector = StatementTypeSelector(self.matcher, self.classifier)
+        self.enricher = PeriodMetadataEnricher()
+        self.deduplicator = PeriodDeduplicator()
+    
+    def determine_optimal_periods(self, xbrl_list: List[XBRL], statement_type: str, 
+                                 max_periods: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Main entry point - orchestrates the entire process"""
+        max_periods = max_periods or self.config.max_periods_default
+        
+        # Step 1: Extract periods from all XBRLs
+        all_periods = self._extract_all_periods(xbrl_list, statement_type)
+        
+        # Step 2: Enrich with metadata
+        enriched_periods = self._enrich_with_metadata(all_periods)
+        
+        # Step 3: Deduplicate, sort, and limit
+        final_periods = self._deduplicate_and_limit(enriched_periods, max_periods, statement_type)
+        
+        return final_periods
+    
+    def _extract_all_periods(self, xbrl_list: List[XBRL], statement_type: str) -> List[Dict[str, Any]]:
+        """Extract periods from all XBRL objects"""
+        all_periods = []
+        
+        for i, xbrl in enumerate(xbrl_list):
+            # Skip XBRLs with no reporting periods
+            if not xbrl.reporting_periods:
+                continue
+            
+            entity_info = xbrl.entity_info or {}
+            doc_period_end_date = self._parse_document_period_end_date(entity_info)
+            fiscal_period = entity_info.get('fiscal_period')
+            fiscal_year = entity_info.get('fiscal_year')
+            
+            # Select appropriate periods based on statement type
+            selected_periods = self._select_periods_for_statement_type(
+                xbrl, statement_type, doc_period_end_date, fiscal_period
+            )
+            
+            # Add context information to each period
+            for period in selected_periods:
+                period_with_context = {
+                    'period': period,
+                    'xbrl_index': i,
+                    'entity_info': entity_info,
+                    'doc_period_end_date': doc_period_end_date,
+                    'fiscal_period': fiscal_period,
+                    'fiscal_year': fiscal_year
+                }
+                all_periods.append(period_with_context)
+        
+        return all_periods
+    
+    def _parse_document_period_end_date(self, entity_info: Dict) -> Optional[date]:
+        """Parse document_period_end_date from entity_info"""
+        if 'document_period_end_date' not in entity_info:
+            return None
+        
+        try:
+            doc_period_end_date = entity_info['document_period_end_date']
+            if not isinstance(doc_period_end_date, date):
+                doc_period_end_date = parse_date(str(doc_period_end_date))
+            return doc_period_end_date
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Failed to parse document_period_end_date: {e}")
+            return None
+    
+    def _select_periods_for_statement_type(self, xbrl: XBRL, statement_type: str, 
+                                         doc_period_end_date: Optional[date], 
+                                         fiscal_period: str) -> List[Dict]:
+        """Select periods based on statement type"""
+        if statement_type == 'BalanceSheet':
+            return self.selector.select_balance_sheet_periods(xbrl, doc_period_end_date)
+        elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
+            if statement_type == 'IncomeStatement':
+                return self.selector.select_income_statement_periods(xbrl, doc_period_end_date, fiscal_period)
+            else:
+                return self.selector.select_cash_flow_periods(xbrl, doc_period_end_date, fiscal_period)
+        else:
+            # For other statement types, use income statement logic as default
+            return self.selector.select_income_statement_periods(xbrl, doc_period_end_date, fiscal_period)
+    
+    def _enrich_with_metadata(self, all_periods: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Enrich periods with comprehensive metadata"""
+        enriched_periods = []
+        
+        for period_context in all_periods:
+            period = period_context['period']
+            enriched_metadata = self.enricher.enrich_period_metadata(
+                period,
+                period_context['xbrl_index'],
+                period_context['entity_info'],
+                period_context['doc_period_end_date'],
+                period_context['fiscal_period'],
+                period_context['fiscal_year']
+            )
+            enriched_periods.append(enriched_metadata)
+        
+        return enriched_periods
+    
+    def _deduplicate_and_limit(self, periods: List[Dict[str, Any]], max_periods: int, 
+                              statement_type: str) -> List[Dict[str, Any]]:
+        """Deduplicate, sort, and limit periods"""
+        # Sort periods chronologically
+        sorted_periods = self.deduplicator.sort_periods_chronologically(periods, statement_type)
+        
+        # Remove duplicates
+        deduplicated_periods = self.deduplicator.deduplicate_periods(sorted_periods, statement_type)
+        
+        # Limit to maximum number of periods
+        final_periods = self.deduplicator.limit_periods(deduplicated_periods, max_periods)
+        
+        return final_periods
+
+
+# Main function that maintains the original API
+def determine_optimal_periods(xbrl_list: List[XBRL], statement_type: str, max_periods: int = 8) -> List[Dict[str, Any]]:
     """
     Determine the optimal periods to display for stitched statements from a list of XBRL objects.
     
@@ -31,376 +540,5 @@ def determine_optimal_periods(xbrl_list: List['XBRL'], statement_type: str, max_
     Returns:
         List of period metadata dictionaries containing information for display
     """
-    all_period_metadata = []
-    
-    # First, extract all relevant reporting periods with their metadata
-    for i, xbrl in enumerate(xbrl_list):
-        # Skip XBRLs with no reporting periods
-        if not xbrl.reporting_periods:
-            continue
-            
-        entity_info = xbrl.entity_info or {}
-        doc_period_end_date = None
-        
-        # Try to parse document_period_end_date from entity_info
-        if 'document_period_end_date' in entity_info:
-            try:
-                doc_period_end_date = entity_info['document_period_end_date']
-                if not isinstance(doc_period_end_date, date):
-                    doc_period_end_date = parse_date(str(doc_period_end_date))
-            except (ValueError, TypeError):
-                pass
-        
-        # Get fiscal information if available
-        fiscal_period = entity_info.get('fiscal_period')
-        fiscal_year = entity_info.get('fiscal_year')
-        
-        # Filter appropriate periods based on statement type
-        appropriate_periods = []
-        if statement_type == 'BalanceSheet':
-            # For balance sheets, we want instant periods
-            periods = [p for p in xbrl.reporting_periods if p['type'] == 'instant']
-            
-            # If we have a document_period_end_date, use that to find the most appropriate period
-            # The optimal period for BalanceSheet should be exactly the document_period_end_date
-            if doc_period_end_date:
-                # Find the exact match for document_period_end_date
-                exact_period = None
-                
-                for period in periods:
-                    try:
-                        period_date = parse_date(period['date'])
-                        # Find exact match or period with date within 3 days (accounting for minor differences)
-                        days_diff = abs((period_date - doc_period_end_date).days)
-                        if days_diff == 0:  # Exact match
-                            exact_period = period
-                            break
-                        elif days_diff <= 3:  # Very close match (within 3 days)
-                            exact_period = period
-                            break
-                    except (ValueError, TypeError):
-                        continue
-                
-                # Use the exact period if found
-                if exact_period:
-                    appropriate_periods.append(exact_period)
-                else:
-                    # If no exact match, find the closest period that's still within 14 days
-                    # (to accommodate for slight filing date variations)
-                    closest_period = None
-                    min_days_diff = float('inf')
-                    
-                    for period in periods:
-                        try:
-                            period_date = parse_date(period['date'])
-                            days_diff = abs((period_date - doc_period_end_date).days)
-                            
-                            if days_diff < min_days_diff:
-                                min_days_diff = days_diff
-                                closest_period = period
-                        except (ValueError, TypeError):
-                            continue
-                    
-                    # Use the closest period if it's within 14 days
-                    if closest_period and min_days_diff <= 14:
-                        appropriate_periods.append(closest_period)
-            
-            # If we couldn't find a period based on document_period_end_date or don't have one,
-            # fall back to the most recent period
-            if not appropriate_periods and periods:
-                # Sort by date (latest first)
-                periods.sort(key=lambda x: x['date'], reverse=True)
-                appropriate_periods.append(periods[0])
-        else:
-            # For income and cash flow statements, we want duration periods
-            periods = [p for p in xbrl.reporting_periods if p['type'] == 'duration']
-            
-            # For income statements, different types of durations are appropriate based on fiscal period:
-            # - Fiscal year (FY): ~365 day period
-            # - Q1: ~90 day period
-            # - Q2: ~90 day period (Q2 only) and ~180 day period (YTD)
-            # - Q3: ~90 day period (Q3 only) and ~270 day period (YTD)
-            # - Q4: ~90 day period (Q4 only) and ~365 day period (full year)
-            
-            # First, determine if this is an annual or quarterly report
-            is_annual = fiscal_period == 'FY'
-            
-            # Group periods by duration length
-            grouped_periods = defaultdict(list)
-            for period in periods:
-                try:
-                    start_date = parse_date(period['start_date'])
-                    end_date = parse_date(period['end_date'])
-                    duration_days = (end_date - start_date).days
-                    period_with_days = period.copy()
-                    period_with_days['duration_days'] = duration_days
-                    grouped_periods[duration_days].append(period_with_days)
-                except (ValueError, TypeError):
-                    continue
-            
-            # We need durations that end exactly on the document_period_end_date (or very close)
-            matching_periods = []
-            if doc_period_end_date:
-                # First, find all periods that end on the document_period_end_date
-                for period in periods:
-                    try:
-                        end_date = parse_date(period['end_date'])
-                        days_diff = abs((end_date - doc_period_end_date).days)
-                        
-                        # Consider periods that end on or very close to document_period_end_date
-                        if days_diff <= 3:
-                            period_with_days = period.copy()
-                            start_date = parse_date(period['start_date'])
-                            period_with_days['duration_days'] = (end_date - start_date).days
-                            matching_periods.append(period_with_days)
-                    except (ValueError, TypeError):
-                        continue
-            
-            # If we found periods that end on the document_period_end_date, filter by appropriate duration
-            if matching_periods:
-                # For annual reports, we want ~365 day periods
-                if is_annual:
-                    # Look for periods with annual duration (350-380 days)
-                    annual_periods = [p for p in matching_periods if 350 <= p['duration_days'] <= 380]
-                    if annual_periods:
-                        # If multiple annual periods, take the one with duration closest to 365 days
-                        annual_periods.sort(key=lambda x: abs(x['duration_days'] - 365))
-                        appropriate_periods.append(annual_periods[0])
-                    
-                # For quarterly reports, select appropriate periods based on fiscal_period
-                else:
-                    # First, add the quarterly period if available
-                    quarterly_periods = [p for p in matching_periods if 80 <= p['duration_days'] <= 100]
-                    if quarterly_periods:
-                        # Sort by how close to 90 days (ideal quarter)
-                        quarterly_periods.sort(key=lambda x: abs(x['duration_days'] - 90))
-                        appropriate_periods.append(quarterly_periods[0])
-                    
-                    # Then, add YTD period based on fiscal_period if available
-                    if fiscal_period == 'Q2':
-                        # Look for ~180 day YTD periods
-                        ytd_periods = [p for p in matching_periods if 175 <= p['duration_days'] <= 190]
-                        if ytd_periods:
-                            ytd_periods.sort(key=lambda x: abs(x['duration_days'] - 180))
-                            appropriate_periods.append(ytd_periods[0])
-                    
-                    elif fiscal_period == 'Q3':
-                        # Look for ~270 day YTD periods
-                        ytd_periods = [p for p in matching_periods if 260 <= p['duration_days'] <= 285]
-                        if ytd_periods:
-                            ytd_periods.sort(key=lambda x: abs(x['duration_days'] - 270))
-                            appropriate_periods.append(ytd_periods[0])
-                    
-                    elif fiscal_period == 'Q4':
-                        # Look for annual period (same as FY)
-                        annual_periods = [p for p in matching_periods if 350 <= p['duration_days'] <= 380]
-                        if annual_periods:
-                            annual_periods.sort(key=lambda x: abs(x['duration_days'] - 365))
-                            appropriate_periods.append(annual_periods[0])
-            
-            # If we didn't find any appropriate periods that end on document_period_end_date,
-            # fall back to traditional selection logic
-            if not appropriate_periods:
-                if is_annual:
-                    # For annual reports, prefer periods closest to 365 days
-                    annual_periods = []
-                    for days in range(350, 380):
-                        if days in grouped_periods:
-                            annual_periods.extend(grouped_periods[days])
-                    
-                    if annual_periods and doc_period_end_date:
-                        # Find the annual period that best matches document_period_end_date
-                        closest_period = None
-                        min_days_diff = float('inf')
-                        
-                        for period in annual_periods:
-                            try:
-                                end_date = parse_date(period['end_date'])
-                                days_diff = abs((end_date - doc_period_end_date).days)
-                                
-                                # Prioritize very close dates
-                                if days_diff <= 3:
-                                    closest_period = period
-                                    break
-                                
-                                # Otherwise track the closest one
-                                if days_diff < min_days_diff:
-                                    min_days_diff = days_diff
-                                    closest_period = period
-                            except (ValueError, TypeError):
-                                continue
-                        
-                        # Use the closest period if found and within reasonable range
-                        if closest_period and min_days_diff <= 14:
-                            appropriate_periods.append(closest_period)
-                        else:
-                            # Fall back to latest if no good match
-                            annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                            appropriate_periods.append(annual_periods[0])
-                    elif annual_periods:
-                        # If no document_period_end_date, use the latest
-                        annual_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                        appropriate_periods.append(annual_periods[0])
-                else:
-                    # For quarterly reports, prefer:
-                    # 1. The quarter duration (~90 days)
-                    # 2. The YTD (year-to-date) duration if available
-                    
-                    # Look for quarterly duration
-                    quarterly_periods = []
-                    for days in range(85, 100):
-                        if days in grouped_periods:
-                            quarterly_periods.extend(grouped_periods[days])
-                    
-                    if quarterly_periods and doc_period_end_date:
-                        # Find the quarterly period that best matches document_period_end_date
-                        closest_period = None
-                        min_days_diff = float('inf')
-                        
-                        for period in quarterly_periods:
-                            try:
-                                end_date = parse_date(period['end_date'])
-                                days_diff = abs((end_date - doc_period_end_date).days)
-                                
-                                # Prioritize very close dates
-                                if days_diff <= 3:
-                                    closest_period = period
-                                    break
-                                
-                                # Otherwise track the closest one
-                                if days_diff < min_days_diff:
-                                    min_days_diff = days_diff
-                                    closest_period = period
-                            except (ValueError, TypeError):
-                                continue
-                        
-                        # Use the closest period if found and within reasonable range
-                        if closest_period and min_days_diff <= 14:
-                            appropriate_periods.append(closest_period)
-                        else:
-                            # Fall back to latest if no good match
-                            quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                            appropriate_periods.append(quarterly_periods[0])
-                    elif quarterly_periods:
-                        # If no document_period_end_date, use the latest
-                        quarterly_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                        appropriate_periods.append(quarterly_periods[0])
-                        
-                    # Look for YTD duration if this is not Q1
-                    if fiscal_period in ['Q2', 'Q3', 'Q4']:
-                        # Define YTD day ranges based on fiscal period
-                        ytd_days_range = {
-                            'Q2': range(175, 190),
-                            'Q3': range(260, 285),
-                            'Q4': range(350, 380)
-                        }.get(fiscal_period, range(0, 0))
-                        
-                        ytd_periods = []
-                        for days in ytd_days_range:
-                            if days in grouped_periods:
-                                ytd_periods.extend(grouped_periods[days])
-                        
-                        if ytd_periods and doc_period_end_date:
-                            # Find the YTD period that best matches document_period_end_date
-                            closest_period = None
-                            min_days_diff = float('inf')
-                            
-                            for period in ytd_periods:
-                                try:
-                                    end_date = parse_date(period['end_date'])
-                                    days_diff = abs((end_date - doc_period_end_date).days)
-                                    
-                                    # Prioritize very close dates
-                                    if days_diff <= 3:
-                                        closest_period = period
-                                        break
-                                    
-                                    # Otherwise track the closest one
-                                    if days_diff < min_days_diff:
-                                        min_days_diff = days_diff
-                                        closest_period = period
-                                except (ValueError, TypeError):
-                                    continue
-                            
-                            # Use the closest period if found and within reasonable range
-                            if closest_period and min_days_diff <= 14:
-                                appropriate_periods.append(closest_period)
-                            else:
-                                # Fall back to latest if no good match
-                                ytd_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                                appropriate_periods.append(ytd_periods[0])
-                        elif ytd_periods:
-                            # If no document_period_end_date, use the latest
-                            ytd_periods.sort(key=lambda x: x['end_date'], reverse=True)
-                            appropriate_periods.append(ytd_periods[0])
-        
-        # Add metadata and source XBRL index to each selected period
-        for period in appropriate_periods:
-            # Add useful metadata
-            period_metadata = {
-                'xbrl_index': i,
-                'period_key': period['key'],
-                'period_label': period['label'],
-                'period_type': period['type'],
-                'entity_info': entity_info,
-                'doc_period_end_date': doc_period_end_date,
-                'fiscal_period': fiscal_period,
-                'fiscal_year': fiscal_year
-            }
-            
-            # Add date information
-            if period['type'] == 'instant':
-                period_metadata['date'] = parse_date(period['date'])
-                period_metadata['display_date'] = format_date(period_metadata['date'])
-            else:  # duration
-                period_metadata['start_date'] = parse_date(period['start_date'])
-                period_metadata['end_date'] = parse_date(period['end_date']) 
-                period_metadata['duration_days'] = period.get('duration_days', 
-                    (period_metadata['end_date'] - period_metadata['start_date']).days)
-                period_metadata['display_date'] = format_date(period_metadata['end_date'])
-            
-            all_period_metadata.append(period_metadata)
-    
-    # Now, select the optimal set of periods to display
-    # 1. Remove duplicates (same end date or very close)
-    # 2. Ensure proper chronological ordering
-    # 3. Limit to a reasonable number of periods
-    
-    # First, sort all periods by date (most recent first)
-    if statement_type == 'BalanceSheet':
-        all_period_metadata.sort(key=lambda x: x['date'], reverse=True)
-    else:
-        all_period_metadata.sort(key=lambda x: x['end_date'], reverse=True)
-    
-    # Filter out periods that are too close to each other
-    filtered_periods = []
-    for period in all_period_metadata:
-        too_close = False
-        for included_period in filtered_periods:
-            # Skip if period types don't match
-            if period['period_type'] != included_period['period_type']:
-                continue
-            
-            # Calculate date difference
-            if period['period_type'] == 'instant':
-                date1 = period['date']
-                date2 = included_period['date']
-            else:  # duration
-                date1 = period['end_date']
-                date2 = included_period['end_date']
-            
-            days_diff = abs((date1 - date2).days)
-            
-            # Periods are too close if they are within 14 days
-            if days_diff <= 14:
-                too_close = True
-                break
-        
-        if not too_close:
-            filtered_periods.append(period)
-    
-    # Limit to a reasonable number of periods (8 is usually sufficient)
-    if len(filtered_periods) > max_periods:
-        filtered_periods = filtered_periods[:max_periods]
-    
-    return filtered_periods
+    optimizer = PeriodOptimizer()
+    return optimizer.determine_optimal_periods(xbrl_list, statement_type, max_periods)

@@ -249,6 +249,10 @@ class FilingSGML:
         return self.header.date_as_of_change
 
     @property
+    def period_of_report(self):
+        return self.header.period_of_report
+
+    @property
     def effective_date(self):
         return self.header.filing_metadata.get('EFFECTIVE DATE')
 

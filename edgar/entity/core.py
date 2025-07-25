@@ -281,8 +281,9 @@ class Entity(SecFiler):
         Returns:
             True if the entity is a company, False otherwise
         """
-        return hasattr(self.data, 'is_company') and self.data.is_company
+        return self.data.is_company
 
+    @property
     def is_individual(self) -> bool:
         """
         Check if this entity is an individual.
@@ -306,7 +307,7 @@ class Entity(SecFiler):
                    is_xbrl: bool = None,
                    is_inline_xbrl: bool = None,
                    sort_by: Union[str, List[Tuple[str, str]]] = None,
-                   trigger_full_load: bool = True) -> Filings:
+                   trigger_full_load: bool = True) -> 'EntityFilings':
         """
         Get the entity's filings and optionally filter by multiple criteria.
         
