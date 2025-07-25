@@ -39,7 +39,7 @@ from edgar.core import get_identity, edgar_mode, strtobool
 from edgar.httpclient_cache import get_cache_controller
 from edgar.httpclient_ratelimiter import RateLimitingTransport, AsyncRateLimitingTransport, create_rate_limiter
 from pathlib import Path
-from core import edgar_data_dir
+from .core import edgar_data_dir
 log = logging.getLogger(__name__)
 
 HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
