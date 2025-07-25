@@ -793,3 +793,16 @@ def test_stitched_facts_view_caching():
     # Different parameters should bypass cache
     facts3 = facts_view.get_facts(max_periods=2)
     assert facts3 is not facts1
+
+
+def test_stitched_statements_uses_document_period_end_date():
+    c = Company("CMI")
+    filings = c.get_filings(form="10-K", amendments=False).latest(3)
+    xbrls = XBRLS.from_filings(filings)
+    statements = xbrls.statements
+    balance_sheet = statements.balance_sheet()
+    print(balance_sheet)
+
+    xbrl_periods = [ xb.period_of_report for xb in xbrls.xbrl_list]
+
+    assert xbrl_periods == balance_sheet.periods
