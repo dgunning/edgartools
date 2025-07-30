@@ -13,8 +13,9 @@ from edgar._filings import Filings
 from edgar.company_reports import TenK, TenQ
 from edgar.formatting import reverse_name, datefmt
 from edgar.entity.data import Address, EntityData, CompanyData
-# Import from our new modules
-from edgar.entity.filings import EntityFacts
+# Import from our new modules  
+from edgar.entity.filings import EntityFacts as OldEntityFacts
+from edgar.entity.entity_facts import EntityFacts
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.reference.tickers import find_cik
@@ -475,6 +476,91 @@ class Company(Entity):
     def get_icon(self):
         return get_icon_from_ticker(self.tickers[0])
     
+    # Enhanced financial data properties and methods
+    @property
+    def facts(self) -> Optional[EntityFacts]:
+        """Get enhanced structured facts about this company."""
+        return self.get_facts()
+    
+    @property
+    def public_float(self) -> Optional[float]:
+        """Get the public float value for this company."""
+        facts = self.facts
+        if facts:
+            return facts.public_float
+        return None
+    
+    @property
+    def shares_outstanding(self) -> Optional[float]:
+        """Get the shares outstanding for this company.""" 
+        facts = self.facts
+        if facts:
+            return facts.shares_outstanding
+        return None
+    
+    def income_statement(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+        """
+        Get income statement data for this company.
+        
+        Args:
+            periods: Number of periods to retrieve
+            annual: If True, prefer annual periods; if False, get quarterly
+            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            
+        Returns:
+            FinancialStatement or DataFrame with income statement data, or None if not available
+        """
+        facts = self.facts
+        if facts:
+            try:
+                return facts.income_statement(periods=periods, annual=annual, as_dataframe=as_dataframe)
+            except Exception as e:
+                from edgar.core import log
+                log.debug(f"Error getting income statement for {self.name}: {e}")
+        return None
+    
+    def balance_sheet(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+        """
+        Get balance sheet data for this company.
+        
+        Args:
+            periods: Number of periods to retrieve
+            annual: If True, prefer annual periods; if False, get quarterly
+            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            
+        Returns:
+            FinancialStatement or DataFrame with balance sheet data, or None if not available
+        """
+        facts = self.facts
+        if facts:
+            try:
+                return facts.balance_sheet(periods=periods, annual=annual, as_dataframe=as_dataframe)
+            except Exception as e:
+                from edgar.core import log
+                log.debug(f"Error getting balance sheet for {self.name}: {e}")
+        return None
+    
+    def cash_flow(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+        """
+        Get cash flow statement data for this company.
+        
+        Args:
+            periods: Number of periods to retrieve
+            annual: If True, prefer annual periods; if False, get quarterly
+            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            
+        Returns:
+            FinancialStatement or DataFrame with cash flow data, or None if not available
+        """
+        facts = self.facts
+        if facts:
+            try:
+                return facts.cash_flow(periods=periods, annual=annual, as_dataframe=as_dataframe)
+            except Exception as e:
+                from edgar.core import log
+                log.debug(f"Error getting cash flow for {self.name}: {e}")
+        return None
+    
     def __str__(self):
         ticker = self.get_ticker()
         ticker_str = f" - {ticker}" if ticker else ""
@@ -796,14 +882,36 @@ def parse_entity_submissions(submissions_json: Dict[str, Any]) -> 'EntityData':
 @lru_cache(maxsize=32)
 def get_company_facts(cik: int) -> Optional[EntityFacts]:
     """
-    Get company facts from the SEC.
+    Get company facts from the SEC using the enhanced EntityFacts API.
     
     Args:
         cik: The company CIK
         
     Returns:
-        Optional[EntityFacts]: The company facts, or None if not found
+        Optional[EntityFacts]: The enhanced company facts, or None if not found
     """
-    # Import here to avoid circular imports
-    from edgar.entity.facts import get_company_facts as _get_facts
-    return _get_facts(cik)
+    try:
+        # Import here to avoid circular imports
+        from edgar.entity.parser import EntityFactsParser
+        from edgar.httprequests import download_json
+        
+        # Download the raw facts JSON from SEC
+        url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
+        facts_json = download_json(url)
+        
+        # Parse using the enhanced parser
+        return EntityFactsParser.parse_company_facts(facts_json)
+    except Exception as e:
+        # Log the error but don't raise - return None for graceful degradation
+        from edgar.core import log
+        log.debug(f"Could not get enhanced facts for CIK {cik}: {e}")
+        
+        # Fallback to the old implementation for compatibility
+        try:
+            from edgar.entity.facts import get_company_facts as _get_facts
+            old_facts = _get_facts(cik)
+            if old_facts:
+                log.debug(f"Fallback to old facts API succeeded for CIK {cik}")
+            return None  # For now, return None instead of old facts to encourage migration
+        except Exception:
+            return None

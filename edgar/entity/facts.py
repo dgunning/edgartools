@@ -10,16 +10,13 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 from rich.panel import Panel
-
+import orjson as json
 from edgar.core import log
 from edgar.httprequests import download_json
 from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.storage import get_edgar_data_directory, is_using_local_storage
 
-try:
-    from rich.group import Group
-except ImportError:
-    from rich.console import Group
+from rich.console import Group
 
 __all__ = [
     'get_company_facts',
@@ -241,14 +238,8 @@ def load_company_facts_from_local(cik: int) -> Optional[Dict[str, Any]]:
         return None
     company_facts_file = company_facts_dir / f"CIK{cik:010}.json"
     if not company_facts_file.exists():
-        company_facts_json = download_company_facts_from_sec(cik)
-        with open(company_facts_file, "wb") as f:
-            import orjson as json
-            f.write(json.dumps(company_facts_json))
-            f.flush()
-            f.close()
-        return company_facts_json
-    import orjson as json
+        raise NoCompanyFactsFound(cik=cik)
+
     return json.loads(company_facts_file.read_text())
 
 
