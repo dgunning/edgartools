@@ -15,6 +15,7 @@ def sample_entity_facts(sample=100):
         try:
             company_facts_json = load_company_facts_from_local(c.cik)
             entity_facts = EntityFactsParser.parse_company_facts(company_facts_json)
+            print(entity_facts)
             if not(entity_facts):
                 assert len(company_facts_json.get('facts', [])) == 0, "Expected no facts for CIK: {}".format(c.cik)
             else:

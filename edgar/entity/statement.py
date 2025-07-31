@@ -11,7 +11,12 @@ This module provides Statement classes that wrap pandas DataFrames with:
 from typing import Dict, Any, Optional, List, Union
 import pandas as pd
 from dataclasses import dataclass
-from edgar.entity.models import FinancialFact
+from rich.box import SIMPLE_HEAVY, SIMPLE
+from rich.console import Group
+from rich.padding import Padding
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
 
 @dataclass
@@ -242,6 +247,137 @@ class FinancialStatement:
             header += f"⚠️  Mixed period lengths: {', '.join(self.period_lengths)}\n\n"
         
         return header + str(formatted_data)
+    
+    def __rich__(self):
+        """Creates a rich representation for professional financial statement display."""
+
+        
+        if self.data.empty:
+            return Panel(
+                Text("No data available", style="dim"),
+                title=f"📊 {self.statement_type.replace('Statement', ' Statement')}",
+                border_style="blue"
+            )
+        
+        # Statement type icon mapping
+        icon_map = {
+            'IncomeStatement': '💰',
+            'BalanceSheet': '⚖️',
+            'CashFlow': '💵',
+            'Statement': '📊'
+        }
+        icon = icon_map.get(self.statement_type, '📊')
+        
+        # Title with company name and statement type
+        if self.entity_name:
+            title = Text.assemble(
+                icon + " ",
+                (self.entity_name, "bold green"),
+                " ",
+                (self.statement_type.replace('Statement', ' Statement'), "bold blue")
+            )
+        else:
+            title = Text.assemble(
+                icon + " ",
+                (self.statement_type.replace('Statement', ' Statement'), "bold blue")
+            )
+        
+        # Create the main financial statement table
+        statement_table = Table(box=SIMPLE, show_header=True, padding=(0, 1))
+        statement_table.add_column("Line Item", style="bold", no_wrap=True, max_width=30)
+        
+        # Add period columns (limit to reasonable number for display)
+        periods = list(self.data.columns)
+        display_periods = periods[:6]  # Show max 6 periods for readability
+        has_more_periods = len(periods) > 6
+        
+        for period in display_periods:
+            statement_table.add_column(str(period), justify="right", max_width=15)
+        
+        # Add rows with formatted values
+        for index in self.data.index:
+            concept_label = str(index)
+            # Truncate long concept names
+            display_label = concept_label[:28] + "..." if len(concept_label) > 30 else concept_label
+            
+            row_values = [display_label]
+            for period in display_periods:
+                value = self.data.loc[index, period]
+                if pd.notna(value) and isinstance(value, (int, float)):
+                    formatted_value = self.format_value(value, concept_label)
+                    row_values.append(formatted_value)
+                else:
+                    row_values.append("-" if pd.isna(value) else str(value)[:12])
+            
+            statement_table.add_row(*row_values)
+        
+        # Create summary info panel
+        info_table = Table(box=SIMPLE_HEAVY, show_header=False, padding=(0, 1))
+        info_table.add_column("Metric", style="dim")
+        info_table.add_column("Value", style="bold")
+        
+        info_table.add_row("Line Items", f"{len(self.data.index):,}")
+        info_table.add_row("Periods", f"{len(self.data.columns):,}")
+        if self.period_lengths:
+            info_table.add_row("Period Types", ", ".join(set(self.period_lengths)))
+        
+        info_panel = Panel(
+            info_table,
+            title="📋 Statement Info",
+            border_style="bright_black"
+        )
+        
+        # Create period warning if needed
+        warning_panel = None
+        if self.mixed_periods:
+            warning_text = Text.assemble(
+                "⚠️  Mixed period lengths detected: ",
+                (", ".join(self.period_lengths), "yellow"),
+                "\nConsider filtering to comparable periods for accurate analysis."
+            )
+            warning_panel = Panel(
+                warning_text,
+                title="🚨 Period Warning",
+                border_style="yellow"
+            )
+        
+        # Subtitle with additional info
+        subtitle_parts = [f"{len(self.data.index):,} line items"]
+        if has_more_periods:
+            subtitle_parts.append(f"showing first {len(display_periods)} of {len(periods)} periods")
+        subtitle = " • ".join(subtitle_parts)
+        
+        # Main statement panel
+        statement_panel = Panel(
+            statement_table,
+            title="📊 Financial Data",
+            subtitle=subtitle,
+            border_style="bright_black"
+        )
+        
+        # Combine all panels
+        content_renderables = [
+            Padding("", (1, 0, 0, 0)),
+            info_panel
+        ]
+        
+        if warning_panel:
+            content_renderables.append(warning_panel)
+        
+        content_renderables.append(statement_panel)
+        
+        content = Group(*content_renderables)
+        
+        return Panel(
+            content,
+            title=title,
+            border_style="blue"
+        )
+    
+    def __repr__(self):
+        """String representation using rich formatting."""
+        from edgar.richtools import repr_rich
+        return repr_rich(self.__rich__())
     
     def to_numeric(self) -> pd.DataFrame:
         """
