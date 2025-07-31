@@ -30,7 +30,7 @@ EntityFacts(cik: int, name: str, facts: List[FinancialFact])
 
 #### Core Properties
 
-##### `cik: int`
+#### `cik: int`
 The company's CIK (Central Index Key) number.
 
 ```python
@@ -38,7 +38,7 @@ facts = company.facts
 print(facts.cik)  # 320193
 ```
 
-##### `name: str`
+#### `name: str`
 The company's official name.
 
 ```python
@@ -48,7 +48,7 @@ print(facts.name)  # "Apple Inc."
 
 #### DEI Properties
 
-##### `shares_outstanding: Optional[float]`
+#### `shares_outstanding: Optional[float]`
 Number of common shares outstanding.
 
 ```python
@@ -57,7 +57,7 @@ if shares:
     print(f"Shares Outstanding: {shares:,.0f}")
 ```
 
-##### `public_float: Optional[float]`
+#### `public_float: Optional[float]`
 Public float value in dollars.
 
 ```python
@@ -66,7 +66,7 @@ if float_val:
     print(f"Public Float: ${float_val:,.0f}")
 ```
 
-##### `shares_outstanding_fact: Optional[FinancialFact]`
+#### `shares_outstanding_fact: Optional[FinancialFact]`
 Full fact object for shares outstanding with metadata.
 
 ```python
@@ -75,7 +75,7 @@ if fact:
     print(f"Shares: {fact.get_formatted_value()} as of {fact.period_end}")
 ```
 
-##### `public_float_fact: Optional[FinancialFact]`
+#### `public_float_fact: Optional[FinancialFact]`
 Full fact object for public float with metadata.
 
 ```python
@@ -88,7 +88,7 @@ if fact:
 
 #### Query Interface
 
-##### `query() -> FactQuery`
+#### `query() -> FactQuery`
 Start building a facts query using the fluent interface.
 
 ```python
@@ -98,7 +98,7 @@ results = query.by_concept('Revenue').latest(4)
 
 **Returns:** FactQuery builder instance
 
-##### `get_fact(concept: str, period: Optional[str] = None) -> Optional[FinancialFact]`
+#### `get_fact(concept: str, period: Optional[str] = None) -> Optional[FinancialFact]`
 Get a single fact by concept name.
 
 ```python
@@ -282,7 +282,7 @@ Created via `EntityFacts.query()` method. Do not instantiate directly.
 
 #### Concept Filtering
 
-##### `by_concept(concept: str, exact: bool = False) -> FactQuery`
+#### `by_concept(concept: str, exact: bool = False) -> FactQuery`
 
 Filter by concept name or pattern.
 
@@ -298,7 +298,7 @@ exact_revenue = query.by_concept('us-gaap:Revenue', exact=True)
 - `concept` (str): Concept name or label to match
 - `exact` (bool): If True, require exact match (default: False)
 
-##### `by_label(label: str, fuzzy: bool = True) -> FactQuery`
+#### `by_label(label: str, fuzzy: bool = True) -> FactQuery`
 
 Filter by human-readable label.
 
@@ -316,7 +316,7 @@ facts = query.by_label('Revenue', fuzzy=False)
 
 #### Time-Based Filtering
 
-##### `by_fiscal_year(year: int) -> FactQuery`
+#### `by_fiscal_year(year: int) -> FactQuery`
 
 Filter by fiscal year.
 
@@ -327,7 +327,7 @@ fy2024_facts = query.by_fiscal_year(2024)
 **Parameters:**
 - `year` (int): Fiscal year to filter by
 
-##### `by_fiscal_period(period: str) -> FactQuery`
+#### `by_fiscal_period(period: str) -> FactQuery`
 
 Filter by fiscal period.
 
@@ -339,7 +339,7 @@ fy_facts = query.by_fiscal_period('FY')
 **Parameters:**
 - `period` (str): Fiscal period ('FY', 'Q1', 'Q2', 'Q3', 'Q4')
 
-##### `by_period_length(months: int) -> FactQuery`
+#### `by_period_length(months: int) -> FactQuery`
 
 Filter by period length in months.
 
@@ -354,7 +354,7 @@ annual = query.by_period_length(12)
 **Parameters:**
 - `months` (int): Period length (3=quarterly, 12=annual, 9=YTD)
 
-##### `date_range(start: date, end: date) -> FactQuery`
+#### `date_range(start: date, end: date) -> FactQuery`
 
 Filter by date range.
 
@@ -369,7 +369,7 @@ recent_facts = query.date_range(
 - `start` (date): Start date (inclusive)
 - `end` (date): End date (inclusive)
 
-##### `as_of(as_of_date: date) -> FactQuery`
+#### `as_of(as_of_date: date) -> FactQuery`
 
 Get facts as of specific date (point-in-time).
 
@@ -382,7 +382,7 @@ snapshot = query.as_of(date(2024, 6, 30))
 
 #### Statement and Form Filtering
 
-##### `by_statement_type(statement_type: str) -> FactQuery`
+#### `by_statement_type(statement_type: str) -> FactQuery`
 
 Filter by financial statement type.
 
@@ -395,7 +395,7 @@ cash_facts = query.by_statement_type('CashFlow')
 **Parameters:**
 - `statement_type` (str): Statement type ('IncomeStatement', 'BalanceSheet', 'CashFlow')
 
-##### `by_form_type(form_type: Union[str, List[str]]) -> FactQuery`
+#### `by_form_type(form_type: Union[str, List[str]]) -> FactQuery`
 
 Filter by SEC form type.
 
@@ -412,7 +412,7 @@ periodic_facts = query.by_form_type(['10-K', '10-Q'])
 
 #### Quality Filtering
 
-##### `high_quality_only() -> FactQuery`
+#### `high_quality_only() -> FactQuery`
 
 Filter to only high-quality, audited facts.
 
@@ -420,7 +420,7 @@ Filter to only high-quality, audited facts.
 quality_facts = query.high_quality_only()
 ```
 
-##### `min_confidence(threshold: float) -> FactQuery`
+#### `min_confidence(threshold: float) -> FactQuery`
 
 Filter by minimum confidence score.
 
@@ -433,7 +433,7 @@ confident_facts = query.min_confidence(0.9)
 
 #### Special Queries
 
-##### `latest_instant() -> FactQuery`
+#### `latest_instant() -> FactQuery`
 
 Filter to most recent instant facts (for balance sheet items).
 
@@ -441,7 +441,7 @@ Filter to most recent instant facts (for balance sheet items).
 latest_balance = query.by_statement_type('BalanceSheet').latest_instant()
 ```
 
-##### `latest_periods(n: int = 4, prefer_annual: bool = True) -> FactQuery`
+#### `latest_periods(n: int = 4, prefer_annual: bool = True) -> FactQuery`
 
 Get facts from the n most recent periods.
 
@@ -459,7 +459,7 @@ recent = query.latest_periods(8, prefer_annual=False)
 
 ### Sorting and Limiting
 
-##### `sort_by(field: str, ascending: bool = True) -> FactQuery`
+#### `sort_by(field: str, ascending: bool = True) -> FactQuery`
 
 Sort results by field.
 
@@ -475,7 +475,7 @@ sorted_facts = query.sort_by('fiscal_year')
 - `field` (str): Field name to sort by
 - `ascending` (bool): Sort order (default: True)
 
-##### `latest(n: int = 1) -> List[FinancialFact]`
+#### `latest(n: int = 1) -> List[FinancialFact]`
 
 Get the n most recent facts.
 
@@ -490,7 +490,7 @@ latest_revenue = query.by_concept('Revenue').latest(5)
 
 ### Execution Methods
 
-##### `execute() -> List[FinancialFact]`
+#### `execute() -> List[FinancialFact]`
 
 Execute query and return matching facts.
 
@@ -500,7 +500,7 @@ facts = query.by_concept('Revenue').by_fiscal_year(2024).execute()
 
 **Returns:** List of FinancialFact objects
 
-##### `count() -> int`
+#### `count() -> int`
 
 Get count of facts matching current filters.
 
@@ -512,7 +512,7 @@ revenue_count = query.by_concept('Revenue').count()
 
 ### Output Methods
 
-##### `to_dataframe(*columns) -> pd.DataFrame`
+#### `to_dataframe(*columns) -> pd.DataFrame`
 
 Convert results to pandas DataFrame.
 
@@ -531,7 +531,7 @@ df = query.by_concept('Revenue').to_dataframe(
 
 **Returns:** DataFrame with query results
 
-##### `pivot_by_period(return_statement: bool = True) -> Union[FinancialStatement, pd.DataFrame]`
+#### `pivot_by_period(return_statement: bool = True) -> Union[FinancialStatement, pd.DataFrame]`
 
 Pivot facts to show concepts as rows and periods as columns.
 
@@ -548,7 +548,7 @@ df = query.by_statement_type('IncomeStatement').pivot_by_period(return_statement
 
 **Returns:** FinancialStatement or DataFrame
 
-##### `to_llm_context() -> List[Dict[str, Any]]`
+#### `to_llm_context() -> List[Dict[str, Any]]`
 
 Convert results to LLM-friendly context.
 
@@ -583,7 +583,7 @@ FinancialStatement(
 
 ### Properties
 
-##### `shape: tuple`
+#### `shape: tuple`
 Shape of the underlying DataFrame.
 
 ```python
@@ -591,7 +591,7 @@ stmt = company.income_statement()
 print(stmt.shape)  # (10, 4)
 ```
 
-##### `columns: pd.Index`
+#### `columns: pd.Index`
 Column names of the statement.
 
 ```python
@@ -599,7 +599,7 @@ periods = stmt.columns
 print(list(periods))  # ['FY 2024', 'FY 2023', 'FY 2022', 'FY 2021']
 ```
 
-##### `index: pd.Index`
+#### `index: pd.Index`
 Row labels (concept names).
 
 ```python
@@ -607,7 +607,7 @@ concepts = stmt.index
 print(list(concepts))  # ['Revenue', 'Cost of Revenue', 'Gross Profit', ...]
 ```
 
-##### `empty: bool`
+#### `empty: bool`
 Whether the statement is empty.
 
 ```python
@@ -617,7 +617,7 @@ if not stmt.empty:
 
 ### Methods
 
-##### `to_numeric() -> pd.DataFrame`
+#### `to_numeric() -> pd.DataFrame`
 
 Get underlying numeric DataFrame for calculations.
 
@@ -629,7 +629,7 @@ growth_rates = numeric_data.pct_change(axis=1)
 
 **Returns:** DataFrame with original numeric values
 
-##### `get_concept(concept_name: str) -> Optional[pd.Series]`
+#### `get_concept(concept_name: str) -> Optional[pd.Series]`
 
 Get data for specific concept across all periods.
 
@@ -644,7 +644,7 @@ if revenue_series is not None:
 
 **Returns:** Series with values across periods, or None
 
-##### `calculate_growth(concept_name: str, periods: int = 2) -> Optional[pd.Series]`
+#### `calculate_growth(concept_name: str, periods: int = 2) -> Optional[pd.Series]`
 
 Calculate period-over-period growth for a concept.
 
@@ -658,7 +658,7 @@ revenue_growth = stmt.calculate_growth('Revenue', periods=1)
 
 **Returns:** Series with growth rates, or None
 
-##### `format_value(value: float, concept_label: str) -> str`
+#### `format_value(value: float, concept_label: str) -> str`
 
 Format a single value based on its concept.
 
@@ -673,7 +673,7 @@ print(formatted)  # "$1,234,567"
 
 **Returns:** Formatted string
 
-##### `to_llm_context() -> Dict[str, Any]`
+#### `to_llm_context() -> Dict[str, Any]`
 
 Generate LLM-friendly context from the statement.
 
@@ -712,77 +712,77 @@ FinancialFact(
 
 ### Core Attributes
 
-##### `concept: str`
+#### `concept: str`
 Standardized concept identifier (e.g., 'us-gaap:Revenue').
 
-##### `taxonomy: str`
+#### `taxonomy: str`
 Taxonomy namespace (us-gaap, ifrs, etc.).
 
-##### `label: str`
+#### `label: str`
 Human-readable label.
 
-##### `value: Union[float, int, str]`
+#### `value: Union[float, int, str]`
 The actual fact value.
 
-##### `numeric_value: Optional[float]`
+#### `numeric_value: Optional[float]`
 Numeric representation for calculations.
 
-##### `unit: str`
+#### `unit: str`
 Unit of measure (USD, shares, etc.).
 
-##### `scale: Optional[int]`
+#### `scale: Optional[int]`
 Scale factor (1000, 1000000, etc.).
 
 ### Temporal Attributes
 
-##### `period_start: Optional[date]`
+#### `period_start: Optional[date]`
 Period start date (for duration facts).
 
-##### `period_end: date`
+#### `period_end: date`
 Period end date.
 
-##### `period_type: Literal['instant', 'duration']`
+#### `period_type: Literal['instant', 'duration']`
 Type of period.
 
-##### `fiscal_year: int`
+#### `fiscal_year: int`
 Fiscal year.
 
-##### `fiscal_period: str`
+#### `fiscal_period: str`
 Fiscal period (FY, Q1, Q2, Q3, Q4).
 
 ### Filing Context
 
-##### `filing_date: date`
+#### `filing_date: date`
 Date the fact was filed with SEC.
 
-##### `form_type: str`
+#### `form_type: str`
 SEC form type (10-K, 10-Q, etc.).
 
-##### `accession: str`
+#### `accession: str`
 SEC accession number.
 
 ### Quality Indicators
 
-##### `data_quality: DataQuality`
+#### `data_quality: DataQuality`
 Data quality enum (HIGH, MEDIUM, LOW).
 
-##### `is_audited: bool`
+#### `is_audited: bool`
 Whether the fact is from audited filing.
 
-##### `confidence_score: float`
+#### `confidence_score: float`
 Confidence score (0.0 to 1.0).
 
 ### AI-Ready Attributes
 
-##### `semantic_tags: List[str]`
+#### `semantic_tags: List[str]`
 Semantic tags for AI processing.
 
-##### `business_context: str`
+#### `business_context: str`
 Business context description.
 
 ### Methods
 
-##### `to_llm_context() -> Dict[str, Any]`
+#### `to_llm_context() -> Dict[str, Any]`
 
 Generate rich context for LLM consumption.
 
@@ -796,7 +796,7 @@ print(context['period'])
 
 **Returns:** Dictionary with formatted context
 
-##### `get_formatted_value() -> str`
+#### `get_formatted_value() -> str`
 
 Format the numeric value for display.
 
@@ -808,7 +808,7 @@ print(formatted)  # "365,817,000,000"
 
 **Returns:** Formatted string representation
 
-##### `get_display_period_key() -> str`
+#### `get_display_period_key() -> str`
 
 Generate display-friendly period key.
 
@@ -826,7 +826,7 @@ Parser for converting SEC JSON data to enhanced EntityFacts format.
 
 ### Static Methods
 
-##### `parse_company_facts(facts_json: Dict[str, Any]) -> EntityFacts`
+#### `parse_company_facts(facts_json: Dict[str, Any]) -> EntityFacts`
 
 Parse SEC company facts JSON to EntityFacts object.
 
