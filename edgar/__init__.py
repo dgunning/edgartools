@@ -11,7 +11,6 @@ from edgar.entity import (
     EntityData,
     Company,
     CompanyData,
-    CompanyFacts,
     CompanySearchResults,
     CompanyFilings,
     CompanyFiling,

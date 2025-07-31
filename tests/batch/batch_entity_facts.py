@@ -1,7 +1,7 @@
 from edgar.entity import EntityFacts
 from edgar.entity.parser import EntityFactsParser
 from edgar.reference.tickers import get_company_tickers
-from edgar.entity.facts import download_company_facts_from_sec, load_company_facts_from_local, NoCompanyFactsFound
+from edgar.entity.entity_facts import download_company_facts_from_sec, load_company_facts_from_local, NoCompanyFactsFound
 from tqdm.auto import tqdm
 from edgar import *
 
@@ -19,6 +19,7 @@ def sample_entity_facts(sample=100):
                 assert len(company_facts_json.get('facts', [])) == 0, "Expected no facts for CIK: {}".format(c.cik)
             else:
                 income_statement = entity_facts.income_statement()
+                print(income_statement)
                 balance_sheet = entity_facts.balance_sheet()
         except NoCompanyFactsFound:
             print("No company facts found for CIK:", c.cik)

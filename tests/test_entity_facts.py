@@ -11,6 +11,7 @@ from edgar.entity.models import FinancialFact, DataQuality, ConceptMetadata
 from edgar.entity.entity_facts import EntityFacts
 from edgar.entity.query import FactQuery
 from edgar.entity.parser import EntityFactsParser
+from edgar import Company
 
 
 class TestFinancialFact:
@@ -250,14 +251,14 @@ class TestEntityFacts:
     
     def test_balance_sheet(self, entity_facts):
         """Test getting balance sheet data"""
-        # Test new FinancialStatement return (default)
-        stmt = entity_facts.balance_sheet()
+        # Test new FinancialStatement return (using annual=False since test data has quarterly data)
+        stmt = entity_facts.balance_sheet(annual=False)
         
         assert not stmt.empty
         assert stmt.statement_type == "BalanceSheet"
         
         # Test raw DataFrame return (multi-period - returns pivoted DataFrame)
-        df = entity_facts.balance_sheet(as_dataframe=True)
+        df = entity_facts.balance_sheet(as_dataframe=True, annual=False)
         assert not df.empty
         # Multi-period returns pivoted data with labels as index
         assert hasattr(df, 'index')
@@ -1001,7 +1002,7 @@ class TestEntityFactsParser:
             ))
         
         entity_facts = EntityFacts(cik=123456, name="Test Co", facts=facts)
-        income_stmt = entity_facts.income_statement()
+        income_stmt = entity_facts.income_statement(annual=False)
         
         # Should have only one column for Q1 2024
         q1_cols = [col for col in income_stmt.columns if "Q1 2024" in col]
@@ -1053,3 +1054,24 @@ class TestEntityFactsParser:
         # Test that EPS maintains precision
         eps_context = context['line_items']['Earnings Per Share']
         assert eps_context['values']['Q1 2024']['formatted_value'] == '1.23'
+
+
+class TestPeriodSelection:
+
+    def test_statement_annual_periods(self):
+        c = Company("BACQ")
+        entity_facts = c.get_facts()
+        print()
+        print(entity_facts)
+        income_statement = entity_facts.income_statement()
+        query = entity_facts.query().by_statement_type('IncomeStatement')
+
+        # Pass entity information and return preference (flip the boolean)
+        result = query.latest_periods(4, annual=True)
+        print(result)
+        print(result.to_dataframe())
+
+        result_pivot = result.pivot_by_period(return_statement=True)
+        columns = result_pivot.data.columns
+        assert not any (c.startswith("Q") for c in columns)
+        print(income_statement)

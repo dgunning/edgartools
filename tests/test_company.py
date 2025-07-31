@@ -10,7 +10,6 @@ from edgar._filings import Filing, Filings, get_filings
 from edgar.core import default_page_size
 from edgar.entity import public_companies
 from edgar.entity import *
-from edgar.entity.core import parse_entity_submissions
 from edgar.entity.data import preprocess_company
 from edgar.search.datasearch import preprocess_company_name
 
@@ -34,13 +33,6 @@ def test_ticker_display_for_company_with_multiple_tickers():
     company = get_test_company(310522)
     assert "FNMA" in company.tickers
     assert "FNMA" in repr(company)
-
-
-def test_parse_company_submission_json():
-    with Path('data/company_submission.json').open("r") as f:
-        cjson = json.loads(f.read())
-    company = parse_entity_submissions(cjson)
-    assert company.cik == 1318605
 
 
 def test_get_company_submissions():
@@ -68,7 +60,7 @@ def test_get_company_with_no_filings():
 
 
 def test_get_company_facts():
-    company_facts: CompanyFacts = get_company_facts(1318605)
+    company_facts: EntityFacts = get_company_facts(1318605)
     assert company_facts
     assert len(company_facts) > 100
     assert "1318605" in str(company_facts)
@@ -233,36 +225,6 @@ def test_company_filing_get_related_filings():
     file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))
     assert len(file_numbers) == 1
     assert file_numbers[0] == filing.file_number
-
-
-def test_get_company_concept():
-    concept = get_concept(1640147,
-                          taxonomy="us-gaap",
-                          concept="AccountsPayableCurrent")
-    latest = concept.latest()
-    assert len(latest) == 1
-    print(latest)
-    data = [CompanyConcept.create_fact(row) for row in latest.itertuples()]
-    assert len(data) == 1
-    assert data[0].form in ['10-Q', '10-K']
-
-
-def test_get_company_concept_with_taxonomy_missing():
-    concept = get_concept(1640147,
-                          taxonomy="not-gap",
-                          concept="AccountsPayableCurrent")
-    assert concept.failure
-    assert concept.error == ("not-gap:AccountsPayableCurrent does not exist for company Snowflake Inc. [1640147]. "
-                             "See https://fasb.org/xbrl")
-
-
-def test_get_company_concept_with_concept_missing():
-    concept = get_concept(1640147,
-                          taxonomy="us-gaap",
-                          concept="AccountsPayableDoesNotExist")
-    assert concept.failure
-    assert concept.error == ("us-gaap:AccountsPayableDoesNotExist does not exist for company Snowflake Inc. [1640147]. "
-                             "See https://fasb.org/xbrl")
 
 
 def test_company_filings_test_company_get_facts_repr():

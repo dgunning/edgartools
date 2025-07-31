@@ -6,16 +6,13 @@ including companies, funds, and individuals.
 """
 from abc import ABC, abstractmethod
 from functools import cached_property
-from functools import lru_cache
 from typing import List, Dict, Optional, Union, Tuple, Any, TypeVar, Iterable
 
 from edgar._filings import Filings
 from edgar.company_reports import TenK, TenQ
 from edgar.formatting import reverse_name, datefmt
 from edgar.entity.data import Address, EntityData, CompanyData
-# Import from our new modules  
-from edgar.entity.filings import EntityFacts as OldEntityFacts
-from edgar.entity.entity_facts import EntityFacts
+from edgar.entity.entity_facts import EntityFacts, get_company_facts
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.reference.tickers import find_cik
@@ -844,74 +841,3 @@ def public_companies() -> Iterable[Company]:
         yield c
 
 
-# Re-export necessary functions from the original entities.py
-# This will be necessary during the transition period
-
-# Functions from the original entities.py that we still need
-@lru_cache(maxsize=32)
-def download_entity_submissions_from_sec(cik: int) -> Optional[Dict[str, Any]]:
-    """
-    Get the entity filings for a given cik.
-    
-    Args:
-        cik: The company CIK
-        
-    Returns:
-        Optional[Dict[str, Any]]: The entity submissions JSON data, or None if not found
-    """
-    # Import here to avoid circular imports
-    from edgar.entity.submissions import download_entity_submissions_from_sec as _download
-    return _download(cik)
-
-
-def parse_entity_submissions(submissions_json: Dict[str, Any]) -> 'EntityData':
-    """
-    Parse the entity submissions JSON data.
-    
-    Args:
-        submissions_json: The JSON data from the SEC submissions API
-        
-    Returns:
-        EntityData: The parsed entity data
-    """
-    # Import here to avoid circular imports
-    from edgar.entity.data import parse_entity_submissions as _parse
-    return _parse(submissions_json)
-
-
-@lru_cache(maxsize=32)
-def get_company_facts(cik: int) -> Optional[EntityFacts]:
-    """
-    Get company facts from the SEC using the enhanced EntityFacts API.
-    
-    Args:
-        cik: The company CIK
-        
-    Returns:
-        Optional[EntityFacts]: The enhanced company facts, or None if not found
-    """
-    try:
-        # Import here to avoid circular imports
-        from edgar.entity.parser import EntityFactsParser
-        from edgar.httprequests import download_json
-        
-        # Download the raw facts JSON from SEC
-        url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
-        facts_json = download_json(url)
-        
-        # Parse using the enhanced parser
-        return EntityFactsParser.parse_company_facts(facts_json)
-    except Exception as e:
-        # Log the error but don't raise - return None for graceful degradation
-        from edgar.core import log
-        log.debug(f"Could not get enhanced facts for CIK {cik}: {e}")
-        
-        # Fallback to the old implementation for compatibility
-        try:
-            from edgar.entity.facts import get_company_facts as _get_facts
-            old_facts = _get_facts(cik)
-            if old_facts:
-                log.debug(f"Fallback to old facts API succeeded for CIK {cik}")
-            return None  # For now, return None instead of old facts to encourage migration
-        except Exception:
-            return None

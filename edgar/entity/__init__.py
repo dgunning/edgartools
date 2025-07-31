@@ -29,15 +29,10 @@ from edgar.entity.filings import (
     EntityFilings
 )
 
-from edgar.entity.facts import (
+from edgar.entity.entity_facts import (
     EntityFacts,
-    CompanyFacts,
     NoCompanyFactsFound,
-    Fact,
-    Concept,
-    CompanyConcept,
     get_company_facts,
-    get_concept
 )
 
 from edgar.entity.search import (
@@ -87,12 +82,7 @@ __all__ = [
     'EntityFiling',
     'EntityFilings',
     'EntityFacts',
-    
-    # Fact classes
-    'Fact',
-    'Concept',
-    'CompanyConcept',
-    
+
     # Factory functions
     'get_entity',
     'get_company',
@@ -120,7 +110,6 @@ __all__ = [
     
     # Fact functions
     'get_company_facts',
-    'get_concept',
     
     # Exceptions
     'NoCompanyFactsFound',
@@ -128,5 +117,4 @@ __all__ = [
     # Backwards compatibility
     'CompanyFiling',
     'CompanyFilings',
-    'CompanyFacts'
 ]

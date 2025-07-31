@@ -8,6 +8,12 @@ financial facts with AI-ready features.
 from datetime import date, datetime
 from typing import List, Dict, Optional, Union, Callable, Any, TYPE_CHECKING
 import pandas as pd
+from rich.box import SIMPLE_HEAVY, SIMPLE
+from rich.console import Group
+from rich.padding import Padding
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 from collections import defaultdict
 
 from edgar.entity.models import FinancialFact, DataQuality
@@ -265,13 +271,13 @@ class FactQuery:
         self._post_filter = keep_latest
         return self
     
-    def latest_periods(self, n: int = 4, prefer_annual: bool = True) -> 'FactQuery':
+    def latest_periods(self, n: int = 4, annual: bool = True) -> 'FactQuery':
         """
         Get facts from the n most recent periods.
         
         Args:
             n: Number of recent periods to include
-            prefer_annual: If True, prefer annual (FY) periods over interim periods
+            annual: If True, only use annual (FY) periods; if False, use all period types
             
         Returns:
             Self for method chaining
@@ -302,57 +308,15 @@ class FactQuery:
         for period_key, info in period_info.items():
             period_list.append((period_key, info))
         
-        if prefer_annual:
-            # Separate annual and interim periods
+        if annual:
+            # When annual=True, only use annual periods - no backfilling with interim periods
             annual_periods = [(pk, info) for pk, info in period_list if info['is_annual']]
-            interim_periods = [(pk, info) for pk, info in period_list if not info['is_annual']]
             
             # Sort annual periods by fiscal year (newest first)
             annual_periods.sort(key=lambda x: x[0][0], reverse=True)  # Sort by fiscal_year
             
-            # Sort interim periods by end date (newest first) 
-            interim_periods.sort(key=lambda x: x[1]['end_date'], reverse=True)
-            
-            # Be very aggressive about preferring annual periods
-            selected_periods = []
-            
-            # First preference: Use only annual periods if we have at least 4
-            if len(annual_periods) >= 4:
-                selected_periods.extend([pk for pk, _ in annual_periods[:n]])
-            elif len(annual_periods) >= n//2:
-                # If we have at least half our target in annual periods, prioritize them heavily
-                selected_periods.extend([pk for pk, _ in annual_periods])
-                
-                # Only add the most recent interim periods from years not covered by annual periods
-                remaining = n - len(selected_periods)
-                if remaining > 0:
-                    annual_years = {pk[0] for pk, _ in annual_periods}
-                    
-                    # Filter to only the most recent periods from years without annual data
-                    recent_years = sorted(set(pk[0] for pk, _ in interim_periods), reverse=True)
-                    filtered_interim = []
-                    
-                    for year in recent_years[:remaining]:
-                        if year not in annual_years:
-                            # Get the longest period available for this year (prefer Q4 over Q1, etc.)
-                            year_periods = [(pk, info) for pk, info in interim_periods if pk[0] == year]
-                            if year_periods:
-                                # Sort by period length (longer periods first), then by end date
-                                year_periods.sort(key=lambda x: (x[1]['period_months'], x[1]['end_date']), reverse=True)
-                                filtered_interim.append(year_periods[0])
-                    
-                    selected_periods.extend([pk for pk, _ in filtered_interim[:remaining]])
-            else:
-                # Fallback: use all annual periods and fill with interim periods
-                selected_periods.extend([pk for pk, _ in annual_periods])
-                
-                remaining = n - len(selected_periods)
-                if remaining > 0:
-                    annual_years = {pk[0] for pk, _ in annual_periods}
-                    filtered_interim = [(pk, info) for pk, info in interim_periods 
-                                      if pk[0] not in annual_years]
-                    
-                    selected_periods.extend([pk for pk, _ in filtered_interim[:remaining]])
+            # Select only annual periods, up to n
+            selected_periods = [pk for pk, _ in annual_periods[:n]]
         else:
             # Sort all periods by end date (newest first)
             period_list.sort(key=lambda x: x[1]['end_date'], reverse=True)
@@ -583,13 +547,6 @@ class FactQuery:
         if len(displayed_period_types) > 1:
             pivot.attrs['mixed_periods'] = True
             pivot.attrs['period_lengths'] = sorted(list(displayed_period_types))
-            # Only warn about truly mixed displayed periods
-            import warnings
-            warnings.warn(
-                f"Mixed period lengths in displayed data: {', '.join(sorted(displayed_period_types))}. "
-                "Consider using prefer_annual=True or filtering to comparable periods for accurate analysis.",
-                UserWarning
-            )
         else:
             pivot.attrs['mixed_periods'] = False
             pivot.attrs['period_lengths'] = list(displayed_period_types) if displayed_period_types else []
@@ -770,7 +727,113 @@ class FactQuery:
         
         return deduplicated
     
+    def __rich__(self):
+        """Creates a rich representation showing the most useful facts information."""
+
+        
+        # Get the facts for this query
+        facts = self.execute()
+        
+        # Title with count
+        title = Text.assemble(
+            "🔍 ",
+            ("Query Results", "bold blue"),
+            f" ({len(facts):,} facts)"
+        )
+        
+        if not facts:
+            # Empty results
+            empty_panel = Panel(
+                Text("No facts matching the current filters", style="dim"),
+                title=title,
+                border_style="blue"
+            )
+            return empty_panel
+        
+        # Limit results for display (show first 20, indicate if more exist)
+        display_limit = 20
+        display_facts = facts[:display_limit]
+        has_more = len(facts) > display_limit
+        
+        # Create main results table
+        results_table = Table(box=SIMPLE, show_header=True, padding=(0, 1))
+        results_table.add_column("Concept", style="bold", max_width=60)
+        results_table.add_column("Value", justify="right", max_width=15)
+        results_table.add_column("Start")
+        results_table.add_column("End", max_width=10)
+        
+        # Add rows
+        for fact in display_facts:
+            
+            # Format period
+            period = f"{fact.fiscal_period} {fact.fiscal_year}" if fact.fiscal_period and fact.fiscal_year else "N/A"
+            
+            # Format filing date
+            filed = fact.filing_date.strftime('%Y-%m-%d') if fact.filing_date else "N/A"
+            
+            results_table.add_row(
+                fact.concept,
+                str(fact.value) if fact.value else "N/A",
+                str(fact.period_start) if fact.period_start else "N/A",
+                str(fact.period_end) if fact.period_end else "N/A",
+            )
+        
+        # Summary stats table
+        stats_table = Table(box=SIMPLE_HEAVY, show_header=False, padding=(0, 1))
+        stats_table.add_column("Metric", style="dim")
+        stats_table.add_column("Value", style="bold")
+        
+        # Calculate stats
+        unique_concepts = len(set(f.concept for f in facts))
+        unique_periods = len(set((f.fiscal_year, f.fiscal_period) for f in facts if f.fiscal_year and f.fiscal_period))
+        form_types = set(f.form_type for f in facts if f.form_type)
+        
+        # Get date range
+        dates = [f.filing_date for f in facts if f.filing_date]
+        if dates:
+            date_range = f"{min(dates).strftime('%Y-%m-%d')} to {max(dates).strftime('%Y-%m-%d')}"
+        else:
+            date_range = "N/A"
+        
+        stats_table.add_row("Total Facts", f"{len(facts):,}")
+        stats_table.add_row("Unique Concepts", f"{unique_concepts:,}")
+        stats_table.add_row("Unique Periods", f"{unique_periods:,}")
+        stats_table.add_row("Form Types", ", ".join(sorted(form_types)[:3]) + ("..." if len(form_types) > 3 else ""))
+        stats_table.add_row("Date Range", date_range)
+        
+        stats_panel = Panel(
+            stats_table,
+            title="📊 Query Summary",
+            border_style="bright_black"
+        )
+        
+        # Main results panel
+        if has_more:
+            subtitle = f"Showing first {display_limit:,} of {len(facts):,} facts • Use .to_dataframe() for all results"
+        else:
+            subtitle = f"All {len(facts):,} facts shown"
+        
+        results_panel = Panel(
+            results_table,
+            title="📋 Facts",
+            subtitle=subtitle,
+            border_style="bright_black"
+        )
+        
+        # Combine panels
+        content = Group(
+            Padding("", (1, 0, 0, 0)),
+            stats_panel,
+            results_panel
+        )
+        
+        return Panel(
+            content,
+            title=title,
+            border_style="blue"
+        )
+
     def __repr__(self) -> str:
-        """String representation"""
-        count = self.count()
-        return f"FactQuery({count} facts matching filters)"
+        """String representation using rich formatting."""
+        from edgar.richtools import repr_rich
+        return repr_rich(self.__rich__())

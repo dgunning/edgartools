@@ -1,8 +1,7 @@
 from edgar.entity import EntityFacts
 from edgar.entity.query import FactQuery
 from edgar.entity.parser import EntityFactsParser, FinancialFact
-from edgar.reference.tickers import get_company_tickers
-from edgar.entity.facts import download_company_facts_from_sec, load_company_facts_from_local, NoCompanyFactsFound
+from edgar.entity.entity_facts import load_company_facts_from_local
 from tqdm.auto import tqdm
 from edgar import *
 import pandas as pd

@@ -441,21 +441,21 @@ Filter to most recent instant facts (for balance sheet items).
 latest_balance = query.by_statement_type('BalanceSheet').latest_instant()
 ```
 
-#### `latest_periods(n: int = 4, prefer_annual: bool = True) -> FactQuery`
+#### `latest_periods(n: int = 4, annual: bool = True) -> FactQuery`
 
 Get facts from the n most recent periods.
 
 ```python
-# Latest 4 periods, preferring annual
-recent = query.latest_periods(4, prefer_annual=True)
+# Latest 4 annual periods only
+recent = query.latest_periods(4, annual=True)
 
 # Latest 8 periods, any type
-recent = query.latest_periods(8, prefer_annual=False)
+recent = query.latest_periods(8, annual=False)
 ```
 
 **Parameters:**
 - `n` (int): Number of recent periods (default: 4)
-- `prefer_annual` (bool): Prefer annual over interim periods (default: True)
+- `annual` (bool): If True, only use annual periods; if False, use all period types (default: True)
 
 ### Sorting and Limiting
 
