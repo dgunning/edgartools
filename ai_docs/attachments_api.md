@@ -70,8 +70,33 @@ Each `Attachment` provides rich metadata and content extraction methods:
 - `attachment.description`: description from SEC filing
 - `attachment.document_type`: type (e.g., 'EX-99.1', 'HTML', etc.)
 - `attachment.text()`: plain text content
+- `attachment.markdown()`: markdown content (HTML attachments only)
 - `attachment.download(path)`: download file
 - `attachment.is_html()`, `attachment.is_xml()`, `attachment.is_text()`, etc.
+
+### Markdown Conversion
+Convert HTML attachments to markdown format:
+```python
+# Convert a single HTML attachment
+attachment = attachments[1]  # Get primary document
+if attachment.is_html():
+    markdown_content = attachment.markdown()
+    print(markdown_content)
+
+# Batch convert all HTML attachments
+markdown_dict = attachments.markdown()
+for doc_name, markdown_content in markdown_dict.items():
+    print(f"Document: {doc_name}")
+    print(f"Content length: {len(markdown_content)} characters")
+    
+# Save markdown to files
+for doc_name, markdown_content in markdown_dict.items():
+    base_name = doc_name.rsplit('.', 1)[0]
+    with open(f"{base_name}.md", "w") as f:
+        f.write(markdown_content)
+```
+
+The `markdown()` method returns `None` for non-HTML attachments, making it safe to call on any attachment.
 
 ## Common Patterns
 - Get all exhibits:
