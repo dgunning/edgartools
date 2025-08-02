@@ -6,17 +6,21 @@ import httpx
 import logging
 from typing import Tuple
 
-from pyrate_limiter import Limiter, Duration, Rate, AbstractBucket, InMemoryBucket
+from pyrate_limiter import Limiter, Duration, Rate, InMemoryBucket
 
 log = logging.getLogger(__name__)
 
 
-def create_rate_limiting_bucket(requests_per_second: int, max_delay: int) -> AbstractBucket:
+def create_rate_limiter(requests_per_second: int, max_delay: int) -> Limiter:
     rate = Rate(requests_per_second, Duration.SECOND)
     rate_limits = [rate]
     bucket = InMemoryBucket(rate_limits)
 
-    return bucket
+    limiter = Limiter(
+        bucket, raise_when_fail=False, retry_until_max_delay=True
+    )
+    
+    return limiter
 
 class RateLimitingTransport(httpx.HTTPTransport):
     def __init__(self, limiter: Limiter, **kwargs):

@@ -76,6 +76,7 @@ dependencies = [
   "pytest-env",
   "pytest-xdist",
   "pytest-asyncio",
+  "filelock",
   "pyinstrument",
   "pyright",
   "ruff",
@@ -89,7 +90,7 @@ dependencies = [
   "mkdocs-material"
 ]
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests --ignore=tests/legacy {args}"
+cov = "pytest -n auto --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests --ignore=tests/legacy {args}"
 no-cov = "cov --no-cov {args}"
 lint = "ruff check edgar"
 smoke-filings = "python tests/batch/batch_filings.py {args}"

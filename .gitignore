@@ -16,3 +16,7 @@ data/.DS_Store
 CLAUDE.md
 internal/*
 gists/bugs/*
+
+# Generated from testing
+ratelimiter.sqlite*
+*_generated.html

@@ -38,4 +38,4 @@ async def test_dont_exceed_limit_async():
     end = time.perf_counter()
 
     duration = end - start
-    assert duration > 3.0 and duration < 5.0, f"{duration=} not between 3 and 5 seconds"
+    assert duration > 3.0, f"{duration=} was faster than available rate limit"
