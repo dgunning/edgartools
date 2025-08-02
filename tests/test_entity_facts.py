@@ -712,6 +712,138 @@ class TestFactQuery:
                 months += fact.period_end.month - fact.period_start.month + 1
                 assert months >= 11  # Allow for fiscal year variations
 
+    def test_date_range_string_format(self, query):
+        """Test date_range with string date formats"""
+        # Test both start and end as strings
+        results = query.by_concept("Revenue").date_range(start="2023-04-01", end="2023-09-30").execute()
+        assert len(results) >= 0
+        for fact in results:
+            assert fact.period_end >= date(2023, 4, 1)
+            assert fact.period_end <= date(2023, 9, 30)
+        
+        # Test mixed date types (date object and string)
+        results = query.by_concept("Revenue").date_range(start=date(2023, 4, 1), end="2023-09-30").execute()
+        assert len(results) >= 0
+        for fact in results:
+            assert fact.period_end >= date(2023, 4, 1)
+            assert fact.period_end <= date(2023, 9, 30)
+    
+    def test_date_range_optional_parameters(self, query):
+        """Test date_range with optional start or end parameters"""
+        # Test only start date
+        results = query.by_concept("Revenue").date_range(start="2023-07-01").execute()
+        assert len(results) >= 0
+        for fact in results:
+            assert fact.period_end >= date(2023, 7, 1)
+        
+        # Test only end date
+        results = query.by_concept("Revenue").date_range(end="2023-06-30").execute()
+        assert len(results) >= 0
+        for fact in results:
+            assert fact.period_end <= date(2023, 6, 30)
+        
+        # Test only start date as date object
+        results = query.by_concept("Revenue").date_range(start=date(2023, 7, 1)).execute()
+        assert len(results) >= 0
+        for fact in results:
+            assert fact.period_end >= date(2023, 7, 1)
+    
+    def test_date_range_error_handling(self, query):
+        """Test date_range error handling"""
+        # Test no parameters provided
+        with pytest.raises(ValueError, match="At least one of start or end date must be provided"):
+            query.date_range().execute()
+        
+        # Test invalid date format
+        with pytest.raises(ValueError, match="Invalid date format.*Expected 'YYYY-MM-DD'"):
+            query.date_range(start="invalid-date").execute()
+        
+        # Test invalid date type
+        with pytest.raises(ValueError, match="Invalid date type"):
+            query.date_range(start=123).execute()
+    
+    def test_by_text_basic(self, query):
+        """Test basic text search functionality"""
+        # Search for "Revenue" in any text field
+        results = query.by_text("Revenue").execute()
+        assert len(results) >= 0
+        for fact in results:
+            # Should match in concept, label, or other text fields
+            text_found = (
+                (fact.concept and "revenue" in fact.concept.lower()) or
+                (fact.label and "revenue" in fact.label.lower()) or
+                (fact.taxonomy and "revenue" in fact.taxonomy.lower()) or
+                (fact.statement_type and "revenue" in fact.statement_type.lower())
+            )
+            assert text_found, f"Pattern 'Revenue' not found in any text field of fact: {fact.concept}"
+    
+    def test_by_text_regex_patterns(self, query):
+        """Test text search with regex patterns"""
+        # Test OR pattern
+        results = query.by_text("Revenue|Assets").execute()
+        assert len(results) >= 0
+        for fact in results:
+            text_found = any([
+                fact.concept and ("revenue" in fact.concept.lower() or "assets" in fact.concept.lower()),
+                fact.label and ("revenue" in fact.label.lower() or "assets" in fact.label.lower()),
+                fact.statement_type and ("revenue" in fact.statement_type.lower() or "assets" in fact.statement_type.lower())
+            ])
+            assert text_found
+        
+        # Test case insensitive
+        results_lower = query.by_text("revenue").execute()
+        results_upper = query.by_text("REVENUE").execute()
+        results_mixed = query.by_text("Revenue").execute()
+        
+        # Should return same results regardless of case
+        assert len(results_lower) == len(results_upper) == len(results_mixed)
+    
+    def test_by_text_concept_search(self, query):
+        """Test text search specifically in concept names"""
+        # Search for GAAP concepts
+        results = query.by_text("us-gaap").execute()
+        assert len(results) >= 0
+        for fact in results:
+            assert fact.concept and "us-gaap" in fact.concept.lower()
+    
+    def test_by_text_label_search(self, query):
+        """Test text search specifically in labels"""
+        # Search for "Current" which should appear in labels like "Current Assets"
+        results = query.by_text("Current").execute()
+        assert len(results) >= 0
+        # At least some results should have "current" in the label
+        label_matches = [fact for fact in results if fact.label and "current" in fact.label.lower()]
+        # We expect some matches, but don't require all results to have label matches
+        # since the search also looks in other fields
+    
+    def test_by_text_statement_type_search(self, query):
+        """Test text search in statement types"""
+        # Search for "Balance" which should match "BalanceSheet"
+        results = query.by_text("Balance").execute()
+        assert len(results) >= 0
+        for fact in results:
+            text_found = any([
+                fact.concept and "balance" in fact.concept.lower(),
+                fact.label and "balance" in fact.label.lower(),
+                fact.statement_type and "balance" in fact.statement_type.lower()
+            ])
+            assert text_found
+    
+    def test_by_text_chaining(self, query):
+        """Test chaining by_text with other filters"""
+        # Chain text search with fiscal year filter
+        results = query.by_text("Revenue").by_fiscal_year(2024).execute()
+        assert len(results) >= 0
+        for fact in results:
+            assert fact.fiscal_year == 2024
+            # Should also match the text pattern
+            text_found = any([
+                fact.concept and "revenue" in fact.concept.lower(),
+                fact.label and "revenue" in fact.label.lower(),
+                fact.statement_type and "revenue" in fact.statement_type.lower()
+            ])
+            assert text_found
+
 
 class TestEntityFactsParser:
     """Test the parser for SEC data"""

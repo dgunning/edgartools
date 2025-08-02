@@ -8,13 +8,13 @@ financial facts with AI-ready features.
 from datetime import date, datetime
 from typing import List, Dict, Optional, Union, Callable, Any, TYPE_CHECKING
 import pandas as pd
+import re
 from rich.box import SIMPLE_HEAVY, SIMPLE
 from rich.console import Group
 from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from collections import defaultdict
 
 from edgar.entity.models import FinancialFact, DataQuality
 
@@ -90,6 +90,54 @@ class FactQuery:
             self._filters.append(lambda f: f.label == label)
         return self
     
+    def by_text(self, pattern: str) -> 'FactQuery':
+        """
+        Search across concept names, labels, and other text fields for a pattern.
+        
+        This is a flexible search that looks for the pattern in all relevant text fields
+        of the financial facts using case-insensitive regex matching.
+        
+        Args:
+            pattern: Pattern to search for in various text fields (supports regex)
+            
+        Returns:
+            Self for method chaining
+            
+        Example:
+            # Find all revenue-related facts
+            facts.query().by_text("revenue|sales")
+            
+            # Find facts with "cash" in any text field
+            facts.query().by_text("cash")
+        """
+        regex = re.compile(pattern, re.IGNORECASE)
+        
+        def text_filter(fact):
+            # Search in concept name
+            if fact.concept and regex.search(fact.concept):
+                return True
+            
+            # Search in label
+            if fact.label and regex.search(fact.label):
+                return True
+            
+            # Search in taxonomy (namespace)
+            if fact.taxonomy and regex.search(fact.taxonomy):
+                return True
+            
+            # Search in business context if available
+            if hasattr(fact, 'business_context') and fact.business_context and regex.search(fact.business_context):
+                return True
+            
+            # Search in statement type if available
+            if fact.statement_type and regex.search(fact.statement_type):
+                return True
+                
+            return False
+        
+        self._filters.append(text_filter)
+        return self
+    
     # Time-based filtering
     def by_fiscal_year(self, year: int) -> 'FactQuery':
         """
@@ -149,20 +197,56 @@ class FactQuery:
         self._filters.append(matches_period_length)
         return self
     
-    def date_range(self, start: date, end: date) -> 'FactQuery':
+    def date_range(self, start: Union[date, str, None] = None, end: Union[date, str, None] = None) -> 'FactQuery':
         """
         Filter by date range.
         
         Args:
-            start: Start date (inclusive)
-            end: End date (inclusive)
+            start: Start date (inclusive). Can be a date object or string in 'YYYY-MM-DD' format
+            end: End date (inclusive). Can be a date object or string in 'YYYY-MM-DD' format
             
         Returns:
             Self for method chaining
+            
+        Raises:
+            ValueError: If neither start nor end is provided, or if date string format is invalid
         """
-        self._filters.append(
-            lambda f: f.period_end and start <= f.period_end <= end
-        )
+        if start is None and end is None:
+            raise ValueError("At least one of start or end date must be provided")
+        
+        # Parse string dates to date objects
+        def parse_date(date_value: Union[date, str, None]) -> Optional[date]:
+            if date_value is None:
+                return None
+            if isinstance(date_value, date):
+                return date_value
+            if isinstance(date_value, str):
+                try:
+                    return datetime.strptime(date_value, '%Y-%m-%d').date()
+                except ValueError:
+                    raise ValueError(f"Invalid date format '{date_value}'. Expected 'YYYY-MM-DD'")
+            raise ValueError(f"Invalid date type: {type(date_value)}. Expected date object or string")
+        
+        parsed_start = parse_date(start)
+        parsed_end = parse_date(end)
+        
+        # Create filter based on provided dates
+        if parsed_start is not None and parsed_end is not None:
+            # Both start and end provided
+            self._filters.append(
+                lambda f: f.period_end and parsed_start <= f.period_end <= parsed_end
+            )
+        elif parsed_start is not None:
+            # Only start provided - filter for dates >= start
+            self._filters.append(
+                lambda f: f.period_end and f.period_end >= parsed_start
+            )
+        else:
+            # Only end provided - filter for dates <= end
+            self._filters.append(
+                lambda f: f.period_end and f.period_end <= parsed_end
+            )
+        
         return self
     
     def as_of(self, as_of_date: date) -> 'FactQuery':
