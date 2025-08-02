@@ -1238,9 +1238,14 @@ class XBRLParser:
                         for dim_elem in segment_elem.findall('.//{http://xbrl.org/2006/xbrldi}typedMember'):
                             dimension = dim_elem.get('dimension')
                             if dimension:
-                                # The typed dimension value is the first child element
+                                # The typed dimension value is the text content of the first child element
                                 for child in dim_elem:
-                                    context.dimensions[dimension] = child.tag
+                                    # Extract the text content, which contains the actual typed member value
+                                    if child.text and child.text.strip():
+                                        context.dimensions[dimension] = child.text.strip()
+                                    else:
+                                        # Fallback to tag if no text content
+                                        context.dimensions[dimension] = child.tag
                                     break
 
                 # Extract period information

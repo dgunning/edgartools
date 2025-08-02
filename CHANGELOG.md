@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.5.1 - 2025-07-31
+
+### Changed
+- Cleanup the `edgar.entity` package and remove the old implementation of `Facts`
+- Add rich display to `EntityFacts`, `FactsQuery`, and `FinancialStatement` classes
+
+## 4.5.0 - 2025-07-30
+
+### Changed
+- The Company Facts API has been completely rewritten to improve accuracy and easy of use
+
+### Fixed
+- Fix bug in XBRL parser not picking up the typedmember correctly
+
+### Added
+- Attachment Reports and Statements now have a `to_dataframe` method to convert the data to a pandas DataFrame
+
+
 ## 4.4.5 - 2025-07-25
 
 ## Fixed

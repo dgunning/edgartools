@@ -79,7 +79,7 @@ class TestEntityHierarchy:
         # Note: Facts might not always be available
         if facts is not None:
             assert facts.cik == 320193
-            assert len(facts.facts) > 0
+            assert len(facts) > 0
     
     def test_class_hierarchy(self):
         """Test that the class hierarchy is correct."""
