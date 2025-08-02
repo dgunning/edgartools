@@ -11,7 +11,7 @@ from httpx import HTTPStatusError, AsyncClient
 from tqdm.auto import tqdm
 from edgar.dates import extract_dates
 from edgar.core import log, get_edgar_data_directory, filing_date_to_year_quarters, strtobool
-from edgar.httprequests import download_bulk_data, download_datafile, download_text, throttle_requests
+from edgar.httprequests import download_bulk_data, download_datafile, download_text
 from edgar.reference.tickers import (ticker_txt_url,
                                      company_tickers_json_url,
                                      mutual_fund_tickers_url,
@@ -444,7 +444,6 @@ def is_feed_file_in_date_range(filename: str,
 
     return True
 
-@throttle_requests(requests_per_second=4)
 def list_filing_feed_files_for_quarter(year:int, quarter:int) -> pd.DataFrame:
     assert quarter in (1, 2, 3, 4), "Quarter must be between 1 and 4"
     url = f"https://www.sec.gov/Archives/edgar/Feed/{year}/QTR{quarter}/"
