@@ -9,11 +9,11 @@ To close the global connection, call `close_client()`
 To change the rate limit, call `update_rate_limiter(requests_per_second)`
 
 ## Caching
-Caching is enabled by default, using the controller rules defined in httpclient_cache. 
+Caching is enabled by default, using the controller rules defined in httpclient_cache.
 
 To disable the cache, set CACHE_ENABLED to False.
 
-## HTTPX Parameters 
+## HTTPX Parameters
 
 HTTPX Parameters are assembled from three sources:
 - edgar.httpclient.HTTPX_PARAMS
@@ -24,7 +24,7 @@ HTTPX Parameters are assembled from three sources:
 
 Implementation notes:
 - In general, changing any settings / globals requires calling `close_client` to make sure the old settings aren't used.
-- To use other storage backends, such as S3, override `get_transport` and `get_async_storage` and use hishel.S3Storage and hishel.AsyncS3Storage object. See https://hishel.com/ for usage. 
+- To use other storage backends, such as S3, override `get_transport` and `get_async_storage` and use hishel.S3Storage and hishel.AsyncS3Storage object. See https://hishel.com/ for usage.
 
 """
 
@@ -40,11 +40,13 @@ from edgar.httpclient_cache import get_cache_controller
 from edgar.httpclient_ratelimiter import RateLimitingTransport, AsyncRateLimitingTransport, create_rate_limiter
 from pathlib import Path
 from .core import edgar_data_dir
+
 log = logging.getLogger(__name__)
 
 HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
 
 CACHE_ENABLED = True
+
 
 def get_cache_directory():
     if CACHE_ENABLED:
@@ -52,16 +54,19 @@ def get_cache_directory():
     else:
         return None
 
+
 _DEFAULT_REQUEST_PER_SEC_LIMIT = 9
 _MAX_DELAY = 1000 * 60  # 1 minute
 
 _RATE_LIMITER = create_rate_limiter(requests_per_second=_DEFAULT_REQUEST_PER_SEC_LIMIT, max_delay=_MAX_DELAY)
+
 
 def update_rate_limiter(requests_per_second: int):
     global _RATE_LIMITER
     _RATE_LIMITER = create_rate_limiter(requests_per_second=_DEFAULT_REQUEST_PER_SEC_LIMIT, max_delay=_MAX_DELAY)
 
     close_clients()
+
 
 def get_edgar_verify_ssl():
     """
@@ -73,11 +78,11 @@ def get_edgar_verify_ssl():
     else:
         return True
 
-def get_http_params():
 
+def get_http_params():
     return {
         **HTTPX_PARAMS,
-        'headers': {'User-Agent': get_identity()},
+        "headers": {"User-Agent": get_identity()},
         "verify": get_edgar_verify_ssl(),
     }
 
@@ -113,7 +118,6 @@ def _http_client_manager():
 
     @contextmanager
     def _get_client(**kwargs):
-
         nonlocal client
 
         if client is None:
@@ -122,7 +126,7 @@ def _http_client_manager():
                 # but future proofing against TOCTOU races in free-threading world
                 if client is None:
                     log.info("Creating new HTTPX Client")
-                    client = edgar_client_factory(**kwargs)                
+                    client = edgar_client_factory(**kwargs)
 
         yield client
 
@@ -156,7 +160,6 @@ async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs
 
 
 def get_transport() -> httpx.BaseTransport:
-
     cache_dir = get_cache_directory()
     if cache_dir:
         log.info(f"Cache is ENABLED, writing to {cache_dir}")
@@ -167,6 +170,7 @@ def get_transport() -> httpx.BaseTransport:
     else:
         log.info("Cache is DISABLED, rate limiting only")
         return RateLimitingTransport(_RATE_LIMITER)
+
 
 def get_async_transport() -> httpx.AsyncBaseTransport:
     cache_dir = get_cache_directory()
@@ -182,6 +186,7 @@ def get_async_transport() -> httpx.AsyncBaseTransport:
 
 
 http_client, _close_client = _http_client_manager()
+
 
 def close_clients():
     """Closes and invalidates existing client session, if created."""

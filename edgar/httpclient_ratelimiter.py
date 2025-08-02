@@ -1,21 +1,20 @@
 """
-The default pyrate_limiter is set to 9 requests per second. 
-
-To change the rate limit, call update_rate_limiter(requests_per_minute)
-
 To control rate limit across multiple processes, see https://pyratelimiter.readthedocs.io/en/latest/#backends
 """
 
 import httpx
 import logging
 
-from pyrate_limiter import Limiter, Duration, Rate, InMemoryBucket
+from pyrate_limiter import Limiter, Duration
 
 from pyrate_limiter import limiter_factory
+
 log = logging.getLogger(__name__)
+
 
 def create_rate_limiter(requests_per_second: int, max_delay: int) -> Limiter:
     return limiter_factory.create_inmemory_limiter(requests_per_second, duration=Duration.SECOND, max_delay=max_delay)
+
 
 class RateLimitingTransport(httpx.HTTPTransport):
     def __init__(self, limiter: Limiter, **kwargs):
