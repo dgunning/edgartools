@@ -8,7 +8,7 @@ This module provides Statement classes that wrap pandas DataFrames with:
 - LLM-ready context generation
 """
 
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 import pandas as pd
 from dataclasses import dataclass
 from rich.box import SIMPLE_HEAVY, SIMPLE
