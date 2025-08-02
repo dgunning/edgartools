@@ -18,6 +18,13 @@ from edgar.core import log
 from edgar.entity.models import FinancialFact
 from edgar.httprequests import download_json
 from edgar.storage import is_using_local_storage, get_edgar_data_directory
+from rich.box import SIMPLE_HEAVY, SIMPLE
+from rich.console import Group
+from rich.columns import Columns
+from rich.padding import Padding
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
 
 class NoCompanyFactsFound(Exception):
@@ -147,14 +154,6 @@ class EntityFacts:
 
     def __rich__(self):
         """Creates a rich representation providing an at-a-glance view of company facts."""
-        from rich.box import SIMPLE_HEAVY, SIMPLE
-        from rich.console import Group
-        from rich.columns import Columns
-        from rich.padding import Padding
-        from rich.panel import Panel
-        from rich.table import Table
-        from rich.text import Text
-        
         # Title
         title = Text.assemble(
             "📊 ", 
