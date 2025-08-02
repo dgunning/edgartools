@@ -11,44 +11,37 @@ import logging
 
 from pyrate_limiter import Limiter, Duration, Rate, InMemoryBucket
 
+from pyrate_limiter import limiter_factory
 log = logging.getLogger(__name__)
 
 def create_rate_limiter(requests_per_second: int, max_delay: int) -> Limiter:
-    rate = Rate(requests_per_second, Duration.SECOND)
-    rate_limits = [rate]
-    bucket = InMemoryBucket(rate_limits)
-    
-    limiter = Limiter(
-        bucket, raise_when_fail=False, max_delay=max_delay, retry_until_max_delay=True
-    )
-
-    return limiter
+    return limiter_factory.create_inmemory_limiter(requests_per_second, duration=Duration.SECOND, max_delay=max_delay)
 
 class RateLimitingTransport(httpx.HTTPTransport):
-    def __init__(self, limiter: Limiter):
-        super().__init__()
-        self._limiter = limiter
+    def __init__(self, limiter: Limiter, **kwargs):
+        super().__init__(**kwargs)
+        self.limiter = limiter
 
-    def handle_request(self, request: httpx.Request) -> httpx.Response:
-        log.debug("Limiter applied")
-        if not self._limiter.try_acquire("edgar", 1):  
-            # this should never occur because we're using
-            # retry_until_max_delay, so only result should be True or Exception            
-            raise RuntimeError("Rate acquisition failed")
+    def handle_request(self, request: httpx.Request, **kwargs) -> httpx.Response:
+        # using a constant string for item name means that the same
+        # rate is applied to all requests.
+        while not self.limiter.try_acquire("httpx_ratelimiter"):
+            log.debug("Lock acquisition timed out, retrying")
 
-        return super().handle_request(request)
+        log.debug("Acquired lock")
+        return super().handle_request(request, **kwargs)
 
 
 class AsyncRateLimitingTransport(httpx.AsyncHTTPTransport):
-    def __init__(self, limiter: Limiter):
-        super().__init__()
-        self._limiter = limiter
+    def __init__(self, limiter: Limiter, **kwargs):
+        super().__init__(**kwargs)
+        self.limiter = limiter
 
-    async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
-        log.debug("Limiter applied")
-        if not await self._limiter.try_acquire_async("edgar", 1):  # blocks until slot available
-            # this should never occur because we're using
-            # retry_until_max_delay, so only result should be True or Exception
-            raise RuntimeError("Rate acquisition failed")
+    async def handle_async_request(self, request: httpx.Request, **kwargs) -> httpx.Response:
+        while not await self.limiter.try_acquire_async("httpx_ratelimiter"):
+            log.debug("Lock acquisition timed out, retrying")
 
-        return await super().handle_async_request(request)
+        log.debug("Acquired lock")
+        response = await super().handle_async_request(request, **kwargs)
+
+        return response
