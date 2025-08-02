@@ -37,8 +37,9 @@ import hishel
 from typing import AsyncGenerator, Optional
 from edgar.core import get_identity, edgar_mode, strtobool
 from edgar.httpclient_cache import get_cache_controller
-from edgar.httpclient_ratelimiter import RateLimitingTransport, AsyncRateLimitingTransport, create_rate_limiter
+from edgar.httpclient_ratelimiter import RateLimitingTransport, AsyncRateLimitingTransport, create_rate_limiting_bucket
 from pathlib import Path
+from pyrate_limiter import Limiter, BucketAsyncWrapper
 from .core import edgar_data_dir
 
 log = logging.getLogger(__name__)
@@ -58,12 +59,12 @@ def get_cache_directory():
 _DEFAULT_REQUEST_PER_SEC_LIMIT = 9
 _MAX_DELAY = 1000 * 60  # 1 minute
 
-_RATE_LIMITER = create_rate_limiter(requests_per_second=_DEFAULT_REQUEST_PER_SEC_LIMIT, max_delay=_MAX_DELAY)
+_RATE_LIMITING_BUCKET = create_rate_limiting_bucket(requests_per_second=_DEFAULT_REQUEST_PER_SEC_LIMIT, max_delay=_MAX_DELAY)
 
 
 def update_rate_limiter(requests_per_second: int):
-    global _RATE_LIMITER
-    _RATE_LIMITER = create_rate_limiter(requests_per_second=_DEFAULT_REQUEST_PER_SEC_LIMIT, max_delay=_MAX_DELAY)
+    global _RATE_LIMITING_BUCKET
+    _RATE_LIMITING_BUCKET = create_rate_limiting_bucket(requests_per_second=requests_per_second, max_delay=_MAX_DELAY)
 
     close_clients()
 
@@ -160,29 +161,40 @@ async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs
 
 
 def get_transport() -> httpx.BaseTransport:
+
+
+    limiter = Limiter(
+        _RATE_LIMITING_BUCKET, raise_when_fail=False, retry_until_max_delay=True
+    )
+    
     cache_dir = get_cache_directory()
     if cache_dir:
         log.info(f"Cache is ENABLED, writing to {cache_dir}")
         storage = hishel.FileStorage(base_path=Path(cache_dir))
         controller = get_cache_controller()
-        rate_limit_transport = RateLimitingTransport(_RATE_LIMITER)
+        rate_limit_transport = RateLimitingTransport(limiter)
         return hishel.CacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
     else:
         log.info("Cache is DISABLED, rate limiting only")
-        return RateLimitingTransport(_RATE_LIMITER)
+        return RateLimitingTransport(limiter)
 
 
 def get_async_transport() -> httpx.AsyncBaseTransport:
+
+    async_limiter = Limiter(
+        BucketAsyncWrapper(_RATE_LIMITING_BUCKET), raise_when_fail=False, retry_until_max_delay=True
+    )
+
     cache_dir = get_cache_directory()
     if cache_dir:
         log.info(f"Cache is ENABLED, writing to {cache_dir}")
         storage = hishel.AsyncFileStorage(base_path=Path(cache_dir))
         controller = get_cache_controller()
-        rate_limit_transport = AsyncRateLimitingTransport(_RATE_LIMITER)
+        rate_limit_transport = AsyncRateLimitingTransport(async_limiter)
         return hishel.AsyncCacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
     else:
         log.info("Cache is DISABLED, rate limiting only")
-        return AsyncRateLimitingTransport(_RATE_LIMITER)
+        return AsyncRateLimitingTransport(async_limiter)
 
 
 http_client, _close_client = _http_client_manager()

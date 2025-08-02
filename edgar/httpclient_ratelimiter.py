@@ -4,17 +4,19 @@ To control rate limit across multiple processes, see https://pyratelimiter.readt
 
 import httpx
 import logging
+from typing import Tuple
 
-from pyrate_limiter import Limiter, Duration
-
-from pyrate_limiter import limiter_factory
+from pyrate_limiter import Limiter, Duration, Rate, AbstractBucket, InMemoryBucket
 
 log = logging.getLogger(__name__)
 
 
-def create_rate_limiter(requests_per_second: int, max_delay: int) -> Limiter:
-    return limiter_factory.create_inmemory_limiter(requests_per_second, duration=Duration.SECOND, max_delay=max_delay)
+def create_rate_limiting_bucket(requests_per_second: int, max_delay: int) -> AbstractBucket:
+    rate = Rate(requests_per_second, Duration.SECOND)
+    rate_limits = [rate]
+    bucket = InMemoryBucket(rate_limits)
 
+    return bucket
 
 class RateLimitingTransport(httpx.HTTPTransport):
     def __init__(self, limiter: Limiter, **kwargs):
@@ -37,6 +39,7 @@ class AsyncRateLimitingTransport(httpx.AsyncHTTPTransport):
         self.limiter = limiter
 
     async def handle_async_request(self, request: httpx.Request, **kwargs) -> httpx.Response:
+
         while not await self.limiter.try_acquire_async("httpx_ratelimiter"):
             log.debug("Lock acquisition timed out, retrying")
 
