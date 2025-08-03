@@ -31,5 +31,5 @@ jobs:
       run: |
         # stop the build if there are Python syntax errors or undefined names
         hatch run cov --enable-cache tests/test_ratelimit.py
-        hatch run cov --cov-append
+        hatch run cov --cov-append -n auto
 
