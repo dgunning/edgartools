@@ -141,7 +141,31 @@ export EDGAR_VERIFY_SSL="true"
 - Development environments with self-signed certificates
 - Network environments with SSL inspection
 
-### Advanced Options
+### HTTP Rate Limiting
+Rate limiting is implemented in `httpclient_ratelimiting`. 
+
+The default rate limit is 9 requests per second. SEC has a maximum of 10 requests per second. To change the rate limit, call: `httpclient.update_rate_limiter(requests_per_second: int)`.
+
+### Advanced: Distributed Rate Limiting
+Distributed Rate Limiting: rate limiting is implemented using [pyrate_limiter](https://pypi.org/project/pyrate-limiter/). To use a distributed rate limiter, such as for multiprocessing, define an httpclient._RATE_LIMITER. See the pyrate_limiter documentation and examples for details. 
+
+### HTTP Caching 
+Web requests are cached by default, according to the rules defined in httpclient_cache. 
+
+#### Cache Directory
+
+The cache directory is set in `httpclient.CACHE_DIRECTORY`, set to `_cache` by default. Set CACHE_DIRECTORY=None to disable cache. Call `httpclient.close_client()` after any changes to the CACHE_DIRECTORY variable. 
+
+#### Caching Rules
+The SEC marks all requests as either NO-STORE or NO-CACHE, therefore a custom cache controller was implemented with the following rules: 
+- `/submissions` URLs for up to 10 minutes by default, set in `MAX_SUBMISSIONS_AGE_SECONDS`
+- `.*index/.*` URLs for up to 30 minutes by default, set in `MAX_INDEX_AGE_SECONDS`
+- `/Archives/edgar/data` URLs indefinitely (forever)
+
+See `httpclient_cache` for implementation. 
+
+#### Advanced: Alternative Storage Caches
+- The underlying cache is a FileStorage cache. While not implemented, it's feasible to replace this with a S3Storage cache by overriding get_transport and get_async_storage. See S3Storage and AsyncS3Storage at https://hishel.com/ for details.
 
 #### EDGAR_USE_RICH_LOGGING
 Enables enhanced console logging with rich formatting.

@@ -17,7 +17,6 @@ from edgar.core import (decode_content,
                         set_identity,
                         ask_for_identity,
                         Result,
-                        client_headers,
                         CRAWL, CAUTION,
                         get_bool,
                         is_start_of_quarter,
@@ -33,6 +32,10 @@ from edgar.filtering import (
 )
 from edgar.richtools import *
 
+from edgar.httpclient import get_http_params
+
+def client_headers():
+    return get_http_params()["headers"]
 
 def test_decode_content():
     text = "Kyle Walker vs Mbappe"
