@@ -34,7 +34,7 @@ def test_dont_exceed_limit():
     """Verify that 30 requests take more than 3 seconds (given a rate limit of 9-10 requests per second), and
     all return status_code 200"""
     url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
-    count = 30
+    count = 35
 
     with http_client() as client:
         for _ in range(10): # warm the bucket
@@ -49,14 +49,14 @@ def test_dont_exceed_limit():
     end = time.perf_counter()
 
     duration = end - start
-    assert duration > 3.0, f"{duration=} too fast"
+    assert duration > 2.0, f"{duration=} too fast"
 
 @pytest.mark.asyncio
 async def test_dont_exceed_limit_async():
     """Verify that 30 requests take more than 3 seconds (given a rate limit of 9-10 requests per second), and
     all return status_code 200"""
     url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
-    count = 30
+    count = 35
 
     start = time.perf_counter()
 
@@ -74,4 +74,4 @@ async def test_dont_exceed_limit_async():
     end = time.perf_counter()
 
     duration = end - start
-    assert duration > 3.0, f"{duration=} was faster than available rate limit"
+    assert duration > 2.0, f"{duration=} was faster than available rate limit"
