@@ -12,12 +12,18 @@ logger = logging.getLogger(__name__)
 FIXTURE_DIR = Path("tests/fixtures/xbrl2")
 DATA_DIR = Path("data/xbrl/datafiles")
 
+
+def pytest_addoption(parser):
+    parser.addoption("--enable-cache", action="store_true", help="Enable HTTP cache")
+
+
 def pytest_configure(config):
     """
     - Disables caching for testing
     """
-    logger.info("Disabling cache for test accuracy")
-    httpclient.CACHE_ENABLED = False
+    if not config.getoption("--enable-cache"):
+        logger.info("Cache disabled for test accuracy")    
+        httpclient.CACHE_ENABLED = False
 
     if hasattr(config, 'workerinput'):
         logger.info("pytest-xdist is enabled, enabling a distributed sqlite ratelimiter")    

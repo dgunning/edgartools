@@ -30,4 +30,6 @@ jobs:
     - name: Run test with coverage
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        hatch run cov
+        hatch run cov --enable-cache tests/test_ratelimit.py
+        hatch run cov --cov-append
+
