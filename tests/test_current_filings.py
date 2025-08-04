@@ -1,5 +1,5 @@
 
-from edgar._filings import get_current_filings, parse_summary, CurrentFilings, get_all_current_filings
+from edgar.current_filings import get_current_filings, parse_summary, CurrentFilings, get_all_current_filings
 from edgar import get_all_current_filings, Filings, iter_current_filings_pages
 import datetime
 import pytest
@@ -9,6 +9,7 @@ def test_get_current_entries():
     print()
     filings = get_current_filings()
     print(filings)
+    print(filings.to_pandas())
     # previous should be None
     assert filings.previous() is None
 

@@ -26,15 +26,12 @@ from edgar.entity import (
 from edgar._filings import (Filing,
                             Filings,
                             FilingHeader,
-                            CurrentFilings,
                             Attachment,
                             Attachments,
                             get_filings,
-                            get_current_filings,
-                            get_all_current_filings,
-                            iter_current_filings_pages,
                             get_by_accession_number,
                             FilingHomepage)
+from edgar.current_filings import CurrentFilings, get_current_filings, iter_current_filings_pages, get_all_current_filings
 from edgar.core import (edgar_mode,
                         CRAWL,
                         CAUTION,

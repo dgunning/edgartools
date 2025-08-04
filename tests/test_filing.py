@@ -15,7 +15,7 @@ from rich import print
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachment, \
-    get_current_filings, filing_date_to_year_quarters, get_filing_by_accession
+    filing_date_to_year_quarters, get_filing_by_accession
 from edgar.company_reports import TenK
 from edgar.core import default_page_size
 from edgar.entity import Company
@@ -739,23 +739,6 @@ def test_10K_filing_with_no_financial_data():
 def test_text_url_for_filing():
     assert carbo_10K.text_url \
            == 'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt'
-
-
-def test_get_current_filings():
-    filings = get_current_filings()
-    print()
-    print(filings)
-    assert not filings.empty
-
-    filing = filings[0]
-    print(str(filing))
-
-
-def test_get_current_filings_by_form():
-    filings = get_current_filings(form="3")
-    print()
-    print(filings)
-    assert not filings.empty
 
 
 def test_filings_get_by_invalid_accession_number(capsys):

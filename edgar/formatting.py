@@ -4,11 +4,12 @@ Formatting utilities for the edgar library.
 This module contains various formatting functions for dates, numbers, and strings.
 """
 import datetime
+import re
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Union, Optional
+
 import humanize
 from rich.text import Text
-import re
 
 
 def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
@@ -197,4 +198,57 @@ def accession_number_text(accession: str) -> Text:
         ("-", None),
         ("0" * seq_zeros, "dim"),
         (seq_value, "bold white")
+    )
+
+
+def accepted_time_text(accepted_datetime) -> Text:
+    """Format accepted datetime for current filings with visual emphasis.
+    
+    Args:
+        accepted_datetime: datetime object from filing acceptance
+        
+    Returns:
+        Rich Text object with color-coded time components:
+        - Date in dim (often the same for recent filings)
+        - Hour in bright color (key differentiator)
+        - Minutes and seconds with emphasis
+    """
+    from datetime import datetime
+    
+    if not accepted_datetime:
+        return Text("N/A", style="dim")
+    
+    # Convert to datetime if needed
+    if not isinstance(accepted_datetime, datetime):
+        try:
+            accepted_datetime = datetime.fromisoformat(str(accepted_datetime))
+        except:
+            return Text(str(accepted_datetime))
+    
+    # Format components
+    date_str = accepted_datetime.strftime("%Y-%m-%d")
+    hour_str = accepted_datetime.strftime("%H")
+    minute_str = accepted_datetime.strftime("%M")
+    second_str = accepted_datetime.strftime("%S")
+    
+    # Determine colors based on time of day
+    hour_int = int(hour_str)
+    if 16 <= hour_int <= 17:  # 4-5 PM (common filing time)
+        hour_color = "yellow"
+    elif hour_int >= 18:  # After hours
+        hour_color = "bright_red"
+    elif hour_int < 9:  # Pre-market
+        hour_color = "bright_cyan"
+    else:  # Regular hours
+        hour_color = "bright_green"
+    
+    # Assemble with visual hierarchy
+    return Text.assemble(
+        (date_str, "dim"),
+        (" ", None),
+        (hour_str, f"bold {hour_color}"),
+        (":", "dim"),
+        (minute_str, "bold white"),
+        (":", "dim"),
+        (second_str, "white")
     )
