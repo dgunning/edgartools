@@ -146,6 +146,11 @@ class XBRL:
     @property
     def contexts(self):
         return self.parser.contexts
+    
+    @property
+    def footnotes(self):
+        """Access to XBRL footnotes."""
+        return self.parser.footnotes
         
     @property
     def _facts(self):
@@ -1308,6 +1313,40 @@ class XBRL:
             
         return dataframes
     
+    def get_footnotes_for_fact(self, fact_id: str) -> List['Footnote']:
+        """Get all footnotes associated with a specific fact ID.
+        
+        Args:
+            fact_id: The ID of the fact to get footnotes for
+            
+        Returns:
+            List of Footnote objects associated with the fact
+        """
+        footnotes = []
+        
+        # First check if any fact has this ID and get its footnote references
+        for fact in self.parser.facts.values():
+            if fact.fact_id == fact_id:
+                # Get the footnote objects for each footnote ID
+                for footnote_id in fact.footnotes:
+                    if footnote_id in self.parser.footnotes:
+                        footnotes.append(self.parser.footnotes[footnote_id])
+                break
+        
+        return footnotes
+    
+    def get_facts_with_footnotes(self) -> Dict[str, 'Fact']:
+        """Get all facts that have associated footnotes.
+        
+        Returns:
+            Dictionary of fact_key -> Fact for all facts with footnotes
+        """
+        facts_with_footnotes = {}
+        for key, fact in self.parser.facts.items():
+            if fact.footnotes:
+                facts_with_footnotes[key] = fact
+        return facts_with_footnotes
+    
     def __rich__(self):
         """Rich representation for pretty printing in console."""
         return generate_rich_representation(self)
@@ -1317,4 +1356,5 @@ class XBRL:
         
     def __str__(self):
         """String representation."""
-        return f"XBRL Document with {len(self._facts)} facts, {len(self.contexts)} contexts, and {len(self.presentation_trees)} statements"
+        footnote_info = f", {len(self.footnotes)} footnotes" if self.footnotes else ""
+        return f"XBRL Document with {len(self._facts)} facts, {len(self.contexts)} contexts, {len(self.presentation_trees)} statements{footnote_info}"

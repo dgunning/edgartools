@@ -36,6 +36,7 @@ class XBRLParser:
         self.contexts: Dict[str, Context] = {}
         self.facts: Dict[str, Fact] = {}
         self.units: Dict[str, Any] = {}
+        self.footnotes: Dict[str, 'Footnote'] = {}
         
         # Presentation structures
         self.presentation_roles: Dict[str, Dict[str, Any]] = {}
@@ -1093,6 +1094,7 @@ class XBRLParser:
             self._extract_contexts(root)
             self._extract_units(root)
             self._extract_facts(root)
+            self._extract_footnotes(root)
             
             # Post-processing steps after all raw data is extracted
             self._extract_entity_info()
@@ -1385,6 +1387,9 @@ class XBRLParser:
                 if not context_ref:
                     return
 
+                # Get fact ID if present (for footnote linkage)
+                fact_id = element.get('id')
+
                 # Extract element namespace and name - optimized split
                 if '}' in tag:
                     namespace, element_name = tag.split('}', 1)
@@ -1457,7 +1462,8 @@ class XBRLParser:
                     unit_ref=unit_ref,
                     decimals=decimals,
                     numeric_value=numeric_value,
-                    instance_id=instance_id
+                    instance_id=instance_id,
+                    fact_id=fact_id
                 )
                 
                 # Store fact with appropriate key
@@ -1491,6 +1497,76 @@ class XBRLParser:
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting facts: {str(e)}")
 
+    def _extract_footnotes(self, root: ET.Element) -> None:
+        """Extract footnotes from instance document.
+        
+        Footnotes in XBRL are linked to facts via footnoteLink elements that contain:
+        1. footnote elements with the actual text content
+        2. footnoteArc elements that connect fact IDs to footnote IDs
+        """
+        try:
+            from .models import Footnote
+            
+            # Find all footnoteLink elements
+            for footnote_link in root.findall('.//{http://www.xbrl.org/2003/linkbase}footnoteLink'):
+                # First, extract all footnote definitions
+                for footnote_elem in footnote_link.findall('{http://www.xbrl.org/2003/linkbase}footnote'):
+                    # Try both 'id' and 'xlink:label' attributes
+                    footnote_id = footnote_elem.get('id') or footnote_elem.get('{http://www.w3.org/1999/xlink}label')
+                    if not footnote_id:
+                        continue
+                    
+                    # Get footnote attributes
+                    lang = footnote_elem.get('{http://www.w3.org/XML/1998/namespace}lang', 'en-US')
+                    role = footnote_elem.get('{http://www.w3.org/1999/xlink}role')
+                    
+                    # Extract text content, handling XHTML formatting
+                    footnote_text = ""
+                    # Check for XHTML content
+                    xhtml_divs = footnote_elem.findall('.//{http://www.w3.org/1999/xhtml}div')
+                    if xhtml_divs:
+                        # Concatenate all text within XHTML elements
+                        for div in xhtml_divs:
+                            footnote_text += "".join(div.itertext()).strip()
+                    else:
+                        # Fall back to direct text content
+                        footnote_text = "".join(footnote_elem.itertext()).strip()
+                    
+                    # Create Footnote object
+                    footnote = Footnote(
+                        footnote_id=footnote_id,
+                        text=footnote_text,
+                        lang=lang,
+                        role=role,
+                        related_fact_ids=[]
+                    )
+                    self.footnotes[footnote_id] = footnote
+                
+                # Second, process footnoteArc elements to link facts to footnotes
+                for arc_elem in footnote_link.findall('{http://www.xbrl.org/2003/linkbase}footnoteArc'):
+                    fact_id = arc_elem.get('{http://www.w3.org/1999/xlink}from')
+                    footnote_id = arc_elem.get('{http://www.w3.org/1999/xlink}to')
+                    
+                    if fact_id and footnote_id:
+                        # Add fact ID to footnote's related facts
+                        if footnote_id in self.footnotes:
+                            self.footnotes[footnote_id].related_fact_ids.append(fact_id)
+                        else:
+                            log.warning(f"Footnote arc references undefined footnote: {footnote_id}")
+                        
+                        # Also update the fact's footnotes list if we can find it
+                        # This requires finding the fact by its fact_id
+                        for fact in self.facts.values():
+                            if fact.fact_id == fact_id:
+                                if footnote_id not in fact.footnotes:
+                                    fact.footnotes.append(footnote_id)
+                                break
+            
+            log.debug(f"Extracted {len(self.footnotes)} footnotes")
+            
+        except Exception as e:
+            # Log the error but don't fail - footnotes are optional
+            log.warning(f"Error extracting footnotes: {str(e)}")
 
     def _apply_calculation_weights(self) -> None:
         """

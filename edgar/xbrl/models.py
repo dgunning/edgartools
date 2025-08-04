@@ -158,6 +158,9 @@ class Fact(BaseModel):
     The instance_id field is used to differentiate between duplicate facts
     that share the same element_id and context_ref. When a fact has no
     duplicates, instance_id will be None.
+    
+    The fact_id field preserves the original id attribute from the XML element,
+    enabling linkage with footnotes.
     """
     element_id: str
     context_ref: str
@@ -167,6 +170,21 @@ class Fact(BaseModel):
     numeric_value: Optional[float] = None
     footnotes: List[str] = Field(default_factory=list)
     instance_id: Optional[int] = None
+    fact_id: Optional[str] = None  # Original id attribute from the XML
+
+
+class Footnote(BaseModel):
+    """
+    Represents an XBRL footnote with its text content and related facts.
+    
+    Footnotes are linked to facts via footnoteArc elements that connect
+    fact IDs to footnote IDs using xlink:from and xlink:to attributes.
+    """
+    footnote_id: str
+    text: str
+    lang: Optional[str] = "en-US"
+    role: Optional[str] = None
+    related_fact_ids: List[str] = Field(default_factory=list)
 
 
 class PresentationNode(BaseModel):
