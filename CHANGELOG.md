@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.6.0 - 2025-08-03
+
+### Added
+- Added HTTP caching in the `edgar.httpclient_cache` module to cache HTTP requests and responses
+- Add `FactQuery.by_text` to filter facts by text search
+- 
+
+### Changed
+- Changed fron using a custom `Throttler` to using `pyratelimiter`. This allows for more flexible rate limiting and caching of HTTP requests
+
+
 ## 4.5.1 - 2025-07-31
 
 ### Changed
