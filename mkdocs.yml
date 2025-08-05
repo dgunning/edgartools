@@ -38,6 +38,7 @@ nav:
   - XBRL and Financials:
     - Getting XBRL from Filings: getting-xbrl.md
     - Querying XBRL Facts: xbrl-querying.md
+    - Getting footnotes from XBRL: guides/xbrl-footnotes.md
   - Data Objects:
     - Data Objects: data-objects.md
     - Insider Filings: insider-filings.md
