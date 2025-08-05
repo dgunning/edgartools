@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.6.1 - 2025-08-04
+
+### Added
+- Added parsing of footnotes from XBRL
+- Add `accepted` field to `CurrentFilings` to indicate when a filing was accepted by the SEC
+
+### Changed
+- Refactored current filings into its own module `edgar.current_filings`
+
 ## 4.6.0 - 2025-08-03
 
 ### Added
