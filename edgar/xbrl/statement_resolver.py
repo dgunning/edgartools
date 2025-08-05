@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from edgar.core import log
 
 from edgar.xbrl.statements import statement_to_concepts
+from edgar.xbrl.exceptions import StatementNotFound
 
 
 class StatementCategory(Enum):
@@ -21,6 +22,8 @@ class StatementCategory(Enum):
     DISCLOSURE = "disclosure"
     DOCUMENT = "document"  # For cover page, signatures, etc.
     OTHER = "other"
+
+
 
 
 @dataclass
@@ -814,12 +817,32 @@ class StatementResolver:
         # No good match found, return best guess with low confidence
         statements, role, conf = self._get_best_guess(statement_type)
         if conf < 0.4:
-
+            # Get entity context for detailed error reporting
+            entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
+            cik = getattr(self.xbrl, 'cik', 'Unknown')
+            period_of_report = getattr(self.xbrl, 'period_of_report', 'Unknown')
+            
             if len(statements) == 0:
-                raise ValueError(f"No matching statements found for type '{statement_type}' with low confidence {conf:.2f}.")
+                raise StatementNotFound(
+                    statement_type=statement_type,
+                    confidence=conf,
+                    found_statements=[],
+                    entity_name=entity_name,
+                    cik=cik,
+                    period_of_report=period_of_report,
+                    reason="No statements available in XBRL data"
+                )
             elif conf < 0.3:
                 found_statements = [s['definition'] for s in statements]
-                raise ValueError(f"Low confidence match for type '{statement_type}': {conf:.2f}. Found statements: {found_statements}")
+                raise StatementNotFound(
+                    statement_type=statement_type,
+                    confidence=conf,
+                    found_statements=found_statements,
+                    entity_name=entity_name,
+                    cik=cik,
+                    period_of_report=period_of_report,
+                    reason="Confidence threshold not met"
+                )
             else:
                 log.warn(
                     f"No good match found for statement type '{statement_type}'. The best guess has low confidence: {conf:.2f}")

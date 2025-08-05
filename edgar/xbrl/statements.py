@@ -7,6 +7,7 @@ This module provides functions for working with financial statements.
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 from edgar.xbrl.rendering import RenderedStatement
+from edgar.xbrl.exceptions import StatementNotFound
 
 import pandas as pd
 from rich import box
@@ -364,6 +365,35 @@ class Statements:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
 
+    def _handle_statement_error(self, e: Exception, statement_type: str) -> Optional[Statement]:
+        """
+        Common error handler for statement resolution failures.
+        
+        Args:
+            e: The exception that occurred
+            statement_type: Type of statement that failed to resolve
+            
+        Returns:
+            None (always, for consistency)
+        """
+        from edgar.core import log
+        
+        if isinstance(e, StatementNotFound):
+            # Custom exception already has detailed context
+            log.warning(str(e))
+        else:
+            # For other exceptions, extract context manually
+            entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
+            cik = getattr(self.xbrl, 'cik', 'Unknown')
+            period_of_report = getattr(self.xbrl, 'period_of_report', 'Unknown')
+            
+            log.warning(
+                f"Failed to resolve {statement_type.lower().replace('_', ' ')} for {entity_name} "
+                f"(CIK: {cik}, Period: {period_of_report}): {type(e).__name__}: {str(e)}"
+            )
+        
+        return None
+
     def find_statement_by_primary_concept(self, statement_type: str, is_parenthetical: bool = False) -> Optional[str]:
         """
         Find a statement by its primary concept.
@@ -688,7 +718,7 @@ class Statements:
 
         return self["CoverPage"]
 
-    def balance_sheet(self, parenthetical: bool = False) -> Statement:
+    def balance_sheet(self, parenthetical: bool = False) -> Optional[Statement]:
         """
         Get a balance sheet.
         
@@ -696,21 +726,24 @@ class Statements:
             parenthetical: Whether to get the parenthetical balance sheet
             
         Returns:
-            A balance sheet statement
+            A balance sheet statement, or None if unable to resolve the statement
         """
-        role = self.find_statement_by_primary_concept("BalanceSheet", is_parenthetical=parenthetical)
-        if role:
-            return Statement(self.xbrl, role, canonical_type="BalanceSheet")
-        
-        # Try using the xbrl.render_statement with parenthetical parameter
-        if hasattr(self.xbrl, 'find_statement'):
-            matching_statements, found_role, _ = self.xbrl.find_statement("BalanceSheet", parenthetical)
-            if found_role:
-                return Statement(self.xbrl, found_role, canonical_type="BalanceSheet")
-        
-        return self["BalanceSheet"]
+        try:
+            role = self.find_statement_by_primary_concept("BalanceSheet", is_parenthetical=parenthetical)
+            if role:
+                return Statement(self.xbrl, role, canonical_type="BalanceSheet")
+            
+            # Try using the xbrl.render_statement with parenthetical parameter
+            if hasattr(self.xbrl, 'find_statement'):
+                matching_statements, found_role, _ = self.xbrl.find_statement("BalanceSheet", parenthetical)
+                if found_role:
+                    return Statement(self.xbrl, found_role, canonical_type="BalanceSheet")
+            
+            return self["BalanceSheet"]
+        except Exception as e:
+            return self._handle_statement_error(e, "BalanceSheet")
 
-    def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False) -> Statement:
+    def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False) -> Optional[Statement]:
         """
         Get an income statement.
         
@@ -719,18 +752,21 @@ class Statements:
             skip_concept_check: If True, skip checking for required concepts (useful for testing)
             
         Returns:
-            An income statement
+            An income statement, or None if unable to resolve the statement
         """
-        # Try using the xbrl.find_statement with parenthetical parameter
-        if hasattr(self.xbrl, 'find_statement'):
-            matching_statements, found_role, _ = self.xbrl.find_statement("IncomeStatement", parenthetical)
-            if found_role:
-                return Statement(self.xbrl, found_role, canonical_type="IncomeStatement", 
-                               skip_concept_check=skip_concept_check)
-        
-        return self["IncomeStatement"]
+        try:
+            # Try using the xbrl.find_statement with parenthetical parameter
+            if hasattr(self.xbrl, 'find_statement'):
+                matching_statements, found_role, _ = self.xbrl.find_statement("IncomeStatement", parenthetical)
+                if found_role:
+                    return Statement(self.xbrl, found_role, canonical_type="IncomeStatement", 
+                                   skip_concept_check=skip_concept_check)
+            
+            return self["IncomeStatement"]
+        except Exception as e:
+            return self._handle_statement_error(e, "IncomeStatement")
 
-    def cashflow_statement(self, parenthetical: bool = False) -> Statement:
+    def cashflow_statement(self, parenthetical: bool = False) -> Optional[Statement]:
         """
         Get a cash flow statement.
         
@@ -738,17 +774,20 @@ class Statements:
             parenthetical: Whether to get the parenthetical cash flow statement
             
         Returns:
-             The cash flow statement
+             The cash flow statement, or None if unable to resolve the statement
         """
-        # Try using the xbrl.find_statement with parenthetical parameter
-        if hasattr(self.xbrl, 'find_statement'):
-            matching_statements, found_role, _ = self.xbrl.find_statement("CashFlowStatement", parenthetical)
-            if found_role:
-                return Statement(self.xbrl, found_role, canonical_type="CashFlowStatement")
-        
-        return self["CashFlowStatement"]
+        try:
+            # Try using the xbrl.find_statement with parenthetical parameter
+            if hasattr(self.xbrl, 'find_statement'):
+                matching_statements, found_role, _ = self.xbrl.find_statement("CashFlowStatement", parenthetical)
+                if found_role:
+                    return Statement(self.xbrl, found_role, canonical_type="CashFlowStatement")
+            
+            return self["CashFlowStatement"]
+        except Exception as e:
+            return self._handle_statement_error(e, "CashFlowStatement")
 
-    def statement_of_equity(self, parenthetical: bool = False) -> Statement:
+    def statement_of_equity(self, parenthetical: bool = False) -> Optional[Statement]:
         """
         Get a statement of equity.
         
@@ -756,15 +795,18 @@ class Statements:
             parenthetical: Whether to get the parenthetical statement of equity
             
         Returns:
-           The statement of equity
+           The statement of equity, or None if unable to resolve the statement
         """
-        # Try using the xbrl.find_statement with parenthetical parameter
-        if hasattr(self.xbrl, 'find_statement'):
-            matching_statements, found_role, _ = self.xbrl.find_statement("StatementOfEquity", parenthetical)
-            if found_role:
-                return Statement(self.xbrl, found_role, canonical_type="StatementOfEquity")
-        
-        return self["StatementOfEquity"]
+        try:
+            # Try using the xbrl.find_statement with parenthetical parameter
+            if hasattr(self.xbrl, 'find_statement'):
+                matching_statements, found_role, _ = self.xbrl.find_statement("StatementOfEquity", parenthetical)
+                if found_role:
+                    return Statement(self.xbrl, found_role, canonical_type="StatementOfEquity")
+            
+            return self["StatementOfEquity"]
+        except Exception as e:
+            return self._handle_statement_error(e, "StatementOfEquity")
 
     def get_period_views(self, statement_type: str) -> List[Dict[str, Any]]:
         """
