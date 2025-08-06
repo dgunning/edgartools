@@ -101,8 +101,9 @@ dependencies = [
   "mkdocs-material"
 ]
 
-extra-dependencies = [
+features = [
     "ai",
+    "ai-dev"
 ]
 
 [tool.hatch.envs.default.scripts]
