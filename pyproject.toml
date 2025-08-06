@@ -48,6 +48,17 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+ai = [
+    "mcp==1.12.3",              # Model Context Protocol (when available)
+    "tiktoken>=0.10.0",         # Token counting for OpenAI models
+]
+
+ai-dev = [
+    "pytest-mock>=3.12.0",       # For mocking AI responses
+    "responses>=0.24.0",         # HTTP response mocking
+]
+
 [project.urls]
 Documentation = "https://dgunning.github.io/edgartools/"
 Issues = "https://github.com/dgunning/edgartools/issues"
@@ -89,6 +100,11 @@ dependencies = [
   "mkdocstrings[python]",
   "mkdocs-material"
 ]
+
+extra-dependencies = [
+    "ai",
+]
+
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests --ignore=tests/legacy {args}"
 no-cov = "cov --no-cov {args}"
