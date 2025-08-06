@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "edgartools"
 description = 'Navigate Edgar filings with ease'
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = ["sec", "edgar", "filings", "company", "python", "finance", "financial", "reports"]
 authors = [
@@ -15,7 +15,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -50,8 +49,8 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 ai = [
-    "mcp==1.12.3",              # Model Context Protocol (when available)
-    "tiktoken>=0.10.0",         # Token counting for OpenAI models
+    "mcp==1.12.3; python_version>='3.10'",  # Model Context Protocol (Python 3.10+ only)
+    "tiktoken>=0.10.0",                      # Token counting for OpenAI models
 ]
 
 ai-dev = [
