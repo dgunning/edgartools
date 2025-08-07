@@ -63,11 +63,27 @@ _DEFAULT_REQUEST_PER_SEC_LIMIT = 9
 _MAX_DELAY = 1000 * 60  # 1 minute
 
 _RATE_LIMITER = create_rate_limiter(requests_per_second=_DEFAULT_REQUEST_PER_SEC_LIMIT, max_delay=_MAX_DELAY)
+_ASYNC_RATE_LIMITER = None  # Will be created lazily when needed
+
+
+def _get_async_rate_limiter():
+    """Get or create the async rate limiter lazily"""
+    global _ASYNC_RATE_LIMITER
+    if _ASYNC_RATE_LIMITER is None:
+        # Extract current rate from sync limiter to stay in sync
+        current_rate = _RATE_LIMITER.bucket_factory.bucket.rates[0].limit
+        _ASYNC_RATE_LIMITER = create_rate_limiter(
+            requests_per_second=current_rate, 
+            max_delay=_MAX_DELAY, 
+            async_bucket=True
+        )
+    return _ASYNC_RATE_LIMITER
 
 
 def update_rate_limiter(requests_per_second: int):
-    global _RATE_LIMITING_BUCKET
-    _RATE_LIMITING_BUCKET = create_rate_limiter(requests_per_second=requests_per_second, max_delay=_MAX_DELAY)
+    global _RATE_LIMITER, _ASYNC_RATE_LIMITER
+    _RATE_LIMITER = create_rate_limiter(requests_per_second=requests_per_second, max_delay=_MAX_DELAY)
+    _ASYNC_RATE_LIMITER = None  # Reset async limiter to be recreated when needed
 
     close_clients()
 
@@ -184,11 +200,11 @@ def get_async_transport() -> httpx.AsyncBaseTransport:
         log.info(f"Cache is ENABLED, writing to {cache_dir}")
         storage = hishel.AsyncFileStorage(base_path=Path(cache_dir))
         controller = get_cache_controller()
-        rate_limit_transport = AsyncRateLimitingTransport(_RATE_LIMITER)
+        rate_limit_transport = AsyncRateLimitingTransport(_get_async_rate_limiter())
         return hishel.AsyncCacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
     else:
         log.info("Cache is DISABLED, rate limiting only")
-        return AsyncRateLimitingTransport(_RATE_LIMITER)
+        return AsyncRateLimitingTransport(_get_async_rate_limiter())
 
 
 http_client, _close_client = _http_client_manager()

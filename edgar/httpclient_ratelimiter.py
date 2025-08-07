@@ -6,15 +6,21 @@ import httpx
 import logging
 from typing import Tuple
 
-from pyrate_limiter import Limiter, Duration, Rate, InMemoryBucket
+from pyrate_limiter import Limiter, Duration, Rate, InMemoryBucket, BucketAsyncWrapper
 
 log = logging.getLogger(__name__)
 
 
-def create_rate_limiter(requests_per_second: int, max_delay: int) -> Limiter:
+def create_rate_limiter(requests_per_second: int, max_delay: int, async_bucket: bool = False) -> Limiter:
     rate = Rate(requests_per_second, Duration.SECOND)
     rate_limits = [rate]
-    bucket = InMemoryBucket(rate_limits)
+    
+    base_bucket = InMemoryBucket(rate_limits)
+    
+    if async_bucket:
+        bucket = BucketAsyncWrapper(base_bucket)
+    else:
+        bucket = base_bucket
 
     limiter = Limiter(
         bucket, raise_when_fail=False, retry_until_max_delay=True
