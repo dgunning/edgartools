@@ -9,7 +9,8 @@ from io import BytesIO
 from pathlib import Path
 from typing import Union, Optional
 
-from httpx import RequestError, Response, AsyncClient
+import tempfile
+import uuid
 import orjson as json
 
 from httpx import AsyncClient, RequestError, Response, TimeoutException, ConnectError, HTTPError, Timeout, ReadTimeout
@@ -439,6 +440,10 @@ async def download_file_async(
 
 
 CHUNK_SIZE = 4 * 1024 * 1024  # 4MB
+CHUNK_SIZE_LARGE = 8 * 1024 * 1024  # 8MB for files > 500MB
+CHUNK_SIZE_MEDIUM = 4 * 1024 * 1024  # 4MB for files > 100MB
+CHUNK_SIZE_SMALL = 2 * 1024 * 1024  # 2MB for files <= 100MB
+CHUNK_SIZE_DEFAULT = CHUNK_SIZE
 
 
 @retry(
@@ -481,67 +486,59 @@ async def stream_file(
                 inspect_response(response)
                 total_size = int(response.headers.get("Content-Length", 0))
 
-            if as_text:
-                # Download as text
-                content = await response.text()
-                return content
-            else:
-                # Download as binary
-                content = b""
-                progress_bar = tqdm(
-                    total=total_size / (1024 * 1024),
-                    unit="MB",
-                    unit_scale=True,
-                    unit_divisor=1024,
-                    leave=False,  # Force horizontal display
-                    position=0,  # Lock the position
-                    dynamic_ncols=True,  # Adapt to terminal width
-                    bar_format="{l_bar}{bar}| {n:.2f}/{total:.2f}MB [{elapsed}<{remaining}, {rate_fmt}]",
-                    desc=f"Downloading {os.path.basename(url)}",
-                    ascii=False,
-                )
-                downloaded = 0
-                async for chunk in response.aiter_bytes(chunk_size=CHUNK_SIZE):
-                    content += chunk
-                    downloaded += len(chunk)
-                    progress_bar.update(len(chunk) / (1024 * 1024))  # Update in MB
-                progress_bar.close()
-
-                # Select optimal chunk size based on file size
-                if total_size > 0:
-                    if total_size > 500 * 1024 * 1024:  # > 500MB
-                        chunk_size = CHUNK_SIZE_LARGE
-                    elif total_size > 100 * 1024 * 1024:  # > 100MB
-                        chunk_size = CHUNK_SIZE_MEDIUM
-                    else:  # <= 100MB
-                        chunk_size = CHUNK_SIZE_SMALL
+                if as_text:
+                    # Download as text
+                    content = await response.text()
+                    return content
                 else:
-                    # Unknown size, use default
-                    chunk_size = CHUNK_SIZE_DEFAULT
+                    # Download as binary - select optimal chunk size first
+                    if total_size > 0:
+                        if total_size > 500 * 1024 * 1024:  # > 500MB
+                            chunk_size = CHUNK_SIZE_LARGE
+                        elif total_size > 100 * 1024 * 1024:  # > 100MB
+                            chunk_size = CHUNK_SIZE_MEDIUM
+                        else:  # <= 100MB
+                            chunk_size = CHUNK_SIZE_SMALL
+                    else:
+                        # Unknown size, use default
+                        chunk_size = CHUNK_SIZE_DEFAULT
 
-                # Always stream to temporary file
-                try:
-                    with open(temp_file, "wb") as f:
-                        # For large files, update progress less frequently to reduce overhead
-                        update_threshold = 1.0 if total_size > 500 * 1024 * 1024 else 0.1  # MB
-                        accumulated_mb = 0.0
-                        
-                        async for chunk in response.aiter_bytes(chunk_size=chunk_size):
-                            f.write(chunk)
-                            chunk_mb = len(chunk) / (1024 * 1024)
-                            accumulated_mb += chunk_mb
+                    progress_bar = tqdm(
+                        total=total_size / (1024 * 1024),
+                        unit="MB",
+                        unit_scale=True,
+                        unit_divisor=1024,
+                        leave=False,  # Force horizontal display
+                        position=0,  # Lock the position
+                        dynamic_ncols=True,  # Adapt to terminal width
+                        bar_format="{l_bar}{bar}| {n:.2f}/{total:.2f}MB [{elapsed}<{remaining}, {rate_fmt}]",
+                        desc=f"Downloading {os.path.basename(url)}",
+                        ascii=False,
+                    )
+
+                    # Always stream to temporary file
+                    try:
+                        with open(temp_file, "wb") as f:
+                            # For large files, update progress less frequently to reduce overhead
+                            update_threshold = 1.0 if total_size > 500 * 1024 * 1024 else 0.1  # MB
+                            accumulated_mb = 0.0
                             
-                            # Update progress bar only when threshold is reached
-                            if accumulated_mb >= update_threshold:
+                            async for chunk in response.aiter_bytes(chunk_size=chunk_size):
+                                f.write(chunk)
+                                chunk_mb = len(chunk) / (1024 * 1024)
+                                accumulated_mb += chunk_mb
+                                
+                                # Update progress bar only when threshold is reached
+                                if accumulated_mb >= update_threshold:
+                                    progress_bar.update(accumulated_mb)
+                                    accumulated_mb = 0.0
+                            
+                            # Update any remaining progress
+                            if accumulated_mb > 0:
                                 progress_bar.update(accumulated_mb)
-                                accumulated_mb = 0.0
-                        
-                        # Update any remaining progress
-                        if accumulated_mb > 0:
-                            progress_bar.update(accumulated_mb)
 
-                finally:
-                    progress_bar.close()
+                    finally:
+                        progress_bar.close()
 
                 # Handle the result based on whether path was provided
                 if path is not None:
