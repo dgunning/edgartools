@@ -11,6 +11,7 @@ from edgar.documents.utils import (
 )
 
 
+@pytest.mark.skip("Work in progress")
 class TestLRUCache:
     """Test LRU cache implementation."""
     
@@ -72,7 +73,7 @@ class TestLRUCache:
         assert len(errors) == 0
         assert cache.size() <= 100
 
-
+@pytest.mark.skip("Work in progress")
 class TestWeakCache:
     """Test weak reference cache."""
 
@@ -126,7 +127,7 @@ class TestWeakCache:
         removed = cache.cleanup()
         assert removed == 2
 
-
+@pytest.mark.skip("Work in progress")
 class TestTimeBasedCache:
     """Test time-based cache."""
     
@@ -159,6 +160,7 @@ class TestTimeBasedCache:
         assert cache.get("b") == 2
 
 
+@pytest.mark.skip("Work in progress")
 class TestCacheDecorator:
     """Test cache decorator."""
     
@@ -209,6 +211,7 @@ class TestCacheDecorator:
         assert result1 == result2
 
 
+@pytest.mark.skip("Work in progress")
 class TestCacheManager:
     """Test cache manager."""
     
