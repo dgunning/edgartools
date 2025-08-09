@@ -44,7 +44,7 @@ from .core import edgar_data_dir
 
 log = logging.getLogger(__name__)
 
-HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
+HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8", http2=True}
 
 CACHE_ENABLED = True
 
