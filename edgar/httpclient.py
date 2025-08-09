@@ -39,19 +39,25 @@ from edgar.core import get_identity, edgar_mode, strtobool
 from edgar.httpclient_cache import get_cache_controller
 from edgar.httpclient_ratelimiter import RateLimitingTransport, AsyncRateLimitingTransport, create_rate_limiter
 from pathlib import Path
-from pyrate_limiter import Limiter, BucketAsyncWrapper
 from .core import edgar_data_dir
 
 log = logging.getLogger(__name__)
 
-HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8"}
+try: 
+    # enable http2 if h2 is installed
+    import h2  # type: ignore  # noqa 
+    http2 = True
+except ImportError: 
+    http2 = False
+
+HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8", "http2": http2}
 
 CACHE_ENABLED = True
 
 
 def get_cache_directory():
     if CACHE_ENABLED:
-        cachedir = Path(edgar_data_dir) / "_cache"
+        cachedir = Path(edgar_data_dir) / "_pcache"
         cachedir.mkdir(exist_ok=True)
 
         return str(cachedir)
@@ -167,7 +173,7 @@ def get_transport() -> httpx.BaseTransport:
     cache_dir = get_cache_directory()
     if cache_dir:
         log.info(f"Cache is ENABLED, writing to {cache_dir}")
-        storage = hishel.FileStorage(base_path=Path(cache_dir))
+        storage = hishel.FileStorage(base_path=Path(cache_dir), serializer=hishel.PickleSerializer())
         controller = get_cache_controller()
         rate_limit_transport = RateLimitingTransport(_RATE_LIMITER)
         return hishel.CacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
