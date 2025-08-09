@@ -13,7 +13,7 @@ from rich.text import Text
 
 
 def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
-             pos='', neg='-', trailneg=''):
+             pos='', neg='-'):
     """Convert Decimal to a money formatted string.
 
     Args:
@@ -24,7 +24,6 @@ def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
         dp: Decimal point indicator (default: '.')
         pos: Sign for positive numbers (default: '')
         neg: Sign for negative numbers (default: '-')
-        trailneg: Trailing minus indicator (default: '')
 
     Examples:
         >>> moneyfmt(Decimal('-1234567.8901'), curr='$')
@@ -61,7 +60,7 @@ def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
     # Add currency symbol and sign
     build(curr)
     if sign:
-        build(trailneg)
+        build(neg)
     else:
         build(pos)
     
