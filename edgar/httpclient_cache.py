@@ -45,6 +45,9 @@ MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) 
 def get_cache_controller(**kwargs):
     class EdgarController(hishel.Controller):
         def is_cachable(self, request: httpcore.Request, response: httpcore.Response) -> bool:
+            if response.status != 200:
+                return False
+
             if request.url.host.decode().endswith("sec.gov"):
                 target = request.url.target.decode()
                 if target.startswith("/submissions") or target.startswith("/include/ticker.txt") or target.startswith("/files/company_tickers.json"):
@@ -64,6 +67,9 @@ def get_cache_controller(**kwargs):
         def construct_response_from_cache(
             self, request: httpcore.Request, response: httpcore.Response, original_request: httpcore.Request
         ) -> Union[httpcore.Request, httpcore.Response, None]:
+            if response.status != 200:
+                return None
+
             target = request.url.target.decode()
 
             if request.url.host.decode().endswith("sec.gov"):
