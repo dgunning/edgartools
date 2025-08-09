@@ -51,7 +51,7 @@ CACHE_ENABLED = True
 
 def get_cache_directory():
     if CACHE_ENABLED:
-        cachedir = Path(edgar_data_dir) / "_cache"
+        cachedir = Path(edgar_data_dir) / "_pcache"
         cachedir.mkdir(exist_ok=True)
 
         return str(cachedir)
@@ -167,7 +167,7 @@ def get_transport() -> httpx.BaseTransport:
     cache_dir = get_cache_directory()
     if cache_dir:
         log.info(f"Cache is ENABLED, writing to {cache_dir}")
-        storage = hishel.FileStorage(base_path=Path(cache_dir))
+        storage = hishel.FileStorage(base_path=Path(cache_dir), serializer=hishel.PickleSerializer())
         controller = get_cache_controller()
         rate_limit_transport = RateLimitingTransport(_RATE_LIMITER)
         return hishel.CacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
