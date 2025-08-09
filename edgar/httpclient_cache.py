@@ -84,6 +84,7 @@ def get_cache_controller(**kwargs):
                     # log.debug("Submissions age is %d, max_age is %d", age_seconds, max_age)
                     if age_seconds > max_age:
                         log.debug("Request needs to be validated before using %s (age=%d, max_age=%d)", target, age_seconds, max_age)
+                        self._make_request_conditional(request=request, response=response)
                         return request
                     else:
                         log.debug("Cache hit for %s (age=%d, max_age=%d)", target, age_seconds, max_age)
