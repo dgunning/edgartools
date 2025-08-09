@@ -43,7 +43,14 @@ from .core import edgar_data_dir
 
 log = logging.getLogger(__name__)
 
-HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8", "http2": True}
+try: 
+    # enable http2 if h2 is installed
+    import h2  # type: ignore  # noqa 
+    http2 = True
+except ImportError: 
+    http2 = False
+
+HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8", "http2": http2}
 
 CACHE_ENABLED = True
 
