@@ -9,8 +9,8 @@ from .core import edgar_data_dir
 
 
 def get_cache_directory() -> str:
-    cachedir = Path(edgar_data_dir) / "_cache"
-    cachedir.mkdir(exist_ok=True)
+    cachedir = Path(edgar_data_dir) / "_pcache"
+    cachedir.mkdir(parents=True, exist_ok=True)
 
     return str(cachedir)
 
