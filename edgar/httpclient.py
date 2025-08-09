@@ -50,10 +50,13 @@ def http_client(**kwargs) -> Generator[httpx.Client, None, None]:
     with HTTP_MGR.client(**kwargs) as client:
         yield client
 
+
 def get_http_params():
     return HTTP_MGR.httpx_params
 
+
 def close_clients():
     HTTP_MGR.close()
+
 
 HTTP_MGR = get_http_mgr()
