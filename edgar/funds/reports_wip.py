@@ -24,6 +24,21 @@ from edgar.xmltools import find_element, child_text, optional_decimal
 
 log = logging.getLogger(__name__)
 
+
+def optional_decimal_attr(element, attr_name):
+    """Helper function to parse optional decimal attributes from XML elements"""
+    if element is None:
+        return None
+    
+    attr_value = element.attrs.get(attr_name)
+    if not attr_value or attr_value == "N/A":
+        return None
+    
+    try:
+        return Decimal(attr_value)
+    except (ValueError, TypeError):
+        return None
+
 # Define constants
 NPORT_FORMS = ["NPORT-P", "NPORT-EX", "N-PORT", "N-PORT/A"]
 
@@ -261,45 +276,262 @@ class Identifiers(BaseModel):
 
 
 # New classes for derivative information
+class ForwardDerivative(BaseModel):
+    counterparty_name: Optional[str]
+    counterparty_lei: Optional[str]
+    currency_sold: Optional[str]
+    amount_sold: Optional[Decimal]
+    currency_purchased: Optional[str]
+    amount_purchased: Optional[Decimal]
+    settlement_date: Optional[str]
+    unrealized_appreciation: Optional[Decimal]
+    
+    @classmethod
+    def from_xml(cls, tag):
+        if tag and tag.name == "fwdDeriv":
+            counterparties = tag.find("counterparties")
+            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
+            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
+            
+            return cls(
+                counterparty_name=counterparty_name,
+                counterparty_lei=counterparty_lei,
+                currency_sold=child_text(tag, "curSold"),
+                amount_sold=optional_decimal(tag, "amtCurSold"),
+                currency_purchased=child_text(tag, "curPur"),
+                amount_purchased=optional_decimal(tag, "amtCurPur"),
+                settlement_date=child_text(tag, "settlementDt"),
+                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr")
+            )
+
+
 class SwapDerivative(BaseModel):
+    # Basic derivative info
     counterparty_name: Optional[str]
     counterparty_lei: Optional[str]
     notional_amount: Optional[Decimal]
+    currency: Optional[str]
     unrealized_appreciation: Optional[Decimal]
     termination_date: Optional[str]
-    floating_rate_index: Optional[str]
-    floating_rate_spread: Optional[Decimal]
-    reference_index: Optional[str]
+    upfront_payment: Optional[Decimal]
+    payment_currency: Optional[str]
+    upfront_receipt: Optional[Decimal]
+    receipt_currency: Optional[str]
+    reference_entity_name: Optional[str]
+    reference_entity_title: Optional[str]
+    reference_entity_cusip: Optional[str]
+    reference_entity_isin: Optional[str]
+    reference_entity_ticker: Optional[str]
+    swap_flag: Optional[str]
+    
+    # DIRECTIONAL RECEIVE LEG (what we receive)
+    fixed_rate_receive: Optional[Decimal]
+    fixed_amount_receive: Optional[Decimal] 
+    fixed_currency_receive: Optional[str]
+    floating_index_receive: Optional[str]
+    floating_spread_receive: Optional[Decimal]
+    floating_amount_receive: Optional[Decimal]
+    floating_currency_receive: Optional[str]
+    floating_tenor_receive: Optional[str]
+    floating_tenor_unit_receive: Optional[str]
+    floating_reset_date_tenor_receive: Optional[str]
+    floating_reset_date_unit_receive: Optional[str]
+    other_description_receive: Optional[str]
+    other_type_receive: Optional[str]  # fixedOrFloating attribute
+    
+    # DIRECTIONAL PAYMENT LEG (what we pay)
+    fixed_rate_pay: Optional[Decimal]
+    fixed_amount_pay: Optional[Decimal]
+    fixed_currency_pay: Optional[str]
+    floating_index_pay: Optional[str]
+    floating_spread_pay: Optional[Decimal]
+    floating_amount_pay: Optional[Decimal]
+    floating_currency_pay: Optional[str]
+    floating_tenor_pay: Optional[str]
+    floating_tenor_unit_pay: Optional[str]
+    floating_reset_date_tenor_pay: Optional[str]
+    floating_reset_date_unit_pay: Optional[str]
+    other_description_pay: Optional[str]
+    other_type_pay: Optional[str]  # fixedOrFloating attribute
     
     @classmethod
     def from_xml(cls, tag):
         if tag and tag.name == "swapDeriv":
-            counterparty = tag.find("counterpartyName")
-            counterparty_lei_tag = tag.find("counterpartyLei")
+            # Basic counterparty and reference info
+            counterparties = tag.find("counterparties")
+            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
+            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
             
-            # Get payment description for rate info
-            floating_pmnt = tag.find("floatingPmntDesc")
-            rate_index = None
-            rate_spread = None
-            if floating_pmnt:
-                rate_index = floating_pmnt.attrs.get("floatingRtIndex")
-                rate_spread = optional_decimal(floating_pmnt, "floatingRtSpread")
+            # Get reference instrument info (for CDS)
+            ref_entity_name = None
+            ref_entity_title = None
+            ref_entity_cusip = None
+            ref_entity_isin = None
+            ref_entity_ticker = None
+            desc_ref = tag.find("descRefInstrmnt")
+            if desc_ref:
+                other_ref = desc_ref.find("otherRefInst")
+                if other_ref:
+                    ref_entity_name = child_text(other_ref, "issuerName")
+                    ref_entity_title = child_text(other_ref, "issueTitle")
+                    identifiers = other_ref.find("identifiers")
+                    if identifiers:
+                        cusip_tag = identifiers.find("cusip")
+                        if cusip_tag:
+                            ref_entity_cusip = cusip_tag.attrs.get("value")
+                        isin_tag = identifiers.find("isin")
+                        if isin_tag:
+                            ref_entity_isin = isin_tag.attrs.get("value")
+                        ticker_tag = identifiers.find("ticker")
+                        if ticker_tag:
+                            ref_entity_ticker = ticker_tag.attrs.get("value")
             
-            # Get reference index
-            ref_index = None
-            index_basket = tag.find("indexBasketInfo")
-            if index_basket:
-                ref_index = child_text(index_basket, "indexName")
+            # DIRECTIONAL RECEIVE LEG PARSING
+            fixed_rec_desc = tag.find("fixedRecDesc")
+            floating_rec_desc = tag.find("floatingRecDesc")
+            other_rec_desc = tag.find("otherRecDesc")
+            
+            # Fixed receive leg
+            fixed_rate_receive = None
+            fixed_amount_receive = None
+            fixed_currency_receive = None
+            if fixed_rec_desc:
+                fixed_rate_receive = optional_decimal_attr(fixed_rec_desc, "fixedRt")
+                fixed_amount_receive = optional_decimal_attr(fixed_rec_desc, "amount")
+                fixed_currency_receive = fixed_rec_desc.attrs.get("curCd")
+            
+            # Floating receive leg
+            floating_index_receive = None
+            floating_spread_receive = None
+            floating_amount_receive = None
+            floating_currency_receive = None
+            floating_tenor_receive = None
+            floating_tenor_unit_receive = None
+            floating_reset_date_tenor_receive = None
+            floating_reset_date_unit_receive = None
+            if floating_rec_desc:
+                floating_index_receive = floating_rec_desc.attrs.get("floatingRtIndex")
+                floating_spread_receive = optional_decimal_attr(floating_rec_desc, "floatingRtSpread")
+                floating_amount_receive = optional_decimal_attr(floating_rec_desc, "pmntAmt")
+                floating_currency_receive = floating_rec_desc.attrs.get("curCd")
+                
+                # Rate reset tenors for receive leg
+                rate_reset_tenors = floating_rec_desc.find("rtResetTenors")
+                if rate_reset_tenors:
+                    rate_reset_tenor = rate_reset_tenors.find("rtResetTenor")
+                    if rate_reset_tenor:
+                        floating_tenor_receive = rate_reset_tenor.attrs.get("rateTenor")
+                        floating_tenor_unit_receive = rate_reset_tenor.attrs.get("rateTenorUnit")
+                        floating_reset_date_tenor_receive = rate_reset_tenor.attrs.get("resetDt")
+                        floating_reset_date_unit_receive = rate_reset_tenor.attrs.get("resetDtUnit")
+            
+            # Other receive leg
+            other_description_receive = None
+            other_type_receive = None
+            if other_rec_desc:
+                other_type_receive = other_rec_desc.attrs.get("fixedOrFloating")
+                if other_type_receive == "Other":
+                    other_description_receive = other_rec_desc.text
+                else:
+                    other_description_receive = other_type_receive
+            
+            # DIRECTIONAL PAYMENT LEG PARSING
+            fixed_pmnt_desc = tag.find("fixedPmntDesc")
+            floating_pmnt_desc = tag.find("floatingPmntDesc")
+            other_pmnt_desc = tag.find("otherPmntDesc")
+            
+            # Fixed payment leg
+            fixed_rate_pay = None
+            fixed_amount_pay = None
+            fixed_currency_pay = None
+            if fixed_pmnt_desc:
+                fixed_rate_pay = optional_decimal_attr(fixed_pmnt_desc, "fixedRt")
+                fixed_amount_pay = optional_decimal_attr(fixed_pmnt_desc, "amount")
+                fixed_currency_pay = fixed_pmnt_desc.attrs.get("curCd")
+            
+            # Floating payment leg
+            floating_index_pay = None
+            floating_spread_pay = None
+            floating_amount_pay = None
+            floating_currency_pay = None
+            floating_tenor_pay = None
+            floating_tenor_unit_pay = None
+            floating_reset_date_tenor_pay = None
+            floating_reset_date_unit_pay = None
+            if floating_pmnt_desc:
+                floating_index_pay = floating_pmnt_desc.attrs.get("floatingRtIndex")
+                floating_spread_pay = optional_decimal_attr(floating_pmnt_desc, "floatingRtSpread")
+                floating_amount_pay = optional_decimal_attr(floating_pmnt_desc, "pmntAmt")
+                floating_currency_pay = floating_pmnt_desc.attrs.get("curCd")
+                
+                # Rate reset tenors for payment leg
+                rate_reset_tenors = floating_pmnt_desc.find("rtResetTenors")
+                if rate_reset_tenors:
+                    rate_reset_tenor = rate_reset_tenors.find("rtResetTenor")
+                    if rate_reset_tenor:
+                        floating_tenor_pay = rate_reset_tenor.attrs.get("rateTenor")
+                        floating_tenor_unit_pay = rate_reset_tenor.attrs.get("rateTenorUnit")
+                        floating_reset_date_tenor_pay = rate_reset_tenor.attrs.get("resetDt")
+                        floating_reset_date_unit_pay = rate_reset_tenor.attrs.get("resetDtUnit")
+            
+            # Other payment leg
+            other_description_pay = None
+            other_type_pay = None
+            if other_pmnt_desc:
+                other_type_pay = other_pmnt_desc.attrs.get("fixedOrFloating")
+                if other_type_pay == "Other":
+                    other_description_pay = other_pmnt_desc.text
+                else:
+                    other_description_pay = other_type_pay
             
             return cls(
-                counterparty_name=child_text(tag, "counterpartyName"),
-                counterparty_lei=child_text(tag, "counterpartyLei"),
+                # Basic info
+                counterparty_name=counterparty_name,
+                counterparty_lei=counterparty_lei,
                 notional_amount=optional_decimal(tag, "notionalAmt"),
+                currency=child_text(tag, "curCd"),
                 unrealized_appreciation=optional_decimal(tag, "unrealizedAppr"),
                 termination_date=child_text(tag, "terminationDt"),
-                floating_rate_index=rate_index,
-                floating_rate_spread=rate_spread,
-                reference_index=ref_index
+                upfront_payment=optional_decimal(tag, "upfrontPmnt"),
+                payment_currency=child_text(tag, "pmntCurCd"),
+                upfront_receipt=optional_decimal(tag, "upfrontRcpt"),
+                receipt_currency=child_text(tag, "rcptCurCd"),
+                reference_entity_name=ref_entity_name,
+                reference_entity_title=ref_entity_title,
+                reference_entity_cusip=ref_entity_cusip,
+                reference_entity_isin=ref_entity_isin,
+                reference_entity_ticker=ref_entity_ticker,
+                swap_flag=child_text(tag, "swapFlag"),
+                
+                # RECEIVE LEG
+                fixed_rate_receive=fixed_rate_receive,
+                fixed_amount_receive=fixed_amount_receive,
+                fixed_currency_receive=fixed_currency_receive,
+                floating_index_receive=floating_index_receive,
+                floating_spread_receive=floating_spread_receive,
+                floating_amount_receive=floating_amount_receive,
+                floating_currency_receive=floating_currency_receive,
+                floating_tenor_receive=floating_tenor_receive,
+                floating_tenor_unit_receive=floating_tenor_unit_receive,
+                floating_reset_date_tenor_receive=floating_reset_date_tenor_receive,
+                floating_reset_date_unit_receive=floating_reset_date_unit_receive,
+                other_description_receive=other_description_receive,
+                other_type_receive=other_type_receive,
+                
+                # PAYMENT LEG
+                fixed_rate_pay=fixed_rate_pay,
+                fixed_amount_pay=fixed_amount_pay,
+                fixed_currency_pay=fixed_currency_pay,
+                floating_index_pay=floating_index_pay,
+                floating_spread_pay=floating_spread_pay,
+                floating_amount_pay=floating_amount_pay,
+                floating_currency_pay=floating_currency_pay,
+                floating_tenor_pay=floating_tenor_pay,
+                floating_tenor_unit_pay=floating_tenor_unit_pay,
+                floating_reset_date_tenor_pay=floating_reset_date_tenor_pay,
+                floating_reset_date_unit_pay=floating_reset_date_unit_pay,
+                other_description_pay=other_description_pay,
+                other_type_pay=other_type_pay
             )
 
 
@@ -309,42 +541,139 @@ class FutureDerivative(BaseModel):
     payoff_profile: Optional[str]
     expiration_date: Optional[str]
     notional_amount: Optional[Decimal]
+    currency: Optional[str]
     unrealized_appreciation: Optional[Decimal]
+    reference_entity_name: Optional[str]
+    reference_entity_title: Optional[str]
     
     @classmethod
     def from_xml(cls, tag):
         if tag and tag.name == "futrDeriv":
+            counterparties = tag.find("counterparties")
+            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
+            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
+            
+            # Get reference instrument info
+            ref_entity_name = None
+            ref_entity_title = None
+            desc_ref = tag.find("descRefInstrmnt")
+            if desc_ref:
+                other_ref = desc_ref.find("otherRefInst")
+                if other_ref:
+                    ref_entity_name = child_text(other_ref, "issuerName")
+                    ref_entity_title = child_text(other_ref, "issueTitle")
+            
             return cls(
-                counterparty_name=child_text(tag, "counterpartyName"),
-                counterparty_lei=child_text(tag, "counterpartyLei"),
+                counterparty_name=counterparty_name,
+                counterparty_lei=counterparty_lei,
                 payoff_profile=child_text(tag, "payOffProf"),
                 expiration_date=child_text(tag, "expDate"),
                 notional_amount=optional_decimal(tag, "notionalAmt"),
-                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr")
+                currency=child_text(tag, "curCd"),
+                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr"),
+                reference_entity_name=ref_entity_name,
+                reference_entity_title=ref_entity_title
+            )
+
+
+class OptionDerivative(BaseModel):
+    counterparty_name: Optional[str]
+    counterparty_lei: Optional[str]
+    put_or_call: Optional[str]
+    written_or_purchased: Optional[str]
+    share_number: Optional[Decimal]
+    exercise_price: Optional[Decimal]
+    exercise_price_currency: Optional[str]
+    expiration_date: Optional[str]
+    delta: Optional[Union[Decimal, str]]  # Can be numeric or 'XXXX'
+    unrealized_appreciation: Optional[Decimal]
+    reference_entity_name: Optional[str]
+    reference_entity_title: Optional[str]
+    reference_entity_cusip: Optional[str]
+    reference_entity_isin: Optional[str]
+    reference_entity_ticker: Optional[str]
+    
+    @classmethod
+    def from_xml(cls, tag):
+        if tag and tag.name == "optionSwaptionWarrantDeriv":
+            counterparties = tag.find("counterparties")
+            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
+            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
+            
+            # Get reference instrument info
+            ref_entity_name = None
+            ref_entity_title = None
+            ref_entity_cusip = None
+            ref_entity_isin = None
+            ref_entity_ticker = None
+            desc_ref = tag.find("descRefInstrmnt")
+            if desc_ref:
+                other_ref = desc_ref.find("otherRefInst")
+                if other_ref:
+                    ref_entity_name = child_text(other_ref, "issuerName")
+                    ref_entity_title = child_text(other_ref, "issueTitle")
+                    identifiers = other_ref.find("identifiers")
+                    if identifiers:
+                        cusip_tag = identifiers.find("cusip")
+                        if cusip_tag:
+                            ref_entity_cusip = cusip_tag.attrs.get("value")
+                        isin_tag = identifiers.find("isin")
+                        if isin_tag:
+                            ref_entity_isin = isin_tag.attrs.get("value")
+                        ticker_tag = identifiers.find("ticker")
+                        if ticker_tag:
+                            ref_entity_ticker = ticker_tag.attrs.get("value")
+            
+            return cls(
+                counterparty_name=counterparty_name,
+                counterparty_lei=counterparty_lei,
+                put_or_call=child_text(tag, "putOrCall"),
+                written_or_purchased=child_text(tag, "writtenOrPur"),
+                share_number=optional_decimal(tag, "shareNo"),
+                exercise_price=optional_decimal(tag, "exercisePrice"),
+                exercise_price_currency=child_text(tag, "exercisePriceCurCd"),
+                expiration_date=child_text(tag, "expDt"),  # Fixed field name
+                delta=child_text(tag, "delta"),  # Add delta field
+                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr"),
+                reference_entity_name=ref_entity_name,
+                reference_entity_title=ref_entity_title,
+                reference_entity_cusip=ref_entity_cusip,
+                reference_entity_isin=ref_entity_isin,
+                reference_entity_ticker=ref_entity_ticker
             )
 
 
 class DerivativeInfo(BaseModel):
-    derivative_category: Optional[str]  # SWP, FUT, OPT, etc.
+    derivative_category: Optional[str]  # FWD, SWP, FUT, OPT, etc.
+    forward_derivative: Optional[ForwardDerivative]
     swap_derivative: Optional[SwapDerivative]
     future_derivative: Optional[FutureDerivative]
+    option_derivative: Optional[OptionDerivative]
     
     @classmethod
     def from_xml(cls, tag):
         if tag and tag.name == "derivativeInfo":
+            fwd_tag = tag.find("fwdDeriv")
             swap_tag = tag.find("swapDeriv")
             future_tag = tag.find("futrDeriv")
+            option_tag = tag.find("optionSwaptionWarrantDeriv")
             
             deriv_cat = None
-            if swap_tag:
+            if fwd_tag:
+                deriv_cat = fwd_tag.attrs.get("derivCat")
+            elif swap_tag:
                 deriv_cat = swap_tag.attrs.get("derivCat")
             elif future_tag:
                 deriv_cat = future_tag.attrs.get("derivCat")
+            elif option_tag:
+                deriv_cat = option_tag.attrs.get("derivCat")
             
             return cls(
                 derivative_category=deriv_cat,
+                forward_derivative=ForwardDerivative.from_xml(fwd_tag) if fwd_tag else None,
                 swap_derivative=SwapDerivative.from_xml(swap_tag) if swap_tag else None,
-                future_derivative=FutureDerivative.from_xml(future_tag) if future_tag else None
+                future_derivative=FutureDerivative.from_xml(future_tag) if future_tag else None,
+                option_derivative=OptionDerivative.from_xml(option_tag) if option_tag else None
             )
 
 
@@ -358,6 +687,9 @@ class InvestmentOrSecurity(BaseModel):
     units: Optional[str]
     desc_other_units: Optional[str]
     currency_code: Optional[str]
+    # Currency conditional fields
+    currency_conditional_code: Optional[str]
+    exchange_rate: Optional[Decimal]
     value_usd: Decimal
     pct_value: Optional[Decimal]
     payoff_profile: Optional[str]
@@ -387,6 +719,73 @@ class InvestmentOrSecurity(BaseModel):
     def absolute_value(self):
         """Return absolute value for sorting purposes"""
         return abs(self.value_usd) if self.value_usd else Decimal(0)
+    
+    @property
+    def derivative_type(self):
+        """Get the derivative type (FWD, SWP, FUT, OPT)"""
+        if self.derivative_info:
+            return self.derivative_info.derivative_category
+        return None
+    
+    @property
+    def is_credit_derivative(self):
+        """Check if this is a credit derivative (CDS)"""
+        return self.asset_category == "DCR"
+    
+    @property
+    def is_interest_rate_derivative(self):
+        """Check if this is an interest rate derivative"""
+        return self.asset_category == "DIR"
+    
+    @property
+    def is_commodity_derivative(self):
+        """Check if this is a commodity derivative"""
+        return self.asset_category == "DCO"
+    
+    @property
+    def is_fx_derivative(self):
+        """Check if this is a foreign exchange derivative"""
+        return self.asset_category == "DFE"
+    
+    @property
+    def is_equity_derivative(self):
+        """Check if this is an equity derivative (including TRS)"""
+        return self.asset_category == "DE"
+    
+    @property
+    def derivative_subtype(self):
+        """Get a descriptive derivative subtype"""
+        if not self.is_derivative:
+            return None
+        
+        deriv_type = self.derivative_type
+        asset_cat = self.asset_category
+        
+        if deriv_type == "SWP":
+            if asset_cat == "DCR":
+                return "Credit Default Swap"
+            elif asset_cat == "DIR":
+                return "Interest Rate Swap"
+            elif asset_cat == "DE":
+                return "Total Return Swap (Equity)"
+            else:
+                return "Swap"
+        elif deriv_type == "FUT":
+            if asset_cat == "DCO":
+                return "Commodity Future"
+            elif asset_cat == "DIR":
+                return "Interest Rate Future"
+            else:
+                return "Future"
+        elif deriv_type == "FWD":
+            if asset_cat == "DFE":
+                return "FX Forward"
+            else:
+                return "Forward"
+        elif deriv_type == "OPT":
+            return "Option"
+        else:
+            return deriv_type
 
 
 class FundReport:
@@ -483,16 +882,8 @@ class FundReport:
                 if investment.security_lending else pd.NA,
                 # Derivative-specific fields
                 "derivative_type": investment.derivative_info.derivative_category if investment.derivative_info else pd.NA,
-                "notional_amount": investment.derivative_info.swap_derivative.notional_amount 
-                    if investment.derivative_info and investment.derivative_info.swap_derivative 
-                    else (investment.derivative_info.future_derivative.notional_amount 
-                          if investment.derivative_info and investment.derivative_info.future_derivative 
-                          else pd.NA),
-                "counterparty": investment.derivative_info.swap_derivative.counterparty_name 
-                    if investment.derivative_info and investment.derivative_info.swap_derivative 
-                    else (investment.derivative_info.future_derivative.counterparty_name 
-                          if investment.derivative_info and investment.derivative_info.future_derivative 
-                          else pd.NA),
+                "notional_amount": self._get_notional_amount(investment),
+                "counterparty": self._get_counterparty(investment),
             }
                 for investment in investments_to_process
             ]
@@ -505,6 +896,41 @@ class FundReport:
         investment_df['ticker'] = investment_df['ticker'].astype(str).fillna(mapped_tickers).fillna("")
 
         return investment_df
+    
+    def _get_notional_amount(self, investment: InvestmentOrSecurity) -> Optional[Decimal]:
+        """Extract notional amount from any derivative type"""
+        if not investment.derivative_info:
+            return pd.NA
+        
+        deriv = investment.derivative_info
+        if deriv.swap_derivative:
+            return deriv.swap_derivative.notional_amount
+        elif deriv.future_derivative:
+            return deriv.future_derivative.notional_amount
+        elif deriv.forward_derivative:
+            # For forwards, could use amount sold or purchased
+            return abs(deriv.forward_derivative.amount_sold) if deriv.forward_derivative.amount_sold else pd.NA
+        elif deriv.option_derivative:
+            # For options, use share number * exercise price as notional
+            if deriv.option_derivative.share_number and deriv.option_derivative.exercise_price:
+                return deriv.option_derivative.share_number * deriv.option_derivative.exercise_price
+        return pd.NA
+    
+    def _get_counterparty(self, investment: InvestmentOrSecurity) -> Optional[str]:
+        """Extract counterparty name from any derivative type"""
+        if not investment.derivative_info:
+            return pd.NA
+        
+        deriv = investment.derivative_info
+        if deriv.forward_derivative:
+            return deriv.forward_derivative.counterparty_name
+        elif deriv.swap_derivative:
+            return deriv.swap_derivative.counterparty_name
+        elif deriv.future_derivative:
+            return deriv.future_derivative.counterparty_name
+        elif deriv.option_derivative:
+            return deriv.option_derivative.counterparty_name
+        return pd.NA
     
     @lru_cache(maxsize=2)
     def derivatives_data(self) -> pd.DataFrame:
@@ -519,26 +945,17 @@ class FundReport:
         deriv_df = pd.DataFrame([{
             "title": d.title,
             "type": d.derivative_info.derivative_category if d.derivative_info else "Unknown",
-            "reference": (d.derivative_info.swap_derivative.reference_index 
-                         if d.derivative_info and d.derivative_info.swap_derivative 
-                         else d.title),
-            "counterparty": (d.derivative_info.swap_derivative.counterparty_name 
-                            if d.derivative_info and d.derivative_info.swap_derivative 
-                            else (d.derivative_info.future_derivative.counterparty_name 
-                                  if d.derivative_info and d.derivative_info.future_derivative 
-                                  else "N/A")),
-            "notional_amount": (d.derivative_info.swap_derivative.notional_amount 
-                               if d.derivative_info and d.derivative_info.swap_derivative 
-                               else (d.derivative_info.future_derivative.notional_amount 
-                                     if d.derivative_info and d.derivative_info.future_derivative 
-                                     else Decimal(0))),
+            "subtype": d.derivative_subtype,
+            "asset_category": d.asset_category,
+            "reference": self._get_reference(d),
+            "counterparty": self._get_counterparty(d),
+            "notional_amount": self._get_notional_amount(d),
             "unrealized_pnl": d.value_usd,
             "pct_nav": d.pct_value,
-            "termination_date": (d.derivative_info.swap_derivative.termination_date 
-                                if d.derivative_info and d.derivative_info.swap_derivative 
-                                else (d.derivative_info.future_derivative.expiration_date 
-                                      if d.derivative_info and d.derivative_info.future_derivative 
-                                      else "N/A")),
+            "termination_date": self._get_termination_date(d),
+            "delta": self._get_delta(d),
+            "currency": d.currency_conditional_code or d.currency_code,
+            "exchange_rate": d.exchange_rate
         } for d in derivatives])
         
         # Sort by absolute unrealized P&L
@@ -546,6 +963,228 @@ class FundReport:
         deriv_df = deriv_df.sort_values('abs_pnl', ascending=False).drop('abs_pnl', axis=1)
         
         return deriv_df
+    
+    def swaps_data(self) -> pd.DataFrame:
+        """Return detailed swap derivatives data with directional receive/pay fields"""
+        swaps = [inv for inv in self.investments 
+                if inv.is_derivative and inv.derivative_info and inv.derivative_info.swap_derivative]
+        
+        if len(swaps) == 0:
+            return pd.DataFrame()
+        
+        swap_data = []
+        for d in swaps:
+            swap = d.derivative_info.swap_derivative
+            swap_data.append({
+                # Basic investment info
+                "title": d.title,
+                "type": "SWP",
+                "subtype": d.derivative_subtype,
+                "asset_category": d.asset_category,
+                "issuer_category": d.issuer_category,
+                "investment_country": d.investment_country,
+                "is_restricted_security": d.is_restricted_security,
+                "fair_value_level": d.fair_value_level,
+                "payoff_profile": d.payoff_profile,
+                "balance": d.balance,
+                "units": d.units,
+                "pct_nav": d.pct_value,
+                "exchange_rate": d.exchange_rate,
+                
+                # Basic swap info
+                "counterparty": swap.counterparty_name,
+                "counterparty_lei": swap.counterparty_lei,
+                "reference_entity": swap.reference_entity_name,
+                "reference_entity_isin": swap.reference_entity_isin,
+                "reference_entity_ticker": swap.reference_entity_ticker,
+                "swap_flag": swap.swap_flag,
+                "notional_amount": swap.notional_amount,
+                "currency": swap.currency,
+                "termination_date": swap.termination_date,
+                "upfront_payment": swap.upfront_payment,
+                "payment_currency": swap.payment_currency,
+                "upfront_receipt": swap.upfront_receipt,
+                "receipt_currency": swap.receipt_currency,
+                "unrealized_pnl": swap.unrealized_appreciation,
+                
+                # DIRECTIONAL RECEIVE LEG (what we receive)
+                "fixed_rate_receive": swap.fixed_rate_receive,
+                "fixed_amount_receive": swap.fixed_amount_receive,
+                "fixed_currency_receive": swap.fixed_currency_receive,
+                "floating_index_receive": swap.floating_index_receive,
+                "floating_spread_receive": swap.floating_spread_receive,
+                "floating_amount_receive": swap.floating_amount_receive,
+                "floating_currency_receive": swap.floating_currency_receive,
+                "floating_tenor_receive": swap.floating_tenor_receive,
+                "floating_tenor_unit_receive": swap.floating_tenor_unit_receive,
+                "floating_reset_date_tenor_receive": swap.floating_reset_date_tenor_receive,
+                "floating_reset_date_unit_receive": swap.floating_reset_date_unit_receive,
+                "other_description_receive": swap.other_description_receive,
+                "other_type_receive": swap.other_type_receive,
+                
+                # DIRECTIONAL PAYMENT LEG (what we pay)
+                "fixed_rate_pay": swap.fixed_rate_pay,
+                "fixed_amount_pay": swap.fixed_amount_pay,
+                "fixed_currency_pay": swap.fixed_currency_pay,
+                "floating_index_pay": swap.floating_index_pay,
+                "floating_spread_pay": swap.floating_spread_pay,
+                "floating_amount_pay": swap.floating_amount_pay,
+                "floating_currency_pay": swap.floating_currency_pay,
+                "floating_tenor_pay": swap.floating_tenor_pay,
+                "floating_tenor_unit_pay": swap.floating_tenor_unit_pay,
+                "floating_reset_date_tenor_pay": swap.floating_reset_date_tenor_pay,
+                "floating_reset_date_unit_pay": swap.floating_reset_date_unit_pay,
+                "other_description_pay": swap.other_description_pay,
+                "other_type_pay": swap.other_type_pay
+            })
+        
+        return pd.DataFrame(swap_data)
+    
+    def options_data(self) -> pd.DataFrame:
+        """Return detailed options derivatives data with option-specific fields"""
+        options = [inv for inv in self.investments 
+                  if inv.is_derivative and inv.derivative_info and inv.derivative_info.option_derivative]
+        
+        if len(options) == 0:
+            return pd.DataFrame()
+        
+        option_data = []
+        for d in options:
+            opt = d.derivative_info.option_derivative
+            option_data.append({
+                "title": d.title,
+                "type": "OPT", 
+                "subtype": d.derivative_subtype,
+                "asset_category": d.asset_category,
+                "counterparty": opt.counterparty_name,
+                "counterparty_lei": opt.counterparty_lei,
+                "reference_entity": opt.reference_entity_name,
+                "reference_entity_isin": opt.reference_entity_isin,
+                "reference_entity_ticker": opt.reference_entity_ticker,
+                "put_or_call": opt.put_or_call,
+                "written_or_purchased": opt.written_or_purchased,
+                "share_number": opt.share_number,
+                "exercise_price": opt.exercise_price,
+                "exercise_price_currency": opt.exercise_price_currency,
+                "expiration_date": opt.expiration_date,
+                "delta": opt.delta,
+                "unrealized_pnl": opt.unrealized_appreciation,
+                "pct_nav": d.pct_value,
+                "currency": d.currency_code,
+                "exchange_rate": d.exchange_rate
+            })
+        
+        return pd.DataFrame(option_data)
+    
+    def forwards_data(self) -> pd.DataFrame:
+        """Return detailed forward derivatives data with forward-specific fields"""
+        forwards = [inv for inv in self.investments 
+                   if inv.is_derivative and inv.derivative_info and inv.derivative_info.forward_derivative]
+        
+        if len(forwards) == 0:
+            return pd.DataFrame()
+        
+        forward_data = []
+        for d in forwards:
+            fwd = d.derivative_info.forward_derivative
+            forward_data.append({
+                "title": d.title,
+                "type": "FWD",
+                "subtype": d.derivative_subtype,
+                "asset_category": d.asset_category,
+                "counterparty": fwd.counterparty_name,
+                "counterparty_lei": fwd.counterparty_lei,
+                "currency_sold": fwd.currency_sold,
+                "amount_sold": fwd.amount_sold,
+                "currency_purchased": fwd.currency_purchased,
+                "amount_purchased": fwd.amount_purchased,
+                "settlement_date": fwd.settlement_date,
+                "unrealized_pnl": fwd.unrealized_appreciation,
+                "pct_nav": d.pct_value,
+                "currency": d.currency_code,
+                "exchange_rate": d.exchange_rate
+            })
+        
+        return pd.DataFrame(forward_data)
+    
+    def futures_data(self) -> pd.DataFrame:
+        """Return detailed futures derivatives data with future-specific fields"""
+        futures = [inv for inv in self.investments 
+                  if inv.is_derivative and inv.derivative_info and inv.derivative_info.future_derivative]
+        
+        if len(futures) == 0:
+            return pd.DataFrame()
+        
+        future_data = []
+        for d in futures:
+            fut = d.derivative_info.future_derivative
+            future_data.append({
+                "title": d.title,
+                "type": "FUT",
+                "subtype": d.derivative_subtype,
+                "asset_category": d.asset_category,
+                "counterparty": fut.counterparty_name,
+                "counterparty_lei": fut.counterparty_lei,
+                "reference_entity": fut.reference_entity_name,
+                "payoff_profile": fut.payoff_profile,
+                "expiration_date": fut.expiration_date,
+                "notional_amount": fut.notional_amount,
+                "currency": fut.currency,
+                "unrealized_pnl": fut.unrealized_appreciation,
+                "pct_nav": d.pct_value,
+                "exchange_rate": d.exchange_rate
+            })
+        
+        return pd.DataFrame(future_data)
+    
+    def _get_reference(self, investment: InvestmentOrSecurity) -> str:
+        """Extract reference entity/index from derivative"""
+        if not investment.derivative_info:
+            return investment.title
+        
+        deriv = investment.derivative_info
+        if deriv.swap_derivative and deriv.swap_derivative.reference_entity_name:
+            return deriv.swap_derivative.reference_entity_name
+        elif deriv.future_derivative and deriv.future_derivative.reference_entity_name:
+            return deriv.future_derivative.reference_entity_name
+        elif deriv.option_derivative and deriv.option_derivative.reference_entity_name:
+            return deriv.option_derivative.reference_entity_name
+        elif deriv.forward_derivative:
+            # For FX forwards, show currency pair
+            fwd = deriv.forward_derivative
+            if fwd.currency_sold and fwd.currency_purchased:
+                return f"{fwd.currency_sold}/{fwd.currency_purchased}"
+        return investment.title
+    
+    def _get_delta(self, investment: InvestmentOrSecurity):
+        """Extract delta from option derivatives"""
+        if not investment.derivative_info:
+            return pd.NA
+        
+        deriv = investment.derivative_info
+        if deriv.option_derivative and deriv.option_derivative.delta:
+            # Try to convert to decimal, return as string if it's 'XXXX' or similar
+            try:
+                return float(deriv.option_derivative.delta)
+            except (ValueError, TypeError, AttributeError):
+                return deriv.option_derivative.delta
+        return pd.NA
+    
+    def _get_termination_date(self, investment: InvestmentOrSecurity) -> str:
+        """Extract termination/expiration date from derivative"""
+        if not investment.derivative_info:
+            return "N/A"
+        
+        deriv = investment.derivative_info
+        if deriv.swap_derivative:
+            return deriv.swap_derivative.termination_date or "N/A"
+        elif deriv.future_derivative:
+            return deriv.future_derivative.expiration_date or "N/A"
+        elif deriv.forward_derivative:
+            return deriv.forward_derivative.settlement_date or "N/A"
+        elif deriv.option_derivative:
+            return deriv.option_derivative.expiration_date or "N/A"
+        return "N/A"
 
     @classmethod
     def from_filing(cls, filing):
@@ -695,6 +1334,14 @@ class FundReport:
                 else:
                     issuer_category = child_text(investment_tag, "issuerCat")
 
+                # currency conditional
+                currency_conditional_code = None
+                exchange_rate = None
+                currency_conditional_tag = investment_tag.find("currencyConditional")
+                if currency_conditional_tag:
+                    currency_conditional_code = currency_conditional_tag.attrs.get("curCd")
+                    exchange_rate = optional_decimal_attr(currency_conditional_tag, "exchangeRt")
+
                 investments_or_security = InvestmentOrSecurity(
                     name=child_text(investment_tag, "name"),
                     lei=child_text(investment_tag, "lei"),
@@ -705,6 +1352,8 @@ class FundReport:
                     units=child_text(investment_tag, "units"),
                     desc_other_units=child_text(investment_tag, "descOthUnits"),
                     currency_code=child_text(investment_tag, "curCd"),
+                    currency_conditional_code=currency_conditional_code,
+                    exchange_rate=exchange_rate,
                     value_usd=optional_decimal(investment_tag, "valUSD"),
                     pct_value=optional_decimal(investment_tag, "pctVal"),
                     payoff_profile=child_text(investment_tag, "payoffProfile"),
@@ -824,7 +1473,7 @@ class FundReport:
         if not derivatives.empty:
             derivatives = derivatives.assign(
                 Title=lambda df: df.title,
-                Type=lambda df: df.type,
+                Subtype=lambda df: df.subtype,
                 Reference=lambda df: df.reference,
                 Counterparty=lambda df: df.counterparty,
                 Notional=lambda df: df.notional_amount.apply(moneyfmt, curr='$', places=0),
@@ -833,7 +1482,7 @@ class FundReport:
                     '% NAV': lambda df: df.pct_nav.apply(moneyfmt, curr='', places=2),
                     'Term/Exp Date': lambda df: df.termination_date
                 }
-            ).filter(['Title', 'Type', 'Reference', 'Counterparty', 'Notional', 'Unrealized P&L', '% NAV', 'Term/Exp Date'])
+            ).filter(['Title', 'Subtype', 'Reference', 'Counterparty', 'Notional', 'Unrealized P&L', '% NAV', 'Term/Exp Date'])
         return df_to_rich_table(derivatives, title="Derivative Positions", title_style="bold deep_sky_blue1", max_rows=2000)
 
     def __rich__(self):
