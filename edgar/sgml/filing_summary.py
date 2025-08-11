@@ -272,6 +272,29 @@ class Report:
         table = self._get_report_table()
         if table:
             print_rich(table.render(500))
+    
+    def to_dataframe(self):
+        """
+        Extract the report's financial table as a pandas DataFrame.
+        
+        Returns:
+            pd.DataFrame: Financial data with periods as columns and line items as index.
+                         Returns empty DataFrame if no tables found.
+                         
+        The DataFrame includes metadata attributes:
+        - currency: The currency used (e.g., 'USD')
+        - units: The units description (e.g., 'thousands')
+        - scaling_factor: Numeric scaling factor (e.g., 1000 for thousands)
+        - period_type: 'instant' or 'duration' for the time periods
+        """
+        from edgar.sgml.table_to_dataframe import extract_statement_dataframe
+        
+        content = self.content
+        if content:
+            return extract_statement_dataframe(content)
+        
+        import pandas as pd
+        return pd.DataFrame()
 
     def __str__(self):
         return f"Report(short_name={self.short_name}, category={self.menu_category}, file_name={self.html_file_name})"

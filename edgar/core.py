@@ -243,11 +243,6 @@ def get_identity() -> str:
         os.environ[edgar_identity] = identity
     return identity
 
-
-@lru_cache(maxsize=1)
-def client_headers():
-    return {'User-Agent': get_identity()}
-
 def decode_content(content: bytes):
     try:
         return content.decode('utf-8')
@@ -385,13 +380,6 @@ def filter_by_date(data: pa.Table,
     # If datetime convert to string
     if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
         date = date.strftime('%Y-%m-%d')
-
-
-
-
-@lru_cache(maxsize=1)
-def client_headers():
-    return {'User-Agent': get_identity()}
 
 def decode_content(content: bytes):
     try:

@@ -9,6 +9,7 @@ from edgar.sgml.tools import get_content_between_tags
 import hashlib
 from io import BytesIO
 from edgar.vendored import uu
+from rich import print
 
 def test_parse_old_full_text():
     source = Path("data/sgml/0001011438-98-000429.txt")
@@ -86,6 +87,8 @@ def test_filing_from_sgml():
     assert filing.company == 'Apple Inc.'
     assert filing.accession_no == '0000320193-24-000123'
     assert filing.cik == 320193
+    print()
+    print(filing)
 
 def test_sgml_parser_detect_content():
     parser = SGMLParser()

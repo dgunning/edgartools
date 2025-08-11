@@ -36,9 +36,9 @@ class StandardConcept(str, Enum):
     # Balance Sheet - Liabilities
     ACCOUNTS_PAYABLE = "Accounts Payable"
     ACCRUED_LIABILITIES = "Accrued Liabilities"
-    SHORT_TERM_DEBT = "Short-Term Debt"
+    SHORT_TERM_DEBT = "Short Term Debt"
     TOTAL_CURRENT_LIABILITIES = "Total Current Liabilities"
-    LONG_TERM_DEBT = "Long-Term Debt"
+    LONG_TERM_DEBT = "Long Term Debt"
     DEFERRED_REVENUE = "Deferred Revenue"
     TOTAL_LIABILITIES = "Total Liabilities"
     
@@ -512,35 +512,26 @@ class ConceptMapper:
         if standard_concept:
             self._cache[cache_key] = standard_concept
             return standard_concept
-        
-        # Infer mapping and confidence
-        inferred_concept, confidence = self._infer_mapping(company_concept, label, context)
-        
-        # Only use high-confidence mappings
-        if confidence >= 0.9:
-            # Cache the result for future lookups
-            self._cache[cache_key] = inferred_concept
-            return inferred_concept
             
         # Cache negative results too to avoid repeated inference
         self._cache[cache_key] = None
         return None
-    
+
     def _infer_mapping(self, company_concept: str, label: str, context: Dict[str, Any]) -> Tuple[Optional[str], float]:
         """
         Infer a mapping between a company concept and a standard concept.
-        
+
         Args:
             company_concept: The company-specific concept
             label: The label for the concept
             context: Additional context information
-            
+
         Returns:
             Tuple of (standard_concept, confidence)
         """
         # Fast path for common patterns
         label_lower = label.lower()
-        
+
         # Quick matching for common concepts without full sequence matching
         if "total assets" in label_lower:
             return StandardConcept.TOTAL_ASSETS.value, 0.95
@@ -548,50 +539,50 @@ class ConceptMapper:
             return StandardConcept.REVENUE.value, 0.9
         elif "net income" in label_lower and "parent" not in label_lower:
             return StandardConcept.NET_INCOME.value, 0.9
-        
+
         # Faster direct match checking with precomputed lowercase values
         for std_concept, std_value_lower in self._std_concept_values:
             if std_value_lower == label_lower:
                 return std_concept.value, 1.0  # Perfect match
-        
+
         # Fall back to sequence matching for similarity
         best_match = None
         best_score = 0
-        
+
         # Only compute similarity if some relevant keywords are present to reduce workload
         statement_type = context.get("statement_type", "")
-        
+
         # Statement type based filtering to reduce unnecessary comparisons
         limited_concepts = []
         if statement_type == "BalanceSheet":
             if any(kw in label_lower for kw in self._bs_keywords):
                 # Filter to balance sheet concepts only
-                limited_concepts = [c for c, v in self._std_concept_values 
+                limited_concepts = [c for c, v in self._std_concept_values
                                   if any(kw in v for kw in self._bs_keywords)]
         elif statement_type == "IncomeStatement":
             if any(kw in label_lower for kw in self._is_keywords):
                 # Filter to income statement concepts only
-                limited_concepts = [c for c, v in self._std_concept_values 
+                limited_concepts = [c for c, v in self._std_concept_values
                                   if any(kw in v for kw in self._is_keywords)]
         elif statement_type == "CashFlowStatement":
             if any(kw in label_lower for kw in self._cf_keywords):
                 # Filter to cash flow concepts only
-                limited_concepts = [c for c, v in self._std_concept_values 
+                limited_concepts = [c for c, v in self._std_concept_values
                                   if any(kw in v for kw in self._cf_keywords)]
-        
+
         # Use limited concepts if available, otherwise use all
         concepts_to_check = limited_concepts if limited_concepts else [c for c, _ in self._std_concept_values]
-        
+
         # Calculate similarities for candidate concepts
         for std_concept in concepts_to_check:
             # Calculate similarity between labels
             similarity = SequenceMatcher(None, label_lower, std_concept.value.lower()).ratio()
-            
+
             # Check if this is the best match so far
             if similarity > best_score:
                 best_score = similarity
                 best_match = std_concept.value
-        
+
         # Apply specific contextual rules based on statement type
         if statement_type == "BalanceSheet":
             if "assets" in label_lower and "total" in label_lower:
@@ -603,7 +594,7 @@ class ConceptMapper:
             elif "equity" in label_lower and ("total" in label_lower or "stockholders" in label_lower):
                 if best_match == StandardConcept.TOTAL_EQUITY.value:
                     best_score = min(1.0, best_score + 0.2)
-        
+
         elif statement_type == "IncomeStatement":
             if any(term in label_lower for term in ["revenue", "sales"]):
                 if best_match == StandardConcept.REVENUE.value:
@@ -611,16 +602,16 @@ class ConceptMapper:
             elif "net income" in label_lower:
                 if best_match == StandardConcept.NET_INCOME.value:
                     best_score = min(1.0, best_score + 0.2)
-        
+
         # Promote to 0.5 confidence if score close enough to help match
         # more items that are almost at threshold
         if 0.45 <= best_score < 0.5:
             best_score = 0.5
-            
+
         # If confidence is too low, return None
         if best_score < 0.5:
             return None, 0.0
-            
+
         return best_match, best_score
     
     def learn_mappings(self, filings: List[Dict[str, Any]]) -> None:

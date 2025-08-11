@@ -520,9 +520,95 @@ def determine_periods_to_display(
                         periods_to_display.append((period['key'], period['label']))
                     return periods_to_display
             
-            # If not annual or no annual periods found, take most recent periods
-            for period in duration_periods[:3]:
-                periods_to_display.append((period['key'], period['label']))
+            # For quarterly reports, apply intelligent period selection
+            else:
+                # First, categorize periods by duration to identify meaningful financial periods
+                quarterly_periods = []  # 85-95 days (one quarter)
+                ytd_periods = []        # 175-185 days (two quarters), 265-275 days (three quarters)
+                annual_periods = []     # 350-380 days (full year for comparisons)
+                
+                current_year = None
+                if document_period_end_date:
+                    try:
+                        current_year = datetime.strptime(document_period_end_date, '%Y-%m-%d').year
+                    except (ValueError, TypeError):
+                        pass
+                
+                # Categorize all duration periods by their length
+                for period in duration_periods:
+                    try:
+                        start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
+                        end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                        days = (end_date - start_date).days
+                        
+                        # Skip single-day or very short periods (less than 30 days)
+                        if days < 30:
+                            continue
+                            
+                        # Categorize by duration
+                        if 85 <= days <= 95:  # Quarterly period (~90 days)
+                            period['period_type'] = 'quarterly'
+                            period['days'] = days
+                            quarterly_periods.append(period)
+                        elif 175 <= days <= 185:  # Semi-annual/YTD for Q2 (~180 days)
+                            period['period_type'] = 'semi-annual'
+                            period['days'] = days
+                            ytd_periods.append(period)
+                        elif 265 <= days <= 275:  # YTD for Q3 (~270 days)
+                            period['period_type'] = 'three-quarters'
+                            period['days'] = days
+                            ytd_periods.append(period)
+                        elif 350 <= days <= 380:  # Annual period for comparisons
+                            period['period_type'] = 'annual'
+                            period['days'] = days
+                            annual_periods.append(period)
+                    except (ValueError, TypeError):
+                        continue
+                
+                # Build the optimal set of periods for quarterly reporting
+                selected_periods = []
+                
+                # 1. Add the most recent quarterly period (current quarter)
+                if quarterly_periods:
+                    # Find the most recent quarterly period
+                    recent_quarterly = quarterly_periods[0]  # Already sorted by end date
+                    selected_periods.append(recent_quarterly)
+                    
+                    # Try to find the same quarter from previous year for comparison
+                    if current_year:
+                        for qp in quarterly_periods[1:]:
+                            try:
+                                qp_end = datetime.strptime(qp['end_date'], '%Y-%m-%d').date()
+                                recent_end = datetime.strptime(recent_quarterly['end_date'], '%Y-%m-%d').date()
+                                # Same quarter, previous year (within 15 days tolerance)
+                                if (qp_end.year == current_year - 1 and 
+                                    qp_end.month == recent_end.month and
+                                    abs(qp_end.day - recent_end.day) <= 15):
+                                    selected_periods.append(qp)
+                                    break
+                            except (ValueError, TypeError):
+                                continue
+                
+                # 2. Add the most recent YTD period if available
+                if ytd_periods:
+                    # Find the YTD period that ends closest to the document period end
+                    selected_periods.append(ytd_periods[0])
+                
+                # 3. If we don't have enough periods yet, add more quarterly periods
+                if len(selected_periods) < 3:
+                    for period in quarterly_periods:
+                        if period not in selected_periods and len(selected_periods) < 3:
+                            selected_periods.append(period)
+                
+                # 4. If still not enough, consider annual periods for year-over-year comparison
+                if len(selected_periods) < 3 and annual_periods:
+                    for period in annual_periods:
+                        if len(selected_periods) < 3:
+                            selected_periods.append(period)
+                
+                # Convert selected periods to display format
+                for period in selected_periods[:3]:  # Limit to 3 periods
+                    periods_to_display.append((period['key'], period['label']))
     
     # For other statement types (not covered by specific logic above)
     else:

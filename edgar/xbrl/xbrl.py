@@ -146,6 +146,11 @@ class XBRL:
     @property
     def contexts(self):
         return self.parser.contexts
+    
+    @property
+    def footnotes(self):
+        """Access to XBRL footnotes."""
+        return self.parser.footnotes
         
     @property
     def _facts(self):
@@ -461,40 +466,36 @@ class XBRL:
         Returns:
             Statement data if found, None otherwise
         """
-        # Ensure indices are built
-        if not self._all_statements_cached:
-            self.get_all_statements()
+        # Use find_statement instead of the flawed index-based lookup
+        matching_statements, found_role, actual_statement_type = self.find_statement(statement_type)
+        
+        if not found_role or not matching_statements:
+            return None
+        
+        # Get statement data using the found role
+        statement_data = self.get_statement(found_role)
+        
+        if statement_data:
+            # Extract periods from the statement data
+            periods = {}
+            for item in statement_data:
+                for period_id, value in item.get('values', {}).items():
+                    if period_id not in periods:
+                        # Get period label from reporting_periods
+                        period_label = period_id
+                        for period in self.reporting_periods:
+                            if period['key'] == period_id:
+                                period_label = period['label']
+                                break
+                        periods[period_id] = {'label': period_label}
             
-        # Use indexed lookup by standard name
-        if statement_type in self._statement_by_standard_name:
-            statements = self._statement_by_standard_name[statement_type]
-            if statements:
-                statement = statements[0]
-                # Get statement data
-                role = statement['role']
-                statement_data = self.get_statement(role)
-                
-                if statement_data:
-                    # Extract periods from the statement data
-                    periods = {}
-                    for item in statement_data:
-                        for period_id, value in item.get('values', {}).items():
-                            if period_id not in periods:
-                                # Get period label from reporting_periods
-                                period_label = period_id
-                                for period in self.reporting_periods:
-                                    if period['key'] == period_id:
-                                        period_label = period['label']
-                                        break
-                                periods[period_id] = {'label': period_label}
-                    
-                    return {
-                        'role': role,
-                        'definition': statement['definition'],
-                        'statement_type': statement_type,
-                        'periods': periods,
-                        'data': statement_data
-                    }
+            return {
+                'role': found_role,
+                'definition': matching_statements[0]['definition'],
+                'statement_type': actual_statement_type,
+                'periods': periods,
+                'data': statement_data
+            }
         
         return None
 
@@ -1312,6 +1313,40 @@ class XBRL:
             
         return dataframes
     
+    def get_footnotes_for_fact(self, fact_id: str) -> List['Footnote']:
+        """Get all footnotes associated with a specific fact ID.
+        
+        Args:
+            fact_id: The ID of the fact to get footnotes for
+            
+        Returns:
+            List of Footnote objects associated with the fact
+        """
+        footnotes = []
+        
+        # First check if any fact has this ID and get its footnote references
+        for fact in self.parser.facts.values():
+            if fact.fact_id == fact_id:
+                # Get the footnote objects for each footnote ID
+                for footnote_id in fact.footnotes:
+                    if footnote_id in self.parser.footnotes:
+                        footnotes.append(self.parser.footnotes[footnote_id])
+                break
+        
+        return footnotes
+    
+    def get_facts_with_footnotes(self) -> Dict[str, 'Fact']:
+        """Get all facts that have associated footnotes.
+        
+        Returns:
+            Dictionary of fact_key -> Fact for all facts with footnotes
+        """
+        facts_with_footnotes = {}
+        for key, fact in self.parser.facts.items():
+            if fact.footnotes:
+                facts_with_footnotes[key] = fact
+        return facts_with_footnotes
+    
     def __rich__(self):
         """Rich representation for pretty printing in console."""
         return generate_rich_representation(self)
@@ -1321,4 +1356,5 @@ class XBRL:
         
     def __str__(self):
         """String representation."""
-        return f"XBRL Document with {len(self._facts)} facts, {len(self.contexts)} contexts, and {len(self.presentation_trees)} statements"
+        footnote_info = f", {len(self.footnotes)} footnotes" if self.footnotes else ""
+        return f"XBRL Document with {len(self._facts)} facts, {len(self.contexts)} contexts, {len(self.presentation_trees)} statements{footnote_info}"

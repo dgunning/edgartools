@@ -5,6 +5,114 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.6.3 - 2025-08-07
+
+### Fixed
+- Fix bug where local storage downloads failed due to an error in the rate limiter handling of async http requests
+
+## 4.6.2 - 2025-08-05
+
+### Fixed
+- Fix bug in period selection for quarterly statements from XBRL that caused some statements to not display data
+
+## 4.6.1 - 2025-08-04
+
+### Added
+- Added parsing of footnotes from XBRL
+- Add `accepted` field to `CurrentFilings` to indicate when a filing was accepted by the SEC
+
+### Changed
+- Refactored current filings into its own module `edgar.current_filings`
+
+## 4.6.0 - 2025-08-03
+
+### Added
+- Added HTTP caching in the `edgar.httpclient_cache` module to cache HTTP requests and responses
+- Add `FactQuery.by_text` to filter facts by text search
+- 
+
+### Changed
+- Changed fron using a custom `Throttler` to using `pyratelimiter`. This allows for more flexible rate limiting and caching of HTTP requests
+
+
+## 4.5.1 - 2025-07-31
+
+### Changed
+- Cleanup the `edgar.entity` package and remove the old implementation of `Facts`
+- Add rich display to `EntityFacts`, `FactsQuery`, and `FinancialStatement` classes
+
+## 4.5.0 - 2025-07-30
+
+### Changed
+- The Company Facts API has been completely rewritten to improve accuracy and easy of use
+
+### Fixed
+- Fix bug in XBRL parser not picking up the typedmember correctly
+
+### Added
+- Attachment Reports and Statements now have a `to_dataframe` method to convert the data to a pandas DataFrame
+
+
+## 4.4.5 - 2025-07-25
+
+## Fixed
+- Fix bug in period selection for `XBRLS` (multiple period financials) that caused some statements to be missing for some companies
+- Fix for some missing functions in Fund classes
+
+## 4.4.4 - 2025-07-22
+
+### Changed
+- Late July Cusip ticker mappings added
+- Minor fix to is_company check
+- Add `owner_name` and `position` properties to `OwnershipForm` parent class of `Form3`, `Form4`, `Form5`
+- Increase logging in `edgar.storage` module
+- More robust handling of errors when getting storage
+- Improvements to downloading of filings to local storage making it easier to incrementally add filings
+
+## 4.4.3 - 2025-07-19
+
+### Added
+- Add a function `set_local_storage_path` to set the local storage path for the EDGAR library
+
+### Changed
+- Simplify how local storage can be turned on by combining setting the local storage path and turning on local storage 
+- Remove unnecessary network calls when displaying a filing
+- The `Filing.period_of_report` now comes from the SGML rather than the Filing Home page. This eliminates a network call when displaying a filing
+
+## 4.4.2 - 2025-07-18
+
+### Fixed
+- Fixed bug where `MultiFinancials` class returned None 
+- Fixed bug in `get_current_filings` where it did not return the last page of current filings
+
+### Added
+- Added `get_all_current_filings` to accumulate all current (most recent unpublished) filings 
+
+
+## 4.4.1 - 2025-07-17
+
+### Fixed
+- Fix incorrect labels for **Total Current Assets** and **Total Current Liabilities** in the standardization mappings
+- Fix bug in finding statement data for some companies when stitching statements
+
+### Changed
+- Don't infer concept labels during standardization. This allows for the original label to be shown if no standardization mapping is found. 
+
+
+## 4.4.0 - 2025-07-16
+
+## Fixed
+- Improved ordering of line items when stitching statements
+
+## Changed
+
+- Early July Cusip ticker mappings added
+- Several improvements to HTML parsing and item selection and rendering - Thanks to [zhangchmeng](https://github.com/zhangchmeng)
+- Switch from the `limiter` package to `pyrate_limiter` for HTTP caching and rate limiting. 
+- Used the scanned PDF as the main filing document for filings with `.paper` as the primary attachment type
+- Use disk when streaming large files such as in `download_filings`
+- Additional standardization mappings for financial concepts in the Income Statement
+
 ## 4.3.1 - 2025-06-29
 
 ### Fixed

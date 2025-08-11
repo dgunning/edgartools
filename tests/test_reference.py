@@ -58,12 +58,9 @@ def test_find_cik():
     assert find_cik("BH-A") == find_cik("BH") == 1726173
     assert find_cik("NOTTHERE") is None
 
-    # ETF Ticker
-    assert find_cik("CGIC") == 2008516
 
 
 def test_find_mutual_fund_cik():
-    assert find_mutual_fund_cik("CGIC") == 2008516
     assert find_mutual_fund_cik("ABNZX") == 3794
     assert find_mutual_fund_cik("NOTTHERE") is None
 

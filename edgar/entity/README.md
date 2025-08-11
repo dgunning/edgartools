@@ -214,12 +214,6 @@ Access structured XBRL data for companies:
 # Get all XBRL facts for a company
 facts = company.get_facts()
 
-# Get a specific concept
-from edgar.entity.facts import get_concept
-revenue = get_concept(company.cik, "us-gaap", "RevenueFromContractWithCustomerExcludingAssessedTax")
-
-# Get the latest value
-latest_revenue = revenue.latest()
 ```
 
 ## Migration from Previous API

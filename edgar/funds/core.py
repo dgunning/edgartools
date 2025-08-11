@@ -105,6 +105,15 @@ class FundClass:
         ticker_str = f" - {self.ticker}" if self.ticker else ""
         return f"FundClass({self.name} [{self.class_id}]{ticker_str})"
         
+    def get_classes(self) -> List['FundClass']:
+        """Get all share classes in the same series as this class."""
+        if self.series and self.series.series_id:
+            from edgar.funds.data import get_fund_object
+            full_series = get_fund_object(self.series.series_id)
+            if full_series and hasattr(full_series, 'get_classes'):
+                return full_series.get_classes()
+        return [self]  # fallback
+    
     def __repr__(self):
         return self.__str__()
         
@@ -164,7 +173,7 @@ class FundSeries:
         Returns:
             Filings object with filtered filings
         """
-        return self.fund.get_filings(**kwargs)
+        return self.fund_company.get_filings(**kwargs)
         
     def __str__(self):
         return f"FundSeries({self.name} [{self.series_id}])"

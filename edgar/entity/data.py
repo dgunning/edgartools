@@ -493,6 +493,8 @@ class EntityData:
             return False
         elif hasattr(self,
                      'state_of_incorporation') and self.state_of_incorporation is not None and self.state_of_incorporation != '':
+            if self.cik == 1033331: # Reed Hastings exception
+                return True
             return False
         elif hasattr(self, 'entity_type') and self.entity_type not in ['', 'other']:
             return False

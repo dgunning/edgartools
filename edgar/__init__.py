@@ -11,7 +11,6 @@ from edgar.entity import (
     EntityData,
     Company,
     CompanyData,
-    CompanyFacts,
     CompanySearchResults,
     CompanyFilings,
     CompanyFiling,
@@ -27,13 +26,12 @@ from edgar.entity import (
 from edgar._filings import (Filing,
                             Filings,
                             FilingHeader,
-                            CurrentFilings,
                             Attachment,
                             Attachments,
                             get_filings,
-                            get_current_filings,
                             get_by_accession_number,
                             FilingHomepage)
+from edgar.current_filings import CurrentFilings, get_current_filings, iter_current_filings_pages, get_all_current_filings
 from edgar.core import (edgar_mode,
                         CRAWL,
                         CAUTION,
@@ -48,7 +46,7 @@ from edgar.xbrl import XBRL
 from edgar.files.html import Document
 from edgar.files import detect_page_breaks, mark_page_breaks
 from edgar.financials import Financials, MultiFinancials
-from edgar.storage import use_local_storage, is_using_local_storage, download_edgar_data, download_filings
+from edgar.storage import use_local_storage, is_using_local_storage, set_local_storage_path, download_edgar_data, download_filings
 
 # Another name for get_current_filings
 get_latest_filings = get_current_filings

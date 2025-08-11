@@ -7,7 +7,7 @@ import time
 
 def sample_and_test_filings(years, sample_size):
     print(f"Sampling {sample_size} filings from {years}")
-    for filing in tqdm(get_filings(year=years, form=['10-K']).sample(sample_size)):
+    for filing in tqdm(get_filings(year=years, form=['10-Q']).sample(sample_size)):
         try:
             obj = filing.obj()
             print(obj.__repr__())

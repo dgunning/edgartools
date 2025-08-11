@@ -150,7 +150,7 @@ from edgar.xbrl.stitching import StatementStitcher
 # Extract statements from XBRL objects
 statements = []
 for xbrl in xbrl_list:
-    statement = xbrl.get_statement_by_type("IncomeStatement")
+    statement = xbrl.find_statement("IncomeStatement")
     if statement:
         statements.append(statement)
 

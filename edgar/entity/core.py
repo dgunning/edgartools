@@ -6,15 +6,13 @@ including companies, funds, and individuals.
 """
 from abc import ABC, abstractmethod
 from functools import cached_property
-from functools import lru_cache
 from typing import List, Dict, Optional, Union, Tuple, Any, TypeVar, Iterable
 
 from edgar._filings import Filings
 from edgar.company_reports import TenK, TenQ
 from edgar.formatting import reverse_name, datefmt
 from edgar.entity.data import Address, EntityData, CompanyData
-# Import from our new modules
-from edgar.entity.filings import EntityFacts
+from edgar.entity.entity_facts import EntityFacts, get_company_facts
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.reference.tickers import find_cik
@@ -281,8 +279,9 @@ class Entity(SecFiler):
         Returns:
             True if the entity is a company, False otherwise
         """
-        return hasattr(self.data, 'is_company') and self.data.is_company
+        return self.data.is_company
 
+    @property
     def is_individual(self) -> bool:
         """
         Check if this entity is an individual.
@@ -306,7 +305,7 @@ class Entity(SecFiler):
                    is_xbrl: bool = None,
                    is_inline_xbrl: bool = None,
                    sort_by: Union[str, List[Tuple[str, str]]] = None,
-                   trigger_full_load: bool = True) -> Filings:
+                   trigger_full_load: bool = True) -> 'EntityFilings':
         """
         Get the entity's filings and optionally filter by multiple criteria.
         
@@ -473,6 +472,91 @@ class Company(Entity):
 
     def get_icon(self):
         return get_icon_from_ticker(self.tickers[0])
+    
+    # Enhanced financial data properties and methods
+    @property
+    def facts(self) -> Optional[EntityFacts]:
+        """Get enhanced structured facts about this company."""
+        return self.get_facts()
+    
+    @property
+    def public_float(self) -> Optional[float]:
+        """Get the public float value for this company."""
+        facts = self.facts
+        if facts:
+            return facts.public_float
+        return None
+    
+    @property
+    def shares_outstanding(self) -> Optional[float]:
+        """Get the shares outstanding for this company.""" 
+        facts = self.facts
+        if facts:
+            return facts.shares_outstanding
+        return None
+    
+    def income_statement(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+        """
+        Get income statement data for this company.
+        
+        Args:
+            periods: Number of periods to retrieve
+            annual: If True, prefer annual periods; if False, get quarterly
+            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            
+        Returns:
+            FinancialStatement or DataFrame with income statement data, or None if not available
+        """
+        facts = self.facts
+        if facts:
+            try:
+                return facts.income_statement(periods=periods, annual=annual, as_dataframe=as_dataframe)
+            except Exception as e:
+                from edgar.core import log
+                log.debug(f"Error getting income statement for {self.name}: {e}")
+        return None
+    
+    def balance_sheet(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+        """
+        Get balance sheet data for this company.
+        
+        Args:
+            periods: Number of periods to retrieve
+            annual: If True, prefer annual periods; if False, get quarterly
+            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            
+        Returns:
+            FinancialStatement or DataFrame with balance sheet data, or None if not available
+        """
+        facts = self.facts
+        if facts:
+            try:
+                return facts.balance_sheet(periods=periods, annual=annual, as_dataframe=as_dataframe)
+            except Exception as e:
+                from edgar.core import log
+                log.debug(f"Error getting balance sheet for {self.name}: {e}")
+        return None
+    
+    def cash_flow(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+        """
+        Get cash flow statement data for this company.
+        
+        Args:
+            periods: Number of periods to retrieve
+            annual: If True, prefer annual periods; if False, get quarterly
+            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            
+        Returns:
+            FinancialStatement or DataFrame with cash flow data, or None if not available
+        """
+        facts = self.facts
+        if facts:
+            try:
+                return facts.cash_flow(periods=periods, annual=annual, as_dataframe=as_dataframe)
+            except Exception as e:
+                from edgar.core import log
+                log.debug(f"Error getting cash flow for {self.name}: {e}")
+        return None
     
     def __str__(self):
         ticker = self.get_ticker()
@@ -757,52 +841,3 @@ def public_companies() -> Iterable[Company]:
         yield c
 
 
-# Re-export necessary functions from the original entities.py
-# This will be necessary during the transition period
-
-# Functions from the original entities.py that we still need
-@lru_cache(maxsize=32)
-def download_entity_submissions_from_sec(cik: int) -> Optional[Dict[str, Any]]:
-    """
-    Get the entity filings for a given cik.
-    
-    Args:
-        cik: The company CIK
-        
-    Returns:
-        Optional[Dict[str, Any]]: The entity submissions JSON data, or None if not found
-    """
-    # Import here to avoid circular imports
-    from edgar.entity.submissions import download_entity_submissions_from_sec as _download
-    return _download(cik)
-
-
-def parse_entity_submissions(submissions_json: Dict[str, Any]) -> 'EntityData':
-    """
-    Parse the entity submissions JSON data.
-    
-    Args:
-        submissions_json: The JSON data from the SEC submissions API
-        
-    Returns:
-        EntityData: The parsed entity data
-    """
-    # Import here to avoid circular imports
-    from edgar.entity.data import parse_entity_submissions as _parse
-    return _parse(submissions_json)
-
-
-@lru_cache(maxsize=32)
-def get_company_facts(cik: int) -> Optional[EntityFacts]:
-    """
-    Get company facts from the SEC.
-    
-    Args:
-        cik: The company CIK
-        
-    Returns:
-        Optional[EntityFacts]: The company facts, or None if not found
-    """
-    # Import here to avoid circular imports
-    from edgar.entity.facts import get_company_facts as _get_facts
-    return _get_facts(cik)

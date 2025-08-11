@@ -610,6 +610,12 @@ def _format_period_labels(
                             # Add quarter info if available
                             if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
                                 final_label = f"{final_label} ({q_num})"
+                            # Add YTD indicator for year-to-date periods
+                            elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                                if 175 <= duration_days <= 190:  # ~6 months
+                                    final_label = f"{final_label} (YTD)"
+                                elif 265 <= duration_days <= 285:  # ~9 months
+                                    final_label = f"{final_label} (YTD)"
                         except (ValueError, TypeError):
                             # If we can't parse the end date, use the original label
                             final_label = end_date_display_str
@@ -722,6 +728,12 @@ def _format_period_labels(
                 # If we have quarter info, ensure it's present for income/cash flow statements
                 if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement'] and f"({q_num})" not in final_label:
                     final_label = f"{final_label} ({q_num})"
+                # Add YTD indicator for year-to-date periods if not already added
+                elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement'] and "(YTD)" not in final_label:
+                    if 175 <= duration_days <= 190:  # ~6 months
+                        final_label = f"{final_label} (YTD)"
+                    elif 265 <= duration_days <= 285:  # ~9 months
+                        final_label = f"{final_label} (YTD)"
         
         # If we don't have a final_label yet, process based on period key
         if not final_label:
@@ -739,12 +751,24 @@ def _format_period_labels(
                     # Add quarter info if available
                     if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
                         final_label = f"{final_label} ({q_num})"
+                    # Add YTD indicator for year-to-date periods
+                    elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                        if 175 <= duration_days <= 190:  # ~6 months
+                            final_label = f"{final_label} (YTD)"
+                        elif 265 <= duration_days <= 285:  # ~9 months
+                            final_label = f"{final_label} (YTD)"
                 elif end_date_obj:
                     final_label = format_date(end_date_obj)
                     
                     # Add quarter info if available
                     if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
                         final_label = f"{final_label} ({q_num})"
+                    # Add YTD indicator for year-to-date periods
+                    elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                        if 175 <= duration_days <= 190:  # ~6 months
+                            final_label = f"{final_label} (YTD)"
+                        elif 265 <= duration_days <= 285:  # ~9 months
+                            final_label = f"{final_label} (YTD)"
                 else:
                     final_label = original_label
             else:
