@@ -70,7 +70,6 @@ def get_cache_controller(**kwargs):
         def construct_response_from_cache(
             self, request: httpcore.Request, response: httpcore.Response, original_request: httpcore.Request
         ) -> Union[httpcore.Request, httpcore.Response, None]:
-            raise ValueError("Shouldn't reach here")
             if response.status != 200:
                 return None
 
