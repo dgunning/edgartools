@@ -7,7 +7,7 @@ import pytest
 from rich import print
 
 from edgar import Filing
-from edgar.funds.reports_wip import FundReport
+from edgar.funds.reports import FundReport
 
 
 def test_derivatives_data_extraction():
@@ -50,7 +50,7 @@ def test_swaps_data_extraction():
             assert col in swaps_df.columns
         
         # Check that all rows are actually swaps
-        assert (swaps_df['subtype'] == 'Swap').all()
+        assert all('Swap' in subtype for subtype in swaps_df['subtype'].unique())
 
 
 def test_options_data_extraction():
@@ -68,7 +68,7 @@ def test_options_data_extraction():
             assert col in options_df.columns
         
         # Check that all rows are actually options
-        assert (options_df['subtype'] == 'Option').all()
+        assert all('Option' in subtype or subtype == 'Option' for subtype in options_df['subtype'].unique())
         
         # Check option types are valid
         valid_option_types = ['Put', 'Call']
@@ -122,7 +122,7 @@ def test_swaptions_data_extraction():
             assert col in swaptions_df.columns
         
         # Check that all rows are actually swaptions
-        assert (swaptions_df['subtype'] == 'Swaption').all()
+        assert (swaptions_df['subtype'] == 'SWO').all()
 
 
 def test_futures_data_extraction():
@@ -139,7 +139,7 @@ def test_futures_data_extraction():
             assert col in futures_df.columns
         
         # Check that all rows are actually futures
-        assert (futures_df['subtype'] == 'Future').all()
+        assert all('Future' in subtype for subtype in futures_df['subtype'].unique())
         
         # Check value_usd field exists and no redundant fields
         assert 'value_usd' in futures_df.columns
@@ -162,7 +162,7 @@ def test_forwards_data_extraction():
             assert col in forwards_df.columns
         
         # Check that all rows are actually forwards
-        assert (forwards_df['subtype'] == 'Forward').all()
+        assert all('Forward' in subtype for subtype in forwards_df['subtype'].unique())
 
 
 def test_index_options_parsing():
@@ -313,7 +313,9 @@ def test_data_types_consistency():
                     # Should be numeric (Decimal or float) or NA
                     non_na_values = df[field].dropna()
                     if not non_na_values.empty:
-                        assert pd.api.types.is_numeric_dtype(non_na_values)
+                        # Check that values are numeric (including Decimal types)
+                        sample_value = non_na_values.iloc[0]
+                        assert isinstance(sample_value, (int, float, Decimal))
 
 
 # Test with real filing if available

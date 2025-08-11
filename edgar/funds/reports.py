@@ -1160,6 +1160,10 @@ class FundReport:
         # Filter investments based on derivative inclusion
         investments_to_process = self.investments if include_derivatives else self.non_derivatives
 
+        # Handle case where no investments match the filter
+        if len(investments_to_process) == 0:
+            return pd.DataFrame(columns=['name', 'title', 'cusip', 'ticker', 'balance', 'units', 'value_usd'])
+
         # This is for adding Ticker to the investments in case it is None
         cusip_mapping = cusip_ticker_mapping(allow_duplicate_cusips=False)
 
