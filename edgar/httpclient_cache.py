@@ -47,9 +47,12 @@ def get_cache_controller(**kwargs):
         def is_cachable(self, request: httpcore.Request, response: httpcore.Response) -> bool:
             if response.status != 200:
                 return False
-
+            
             if request.url.host.decode().endswith("sec.gov"):
                 target = request.url.target.decode()
+                if target.startswith("/Archives/edgar/Feed") or target.startswith("/Archives/edgar/full-index"):
+                    # Never cache bulk files
+                    return False
                 if target.startswith("/submissions") or target.startswith("/include/ticker.txt") or target.startswith("/files/company_tickers.json"):
                     # /submissions are marked "no-store", but we're going to override this and allow it to be cached for MAX_SUBMISSIONS_AGE_SECONDS
                     return True
@@ -67,13 +70,17 @@ def get_cache_controller(**kwargs):
         def construct_response_from_cache(
             self, request: httpcore.Request, response: httpcore.Response, original_request: httpcore.Request
         ) -> Union[httpcore.Request, httpcore.Response, None]:
+            raise ValueError("Shouldn't reach here")
             if response.status != 200:
                 return None
 
             target = request.url.target.decode()
 
             if request.url.host.decode().endswith("sec.gov"):
-                if target.startswith("/submissions") or target.startswith("/include/ticker.txt") or target.startswith("/files/company_tickers.json"):
+                if target.startswith("/Archives/edgar/Feed") or target.startswith("/Archives/edgar/full-index"):
+                    # Never cache
+                    return None
+                elif target.startswith("/submissions") or target.startswith("/include/ticker.txt") or target.startswith("/files/company_tickers.json"):
                     max_age = MAX_SUBMISSIONS_AGE_SECONDS
                 elif "index/" in target:
                     max_age = MAX_INDEX_AGE_SECONDS

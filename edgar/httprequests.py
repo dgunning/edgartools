@@ -481,7 +481,7 @@ async def stream_file(
     temp_file = Path(temp_dir) / f"download_{uuid.uuid1()}"
 
     try:
-        async with async_http_client(client, timeout=TIMEOUT) as async_client:
+        async with async_http_client(client, timeout=TIMEOUT, bypass_cache=True) as async_client:
             async with async_client.stream("GET", url) as response:
                 inspect_response(response)
                 total_size = int(response.headers.get("Content-Length", 0))

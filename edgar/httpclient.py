@@ -91,22 +91,22 @@ def get_http_params():
     }
 
 
-def edgar_client_factory(**kwargs) -> httpx.Client:
+def edgar_client_factory(bypass_cache: bool, **kwargs) -> httpx.Client:
     params = get_http_params()
     params.update(**kwargs)
 
     if "transport" not in params:
-        params["transport"] = get_transport()
+        params["transport"] = get_transport(bypass_cache=bypass_cache)
 
     return httpx.Client(**params)
 
 
-def edgar_client_factory_async(**kwargs) -> httpx.AsyncClient:
+def edgar_client_factory_async(bypass_cache: bool, **kwargs) -> httpx.AsyncClient:
     params = get_http_params()
     params.update(**kwargs)
 
     if "transport" not in params:
-        params["transport"] = get_async_transport()
+        params["transport"] = get_async_transport(bypass_cache=bypass_cache)
 
     return httpx.AsyncClient(**params)
 
@@ -117,39 +117,22 @@ def _http_client_manager():
 
     This function is used for all synchronous requests.
     """
-    client = None
-    lock = threading.Lock()
 
     @contextmanager
-    def _get_client(**kwargs):
-        nonlocal client
-
-        if client is None:
-            with lock:
-                # Locking: not super critical, since worst case might be extra httpx clients created,
-                # but future proofing against TOCTOU races in free-threading world
-                if client is None:
-                    log.info("Creating new HTTPX Client")
-                    client = edgar_client_factory(**kwargs)
-
-        yield client
+    def _get_client(bypass_cache: bool = False, **kwargs):
+        log.info("Creating new HTTPX Client")
+        yield edgar_client_factory(bypass_cache=bypass_cache, **kwargs)
 
     def _close_client():
-        nonlocal client
-
-        if client is not None:
-            try:
-                client.close()
-            except Exception:
-                log.exception("Exception closing client")
-
-            client = None
+        pass  # noop, to deprecate
 
     return _get_client, _close_client
 
 
 @asynccontextmanager
-async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs) -> AsyncGenerator[httpx.AsyncClient, None]:
+async def async_http_client(
+    client: Optional[httpx.AsyncClient] = None, bypass_cache: bool = False, **kwargs
+) -> AsyncGenerator[httpx.AsyncClient, None]:
     """
     Async callers should create a single client for a group of tasks, rather than creating a single client per task.
 
@@ -159,13 +142,13 @@ async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs
     if client is not None:
         yield nullcontext(client)  # type: ignore # Caller is responsible for closing
 
-    async with edgar_client_factory_async(**kwargs) as client:
+    async with edgar_client_factory_async(bypass_cache=bypass_cache, **kwargs) as client:
         yield client
 
 
-def get_transport() -> httpx.BaseTransport:
+def get_transport(bypass_cache: bool) -> httpx.BaseTransport:
     cache_dir = get_cache_directory()
-    if cache_dir:
+    if cache_dir and not bypass_cache:
         log.info(f"Cache is ENABLED, writing to {cache_dir}")
         storage = hishel.FileStorage(base_path=Path(cache_dir))
         controller = get_cache_controller()
@@ -176,9 +159,9 @@ def get_transport() -> httpx.BaseTransport:
         return RateLimitingTransport(_RATE_LIMITER)
 
 
-def get_async_transport() -> httpx.AsyncBaseTransport:
+def get_async_transport(bypass_cache: bool) -> httpx.AsyncBaseTransport:
     cache_dir = get_cache_directory()
-    if cache_dir:
+    if cache_dir and not bypass_cache:
         log.info(f"Cache is ENABLED, writing to {cache_dir}")
         storage = hishel.AsyncFileStorage(base_path=Path(cache_dir))
         controller = get_cache_controller()
