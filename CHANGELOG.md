@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.7.0 - 2025-08-11
+
+### Changed
+- Ensure only HTTP 200 responses are cached in the HTTP cache
+- Switch serializer, the default jsonserializer is very slow for large responses
+- Enable `http2`, if installed
+- Add `_make_request_conditional` to ensure proper revalidation of cached responses
+- Bypass cache for large files
+- Add 3.13 to to classifiers for PyPI
+
+### Fixed
+- Use a single global rate limiter even for async requests to avoid exceeding the SEC rate limits
+- Cleanup unused async path
+- Fix negative sign display in `moneyfmt` function
+
 ## 4.6.3 - 2025-08-07
 
 ### Fixed
