@@ -56,7 +56,7 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
         cache_dir = None
 
     http_mgr = HttpxThrottleCache(
-        user_agent=get_identity(), cache_dir=cache_dir, cache_enabled=cache_enabled, request_per_sec_limit=request_per_sec_limit,
+        user_agent_factory=get_identity, cache_dir=cache_dir, cache_mode="Hishel-File", request_per_sec_limit=request_per_sec_limit,
         cache_rules = CACHE_RULES
     )
     http_mgr.httpx_params["verify"] = get_edgar_verify_ssl
@@ -71,7 +71,7 @@ async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs
 
 @contextmanager
 def http_client(**kwargs) -> Generator[httpx.Client, None, None]:
-    with HTTP_MGR.client(**kwargs) as client:
+    with HTTP_MGR.http_client(**kwargs) as client:
         yield client
 
 
