@@ -52,11 +52,13 @@ def get_edgar_verify_ssl():
 def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> HttpxThrottleCache:
     if cache_enabled:
         cache_dir = get_cache_directory()
+        cache_mode = "Hishel-File"
     else:
         cache_dir = None
+        cache_mode = "Disabled"
 
     http_mgr = HttpxThrottleCache(
-        user_agent_factory=get_identity, cache_dir=cache_dir, cache_mode="Hishel-File", request_per_sec_limit=request_per_sec_limit,
+        user_agent_factory=get_identity, cache_dir=cache_dir, cache_mode=cache_mode, request_per_sec_limit=request_per_sec_limit,
         cache_rules = CACHE_RULES
     )
     http_mgr.httpx_params["verify"] = get_edgar_verify_ssl
