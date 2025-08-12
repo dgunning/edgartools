@@ -1,81 +1,41 @@
-"""
-
-Exposes two function for creating HTTP Clients:
-- http_client: Returns a global (technically a local in a closure) httpx.Client for synchronous use.
-- async_http_client: Creates and destroys an HTTP client for each async caller. For best results, create once per group of operations
-
-To close the global connection, call `close_client()`
-
-To change the rate limit, call `update_rate_limiter(requests_per_second)`
-
-## Caching
-Caching is enabled by default, using the controller rules defined in httpclient_cache.
-
-To disable the cache, set CACHE_ENABLED to False.
-
-## HTTPX Parameters
-
-HTTPX Parameters are assembled from three sources:
-- edgar.httpclient.HTTPX_PARAMS
-- get_edgar_verify_ssl: checks EDGAR_VERIFY_SSL environment variable
-- edgar.core.get_identity: user_agent
-- any kwargs passed to http_client or async_http_client
-
-
-Implementation notes:
-- In general, changing any settings / globals requires calling `close_client` to make sure the old settings aren't used.
-- To use other storage backends, such as S3, override `get_transport` and `get_async_storage` and use hishel.S3Storage and hishel.AsyncS3Storage object. See https://hishel.com/ for usage.
-
-"""
-
-import logging
+from httpxthrottlecache import HttpxThrottleCache
+from edgar.core import get_identity, strtobool
 import os
-import threading
-from contextlib import asynccontextmanager, contextmanager, nullcontext
+from contextlib import asynccontextmanager, contextmanager
 import httpx
-import hishel
-from typing import AsyncGenerator, Optional
-from edgar.core import get_identity, edgar_mode, strtobool
-from edgar.httpclient_cache import get_cache_controller
-from edgar.httpclient_ratelimiter import RateLimitingTransport, AsyncRateLimitingTransport, create_rate_limiter
+from typing import AsyncGenerator, Optional, Generator
 from pathlib import Path
 from .core import edgar_data_dir
 
-log = logging.getLogger(__name__)
 
-try: 
-    # enable http2 if h2 is installed
-    import h2  # type: ignore  # noqa 
-    http2 = True
-except ImportError: 
-    http2 = False
+MAX_SUBMISSIONS_AGE_SECONDS = 10 * 60  # Check for submissions every 10 minutes
+MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes
 
-HTTPX_PARAMS = {"timeout": edgar_mode.http_timeout, "limits": edgar_mode.limits, "default_encoding": "utf-8", "http2": http2}
-
-CACHE_ENABLED = True
-
-
-def get_cache_directory():
-    if CACHE_ENABLED:
-        cachedir = Path(edgar_data_dir) / "_pcache"
-        cachedir.mkdir(exist_ok=True)
-
-        return str(cachedir)
-    else:
-        return None
+# rules are regular expressions matching the request url path: 
+# The value determines whether it is cached or not:
+# - int > 0: how many seconds it'll be considered valid. During this time, the cached object will not be revalidated.
+# - False or 0: Do not cache
+# - True: Cache forever, never revalidate
+# - None: Determine cachability using response cache headers only. 
+#
+# Note that: revalidation consumes rate limit "hit", but will be served from cache if the data hasn't changed.
 
 
-_DEFAULT_REQUEST_PER_SEC_LIMIT = 9
-_MAX_DELAY = 1000 * 60  # 1 minute
+CACHE_RULES = {
+    r".*\.sec\.gov": {
+        "/submissions.*": MAX_SUBMISSIONS_AGE_SECONDS,
+        r"/include/ticker\.txt.*": MAX_SUBMISSIONS_AGE_SECONDS,
+        r"/files/company_tickers\.json.*": MAX_SUBMISSIONS_AGE_SECONDS,
+        ".*index/.*": MAX_INDEX_AGE_SECONDS,
+        "/Archives/edgar/data": True,  # cache forever
+    }
+}
 
-_RATE_LIMITER = create_rate_limiter(requests_per_second=_DEFAULT_REQUEST_PER_SEC_LIMIT, max_delay=_MAX_DELAY)
+def get_cache_directory() -> str:
+    cachedir = Path(edgar_data_dir) / "_pcache"
+    cachedir.mkdir(parents=True, exist_ok=True)
 
-
-def update_rate_limiter(requests_per_second: int):
-    global _RATE_LIMITER
-    _RATE_LIMITER = create_rate_limiter(requests_per_second=requests_per_second, max_delay=_MAX_DELAY)
-
-    close_clients()
+    return str(cachedir)
 
 
 def get_edgar_verify_ssl():
@@ -89,98 +49,40 @@ def get_edgar_verify_ssl():
         return True
 
 
-def get_http_params():
-    return {
-        **HTTPX_PARAMS,
-        "headers": {"User-Agent": get_identity()},
-        "verify": get_edgar_verify_ssl(),
-    }
+def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> HttpxThrottleCache:
+    if cache_enabled:
+        cache_dir = get_cache_directory()
+        cache_mode = "Hishel-File"
+    else:
+        cache_dir = None
+        cache_mode = "Disabled"
 
-
-def edgar_client_factory(bypass_cache: bool, **kwargs) -> httpx.Client:
-    params = get_http_params()
-    params.update(**kwargs)
-
-    if "transport" not in params:
-        params["transport"] = get_transport(bypass_cache=bypass_cache)
-
-    return httpx.Client(**params)
-
-
-def edgar_client_factory_async(bypass_cache: bool, **kwargs) -> httpx.AsyncClient:
-    params = get_http_params()
-    params.update(**kwargs)
-
-    if "transport" not in params:
-        params["transport"] = get_async_transport(bypass_cache=bypass_cache)
-
-    return httpx.AsyncClient(**params)
-
-
-def _http_client_manager():
-    """
-    Creates and reuses an HTTPX Client.
-
-    This function is used for all synchronous requests.
-    """
-
-    @contextmanager
-    def _get_client(bypass_cache: bool = False, **kwargs):
-        log.info("Creating new HTTPX Client")
-        yield edgar_client_factory(bypass_cache=bypass_cache, **kwargs)
-
-    def _close_client():
-        pass  # noop, to deprecate
-
-    return _get_client, _close_client
+    http_mgr = HttpxThrottleCache(
+        user_agent_factory=get_identity, cache_dir=cache_dir, cache_mode=cache_mode, request_per_sec_limit=request_per_sec_limit,
+        cache_rules = CACHE_RULES
+    )
+    http_mgr.httpx_params["verify"] = get_edgar_verify_ssl
+    return http_mgr
 
 
 @asynccontextmanager
-async def async_http_client(
-    client: Optional[httpx.AsyncClient] = None, bypass_cache: bool = False, **kwargs
-) -> AsyncGenerator[httpx.AsyncClient, None]:
-    """
-    Async callers should create a single client for a group of tasks, rather than creating a single client per task.
-
-    If a null client is passed, then this is a no-op and the client isn't closed. This (passing a client) occurs when a higher level async task creates the client to be used by child calls.
-    """
-
-    if client is not None:
-        yield nullcontext(client)  # type: ignore # Caller is responsible for closing
-
-    async with edgar_client_factory_async(bypass_cache=bypass_cache, **kwargs) as client:
+async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs) -> AsyncGenerator[httpx.AsyncClient, None]:
+    async with HTTP_MGR.async_http_client(client=client, **kwargs) as client:
         yield client
 
 
-def get_transport(bypass_cache: bool) -> httpx.BaseTransport:
-    cache_dir = get_cache_directory()
-    if cache_dir and not bypass_cache:
-        log.info(f"Cache is ENABLED, writing to {cache_dir}")
-        storage = hishel.FileStorage(base_path=Path(cache_dir), serializer=hishel.PickleSerializer())
-        controller = get_cache_controller()
-        rate_limit_transport = RateLimitingTransport(_RATE_LIMITER)
-        return hishel.CacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
-    else:
-        log.info("Cache is DISABLED, rate limiting only")
-        return RateLimitingTransport(_RATE_LIMITER)
+@contextmanager
+def http_client(**kwargs) -> Generator[httpx.Client, None, None]:
+    with HTTP_MGR.http_client(**kwargs) as client:
+        yield client
 
 
-def get_async_transport(bypass_cache: bool) -> httpx.AsyncBaseTransport:
-    cache_dir = get_cache_directory()
-    if cache_dir and not bypass_cache:
-        log.info(f"Cache is ENABLED, writing to {cache_dir}")
-        storage = hishel.AsyncFileStorage(base_path=Path(cache_dir))
-        controller = get_cache_controller()
-        rate_limit_transport = AsyncRateLimitingTransport(_RATE_LIMITER)
-        return hishel.AsyncCacheTransport(transport=rate_limit_transport, storage=storage, controller=controller)
-    else:
-        log.info("Cache is DISABLED, rate limiting only")
-        return AsyncRateLimitingTransport(_RATE_LIMITER)
-
-
-http_client, _close_client = _http_client_manager()
+def get_http_params():
+    return HTTP_MGR.populate_user_agent(HTTP_MGR.httpx_params.copy())
 
 
 def close_clients():
-    """Closes and invalidates existing client session, if created."""
-    _close_client()
+    HTTP_MGR.close()
+
+
+HTTP_MGR = get_http_mgr()
