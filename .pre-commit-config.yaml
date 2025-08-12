@@ -1,0 +1,27 @@
+default_language_version:
+  python: python3
+exclude: "^$"
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.12.8
+    hooks:
+      - id: ruff-check
+        types_or: [ python, pyi, jupyter ]
+        args: [ --fix ]
+      - id: ruff-format
+        types_or: [ python, pyi, jupyter ]
+  - repo: local
+    hooks:
+      - entry: pyright
+        id: "pyright"
+        name: "pyright"
+        types_or: [python]
+        language: node
+        pass_filenames: true
+        additional_dependencies: ["pyright"]
