@@ -76,9 +76,9 @@ Users typically start their search using one of these identifiers:
    - Path: Fund Company → Multiple Fund Series
    - User needs: Browse investment options, compare strategies
 
-4. **"I want to see a fund's holdings"**
-   - Path: Fund Series → Portfolio Holdings
-   - User needs: See what securities the fund invests in, sector breakdown
+4. **"I want to see a fund's holdings and derivatives"**
+   - Path: Fund Series → Portfolio Holdings (Traditional + Derivatives)
+   - User needs: See what securities the fund invests in, sector breakdown, hedging strategies
 
 ## Product Management Perspective
 
@@ -169,7 +169,7 @@ The package provides a smart finder function `find_fund()` that returns the appr
    - Create a unified "Fund" interface that hides complexity
    - Present the right level of detail based on user needs
 
-### Implementation Status (as of April 2025)
+### Implementation Status (updated August 2025)
 
 ### User Journey Assessment
 
@@ -243,16 +243,78 @@ The package provides a smart finder function `find_fund()` that returns the appr
 - Limited search by fund attributes
 
 #### 3. Portfolio Analysis
-**Progress: 55% Complete**
+**Progress: 75% Complete (Previously 55%)**   
+Users want to understand what funds actually own - both traditional securities and derivatives. This has become significantly more sophisticated with enhanced N-PORT parsing.
+#### Common User Scenarios
+Traditional Securities Analysis:
+
+- "What stocks/bonds does this fund hold?"
+- "Show me the fund's sector allocation"
+- "What are the top 10 holdings by weight?"
+
+Derivatives Analysis (NEW CAPABILITIES):
+
+- "Does this fund use derivatives for hedging?"
+- "What's the fund's interest rate swap exposure?"
+- "Show me all the fund's options positions"
+- "How much leverage does this fund have through derivatives?"   
 
 ✓ **Implemented:**
-- Basic portfolio holdings retrieval
-- Connection to appropriate fund entities
 
-⚠️ **Gaps:**
-- Limited analysis tools for the portfolio data
-- No sector breakdown or allocation views
-- No temporal comparison
+Basic portfolio holdings extraction via investment_data()
+Comprehensive derivatives parsing with six specialized methods:
+
+- `derivatives_data()` - Unified view of all derivatives  
+- `swaps_data()` - Interest rate, credit, and total return swaps
+- `swaptions_data()` - Options on swaps with nested details
+- `options_data()` - Equity/index options including nested derivatives
+- `forwards_data()` - FX forwards and other forward contracts
+- `futures_data()` - Future contracts with reference entities
+
+Index reference parsing (S&P 500 INDEX, etc.)    
+Nested derivative support (options on forwards/futures/swaps)  
+Dynamic column structures that adapt to instrument type  
+
+⚠️ Partial Implementation:
+
+Warrant derivatives (WAR) - parsed but no dedicated method     
+Complex structured products    
+Multi-level derivative nesting (>1 level)    
+Portfolio-level analytics and aggregations    
+
+❌ Work to be done:
+
+Sector/industry breakdown views   
+Geographic allocation analysis   
+Temporal portfolio comparison   
+Risk analytics (VaR, duration, etc.)   
+Performance attribution 
+
+**Data Model Enhancement**  
+The portfolio analysis now supports a comprehensive investment hierarchy:   
+```bash
+Portfolio Holdings
+├── Traditional Securities
+│   ├── Equity Securities
+│   ├── Fixed Income Securities
+│   └── Other Securities
+└── Derivative Instruments (NEW)
+    ├── Interest Rate Derivatives
+    │   ├── Swaps (IRS, CDS, TRS)
+    │   ├── Swaptions
+    │   └── Interest Rate Futures
+    ├── Equity Derivatives
+    │   ├── Equity Options
+    │   ├── Index Options
+    │   └── Equity Futures
+    ├── FX Derivatives
+    │   ├── FX Forwards
+    │   ├── FX Options
+    │   └── Currency Swaps
+    └── Other Derivatives
+        ├── Commodity Derivatives
+        └── Credit Derivatives
+```
 
 ### Overall Assessment
 
@@ -260,6 +322,6 @@ Recent improvements have significantly enhanced the **Discovery Journey** by int
 
 The enhanced inference logic in entity relationships directly supports key user scenarios like "I want to see all share classes of a fund" and the improved navigation between entities makes it easier to explore the fund hierarchy.
 
-**Current State: ~75% Complete Across All Journeys**
+**Current State: ~78% Complete Across All Journeys**
 
 The core relationships between entities are now robust and intuitive, providing a solid foundation for building more advanced features to fulfill these user journeys completely. The API is now more predictable and better aligned with user expectations.

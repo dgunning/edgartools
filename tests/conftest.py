@@ -23,9 +23,9 @@ def pytest_configure(config):
     """
     if not config.getoption("--enable-cache"):
         logger.info("Cache disabled for test accuracy")    
-        httpclient.CACHE_ENABLED = False
+        httpclient.HTTP_MGR = httpclient.get_http_mgr(cache_enabled=False)
 
     if hasattr(config, 'workerinput'):
         logger.info("pytest-xdist is enabled, enabling a distributed sqlite ratelimiter")    
         from pyrate_limiter import limiter_factory
-        httpclient._RATE_LIMITER = limiter_factory.create_sqlite_limiter(rate_per_duration=10, db_path="ratelimiter.sqlite", use_file_lock=True)
+        httpclient.HTTP_MGR.rate_limiter = limiter_factory.create_sqlite_limiter(rate_per_duration=10, db_path="ratelimiter.sqlite", use_file_lock=True)
