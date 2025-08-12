@@ -24,6 +24,13 @@ from edgar.xmltools import find_element, child_text, optional_decimal
 
 log = logging.getLogger(__name__)
 
+# Functions for export
+__all__ = [
+    'FundReport',
+    'CurrentMetric',
+    'NPORT_FORMS',
+    'get_fund_portfolio_from_filing',
+]
 
 def optional_decimal_attr(element, attr_name):
     """Helper function to parse optional decimal attributes from XML elements"""
@@ -2136,4 +2143,5 @@ def get_fund_portfolio_from_filing(filing) -> pd.DataFrame:
 
     # Return empty DataFrame if extraction failed
     return pd.DataFrame()
+
 
