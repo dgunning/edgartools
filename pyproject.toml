@@ -86,6 +86,7 @@ dependencies = [
   "pytest-env",
   "pytest-xdist",
   "pytest-asyncio",
+  "pytest-retry",
   "filelock",
   "pyinstrument",
   "pyright",
@@ -147,3 +148,9 @@ line-length = 150
 env = [
     "EDGAR_IDENTITY=Dev Gunning developer-gunning@gmail.com",
 ]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+retries = 2
+retry_delay = 4
+cumulative_timing = false
+retry_outcome = "rerun"
