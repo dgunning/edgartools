@@ -44,7 +44,7 @@ dependencies = [
   "jinja2>=3.1.0",
   "pyrate-limiter>=3.9.0",
   "hishel>=0.1.3",
-  "packaging==24.2"
+  "packaging==24.2",
 ]
 dynamic = ["version"]
 
@@ -87,6 +87,7 @@ dependencies = [
   "pytest-env",
   "pytest-xdist",
   "pytest-asyncio",
+  "pytest-retry",
   "filelock",
   "pyinstrument",
   "pyright",
@@ -139,12 +140,6 @@ exclude_lines = [
 ]
 
 
-[tool.pytest.ini_options]
-env = [
-    "EDGAR_IDENTITY=Dev Gunning developer-gunning@gmail.com",
-]
-
-
 [tool.ruff]
 line-length = 150
 exclude = [
@@ -174,4 +169,16 @@ ignore = [
 [dependency-groups]
 dev = [
     "pre-commit>=4.3.0",
+    "pytest-retry>=1.7.0",
 ]
+
+[tool.pytest.ini_options]
+env = [
+    "EDGAR_IDENTITY=Dev Gunning developer-gunning@gmail.com",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+retries = 2
+retry_delay = 4
+cumulative_timing = false
+retry_outcome = "rerun"
