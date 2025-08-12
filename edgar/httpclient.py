@@ -78,7 +78,7 @@ def http_client(**kwargs) -> Generator[httpx.Client, None, None]:
 
 
 def get_http_params():
-    return HTTP_MGR.httpx_params
+    return HTTP_MGR.populate_user_agent(HTTP_MGR.httpx_params.copy())
 
 
 def close_clients():
