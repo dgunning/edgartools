@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Release 4.8.0 - 2025-08-14
+
+### Added
+- Add `edgar.entity.company_subsets` module to allow for easy access to company subsets like `sp500`, `nasdaq100`, etc.
+- Add derivative parsing for **NPORT** filings
+### Fixed
+- Fix `fetch_daily_filing_index` which used a different date format from the one used for quarterly indexes
+- Code cleanup across the library to remove unused imports and functions
+
+### Changed
+- Improve XBRL query by dimension to allow for more flexible querying of XBRL facts e.g. without namespaces
+- Improve the assignment of facts to statements in the EntityFacts using a learning approach
+- Improve the display of EntityFact statements
+- HTTP caching and throttling moved to a separate library `httpxthrottlecache`
+
 ## 4.7.0 - 2025-08-11
 
 ### Changed
