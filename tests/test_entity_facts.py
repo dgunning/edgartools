@@ -243,20 +243,21 @@ class TestEntityFacts:
     
     def test_income_statement(self, entity_facts):
         """Test getting income statement data"""
-        df = entity_facts.income_statement(periods=4)
+        df = entity_facts.income_statement(periods=4).to_dataframe()
         
         # Should return pivoted data
         assert not df.empty
-        assert df.index.name == "label"
+        assert df.index.name == "concept"
     
     def test_balance_sheet(self, entity_facts):
         """Test getting balance sheet data"""
         # Test new FinancialStatement return (using annual=False since test data has quarterly data)
         stmt = entity_facts.balance_sheet(annual=False)
-        
-        assert not stmt.empty
         assert stmt.statement_type == "BalanceSheet"
-        
+
+        stmt_df = stmt.to_dataframe()
+        assert not stmt_df.empty
+
         # Test raw DataFrame return (multi-period - returns pivoted DataFrame)
         df = entity_facts.balance_sheet(as_dataframe=True, annual=False)
         assert not df.empty
@@ -994,11 +995,11 @@ class TestEntityFactsParser:
             print(f"Revenue facts found: {len(revenue_facts)}")
         
         # Test specific financial statements
-        income_stmt = entity_facts.income_statement()
+        income_stmt = entity_facts.income_statement(as_dataframe=True)
         assert income_stmt is not None
         print(f"Income statement facts: {len(income_stmt) if not income_stmt.empty else 0}")
         
-        balance_sheet = entity_facts.balance_sheet()
+        balance_sheet = entity_facts.balance_sheet(as_dataframe=True)
         assert balance_sheet is not None
         print(f"Balance sheet facts: {len(balance_sheet) if not balance_sheet.empty else 0}")
         
@@ -1134,14 +1135,14 @@ class TestEntityFactsParser:
             ))
         
         entity_facts = EntityFacts(cik=123456, name="Test Co", facts=facts)
-        income_stmt = entity_facts.income_statement(annual=False)
+        income_stmt = entity_facts.income_statement(as_dataframe=True, annual=False)
         
         # Should have only one column for Q1 2024
         q1_cols = [col for col in income_stmt.columns if "Q1 2024" in col]
         assert len(q1_cols) == 1
         
         # Should have chosen the 10-K value (1002000)
-        assert income_stmt.data.loc["Revenue", q1_cols[0]] == 1002000.0
+        assert income_stmt.loc["Revenue", q1_cols[0]] == 1002000.0
     
     def test_financial_statement_formatting(self):
         """Test FinancialStatement formatting functionality"""
