@@ -287,3 +287,134 @@ def test_query_by_dimension_none(aapl_xbrl):
              )
     print(facts.to_dataframe().columns.tolist())
     assert not any('dim' in col for col in facts.to_dataframe().columns)
+
+
+def test_flexible_dimension_matching(aapl_xbrl):
+    """Test the improved flexible dimension matching functionality."""
+    
+    # First, find available dimensions in the data
+    sample_facts = aapl_xbrl.query().limit(100).execute()
+    dimensions = {}
+    
+    for fact in sample_facts:
+        for key, value in fact.items():
+            if key.startswith('dim_'):
+                dim_name = key[4:]  # Remove 'dim_' prefix
+                if dim_name not in dimensions:
+                    dimensions[dim_name] = set()
+                if value:
+                    dimensions[dim_name].add(value)
+    
+    # Skip test if no dimensions are available
+    if not dimensions:
+        pytest.skip("No dimensions found in test data")
+    
+    # Pick the first dimension with values for testing
+    test_dim = None
+    test_values = []
+    for dim_name, values in dimensions.items():
+        if values:
+            test_dim = dim_name
+            test_values = list(values)
+            break
+    
+    if not test_dim or not test_values:
+        pytest.skip("No suitable dimensions with values found for testing")
+    
+    test_value = test_values[0]
+    
+    print(f"\nTesting with dimension: {test_dim}")
+    print(f"Testing with value: {test_value}")
+    
+    # Test 1: Original format (exact match)
+    results_exact = aapl_xbrl.query().by_dimension(test_dim, test_value).limit(10).execute()
+    original_count = len(results_exact)
+    
+    assert original_count > 0, f"No results for exact dimension match: {test_dim} = {test_value}"
+    
+    # Test 2: Dimension name with colon instead of underscore
+    dim_with_colon = test_dim.replace('_', ':')
+    if dim_with_colon != test_dim:
+        results_colon_dim = aapl_xbrl.query().by_dimension(dim_with_colon, test_value).limit(10).execute()
+        assert len(results_colon_dim) == original_count, \
+            f"Different results for dimension format variation: {dim_with_colon}"
+    
+    # Test 3: Value with underscore instead of colon (and vice versa)
+    if ':' in test_value:
+        value_with_underscore = test_value.replace(':', '_')
+        results_underscore_val = aapl_xbrl.query().by_dimension(test_dim, value_with_underscore).limit(10).execute()
+        assert len(results_underscore_val) == original_count, \
+            f"Different results for value format variation: {value_with_underscore}"
+    elif '_' in test_value:
+        value_with_colon = test_value.replace('_', ':')
+        results_colon_val = aapl_xbrl.query().by_dimension(test_dim, value_with_colon).limit(10).execute()
+        assert len(results_colon_val) == original_count, \
+            f"Different results for value format variation: {value_with_colon}"
+    
+    # Test 4: Local dimension name (without namespace prefix)
+    if '_' in test_dim:
+        local_dim = test_dim.split('_')[-1]
+        results_local_dim = aapl_xbrl.query().by_dimension(local_dim, test_value).limit(10).execute()
+        assert len(results_local_dim) == original_count, \
+            f"Different results for local dimension name: {local_dim}"
+    
+    # Test 5: Local value name (without namespace prefix)  
+    if ':' in test_value:
+        local_value = test_value.split(':')[-1]
+        results_local_val = aapl_xbrl.query().by_dimension(test_dim, local_value).limit(10).execute()
+        assert len(results_local_val) == original_count, \
+            f"Different results for local value name: {local_value}"
+    
+    # Test 6: Dimension existence (without specifying value)
+    results_exists = aapl_xbrl.query().by_dimension(test_dim).limit(20).execute()
+    assert len(results_exists) >= original_count, \
+        "Dimension existence filter should return at least as many results as specific value filter"
+    
+    # Test 7: Verify that all returned facts actually have the expected dimension
+    for fact in results_exact:
+        found_dim = False
+        for key, value in fact.items():
+            if key.startswith('dim_') and key == f'dim_{test_dim}':
+                assert value == test_value, \
+                    f"Fact has wrong dimension value. Expected: {test_value}, Got: {value}"
+                found_dim = True
+                break
+        assert found_dim, f"Fact missing expected dimension: dim_{test_dim}"
+    
+    print(f"✅ All flexible dimension matching tests passed!")
+    print(f"   Original exact match: {original_count} results")
+    print(f"   All format variations returned same count")
+
+
+def test_dimension_format_normalization():
+    """Test the dimension format normalization helper methods."""
+    from edgar.xbrl.facts import FactQuery
+    from unittest.mock import MagicMock
+    
+    # Create a mock FactsView for testing
+    mock_facts_view = MagicMock()
+    query = FactQuery(mock_facts_view)
+    
+    # Test dimension key normalization
+    assert query._normalize_dimension_key("us-gaap:ProductAxis") == "us-gaap_ProductAxis"
+    assert query._normalize_dimension_key("us-gaap_ProductAxis") == "us-gaap_ProductAxis"
+    assert query._normalize_dimension_key("ProductAxis") == "ProductAxis"
+    
+    # Test dimension value normalization  
+    assert query._normalize_dimension_value("us-gaap_ServiceMember") == "us-gaap:ServiceMember"
+    assert query._normalize_dimension_value("us-gaap:ServiceMember") == "us-gaap:ServiceMember"
+    assert query._normalize_dimension_value("ServiceMember") == "ServiceMember"
+    
+    # Test dimension key matching
+    assert query._dimension_key_matches("dim_us-gaap_ProductAxis", "us-gaap:ProductAxis")
+    assert query._dimension_key_matches("dim_us-gaap_ProductAxis", "us-gaap_ProductAxis") 
+    assert query._dimension_key_matches("dim_us-gaap_ProductAxis", "ProductAxis")
+    assert not query._dimension_key_matches("dim_us-gaap_ProductAxis", "ServiceAxis")
+    
+    # Test dimension value matching
+    assert query._dimension_value_matches("us-gaap:ServiceMember", "us-gaap_ServiceMember")
+    assert query._dimension_value_matches("us-gaap:ServiceMember", "us-gaap:ServiceMember")
+    assert query._dimension_value_matches("us-gaap:ServiceMember", "ServiceMember")
+    assert not query._dimension_value_matches("us-gaap:ServiceMember", "ProductMember")
+    
+    print("✅ All dimension normalization tests passed!")

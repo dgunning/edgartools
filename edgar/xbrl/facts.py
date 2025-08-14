@@ -244,23 +244,146 @@ class FactQuery:
 
     def by_dimension(self, dimension: Optional[str], value: Optional[str] = None) -> FactQuery:
         """
-        Filter facts by dimension.
+        Filter facts by dimension with flexible matching.
+        
+        This method provides intelligent matching for dimension names and values, handling
+        common XBRL formatting variations including:
+        - Namespace prefixes (us-gaap:, srt:, etc.)
+        - Underscore vs colon separators  
+        - Partial dimension names
         
         Args:
-            dimension: Dimension name, or None to filter for facts with no dimensions
-            value: Optional dimension value to filter by
+            dimension: Dimension name (supports multiple formats), or None to filter for facts with no dimensions
+            value: Optional dimension value to filter by (supports multiple formats)
             
         Returns:
             Self for method chaining
+            
+        Examples:
+            # These are all equivalent:
+            .by_dimension("srt_ProductOrServiceAxis", "us-gaap:ServiceMember")
+            .by_dimension("srt:ProductOrServiceAxis", "us-gaap_ServiceMember") 
+            .by_dimension("ProductOrServiceAxis", "ServiceMember")
         """
         if dimension is None:
             # Filter for facts with no dimensions
             self._filters.append(lambda f: not any(key.startswith('dim_') for key in f.keys()))
-        elif value:
-            self._filters.append(lambda f: f'dim_{dimension}' in f and f[f'dim_{dimension}'] == value)
+            return self
+        
+        # Normalize the input dimension to match stored format
+        normalized_dim = self._normalize_dimension_key(dimension)
+        
+        if value is not None:
+            # Normalize the value as well
+            normalized_value = self._normalize_dimension_value(value)
+            
+            def dimension_filter_with_value(f):
+                # Try exact match first
+                if f'dim_{normalized_dim}' in f and f[f'dim_{normalized_dim}'] == normalized_value:
+                    return True
+                
+                # Try flexible matching for dimensions
+                for dim_key, dim_value in f.items():
+                    if not dim_key.startswith('dim_'):
+                        continue
+                    
+                    # Check if this dimension key matches (flexible)
+                    if self._dimension_key_matches(dim_key, dimension):
+                        # Check if the value matches (flexible)
+                        if self._dimension_value_matches(dim_value, value):
+                            return True
+                return False
+            
+            self._filters.append(dimension_filter_with_value)
         else:
-            self._filters.append(lambda f: f'dim_{dimension}' in f)
+            # Filter for facts that have this dimension (any value)
+            def dimension_filter_exists(f):
+                # Try exact match first
+                if f'dim_{normalized_dim}' in f:
+                    return True
+                
+                # Try flexible matching
+                for dim_key in f.keys():
+                    if dim_key.startswith('dim_') and self._dimension_key_matches(dim_key, dimension):
+                        return True
+                return False
+            
+            self._filters.append(dimension_filter_exists)
+        
         return self
+    
+    def _normalize_dimension_key(self, dimension: str) -> str:
+        """Normalize dimension key to the format used internally (underscores)."""
+        # Replace colons with underscores (us-gaap:Axis -> us-gaap_Axis)
+        return dimension.replace(':', '_')
+    
+    def _normalize_dimension_value(self, value: str) -> str:
+        """Normalize dimension value to the format used internally."""
+        # Replace underscores with colons for values (us-gaap_Member -> us-gaap:Member)
+        return value.replace('_', ':')
+    
+    def _dimension_key_matches(self, stored_key: str, query_key: str) -> bool:
+        """
+        Check if a stored dimension key matches a query key with flexible matching.
+        
+        Args:
+            stored_key: The dimension key as stored (e.g., 'dim_us-gaap_ProductAxis')
+            query_key: The dimension key from the query (e.g., 'ProductAxis' or 'us-gaap:ProductAxis')
+        
+        Returns:
+            True if the keys match
+        """
+        # Remove 'dim_' prefix from stored key
+        stored_clean = stored_key[4:] if stored_key.startswith('dim_') else stored_key
+        
+        # Normalize both keys
+        stored_normalized = stored_clean.replace(':', '_').replace('-', '_')
+        query_normalized = query_key.replace(':', '_').replace('-', '_')
+        
+        # Try exact match
+        if stored_normalized == query_normalized:
+            return True
+        
+        # Try partial match (query might be just the local name without namespace)
+        if '_' in stored_normalized:
+            # Extract local name (part after last underscore)
+            stored_local = stored_normalized.split('_')[-1]
+            query_local = query_normalized.split('_')[-1]
+            if stored_local == query_local:
+                return True
+        
+        return False
+    
+    def _dimension_value_matches(self, stored_value: str, query_value: str) -> bool:
+        """
+        Check if a stored dimension value matches a query value with flexible matching.
+        
+        Args:
+            stored_value: The dimension value as stored (e.g., 'us-gaap:ServiceMember')
+            query_value: The dimension value from query (e.g., 'ServiceMember' or 'us-gaap_ServiceMember')
+        
+        Returns:
+            True if the values match
+        """
+        if not stored_value or not query_value:
+            return stored_value == query_value
+        
+        # Normalize both values (handle colon/underscore variations)
+        stored_normalized = stored_value.replace('_', ':').replace('-', '_')
+        query_normalized = query_value.replace('_', ':').replace('-', '_')
+        
+        # Try exact match
+        if stored_normalized == query_normalized:
+            return True
+        
+        # Try partial match (query might be just the local name without namespace)
+        if ':' in stored_normalized:
+            stored_local = stored_normalized.split(':')[-1]
+            query_local = query_normalized.split(':')[-1] if ':' in query_normalized else query_normalized
+            if stored_local == query_local:
+                return True
+        
+        return False
 
     def by_statement_type(self, statement_type: str) -> FactQuery:
         """
