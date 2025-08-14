@@ -56,23 +56,6 @@ def _empty_filing_index():
         pa.array([], type=pa.timestamp('s')),
     ], schema=schema)
 
-@lru_cache()
-def get_current_filings(form: str = '',
-                        owner: str = 'include',
-                        page_size: int = 40):
-    """
-    Get the current filings from the SEC
-    :return: The current filings from the SEC
-    """
-    owner = owner if owner in ['include', 'exclude', 'only'] else 'include'
-    page_size = page_size if page_size in [10, 20, 40, 80, 100] else 100
-    start = 0
-
-    entries = get_current_entries_on_page(count=page_size, start=start, form=form, owner=owner)
-    if not entries:
-        return CurrentFilings(filing_index=_empty_filing_index(), owner=owner, form=form, page_size=page_size)
-    return CurrentFilings(filing_index=pa.Table.from_pylist(entries), owner=owner, form=form, page_size=page_size)
-
 def parse_title(title: str):
     """
     Given the title in this example
