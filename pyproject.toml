@@ -139,11 +139,38 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
+
 [tool.ruff]
 line-length = 150
+exclude = [
+  ".git",
+  "__pycache__",
+  "build",
+  "dist",
+  "docs/source/conf.py",
+  "tests",
+]
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "S", "B", "G", "N", "I001", "T", "PD", "C90"]
+ignore = [
+  "W291",
+  "E501",
+  "S608",
+  "PD901",
+  "C901",
+  "S101"
+]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+    "pytest-retry>=1.7.0",
+]
 
 [tool.pytest.ini_options]
 env = [
