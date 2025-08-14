@@ -15,20 +15,16 @@ Key features:
 All functions return a standardized DataFrame with columns: ['cik', 'ticker', 'name', 'exchange']
 """
 
-import logging
-import random
-from functools import lru_cache
-from typing import Union, List, Optional, Dict, Any, Callable
 from enum import Enum
+from functools import lru_cache
+from typing import Union, List, Optional, Callable
 
 import pandas as pd
 
 from edgar.core import log
 from edgar.reference.tickers import (
-    get_company_ticker_name_exchange, 
-    get_companies_by_exchange,
-    popular_us_stocks,
-    Exchange
+    get_company_ticker_name_exchange,
+    popular_us_stocks
 )
 
 __all__ = [

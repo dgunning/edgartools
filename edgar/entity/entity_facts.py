@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Iterator, Any
 import httpx
 import orjson as json
 import pandas as pd
+from pandas.core.interchange.dataframe_protocol import DataFrame
 
 from edgar.core import log
 from edgar.entity.models import FinancialFact
@@ -25,6 +26,8 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+from typing import Union
+from edgar.entity.enhanced_statement import MultiPeriodStatement
 
 
 class NoCompanyFactsFound(Exception):
@@ -606,7 +609,7 @@ class EntityFacts:
 
     # Financial statement helpers
     def income_statement(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                         annual: bool = True, concise_format: bool = False):
+                         annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
         """
         Get income statement facts for recent periods.
         
@@ -655,7 +658,7 @@ class EntityFacts:
         return enhanced_stmt
 
     def balance_sheet(self, periods: int = 4, as_of: Optional[date] = None, as_dataframe: bool = False,
-                      annual: bool = True, concise_format: bool = False):
+                      annual: bool = True, concise_format: bool = False) -> Union[pd.DataFrame, MultiPeriodStatement]:
         """
         Get balance sheet facts for recent periods or as of a specific date.
         
@@ -772,7 +775,7 @@ class EntityFacts:
             return result
 
     def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                  annual: bool = True, concise_format: bool = False):
+                  annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
         """
         Get cash flow statement facts.
         
