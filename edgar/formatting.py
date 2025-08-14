@@ -212,15 +212,14 @@ def accepted_time_text(accepted_datetime) -> Text:
         - Hour in bright color (key differentiator)
         - Minutes and seconds with emphasis
     """
-    from datetime import datetime
-    
+
     if not accepted_datetime:
         return Text("N/A", style="dim")
     
     # Convert to datetime if needed
-    if not isinstance(accepted_datetime, datetime):
+    if not isinstance(accepted_datetime, datetime.datetime):
         try:
-            accepted_datetime = datetime.fromisoformat(str(accepted_datetime))
+            accepted_datetime = datetime.datetime.fromisoformat(str(accepted_datetime))
         except:
             return Text(str(accepted_datetime))
     

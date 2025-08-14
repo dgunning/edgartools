@@ -1115,13 +1115,11 @@ class FundReport:
                  header: Header,
                  general_info: GeneralInfo,
                  fund_info: FundInfo,
-                 investments: List[InvestmentOrSecurity],
-                 series_and_contracts: Optional['FundSeriesAndContracts'] = None):
+                 investments: List[InvestmentOrSecurity]):
         self.header = header
         self.general_info: GeneralInfo = general_info
         self.fund_info: FundInfo = fund_info
         self.investments: List[InvestmentOrSecurity] = investments
-        self.series_and_contracts: Optional['FundSeriesAndContracts'] = series_and_contracts
         self.fund_company = FundCompany(cik_or_identifier=self.general_info.cik, fund_name=self.general_info.name)
 
     def __str__(self):

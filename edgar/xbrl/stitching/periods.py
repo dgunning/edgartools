@@ -9,11 +9,10 @@ Refactored to use a clean class-based architecture for better maintainability,
 testability, and extensibility.
 """
 
-from collections import defaultdict
+import logging
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Dict, List, Optional, Tuple
-import logging
 
 from edgar.xbrl.core import format_date, parse_date
 from edgar.xbrl.xbrl import XBRL

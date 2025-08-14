@@ -7,7 +7,7 @@ This module provides functions for handling periods in XBRL statements, includin
 - Handling fiscal year and quarter information
 """
 
-from datetime import datetime, date
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 # Configuration for different statement types

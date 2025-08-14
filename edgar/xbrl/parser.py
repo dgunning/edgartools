@@ -234,7 +234,6 @@ class XBRLParser:
                     continue
                 
                 # Extract element properties
-                name = element.get('name', '')
                 data_type = element.get('type', '')
                 
                 # Check for balance and period type in child annotations
