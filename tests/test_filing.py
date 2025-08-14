@@ -15,7 +15,7 @@ from rich import print
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachment, \
-    filing_date_to_year_quarters, get_filing_by_accession
+    filing_date_to_year_quarters, get_filing_by_accession, fetch_daily_filing_index
 from edgar.company_reports import TenK
 from edgar.core import default_page_size
 from edgar.entity import Company
@@ -38,6 +38,10 @@ def filings_2021_q1():
 def filings_2021_q1_xbrl():
     return get_filings(2021, 1, index="xbrl")
 
+
+def test_fetch_daily_filing_index():
+    index_data = fetch_daily_filing_index('2025-08-07')
+    assert index_data
 
 def test_read_fixed_width_index_for_daily_file():
     index_text = Path('data/index_files/form.20200318.idx').read_text()

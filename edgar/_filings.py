@@ -272,7 +272,9 @@ def read_fixed_width_index(index_text: str,
     )
 
 
-def read_index_file(index_text: str, form_column: int = FORM_INDEX_FORM_COLUMN) -> pa.Table:
+def read_index_file(index_text: str,
+                    form_column: int = FORM_INDEX_FORM_COLUMN,
+                    filing_date_format:str="%Y-%m-%d") -> pa.Table:
     """
     Read the index text using multiple spaces as delimiter
     """
@@ -303,7 +305,7 @@ def read_index_file(index_text: str, form_column: int = FORM_INDEX_FORM_COLUMN) 
     ciks = pa.array([int(row[-3]) for row in rows], type=pa.int32())
 
     # Dates are always second-to-last field
-    dates = pc.strptime(pa.array([row[-2] for row in rows]), '%Y-%m-%d', 'us')
+    dates = pc.strptime(pa.array([row[-2] for row in rows]), filing_date_format, 'us')
     dates = pc.cast(dates, pa.date32())
 
     # Accession numbers are in the file path
@@ -375,12 +377,13 @@ def fetch_daily_filing_index(date: str,
     year, month, day = date.split("-")
     quarter = (int(month) - 1) // 3 + 1
     url = daily_index_url.format(year, quarter, index, date.replace("-", ""))
-    index_table = fetch_filing_index_at_url(url, index)
+    index_table = fetch_filing_index_at_url(url, index, filing_date_format='%Y%m%d')
     return index_table
 
 
 def fetch_filing_index_at_url(url: str,
-                              index: str) -> Optional[pa.Table]:
+                              index: str,
+                              filing_date_format:str='%Y-%m-%d') -> Optional[pa.Table]:
     index_text = download_text(url=url)
     assert index_text is not None
     if index == "xbrl":
@@ -388,7 +391,7 @@ def fetch_filing_index_at_url(url: str,
     else:
         # Read as a fixed width index file
         form_column = FORM_INDEX_FORM_COLUMN if index == "form" else COMPANY_INDEX_FORM_COLUMN
-        index_table: pa.Table = read_index_file(index_text, form_column=form_column)
+        index_table: pa.Table = read_index_file(index_text, form_column=form_column, filing_date_format=filing_date_format)
     return index_table
 
 
