@@ -17,16 +17,16 @@ def load_entity_facts(cik: str) -> EntityFacts:
     Returns:
         EntityFacts: The parsed entity facts
     """
-    c = Company("TSLA")
-    company_facts_json = load_company_facts_from_local(c.cik)
+    for ticker in ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NFLX", "NVDA", "BRK.A", "V"]:
+        print(f"Loading entity facts for {ticker}...")
+        c = Company(ticker)
+        company_facts_json = load_company_facts_from_local(c.cik)
 
-    entity_facts = EntityFactsParser.parse_company_facts(company_facts_json)
-    print(entity_facts)
-    print(entity_facts.income_statement())
-    print(entity_facts.dei_facts())
-    fact:FinancialFact = entity_facts._facts[-1]
-    fact_query:FactQuery = entity_facts.query().by_concept("GrossProfit")
-    print(fact_query.to_dataframe('concept', 'label',  'period_start', 'period_end', 'value','fiscal_year', 'fiscal_period', 'filing_date',))
+        entity_facts = EntityFactsParser.parse_company_facts(company_facts_json)
+        print(f"Entity facts for {ticker} loaded successfully.")
+        print(entity_facts.balance_sheet())
+        print(entity_facts.cash_flow())
+        print(entity_facts.income_statement())
 
 
 

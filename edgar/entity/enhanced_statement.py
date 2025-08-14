@@ -139,35 +139,13 @@ class MultiPeriodStatement:
         # Add all items
         for item in self.items:
             add_item_to_table(item)
-        
-        # Metadata
-        metadata_text = []
-        if self.canonical_coverage > 0:
-            coverage_pct = self.canonical_coverage * 100
-            coverage_style = "green" if coverage_pct >= 50 else "yellow" if coverage_pct >= 25 else "red"
-            metadata_text.append(
-                Text.assemble(
-                    "Canonical Coverage: ",
-                    (f"{coverage_pct:.1f}%", coverage_style)
-                )
-            )
-        
-        metadata_text.append(Text(f"Periods: {len(self.periods)}", style="dim"))
+
         
         # Combine content
         content_parts = [
             Padding("", (1, 0, 0, 0)),
             stmt_table
         ]
-        
-        if metadata_text:
-            metadata_panel = Panel(
-                Group(*metadata_text),
-                title="📊 Metadata",
-                border_style="bright_black"
-            )
-            content_parts.append(Padding("", (1, 0)))
-            content_parts.append(metadata_panel)
         
         content = Group(*content_parts)
         
@@ -223,6 +201,557 @@ class MultiPeriodStatement:
             df = df.set_index('concept')
         
         return df
+    
+    def to_llm_context(self, 
+                       include_metadata: bool = True,
+                       include_hierarchy: bool = False,
+                       flatten_values: bool = True) -> Dict[str, Any]:
+        """
+        Generate structured context optimized for LLM consumption.
+        
+        This method creates a clean, structured representation of financial data
+        that LLMs can easily parse and reason about, avoiding complex hierarchies
+        and focusing on key-value pairs with clear semantics.
+        
+        Args:
+            include_metadata: Include metadata about data quality and coverage
+            include_hierarchy: Include parent-child relationships (default False for simplicity)
+            flatten_values: Flatten multi-period values into period-prefixed keys (default True)
+            
+        Returns:
+            Dictionary with structured financial data for LLM analysis
+            
+        Example Output:
+            {
+                "company": "Apple Inc.",
+                "statement_type": "income_statement",
+                "periods": ["FY 2024", "FY 2023"],
+                "currency": "USD",
+                "scale": "actual",
+                "data": {
+                    "revenue_fy2024": 391035000000,
+                    "revenue_fy2023": 383285000000,
+                    "net_income_fy2024": 93736000000,
+                    ...
+                },
+                "key_metrics": {
+                    "revenue_growth": 0.02,
+                    "profit_margin_fy2024": 0.24,
+                    ...
+                },
+                "metadata": {
+                    "total_concepts": 173,
+                    "coverage_ratio": 0.85,
+                    ...
+                }
+            }
+        """
+        from datetime import datetime
+        
+        context = {
+            "company": self.company_name or "Unknown",
+            "cik": self.cik or "Unknown",
+            "statement_type": self._get_statement_type_name(),
+            "periods": self.periods,
+            "currency": "USD",  # Default, could be enhanced
+            "scale": "actual",  # Values are in actual amounts
+            "generated_at": datetime.now().isoformat()
+        }
+        
+        # Prepare main data section
+        data = {}
+        hierarchical_data = [] if include_hierarchy else None
+        
+        def process_item(item: 'MultiPeriodItem', parent_path: str = ""):
+            """Process an item and its children."""
+            # Skip abstract items unless they have values
+            if item.is_abstract and not any(v is not None for v in item.values.values()):
+                # Still process children
+                for child in item.children:
+                    process_item(child, parent_path)
+                return
+            
+            # Create a clean concept key (lowercase, underscored)
+            concept_key = self._create_llm_key(item.concept)
+            
+            if flatten_values:
+                # Create period-specific keys
+                for period in self.periods:
+                    value = item.values.get(period)
+                    if value is not None:
+                        # Create period suffix
+                        period_key = period.lower().replace(' ', '_').replace('-', '_')
+                        full_key = f"{concept_key}_{period_key}"
+                        data[full_key] = value
+                        
+                        # Also store with label for better readability
+                        label_key = f"{self._create_llm_key(item.label)}_{period_key}"
+                        if label_key != full_key and label_key not in data:
+                            data[label_key] = value
+            else:
+                # Store as nested structure
+                if any(v is not None for v in item.values.values()):
+                    data[concept_key] = {
+                        "label": item.label,
+                        "values": {p: v for p, v in item.values.items() if v is not None},
+                        "is_total": item.is_total
+                    }
+            
+            # Add to hierarchical data if requested
+            if include_hierarchy and hierarchical_data is not None:
+                hierarchical_data.append({
+                    "concept": item.concept,
+                    "label": item.label,
+                    "parent": parent_path or None,
+                    "depth": item.depth,
+                    "is_total": item.is_total,
+                    "values": {p: v for p, v in item.values.items() if v is not None}
+                })
+            
+            # Process children
+            current_path = f"{parent_path}/{item.concept}" if parent_path else item.concept
+            for child in item.children:
+                process_item(child, current_path)
+        
+        # Process all top-level items
+        for item in self.items:
+            process_item(item)
+        
+        context["data"] = data
+        
+        if include_hierarchy and hierarchical_data:
+            context["hierarchy"] = hierarchical_data
+        
+        # Calculate key metrics and ratios
+        key_metrics = self._calculate_key_metrics(data)
+        if key_metrics:
+            context["key_metrics"] = key_metrics
+        
+        # Add metadata if requested
+        if include_metadata:
+            metadata = {
+                "total_concepts": len([i for i in self._flatten_items() if not i.is_abstract]),
+                "total_values": sum(1 for v in data.values() if v is not None),
+                "periods_count": len(self.periods),
+                "has_comparisons": len(self.periods) > 1,
+                "coverage_ratio": self.coverage if hasattr(self, 'coverage') else None
+            }
+            
+            # Add data quality indicators
+            quality_indicators = []
+            if metadata["total_concepts"] > 100:
+                quality_indicators.append("comprehensive")
+            elif metadata["total_concepts"] > 50:
+                quality_indicators.append("detailed")
+            else:
+                quality_indicators.append("basic")
+            
+            if metadata["has_comparisons"]:
+                quality_indicators.append("comparable")
+            
+            metadata["quality_indicators"] = quality_indicators
+            context["metadata"] = metadata
+        
+        return context
+    
+    def _get_statement_type_name(self) -> str:
+        """Get clean statement type name for LLM context."""
+        type_map = {
+            "IncomeStatement": "income_statement",
+            "BalanceSheet": "balance_sheet", 
+            "CashFlow": "cash_flow",
+            "CashFlowStatement": "cash_flow"
+        }
+        return type_map.get(self.statement_type, self.statement_type.lower())
+    
+    def _create_llm_key(self, text: str) -> str:
+        """Create a clean key from concept or label text."""
+        import re
+        # Remove special characters and convert to snake_case
+        text = re.sub(r'[^\w\s]', '', text)
+        text = re.sub(r'\s+', '_', text.strip())
+        return text.lower()
+    
+    def _flatten_items(self) -> List['MultiPeriodItem']:
+        """Flatten all items into a single list."""
+        result = []
+        
+        def collect(item: 'MultiPeriodItem'):
+            result.append(item)
+            for child in item.children:
+                collect(child)
+        
+        for item in self.items:
+            collect(item)
+        
+        return result
+    
+    def _calculate_key_metrics(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculate important financial metrics from the data."""
+        metrics = {}
+        
+        # Try to calculate based on statement type
+        if "income" in self.statement_type.lower():
+            metrics.update(self._calculate_income_metrics(data))
+        elif "balance" in self.statement_type.lower():
+            metrics.update(self._calculate_balance_metrics(data))
+        elif "cash" in self.statement_type.lower():
+            metrics.update(self._calculate_cashflow_metrics(data))
+        
+        return metrics
+    
+    def _calculate_income_metrics(self, data: Dict[str, Any]) -> Dict[str, float]:
+        """Calculate income statement metrics."""
+        metrics = {}
+        
+        # Find revenue and net income for each period
+        for period in self.periods:
+            period_key = period.lower().replace(' ', '_').replace('-', '_')
+            
+            # Find revenue
+            revenue_keys = [k for k in data.keys() if 'revenue' in k.lower() and period_key in k and 'total' in k.lower()]
+            if not revenue_keys:
+                revenue_keys = [k for k in data.keys() if 'revenue' in k.lower() and period_key in k]
+            
+            if revenue_keys:
+                revenue = data[revenue_keys[0]]
+                
+                # Find net income
+                income_keys = [k for k in data.keys() if 'net_income' in k.lower() and period_key in k]
+                if income_keys:
+                    net_income = data[income_keys[0]]
+                    # Calculate profit margin
+                    if revenue and revenue != 0:
+                        metrics[f"profit_margin_{period_key}"] = round(net_income / revenue, 4)
+                
+                # Find operating income
+                op_income_keys = [k for k in data.keys() if 'operating_income' in k.lower() and period_key in k]
+                if op_income_keys:
+                    op_income = data[op_income_keys[0]]
+                    if revenue and revenue != 0:
+                        metrics[f"operating_margin_{period_key}"] = round(op_income / revenue, 4)
+        
+        # Calculate growth rates if we have multiple periods
+        if len(self.periods) >= 2:
+            # Get the two most recent periods
+            recent_period = self.periods[0].lower().replace(' ', '_').replace('-', '_')
+            prior_period = self.periods[1].lower().replace(' ', '_').replace('-', '_')
+            
+            # Revenue growth
+            recent_rev_keys = [k for k in data.keys() if 'revenue' in k.lower() and recent_period in k and 'total' in k.lower()]
+            prior_rev_keys = [k for k in data.keys() if 'revenue' in k.lower() and prior_period in k and 'total' in k.lower()]
+            
+            if recent_rev_keys and prior_rev_keys:
+                recent_rev = data[recent_rev_keys[0]]
+                prior_rev = data[prior_rev_keys[0]]
+                if prior_rev and prior_rev != 0:
+                    metrics["revenue_growth_rate"] = round((recent_rev - prior_rev) / prior_rev, 4)
+        
+        return metrics
+    
+    def _calculate_balance_metrics(self, data: Dict[str, Any]) -> Dict[str, float]:
+        """Calculate balance sheet metrics."""
+        metrics = {}
+        
+        for period in self.periods:
+            period_key = period.lower().replace(' ', '_').replace('-', '_')
+            
+            # Find key balance sheet items
+            assets_keys = [k for k in data.keys() if 'total_assets' in k.lower() and period_key in k]
+            liabilities_keys = [k for k in data.keys() if 'total_liabilities' in k.lower() and period_key in k]
+            equity_keys = [k for k in data.keys() if 'stockholders_equity' in k.lower() and period_key in k]
+            
+            if assets_keys and liabilities_keys:
+                assets = data[assets_keys[0]]
+                liabilities = data[liabilities_keys[0]]
+                
+                # Debt to assets ratio
+                if assets and assets != 0:
+                    metrics[f"debt_to_assets_{period_key}"] = round(liabilities / assets, 4)
+                
+                # Equity ratio
+                if equity_keys:
+                    equity = data[equity_keys[0]]
+                    if assets and assets != 0:
+                        metrics[f"equity_ratio_{period_key}"] = round(equity / assets, 4)
+        
+        return metrics
+    
+    def _calculate_cashflow_metrics(self, data: Dict[str, Any]) -> Dict[str, float]:
+        """Calculate cash flow metrics."""
+        metrics = {}
+        
+        for period in self.periods:
+            period_key = period.lower().replace(' ', '_').replace('-', '_')
+            
+            # Find operating cash flow
+            ocf_keys = [k for k in data.keys() if 'operating_activities' in k.lower() and 'net_cash' in k.lower() and period_key in k]
+            if ocf_keys:
+                ocf = data[ocf_keys[0]]
+                
+                # Find capital expenditures
+                capex_keys = [k for k in data.keys() if 'capital_expenditure' in k.lower() and period_key in k]
+                if not capex_keys:
+                    capex_keys = [k for k in data.keys() if 'property_plant_equipment' in k.lower() and 'acquire' in k.lower() and period_key in k]
+                
+                if capex_keys:
+                    capex = abs(data[capex_keys[0]])  # Capex is usually negative
+                    # Calculate free cash flow
+                    metrics[f"free_cash_flow_{period_key}"] = ocf - capex
+        
+        return metrics
+    
+    def __iter__(self):
+        """
+        Iterate over all items in the statement (flat iteration).
+        
+        Yields items in display order (depth-first traversal).
+        
+        Example:
+            for item in statement:
+                print(f"{item.label}: {item.values}")
+        """
+        def traverse(item: 'MultiPeriodItem'):
+            yield item
+            for child in item.children:
+                yield from traverse(child)
+        
+        for item in self.items:
+            yield from traverse(item)
+    
+    def iter_hierarchy(self):
+        """
+        Iterate over items with hierarchy information.
+        
+        Yields tuples of (item, depth, parent) for each item.
+        
+        Example:
+            for item, depth, parent in statement.iter_hierarchy():
+                indent = "  " * depth
+                print(f"{indent}{item.label}")
+        """
+        def traverse(item: 'MultiPeriodItem', depth: int = 0, parent: Optional['MultiPeriodItem'] = None):
+            yield (item, depth, parent)
+            for child in item.children:
+                yield from traverse(child, depth + 1, item)
+        
+        for item in self.items:
+            yield from traverse(item)
+    
+    def iter_with_values(self):
+        """
+        Iterate over items that have actual values (skip abstract/empty items).
+        
+        Yields only items with at least one non-None value.
+        
+        Example:
+            for item in statement.iter_with_values():
+                for period in statement.periods:
+                    value = item.values.get(period)
+                    if value:
+                        print(f"{item.label} ({period}): ${value:,.0f}")
+        """
+        for item in self:
+            if any(v is not None for v in item.values.values()):
+                yield item
+    
+    def get_items_by_depth(self, max_depth: int = None) -> List['MultiPeriodItem']:
+        """
+        Get all items up to a specified depth level.
+        
+        Args:
+            max_depth: Maximum depth to include (None for all depths)
+            
+        Returns:
+            List of items up to the specified depth
+            
+        Example:
+            # Get only top-level and first-level items
+            top_items = statement.get_items_by_depth(1)
+        """
+        result = []
+        for item, depth, _ in self.iter_hierarchy():
+            if max_depth is None or depth <= max_depth:
+                result.append(item)
+        return result
+    
+    def find_item(self, concept: str = None, label: str = None) -> Optional['MultiPeriodItem']:
+        """
+        Find a specific item by concept name or label.
+        
+        Args:
+            concept: Concept name to search for (case-insensitive)
+            label: Label text to search for (case-insensitive)
+            
+        Returns:
+            First matching item or None if not found
+            
+        Example:
+            revenue = statement.find_item(label="Total Revenue")
+            if revenue:
+                print(revenue.values)
+        """
+        if not concept and not label:
+            return None
+        
+        for item in self:
+            if concept and item.concept.lower() == concept.lower():
+                return item
+            if label and item.label.lower() == label.lower():
+                return item
+        return None
+    
+    def to_dict(self, include_empty: bool = False) -> Dict[str, Any]:
+        """
+        Convert statement to a simple dictionary structure for JSON serialization.
+        
+        Args:
+            include_empty: Include items with no values
+            
+        Returns:
+            Dictionary representation suitable for web APIs
+            
+        Example:
+            data = statement.to_dict()
+            json.dumps(data)  # Ready for web API response
+        """
+        def item_to_dict(item: 'MultiPeriodItem') -> Dict[str, Any]:
+            # Skip items with no values unless requested
+            if not include_empty and not any(v is not None for v in item.values.values()):
+                return None
+            
+            result = {
+                'concept': item.concept,
+                'label': item.label,
+                'values': item.values,
+                'is_abstract': item.is_abstract,
+                'is_total': item.is_total,
+                'depth': item.depth,
+                'confidence': item.confidence
+            }
+            
+            # Add children if they exist
+            if item.children:
+                children = []
+                for child in item.children:
+                    child_dict = item_to_dict(child)
+                    if child_dict:
+                        children.append(child_dict)
+                if children:
+                    result['children'] = children
+            
+            return result
+        
+        items_data = []
+        for item in self.items:
+            item_dict = item_to_dict(item)
+            if item_dict:
+                items_data.append(item_dict)
+        
+        return {
+            'company': self.company_name,
+            'cik': self.cik,
+            'statement_type': self._get_statement_type_name(),
+            'periods': self.periods,
+            'items': items_data,
+            'metadata': {
+                'canonical_coverage': self.canonical_coverage,
+                'total_items': len(list(self.iter_with_values())),
+                'concise_format': self.concise_format
+            }
+        }
+    
+    def to_flat_list(self) -> List[Dict[str, Any]]:
+        """
+        Convert statement to a flat list of items for table rendering.
+        
+        Returns:
+            List of dictionaries, each representing one row
+            
+        Example:
+            rows = statement.to_flat_list()
+            # Perfect for rendering in HTML tables or data grids
+            for row in rows:
+                print(f"{row['label']}: {row['values']}")
+        """
+        result = []
+        
+        for item, depth, parent in self.iter_hierarchy():
+            # Skip empty abstract items
+            if item.is_abstract and not any(v is not None for v in item.values.values()):
+                continue
+            
+            row = {
+                'concept': item.concept,
+                'label': item.label,
+                'depth': depth,
+                'parent': parent.concept if parent else None,
+                'is_abstract': item.is_abstract,
+                'is_total': item.is_total,
+                'confidence': item.confidence
+            }
+            
+            # Add period values
+            for period in self.periods:
+                row[period] = item.values.get(period)
+                # Also add formatted version
+                row[f"{period}_formatted"] = item.get_display_value(period, self.concise_format)
+            
+            result.append(row)
+        
+        return result
+    
+    def get_period_comparison(self, period1: str, period2: str) -> List[Dict[str, Any]]:
+        """
+        Get comparison data between two periods.
+        
+        Args:
+            period1: First period to compare
+            period2: Second period to compare
+            
+        Returns:
+            List of items with values, changes, and percentages
+            
+        Example:
+            comparison = statement.get_period_comparison("FY 2024", "FY 2023")
+            for item in comparison:
+                if item['change_percent']:
+                    print(f"{item['label']}: {item['change_percent']:.1%} change")
+        """
+        if period1 not in self.periods or period2 not in self.periods:
+            raise ValueError(f"Periods must be in {self.periods}")
+        
+        result = []
+        
+        for item in self.iter_with_values():
+            val1 = item.values.get(period1)
+            val2 = item.values.get(period2)
+            
+            comparison = {
+                'concept': item.concept,
+                'label': item.label,
+                'is_total': item.is_total,
+                period1: val1,
+                period2: val2,
+                f"{period1}_formatted": item.get_display_value(period1, self.concise_format),
+                f"{period2}_formatted": item.get_display_value(period2, self.concise_format)
+            }
+            
+            # Calculate change if both values exist
+            if val1 is not None and val2 is not None and val2 != 0:
+                change = val1 - val2
+                change_percent = change / abs(val2)
+                comparison['change'] = change
+                comparison['change_percent'] = change_percent
+                comparison['change_formatted'] = f"${change:,.0f}" if abs(change) >= 1 else f"{change:.2f}"
+            else:
+                comparison['change'] = None
+                comparison['change_percent'] = None
+                comparison['change_formatted'] = None
+            
+            result.append(comparison)
+        
+        return result
     
     def __repr__(self) -> str:
         """String representation using rich formatting."""
