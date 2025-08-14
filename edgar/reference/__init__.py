@@ -1,6 +1,24 @@
 
 from edgar.reference.forms import describe_form
 from edgar.reference.tickers import get_ticker_from_cusip, get_icon_from_ticker, cusip_ticker_mapping
+from edgar.reference.company_subsets import (
+    CompanySubset,
+    get_all_companies,
+    get_companies_by_exchanges, 
+    get_popular_companies,
+    get_random_sample,
+    get_stratified_sample,
+    get_top_companies_by_metric,
+    filter_companies,
+    exclude_companies,
+    combine_company_sets,
+    intersect_company_sets,
+    get_faang_companies,
+    get_tech_giants,
+    get_dow_jones_sample,
+    MarketCapTier,
+    PopularityTier
+)
 
 
 # A dict of state abbreviations and their full names
