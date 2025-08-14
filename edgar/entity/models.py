@@ -68,6 +68,14 @@ class FinancialFact:
     statement_type: Optional[str] = None
     line_item_sequence: Optional[int] = None
     
+    # Structural metadata (from learned mappings)
+    depth: Optional[int] = None            # Hierarchy depth in statement
+    parent_concept: Optional[str] = None   # Parent concept in hierarchy
+    section: Optional[str] = None          # Statement section (e.g., "Current Assets")
+    is_abstract: bool = False              # Abstract/header item
+    is_total: bool = False                 # Total/sum item
+    presentation_order: Optional[float] = None  # Order in presentation
+    
     def to_llm_context(self) -> Dict[str, Any]:
         """
         Generate rich context for LLM consumption.

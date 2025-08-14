@@ -11,6 +11,7 @@ import logging
 
 from edgar.entity.models import FinancialFact, DataQuality
 from edgar.entity.entity_facts import EntityFacts
+from edgar.entity.mappings_loader import load_learned_mappings
 
 log = logging.getLogger(__name__)
 
@@ -171,6 +172,9 @@ class EntityFactsParser:
             
         # Get semantic tags
         semantic_tags = cls._get_semantic_tags(concept)
+        
+        # Get structural metadata from learned mappings
+        structural_info = cls._get_structural_info(concept)
             
         # Determine data quality
         data_quality = cls._assess_data_quality(fact_data, fiscal_period)
@@ -207,7 +211,14 @@ class EntityFactsParser:
                 confidence_score=0.9 if data_quality == DataQuality.HIGH else 0.7,
                 semantic_tags=semantic_tags,
                 business_context=business_context,
-                statement_type=statement_type
+                statement_type=statement_type,
+                # Add structural metadata
+                depth=structural_info.get('depth'),
+                parent_concept=structural_info.get('parent'),
+                section=structural_info.get('section'),
+                is_abstract=structural_info.get('is_abstract', False),
+                is_total=structural_info.get('is_total', False),
+                presentation_order=structural_info.get('avg_depth')
             )
             
 
@@ -245,12 +256,32 @@ class EntityFactsParser:
     
     @classmethod
     def _determine_statement_type(cls, concept: str) -> Optional[str]:
-        """Determine which financial statement a concept belongs to"""
+        """
+        Determine which financial statement a concept belongs to.
+        
+        First checks static mappings, then falls back to learned mappings
+        with confidence threshold.
+        """
         # Remove namespace if present
         if ':' in concept:
             concept = concept.split(':')[-1]
         
-        return cls.STATEMENT_MAPPING.get(concept)
+        # Check static mappings first (highest confidence)
+        if concept in cls.STATEMENT_MAPPING:
+            return cls.STATEMENT_MAPPING[concept]
+        
+        # Check learned mappings
+        try:
+            learned_mappings = load_learned_mappings()
+            if concept in learned_mappings:
+                mapping = learned_mappings[concept]
+                # Only use high-confidence learned mappings
+                if mapping.get('confidence', 0) >= 0.5:  # 50% threshold
+                    return mapping['statement_type']
+        except Exception as e:
+            log.debug(f"Error loading learned mappings: {e}")
+        
+        return None
     
     @classmethod
     def _get_semantic_tags(cls, concept: str) -> List[str]:
@@ -260,6 +291,33 @@ class EntityFactsParser:
             concept = concept.split(':')[-1]
         
         return cls.SEMANTIC_TAGS.get(concept, [])
+    
+    @classmethod
+    def _get_structural_info(cls, concept: str) -> Dict[str, Any]:
+        """
+        Get structural metadata for a concept from learned mappings.
+        
+        Returns dict with depth, parent, section, is_abstract, is_total
+        """
+        # Remove namespace if present
+        if ':' in concept:
+            concept = concept.split(':')[-1]
+        
+        try:
+            learned_mappings = load_learned_mappings()
+            if concept in learned_mappings:
+                mapping = learned_mappings[concept]
+                return {
+                    'depth': int(mapping.get('avg_depth', 0)) if mapping.get('avg_depth') else None,
+                    'parent': mapping.get('parent'),
+                    'section': mapping.get('section'),
+                    'is_abstract': mapping.get('is_abstract', False),
+                    'is_total': mapping.get('is_total', False)
+                }
+        except Exception as e:
+            log.debug(f"Error getting structural info: {e}")
+        
+        return {}
     
     @staticmethod
     def _assess_data_quality(fact_data: Dict[str, Any], fiscal_period: str) -> DataQuality:

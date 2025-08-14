@@ -7,6 +7,7 @@ financial facts with AI-ready features.
 
 from datetime import date, datetime
 from typing import List, Dict, Optional, Union, Callable, Any, TYPE_CHECKING
+from collections import defaultdict
 import pandas as pd
 import re
 from rich.box import SIMPLE_HEAVY, SIMPLE
@@ -412,6 +413,95 @@ class FactQuery:
         )
         return self
     
+    # Enhanced filtering methods for structural metadata
+    def by_section(self, section: str) -> 'FactQuery':
+        """
+        Filter by statement section (e.g., 'Current Assets', 'Operating Activities').
+        
+        Args:
+            section: Section name to filter by
+            
+        Returns:
+            Self for method chaining
+        """
+        section_lower = section.lower()
+        self._filters.append(
+            lambda f: f.section and section_lower in f.section.lower()
+        )
+        return self
+    
+    def by_depth(self, max_depth: int) -> 'FactQuery':
+        """
+        Filter by hierarchy depth in statement.
+        
+        Args:
+            max_depth: Maximum depth to include
+            
+        Returns:
+            Self for method chaining
+        """
+        self._filters.append(
+            lambda f: f.depth is not None and f.depth <= max_depth
+        )
+        return self
+    
+    def totals_only(self) -> 'FactQuery':
+        """
+        Get only total/sum concepts.
+        
+        Returns:
+            Self for method chaining
+        """
+        self._filters.append(lambda f: f.is_total)
+        return self
+    
+    def concrete_only(self) -> 'FactQuery':
+        """
+        Exclude abstract/header concepts.
+        
+        Returns:
+            Self for method chaining
+        """
+        self._filters.append(lambda f: not f.is_abstract)
+        return self
+    
+    def abstracts_only(self) -> 'FactQuery':
+        """
+        Get only abstract/header concepts.
+        
+        Returns:
+            Self for method chaining
+        """
+        self._filters.append(lambda f: f.is_abstract)
+        return self
+    
+    def with_parent(self, parent_concept: str) -> 'FactQuery':
+        """
+        Filter by parent concept in hierarchy.
+        
+        Args:
+            parent_concept: Parent concept name
+            
+        Returns:
+            Self for method chaining
+        """
+        self._filters.append(
+            lambda f: f.parent_concept and parent_concept in f.parent_concept
+        )
+        return self
+    
+    def root_items_only(self) -> 'FactQuery':
+        """
+        Get only root level items (no parent).
+        
+        Returns:
+            Self for method chaining
+        """
+        self._filters.append(
+            lambda f: f.parent_concept is None or f.depth == 0
+        )
+        return self
+    
     # Sorting and limiting
     def sort_by(self, field: str, ascending: bool = True) -> 'FactQuery':
         """
@@ -472,6 +562,16 @@ class FactQuery:
             results = results[:self._limit]
         
         return results
+    
+    def with_hierarchy(self) -> 'HierarchicalFactsResult':
+        """
+        Return facts organized hierarchically based on parent-child relationships.
+        
+        Returns:
+            HierarchicalFactsResult with tree structure
+        """
+        facts = self.execute()
+        return HierarchicalFactsResult(facts)
     
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
@@ -921,3 +1021,134 @@ class FactQuery:
         """String representation using rich formatting."""
         from edgar.richtools import repr_rich
         return repr_rich(self.__rich__())
+
+
+class HierarchicalFactsResult:
+    """
+    Results organized in hierarchical tree structure.
+    
+    This class organizes facts based on parent-child relationships
+    to provide a tree view of the data.
+    """
+    
+    def __init__(self, facts: List[FinancialFact]):
+        """
+        Initialize with flat list of facts.
+        
+        Args:
+            facts: List of financial facts to organize
+        """
+        self.facts = facts
+        self._build_hierarchy()
+    
+    def _build_hierarchy(self):
+        """Build hierarchical structure from facts."""
+        # Create lookup maps
+        self.fact_map = {}
+        self.children_map = defaultdict(list)
+        self.roots = []
+        
+        # First pass: create map and identify relationships
+        for fact in self.facts:
+            concept = fact.concept.split(':')[-1] if ':' in fact.concept else fact.concept
+            self.fact_map[concept] = fact
+            
+            if fact.parent_concept:
+                self.children_map[fact.parent_concept].append(concept)
+            elif fact.depth == 0 or fact.depth is None:
+                self.roots.append(concept)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to nested dictionary structure."""
+        def build_node(concept: str) -> Dict[str, Any]:
+            fact = self.fact_map.get(concept)
+            if not fact:
+                return {'concept': concept, 'error': 'Fact not found'}
+            
+            node = {
+                'concept': concept,
+                'label': fact.label,
+                'value': fact.numeric_value,
+                'is_abstract': fact.is_abstract,
+                'is_total': fact.is_total,
+                'section': fact.section,
+                'depth': fact.depth
+            }
+            
+            # Add children
+            children = self.children_map.get(concept, [])
+            if children:
+                node['children'] = [build_node(child) for child in children]
+            
+            return node
+        
+        return {
+            'roots': [build_node(root) for root in self.roots],
+            'total_facts': len(self.facts)
+        }
+    
+    def to_dataframe(self, include_hierarchy: bool = True) -> pd.DataFrame:
+        """
+        Convert to DataFrame with optional hierarchy indicators.
+        
+        Args:
+            include_hierarchy: Whether to include hierarchy columns
+            
+        Returns:
+            DataFrame with facts and hierarchy info
+        """
+        records = []
+        
+        def process_node(concept: str, level: int = 0, parent: str = None):
+            fact = self.fact_map.get(concept)
+            if not fact:
+                return
+            
+            record = {
+                'concept': concept,
+                'label': fact.label,
+                'value': fact.numeric_value,
+                'unit': fact.unit,
+                'fiscal_year': fact.fiscal_year,
+                'fiscal_period': fact.fiscal_period
+            }
+            
+            if include_hierarchy:
+                record['level'] = level
+                record['parent'] = parent
+                record['is_abstract'] = fact.is_abstract
+                record['is_total'] = fact.is_total
+                record['section'] = fact.section
+            
+            records.append(record)
+            
+            # Process children
+            for child in self.children_map.get(concept, []):
+                process_node(child, level + 1, concept)
+        
+        # Process all roots
+        for root in self.roots:
+            process_node(root)
+        
+        # Add orphaned facts (not in hierarchy)
+        processed = set(r['concept'] for r in records)
+        for fact in self.facts:
+            concept = fact.concept.split(':')[-1] if ':' in fact.concept else fact.concept
+            if concept not in processed:
+                record = {
+                    'concept': concept,
+                    'label': fact.label,
+                    'value': fact.numeric_value,
+                    'unit': fact.unit,
+                    'fiscal_year': fact.fiscal_year,
+                    'fiscal_period': fact.fiscal_period
+                }
+                if include_hierarchy:
+                    record['level'] = 0
+                    record['parent'] = None
+                    record['is_abstract'] = fact.is_abstract
+                    record['is_total'] = fact.is_total
+                    record['section'] = fact.section
+                records.append(record)
+        
+        return pd.DataFrame(records) if records else pd.DataFrame()

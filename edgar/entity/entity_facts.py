@@ -151,6 +151,15 @@ class EntityFacts:
     def __iter__(self) -> Iterator[FinancialFact]:
         """Iterate over all facts"""
         return iter(self._facts)
+    
+    def get_all_facts(self) -> List[FinancialFact]:
+        """
+        Get all facts for this entity.
+        
+        Returns:
+            List of all FinancialFact objects
+        """
+        return self._facts
 
     def __rich__(self):
         """Creates a rich representation providing an at-a-glance view of company facts."""
@@ -597,70 +606,100 @@ class EntityFacts:
 
     # Financial statement helpers
     def income_statement(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                         annual: bool = True):
+                         annual: bool = True, concise_format: bool = False):
         """
         Get income statement facts for recent periods.
         
         Args:
             periods: Number of periods to retrieve
             period_length: Optional filter for period length in months (3=quarterly, 12=annual)
-            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement wrapper
+            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: If True, prefer annual (FY) periods over interim periods
+            concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
             
         Returns:
-            FinancialStatement or DataFrame with income statement data pivoted by period
+            MultiPeriodStatement or DataFrame with income statement data
             
         Example:
-            # Get formatted income statement with annual periods preferred
+            # Get hierarchical multi-period statement (default)
             stmt = facts.income_statement(periods=4, annual=True)
+            print(stmt)  # Rich display with hierarchy
             
-            # Get quarterly periods only
-            stmt = facts.income_statement(periods=4, period_length=3, annual=False)
+            # Get with concise format
+            stmt = facts.income_statement(periods=4, concise_format=True)
             
-            # Get raw DataFrame for calculations
+            # Get DataFrame for analysis
             df = facts.income_statement(periods=4, as_dataframe=True)
+            
+            # Convert statement to DataFrame later
+            stmt = facts.income_statement(periods=4)
+            df = stmt.to_dataframe()
         """
-        from edgar.entity.query import FactQuery
-        query = FactQuery(self._facts, self._fact_index)
-
-        query = query.by_statement_type('IncomeStatement')
-
-        if period_length:
-            query = query.by_period_length(period_length)
-
-        # Pass entity information and return preference (flip the boolean)
-        result = query.latest_periods(periods, annual=annual).pivot_by_period(return_statement=not as_dataframe)
-
-        # If returning a Statement object, set the entity name
-        if not as_dataframe and hasattr(result, 'entity_name'):
-            result.entity_name = self.name
-
-        return result
+        # Always build the enhanced multi-period statement
+        from edgar.entity.enhanced_statement import EnhancedStatementBuilder
+        builder = EnhancedStatementBuilder()
+        enhanced_stmt = builder.build_multi_period_statement(
+            facts=self._facts,
+            statement_type='IncomeStatement',
+            periods=periods,
+            annual=annual
+        )
+        enhanced_stmt.company_name = self.name
+        enhanced_stmt.cik = str(self.cik)
+        enhanced_stmt.concise_format = concise_format
+        
+        # Return DataFrame if requested
+        if as_dataframe:
+            return enhanced_stmt.to_dataframe()
+        
+        return enhanced_stmt
 
     def balance_sheet(self, periods: int = 4, as_of: Optional[date] = None, as_dataframe: bool = False,
-                      annual: bool = True):
+                      annual: bool = True, concise_format: bool = False):
         """
         Get balance sheet facts for recent periods or as of a specific date.
         
         Args:
             periods: Number of periods to retrieve (ignored if as_of is specified)
             as_of: Optional date for point-in-time view; if specified, gets single snapshot
-            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement wrapper
+            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: If True, prefer annual (FY) periods over interim periods
+            concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
             
         Returns:
-            FinancialStatement or DataFrame with balance sheet data
+            MultiPeriodStatement or DataFrame with balance sheet data
             
         Example:
-            # Get formatted balance sheet for recent periods
+            # Get hierarchical multi-period statement (default)
             stmt = facts.balance_sheet(periods=4, annual=True)
+            print(stmt)  # Rich display with hierarchy
             
-            # Get balance sheet as of specific date
-            stmt = facts.balance_sheet(as_of=date(2024, 12, 31))
-            
-            # Get raw DataFrame for calculations
+            # Get DataFrame for analysis
             df = facts.balance_sheet(periods=4, as_dataframe=True)
+            
+            # Convert statement to DataFrame later
+            stmt = facts.balance_sheet(periods=4)
+            df = stmt.to_dataframe()
         """
+        if not as_of:
+            # Always build the enhanced multi-period statement for regular periods
+            from edgar.entity.enhanced_statement import EnhancedStatementBuilder
+            builder = EnhancedStatementBuilder()
+            enhanced_stmt = builder.build_multi_period_statement(
+                facts=self._facts,
+                statement_type='BalanceSheet',
+                periods=periods,
+                annual=annual
+            )
+            enhanced_stmt.company_name = self.name
+            enhanced_stmt.cik = str(self.cik)
+            enhanced_stmt.concise_format = concise_format
+            
+            # Return DataFrame if requested
+            if as_dataframe:
+                return enhanced_stmt.to_dataframe()
+            
+            return enhanced_stmt
         from edgar.entity.query import FactQuery
         query = FactQuery(self._facts, self._fact_index)
 
@@ -733,45 +772,50 @@ class EntityFacts:
             return result
 
     def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                  annual: bool = True):
+                  annual: bool = True, concise_format: bool = False):
         """
         Get cash flow statement facts.
         
         Args:
             periods: Number of periods to retrieve
             period_length: Optional filter for period length in months (3=quarterly, 12=annual)
-            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement wrapper
+            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: If True, prefer annual (FY) periods over interim periods
+            concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
             
         Returns:
-            FinancialStatement or DataFrame with cash flow data pivoted by period
+            MultiPeriodStatement or DataFrame with cash flow data
             
         Example:
-            # Get formatted cash flow statement with annual periods preferred
+            # Get hierarchical multi-period statement (default)
             stmt = facts.cash_flow(periods=4, annual=True)
+            print(stmt)  # Rich display with hierarchy
             
-            # Get quarterly periods only
-            stmt = facts.cash_flow(periods=4, period_length=3, annual=False)
-            
-            # Get raw DataFrame for calculations
+            # Get DataFrame for analysis
             df = facts.cash_flow(periods=4, as_dataframe=True)
+            
+            # Convert statement to DataFrame later
+            stmt = facts.cash_flow(periods=4)
+            df = stmt.to_dataframe()
         """
-        from edgar.entity.query import FactQuery
-        query = FactQuery(self._facts, self._fact_index)
-
-        query = query.by_statement_type('CashFlow')
-
-        if period_length:
-            query = query.by_period_length(period_length)
-
-        # Pass entity information and return preference (flip the boolean)
-        result = query.latest_periods(periods, annual=annual).pivot_by_period(return_statement=not as_dataframe)
-
-        # If returning a Statement object, set the entity name
-        if not as_dataframe and hasattr(result, 'entity_name'):
-            result.entity_name = self.name
-
-        return result
+        # Always build the enhanced multi-period statement
+        from edgar.entity.enhanced_statement import EnhancedStatementBuilder
+        builder = EnhancedStatementBuilder()
+        enhanced_stmt = builder.build_multi_period_statement(
+            facts=self._facts,
+            statement_type='CashFlow',
+            periods=periods,
+            annual=annual
+        )
+        enhanced_stmt.company_name = self.name
+        enhanced_stmt.cik = str(self.cik)
+        enhanced_stmt.concise_format = concise_format
+        
+        # Return DataFrame if requested
+        if as_dataframe:
+            return enhanced_stmt.to_dataframe()
+        
+        return enhanced_stmt
 
     # Investment analytics
     def calculate_ratios(self) -> Dict[str, float]:

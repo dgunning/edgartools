@@ -12,7 +12,7 @@ from edgar._filings import Filings
 from edgar.company_reports import TenK, TenQ
 from edgar.formatting import reverse_name, datefmt
 from edgar.entity.data import Address, EntityData, CompanyData
-from edgar.entity.entity_facts import EntityFacts, get_company_facts
+from edgar.entity.entity_facts import EntityFacts, get_company_facts, NoCompanyFactsFound
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.reference.tickers import find_cik
@@ -354,6 +354,61 @@ class Entity(SecFiler):
         except NoCompanyFactsFound:
             return None
     
+    def get_structured_statement(self, 
+                                statement_type: str,
+                                fiscal_year: Optional[int] = None,
+                                fiscal_period: Optional[str] = None,
+                                use_canonical: bool = True,
+                                include_missing: bool = False) -> Optional['StructuredStatement']:
+        """
+        Get a hierarchically structured financial statement.
+        
+        This method uses learned canonical structures to build complete financial
+        statements with proper hierarchy and relationships, filling in missing
+        concepts when requested.
+        
+        Args:
+            statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', 'CashFlow')
+            fiscal_year: Fiscal year to retrieve (defaults to latest)
+            fiscal_period: Fiscal period ('FY', 'Q1', 'Q2', 'Q3', 'Q4')
+            use_canonical: Use canonical structure for organization (recommended)
+            include_missing: Include placeholders for missing canonical concepts
+            
+        Returns:
+            StructuredStatement with hierarchical organization or None if no data
+            
+        Example:
+            >>> company = Company('AAPL')
+            >>> stmt = company.get_structured_statement('IncomeStatement', 2024, 'Q4')
+            >>> print(stmt.get_hierarchical_display())
+        """
+        from edgar.entity.statement_builder import StatementBuilder
+        
+        facts_data = self.get_facts()
+        if not facts_data:
+            return None
+        
+        # Get all facts
+        all_facts = facts_data.get_all_facts()
+        if not all_facts:
+            return None
+        
+        # Build the statement
+        builder = StatementBuilder(cik=str(self.cik))
+        structured_stmt = builder.build_statement(
+            facts=all_facts,
+            statement_type=statement_type,
+            fiscal_year=fiscal_year,
+            fiscal_period=fiscal_period,
+            use_canonical=use_canonical,
+            include_missing=include_missing
+        )
+        
+        # Add company metadata
+        structured_stmt.company_name = self.name
+        
+        return structured_stmt
+    
     def latest(self, form: str, n=1):
         """Get the latest filing(s) for a given form."""
         return self.get_filings(form=form, trigger_full_load=False).latest(n)
@@ -495,64 +550,67 @@ class Company(Entity):
             return facts.shares_outstanding
         return None
     
-    def income_statement(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+    def income_statement(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
         """
         Get income statement data for this company.
         
         Args:
             periods: Number of periods to retrieve
             annual: If True, prefer annual periods; if False, get quarterly
-            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
+            concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
             
         Returns:
-            FinancialStatement or DataFrame with income statement data, or None if not available
+            MultiPeriodStatement or DataFrame with income statement data, or None if not available
         """
         facts = self.facts
         if facts:
             try:
-                return facts.income_statement(periods=periods, annual=annual, as_dataframe=as_dataframe)
+                return facts.income_statement(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
             except Exception as e:
                 from edgar.core import log
                 log.debug(f"Error getting income statement for {self.name}: {e}")
         return None
     
-    def balance_sheet(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+    def balance_sheet(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
         """
         Get balance sheet data for this company.
         
         Args:
             periods: Number of periods to retrieve
             annual: If True, prefer annual periods; if False, get quarterly
-            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
+            concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
             
         Returns:
-            FinancialStatement or DataFrame with balance sheet data, or None if not available
+            MultiPeriodStatement or DataFrame with balance sheet data, or None if not available
         """
         facts = self.facts
         if facts:
             try:
-                return facts.balance_sheet(periods=periods, annual=annual, as_dataframe=as_dataframe)
+                return facts.balance_sheet(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
             except Exception as e:
                 from edgar.core import log
                 log.debug(f"Error getting balance sheet for {self.name}: {e}")
         return None
     
-    def cash_flow(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False):
+    def cash_flow(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
         """
         Get cash flow statement data for this company.
         
         Args:
             periods: Number of periods to retrieve
             annual: If True, prefer annual periods; if False, get quarterly
-            as_dataframe: If True, return raw DataFrame; if False, return FinancialStatement
+            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
+            concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
             
         Returns:
-            FinancialStatement or DataFrame with cash flow data, or None if not available
+            MultiPeriodStatement or DataFrame with cash flow data, or None if not available
         """
         facts = self.facts
         if facts:
             try:
-                return facts.cash_flow(periods=periods, annual=annual, as_dataframe=as_dataframe)
+                return facts.cash_flow(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
             except Exception as e:
                 from edgar.core import log
                 log.debug(f"Error getting cash flow for {self.name}: {e}")
