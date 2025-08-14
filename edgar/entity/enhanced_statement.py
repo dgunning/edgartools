@@ -5,22 +5,21 @@ This module provides an enhanced statement class that uses learned mappings
 to show multiple periods with proper hierarchical organization.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Union
-from datetime import date
-import pandas as pd
 from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import date
+from typing import Dict, List, Optional, Any
 
+import pandas as pd
+from rich import box
+from rich.console import Group
+from rich.padding import Padding
+from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from rich.panel import Panel
-from rich.console import Group
-from rich import box
-from rich.padding import Padding
 
-from edgar.entity.models import FinancialFact
 from edgar.entity.mappings_loader import load_learned_mappings, load_virtual_trees
-from edgar.entity.statement_builder import StatementItem
+from edgar.entity.models import FinancialFact
 from edgar.richtools import repr_rich
 
 
@@ -934,7 +933,6 @@ class EnhancedStatementBuilder:
         Returns:
             MultiPeriodStatement with hierarchical structure and multiple periods
         """
-        from datetime import date
         
         # Filter facts by statement type
         # Handle both 'CashFlow' and 'CashFlowStatement' for compatibility

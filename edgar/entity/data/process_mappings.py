@@ -5,7 +5,7 @@ optimized for the Facts API.
 """
 
 import json
-from pathlib import Path
+
 
 def process_mappings():
     """Convert canonical structures to simple concept->statement mappings."""
@@ -51,7 +51,7 @@ def process_mappings():
         json.dump(output, f, indent=2)
     
     print(f"Processed {len(mappings)} concept mappings")
-    print(f"Statement distribution:")
+    print("Statement distribution:")
     
     stmt_counts = {}
     for concept, data in mappings.items():

@@ -6,23 +6,24 @@ including companies, funds, and individuals.
 """
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import List, Dict, Optional, Union, Tuple, Any, TypeVar, Iterable
+from typing import List, Optional, Union, Tuple, TypeVar, Iterable
 
-from edgar._filings import Filings
-from edgar.company_reports import TenK, TenQ
-from edgar.formatting import reverse_name, datefmt
-from edgar.entity.data import Address, EntityData, CompanyData
-from edgar.entity.entity_facts import EntityFacts, get_company_facts, NoCompanyFactsFound
-from edgar.entity.tickers import get_icon_from_ticker
-from edgar.financials import Financials
-from edgar.reference.tickers import find_cik
 from rich import box
-from rich.console import Group
 from rich.columns import Columns
+from rich.console import Group
 from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
+from edgar._filings import Filings
+from edgar.company_reports import TenK, TenQ
+from edgar.entity.data import Address, EntityData, CompanyData
+from edgar.entity.entity_facts import EntityFacts, get_company_facts, NoCompanyFactsFound
+from edgar.entity.tickers import get_icon_from_ticker
+from edgar.financials import Financials
+from edgar.formatting import reverse_name, datefmt
+from edgar.reference.tickers import find_cik
 from edgar.richtools import repr_rich
 
 # Performance optimization: use set for O(1) lookups
@@ -847,13 +848,6 @@ class Company(Entity):
             return f"{months[month]} {day}"
         except (ValueError, IndexError):
             return date_str
-
-
-class NoCompanyFactsFound(Exception):
-    """Exception raised when company facts cannot be found."""
-    def __init__(self, cik: int):
-        super().__init__()
-        self.message = f"No company facts found for CIK {cik}"
 
 
 # Factory functions for backward compatibility

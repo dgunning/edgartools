@@ -527,7 +527,6 @@ class EntityData:
         find_ticker = lazy_import('edgar.reference.tickers.find_ticker')
         zip_longest = lazy_import('itertools.zip_longest')
         datefmt = lazy_import('edgar.formatting.datefmt')
-        reverse_name = lazy_import('edgar.formatting.reverse_name')
 
         # Primary entity identification section
         if self.is_company:

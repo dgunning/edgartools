@@ -949,12 +949,6 @@ class FactQuery:
         # Add rows
         for fact in display_facts:
             
-            # Format period
-            period = f"{fact.fiscal_period} {fact.fiscal_year}" if fact.fiscal_period and fact.fiscal_year else "N/A"
-            
-            # Format filing date
-            filed = fact.filing_date.strftime('%Y-%m-%d') if fact.filing_date else "N/A"
-            
             results_table.add_row(
                 fact.concept,
                 str(fact.value) if fact.value else "N/A",

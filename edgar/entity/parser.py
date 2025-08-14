@@ -5,13 +5,13 @@ This module handles the conversion of raw SEC company facts JSON data
 into the new unified FinancialFact model.
 """
 
-from datetime import datetime, date
-from typing import Dict, List, Optional, Any, Tuple
 import logging
+from datetime import datetime, date
+from typing import Dict, List, Optional, Any
 
-from edgar.entity.models import FinancialFact, DataQuality
 from edgar.entity.entity_facts import EntityFacts
 from edgar.entity.mappings_loader import load_learned_mappings
+from edgar.entity.models import FinancialFact, DataQuality
 
 log = logging.getLogger(__name__)
 
@@ -348,11 +348,11 @@ class EntityFactsParser:
         
         # Generate context based on label and unit
         if label and 'Revenue' in label:
-            return f"Total revenue generated from operations"
+            return "Total revenue generated from operations"
         elif label and 'Income' in label:
-            return f"Net earnings after all expenses and taxes"
+            return "Net earnings after all expenses and taxes"
         elif label and 'Assets' in label:
-            return f"Total resources owned by the company"
+            return "Total resources owned by the company"
         
         # Return label if available, otherwise empty string
         return label if label else ""

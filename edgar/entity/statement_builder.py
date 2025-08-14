@@ -22,8 +22,7 @@ from rich.padding import Padding
 from edgar.entity.models import FinancialFact
 from edgar.entity.mappings_loader import (
     load_canonical_structures, 
-    load_virtual_trees,
-    get_statement_concepts
+    load_virtual_trees
 )
 
 log = logging.getLogger(__name__)
