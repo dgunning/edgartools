@@ -179,7 +179,6 @@ def test_parse_fund_header_sgml():
 def test_fund_from_filing():
     fund_report = FundReport.from_filing(jacob_funds)
     assert fund_report
-    assert fund_report.series_and_contracts is not None
 
     # Test .obj()
     fund_report = jacob_funds.obj()

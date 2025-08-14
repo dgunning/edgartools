@@ -1116,12 +1116,12 @@ class FundReport:
                  general_info: GeneralInfo,
                  fund_info: FundInfo,
                  investments: List[InvestmentOrSecurity],
-                 series_and_contracts: 'FundSeriesAndContracts' = None):
+                 series_and_contracts: Optional['FundSeriesAndContracts'] = None):
         self.header = header
         self.general_info: GeneralInfo = general_info
         self.fund_info: FundInfo = fund_info
         self.investments: List[InvestmentOrSecurity] = investments
-        self.series_and_contracts: 'FundSeriesAndContracts' = series_and_contracts
+        self.series_and_contracts: Optional['FundSeriesAndContracts'] = series_and_contracts
         self.fund_company = FundCompany(cik_or_identifier=self.general_info.cik, fund_name=self.general_info.name)
 
     def __str__(self):
@@ -1804,11 +1804,6 @@ class FundReport:
         if not xml:
             return None
         fund_report_dict = FundReport.parse_fund_xml(xml)
-
-        # Parse ticker, fund, series information from the filing header
-        # Import here to avoid circular imports
-        from edgar.funds import get_fund_information
-        fund_report_dict['series_and_contracts'] = get_fund_information(filing.header)
 
         return cls(**fund_report_dict)
 
