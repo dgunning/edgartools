@@ -665,6 +665,11 @@ def initialize_rich_logging():
 
     # Turn down 3rd party logging
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpxthrottlecache").setLevel(logging.WARNING)
+    logging.getLogger("pyrate_limiter").setLevel(
+        logging.CRITICAL
+    )  # TODO: Temporary, until next pyrate_limiter update that reduces the spurious "async" message
+
 
 # Turn on rich logging if the environment variable is set
 if os.getenv('EDGAR_USE_RICH_LOGGING', '0') == '1':
