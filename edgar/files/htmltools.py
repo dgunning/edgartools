@@ -288,8 +288,10 @@ def chunks2df(chunks: List[List[Block]],
     # Foward fill item and parts
     # Handle deprecation warning in fillna(method='ffill')
     if pandas_version >= (2, 1, 0):
-        chunk_df.Item = chunk_df.Item.ffill().infer_objects(copy=False)
-        chunk_df.Part = chunk_df.Part.ffill().infer_objects(copy=False)
+        # Opt-in to pandas future behavior to avoid silent downcasting warnings
+        with pd.option_context('future.no_silent_downcasting', True):
+            chunk_df['Item'] = chunk_df['Item'].ffill()
+            chunk_df['Part'] = chunk_df['Part'].ffill()
     else:
         chunk_df.Item = chunk_df.Item.fillna(method='ffill')
         chunk_df.Part = chunk_df.Part.fillna(method='ffill')
