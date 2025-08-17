@@ -2,6 +2,13 @@
 
 The Company Facts API provides comprehensive access to SEC financial data through an intuitive, AI-ready interface. Get financial statements, key metrics, and detailed company information with just a few lines of code.
 
+✨ **Latest Features:**
+- **Enhanced Value Formatting**: Full numbers with commas (1,000,000,000) by default, with optional concise format ($1.0B)
+- **Multi-Period Statements**: Rich hierarchical display showing multiple periods side-by-side
+- **LLM Integration**: Built-in `to_llm_context()` method for AI consumption
+- **Web Rendering Support**: Easy iteration over statement items with comprehensive web API methods
+- **Improved Visual Display**: Professional formatting with color-coded values and hierarchical structure
+
 ## Quick Start
 
 ```python
@@ -16,21 +23,28 @@ company = Company(320193)  # CIK number
 print(f"Shares Outstanding: {company.shares_outstanding:,.0f}")
 print(f"Public Float: ${company.public_float:,.0f}")
 
-# Get financial statements
-income_stmt = company.income_statement()
+# Get enhanced multi-period financial statements
+income_stmt = company.income_statement()  # Shows multiple periods with hierarchy
 balance_sheet = company.balance_sheet()  
 cash_flow = company.cash_flow()
 
-print(income_stmt)  # Displays beautifully formatted statement
+print(income_stmt)  # Rich multi-period display
+
+# Get concise format for quick overview
+income_compact = company.income_statement(concise_format=True)
+print(income_compact)  # Shows $1.0B instead of $1,000,000,000
 ```
 
 ## Key Features
 
 - **🚀 Zero Setup** - Works immediately with existing Company objects
-- **💰 Full Precision** - No information loss from scaled formatting  
-- **📊 Rich Display** - Professional formatting for Jupyter notebooks
-- **🛡️ Error Resilient** - Graceful handling of missing data
-- **🤖 AI-Ready** - Structured data perfect for analysis and LLMs
+- **💰 Full Precision** - Full numbers with commas by default, optional concise formatting
+- **📊 Enhanced Display** - Multi-period hierarchical statements with rich formatting
+- **🛡️ Error Resilient** - Graceful handling of missing data with intelligent fallbacks
+- **🤖 AI-Ready** - Built-in LLM context generation with structured data output
+- **🌐 Web Integration** - Easy iteration methods and rendering support for web applications
+- **⚡ Performance Optimized** - Intelligent caching and efficient data structures
+- **🎨 Professional Formatting** - Color-coded values, hierarchical structure, and smart spacing
 
 ## Core Properties
 
@@ -59,45 +73,69 @@ if company.facts:
 
 ### Income Statement
 
-Get income statement data with flexible period options:
+Get hierarchical income statement data with flexible period options:
 
 ```python
-# Default: 4 annual periods, formatted display
+# Default: 4 annual periods, enhanced multi-period display
 income_stmt = company.income_statement()
+print(income_stmt)  # Rich hierarchical display with multiple periods
 
-# Get 8 quarterly periods  
+# Get 8 quarterly periods with full number formatting
 quarterly = company.income_statement(periods=8, annual=False)
+
+# Use concise format for quick analysis ($1.0B vs $1,000,000,000)
+compact = company.income_statement(concise_format=True)
 
 # Get raw DataFrame for analysis
 df = company.income_statement(periods=4, as_dataframe=True)
+
+# Convert to LLM-friendly format
+llm_data = income_stmt.to_llm_context()
+print(llm_data['key_metrics'])  # Automatic ratio calculations
 ```
 
 ### Balance Sheet
 
-Access balance sheet data for point-in-time or trend analysis:
+Access hierarchical balance sheet data for point-in-time or trend analysis:
 
 ```python
-# Multi-period balance sheet trends
+# Enhanced multi-period balance sheet with hierarchy
 balance_sheet = company.balance_sheet(periods=4)
+print(balance_sheet)  # Shows Assets, Liabilities, Equity sections
 
 # Point-in-time snapshot as of specific date
 from datetime import date
 snapshot = company.balance_sheet(as_of=date(2024, 12, 31))
 
+# Concise format for executive summaries
+exec_summary = company.balance_sheet(concise_format=True)
+
 # Raw data for calculations
 df = company.balance_sheet(periods=3, as_dataframe=True)
+
+# Web rendering support - iterate over items
+for item in balance_sheet:
+    print(f"{item.label}: {item.get_display_value(balance_sheet.periods[0])}")
 ```
 
 ### Cash Flow Statement
 
-Analyze cash flow patterns across periods:
+Analyze hierarchical cash flow patterns across periods:
 
 ```python
-# Annual cash flow trends
+# Enhanced annual cash flow with operating/investing/financing sections
 cash_flow = company.cash_flow(periods=5, annual=True)
+print(cash_flow)  # Rich display with cash flow categories
 
-# Quarterly cash flow analysis
+# Quarterly cash flow analysis with full formatting
 quarterly_cf = company.cash_flow(periods=8, annual=False)
+
+# Executive dashboard format
+exec_cf = company.cash_flow(concise_format=True)
+
+# Generate analysis context for AI
+ai_context = cash_flow.to_llm_context(include_metadata=True)
+print(ai_context['key_metrics'])  # Automatic cash flow metrics
 ```
 
 ## Method Parameters
@@ -108,56 +146,233 @@ All financial statement methods support consistent parameters:
 |-----------|------|---------|-------------|
 | `periods` | int | 4 | Number of periods to retrieve |
 | `annual` | bool | True | If True, prefer annual periods; if False, get quarterly |
-| `as_dataframe` | bool | False | If True, return raw DataFrame; if False, return formatted FinancialStatement |
+| `as_dataframe` | bool | False | If True, return raw DataFrame; if False, return MultiPeriodStatement |
+| `concise_format` | bool | False | If True, display as $1.0B; if False, display as $1,000,000,000 |
 
 **Special Parameters:**
 - `balance_sheet()` also supports `as_of` parameter for point-in-time views
 
 ## Return Types
 
-### FinancialStatement Objects (Default)
+### MultiPeriodStatement Objects (Default)
 
-When `as_dataframe=False` (default), methods return `FinancialStatement` objects with:
+When `as_dataframe=False` (default), methods return enhanced `MultiPeriodStatement` objects with:
 
-- **Rich Display**: Professional formatting in Jupyter notebooks
-- **Full Precision**: No loss of decimal precision  
-- **Context Aware**: Different formatting for EPS vs Revenue vs Ratios
-- **Data Access**: Use `.to_numeric()` to get underlying numbers
+- **Hierarchical Structure**: Organized sections with proper parent-child relationships
+- **Multi-Period Display**: Side-by-side period comparison with rich formatting
+- **Smart Value Formatting**: Full numbers ($1,000,000,000) by default, per-share amounts as decimals
+- **Color-Coded Display**: Green/red values, bold totals, hierarchical indentation
+- **Web Rendering Support**: Easy iteration and item access for web applications
+- **LLM Integration**: Built-in context generation for AI analysis
 
 ```python
 stmt = company.income_statement()
 
-# Display formatted (automatic in notebooks)
+# Rich multi-period display (automatic in notebooks)
 print(stmt)
 
-# Access raw numbers for calculations
-data = stmt.to_numeric()
-revenue_growth = data.loc['Revenue'].pct_change()
+# Convert to DataFrame for analysis
+df = stmt.to_dataframe()
+revenue_growth = df.loc['Revenue'].pct_change()
+
+# Generate LLM-friendly context
+llm_data = stmt.to_llm_context()
+print(llm_data['key_metrics']['profit_margin_fy_2024'])
+
+# Iterate over items for web rendering
+for item in stmt.iter_with_values():
+    print(f"{item.label}: {item.get_display_value(stmt.periods[0])}")
+
+# Get specific item
+revenue_item = stmt.find_item('Revenue')
+if revenue_item:
+    print(f"Revenue trend: {revenue_item.values}")
 ```
 
 ### DataFrame Objects
 
-When `as_dataframe=True`, methods return pandas DataFrames:
+When `as_dataframe=True`, methods return pandas DataFrames with enhanced structure:
 
 ```python
 df = company.income_statement(as_dataframe=True)
 
-# Standard pandas operations
+# Enhanced DataFrame with metadata columns
+print(df.columns)  # Includes: periods, depth, is_total, section, confidence
 print(df.dtypes)
 print(df.describe()) 
-revenue_series = df.loc['Revenue']
+
+# Access financial data
+revenue_series = df.loc['us-gaap:Revenues']  # Full concept names as index
+print(df[df['is_total']])  # Filter to total/subtotal rows only
+print(df[df['section'] == 'Revenue'])  # Filter by statement section
+```
+
+## Enhanced Features
+
+### Value Formatting Options
+
+The API now provides flexible value formatting to suit different use cases:
+
+```python
+# Full precision formatting (default) - best for analysis
+stmt_full = company.income_statement(concise_format=False)
+print(stmt_full)  # Shows: $391,035,000,000
+
+# Concise formatting - best for presentations and dashboards
+stmt_concise = company.income_statement(concise_format=True)  
+print(stmt_concise)  # Shows: $391.0B
+
+# Per-share amounts are always displayed as decimals
+# Example: Earnings Per Share shows as "2.97" not "$2.97" or "$2,970,000,000"
+```
+
+**Formatting Rules:**
+- **Default (`concise_format=False`)**: Full numbers with commas ($1,000,000,000)
+- **Concise (`concise_format=True`)**: Scaled format ($1.0B, $500.3M)
+- **Per-Share Values**: Always decimal format (2.97) regardless of setting
+- **Negative Values**: Properly formatted with minus signs
+- **Zero/Null Values**: Displayed as "-" for clean presentation
+
+### LLM Integration and AI Context
+
+Generate structured data optimized for AI and LLM consumption:
+
+```python
+stmt = company.income_statement(periods=4)
+
+# Generate LLM-friendly context
+llm_context = stmt.to_llm_context(
+    include_metadata=True,      # Include data quality metrics
+    include_hierarchy=False,    # Flatten for simplicity (default)
+    flatten_values=True         # Create period-prefixed keys (default)
+)
+
+print("LLM Context Structure:")
+print(f"Company: {llm_context['company']}")
+print(f"Statement Type: {llm_context['statement_type']}")
+print(f"Periods: {llm_context['periods']}")
+print(f"Data Quality: {llm_context['metadata']['quality_indicators']}")
+
+# Access flattened financial data
+financial_data = llm_context['data']
+print(f"Revenue FY 2024: ${financial_data.get('revenue_fy_2024', 0):,.0f}")
+print(f"Revenue FY 2023: ${financial_data.get('revenue_fy_2023', 0):,.0f}")
+
+# Automatic ratio calculations
+key_metrics = llm_context.get('key_metrics', {})
+if 'profit_margin_fy_2024' in key_metrics:
+    print(f"Current Profit Margin: {key_metrics['profit_margin_fy_2024']:.1%}")
+
+# Feed to LLM for analysis
+import json
+analysis_prompt = f"""
+Analyze this financial data for {llm_context['company']}:
+{json.dumps(llm_context, indent=2)}
+
+Provide insights on profitability trends and growth patterns.
+"""
+```
+
+### Web Application Integration
+
+Easy iteration and rendering support for web applications:
+
+```python
+stmt = company.income_statement(periods=4)
+
+# Basic iteration over all items
+for item in stmt:
+    print(f"{item.label}: {item.get_display_value(stmt.periods[0])}")
+
+# Iterate with hierarchy information  
+for item in stmt.iter_hierarchy():
+    indent = "  " * item.depth
+    parent_info = f" (parent: {item.parent.label})" if item.parent else ""
+    print(f"{indent}{item.label}{parent_info}")
+
+# Only items with values (skip empty rows)
+for item in stmt.iter_with_values():
+    values_summary = ", ".join([
+        f"{period}: {item.get_display_value(period)}" 
+        for period in stmt.periods 
+        if item.values.get(period)
+    ])
+    print(f"{item.label} -> {values_summary}")
+
+# Find specific items
+revenue_item = stmt.find_item('Revenue')
+if revenue_item:
+    print(f"Found Revenue: {revenue_item.values}")
+
+# Convert to web-friendly format
+web_data = stmt.to_dict()  # Nested dictionary
+flat_data = stmt.to_flat_list()  # Flat list for tables
+
+# Period comparison analysis
+comparison = stmt.get_period_comparison()
+for concept, analysis in comparison.items():
+    if analysis['growth_rate']:
+        print(f"{concept}: {analysis['growth_rate']:.1%} growth")
+```
+
+### Advanced Statement Features
+
+#### Smart Hierarchical Organization
+
+Statements now display with intelligent hierarchy based on accounting standards:
+
+```python
+stmt = company.income_statement()
+print(stmt)  # Shows:
+# Revenue
+#   Product Revenue
+#   Service Revenue
+# Cost of Revenue
+#   Cost of Product Sales
+#   Cost of Services
+# Gross Profit  [calculated]
+# Operating Expenses
+#   Research and Development
+#   Sales and Marketing
+# Operating Income [calculated]
+```
+
+#### Professional Visual Display
+
+- **Color Coding**: Green for positive values, red for negative
+- **Bold Formatting**: Totals and subtotals are emphasized
+- **Hierarchical Indentation**: Clear parent-child relationships
+- **Confidence Indicators**: Low-confidence items marked with ◦
+- **Smart Spacing**: Separators after major sections
+
+#### Enhanced Data Quality
+
+Statements include data quality metadata:
+
+```python
+stmt = company.income_statement()
+
+# Check overall statement quality
+if hasattr(stmt, 'canonical_coverage'):
+    print(f"Canonical Coverage: {stmt.canonical_coverage:.1%}")
+
+# Item-level confidence scores
+for item in stmt.iter_with_values():
+    if hasattr(item, 'confidence') and item.confidence < 0.8:
+        print(f"Low confidence: {item.label} ({item.confidence:.2f})")
 ```
 
 ## Advanced Usage
 
 ### Working with EntityFacts Directly
 
-For advanced analysis, access the full EntityFacts object:
+For advanced analysis, access the enhanced EntityFacts object with rich display:
 
 ```python
 facts = company.facts
+print(facts)  # Rich console display with summary statistics and key metrics
 
-# Query specific facts
+# Query specific facts with enhanced query interface
 revenue_facts = facts.query().by_concept('Revenue').execute()
 
 # Get time series for any concept
@@ -166,6 +381,17 @@ revenue_ts = facts.time_series('Revenue', periods=20)
 # Get DEI (Document and Entity Information) facts
 dei_info = facts.dei_facts()
 entity_summary = facts.entity_info()
+
+# Generate comprehensive LLM context
+llm_context = facts.to_llm_context(
+    focus_areas=['profitability', 'growth'], 
+    time_period='5Y'
+)
+print(llm_context['focus_analysis']['profitability'])
+
+# Export as AI agent tools (MCP-compatible)
+agent_tools = facts.to_agent_tools()
+print(agent_tools[0])  # Tool definition for AI agents
 ```
 
 ## Advanced Querying
@@ -360,6 +586,10 @@ for fact_context in llm_context:
 # Count matching facts without loading them
 revenue_count = facts.query().by_concept('Revenue').count()
 print(f"Found {revenue_count} revenue facts")
+
+# Enhanced query with rich display
+revenue_query = facts.query().by_concept('Revenue')
+print(revenue_query)  # Rich representation of the query
 ```
 
 #### Sort Results
@@ -477,22 +707,29 @@ facts.query().by_concept('Revenue').by_fiscal_year(2024).by_form_type('10-K')
 
 The query interface provides powerful flexibility for financial analysis while maintaining simplicity for common use cases.
 
-### Period Selection Logic
+### Enhanced Period Selection Logic
 
-The API intelligently handles period selection:
+The API intelligently handles period selection with improved consistency:
 
 ```python
 # Annual periods preferred - gets FY 2024, FY 2023, etc.
 annual = company.income_statement(annual=True)
+print(annual)  # Rich display with period headers
 
-# Quarterly periods - gets Q2 2024, Q1 2024, etc.  
+# Quarterly periods - gets most recent quarters
 quarterly = company.income_statement(annual=False)
+
+# Mixed periods automatically detected and handled
+mixed = company.income_statement(periods=8, annual=False)
+# API intelligently selects best available periods
 ```
 
-**Period Labeling:**
-- Periods are labeled by calendar quarters based on end dates
-- "Q2 2024" means period ending in Apr/May/Jun 2024
-- "FY 2024" means full fiscal year ending in 2024
+**Enhanced Period Features:**
+- **Smart Labeling**: Periods labeled by fiscal quarters and years
+- **Consistency**: "Q2 2024" means period ending in company's fiscal Q2 of 2024
+- **Hierarchy**: "FY 2024" means full fiscal year ending in 2024
+- **Quality Indicators**: Period data quality shown in metadata
+- **Automatic Selection**: API selects best available periods when requested periods aren't available
 
 ## Error Handling
 
@@ -516,7 +753,7 @@ else:
 
 ## Real-World Examples
 
-### Compare Revenue Growth
+### Compare Revenue Growth with Enhanced Display
 
 ```python
 from edgar import Company
@@ -525,127 +762,332 @@ companies = ['AAPL', 'MSFT', 'GOOGL']
 for ticker in companies:
     company = Company(ticker)
     if company.facts:
-        stmt = company.income_statement(as_dataframe=True)
-        if 'Revenue' in stmt.index:
-            revenue = stmt.loc['Revenue']
-            growth = revenue.pct_change().iloc[0] * 100
-            print(f"{ticker}: {growth:.1f}% revenue growth")
+        # Get enhanced multi-period statement
+        stmt = company.income_statement(periods=2)
+        print(f"\n{ticker} Revenue Analysis:")
+        print(stmt)  # Rich multi-period display
+        
+        # Calculate growth using new methods
+        df = stmt.to_dataframe()
+        if not df.empty:
+            revenue_row = df[df['label'].str.contains('Revenue', case=False, na=False)].iloc[0]
+            periods = stmt.periods
+            if len(periods) >= 2:
+                current = revenue_row[periods[0]]
+                prior = revenue_row[periods[1]]
+                if current and prior:
+                    growth = ((current - prior) / prior) * 100
+                    print(f"{ticker}: {growth:.1f}% revenue growth")
+        
+        # Generate LLM context for deeper analysis
+        llm_data = stmt.to_llm_context()
+        if 'key_metrics' in llm_data:
+            print(f"AI Analysis Available: {list(llm_data['key_metrics'].keys())}")
+            
+            # Display some automatic calculations
+            if 'profit_margin_fy_2024' in llm_data['key_metrics']:
+                margin = llm_data['key_metrics']['profit_margin_fy_2024']
+                print(f"{ticker} Profit Margin: {margin:.1%}")
 ```
 
-### Build Comparison Dashboard
+### Build Enhanced Comparison Dashboard
 
 ```python
 import pandas as pd
 
-def compare_companies(tickers, metric='Revenue'):
+def compare_companies_enhanced(tickers, periods=2):
     results = []
     for ticker in tickers:
         company = Company(ticker)
-        stmt = company.income_statement(as_dataframe=True)
-        if stmt is not None and metric in stmt.index:
-            latest_value = stmt.loc[metric].iloc[0]
-            results.append({
+        if company.facts:
+            # Get enhanced multi-period statement
+            stmt = company.income_statement(periods=periods)
+            
+            # Extract LLM context for automated metrics
+            llm_data = stmt.to_llm_context(include_metadata=True)
+            
+            # Build comprehensive comparison data
+            company_data = {
                 'Company': company.name,
                 'Ticker': ticker,
-                metric: latest_value
-            })
+                'Periods': len(stmt.periods),
+                'Data_Quality': llm_data.get('metadata', {}).get('quality_indicators', []),
+            }
+            
+            # Add revenue data for all periods
+            revenue_item = stmt.find_item('Revenue')
+            if revenue_item:
+                for period in stmt.periods:
+                    value = revenue_item.values.get(period)
+                    if value:
+                        company_data[f'Revenue_{period.replace(" ", "_")}'] = value
+            
+            # Add key metrics if available
+            if 'key_metrics' in llm_data:
+                for metric, value in llm_data['key_metrics'].items():
+                    company_data[f'Metric_{metric}'] = value
+            
+            results.append(company_data)
+    
     return pd.DataFrame(results)
 
-# Compare revenue across tech companies
-comparison = compare_companies(['AAPL', 'MSFT', 'GOOGL', 'AMZN'])
-print(comparison.sort_values('Revenue', ascending=False))
+# Compare with enhanced analytics
+comparison = compare_companies_enhanced(['AAPL', 'MSFT', 'GOOGL', 'AMZN'])
+print(comparison)
+
+# Web rendering example
+def render_for_web(ticker):
+    company = Company(ticker)
+    stmt = company.income_statement()
+    
+    web_data = []
+    for item in stmt.iter_with_values():
+        web_data.append({
+            'concept': item.concept,
+            'label': item.label, 
+            'depth': getattr(item, 'depth', 0),
+            'is_total': item.is_total,
+            'values': {period: item.get_display_value(period) 
+                      for period in stmt.periods if item.values.get(period)}
+        })
+    return web_data
+
+web_ready_data = render_for_web('AAPL')
+print(f"Generated {len(web_ready_data)} items for web display")
 ```
 
-### Extract Key Metrics
+### Extract Enhanced Key Metrics
 
 ```python
-def company_snapshot(ticker):
+def company_snapshot_enhanced(ticker):
     company = Company(ticker)
-    return {
+    snapshot = {
         'name': company.name,
         'ticker': ticker,
         'shares_outstanding': company.shares_outstanding,
         'public_float': company.public_float,
         'has_facts': company.facts is not None
     }
+    
+    if company.facts:
+        # Get entity information
+        entity_info = company.facts.entity_info()
+        snapshot.update(entity_info)
+        
+        # Get financial statement summaries with LLM context
+        income_stmt = company.income_statement(periods=2)
+        if income_stmt:
+            llm_context = income_stmt.to_llm_context()
+            snapshot.update({
+                'revenue_latest': llm_context['data'].get('revenue_fy_2024') or llm_context['data'].get('revenue_q4_2024'),
+                'key_metrics': llm_context.get('key_metrics', {}),
+                'data_quality': llm_context.get('metadata', {}).get('quality_indicators', [])
+            })
+        
+        # Get balance sheet strength indicators
+        balance_sheet = company.balance_sheet(periods=1)
+        if balance_sheet:
+            bs_context = balance_sheet.to_llm_context()
+            assets_key = next((k for k in bs_context['data'].keys() if 'assets' in k.lower() and 'total' in k.lower()), None)
+            if assets_key:
+                snapshot['total_assets'] = bs_context['data'][assets_key]
+            
+            # Add balance sheet metrics if available
+            if 'key_metrics' in bs_context:
+                snapshot['balance_sheet_metrics'] = bs_context['key_metrics']
+    
+    return snapshot
 
-# Get snapshot for multiple companies
+# Get enhanced snapshots with auto-calculated metrics
 tickers = ['AAPL', 'TSLA', 'NVDA']
-snapshots = [company_snapshot(t) for t in tickers]
+snapshots = [company_snapshot_enhanced(t) for t in tickers]
 df = pd.DataFrame(snapshots)
-print(df)
+print(df[['name', 'ticker', 'revenue_latest', 'total_assets']].to_string())
+
+# Display detailed metrics for one company
+print("\nDetailed metrics for AAPL:")
+aapl_snapshot = snapshots[0]
+for key, value in aapl_snapshot.get('key_metrics', {}).items():
+    print(f"{key}: {value}")
+
+# Show data quality indicators
+if 'data_quality' in aapl_snapshot:
+    print(f"Data Quality: {', '.join(aapl_snapshot['data_quality'])}")
+
+# Show balance sheet metrics if available
+if 'balance_sheet_metrics' in aapl_snapshot:
+    print("\nBalance Sheet Metrics:")
+    for key, value in aapl_snapshot['balance_sheet_metrics'].items():
+        print(f"{key}: {value}")
 ```
 
 ## Performance Tips
 
-1. **Cache Company Objects**: Reuse Company instances to leverage caching
+1. **Cache Company Objects**: Reuse Company instances to leverage enhanced caching
 2. **Use as_dataframe=True**: For bulk calculations, raw DataFrames are faster
-3. **Limit Periods**: Request only the periods you need
+3. **Limit Periods**: Request only the periods you need for analysis
 4. **Check Availability**: Use `if company.facts:` before accessing financial data
+5. **Choose Format Wisely**: Use `concise_format=True` for display, `False` for calculations
+6. **Cache LLM Context**: Store `to_llm_context()` results for repeated AI analysis
+7. **Batch Web Rendering**: Use `iter_with_values()` to skip empty items
 
 ```python
-# Good: Reuse company object
+# Good: Reuse company object with enhanced features
 company = Company('AAPL')
 if company.facts:
+    print(company.facts)  # Rich display with summary statistics
+    
+    # Get multiple statements efficiently
     income = company.income_statement()
     balance = company.balance_sheet()
     cash = company.cash_flow()
+    
+    # Cache LLM context for AI applications
+    llm_context = income.to_llm_context()
+    # Reuse llm_context for multiple AI queries
 
-# Good: Use DataFrame for calculations
+# Good: Use DataFrame for bulk analysis
 df = company.income_statement(periods=10, as_dataframe=True)
-analysis = df.pct_change()
+analysis = df.select_dtypes(include=[np.number]).pct_change()
+
+# Good: Efficient web rendering
+web_items = [item for item in stmt.iter_with_values()]  # Only items with data
+rendered_data = stmt.to_dict()  # Single conversion for web APIs
+
+# Good: Format choice based on use case
+exec_dashboard = company.income_statement(concise_format=True)   # For presentations
+analysis_data = company.income_statement(concise_format=False)   # For calculations
 ```
 
 ## Integration with Other EdgarTools Features
 
-The Facts API works seamlessly with other EdgarTools features:
+The enhanced Facts API works seamlessly with other EdgarTools features:
 
 ```python
 company = Company('AAPL')
 
-# Combine with filings
+# Combine with filings for comprehensive analysis
 latest_10k = company.latest('10-K')
-facts_data = company.income_statement()
+facts_stmt = company.income_statement()
 
-# Use with existing financials
-financials = company.get_financials()  # Traditional XBRL approach
-facts_stmt = company.income_statement()  # New Facts API approach
+# Generate cross-referenced analysis
+analysis_context = {
+    'filing_info': {
+        'form': latest_10k.form,
+        'filing_date': latest_10k.filing_date,
+        'accession': latest_10k.accession_no
+    },
+    'financial_data': facts_stmt.to_llm_context(),
+    'data_sources': 'SEC Company Facts API + EDGAR Filings'
+}
+
+# Compare with traditional XBRL (if available)
+try:
+    xbrl = latest_10k.xbrl()  # Traditional XBRL approach
+    xbrl_stmt = xbrl.statements.income_statement
+    facts_stmt = company.income_statement()  # Enhanced Facts API
+    
+    print("Data Source Comparison:")
+    print(f"XBRL Concepts: {len(xbrl_stmt) if xbrl_stmt else 0}")
+    print(f"Facts API Items: {len(facts_stmt.items)}")
+    print(f"Facts API Quality: {getattr(facts_stmt, 'canonical_coverage', 'N/A')}")
+except:
+    print("XBRL data not available - Facts API provides comprehensive coverage")
 ```
 
 ## Migration Guide
 
-If you're using the old facts API, migration is straightforward:
+Upgrading from previous versions is straightforward with enhanced features:
 
 ```python
-# Old approach
-old_facts = company.get_facts()  # Returns different format
+# Previous approach (still works)
+old_facts = company.get_facts()  # Returns basic format
+old_stmt = company.income_statement(as_dataframe=True)
 
-# New approach  
-company.facts                    # EntityFacts object
-company.income_statement()       # Formatted financial statements
-company.shares_outstanding       # Direct property access
+# Enhanced approach with new features
+facts = company.facts            # Rich EntityFacts with console display
+stmt = company.income_statement()  # MultiPeriodStatement with hierarchy
+
+# New formatting options
+compact_stmt = company.income_statement(concise_format=True)  # $1.0B format
+full_stmt = company.income_statement(concise_format=False)    # $1,000,000,000 format
+
+# New LLM integration
+llm_data = stmt.to_llm_context()  # AI-ready structured data
+
+# New web integration
+web_items = list(stmt.iter_with_values())  # Easy web rendering
+specific_item = stmt.find_item('Revenue')  # Direct item access
+
+# Enhanced property access with full context
+shares_fact = facts.shares_outstanding_fact  # Full FinancialFact object
+shares_value = facts.shares_outstanding       # Direct numeric value
 ```
 
-The new API is designed to be more intuitive and powerful while maintaining full backward compatibility.
+**Key Improvements:**
+- **Backward Compatible**: All existing code continues to work
+- **Enhanced Display**: Rich console formatting with colors and hierarchy
+- **Better Formatting**: Smart value formatting with concise options
+- **AI Integration**: Built-in LLM context generation
+- **Web Support**: Easy iteration and rendering methods
+- **Performance**: Optimized caching and data structures
 
 ## Troubleshooting
 
 **Q: Why do some companies return None for financial statements?**
-A: Not all companies have facts data available through the SEC API. This is normal for some entity types.
+A: Not all companies have facts data available through the SEC API. This is normal for some entity types. The enhanced API provides better error handling and fallback strategies.
 
-**Q: Why do I see mixed period warnings?**
-A: This happens when a company has periods of different lengths (quarterly vs annual). Use `annual=True` to prefer consistent annual periods.
+**Q: What's the difference between concise_format=True and False?**
+A: `concise_format=False` (default) shows full numbers with commas ($1,000,000,000) for precision. `concise_format=True` shows scaled format ($1.0B) for presentations. Per-share amounts are always decimals regardless of setting.
 
-**Q: How do I get the most recent quarter?**
-A: Use `company.income_statement(periods=1, annual=False)` to get the latest quarterly period.
+**Q: How do I use the hierarchical structure in web applications?**
+A: Use the iteration methods: `stmt.iter_hierarchy()` for parent-child relationships, `stmt.iter_with_values()` for items with data, or `stmt.to_dict()` for nested JSON structure.
+
+**Q: How do I get the most recent quarter with the new format?**
+A: Use `company.income_statement(periods=1, annual=False)` to get the latest quarterly period with enhanced formatting and hierarchy.
 
 **Q: Can I get historical data beyond what's shown?**
-A: Yes, increase the `periods` parameter: `company.income_statement(periods=20)` for more historical data.
+A: Yes, increase the `periods` parameter: `company.income_statement(periods=20)` for extensive historical data with consistent formatting.
+
+**Q: How do I integrate with AI/LLM applications?**
+A: Use `stmt.to_llm_context()` to get structured, AI-ready data with automatic metric calculations and clean formatting optimized for language models.
 
 ## API Reference
+
+### MultiPeriodStatement Methods
+
+| Method | Description |
+|--------|-------------|
+| `to_dataframe()` | Convert to pandas DataFrame with metadata |
+| `to_llm_context()` | Generate AI-ready structured context |
+| `iter_hierarchy()` | Iterate with depth and parent information |
+| `iter_with_values()` | Iterate only items with values |
+| `find_item(concept)` | Find specific item by concept or label |
+| `to_dict()` | Convert to nested dictionary structure |
+| `to_flat_list()` | Convert to flat list for web APIs |
+| `get_period_comparison()` | Get period-over-period analysis |
+
+### EntityFacts Enhanced Methods
+
+| Method | Description |
+|--------|-------------|
+| `to_llm_context()` | Comprehensive AI context with focus areas |
+| `to_agent_tools()` | Export as MCP-compatible agent tools |
+| `calculate_ratios()` | Financial ratio calculations |
+| `peer_comparison()` | Compare with peer companies |
+| `detect_anomalies()` | Identify unusual patterns |
+
+### New Parameters
+
+| Parameter | Methods | Description |
+|-----------|---------|-------------|
+| `concise_format` | All statement methods | Value display format control |
+| `include_metadata` | `to_llm_context()` | Include data quality metrics |
+| `flatten_values` | `to_llm_context()` | Flatten multi-period values |
+| `focus_areas` | `to_llm_context()` | Emphasize specific analysis areas |
 
 For complete API documentation of the underlying EntityFacts class and query interface, see the [EntityFacts API Reference](../api/entity-facts-reference.md).
 
 ---
 
-*The Company Facts API is part of EdgarTools' comprehensive SEC data platform. For more information, visit the [EdgarTools Documentation](https://edgartools.dev).*
+*The enhanced Company Facts API is part of EdgarTools' comprehensive SEC data platform, now with AI integration, web rendering support, and professional formatting. For more information, visit the [EdgarTools Documentation](https://edgartools.dev).*
