@@ -14,7 +14,7 @@ and handling dimensional qualifiers.
 import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
-
+from textwrap import dedent
 import pandas as pd
 from rich import box
 from rich.table import Column, Table
@@ -298,7 +298,13 @@ class XBRL:
         Returns:
             XBRL object with parsed data
         """
-        
+        if filing.form.endswith("/A"):
+            log.warning(dedent(f"""
+            {filing}
+            is an amended filing and may not contain full XBRL data e.g. some statements might be missing.
+            Consider using the original filing instead if available with `get_filings(form="10-K", amendments=False)`
+            """))
+
         xbrl = cls()
 
         xbrl_attachments = XBRLAttachments(filing.attachments)
