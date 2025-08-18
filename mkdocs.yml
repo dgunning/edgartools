@@ -29,6 +29,7 @@ nav:
       - "Working with a company": guides/finding-companies.md
       - Getting company facts: guides/company-facts.md
       - Getting a list of company insiders: guides/company-insiders.md
+      - Getting subsets of companies: company-subsets.md
     - Financial Analysis:
       - "Extract Financial Statements": guides/extract-statements.md
     - Advanced:
