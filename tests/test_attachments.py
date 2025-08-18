@@ -276,4 +276,184 @@ def test_get_report_attachments():
     assert 'CONSOLIDATED BALANCE SHEETS' in text
 
 
+def test_attachment_markdown_conversion():
+    """Test that HTML attachments can be converted to markdown"""
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    attachments = filing.attachments
+    
+    # Get the HTML attachment (sequence 1)
+    html_attachment = attachments.get_by_sequence(1)
+    assert html_attachment.document == "cyber_10k.htm"
+    assert html_attachment.is_html()
+    
+    # Test markdown conversion
+    markdown_content = html_attachment.markdown()
+    assert markdown_content is not None
+    assert isinstance(markdown_content, str)
+    assert len(markdown_content) > 0
+    
+    # Test that non-HTML attachments return None
+    if len(attachments) > 1:
+        for attachment in attachments:
+            if not attachment.is_html():
+                assert attachment.markdown() is None
+
+
+def test_attachments_markdown_batch_conversion():
+    """Test batch markdown conversion for all HTML attachments"""
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    attachments = filing.attachments
+    
+    # Get markdown for all HTML attachments
+    markdown_dict = attachments.markdown()
+    assert isinstance(markdown_dict, dict)
+    
+    # Should have at least the main HTML document
+    assert len(markdown_dict) > 0
+    
+    # Check that the main HTML document is included
+    assert "cyber_10k.htm" in markdown_dict
+    
+    # Verify all entries are strings
+    for doc_name, markdown_content in markdown_dict.items():
+        assert isinstance(doc_name, str)
+        assert isinstance(markdown_content, str)
+        assert len(markdown_content) > 0
+
+
+def test_attachment_markdown_with_non_html_filing():
+    """Test markdown conversion with a filing that has non-HTML primary document"""
+    filing = Filing(form='4', filing_date='2024-05-24', company='t Hart Cees', cik=1983327,
+                    accession_no='0000950170-24-064537')
+    attachments = filing.attachments
+    
+    # Test markdown conversion - should handle gracefully
+    markdown_dict = attachments.markdown()
+    assert isinstance(markdown_dict, dict)
+    
+    # May be empty if no HTML attachments
+    for doc_name, markdown_content in markdown_dict.items():
+        assert isinstance(doc_name, str)
+        assert isinstance(markdown_content, str)
+
+
+def test_attachment_markdown_with_page_breaks():
+    """Test that HTML attachments can be converted to markdown with page breaks"""
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    attachments = filing.attachments
+    
+    # Get the HTML attachment (sequence 1)
+    html_attachment = attachments.get_by_sequence(1)
+    assert html_attachment.document == "cyber_10k.htm"
+    assert html_attachment.is_html()
+    
+    # Test with page breaks enabled
+    markdown_with_breaks = html_attachment.markdown(include_page_breaks=True)
+    assert markdown_with_breaks is not None
+    assert isinstance(markdown_with_breaks, str)
+    
+    # Test without page breaks
+    markdown_without_breaks = html_attachment.markdown(include_page_breaks=False)
+    assert markdown_without_breaks is not None
+    assert isinstance(markdown_without_breaks, str)
+    
+    # Check that page break markers are present when enabled
+    if '{' in markdown_with_breaks and '}' in markdown_with_breaks:
+        assert '------------------------------------------------' in markdown_with_breaks
+        print("✓ Page break delimiters found in markdown output")
+    else:
+        print("ℹ No page break markers found in this document")
+    
+    # The version with page breaks should be different from the one without
+    # (unless there are no page breaks in the document)
+    if '{' in markdown_with_breaks:
+        assert markdown_with_breaks != markdown_without_breaks
+        print("✓ Page break versions are different")
+    else:
+        print("ℹ No page breaks detected in this document")
+
+
+def test_attachments_batch_markdown_with_page_breaks():
+    """Test batch conversion of attachments with page breaks"""
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    attachments = filing.attachments
+    
+    # Test batch conversion with page breaks
+    markdown_dict_with_breaks = attachments.markdown(include_page_breaks=True)
+    assert isinstance(markdown_dict_with_breaks, dict)
+    
+    # Test batch conversion without page breaks
+    markdown_dict_without_breaks = attachments.markdown(include_page_breaks=False)
+    assert isinstance(markdown_dict_without_breaks, dict)
+    
+    # Both should have the same keys (document names)
+    assert set(markdown_dict_with_breaks.keys()) == set(markdown_dict_without_breaks.keys())
+    
+    # Check that at least one attachment was converted
+    assert len(markdown_dict_with_breaks) > 0
+    print(f"✓ Converted {len(markdown_dict_with_breaks)} attachments to markdown")
+
+
+def test_filing_markdown_with_page_breaks():
+    """Test that main filing can be converted to markdown with page breaks"""
+    filing = Filing(form='10-K', filing_date='2023-06-02', company='Cyber App Solutions Corp.', cik=1851048,
+                    accession_no='0001477932-23-004175')
+    
+    # Test main filing with page breaks
+    markdown_with_breaks = filing.markdown(include_page_breaks=True)
+    assert markdown_with_breaks is not None
+    assert isinstance(markdown_with_breaks, str)
+    
+    # Test main filing without page breaks
+    markdown_without_breaks = filing.markdown(include_page_breaks=False)
+    assert markdown_without_breaks is not None
+    assert isinstance(markdown_without_breaks, str)
+    
+    print("✓ Main filing markdown conversion with page breaks working")
+
+
+def test_page_break_detection_patterns():
+    """Test that various page break patterns are detected correctly"""
+    test_html = """
+    <html>
+    <body>
+        <div>Content before first page break</div>
+        <p style="page-break-before:always"></p>
+        <div>Content after first page break</div>
+        <hr style="page-break-after:always"/>
+        <div>Content after second page break</div>
+        <div style="page-break-before:always"></div>
+        <div>Content after third page break</div>
+    </body>
+    </html>
+    """
+    
+    from edgar.files.html import Document
+    
+    # Test with page breaks enabled
+    document = Document.parse(test_html, include_page_breaks=True)
+    assert document is not None
+    
+    # Count page break nodes
+    page_break_nodes = [node for node in document.nodes if node.type == 'page_break']
+    assert len(page_break_nodes) >= 1  # At least one page break should be detected
+    
+    # Check that page numbers are sequential starting from 0
+    page_numbers = [node.page_number for node in page_break_nodes]
+    expected_numbers = list(range(0, len(page_break_nodes)))
+    assert page_numbers == expected_numbers
+    
+    # Ensure the first page break is page 0 (document start)
+    assert page_numbers[0] == 0
+    
+    print(f"✓ Detected {len(page_break_nodes)} page breaks with correct numbering: {page_numbers}")
+
+
+
+
+
 
