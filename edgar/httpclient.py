@@ -32,7 +32,7 @@ CACHE_RULES = {
 }
 
 def get_cache_directory() -> str:
-    cachedir = Path(edgar_data_dir) / "_pcache"
+    cachedir = Path(edgar_data_dir) / "_tcache"
     cachedir.mkdir(parents=True, exist_ok=True)
 
     return str(cachedir)
