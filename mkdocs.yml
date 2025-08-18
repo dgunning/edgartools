@@ -27,7 +27,7 @@ nav:
       - "Finding the most recent filings": guides/current-filings.md
     - Companies:
       - "Working with a company": guides/finding-companies.md
-      - "Company Facts and information": guides/company-facts.md
+      - Getting company facts: guides/company-facts.md
       - Getting a list of company insiders: guides/company-insiders.md
     - Financial Analysis:
       - "Extract Financial Statements": guides/extract-statements.md

@@ -3,6 +3,7 @@
 The Company Facts API provides comprehensive access to SEC financial data through an intuitive, AI-ready interface. Get financial statements, key metrics, and detailed company information with just a few lines of code.
 
 ✨ **Latest Features:**
+
 - **Enhanced Value Formatting**: Full numbers with commas (1,000,000,000) by default, with optional concise format ($1.0B)
 - **Multi-Period Statements**: Rich hierarchical display showing multiple periods side-by-side
 - **LLM Integration**: Built-in `to_llm_context()` method for AI consumption
@@ -65,6 +66,7 @@ if company.facts:
 ```
 
 **Available Properties:**
+
 - `company.facts` - Access to the full EntityFacts object
 - `company.shares_outstanding` - Number of shares outstanding
 - `company.public_float` - Public float value in dollars
@@ -227,6 +229,7 @@ print(stmt_concise)  # Shows: $391.0B
 ```
 
 **Formatting Rules:**
+
 - **Default (`concise_format=False`)**: Full numbers with commas ($1,000,000,000)
 - **Concise (`concise_format=True`)**: Scaled format ($1.0B, $500.3M)
 - **Per-Share Values**: Always decimal format (2.97) regardless of setting
@@ -725,6 +728,7 @@ mixed = company.income_statement(periods=8, annual=False)
 ```
 
 **Enhanced Period Features:**
+
 - **Smart Labeling**: Periods labeled by fiscal quarters and years
 - **Consistency**: "Q2 2024" means period ending in company's fiscal Q2 of 2024
 - **Hierarchy**: "FY 2024" means full fiscal year ending in 2024
@@ -1025,6 +1029,7 @@ shares_value = facts.shares_outstanding       # Direct numeric value
 ```
 
 **Key Improvements:**
+
 - **Backward Compatible**: All existing code continues to work
 - **Enhanced Display**: Rich console formatting with colors and hierarchy
 - **Better Formatting**: Smart value formatting with concise options
