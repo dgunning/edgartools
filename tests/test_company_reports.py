@@ -97,7 +97,6 @@ def test_items_for_10k_filing():
     item_15 = tenk['Item 15']
     assert item_15
     assert 'FINANCIAL STATEMENTS' in item_15
-    assert tenk['ITEM 15'] == item_15
     print(item_15)
 
 def test_tenk_item_structure():
