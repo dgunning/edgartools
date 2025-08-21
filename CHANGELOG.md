@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Release 4.8.1 - 2025-08-21
+
+### Changed
+- Reduce logging level for the `httpxthrottlecache` library to avoid excessive debug logs
+- Change cachedir due to the serialization change
+- Add warning when creating xbrl from amended filings
+
+### Added
+- Add markdown conversion support for HTML attachments and add support for optional page breaks 
+
 ## Release 4.8.0 - 2025-08-14
 
 ### Added
