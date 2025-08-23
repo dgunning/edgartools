@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Mapping, Optional, Tuple, Union
 
 import pandas as pd
+import numpy as np
 from pandas import Index
 from rich import box
 from rich.console import Group
@@ -19,6 +20,77 @@ from rich.text import Text
 
 from edgar.richtools import repr_rich
 from edgar.xbrl.standardization import MappingStore, StandardConcept
+
+
+def _clean_series_data(series: pd.Series) -> pd.Series:
+    """
+    Clean pandas Series data by converting empty strings and invalid values to NaN.
+    
+    Args:
+        series: Input pandas Series that may contain empty strings or invalid values
+        
+    Returns:
+        Cleaned pandas Series with empty strings converted to NaN and proper numeric dtype
+    """
+    if series is None:
+        return series
+    
+    # Create a copy to avoid modifying the original
+    cleaned = series.copy()
+    
+    # Convert empty strings to NaN
+    if cleaned.dtype == object:
+        # Replace empty strings and whitespace-only strings with NaN
+        cleaned = cleaned.replace(r'^\s*$', np.nan, regex=True).infer_objects(copy=False)
+        cleaned = cleaned.replace('', np.nan).infer_objects(copy=False)
+        
+        # Try to convert to numeric, coercing errors to NaN
+        cleaned = pd.to_numeric(cleaned, errors='coerce')
+    
+    return cleaned
+
+
+def _safe_divide(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
+    """
+    Safely divide two pandas Series, handling NaN and zero denominators.
+    
+    Args:
+        numerator: Series to be divided
+        denominator: Series to divide by
+        
+    Returns:
+        Series with division results, NaN where division is invalid
+    """
+    # Clean both series first
+    clean_num = _clean_series_data(numerator)
+    clean_denom = _clean_series_data(denominator)
+    
+    # Use pandas division which handles NaN and division by zero appropriately
+    with np.errstate(divide='ignore', invalid='ignore'):
+        result = clean_num / clean_denom
+    
+    return result
+
+
+def _safe_subtract(minuend: pd.Series, subtrahend: pd.Series) -> pd.Series:
+    """
+    Safely subtract two pandas Series, handling NaN values.
+    
+    Args:
+        minuend: Series to subtract from
+        subtrahend: Series to subtract
+        
+    Returns:
+        Series with subtraction results, NaN where subtraction is invalid
+    """
+    # Clean both series first
+    clean_minuend = _clean_series_data(minuend)
+    clean_subtrahend = _clean_series_data(subtrahend)
+    
+    # Use pandas subtraction which handles NaN appropriately
+    result = clean_minuend - clean_subtrahend
+    
+    return result
 
 
 @dataclass
@@ -87,11 +159,16 @@ class RatioData:
             concept: The concept to check
             
         Returns:
-            True if the concept exists and has at least one non-NaN value
+            True if the concept exists and has at least one non-NaN, non-empty string value
         """
         if concept not in self.calculation_df.index:
             return False
-        return not self.calculation_df.loc[concept].isna().all()
+        
+        # Get the raw series and clean it to properly check for valid data
+        raw_series = self.calculation_df.loc[concept]
+        cleaned_series = _clean_series_data(raw_series)
+        # Check if we have at least one valid (non-NaN) value
+        return not cleaned_series.isna().all() and len(cleaned_series.dropna()) > 0
     
     def get_concept(self, concept: str, default_value: Optional[float] = None) -> pd.Series:
         """Get a concept's values for all periods.
@@ -101,13 +178,16 @@ class RatioData:
             default_value: Default value to use if concept is not found (only for optional concepts)
             
         Returns:
-            Series containing the concept values indexed by period
+            Series containing the concept values indexed by period, with empty strings converted to NaN
             
         Raises:
             KeyError: If concept is required but not found and no default is provided
         """
         if self.has_concept(concept):
-            return self.calculation_df.loc[concept]
+            raw_series = self.calculation_df.loc[concept]
+            # Clean the series data to convert empty strings to NaN
+            cleaned_series = _clean_series_data(raw_series)
+            return cleaned_series
             
         # Concept not found or all NaN
         if concept in self.required_concepts and default_value is None:
@@ -484,7 +564,9 @@ class FinancialRatios:
         """
         # First try to get the direct value
         try:
-            value = calc_df.loc[concept]
+            raw_value = calc_df.loc[concept]
+            # Clean the value to convert empty strings to NaN
+            value = _clean_series_data(raw_value)
             # Check if we actually have any non-NaN values
             if not value.isna().all():
                 return value, None
@@ -502,9 +584,15 @@ class FinancialRatios:
                             continue
 
                     # Calculate equivalent value for each period
-                    values = pd.Series(index=calc_df.columns)
+                    values = pd.Series(index=calc_df.columns, dtype=float)
                     for period in calc_df.columns:
-                        values[period] = equivalent.calculation(calc_df, period)
+                        try:
+                            # Clean the calc_df data before calculation
+                            calc_value = equivalent.calculation(calc_df, period)
+                            values[period] = calc_value if pd.notna(calc_value) else np.nan
+                        except (TypeError, ValueError):
+                            # If calculation fails due to string/numeric operations, set to NaN
+                            values[period] = np.nan
 
                     return values, equivalent.description
                 except (KeyError, ZeroDivisionError):
@@ -637,7 +725,7 @@ class FinancialRatios:
                 name="Current Ratio",
                 description="Measures ability to pay short-term obligations",
                 calculation_df=ratio_data.calculation_df,
-                results=(current_assets / current_liab).to_frame().T,
+                results=_safe_divide(current_assets, current_liab).to_frame().T,
                 components={
                     'current_assets': current_assets,
                     'current_liabilities': current_liab
@@ -674,7 +762,7 @@ class FinancialRatios:
                 name="Return on Assets",
                 description="Measures how efficiently company uses its assets to generate earnings",
                 calculation_df=calc_df,
-                results=(net_income / avg_assets).to_frame().T,
+                results=_safe_divide(net_income, avg_assets).to_frame().T,
                 components={
                     'net_income': net_income,
                     'average_total_assets': avg_assets
@@ -707,7 +795,7 @@ class FinancialRatios:
                 name="Operating Margin",
                 description="Measures operating efficiency and pricing strategy",
                 calculation_df=calc_df,
-                results=(operating_income / revenue).to_frame().T,
+                results=_safe_divide(operating_income, revenue).to_frame().T,
                 components={
                     'operating_income': operating_income,
                     'revenue': revenue
@@ -743,7 +831,7 @@ class FinancialRatios:
                 name="Gross Margin",
                 description="Measures basic profitability from core business activities",
                 calculation_df=calc_df,
-                results=(gross_profit / revenue).to_frame().T,
+                results=_safe_divide(gross_profit, revenue).to_frame().T,
                 components={
                     'gross_profit': gross_profit,
                     'revenue': revenue
@@ -774,8 +862,8 @@ class FinancialRatios:
             # Get inventory with default 0 - the RatioData class handles missing inventory
             inventory = ratio_data.get_concept(StandardConcept.INVENTORY)
             
-            # Calculate quick assets
-            quick_assets = current_assets - inventory
+            # Calculate quick assets using safe subtraction
+            quick_assets = _safe_subtract(current_assets, inventory)
 
             # Collect equivalent descriptions for used concepts
             equivalents_used = {}
@@ -793,7 +881,7 @@ class FinancialRatios:
                 name="Quick Ratio",
                 description="Measures ability to pay short-term obligations using only highly liquid assets",
                 calculation_df=ratio_data.calculation_df,
-                results=(quick_assets / current_liab).to_frame().T,
+                results=_safe_divide(quick_assets, current_liab).to_frame().T,
                 components={
                     'quick_assets': quick_assets,
                     'current_liabilities': current_liab,
@@ -814,7 +902,7 @@ class FinancialRatios:
 
         try:
             cash, cash_equiv = self._get_concept_value(
-                StandardConcept.CASH, calc_df)
+                StandardConcept.CASH_AND_EQUIVALENTS, calc_df)
             current_liab, liab_equiv = self._get_concept_value(
                 StandardConcept.TOTAL_CURRENT_LIABILITIES, calc_df)
 
@@ -828,7 +916,7 @@ class FinancialRatios:
                 name="Cash Ratio",
                 description="Measures ability to pay short-term obligations using only cash",
                 calculation_df=calc_df,
-                results=(cash / current_liab).to_frame().T,
+                results=_safe_divide(cash, current_liab).to_frame().T,
                 components={
                     'cash': cash,
                     'current_liabilities': current_liab
@@ -858,7 +946,7 @@ class FinancialRatios:
             if liab_equiv:
                 equivalents_used['current_liabilities'] = liab_equiv
 
-            working_capital = current_assets - current_liab
+            working_capital = _safe_subtract(current_assets, current_liab)
 
             return RatioAnalysis(
                 name="Working Capital",
