@@ -17,7 +17,7 @@ pd.options.display.width = 1000
 
 
 
-Nvidia_2021_10k = Path("data/Nvidia.10-K.html").read_text()
+Nvidia_2021_10k = Path("data/html/Nvidia.10-K.html").read_text()
 
 
 def test_html2df():
@@ -78,7 +78,7 @@ def test_html_sections_from_html_with_table_with_no_tbody():
 
 
 def test_that_items_are_ordered_in_chunked_document_for_filing():
-    nvidia_10k_html = Path("data/Nvidia.10-K.html").read_text()
+    nvidia_10k_html = Path("data/html/Nvidia.10-K.html").read_text()
     chunked_documents: ChunkedDocument = ChunkedDocument(nvidia_10k_html)
     chunked_data = chunked_documents._chunked_data
     # Test the repr
