@@ -546,7 +546,7 @@ def determine_periods_to_display(
                             continue
                             
                         # Categorize by duration
-                        if 85 <= days <= 95:  # Quarterly period (~90 days)
+                        if 85 <= days <= 100:  # Quarterly period (~90 days)
                             period['period_type'] = 'quarterly'
                             period['days'] = days
                             quarterly_periods.append(period)

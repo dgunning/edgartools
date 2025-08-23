@@ -1208,19 +1208,11 @@ def render_statement(
         periods_to_display, entity_info, statement_type, show_date_range
     )
     
-    # Filter the PeriodData objects by data density
-    filtered_periods = []
-    for period_obj in formatted_period_objects:
-        # Find matching metadata
-        metadata = next((m for m in period_metadatas if m['key'] == period_obj.key), None)
-        if metadata and metadata.get('data_density', 0) > 0.3:
-            filtered_periods.append(period_obj)
-    
     # Create the RenderedStatement and its header
     header = StatementHeader(
-        columns=[period.label for period in filtered_periods],
-        period_keys=[period.key for period in filtered_periods],
-        periods=filtered_periods,
+        columns=[period.label for period in formatted_period_objects],
+        period_keys=[period.key for period in formatted_period_objects],
+        periods=formatted_period_objects,
         metadata={
             'dominant_scale': dominant_scale,
             'shares_scale': shares_scale,
@@ -1252,10 +1244,6 @@ def render_statement(
         if not item.get('has_values', False) and item.get('is_abstract') and not has_children:
             continue
             
-        # Skip non-abstract items without values (missing data)
-        if not item.get('has_values', False) and not item.get('is_abstract') and not item.get('children'):
-            continue
-            
         # Skip axis/dimension items (they contain brackets in their labels)
         if any(bracket in item['label'] for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
             continue
@@ -1281,7 +1269,7 @@ def render_statement(
         )
         
         # Add values for each period
-        for period in filtered_periods:
+        for period in formatted_period_objects:
             period_key = period.key
             value = item['values'].get(period_key, "")
             # Get comparison info for this item and period if available
