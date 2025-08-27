@@ -943,17 +943,17 @@ class EnhancedStatementBuilder:
         
         # Use the same logic as FactQuery.latest_periods for consistency
         # Group facts by unique periods and calculate period info
+        # FIX: Use period_end as part of the key to keep all variations
         period_info = {}
         period_facts = defaultdict(list)
         
         for fact in stmt_facts:
-            period_key = (fact.fiscal_year, fact.fiscal_period)
+            # Include period_end in the key to avoid losing different period_end variations
+            period_key = (fact.fiscal_year, fact.fiscal_period, fact.period_end)
+            # Make period label unique by including period_end when there are duplicates
             period_label = f"{fact.fiscal_period} {fact.fiscal_year}"
             
-            # Store facts by period label
-            period_facts[period_label].append(fact)
-            
-            # Store period metadata
+            # Store period metadata for each unique combination
             if period_key not in period_info:
                 period_info[period_key] = {
                     'label': period_label,
@@ -963,6 +963,9 @@ class EnhancedStatementBuilder:
                     'fiscal_year': fact.fiscal_year,
                     'fiscal_period': fact.fiscal_period
                 }
+            
+            # Store facts by the unique period key instead of label
+            period_facts[period_key].append(fact)
         
         # Create list of periods with their metadata
         period_list = []
@@ -970,21 +973,98 @@ class EnhancedStatementBuilder:
             period_list.append((period_key, info))
         
         if annual:
-            # When annual=True, only use annual periods - no backfilling with interim periods
-            annual_periods = [(pk, info) for pk, info in period_list if info['is_annual']]
+            # When annual=True, filter for TRUE annual periods using duration
+            # Some facts are marked as FY but are actually quarterly (90 days vs 363+ days)
+            true_annual_periods = []
             
-            # Sort annual periods by fiscal year (newest first)
-            annual_periods.sort(key=lambda x: x[0][0] if x[0][0] else 0, reverse=True)
+            for pk, info in period_list:
+                if not info['is_annual']:
+                    continue
+                    
+                # pk is now (fiscal_year, fiscal_period, period_end)
+                fiscal_year = pk[0]
+                period_end_date = pk[2]
+                
+                # Allow fiscal_year to be within 0-3 years of period_end.year
+                # This handles current year data and comparative periods
+                if not period_end_date:
+                    continue
+                year_diff = fiscal_year - period_end_date.year
+                if year_diff < -1 or year_diff > 3:
+                    continue  # Too far off to be valid
+                
+                # Get a fact from this period to check duration
+                period_fact_list = period_facts.get(pk, [])
+                if period_fact_list:
+                    # Check if this is truly annual by looking at period duration
+                    sample_fact = period_fact_list[0]
+                    if sample_fact.period_start and sample_fact.period_end:
+                        duration = (sample_fact.period_end - sample_fact.period_start).days
+                        # Annual periods are typically 360-370 days, quarterly are ~90 days
+                        if duration > 300:  # This is truly annual
+                            true_annual_periods.append((pk, info))
+                    elif not sample_fact.period_start:
+                        # If no period_start, assume it's annual if marked as FY
+                        # (this handles instant facts like balance sheet items)
+                        true_annual_periods.append((pk, info))
             
-            # Select only annual periods, up to n
-            selected_period_info = annual_periods[:periods]
+            # Group by actual period year (not fiscal year) and deduplicate
+            # Keep the one with the latest filing_date for each period year
+            annual_by_period_year = {}
+            for pk, info in true_annual_periods:
+                period_end_date = pk[2]
+                period_year = period_end_date.year if period_end_date else None
+                
+                if period_year:
+                    # If we have multiple facts for the same period year,
+                    # keep the one with the latest filing date (most recent filing)
+                    if period_year not in annual_by_period_year or \
+                       (info.get('filing_date') and 
+                        annual_by_period_year[period_year][1].get('filing_date') and
+                        info['filing_date'] > annual_by_period_year[period_year][1]['filing_date']):
+                        annual_by_period_year[period_year] = (pk, info)
+            
+            # Sort by period year (descending) and select
+            sorted_periods = sorted(annual_by_period_year.items(), key=lambda x: x[0], reverse=True)
+            selected_period_info = [period_info for year, period_info in sorted_periods[:periods]]
         else:
             # Sort all periods by end date (newest first)
             period_list.sort(key=lambda x: x[1]['end_date'], reverse=True)
             selected_period_info = period_list[:periods]
         
-        # Extract period labels for selected periods
-        selected_periods = [info['label'] for _, info in selected_period_info]
+        # Extract period labels and build a mapping for the selected periods
+        # For annual periods, use the actual period end year in the label
+        selected_periods = []
+        for pk, info in selected_period_info:
+            if annual and info.get('is_annual') and pk[2]:  # pk[2] is period_end
+                # Use the actual period year instead of fiscal year in the label
+                label = f"FY {pk[2].year}"
+            else:
+                label = info['label']
+            selected_periods.append(label)
+        
+        # Create a new period_facts dict with labels as keys for the selected periods
+        # CRITICAL: For annual periods, filter facts to only include those with duration > 300 days
+        period_facts_by_label = defaultdict(list)
+        for i, (period_key, info) in enumerate(selected_period_info):
+            label = selected_periods[i]  # Use the corrected label
+            facts_for_period = period_facts.get(period_key, [])
+            
+            # If this is an annual period, filter to only include annual facts
+            if annual and info.get('is_annual'):
+                filtered_facts = []
+                for fact in facts_for_period:
+                    # Keep facts with annual duration (>300 days) or instant facts (no period_start)
+                    if fact.period_start and fact.period_end:
+                        duration = (fact.period_end - fact.period_start).days
+                        if duration > 300:
+                            filtered_facts.append(fact)
+                    else:
+                        # Instant facts (balance sheet items) don't have duration
+                        filtered_facts.append(fact)
+                period_facts_by_label[label] = filtered_facts
+            else:
+                period_facts_by_label[label] = facts_for_period
         
         # Build hierarchical structure using canonical template
         # Handle statement type naming inconsistencies
@@ -1004,10 +1084,10 @@ class EnhancedStatementBuilder:
             virtual_tree_key = statement_type
         
         if virtual_tree_key in self.virtual_trees:
-            items = self._build_with_canonical(period_facts, selected_periods, virtual_tree_key)
+            items = self._build_with_canonical(period_facts_by_label, selected_periods, virtual_tree_key)
             canonical_coverage = self._calculate_coverage(stmt_facts, virtual_tree_key)
         else:
-            items = self._build_from_facts(period_facts, selected_periods)
+            items = self._build_from_facts(period_facts_by_label, selected_periods)
             canonical_coverage = 0.0
         
         return MultiPeriodStatement(
