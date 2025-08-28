@@ -18,6 +18,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from .terminal_styles import get_current_scheme
+
 
 @dataclass
 class ConceptFormatting:
@@ -252,11 +254,13 @@ class FinancialStatement:
         """Creates a rich representation for professional financial statement display."""
 
         
+        colors = get_current_scheme()
+        
         if self.data.empty:
             return Panel(
-                Text("No data available", style="dim"),
+                Text("No data available", style=colors["empty_value"]),
                 title=f"📊 {self.statement_type.replace('Statement', ' Statement')}",
-                border_style="blue"
+                border_style=colors["panel_border"]
             )
         
         # Statement type icon mapping
@@ -272,19 +276,19 @@ class FinancialStatement:
         if self.entity_name:
             title = Text.assemble(
                 icon + " ",
-                (self.entity_name, "bold green"),
+                (self.entity_name, colors["company_name"]),
                 " ",
-                (self.statement_type.replace('Statement', ' Statement'), "bold blue")
+                (self.statement_type.replace('Statement', ' Statement'), colors["statement_type"])
             )
         else:
             title = Text.assemble(
                 icon + " ",
-                (self.statement_type.replace('Statement', ' Statement'), "bold blue")
+                (self.statement_type.replace('Statement', ' Statement'), colors["statement_type"])
             )
         
         # Create the main financial statement table
         statement_table = Table(box=SIMPLE, show_header=True, padding=(0, 1))
-        statement_table.add_column("Line Item", style="bold", no_wrap=True, max_width=30)
+        statement_table.add_column("Line Item", style=colors["total_item"], no_wrap=True, max_width=30)
         
         # Add period columns (limit to reasonable number for display)
         periods = list(self.data.columns)
@@ -313,8 +317,8 @@ class FinancialStatement:
         
         # Create summary info panel
         info_table = Table(box=SIMPLE_HEAVY, show_header=False, padding=(0, 1))
-        info_table.add_column("Metric", style="dim")
-        info_table.add_column("Value", style="bold")
+        info_table.add_column("Metric", style=colors["low_confidence_item"])
+        info_table.add_column("Value", style=colors["total_item"])
         
         info_table.add_row("Line Items", f"{len(self.data.index):,}")
         info_table.add_row("Periods", f"{len(self.data.columns):,}")
@@ -338,7 +342,7 @@ class FinancialStatement:
             warning_panel = Panel(
                 warning_text,
                 title="🚨 Period Warning",
-                border_style="yellow"
+                border_style=colors.get("warning", "yellow")
             )
         
         # Subtitle with additional info
@@ -371,7 +375,7 @@ class FinancialStatement:
         return Panel(
             content,
             title=title,
-            border_style="blue"
+            border_style=colors["panel_border"]
         )
     
     def __repr__(self):

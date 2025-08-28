@@ -20,6 +20,26 @@ from rich.text import Text
 
 from edgar.entity.mappings_loader import load_learned_mappings, load_virtual_trees
 from edgar.entity.models import FinancialFact
+
+try:
+    from edgar.entity.terminal_styles import get_current_scheme
+except ImportError:
+    # Fallback if terminal_styles not available - use professional scheme
+    def get_current_scheme():
+        return {
+            "abstract_item": "bold blue",
+            "total_item": "bold bright_white",
+            "regular_item": "",
+            "low_confidence_item": "italic",
+            "positive_value": "green",
+            "negative_value": "red",
+            "total_value_prefix": "bold",
+            "separator": "blue",
+            "company_name": "bold bright_white",
+            "statement_type": "bold blue",
+            "panel_border": "white",
+            "empty_value": "bright_black",
+        }
 from edgar.richtools import repr_rich
 
 
@@ -50,6 +70,9 @@ class MultiPeriodStatement:
     
     def __rich__(self):
         """Create a rich representation with multiple periods."""
+        # Get color scheme at the start
+        colors = get_current_scheme()
+        
         # Statement type mapping
         statement_names = {
             'IncomeStatement': 'Income Statement',
@@ -60,9 +83,9 @@ class MultiPeriodStatement:
         # Title
         title_parts = []
         if self.company_name:
-            title_parts.append((self.company_name, "bold green"))
+            title_parts.append((self.company_name, colors["company_name"]))
         else:
-            title_parts.append(("Financial Statement", "bold"))
+            title_parts.append(("Financial Statement", colors["total_item"]))
         
         title = Text.assemble(*title_parts)
         
@@ -95,12 +118,31 @@ class MultiPeriodStatement:
             
             # Concept label
             if item.is_abstract:
-                row.append(Text(f"{indent}{item.label}", style="bold cyan"))
+                row.append(Text(f"{indent}{item.label}", style=colors["abstract_item"]))
             elif item.is_total:
-                row.append(Text(f"{indent}{item.label}", style="bold"))
+                row.append(Text(f"{indent}{item.label}", style=colors["total_item"]))
             else:
-                style = "dim" if item.confidence < 0.8 else ""
-                confidence_marker = " ◦" if item.confidence < 0.8 else ""
+                # Check if this is a key financial item that should always be prominent
+                important_labels = [
+                    'Total Revenue', 'Revenue', 'Net Sales', 'Total Net Sales',
+                    'Operating Income', 'Operating Income (Loss)', 'Operating Profit',
+                    'Net Income', 'Net Income (Loss)', 'Net Earnings',
+                    'Gross Profit', 'Gross Margin',
+                    'Cost of Revenue', 'Cost of Goods Sold',
+                    'Operating Expenses', 'Total Operating Expenses',
+                    'Earnings Per Share', 'EPS'
+                ]
+                
+                is_important = any(label in item.label for label in important_labels)
+                
+                # Don't mark important items as low confidence even if score is low
+                if is_important:
+                    style = colors["total_item"]  # Use bold styling for important items
+                    confidence_marker = ""
+                else:
+                    style = colors["low_confidence_item"] if item.confidence < 0.8 else colors["regular_item"]
+                    confidence_marker = " ◦" if item.confidence < 0.8 else ""
+                
                 row.append(Text(f"{indent}{item.label}{confidence_marker}", style=style))
             
             # Period values
@@ -110,12 +152,16 @@ class MultiPeriodStatement:
                     # Color code values
                     value = item.values.get(period)
                     if value and isinstance(value, (int, float)):
-                        value_style = "red" if value < 0 else "green"
+                        value_style = colors["negative_value"] if value < 0 else colors["positive_value"]
                     else:
                         value_style = ""
                     
                     if item.is_total:
-                        row.append(Text(value_str, style=f"bold yellow {value_style}"))
+                        # Combine total style with value color if present
+                        total_style = colors["total_value_prefix"]
+                        if value_style:
+                            total_style = f"{total_style} {value_style}"
+                        row.append(Text(value_str, style=total_style))
                     else:
                         row.append(Text(value_str, style=value_style))
                 else:
@@ -125,9 +171,9 @@ class MultiPeriodStatement:
             
             # Add separator line after totals
             if item.is_total and depth == 0:
-                separator_row = [Text("─" * 40, style="dim")]
+                separator_row = [Text("─" * 40, style=colors["separator"])]
                 for _ in self.periods:
-                    separator_row.append(Text("─" * 15, style="dim"))
+                    separator_row.append(Text("─" * 15, style=colors["separator"]))
                 stmt_table.add_row(*separator_row)
             
             # Add children
@@ -152,7 +198,7 @@ class MultiPeriodStatement:
             content,
             title=title,
             subtitle=subtitle,
-            border_style="blue",
+            border_style=colors["panel_border"],
             expand=True
         )
     
@@ -1150,6 +1196,9 @@ class EnhancedStatementBuilder:
         for item in items:
             self._apply_smart_aggregation(item)
         
+        # Remove redundant table duplicates for cleaner presentation
+        items = self._deduplicate_table_items(items)
+        
         return items
     
     def _build_with_promoted_concepts(self,
@@ -1558,6 +1607,116 @@ class EnhancedStatementBuilder:
                         # Mark as aggregated
                         if not item.label.endswith(' (Aggregated)'):
                             item.label = item.label + ' (Aggregated)'
+    
+    def _deduplicate_table_items(self, items: List[MultiPeriodItem]) -> List[MultiPeriodItem]:
+        """
+        Remove redundant items from Statement [Table] structures when they duplicate primary items.
+        
+        This handles the XBRL quirk where the same concepts appear both:
+        1. At the top level (primary context)
+        2. Under Statement [Table] -> Statement [Line Items] (dimensional context)
+        
+        When there are no actual dimensions, these are pure duplicates.
+        """
+        # First, collect all concepts and their values from non-table contexts
+        primary_concepts = {}
+        
+        def collect_primary_concepts(item: MultiPeriodItem, in_table: bool = False):
+            """Collect concepts that are not in table structures."""
+            # Check if we're entering a table
+            if 'Table' in item.label and 'Statement' in item.label:
+                in_table = True
+            
+            if not in_table and item.concept and item.values:
+                # Store the concept and its values
+                if any(v is not None for v in item.values.values()):
+                    primary_concepts[item.concept] = item.values
+            
+            # Recurse through children
+            for child in item.children:
+                collect_primary_concepts(child, in_table)
+        
+        # Collect all primary (non-table) concepts
+        for item in items:
+            collect_primary_concepts(item)
+        
+        def remove_duplicate_table_items(item: MultiPeriodItem, in_table: bool = False) -> Optional[MultiPeriodItem]:
+            """Remove items from table structures that duplicate primary items."""
+            # Check if we're entering a table
+            if 'Table' in item.label and 'Statement' in item.label:
+                in_table = True
+                
+                # For table structures, check if ALL children are duplicates
+                # If so, we might want to skip the entire table
+                cleaned_children = []
+                total_children = 0
+                duplicate_children = 0
+                
+                for child in item.children:
+                    total_children += 1
+                    cleaned_child = remove_duplicate_table_items(child, in_table)
+                    if cleaned_child:
+                        cleaned_children.append(cleaned_child)
+                    else:
+                        duplicate_children += 1
+                
+                # If most children are duplicates and we have few remaining items,
+                # consider removing the table entirely
+                if cleaned_children and len(cleaned_children) > 2:
+                    # Keep the table if it has meaningful content
+                    item.children = cleaned_children
+                    return item
+                elif not cleaned_children:
+                    # Table is entirely duplicates, remove it
+                    return None
+                else:
+                    # Table has very little unique content, remove it
+                    return None
+            
+            # For items within tables, check if they're duplicates
+            if in_table and item.concept in primary_concepts:
+                # Check if values match
+                if item.values == primary_concepts[item.concept]:
+                    # This is a duplicate, remove it (but keep exploring children
+                    # in case they have unique dimensional breakdowns)
+                    has_unique_children = False
+                    cleaned_children = []
+                    
+                    for child in item.children:
+                        cleaned_child = remove_duplicate_table_items(child, in_table)
+                        if cleaned_child:
+                            cleaned_children.append(cleaned_child)
+                            # Check if child has different values
+                            if cleaned_child.concept not in primary_concepts or \
+                               cleaned_child.values != primary_concepts.get(cleaned_child.concept):
+                                has_unique_children = True
+                    
+                    if has_unique_children:
+                        # Keep this item as a container for unique children
+                        item.children = cleaned_children
+                        return item
+                    else:
+                        # Pure duplicate with no unique children
+                        return None
+            
+            # For non-duplicate items, clean their children
+            cleaned_children = []
+            for child in item.children:
+                cleaned_child = remove_duplicate_table_items(child, in_table)
+                if cleaned_child:
+                    cleaned_children.append(cleaned_child)
+            
+            item.children = cleaned_children
+            return item
+        
+        # Process all top-level items
+        cleaned_items = []
+        for item in items:
+            cleaned_item = remove_duplicate_table_items(item)
+            if cleaned_item:
+                cleaned_items.append(cleaned_item)
+        
+        return cleaned_items
     
     def _should_aggregate_children(self, item: MultiPeriodItem) -> bool:
         """Determine if children should be aggregated for this parent."""
