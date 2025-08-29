@@ -1118,7 +1118,7 @@ class XBRL:
         if parenthetical:
             statement_title = f"{statement_title} (Parenthetical)"
         
-        # Get periods to display using the new periods module
+        # Get periods to display using smart selection with legacy fallback
         periods_to_display = determine_periods_to_display(
             self, actual_statement_type, period_filter, period_view
         )
