@@ -153,6 +153,11 @@ class Statement:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+    
+    def __str__(self):
+        """String representation using improved rendering with proper width."""
+        rendered_statement = self.render()
+        return str(rendered_statement)  # Delegates to RenderedStatement.__str__()
 
     @property
     def primary_concept(self):

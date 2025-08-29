@@ -85,6 +85,22 @@ ACCESSIBLE_SCHEME = {
     "empty_value": "bright_black",
 }
 
+# SEC filing style - mimics actual printed filings
+FILING_SCHEME = {
+    "abstract_item": "bold",           # Major sections (ASSETS, LIABILITIES) - just bold
+    "total_item": "bold",              # Subtotals - bold only
+    "regular_item": "",                # Regular items - no styling
+    "low_confidence_item": "dim",      # Low confidence items - dimmed
+    "positive_value": "",              # Positive values - no color (like printed filings)
+    "negative_value": "",              # Negative values - no color (parentheses show negative)
+    "total_value_prefix": "bold",      # Total values - bold only
+    "separator": "dim",                # Table separators - dimmed
+    "company_name": "bold",            # Company name - just bold
+    "statement_type": "bold",          # Statement title - just bold
+    "panel_border": "white",           # Panel borders - white
+    "empty_value": "dim",              # Empty values - dimmed
+}
+
 # Available schemes
 SCHEMES: Dict[str, Dict[str, str]] = {
     "default": DEFAULT_SCHEME,
@@ -92,6 +108,7 @@ SCHEMES: Dict[str, Dict[str, str]] = {
     "professional": PROFESSIONAL_SCHEME,
     "minimal": MINIMAL_SCHEME,
     "accessible": ACCESSIBLE_SCHEME,
+    "filing": FILING_SCHEME,
 }
 
 def get_color_scheme(scheme_name: str = "professional") -> Dict[str, str]:
@@ -99,7 +116,7 @@ def get_color_scheme(scheme_name: str = "professional") -> Dict[str, str]:
     Get a color scheme by name.
     
     Args:
-        scheme_name: Name of the scheme (default, high_contrast, professional, minimal, accessible)
+        scheme_name: Name of the scheme (default, high_contrast, professional, minimal, accessible, filing)
         
     Returns:
         Dictionary of style mappings
@@ -114,7 +131,7 @@ def get_current_scheme() -> Dict[str, str]:
     Get the current color scheme based on environment variable or default.
     
     Environment variable: EDGAR_FINANCIALS_COLOR_SCHEME
-    Values: default, high_contrast, professional, minimal, accessible
+    Values: default, high_contrast, professional, minimal, accessible, filing
     """
     scheme_name = os.environ.get("EDGAR_FINANCIALS_COLOR_SCHEME", "professional")
     return get_color_scheme(scheme_name)

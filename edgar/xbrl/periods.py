@@ -298,6 +298,9 @@ def determine_periods_to_display(
     """
     Determine which periods should be displayed for a statement.
     
+    Uses smart period selection, which balances investor needs
+    with data availability for optimal financial analysis.
+    
     Args:
         xbrl_instance: XBRL instance with context and entity information
         statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
@@ -329,6 +332,16 @@ def determine_periods_to_display(
                         periods_to_display.append((period_key, period['label']))
                         break
             return periods_to_display
+    
+    # Use smart period selection with fallback to legacy logic
+    try:
+        from edgar.xbrl.smart_periods import select_smart_periods
+        return select_smart_periods(xbrl_instance, statement_type)
+    except Exception as e:
+        # Log the error and fall back to legacy logic
+        import logging
+        logging.warning(f"Smart period selection failed, using legacy logic: {e}")
+        # Continue to legacy logic below
     
     # If no specific periods requested, use default logic based on statement type
     all_periods = xbrl_instance.reporting_periods
@@ -412,14 +425,31 @@ def determine_periods_to_display(
                         break  # Stop when we have 3 periods
                     
                     # For annual reports, only add periods that are fiscal year ends
+                    # ENHANCED: Ensure we're selecting true annual period ends, not quarterly
                     if is_annual_report and fiscal_year_end_month is not None and fiscal_year_end_day is not None:
                         try:
                             # Check if this period is close to the fiscal year end
                             period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
+                            
+                            # STRICT CHECK: For annual reports, be more selective
+                            # The period should be within a reasonable range of fiscal year end
                             is_fiscal_year_end = (
                                     period_date.month == fiscal_year_end_month and
                                     abs(period_date.day - fiscal_year_end_day) <= 15  # Allow some flexibility
                             )
+                            
+                            # Additional check: Ensure this is approximately 1 year before previous periods
+                            if is_fiscal_year_end and len(periods_to_display) > 0:
+                                prev_date_str = periods_to_display[-1][0].split('_')[-1] if '_' in periods_to_display[-1][0] else None
+                                if prev_date_str:
+                                    try:
+                                        prev_date = datetime.strptime(prev_date_str, '%Y-%m-%d').date()
+                                        year_diff = abs((prev_date - period_date).days)
+                                        # Should be approximately 365 days apart (allow 350-380 range)
+                                        if not (350 <= year_diff <= 380):
+                                            is_fiscal_year_end = False
+                                    except (ValueError, TypeError):
+                                        pass
                             
                             # Only include this period if it's a fiscal year end
                             if not is_fiscal_year_end:
@@ -473,17 +503,22 @@ def determine_periods_to_display(
                 fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
                 
                 # First pass: Find all periods that are approximately a year long
+                # CRITICAL FIX: Apply strict duration filtering to ensure we only get annual periods
+                # Some facts are marked as FY but are actually quarterly (90 days vs 363+ days)
                 candidate_annual_periods = []
                 for period in duration_periods:
                     try:
                         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
                         end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
                         days = (end_date - start_date).days
-                        if 350 <= days <= 380:  # ~365 days
+                        # STRICT CHECK: Annual periods must be > 300 days
+                        # This filters out quarterly periods incorrectly marked as FY
+                        if days > 300:  # Truly annual period (not quarterly)
                             # Add a score to each period for later sorting
                             # Default score is 0 (will be increased for fiscal year matches)
                             period_with_score = period.copy()
                             period_with_score['fiscal_alignment_score'] = 0
+                            period_with_score['duration_days'] = days  # Store for debugging
                             candidate_annual_periods.append(period_with_score)
                     except (ValueError, TypeError):
                         continue
@@ -535,6 +570,7 @@ def determine_periods_to_display(
                         pass
                 
                 # Categorize all duration periods by their length
+                # ENHANCED: More strict duration checking to avoid misclassification
                 for period in duration_periods:
                     try:
                         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
@@ -545,20 +581,20 @@ def determine_periods_to_display(
                         if days < 30:
                             continue
                             
-                        # Categorize by duration
-                        if 85 <= days <= 100:  # Quarterly period (~90 days)
+                        # Categorize by duration with stricter checks
+                        if 80 <= days <= 100:  # Quarterly period (~90 days), slightly wider range
                             period['period_type'] = 'quarterly'
                             period['days'] = days
                             quarterly_periods.append(period)
-                        elif 175 <= days <= 185:  # Semi-annual/YTD for Q2 (~180 days)
+                        elif 170 <= days <= 190:  # Semi-annual/YTD for Q2 (~180 days)
                             period['period_type'] = 'semi-annual'
                             period['days'] = days
                             ytd_periods.append(period)
-                        elif 265 <= days <= 275:  # YTD for Q3 (~270 days)
+                        elif 260 <= days <= 280:  # YTD for Q3 (~270 days)
                             period['period_type'] = 'three-quarters'
                             period['days'] = days
                             ytd_periods.append(period)
-                        elif 350 <= days <= 380:  # Annual period for comparisons
+                        elif days > 300:  # Annual period for comparisons (strict check)
                             period['period_type'] = 'annual'
                             period['days'] = days
                             annual_periods.append(period)

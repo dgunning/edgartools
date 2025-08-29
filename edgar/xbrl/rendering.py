@@ -20,29 +20,70 @@ from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
 from edgar.xbrl.core import determine_dominant_scale, format_date, format_value, parse_date
 
-# Default style configuration
-DEFAULT_STYLES = {
-    'header': {
-        'top_level': {'style': 'bold', 'case': 'upper'},
-        'section': {'style': 'bold', 'case': 'title'},
-        'subsection': {'style': 'bold', 'case': 'title'}
-    },
-    'dimension': {
-        'single': {'style': 'italic', 'case': 'title'},
-        'multi': {'style': 'italic dim', 'case': 'title'}
-    },
-    'value': {
-        'positive': {'style': 'none', 'color': 'default'},
-        'negative': {'style': 'none', 'color': 'red'},
-        'zero': {'style': 'dim', 'color': 'default'},
-        'empty': {'style': 'dim', 'color': 'grey'}
-    },
-    'comparison': {
-        'increase': {'symbol': '▲', 'color': 'green'},
-        'decrease': {'symbol': '▼', 'color': 'red'},
-        'unchanged': {'symbol': '•', 'color': 'grey'}
+# Import color schemes from entity package
+try:
+    from edgar.entity.terminal_styles import get_color_scheme
+    import os
+    
+    def get_xbrl_color_scheme():
+        """Get XBRL-specific color scheme with filing as default."""
+        scheme_name = os.environ.get("EDGAR_FINANCIALS_COLOR_SCHEME", "filing")  # Default to filing for XBRL
+        return get_color_scheme(scheme_name)
+        
+except ImportError:
+    # Fallback if terminal_styles not available
+    def get_xbrl_color_scheme():
+        return {
+            "abstract_item": "bold",
+            "total_item": "bold",
+            "regular_item": "",
+            "low_confidence_item": "dim",
+            "positive_value": "",
+            "negative_value": "",
+            "total_value_prefix": "bold",
+            "separator": "dim",
+            "company_name": "bold",
+            "statement_type": "bold",
+            "panel_border": "white",
+            "empty_value": "dim",
+        }
+
+# Enhanced style configuration using XBRL color schemes
+def get_xbrl_styles():
+    """Get XBRL rendering styles based on current color scheme."""
+    colors = get_xbrl_color_scheme()
+    
+    return {
+        'header': {
+            'company_name': colors['company_name'],
+            'statement_title': colors['statement_type'],
+            'top_level': colors['abstract_item'],  # Major sections like ASSETS, LIABILITIES
+            'section': colors['total_item'],       # Subtotals like Current assets
+            'subsection': colors['regular_item']   # Regular line items
+        },
+        'value': {
+            'positive': colors['positive_value'],
+            'negative': colors['negative_value'],
+            'total': colors['total_value_prefix'],
+            'empty': colors['empty_value']
+        },
+        'structure': {
+            'separator': colors['separator'],
+            'border': colors['panel_border'],
+            'abstract': colors['abstract_item'],
+            'total': colors['total_item'],
+            'regular': colors['regular_item'],
+            'low_confidence': colors['low_confidence_item']
+        },
+        'comparison': {
+            'increase': {'symbol': '▲', 'color': colors['positive_value']},
+            'decrease': {'symbol': '▼', 'color': colors['negative_value']},
+            'unchanged': {'symbol': '•', 'color': colors['separator']}
+        }
     }
-}
+
+# Legacy fallback for existing code
+DEFAULT_STYLES = get_xbrl_styles()
 
 # Configuration for comparative analysis
 COMPARISON_CONFIG = {
@@ -180,75 +221,152 @@ class RenderedStatement:
         return self.header.periods
 
     def __rich__(self) -> RichTable:
-        """Render as a rich table"""
-        # Create the table
-        table = RichTable(title=self.title, box=box.SIMPLE)
-
-        # Add the fiscal period indicator and units note as a subtitle if available
-        if self.header.columns:
-            subtitles = []
-
-            # Add fiscal period indicator if available
-            if self.fiscal_period_indicator:
-                subtitles.append(f"[bold]{self.fiscal_period_indicator}[/bold]")
-
-            # Add units note
-            if self.units_note:
-                subtitles.append(self.units_note)
-
-            # Apply subtitles to table title
-            if subtitles:
-                table.title = f"{self.title}\n{' '.join(subtitles)}"
+        """Render as a rich table with professional styling"""
+        # Get professional color scheme
+        styles = get_xbrl_styles()
+        
+        # Clean up title - remove internal terminology like "(Standardized)"
+        clean_title = self.title.replace("(Standardized)", "").strip()
+        
+        # Build title hierarchy with improved visual design
+        title_parts = []
+        
+        # Main title (bold, prominent)
+        title_parts.append(f"[{styles['header']['statement_title']}]{clean_title}[/{styles['header']['statement_title']}]")
+        
+        # Subtitle: fiscal period indicator (normal weight)
+        if self.fiscal_period_indicator:
+            title_parts.append(f"{self.fiscal_period_indicator}")
+        
+        # Units note (dim, subtle)
+        if self.units_note:
+            title_parts.append(f"[{styles['structure']['separator']}]{self.units_note}[/{styles['structure']['separator']}]")
+        
+        # Create the table with clean title hierarchy
+        table = RichTable(title="\n".join(title_parts), 
+                         box=box.SIMPLE, 
+                         border_style=styles['structure']['border'])
 
         # Add columns with right-alignment for numeric columns
         table.add_column("", justify="left")
         for column in self.header.columns:
-            table.add_column(column)
+            # Apply styling to column headers
+            header_style = styles['structure']['total']
+            if header_style:
+                styled_column = Text(column, style=header_style)
+                table.add_column(styled_column)
+            else:
+                table.add_column(column)
 
-        # Add rows
+        # Add rows with professional styling
         for row in self.rows:
-            # Format the label based on level and properties
+            # Format the label based on level and properties with professional colors
+            indent = "  " * row.level
+            
             if row.is_dimension:
-                # Format dimension items with the appropriate style
-                indent = "  " * row.level
-                styled_label = f"{indent}[italic]{row.label}[/italic]"
+                # Format dimension items with italic style
+                label_text = f"{indent}{row.label}"
+                style = styles['structure']['low_confidence']
+                styled_label = Text(label_text, style=style) if style else Text(label_text)
             elif row.is_abstract:
                 if row.level == 0:
-                    # Top-level header - full caps, bold
-                    styled_label = f"[bold]{row.label.upper()}[/bold]"
+                    # Top-level header - major sections like ASSETS, LIABILITIES
+                    label_text = row.label.upper()
+                    style = styles['header']['top_level']
+                    styled_label = Text(label_text, style=style) if style else Text(label_text)
                 elif row.level == 1:
-                    # Section header - bold
-                    styled_label = f"[bold]{row.label}[/bold]"
+                    # Section header - subtotals like Current assets
+                    label_text = row.label
+                    style = styles['header']['section']
+                    styled_label = Text(label_text, style=style) if style else Text(label_text)
                 else:
                     # Sub-section header - indented, bold
-                    indent = "  " * (row.level - 1)  # Less aggressive indentation
-                    styled_label = f"[bold]{indent}{row.label}[/bold]"
+                    sub_indent = "  " * (row.level - 1)
+                    label_text = f"{sub_indent}{row.label}"
+                    style = styles['header']['subsection']
+                    styled_label = Text(label_text, style=style) if style else Text(label_text)
             else:
                 # Regular line items - indented based on level
-                indent = "  " * row.level
-                # If this item has dimension children, make it bold and add a colon
                 if row.has_dimension_children and row.cells:
-                    styled_label = f"[bold]{indent}{row.label}:[/bold]"
+                    # Items with dimension children get bold styling and colon
+                    label_text = f"{indent}{row.label}:"
+                    style = styles['structure']['total']
+                    styled_label = Text(label_text, style=style) if style else Text(label_text)
                 else:
-                    styled_label = f"{indent}{row.label}"
+                    # Regular line items
+                    label_text = f"{indent}{row.label}"
+                    style = styles['header']['subsection'] if styles['header']['subsection'] else None
+                    styled_label = Text(label_text, style=style) if style else Text(label_text)
 
-            # Convert cells to their display representation as Rich Text objects
+            # Convert cells to their display representation with value-based styling
             cell_values = []
             for cell in row.cells:
-                # Convert string values to Rich Text objects for console display
                 if cell.value is None or cell.value == "":
-                    cell_values.append("")
+                    # Empty values - create empty Text object
+                    cell_values.append(Text("", justify="right"))
                 else:
-                    # Create a Rich Text object with right justification
+                    # Format the cell value first
                     cell_value = cell.formatter(cell.value)
-                    cell_values.append(Text(str(cell_value), justify="right"))
+                    cell_str = str(cell_value)
+                    
+                    # Determine the style to apply based on content
+                    if row.is_abstract or "Total" in row.label:
+                        # Totals get special styling
+                        style = styles['value']['total']
+                    elif cell_str.startswith('(') or cell_str.startswith('-') or cell_str.startswith('$('):
+                        # Negative values
+                        style = styles['value']['negative']
+                    else:
+                        # Positive values
+                        style = styles['value']['positive']
+                    
+                    # Create Rich Text object with proper styling
+                    if style:
+                        # Apply the style directly to the Text object
+                        text_obj = Text(cell_str, style=style, justify="right")
+                    else:
+                        text_obj = Text(cell_str, justify="right")
+                    
+                    cell_values.append(text_obj)
 
             table.add_row(styled_label, *cell_values)
+
+        # Add footer metadata as table caption
+        footer_parts = []
+        
+        # Extract metadata if available
+        company_name = self.metadata.get('company_name')
+        form_type = self.metadata.get('form_type')
+        period_end = self.metadata.get('period_end')
+        fiscal_period = self.metadata.get('fiscal_period')
+        
+        # Build footer with available information
+        if company_name:
+            footer_parts.append(company_name)
+        if form_type:
+            footer_parts.append(f"Form {form_type}")
+        if period_end:
+            footer_parts.append(f"Period ending {period_end}")
+        if fiscal_period:
+            footer_parts.append(f"Fiscal {fiscal_period}")
+        
+        # Always add source
+        footer_parts.append("Source: SEC XBRL")
+        
+        # Apply dim styling to footer
+        if footer_parts:
+            footer_text = " • ".join(footer_parts)
+            table.caption = f"[{styles['structure']['separator']}]{footer_text}[/{styles['structure']['separator']}]"
 
         return table
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+    
+    def __str__(self) -> str:
+        """Convert to string with proper width to avoid truncation."""
+        from edgar.richtools import rich_to_text
+        return rich_to_text(self.__rich__(), width=150)
 
     def to_dataframe(self) -> Any:
         """Convert to a pandas DataFrame"""
@@ -463,83 +581,88 @@ def _format_period_labels(
     # We get entity_info but don't currently use document_period_end_date
     # Uncomment if needed: doc_period_end_date = entity_info.get('document_period_end_date')
     
-    # First, determine the fiscal period type (annual, quarterly, etc.) based on the first period
+    # Analyze ALL periods to detect mixed period types (not just the first one)
+    period_types = []
+    is_balance_sheet = False
+    
     if periods_to_display:
+        # Check if this is a balance sheet (instant periods)
         first_period_key = periods_to_display[0][0]
+        is_balance_sheet = first_period_key.startswith('instant_')
         
-        # For instant periods (Balance Sheet)
-        if first_period_key.startswith('instant_'):
-            date_str = first_period_key.split('_')[1]
-            try:
-                date = parse_date(date_str)
-                
-                # Determine if this is fiscal year end or interim period
-                if ('fiscal_year_end_month' in entity_info and 
-                    'fiscal_year_end_day' in entity_info and
-                    'fiscal_period' in entity_info):
+        if is_balance_sheet:
+            # For Balance Sheet - simple "As of" indicator
+            fiscal_period_indicator = "As of"
+            # Include dates in the indicator if multiple periods
+            if len(periods_to_display) > 1:
+                try:
+                    dates = []
+                    for period_key, _ in periods_to_display:
+                        if period_key.startswith('instant_'):
+                            date_str = period_key.split('_')[1]
+                            date_obj = parse_date(date_str)
+                            dates.append(date_obj.strftime("%B %d, %Y"))
                     
-                    fiscal_month = entity_info.get('fiscal_year_end_month')
-                    fiscal_day = entity_info.get('fiscal_year_end_day')
-                    fiscal_period = entity_info.get('fiscal_period')
-                    
-                    if fiscal_period == 'FY' or (
-                            date.month == fiscal_month and 
-                            abs(date.day - fiscal_day) <= 7):
-                        fiscal_period_indicator = "Fiscal Year Ended"
+                    if len(dates) == 2:
+                        fiscal_period_indicator = f"As of {dates[0]} and {dates[1]}"
                     else:
-                        # For quarterly periods
-                        if fiscal_period in ['Q1', 'Q2', 'Q3']:
-                            month_names = {
-                                'Q1': 'First Quarter Ended',
-                                'Q2': 'Second Quarter Ended',
-                                'Q3': 'Third Quarter Ended'
-                            }
-                            # Handle potential None value for fiscal_period
-                            if fiscal_period is not None:
-                                fiscal_period_indicator = month_names.get(fiscal_period, "Quarter Ended")
-                            else:
-                                fiscal_period_indicator = "Quarter Ended"
-                        else:
-                            fiscal_period_indicator = "As of"
-                else:
+                        fiscal_period_indicator = "As of"
+                except (ValueError, TypeError, IndexError):
                     fiscal_period_indicator = "As of"
-            except (ValueError, TypeError):
-                fiscal_period_indicator = "As of"
-        
-        # For duration periods (Income Statement, Cash Flow)
         else:
-            start_date_str, end_date_str = first_period_key.split('_')[1], first_period_key.split('_')[2]
-            try:
-                start_date = parse_date(start_date_str)
-                end_date = parse_date(end_date_str)
-                duration_days = (end_date - start_date).days
-                
-                # Determine period type based on duration
-                if 85 <= duration_days <= 95:
+            # For Income/Cash Flow - analyze duration periods to detect mixed types
+            for period_key, _ in periods_to_display:
+                if not period_key.startswith('instant_') and '_' in period_key:
+                    try:
+                        parts = period_key.split('_')
+                        if len(parts) >= 3:
+                            start_date = parse_date(parts[1])
+                            end_date = parse_date(parts[2])
+                            duration_days = (end_date - start_date).days
+                            
+                            # Categorize by duration
+                            if 85 <= duration_days <= 95:
+                                period_types.append("quarterly")
+                            elif 175 <= duration_days <= 190:
+                                period_types.append("semi-annual")
+                            elif 265 <= duration_days <= 285:
+                                period_types.append("nine-month")
+                            elif 355 <= duration_days <= 375:
+                                period_types.append("annual")
+                            else:
+                                period_types.append("other")
+                    except (ValueError, TypeError, IndexError):
+                        period_types.append("other")
+            
+            # Generate fiscal period indicator based on detected types
+            unique_types = list(set(period_types))
+            
+            if len(unique_types) == 1:
+                # Single period type
+                period_type = unique_types[0]
+                if period_type == "quarterly":
                     fiscal_period_indicator = "Three Months Ended"
-                elif 175 <= duration_days <= 190:
+                elif period_type == "semi-annual":
                     fiscal_period_indicator = "Six Months Ended"
-                elif 265 <= duration_days <= 285:
+                elif period_type == "nine-month":
                     fiscal_period_indicator = "Nine Months Ended"
-                elif 355 <= duration_days <= 375:
+                elif period_type == "annual":
                     fiscal_period_indicator = "Year Ended"
                 else:
-                    # Use fiscal period information if available
-                    if 'fiscal_period' in entity_info:
-                        fiscal_period = entity_info.get('fiscal_period')
-                        if fiscal_period == 'FY':
-                            fiscal_period_indicator = "Year Ended"
-                        elif fiscal_period == 'Q1':
-                            fiscal_period_indicator = "Three Months Ended"
-                        elif fiscal_period == 'Q2':
-                            fiscal_period_indicator = "Six Months Ended"
-                        elif fiscal_period == 'Q3':
-                            fiscal_period_indicator = "Nine Months Ended"
-                        else:
-                            fiscal_period_indicator = "Period Ended"
-                    else:
-                        fiscal_period_indicator = "Period Ended"
-            except (ValueError, TypeError, IndexError):
+                    fiscal_period_indicator = "Period Ended"
+            elif "quarterly" in unique_types and "nine-month" in unique_types:
+                # Mixed quarterly and YTD - common for Q3 reports
+                fiscal_period_indicator = "Three and Nine Months Ended"
+            elif "quarterly" in unique_types and "semi-annual" in unique_types:
+                # Mixed quarterly and semi-annual - common for Q2 reports
+                fiscal_period_indicator = "Three and Six Months Ended"
+            elif "quarterly" in unique_types and "annual" in unique_types:
+                # Mixed quarterly and annual - common for Q4/year-end reports
+                fiscal_period_indicator = "Three Months and Year Ended"
+            elif len(unique_types) > 1:
+                # Other mixed types
+                fiscal_period_indicator = "Multiple Periods Ended"
+            else:
                 fiscal_period_indicator = "Period Ended"
     
     # Create formatted period columns
@@ -1221,6 +1344,23 @@ def render_statement(
         }
     )
     
+    # Extract footer information from XBRL and entity info
+    footer_metadata = {}
+    
+    # Extract company name
+    if hasattr(xbrl_instance, 'entity_name') and xbrl_instance.entity_name:
+        footer_metadata['company_name'] = xbrl_instance.entity_name
+    elif hasattr(xbrl_instance, 'company_name') and xbrl_instance.company_name:
+        footer_metadata['company_name'] = xbrl_instance.company_name
+    
+    # Extract form type and periods
+    if hasattr(xbrl_instance, 'form_type') and xbrl_instance.form_type:
+        footer_metadata['form_type'] = xbrl_instance.form_type
+    if hasattr(xbrl_instance, 'period_of_report') and xbrl_instance.period_of_report:
+        footer_metadata['period_end'] = str(xbrl_instance.period_of_report)
+    if entity_info and entity_info.get('fiscal_period'):
+        footer_metadata['fiscal_period'] = entity_info.get('fiscal_period')
+    
     rendered_statement = RenderedStatement(
         title=statement_title,
         header=header,
@@ -1229,7 +1369,8 @@ def render_statement(
             'standard': standard,
             'show_date_range': show_date_range,
             'entity_info': entity_info,
-            'comparison_data': comparison_data
+            'comparison_data': comparison_data,
+            **footer_metadata  # Add footer metadata
         },
         statement_type=statement_type,
         fiscal_period_indicator=fiscal_period_indicator,
