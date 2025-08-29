@@ -813,6 +813,31 @@ class Statements:
         except Exception as e:
             return self._handle_statement_error(e, "StatementOfEquity")
 
+    def comprehensive_income(self, parenthetical: bool = False) -> Optional[Statement]:
+        """
+        Get a statement of comprehensive income.
+        
+        Comprehensive income includes net income plus other comprehensive income items
+        such as foreign currency translation adjustments, unrealized gains/losses on
+        investments, and pension adjustments.
+        
+        Args:
+            parenthetical: Whether to get the parenthetical comprehensive income statement
+            
+        Returns:
+            The comprehensive income statement, or None if unable to resolve the statement
+        """
+        try:
+            # Try using the xbrl.find_statement with parenthetical parameter
+            if hasattr(self.xbrl, 'find_statement'):
+                matching_statements, found_role, _ = self.xbrl.find_statement("ComprehensiveIncome", parenthetical)
+                if found_role:
+                    return Statement(self.xbrl, found_role, canonical_type="ComprehensiveIncome")
+            
+            return self["ComprehensiveIncome"]
+        except Exception as e:
+            return self._handle_statement_error(e, "ComprehensiveIncome")
+
     def get_period_views(self, statement_type: str) -> List[Dict[str, Any]]:
         """
         Get available period views for a statement type.
