@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Release 4.9.0 - 2025-08-29
+
+### Added
+- Add `comprehensive_income()` method to XBRL Statements class for consistent API access to comprehensive income statements (#396)
+
+### Enhanced
+- Implement smart period selection for XBRL statements to eliminate sparse columns
+- Add statement-specific scoring thresholds for better data availability assessment
+- Introduce Cash Flow statement-specific period selection (60/40 investor/data weight vs 75/25 for other statements)
+- Add post-selection sparsity filter to remove periods with insufficient data (minimum 5 facts for Cash Flow)
+- Set filing color scheme as default for XBRL statements (professional black-and-white formatting)
+
+### Fixed
+- Fix sparse column issue in financial statements where companies like JPM showed quarterly periods with 1-2 facts alongside YTD periods with 40+ facts
+- Improve period selection for companies with YTD-only cash flow reporting patterns
+- Enhance visual hierarchy and contextual information placement in statement rendering
+
 ## Release 4.8.3 - 2025-08-28
 
 ### Fixed
