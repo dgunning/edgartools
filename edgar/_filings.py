@@ -1300,6 +1300,26 @@ class Filing:
         filing._sgml = filing_sgml
         return filing
 
+    @classmethod
+    def from_text(cls, full_text_submission: str):
+        """
+        Read the filing from the full text submission
+        """
+        filing_sgml = FilingSGML.from_text(full_text_submission)
+        filers = filing_sgml.headers.filers
+        if filers and len(filers) > 0:
+             company = filers[0].company_information.name if filers[0].company_information else ""
+        else:
+            company = ""
+
+        filing = cls(cik=filing_sgml.cik,
+                   accession_no=filing_sgml.accession_number,
+                   form=filing_sgml.form,
+                   company=company,
+                   filing_date=filing_sgml.filing_date)
+        filing._sgml = filing_sgml
+        return filing
+
     def sgml(self) -> FilingSGML:
         """
         Read the filing from the local storage path if it exists
