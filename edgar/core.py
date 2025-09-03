@@ -14,7 +14,6 @@ from functools import lru_cache, partial
 from functools import wraps
 from pathlib import Path
 from typing import Union, Optional, Tuple, List, TypeVar, Callable, Iterable
-from packaging import version
 import httpx
 import pandas as pd
 import pyarrow as pa
@@ -29,9 +28,17 @@ from edgar.datatools import (
 
 log = logging.getLogger(__name__)
 
-pandas_version_raw = version.parse(pd.__version__)
-major, minor, patch = pandas_version_raw.major, pandas_version_raw.minor, pandas_version_raw.micro
-pandas_version = (major, minor, patch)
+def parse_pandas_version():
+    """Parse pandas version without external dependencies"""
+    version_parts = pd.__version__.split('.')
+    major = int(version_parts[0])
+    minor = int(version_parts[1]) if len(version_parts) > 1 else 0
+    # Handle dev versions, rc versions, and build metadata
+    patch_str = version_parts[2] if len(version_parts) > 2 else '0'
+    patch = int(patch_str.split('+')[0].split('rc')[0].split('dev')[0])
+    return (major, minor, patch)
+
+pandas_version = parse_pandas_version()
 
 # sys version
 python_version = tuple(map(int, sys.version.split()[0].split('.')))
