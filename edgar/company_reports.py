@@ -618,7 +618,7 @@ class TwentyF(CompanyReport):
         return f"""TwentyF('{self.company}')"""
 
 
-class CurrentReport():
+class CurrentReport(CompanyReport):
     structure = ItemOnlyFilingStructure({
         "ITEM 1.01": {
             "Title": "Entry into a Material Definitive Agreement",
@@ -702,7 +702,7 @@ class CurrentReport():
 
     def __init__(self, filing):
         assert filing.form in ['8-K', '8-K/A', '6-K', '6-K/A'], f"This form should be an 8-K but was {filing.form}"
-        self._filing = filing
+        super().__init__(filing)
 
     @property
     def has_press_release(self):
@@ -720,18 +720,6 @@ class CurrentReport():
         press_release_results = attachments.query(press_release_query)
         if press_release_results:
             return PressReleases(press_release_results)
-
-    @property
-    def filing_date(self):
-        return self._filing.filing_date
-
-    @property
-    def form(self):
-        return self._filing.form
-
-    @property
-    def company(self):
-        return self._filing.company
 
     @property
     @lru_cache(maxsize=1)
