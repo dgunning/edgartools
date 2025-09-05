@@ -1301,12 +1301,12 @@ class Filing:
         return filing
 
     @classmethod
-    def from_text(cls, full_text_submission: str):
+    def from_sgml_text(cls, full_text_submission: str):
         """
         Read the filing from the full text submission
         """
         filing_sgml = FilingSGML.from_text(full_text_submission)
-        filers = filing_sgml.headers.filers
+        filers = filing_sgml.header.filers
         if filers and len(filers) > 0:
              company = filers[0].company_information.name if filers[0].company_information else ""
         else:

@@ -90,6 +90,12 @@ def test_filing_from_sgml():
     print()
     print(filing)
 
+def test_from_sgml_text():
+    content = Path('data/sgml/0000320193-24-000123.txt').read_text()
+    filing = Filing.from_sgml_text(content)
+    assert filing
+
+
 def test_sgml_parser_detect_content():
     parser = SGMLParser()
     assert parser.detect_format(Path("data/sgml/0001011438-98-000429.txt").read_text()) == SGMLFormatType.SEC_DOCUMENT
