@@ -216,10 +216,10 @@ print(income_with_dates)
 
 ```python
 # Use standardized labels for cross-company comparison (default)
-standardized = statements.income_statement(standard=True)
+standardized = statements.income_statement(standardize=True)
 
 # Use company-specific labels as reported in filing
-company_specific = statements.income_statement(standard=False)
+company_specific = statements.income_statement(standardize=False)
 
 print("Standardized Labels:")
 print(standardized.to_dataframe()['label'].head(10))
