@@ -528,7 +528,8 @@ def stitch_statements(
     period_type: Union[StatementStitcher.PeriodType, str] = StatementStitcher.PeriodType.RECENT_PERIODS,
     max_periods: int = 3,
     standard: bool = True,
-    use_optimal_periods: bool = True
+    use_optimal_periods: bool = True,
+    include_dimensions: bool = False
 ) -> Dict[str, Any]:
     """
     Stitch together statements from multiple XBRL objects.
@@ -540,6 +541,7 @@ def stitch_statements(
         max_periods: Maximum number of periods to include (default: 3)
         standard: Whether to use standardized concept labels (default: True)
         use_optimal_periods: Whether to use the entity info to determine optimal periods (default: True)
+        include_dimensions: Whether to include dimensional segment data (default: False for stitching)
         
     Returns:
         Stitched statement data
@@ -565,7 +567,7 @@ def stitch_statements(
             xbrl = xbrl_list[xbrl_index]
             
             # Get the statement and period info
-            statement = xbrl.get_statement_by_type(statement_type)
+            statement = xbrl.get_statement_by_type(statement_type, include_dimensions=include_dimensions)
             if statement:
                 # Only include the specific period from this statement
                 period_key = period_metadata['period_key']

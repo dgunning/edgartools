@@ -926,7 +926,7 @@ class StitchedStatement:
     """
 
     def __init__(self, xbrls, statement_type: str, max_periods: int = 8, standardize: bool = True,
-                 use_optimal_periods: bool = True):
+                 use_optimal_periods: bool = True, include_dimensions: bool = False):
         """
         Initialize with XBRLS object and statement parameters.
         
@@ -936,12 +936,14 @@ class StitchedStatement:
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
+            include_dimensions: Whether to include dimensional segment data (default: False for stitching)
         """
         self.xbrls = xbrls
         self.statement_type = statement_type
         self.max_periods = max_periods
         self.standardize = standardize
         self.use_optimal_periods = use_optimal_periods
+        self.include_dimensions = include_dimensions
         self.show_date_range = False  # Default to not showing date ranges
 
         # Statement titles
@@ -971,7 +973,8 @@ class StitchedStatement:
                 self.statement_type,
                 self.max_periods,
                 self.standardize,
-                self.use_optimal_periods
+                self.use_optimal_periods,
+                self.include_dimensions
             )
         return self._statement_data
 

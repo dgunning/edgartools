@@ -498,12 +498,13 @@ class XBRL:
         self._all_statements_cached = statements
         return statements
         
-    def get_statement_by_type(self, statement_type: str) -> Optional[Dict[str, Any]]:
+    def get_statement_by_type(self, statement_type: str, include_dimensions: bool = True) -> Optional[Dict[str, Any]]:
         """
         Get the first statement matching the given type.
         
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', 'Notes', etc.)
+            include_dimensions: Whether to include dimensional segment data (default: True)
             
         Returns:
             Statement data if found, None otherwise
@@ -515,7 +516,7 @@ class XBRL:
             return None
         
         # Get statement data using the found role
-        statement_data = self.get_statement(found_role)
+        statement_data = self.get_statement(found_role, should_display_dimensions=include_dimensions)
         
         if statement_data:
             # Extract periods from the statement data

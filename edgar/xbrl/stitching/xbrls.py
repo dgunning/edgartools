@@ -136,7 +136,8 @@ class XBRLS:
     def get_statement(self, statement_type: str, 
                      max_periods: int = 8, 
                      standardize: bool = True,
-                     use_optimal_periods: bool = True) -> Dict[str, Any]:
+                     use_optimal_periods: bool = True,
+                     include_dimensions: bool = False) -> Dict[str, Any]:
         """
         Get a stitched statement of the specified type.
         
@@ -145,12 +146,13 @@ class XBRLS:
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
+            include_dimensions: Whether to include dimensional segment data (default: False for stitching)
             
         Returns:
             Dictionary with stitched statement data
         """
         # Check cache first
-        cache_key = f"{statement_type}_{max_periods}_{standardize}_{use_optimal_periods}"
+        cache_key = f"{statement_type}_{max_periods}_{standardize}_{use_optimal_periods}_{include_dimensions}"
         if cache_key in self._statement_cache:
             return self._statement_cache[cache_key]
         
@@ -161,7 +163,8 @@ class XBRLS:
             period_type=StatementStitcher.PeriodType.ALL_PERIODS,
             max_periods=max_periods,
             standard=standardize,
-            use_optimal_periods=use_optimal_periods
+            use_optimal_periods=use_optimal_periods,
+            include_dimensions=include_dimensions
         )
         
         # Cache the result
@@ -173,7 +176,8 @@ class XBRLS:
                         max_periods: int = 8, 
                         standardize: bool = True,
                         use_optimal_periods: bool = True,
-                        show_date_range: bool = False):
+                        show_date_range: bool = False,
+                        include_dimensions: bool = False):
         """
         Render a stitched statement in a rich table format.
         
@@ -183,13 +187,14 @@ class XBRLS:
             standardize: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             show_date_range: Whether to show full date ranges for duration periods
+            include_dimensions: Whether to include dimensional segment data (default: False for stitching)
             
         Returns:
             RichTable: A formatted table representation of the stitched statement
         """
         # Create a StitchedStatement object and use its render method
         from edgar.xbrl.statements import StitchedStatement
-        statement = StitchedStatement(self, statement_type, max_periods, standardize, use_optimal_periods)
+        statement = StitchedStatement(self, statement_type, max_periods, standardize, use_optimal_periods, include_dimensions)
         return statement.render(show_date_range=show_date_range)
     
     def to_dataframe(self, statement_type: str, 
