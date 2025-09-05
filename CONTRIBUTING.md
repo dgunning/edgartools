@@ -69,9 +69,51 @@ This project uses [Hatch](https://hatch.pypa.io/) for environment and project ma
     *   Explain the changes you made and why.
 8.  **Review:** A maintainer will review your PR. Be prepared to discuss your changes and make further adjustments based on feedback.
 
+## Documentation Structure
+
+EdgarTools uses a three-tier documentation system:
+
+### External Documentation (`docs/`)
+- **Purpose**: User-facing documentation published to edgartools.readthedocs.com
+- **Content**: API reference, user guides, tutorials, installation, configuration
+- **Standards**: Must be maintained, versioned, and follow consistent style
+- **Audience**: End users and developers using EdgarTools
+
+### Internal Documentation (`docs-internal/`)
+- **Purpose**: Internal planning, research, and development documentation
+- **Content**: Architecture decisions, feature proposals, research analysis, runbooks
+- **Standards**: Can include sensitive details, work-in-progress, more informal
+- **Audience**: EdgarTools maintainers and contributors
+
+### AI Documentation (`ai_docs/`)
+- **Purpose**: Documentation for AI agents working with the codebase
+- **Content**: Agent instructions, API context, code patterns, generated docs
+- **Standards**: CLAUDE.md is source of truth, context should be accurate and concise
+- **Audience**: AI assistants and automated tools
+
+### Local Documentation Management
+
+To avoid conflicts over temporary documentation, use **local exclusions** instead of global .gitignore:
+
+```bash
+# Setup local exclusions (run once per developer)
+cat >> .git/info/exclude << 'EOF'
+# AI-generated documentation
+ai_docs/generated/
+
+# Module-specific ephemeral docs
+edgar/**/.docs/
+
+# Personal temporary docs
+**/TEMP_*.md
+**/WIP_*.md
+**/LOCAL_*.md
+EOF
+```
+
 ## Building Documentation Locally
 
-To preview the documentation site locally:
+To preview the external documentation site locally:
 
 ```bash
 hatch run mkdocs serve
