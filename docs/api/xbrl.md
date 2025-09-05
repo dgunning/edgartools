@@ -844,6 +844,29 @@ else:
     print("Income statement not found")
 ```
 
+## XBRL Calculation Weights
+
+EdgarTools intelligently handles XBRL calculation weights to ensure consistent financial data presentation:
+
+### Enhanced Calculation Weight Logic
+
+The parser applies calculation weights with enhanced logic for expense concepts:
+
+1. **Smart Expense Handling**: Major expense categories (R&D, SG&A, Marketing, Depreciation, etc.) are kept positive for consistency across companies
+2. **Cash Flow Precision**: Elements with negative weights (-1.0) in cash flow statements maintain proper sign relationships  
+3. **Exception Handling**: Legitimate negative concepts (tax benefits, foreign exchange gains/losses) preserve their intended signs
+4. **SEC API Consistency**: Aligns with SEC CompanyFacts API presentation while maintaining XBRL calculation integrity
+
+```python
+# Example: Consistent expense presentation across companies
+msft_xbrl = XBRL.from_filing(msft_filing)
+aapl_xbrl = XBRL.from_filing(aapl_filing)
+
+# Both show R&D expenses as positive (no longer inconsistent signs)
+msft_rnd = msft_xbrl.statements.income_statement().get_concept_value("ResearchAndDevelopmentExpense")  # Positive
+aapl_rnd = aapl_xbrl.statements.income_statement().get_concept_value("ResearchAndDevelopmentExpense")  # Positive
+```
+
 ## Performance Tips
 
 1. **Use specific queries** - Filter facts early to reduce processing time

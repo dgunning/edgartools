@@ -321,12 +321,22 @@ for role_uri, calc_tree in xbrl.calculation_trees.items():
             print(f"- {element_id}: weight={node.weight}")
 ```
 
-The parser automatically adjusts fact values based on calculation arc weights, ensuring:
+The parser intelligently applies calculation weights to ensure consistent financial data presentation:
 
-1. Elements with negative weights (-1.0) are displayed with the correct sign
-2. Cash flow statements present inflows and outflows with the proper signage
-3. Calculation validations use the adjusted values for proper summation
-4. Contextual interpretation of values aligns with statement presentation
+1. **Expense Concept Consistency**: Major expense categories (R&D, SG&A, Marketing, etc.) are consistently positive across companies, matching SEC CompanyFacts API behavior
+2. **Cash Flow Integrity**: Elements with negative weights (-1.0) in cash flow statements maintain proper sign relationships for accurate calculations
+3. **Legitimate Negatives Preserved**: Concepts that should be negative (tax benefits, foreign exchange gains/losses) retain their intended signs
+4. **Cross-Company Comparability**: Eliminates inconsistencies where MSFT showed R&D as negative while AAPL showed positive values
+
+```python
+# Example: R&D expenses are now consistently positive across companies
+msft_statements = msft_xbrl.statements.income_statement()
+aapl_statements = aapl_xbrl.statements.income_statement()
+
+# Both show R&D as positive values for proper comparison
+msft_rnd = msft_statements.get_concept_value("ResearchAndDevelopmentExpense")  # $32.5B (positive)
+aapl_rnd = aapl_statements.get_concept_value("ResearchAndDevelopmentExpense")  # $31.4B (positive)
+```
 
 ## Future Enhancements
 

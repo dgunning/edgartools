@@ -111,6 +111,18 @@ for r in results:
 
 2. **For delisted companies**, try using the CIK number directly.
 
+### Inconsistent Financial Data Signs
+
+**Symptom**: Expense values appear negative for some companies but positive for others in cross-company analysis.
+
+**Solution**: This was resolved in edgartools 4.9.2+ through enhanced calculation weight handling. Update to the latest version:
+
+```python
+pip install --upgrade edgartools
+```
+
+Major expense categories (R&D, SG&A, Marketing) are now consistently positive across companies, matching SEC CompanyFacts API behavior while preserving calculation relationships for cash flow items.
+
 ### Missing Financial Data
 
 **Symptom**: Financial statements are empty or missing expected values.
