@@ -753,17 +753,20 @@ class Statements:
         except Exception as e:
             return self._handle_statement_error(e, "BalanceSheet")
 
-    def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False, include_dimensions: bool = True) -> Optional[Statement]:
+    def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False) -> Optional[Statement]:
         """
         Get an income statement.
         
         Args:
             parenthetical: Whether to get the parenthetical income statement
             skip_concept_check: If True, skip checking for required concepts (useful for testing)
-            include_dimensions: Whether to include dimensional segment data (default: True)
             
         Returns:
             An income statement, or None if unable to resolve the statement
+            
+        Note:
+            To control dimensional display, use the include_dimensions parameter when calling
+            render() or to_dataframe() on the returned Statement object.
         """
         try:
             # Try using the xbrl.find_statement with parenthetical parameter

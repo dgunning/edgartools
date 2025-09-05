@@ -51,10 +51,12 @@ def main():
     print("Usage:")
     print("  # Default behavior - includes dimensional data")
     print("  income_stmt = xbrl.statements.income_statement()")
-    print("  print(income_stmt)")
+    print("  print(income_stmt)  # Uses include_dimensions=True by default")
     print()
     print("  # Disable dimensional data if desired")
     print("  df = income_stmt.to_dataframe(include_dimensions=False)")
+    print("  # or")
+    print("  print(income_stmt.render(include_dimensions=False))")
 
 
 if __name__ == "__main__":
