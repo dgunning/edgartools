@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Release 4.10.1 - 2025-09-05
+
+### Fixed
+- **CurrentReport (6-K/8-K) missing financials attribute (#332)**: Fixed AttributeError when accessing financials on 6-K and 8-K filings. CurrentReport now properly inherits from CompanyReport, providing consistent access to financial data across all filing types.
+
+## Release 4.10.0 - 2025-09-05
+
+### Fixed
+- **Calculation weights causing inconsistent expense signs across companies (#334)**: Fixed a critical issue where R&D expenses and other operating expenses showed inconsistent signs (positive vs negative) across different companies due to variations in XBRL calculation weight structures. MSFT R&D expenses now show as positive $32.5B (previously negative), consistent with AAPL's positive $31.4B and the SEC CompanyFacts API.
+
+### Enhanced  
+- **Improved cross-company financial data consistency**: Enhanced XBRL parser to selectively preserve positive values for 15+ expense concept categories (R&D, SG&A, Marketing, Share-based Compensation, etc.) while maintaining proper calculation weight functionality for cash flow items and legitimate negative values (tax benefits, foreign exchange gains/losses).
+
+### Technical
+- **XBRL calculation weights processing**: Updated `_apply_calculation_weights()` method to ensure consistent expense representation across companies while preserving backwards compatibility and maintaining accuracy for cash flow calculations.
+
 ## Release 4.9.1 - 2025-09-03
 
 ### Changed
