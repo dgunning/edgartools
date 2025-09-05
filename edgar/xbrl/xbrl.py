@@ -380,6 +380,29 @@ class XBRL:
         if not hasattr(self, '_facts_view'):
             self._facts_view = FactsView(self)
         return self._facts_view
+    
+    @property
+    def current_period(self):
+        """
+        Convenient access to current period financial data.
+        
+        Provides simplified access to the most recent period's financial data
+        without comparative information. This addresses common use cases where
+        users only need the current period data.
+        
+        Returns:
+            CurrentPeriodView: Interface for accessing current period data
+            
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> current = xbrl.current_period
+            >>> balance_sheet = current.balance_sheet()
+            >>> income = current.income_statement(raw_concepts=True)
+        """
+        from edgar.xbrl.current_period import CurrentPeriodView
+        if not hasattr(self, '_current_period_view'):
+            self._current_period_view = CurrentPeriodView(self)
+        return self._current_period_view
 
     def query(self,
               include_dimensions: bool = True,
@@ -749,19 +772,21 @@ class XBRL:
         
         # For dimensional statements with dimension data, handle the parent item specially
         if should_display_dimensions and dimensioned_facts:
-            # Create parent line item as an abstract header for dimensions
+            # Create parent line item with total values AND dimensional children
+            # This ensures users see both the total (e.g., Total Revenue = $25,500M) 
+            # and the dimensional breakdown (e.g., Auto Revenue = $19,878M, Energy = $3,014M)
             line_item = {
                 'concept': element_id,
                 'name': node.element_name,
                 'all_names': [node.element_name],
-                'label': f"{label}:", # Add colon to indicate it's a header with dimension children
-                'values': {},  # No values for the parent header
-                'decimals': {},
+                'label': label,  # Keep original label, don't add colon
+                'values': values,  # Show the total values
+                'decimals': decimals,  # Include decimals for formatting
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
-                'is_abstract': True,  # Mark as abstract since it's just a header
+                'is_abstract': False,  # Not abstract since it has values
                 'children': node.children,
-                'has_values': False,
+                'has_values': len(values) > 0,  # True if we have total values
                 'has_dimension_children': True  # Mark as having dimension children
             }
         else:
