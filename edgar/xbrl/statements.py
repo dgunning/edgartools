@@ -118,7 +118,8 @@ class Statement:
     def render(self, period_filter: Optional[str] = None,
                period_view: Optional[str] = None,
                standard: bool = True,
-               show_date_range: bool = False) -> Any:
+               show_date_range: bool = False,
+               include_dimensions: bool = True) -> Any:
         """
         Render the statement as a formatted table.
         
@@ -127,6 +128,7 @@ class Statement:
             period_view: Optional name of a predefined period view
             standard: Whether to use standardized concept labels
             show_date_range: Whether to show full date ranges for duration periods
+            include_dimensions: Whether to include dimensional segment data
             
         Returns:
             Rich Table containing the rendered statement
@@ -138,7 +140,8 @@ class Statement:
                                           period_filter=period_filter,
                                           period_view=period_view,
                                           standard=standard,
-                                          show_date_range=show_date_range)
+                                          show_date_range=show_date_range,
+                                          include_dimensions=include_dimensions)
 
     def __rich__(self) -> Any:
         """
@@ -167,16 +170,18 @@ class Statement:
     def to_dataframe(self,
                      period_filter:str=None,
                      period_view:str=None,
-                     standard:bool=True ) -> Any:
+                     standard:bool=True,
+                     include_dimensions:bool=True ) -> Any:
         """Convert statement to pandas DataFrame.
             period_filter: Optional period key to filter facts
             period_view: Optional name of a predefined period view
             standard: Whether to use standardized concept labels
+            include_dimensions: Whether to include dimensional segment data
         
         Returns:
             DataFrame if pandas is available, else None
         """
-        rendered_statement:RenderedStatement = self.render(period_filter=period_filter, period_view=period_view, standard=standard)
+        rendered_statement:RenderedStatement = self.render(period_filter=period_filter, period_view=period_view, standard=standard, include_dimensions=include_dimensions)
         return rendered_statement.to_dataframe()
 
     def _validate_statement(self, skip_concept_check: bool = False) -> None:
@@ -748,13 +753,14 @@ class Statements:
         except Exception as e:
             return self._handle_statement_error(e, "BalanceSheet")
 
-    def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False) -> Optional[Statement]:
+    def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False, include_dimensions: bool = True) -> Optional[Statement]:
         """
         Get an income statement.
         
         Args:
             parenthetical: Whether to get the parenthetical income statement
             skip_concept_check: If True, skip checking for required concepts (useful for testing)
+            include_dimensions: Whether to include dimensional segment data (default: True)
             
         Returns:
             An income statement, or None if unable to resolve the statement
@@ -890,7 +896,8 @@ class Statements:
     def to_dataframe(self,
                      statement_type: str,
                      period_view: Optional[str] = None,
-                     standard: bool = True) -> Optional[pd.DataFrame]:
+                     standard: bool = True,
+                     include_dimensions: bool = True) -> Optional[pd.DataFrame]:
         """
         Convert a statement to a pandas DataFrame.
         
@@ -898,12 +905,13 @@ class Statements:
             statement_type: Type of statement to convert
             period_view: Optional period view name
             standard: Whether to use standardized concept labels (default: True)
+            include_dimensions: Whether to include dimensional segment data (default: True)
             
         Returns:
             pandas DataFrame containing the statement data
         """
         statement = self[statement_type]
-        return statement.render(period_view=period_view, standard=standard).to_dataframe()
+        return statement.render(period_view=period_view, standard=standard, include_dimensions=include_dimensions).to_dataframe()
 
 
 class StitchedStatement:

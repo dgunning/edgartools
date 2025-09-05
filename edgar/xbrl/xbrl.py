@@ -125,11 +125,6 @@ class XBRL:
         Returns:
             bool: True if dimensions should be displayed, False otherwise
         """
-        # Skip financial statements where dimensions would mess up the display
-        if statement_type in ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement', 
-                             'StatementOfEquity', 'ComprehensiveIncome']:
-            return False
-            
         # Look for keywords in role definition that suggest dimensional breakdowns
         dimension_keywords = [
             'segment', 'geography', 'geographic', 'region', 'product', 'business',
@@ -137,6 +132,47 @@ class XBRL:
         ]
         
         role_def_lower = role_definition.lower() if role_definition else ""
+        
+        # For core financial statements, check if they contain segment information
+        if statement_type in ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement', 
+                             'StatementOfEquity', 'ComprehensiveIncome']:
+            
+            # Allow dimensional display if the role definition suggests segment/product breakdown
+            if any(keyword in role_def_lower for keyword in dimension_keywords):
+                return True
+                
+            # For income statements specifically, check if there are segment-related dimensional facts
+            if statement_type == 'IncomeStatement':
+                # Check if there are facts with ProductOrServiceAxis dimensions
+                try:
+                    # Look for revenue facts with ProductOrServiceAxis dimensions
+                    revenue_concepts = [
+                        'us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax',
+                        'us-gaap:Revenues',
+                        'us-gaap:SalesRevenueNet'
+                    ]
+                    
+                    for fact_key, fact in self.parser.facts.items():
+                        # Check if this is a revenue-related concept
+                        concept_name = fact.element_id if hasattr(fact, 'element_id') else getattr(fact, 'concept', str(fact))
+                        if any(revenue_concept in concept_name for revenue_concept in revenue_concepts):
+                            
+                            # Check if this fact has ProductOrServiceAxis dimension
+                            context = self.parser.contexts.get(fact.context_ref)
+                            if context and hasattr(context, 'dimensions') and context.dimensions:
+                                for dim_name, dim_value in context.dimensions.items():
+                                    if 'ProductOrServiceAxis' in dim_name:
+                                        return True
+                                        
+                    return False
+                except Exception:
+                    # If any error occurs, default to False
+                    return False
+            
+            # For other core statements, skip dimensional display by default
+            return False
+        
+        # For non-core statements, check if they contain dimensional breakdowns
         return any(keyword in role_def_lower for keyword in dimension_keywords)
         
     @property
@@ -1071,7 +1107,8 @@ class XBRL:
                           period_view: Optional[str] = None,
                           standard: bool = True,
                           show_date_range: bool = False,
-                          parenthetical: bool = False) -> Optional[RenderedStatement]:
+                          parenthetical: bool = False,
+                          include_dimensions: bool = True) -> Optional[RenderedStatement]:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         
@@ -1083,6 +1120,7 @@ class XBRL:
             standard: Whether to use standardized concept labels (default: True)
             show_date_range: Whether to show full date ranges for duration periods (default: False)
             parenthetical: Whether to look for a parenthetical statement (default: False)
+            include_dimensions: Whether to include dimensional segment data (default: True)
             
         Returns:
             RichTable: A formatted table representation of the statement
@@ -1096,7 +1134,7 @@ class XBRL:
             role_definition = matching_statements[0]['definition']
         
         # Determine if this statement should display dimensions
-        should_display_dimensions = self._is_dimension_display_statement(actual_statement_type, role_definition)
+        should_display_dimensions = include_dimensions and self._is_dimension_display_statement(actual_statement_type, role_definition)
         
         # Get the statement data with dimension display flag
         statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions)

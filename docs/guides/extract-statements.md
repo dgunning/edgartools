@@ -52,6 +52,134 @@ cash_flow = statements.cashflow_statement()
 print(balance_sheet)  # Rich formatted output
 ```
 
+## Standardized Financial Data Access
+
+### Simple Metric Extraction (New!)
+
+The easiest way to get key financial metrics is using the new standardized accessor methods:
+
+```python
+from edgar import Company
+
+# Get a company's financials
+company = Company("AAPL")
+financials = company.get_financials()
+
+# Extract key metrics directly - these work across all companies!
+revenue = financials.get_revenue()
+net_income = financials.get_net_income()
+total_assets = financials.get_total_assets()
+
+print(f"Revenue: ${revenue:,.0f}")
+print(f"Net Income: ${net_income:,.0f}")
+print(f"Total Assets: ${total_assets:,.0f}")
+```
+
+This simple API works consistently across all companies, regardless of their custom XBRL concepts!
+
+### Available Standardized Methods
+
+All methods support historical data via the `period_offset` parameter:
+
+```python
+# Income Statement Metrics
+revenue_current = financials.get_revenue()           # Current period
+revenue_previous = financials.get_revenue(1)        # Previous period
+net_income = financials.get_net_income()
+
+# Balance Sheet Metrics  
+total_assets = financials.get_total_assets()
+total_liabilities = financials.get_total_liabilities()
+stockholders_equity = financials.get_stockholders_equity()
+current_assets = financials.get_current_assets()
+current_liabilities = financials.get_current_liabilities()
+
+# Cash Flow Metrics
+operating_cash_flow = financials.get_operating_cash_flow()
+capital_expenditures = financials.get_capital_expenditures()
+free_cash_flow = financials.get_free_cash_flow()    # Calculated automatically
+```
+
+### Comprehensive Financial Analysis
+
+Get all key metrics at once with automatic ratio calculations:
+
+```python
+# Get comprehensive metrics dictionary
+metrics = financials.get_financial_metrics()
+
+# All the standard metrics are available
+print(f"Revenue: ${metrics['revenue']:,.0f}")
+print(f"Net Income: ${metrics['net_income']:,.0f}")
+print(f"Total Assets: ${metrics['total_assets']:,.0f}")
+
+# Plus calculated ratios
+print(f"Current Ratio: {metrics['current_ratio']:.2f}")
+print(f"Debt to Assets: {metrics['debt_to_assets']:.2f}")
+print(f"Free Cash Flow: ${metrics['free_cash_flow']:,.0f}")
+```
+
+### Cross-Company Analysis Made Simple
+
+Now comparing multiple companies is trivial:
+
+```python
+companies = ["AAPL", "MSFT", "GOOGL", "AMZN", "META"]
+
+print("Company\t\tRevenue\t\tNet Income\tTotal Assets")
+print("-" * 60)
+
+for ticker in companies:
+    company = Company(ticker)
+    financials = company.get_financials()
+    
+    if financials:
+        revenue = financials.get_revenue()
+        net_income = financials.get_net_income()
+        total_assets = financials.get_total_assets()
+        
+        print(f"{ticker}\t\t${revenue/1e9:.1f}B\t\t${net_income/1e9:.1f}B\t\t${total_assets/1e9:.1f}B")
+```
+
+### Tesla Custom Concepts - No Problem!
+
+The standardized methods automatically handle companies with custom concepts like Tesla:
+
+```python
+# Works even with companies that use non-standard XBRL concepts
+tesla = Company("TSLA")
+tsla_financials = tesla.get_financials()
+
+# These work despite Tesla's custom concepts
+tsla_revenue = tsla_financials.get_revenue()
+tsla_net_income = tsla_financials.get_net_income()
+
+print(f"Tesla Revenue: ${tsla_revenue:,.0f}")
+print(f"Tesla Net Income: ${tsla_net_income:,.0f}")
+```
+
+### Growth Analysis with Historical Data
+
+Calculate growth rates using the `period_offset` parameter:
+
+```python
+# Get current and previous year data
+current_revenue = financials.get_revenue(0)    # Current period
+previous_revenue = financials.get_revenue(1)   # Previous period
+
+if current_revenue and previous_revenue:
+    growth_rate = (current_revenue - previous_revenue) / previous_revenue * 100
+    print(f"Revenue Growth: {growth_rate:.1f}%")
+
+# Same pattern works for any metric
+current_ni = financials.get_net_income(0)
+previous_ni = financials.get_net_income(1)
+
+if current_ni and previous_ni:
+    ni_growth = (current_ni - previous_ni) / previous_ni * 100
+    print(f"Net Income Growth: {ni_growth:.1f}%")
+```
+
 ## Multi-Period Analysis
 
 ### Method 1: Using MultiFinancials
@@ -230,29 +358,28 @@ print(company_specific.to_dataframe()['label'].head(10))
 
 ## Cross-Company Analysis
 
-### Compare Multiple Companies
+### Compare Multiple Companies (Updated with New API!)
 
 ```python
 import pandas as pd
 
 def get_key_metrics(ticker):
-    """Extract key financial metrics for a company."""
+    """Extract key financial metrics for a company using new standardized methods."""
     try:
         company = Company(ticker)
-        financials = company.financials
+        financials = company.get_financials()
         
-        # Get statements
-        bs = financials.balance_sheet
-        inc = financials.income
-        cf = financials.cash_flow
-        
-        # Extract key metrics
+        if not financials:
+            return None
+            
+        # Use the new standardized accessor methods - much simpler!
         return {
             'ticker': ticker,
-            'revenue': inc.loc['Revenue'].iloc[0] if 'Revenue' in inc.index else None,
-            'net_income': inc.loc['Net Income'].iloc[0] if 'Net Income' in inc.index else None,
-            'total_assets': bs.loc['Total Assets'].iloc[0] if 'Total Assets' in bs.index else None,
-            'operating_cf': cf.loc['Net Cash from Operating Activities'].iloc[0] if 'Net Cash from Operating Activities' in cf.index else None
+            'revenue': financials.get_revenue(),
+            'net_income': financials.get_net_income(),
+            'total_assets': financials.get_total_assets(),
+            'operating_cf': financials.get_operating_cash_flow(),
+            'free_cf': financials.get_free_cash_flow()
         }
     except Exception as e:
         print(f"Error processing {ticker}: {e}")
@@ -274,10 +401,13 @@ comparison_df = pd.DataFrame(metrics)
 comparison_df['revenue_b'] = comparison_df['revenue'] / 1e9
 comparison_df['net_income_b'] = comparison_df['net_income'] / 1e9
 comparison_df['net_margin'] = (comparison_df['net_income'] / comparison_df['revenue']) * 100
+comparison_df['roa'] = (comparison_df['net_income'] / comparison_df['total_assets']) * 100
 
 print("Tech Giants Comparison:")
-print(comparison_df[['ticker', 'revenue_b', 'net_income_b', 'net_margin']].round(1))
+print(comparison_df[['ticker', 'revenue_b', 'net_income_b', 'net_margin', 'roa']].round(1))
 ```
+
+The new standardized methods make cross-company analysis much more reliable and easier to implement!
 
 ## Advanced XBRL Features
 
