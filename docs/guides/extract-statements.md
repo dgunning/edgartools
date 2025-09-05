@@ -52,6 +52,43 @@ cash_flow = statements.cashflow_statement()
 print(balance_sheet)  # Rich formatted output
 ```
 
+### Enhanced Dimensional Display
+
+EdgarTools now automatically surfaces rich dimensional segment data in financial statements when available:
+
+```python
+# Get Microsoft's income statement - now shows product/service breakdowns
+company = Company("MSFT")
+xbrl = company.get_filings(form="10-K").latest().xbrl()
+income_stmt = xbrl.statements.income_statement()
+
+print(income_stmt)
+# Output shows both summary revenue AND detailed breakdowns:
+# - Product revenue: $63.9B 
+# - Service revenue: $217.8B
+# - Business segment details (LinkedIn: $17.8B, Gaming: $23.5B, etc.)
+```
+
+**Control Dimensional Display:**
+
+```python
+# Default behavior - includes dimensional segment data
+df_enhanced = income_stmt.to_dataframe()  # 48 rows for Microsoft
+print(f"Enhanced view: {len(df_enhanced)} rows")
+
+# Traditional view - excludes dimensional data
+df_traditional = income_stmt.to_dataframe(include_dimensions=False)  # 21 rows
+print(f"Traditional view: {len(df_traditional)} rows")
+```
+
+**What Gets Enhanced:**
+- Product/service revenue breakdowns
+- Geographic segment data  
+- Business unit financial details
+- Any ProductOrServiceAxis dimensional facts
+
+This enhancement works automatically across companies that provide segment data in their XBRL filings, including Microsoft, Apple, Amazon, Google, and many others.
+
 ## Standardized Financial Data Access
 
 ### Simple Metric Extraction (New!)
@@ -233,6 +270,23 @@ revenue_trend = income_trend.to_dataframe()
 revenue_row = revenue_trend.loc[revenue_trend['label'] == 'Revenue']
 print(revenue_row)
 ```
+
+**Dimensional Data in Stitching:**
+
+By default, stitching uses traditional statement structures for performance and compatibility:
+
+```python
+# Default stitching - traditional structure for multi-period consistency
+income_stmt = xbrls.render_statement("IncomeStatement")  # Clean, focused view
+
+# Enable dimensional data in stitching if desired (advanced usage)
+income_stmt_detailed = xbrls.render_statement("IncomeStatement", include_dimensions=True)
+# Note: May result in missing data if not all periods have consistent dimensional coverage
+```
+
+**When to Use Each:**
+- **Traditional stitching** (default): Best for trend analysis, ratios, and cross-period comparisons
+- **Dimensional stitching**: Use when you specifically need segment data across periods and know the data is consistent
 
 ## Working with Individual Statements
 
