@@ -135,7 +135,7 @@ class XBRLS:
     
     def get_statement(self, statement_type: str, 
                      max_periods: int = 8, 
-                     standardize: bool = True,
+                     standard: bool = True,
                      use_optimal_periods: bool = True,
                      include_dimensions: bool = False) -> Dict[str, Any]:
         """
@@ -144,7 +144,7 @@ class XBRLS:
         Args:
             statement_type: Type of statement to stitch ('IncomeStatement', 'BalanceSheet', etc.)
             max_periods: Maximum number of periods to include
-            standardize: Whether to use standardized concept labels
+            standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             include_dimensions: Whether to include dimensional segment data (default: False for stitching)
             
@@ -152,7 +152,7 @@ class XBRLS:
             Dictionary with stitched statement data
         """
         # Check cache first
-        cache_key = f"{statement_type}_{max_periods}_{standardize}_{use_optimal_periods}_{include_dimensions}"
+        cache_key = f"{statement_type}_{max_periods}_{standard}_{use_optimal_periods}_{include_dimensions}"
         if cache_key in self._statement_cache:
             return self._statement_cache[cache_key]
         
@@ -162,7 +162,7 @@ class XBRLS:
             statement_type=statement_type,
             period_type=StatementStitcher.PeriodType.ALL_PERIODS,
             max_periods=max_periods,
-            standard=standardize,
+            standard=standard,
             use_optimal_periods=use_optimal_periods,
             include_dimensions=include_dimensions
         )

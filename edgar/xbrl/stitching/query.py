@@ -54,21 +54,21 @@ class StitchedFactsView:
     
     def get_facts(self, 
                   max_periods: int = 8, 
-                  standardize: bool = True, 
+                  standard: bool = True, 
                   statement_types: Optional[List[str]] = None) -> List[Dict[str, Any]]:
         """
         Extract facts from stitched statements.
         
         Args:
             max_periods: Maximum periods to include
-            standardize: Whether to use standardized labels
+            standard: Whether to use standardized labels
             statement_types: List of statement types to include
             
         Returns:
             List of fact dictionaries with stitched/standardized data
         """
         # Create cache key
-        cache_key = (max_periods, standardize, tuple(statement_types or []))
+        cache_key = (max_periods, standard, tuple(statement_types or []))
         if self._facts_cache and self._last_cache_key == cache_key:
             return self._facts_cache
         
@@ -85,7 +85,7 @@ class StitchedFactsView:
                 stitched_data = self.xbrls.get_statement(
                     statement_type=statement_type,
                     max_periods=max_periods,
-                    standardize=standardize
+                    standard=standard
                 )
                 
                 # Extract facts from stitched data
@@ -276,7 +276,7 @@ class StitchedFactQuery(FactQuery):
         
         # Store query-specific parameters for get_facts
         self._max_periods = kwargs.get('max_periods', 8)
-        self._standardize = kwargs.get('standardize', True)
+        self._standard = kwargs.get('standard', True)
         self._statement_types = kwargs.get('statement_types', None)
     
     def __str__(self):
@@ -400,7 +400,7 @@ class StitchedFactQuery(FactQuery):
         # Get base results from stitched facts with query parameters
         results = self._stitched_facts_view.get_facts(
             max_periods=self._max_periods,
-            standardize=self._standardize,
+            standard=self._standard,
             statement_types=self._statement_types
         )
         
