@@ -45,7 +45,7 @@ class XBRLS:
         self._stitched_facts_view = None
     
     @classmethod
-    def from_filings(cls, filings: Union['Filings', List[Any]]) -> 'XBRLS':
+    def from_filings(cls, filings: Union['Filings', List[Any]], filter_amendments:bool=True) -> 'XBRLS':
         """
         Create an XBRLS object from a list of Filing objects or a Filings object containing multiple filings.
         Each filing should be the same form (e.g., 10-K, 10-Q) and from the same company.
@@ -57,9 +57,12 @@ class XBRLS:
             XBRLS object with stitched data
         """
         from edgar.xbrl.xbrl import XBRL
+
+        if filter_amendments:
+            filtered_filings = filings.filter(amendments=False)
         
         # Sort filings by date (newest first)
-        sorted_filings = sorted(filings, key=lambda f: f.filing_date, reverse=True)
+        sorted_filings = sorted(filtered_filings, key=lambda f: f.filing_date, reverse=True)
         
         # Create XBRL objects from filings
         xbrl_list = []
@@ -221,7 +224,17 @@ class XBRLS:
         Get all available periods across all XBRL objects.
         
         Returns:
-            List of period information dictionaries
+            List of period information dictionaries, each containing:
+            - 'type': 'instant' or 'duration'  
+            - 'key': period key (e.g., 'instant_2024-09-28', 'duration_2024-01-01_2024-09-28')
+            - 'label': human-readable label
+            For instant periods:
+            - 'date': end date as 'YYYY-MM-DD'
+            For duration periods:  
+            - 'start_date': start date as 'YYYY-MM-DD'
+            - 'end_date': end date as 'YYYY-MM-DD'
+            - 'days': duration in days
+            - 'period_type': classification ('Annual', 'Quarterly', etc.)
         """
         all_periods = []
         
@@ -238,6 +251,40 @@ class XBRLS:
                 unique_periods[key] = period
         
         return list(unique_periods.values())
+    
+    def get_period_end_dates(self) -> List[str]:
+        """
+        Get end dates for all available periods in YYYY-MM-DD format.
+        
+        This is a convenience method that extracts just the end dates from periods,
+        handling both instant and duration periods correctly.
+        
+        Returns:
+            List of end dates as strings in YYYY-MM-DD format, sorted newest first
+        """
+        periods = self.get_periods()
+        end_dates = []
+        
+        for period in periods:
+            if period.get('type') == 'duration':
+                end_date = period.get('end_date')
+            elif period.get('type') == 'instant':
+                end_date = period.get('date')
+            else:
+                continue
+                
+            if end_date:
+                end_dates.append(end_date)
+        
+        # Sort newest first and remove duplicates while preserving order
+        seen = set()
+        sorted_dates = []
+        for date in sorted(set(end_dates), reverse=True):
+            if date not in seen:
+                sorted_dates.append(date)
+                seen.add(date)
+                
+        return sorted_dates
     
     def __str__(self) -> str:
         """

@@ -66,33 +66,39 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
     # Extract periods and statement data
     statement_data = stitched_data['statement_data']
     
-    # Create a dictionary for the DataFrame
+    # Create ordered list of period column names (preserving the original ordering)
+    period_columns = []
+    for period_id, period_label in stitched_data['periods']:
+        # Use the end_date in YYYY-MM-DD format as the column name
+        col = period_id[-10:]
+        period_columns.append(col)
+    
+    # Create a dictionary for the DataFrame with ordered columns
+    # Start with metadata columns
     data = {}
-
-    # Initialize columns
-    data['label'] = [None] * len(statement_data)
-    data['concept'] = [None] * len(statement_data)
+    data['label'] = []
+    data['concept'] = []
+    
+    # Initialize period columns in the correct order (newest first)
+    for col in period_columns:
+        data[col] = []
     
     for i, item in enumerate(statement_data):
         # Skip abstract items without values
         if item['is_abstract'] and not item['has_values']:
             continue
 
-        data['label'][i] = item['label']
-        data['concept'][i] = item['concept']
+        data['label'].append(item['label'])
+        data['concept'].append(item['concept'])
         
-        # Add values for each period
-        for j, (period_id, period_label) in enumerate(stitched_data['periods']):
-            # Use the end_date in YYYY-MM-DD format as the column name
+        # Add values for each period in the correct order
+        for period_id, period_label in stitched_data['periods']:
             col = period_id[-10:]
-            if col not in data:
-                data[col] = [None] * len(statement_data)
-            
-            # Get value for this period if available
             value = item['values'].get(period_id)
-            data[col][i] = value
+            data[col].append(value)
     
-    # Create the DataFrame
-    df = pd.DataFrame(data)
+    # Create the DataFrame with columns in the correct order
+    column_order = ['label', 'concept'] + period_columns
+    df = pd.DataFrame(data, columns=column_order)
     
     return df
