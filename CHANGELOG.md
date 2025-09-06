@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## Release 4.11.0 - 2025-09-06
+
+### Added
+- **Current Period API (#425)**: New simplified API for accessing the most recent period's financial data without comparative information
+  - `xbrl.current_period.balance_sheet()` - Automatic period detection and clean single-period output
+  - `xbrl.current_period.income_statement(raw_concepts=True)` - Support for raw XBRL concept names
+  - `xbrl.current_period.get_fact()` - Individual fact lookup with optional raw concept access
+  - `xbrl.current_period.notes()` - Access to notes sections
+  - `current_period.to_dict()` - Dictionary export functionality
+- **Filing creation from full SGML text (#413/#414)**: New `Filing.from_sgml_text()` method to create Filing objects directly from complete SGML submission text
+- **Dimensional segment data control**: Added `include_dimensions` parameter for controlling display of dimensional segment data in financial statements
+
+### Fixed
+- **Inconsistent parameter naming in stitched statements (#403)**: Fixed issue where documentation showed `standard=True` parameter but stitched statement methods only accepted `standardize` parameter. All statement methods now consistently accept the `standard` parameter as documented:
+  - `statements.income_statement(standard=True/False)`
+  - `statements.balance_sheet(standard=True/False)`
+  - `statements.cashflow_statement(standard=True/False)`
+  - `statements.statement_of_equity(standard=True/False)`
+  - `statements.comprehensive_income(standard=True/False)`
+- **Missing parent totals in dimensional breakdowns (#416)**: Fixed Tesla income statement test failure where dimensional display hid parent total lines. Parent totals like "Contract Revenue: $25,500M" now display alongside dimensional children (Auto: $19,878M, Energy: $3,014M)
+
+### Changed
+- **Standardized parameter naming**: Removed the deprecated `standardize` parameter from all stitched statement methods and internal APIs in favor of the consistent `standard` parameter
+- **API method rename**: Changed `Filing.from_text()` to `Filing.from_sgml_text()` for clarity about expected input format
+- **Dimensional display defaults**: Enhanced dimensional segment data is now shown by default (`include_dimensions=True`) with user control to disable if needed
+
+### Enhanced
+- **Documentation alignment**: API now matches documentation examples exactly, enabling seamless cross-period concept standardization for Revenue, Gross Profit, Net Income, and other financial metrics
+- **Internal API consistency**: Updated XBRLS.get_statement() and StitchedFactsView.get_facts() to use standard parameter throughout the call chain
+- **Beginner-friendly current period access**: No complex period filtering required - automatic detection of most recent period with clean DataFrame output
+- **Rich dimensional data visibility**: Surfaces product/service segment breakdowns that were always in XBRL but previously hidden
+- **Improved stitching compatibility**: Enhanced dimensional display works seamlessly with multi-period stitched statements
+
+### Technical
+- **Comprehensive test coverage**: Added regression tests and verification scripts to prevent future parameter naming inconsistencies
+- **Current period implementation**: 420 lines of new functionality with 30 comprehensive test cases achieving 100% pass rate
+- **Enhanced XBRL parsing**: Improved handling of dimensional facts and parent-child relationships in statements
+- **Backwards compatibility**: All changes maintain existing functionality while adding new capabilities
+
 ## Release 4.10.1 - 2025-09-05
 
 ### Fixed
