@@ -85,6 +85,17 @@ def mock_xbrl():
         }
     ])
     
+    # Mock find_statement (needed for Statement objects)
+    xbrl.find_statement = Mock(return_value=(
+        [{'definition': 'Test Statement'}], 
+        'http://test.com/role', 
+        'TestType'
+    ))
+    
+    # Mock render_statement (needed for Statement objects)
+    from edgar.xbrl.rendering import RenderedStatement
+    xbrl.render_statement = Mock(return_value=Mock(spec=RenderedStatement))
+    
     return xbrl
 
 
@@ -130,9 +141,14 @@ class TestCurrentPeriodView:
     def test_balance_sheet_standard_concepts(self, mock_xbrl):
         """Test balance sheet retrieval with standard concept names."""
         current_period = CurrentPeriodView(mock_xbrl)
-        df = current_period.balance_sheet(raw_concepts=False)
+        stmt = current_period.balance_sheet(raw_concepts=False)
         
-        # Verify DataFrame structure
+        # Now returns Statement by default
+        from edgar.xbrl.current_period import CurrentPeriodStatement
+        assert isinstance(stmt, CurrentPeriodStatement)
+        
+        # Test DataFrame conversion
+        df = stmt.get_dataframe()
         assert isinstance(df, pd.DataFrame)
         assert not df.empty
         assert 'concept' in df.columns
@@ -147,7 +163,14 @@ class TestCurrentPeriodView:
     def test_balance_sheet_raw_concepts(self, mock_xbrl):
         """Test balance sheet retrieval with raw XBRL concept names."""
         current_period = CurrentPeriodView(mock_xbrl)
-        df = current_period.balance_sheet(raw_concepts=True)
+        stmt = current_period.balance_sheet(raw_concepts=True)
+        
+        # Now returns Statement by default
+        from edgar.xbrl.current_period import CurrentPeriodStatement
+        assert isinstance(stmt, CurrentPeriodStatement)
+        
+        # Test DataFrame conversion with raw concepts
+        df = stmt.get_dataframe(raw_concepts=True)
         
         # Should have additional columns for raw concepts
         assert 'standardized_label' in df.columns
@@ -160,51 +183,68 @@ class TestCurrentPeriodView:
     def test_income_statement(self, mock_xbrl):
         """Test income statement retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
-        df = current_period.income_statement()
+        stmt = current_period.income_statement()
         
-        assert isinstance(df, pd.DataFrame)
-        # Call should work without error
-        mock_xbrl.get_statement.assert_called_with('IncomeStatement', period_filter='instant_2023-12-31')
+        # Now returns Statement by default
+        from edgar.xbrl.current_period import CurrentPeriodStatement
+        assert isinstance(stmt, CurrentPeriodStatement)
+        # Verify it's an income statement
+        assert stmt.canonical_type == 'IncomeStatement'
+        assert 'duration_' in stmt.period_filter  # Should use duration period
     
     def test_cashflow_statement(self, mock_xbrl):
         """Test cash flow statement retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
-        df = current_period.cashflow_statement()
+        stmt = current_period.cashflow_statement()
         
-        assert isinstance(df, pd.DataFrame)
-        mock_xbrl.get_statement.assert_called_with('CashFlowStatement', period_filter='instant_2023-12-31')
+        # Now returns Statement by default
+        from edgar.xbrl.current_period import CurrentPeriodStatement
+        assert isinstance(stmt, CurrentPeriodStatement)
+        # Verify it's a cash flow statement
+        assert stmt.canonical_type == 'CashFlowStatement'
+        assert 'duration_' in stmt.period_filter  # Should use duration period
     
     def test_statement_of_equity(self, mock_xbrl):
         """Test statement of equity retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
-        df = current_period.statement_of_equity()
+        stmt = current_period.statement_of_equity()
         
-        assert isinstance(df, pd.DataFrame)
-        mock_xbrl.get_statement.assert_called_with('StatementOfEquity', period_filter='instant_2023-12-31')
+        # Now returns Statement by default
+        from edgar.xbrl.current_period import CurrentPeriodStatement
+        assert isinstance(stmt, CurrentPeriodStatement)
+        # Verify it's a statement of equity
+        assert stmt.canonical_type == 'StatementOfEquity'
+        assert 'instant_' in stmt.period_filter  # Should use instant period
     
     def test_comprehensive_income(self, mock_xbrl):
         """Test comprehensive income statement retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
-        df = current_period.comprehensive_income()
+        stmt = current_period.comprehensive_income()
         
-        assert isinstance(df, pd.DataFrame)
-        mock_xbrl.get_statement.assert_called_with('ComprehensiveIncome', period_filter='instant_2023-12-31')
+        # Now returns Statement by default
+        from edgar.xbrl.current_period import CurrentPeriodStatement
+        assert isinstance(stmt, CurrentPeriodStatement)
+        # Verify it's a comprehensive income statement
+        assert stmt.canonical_type == 'ComprehensiveIncome'
+        assert 'duration_' in stmt.period_filter  # Should use duration period
     
     def test_statement_not_found_error(self, mock_xbrl):
         """Test handling of missing statements."""
-        mock_xbrl.get_statement.return_value = None
+        # Mock find_statement to return no matching role
+        mock_xbrl.find_statement.return_value = ([], None, None)
         current_period = CurrentPeriodView(mock_xbrl)
         
         with pytest.raises(StatementNotFound):
             current_period.balance_sheet()
     
     def test_empty_statement_data_error(self, mock_xbrl):
-        """Test handling of empty statement data."""
+        """Test handling of empty statement data with DataFrame mode."""
         mock_xbrl.get_statement.return_value = []
         current_period = CurrentPeriodView(mock_xbrl)
         
+        # Test with DataFrame mode (as_statement=False)
         with pytest.raises(StatementNotFound):
-            current_period.income_statement()
+            current_period.income_statement(as_statement=False)
     
     def test_notes_access(self, mock_xbrl):
         """Test notes sections retrieval."""
@@ -305,7 +345,13 @@ class TestCurrentPeriodIntegration:
         current_period = aapl_xbrl.current_period
         
         try:
-            df = current_period.balance_sheet()
+            # Test Statement object (new default)
+            stmt = current_period.balance_sheet()
+            from edgar.xbrl.current_period import CurrentPeriodStatement
+            assert isinstance(stmt, CurrentPeriodStatement)
+            
+            # Convert to DataFrame for data validation
+            df = stmt.get_dataframe()
             assert isinstance(df, pd.DataFrame)
             
             if not df.empty:
@@ -325,7 +371,13 @@ class TestCurrentPeriodIntegration:
         current_period = aapl_xbrl.current_period
         
         try:
-            df = current_period.income_statement()
+            # Test Statement object (new default)
+            stmt = current_period.income_statement()
+            from edgar.xbrl.current_period import CurrentPeriodStatement
+            assert isinstance(stmt, CurrentPeriodStatement)
+            
+            # Convert to DataFrame for data validation
+            df = stmt.get_dataframe()
             assert isinstance(df, pd.DataFrame)
             
             if not df.empty:
@@ -340,7 +392,13 @@ class TestCurrentPeriodIntegration:
         current_period = aapl_xbrl.current_period
         
         try:
-            df = current_period.balance_sheet(raw_concepts=True)
+            # Test Statement object with raw concepts
+            stmt = current_period.balance_sheet(raw_concepts=True)
+            from edgar.xbrl.current_period import CurrentPeriodStatement
+            assert isinstance(stmt, CurrentPeriodStatement)
+            
+            # Convert to DataFrame with raw concepts for validation
+            df = stmt.get_dataframe(raw_concepts=True)
             assert isinstance(df, pd.DataFrame)
             
             if not df.empty:
