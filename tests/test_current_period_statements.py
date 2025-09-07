@@ -273,16 +273,16 @@ class TestCurrentPeriodStatementClass:
             period_label='December 31, 2024'
         )
         
-        # Test __repr__
+        # Test __repr__ now returns rich-rendered content (after rich changes)
         repr_str = repr(stmt)
-        assert 'CurrentPeriodStatement' in repr_str
-        assert 'Test Company' in repr_str
-        assert 'BalanceSheet' in repr_str
-        assert 'December 31, 2024' in repr_str
+        assert "Rendered Table" in repr_str  # Should contain the rendered table
         
-        # Test __str__ calls render
+        # Test __str__ also returns rich-rendered content 
         str_result = str(stmt)
-        assert str_result == "Rendered Table"
+        assert "Rendered Table" in str_result
+        
+        # Test that both __repr__ and __str__ return the same rich content
+        assert repr_str == str_result
     
     def test_render_method(self):
         """Test render method passes parameters correctly"""
