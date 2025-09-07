@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.11.1 - 2025-09-07
+
+### Fixed
+- **Issue #427**: Fixed XBRLS DataFrame column ordering and amendment filtering to ensure consistent and predictable data presentation
+- **Issue #429**: Resolved regression in Statement object defaults that was causing test failures after CurrentPeriod API enhancements
+
+### Enhanced
+- **CurrentPeriod API improvements**: Added Statement object support with improved defaults for better user experience when accessing current period financial data
+
 ## Release 4.11.0 - 2025-09-06
 
 ### Added
