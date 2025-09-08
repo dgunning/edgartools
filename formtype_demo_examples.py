@@ -14,7 +14,7 @@ print("\n📝 Example 1: IDE Autocomplete Experience")
 print("-" * 40)
 
 from edgar import Company
-from edgar.types import FormType
+from edgar.formtypes import FormType
 
 print("# Before: Manual string typing, no autocomplete")
 print('filings = company.get_filings(form="10-K")  # Have to remember exact string')
@@ -92,7 +92,7 @@ print(f"✅ Mixed usage works: Found {len(mixed_filings)} filings")
 print("\n📚 Example 6: Convenient Form Collections")
 print("-" * 40)
 
-from edgar.types import PERIODIC_FORMS, PROXY_FORMS, REGISTRATION_FORMS
+from edgar.formtypes import PERIODIC_FORMS, PROXY_FORMS, REGISTRATION_FORMS
 
 print("# Pre-defined collections for common use cases:")
 print(f"PERIODIC_FORMS: {[f.value for f in PERIODIC_FORMS]}")

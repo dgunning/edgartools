@@ -6,7 +6,7 @@ Tests both new FormType usage and backwards compatibility
 
 # Test imports work correctly
 try:
-    from edgar.types import FormType, validate_form_type, FormInput
+    from edgar.formtypes import FormType, validate_form_type, FormInput
     print("✅ FormType import successful")
 except ImportError as e:
     print(f"❌ FormType import failed: {e}")
@@ -74,7 +74,7 @@ print(f"\nTotal form types available: {len(list(FormType))}")
 
 print("\n=== Testing Form Collections ===")
 try:
-    from edgar.types import PERIODIC_FORMS, PROXY_FORMS, REGISTRATION_FORMS
+    from edgar.formtypes import PERIODIC_FORMS, PROXY_FORMS, REGISTRATION_FORMS
     print(f"✅ Periodic forms: {len(PERIODIC_FORMS)} types")
     print(f"✅ Proxy forms: {len(PROXY_FORMS)} types") 
     print(f"✅ Registration forms: {len(REGISTRATION_FORMS)} types")

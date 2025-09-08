@@ -9,7 +9,7 @@ I've implemented the **StrEnum approach** you discussed and have a working proto
 ### **New Developer Experience**
 ```python
 from edgar import Company
-from edgar.types import FormType
+from edgar.formtypes import FormType
 
 # IDE autocomplete for form types! 🚀
 company = Company("AAPL")
@@ -69,7 +69,7 @@ I've thoroughly tested the implementation:
 ```python
 # Test it yourself!
 from edgar import Company  
-from edgar.types import FormType
+from edgar.formtypes import FormType
 
 company = Company("AAPL")
 
@@ -90,7 +90,7 @@ print("✅ Perfect compatibility confirmed")
 
 1. **Form Coverage**: Are there specific form types missing from the 31 included? 
 2. **Priority**: Should we expand to other parameters like periods, statement types?
-3. **Import Style**: Happy with `from edgar.types import FormType`?
+3. **Import Style**: Happy with `from edgar.formtypes import FormType`?
 4. **Error Messages**: Are the validation messages helpful enough?
 
 ## 🚀 **Next Steps**

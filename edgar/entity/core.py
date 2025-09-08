@@ -29,7 +29,7 @@ from edgar.richtools import repr_rich
 # Import FormType for type hints (with TYPE_CHECKING to avoid circular imports)
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from edgar.types import FormType
+    from edgar.formtypes import FormType
 
 # Performance optimization: use set for O(1) lookups
 COMPANY_FORMS = {
