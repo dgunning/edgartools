@@ -26,6 +26,11 @@ from edgar.formatting import reverse_name, datefmt
 from edgar.reference.tickers import find_cik
 from edgar.richtools import repr_rich
 
+# Import FormType for type hints (with TYPE_CHECKING to avoid circular imports)
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from edgar.types import FormType
+
 # Performance optimization: use set for O(1) lookups
 COMPANY_FORMS = {
     # Registration statements
@@ -297,7 +302,7 @@ class Entity(SecFiler):
                    *,
                    year: Union[int, List[int]] = None,
                    quarter: Union[int, List[int]] = None,
-                   form: Union[str, List] = None,
+                   form: Union[str, 'FormType', List[Union[str, 'FormType']]] = None,
                    accession_number: Union[str, List] = None,
                    file_number: Union[str, List] = None,
                    filing_date: Union[str, Tuple[str, str]] = None,
@@ -318,7 +323,7 @@ class Entity(SecFiler):
         Args:
             year: The year or list of years to filter by (e.g. 2023, [2022, 2023])
             quarter: The quarter or list of quarters to filter by (1-4, e.g. 4, [3, 4])
-            form: The form as a string e.g. '10-K' or List of strings ['10-Q', '10-K']
+            form: The form type (e.g. FormType.ANNUAL_REPORT, '10-K', or ['10-Q', '10-K'])
             accession_number: The accession number that identifies a filing
             file_number: The file number e.g. 001-39504
             filing_date: Filter by filing date (YYYY-MM-DD or range)
