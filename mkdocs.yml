@@ -44,6 +44,7 @@ nav:
   - Data Objects:
     - Data Objects: data-objects.md
     - Insider Filings: insider-filings.md
+    - ThirteenF Holding Reports: 13f-filings.md
   - Concepts:
     - "Understanding SEC Filings": concepts/sec-filings.md
     - "Understanding Data Objects": concepts/data-objects.md
