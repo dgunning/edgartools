@@ -39,7 +39,6 @@ except ImportError:
 
 from typing import Union, List, Any, Optional, Set, Dict
 import difflib
-import re
 
 __all__ = ['FormType', 'PeriodType', 'StatementType', 'ValidationError', 'enhanced_validate']
 
@@ -189,28 +188,37 @@ class ValidationError(ValueError):
 
 def fuzzy_match(value: str, valid_options: Set[str], threshold: float = 0.6) -> List[str]:
     """
-    Find fuzzy matches for a value against valid options.
+    Find fuzzy matches for a value against valid options using conservative similarity scoring.
     
     Args:
         value: The input value to match
         valid_options: Set of valid option strings
-        threshold: Similarity threshold (0.0 to 1.0)
+        threshold: Similarity threshold (0.0 to 1.0). Higher values = more restrictive
         
     Returns:
-        List of suggested matches, ordered by similarity
+        List of suggested matches, ordered by similarity (max 3 results)
     """
-    if not isinstance(value, str):
+    if not isinstance(value, str) or len(value.strip()) == 0:
         return []
     
-    # Get close matches using difflib
+    value_lower = value.lower().strip()
+    
+    # Use more conservative matching for very short inputs to avoid poor suggestions
+    adjusted_threshold = threshold
+    if len(value_lower) <= 2:
+        adjusted_threshold = max(threshold, 0.8)  # Require high similarity for short inputs
+    elif len(value_lower) <= 4:
+        adjusted_threshold = max(threshold, 0.7)  # Moderate similarity for medium inputs
+    
+    # Get close matches using difflib with adjusted threshold
     matches = difflib.get_close_matches(
-        value.lower(), 
+        value_lower, 
         [opt.lower() for opt in valid_options], 
-        n=3, 
-        cutoff=threshold
+        n=3,  # Limit to top 3 to avoid overwhelming users
+        cutoff=adjusted_threshold
     )
     
-    # Return original case matches
+    # Return original case matches, preserving order
     original_matches = []
     for match in matches:
         for option in valid_options:
@@ -219,6 +227,42 @@ def fuzzy_match(value: str, valid_options: Set[str], threshold: float = 0.6) -> 
                 break
                 
     return original_matches
+
+
+def _is_case_mismatch(value: str, option: str) -> bool:
+    """Check if strings match except for case differences."""
+    return value == option
+
+
+def _is_missing_hyphen(value: str, option: str) -> bool:
+    """Check if value is missing hyphens compared to option (e.g., '10k' vs '10-K')."""
+    return value.replace('-', '') == option.replace('-', '')
+
+
+def _is_missing_character(value: str, option: str) -> bool:
+    """Check if value is missing exactly one character from option."""
+    return (len(value) == len(option) - 1 and 
+            all(char in option for char in value))
+
+
+def _is_extra_character(value: str, option: str) -> bool:
+    """Check if value has exactly one extra character compared to option."""
+    return (len(value) == len(option) + 1 and 
+            all(char in value for char in option))
+
+
+def _is_single_substitution(value: str, option: str) -> bool:
+    """Check if strings differ by exactly one character substitution."""
+    return (len(value) == len(option) and 
+            sum(c1 != c2 for c1, c2 in zip(value, option)) == 1)
+
+
+def _is_transposed_characters(value: str, option: str) -> bool:
+    """Check if strings differ by exactly one pair of transposed adjacent characters."""
+    if len(value) != len(option) or len(value) < 2:
+        return False
+    return any(value[:i] + value[i+1] + value[i] + value[i+2:] == option 
+               for i in range(len(value)-1))
 
 
 def detect_common_typos(value: str, valid_options: Set[str]) -> List[str]:
@@ -235,30 +279,24 @@ def detect_common_typos(value: str, valid_options: Set[str]) -> List[str]:
     suggestions = []
     value_lower = value.lower()
     
+    # Define typo detection patterns with their corresponding functions
+    typo_patterns = [
+        (_is_case_mismatch, "case mismatch"),
+        (_is_missing_hyphen, "missing hyphen"),
+        (_is_missing_character, "missing character"), 
+        (_is_extra_character, "extra character"),
+        (_is_single_substitution, "character substitution"),
+        (_is_transposed_characters, "transposed characters")
+    ]
+    
     for option in valid_options:
         option_lower = option.lower()
         
-        # Check for common typo patterns
-        patterns = [
-            # Case issues (exact match except case)
-            (lambda v, o: v == o, "case mismatch"),
-            # Missing hyphen (10k -> 10-K)
-            (lambda v, o: v.replace('-', '') == o.replace('-', ''), "missing hyphen"),
-            # Missing characters (one char difference)
-            (lambda v, o: len(v) == len(o) - 1 and all(c in o for c in v), "missing character"),
-            # Extra characters (one char difference)
-            (lambda v, o: len(v) == len(o) + 1 and all(c in v for c in o), "extra character"),
-            # Single character substitution
-            (lambda v, o: len(v) == len(o) and sum(c1 != c2 for c1, c2 in zip(v, o)) == 1, "character substitution"),
-            # Transposed adjacent characters
-            (lambda v, o: len(v) == len(o) and 
-             any(v[:i] + v[i+1] + v[i] + v[i+2:] == o for i in range(len(v)-1)), "transposed characters")
-        ]
-        
-        for pattern_func, pattern_name in patterns:
+        # Check each typo pattern
+        for pattern_func, pattern_name in typo_patterns:
             if pattern_func(value_lower, option_lower):
                 suggestions.append(option)
-                break
+                break  # Only match first pattern per option
                 
     return suggestions[:3]  # Return top 3 suggestions
 
@@ -365,10 +403,9 @@ def validate_form_type(form: Union[FormType, str]) -> str:
         ValidationError: If form string is not recognized with helpful suggestions
         TypeError: For wrong parameter types
     """
-    valid_forms = set(FormType.__members__.values())
     return enhanced_validate(
         form, 
-        valid_forms, 
+        _CACHED_FORM_TYPES, 
         "form type",
         enum_type=FormType,
         context_hint="Common forms: '10-K' (annual), '10-Q' (quarterly), '8-K' (current report)."
@@ -389,10 +426,9 @@ def validate_period_type(period: Union[PeriodType, str]) -> str:
         ValidationError: If period string is not recognized with helpful suggestions
         TypeError: For wrong parameter types
     """
-    valid_periods = set(PeriodType.__members__.values())
     return enhanced_validate(
         period, 
-        valid_periods, 
+        _CACHED_PERIOD_TYPES, 
         "period type",
         enum_type=PeriodType,
         context_hint="Common periods: 'annual' (full year), 'quarterly' (3 months), 'ttm' (trailing 12 months)."
@@ -413,10 +449,9 @@ def validate_statement_type(statement: Union[StatementType, str]) -> str:
         ValidationError: If statement string is not recognized with helpful suggestions
         TypeError: For wrong parameter types
     """
-    valid_statements = set(StatementType.__members__.values())
     return enhanced_validate(
         statement, 
-        valid_statements, 
+        _CACHED_STATEMENT_TYPES, 
         "statement type",
         enum_type=StatementType,
         context_hint="Primary statements: 'income_statement' (P&L), 'balance_sheet' (financial position), 'cash_flow_statement' (cash movements)."
@@ -442,17 +477,27 @@ def _get_form_display_name(form: Union[FormType, str]) -> str:
 
 
 # Commonly used form collections for convenience
+
 PERIODIC_FORMS = [
     FormType.ANNUAL_REPORT,
     FormType.QUARTERLY_REPORT, 
     FormType.ANNUAL_REPORT_AMENDED,
     FormType.QUARTERLY_REPORT_AMENDED
 ]
+"""
+Collection of periodic reporting forms (annual and quarterly reports).
+Includes both original filings and amended versions.
+Most commonly used forms for ongoing company reporting.
+"""
 
 CURRENT_REPORT_FORMS = [
     FormType.CURRENT_REPORT,
     FormType.FOREIGN_CURRENT_REPORT
 ]
+"""
+Collection of current report forms for immediate disclosure of material events.
+Includes domestic (8-K) and foreign issuer (6-K) current reports.
+"""
 
 PROXY_FORMS = [
     FormType.PROXY_STATEMENT,
@@ -460,6 +505,10 @@ PROXY_FORMS = [
     FormType.ADDITIONAL_PROXY,
     FormType.MERGER_PROXY
 ]
+"""
+Collection of proxy statement forms for shareholder voting and corporate governance.
+Includes definitive, preliminary, additional, and merger-related proxy statements.
+"""
 
 REGISTRATION_FORMS = [
     FormType.REGISTRATION_S1,
@@ -467,17 +516,33 @@ REGISTRATION_FORMS = [
     FormType.REGISTRATION_S4,
     FormType.REGISTRATION_S8
 ]
+"""
+Collection of the most common SEC registration statement forms.
+Used for registering securities offerings with the SEC.
+S-1: General registration, S-3: Shelf registration, S-4: Business combinations, S-8: Employee benefit plans.
+"""
 
 # Period type collections for convenience
+
 STANDARD_PERIODS = [
     PeriodType.ANNUAL,
     PeriodType.QUARTERLY
 ]
+"""
+Collection of standard financial reporting periods.
+Annual reports cover full fiscal years, quarterly reports cover 3-month periods.
+These are the most commonly requested periods for financial analysis.
+"""
 
 SPECIAL_PERIODS = [
     PeriodType.TTM,
     PeriodType.YTD
 ]
+"""
+Collection of special calculation periods for financial metrics.
+TTM (Trailing Twelve Months): Rolling 12-month calculation.
+YTD (Year to Date): From fiscal year start to current period.
+"""
 
 ALL_PERIODS = [
     PeriodType.ANNUAL,
@@ -486,14 +551,28 @@ ALL_PERIODS = [
     PeriodType.TTM,
     PeriodType.YTD
 ]
+"""
+Complete collection of all available period types.
+Includes standard reporting periods (annual, quarterly, monthly) and 
+special calculation periods (TTM, YTD).
+"""
 
 # Statement type collections for convenience
+
 PRIMARY_STATEMENTS = [
     StatementType.INCOME_STATEMENT,
     StatementType.BALANCE_SHEET,
     StatementType.CASH_FLOW,
     StatementType.CHANGES_IN_EQUITY
 ]
+"""
+Collection of the four primary financial statements required by GAAP.
+These form the core of financial reporting and analysis:
+- Income Statement: Revenue, expenses, and net income
+- Balance Sheet: Assets, liabilities, and equity at a point in time  
+- Cash Flow Statement: Cash receipts and payments by activity
+- Changes in Equity: Movements in shareholders' equity accounts
+"""
 
 COMPREHENSIVE_STATEMENTS = [
     StatementType.INCOME_STATEMENT,
@@ -502,6 +581,11 @@ COMPREHENSIVE_STATEMENTS = [
     StatementType.CHANGES_IN_EQUITY,
     StatementType.COMPREHENSIVE_INCOME
 ]
+"""
+Collection of primary financial statements plus comprehensive income.
+Includes all primary statements plus the Statement of Comprehensive Income,
+which reports total comprehensive income including other comprehensive income items.
+"""
 
 ANALYTICAL_STATEMENTS = [
     StatementType.SEGMENTS,
@@ -509,10 +593,26 @@ ANALYTICAL_STATEMENTS = [
     StatementType.FOOTNOTES,
     StatementType.ACCOUNTING_POLICIES
 ]
+"""
+Collection of supplementary financial information for detailed analysis.
+Includes segment reporting, subsidiary information, footnote disclosures,
+and accounting policy descriptions that provide context to the primary statements.
+"""
 
 SPECIALIZED_STATEMENTS = [
     StatementType.REGULATORY_CAPITAL,
     StatementType.INSURANCE_RESERVES
 ]
+"""
+Collection of industry-specific financial statements.
+Regulatory Capital: Required for banking institutions.
+Insurance Reserves: Required for insurance companies.
+These statements address specialized regulatory reporting requirements.
+"""
 
 ALL_STATEMENTS = PRIMARY_STATEMENTS + [StatementType.COMPREHENSIVE_INCOME] + ANALYTICAL_STATEMENTS + SPECIALIZED_STATEMENTS
+
+# Cached validation sets to avoid recreating on every validation call
+_CACHED_FORM_TYPES = set(FormType.__members__.values())
+_CACHED_PERIOD_TYPES = set(PeriodType.__members__.values()) 
+_CACHED_STATEMENT_TYPES = set(StatementType.__members__.values())
