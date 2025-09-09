@@ -8,19 +8,21 @@ This module provides StrEnum types for common EdgarTools parameters to enable:
 
 Examples:
     from edgar import Company
-    from edgar.types import FormType
+    from edgar.types import FormType, PeriodType
     
     # New usage with autocomplete
     filings = company.get_filings(form=FormType.ANNUAL_REPORT)
+    facts = company.get_facts(period=PeriodType.ANNUAL)
     
     # Existing usage still works
     filings = company.get_filings(form="10-K")
+    facts = company.get_facts(annual=True)
 """
 
 from enum import StrEnum
 from typing import Union, List
 
-__all__ = ['FormType']
+__all__ = ['FormType', 'PeriodType']
 
 
 class FormType(StrEnum):
@@ -85,8 +87,33 @@ class FormType(StrEnum):
     LATE_10Q_NOTICE = "NT 10-Q"
 
 
+class PeriodType(StrEnum):
+    """
+    Enumeration of financial reporting period types with IDE autocomplete support.
+    
+    This enum provides type-safe access to period specifications while maintaining
+    backwards compatibility with boolean annual parameters through Union types.
+    
+    Values correspond to common financial reporting periods.
+    """
+    
+    # Primary period types
+    ANNUAL = "annual"           # Annual reporting periods (full fiscal year)
+    QUARTERLY = "quarterly"     # Quarterly reporting periods (3-month periods)
+    MONTHLY = "monthly"         # Monthly reporting periods (rarely used)
+    
+    # Special period types  
+    TTM = "ttm"                # Trailing Twelve Months
+    YTD = "ytd"                # Year to Date
+    
+    # Alternative names for convenience
+    YEARLY = "annual"          # Alias for ANNUAL
+    QUARTER = "quarterly"      # Alias for QUARTERLY
+
+
 # Type aliases for function signatures
 FormInput = Union[FormType, str, List[Union[FormType, str]]]
+PeriodInput = Union[PeriodType, str]
 
 
 def validate_form_type(form: Union[FormType, str]) -> str:
@@ -128,6 +155,47 @@ def validate_form_type(form: Union[FormType, str]) -> str:
             )
     
     raise TypeError(f"Form must be FormType or str, not {type(form)}")
+
+
+def validate_period_type(period: Union[PeriodType, str]) -> str:
+    """
+    Validate and normalize period type parameter.
+    
+    Args:
+        period: Period type as PeriodType enum or string
+        
+    Returns:
+        Normalized period string
+        
+    Raises:
+        ValueError: If period string is not recognized with helpful suggestions
+    """
+    if isinstance(period, PeriodType):
+        return period.value
+    
+    if isinstance(period, str):
+        # Check if it's a valid period string
+        valid_periods = set(PeriodType.__members__.values())
+        
+        if period in valid_periods:
+            return period
+            
+        # Provide helpful error message with suggestions
+        import difflib
+        suggestions = difflib.get_close_matches(period, valid_periods, n=3, cutoff=0.6)
+        
+        if suggestions:
+            raise ValueError(
+                f"Invalid period type '{period}'. Did you mean one of: {', '.join(suggestions)}? "
+                f"Use PeriodType enum for autocomplete or see PeriodType documentation for all valid periods."
+            )
+        else:
+            raise ValueError(
+                f"Invalid period type '{period}'. "
+                f"Use PeriodType enum for autocomplete or see PeriodType documentation for all valid periods."
+            )
+    
+    raise TypeError(f"Period must be PeriodType or str, not {type(period)}")
 
 
 def _get_form_display_name(form: Union[FormType, str]) -> str:
@@ -173,4 +241,23 @@ REGISTRATION_FORMS = [
     FormType.REGISTRATION_S3,
     FormType.REGISTRATION_S4,
     FormType.REGISTRATION_S8
+]
+
+# Period type collections for convenience
+STANDARD_PERIODS = [
+    PeriodType.ANNUAL,
+    PeriodType.QUARTERLY
+]
+
+SPECIAL_PERIODS = [
+    PeriodType.TTM,
+    PeriodType.YTD
+]
+
+ALL_PERIODS = [
+    PeriodType.ANNUAL,
+    PeriodType.QUARTERLY,
+    PeriodType.MONTHLY,
+    PeriodType.TTM,
+    PeriodType.YTD
 ]
