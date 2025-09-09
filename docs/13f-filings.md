@@ -39,7 +39,7 @@ Search for a specific institutional manager by company name:
 from edgar import Company
 
 # Berkshire Hathaway's 13F filings
-berkshire = Company("BERKSHIRE HATHAWAY INC")
+berkshire = Company("BRK.A")
 filings = berkshire.get_filings(form="13F-HR")
 print(filings)
 ```
