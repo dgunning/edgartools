@@ -21,7 +21,22 @@ Examples:
     statement = company.get_income_statement()
 """
 
-from enum import StrEnum
+try:
+    from enum import StrEnum
+except ImportError:
+    # Python < 3.11 compatibility
+    from enum import Enum
+    
+    class StrEnum(str, Enum):
+        """Compatibility StrEnum for Python < 3.11"""
+        def __new__(cls, value):
+            obj = str.__new__(cls, value)
+            obj._value_ = value
+            return obj
+        
+        def __str__(self):
+            return str(self._value_)
+
 from typing import Union, List, Any, Optional, Set, Dict
 import difflib
 import re
