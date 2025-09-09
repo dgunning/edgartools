@@ -13,10 +13,12 @@ Examples:
     # New usage with autocomplete
     filings = company.get_filings(form=FormType.ANNUAL_REPORT)
     facts = company.get_facts(period=PeriodType.ANNUAL)
+    statement = company.get_statement(StatementType.INCOME_STATEMENT)
     
     # Existing usage still works
     filings = company.get_filings(form="10-K")
     facts = company.get_facts(annual=True)
+    statement = company.get_income_statement()
 """
 
 from enum import StrEnum
@@ -24,7 +26,7 @@ from typing import Union, List, Any, Optional, Set, Dict
 import difflib
 import re
 
-__all__ = ['FormType', 'PeriodType', 'ValidationError', 'enhanced_validate']
+__all__ = ['FormType', 'PeriodType', 'StatementType', 'ValidationError', 'enhanced_validate']
 
 
 class FormType(StrEnum):
@@ -113,9 +115,50 @@ class PeriodType(StrEnum):
     QUARTER = "quarterly"      # Alias for QUARTERLY
 
 
+class StatementType(StrEnum):
+    """
+    Enumeration of financial statement types with IDE autocomplete support.
+    
+    This enum provides type-safe access to statement specifications while maintaining
+    backwards compatibility with string parameters through Union types.
+    
+    Values correspond to common financial statement categories.
+    """
+    
+    # Primary financial statements (The Big Four)
+    INCOME_STATEMENT = "income_statement"           # Profit & Loss Statement
+    BALANCE_SHEET = "balance_sheet"                 # Statement of Financial Position
+    CASH_FLOW = "cash_flow_statement"              # Statement of Cash Flows  
+    CHANGES_IN_EQUITY = "changes_in_equity"        # Statement of Changes in Equity
+    
+    # Comprehensive income statement
+    COMPREHENSIVE_INCOME = "comprehensive_income"   # Statement of Comprehensive Income
+    
+    # Segment and subsidiary reporting
+    SEGMENTS = "segment_reporting"                  # Segment Information
+    SUBSIDIARIES = "subsidiaries"                   # Subsidiary Information
+    
+    # Notes and disclosures
+    FOOTNOTES = "footnotes"                        # Notes to Financial Statements
+    ACCOUNTING_POLICIES = "accounting_policies"     # Significant Accounting Policies
+    
+    # Special purpose statements
+    REGULATORY_CAPITAL = "regulatory_capital"       # Regulatory Capital (banks)
+    INSURANCE_RESERVES = "insurance_reserves"       # Insurance Reserves (insurance cos)
+    
+    # Alternative names for user convenience and compatibility
+    PROFIT_LOSS = "income_statement"               # Alias for income statement
+    PL_STATEMENT = "income_statement"              # Another P&L alias
+    FINANCIAL_POSITION = "balance_sheet"           # Alias for balance sheet
+    STATEMENT_OF_POSITION = "balance_sheet"        # Another balance sheet alias
+    CASH_FLOWS = "cash_flow_statement"            # Alias for cash flow
+    EQUITY_CHANGES = "changes_in_equity"          # Alias for equity statement
+
+
 # Type aliases for function signatures
 FormInput = Union[FormType, str, List[Union[FormType, str]]]
 PeriodInput = Union[PeriodType, str]
+StatementInput = Union[StatementType, str]
 
 
 # FEAT-004: Enhanced Parameter Validation Framework
@@ -341,6 +384,30 @@ def validate_period_type(period: Union[PeriodType, str]) -> str:
     )
 
 
+def validate_statement_type(statement: Union[StatementType, str]) -> str:
+    """
+    Validate and normalize statement type parameter using enhanced validation.
+    
+    Args:
+        statement: Statement type as StatementType enum or string
+        
+    Returns:
+        Normalized statement string
+        
+    Raises:
+        ValidationError: If statement string is not recognized with helpful suggestions
+        TypeError: For wrong parameter types
+    """
+    valid_statements = set(StatementType.__members__.values())
+    return enhanced_validate(
+        statement, 
+        valid_statements, 
+        "statement type",
+        enum_type=StatementType,
+        context_hint="Primary statements: 'income_statement' (P&L), 'balance_sheet' (financial position), 'cash_flow_statement' (cash movements)."
+    )
+
+
 def _get_form_display_name(form: Union[FormType, str]) -> str:
     """
     Get human-readable display name for form type.
@@ -404,3 +471,33 @@ ALL_PERIODS = [
     PeriodType.TTM,
     PeriodType.YTD
 ]
+
+# Statement type collections for convenience
+PRIMARY_STATEMENTS = [
+    StatementType.INCOME_STATEMENT,
+    StatementType.BALANCE_SHEET,
+    StatementType.CASH_FLOW,
+    StatementType.CHANGES_IN_EQUITY
+]
+
+COMPREHENSIVE_STATEMENTS = [
+    StatementType.INCOME_STATEMENT,
+    StatementType.BALANCE_SHEET,
+    StatementType.CASH_FLOW,
+    StatementType.CHANGES_IN_EQUITY,
+    StatementType.COMPREHENSIVE_INCOME
+]
+
+ANALYTICAL_STATEMENTS = [
+    StatementType.SEGMENTS,
+    StatementType.SUBSIDIARIES,
+    StatementType.FOOTNOTES,
+    StatementType.ACCOUNTING_POLICIES
+]
+
+SPECIALIZED_STATEMENTS = [
+    StatementType.REGULATORY_CAPITAL,
+    StatementType.INSURANCE_RESERVES
+]
+
+ALL_STATEMENTS = PRIMARY_STATEMENTS + [StatementType.COMPREHENSIVE_INCOME] + ANALYTICAL_STATEMENTS + SPECIALIZED_STATEMENTS
