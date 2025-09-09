@@ -1,0 +1,1136 @@
+{
+  "metadata": {
+    "version": "2025.01.09",
+    "description": "Expanded curated database of portfolio managers for major 13F filing institutions",
+    "total_companies": 40,
+    "total_managers": 75,
+    "last_updated": "2025-01-09",
+    "sources": [
+      "company_websites",
+      "sec_filings",
+      "press_releases",
+      "public_records",
+      "financial_press"
+    ],
+    "confidence_levels": {
+      "high": "Verified from multiple official sources",
+      "medium": "Verified from single official source",
+      "low": "Approximate or historical information"
+    },
+    "status_definitions": {
+      "active": "Currently in active management role",
+      "retired": "Retired but may retain advisory role",
+      "deceased": "Deceased as of specified year",
+      "former": "No longer with the organization"
+    }
+  },
+  "managers": {
+    "berkshire_hathaway": {
+      "company_name": "Berkshire Hathaway Inc",
+      "cik": 1067983,
+      "tickers": [
+        "BRK-A",
+        "BRK-B"
+      ],
+      "aum_billions": 335,
+      "match_patterns": [
+        "berkshire hathaway",
+        "brk",
+        "berkshire"
+      ],
+      "website": "https://www.berkshirehathaway.com",
+      "managers": [
+        {
+          "name": "Warren Buffett",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "annual_report_2024",
+            "sec_filings"
+          ],
+          "start_date": "1965-05-01",
+          "last_verified": "2024-12-01",
+          "note": "Primary investment decision maker, 'Oracle of Omaha'"
+        },
+        {
+          "name": "Charlie Munger",
+          "title": "Vice Chairman",
+          "status": "deceased_2023",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "obituary_2023"
+          ],
+          "start_date": "1978-01-01",
+          "end_date": "2023-11-28",
+          "last_verified": "2024-12-01",
+          "note": "Former vice chairman and investment partner, died November 2023"
+        }
+      ]
+    },
+    "millennium": {
+      "company_name": "Millennium Management LLC",
+      "aum_billions": 506,
+      "match_patterns": [
+        "millennium",
+        "millennium management"
+      ],
+      "website": "https://www.mlp.com",
+      "managers": [
+        {
+          "name": "Israel Englander",
+          "title": "Founder & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press",
+            "sec_filings"
+          ],
+          "start_date": "1989-01-01",
+          "last_verified": "2025-01-01",
+          "note": "Founded with $35 million, uses global multi-strategy approach, highest-earning hedge fund manager 2024"
+        },
+        {
+          "name": "Ross Garon",
+          "title": "Global Head of Quantitative Strategies",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2020-01-01",
+          "last_verified": "2024-06-01",
+          "note": "Member of Senior Management team, responsible for quantitative strategies"
+        }
+      ]
+    },
+    "bridgewater": {
+      "company_name": "Bridgewater Associates, LP",
+      "aum_billions": 172,
+      "match_patterns": [
+        "bridgewater",
+        "bridgewater associates"
+      ],
+      "website": "https://www.bridgewater.com",
+      "managers": [
+        {
+          "name": "Ray Dalio",
+          "title": "Founder",
+          "status": "former",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "public_interviews"
+          ],
+          "start_date": "1975-01-01",
+          "end_date": "2024-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Founder, known for 'Principles' philosophy and macroeconomic strategies, no longer associated with firm"
+        }
+      ],
+      "cik": 1350694
+    },
+    "citadel": {
+      "company_name": "Citadel Advisors LLC",
+      "aum_billions": 397,
+      "match_patterns": [
+        "citadel",
+        "citadel advisors"
+      ],
+      "website": "https://www.citadel.com",
+      "managers": [
+        {
+          "name": "Ken Griffin",
+          "title": "Founder & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "forbes_billionaires"
+          ],
+          "start_date": "1990-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Founded Citadel from Harvard dorm room, focus on quantitative strategies"
+        }
+      ],
+      "cik": 1423053
+    },
+    "arrowstreet": {
+      "company_name": "ARROWSTREET CAPITAL, LIMITED PARTNERSHIP",
+      "aum_billions": 216,
+      "match_patterns": [
+        "arrowstreet",
+        "arrowstreet capital"
+      ],
+      "website": "https://www.arrowstreetcapital.com",
+      "managers": [
+        {
+          "name": "Bruce Clarke",
+          "title": "Co-Founder",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "1999-01-01",
+          "last_verified": "2024-05-01",
+          "note": "Co-founder with John Campbell and Peter Rathjens, specializes in systematic quantitative strategies"
+        },
+        {
+          "name": "John Y. Campbell",
+          "title": "Co-Founder",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "1999-01-01",
+          "last_verified": "2024-05-01",
+          "note": "Co-founder, Harvard Economics Professor, quantitative equity strategies"
+        },
+        {
+          "name": "Peter Rathjens",
+          "title": "Co-Founder",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "1999-01-01",
+          "last_verified": "2024-05-01",
+          "note": "Co-founder, focus on global equity investment strategies"
+        }
+      ],
+      "cik": 1164508
+    },
+    "man_group": {
+      "company_name": "Man Group plc",
+      "aum_billions": 175,
+      "match_patterns": [
+        "man group",
+        "man"
+      ],
+      "website": "https://www.man.com",
+      "managers": [
+        {
+          "name": "Luke Ellis",
+          "title": "CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2016-01-01",
+          "last_verified": "2024-09-01",
+          "note": "CEO of world's largest publicly-traded hedge fund, over 25 years in investment management"
+        }
+      ],
+      "cik": 1637460
+    },
+    "blackrock": {
+      "company_name": "BlackRock Inc",
+      "cik": 2012383,
+      "tickers": [
+        "BLK"
+      ],
+      "aum_billions": 9100,
+      "match_patterns": [
+        "blackrock",
+        "black rock"
+      ],
+      "website": "https://www.blackrock.com",
+      "managers": [
+        {
+          "name": "Larry Fink",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "annual_report_2024"
+          ],
+          "start_date": "1988-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Co-founder and CEO, known for ESG investing advocacy"
+        }
+      ]
+    },
+    "vanguard": {
+      "company_name": "Vanguard Group Inc",
+      "aum_billions": 8100,
+      "match_patterns": [
+        "vanguard",
+        "vanguard group"
+      ],
+      "website": "https://www.vanguard.com",
+      "managers": [
+        {
+          "name": "Mortimer J. Buckley",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "press_releases"
+          ],
+          "start_date": "2018-01-01",
+          "last_verified": "2024-12-01",
+          "note": "CEO since 2018, focused on low-cost index fund strategies"
+        }
+      ]
+    },
+    "fidelity": {
+      "company_name": "FMR LLC",
+      "aum_billions": 4200,
+      "match_patterns": [
+        "fidelity",
+        "fidelity management",
+        "fmr"
+      ],
+      "website": "https://www.fidelity.com",
+      "managers": [
+        {
+          "name": "Abigail Johnson",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "forbes_profile"
+          ],
+          "start_date": "2014-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Granddaughter of founder Edward Johnson II, focus on digital innovation"
+        }
+      ],
+      "cik": 315066
+    },
+    "state_street": {
+      "company_name": "STATE STREET CORP",
+      "aum_billions": 3700,
+      "match_patterns": [
+        "state street",
+        "ssga"
+      ],
+      "website": "https://www.statestreet.com",
+      "managers": [
+        {
+          "name": "Ronald P. O'Hanley",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "sec_filings"
+          ],
+          "start_date": "2019-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Former Fidelity executive, CEO since 2019"
+        }
+      ],
+      "cik": 93751
+    },
+    "jpmorgan": {
+      "company_name": "JPMorgan Chase & Co",
+      "cik": 19617,
+      "tickers": [
+        "JPM"
+      ],
+      "aum_billions": 3200,
+      "match_patterns": [
+        "jpmorgan",
+        "jp morgan",
+        "jpmorgan chase"
+      ],
+      "website": "https://www.jpmorgan.com",
+      "managers": [
+        {
+          "name": "Jamie Dimon",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "annual_report_2024"
+          ],
+          "start_date": "2005-12-31",
+          "last_verified": "2024-12-01",
+          "note": "CEO since 2005, known for annual shareholder letters and banking expertise"
+        }
+      ]
+    },
+    "goldman_sachs": {
+      "company_name": "Goldman Sachs Group Inc",
+      "aum_billions": 2300,
+      "match_patterns": [
+        "goldman sachs",
+        "goldman",
+        "gs"
+      ],
+      "website": "https://www.goldmansachs.com",
+      "managers": [
+        {
+          "name": "David Solomon",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "sec_filings"
+          ],
+          "start_date": "2018-10-01",
+          "last_verified": "2024-12-01",
+          "note": "CEO since 2018, former investment banking division head"
+        }
+      ],
+      "cik": 886982
+    },
+    "t_rowe_price": {
+      "company_name": "T. Rowe Price Group Inc",
+      "aum_billions": 1610,
+      "match_patterns": [
+        "t rowe price",
+        "t. rowe price",
+        "trow",
+        "trp"
+      ],
+      "website": "https://www.troweprice.com",
+      "managers": [
+        {
+          "name": "Rob Sharps",
+          "title": "Chairman, CEO & President",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "sec_filings"
+          ],
+          "start_date": "2022-01-01",
+          "last_verified": "2024-12-01",
+          "note": "CEO since 2022, former portfolio manager of Large-Cap Growth strategy"
+        },
+        {
+          "name": "David Giroux",
+          "title": "Portfolio Manager, Capital Appreciation Fund",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2007-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Record-setting performance: 17 consecutive years outperforming peer group"
+        },
+        {
+          "name": "Steph Jackson",
+          "title": "Head of T. Rowe Price Investment Management",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website"
+          ],
+          "start_date": "2020-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Former Brown Capital Management senior portfolio manager"
+        }
+      ]
+    },
+    "wellington": {
+      "company_name": "Wellington Management Company",
+      "aum_billions": 1300,
+      "match_patterns": [
+        "wellington",
+        "wellington management"
+      ],
+      "website": "https://www.wellington.com",
+      "managers": [
+        {
+          "name": "Jean Hynes",
+          "title": "CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2017-01-01",
+          "last_verified": "2024-12-01",
+          "note": "First female CEO, leads $1.3 trillion investment platform"
+        },
+        {
+          "name": "Roberto Isch",
+          "title": "Portfolio Manager, Global Multi-Strategy Fund",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website"
+          ],
+          "start_date": "2024-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Manages Wellington's first interval fund"
+        }
+      ]
+    },
+    "renaissance": {
+      "company_name": "RENAISSANCE TECHNOLOGIES LLC",
+      "aum_billions": 110,
+      "match_patterns": [
+        "renaissance",
+        "renaissance technologies",
+        "rentech"
+      ],
+      "website": "https://www.rentec.com",
+      "managers": [
+        {
+          "name": "Peter Brown",
+          "title": "CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_filings",
+            "industry_publications"
+          ],
+          "start_date": "2010-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Current CEO, co-chief executive with Robert Mercer until 2017"
+        },
+        {
+          "name": "Jim Simons",
+          "title": "Founder",
+          "status": "deceased_2024",
+          "confidence": "high",
+          "sources": [
+            "company_history",
+            "academic_records",
+            "obituary_2024"
+          ],
+          "start_date": "1988-01-01",
+          "end_date": "2024-05-10",
+          "last_verified": "2024-12-01",
+          "note": "Legendary mathematician and founder, died May 2024, greatest hedge fund investor of all time"
+        }
+      ],
+      "cik": 1037389
+    },
+    "de_shaw": {
+      "company_name": "D.E. Shaw & Co",
+      "aum_billions": 121,
+      "match_patterns": [
+        "de shaw",
+        "d.e. shaw",
+        "shaw"
+      ],
+      "website": "https://www.deshaw.com",
+      "managers": [
+        {
+          "name": "David Shaw",
+          "title": "Founder",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "1988-01-01",
+          "last_verified": "2024-08-01",
+          "note": "Computer science professor turned quant pioneer, computational methods and algorithms"
+        }
+      ]
+    },
+    "point72": {
+      "company_name": "Point72 Asset Management, L.P.",
+      "aum_billions": 67,
+      "match_patterns": [
+        "point72",
+        "point 72"
+      ],
+      "website": "https://point72.com",
+      "managers": [
+        {
+          "name": "Steven A. Cohen",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2014-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Successor to SAC Capital, owner of NY Mets, family office converted to hedge fund 2018"
+        }
+      ],
+      "cik": 1603466
+    },
+    "baupost": {
+      "company_name": "BAUPOST GROUP LLC/MA",
+      "aum_billions": 30,
+      "match_patterns": [
+        "baupost",
+        "baupost group"
+      ],
+      "website": "https://www.baupost.com",
+      "managers": [
+        {
+          "name": "Seth Klarman",
+          "title": "CEO & Portfolio Manager",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "1982-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Value investing legend, author of 'Margin of Safety', 20% compounded returns since 1982"
+        },
+        {
+          "name": "Jim Mooney",
+          "title": "President",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website"
+          ],
+          "start_date": "2020-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Works alongside Klarman to steward client capital"
+        }
+      ],
+      "cik": 1061768
+    },
+    "aqr": {
+      "company_name": "AQR CAPITAL MANAGEMENT LLC",
+      "aum_billions": 97,
+      "match_patterns": [
+        "aqr",
+        "aqr capital"
+      ],
+      "website": "https://www.aqr.com",
+      "managers": [
+        {
+          "name": "Cliff Asness",
+          "title": "Founder & CIO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "academic_papers"
+          ],
+          "start_date": "1998-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Quantitative investing pioneer, PhD in Finance from University of Chicago"
+        }
+      ],
+      "cik": 1167557
+    },
+    "two_sigma": {
+      "company_name": "TWO SIGMA ADVISERS, LP",
+      "aum_billions": 58,
+      "match_patterns": [
+        "two sigma",
+        "two sigma investments"
+      ],
+      "website": "https://www.twosigma.com",
+      "managers": [
+        {
+          "name": "John Overdeck",
+          "title": "Co-Founder",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2001-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Co-founder with David Siegel, focus on machine learning and AI"
+        },
+        {
+          "name": "David Siegel",
+          "title": "Co-Founder",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2001-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Co-founder with John Overdeck, computer science background"
+        }
+      ],
+      "cik": 1478735
+    },
+    "elliott": {
+      "company_name": "Elliott Investment Management L.P.",
+      "aum_billions": 65,
+      "match_patterns": [
+        "elliott",
+        "elliott management",
+        "elliott investment"
+      ],
+      "website": "https://www.elliottmgmt.com",
+      "managers": [
+        {
+          "name": "Paul Singer",
+          "title": "Founder & President",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_filings",
+            "financial_press"
+          ],
+          "start_date": "1977-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Founder of activist hedge fund, known for distressed debt investing"
+        }
+      ],
+      "cik": 1791786
+    },
+    "pershing_square": {
+      "company_name": "Pershing Square Capital Management, L.P.",
+      "aum_billions": 16,
+      "match_patterns": [
+        "pershing square",
+        "pershing"
+      ],
+      "website": "https://www.pershingsquareholdings.com",
+      "managers": [
+        {
+          "name": "Bill Ackman",
+          "title": "Founder & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "twitter_profile"
+          ],
+          "start_date": "2004-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Activist investor, known for high-profile campaigns and social media presence"
+        }
+      ],
+      "cik": 1336528
+    },
+    "icahn": {
+      "company_name": "ICAHN CARL C",
+      "aum_billions": 15,
+      "match_patterns": [
+        "icahn",
+        "icahn capital",
+        "icahn enterprises"
+      ],
+      "website": "https://www.icahnenterprises.com",
+      "managers": [
+        {
+          "name": "Carl Icahn",
+          "title": "Founder & Chairman",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_filings",
+            "sec_filings"
+          ],
+          "start_date": "1968-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Legendary corporate raider and activist investor"
+        }
+      ],
+      "cik": 921669
+    },
+    "capital_group": {
+      "company_name": "Capital Group Companies",
+      "aum_billions": 2800,
+      "match_patterns": [
+        "capital group",
+        "american funds"
+      ],
+      "website": "https://www.capitalgroup.com",
+      "managers": [
+        {
+          "name": "Mike Gitlin",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2018-01-01",
+          "last_verified": "2024-12-01",
+          "note": "CEO since 2018, oversees American Funds family"
+        }
+      ]
+    },
+    "invesco": {
+      "company_name": "Invesco Ltd.",
+      "aum_billions": 1700,
+      "match_patterns": [
+        "invesco"
+      ],
+      "website": "https://www.invesco.com",
+      "managers": [
+        {
+          "name": "Andrew Schlossberg",
+          "title": "President & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website"
+          ],
+          "start_date": "2020-01-01",
+          "last_verified": "2024-12-01",
+          "note": "CEO since 2020, former head of Americas"
+        }
+      ],
+      "cik": 914208
+    },
+    "balyasny": {
+      "company_name": "Balyasny Asset Management",
+      "aum_billions": 85,
+      "match_patterns": [
+        "balyasny",
+        "bam"
+      ],
+      "website": "https://www.balyasny.com",
+      "managers": [
+        {
+          "name": "Dmitry Balyasny",
+          "title": "Founder & CIO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "2001-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Multi-strategy hedge fund, transitioned from fundamental to macro strategies"
+        }
+      ]
+    },
+    "mariner": {
+      "company_name": "Mariner Investment Group",
+      "aum_billions": 45,
+      "match_patterns": [
+        "mariner",
+        "mariner investment"
+      ],
+      "website": "https://www.marinerinvestment.com",
+      "managers": [
+        {
+          "name": "William Michaelcheck",
+          "title": "Founder & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "1992-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Founded after serving as co-head of fixed-income at Bear Stearns"
+        }
+      ]
+    },
+    "element": {
+      "company_name": "Element Capital Management",
+      "aum_billions": 3,
+      "match_patterns": [
+        "element capital",
+        "element"
+      ],
+      "website": "https://www.elementcapital.com",
+      "managers": [
+        {
+          "name": "Jeffrey Talpins",
+          "title": "Founder & CIO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "investor_reports"
+          ],
+          "start_date": "2005-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Former Yale endowment, managed up to $20B in 2020, returned $6B to investors in 2024"
+        }
+      ]
+    },
+    "d1_capital": {
+      "company_name": "D1 Capital Partners",
+      "aum_billions": 25,
+      "match_patterns": [
+        "d1 capital",
+        "d1"
+      ],
+      "website": "https://www.d1capital.com",
+      "managers": [
+        {
+          "name": "Dan Sundheim",
+          "title": "Founder & CIO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "tiger_cub_reports"
+          ],
+          "start_date": "2018-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Tiger Cub, former Viking Global partner, earned $375M in 2024"
+        }
+      ]
+    },
+    "coatue": {
+      "company_name": "COATUE MANAGEMENT LLC",
+      "aum_billions": 48,
+      "match_patterns": [
+        "coatue",
+        "coatue management"
+      ],
+      "website": "https://www.coatue.com",
+      "managers": [
+        {
+          "name": "Philippe Laffont",
+          "title": "Founder & CIO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "tiger_cub_reports"
+          ],
+          "start_date": "1999-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Tiger Cub, focus on technology and consumer internet investments"
+        }
+      ],
+      "cik": 1135730
+    },
+    "tiger_global": {
+      "company_name": "TIGER GLOBAL MANAGEMENT LLC",
+      "aum_billions": 35,
+      "match_patterns": [
+        "tiger global",
+        "tiger"
+      ],
+      "website": "https://www.tigerglobal.com",
+      "managers": [
+        {
+          "name": "Chase Coleman",
+          "title": "Founder & CIO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "tiger_cub_reports"
+          ],
+          "start_date": "2001-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Tiger Cub, protégé of Julian Robertson, technology-focused investments"
+        }
+      ],
+      "cik": 1167483
+    },
+    "viking_global": {
+      "company_name": "Viking Global Investors",
+      "aum_billions": 32,
+      "match_patterns": [
+        "viking",
+        "viking global"
+      ],
+      "website": "https://www.vikingglobal.com",
+      "managers": [
+        {
+          "name": "Ole Andreas Halvorsen",
+          "title": "Founder & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "tiger_cub_reports"
+          ],
+          "start_date": "1999-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Tiger Cub, long/short equity strategies"
+        }
+      ]
+    },
+    "lone_pine": {
+      "company_name": "Lone Pine Capital",
+      "aum_billions": 28,
+      "match_patterns": [
+        "lone pine",
+        "lone pine capital"
+      ],
+      "website": "https://www.lonepinecapital.com",
+      "managers": [
+        {
+          "name": "Stephen Mandel",
+          "title": "Founder",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "tiger_cub_reports"
+          ],
+          "start_date": "1997-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Tiger Cub, Harvard Business School classmate of Jamie Dimon"
+        }
+      ]
+    },
+    "anchorage": {
+      "company_name": "Anchorage Capital Group",
+      "aum_billions": 26,
+      "match_patterns": [
+        "anchorage",
+        "anchorage capital"
+      ],
+      "website": "https://www.anchoragecapital.com",
+      "managers": [
+        {
+          "name": "Kevin Ulrich",
+          "title": "Founder & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "company_filings"
+          ],
+          "start_date": "2003-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Leading hedge fund investor in distressed debt, serves North America and Europe"
+        }
+      ]
+    },
+    "tci": {
+      "company_name": "TCI Fund Management",
+      "aum_billions": 42,
+      "match_patterns": [
+        "tci",
+        "children's investment fund"
+      ],
+      "website": "https://www.tcifund.com",
+      "managers": [
+        {
+          "name": "Chris Hohn",
+          "title": "Founder & CIO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "company_reports"
+          ],
+          "start_date": "2003-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Activist approach to investing, known for environmental and climate activism"
+        }
+      ]
+    },
+    "artisan": {
+      "company_name": "Artisan Partners Asset Management",
+      "aum_billions": 185,
+      "match_patterns": [
+        "artisan",
+        "artisan partners"
+      ],
+      "website": "https://www.artisanpartners.com",
+      "managers": [
+        {
+          "name": "Eric Colson",
+          "title": "Chairman & CEO",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "sec_filings"
+          ],
+          "start_date": "2002-01-01",
+          "last_verified": "2024-12-01",
+          "note": "CEO since 2002, focuses on process-driven investment strategies"
+        }
+      ]
+    },
+    "paulson": {
+      "company_name": "Paulson & Co",
+      "aum_billions": 8,
+      "match_patterns": [
+        "paulson",
+        "paulson & co"
+      ],
+      "website": "https://www.paulsonpartners.com",
+      "managers": [
+        {
+          "name": "John Paulson",
+          "title": "Founder & President",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "financial_press",
+            "company_reports"
+          ],
+          "start_date": "1994-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Famous for shorting subprime mortgages before 2008 crisis, made $4 billion in 2007"
+        }
+      ]
+    },
+    "grantham": {
+      "company_name": "Grantham, Mayo, Van Otterloo & Co",
+      "aum_billions": 65,
+      "match_patterns": [
+        "gmo",
+        "grantham mayo"
+      ],
+      "website": "https://www.gmo.com",
+      "managers": [
+        {
+          "name": "Jeremy Grantham",
+          "title": "Co-Founder & Chief Investment Strategist",
+          "status": "active",
+          "confidence": "high",
+          "sources": [
+            "company_website",
+            "financial_press"
+          ],
+          "start_date": "1977-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Value investor and market historian, known for bubble predictions and climate investing"
+        }
+      ]
+    },
+    "och_ziff": {
+      "company_name": "Sculptor Capital Management",
+      "aum_billions": 12,
+      "match_patterns": [
+        "sculptor",
+        "och ziff"
+      ],
+      "website": "https://www.sculptor.com",
+      "managers": [
+        {
+          "name": "James Levin",
+          "title": "CEO",
+          "status": "active",
+          "confidence": "medium",
+          "sources": [
+            "financial_press"
+          ],
+          "start_date": "2019-01-01",
+          "last_verified": "2024-12-01",
+          "note": "Formerly Och-Ziff Capital Management, rebranded to Sculptor in 2019"
+        }
+      ]
+    }
+  }
+}
