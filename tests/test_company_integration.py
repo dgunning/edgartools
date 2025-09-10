@@ -8,7 +8,7 @@ print("=== Testing Company Integration ===")
 
 try:
     from edgar import Company
-    from edgar.types import FormType
+    from edgar.enums import FormType
     print("✅ Imports successful")
 except ImportError as e:
     print(f"❌ Import failed: {e}")

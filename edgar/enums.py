@@ -8,7 +8,7 @@ This module provides StrEnum types for common EdgarTools parameters to enable:
 
 Examples:
     from edgar import Company
-    from edgar.types import FormType, PeriodType
+    from edgar.enums import FormType, PeriodType
     
     # New usage with autocomplete
     filings = company.get_filings(form=FormType.ANNUAL_REPORT)
