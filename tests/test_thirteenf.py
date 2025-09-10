@@ -291,8 +291,10 @@ def test_get_portfolio_managers_known_company():
     assert warren_buffett is not None
     assert warren_buffett['title'] == 'Chairman & CEO'
     assert warren_buffett['status'] == 'active'
-    assert warren_buffett['source'] == 'public_records'
-    assert 'last_updated' in warren_buffett
+    assert 'sources' in warren_buffett
+    assert isinstance(warren_buffett['sources'], list)
+    assert len(warren_buffett['sources']) > 0
+    assert 'last_verified' in warren_buffett
 
 
 def test_get_portfolio_managers_include_approximate():
@@ -479,14 +481,19 @@ def test_portfolio_manager_database_structure():
         
         for manager in managers:
             # Verify required fields
-            required_fields = ['name', 'title', 'status', 'source', 'last_updated']
+            required_fields = ['name', 'title', 'status', 'last_verified']
             for field in required_fields:
                 assert field in manager, f"Missing field '{field}' in manager data for {company}"
                 assert manager[field] is not None, f"Field '{field}' is None for {company}"
                 assert isinstance(manager[field], str), f"Field '{field}' should be string for {company}"
             
+            # Verify sources field (should be a list)
+            assert 'sources' in manager, f"Missing 'sources' field in manager data for {company}"
+            assert isinstance(manager['sources'], list), f"Field 'sources' should be list for {company}"
+            assert len(manager['sources']) > 0, f"Field 'sources' should not be empty for {company}"
+            
             # Verify status is valid
-            valid_statuses = ['active', 'retired', 'deceased_2023']
+            valid_statuses = ['active', 'retired', 'former', 'deceased_2023', 'deceased_2024']
             assert manager['status'] in valid_statuses, f"Invalid status '{manager['status']}' for {company}"
 
 
