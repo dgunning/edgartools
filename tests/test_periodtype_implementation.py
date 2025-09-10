@@ -15,7 +15,7 @@ from pathlib import Path
 # Add edgar to path for testing
 sys.path.insert(0, str(Path(__file__).parent / "edgar"))
 
-from edgar.types import (
+from edgar.enums import (
     PeriodType,
     PeriodInput,
     validate_period_type,
