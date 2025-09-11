@@ -46,13 +46,13 @@ Enhanced developer experience through IDE autocomplete and parameter validation 
 
 ### Import
 ```python
-from edgar.types import StatementType, StatementInput, validate_statement_type
+from edgar.enums import StatementType, StatementInput, validate_statement_type
 ```
 
 ### Unified Statement Access (New Style)
 ```python
 from edgar import Company
-from edgar.types import StatementType
+from edgar.enums import StatementType
 
 # Enhanced with autocomplete
 company = Company("AAPL")
@@ -76,7 +76,7 @@ balance = company.get_balance_sheet()
 
 ### Smart Error Messages
 ```python
-from edgar.types import validate_statement_type
+from edgar.enums import validate_statement_type
 
 # Typo detection
 try:
@@ -101,7 +101,7 @@ except ValidationError as e:
 
 ### Type Hints
 ```python
-from edgar.types import StatementInput
+from edgar.enums import StatementInput
 
 def analyze_statement(company: str, statement: StatementInput) -> dict:
     """Function with StatementType parameter."""
@@ -131,7 +131,7 @@ def get_statement(statement_type: StatementInput, periods: int = 4) -> Statement
 ## 📚 Convenience Collections
 
 ```python
-from edgar.types import (
+from edgar.enums import (
     PRIMARY_STATEMENTS, 
     COMPREHENSIVE_STATEMENTS,
     ANALYTICAL_STATEMENTS, 
@@ -355,7 +355,7 @@ def get_statement_with_help(statement_type: StatementInput) -> Tuple[Statement, 
 ### Common Errors and Solutions
 
 ```python
-from edgar.types import validate_statement_type, StatementType
+from edgar.enums import validate_statement_type, StatementType
 
 # Typo in string
 try:

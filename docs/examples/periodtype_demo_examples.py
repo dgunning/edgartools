@@ -12,7 +12,7 @@ from pathlib import Path
 # Add edgar to path
 sys.path.insert(0, str(Path(__file__).parent / "edgar"))
 
-from edgar.types import (
+from edgar.enums import (
     PeriodType, 
     PeriodInput,
     validate_period_type,
@@ -178,7 +178,7 @@ def demo_comparison_with_formtype():
     print("⚖️ Consistency with FormType Pattern")
     print("=" * 50)
     
-    from edgar.types import FormType, validate_form_type
+    from edgar.enums import FormType, validate_form_type
     
     print("Both enums follow the same pattern:")
     print()

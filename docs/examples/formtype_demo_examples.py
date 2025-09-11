@@ -14,7 +14,7 @@ print("\n📝 Example 1: IDE Autocomplete Experience")
 print("-" * 40)
 
 from edgar import Company
-from edgar.types import FormType
+from edgar.enums import FormType
 
 print("# Before: Manual string typing, no autocomplete")
 print('filings = company.get_filings(form="10-K")  # Have to remember exact string')
@@ -49,7 +49,7 @@ print("-" * 40)
 print("# Common typos now provide suggestions:")
 print('company.get_filings(form="10k")  # lowercase')
 try:
-    from edgar.types import validate_form_type
+    from edgar.enums import validate_form_type
     validate_form_type("10k")
 except ValueError as e:
     print(f"# → {e}")
@@ -92,7 +92,7 @@ print(f"✅ Mixed usage works: Found {len(mixed_filings)} filings")
 print("\n📚 Example 6: Convenient Form Collections")
 print("-" * 40)
 
-from edgar.types import PERIODIC_FORMS, PROXY_FORMS, REGISTRATION_FORMS
+from edgar.enums import PERIODIC_FORMS, PROXY_FORMS, REGISTRATION_FORMS
 
 print("# Pre-defined collections for common use cases:")
 print(f"PERIODIC_FORMS: {[f.value for f in PERIODIC_FORMS]}")

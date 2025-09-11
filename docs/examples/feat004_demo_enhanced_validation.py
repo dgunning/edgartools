@@ -12,7 +12,7 @@ from pathlib import Path
 # Add edgar to path
 sys.path.insert(0, str(Path(__file__).parent / "edgar"))
 
-from edgar.types import (
+from edgar.enums import (
     ValidationError,
     enhanced_validate,
     validate_form_type,

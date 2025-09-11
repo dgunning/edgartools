@@ -4,7 +4,7 @@
 
 ```python
 from edgar import Company
-from edgar.types import FormType
+from edgar.enums import FormType
 
 company = Company("AAPL")
 
@@ -79,7 +79,7 @@ FormType.LATE_10Q_NOTICE           # "NT 10-Q"
 ## 📚 **Form Collections**
 
 ```python
-from edgar.types import PERIODIC_FORMS, PROXY_FORMS, REGISTRATION_FORMS
+from edgar.enums import PERIODIC_FORMS, PROXY_FORMS, REGISTRATION_FORMS
 
 # Pre-defined collections for common workflows
 PERIODIC_FORMS      # [10-K, 10-Q, 10-K/A, 10-Q/A]

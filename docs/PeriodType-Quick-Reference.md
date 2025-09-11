@@ -23,13 +23,13 @@ Enhanced developer experience through IDE autocomplete and parameter validation 
 
 ### Import
 ```python
-from edgar.types import PeriodType, PeriodInput
+from edgar.enums import PeriodType, PeriodInput
 ```
 
 ### Function Parameters (New Style)
 ```python
 from edgar import Company
-from edgar.types import PeriodType
+from edgar.enums import PeriodType
 
 # Enhanced with autocomplete
 company = Company("AAPL")
@@ -49,7 +49,7 @@ quarterly_data = company.get_facts(period="quarterly")
 
 ### Smart Error Messages
 ```python
-from edgar.types import validate_period_type
+from edgar.enums import validate_period_type
 
 # Typo detection
 try:
@@ -68,7 +68,7 @@ except ValueError as e:
 
 ### Type Hints
 ```python
-from edgar.types import PeriodInput
+from edgar.enums import PeriodInput
 
 def analyze_financials(ticker: str, period: PeriodInput = PeriodType.ANNUAL) -> str:
     """Function with PeriodType parameter."""
@@ -102,7 +102,7 @@ def new_style(period: PeriodInput = PeriodType.ANNUAL) -> str:
 ## 📚 Convenience Collections
 
 ```python
-from edgar.types import STANDARD_PERIODS, SPECIAL_PERIODS, ALL_PERIODS
+from edgar.enums import STANDARD_PERIODS, SPECIAL_PERIODS, ALL_PERIODS
 
 # Most common periods
 for period in STANDARD_PERIODS:
@@ -283,7 +283,7 @@ def get_financials(period: PeriodInput = PeriodType.ANNUAL):
 ### Common Errors and Solutions
 
 ```python
-from edgar.types import validate_period_type, PeriodType
+from edgar.enums import validate_period_type, PeriodType
 
 # Typo in string
 try:
