@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.12.0 - 2025-01-11
+
+### Added
+- **Portfolio Manager Enhancement (FEAT-021)**: Major enhancement to 13F filing analysis with curated portfolio manager database
+  - `thirteen_f.management_company_name` - Legal name of the investment management company
+  - `thirteen_f.filing_signer_name` - Name of the person who signed the filing  
+  - `thirteen_f.filing_signer_title` - Title of the filing signer
+  - `thirteen_f.get_portfolio_managers()` - Get actual portfolio manager information for investment firms
+  - `thirteen_f.get_manager_info_summary()` - Summary of manager data availability
+  - **Coverage**: 75 portfolio managers across 40 major investment firms ($26+ trillion AUM)
+  - **Accuracy**: CIK-based matching eliminates false positives from name-based searching
+  - **Key Firms**: BlackRock, Fidelity, State Street, Citadel, Bridgewater, Renaissance Technologies, and more
+
+- **Enhanced Type System (FEAT-002 to FEAT-005)**: Comprehensive type safety and validation improvements
+  - `FormType` enumeration for type-safe form parameter usage
+  - `PeriodType` classification for enhanced period filtering  
+  - `StatementType` classifications for intelligent statement type detection
+  - Enhanced parameter validation with intelligent correction suggestions
+  - Comprehensive type hints throughout the API
+
+### Fixed
+- **Data Quality**: Fixed test assertions to match actual portfolio manager database structure
+
+### Enhanced
+- **Current Period API**: Enhanced Statement object support with improved defaults
+- **Documentation**: Comprehensive 13F filings guide, quick reference guides for type enumerations
+- **GitHub Integration**: Issue templates for bug reports, feature requests, performance issues, and data quality
+- **Development Workflow**: Enhanced feature development workflow with systematic tracking and follow-up planning
+
 ## Release 4.11.1 - 2025-09-07
 
 ### Fixed
