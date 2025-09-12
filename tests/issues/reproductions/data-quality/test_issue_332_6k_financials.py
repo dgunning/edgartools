@@ -17,6 +17,7 @@ from unittest.mock import Mock
 from edgar.company_reports import CurrentReport, SixK, EightK
 
 
+@pytest.mark.regression
 def test_current_report_inherits_from_company_report():
     """Test that CurrentReport inherits from CompanyReport and has all financial methods"""
     from edgar.company_reports import CompanyReport
@@ -30,19 +31,20 @@ def test_current_report_inherits_from_company_report():
     assert 'balance_sheet' in CompanyReport.__dict__, "Should have balance_sheet property"
     assert 'cash_flow_statement' in CompanyReport.__dict__, "Should have cash_flow_statement property"
 
-
+@pytest.mark.regression
 def test_sixk_alias_inherits_financial_properties():
     """Test that SixK alias also has access to the financial properties"""
     # Test that SixK is actually CurrentReport
     assert SixK is CurrentReport, "SixK should be an alias for CurrentReport"
 
 
+@pytest.mark.regression
 def test_eightk_alias_inherits_financial_properties():
     """Test that EightK alias also has access to the financial properties"""
     # Test that EightK is actually CurrentReport
     assert EightK is CurrentReport, "EightK should be an alias for CurrentReport"
 
-
+@pytest.mark.regression
 def test_current_report_accepts_both_6k_and_8k():
     """Test that CurrentReport accepts both 6-K and 8-K form types"""
     # Test with 6-K - should not raise assertion error in __init__
@@ -69,7 +71,7 @@ def test_current_report_accepts_both_6k_and_8k():
     
     assert success_8k, "CurrentReport should accept 8-K forms"
 
-
+@pytest.mark.regression
 def test_current_report_financial_properties_callable():
     """Test that the financial properties can be accessed without raising AttributeError"""
     # Create a mock filing with minimal required methods
@@ -95,6 +97,7 @@ def test_current_report_financial_properties_callable():
             
 
 # Integration test (may be skipped if network/data not available)
+@pytest.mark.regression
 def test_real_filing_integration():
     """Integration test with real filing data if available"""
     try:

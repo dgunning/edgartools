@@ -6,6 +6,7 @@ This script tests the new standardized methods added to the Financials class.
 
 import sys
 import traceback
+import pytest
 
 # Add the project root to Python path if needed
 if '/Users/dwight/PycharmProjects/edgartools' not in sys.path:
@@ -14,6 +15,7 @@ if '/Users/dwight/PycharmProjects/edgartools' not in sys.path:
 from edgar import Company
 
 
+@pytest.mark.regression
 def test_standardized_methods():
     """Test the new standardized financial accessor methods."""
     print("=" * 60)
@@ -65,7 +67,7 @@ def test_standardized_methods():
             print(f"✗ Error with {ticker}: {e}")
             traceback.print_exc()
 
-
+@pytest.mark.regression
 def test_financial_metrics_method():
     """Test the comprehensive get_financial_metrics() method."""
     print("\n" + "=" * 60)
@@ -100,7 +102,7 @@ def test_financial_metrics_method():
         print(f"✗ Error testing financial metrics: {e}")
         traceback.print_exc()
 
-
+@pytest.mark.regression
 def test_period_offset():
     """Test the period_offset functionality."""
     print("\n" + "=" * 60)
@@ -129,7 +131,7 @@ def test_period_offset():
         print(f"✗ Error testing period offset: {e}")
         traceback.print_exc()
 
-
+@pytest.mark.regression
 def test_user_original_workflow():
     """Test the exact workflow the user wanted in their issue."""
     print("\n" + "=" * 60)

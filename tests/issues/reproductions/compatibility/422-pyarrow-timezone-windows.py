@@ -39,7 +39,8 @@ class TestIssue422:
             "architecture": platform.architecture(),
             "machine": platform.machine(),
         }
-        
+
+    @pytest.mark.regression
     def test_reproduction_minimal(self):
         """Minimal reproduction of the PyArrow timezone compatibility issue."""
         print(f"Testing on: {self.platform_info['system']} {self.platform_info['platform']}")
@@ -68,6 +69,7 @@ class TestIssue422:
                 # Unexpected error type
                 pytest.fail(f"Unexpected error ({error_type}): {error_message}")
 
+    @pytest.mark.regression
     def test_timezone_dependency_check(self):
         """Check if timezone dependencies are available."""
         # Check for tzdata package (the typical fix)
@@ -91,6 +93,7 @@ class TestIssue422:
         if platform.system() == "Windows" and not tzdata_available:
             pytest.skip("tzdata package required on Windows for timezone support")
 
+    @pytest.mark.regression
     def test_alternative_timezone_solutions(self):
         """Test alternative solutions to timezone issues."""
         pytest.skip("Enable to test different timezone handling approaches")
@@ -113,7 +116,8 @@ class TestIssue422:
                 
         if not available_solutions:
             pytest.fail("No timezone solutions available")
-            
+
+    @pytest.mark.regression
     def test_environment_specific_behavior(self):
         """Test behavior specific to different environments."""
         system = platform.system()
@@ -147,6 +151,7 @@ class TestIssue422:
             else:
                 pytest.fail(f"Timezone operations should work on {system}: {e}")
 
+    @pytest.mark.regression
     def test_filings_retrieval_robustness(self):
         """Test robust filings retrieval with error handling."""
         # This test shows how the issue should be handled gracefully

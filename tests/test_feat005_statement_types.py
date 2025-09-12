@@ -13,6 +13,7 @@ This script tests the new StatementType enum functionality to ensure:
 
 import sys
 from pathlib import Path
+import pytest
 
 # Add project root to path for testing
 project_root = Path(__file__).parent.parent
@@ -31,6 +32,7 @@ from edgar.enums import (
     ALL_STATEMENTS
 )
 
+@pytest.mark.fast
 def test_statement_type_enum():
     """Test StatementType enum basic functionality."""
     print("🔍 Testing StatementType enum basic functionality...")
@@ -57,6 +59,7 @@ def test_statement_type_enum():
     
     print("   ✅ All enum values work correctly")
 
+@pytest.mark.fast
 def test_statement_validation():
     """Test statement validation function."""
     print("🔍 Testing statement validation...")
@@ -105,6 +108,7 @@ def test_statement_validation():
         assert "StatementType or str" in str(e)
         print(f"   ✅ Type validation: {e}")
 
+@pytest.mark.fast
 def test_statement_collections():
     """Test statement collections."""
     print("🔍 Testing statement collections...")
@@ -151,6 +155,7 @@ def test_statement_collections():
     assert len(unique_enum_values) == len(ALL_STATEMENTS)
     print("   ✅ All statements collection includes all unique values")
 
+@pytest.mark.fast
 def test_type_hints():
     """Test type hint functionality."""
     print("🔍 Testing type hints...")
@@ -167,6 +172,7 @@ def test_type_hints():
     
     print("   ✅ Type hints work correctly")
 
+@pytest.mark.fast
 def test_real_world_usage():
     """Test realistic usage scenarios."""
     print("🔍 Testing real-world usage scenarios...")
@@ -194,6 +200,7 @@ def test_real_world_usage():
     
     print("   ✅ Real-world usage patterns work")
 
+@pytest.mark.fast
 def test_financial_statement_categories():
     """Test financial statement categorization."""
     print("🔍 Testing financial statement categorization...")
@@ -229,6 +236,7 @@ def test_financial_statement_categories():
     assert "balance_sheet" in analysis
     print("   ✅ Comprehensive analysis workflow works")
 
+@pytest.mark.fast
 def test_alias_handling():
     """Test that aliases work correctly."""
     print("🔍 Testing alias handling...")
@@ -249,6 +257,7 @@ def test_alias_handling():
     
     print("   ✅ All aliases work correctly")
 
+@pytest.mark.fast
 def test_enum_iteration():
     """Test enum iteration and introspection."""
     print("🔍 Testing enum iteration...")
@@ -269,6 +278,7 @@ def test_enum_iteration():
     
     print(f"   ✅ Available statements: {sorted(unique_values)}")
 
+@pytest.mark.fast
 def test_error_message_quality():
     """Test that error messages are helpful for financial statements."""
     print("🔍 Testing error message quality...")
@@ -291,6 +301,7 @@ def test_error_message_quality():
                 assert part in error_msg, f"Expected '{part}' in error message: {error_msg}"
             print(f"   ✅ '{test_input}' -> Professional error message")
 
+@pytest.mark.fast
 def test_performance():
     """Test that statement validation performance is acceptable."""
     print("🔍 Testing validation performance...")

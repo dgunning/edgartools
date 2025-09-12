@@ -12,6 +12,7 @@ This script tests the enhanced validation framework to ensure:
 
 import sys
 from pathlib import Path
+import pytest
 
 # Add project root to path for testing  
 project_root = Path(__file__).parent.parent
@@ -29,6 +30,7 @@ from edgar.enums import (
     PeriodType
 )
 
+@pytest.mark.fast
 def test_fuzzy_matching():
     """Test fuzzy string matching functionality."""
     print("🔍 Testing fuzzy matching...")
@@ -51,6 +53,7 @@ def test_fuzzy_matching():
     
     print("   ✅ Fuzzy matching works correctly")
 
+@pytest.mark.fast
 def test_typo_detection():
     """Test common typo detection patterns."""
     print("🔍 Testing typo detection...")
@@ -74,6 +77,7 @@ def test_typo_detection():
     
     print("   ✅ Typo detection works correctly")
 
+@pytest.mark.fast
 def test_enhanced_validation():
     """Test the enhanced validation framework."""
     print("🔍 Testing enhanced validation framework...")
@@ -115,6 +119,7 @@ def test_enhanced_validation():
         assert "must be FormType or str" in str(e)
         print(f"   ✅ Type validation: {e}")
 
+@pytest.mark.fast
 def test_form_type_validation():
     """Test enhanced FormType validation."""
     print("🔍 Testing FormType validation enhancements...")
@@ -150,6 +155,7 @@ def test_form_type_validation():
         assert "'10-K'" in error_msg
         print(f"   ✅ Invalid form error: {e}")
 
+@pytest.mark.fast
 def test_period_type_validation():
     """Test enhanced PeriodType validation."""
     print("🔍 Testing PeriodType validation enhancements...")
@@ -185,6 +191,7 @@ def test_period_type_validation():
         assert "quarterly" in str(e)
         print(f"   ✅ Multiple suggestions: {e}")
 
+@pytest.mark.fast
 def test_error_message_quality():
     """Test that error messages are helpful and professional."""
     print("🔍 Testing error message quality...")
@@ -217,6 +224,7 @@ def test_error_message_quality():
             assert part in error_msg
         print(f"   ✅ Type error -> Professional error message")
 
+@pytest.mark.fast
 def test_performance():
     """Test that validation performance is acceptable."""
     print("🔍 Testing validation performance...")
@@ -249,6 +257,7 @@ def test_performance():
     assert period_time < 10.0, "Period validation too slow"
     print("   ✅ Performance is acceptable")
 
+@pytest.mark.fast
 def test_backwards_compatibility():
     """Test that existing validation behavior is preserved."""
     print("🔍 Testing backwards compatibility...")
@@ -277,6 +286,7 @@ def test_backwards_compatibility():
     print("   ✅ Invalid inputs still raise errors")
     print("   ✅ Backwards compatibility maintained")
 
+@pytest.mark.fast
 def test_real_world_scenarios():
     """Test realistic usage scenarios."""
     print("🔍 Testing real-world scenarios...")

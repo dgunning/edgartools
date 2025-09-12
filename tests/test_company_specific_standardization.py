@@ -12,7 +12,9 @@ from edgar.xbrl.standardization.core import initialize_default_mappings
 from rich import print
 from rich.table import Table
 from rich.console import Console
+import pytest
 
+@pytest.mark.fast
 def test_priority_resolution():
     """Test how priority-based resolution works."""
     print("[bold blue]Company-Specific Standardization Priority System[/bold blue]\n")
@@ -123,6 +125,7 @@ def show_mapping_structure():
 }'''
     print(structure)
 
+@pytest.mark.fast
 def test_entity_detection():
     """Test how entity detection works."""
     print("\n[bold blue]Entity Detection from Concept Names[/bold blue]\n")

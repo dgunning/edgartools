@@ -4,8 +4,9 @@ from rich import print
 
 from edgar import *
 from edgar.headers import *
+import pytest
 
-
+@pytest.mark.fast
 def test_load_filing_header_from_text_for_8K():
     header_text = Path('data/headers/23AndMe.index-headers.html').read_text()
     filing_header: IndexHeaders = IndexHeaders.load(header_text)
@@ -21,7 +22,7 @@ def test_load_filing_header_from_text_for_8K():
     print()
     print(filing_header)
 
-
+@pytest.mark.fast
 def test_load_filing_header_from_text():
     header_text = Path('data/headers/0001971857-23-000246-index-headers.html').read_text()
     filing_header: IndexHeaders = IndexHeaders.load(header_text)
@@ -29,7 +30,7 @@ def test_load_filing_header_from_text():
     print()
     print(filing_header)
 
-
+@pytest.mark.fast
 def test_load_filing_directory():
     basedir = 'https://www.sec.gov/Archives/edgar/data/1648960/000121390024004875/'
     filing_dir: FilingDirectory = FilingDirectory.load(basedir)
@@ -38,14 +39,14 @@ def test_load_filing_directory():
     print()
     print(filing_dir)
 
-
+@pytest.mark.fast
 def test_filing_directory_index_headers():
     basedir = 'https://www.sec.gov/Archives/edgar/data/1648960/000121390024004875/'
     filing_dir: FilingDirectory = FilingDirectory.load(basedir)
     index_headers = filing_dir.index_headers
     print(index_headers)
 
-
+@pytest.mark.network
 def test_get_inndex_header_from_filing():
     # filing = Filing(form='13F-HR', filing_date='2024-06-05', company='Objective Capital Management, LLC', cik=1924152, accession_no='0001924152-24-000002')
     filing = Filing(form='1-U', filing_date='2024-06-06', company='Masterworks Vault 5, LLC', cik=1999710,
@@ -54,7 +55,7 @@ def test_get_inndex_header_from_filing():
     print()
     print(index_headers)
 
-
+@pytest.mark.network
 def test_get_index_headers_form_form4():
     filing = Filing(form='4', filing_date='2024-06-07', company='Hassett Joseph',
                     cik=1641388, accession_no='0001062993-24-012217')

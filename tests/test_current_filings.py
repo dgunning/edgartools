@@ -5,6 +5,7 @@ import datetime
 import pytest
 from edgar import get_by_accession_number
 
+@pytest.mark.network
 def test_get_current_entries():
     print()
     filings = get_current_filings()
@@ -20,7 +21,7 @@ def test_get_current_entries():
     print(previous_filings)
     assert previous_filings.previous() is None
 
-
+@pytest.mark.network
 def test_get_current_filings_by_form():
     form='4'
     filings:CurrentFilings = get_current_filings(form=form)
@@ -33,7 +34,7 @@ def test_get_current_filings_by_form():
             break
         assert all(f.startswith(form) for f in set(filings.data['form'].to_pylist()))
 
-
+@pytest.mark.network
 def test_current_filings_to_pandas():
     filings:CurrentFilings = get_current_filings()
     filing_pandas = filings.to_pandas()
@@ -48,7 +49,7 @@ def test_current_filings_to_pandas():
     #accession_number_on_page1 = filings_page2[0].accession_no
     #assert accession_number_on_page0 != accession_number_on_page1
 
-
+@pytest.mark.network
 def test_current_filings_get_by_index_on_page1():
     print()
     filings: CurrentFilings = get_current_filings()
@@ -60,6 +61,7 @@ def test_current_filings_get_by_index_on_page1():
     filing_page2 = filings.next()
     print(filing_page2)
 
+@pytest.mark.network
 def test_current_filings_get_by_index_on_page2():
     filings: CurrentFilings = get_current_filings()
     # Find the filing on page2
@@ -77,7 +79,7 @@ def test_current_filings_get_by_index_on_page2():
         # The boundary is 80
         filing_page2[80]
 
-
+@pytest.mark.network
 def test_current_filings_get_accession_number():
     filings:CurrentFilings = get_current_filings()
     filings = filings.next()
@@ -88,7 +90,7 @@ def test_current_filings_get_accession_number():
     assert filing
     assert filing.accession_no == accession_number
 
-
+@pytest.mark.network
 def test_current_filings_get_accession_number_not_found():
     filings:CurrentFilings = get_current_filings().next()
     accession_number = '0000000900-24-000000'
@@ -96,7 +98,7 @@ def test_current_filings_get_accession_number_not_found():
     filing = filings.get(accession_number)
     assert not filing
 
-
+@pytest.mark.network
 def test_parse_summary():
     summary1 = '<b>Filed:</b> 2023-09-13 <b>AccNo:</b> 0001714174-23-000114 <b>Size:</b> 668 KB'
 
@@ -106,6 +108,7 @@ def test_parse_summary():
     summary2 = '<b>Film#:</b> 23003229  <b>Filed:</b> 2023-08-17 <b>AccNo:</b> 9999999997-23-004141 <b>Size:</b> 1 KB'
     assert parse_summary(summary2) == (datetime.date(2023, 8, 17), '9999999997-23-004141')
 
+@pytest.mark.network
 def test_current_filings_with_no_results():
 
     filings = get_current_filings(form='4000')
@@ -114,6 +117,7 @@ def test_current_filings_with_no_results():
     assert filings.start_date is None
     assert filings.end_date is None
 
+@pytest.mark.network
 def test_get_current_filing_by_accession_number():
     current_filings = get_current_filings()
     print()
@@ -129,11 +133,13 @@ def test_get_current_filing_by_accession_number():
     filing_on_next_page = current_filings[40]
     print(filing_on_next_page)
 
+@pytest.mark.network
 def test_get_all_current_filings():
     all_filings = get_all_current_filings()
     assert isinstance(all_filings, Filings)
     assert len(all_filings) > 100
 
+@pytest.mark.network
 def test_iter_current_filings_pages():
     filings = next(iter_current_filings_pages())
     assert filings

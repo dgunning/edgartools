@@ -7,25 +7,29 @@ from edgar import Filing
 from rich import print
 from edgar.richtools import rich_to_text
 from bs4 import BeautifulSoup
-
+import pytest
 
 def get_html(path):
     return Path(path).read_text()
 
+@pytest.mark.fast
 def test_parse_html_with_table():
     document = Document.parse(get_html('data/html/OneTable.html'))
     assert len(document.tables) == 1
 
+@pytest.mark.fast
 def test_parse_html_with_2tables():
     document = Document.parse(get_html('data/html/TwoTables.html'))
     assert len(document.tables) == 2
     assert len(document.nodes) == 2
 
+@pytest.mark.fast
 def test_parse_html_with_table_inside_div():
     document = Document.parse(get_html('data/html/TableInsideDiv.html'))
     assert len(document.tables) == 1
     assert len(document.nodes) == 1
 
+@pytest.mark.fast
 def test_parse_html_with_table_inside_div_with_h2():
     content = get_html('data/html/TableInsideDivWithHeader.html')
     document = Document.parse(content)
@@ -33,6 +37,7 @@ def test_parse_html_with_table_inside_div_with_h2():
     assert len(document.nodes) == 2
     assert document.nodes[0].content == 'This HTML has a table. This is a header'
 
+@pytest.mark.fast
 def test_handle_spans_inside_divs():
     content = """
     <html>
@@ -49,7 +54,7 @@ def test_handle_spans_inside_divs():
     assert len(document.nodes) == 1
     assert document.nodes[0].content == 'This is a span A second span 2 And a 3rd'
 
-
+@pytest.mark.fast
 def test_multiple_spans_in_div():
     # Test HTML
     html = """
@@ -83,7 +88,7 @@ def test_multiple_spans_in_div():
     expected_text = "This is a span A second span 2 And a 3rd"
     assert node.content.strip() == expected_text, f"Expected '{expected_text}' but got '{node.content.strip()}'"
 
-
+@pytest.mark.fast
 def test_spans_with_styling():
     # Test HTML with styled spans
     html = """
@@ -115,7 +120,7 @@ def test_spans_with_styling():
     # Verify div styling was preserved
     assert node.style.text_align == 'center'
 
-
+@pytest.mark.fast
 def test_mixed_content_spans():
     # Test HTML with mixed content
     html = """
@@ -146,7 +151,7 @@ def test_mixed_content_spans():
     expected_text = "Text before Inside span Text between Another span Text after"
     assert node.content.strip() == expected_text
 
-
+@pytest.mark.fast
 def test_spans_with_breaks():
     # Test HTML with line breaks between spans
     html = """
@@ -177,7 +182,7 @@ def test_spans_with_breaks():
     expected_text = 'First line \n Second line \n Third line'
     assert node.content.strip() == expected_text
 
-
+@pytest.mark.fast
 def test_parse_correct_setting_of_widths():
     html = Path("data/html/424-DivContainingSpans.html").read_text()
     document = Document.parse(html)
@@ -189,7 +194,7 @@ def test_parse_correct_setting_of_widths():
     assert 'Offers to purchase the' in str(document)
     assert 'educational and charitable institutions' in str(document)
 
-
+@pytest.mark.fast
 def test_parse_table_from_nextpoint_filing():
     html_content = Path('data/NextPoint.8K.html').read_text()
     document = Document.parse(html_content)
@@ -197,13 +202,14 @@ def test_parse_table_from_nextpoint_filing():
     assert len(tables) == 8
     print(document)
 
+@pytest.mark.fast
 def test_order_of_table_in_document():
     html = Path("data/html/OrderOfTableInDiv.html").read_text()
     document = Document.parse(html)
     print(document)
     assert "2024" in str(document)
 
-
+@pytest.mark.fast
 def test_document_tables():
     html = Path("data/html/Apple.10-Q.html").read_text()
     document = Document.parse(html)
@@ -220,6 +226,7 @@ def test_document_tables():
             print(table.render(160))
             print("-" * 80)
 
+@pytest.mark.fast
 def test_document_tables_in_10K():
     html = Path("data/html/Apple.10-K.html").read_text()
     document = Document.parse(html)
@@ -230,7 +237,7 @@ def test_document_tables_in_10K():
             print(table.render(160))
             print("-" * 80)
 
-
+@pytest.mark.fast
 def test_parse_financial_table_with_two_header_rows():
     html = Path("data/html/AppleIncomeTaxTable.html").read_text()
     document:Document = Document.parse(html)
@@ -242,23 +249,25 @@ def test_parse_financial_table_with_two_header_rows():
     assert header.virtual_columns == 24
     print(document)
 
+@pytest.mark.fast
 def test_oracle_10K_document():
     document = Document.parse(Path("data/html/Oracle.10-Q.html").read_text())
     print(document)
 
+@pytest.mark.fast
 def test_oracle_randd_table():
     html = Path("data/html/OracleR&DTable.html").read_text()
     document = Document.parse(html)
     print(document)
 
-
+@pytest.mark.fast
 def test_8k_markdown():
     print("")
     document = Document.parse(Path('data/html/Oracle.8-K.html').read_text())
     md = document.to_markdown()
     print(md)
 
-
+@pytest.mark.fast
 def test_document_parse_nextpoint_8k():
     content = Path('data/NextPoint.8K.html').read_text()
     document = Document.parse(content)
@@ -272,6 +281,7 @@ def test_document_parse_nextpoint_8k():
     assert len(tables) > 0
     #assert len(document) > 30
 
+@pytest.mark.fast
 def test_financial_table_header_displays_line_breaks():
     html = Path("data/html/AppleRSUTable.html").read_text()
     document:Document = Document.parse(html)
@@ -282,12 +292,13 @@ def test_financial_table_header_displays_line_breaks():
     cell = row.cells[1]
     assert cell.content == 'Number of\nRSUs\n(in thousands)'
 
+@pytest.mark.fast
 def test_table_metadata():
     html = Path("data/html/AppleRSUTable.html").read_text()
     document: Document = Document.parse(html)
     table = document.nodes[0]
 
-
+@pytest.mark.fast
 def test_table_processor_process_table():
     document = Document.parse(Path('data/html/AppleRSUTable.html').read_text())
     table_node = document.nodes[0]
@@ -300,7 +311,7 @@ def test_table_processor_process_table():
     assert table
     print(table)
 
-
+@pytest.mark.fast
 def test_read_html_document_wih_financials():
     content = Path("data/html/BuckleInc.8-K.EX99.1.html").read_text()
     document = Document.parse(content)
@@ -308,6 +319,7 @@ def test_read_html_document_wih_financials():
     print()
     print(document)
 
+@pytest.mark.fast
 def test_render_paragraph_block_with_line_breaks():
     content = Path("data/html/BuckleInc.8-K.EX99.1.html").read_text()
     document = Document.parse(content)
@@ -317,6 +329,7 @@ def test_render_paragraph_block_with_line_breaks():
     print()
     print(text)
 
+@pytest.mark.fast
 def test_document_parses_table_inside_ix_elements():
     html = Path("data/html/TableInsideIxElement.html").read_text()
     document = Document.parse(html)
@@ -331,6 +344,7 @@ def test_document_parses_table_inside_ix_elements():
     #print()
     #print(md)
 
+@pytest.mark.fast
 def test_document_markdown_headings_parsed_correctly():
     html = Path("data/NextPoint.8K.html").read_text()
     document = Document.parse(html)
@@ -339,7 +353,7 @@ def test_document_markdown_headings_parsed_correctly():
     print(md)
     #assert "# SECURITIES AND EXCHANGE COMMISSION" in md
 
-
+@pytest.mark.fast
 def test_document_parsed_from_plain_text_returns_plain_text():
     html = """
     This document is just test
@@ -354,11 +368,13 @@ def test_document_parsed_from_plain_text_returns_plain_text():
     document = Document.parse(html)
     #assert document is not None, "Document should not be None"
 
+@pytest.mark.fast
 def test_document_from_filing_with_plain_text_filing_document():
     f = Filing(form='SC 13G/A', filing_date='2024-11-25', company='Bridgeline Digital, Inc.', cik=1378590, accession_no='0001968076-24-000022')
     html = f.html()
     assert html
 
+@pytest.mark.fast
 def test_text_in_spans():
     html="""<p id="part_ii_or_information"><span>PART II. OTHE</span><span>R INFORMATION</span></p>"""
     document = Document.parse(html)
@@ -368,6 +384,7 @@ def test_text_in_spans():
     document = Document.parse(html)
     assert document.nodes[0].content == "PART I. FINANCIAL INFORMATION"
 
+@pytest.mark.fast
 def test_document_to_text():
     document = Document.parse(
         """
@@ -382,6 +399,7 @@ def test_document_to_text():
     assert text == "Basic Document\n"
     print(text)
 
+@pytest.mark.fast
 def test_render_paragraph():
     html = Path("data/html/424-Snippet.html").read_text()
     document = Document.parse(html)
@@ -390,6 +408,7 @@ def test_render_paragraph():
     paragraph = document.nodes[0]
     print(paragraph.content)
 
+@pytest.mark.fast
 def test_get_text_from_filing_with_no_body_tag():
     filing = Filing(form='TA-1/A', filing_date='2024-04-17', company='PEAR TREE ADVISORS INC /TA',
                     cik=949738, accession_no='0000949738-24-000005')
@@ -398,14 +417,14 @@ def test_get_text_from_filing_with_no_body_tag():
     text = filing.text()
     assert text
 
-
+@pytest.mark.fast
 def test_parse_document_within_just_paragraph_tags():
     content = Path('data/html/BeyondAir.html').read_text()
     document = Document.parse(content)
     print()
     print(document)
 
-
+@pytest.mark.fast
 def test_table_of_content_for_10K():
     content = Path('data/html/Apple.10-K.html').read_text()
     document = Document.parse(content)
@@ -415,6 +434,7 @@ def test_table_of_content_for_10K():
     #toc = document.table_of_contents()
     #print(toc)
 
+@pytest.mark.fast
 def test_parse_and_identify_headings():
     content = Path('data/html/Headings-Snippet.html').read_text()
     document = Document.parse(content)
@@ -425,7 +445,7 @@ def test_parse_and_identify_headings():
     print()
     print(document)
 
-
+@pytest.mark.fast
 def test_html_from_old_filings_is_none():
     f = Filing(form='8-K', filing_date='1998-01-05', company='YAHOO INC', cik=1011006, accession_no='0001047469-98-000122')
     text = f.text()
@@ -433,6 +453,7 @@ def test_html_from_old_filings_is_none():
     html = f.html()
     assert not html
 
+@pytest.mark.fast
 def test_get_html_problem_filing():
     filing = Filing(form='497K',
                     filing_date='2024-12-30',
@@ -443,12 +464,13 @@ def test_get_html_problem_filing():
     assert text
     print(text)
 
-
+@pytest.mark.fast
 def test_parse_html_document_with_pre():
     content = Path('data/html/document-with-pre.html').read_text()
     document = Document.parse(content)
     assert document
 
+@pytest.mark.fast
 def test_pre_tag_handling():
     # Test case 1: Pre with plain text
     html1 = "<pre>Simple text content</pre>"

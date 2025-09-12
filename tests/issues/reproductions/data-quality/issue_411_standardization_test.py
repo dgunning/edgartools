@@ -16,7 +16,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[4]))
 
 from edgar import Company
+import pytest
 
+@pytest.mark.regression
 def test_standardization_issue():
     """Test the standardization functionality with companies mentioned in the issue."""
     

@@ -22,7 +22,7 @@ def berkshire_hills_header():
     return Filing(form='SC 13G/A', filing_date='2024-01-23', company='BERKSHIRE HILLS BANCORP INC', cik=1108134,
                   accession_no='0001086364-24-001430').header
 
-
+@pytest.mark.network
 def test_filing_sec_header(carbo_ceramics_header):
     filing_header: FilingHeader = carbo_ceramics_header
     assert len(filing_header.filers) == 1
@@ -48,7 +48,7 @@ def test_filing_sec_header(carbo_ceramics_header):
     assert filer.business_address.state_or_country == 'TX'
     assert filer.business_address.zipcode == '77079'
 
-
+@pytest.mark.fast
 def test_parse_filing_header_with_filer():
     header_content = Path('data/secheader.424B5.abeona.txt').read_text()
     filing_header = FilingHeader.parse_from_sgml_text(header_content)
@@ -100,7 +100,7 @@ def test_parse_filing_header_with_filer():
     assert filing_header.filers[0].business_address.street1 == '200 WEST STREET'
     assert filing_header.filers[0].business_address.street2 == 'ATT: PRIVATE CREDIT GROUP'
 
-
+@pytest.mark.fast
 def test_parse_filing_header_with_reporting_owner():
     header_content = Path('data/secheader.4.evercommerce.txt').read_text()
     print(header_content)
@@ -130,14 +130,14 @@ def test_parse_filing_header_with_reporting_owner():
     assert issuer.business_address.state_or_country == 'CO'
     assert issuer.business_address.zipcode == '80205'
 
-
+@pytest.mark.network
 def test_period_of_report_from_filing_header():
     filing = Filing(form='13F-HR', filing_date='2023-09-21', company='Halpern Financial, Inc.', cik=1994335,
                     accession_no='0001994335-23-000001')
     filing_header = filing.header
     assert filing_header.period_of_report == '2019-12-31'
 
-
+@pytest.mark.fast
 def test_parse_header_with_subject_company():
     filing_header = FilingHeader.parse_from_sgml_text("""
 <ACCEPTANCE-DATETIME>20230612150550
@@ -223,7 +223,7 @@ REPORTING-OWNER:
 
     assert len(subject_company.former_company_names) == 1
 
-
+@pytest.mark.fast
 def test_parse_header_filing_with_multiple_filers():
     # Formatting this file screws up the test. The text should be tight to the left margin
     header_text = Path('data/MultipleFilersHeader.txt').read_text()
@@ -260,7 +260,7 @@ def test_parse_header_filing_with_multiple_filers():
     assert filer1.filing_information.film_number == '231004916'
     assert not filer1.business_address
 
-
+@pytest.mark.fast
 def test_parse_header_filing_with_multiple_former_companies():
     header_text = Path('data/MultipleFormerCompaniesHeader.txt').read_text()
     filing_header = FilingHeader.parse_from_sgml_text(header_text)
@@ -275,7 +275,7 @@ def test_parse_header_filing_with_multiple_former_companies():
     assert filer.former_company_names[1].date_of_change == '20170621'
     assert filer.former_company_names[2].date_of_change == '20111007'
 
-
+@pytest.mark.network
 def test_filing_header_for_fund():
     filing = Filing(form='497K', filing_date='2022-11-01', company='JAMES ADVANTAGE FUNDS', cik=1045487,
                     accession_no='0001398344-22-021082')
@@ -283,7 +283,7 @@ def test_filing_header_for_fund():
     # We don't have partially parsed keys like "/SERIES"
     assert header.filing_metadata.get("/SERIES") is None
 
-
+@pytest.mark.network
 def test_file_number():
     filing = Filing(form='4', filing_date='2024-01-23', company='22NW Fund GP, LLC', cik=1770575,
                     accession_no='0001193805-24-000084')
@@ -293,18 +293,18 @@ def test_file_number():
                     cik=2009156, accession_no='0002009156-24-000001')
     assert '021-503213' in filing.header.file_numbers
 
-
+@pytest.mark.network
 def test_file_number_for_filing_with_many_filers():
     filing = Filing(form='40-APP', filing_date='2024-01-05', company='A-A European Senior Debt Fund, L.P.', cik=1531061,
                     accession_no='0001193125-24-003453')
     assert '812-15538' in filing.header.file_numbers
     assert len(filing.header.file_numbers) == 239
 
-
+@pytest.mark.network
 def test_filing_number_from_subject_company(berkshire_hills_header):
     assert '005-60595' in berkshire_hills_header.file_numbers
 
-
+@pytest.mark.network
 def test_header_properties(berkshire_hills_header):
     print()
     print(berkshire_hills_header.filing_metadata)
@@ -316,7 +316,7 @@ def test_header_properties(berkshire_hills_header):
     assert berkshire_hills_header.accession_number == '0001086364-24-001430'
     assert berkshire_hills_header.period_of_report is None
 
-
+@pytest.mark.fast
 def test_parse_header_from_the_1990s():
     header_text = Path('data/1990sheader.txt').read_text()
     header_text = extract_text_between_tags(header_text, 'SEC-HEADER')
@@ -355,7 +355,7 @@ def test_preprocess_old_headers():
     assert not "REPORTING-OWNER" in new_text
     assert not "DIRECTOR" in new_text
 
-
+@pytest.mark.fast
 def test_preprocess_actual_old_header():
     header_text = Path('data/1990sheader.txt').read_text()
     new_text = preprocess_old_headers(header_text)
@@ -373,20 +373,21 @@ def test_preprocess_actual_old_header():
     with pytest.raises(KeyError):
         header: FilingHeader = FilingHeader.parse_from_sgml_text(header_text, preprocess=False)
 
-
+@pytest.mark.network
 def test_get_header_from_old_filing():
     filing = Filing(form='4', filing_date='1998-11-20', company='CANTALUPO JAMES R', cik=1012325,
                     accession_no='0001012325-98-000004')
     header = filing.header
     assert header.accession_number == '0001012325-98-000004'
 
-
+@pytest.mark.network
 def test_get_header_for_filing_with_no_reportingowner_entity():
     filing = Filing(form='4', filing_date='2024-08-23', company='Hut 8 Corp.', cik=1964789,
                     accession_no='0001127602-24-022866')
     header = filing.header
     assert header
 
+@pytest.mark.network
 def test_get_header_for_list_fields():
     filing = Filing(form='SC 13G', filing_date='2024-09-06', company='BioCardia, Inc.', cik=925741,
                     accession_no='0001213900-24-076658')
@@ -394,6 +395,7 @@ def test_get_header_for_list_fields():
     members = filing.header.filing_metadata.get("GROUP MEMBERS") 
     assert members == "DANIEL B. ASHER, MITCHELL P. KOPIN"
 
+@pytest.mark.fast
 def test_get_header_for_list_fields_with_multiple_entries():
     # Inject a new field with multiple entries
     header_content = Path('data/secheader.424B5.abeona.txt').read_text()

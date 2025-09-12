@@ -10,7 +10,9 @@ from edgar.xbrl.standardization.core import initialize_default_mappings
 from rich import print
 from rich.table import Table
 from rich.console import Console
+import pytest
 
+@pytest.mark.regression
 def test_cost_of_revenue_hierarchy_fix():
     """Test that Cost concepts now have distinct labels."""
     print("[bold green]Cost of Revenue Hierarchy Fix Verification[/bold green]\n")
@@ -68,6 +70,7 @@ def test_cost_of_revenue_hierarchy_fix():
     
     return all_correct
 
+@pytest.mark.regression
 def test_cost_hierarchy_separation():
     """Test that we've properly separated the cost hierarchy."""
     print("\n[bold blue]Cost Hierarchy Separation[/bold blue]\n")

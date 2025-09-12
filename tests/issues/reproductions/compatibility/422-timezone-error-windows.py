@@ -39,7 +39,8 @@ class TestIssue422:
             "architecture": platform.architecture(),
             "machine": platform.machine(),
         }
-        
+
+    @pytest.mark.regression
     def test_reproduction_minimal(self):
         """Minimal reproduction of the compatibility issue."""
         # This reproduces the PyArrow timezone error from issue #422
@@ -70,6 +71,7 @@ class TestIssue422:
             else:
                 pytest.fail(f"Compatibility error: {error_info}")
 
+    @pytest.mark.regression
     def test_timezone_handling(self):
         """Test timezone handling across different systems.""" 
         # This is particularly relevant for the PyArrow timezone issue
@@ -95,6 +97,7 @@ class TestIssue422:
             else:
                 raise
 
+    @pytest.mark.regression
     def test_dependency_compatibility(self):
         """Test compatibility with required dependencies."""
         # Test pandas compatibility

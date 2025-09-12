@@ -101,14 +101,16 @@ def mock_xbrl():
 
 class TestCurrentPeriodView:
     """Test cases for CurrentPeriodView class."""
-    
+
+    @pytest.mark.fast
     def test_initialization(self, mock_xbrl):
         """Test CurrentPeriodView initialization."""
         current_period = CurrentPeriodView(mock_xbrl)
         assert current_period.xbrl == mock_xbrl
         assert current_period._current_period_key is None
         assert current_period._current_period_label is None
-    
+
+    @pytest.mark.fast
     def test_period_detection_with_document_end_date(self, mock_xbrl):
         """Test period detection using document period end date."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -120,7 +122,8 @@ class TestCurrentPeriodView:
         # Should have proper label
         period_label = current_period.period_label
         assert period_label == 'December 31, 2023'
-    
+
+    @pytest.mark.fast
     def test_period_detection_without_document_date(self, mock_xbrl):
         """Test period detection fallback when no document date."""
         mock_xbrl.period_of_report = None
@@ -129,7 +132,8 @@ class TestCurrentPeriodView:
         # Should fall back to most recent period by date
         period_key = current_period.period_key
         assert period_key in ['duration_2023-01-01_2023-12-31', 'instant_2023-12-31']
-    
+
+    @pytest.mark.fast
     def test_period_detection_empty_periods(self, mock_xbrl):
         """Test period detection with no reporting periods."""
         mock_xbrl.reporting_periods = []
@@ -137,7 +141,8 @@ class TestCurrentPeriodView:
         
         period_key = current_period.period_key
         assert period_key == ""
-    
+
+    @pytest.mark.fast
     def test_balance_sheet_standard_concepts(self, mock_xbrl):
         """Test balance sheet retrieval with standard concept names."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -159,7 +164,8 @@ class TestCurrentPeriodView:
         assets_row = df[df['label'] == 'Total Assets'].iloc[0]
         assert assets_row['value'] == 1000000
         assert assets_row['concept'] == 'us-gaap_Assets'
-    
+
+    @pytest.mark.fast
     def test_balance_sheet_raw_concepts(self, mock_xbrl):
         """Test balance sheet retrieval with raw XBRL concept names."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -179,7 +185,8 @@ class TestCurrentPeriodView:
         # Concept name should attempt to restore colon format
         assets_row = df[df['label'] == 'Total Assets'].iloc[0]
         assert assets_row['original_concept'] == 'us-gaap_Assets'
-    
+
+    @pytest.mark.fast
     def test_income_statement(self, mock_xbrl):
         """Test income statement retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -191,7 +198,8 @@ class TestCurrentPeriodView:
         # Verify it's an income statement
         assert stmt.canonical_type == 'IncomeStatement'
         assert 'duration_' in stmt.period_filter  # Should use duration period
-    
+
+    @pytest.mark.fast
     def test_cashflow_statement(self, mock_xbrl):
         """Test cash flow statement retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -203,7 +211,8 @@ class TestCurrentPeriodView:
         # Verify it's a cash flow statement
         assert stmt.canonical_type == 'CashFlowStatement'
         assert 'duration_' in stmt.period_filter  # Should use duration period
-    
+
+    @pytest.mark.fast
     def test_statement_of_equity(self, mock_xbrl):
         """Test statement of equity retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -215,7 +224,8 @@ class TestCurrentPeriodView:
         # Verify it's a statement of equity
         assert stmt.canonical_type == 'StatementOfEquity'
         assert 'instant_' in stmt.period_filter  # Should use instant period
-    
+
+    @pytest.mark.fast
     def test_comprehensive_income(self, mock_xbrl):
         """Test comprehensive income statement retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -227,7 +237,8 @@ class TestCurrentPeriodView:
         # Verify it's a comprehensive income statement
         assert stmt.canonical_type == 'ComprehensiveIncome'
         assert 'duration_' in stmt.period_filter  # Should use duration period
-    
+
+    @pytest.mark.fast
     def test_statement_not_found_error(self, mock_xbrl):
         """Test handling of missing statements."""
         # Mock find_statement to return no matching role
@@ -236,7 +247,8 @@ class TestCurrentPeriodView:
         
         with pytest.raises(StatementNotFound):
             current_period.balance_sheet()
-    
+
+    @pytest.mark.fast
     def test_empty_statement_data_error(self, mock_xbrl):
         """Test handling of empty statement data with DataFrame mode."""
         mock_xbrl.get_statement.return_value = []
@@ -245,7 +257,8 @@ class TestCurrentPeriodView:
         # Test with DataFrame mode (as_statement=False)
         with pytest.raises(StatementNotFound):
             current_period.income_statement(as_statement=False)
-    
+
+    @pytest.mark.fast
     def test_notes_access(self, mock_xbrl):
         """Test notes sections retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -255,7 +268,8 @@ class TestCurrentPeriodView:
         assert len(notes) == 1
         assert notes[0]['section_name'] == 'Notes to Financial Statements'
         assert notes[0]['type'] == 'Notes'
-    
+
+    @pytest.mark.fast
     def test_notes_specific_section(self, mock_xbrl):
         """Test retrieval of specific note section."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -263,7 +277,8 @@ class TestCurrentPeriodView:
         
         assert isinstance(notes, list)
         assert len(notes) == 1  # Should match "Notes to Financial Statements"
-    
+
+    @pytest.mark.fast
     def test_get_fact_standard_concept(self, mock_xbrl):
         """Test individual fact retrieval with standard concept."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -271,7 +286,8 @@ class TestCurrentPeriodView:
         
         assert value == 1000000
         mock_xbrl._find_facts_for_element.assert_called_with('Assets', period_filter='instant_2023-12-31')
-    
+
+    @pytest.mark.fast
     def test_get_fact_raw_concept(self, mock_xbrl):
         """Test individual fact retrieval with raw XBRL concept."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -280,7 +296,8 @@ class TestCurrentPeriodView:
         assert value == 1000000
         # Should convert colon to underscore for internal lookup
         mock_xbrl._find_facts_for_element.assert_called_with('us-gaap_Assets', period_filter='instant_2023-12-31')
-    
+
+    @pytest.mark.fast
     def test_get_fact_not_found(self, mock_xbrl):
         """Test fact retrieval when fact doesn't exist."""
         mock_xbrl._find_facts_for_element.return_value = {}
@@ -288,7 +305,8 @@ class TestCurrentPeriodView:
         
         value = current_period.get_fact('NonExistentConcept')
         assert value is None
-    
+
+    @pytest.mark.fast
     def test_to_dict(self, mock_xbrl):
         """Test conversion to dictionary format."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -300,7 +318,8 @@ class TestCurrentPeriodView:
         assert result['document_type'] == '10-K'
         assert 'statements' in result
         assert 'BalanceSheet' in result['statements']
-    
+
+    @pytest.mark.fast
     def test_repr(self, mock_xbrl):
         """Test string representation."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -309,7 +328,8 @@ class TestCurrentPeriodView:
         assert 'CurrentPeriodView' in repr_str
         assert 'Test Company Inc.' in repr_str
         assert 'December 31, 2023' in repr_str
-    
+
+    @pytest.mark.fast
     def test_str(self, mock_xbrl):
         """Test user-friendly string representation."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -321,13 +341,15 @@ class TestCurrentPeriodView:
 
 class TestCurrentPeriodIntegration:
     """Integration tests with real XBRL data."""
-    
+
+    @pytest.mark.fast
     def test_xbrl_current_period_property(self, aapl_xbrl):
         """Test that XBRL class provides current_period property."""
         assert hasattr(aapl_xbrl, 'current_period')
         current_period = aapl_xbrl.current_period
         assert isinstance(current_period, CurrentPeriodView)
-    
+
+    @pytest.mark.fast
     def test_apple_period_detection(self, aapl_xbrl):
         """Test period detection with real Apple data."""
         current_period = aapl_xbrl.current_period
@@ -339,7 +361,8 @@ class TestCurrentPeriodIntegration:
         
         # Should be either instant or duration format
         assert period_key.startswith(('instant_', 'duration_'))
-    
+
+    @pytest.mark.fast
     def test_apple_balance_sheet_current_period(self, aapl_xbrl):
         """Test balance sheet retrieval with real Apple data."""
         current_period = aapl_xbrl.current_period
@@ -365,7 +388,8 @@ class TestCurrentPeriodIntegration:
         except StatementNotFound:
             # It's okay if the specific statement isn't found in test data
             pytest.skip("Balance sheet not available in test data")
-    
+
+    @pytest.mark.fast
     def test_apple_income_statement_current_period(self, aapl_xbrl):
         """Test income statement retrieval with real Apple data."""
         current_period = aapl_xbrl.current_period
@@ -386,7 +410,8 @@ class TestCurrentPeriodIntegration:
                 # It's okay if no revenue data is found in test fixtures
         except StatementNotFound:
             pytest.skip("Income statement not available in test data")
-    
+
+    @pytest.mark.fast
     def test_apple_raw_concepts(self, aapl_xbrl):
         """Test raw concepts functionality with real Apple data."""
         current_period = aapl_xbrl.current_period
@@ -406,7 +431,8 @@ class TestCurrentPeriodIntegration:
                 assert 'original_concept' in df.columns or 'concept' in df.columns
         except StatementNotFound:
             pytest.skip("Balance sheet not available in test data")
-    
+
+    @pytest.mark.fast
     def test_period_caching(self, aapl_xbrl):
         """Test that period detection results are cached."""
         current_period = aapl_xbrl.current_period
@@ -423,7 +449,8 @@ class TestCurrentPeriodIntegration:
 
 class TestRawConceptNameHandling:
     """Test raw XBRL concept name handling functionality."""
-    
+
+    @pytest.mark.fast
     def test_get_concept_name_standard(self, mock_xbrl):
         """Test concept name retrieval in standard mode."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -435,7 +462,8 @@ class TestRawConceptNameHandling:
         
         concept_name = current_period._get_concept_name(item, raw_concepts=False)
         assert concept_name == 'Assets'
-    
+
+    @pytest.mark.fast
     def test_get_concept_name_raw(self, mock_xbrl):
         """Test concept name retrieval in raw mode."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -447,7 +475,8 @@ class TestRawConceptNameHandling:
         
         concept_name = current_period._get_concept_name(item, raw_concepts=True)
         assert concept_name == 'us-gaap:Assets'  # Should restore colon format
-    
+
+    @pytest.mark.fast
     def test_get_concept_name_raw_already_colon_format(self, mock_xbrl):
         """Test concept name with existing colon format."""
         current_period = CurrentPeriodView(mock_xbrl)
@@ -459,7 +488,8 @@ class TestRawConceptNameHandling:
         
         concept_name = current_period._get_concept_name(item, raw_concepts=True)
         assert concept_name == 'us-gaap:Assets'  # Should keep existing format
-    
+
+    @pytest.mark.fast
     def test_get_concept_name_no_all_names(self, mock_xbrl):
         """Test concept name when all_names is empty."""
         current_period = CurrentPeriodView(mock_xbrl)

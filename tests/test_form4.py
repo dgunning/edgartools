@@ -1,7 +1,8 @@
 from edgar import *
 from edgar.ownership import Form4
+import pytest
 
-
+@pytest.mark.network
 def test_form4_with_derivatives():
     filing = Filing(company='VERTEX PHARMACEUTICALS INC / MA',
                     cik=875320,
@@ -25,6 +26,7 @@ def test_form4_with_derivatives():
     df = form4.to_dataframe()
     print(df)
 
+@pytest.mark.network
 def test_create_form4_with_non_numeric_underlying():
     filing = Filing(form='4', filing_date='2024-10-02', company='Arnaboldi Nicole S', cik=1950032, accession_no='0001062993-24-017232')
     form4:Form4 = filing.obj()
@@ -32,6 +34,7 @@ def test_create_form4_with_non_numeric_underlying():
     print()
     print(form4)
 
+@pytest.mark.network
 def test_detailed_transaction_counts():
     filing = Filing(form='4', filing_date='2025-03-07', company='DYADIC INTERNATIONAL INC', cik=1213809, accession_no='0001437749-25-006667')
     form4 = filing.obj()

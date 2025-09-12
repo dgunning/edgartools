@@ -1,7 +1,8 @@
 from edgar import Filing
 from edgar.ownership import Form3
+import pytest
 
-
+@pytest.mark.network
 def test_form3_initial_holdings():
     f = Filing(form='3', filing_date='2025-02-28', company='Almeida Prado Claudio', cik=2058644,
                accession_no='0001562180-25-001814')
@@ -13,6 +14,7 @@ def test_form3_initial_holdings():
     assert ownership_summary.position == 'Executive Vice President'
     assert ownership_summary.total_shares == 50257.0
 
+@pytest.mark.network
 def test_initial_holdings_to_dataframe():
     f = Filing(form='3',
               filing_date='2025-03-05',

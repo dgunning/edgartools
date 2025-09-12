@@ -145,3 +145,18 @@ def filings_2021_q1_xbrl():
 def filings_2014_q4():
     """2014 Q4 filings - cached per test module"""
     return get_filings(2014, 4)
+
+
+# Company Reports fixtures for test_company_reports.py
+@pytest.fixture(scope="module")
+def frontier_masters_10k_filing():
+    """Frontier Masters Fund 10-K filing - cached per test module"""
+    return Filing(form='10-K', filing_date='2023-04-06', company='Frontier Masters Fund', 
+                 cik=1450722, accession_no='0001213900-23-028058')
+
+
+@pytest.fixture(scope="module") 
+def apple_2024_10k_filing():
+    """Apple Inc. 2024 10-K filing - cached per test module"""
+    return Filing(company='Apple Inc.', cik=320193, form='10-K', 
+                 filing_date='2024-11-01', accession_no='0000320193-24-000123')

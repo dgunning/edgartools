@@ -5,12 +5,15 @@ Test specifically for the fixed financial metrics issue
 
 import sys
 from pathlib import Path
+import pytest
 
 # Add the edgar package to path
 sys.path.insert(0, str(Path(__file__).parents[4]))
 
 from edgar import Company
 
+
+@pytest.mark.regression
 def test_financial_metrics_fix():
     """Test the fixed get_financial_metrics method for previously failing companies."""
     

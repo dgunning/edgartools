@@ -11,7 +11,8 @@ from edgar.xbrl.rendering import RenderedStatement
 
 class TestCurrentPeriodStatementObjects:
     """Test Statement object support in CurrentPeriodView"""
-    
+
+    @pytest.mark.fast
     def test_balance_sheet_returns_statement_object(self):
         """Test that balance_sheet(as_statement=True) returns CurrentPeriodStatement"""
         # Create mock XBRL
@@ -36,7 +37,8 @@ class TestCurrentPeriodStatementObjects:
         assert stmt.canonical_type == 'BalanceSheet'
         assert stmt.period_filter == 'instant_2024-12-31'
         assert stmt.period_label == 'December 31, 2024'
-    
+
+    @pytest.mark.fast
     def test_balance_sheet_returns_statement_by_default(self):
         """Test that balance_sheet() returns Statement by default"""
         # Create mock XBRL with statement data
@@ -57,7 +59,8 @@ class TestCurrentPeriodStatementObjects:
         
         assert isinstance(stmt, CurrentPeriodStatement)
         assert stmt.canonical_type == 'BalanceSheet'
-    
+
+    @pytest.mark.fast
     def test_income_statement_period_selection(self):
         """Test that income statement uses appropriate duration period"""
         # Mock XBRL with instant and duration periods
@@ -80,7 +83,8 @@ class TestCurrentPeriodStatementObjects:
         stmt = current.income_statement(as_statement=True)
         
         assert stmt.period_filter == 'duration_2024-01-01_2024-12-31'
-    
+
+    @pytest.mark.fast
     def test_statement_object_methods(self):
         """Test CurrentPeriodStatement methods work correctly"""
         # Create mock XBRL and statement
@@ -125,7 +129,8 @@ class TestCurrentPeriodStatementObjects:
         assert len(df) == 1
         assert df.iloc[0]['concept'] == 'us-gaap_Assets'
         assert df.iloc[0]['value'] == 1000000
-    
+
+    @pytest.mark.fast
     def test_get_dataframe_with_raw_concepts(self):
         """Test get_dataframe with raw_concepts=True"""
         mock_xbrl = Mock()
@@ -157,7 +162,8 @@ class TestCurrentPeriodStatementObjects:
         assert df.iloc[0]['concept'] == 'us-gaap:Assets'  # Should convert underscore to colon
         assert 'original_concept' in df.columns
         assert df.iloc[0]['original_concept'] == 'us-gaap_Assets'
-    
+
+    @pytest.mark.fast
     def test_debug_info_method(self):
         """Test debug_info method provides useful debugging information"""
         # Create mock XBRL
@@ -194,7 +200,8 @@ class TestCurrentPeriodStatementObjects:
         assert 'BalanceSheet' in debug_info['statements']
         assert 'IncomeStatement' in debug_info['statements']
         assert 'CashFlowStatement' in debug_info['statements']
-    
+
+    @pytest.mark.fast
     def test_error_handling_for_missing_statements(self):
         """Test error handling when statements are not found"""
         # Create mock XBRL that will raise StatementNotFound
@@ -215,7 +222,8 @@ class TestCurrentPeriodStatementObjects:
         # Should raise StatementNotFound
         with pytest.raises(StatementNotFound):
             current.balance_sheet(as_statement=True)
-    
+
+    @pytest.mark.fast
     def test_all_statement_methods_support_as_statement(self):
         """Test that all statement methods support as_statement parameter"""
         mock_xbrl = Mock()
@@ -258,7 +266,8 @@ class TestCurrentPeriodStatementObjects:
 
 class TestCurrentPeriodStatementClass:
     """Direct tests for CurrentPeriodStatement class"""
-    
+
+    @pytest.mark.fast
     def test_string_representations(self):
         """Test __repr__ and __str__ methods"""
         mock_xbrl = Mock()
@@ -283,7 +292,8 @@ class TestCurrentPeriodStatementClass:
         
         # Test that both __repr__ and __str__ return the same rich content
         assert repr_str == str_result
-    
+
+    @pytest.mark.fast
     def test_render_method(self):
         """Test render method passes parameters correctly"""
         mock_xbrl = Mock()
