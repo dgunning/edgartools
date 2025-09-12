@@ -1,8 +1,6 @@
 import pytest
 from pathlib import Path
-from typing import Dict, Any
 
-from edgar.xbrl import XBRL
 from edgar import httpclient
 from edgar import Company
 from edgar._filings import Filing, get_filings
@@ -30,7 +28,9 @@ def pytest_configure(config):
     if hasattr(config, 'workerinput'):
         logger.info("pytest-xdist is enabled, enabling a distributed sqlite ratelimiter")    
         from pyrate_limiter import limiter_factory
-        httpclient.HTTP_MGR.rate_limiter = limiter_factory.create_sqlite_limiter(rate_per_duration=10, db_path="ratelimiter.sqlite", use_file_lock=True)
+        httpclient.HTTP_MGR.rate_limiter = limiter_factory.create_sqlite_limiter(
+            rate_per_duration=10, db_path="ratelimiter.sqlite", use_file_lock=True
+        )
 
 
 def pytest_collection_modifyitems(items):

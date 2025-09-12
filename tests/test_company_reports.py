@@ -20,8 +20,6 @@ def test_tenk_filing_with_no_gaap(frontier_masters_10k_filing):
 def test_tenk_item_and_parts(frontier_masters_10k_filing):
     filing = frontier_masters_10k_filing
 
-    chunked_document = ChunkedDocument(filing.html())
-    chunk_df = chunked_document._chunked_data
     tenk: TenK = filing.obj()
     # Get item 1
     item1 = tenk['Item 1']
