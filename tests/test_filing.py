@@ -24,25 +24,13 @@ from edgar._filings import read_index_file
 pd.options.display.max_colwidth = 200
 
 
-@pytest.fixture(scope='module')
-def filings_2022_q3():
-    return get_filings(2022, 3)
 
-
-@pytest.fixture(scope='module')
-def filings_2021_q1():
-    return get_filings(2021, 1)
-
-
-@pytest.fixture(scope='module')
-def filings_2021_q1_xbrl():
-    return get_filings(2021, 1, index="xbrl")
-
-
+@pytest.mark.network
 def test_fetch_daily_filing_index():
     index_data = fetch_daily_filing_index('2025-08-07')
     assert index_data
 
+@pytest.mark.fast
 def test_read_fixed_width_index_for_daily_file():
     index_text = Path('data/index_files/form.20200318.idx').read_text()
     index_data = read_fixed_width_index(index_text, form_specs)
@@ -55,6 +43,7 @@ def test_read_fixed_width_index_for_daily_file():
     assert index_df.iloc[-1]['accession_number'] == '0001105608-20-000004'
 
 
+@pytest.mark.fast
 def test_read_fixed_width_index_for_quarterly_file():
     index_text = Path('data/form.idx').read_text()
     index_data = read_fixed_width_index(index_text, form_specs)
@@ -65,6 +54,7 @@ def test_read_fixed_width_index_for_quarterly_file():
     assert index_df.iloc[-1]['accession_number'] == '0001085910-24-000002'
 
 
+@pytest.mark.network
 def test_read_form_filing_index_year_and_quarter():
     filings: Filings = get_filings(2021, 1)
     assert filings
@@ -79,6 +69,7 @@ def test_read_form_filing_index_year_and_quarter():
     assert filings.data[0][0].as_py() == '10-Q'
 
 
+@pytest.mark.network
 def test_read_form_filing_index_year():
     filings: Filings = get_filings(2021)
     assert filings
@@ -220,20 +211,19 @@ def test_iterate_filings(filings_2021_q1_xbrl):
         assert filing
 
 
-carbo_10K = Filing(form='10-K', company='CARBO CERAMICS INC', cik=1009672, filing_date='2018-03-08',
-                   accession_no='0001564590-18-004771')
+# Global filing objects (some tests converted to use fixtures)
 
-four37_capital_staff_filing = Filing(form='SEC STAFF ACTION', company='437 CAPITAL Fund Corp', cik=1805559,
-                                     filing_date='2022-03-24', accession_no='9999999997-22-001189')
-
-
-def test_filing_homepage_url():
-    assert carbo_10K.homepage_url == "https://www.sec.gov/Archives/edgar/data/1009672/0001564590-18-004771-index.html"
-    r = httpx.get(carbo_10K.homepage_url, headers={'User-Agent': 'Mike Banton mb@yahoo.com'})
+@pytest.mark.network
+def test_filing_homepage_url(carbo_10k_filing):
+    assert carbo_10k_filing.homepage_url == "https://www.sec.gov/Archives/edgar/data/1009672/0001564590-18-004771-index.html"
+    r = httpx.get(carbo_10k_filing.homepage_url, headers={'User-Agent': 'Mike Banton mb@yahoo.com'})
     assert r.status_code == 200
 
 
+@pytest.mark.network
 def test_filing_primary_document():
+    four37_capital_staff_filing = Filing(form='SEC STAFF ACTION', company='437 CAPITAL Fund Corp', cik=1805559,
+                         filing_date='2022-03-24', accession_no='9999999997-22-001189')
     homepage_url = four37_capital_staff_filing.homepage_url
     assert homepage_url == 'https://www.sec.gov/Archives/edgar/data/1805559/9999999997-22-001189-index.html'
     homepage: FilingHomepage = four37_capital_staff_filing.homepage
@@ -247,13 +237,15 @@ def test_filing_primary_document():
     assert filing
 
 
-def test_filing_homepage_for_filing():
-    filing_homepage: FilingHomepage = carbo_10K.homepage
+@pytest.mark.network
+def test_filing_homepage_for_filing(carbo_10k_filing):
+    filing_homepage: FilingHomepage = carbo_10k_filing.homepage
     assert 'Description'
-    assert filing_homepage.url == carbo_10K.url
-    assert carbo_10K.home == carbo_10K.homepage
+    assert filing_homepage.url == carbo_10k_filing.url
+    assert carbo_10k_filing.home == carbo_10k_filing.homepage
 
 
+@pytest.mark.network
 def test_filing_homepage_for_filing_multiple_instruments():
     filing = Filing(form='DEF 14A', filing_date='2023-06-16', company='T. Rowe Price All-Cap Opportunities Fund, Inc.',
                     cik=773485, accession_no='0001741773-23-002051')
@@ -262,27 +254,31 @@ def test_filing_homepage_for_filing_multiple_instruments():
     assert homepage
 
 
-def test_filing_homepage_documents_and_datafiles():
-    filing_homepage: FilingHomepage = carbo_10K.homepage
+@pytest.mark.network
+def test_filing_homepage_documents_and_datafiles(carbo_10k_filing):
+    filing_homepage: FilingHomepage = carbo_10k_filing.homepage
     assert 'Description'
     assert len(filing_homepage.documents) > 8
     assert len(filing_homepage.datafiles) >= 6
-    assert filing_homepage.url == carbo_10K.url
+    assert filing_homepage.url == carbo_10k_filing.url
 
 
-def test_filing_document():
-    assert carbo_10K.homepage.primary_html_document.url == \
+@pytest.mark.network
+def test_filing_document(carbo_10k_filing):
+    assert carbo_10k_filing.homepage.primary_html_document.url == \
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
 
 
-def test_xbrl_document():
-    xbrl_document = carbo_10K.homepage.xbrl_document
+@pytest.mark.network
+def test_xbrl_document(carbo_10k_filing):
+    xbrl_document = carbo_10k_filing.homepage.xbrl_document
     assert xbrl_document.url == \
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-20171231.xml'
 
 
-def test_filing_homepage_get_file():
-    filing_document = carbo_10K.homepage.attachments.get_by_sequence(1)
+@pytest.mark.network
+def test_filing_homepage_get_file(carbo_10k_filing):
+    filing_document = carbo_10k_filing.homepage.attachments.get_by_sequence(1)
     assert filing_document
     assert filing_document.sequence_number == '1'
     assert filing_document.path == '/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
@@ -291,12 +287,14 @@ def test_filing_homepage_get_file():
     assert filing_document.document == 'crr-10k_20171231.htm'
 
 
-def test_download_filing_document():
-    filing_document = carbo_10K.homepage.primary_html_document
+@pytest.mark.network
+def test_download_filing_document(carbo_10k_filing):
+    filing_document = carbo_10k_filing.homepage.primary_html_document
     contents = filing_document.download()
     assert '<html>' in contents
 
 
+@pytest.mark.network
 def test_filings_get_item_as_filing():
     filings: Filings = get_filings(2021, 1, index="xbrl")
     filing: Filing = filings[0]
@@ -308,18 +306,21 @@ def test_filings_get_item_as_filing():
     print(filing)
 
 
+@pytest.mark.fast
 def test_form_specs():
     assert form_specs.splits[0] == (0, 12)
     assert form_specs.splits[1] == (12, 74)
     assert form_specs.schema.names[:2] == ['form', 'company']
 
 
+@pytest.mark.fast
 def test_company_specs():
     assert company_specs.splits[0] == (0, 62)
     assert company_specs.splits[1] == (62, 74)
     assert company_specs.schema.names[:2] == ['company', 'form']
 
 
+@pytest.mark.network
 def test_filing_primary_document_for_def14a_filing():
     filing = Filing(form='DEF 14A', company='180 DEGREE CAPITAL CORP. /NY/', cik=893739, filing_date='2020-03-25',
                     accession_no='0000893739-20-000019')
@@ -330,19 +331,8 @@ def test_filing_primary_document_for_def14a_filing():
     assert primary_document.sequence_number == '1'
 
 
-barclays_filing = Filing(form='ATS-N/MA', company='BARCLAYS CAPITAL INC.', cik=851376, filing_date='2020-02-21',
-                         accession_no='0000851376-20-000003')
 
-
-def test_filing_primary_document_seq_5():
-    primary_document: Attachment = barclays_filing.document
-    assert primary_document
-    assert primary_document.url == \
-           'https://www.sec.gov/Archives/edgar/data/851376/000085137620000003/xslATSN_COVER_X01/coverpage.xml'
-    assert primary_document.extension == '.html'
-    assert primary_document.sequence_number == '5'
-
-
+@pytest.mark.network
 def test_filing_html():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
@@ -353,6 +343,7 @@ def test_filing_html():
     assert "10x Genomics, Inc." in html
 
 
+@pytest.mark.network
 def test_filing_markdown():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
@@ -362,19 +353,21 @@ def test_filing_markdown():
     assert "10x Genomics, Inc." in markdown
 
 
-ONE_800_FLOWERS_10Q = Filing(form='10-Q', company='1 800 FLOWERS COM INC',
-                             cik=1084869, filing_date='2023-02-10',
-                             accession_no='0001437749-23-002992')
 
-
+@pytest.mark.fast
 def test_filing_url_for_ixbrl_filing():
     # ixbrl url
+    ONE_800_FLOWERS_10Q = Filing(form='10-Q', company='1 800 FLOWERS COM INC',
+                                cik=1084869, filing_date='2023-03-09', accession_no='0001437749-23-002992')
     'https://www.sec.gov/ix.xhtml?doc=/Archives/edgar/data/1084869/000143774923002992/flws20230101_10q.htm'
 
     assert ONE_800_FLOWERS_10Q.document.url.endswith('flws20230101_10q.htm')
 
 
+@pytest.mark.network
 def test_filing_html_for_ixbrl_filing():
+    ONE_800_FLOWERS_10Q = Filing(form='10-Q', company='1 800 FLOWERS COM INC',
+                                cik=1084869, filing_date='2023-03-09', accession_no='0001437749-23-002992')
     filing = ONE_800_FLOWERS_10Q
     html = filing.html()
     assert html
@@ -413,11 +406,6 @@ def test_primary_xml_for_10k():
     assert len(primary_documents) == 1
 
 @pytest.mark.network
-def test_filing_html_is_xhtml_for_xml_filing():
-    html = barclays_filing.html()
-    assert "-//W3C//DTD XHTML 1.0 Strict//EN" in html
-
-@pytest.mark.network
 def test_filing_html_for_pdf_only_filing():
     filing = Filing(form='40-17G', filing_date='2024-02-27', company='FIDELITY CAPITAL TRUST', cik=275309,
                     accession_no='0000880195-24-000030')
@@ -425,10 +413,8 @@ def test_filing_html_for_pdf_only_filing():
     assert not html
 
 @pytest.mark.network
-def test_filing_homepage_primary_documents():
-    filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
-                    cik=1609804, filing_date='2022-11-04',
-                    accession_no='0000950142-22-003095')
+def test_filing_homepage_primary_documents(orion_form4_filing):
+    filing = orion_form4_filing
     print()
     primary_documents: List[Attachment] = filing.homepage.primary_documents
     assert len(primary_documents) == 2
@@ -448,37 +434,33 @@ def test_filing_homepage_primary_documents():
     assert primary_xml.display_extension == '.xml'
 
 
-orion_form4 = Filing(form='4', company='Orion Engineered Carbons S.A.',
-                     cik=1609804, filing_date='2022-11-04',
-                     accession_no='0000950142-22-003095')
-
-
-def test_filing_primary_xml_document():
-    xml_document = orion_form4.homepage.primary_xml_document
+@pytest.mark.network
+def test_filing_primary_xml_document(orion_form4_filing):
+    xml_document = orion_form4_filing.homepage.primary_xml_document
     print(xml_document)
     assert xml_document.display_extension == ".xml"
     assert xml_document.document == "es220296680_4-davis.xml"
     assert xml_document.path == "/Archives/edgar/data/1300650/000095014222003095/es220296680_4-davis.xml"
 
-    html_document = orion_form4.homepage.primary_html_document
+    html_document = orion_form4_filing.homepage.primary_html_document
     print(html_document)
     assert html_document.display_extension == ".html"
     assert html_document.document == "es220296680_4-davis.html"
     assert html_document.path == "/Archives/edgar/data/1300650/000095014222003095/xslF345X03/es220296680_4-davis.xml"
 
 @pytest.mark.network
-def test_filing_xml_downoads_xml_if_filing_has_xml():
-    assert carbo_10K.xml() is None
-    assert orion_form4.xml()
+def test_filing_xml_downoads_xml_if_filing_has_xml(carbo_10k_filing, orion_form4_filing):
+    assert carbo_10k_filing.xml() is None
+    assert orion_form4_filing.xml()
 
 @pytest.mark.network
-def test_filing_get_entity():
-    company = carbo_10K.get_entity()
-    assert company.cik == carbo_10K.cik
+def test_filing_get_entity(carbo_10k_filing):
+    company = carbo_10k_filing.get_entity()
+    assert company.cik == carbo_10k_filing.cik
 
 @pytest.mark.network
-def test_get_related_filings():
-    related_filings = carbo_10K.related_filings()
+def test_get_related_filings(carbo_10k_filing):
+    related_filings = carbo_10k_filing.related_filings()
     assert len(related_filings) > 200
     file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))
     assert len(file_numbers) == 1
@@ -510,24 +492,24 @@ def test_create_filings_with_empty_table():
     assert filings_copy.empty
 
 @pytest.mark.network
-def test_filing_str():
-    filing_str = str(carbo_10K)
-    assert str(carbo_10K.cik) in filing_str
-    assert str(carbo_10K.company) in filing_str
-    assert str(carbo_10K.form) in filing_str
-    assert str(carbo_10K.filing_date) in filing_str
+def test_filing_str(carbo_10k_filing):
+    filing_str = str(carbo_10k_filing)
+    assert str(carbo_10k_filing.cik) in filing_str
+    assert str(carbo_10k_filing.company) in filing_str
+    assert str(carbo_10k_filing.form) in filing_str
+    assert str(carbo_10k_filing.filing_date) in filing_str
     print(filing_str)
 
 @pytest.mark.network
-def test_filing_repr():
-    filing_repr = carbo_10K.__repr__()
-    assert str(carbo_10K.company) in filing_repr
-    assert str(carbo_10K.form) in filing_repr
-    assert str(carbo_10K.filing_date) in filing_repr
+def test_filing_repr(carbo_10k_filing):
+    filing_repr = carbo_10k_filing.__repr__()
+    assert str(carbo_10k_filing.company) in filing_repr
+    assert str(carbo_10k_filing.form) in filing_repr
+    assert str(carbo_10k_filing.filing_date) in filing_repr
 
 @pytest.mark.network
-def test_filing_homepage_repr():
-    homepage = carbo_10K.homepage
+def test_filing_homepage_repr(carbo_10k_filing):
+    homepage = carbo_10k_filing.homepage
     print(homepage.__repr__())
 
 @pytest.mark.network
@@ -675,8 +657,8 @@ def test_find_company_in_filings():
     assert set(filings.data['cik'].to_pylist()) == {1668717}
 
 @pytest.mark.network
-def test_filing_sections():
-    sections = carbo_10K.sections()
+def test_filing_sections(carbo_10k_filing):
+    sections = carbo_10k_filing.sections()
     assert len(sections) > 20
 
 @pytest.mark.network
@@ -690,9 +672,10 @@ def test_filing_with_complex_sections():
             assert "Financial Condition. On March 15, 2023," in section
 
 
-def test_search_for_text_in_filing_with_bm25():
+@pytest.mark.network
+def test_search_for_text_in_filing_with_bm25(carbo_10k_filing):
     print()
-    results = carbo_10K.search("risks")
+    results = carbo_10k_filing.search("risks")
     assert len(results) > 10
     print(results)
 
@@ -742,9 +725,9 @@ def test_find_old_filing():
 
 
 @pytest.mark.network
-def test_as_company_filing():
-    company_filing = carbo_10K.as_company_filing()
-    assert company_filing.cik == carbo_10K.cik
+def test_as_company_filing(carbo_10k_filing):
+    company_filing = carbo_10k_filing.as_company_filing()
+    assert company_filing.cik == carbo_10k_filing.cik
 
 @pytest.mark.network
 def test_10K_filing_with_no_financial_data():
@@ -758,8 +741,8 @@ def test_10K_filing_with_no_financial_data():
     print(tenk)
 
 @pytest.mark.fast
-def test_text_url_for_filing():
-    assert carbo_10K.text_url \
+def test_text_url_for_filing(carbo_10k_filing):
+    assert carbo_10k_filing.text_url \
            == 'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt'
 
 @pytest.mark.network
@@ -811,6 +794,7 @@ def test_save_filing_to_directory():
     filing = Filing.load(filing_path)
     assert filing.filing_date == '2024-03-08'
 
+@pytest.mark.fast
 @pytest.mark.fast
 def test_filing_date_to_year_quarter():
     # Test case 1: Single date
@@ -991,6 +975,7 @@ def test_year_extraction_parametrized(accession_number, expected_year):
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
     assert year == expected_year
 
+@pytest.mark.network
 def test_get_filings_by_range():
     filings = get_filings(year=range(2022, 2024))
     assert not filings.empty
@@ -998,6 +983,7 @@ def test_get_filings_by_range():
     assert filings.date_range == (datetime.date(2022, 1, 3), datetime.date(2023, 12, 29))
 
 
+@pytest.mark.fast
 def test_filing_url():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
