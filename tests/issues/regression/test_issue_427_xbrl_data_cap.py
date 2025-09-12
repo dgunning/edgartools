@@ -13,6 +13,7 @@ from edgar import Company
 from edgar.xbrl.stitching.xbrls import XBRLS
 
 
+@pytest.mark.regression
 class TestIssue427XBRLDataCap:
     """Regression tests for XBRL data cap issue."""
     

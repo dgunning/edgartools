@@ -219,8 +219,8 @@ def test_stitch_statements(stitcher):
     assert result['statement_data'][0]['label'] == 'Total Assets'
 
 
-def test_stitch_aapl_statements():
-    c = Company("AAPL")
+def test_stitch_aapl_statements(aapl_company):
+    c = aapl_company
     filings = c.latest("10-K", 2)  # 2 filings should cover ~4 years with overlaps
     print()
     xbrls = [XBRL.from_filing(f) for f in filings]
@@ -268,8 +268,8 @@ def test_stitch_aapl_statements():
     assert len(statement_data['periods']) >= 2, f"Expected at least 4 periods, got {len(statement_data['periods'])}"
 
 
-def test_stitching_using_xbrls():
-    c = Company("AAPL")
+def test_stitching_using_xbrls(aapl_company):
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls:XBRLS = XBRLS.from_filings(filings)
     income_statement = xbrls.statements.income_statement()
@@ -285,8 +285,8 @@ def get_statements(ticker:str, n=6):
     return XBRLS.from_filings(filings).statements
 
 
-def test_determine_optimal_periods():
-    c = Company("AAPL")
+def test_determine_optimal_periods(aapl_company):
+    c = aapl_company
     filings = c.latest("10-K", 4)
     xbrls = [XBRL.from_filing(f) for f in filings]
     optimal_periods = determine_optimal_periods(xbrls, "BalanceSheet")
@@ -523,8 +523,8 @@ def test_stitch_3_statements(amd_xbrl, meta_xbrl):
     assert len(statement['periods']) == 3
 
 
-def test_stitch_aapl_statements_from_2019():
-    c = Company("AAPL")
+def test_stitch_aapl_statements_from_2019(aapl_company):
+    c = aapl_company
     filings = c.get_filings(form="10-K", filing_date="2019-01-01:2020-11-05").head(2)
     xbrls = XBRLS.from_filings(filings)
     optimal_periods = determine_optimal_periods(xbrls.xbrl_list, "IncomeStatement")
@@ -537,8 +537,8 @@ def test_stitch_aapl_statements_from_2019():
     assert '$(161,782)' in _repr
 
 
-def test_stitch_statements_using_max_periods():
-    c = Company("AAPL")
+def test_stitch_statements_using_max_periods(aapl_company):
+    c = aapl_company
     filings = c.latest("10-K", 10)
     xb = XBRLS.from_filings(filings)
     income_statement = xb.statements.income_statement(max_periods=10)
@@ -547,9 +547,9 @@ def test_stitch_statements_using_max_periods():
 
 # ======== NEW QUERY FUNCTIONALITY TESTS ========
 
-def test_xbrls_facts_property():
+def test_xbrls_facts_property(aapl_company):
     """Test that XBRLS has a facts property that returns StitchedFactsView."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     
@@ -563,9 +563,9 @@ def test_xbrls_facts_property():
     assert facts_view is facts_view2
 
 
-def test_stitched_facts_view_basic():
+def test_stitched_facts_view_basic(aapl_company):
     """Test basic functionality of StitchedFactsView."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     
@@ -593,9 +593,9 @@ def test_stitched_facts_view_basic():
     assert fact['standardized'] is True
 
 
-def test_xbrls_query_method():
+def test_xbrls_query_method(aapl_company):
     """Test XBRLS query method."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     
@@ -609,9 +609,9 @@ def test_xbrls_query_method():
     assert len(results) > 0
 
 
-def test_stitched_fact_query_by_standardized_concept():
+def test_stitched_fact_query_by_standardized_concept(aapl_company):
     """Test filtering by standardized concept."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     
@@ -629,9 +629,9 @@ def test_stitched_fact_query_by_standardized_concept():
         assert 'revenue' in label or 'revenue' in concept
 
 
-def test_stitched_fact_query_by_original_label():
+def test_stitched_fact_query_by_original_label(aapl_company):
     """Test filtering by original company-specific labels."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     
@@ -646,9 +646,9 @@ def test_stitched_fact_query_by_original_label():
             assert 'sales' in original_label
 
 
-def test_stitched_fact_query_across_periods():
+def test_stitched_fact_query_across_periods(aapl_company):
     """Test filtering to concepts that appear across multiple periods."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 3)
     xbrls = XBRLS.from_filings(filings)
     
@@ -669,9 +669,9 @@ def test_stitched_fact_query_across_periods():
         assert len(periods) >= 2, f"Concept {concept} appears in {len(periods)} periods, expected >= 2"
 
 
-def test_stitched_fact_query_trend_analysis():
+def test_stitched_fact_query_trend_analysis(aapl_company):
     """Test trend analysis functionality."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 3)
     xbrls = XBRLS.from_filings(filings)
     
@@ -692,9 +692,9 @@ def test_stitched_fact_query_trend_analysis():
             assert len(trend_df.columns) > 0
 
 
-def test_stitched_fact_query_to_dataframe():
+def test_stitched_fact_query_to_dataframe(aapl_company):
     """Test converting query results to DataFrame."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     
@@ -715,9 +715,9 @@ def test_stitched_fact_query_to_dataframe():
     assert list(df_filtered.columns) == ['concept', 'label', 'value']
 
 
-def test_stitched_fact_query_chaining():
+def test_stitched_fact_query_chaining(aapl_company):
     """Test method chaining for complex queries."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 3)
     xbrls = XBRLS.from_filings(filings)
     
@@ -741,9 +741,9 @@ def test_stitched_fact_query_chaining():
             assert period_ends == sorted(period_ends), "Results should be sorted by period_end"
 
 
-def test_stitched_fact_query_value_filtering():
+def test_stitched_fact_query_value_filtering(aapl_company):
     """Test filtering by value ranges."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     
@@ -758,9 +758,9 @@ def test_stitched_fact_query_value_filtering():
             assert numeric_value > 1000000000
 
 
-def test_stitched_fact_query_statement_type_filtering():
+def test_stitched_fact_query_statement_type_filtering(aapl_company):
     """Test filtering by statement type."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     
@@ -773,9 +773,9 @@ def test_stitched_fact_query_statement_type_filtering():
         assert fact.get('statement_type') == 'IncomeStatement'
 
 
-def test_stitched_facts_view_caching():
+def test_stitched_facts_view_caching(aapl_company):
     """Test that facts are cached properly."""
-    c = Company("AAPL")
+    c = aapl_company
     filings = c.latest("10-K", 2)
     xbrls = XBRLS.from_filings(filings)
     

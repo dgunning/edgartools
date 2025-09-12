@@ -11,6 +11,7 @@ This script tests the new PeriodType enum functionality to ensure:
 
 import sys
 from pathlib import Path
+import pytest
 
 # Add edgar to path for testing
 sys.path.insert(0, str(Path(__file__).parent / "edgar"))
@@ -24,6 +25,7 @@ from edgar.enums import (
     ALL_PERIODS
 )
 
+@pytest.mark.fast
 def test_period_type_enum():
     """Test PeriodType enum basic functionality."""
     print("🔍 Testing PeriodType enum basic functionality...")
@@ -41,6 +43,7 @@ def test_period_type_enum():
     
     print("   ✅ All enum values work correctly")
 
+@pytest.mark.fast
 def test_period_validation():
     """Test period validation function."""
     print("🔍 Testing period validation...")
@@ -82,6 +85,7 @@ def test_period_validation():
         assert "PeriodType or str" in str(e)
         print(f"   ✅ Type validation: {e}")
 
+@pytest.mark.fast
 def test_convenience_collections():
     """Test period collections."""
     print("🔍 Testing convenience collections...")
@@ -101,6 +105,7 @@ def test_convenience_collections():
     assert len(unique_enum_values) == len(ALL_PERIODS)
     print("   ✅ All collections work correctly")
 
+@pytest.mark.fast
 def test_type_hints():
     """Test type hint functionality."""
     print("🔍 Testing type hints...")
@@ -140,6 +145,7 @@ def test_real_world_usage():
     
     print("   ✅ Real-world usage patterns work")
 
+@pytest.mark.fast
 def test_enum_iteration():
     """Test enum iteration and introspection."""
     print("🔍 Testing enum iteration...")

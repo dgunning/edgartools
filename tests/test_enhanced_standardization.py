@@ -64,7 +64,7 @@ def temp_standardization_dir():
     shutil.rmtree(temp_dir)
 
 
-
+@pytest.mark.fast
 def test_tesla_specific_mapping_priority(temp_standardization_dir):
     """Test that Tesla-specific mappings have higher priority than core mappings."""
     
@@ -79,7 +79,7 @@ def test_tesla_specific_mapping_priority(temp_standardization_dir):
     result = store.get_standard_concept("us-gaap_Revenue")
     assert result == "Revenue"
 
-
+@pytest.mark.fast
 def test_fallback_to_core_mappings(temp_standardization_dir):
     """Test fallback to core mappings when enhanced mappings don't match."""
     
@@ -90,12 +90,9 @@ def test_fallback_to_core_mappings(temp_standardization_dir):
     result = store.get_standard_concept("us-gaap_NetIncome")
     assert result == "Net Income"
 
-
+@pytest.mark.fast
 def test_company_detection_from_concept_prefix(temp_standardization_dir):
     """Test automatic company detection from concept prefixes."""
-
-    
-
     core_mappings_path = os.path.join(temp_standardization_dir, "concept_mappings.json")
     store = MappingStore(source=core_mappings_path, read_only=True)
         
@@ -104,7 +101,7 @@ def test_company_detection_from_concept_prefix(temp_standardization_dir):
     assert store._detect_entity_from_concept("us-gaap_Revenue") is None
     assert store._detect_entity_from_concept("unknown:Concept") is None
 
-
+@pytest.mark.fast
 def test_enhanced_standardization_backwards_compatibility(temp_standardization_dir):
     """Test that enhanced standardization maintains backwards compatibility."""
     # Test with enhanced features disabled
@@ -116,7 +113,7 @@ def test_enhanced_standardization_backwards_compatibility(temp_standardization_d
 
 
 
-
+@pytest.mark.fast
 def test_hierarchy_rules_loading(temp_standardization_dir):
     """Test that hierarchy rules are properly loaded from company mappings."""
 
@@ -128,11 +125,9 @@ def test_hierarchy_rules_loading(temp_standardization_dir):
     assert "Revenue" in store.hierarchy_rules
     assert store.hierarchy_rules["Revenue"]["children"] == ["Automotive Revenue", "Energy Revenue"]
 
-
+@pytest.mark.fast
 def test_enhanced_concept_mapper_integration(temp_standardization_dir):
     """Test that ConceptMapper works with enhanced MappingStore."""
-
-    
     core_mappings_path = os.path.join(temp_standardization_dir, "concept_mappings.json")
     store = MappingStore(source=core_mappings_path, read_only=True)
     mapper = ConceptMapper(store)
@@ -153,7 +148,7 @@ def test_enhanced_concept_mapper_integration(temp_standardization_dir):
     )
     assert result == "Revenue"
 
-
+@pytest.mark.fast
 def test_standardize_statement_with_tesla_concepts(temp_standardization_dir):
     """Test standardizing a statement with Tesla-specific concepts."""
 
@@ -191,7 +186,7 @@ def test_standardize_statement_with_tesla_concepts(temp_standardization_dir):
     assert gaap_item["label"] == "Revenue"
     assert gaap_item["original_label"] == "Total revenues"
 
-
+@pytest.mark.fast
 def test_new_standard_concepts_available():
     """Test that new hierarchical standard concepts are available."""
     # Test hierarchical revenue concepts
@@ -204,7 +199,7 @@ def test_new_standard_concepts_available():
     assert StandardConcept.GENERAL_ADMIN_EXPENSE.value == "General and Administrative Expense"
     assert StandardConcept.MARKETING_EXPENSE.value == "Marketing Expense"
 
-
+@pytest.mark.fast
 def test_enhanced_disabled_company_not_in_list(temp_standardization_dir):
     """Test that enhanced mappings only apply to companies in ENHANCED_COMPANIES list."""
 
@@ -221,7 +216,7 @@ def test_enhanced_disabled_company_not_in_list(temp_standardization_dir):
     # This depends on the specific implementation priority logic
     assert result == "Automotive Leasing Revenue"  # Tesla mappings still work
 
-
+@pytest.mark.fast
 def test_error_handling_missing_company_mapping_file(temp_standardization_dir):
     """Test error handling when company mapping files are missing or invalid."""
     # Create invalid JSON file
@@ -237,7 +232,7 @@ def test_error_handling_missing_company_mapping_file(temp_standardization_dir):
     # Tesla mappings should still work
     assert 'tsla' in store.company_mappings
 
-
+@pytest.mark.fast
 def test_performance_with_enhanced_mappings(temp_standardization_dir):
     """Test that enhanced mappings initialization doesn't cause major performance issues."""
     import time

@@ -3,6 +3,7 @@ from datetime import date
 import pytest
 from edgar._filings import sort_filings_by_priority
 
+
 def create_test_table():
     """Create a test table with known data"""
     test_data = {
@@ -23,6 +24,7 @@ def create_test_table():
     return pa.Table.from_pydict(test_data)
 
 
+@pytest.mark.fast
 def test_default_priority_sort():
     """Test sorting with default priority forms"""
     table = create_test_table()
@@ -45,6 +47,7 @@ def test_default_priority_sort():
     assert result.iloc[-1]['form'] == 'DEF 14A'
 
 
+@pytest.mark.fast
 def test_custom_priority_sort():
     """Test sorting with custom priority forms"""
     table = create_test_table()
@@ -74,6 +77,7 @@ def test_custom_priority_sort():
         assert priorities == sorted(priorities)  # Should be in priority order
 
 
+@pytest.mark.fast
 def test_empty_priority_sort():
     """Test sorting with empty priority list"""
     table = create_test_table()
@@ -89,7 +93,7 @@ def test_empty_priority_sort():
         forms = list(date_filings['form'])
         assert forms == sorted(forms)
 
-
+@pytest.mark.fast
 def test_sorting_edge_cases():
     """Test edge cases and corner conditions"""
     # Single form type

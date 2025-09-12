@@ -4,6 +4,7 @@ from typing import Dict, Any
 
 from edgar.xbrl import XBRL
 from edgar import httpclient
+from edgar import Company
 
 import logging
 
@@ -29,3 +30,46 @@ def pytest_configure(config):
         logger.info("pytest-xdist is enabled, enabling a distributed sqlite ratelimiter")    
         from pyrate_limiter import limiter_factory
         httpclient.HTTP_MGR.rate_limiter = limiter_factory.create_sqlite_limiter(rate_per_duration=10, db_path="ratelimiter.sqlite", use_file_lock=True)
+
+
+# Session-scoped company fixtures for performance optimization
+@pytest.fixture(scope="session")
+def aapl_company():
+    """Apple Inc. company fixture - cached for entire test session"""
+    return Company("AAPL")
+
+
+@pytest.fixture(scope="session") 
+def tsla_company():
+    """Tesla Inc. company fixture - cached for entire test session"""
+    return Company("TSLA")
+
+
+@pytest.fixture(scope="module")
+def expe_company():
+    """Expedia Group company fixture - cached per test module"""
+    return Company("EXPE")
+
+
+@pytest.fixture(scope="module")
+def nvda_company():
+    """NVIDIA Corporation company fixture - cached per test module"""
+    return Company("NVDA")
+
+
+@pytest.fixture(scope="module")
+def snow_company():
+    """Snowflake Inc. company fixture - cached per test module"""
+    return Company("SNOW")
+
+
+@pytest.fixture(scope="module")
+def msft_company():
+    """Microsoft Corporation company fixture - cached per test module"""
+    return Company("MSFT")
+
+
+@pytest.fixture(scope="module")
+def amzn_company():
+    """Amazon.com Inc. company fixture - cached per test module"""
+    return Company("AMZN")

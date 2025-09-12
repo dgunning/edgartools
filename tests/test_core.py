@@ -37,42 +37,43 @@ from edgar.httpclient import get_http_params
 def client_headers():
     return get_http_params()["headers"]
 
+@pytest.mark.fast
 def test_decode_content():
     text = "Kyle Walker vs Mbappe"
     assert decode_content(text.encode('utf-8')) == text
     assert decode_content(text.encode('latin-1')) == text
 
-
+@pytest.mark.fast
 def test_decode_latin1():
     text = "Mbappe vs Messi"
     assert decode_content(text.encode("latin-1")) == text
 
-
+@pytest.mark.fast
 def test_get_identity():
     identity = get_identity()
     assert identity
 
-
+@pytest.mark.fast
 def test_get_identity_environment_variable_not_set(monkeypatch):
     monkeypatch.setattr('builtins.input', lambda: "Tom Holland tholland@restishistory.com")
     monkeypatch.delenv("EDGAR_IDENTITY", raising=False)
     identity = get_identity()
     assert identity == "Tom Holland tholland@restishistory.com"
 
-
+@pytest.mark.fast
 def test_set_identity():
     old_identity = get_identity()
     set_identity("Mike Tirico mtirico@cal.com")
     assert get_identity() == "Mike Tirico mtirico@cal.com"
     set_identity(old_identity)
 
-
+@pytest.mark.fast
 def test_ask_for_identity(monkeypatch):
     monkeypatch.setattr('builtins.input', lambda: "Tom Holland tholland@restishistory.com")
     identity = ask_for_identity()
     assert identity == "Tom Holland tholland@restishistory.com"
 
-
+@pytest.mark.fast
 def test_ask_for_identity_prompt(monkeypatch, capsys):
     monkeypatch.setattr('builtins.input', lambda: "Tom Holland tholland@restishistory.com")
     identity = ask_for_identity("Who are you")
@@ -80,7 +81,7 @@ def test_ask_for_identity_prompt(monkeypatch, capsys):
     captured = capsys.readouterr()
     assert 'Who are you' in captured.out
 
-
+@pytest.mark.fast
 def test_ask_for_identity_keyboard_interrupt(monkeypatch):
     def input_interrupt():
         raise KeyboardInterrupt()
@@ -89,18 +90,18 @@ def test_ask_for_identity_keyboard_interrupt(monkeypatch):
     with pytest.raises(TimeoutError) as exc:
         ask_for_identity("Who are you")
 
-
+@pytest.mark.fast
 def test_get_header():
     assert client_headers()['User-Agent'] == get_identity()
 
-
+@pytest.mark.fast
 def test_df_to_rich_table():
     df = pd.read_csv('data/cereal.csv')
     table: Table = df_to_rich_table(df)
     assert table
     assert len(table.rows) == 21
 
-
+@pytest.mark.fast
 def test_repr_rich():
     df = pd.read_csv('data/cereal.csv',
                      usecols=['name', 'mfr', 'type', 'calories', 'protein', 'fat', 'sodium'])
@@ -108,7 +109,7 @@ def test_repr_rich():
     value = repr_rich(table)
     assert '100% Bran' in value
 
-
+@pytest.mark.fast
 def test_result():
     result = Result.Ok(value=1)
     assert result.success
@@ -124,7 +125,7 @@ def test_result():
     assert result.error == "Does not work"
     assert "Failure" in str(result)
 
-
+@pytest.mark.fast
 def test_display_size():
     assert display_size(117000) == "114.3 KB"
     assert display_size(1170000) == "1.1 MB"
@@ -142,7 +143,7 @@ def date(s):
 def date_now():
     return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-
+@pytest.mark.fast
 def test_extract_dates():
     # Basic valid cases
     assert extract_dates("2022-03-04") == (date("2022-03-04"), None, False)
@@ -233,12 +234,12 @@ def test_extract_dates():
         assert "YYYY-MM-DD" in str(e)
         assert "2022-10-27" in str(e)  # Example date in error message
 
-
+@pytest.mark.fast
 def test_invalid_date_exception():
     exception = InvalidDateException("Something went wrong")
     assert str(exception) == "Something went wrong"
 
-
+@pytest.mark.fast
 def test_filter_by_date():
     arrays = [pa.array(['a', 'b', 'c']),
               pa.array([3, 2, 1]),
@@ -255,7 +256,7 @@ def test_filter_by_date():
     # Use datetime to filter by date
     assert len(filter_by_date(table, datetime.strptime('2013-04-24', '%Y-%m-%d'), 'date')) == 1
 
-
+@pytest.mark.fast
 def test_filter_by_form():
     arrays = [pa.array(['a', 'b', 'c', 'd']),
               pa.array([3, 2, 1, 4]),
@@ -272,7 +273,7 @@ def test_filter_by_form():
     assert len(filter_by_form(table, form=['10-K', '10-Q', '10-K/A'], amendments=False)) == 3
     assert len(filter_by_form(table, form=['10-K', '10-Q', '10-K/A'], amendments=True)) == 4
 
-
+@pytest.mark.fast
 def test_filter_by_accession_number():
     arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
               pa.array([3, 2, 1, 4, 4]),
@@ -287,7 +288,7 @@ def test_filter_by_accession_number():
     assert len(filter_by_accession_number(table, ['3', 4], )) == 3
     assert len(filter_by_accession_number(table, ['3'], )) == 1
 
-
+@pytest.mark.fast
 def test_filter_by_cik():
     arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
               pa.array([3, 2, 1, 4, 4]),
@@ -302,7 +303,7 @@ def test_filter_by_cik():
     assert len(filter_by_cik(table, ['3', 4], )) == 3
     assert len(filter_by_cik(table, ['3'], )) == 1
 
-
+@pytest.mark.fast
 def test_filter_by_ticker():
     arrays = [pa.array(['a', 'b', 'c', 'd', 'e']),
               pa.array([3, 2, 1, 4, 4]),
@@ -317,7 +318,7 @@ def test_filter_by_ticker():
     assert len(filter_by_ticker(table, 'ORCL')) == 1
     assert len(filter_by_ticker(table, 'PD')) == 0
 
-
+@pytest.mark.fast
 def test_dataframe_pager():
     from edgar.core import DataPager
     import numpy as np
@@ -350,7 +351,7 @@ def test_dataframe_pager():
     assert last_page is None
     """
 
-
+@pytest.mark.fast
 def test_settings():
     assert edgar.edgar_mode.max_connections == 10
 
@@ -360,7 +361,7 @@ def test_settings():
     edgar.edgar_mode = CRAWL
     assert edgar.edgar_mode.max_connections == 2
 
-
+@pytest.mark.fast
 def test_reverse_name():
     assert reverse_name('WALKER KYLE') == 'Kyle Walker'
     assert reverse_name('KONDO CHRIS') == 'Chris Kondo'
@@ -383,7 +384,7 @@ def test_reverse_name():
     # O'Names
     assert reverse_name("O'CONNELL BENJAMIN") == "Benjamin O'Connell"
 
-
+@pytest.mark.fast
 def test_get_bool():
     assert get_bool(1)
     assert get_bool("1")
@@ -392,7 +393,7 @@ def test_get_bool():
     assert get_bool("TRUE")
     assert get_bool("True")
 
-
+@pytest.mark.fast
 def test_split_camel_case():
     assert split_camel_case("CoverPage") == "Cover Page"
     assert split_camel_case("CONSOLIDATEDBALANCESHEETS") == "CONSOLIDATEDBALANCESHEETS"
@@ -400,7 +401,7 @@ def test_split_camel_case():
     assert split_camel_case("SummaryofSignificantAccountingPolicies") == "Summaryof Significant Accounting Policies"
     assert split_camel_case("RoleStatementINCOMESTATEMENTS") == "Role Statement INCOMESTATEMENTS"
 
-
+@pytest.mark.fast
 @pytest.mark.parametrize("test_date, expected_result", [
     ("2024-01-01", True),  # New Year's Day (start of Q1)
     ("2024-01-02", True),  # First business day after New Year's
@@ -418,11 +419,13 @@ def test_split_camel_case():
     ("2024-12-31", False),  # Last day of Q4
     ("2024-05-15", False),  # Random day in middle of quarter
 ])
+
+@pytest.mark.fast
 def test_is_start_of_quarter(test_date, expected_result):
     with freeze_time(test_date):
         assert is_start_of_quarter() == expected_result
 
-
+@pytest.mark.fast
 @pytest.mark.parametrize("test_datetime, expected_result", [
     ("2024-01-01 00:00:01", True),  # Just after midnight on New Year's
     ("2024-01-02 23:59:59", True),  # Just before midnight on Jan 2
@@ -435,7 +438,7 @@ def test_is_start_of_quarter_with_time(test_datetime, expected_result):
     with freeze_time(test_datetime):
         assert is_start_of_quarter() == expected_result
 
-
+@pytest.mark.fast
 def test_has_html_content():
     assert has_html_content(
         """
@@ -470,7 +473,7 @@ def test_has_html_content():
         """
     )
 
-
+@pytest.mark.fast
 def test_parallel_thread_map_basic():
     """Test basic functionality of parallel_thread_map"""
 
@@ -485,7 +488,7 @@ def test_parallel_thread_map_basic():
     # Check results
     assert result == [1, 4, 9, 16, 25]
 
-
+@pytest.mark.fast
 def test_parallel_thread_map_with_kwargs():
     """Test parallel_thread_map with keyword arguments"""
 
@@ -500,14 +503,14 @@ def test_parallel_thread_map_with_kwargs():
     # Check results
     assert result == [2, 4, 6, 8, 10]
 
-
+@pytest.mark.fast
 def test_parallel_thread_map_empty_list():
     """Test parallel_thread_map with an empty list"""
     # Should return an empty list
     result = parallel_thread_map(lambda x: x * 2, [])
     assert result == []
 
-
+@pytest.mark.fast
 def test_parallel_thread_map_with_io_bound_task():
     """Test parallel_thread_map with an I/O-bound task"""
 
@@ -536,7 +539,7 @@ def test_parallel_thread_map_with_io_bound_task():
     # but don't assert on timing as it could be inconsistent in CI environments
     print(f"Parallel: {parallel_time:.4f}s, Sequential: {sequential_time:.4f}s")
 
-
+@pytest.mark.fast
 def test_parallel_thread_map_with_n_workers():
     """Test parallel_thread_map with a specific number of workers"""
 

@@ -111,6 +111,26 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar 
 no-cov = "cov --no-cov {args}"
 lint = "ruff check edgar"
 smoke-filings = "python tests/batch/batch_filings.py {args}"
+# Test categorization commands
+test-fast = "pytest -m 'fast' {args}"
+test-slow = "pytest -m 'slow' {args}"  
+test-network = "pytest -m 'network' {args}"
+test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+
+# Parallel CI test strategy (skip regression tests)
+test-ci-fast = "pytest --cov --cov-report=xml -m 'fast and not regression' {args}"
+test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}" 
+test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
+test-ci-core = "pytest --cov --cov-report=xml -m 'not (fast or network or slow or regression or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/manual --ignore=tests/perf {args}"
+
+# Regression tests (run separately/on-demand)
+test-regression = "pytest --cov --cov-report=xml -m regression {args}"
+
+# Other test categories  
+test-batch = "pytest tests/batch/ -m 'batch' {args}"
+test-reproduction = "pytest tests/issues/reproductions/ -m 'reproduction' {args}"
+test-full = "pytest --ignore=tests/manual --ignore=tests/perf {args}"
 
 [tool.hatch.envs.test]
 dependencies = [
@@ -181,3 +201,15 @@ retries = 2
 retry_delay = 4
 cumulative_timing = false
 retry_outcome = "rerun"
+
+# Pytest markers for test categorization
+markers = [
+    "fast: Fast tests that run quickly (< 0.1s each)",
+    "slow: Slow tests that take significant time (> 1s each)",
+    "network: Tests that require internet connectivity",
+    "regression: Regression tests for specific GitHub issues",
+    "batch: Batch processing tests",
+    "performance: Performance and benchmarking tests",
+    "reproduction: Tests that reproduce specific issues",
+    "integration: Integration tests",
+]

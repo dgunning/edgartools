@@ -13,6 +13,7 @@ from edgar.xbrl.statements import StitchedStatements
 from edgar.xbrl.stitching.xbrls import XBRLS
 
 
+@pytest.mark.regression
 class TestIssue403Regression:
     """Regression test for standard parameter in stitched statements."""
     

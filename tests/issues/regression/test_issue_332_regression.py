@@ -16,6 +16,7 @@ from unittest.mock import Mock, patch
 from edgar.company_reports import CurrentReport, CompanyReport, SixK, EightK
 
 
+@pytest.mark.regression
 class TestIssue332Regression:
     """Regression tests to prevent the return of issue #332"""
     

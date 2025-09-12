@@ -11,6 +11,7 @@ import pytest
 from edgar import Company
 
 
+@pytest.mark.regression
 class TestMultiYearIncomeStatements:
     """Test suite for multi-year income statement retrieval."""
     

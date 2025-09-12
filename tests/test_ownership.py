@@ -44,11 +44,9 @@ def test_is_numeric():
     assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'nan']))
     assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'NAN']))
 
-
 def test_translate():
     assert translate_ownership('I') == 'Indirect'
     assert translate_ownership('D') == 'Direct'
-
 
 def test_derivative_table_repr():
     form3_content = Path('data/ownership/form3.snow.xml').read_text()
@@ -56,10 +54,6 @@ def test_derivative_table_repr():
     print()
     print(ownership)
     print()
-    # print(snow_form4.derivative_table.transactions)
-    # print(ownership.derivative_table.holdings)
-    # print(ownership.derivative_table.transactions)
-    # print(ownership.derivative_table)
 
 
 def test_non_derivatives_repr():

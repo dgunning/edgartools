@@ -10,10 +10,12 @@ periods for different statement types:
 """
 
 import unittest
+import pytest
 import edgar
 from edgar.xbrl.current_period import CurrentPeriodView
 
 
+@pytest.mark.regression  
 class TestIssue429StatementPeriodRegression(unittest.TestCase):
     """
     Regression tests for issue #429 - statement period selection fix

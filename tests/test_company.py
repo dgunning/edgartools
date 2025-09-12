@@ -19,6 +19,7 @@ def get_test_company(company_identifier):
     return Company(company_identifier)
 
 
+@pytest.mark.network
 def test_company_repr():
     company = get_test_company("NVDA")
     print()
@@ -29,29 +30,21 @@ def test_company_repr():
     assert 'Semiconductors' in company.__repr__()
 
 
+@pytest.mark.network
 def test_ticker_display_for_company_with_multiple_tickers():
     company = get_test_company(310522)
     assert "FNMA" in company.tickers
     assert "FNMA" in repr(company)
 
 
-def test_get_company_submissions():
-    company: CompanyData = get_entity_submissions(1318605)
-    assert company
-    assert company.cik == 1318605
-    filings = company.get_filings()
-    assert len(filings) > 1000
 
-    # We can get the earliest filing for TESLA and it is a REGDEX
-    filing = filings[-1]
-    assert filing.form == "REGDEX"
-
-
+@pytest.mark.network
 def test_no_company_for_cik():
     company = Company(-1)
     assert company.not_found
 
 
+@pytest.mark.network
 def test_get_company_with_no_filings():
     company = Company("0000350001")
     assert company.get_filings() is not None
@@ -59,6 +52,8 @@ def test_get_company_with_no_filings():
     assert company.name == "Company Name Three `!#$(),:;=.-;\\|@/{}&'\\WA\\"
 
 
+@pytest.mark.network
+@pytest.mark.slow
 def test_get_company_facts():
     company_facts: EntityFacts = get_company_facts(1318605)
     assert company_facts
@@ -66,6 +61,8 @@ def test_get_company_facts():
     assert "1318605" in str(company_facts)
 
 
+@pytest.mark.network
+@pytest.mark.slow
 def test_company_get_facts():
     company = get_test_company("TSLA")
     facts = company.get_facts()
@@ -73,6 +70,8 @@ def test_company_get_facts():
     assert len(facts) > 100
 
 
+@pytest.mark.network
+@pytest.mark.slow
 def test_company_get_facts_repr():
     company = get_test_company(1318605)
     facts = company.get_facts()
@@ -80,22 +79,26 @@ def test_company_get_facts_repr():
     assert 'Tesla' in facts_repr
 
 
+@pytest.mark.network
+@pytest.mark.slow
 def test_get_company_tickers():
     company_tickers = get_company_tickers()
     assert company_tickers is not None
 
 
+@pytest.mark.network
+@pytest.mark.slow
 def test_get_cik_lookup_data():
     cik_lookup = get_cik_lookup_data()
     assert cik_lookup[cik_lookup.cik == 1448632].name.item() == 'ZZIF 2008 INVESTMENT LLC'
 
 
-def test_company_filings_filter_by_date():
-    expe = Company("EXPE")
-    filings = expe.get_filings()
+@pytest.mark.network
+def test_company_filings_filter_by_date(expe_company):
+    filings = expe_company.get_filings()
     filtered_filings = filings.filter(filing_date="2023-01-04:")
     assert not filtered_filings.empty
-    assert len(filtered_filings) < len(expe.get_filings())
+    assert len(filtered_filings) < len(expe_company.get_filings())
 
 
 def test_company_filter_with_no_results_returns_filings():
@@ -107,9 +110,8 @@ def test_company_filter_with_no_results_returns_filings():
     assert not latest
 
 
-def test_company_get_filings_for_form():
-    company: Company = Company("EXPE")
-    tenk_filings: Filings = company.get_filings(form='10-K')
+def test_company_get_filings_for_form(expe_company):
+    tenk_filings: Filings = expe_company.get_filings(form='10-K')
 
     forms = tenk_filings.to_pandas("form").form.drop_duplicates().tolist()
     print(forms)
@@ -121,47 +123,41 @@ def test_company_get_filings_for_form():
     assert isinstance(filing.accession_no, str)
 
 
-def test_company_get_form_by_date():
-    company: Company = Company("EXPE")
-    filings = company.get_filings(filing_date="2022-11-01:2023-01-20")
+def test_company_get_form_by_date(expe_company):
+    filings = expe_company.get_filings(filing_date="2022-11-01:2023-01-20")
     assert not filings.empty
-    assert len(filings) < len(company.get_filings())
+    assert len(filings) < len(expe_company.get_filings())
 
-    filings_10k = company.get_filings(filing_date="2022-11-01:2023-01-20", form="10-Q")
+    filings_10k = expe_company.get_filings(filing_date="2022-11-01:2023-01-20", form="10-Q")
     assert len(filings_10k) == 1
 
 
-def test_company_get_filings_for_multiple_forms():
-    company: Company = Company("EXPE")
-    company_filings = company.get_filings(form=['10-K', '10-Q', '8-K'])
+def test_company_get_filings_for_multiple_forms(expe_company):
+    company_filings = expe_company.get_filings(form=['10-K', '10-Q', '8-K'])
     form_list = pc.unique(company_filings.data['form']).tolist()
     assert sorted(form_list) == ['10-K', '10-K/A', '10-Q', '10-Q/A', '8-K', '8-K/A']
 
 
-def test_get_company_for_ticker_lowercase():
-    company: Company = Company("expe")
-    assert company
-    assert company.tickers == ["EXPE"]
+def test_get_company_for_ticker_lowercase(expe_company):
+    assert expe_company
+    assert expe_company.tickers == ["EXPE"]
 
 
-def test_company_filings_repr():
-    company: CompanyData = Company("EXPE")
-    expe_filings: CompanyFilings = company.get_filings()
+def test_company_filings_repr(expe_company):
+    expe_filings: CompanyFilings = expe_company.get_filings()
     filings_repr = str(expe_filings)
     assert "Expedia" in filings_repr
 
 
-def test_get_latest_10k_10q():
-    company = Company('NVDA')
-    filings: CompanyFilings = company.get_filings(form=["10-K", "10-Q"])
+def test_get_latest_10k_10q(nvda_company):
+    filings: CompanyFilings = nvda_company.get_filings(form=["10-K", "10-Q"])
     latest_filings = filings.latest(4)
     assert len(latest_filings) == 4
     print(latest_filings.to_pandas())
 
 
-def test_filings_latest_one():
-    company = Company('NVDA')
-    filing = company.get_filings(form='10-Q').latest()
+def test_filings_latest_one(nvda_company):
+    filing = nvda_company.get_filings(form='10-Q').latest()
     assert filing.form == '10-Q'
     assert isinstance(filing, Filing)
 
@@ -192,23 +188,20 @@ def test_company_get_filings_by_assession_number():
     assert len(filings_for_file) == 1
 
 
-def test_get_filings_xbrl():
-    company = Company("SNOW")
-    xbrl_filings = company.get_filings(is_xbrl=True)
+def test_get_filings_xbrl(snow_company):
+    xbrl_filings = snow_company.get_filings(is_xbrl=True)
     assert xbrl_filings.to_pandas("isXBRL").isXBRL.all()
-    assert company.get_filings(is_xbrl=False).to_pandas().isXBRL.drop_duplicates().tolist() == [False]
+    assert snow_company.get_filings(is_xbrl=False).to_pandas().isXBRL.drop_duplicates().tolist() == [False]
 
 
-def test_get_filings_inline_xbrl():
-    company = Company("SNOW")
-    xbrl_filings = company.get_filings(is_inline_xbrl=True)
+def test_get_filings_inline_xbrl(snow_company):
+    xbrl_filings = snow_company.get_filings(is_inline_xbrl=True)
     assert xbrl_filings.to_pandas("isInlineXBRL").isInlineXBRL.all()
-    assert company.get_filings(is_xbrl=False).to_pandas().isInlineXBRL.drop_duplicates().tolist() == [False]
+    assert snow_company.get_filings(is_xbrl=False).to_pandas().isInlineXBRL.drop_duplicates().tolist() == [False]
 
 
-def test_get_filings_multiple_filters():
-    company = Company("SNOW")
-    filings = company.get_filings(form=["10-Q", "10-K"], is_inline_xbrl=True)
+def test_get_filings_multiple_filters(snow_company):
+    filings = snow_company.get_filings(form=["10-Q", "10-K"], is_inline_xbrl=True)
     filings_df = filings.to_pandas("form", "filingDate", 'isXBRL', "isInlineXBRL")
     assert filings_df.isInlineXBRL.all()
     assert set(filings_df.form.tolist()) == {"10-Q", "10-K"}

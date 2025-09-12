@@ -1,33 +1,29 @@
-import pytest
-
 from edgar import obj, matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
 from edgar.company_reports import TenK
 from edgar.effect import Effect
-from edgar.entity import Entity, Company
+from edgar.entity import Entity
 from edgar.offerings import FormD
 from edgar.ownership import Ownership
-import httpx
 import pytest
-import edgar.httprequests
-from edgar import get_filings
 
+@pytest.fixture(scope="module")
+def bioen_filing():
+    return Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
+                  filing_date='2013-04-29', accession_no='0001477932-13-002021')
 
-def test_matches_form():
-    form3_filing = Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
-                          filing_date='2013-04-29', accession_no='0001477932-13-002021')
+@pytest.mark.network
+def test_matches_form(bioen_filing):
     form3_filing_amendment = Filing(form='3/A', company='Bio-En Holdings Corp.', cik=1568139,
                                     filing_date='2013-04-29', accession_no='0001477932-13-002021')
-    assert matches_form(form3_filing, form=["3", "4", "5"])
-    assert matches_form(form3_filing, form="3")
-    assert matches_form(form3_filing, form=["3"])
-    assert not matches_form(form3_filing, form="4")
+    assert matches_form(bioen_filing, form=["3", "4", "5"])
+    assert matches_form(bioen_filing, form="3")
+    assert matches_form(bioen_filing, form=["3"])
+    assert not matches_form(bioen_filing, form="4")
     assert matches_form(form3_filing_amendment, form=["3", "4", "5"])
 
-
-def test_obj():
-    form3_filing = Filing(form='3', company='Bio-En Holdings Corp.', cik=1568139,
-                          filing_date='2013-04-29', accession_no='0001477932-13-002021')
-    ownership = obj(form3_filing)
+@pytest.mark.network
+def test_obj(bioen_filing):
+    ownership = obj(bioen_filing)
     assert ownership
     assert isinstance(ownership, Ownership)
 
@@ -74,7 +70,7 @@ def test_obj():
                     accession_no='0001493152-23-008348')
     assert filing.obj() is None
 
-
+@pytest.mark.network
 def test_find():
     assert find("0001493152-23-008348").accession_no == "0001493152-23-008348"
     assert find("000149315223008348").accession_no == "0001493152-23-008348"
@@ -82,12 +78,12 @@ def test_find():
     assert find("1905495").name == 'CancerVAX, Inc.'
     assert isinstance(find("CancerVAX, Inc."), CompanySearchResults)
 
-
+@pytest.mark.network
 def test_find_a_dot_ticker():
     assert find("BRK.B").cik == 1067983
     assert find("CRD-A").cik == 25475
 
-
+@pytest.mark.network
 def test_find_a_current_filing():
     filings: CurrentFilings = get_current_filings().next()
     accession_number = filings.data['accession_number'].to_pylist()[0]

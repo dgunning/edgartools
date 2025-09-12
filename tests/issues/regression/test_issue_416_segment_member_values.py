@@ -11,6 +11,7 @@ import pytest
 from edgar import *
 
 
+@pytest.mark.regression
 def test_msft_segment_member_values():
     """Test that Microsoft's product and service segment values appear in income statement"""
     

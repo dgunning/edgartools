@@ -609,38 +609,56 @@ def test_filings_next_and_previous():
     assert not filings.previous()
 
 
+@pytest.mark.network
+@pytest.mark.parametrize("form,expected_exists", [
+    (None, True),      # Default case - should return filings
+    ("8-K", True),    # Valid form - should return filings  
+    ("NONSENSE", True),  # Invalid form - should return empty but not None
+])
+def test_get_filings_by_form(form, expected_exists):
+    """Test get_filings with different form parameters"""
+    filings = get_filings(form=form)
+    if expected_exists:
+        assert filings is not None
+        if form == "NONSENSE":
+            assert len(filings) == 0
+    else:
+        assert filings is None
+
+@pytest.mark.network
 def test_get_filings_for_future_period(capsys):
+    """Test that future periods return None"""
     filings = get_filings(2050, 1)
     assert filings is None
 
 
-def test_get_filings_default():
-    filings = get_filings()
-    assert filings is not None
 
-    filings = get_filings(form="8-K")
-    assert filings is not None
-
-    filings = get_filings(form="NONSENSE")
-    assert filings is not None
-    assert len(filings) == 0
-
-
-
-def test_filings_get_by_index_or_accession_number():
+@pytest.mark.network
+@pytest.mark.parametrize("accessor,expected_result", [
+    ("0001721868-22-000010", "valid"),  # Valid accession number
+    ("0001721868-22", "invalid"),       # Invalid accession format
+    (100, "valid_index"),               # Valid integer index
+    ("100", "valid_string_index"),      # Valid string index
+])
+def test_filings_get_by_accessor(accessor, expected_result):
+    """Test filings.get() with different accessor types"""
     filings = cached_filings(2022, 1)
-    print()
-    filing: Filing = filings.get("0001721868-22-000010")
-
-    assert filing.cik == 884380
-    assert filing.accession_no == "0001721868-22-000010"
-
-    # Invalid accession number
-    assert filings.get("0001721868-22") is None
-
-    filing_one_hundred = filings.get(100)
-    filing_100 = filings.get("100")
-    assert filing_100.accession_no == filing_one_hundred.accession_no
+    
+    if expected_result == "valid":
+        filing = filings.get(accessor)
+        assert filing is not None
+        assert filing.cik == 884380
+        assert filing.accession_no == "0001721868-22-000010"
+    elif expected_result == "invalid":
+        filing = filings.get(accessor)
+        assert filing is None
+    elif expected_result in ["valid_index", "valid_string_index"]:
+        filing = filings.get(accessor)
+        assert filing is not None
+        # Both integer and string indices should return same filing
+        if expected_result == "valid_string_index":
+            filing_int = filings.get(100)
+            assert filing.accession_no == filing_int.accession_no
 
 def test_find_company_in_filings():
     # TODO: Looks like the search results ordering is broken for some reason
@@ -828,23 +846,29 @@ def test_filing_date_to_year_quarter():
     ]
 
 
-def test_get_filings_by_filing_date():
-    filings = get_filings(filing_date='2023-02-01')
-    assert filings.date_range == (datetime.date(2023, 2, 1), datetime.date(2023, 2, 1))
-
-    filings = get_filings(filing_date='2023-02-01:2023-02-28')
-    assert filings.date_range == (datetime.date(2023, 2, 1), datetime.date(2023, 2, 28))
-
-    filings = get_filings(filing_date='2023-02-01:2024-01-02')
-    assert filings.date_range == (datetime.date(2023, 2, 1), datetime.date(2024, 1, 2))
-
-    # Ignore the year if filing date os present
-    filings = get_filings(filing_date='2023-02-01', year=2020)
-    assert filings.date_range == (datetime.date(2023, 2, 1), datetime.date(2023, 2, 1))
-
-    # Invalid filing date
-    assert get_filings(filing_date='2023-02-01:2024-01-02:2025-01-02') is None
-    assert get_filings(filing_date="01-02-2023") is None
+@pytest.mark.network
+@pytest.mark.parametrize("filing_date,year,expected_start,expected_end,should_succeed", [
+    ('2023-02-01', None, (2023, 2, 1), (2023, 2, 1), True),              # Single date
+    ('2023-02-01:2023-02-28', None, (2023, 2, 1), (2023, 2, 28), True),  # Date range
+    ('2023-02-01:2024-01-02', None, (2023, 2, 1), (2024, 1, 2), True),   # Cross-year range
+    ('2023-02-01', 2020, (2023, 2, 1), (2023, 2, 1), True),              # Date overrides year
+    ('2023-02-01:2024-01-02:2025-01-02', None, None, None, False),       # Invalid format
+    ("01-02-2023", None, None, None, False),                             # Invalid date format
+])
+def test_get_filings_by_filing_date(filing_date, year, expected_start, expected_end, should_succeed):
+    """Test get_filings with various filing date parameters"""
+    kwargs = {'filing_date': filing_date}
+    if year is not None:
+        kwargs['year'] = year
+        
+    filings = get_filings(**kwargs)
+    
+    if should_succeed:
+        assert filings is not None
+        expected_range = (datetime.date(*expected_start), datetime.date(*expected_end))
+        assert filings.date_range == expected_range
+    else:
+        assert filings is None
 
 
 def test_get_text_from_old_filing():
