@@ -13,7 +13,8 @@ from edgar.files.markdown import to_markdown
 
 class TestPageBreakDetector:
     """Test the PageBreakDetector class."""
-    
+
+    @pytest.mark.fast
     def test_css_page_break_detection(self):
         """Test detection of CSS page break properties."""
         html = """
@@ -33,7 +34,8 @@ class TestPageBreakDetector:
         assert 'page-break' in page_breaks[0]['selector']
         assert 'page-break' in page_breaks[1]['selector']
         assert 'page-break' in page_breaks[2]['selector']
-    
+
+    @pytest.mark.fast
     def test_uppercase_css_page_break_detection(self):
         """Test detection of uppercase CSS page break properties."""
         html = """
@@ -50,7 +52,8 @@ class TestPageBreakDetector:
         assert page_breaks[0]['element'] == 'p'
         assert page_breaks[1]['element'] == 'p'
         assert page_breaks[2]['element'] == 'div'
-    
+
+    @pytest.mark.fast
     def test_mixed_case_css_page_break_detection(self):
         """Test detection of mixed case CSS page break properties."""
         html = """
@@ -67,7 +70,8 @@ class TestPageBreakDetector:
         assert page_breaks[0]['element'] == 'p'
         assert page_breaks[1]['element'] == 'p'
         assert page_breaks[2]['element'] == 'div'
-    
+
+    @pytest.mark.fast
     def test_class_based_page_break_detection(self):
         """Test detection of class-based page breaks."""
         html = """
@@ -84,7 +88,8 @@ class TestPageBreakDetector:
         assert 'BRPFPageBreak' in page_breaks[0]['selector']
         assert 'pagebreak' in page_breaks[1]['selector']
         assert 'page-break' in page_breaks[2]['selector']
-    
+
+    @pytest.mark.fast
     def test_hr_page_break_detection(self):
         """Test detection of HR elements with page break styling."""
         html = """
@@ -98,7 +103,8 @@ class TestPageBreakDetector:
         assert len(page_breaks) == 2
         assert all(pb['element'] == 'hr' for pb in page_breaks)
         assert 'height:3px' in page_breaks[0]['selector']
-    
+
+    @pytest.mark.fast
     def test_page_like_div_detection(self):
         """Test detection of divs with page-like dimensions."""
         html = """
@@ -114,7 +120,8 @@ class TestPageBreakDetector:
         assert all(pb['is_page_div'] for pb in page_breaks)
         assert '842.4pt' in page_breaks[0]['style']
         assert '792pt' in page_breaks[1]['style']
-    
+
+    @pytest.mark.fast
     def test_is_page_like_div(self):
         """Test the _is_page_like_div method directly."""
         # Test valid page-like divs
@@ -140,7 +147,8 @@ class TestPageBreakDetector:
 
 class TestPageBreakFunctions:
     """Test the public page break detection functions."""
-    
+
+    @pytest.mark.fast
     def test_detect_page_breaks(self):
         """Test the detect_page_breaks function."""
         html = """
@@ -154,7 +162,8 @@ class TestPageBreakFunctions:
         assert len(page_breaks) == 2
         assert page_breaks[0]['element'] == 'p'
         assert page_breaks[1]['element'] == 'div'
-    
+
+    @pytest.mark.fast
     def test_mark_page_breaks(self):
         """Test the mark_page_breaks function."""
         html = """
@@ -173,7 +182,8 @@ class TestPageBreakFunctions:
 
 class TestStartPageNumber:
     """Test the start_page_number functionality."""
-    
+
+    @pytest.mark.fast
     def test_start_page_number_functionality(self):
         """Test that start_page_number parameter correctly offsets page break numbers"""
         html_content = """
@@ -211,6 +221,7 @@ class TestStartPageNumber:
         assert "{1}------------------------------------------------" not in markdown_offset
         assert "{2}------------------------------------------------" not in markdown_offset
 
+    @pytest.mark.fast
     def test_to_markdown_function_with_start_page_number(self):
         """Test the to_markdown function with start_page_number parameter"""
         html_content = """
@@ -235,7 +246,8 @@ class TestStartPageNumber:
 
 class TestFilingAndAttachmentMarkdown:
     """Test the start_page_number functionality in Filing and Attachment classes."""
-    
+
+    @pytest.mark.fast
     def test_filing_markdown_with_start_page_number(self):
         """Test that Filing.markdown() supports start_page_number parameter"""
         from edgar import Filing
@@ -271,7 +283,8 @@ class TestFilingAndAttachmentMarkdown:
             assert markdown_default is not None
             assert "{0}------------------------------------------------" in markdown_default
             assert "{1}------------------------------------------------" in markdown_default
-    
+
+    @pytest.mark.fast
     def test_attachment_markdown_with_start_page_number(self):
         """Test that Attachment.markdown() supports start_page_number parameter"""
         from edgar.attachments import Attachment
@@ -311,7 +324,8 @@ class TestFilingAndAttachmentMarkdown:
             assert markdown_default is not None
             assert "{0}------------------------------------------------" in markdown_default
             assert "{1}------------------------------------------------" in markdown_default
-    
+
+    @pytest.mark.fast
     def test_attachments_markdown_with_start_page_number(self):
         """Test that Attachments.markdown() supports start_page_number parameter"""
         from edgar.attachments import Attachments, Attachment

@@ -2,7 +2,9 @@ from rich.console import Console
 from rich.theme import Theme
 from edgar.files.text import XMLHighlighter, XmlDocument
 from rich import print
+import pytest
 
+@pytest.mark.fast
 def test_highlight_xml():
     theme = Theme({
         "xml.tag": "bold cyan",
@@ -28,6 +30,7 @@ def test_highlight_xml():
 
     console.print(xml_example)
 
+@pytest.mark.fast
 def test_xml_document():
     xml_example = """<?xml version="1.0" encoding="UTF-8"?>
         <!-- This is a comment -->

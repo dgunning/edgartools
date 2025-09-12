@@ -32,6 +32,23 @@ def pytest_configure(config):
         httpclient.HTTP_MGR.rate_limiter = limiter_factory.create_sqlite_limiter(rate_per_duration=10, db_path="ratelimiter.sqlite", use_file_lock=True)
 
 
+def pytest_collection_modifyitems(items):
+    """
+    Automatically add regression marker to tests in regression folders.
+    
+    This ensures that any test file in a 'regression' folder is automatically
+    marked with @pytest.mark.regression, even if developers or agents forget
+    to add the marker manually. This provides a robust safety net for CI
+    test exclusion.
+    """
+    for item in items:
+        test_path = str(item.fspath)
+        # Check if test is in any regression folder (supports nested paths)
+        if "/regression/" in test_path or "\\regression\\" in test_path:
+            item.add_marker(pytest.mark.regression)
+            logger.debug(f"Auto-marked regression test: {item.nodeid}")
+
+
 # Session-scoped company fixtures for performance optimization
 @pytest.fixture(scope="session")
 def aapl_company():

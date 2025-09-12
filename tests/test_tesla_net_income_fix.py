@@ -10,7 +10,9 @@ from edgar.xbrl.standardization.core import initialize_default_mappings
 from rich import print
 from rich.table import Table
 from rich.console import Console
+import pytest
 
+@pytest.mark.fast
 def test_tesla_net_income_fix():
     """Test that Tesla Net Income concepts have distinct labels."""
     print("[bold green]Tesla Net Income Hierarchy Fix Verification[/bold green]\n")

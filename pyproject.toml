@@ -117,14 +117,22 @@ test-slow = "pytest -m 'slow' {args}"
 test-network = "pytest -m 'network' {args}"
 test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
 
-# Parallel CI test strategy (skip regression tests)
+# Parallel CI test strategy (skip regression tests for faster feedback)
+# 
+# HYBRID EXCLUSION STRATEGY:
+# 1. Marker-based: -m 'not regression' excludes tests marked as regression
+# 2. Path-based: --ignore=tests/issues/regression excludes entire folder
+# 3. Auto-marking: conftest.py automatically marks tests in regression folders
+#
+# This ensures regression tests are excluded even if developers/agents forget markers.
+
 test-ci-fast = "pytest --cov --cov-report=xml -m 'fast and not regression' {args}"
 test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}" 
 test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
-test-ci-core = "pytest --cov --cov-report=xml -m 'not (fast or network or slow or regression or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
-test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/manual --ignore=tests/perf {args}"
+test-ci-core = "pytest --cov --cov-report=xml -m 'not (fast or network or slow or regression or performance or batch)' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
+test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
 
-# Regression tests (run separately/on-demand)
+# Regression tests (run separately/on-demand for comprehensive bug prevention)
 test-regression = "pytest --cov --cov-report=xml -m regression {args}"
 
 # Other test categories  

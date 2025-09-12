@@ -385,7 +385,7 @@ def test_filing_html_for_ixbrl_filing():
                     accession_no='0001037038-23-000009')
     assert "RALPH LAUREN" in filing.html()
 
-
+@pytest.mark.network
 def test_filing_text():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
@@ -399,7 +399,7 @@ def test_filing_text():
     assert text
     assert "ACCESSION NUMBER:		0001193125-20-052640" in text
 
-
+@pytest.mark.network
 def test_primary_xml_for_10k():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
@@ -412,19 +412,19 @@ def test_primary_xml_for_10k():
     print(primary_documents)
     assert len(primary_documents) == 1
 
-
+@pytest.mark.network
 def test_filing_html_is_xhtml_for_xml_filing():
     html = barclays_filing.html()
     assert "-//W3C//DTD XHTML 1.0 Strict//EN" in html
 
-
+@pytest.mark.network
 def test_filing_html_for_pdf_only_filing():
     filing = Filing(form='40-17G', filing_date='2024-02-27', company='FIDELITY CAPITAL TRUST', cik=275309,
                     accession_no='0000880195-24-000030')
     html = filing.html()
     assert not html
 
-
+@pytest.mark.network
 def test_filing_homepage_primary_documents():
     filing = Filing(form='4', company='Orion Engineered Carbons S.A.',
                     cik=1609804, filing_date='2022-11-04',
@@ -466,24 +466,24 @@ def test_filing_primary_xml_document():
     assert html_document.document == "es220296680_4-davis.html"
     assert html_document.path == "/Archives/edgar/data/1300650/000095014222003095/xslF345X03/es220296680_4-davis.xml"
 
-
+@pytest.mark.network
 def test_filing_xml_downoads_xml_if_filing_has_xml():
     assert carbo_10K.xml() is None
     assert orion_form4.xml()
 
-
+@pytest.mark.network
 def test_filing_get_entity():
     company = carbo_10K.get_entity()
     assert company.cik == carbo_10K.cik
 
-
+@pytest.mark.network
 def test_get_related_filings():
     related_filings = carbo_10K.related_filings()
     assert len(related_filings) > 200
     file_numbers = list(set(related_filings.data['fileNumber'].to_pylist()))
     assert len(file_numbers) == 1
 
-
+@pytest.mark.network
 def test_print_filings():
     filings = get_filings(2022, 1, index="xbrl")
     print(filings)
@@ -497,7 +497,7 @@ def test_print_filings():
     loop_filings = ten_k_filings.filter(ticker="LOOP")
     print(loop_filings)
 
-
+@pytest.mark.network
 def test_create_filings_with_empty_table():
     filings = get_filings(2022, 1, index="xbrl")
     data = filings.filter(form="LOOP").data
@@ -509,7 +509,7 @@ def test_create_filings_with_empty_table():
     assert len(filings_copy) == 0
     assert filings_copy.empty
 
-
+@pytest.mark.network
 def test_filing_str():
     filing_str = str(carbo_10K)
     assert str(carbo_10K.cik) in filing_str
@@ -518,19 +518,19 @@ def test_filing_str():
     assert str(carbo_10K.filing_date) in filing_str
     print(filing_str)
 
-
+@pytest.mark.network
 def test_filing_repr():
     filing_repr = carbo_10K.__repr__()
     assert str(carbo_10K.company) in filing_repr
     assert str(carbo_10K.form) in filing_repr
     assert str(carbo_10K.filing_date) in filing_repr
 
-
+@pytest.mark.network
 def test_filing_homepage_repr():
     homepage = carbo_10K.homepage
     print(homepage.__repr__())
 
-
+@pytest.mark.network
 def test_filing_filter_by_form():
     filings = get_filings(2014, 4, form="10-K")
     assert set(filings.data['form'].to_pylist()) == {'10-K', '10-K/A'}
@@ -538,13 +538,13 @@ def test_filing_filter_by_form():
     filings = get_filings(2014, 4, form=["10-K", "8-K"])
     assert set(filings.data['form'].to_pylist()) == {'10-K', '10-K/A', '8-K', '8-K/A'}
 
-
+@pytest.mark.network
 def test_filter_by_cik():
     # Test non-xbrl filings
     filings = get_filings(2022, 3).filter(cik=[1078799, 1877934])
     assert len(filings) == 17
 
-
+@pytest.mark.network
 def test_filter_by_date():
     # Test non-xbrl filings
     filings = get_filings(2022, 3)
@@ -568,13 +568,13 @@ def test_filter_by_date():
     start_date = filings_after.date_range[0]
     assert start_date == datetime.datetime.strptime("2022-08-16", "%Y-%m-%d").date()
 
-
+@pytest.mark.network
 def test_filter_invalid_date(filings_2022_q3):
     filings = filings_2022_q3
     filtered = filings.filter(filing_date="2022-08:")
     assert not filtered
 
-
+@pytest.mark.network
 def test_filter_by_date_xbrl():
     # Test XBRL filings
     filings = get_filings(2022, 3, index="xbrl")
@@ -584,7 +584,7 @@ def test_filter_by_date_xbrl():
     filing_dates = [d.strftime('%Y-%m-%d') for d in set(filings_on_date.data['filing_date'].to_pylist())]
     assert filing_dates == ['2022-08-10']
 
-
+@pytest.mark.network
 def test_filing_filter_by_form_no_amendments():
     filings = get_filings(2014,
                           4,
@@ -592,7 +592,7 @@ def test_filing_filter_by_form_no_amendments():
                           amendments=False)
     assert set(filings.data['form'].to_pylist()) == {'10-K'}
 
-
+@pytest.mark.network
 def test_filings_next_and_previous():
     filings: Filings = cached_filings(2021, 1, index="xbrl")
     print(filings)
@@ -660,6 +660,7 @@ def test_filings_get_by_accessor(accessor, expected_result):
             filing_int = filings.get(100)
             assert filing.accession_no == filing_int.accession_no
 
+@pytest.mark.network
 def test_find_company_in_filings():
     # TODO: Looks like the search results ordering is broken for some reason
     filings = cached_filings(2022, 1)
@@ -673,12 +674,12 @@ def test_find_company_in_filings():
     print(filings)
     assert set(filings.data['cik'].to_pylist()) == {1668717}
 
-
+@pytest.mark.network
 def test_filing_sections():
     sections = carbo_10K.sections()
     assert len(sections) > 20
 
-
+@pytest.mark.network
 def test_filing_with_complex_sections():
     filing = Filing(form='8-K', filing_date='2023-03-15', company='ADOBE INC.', cik=796343,
                     accession_no='0000796343-23-000044')
@@ -695,7 +696,7 @@ def test_search_for_text_in_filing_with_bm25():
     assert len(results) > 10
     print(results)
 
-
+@pytest.mark.network
 def test_search_for_text_with_regex():
     print()
 
@@ -711,7 +712,7 @@ def test_search_for_text_with_regex():
     assert len(results) > 0
     print(results)
 
-
+@pytest.mark.network
 def test_get_by_accession_number():
     filing = get_by_accession_number("0000072333-23-000015")
     assert filing.company == "NORDSTROM INC"
@@ -727,26 +728,25 @@ def test_get_by_accession_number():
     assert get_by_accession_number("9990072333-45-000015") is None
     assert get_by_accession_number("9990072333-22-000015") is None
 
+@pytest.mark.network
 def test_get_by_accession_number_show_progress_false():
     filing = get_by_accession_number("0000072333-23-000015", show_progress=False)
     assert filing.company == "NORDSTROM INC"
     assert filing.cik == 72333
     assert filing.form == "8-K"
 
-
+@pytest.mark.network
 def test_find_old_filing():
     filing = get_by_accession_number("0000320193-96-000018")
     assert filing
 
 
-
-
-
+@pytest.mark.network
 def test_as_company_filing():
     company_filing = carbo_10K.as_company_filing()
     assert company_filing.cik == carbo_10K.cik
 
-
+@pytest.mark.network
 def test_10K_filing_with_no_financial_data():
     filing = Filing(form='10-K', filing_date='2023-05-26', company='CarMax Auto Owner Trust 2019-3', cik=1779026,
                     accession_no='0001779026-23-000027')
@@ -757,16 +757,16 @@ def test_10K_filing_with_no_financial_data():
     assert not tenk.cash_flow_statement
     print(tenk)
 
-
+@pytest.mark.fast
 def test_text_url_for_filing():
     assert carbo_10K.text_url \
            == 'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt'
 
-
+@pytest.mark.network
 def test_filings_get_by_invalid_accession_number(capsys):
     assert cached_filings(2022, 1).get('INVALID-ACCESS-NUMBER') is None
 
-
+@pytest.mark.network
 def test_filing_to_dict():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
@@ -784,7 +784,7 @@ def test_filing_to_dict():
     assert filing.cik == 66740
     assert filing.accession_number == '0000066740-24-000023'
 
-
+@pytest.mark.network
 def test_save_filing_to_file():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
@@ -796,7 +796,7 @@ def test_save_filing_to_file():
     filing = Filing.load(Path(filing_path.name))
     assert filing.filing_date == '2024-03-08'
 
-
+@pytest.mark.network
 def test_save_filing_to_directory():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
@@ -811,7 +811,7 @@ def test_save_filing_to_directory():
     filing = Filing.load(filing_path)
     assert filing.filing_date == '2024-03-08'
 
-
+@pytest.mark.fast
 def test_filing_date_to_year_quarter():
     # Test case 1: Single date
     assert filing_date_to_year_quarters("2024-03-01") == [(2024, 1)]
@@ -870,7 +870,7 @@ def test_get_filings_by_filing_date(filing_date, year, expected_start, expected_
     else:
         assert filings is None
 
-
+@pytest.mark.network
 def test_get_text_from_old_filing():
     filing = Filing(form='10-Q', filing_date='2000-05-11', company='APPLE COMPUTER INC', cik=320193,
                     accession_no='0000912057-00-023442')
@@ -880,7 +880,7 @@ def test_get_text_from_old_filing():
     text = filing.text()
     assert text
 
-
+@pytest.mark.network
 def test_filings_to_dict():
     filings: Filings = get_filings(filing_date='2023-02-01')
     filings_json = filings.to_dict()
@@ -888,7 +888,7 @@ def test_filings_to_dict():
     assert len(filings.to_dict(50)) == 50
     assert len(filings.head(10).to_dict()) == 10
 
-
+@pytest.mark.network
 def test_company_filing_to_dict():
     company = Company(320193)
     filing = company.get_filings(form="4").latest(1)
@@ -897,7 +897,7 @@ def test_company_filing_to_dict():
     assert filing_dict['company'] == 'Apple Inc.'
     assert filing_dict['cik'] == 320193
 
-
+@pytest.mark.network
 def test_filter_by_ticker(filings_2022_q3):
     tesla_filings = filings_2022_q3.filter(ticker="TSLA")
     assert len(tesla_filings) > 0
@@ -913,6 +913,7 @@ def test_filter_by_ticker(filings_2022_q3):
     assert len(tesla_8k) > 0
     assert set(tesla_8k.data['form'].to_pylist()) == {'8-K'}
 
+@pytest.mark.network
 def test_filter_by_amendments(filings_2022_q3):
     filings = filings_2022_q3.filter(form=["10-K", "20-F", "40-F"])
     filings_no_amendments = filings.filter(amendments=False)
@@ -948,7 +949,7 @@ def mock_cached_filings():
 
     return _get_cached_filings
 
-
+@pytest.mark.network
 def test_get_filing_by_accession_found(mock_cached_filings):
     with patch('edgar._filings._get_cached_filings', mock_cached_filings):
         # First call - should hit the mock and cache
@@ -963,7 +964,7 @@ def test_get_filing_by_accession_found(mock_cached_filings):
         # Verify it's the same cached object
         assert result1 is result2
 
-
+@pytest.mark.network
 def test_get_filing_by_accession_not_found(mock_cached_filings):
     with patch('edgar._filings._get_cached_filings', mock_cached_filings):
         # Non-existent filing
@@ -974,12 +975,12 @@ def test_get_filing_by_accession_not_found(mock_cached_filings):
         cache_info = get_filing_by_accession.cache_info()
         assert cache_info.hits == 0  # Should be no cache hits
 
-
+@pytest.mark.fast
 def test_get_filing_by_accession_invalid_format():
     with pytest.raises(AssertionError):
         get_filing_by_accession("invalid-format", 2022)
 
-
+@pytest.mark.fast
 @pytest.mark.parametrize("accession_number,expected_year", [
     ("0000000123-98-000456", 1998),  # 1900s
     ("0000000123-22-000456", 2022),  # 2000s
@@ -1002,6 +1003,7 @@ def test_filing_url():
                     accession_no='0000066740-24-000023')
     assert filing.filing_url == 'https://www.sec.gov/Archives/edgar/data/66740/000006674024000023/mmm-20240308.htm'
 
+@pytest.mark.fast
 def test_parse_empty_index_file():
     text = Path('data/index_files/empty-form.idx').read_text()
     table = read_index_file(text)
