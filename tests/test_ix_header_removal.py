@@ -4,6 +4,7 @@ import pytest
 from edgar.documents import parse_html, ParserConfig
 
 
+@pytest.mark.fast
 def test_ix_header_removed():
     """Test that ix:header content is removed from rendering."""
     html = """
@@ -48,7 +49,7 @@ def test_ix_header_removed():
     assert "0000320193" not in text  # CIK from context
     assert "false" not in text  # Amendment flag value
 
-
+@pytest.mark.fast
 def test_xbrl_extraction_from_header():
     """Test that XBRL data is still extracted from ix:header before removal."""
     html = """
@@ -106,7 +107,7 @@ def test_xbrl_extraction_from_header():
     assert len(doc_type_facts) == 1
     assert doc_type_facts[0].value == '10-K'
 
-
+@pytest.mark.fast
 def test_real_apple_10k_header():
     """Test with actual Apple 10-K header content."""
     html = """

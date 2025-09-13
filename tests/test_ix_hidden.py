@@ -3,7 +3,7 @@
 import pytest
 from edgar.documents import parse_html, ParserConfig
 
-
+@pytest.mark.fast
 def test_ix_hidden_content_removed():
     """Test that ix:hidden content is removed from rendering."""
     html = """
@@ -35,7 +35,7 @@ def test_ix_hidden_content_removed():
     # Tables inside ix:hidden should not be counted
     assert len(doc.tables) == 0
 
-
+@pytest.mark.fast
 def test_nested_ix_hidden():
     """Test nested ix:hidden tags."""
     html = """
@@ -61,7 +61,7 @@ def test_nested_ix_hidden():
     assert "Hidden paragraph" not in text
     assert "Nested hidden paragraph" not in text
 
-
+@pytest.mark.fast
 def test_ix_hidden_with_attributes():
     """Test ix:hidden with various attributes."""
     html = """
@@ -83,7 +83,7 @@ def test_ix_hidden_with_attributes():
     assert "After hidden" in text
     assert "Hidden span content" not in text
 
-
+@pytest.mark.fast
 def test_ix_hidden_case_insensitive():
     """Test that ix:hidden matching is case insensitive."""
     html = """
@@ -105,7 +105,7 @@ def test_ix_hidden_case_insensitive():
     assert "Hidden uppercase" not in text
     assert "Hidden mixed case" not in text
 
-
+@pytest.mark.fast
 def test_real_world_ix_hidden():
     """Test a real-world example of ix:hidden usage."""
     html = """
@@ -134,8 +134,9 @@ def test_real_world_ix_hidden():
     
     # The machine-readable version should be hidden
     assert "1234567000" not in text
-    
-    
+
+
+@pytest.mark.fast
 def test_ix_hidden_preserves_structure():
     """Test that removing ix:hidden doesn't break document structure."""
     html = """
