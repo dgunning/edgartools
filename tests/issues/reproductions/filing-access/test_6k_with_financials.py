@@ -5,7 +5,7 @@ to determine if the fix is justified.
 
 from edgar import Company, Financials
 import traceback
-
+import pytest
 
 def find_6k_with_financials():
     """Find 6-K filings that actually contain financial data"""
@@ -96,6 +96,7 @@ def find_6k_with_financials():
     return found_financials
 
 
+@pytest.mark.regression
 def test_proposed_fix():
     """Test what the fix would look like"""
     

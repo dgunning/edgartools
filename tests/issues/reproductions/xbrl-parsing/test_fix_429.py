@@ -5,9 +5,11 @@ Test the fix for issue #429
 
 import edgar
 from rich.console import Console
+import pytest
 
 console = Console()
 
+@pytest.mark.regression
 def test_period_selection():
     """Test the period selection fix"""
     console.print(f"\n[bold blue]Testing period selection fix[/bold blue]")
@@ -27,6 +29,7 @@ def test_period_selection():
         except Exception as e:
             console.print(f"{statement_type}: Error - {e}")
 
+@pytest.mark.regression
 def test_statements_with_fix():
     """Test statements with the fix"""
     console.print(f"\n[bold blue]Testing statements with fix[/bold blue]")

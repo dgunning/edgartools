@@ -14,8 +14,9 @@ This script reproduces the issue and verifies the current behavior.
 import pandas as pd
 from edgar import get_by_accession_number
 from decimal import Decimal
+import pytest
 
-
+@pytest.mark.regression
 def test_msft_research_development_expense():
     """Test MSFT 10-K 2024 - should show inconsistent sign (negative in edgartools)."""
     print("=== Testing MSFT 10-K 2024 ===")
@@ -49,7 +50,7 @@ def test_msft_research_development_expense():
     
     return False
 
-
+@pytest.mark.regression
 def test_aapl_research_development_expense():
     """Test AAPL 10-K 2024 - should show consistent sign (positive in edgartools)."""
     print("\n=== Testing AAPL 10-K 2024 ===") 

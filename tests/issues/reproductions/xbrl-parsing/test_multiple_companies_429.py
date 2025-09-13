@@ -6,9 +6,11 @@ Test the fix for issue #429 across multiple companies
 import edgar
 from rich.console import Console
 from rich.table import Table
+import pytest
 
 console = Console()
 
+@pytest.mark.regression
 def test_multiple_companies():
     """Test the fix across multiple companies"""
     console.print(f"\n[bold blue]Testing Issue #429 Fix Across Multiple Companies[/bold blue]")
