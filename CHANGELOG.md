@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.12.1 - 2025-09-13
+
+### Fixed
+- **Issue #412**: Fixed SGML parser robustness for filings with mixed content types
+  - Resolved "ValueError: too many values to unpack (expected 2)" when parsing XBRL inline content with multiple '>' characters
+  - Enhanced SGML parser with tag validation to distinguish SGML from HTML/XBRL content
+  - Added `_is_valid_sgml_tag()` method to prevent interference from HTML/XBRL tags during header parsing
+  - Fixed TSLA financial data access issues and other filings with embedded XBRL data
+  - Maintains full backwards compatibility with existing SGML parsing (all 35 existing tests pass)
+
+### Enhanced
+- **SGML Parser Robustness**: Improved handling of SEC filings with mixed SGML/HTML/XBRL content
+- **Test Coverage**: Added comprehensive regression tests for Issue #412 with minimal test data files
+- **Error Handling**: Enhanced graceful handling of malformed SGML lines without proper formatting
+
+### Technical Details
+- Modified `sgml_header.py` to split only on first '>' character using `split('>', 1)`
+- Added tag validation to skip non-SGML content during header parsing
+- Zero performance impact on existing functionality
+- Enables parsing of complex SEC filings that previously failed
+
 ## Release 4.12.0 - 2025-01-11
 
 ### Added
