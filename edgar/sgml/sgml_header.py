@@ -678,9 +678,15 @@ class FilingHeader:
             else:
                 if line.strip().startswith("<"):
                     # The line looks like this <KEY>VALUE
-                    key, value = line.split('>')
-                    # Strip the leading '<' from the key
-                    key = key[1:]
+                    # Handle lines with multiple '>' characters (e.g., XBRL inline content)
+                    split_parts = line.split('>', 1)  # Split only on first '>' character
+                    if len(split_parts) >= 2:
+                        key, value = split_parts[0], split_parts[1]
+                        # Strip the leading '<' from the key
+                        key = key[1:]
+                    else:
+                        # Skip malformed lines that don't have a '>' character
+                        continue
 
                     # If the key already exists, we should convert it to a list
                     if key in data:

@@ -10,6 +10,7 @@ import hashlib
 from io import BytesIO
 from edgar.vendored import uu
 from rich import print
+import pytest
 
 def test_parse_old_full_text():
     source = Path("data/sgml/0001011438-98-000429.txt")
@@ -60,7 +61,7 @@ def test_sgml_from_url():
     assert document.description == ""
     assert document.html()
 
-
+@pytest.mark.network
 def test_sgm_sequence_numbers_match_attachment_sequence_numbers():
     filing = Filing(form='3', filing_date='2018-12-21', company='Aptose Biosciences Inc.', cik=882361, accession_no='0001567619-18-008556')
     attachments = filing.attachments
@@ -69,7 +70,7 @@ def test_sgm_sequence_numbers_match_attachment_sequence_numbers():
     attachment_sequences = {attachment.sequence_number for attachment in attachments if attachment.sequence_number.isdigit()}
     assert sgml_sequences & attachment_sequences
 
-
+@pytest.mark.network
 def test_sgml_from_filing():
     filing = Filing(form='S-3/A', filing_date='1995-05-25', company='PAGE AMERICA GROUP INC', cik=311048,
            accession_no='0000899681-95-000096')
@@ -102,6 +103,7 @@ def test_sgml_parser_detect_content():
     assert parser.detect_format(Path("data/sgml/0000899681-95-000096.txt").read_text()) == SGMLFormatType.SEC_DOCUMENT
     assert parser.detect_format(Path("data/sgml/0001398344-24-000491.nc").read_text()) == SGMLFormatType.SUBMISSION
 
+@pytest.mark.network
 def test_get_attachment_content_from_sgml():
 
     filings = [
@@ -127,7 +129,7 @@ def test_get_attachment_content_from_sgml():
                 assert sgml_document.text()
                 assert attachment.url
 
-
+@pytest.mark.network
 def test_sgml_parsing_of_headers():
     filing = Filing(form='8-K', filing_date='2003-03-05', company='NEW YORK COMMUNITY BANCORP INC', cik=910073, accession_no='0001169232-03-001935')
     filing_sgml = FilingSGML.from_filing(filing)
@@ -277,7 +279,7 @@ def test_download_to_archive():
             for document in sgml._documents_by_name.values():
                 assert document.filename in archive_names
 
-
+@pytest.mark.network
 def test_get_sgml_from_filing_when_no_local_storage_exists(monkeypatch):
     filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01',
             accession_no='0000320193-24-000123')
@@ -378,6 +380,7 @@ def test_sgml_from_really_old_filing_needing_preprocessing():
     sgml = FilingSGML.from_source('data/sgml/0001094891-00-000193.txt')
     assert sgml
 
+@pytest.mark.network
 def test_sgml_header_has_company_information_485POS():
     filing = Filing(form='485APOS', filing_date='2024-03-13', company='iSHARES TRUST', cik=1100663, accession_no='0001193125-24-066744')
     # This was failing because the header text had extra newlines
@@ -397,7 +400,7 @@ def test_parse_header_with_double_newlines():
 
     assert filer.mailing_address.city == 'SAN FRANCISCO'
 
-
+@pytest.mark.network
 def test_parse_filing_header_with_problem():
     filing = Filing(form='424B5',
                     filing_date='2000-03-14',
@@ -406,3 +409,9 @@ def test_parse_filing_header_with_problem():
                     accession_no='0000912057-00-011488')
     filing_sgml = FilingSGML.from_filing(filing)
     assert filing_sgml
+
+
+def test_parse_tsla_sgml_with_embedded_ixbrl():
+    content = Path("data/sgml/0001564590-20-004475-minimal.txt").read_text()
+    filing_header = FilingHeader.parse_from_sgml_text(content)
+    assert filing_header
