@@ -28,6 +28,7 @@ class EntityFactsParser:
     STATEMENT_MAPPING = {
         # Income Statement
         'Revenue': 'IncomeStatement',
+        'Revenues': 'IncomeStatement',  # Fix for Issue #438 - ensure us-gaap:Revenues maps properly
         'RevenueFromContractWithCustomerExcludingAssessedTax': 'IncomeStatement',
         'SalesRevenueNet': 'IncomeStatement',
         'CostOfRevenue': 'IncomeStatement',
