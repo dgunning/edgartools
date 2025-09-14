@@ -13,7 +13,8 @@ import pandas as pd
 
 class TestIssue412Regression:
     """Regression tests for Issue #412 - Missing historical balance sheet data."""
-    
+
+    @pytest.mark.regression
     def test_tsla_historical_balance_sheet_completeness(self):
         """
         Test that TSLA balance sheet shows comprehensive data for historical years.
@@ -56,7 +57,8 @@ class TestIssue412Regression:
                 f"Fourth period ({fourth_period}) should have comprehensive data. "
                 f"Got {fourth_period_completeness:.1%} populated, expected >40%"
             )
-    
+
+    @pytest.mark.regression
     def test_tsla_balance_sheet_key_items_present(self):
         """
         Test that key balance sheet items are present in historical periods.
@@ -91,7 +93,8 @@ class TestIssue412Regression:
                 f"Expected at least 3 key balance sheet concepts populated in {third_period}, "
                 f"but only found {populated_key_concepts}"
             )
-    
+
+    @pytest.mark.regression
     def test_rich_output_shows_historical_data(self):
         """
         Test that rich output (__rich__) shows data in historical columns.
@@ -136,7 +139,8 @@ class TestIssue412Regression:
             assert third_period in output, f"Third period {third_period} should appear in output"
             if fourth_period:
                 assert fourth_period in output, f"Fourth period {fourth_period} should appear in output"
-    
+
+    @pytest.mark.regression
     def test_multiple_companies_no_regression(self):
         """
         Test that the fix doesn't break other companies.

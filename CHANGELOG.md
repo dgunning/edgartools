@@ -17,22 +17,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Results**: TSLA historical periods improved from 2% to 54.9% data completeness
   - **Impact**: Affects balance sheets, income statements, and cash flow statements for companies with amendment filing patterns
 
-- **Issue #438**: Resolved missing revenue facts in NVDA income statements
-  - **Problem**: NVDA income statements showed missing revenue data because us-gaap:Revenues concepts returned statement_type=None
-  - **Root Cause**: STATEMENT_MAPPING contained "Revenue" (singular) but not "Revenues" (plural), causing classification failures
-  - **Solution**: Added 'Revenues': 'IncomeStatement' to STATEMENT_MAPPING for comprehensive coverage
-  - **Results**: All 267 us-gaap:Revenues facts now properly classified, revenue data appears in all periods
-  - **Impact**: Affects companies using plural "Revenues" concept in their XBRL filings
+- **Issue #438**: Resolved missing revenue facts and duplicate entries in NVDA income statements
+  - **Problem**: NVDA income statements showed missing revenue data and potential duplicate entries when fixed
+  - **Root Cause**: STATEMENT_MAPPING missing "Revenues" concept, plus multiple revenue concepts creating duplicates
+  - **Solution**: Two-part fix - concept mapping enhancement + intelligent revenue deduplication
+  - **Results**: Revenue data properly classified (267 facts) with no duplicate entries, optimal revenue concept selected
+  - **Impact**: Affects companies using plural "Revenues" concept or multiple revenue representations in XBRL
 
 ### Enhanced
 - **Financial Statement Completeness**: Comprehensive historical financial data now available for affected companies
-- **XBRL Concept Mapping**: Enhanced revenue concept classification supporting both singular and plural forms
+- **XBRL Concept Mapping**: Enhanced revenue concept classification with intelligent deduplication preventing duplicate entries
+- **Revenue Processing**: Smart hierarchical precedence system automatically selects optimal revenue concept from multiple representations
 - **Test Coverage**: Added extensive regression tests (`test_412_regression.py`, `test_issue_438_regression.py`) preventing future occurrences  
 - **Data Quality**: Maintains accuracy through recency component while ensuring comprehensive historical data
 
 ### Technical Details
 - Modified `edgar/entity/enhanced_statement.py:1057-1074` with improved period selection logic (Issue #412)
 - Enhanced `edgar/entity/parser.py` STATEMENT_MAPPING with additional revenue concept coverage (Issue #438)
+- Added `edgar/xbrl/deduplication_strategy.py` for intelligent revenue deduplication (Issue #438)
+- Integrated deduplication with XBRL statement generation in `edgar/xbrl/xbrl.py`
 - Zero performance impact - same filtering process with better selection criteria
 - Backwards compatible - all existing functionality preserved
 - Added comprehensive test suites verifying data completeness and concept mapping accuracy
