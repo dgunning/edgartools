@@ -1231,6 +1231,13 @@ class EnhancedStatementBuilder:
             'EarningsPerShareDiluted'
         ]
         
+        # Revenue concepts for deduplication (in priority order)
+        REVENUE_CONCEPTS = [
+            'RevenueFromContractWithCustomerExcludingAssessedTax',
+            'SalesRevenueNet',
+            'Revenues'
+        ]
+        
         # First, add the abstract root for structure
         for root_concept in virtual_tree.get('roots', []):
             if 'Abstract' in root_concept:
@@ -1246,10 +1253,19 @@ class EnhancedStatementBuilder:
                     # Clear children to rebuild with promoted concepts
                     item.children = []
                     
-                    # Add promoted concepts that have values
+                    # Handle revenue deduplication first
                     promoted_added = set()
+                    revenue_item = self._create_deduplicated_revenue_item(
+                        REVENUE_CONCEPTS, nodes, period_maps, periods, statement_type
+                    )
+                    if revenue_item:
+                        item.children.append(revenue_item)
+                        # Mark all revenue concepts as processed
+                        promoted_added.update(REVENUE_CONCEPTS)
+                    
+                    # Add other promoted concepts that have values
                     for concept in ESSENTIAL_CONCEPTS:
-                        if concept in nodes:
+                        if concept not in promoted_added and concept in nodes:
                             # Check if it has values in any period
                             has_values = any(
                                 concept in period_maps[p] for p in periods
@@ -1265,9 +1281,7 @@ class EnhancedStatementBuilder:
                                 )
                                 if promoted_item:
                                     # Override label for better display
-                                    if concept == 'RevenueFromContractWithCustomerExcludingAssessedTax':
-                                        promoted_item.label = 'Total Revenue'
-                                    elif concept == 'CostOfGoodsAndServicesSold':
+                                    if concept == 'CostOfGoodsAndServicesSold':
                                         promoted_item.label = 'Cost of Revenue'
                                     
                                     promoted_item.children = []  # Don't show deep hierarchy
@@ -1306,6 +1320,117 @@ class EnhancedStatementBuilder:
                     items.append(item)
         
         return items
+    
+    def _create_deduplicated_revenue_item(self,
+                                        revenue_concepts: List[str],
+                                        nodes: Dict[str, Any],
+                                        period_maps: Dict[str, Dict[str, FinancialFact]],
+                                        periods: List[str],
+                                        statement_type: str) -> Optional[MultiPeriodItem]:
+        """
+        Create a single deduplicated revenue item by combining multiple revenue concepts.
+        
+        This method implements revenue deduplication for the Facts API path, similar to 
+        what was done for XBRL processing. It combines revenue from different concepts
+        across periods to show comprehensive revenue data. When no explicit revenue
+        concepts exist, it attempts to calculate revenue from GrossProfit + CostOfRevenue.
+        
+        Args:
+            revenue_concepts: List of revenue concepts in priority order
+            nodes: Virtual tree nodes
+            period_maps: Period-mapped fact data
+            periods: List of periods
+            statement_type: Statement type
+            
+        Returns:
+            Single MultiPeriodItem with deduplicated revenue data or None if no revenue found
+        """
+        # Collect all revenue values across all concepts and periods
+        consolidated_values = {}
+        best_label = "Total Revenue"  # Default label
+        has_any_revenue = False
+        
+        # Track which concept provides data for each period (for debugging/transparency)
+        source_tracking = {}
+        
+        for period in periods:
+            period_value = None
+            source_concept = None
+            
+            # Try explicit revenue concepts in priority order for this period
+            for concept in revenue_concepts:
+                if concept in period_maps[period]:
+                    fact = period_maps[period][concept]
+                    if fact.numeric_value is not None:
+                        period_value = fact.numeric_value
+                        source_concept = concept
+                        has_any_revenue = True
+                        
+                        # Use the label from the first concept we find
+                        if period_value is not None and not source_tracking:
+                            best_label = fact.label if fact.label else "Total Revenue"
+                        
+                        break  # Found value for this period, use highest priority
+            
+            # If no explicit revenue found, try to calculate from GrossProfit + CostOfRevenue
+            if period_value is None:
+                gross_profit = None
+                cost_of_revenue = None
+                
+                # Look for GrossProfit
+                if 'GrossProfit' in period_maps[period]:
+                    gross_profit_fact = period_maps[period]['GrossProfit']
+                    gross_profit = gross_profit_fact.numeric_value
+                
+                # Look for CostOfRevenue
+                if 'CostOfRevenue' in period_maps[period]:
+                    cost_fact = period_maps[period]['CostOfRevenue']
+                    cost_of_revenue = cost_fact.numeric_value
+                
+                # Calculate revenue if both components are available
+                if gross_profit is not None and cost_of_revenue is not None:
+                    period_value = gross_profit + cost_of_revenue
+                    source_concept = 'Calculated_Revenue'
+                    has_any_revenue = True
+                    # Debug output (disabled)
+                    # print(f"DEBUG: Calculated revenue for {period}: ${period_value:,} (GP: ${gross_profit:,} + CoR: ${cost_of_revenue:,})")
+            
+            consolidated_values[period] = period_value
+            if source_concept:
+                source_tracking[period] = source_concept
+        
+        if not has_any_revenue:
+            return None
+        
+        # Override label to be more descriptive
+        best_label = "Total Revenue"
+        
+        # Find the highest priority concept that has data to determine other properties
+        primary_concept = None
+        for concept in revenue_concepts:
+            if any(concept in period_maps[p] for p in periods):
+                primary_concept = concept
+                break
+        
+        # If no explicit revenue concepts, use a calculated concept identifier
+        if not primary_concept:
+            primary_concept = 'TotalRevenue_Consolidated'
+        
+        # Create the deduplicated revenue item
+        revenue_item = MultiPeriodItem(
+            concept=primary_concept,  # Use the highest priority concept as the base
+            label=best_label,
+            values=consolidated_values,
+            depth=1,
+            parent_concept=None,
+            is_abstract=False,
+            is_total=True,  # Revenue is typically a total
+            section=None,
+            confidence=0.95,  # High confidence for deduplicated revenue
+            children=[]
+        )
+        
+        return revenue_item
     
     def _build_canonical_item(self,
                              concept: str,
