@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.12.2 - 2025-09-14
+
+### Fixed
+- **Issue #412**: Resolved missing historical balance sheet data for companies like TSLA
+  - **Problem**: Historical periods (FY 2021-2022) showed sparse data (~2% completeness) despite comprehensive data being available in Facts API
+  - **Root Cause**: Period selection logic prioritized recent filing dates over data completeness, selecting amended filings with sparse comparative data
+  - **Solution**: Implemented "Recency + Availability" approach that filters periods requiring ≥5 facts before selecting most recent filing
+  - **Results**: TSLA historical periods improved from 2% to 54.9% data completeness
+  - **Impact**: Affects balance sheets, income statements, and cash flow statements for companies with amendment filing patterns
+
+### Enhanced
+- **Financial Statement Completeness**: Comprehensive historical financial data now available for affected companies
+- **Test Coverage**: Added extensive regression tests (`test_412_regression.py`) preventing future occurrences
+- **Data Quality**: Maintains accuracy through recency component while ensuring comprehensive historical data
+
+### Technical Details
+- Modified `edgar/entity/enhanced_statement.py:1057-1074` with improved period selection logic
+- Zero performance impact - same filtering process with better selection criteria
+- Backwards compatible - all existing functionality preserved
+- Added comprehensive test suite verifying >40% completeness for historical periods
+
 ## Release 4.12.1 - 2025-09-13
 
 ### Fixed
