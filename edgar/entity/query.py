@@ -935,13 +935,14 @@ class FactQuery:
             return empty_panel
         
         # Limit results for display (show first 20, indicate if more exist)
-        display_limit = 20
+        display_limit = 40
         display_facts = facts[:display_limit]
         has_more = len(facts) > display_limit
         
         # Create main results table
         results_table = Table(box=SIMPLE, show_header=True, padding=(0, 1))
-        results_table.add_column("Concept", style="bold", max_width=60)
+        results_table.add_column("Concept", style="bold", max_width=80)
+        results_table.add_column("Label", style="bold", max_width=80)
         results_table.add_column("Value", justify="right", max_width=15)
         results_table.add_column("Start")
         results_table.add_column("End", max_width=10)
@@ -951,6 +952,7 @@ class FactQuery:
             
             results_table.add_row(
                 fact.concept,
+                fact.label,
                 str(fact.value) if fact.value else "N/A",
                 str(fact.period_start) if fact.period_start else "N/A",
                 str(fact.period_end) if fact.period_end else "N/A",
