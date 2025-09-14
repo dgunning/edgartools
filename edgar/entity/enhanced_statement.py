@@ -1054,21 +1054,24 @@ class EnhancedStatementBuilder:
                         # (this handles instant facts like balance sheet items)
                         true_annual_periods.append((pk, info))
             
-            # Group by actual period year (not fiscal year) and deduplicate
-            # Keep the one with the latest filing_date for each period year
+            # Group by period year and select most recent comprehensive filing
+            # This approach combines availability (comprehensive data) with recency (latest corrections)
             annual_by_period_year = {}
             for pk, info in true_annual_periods:
                 period_end_date = pk[2]
                 period_year = period_end_date.year if period_end_date else None
                 
                 if period_year:
-                    # If we have multiple facts for the same period year,
-                    # keep the one with the latest filing date (most recent filing)
-                    if period_year not in annual_by_period_year or \
-                       (info.get('filing_date') and 
-                        annual_by_period_year[period_year][1].get('filing_date') and
-                        info['filing_date'] > annual_by_period_year[period_year][1]['filing_date']):
-                        annual_by_period_year[period_year] = (pk, info)
+                    facts_for_period = period_facts.get(pk, [])
+                    filing_date = info.get('filing_date')
+                    
+                    # Only consider periods with substantial data (≥5 facts) to avoid sparse comparative data
+                    if len(facts_for_period) >= 5:
+                        if (period_year not in annual_by_period_year or 
+                            (filing_date and 
+                             annual_by_period_year[period_year][1].get('filing_date') and
+                             filing_date > annual_by_period_year[period_year][1]['filing_date'])):
+                            annual_by_period_year[period_year] = (pk, info)
             
             # Sort by period year (descending) and select
             sorted_periods = sorted(annual_by_period_year.items(), key=lambda x: x[0], reverse=True)
