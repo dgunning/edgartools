@@ -647,6 +647,11 @@ class XBRL:
         line_items = []
         self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None, should_display_dimensions)
         
+        # Apply revenue deduplication for income statements to fix Issue #438
+        if actual_statement_type == 'IncomeStatement':
+            from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
+            line_items = RevenueDeduplicator.deduplicate_statement_items(line_items)
+        
         return line_items
     
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode], 
