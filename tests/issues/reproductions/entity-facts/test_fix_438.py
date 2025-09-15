@@ -18,7 +18,8 @@ from edgar.entity.parser import EntityFactsParser
 
 class TestIssue438Fix:
     """Test suite for Issue #438 revenue classification fix."""
-    
+
+    @pytest.mark.regression
     def test_revenues_in_statement_mapping(self):
         """Test that 'Revenues' is properly included in STATEMENT_MAPPING."""
         # Verify that both singular and plural forms are mapped
@@ -28,7 +29,8 @@ class TestIssue438Fix:
         # Verify they both map to IncomeStatement
         assert EntityFactsParser.STATEMENT_MAPPING['Revenue'] == 'IncomeStatement'
         assert EntityFactsParser.STATEMENT_MAPPING['Revenues'] == 'IncomeStatement'
-    
+
+    @pytest.mark.regression
     def test_determine_statement_type_with_revenues(self):
         """Test that _determine_statement_type properly handles 'Revenues' concept."""
         # Test the exact scenarios identified in Issue #438
@@ -47,7 +49,8 @@ class TestIssue438Fix:
         
         result_us_gaap_revenues = EntityFactsParser._determine_statement_type('us-gaap:Revenues')
         assert result_us_gaap_revenues == 'IncomeStatement'
-    
+
+    @pytest.mark.regression
     def test_edge_case_scenarios(self):
         """Test edge case scenarios that could trigger the static mapping fallback."""
         
@@ -66,7 +69,8 @@ class TestIssue438Fix:
         for concept in test_cases:
             result = EntityFactsParser._determine_statement_type(concept)
             assert result == 'IncomeStatement', f"Failed for concept: {concept}"
-    
+
+    @pytest.mark.regression
     def test_no_duplicate_entries_created(self):
         """Verify that adding 'Revenues' doesn't create duplicate entries issue."""
         
@@ -85,7 +89,7 @@ class TestIssue438Fix:
         for concept in revenue_concepts:
             assert mapping[concept] == 'IncomeStatement'
 
-
+@pytest.mark.regression
 def test_regression_no_statement_type_none():
     """Regression test to ensure revenue facts don't get statement_type=None."""
     

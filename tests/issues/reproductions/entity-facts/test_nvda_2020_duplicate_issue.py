@@ -10,6 +10,7 @@ These are the same value appearing twice with different labels.
 
 import sys
 import os
+import pytest
 
 # Add the project root to the path to ensure we import from source
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
@@ -23,7 +24,7 @@ import logging
 # Reduce log noise
 logging.basicConfig(level=logging.WARNING)
 
-
+@pytest.mark.regression
 def test_nvda_2020_duplicate_issue():
     """
     Test for the specific NVDA FY 2020 duplicate revenue issue.

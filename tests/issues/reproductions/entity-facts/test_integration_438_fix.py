@@ -8,6 +8,7 @@ company filings and doesn't break existing functionality.
 import sys
 import os
 import logging
+import pytest
 
 # Add the project root to the path to ensure we import from source
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
@@ -19,7 +20,7 @@ from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
 # Reduce log noise for cleaner test output
 logging.basicConfig(level=logging.WARNING)
 
-
+@pytest.mark.regression
 def test_integration_no_regression_with_nvda():
     """
     Integration test with NVDA to ensure no regressions.
@@ -90,7 +91,7 @@ def test_integration_no_regression_with_nvda():
         traceback.print_exc()
         raise
 
-
+@pytest.mark.regression
 def test_integration_with_multiple_companies():
     """
     Test with multiple companies to ensure broad compatibility.
@@ -148,7 +149,7 @@ def test_integration_with_multiple_companies():
     
     print("✓ Multi-company integration test completed")
 
-
+@pytest.mark.regression
 def test_deduplication_disabled_for_non_income_statements():
     """
     Test that deduplication is only applied to income statements.

@@ -7,7 +7,9 @@ import edgar
 from rich import print
 import traceback
 import pandas as pd
+import pytest
 
+@pytest.mark.regression
 def test_multiperiod_statements():
     """Test MultiPeriodStatement objects for blank data"""
     
@@ -120,6 +122,7 @@ def test_multiperiod_statements():
             print(f"[red]Failed to process {ticker}: {e}[/red]")
             traceback.print_exc()
 
+@pytest.mark.regression
 def test_historical_years():
     """Test if historical years are actually available in MultiPeriodStatement"""
     
