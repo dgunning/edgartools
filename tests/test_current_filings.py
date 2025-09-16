@@ -75,8 +75,8 @@ def test_current_filings_get_by_index_on_page2():
     assert filing.accession_no == accession_number
     assert filing_page2[79]
 
-    with pytest.raises(AssertionError):
-        # The boundary is 80
+    with pytest.raises(IndexError):
+        # The boundary is 80 - should raise IndexError for out of bounds
         filing_page2[80]
 
 @pytest.mark.network

@@ -170,9 +170,27 @@ class CurrentFilings(Filings):
             return self
 
     def __getitem__(self, item):  # type: ignore
-        item = self.get(item)
-        assert item is not None
-        return item
+        result = self.get(item)
+        if result is None:
+            if isinstance(item, int) or item.isdigit():
+                raise IndexError(f"Filing index {item} is out of range for current page")
+            else:
+                raise KeyError(f"Filing with accession number '{item}' not found")
+        return result
+
+    def __iter__(self):
+        """Override to reset iteration index for current page"""
+        self.n = 0
+        return self
+
+    def __next__(self):
+        """Override to handle pagination properly - use page-relative indices"""
+        if self.n < len(self.data):
+            filing = super().get_filing_at(self.n)  # Use page-relative index directly
+            self.n += 1
+            return filing
+        else:
+            raise StopIteration
 
     def get(self, index_or_accession_number: IntString):
         if isinstance(index_or_accession_number, int) or index_or_accession_number.isdigit():
@@ -181,6 +199,8 @@ class CurrentFilings(Filings):
                 # Where on this page is the index
                 idx_on_page = idx - (self._start - 1)
                 return super().get_filing_at(idx_on_page)
+            # Index is out of bounds for current page
+            return None
         else:
             accession_number = index_or_accession_number.strip()
             # See if the filing is in this page
