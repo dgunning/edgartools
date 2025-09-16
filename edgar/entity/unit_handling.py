@@ -246,7 +246,8 @@ class UnitNormalizer:
         cls,
         fact: FinancialFact,
         target_unit: Optional[str] = None,
-        apply_scale: bool = True
+        apply_scale: bool = True,
+        strict_unit_match: bool = False
     ) -> UnitResult:
         """
         Get a normalized value from a financial fact with detailed error reporting.
@@ -255,6 +256,7 @@ class UnitNormalizer:
             fact: FinancialFact to normalize
             target_unit: Desired unit (if None, just normalize existing unit)
             apply_scale: Whether to apply scale factor
+            strict_unit_match: If True, require exact unit match. If False, allow compatible units.
 
         Returns:
             UnitResult with value and metadata
@@ -304,8 +306,8 @@ class UnitNormalizer:
                 unit_type=unit_type
             )
 
-        elif cls.are_compatible(normalized_unit, target_normalized):
-            # Compatible units - could potentially convert
+        elif not strict_unit_match and cls.are_compatible(normalized_unit, target_normalized):
+            # Compatible units - could potentially convert (only if not in strict mode)
             suggestions = []
             if cls.get_unit_type(normalized_unit) == UnitType.CURRENCY:
                 suggestions.append(f"Consider currency conversion from {normalized_unit} to {target_normalized}")

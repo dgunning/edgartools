@@ -574,7 +574,8 @@ class EntityFacts:
             ],
             period=period,
             unit=unit,
-            fallback_calculation=self._calculate_revenue_from_components
+            fallback_calculation=self._calculate_revenue_from_components,
+            strict_unit_match=True
         )
 
     def get_net_income(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
@@ -1289,7 +1290,8 @@ class EntityFacts:
                                       period: Optional[str] = None,
                                       unit: Optional[str] = None,
                                       fallback_calculation: Optional[callable] = None,
-                                      return_detailed: bool = False) -> Optional[float]:
+                                      return_detailed: bool = False,
+                                      strict_unit_match: bool = False) -> Optional[float]:
         """
         Core method for retrieving standardized concept values with enhanced unit handling.
 
@@ -1299,6 +1301,7 @@ class EntityFacts:
             unit: Optional unit filter (defaults to USD)
             fallback_calculation: Optional function to calculate value from components
             return_detailed: If True, return UnitResult instead of just value
+            strict_unit_match: If True, require exact unit match. If False, allow compatible units.
 
         Returns:
             Numeric value or None if not found (or UnitResult if return_detailed=True)
@@ -1318,7 +1321,8 @@ class EntityFacts:
                     unit_result = UnitNormalizer.get_normalized_value(
                         fact=fact,
                         target_unit=target_unit,
-                        apply_scale=True
+                        apply_scale=True,
+                        strict_unit_match=strict_unit_match
                     )
 
                     if unit_result.success:
@@ -1387,8 +1391,8 @@ class EntityFacts:
             cost_of_revenue_fact.numeric_value is not None):
 
             # Use enhanced unit compatibility checking
-            gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True)
-            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True)
+            gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True, strict_unit_match=True)
+            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True, strict_unit_match=True)
 
             if gp_result.success and cr_result.success:
                 return gp_result.value + cr_result.value
@@ -1396,8 +1400,8 @@ class EntityFacts:
             # Try compatibility check if direct match failed
             if UnitNormalizer.are_compatible(gross_profit_fact.unit, cost_of_revenue_fact.unit):
                 # Same unit type but different representations - try calculation anyway
-                gp_normalized = UnitNormalizer.get_normalized_value(gross_profit_fact, apply_scale=True)
-                cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True)
+                gp_normalized = UnitNormalizer.get_normalized_value(gross_profit_fact, apply_scale=True, strict_unit_match=False)
+                cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True, strict_unit_match=False)
 
                 if gp_normalized.success and cr_normalized.success:
                     return gp_normalized.value + cr_normalized.value
