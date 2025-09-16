@@ -731,7 +731,7 @@ class XBRL:
                         # This is a non-dimensioned fact for this concept, use in the main item
                         if not values.get(period_key):
                             values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
-                            
+
                             # Store the decimals info for proper scaling
                             if fact.decimals is not None:
                                 try:
@@ -741,6 +741,7 @@ class XBRL:
                                         decimals[period_key] = int(fact.decimals)
                                 except (ValueError, TypeError):
                                     decimals[period_key] = 0  # Default
+
             else:
                 # For standard financial statements, prefer non-dimensioned facts
                 # If only one fact, use it
@@ -764,7 +765,7 @@ class XBRL:
                 
                 # Store the value
                 values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
-                
+
                 # Store the decimals info for proper scaling
                 if fact.decimals is not None:
                     try:
@@ -774,6 +775,7 @@ class XBRL:
                             decimals[period_key] = int(fact.decimals)
                     except (ValueError, TypeError):
                         decimals[period_key] = 0  # Default if decimals can't be converted
+
         
         # For dimensional statements with dimension data, handle the parent item specially
         if should_display_dimensions and dimensioned_facts:
@@ -853,6 +855,7 @@ class XBRL:
                                 dim_decimals[period_key] = int(fact.decimals)
                         except (ValueError, TypeError):
                             dim_decimals[period_key] = 0
+
                 
                 # For better display, use the member label for dimension items,
                 # but make sure we don't add the parent concept name as well
@@ -1200,7 +1203,9 @@ class XBRL:
             actual_statement_type,
             self.entity_info,
             standard,
-            show_date_range
+            show_date_range,
+            show_comparisons=True,
+            xbrl_instance=self
         )
 
     
@@ -1421,7 +1426,45 @@ class XBRL:
             if fact.footnotes:
                 facts_with_footnotes[key] = fact
         return facts_with_footnotes
-    
+
+    def get_currency_for_fact(self, element_name: str, period_key: str) -> Optional[str]:
+        """
+        Get currency for a specific fact/period on-demand with caching.
+
+        Args:
+            element_name: The XBRL element name
+            period_key: The period key to look up
+
+        Returns:
+            Currency measure string (e.g., 'iso4217:EUR') or None if not found
+        """
+        # Create cache key
+        cache_key = f"{element_name}_{period_key}"
+
+        # Check cache first
+        if not hasattr(self, '_currency_cache'):
+            self._currency_cache = {}
+
+        if cache_key in self._currency_cache:
+            return self._currency_cache[cache_key]
+
+        # Find facts for this element and period
+        facts = self._find_facts_for_element(element_name, period_key)
+
+        # Look for the first fact with currency information
+        currency_measure = None
+        for context_id, wrapped_fact in facts.items():
+            fact = wrapped_fact['fact']
+            if hasattr(fact, 'unit_ref') and fact.unit_ref and fact.unit_ref in self.units:
+                unit_info = self.units[fact.unit_ref]
+                if 'measure' in unit_info:
+                    currency_measure = unit_info['measure']
+                    break
+
+        # Cache the result (including None values to avoid repeated lookups)
+        self._currency_cache[cache_key] = currency_measure
+        return currency_measure
+
     def __rich__(self):
         """Rich representation for pretty printing in console."""
         return generate_rich_representation(self)

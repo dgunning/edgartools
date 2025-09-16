@@ -230,17 +230,72 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
     return -6
 
 
-def format_value(value: Union[int, float, str], is_monetary: bool, scale: int, 
-                 decimals: Optional[int] = None) -> str:
+def get_currency_symbol(unit_measure: Optional[str]) -> str:
+    """
+    Get the appropriate currency symbol from a unit measure string.
+
+    Args:
+        unit_measure: Unit measure string (e.g., 'iso4217:USD', 'iso4217:EUR')
+
+    Returns:
+        Currency symbol (e.g., '$', '€', '£')
+    """
+    if not unit_measure:
+        return "$"  # Default to USD
+
+    # Map common ISO 4217 currency codes to symbols
+    currency_symbols = {
+        'iso4217:USD': '$',
+        'iso4217:EUR': '€',
+        'iso4217:GBP': '£',
+        'iso4217:JPY': '¥',
+        'iso4217:CAD': 'C$',
+        'iso4217:AUD': 'A$',
+        'iso4217:CHF': 'CHF',
+        'iso4217:CNY': '¥',
+        'iso4217:INR': '₹',
+        'iso4217:KRW': '₩',
+        'iso4217:BRL': 'R$',
+        'iso4217:MXN': 'MX$',
+        'iso4217:SEK': 'kr',
+        'iso4217:NOK': 'kr',
+        'iso4217:DKK': 'kr',
+        'iso4217:PLN': 'zł',
+        'iso4217:CZK': 'Kč',
+        'iso4217:HUF': 'Ft',
+        'iso4217:RUB': '₽',
+        'iso4217:ZAR': 'R',
+        'iso4217:SGD': 'S$',
+        'iso4217:HKD': 'HK$',
+        'iso4217:TWD': 'NT$',
+        'iso4217:THB': '฿',
+        'iso4217:MYR': 'RM',
+        'iso4217:IDR': 'Rp',
+        'iso4217:PHP': '₱',
+        'iso4217:VND': '₫',
+        'iso4217:ILS': '₪',
+        'iso4217:TRY': '₺',
+        'iso4217:AED': 'AED',
+        'iso4217:SAR': 'SR',
+        'iso4217:EGP': 'E£',
+        'iso4217:NGN': '₦',
+    }
+
+    return currency_symbols.get(unit_measure, '$')  # Default to USD if unknown
+
+
+def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
+                 decimals: Optional[int] = None, currency_symbol: Optional[str] = None) -> str:
     """
     Format a value with appropriate scaling and formatting.
-    
+
     Args:
         value: The value to format
         is_monetary: Whether the value is monetary
         scale: The scale to apply (-3 for thousands, -6 for millions, -9 for billions)
         decimals: XBRL decimals attribute value (optional)
-        
+        currency_symbol: Currency symbol to use for monetary values (default: '$')
+
     Returns:
         Formatted value string
     """
@@ -291,10 +346,12 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
     
     # Format with currency symbol if monetary, otherwise just format the number
     if is_monetary:
+        # Use the provided currency symbol or default to '$'
+        symbol = currency_symbol if currency_symbol is not None else '$'
         if value < 0:
-            return f"$({abs(scaled_value):{decimal_format}})"
+            return f"{symbol}({abs(scaled_value):{decimal_format}})"
         else:
-            return f"${scaled_value:{decimal_format}}"
+            return f"{symbol}{scaled_value:{decimal_format}}"
     else:
         # For non-monetary values, use parentheses for negative numbers
         if value < 0:

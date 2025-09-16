@@ -968,13 +968,14 @@ def _create_units_note(
 
 
 def _format_value_for_display_as_string(
-    value: Any, 
-    item: Dict[str, Any], 
-    period_key: str, 
+    value: Any,
+    item: Dict[str, Any],
+    period_key: str,
     is_monetary_statement: bool,
     dominant_scale: int,
     shares_scale: Optional[int],
-    comparison_info: Optional[Dict[str, Any]] = None
+    comparison_info: Optional[Dict[str, Any]] = None,
+    xbrl_instance: Optional[Any] = None
 ) -> str:
     """
     Format a value for display in a financial statement, returning a string.
@@ -1057,7 +1058,18 @@ def _format_value_for_display_as_string(
                 return f"{value:,.0f}"
         else:
             # Use cached format_value function for other values
-            return format_value(value, is_monetary, dominant_scale, fact_decimals)
+            # Get currency symbol for this period using on-demand resolution
+            currency_symbol = None
+            if is_monetary and period_key and xbrl_instance:
+                from edgar.xbrl.core import get_currency_symbol
+                # Get element name from item
+                element_name = item.get('name') or item.get('concept', '')
+                if element_name:
+                    currency_measure = xbrl_instance.get_currency_for_fact(element_name, period_key)
+                    if currency_measure:
+                        currency_symbol = get_currency_symbol(currency_measure)
+
+            return format_value(value, is_monetary, dominant_scale, fact_decimals, currency_symbol)
     else:
         # String values - only check HTML if it might contain tags
         if '<' in value and '>' in value and _is_html(value):
@@ -1066,13 +1078,14 @@ def _format_value_for_display_as_string(
 
 
 def _format_value_for_display(
-    value: Any, 
-    item: Dict[str, Any], 
-    period_key: str, 
+    value: Any,
+    item: Dict[str, Any],
+    period_key: str,
     is_monetary_statement: bool,
     dominant_scale: int,
     shares_scale: Optional[int],
-    comparison_info: Optional[Dict[str, Any]] = None
+    comparison_info: Optional[Dict[str, Any]] = None,
+    xbrl_instance: Optional[Any] = None
 ) -> Text:
     """
     Format a value for display in a financial statement, returning a Rich Text object.
@@ -1091,7 +1104,7 @@ def _format_value_for_display(
     """
     # Get the formatted string value
     formatted_str = _format_value_for_display_as_string(
-        value, item, period_key, is_monetary_statement, dominant_scale, shares_scale, comparison_info
+        value, item, period_key, is_monetary_statement, dominant_scale, shares_scale, comparison_info, xbrl_instance
     )
     
     # Convert to Rich Text object with right justification
@@ -1106,7 +1119,8 @@ def render_statement(
     entity_info: Optional[Dict[str, Any]] = None,
     standard: bool = True,
     show_date_range: bool = False,
-    show_comparisons: bool = True
+    show_comparisons: bool = True,
+    xbrl_instance: Optional[Any] = None
 ) -> RenderedStatement:
     """
     Render a financial statement as a structured intermediate representation.
@@ -1127,7 +1141,7 @@ def render_statement(
     """
     if entity_info is None:
         entity_info = {}
-    
+
     # Apply standardization if requested
     if standard:
         # Create a concept mapper with default mappings
@@ -1141,9 +1155,11 @@ def render_statement(
         statement_data = standardization.standardize_statement(statement_data, mapper)
         
         # Update facts with standardized labels if XBRL instance is available
-        xbrl_instance = entity_info.get('xbrl_instance')
-        if xbrl_instance and hasattr(xbrl_instance, 'facts_view'):
-            facts_view = xbrl_instance.facts_view
+        entity_xbrl_instance = entity_info.get('xbrl_instance')
+        # Use passed xbrl_instance or fall back to entity info
+        facts_xbrl_instance = xbrl_instance or entity_xbrl_instance
+        if facts_xbrl_instance and hasattr(facts_xbrl_instance, 'facts_view'):
+            facts_view = facts_xbrl_instance.facts_view
             facts = facts_view.get_facts()
             
             # Create a mapping of concept -> standardized label from statement data
@@ -1427,7 +1443,7 @@ def render_statement(
                 return _format_value_for_display_as_string(
                     value, item, pk,
                     is_monetary_statement, dominant_scale, shares_scale,
-                    comparison_info
+                    comparison_info, xbrl_instance
                 )
             
             # Create a cell and add it to the row

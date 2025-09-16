@@ -5,7 +5,7 @@ This module contains utility functions for rendering and converting stitched
 statement data.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import pandas as pd
 
@@ -15,7 +15,8 @@ def render_stitched_statement(
     statement_title: str,
     statement_type: str,
     entity_info: Dict[str, Any] = None,
-    show_date_range: bool = False
+    show_date_range: bool = False,
+    xbrl_instance: Optional[Any] = None
 ):
     """
     Render a stitched statement using the same rendering logic as individual statements.
@@ -49,7 +50,8 @@ def render_stitched_statement(
         statement_title=statement_title,
         statement_type=statement_type,
         entity_info=entity_info,
-        show_date_range=show_date_range
+        show_date_range=show_date_range,
+        xbrl_instance=xbrl_instance
     )
 
 
