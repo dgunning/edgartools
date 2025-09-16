@@ -11,13 +11,11 @@ from edgar import Company
 from edgar.core import set_identity
 
 
-# Set identity for SEC API requests
-set_identity("EdgarTools Test Suite test@edgartools.dev")
-
 
 class TestStandardizedConcepts:
     """Test standardized financial concept access methods."""
 
+    @pytest.mark.network
     def test_get_revenue_apple(self):
         """Test revenue standardization with Apple (uses RevenueFromContractWithCustomerExcludingAssessedTax)."""
         company = Company("AAPL")
@@ -32,6 +30,7 @@ class TestStandardizedConcepts:
         if revenue_2023:
             assert revenue_2023 > 200_000_000_000, "Apple 2023 revenue should be > $200B"
 
+    @pytest.mark.network
     def test_get_revenue_tesla(self):
         """Test revenue standardization with Tesla (may use different concept)."""
         company = Company("TSLA")
@@ -41,6 +40,7 @@ class TestStandardizedConcepts:
         assert revenue is not None, "Tesla should have revenue data"
         assert revenue > 35_000_000_000, "Tesla revenue should be > $35B"
 
+    @pytest.mark.network
     def test_get_net_income_apple(self):
         """Test net income standardization with Apple."""
         company = Company("AAPL")
@@ -50,6 +50,7 @@ class TestStandardizedConcepts:
         assert net_income is not None, "Apple should have net income data"
         assert net_income > 80_000_000_000, "Apple net income should be > $80B"
 
+    @pytest.mark.network
     def test_get_total_assets_apple(self):
         """Test total assets standardization with Apple."""
         company = Company("AAPL")
@@ -59,6 +60,7 @@ class TestStandardizedConcepts:
         assert assets is not None, "Apple should have total assets data"
         assert assets > 300_000_000_000, "Apple assets should be > $300B"
 
+    @pytest.mark.network
     def test_get_total_liabilities_apple(self):
         """Test total liabilities standardization with Apple."""
         company = Company("AAPL")
@@ -68,6 +70,7 @@ class TestStandardizedConcepts:
         assert liabilities is not None, "Apple should have total liabilities data"
         assert liabilities > 100_000_000_000, "Apple liabilities should be > $100B"
 
+    @pytest.mark.network
     def test_get_shareholders_equity_apple(self):
         """Test shareholders equity standardization with Apple."""
         company = Company("AAPL")
@@ -77,6 +80,7 @@ class TestStandardizedConcepts:
         assert equity is not None, "Apple should have shareholders equity data"
         assert equity > 50_000_000_000, "Apple equity should be > $50B"
 
+    @pytest.mark.network
     def test_get_operating_income_apple(self):
         """Test operating income standardization with Apple."""
         company = Company("AAPL")
@@ -86,6 +90,7 @@ class TestStandardizedConcepts:
         assert op_income is not None, "Apple should have operating income data"
         assert op_income > 100_000_000_000, "Apple operating income should be > $100B"
 
+    @pytest.mark.network
     def test_get_gross_profit_apple(self):
         """Test gross profit standardization with Apple."""
         company = Company("AAPL")
@@ -95,6 +100,7 @@ class TestStandardizedConcepts:
         assert gross_profit is not None, "Apple should have gross profit data"
         assert gross_profit > 100_000_000_000, "Apple gross profit should be > $100B"
 
+    @pytest.mark.network
     def test_concept_consistency_apple(self):
         """Test that concepts are consistent and make financial sense."""
         company = Company("AAPL")
@@ -120,6 +126,7 @@ class TestStandardizedConcepts:
             balance_diff = abs(assets - (liabilities + equity))
             assert balance_diff / assets < 0.01, "Assets should equal Liabilities + Equity"
 
+    @pytest.mark.network
     def test_period_specific_access(self):
         """Test accessing data for specific periods."""
         company = Company("AAPL")
@@ -132,6 +139,7 @@ class TestStandardizedConcepts:
         if q4_revenue and annual_revenue:
             assert q4_revenue < annual_revenue, "Q4 revenue should be less than annual revenue"
 
+    @pytest.mark.network
     def test_unit_filtering(self):
         """Test unit filtering functionality."""
         company = Company("AAPL")
@@ -144,6 +152,7 @@ class TestStandardizedConcepts:
         if revenue_usd and revenue_default:
             assert revenue_usd == revenue_default, "USD and default should return same value"
 
+    @pytest.mark.network
     def test_missing_concepts_return_none(self):
         """Test that missing concepts return None rather than throwing errors."""
         company = Company("AAPL")
@@ -159,6 +168,7 @@ class TestStandardizedConcepts:
         missing_unit = facts.get_revenue(unit="shares")
         assert missing_unit is None, "Incompatible unit type should return None"
 
+    @pytest.mark.network
     def test_concept_mapping_info(self):
         """Test the concept mapping info helper method."""
         company = Company("AAPL")
@@ -185,6 +195,8 @@ class TestStandardizedConcepts:
             assert 'unit' in details
             assert 'latest_value' in details
 
+    @pytest.mark.network
+    @pytest.mark.slow
     def test_multiple_companies_consistency(self):
         """Test that standardized methods work consistently across different companies."""
         companies = ["AAPL", "MSFT", "GOOGL"]
@@ -203,6 +215,7 @@ class TestStandardizedConcepts:
             assert assets is not None, f"{ticker} should have assets data"
             assert assets > 50_000_000_000, f"{ticker} assets should be > $50B"
 
+    @pytest.mark.network
     def test_fallback_calculations(self):
         """Test that fallback calculations work when primary concepts are missing."""
         company = Company("AAPL")
@@ -220,6 +233,7 @@ class TestStandardizedConcepts:
                 # This should be positive for profitable companies
                 assert calculated_gross > 0, "Calculated gross profit should be positive"
 
+    @pytest.mark.network
     def test_edge_cases(self):
         """Test edge cases and error handling."""
         company = Company("AAPL")
@@ -237,6 +251,8 @@ class TestStandardizedConcepts:
 class TestRealWorldScenarios:
     """Test real-world usage scenarios from FEAT-411."""
 
+    @pytest.mark.network
+    @pytest.mark.slow
     def test_user_example_from_issue(self):
         """Test the exact example from the GitHub issue."""
         # This tests the specific use case that led to FEAT-411
@@ -263,6 +279,8 @@ class TestRealWorldScenarios:
             assert data['revenue'] > 0, f"{ticker} revenue should be positive"
             assert data['assets'] > 0, f"{ticker} assets should be positive"
 
+    @pytest.mark.network
+    @pytest.mark.slow
     def test_multi_company_analysis_workflow(self):
         """Test a typical multi-company analysis workflow."""
         companies = ["AAPL", "MSFT"]
@@ -294,6 +312,7 @@ class TestRealWorldScenarios:
             assert 0 < metric['profit_margin'] < 50, "Profit margin should be reasonable"
             assert 0 < metric['roa'] < 30, "ROA should be reasonable"
 
+    @pytest.mark.network
     def test_period_comparison_analysis(self):
         """Test period-over-period comparison analysis."""
         company = Company("AAPL")
@@ -307,6 +326,7 @@ class TestRealWorldScenarios:
             # Apple should have some growth, but not more than 50%
             assert -20 < growth_rate < 50, "Revenue growth rate should be reasonable"
 
+    @pytest.mark.network
     def test_standardized_vs_direct_access(self):
         """Test that standardized methods return same values as direct fact access when possible."""
         company = Company("AAPL")

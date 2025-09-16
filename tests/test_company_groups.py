@@ -5,12 +5,12 @@ A simple and elegant way to test features across curated groups of companies
 using the company-subsets API as the foundation.
 
 Example usage:
-    @test_on_company_group(nasdaq_top20)
+    @run_on_company_group(nasdaq_top20)
     def test_standardized_concepts(company):
         facts = company.get_facts()
         assert facts.get_revenue() is not None
 
-    @test_on_company_group("tech_giants", max_failures=2)
+    @run_on_company_group("tech_giants", max_failures=2)
     def test_financial_ratios(company):
         # Test logic here
         pass
@@ -32,10 +32,6 @@ from edgar.reference.company_subsets import (
     get_dow_jones_sample,
     PopularityTier
 )
-
-
-# Set identity for SEC API requests
-set_identity("EdgarTools Test Suite test@edgartools.dev")
 
 
 @dataclass
@@ -137,7 +133,7 @@ def get_company_group(group: Union[str, pd.DataFrame, Callable]) -> pd.DataFrame
         raise ValueError(f"Invalid group type: {type(group)}")
 
 
-def test_on_company_group(
+def run_on_company_group(
     group: Union[str, pd.DataFrame, Callable],
     max_failures: int = 5,
     skip_on_error: bool = True,
@@ -153,7 +149,7 @@ def test_on_company_group(
         timeout_per_company: Max seconds per company (future enhancement)
 
     Example:
-        @test_on_company_group("tech_giants", max_failures=2)
+        @run_on_company_group("tech_giants", max_failures=2)
         def test_revenue_available(company):
             facts = company.get_facts()
             revenue = facts.get_revenue()
@@ -263,40 +259,41 @@ def test_on_company_group(
 
 
 # Convenience decorators for common groups
-def test_on_tech_giants(max_failures: int = 3):
+def on_tech_giants(max_failures: int = 3):
     """Test on major technology companies."""
-    return test_on_company_group("tech_giants", max_failures=max_failures)
+    return run_on_company_group("tech_giants", max_failures=max_failures)
 
 
-def test_on_nasdaq_top20(max_failures: int = 4):
+def on_nasdaq_top20(max_failures: int = 4):
     """Test on top 20 NASDAQ companies."""
-    return test_on_company_group("nasdaq_top20", max_failures=max_failures)
+    return run_on_company_group("nasdaq_top20", max_failures=max_failures)
 
 
-def test_on_diverse_sample(max_failures: int = 5):
+def on_diverse_sample(max_failures: int = 5):
     """Test on diverse sample of popular companies."""
-    return test_on_company_group("diverse_sample", max_failures=max_failures)
+    return run_on_company_group("diverse_sample", max_failures=max_failures)
 
 
-# Example test classes using the framework
-class TestStandardizedConceptsOnGroups:
-    """Test standardized financial concepts across company groups."""
+# Example tests using the framework (these are examples, not regular pytest tests)
+# Use these by calling them directly or importing them into other test files
 
-    @test_on_tech_giants(max_failures=2)
-    def test_revenue_standardization(self, company):
-        """Test that revenue standardization works across tech companies."""
+def example_revenue_standardization_test():
+    """Example: Test that revenue standardization works across tech companies."""
+    @on_tech_giants(max_failures=2)
+    def test_revenue(company):
         facts = company.get_facts()
         revenue = facts.get_revenue()
-
         assert revenue is not None, f"{company.ticker} should have revenue data"
         assert revenue > 1_000_000_000, f"{company.ticker} revenue should be > $1B"
 
-    @test_on_company_group("mega_cap", max_failures=1)
-    def test_complete_financial_metrics(self, company):
-        """Test that mega-cap companies have complete financial metrics."""
-        facts = company.get_facts()
+    return test_revenue()
 
-        # All these methods should return values for mega-cap companies
+
+def example_complete_financial_metrics_test():
+    """Example: Test that mega-cap companies have complete financial metrics."""
+    @run_on_company_group("mega_cap", max_failures=1)
+    def test_financials(company):
+        facts = company.get_facts()
         revenue = facts.get_revenue()
         net_income = facts.get_net_income()
         assets = facts.get_total_assets()
@@ -304,24 +301,21 @@ class TestStandardizedConceptsOnGroups:
         assert revenue is not None, f"{company.ticker} missing revenue"
         assert net_income is not None, f"{company.ticker} missing net income"
         assert assets is not None, f"{company.ticker} missing assets"
-
-        # Basic financial relationships
         assert assets > revenue, f"{company.ticker} assets should be > revenue"
 
-    @test_on_diverse_sample(max_failures=5)
-    def test_concept_mapping_robustness(self, company):
-        """Test that concept mapping works across diverse companies."""
+    return test_financials()
+
+
+def example_concept_mapping_robustness_test():
+    """Example: Test that concept mapping works across diverse companies."""
+    @on_diverse_sample(max_failures=5)
+    def test_concepts(company):
         facts = company.get_facts()
-
-        # At least one of these should be available
-        metrics = [
-            facts.get_revenue(),
-            facts.get_net_income(),
-            facts.get_total_assets()
-        ]
-
+        metrics = [facts.get_revenue(), facts.get_net_income(), facts.get_total_assets()]
         available_metrics = [m for m in metrics if m is not None]
         assert len(available_metrics) > 0, f"{company.ticker} has no standardized metrics available"
+
+    return test_concepts()
 
 
 # Custom group examples
@@ -347,30 +341,29 @@ def create_custom_size_stratified_group():
     return combine_company_sets([mega_cap, popular])
 
 
-class TestCustomGroups:
-    """Examples of testing with custom company groups."""
-
-    @test_on_company_group(create_custom_healthcare_group, max_failures=3)
-    def test_healthcare_companies(self, company):
-        """Test standardized concepts on healthcare companies."""
+# Examples of testing with custom company groups
+def example_healthcare_companies_test():
+    """Example: Test standardized concepts on healthcare companies."""
+    @run_on_company_group(create_custom_healthcare_group, max_failures=3)
+    def test_healthcare(company):
         facts = company.get_facts()
-
-        # Healthcare companies should have basic financial data
         revenue = facts.get_revenue()
         if revenue is not None:
             assert revenue > 0, f"{company.ticker} revenue should be positive"
 
-    @test_on_company_group(create_custom_size_stratified_group, max_failures=2)
-    def test_size_stratified_consistency(self, company):
-        """Test that standardized methods work across company sizes."""
-        facts = company.get_facts()
+    return test_healthcare()
 
-        # Should be able to get concept mapping info
+
+def example_size_stratified_consistency_test():
+    """Example: Test that standardized methods work across company sizes."""
+    @run_on_company_group(create_custom_size_stratified_group, max_failures=2)
+    def test_stratified(company):
+        facts = company.get_facts()
         revenue_concepts = ['Revenue', 'Revenues', 'NetSales']
         info = facts.get_concept_mapping_info(revenue_concepts)
-
-        # Should have at least some concept information
         assert len(info['available']) + len(info['missing']) == len(revenue_concepts)
+
+    return test_stratified()
 
 
 if __name__ == "__main__":
@@ -382,7 +375,7 @@ if __name__ == "__main__":
     print(f"📋 Available company groups: {list(COMPANY_GROUPS.keys())}")
 
     # Demo a simple test
-    @test_on_company_group("faang", max_failures=1)
+    @run_on_company_group("faang", max_failures=1)
     def demo_test(company):
         facts = company.get_facts()
         revenue = facts.get_revenue()

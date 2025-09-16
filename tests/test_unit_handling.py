@@ -18,13 +18,11 @@ from edgar.entity.models import FinancialFact
 from edgar import Company
 from edgar.core import set_identity
 
-# Set identity for SEC API requests
-set_identity("EdgarTools Test Suite test@edgartools.dev")
-
 
 class TestUnitNormalizer:
     """Test the UnitNormalizer class functionality."""
 
+    @pytest.mark.fast
     def test_currency_normalization(self):
         """Test currency unit normalization."""
         # Standard currency units
@@ -42,6 +40,7 @@ class TestUnitNormalizer:
         assert UnitNormalizer.normalize_unit("POUND") == "GBP"
         assert UnitNormalizer.normalize_unit("BRITISH POUND") == "GBP"
 
+    @pytest.mark.fast
     def test_share_unit_normalization(self):
         """Test share-based unit normalization."""
         assert UnitNormalizer.normalize_unit("shares") == "shares"
@@ -52,6 +51,7 @@ class TestUnitNormalizer:
         assert UnitNormalizer.normalize_unit("shares_unit") == "shares_unit"
         assert UnitNormalizer.normalize_unit("USD/PartnershipUnit") == "partnership_unit"
 
+    @pytest.mark.fast
     def test_ratio_unit_normalization(self):
         """Test ratio/dimensionless unit normalization."""
         assert UnitNormalizer.normalize_unit("pure") == "pure"
@@ -60,12 +60,14 @@ class TestUnitNormalizer:
         assert UnitNormalizer.normalize_unit("percent") == "pure"
         assert UnitNormalizer.normalize_unit("%") == "pure"
 
+    @pytest.mark.fast
     def test_per_share_unit_normalization(self):
         """Test per-share unit normalization."""
         assert UnitNormalizer.normalize_unit("USD/shares") == "USD_per_share"
         assert UnitNormalizer.normalize_unit("USD per share") == "USD_per_share"
         assert UnitNormalizer.normalize_unit("USD/shares_unit") == "USD_per_share_unit"
 
+    @pytest.mark.fast
     def test_business_unit_normalization(self):
         """Test business/operational unit normalization."""
         assert UnitNormalizer.normalize_unit("Customer") == "customer"
@@ -74,22 +76,26 @@ class TestUnitNormalizer:
         assert UnitNormalizer.normalize_unit("Segment") == "segment"
         assert UnitNormalizer.normalize_unit("reportable_segment") == "segment"
 
+    @pytest.mark.fast
     def test_time_unit_normalization(self):
         """Test time-based unit normalization."""
         assert UnitNormalizer.normalize_unit("Year") == "years"
         assert UnitNormalizer.normalize_unit("YEARS") == "years"
         assert UnitNormalizer.normalize_unit("Month") == "months"
 
+    @pytest.mark.fast
     def test_area_unit_normalization(self):
         """Test area unit normalization."""
         assert UnitNormalizer.normalize_unit("sqft") == "sqft"
         assert UnitNormalizer.normalize_unit("square_feet") == "sqft"
 
+    @pytest.mark.fast
     def test_unknown_units_passthrough(self):
         """Test that unknown units pass through unchanged."""
         assert UnitNormalizer.normalize_unit("UNKNOWN_UNIT") == "UNKNOWN_UNIT"
         assert UnitNormalizer.normalize_unit("CustomUnit") == "CustomUnit"
 
+    @pytest.mark.fast
     def test_get_unit_type(self):
         """Test unit type classification."""
         assert UnitNormalizer.get_unit_type("USD") == UnitType.CURRENCY
@@ -109,6 +115,7 @@ class TestUnitNormalizer:
 
         assert UnitNormalizer.get_unit_type("unknown") == UnitType.OTHER
 
+    @pytest.mark.fast
     def test_unit_compatibility(self):
         """Test unit compatibility checking."""
         # Exact matches
@@ -137,6 +144,7 @@ class TestUnitNormalizer:
 class TestUnitResult:
     """Test the UnitResult class functionality."""
 
+    @pytest.mark.fast
     def test_unit_result_creation(self):
         """Test UnitResult object creation."""
         result = UnitResult(
@@ -154,6 +162,7 @@ class TestUnitResult:
         assert result.scale_applied == 1000
         assert result.suggestions == []  # Default empty list
 
+    @pytest.mark.fast
     def test_unit_result_with_error(self):
         """Test UnitResult with error information."""
         result = UnitResult(
@@ -174,6 +183,7 @@ class TestUnitResult:
 class TestGetNormalizedValue:
     """Test the get_normalized_value method."""
 
+    @pytest.mark.fast
     def create_test_fact(self, value: float, unit: str, scale: int = None) -> FinancialFact:
         """Helper to create test FinancialFact objects."""
         return FinancialFact(
@@ -193,6 +203,7 @@ class TestGetNormalizedValue:
             accession="test"
         )
 
+    @pytest.mark.fast
     def test_get_normalized_value_success(self):
         """Test successful unit normalization."""
         fact = self.create_test_fact(1000.0, "USD")
@@ -203,6 +214,7 @@ class TestGetNormalizedValue:
         assert result.normalized_unit == "USD"
         assert result.original_unit == "USD"
 
+    @pytest.mark.fast
     def test_get_normalized_value_with_variation(self):
         """Test normalization with unit variation."""
         fact = self.create_test_fact(1000.0, "US DOLLAR")
@@ -213,6 +225,7 @@ class TestGetNormalizedValue:
         assert result.normalized_unit == "USD"  # Normalized
         assert result.original_unit == "US DOLLAR"
 
+    @pytest.mark.fast
     def test_get_normalized_value_with_scale(self):
         """Test normalization with scale factor."""
         fact = self.create_test_fact(1000.0, "USD", scale=1000)
@@ -222,6 +235,7 @@ class TestGetNormalizedValue:
         assert result.value == 1_000_000.0  # 1000 * 1000
         assert result.scale_applied == 1000
 
+    @pytest.mark.fast
     def test_get_normalized_value_no_scale(self):
         """Test normalization without applying scale."""
         fact = self.create_test_fact(1000.0, "USD", scale=1000)
@@ -231,6 +245,7 @@ class TestGetNormalizedValue:
         assert result.value == 1000.0  # Scale not applied
         assert result.scale_applied is None
 
+    @pytest.mark.fast
     def test_get_normalized_value_compatible_currency(self):
         """Test normalization with compatible but different currency."""
         fact = self.create_test_fact(1000.0, "EUR")
@@ -242,6 +257,7 @@ class TestGetNormalizedValue:
         assert len(result.suggestions) > 0
         assert "currency conversion" in result.suggestions[0].lower()
 
+    @pytest.mark.fast
     def test_get_normalized_value_incompatible(self):
         """Test normalization with incompatible units."""
         fact = self.create_test_fact(1000.0, "shares")
@@ -252,6 +268,7 @@ class TestGetNormalizedValue:
         assert "not compatible" in result.error_reason
         assert len(result.suggestions) > 0
 
+    @pytest.mark.fast
     def test_get_normalized_value_no_numeric_value(self):
         """Test normalization with no numeric value."""
         fact = self.create_test_fact(None, "USD")
@@ -262,6 +279,7 @@ class TestGetNormalizedValue:
         assert result.value is None
         assert "No numeric value available" in result.error_reason
 
+    @pytest.mark.fast
     def test_get_normalized_value_no_target_unit(self):
         """Test normalization without target unit (just normalize)."""
         fact = self.create_test_fact(1000.0, "US DOLLAR")
@@ -276,12 +294,14 @@ class TestGetNormalizedValue:
 class TestUtilityFunctions:
     """Test utility functions."""
 
+    @pytest.mark.fast
     def test_apply_scale_factor(self):
         """Test scale factor application."""
         assert apply_scale_factor(1000.0, 1000) == 1_000_000.0
         assert apply_scale_factor(1000.0, 1) == 1000.0
         assert apply_scale_factor(1000.0, None) == 1000.0
 
+    @pytest.mark.fast
     def test_format_unit_error(self):
         """Test unit error formatting."""
         result = UnitResult(
@@ -300,6 +320,7 @@ class TestUtilityFunctions:
         assert "Original unit: 'shares'" in formatted
         assert "Normalized to: 'USD'" in formatted
 
+    @pytest.mark.fast
     def test_format_unit_error_success(self):
         """Test error formatting for successful result."""
         result = UnitResult(
@@ -316,6 +337,7 @@ class TestUtilityFunctions:
 class TestEnhancedStandardizedMethods:
     """Test enhanced standardized methods with unit handling."""
 
+    @pytest.mark.network
     def test_get_revenue_detailed(self):
         """Test detailed revenue method with unit information."""
         company = Company("AAPL")
@@ -337,6 +359,7 @@ class TestEnhancedStandardizedMethods:
             assert result.error_reason is not None
             assert isinstance(result.suggestions, list)
 
+    @pytest.mark.network
     def test_get_net_income_detailed(self):
         """Test detailed net income method with unit information."""
         company = Company("AAPL")
@@ -351,6 +374,7 @@ class TestEnhancedStandardizedMethods:
         else:
             assert result.error_reason is not None
 
+    @pytest.mark.network
     def test_check_unit_compatibility(self):
         """Test unit compatibility checking method."""
         company = Company("AAPL")
@@ -371,6 +395,7 @@ class TestEnhancedStandardizedMethods:
             assert 'fact1_normalized' in compat
             assert 'fact2_normalized' in compat
 
+    @pytest.mark.network
     def test_check_unit_compatibility_missing_concept(self):
         """Test unit compatibility with missing concept."""
         company = Company("AAPL")
@@ -383,6 +408,7 @@ class TestEnhancedStandardizedMethods:
         assert 'not found' in compat['issue']
         assert len(compat['suggestions']) > 0
 
+    @pytest.mark.network
     def test_enhanced_methods_vs_original(self):
         """Test that enhanced methods return same values as original methods."""
         company = Company("AAPL")
@@ -406,6 +432,7 @@ class TestEnhancedStandardizedMethods:
 class TestRealWorldUnitScenarios:
     """Test real-world unit handling scenarios."""
 
+    @pytest.mark.network
     def test_fallback_calculation_with_unit_handling(self):
         """Test that fallback calculations use enhanced unit handling."""
         company = Company("AAPL")
@@ -423,6 +450,7 @@ class TestRealWorldUnitScenarios:
             # Fallback calculation may fail, which is acceptable
             pass
 
+    @pytest.mark.network
     def test_scale_factor_handling(self):
         """Test handling of scale factors in unit normalization."""
         company = Company("AAPL")
@@ -444,6 +472,7 @@ class TestRealWorldUnitScenarios:
                 assert abs(result.value - expected_value) < 0.01
                 assert result.scale_applied == fact.scale
 
+    @pytest.mark.fast
     def test_currency_unit_variations(self):
         """Test handling of various currency unit representations."""
         # Create test facts with different currency representations
@@ -460,6 +489,7 @@ class TestRealWorldUnitScenarios:
             normalized = UnitNormalizer.normalize_unit(original_unit)
             assert normalized == expected_normalized, f"Failed for {original_unit}"
 
+    @pytest.mark.fast
     def test_per_share_unit_variations(self):
         """Test handling of per-share unit variations."""
         # USD/shares and USD/shares_unit are different concepts - one is per common share,

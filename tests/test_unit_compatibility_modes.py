@@ -10,13 +10,11 @@ from edgar import Company
 from edgar.core import set_identity
 from edgar.entity.unit_handling import UnitNormalizer, UnitResult
 
-# Set identity for SEC API requests
-set_identity("EdgarTools Test Suite test@edgartools.dev")
-
 
 class TestUnitCompatibilityModes:
     """Test strict vs compatible unit matching behavior."""
 
+    @pytest.mark.network
     def test_strict_unit_matching_default(self):
         """Test that standardized methods use strict unit matching by default."""
         company = Company("AAPL")
@@ -34,6 +32,7 @@ class TestUnitCompatibilityModes:
         shares_revenue = facts.get_revenue(unit="shares")
         assert shares_revenue is None, "shares unit should return None for revenue"
 
+    @pytest.mark.fast
     def test_unit_normalizer_strict_mode(self):
         """Test UnitNormalizer strict mode behavior directly."""
         from edgar.entity.models import FinancialFact
@@ -65,6 +64,7 @@ class TestUnitCompatibilityModes:
         assert result_compatible.value is not None, "Compatible mode should return value"
         assert len(result_compatible.suggestions) > 0, "Should provide conversion suggestion"
 
+    @pytest.mark.fast
     def test_per_share_unit_precision(self):
         """Test that per-share units require exact matching even in compatible mode."""
         # USD/shares and USD/shares_unit should not be compatible
@@ -74,6 +74,7 @@ class TestUnitCompatibilityModes:
         assert UnitNormalizer.are_compatible("USD/shares", "USD per share")
         assert UnitNormalizer.are_compatible("USD/shares_unit", "USD per share unit")
 
+    @pytest.mark.fast
     def test_unit_type_classification(self):
         """Test that unit types are correctly classified."""
         # Regular currencies
@@ -88,6 +89,7 @@ class TestUnitCompatibilityModes:
         assert UnitNormalizer.get_unit_type("shares").name == "SHARES"
         assert UnitNormalizer.get_unit_type("shares_unit").name == "SHARES"
 
+    @pytest.mark.network
     def test_fallback_calculation_unit_handling(self):
         """Test that fallback calculations handle unit compatibility appropriately."""
         company = Company("AAPL")
@@ -99,6 +101,7 @@ class TestUnitCompatibilityModes:
             # Should get a reasonable value
             assert gross_profit > 0, "Gross profit should be positive"
 
+    @pytest.mark.fast
     def test_real_world_unit_variations(self):
         """Test handling of real-world unit variations."""
         # Test various currency representations
@@ -113,6 +116,7 @@ class TestUnitCompatibilityModes:
             assert UnitNormalizer.normalize_unit(variation) == normalized
             assert UnitNormalizer.are_compatible(normalized, variation)
 
+    @pytest.mark.fast
     def test_error_messages_and_suggestions(self):
         """Test that unit mismatch errors provide helpful suggestions."""
         from edgar.entity.models import FinancialFact
@@ -142,6 +146,7 @@ class TestUnitCompatibilityModes:
 class TestUnitHandlingDocumentation:
     """Document expected behavior through tests."""
 
+    @pytest.mark.network
     def test_user_expectations_documentation(self):
         """Document what users should expect from unit filtering."""
         company = Company("AAPL")
@@ -160,6 +165,7 @@ class TestUnitHandlingDocumentation:
         assert eur_revenue is None, "Should not auto-convert to EUR"
         assert shares_revenue is None, "Shares is incompatible with revenue"
 
+    @pytest.mark.fast
     def test_advanced_usage_patterns(self):
         """Test advanced usage patterns for power users."""
         # Power users can access the unit handling directly for more control
