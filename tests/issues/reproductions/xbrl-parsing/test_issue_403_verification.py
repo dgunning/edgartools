@@ -24,6 +24,7 @@ class TestIssue403Verification:
         # Create StitchedStatements instance
         self.statements = StitchedStatements(self.mock_xbrls)
 
+    @pytest.mark.regression
     @patch('edgar.xbrl.statements.StitchedStatement')
     def test_income_statement_standard_true(self, mock_stitched_statement):
         """Test that income_statement accepts 'standard=True' parameter."""
@@ -35,6 +36,7 @@ class TestIssue403Verification:
         args = mock_stitched_statement.call_args[0]
         assert args[3] == True  # standard parameter should be True
 
+    @pytest.mark.regression
     @patch('edgar.xbrl.statements.StitchedStatement')
     def test_income_statement_standard_false(self, mock_stitched_statement):
         """Test that income_statement accepts 'standard=False' parameter."""
@@ -46,6 +48,7 @@ class TestIssue403Verification:
         args = mock_stitched_statement.call_args[0]
         assert args[3] == False  # standard parameter should be False
 
+    @pytest.mark.regression
     @patch('edgar.xbrl.statements.StitchedStatement')
     def test_balance_sheet_standard_true(self, mock_stitched_statement):
         """Test that balance_sheet accepts 'standard=True' parameter."""
@@ -55,6 +58,7 @@ class TestIssue403Verification:
         args = mock_stitched_statement.call_args[0]
         assert args[3] == True
 
+    @pytest.mark.regression
     @patch('edgar.xbrl.statements.StitchedStatement')
     def test_cashflow_statement_standard_false(self, mock_stitched_statement):
         """Test that cashflow_statement accepts 'standard=False' parameter."""
@@ -64,6 +68,7 @@ class TestIssue403Verification:
         args = mock_stitched_statement.call_args[0]
         assert args[3] == False
 
+    @pytest.mark.regression
     @patch('edgar.xbrl.statements.StitchedStatement')
     def test_statement_of_equity_standard_true(self, mock_stitched_statement):
         """Test that statement_of_equity accepts 'standard=True' parameter."""
@@ -73,6 +78,7 @@ class TestIssue403Verification:
         args = mock_stitched_statement.call_args[0]
         assert args[3] == True
 
+    @pytest.mark.regression
     @patch('edgar.xbrl.statements.StitchedStatement')
     def test_comprehensive_income_standard_false(self, mock_stitched_statement):
         """Test that comprehensive_income accepts 'standard=False' parameter."""
@@ -82,6 +88,7 @@ class TestIssue403Verification:
         args = mock_stitched_statement.call_args[0]
         assert args[3] == False
 
+    @pytest.mark.regression
     def test_all_methods_have_standard_parameter(self):
         """Test that all statement methods have the 'standard' parameter."""
         import inspect
@@ -101,7 +108,7 @@ class TestIssue403Verification:
             assert 'standard' in sig.parameters, f"{method_name} missing 'standard' parameter"
             assert sig.parameters['standard'].default == True, f"{method_name} wrong default for 'standard'"
 
-
+@pytest.mark.regression
 def test_original_issue_scenario():
     """
     Test the original issue scenario: using standard=True should work.
