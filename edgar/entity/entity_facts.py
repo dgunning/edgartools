@@ -1288,19 +1288,23 @@ class EntityFacts:
                                       concept_variants: List[str],
                                       period: Optional[str] = None,
                                       unit: Optional[str] = None,
-                                      fallback_calculation: Optional[callable] = None) -> Optional[float]:
+                                      fallback_calculation: Optional[callable] = None,
+                                      return_detailed: bool = False) -> Optional[float]:
         """
-        Core method for retrieving standardized concept values with fallback logic.
+        Core method for retrieving standardized concept values with enhanced unit handling.
 
         Args:
             concept_variants: List of concept names to try in priority order
             period: Optional period filter
             unit: Optional unit filter (defaults to USD)
             fallback_calculation: Optional function to calculate value from components
+            return_detailed: If True, return UnitResult instead of just value
 
         Returns:
-            Numeric value or None if not found
+            Numeric value or None if not found (or UnitResult if return_detailed=True)
         """
+        from edgar.entity.unit_handling import UnitNormalizer, UnitResult, apply_scale_factor
+
         # Default to USD if no unit specified
         target_unit = unit or 'USD'
 
@@ -1310,20 +1314,53 @@ class EntityFacts:
             for concept_variant in [concept, f'us-gaap:{concept}']:
                 fact = self.get_fact(concept_variant, period)
                 if fact and fact.numeric_value is not None:
-                    # Check unit match (case-insensitive)
-                    if fact.unit.upper() == target_unit.upper():
-                        return fact.numeric_value
-                    # For some facts, unit might be stored differently
-                    elif target_unit.upper() == 'USD' and fact.unit.upper() in ['USD', 'US DOLLAR', 'DOLLARS']:
-                        return fact.numeric_value
+                    # Use enhanced unit handling
+                    unit_result = UnitNormalizer.get_normalized_value(
+                        fact=fact,
+                        target_unit=target_unit,
+                        apply_scale=True
+                    )
+
+                    if unit_result.success:
+                        if return_detailed:
+                            return unit_result
+                        return unit_result.value
 
         # Try fallback calculation if provided
         if fallback_calculation:
             try:
-                return fallback_calculation(period, target_unit)
-            except:
+                fallback_value = fallback_calculation(period, target_unit)
+                if fallback_value is not None:
+                    if return_detailed:
+                        return UnitResult(
+                            value=fallback_value,
+                            normalized_unit=UnitNormalizer.normalize_unit(target_unit),
+                            original_unit=target_unit,
+                            success=True,
+                            error_reason="Calculated from components"
+                        )
+                    return fallback_value
+            except Exception as e:
                 # Fallback calculation failed, continue
-                pass
+                if return_detailed:
+                    return UnitResult(
+                        value=None,
+                        normalized_unit=None,
+                        original_unit=target_unit or "",
+                        success=False,
+                        error_reason=f"Fallback calculation failed: {str(e)}"
+                    )
+
+        # No value found
+        if return_detailed:
+            return UnitResult(
+                value=None,
+                normalized_unit=None,
+                original_unit=target_unit or "",
+                success=False,
+                error_reason="No matching concept found",
+                suggestions=[f"Try checking if company uses alternative concept names"]
+            )
 
         return None
 
@@ -1333,6 +1370,8 @@ class EntityFacts:
 
         This follows the same logic as the enhanced_statement.py revenue deduplication.
         """
+        from edgar.entity.unit_handling import UnitNormalizer
+
         gross_profit_fact = self.get_fact('GrossProfit', period)
         cost_of_revenue_fact = self.get_fact('CostOfRevenue', period)
 
@@ -1347,10 +1386,21 @@ class EntityFacts:
             gross_profit_fact.numeric_value is not None and
             cost_of_revenue_fact.numeric_value is not None):
 
-            # Verify units match
-            if (gross_profit_fact.unit.upper() == unit.upper() and
-                cost_of_revenue_fact.unit.upper() == unit.upper()):
-                return gross_profit_fact.numeric_value + cost_of_revenue_fact.numeric_value
+            # Use enhanced unit compatibility checking
+            gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True)
+            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True)
+
+            if gp_result.success and cr_result.success:
+                return gp_result.value + cr_result.value
+
+            # Try compatibility check if direct match failed
+            if UnitNormalizer.are_compatible(gross_profit_fact.unit, cost_of_revenue_fact.unit):
+                # Same unit type but different representations - try calculation anyway
+                gp_normalized = UnitNormalizer.get_normalized_value(gross_profit_fact, apply_scale=True)
+                cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True)
+
+                if gp_normalized.success and cr_normalized.success:
+                    return gp_normalized.value + cr_normalized.value
 
         return None
 
@@ -1358,6 +1408,8 @@ class EntityFacts:
         """
         Calculate gross profit from Revenue - Cost of Revenue when explicit gross profit not available.
         """
+        from edgar.entity.unit_handling import UnitNormalizer
+
         # Try to get revenue using standardized method (but avoid infinite recursion)
         revenue_fact = None
         for concept in ['RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'Revenues', 'Revenue']:
@@ -1378,10 +1430,21 @@ class EntityFacts:
             revenue_fact.numeric_value is not None and
             cost_of_revenue_fact.numeric_value is not None):
 
-            # Verify units match
-            if (revenue_fact.unit.upper() == unit.upper() and
-                cost_of_revenue_fact.unit.upper() == unit.upper()):
-                return revenue_fact.numeric_value - cost_of_revenue_fact.numeric_value
+            # Use enhanced unit compatibility checking
+            rev_result = UnitNormalizer.get_normalized_value(revenue_fact, target_unit=unit, apply_scale=True)
+            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True)
+
+            if rev_result.success and cr_result.success:
+                return rev_result.value - cr_result.value
+
+            # Try compatibility check if direct match failed
+            if UnitNormalizer.are_compatible(revenue_fact.unit, cost_of_revenue_fact.unit):
+                # Same unit type but different representations - try calculation anyway
+                rev_normalized = UnitNormalizer.get_normalized_value(revenue_fact, apply_scale=True)
+                cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True)
+
+                if rev_normalized.success and cr_normalized.success:
+                    return rev_normalized.value - cr_normalized.value
 
         return None
 
@@ -1423,3 +1486,129 @@ class EntityFacts:
                 info['missing'].append(concept)
 
         return info
+
+    # Enhanced methods with detailed unit information (FEAT-411 Unit Handling)
+    def get_revenue_detailed(self, period: Optional[str] = None, unit: Optional[str] = None):
+        """
+        Get revenue with detailed unit information and error reporting.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD)
+
+        Returns:
+            UnitResult with value, unit info, and error details
+
+        Example:
+            >>> result = facts.get_revenue_detailed()
+            >>> if result.success:
+            ...     print(f"Revenue: ${result.value/1e9:.1f}B (unit: {result.normalized_unit})")
+            ... else:
+            ...     print(f"Error: {result.error_reason}")
+            ...     for suggestion in result.suggestions:
+            ...         print(f"  - {suggestion}")
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'RevenueFromContractWithCustomerExcludingAssessedTax',
+                'SalesRevenueNet',
+                'Revenues',
+                'Revenue',
+                'TotalRevenues',
+                'NetSales'
+            ],
+            period=period,
+            unit=unit,
+            fallback_calculation=self._calculate_revenue_from_components,
+            return_detailed=True
+        )
+
+    def get_net_income_detailed(self, period: Optional[str] = None, unit: Optional[str] = None):
+        """
+        Get net income with detailed unit information and error reporting.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD)
+
+        Returns:
+            UnitResult with value, unit info, and error details
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'NetIncomeLoss',
+                'ProfitLoss',
+                'NetIncome',
+                'NetEarnings',
+                'NetIncomeLossAttributableToParent'
+            ],
+            period=period,
+            unit=unit,
+            return_detailed=True
+        )
+
+    def check_unit_compatibility(self, concept1: str, concept2: str, period: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Check unit compatibility between two concepts for calculations.
+
+        Args:
+            concept1: First concept name
+            concept2: Second concept name
+            period: Optional period filter
+
+        Returns:
+            Dictionary with compatibility info and suggestions
+
+        Example:
+            >>> compat = facts.check_unit_compatibility('Revenue', 'CostOfRevenue')
+            >>> if compat['compatible']:
+            ...     print("Units are compatible for calculations")
+            ... else:
+            ...     print(f"Unit issue: {compat['issue']}")
+        """
+        from edgar.entity.unit_handling import UnitNormalizer, format_unit_error
+
+        fact1 = self.get_fact(concept1, period)
+        fact2 = self.get_fact(concept2, period)
+
+        result = {
+            'compatible': False,
+            'concept1': concept1,
+            'concept2': concept2,
+            'fact1_found': fact1 is not None,
+            'fact2_found': fact2 is not None,
+            'issue': None,
+            'suggestions': []
+        }
+
+        if not fact1:
+            result['issue'] = f"Concept '{concept1}' not found"
+            result['suggestions'].append(f"Check if {concept1} exists for this company")
+            return result
+
+        if not fact2:
+            result['issue'] = f"Concept '{concept2}' not found"
+            result['suggestions'].append(f"Check if {concept2} exists for this company")
+            return result
+
+        # Check unit compatibility
+        compatible = UnitNormalizer.are_compatible(fact1.unit, fact2.unit)
+        result['compatible'] = compatible
+
+        result['fact1_unit'] = fact1.unit
+        result['fact2_unit'] = fact2.unit
+        result['fact1_normalized'] = UnitNormalizer.normalize_unit(fact1.unit)
+        result['fact2_normalized'] = UnitNormalizer.normalize_unit(fact2.unit)
+
+        if not compatible:
+            result['issue'] = f"Incompatible units: {fact1.unit} vs {fact2.unit}"
+
+            unit1_type = UnitNormalizer.get_unit_type(fact1.unit)
+            unit2_type = UnitNormalizer.get_unit_type(fact2.unit)
+
+            if unit1_type != unit2_type:
+                result['suggestions'].append(f"Unit type mismatch: {unit1_type.value} vs {unit2_type.value}")
+            else:
+                result['suggestions'].append("Same unit type but different representations")
+
+        return result

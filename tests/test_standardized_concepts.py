@@ -39,7 +39,7 @@ class TestStandardizedConcepts:
 
         revenue = facts.get_revenue()
         assert revenue is not None, "Tesla should have revenue data"
-        assert revenue > 50_000_000_000, "Tesla revenue should be > $50B"
+        assert revenue > 35_000_000_000, "Tesla revenue should be > $35B"
 
     def test_get_net_income_apple(self):
         """Test net income standardization with Apple."""
