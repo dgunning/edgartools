@@ -544,6 +544,192 @@ class EntityFacts:
 
         return info
 
+    # Standardized financial concept access methods (FEAT-411)
+    def get_revenue(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
+        """
+        Get standardized revenue value across all companies.
+
+        This method handles various revenue concept names (Revenue, Contract Revenue, Net Sales, etc.)
+        and provides consistent access regardless of company-specific naming conventions.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD if not specified)
+
+        Returns:
+            Revenue value as float, or None if not found
+
+        Example:
+            >>> revenue = facts.get_revenue()
+            >>> quarterly_revenue = facts.get_revenue(period="2024-Q1")
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'RevenueFromContractWithCustomerExcludingAssessedTax',
+                'SalesRevenueNet',
+                'Revenues',
+                'Revenue',
+                'TotalRevenues',
+                'NetSales'
+            ],
+            period=period,
+            unit=unit,
+            fallback_calculation=self._calculate_revenue_from_components
+        )
+
+    def get_net_income(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
+        """
+        Get standardized net income value across all companies.
+
+        Handles various net income concept names and provides consistent access.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD if not specified)
+
+        Returns:
+            Net income value as float, or None if not found
+
+        Example:
+            >>> net_income = facts.get_net_income()
+            >>> annual_income = facts.get_net_income(period="2024-FY")
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'NetIncomeLoss',
+                'ProfitLoss',
+                'NetIncome',
+                'NetEarnings',
+                'NetIncomeLossAttributableToParent'
+            ],
+            period=period,
+            unit=unit
+        )
+
+    def get_total_assets(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
+        """
+        Get standardized total assets value across all companies.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD if not specified)
+
+        Returns:
+            Total assets value as float, or None if not found
+
+        Example:
+            >>> assets = facts.get_total_assets()
+            >>> q4_assets = facts.get_total_assets(period="2024-Q4")
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'Assets',
+                'TotalAssets',
+                'AssetsCurrent'  # Fallback for some filings
+            ],
+            period=period,
+            unit=unit
+        )
+
+    def get_total_liabilities(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
+        """
+        Get standardized total liabilities value across all companies.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD if not specified)
+
+        Returns:
+            Total liabilities value as float, or None if not found
+
+        Example:
+            >>> liabilities = facts.get_total_liabilities()
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'Liabilities',
+                'TotalLiabilities',
+                'LiabilitiesAndStockholdersEquity'  # Some companies structure it this way
+            ],
+            period=period,
+            unit=unit
+        )
+
+    def get_shareholders_equity(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
+        """
+        Get standardized shareholders equity value across all companies.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD if not specified)
+
+        Returns:
+            Shareholders equity value as float, or None if not found
+
+        Example:
+            >>> equity = facts.get_shareholders_equity()
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'StockholdersEquity',
+                'ShareholdersEquity',
+                'TotalEquity',
+                'PartnersCapital',  # For partnerships
+                'MembersEquity'     # For LLCs
+            ],
+            period=period,
+            unit=unit
+        )
+
+    def get_operating_income(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
+        """
+        Get standardized operating income value across all companies.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD if not specified)
+
+        Returns:
+            Operating income value as float, or None if not found
+
+        Example:
+            >>> op_income = facts.get_operating_income()
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'OperatingIncomeLoss',
+                'OperatingIncome',
+                'IncomeLossFromOperations',
+                'OperatingProfit'
+            ],
+            period=period,
+            unit=unit
+        )
+
+    def get_gross_profit(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
+        """
+        Get standardized gross profit value across all companies.
+
+        Args:
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD if not specified)
+
+        Returns:
+            Gross profit value as float, or None if not found
+
+        Example:
+            >>> gross_profit = facts.get_gross_profit()
+        """
+        return self._get_standardized_concept_value(
+            concept_variants=[
+                'GrossProfit',
+                'GrossMargin'
+            ],
+            period=period,
+            unit=unit,
+            fallback_calculation=self._calculate_gross_profit_from_components
+        )
+
     # Convenient properties for common DEI facts
     @property
     def shares_outstanding(self) -> Optional[float]:
@@ -1096,3 +1282,144 @@ class EntityFacts:
             }
 
         return {"message": "Insufficient data for liquidity analysis"}
+
+    # Helper methods for standardized concept access (FEAT-411)
+    def _get_standardized_concept_value(self,
+                                      concept_variants: List[str],
+                                      period: Optional[str] = None,
+                                      unit: Optional[str] = None,
+                                      fallback_calculation: Optional[callable] = None) -> Optional[float]:
+        """
+        Core method for retrieving standardized concept values with fallback logic.
+
+        Args:
+            concept_variants: List of concept names to try in priority order
+            period: Optional period filter
+            unit: Optional unit filter (defaults to USD)
+            fallback_calculation: Optional function to calculate value from components
+
+        Returns:
+            Numeric value or None if not found
+        """
+        # Default to USD if no unit specified
+        target_unit = unit or 'USD'
+
+        # Try each concept variant in priority order
+        for concept in concept_variants:
+            # Try both with and without namespace prefix
+            for concept_variant in [concept, f'us-gaap:{concept}']:
+                fact = self.get_fact(concept_variant, period)
+                if fact and fact.numeric_value is not None:
+                    # Check unit match (case-insensitive)
+                    if fact.unit.upper() == target_unit.upper():
+                        return fact.numeric_value
+                    # For some facts, unit might be stored differently
+                    elif target_unit.upper() == 'USD' and fact.unit.upper() in ['USD', 'US DOLLAR', 'DOLLARS']:
+                        return fact.numeric_value
+
+        # Try fallback calculation if provided
+        if fallback_calculation:
+            try:
+                return fallback_calculation(period, target_unit)
+            except:
+                # Fallback calculation failed, continue
+                pass
+
+        return None
+
+    def _calculate_revenue_from_components(self, period: Optional[str] = None, unit: str = 'USD') -> Optional[float]:
+        """
+        Calculate revenue from Gross Profit + Cost of Revenue when explicit revenue not available.
+
+        This follows the same logic as the enhanced_statement.py revenue deduplication.
+        """
+        gross_profit_fact = self.get_fact('GrossProfit', period)
+        cost_of_revenue_fact = self.get_fact('CostOfRevenue', period)
+
+        # Try alternative cost concepts
+        if not cost_of_revenue_fact:
+            for cost_concept in ['CostOfGoodsAndServicesSold', 'CostOfGoodsSold', 'CostOfSales']:
+                cost_of_revenue_fact = self.get_fact(cost_concept, period)
+                if cost_of_revenue_fact:
+                    break
+
+        if (gross_profit_fact and cost_of_revenue_fact and
+            gross_profit_fact.numeric_value is not None and
+            cost_of_revenue_fact.numeric_value is not None):
+
+            # Verify units match
+            if (gross_profit_fact.unit.upper() == unit.upper() and
+                cost_of_revenue_fact.unit.upper() == unit.upper()):
+                return gross_profit_fact.numeric_value + cost_of_revenue_fact.numeric_value
+
+        return None
+
+    def _calculate_gross_profit_from_components(self, period: Optional[str] = None, unit: str = 'USD') -> Optional[float]:
+        """
+        Calculate gross profit from Revenue - Cost of Revenue when explicit gross profit not available.
+        """
+        # Try to get revenue using standardized method (but avoid infinite recursion)
+        revenue_fact = None
+        for concept in ['RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'Revenues', 'Revenue']:
+            revenue_fact = self.get_fact(concept, period)
+            if revenue_fact:
+                break
+
+        cost_of_revenue_fact = self.get_fact('CostOfRevenue', period)
+
+        # Try alternative cost concepts
+        if not cost_of_revenue_fact:
+            for cost_concept in ['CostOfGoodsAndServicesSold', 'CostOfGoodsSold', 'CostOfSales']:
+                cost_of_revenue_fact = self.get_fact(cost_concept, period)
+                if cost_of_revenue_fact:
+                    break
+
+        if (revenue_fact and cost_of_revenue_fact and
+            revenue_fact.numeric_value is not None and
+            cost_of_revenue_fact.numeric_value is not None):
+
+            # Verify units match
+            if (revenue_fact.unit.upper() == unit.upper() and
+                cost_of_revenue_fact.unit.upper() == unit.upper()):
+                return revenue_fact.numeric_value - cost_of_revenue_fact.numeric_value
+
+        return None
+
+    def get_concept_mapping_info(self, concept_variants: List[str]) -> Dict[str, Any]:
+        """
+        Get information about which concept variants are available for this company.
+
+        Useful for debugging standardized method behavior and understanding
+        company-specific concept usage.
+
+        Args:
+            concept_variants: List of concept names to check
+
+        Returns:
+            Dictionary with availability and confidence information
+
+        Example:
+            >>> info = facts.get_concept_mapping_info(['Revenue', 'Revenues', 'NetSales'])
+            >>> print(f"Available concepts: {info['available']}")
+        """
+        info = {
+            'available': [],
+            'missing': [],
+            'fact_details': {}
+        }
+
+        for concept in concept_variants:
+            fact = self.get_fact(concept)
+            if fact:
+                info['available'].append(concept)
+                info['fact_details'][concept] = {
+                    'label': fact.label,
+                    'unit': fact.unit,
+                    'latest_period': f"{fact.fiscal_period} {fact.fiscal_year}",
+                    'latest_value': fact.numeric_value,
+                    'filing_date': fact.filing_date
+                }
+            else:
+                info['missing'].append(concept)
+
+        return info
