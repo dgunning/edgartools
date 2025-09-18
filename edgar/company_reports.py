@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from functools import lru_cache, partial
+from functools import lru_cache, partial, cached_property
 from typing import Dict, List, Optional
 
 from rich import box, print
@@ -62,7 +62,7 @@ class CompanyReport:
         return self.financials.cashflow_statement() if self.financials else None
 
     @property
-    @lru_cache(1)
+    @cached_property
     def financials(self):
         return Financials.extract(self._filing)
 
@@ -71,7 +71,7 @@ class CompanyReport:
         return self._filing.header.period_of_report
 
     @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def chunked_document(self):
         return ChunkedDocument(self._filing.html())
 
@@ -270,7 +270,7 @@ class TenK(CompanyReport):
         return self['Item 10']
 
     @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def chunked_document(self):
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
@@ -446,7 +446,7 @@ class TenQ(CompanyReport):
         return ParsedHtml10Q().extract_html(self._filing.html(), self.structure, markdown=markdown)
 
     @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def chunked_document(self):
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
@@ -721,7 +721,7 @@ class CurrentReport(CompanyReport):
             return PressReleases(press_release_results)
 
     @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def chunked_document(self):
         html = self._filing.html()
         if not html:

@@ -1384,7 +1384,7 @@ class Filing:
             return cls.from_dict(data)
 
     @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def header(self):
         _sgml = self.sgml()
         return _sgml.header
@@ -1415,11 +1415,11 @@ class Filing:
         assert html is not None
         return html_sections(html)
 
-    @lru_cache(maxsize=1)
+    @cached_property
     def __get_bm25_search_index(self):
         return BM25Search(self.sections())
 
-    @lru_cache(maxsize=1)
+    @cached_property
     def __get_regex_search_index(self):
         return RegexSearch(self.sections())
 
@@ -1470,14 +1470,14 @@ class Filing:
         """Alias for homepage"""
         return self.homepage
 
-    @lru_cache(maxsize=1)
+    @cached_property
     def get_entity(self):
         """Get the company to which this filing belongs"""
         "Get the company for cik. Cache for performance"
         from edgar.entity import Company
         return Company(self.cik)
 
-    @lru_cache(maxsize=1)
+    @cached_property
     def as_company_filing(self):
         """Get this filing as a company filing. Company Filings have more information"""
         company = self.get_entity()
@@ -1489,7 +1489,7 @@ class Filing:
             return filings[0]
         return None
 
-    @lru_cache(maxsize=1)
+    @cached_property
     def related_filings(self):
         """Get all the filings related to this one
         There is no file number on this base Filing class so first get the company,
