@@ -218,10 +218,10 @@ class MappingStore:
         logger = logging.getLogger(__name__)
 
         if missing_in_enum:
-            logger.warning(f"Found {len(missing_in_enum)} keys in concept_mappings.json that don't exist in StandardConcept enum: {sorted(missing_in_enum)}")
+            logger.warning("Found %d keys in concept_mappings.json that don't exist in StandardConcept enum: %s", len(missing_in_enum), sorted(missing_in_enum))
 
         if missing_in_json:
-            logger.info(f"Found {len(missing_in_json)} StandardConcept values without mappings in concept_mappings.json: {sorted(missing_in_json)}")
+            logger.info("Found %d StandardConcept values without mappings in concept_mappings.json: %s", len(missing_in_json), sorted(missing_in_json))
 
         return len(missing_in_enum) == 0, list(missing_in_enum)
 
@@ -264,7 +264,7 @@ class MappingStore:
                     except (FileNotFoundError, json.JSONDecodeError) as e:
                         import logging
                         logger = logging.getLogger(__name__)
-                        logger.warning(f"Failed to load {file}: {e}")
+                        logger.warning("Failed to load %s: %s", file, e)
 
         return mappings
 
@@ -439,7 +439,7 @@ class MappingStore:
                 best_match = max(candidates, key=lambda x: x[1])
                 import logging
                 logger = logging.getLogger(__name__)
-                logger.debug(f"Mapping applied: {company_concept} -> {best_match[0]} (source: {best_match[2]}, priority: {best_match[1]})")
+                logger.debug("Mapping applied: %s -> %s (source: %s, priority: %s)", company_concept, best_match[0], best_match[2], best_match[1])
                 return best_match[0]
 
         # Fallback to core mappings

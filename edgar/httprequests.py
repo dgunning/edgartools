@@ -562,7 +562,7 @@ async def stream_file(
         try:
             shutil.rmtree(temp_dir, ignore_errors=True)
         except Exception as e:
-            logger.warning(f"Failed to clean up temporary directory {temp_dir}: {e}")
+            logger.warning("Failed to clean up temporary directory %s: %s", temp_dir, e)
 
 
 def download_json(data_url: str) -> dict:
@@ -732,7 +732,7 @@ async def download_bulk_data(
                 if download_filename.exists():
                     download_filename.unlink()
             except Exception as e:
-                logger.warning(f"Failed to delete archive file {download_filename}: {e}")
+                logger.warning("Failed to delete archive file %s: %s", download_filename, e)
 
         return download_path
 
@@ -742,7 +742,7 @@ async def download_bulk_data(
             if download_path.exists():
                 shutil.rmtree(download_path)
         except Exception as cleanup_error:
-            logger.error(f"Failed to clean up after error: {cleanup_error}")
+            logger.error("Failed to clean up after error: %s", cleanup_error)
         raise
 
 

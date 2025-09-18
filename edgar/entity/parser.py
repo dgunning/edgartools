@@ -106,13 +106,13 @@ class EntityFactsParser:
                                 facts.append(fact)
 
             if not facts:
-                log.warning(f"No facts found for CIK {cik}")
+                log.warning("No facts found for CIK %s", cik)
                 return None
 
             return EntityFacts(cik=cik, name=entity_name, facts=facts)
 
         except Exception as e:
-            log.error(f"Error parsing company facts: {e}")
+            log.error("Error parsing company facts: %s", e)
             return None
 
     @classmethod
@@ -280,7 +280,7 @@ class EntityFactsParser:
                 if mapping.get('confidence', 0) >= 0.5:  # 50% threshold
                     return mapping['statement_type']
         except Exception as e:
-            log.debug(f"Error loading learned mappings: {e}")
+            log.debug("Error loading learned mappings: %s", e)
 
         return None
 
@@ -316,7 +316,7 @@ class EntityFactsParser:
                     'is_total': mapping.get('is_total', False)
                 }
         except Exception as e:
-            log.debug(f"Error getting structural info: {e}")
+            log.debug("Error getting structural info: %s", e)
 
         return {}
 

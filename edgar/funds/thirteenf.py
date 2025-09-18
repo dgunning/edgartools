@@ -43,13 +43,13 @@ def get_thirteenf_portfolio(filing) -> pd.DataFrame:
 
         # Check if the filing has an information table
         if not thirteenf.has_infotable():
-            log.info(f"Filing {filing.accession_no} does not have an information table")
+            log.info("Filing %s does not have an information table", filing.accession_no)
             return pd.DataFrame()
 
         # Extract the information table
         infotable = thirteenf.infotable
         if infotable is None:
-            log.warning(f"Could not extract information table from filing {filing.accession_no}")
+            log.warning("Could not extract information table from filing %s", filing.accession_no)
             return pd.DataFrame()
 
         # Convert to DataFrame
@@ -76,7 +76,7 @@ def get_thirteenf_portfolio(filing) -> pd.DataFrame:
                 cusip_map = cusip_ticker_mapping(allow_duplicate_cusips=False)
                 df['ticker'] = df['cusip'].map(cusip_map.Ticker)
             except Exception as e:
-                log.warning(f"Error adding ticker mappings: {e}")
+                log.warning("Error adding ticker mappings: %s", e)
                 df['ticker'] = None
 
             # Calculate percent of portfolio
@@ -93,7 +93,7 @@ def get_thirteenf_portfolio(filing) -> pd.DataFrame:
         return df
 
     except Exception as e:
-        log.warning(f"Error extracting holdings from 13F filing: {e}")
+        log.warning("Error extracting holdings from 13F filing: %s", e)
 
     # Return empty DataFrame if extraction failed
     return pd.DataFrame()

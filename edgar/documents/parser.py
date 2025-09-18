@@ -309,7 +309,7 @@ class HTMLParser:
         except Exception as e:
             # Log error but don't fail parsing
             import logging
-            logging.warning(f"Failed to extract XBRL data: {e}")
+            logging.warning("Failed to extract XBRL data: %s", e)
             return []
 
     def parse_file(self, file_path: str) -> Document:

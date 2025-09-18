@@ -90,7 +90,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
             raise ValueError(f"Unknown tool: {name}")
 
     except Exception as e:
-        logger.error(f"Error in tool {name}: {e}")
+        logger.error("Error in tool %s: %s", name, e)
         return [TextContent(
             type="text",
             text=f"Error: {str(e)}"

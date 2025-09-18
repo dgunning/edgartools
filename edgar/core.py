@@ -184,7 +184,7 @@ def set_identity(user_identity: str):
     :param user_identity:
     """
     os.environ[edgar_identity] = user_identity
-    log.info(f"Identity of the Edgar REST client set to [{user_identity}]")
+    log.info("Identity of the Edgar REST client set to [%s]", user_identity)
 
     from edgar.httpclient import close_clients
     close_clients() # close any httpx clients, to reset the identity. 

@@ -327,7 +327,7 @@ class DataAvailabilityScorer:
                 score = min(score + essential_bonus, 1.0)
 
         except Exception as e:
-            logger.debug(f"Error scoring period {period_key}: {e}")
+            logger.debug("Error scoring period %s: %s", period_key, e)
             score = 0.1  # Small fallback score if query fails
 
         self._fact_cache[cache_key] = score
@@ -441,7 +441,7 @@ class SmartPeriodSelector:
                     return selected_periods
 
         except Exception as e:
-            logger.warning(f"Smart period selection failed: {e}")
+            logger.warning("Smart period selection failed: %s", e)
 
         # Fallback to existing logic
         return self._fallback_selection(statement_type, max_periods)
@@ -465,7 +465,7 @@ class SmartPeriodSelector:
 
             return [(p['key'], p['label']) for p in periods]
         except Exception as e:
-            logger.error(f"Fallback period selection failed: {e}")
+            logger.error("Fallback period selection failed: %s", e)
             # Last resort: return any available periods
             return [(p['key'], p['label']) for p in self.xbrl.reporting_periods[:max_periods]]
 
@@ -499,10 +499,10 @@ class SmartPeriodSelector:
                 if fact_count >= min_facts:
                     filtered_periods.append((period_key, period_label))
                 else:
-                    logger.debug(f"Filtering out sparse period {period_label} with only {fact_count} facts")
+                    logger.debug("Filtering out sparse period %s with only %d facts", period_label, fact_count)
 
             except Exception as e:
-                logger.debug(f"Error checking facts for period {period_key}: {e}")
+                logger.debug("Error checking facts for period %s: %s", period_key, e)
                 # Keep the period if we can't check it
                 filtered_periods.append((period_key, period_label))
 
