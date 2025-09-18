@@ -38,120 +38,12 @@ from edgar.richtools import repr_rich
 if TYPE_CHECKING:
     from edgar.enums import FormType
 
-# Performance optimization: use set for O(1) lookups
-COMPANY_FORMS = {
-    # Registration statements
-    "S-1", "S-3", "S-4", "S-8", "S-11",
-    # Foreign issuers registration forms
-    "F-1", "F-3", "F-4", "F-6", "F-7", "F-8", "F-9", "F-10", "F-80",
-    # Foreign form amendments and effectiveness
-    "F-6EF", "F-6 POS", "F-3ASR", "F-4MEF", "F-10EF", "F-3D", "F-3MEF",
-    # Exchange Act registration
-    "10-12B", "10-12G",
-    # Periodic reports
-    "10-K", "10-Q", "10-K/A", "10-Q/A",
-    "20-F", "40-F",  # Foreign issuers
-    "11-K",  # Employee benefit plans
-    # Current reports
-    "8-K", "6-K",
-    # Proxy materials
-    "DEF 14A", "PRE 14A", "DEFA14A", "DEFM14A",
-    # Other corporate filings
-    "424B1", "424B2", "424B3", "424B4", "424B5",
-    "ARS", "NT 10-K", "NT 10-Q",
-    "SC 13D", "SC 13G", "SC TO-I", "SC TO-T",
-    "SD", "PX14A6G",
-    # Specialized corporate filings
-    "N-CSR", "N-Q", "N-MFP", "N-CEN",
-    "X-17A-5", "17-H",
-    "TA-1", "TA-2",
-    "ATS-N",
-    # Corporate disclosures
-    "EFFECT", "FWP", "425", "CB",
-    "POS AM", "CORRESP", "UPLOAD"
-}
-
-def has_company_filings(filings_form_array: 'pyarrow.ChunkedArray', max_filings: int = 50) -> bool:
-    """
-    Efficiently check if any form in the PyArrow ChunkedArray matches company-only forms.
-    Limited to checking the first max_filings entries for performance.
-
-    Args:
-        filings_form_array: PyArrow ChunkedArray containing form values
-        max_filings: Maximum number of filings to check
-
-    Returns:
-        True if any form matches a company form, False otherwise
-    """
-
-    # Early exit for empty arrays
-    if filings_form_array.null_count == filings_form_array.length:
-        return False
-
-    # Handle case with fewer than max_filings
-    total_filings = filings_form_array.length()
-    filings_to_check = min(total_filings, max_filings)
-
-    # Track how many we've checked so far
-    checked_count = 0
-
-    # Process chunks in the ChunkedArray until we hit our limit
-    for chunk in filings_form_array.chunks:
-        chunk_size = len(chunk)
-
-        # If this chunk would exceed our limit, slice it
-        if checked_count + chunk_size > filings_to_check:
-            # Only check remaining forms needed to reach filings_to_check
-            remaining = filings_to_check - checked_count
-            sliced_chunk = chunk.slice(0, remaining)
-
-            # Use safer iteration over array values
-            for i in range(len(sliced_chunk)):
-                # Get value safely, handling nulls
-                val = sliced_chunk.take([i]).to_pylist()[0]
-                if val is not None and val in COMPANY_FORMS:
-                    return True
-        else:
-            # Process full chunk safely
-            for val in chunk.to_pylist():
-                if val is not None and val in COMPANY_FORMS:
-                    return True
-
-        # Update count of checked filings
-        if checked_count + chunk_size > filings_to_check:
-            checked_count += (filings_to_check - checked_count)
-        else:
-            checked_count += chunk_size
-
-        # Stop if we've checked enough
-        if checked_count >= filings_to_check:
-            break
-
-    return False
+# Import constants and utilities from separate modules
+from edgar.entity.constants import COMPANY_FORMS
+from edgar.entity.utils import has_company_filings, normalize_cik
 
 # Type variables for better type annotations
 T = TypeVar('T')
-
-def normalize_cik(cik_or_identifier: Union[str, int]) -> int:
-    """
-    Normalize a CIK to an integer by removing leading zeros.
-
-    Args:
-        cik_or_identifier: CIK as string or int
-
-    Returns:
-        Normalized CIK as an integer
-    """
-    if isinstance(cik_or_identifier, int):
-        return cik_or_identifier
-
-    # If it's a string that represents an int (like '0000320193')
-    if isinstance(cik_or_identifier, str) and cik_or_identifier.isdigit():
-        return int(cik_or_identifier)
-
-    # If it's another type of string (like a ticker), we can't normalize it
-    # This should be handled by the caller
-    return cik_or_identifier
 
 __all__ = [
     'SecFiler',
@@ -491,14 +383,14 @@ class Company(Entity):
         """Get financial statements for this company."""
         tenk_filing = self.latest_tenk
         if tenk_filing is not None:
-            return tenk_filing.financials()
+            return tenk_filing.financials
         return None
 
     def get_quarterly_financials(self) -> Optional[Financials]:
         """Get quarterly financial statements for this company."""
         tenq_filing = self.latest_tenq
         if tenq_filing is not None:
-            return tenq_filing.financials()
+            return tenq_filing.financials
         return None
 
     @property

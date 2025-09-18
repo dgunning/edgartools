@@ -5,6 +5,7 @@ This module provides the Entity, Company, Fund, and related classes
 for working with SEC filers.
 """
 # Import for backward compatibility
+from edgar.entity.constants import COMPANY_FORMS
 from edgar.entity.core import (
     Company,
     Entity,
@@ -13,6 +14,7 @@ from edgar.entity.core import (
     get_entity,
     public_companies,
 )
+from edgar.entity.utils import has_company_filings, normalize_cik
 from edgar.entity.data import Address, CompanyData, EntityData
 from edgar.entity.entity_facts import (
     EntityFacts,
@@ -85,6 +87,11 @@ __all__ = [
 
     # Exceptions
     'NoCompanyFactsFound',
+
+    # Constants and utilities
+    'COMPANY_FORMS',
+    'has_company_filings',
+    'normalize_cik',
 
     # Backwards compatibility
     'CompanyFiling',

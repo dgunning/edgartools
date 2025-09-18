@@ -1,7 +1,7 @@
 """Test XBRL footnote parsing functionality."""
 import pytest
 from pathlib import Path
-from edgar.xbrl.parser import XBRLParser
+from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.models import Footnote
 
 

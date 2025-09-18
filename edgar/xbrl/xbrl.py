@@ -30,7 +30,7 @@ from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL
 from edgar.xbrl.models import PresentationNode
-from edgar.xbrl.parser import XBRLParser
+from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.periods import determine_periods_to_display, get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.xbrl.statement_resolver import StatementResolver

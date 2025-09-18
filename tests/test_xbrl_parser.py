@@ -1,5 +1,5 @@
 from edgar.xbrl import XBRL
-from edgar.xbrl.parser import XBRLParser
+from edgar.xbrl.parsers import XBRLParser
 from pathlib import Path
 from edgar import *
 
