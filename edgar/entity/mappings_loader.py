@@ -28,7 +28,7 @@ def load_learned_mappings() -> Dict[str, Dict[str, Any]]:
         mappings_file = data_dir / 'statement_mappings_v1.json'
 
         if not mappings_file.exists():
-            log.warning(f"Learned mappings file not found: {mappings_file}")
+            log.warning("Learned mappings file not found: %s", mappings_file)
             return {}
 
         with open(mappings_file, 'r') as f:
@@ -37,13 +37,12 @@ def load_learned_mappings() -> Dict[str, Dict[str, Any]]:
         mappings = data.get('mappings', {})
         metadata = data.get('metadata', {})
 
-        log.info(f"Loaded {len(mappings)} learned concept mappings "
-                f"(version: {metadata.get('version', 'unknown')})")
+        log.info("Loaded %d learned concept mappings (version: %s)", len(mappings), metadata.get('version', 'unknown'))
 
         return mappings
 
     except Exception as e:
-        log.error(f"Error loading learned mappings: {e}")
+        log.error("Error loading learned mappings: %s", e)
         return {}
 
 
@@ -60,17 +59,17 @@ def load_canonical_structures() -> Dict[str, Any]:
         structures_file = data_dir / 'learned_mappings.json'
 
         if not structures_file.exists():
-            log.warning(f"Canonical structures file not found: {structures_file}")
+            log.warning("Canonical structures file not found: %s", structures_file)
             return {}
 
         with open(structures_file, 'r') as f:
             structures = json.load(f)
 
-        log.info(f"Loaded canonical structures for {len(structures)} statement types")
+        log.info("Loaded canonical structures for %d statement types", len(structures))
         return structures
 
     except Exception as e:
-        log.error(f"Error loading canonical structures: {e}")
+        log.error("Error loading canonical structures: %s", e)
         return {}
 
 
@@ -87,17 +86,17 @@ def load_virtual_trees() -> Dict[str, Any]:
         trees_file = data_dir / 'virtual_trees.json'
 
         if not trees_file.exists():
-            log.warning(f"Virtual trees file not found: {trees_file}")
+            log.warning("Virtual trees file not found: %s", trees_file)
             return {}
 
         with open(trees_file, 'r') as f:
             trees = json.load(f)
 
-        log.info(f"Loaded virtual trees for {len(trees)} statement types")
+        log.info("Loaded virtual trees for %d statement types", len(trees))
         return trees
 
     except Exception as e:
-        log.error(f"Error loading virtual trees: {e}")
+        log.error("Error loading virtual trees: %s", e)
         return {}
 
 

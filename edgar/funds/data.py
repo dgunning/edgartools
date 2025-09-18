@@ -397,7 +397,7 @@ def direct_get_fund_with_filings(contract_or_series_id: str):
         else:
             return _FundSeries(company_info)
     except Exception as e:
-        log.warning(f"Error retrieving fund information for {contract_or_series_id}: {e}")
+        log.warning("Error retrieving fund information for %s: %s", contract_or_series_id, e)
         return None
 
 @lru_cache(maxsize=16)
@@ -422,7 +422,7 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
         identifier_type = 'FundCompany'
         fund_search_url = fund_series_search_url + f"&CIK={identifier}"
     else:
-        log.warning(f"Invalid fund identifier {identifier}")
+        log.warning("Invalid fund identifier %s", identifier)
         return None
 
     # Download the fund page
@@ -436,7 +436,7 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
 
      # The fund table is the 6th table on the page
     if len(tables) < 6:
-        log.warning(f"Expected fund table not found for {identifier}")
+        log.warning("Expected fund table not found for %s", identifier)
         return None
 
     fund_table = tables[5]
@@ -524,7 +524,7 @@ def resolve_fund_identifier(identifier):
                 if fund_info and hasattr(fund_info, 'fund_cik'):
                     return int(fund_info.fund_cik)
             except Exception as e:
-                log.warning(f"Error resolving series ID {identifier}: {e}")
+                log.warning("Error resolving series ID %s: %s", identifier, e)
 
         # Handle Class ID (C000XXXXX)
         if identifier.startswith('C') and identifier[1:].isdigit():
@@ -534,7 +534,7 @@ def resolve_fund_identifier(identifier):
                 if fund_info and hasattr(fund_info, 'fund_cik'):
                     return int(fund_info.fund_cik)
             except Exception as e:
-                log.warning(f"Error resolving class ID {identifier}: {e}")
+                log.warning("Error resolving class ID %s: %s", identifier, e)
 
         # Handle fund ticker
         if is_fund_ticker(identifier):
@@ -544,7 +544,7 @@ def resolve_fund_identifier(identifier):
                 if fund_info and hasattr(fund_info, 'company_cik'):
                     return int(fund_info.company_cik)
             except Exception as e:
-                log.warning(f"Error resolving fund ticker {identifier}: {e}")
+                log.warning("Error resolving fund ticker %s: %s", identifier, e)
 
     return identifier
 
@@ -580,7 +580,7 @@ def get_fund_information(header):
             return FundSeriesAndContracts(df)
 
     except Exception as e:
-        log.debug(f"Error parsing fund information directly: {e}")
+        log.debug("Error parsing fund information directly: %s", e)
 
     # Fallback implementation - extract fund information from header directly using regex
     try:
@@ -614,7 +614,7 @@ def get_fund_information(header):
                     return FundSeriesAndContracts(pd.DataFrame(data))
 
     except Exception as e:
-        log.warning(f"Error in fallback get_fund_information: {e}")
+        log.warning("Error in fallback get_fund_information: %s", e)
 
     # Return an empty container if everything else fails
     return FundSeriesAndContracts()
@@ -642,7 +642,7 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
     series_data = []
 
     # Debug information
-    log.debug(f"Parsing series HTML content for fund {cik}")
+    log.debug("Parsing series HTML content for fund %s", cik)
 
     # The table structure in this specific page has series and classes
     # organized in a specific way with indentation levels
@@ -670,7 +670,7 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
         rows = table.find_all('tr')
 
         # Debug information
-        log.debug(f"Found {len(rows)} rows in the table")
+        log.debug("Found %d rows in the table", len(rows))
 
         # Process all rows since the table structure might vary
         for _row_idx, row in enumerate(rows):
@@ -719,7 +719,7 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
                     'classes': []
                 }
                 series_data.append(current_series)
-                log.debug(f"Found series: {series_id} - {series_name}")
+                log.debug("Found series: %s - %s", series_id, series_name)
 
             # Check if this row contains a class - marked by a C000 ID
             # Classes appear after a series and are indented
@@ -762,13 +762,13 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
                         'class_name': class_name,
                         'ticker': class_ticker
                     })
-                    log.debug(f"Found class: {class_id} - {class_name} ({class_ticker})")
+                    log.debug("Found class: %s - %s (%s)", class_id, class_name, class_ticker)
 
         # Debug information
-        log.debug(f"Found {len(series_data)} series with classes")
+        log.debug("Found %d series with classes", len(series_data))
 
     except Exception as e:
-        log.warning(f"Error parsing series HTML: {e}")
+        log.warning("Error parsing series HTML: %s", e)
         import traceback
         log.debug(traceback.format_exc())
 
@@ -798,7 +798,7 @@ def get_series_and_classes_from_sec(cik: Union[str, int]) -> List[Dict]:
 
     # Check if we received valid content
     if 'No matching' in html_content or 'series for cik' not in html_content.lower():
-        log.debug(f"No series information found for CIK {cik}")
+        log.debug("No series information found for CIK %s", cik)
         return []
 
     return parse_series_and_classes_from_html(html_content, cik)

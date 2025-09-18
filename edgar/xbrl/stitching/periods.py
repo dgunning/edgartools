@@ -57,7 +57,7 @@ class PeriodMatcher:
                 if period_date == target_date:
                     return period
             except (ValueError, TypeError) as e:
-                logger.warning(f"Failed to parse period date '{period.get('date')}': {e}")
+                logger.warning("Failed to parse period date '%s': %s", period.get('date'), e)
                 continue
         return None
 
@@ -69,7 +69,7 @@ class PeriodMatcher:
                 if end_date == target_date:
                     return period
             except (ValueError, TypeError) as e:
-                logger.warning(f"Failed to parse period end date '{period.get('end_date')}': {e}")
+                logger.warning("Failed to parse period end date '%s': %s", period.get('end_date'), e)
                 continue
         return None
 
@@ -87,7 +87,7 @@ class PeriodMatcher:
                     period = period.copy()
                     period['duration_days'] = duration_days
                 except (ValueError, TypeError) as e:
-                    logger.warning(f"Failed to calculate duration for period: {e}")
+                    logger.warning("Failed to calculate duration for period: %s", e)
                     continue
 
             if min_days <= duration_days <= max_days:
@@ -204,7 +204,7 @@ class StatementTypeSelector:
                 return [exact_match]
             else:
                 # No exact match found - don't use fallback to prevent fiscal year boundary issues
-                logger.info(f"No exact instant period match found for {doc_period_end_date}")
+                logger.info("No exact instant period match found for %s", doc_period_end_date)
                 return []
 
         # No document_period_end_date available - use most recent period
@@ -240,7 +240,7 @@ class StatementTypeSelector:
                 period_copy['duration_days'] = (end_date - start_date).days
                 enriched_periods.append(period_copy)
             except (ValueError, TypeError) as e:
-                logger.warning(f"Failed to parse period dates: {e}")
+                logger.warning("Failed to parse period dates: %s", e)
                 continue
 
         if not enriched_periods:
@@ -261,7 +261,7 @@ class StatementTypeSelector:
                 return self._select_appropriate_durations(matching_periods, fiscal_period)
             else:
                 # No exact match found - don't use fallback
-                logger.info(f"No exact duration period match found for {doc_period_end_date}")
+                logger.info("No exact duration period match found for %s", doc_period_end_date)
                 return []
 
         # No document_period_end_date - use fallback logic
@@ -471,7 +471,7 @@ class PeriodOptimizer:
                 doc_period_end_date = parse_date(str(doc_period_end_date))
             return doc_period_end_date
         except (ValueError, TypeError) as e:
-            logger.warning(f"Failed to parse document_period_end_date: {e}")
+            logger.warning("Failed to parse document_period_end_date: %s", e)
             return None
 
     def _select_periods_for_statement_type(self, xbrl: XBRL, statement_type: str, 
