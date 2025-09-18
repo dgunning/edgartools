@@ -79,7 +79,7 @@ def df_to_rich_table(
 
     data_for_display = data_for_display.reset_index()
 
-    for _index, value_list in enumerate(data_for_display.values.tolist()):
+    for _index, value_list in enumerate(data_for_display.to_numpy().tolist()):
         # row = [str(index)] if show_index else []
         row = [str(x) for x in value_list]
         rich_table.add_row(*row)
@@ -220,7 +220,7 @@ def rich_to_png(rich_object, width: int = 120, output_path: str = None) -> Optio
         raise ImportError(
             "CairoSVG is required for PNG conversion. "
             "Install it with: pip install cairosvg"
-        )
+        ) from None
 
     # First get the SVG output
     svg_content = rich_to_svg(rich_object, width=width)

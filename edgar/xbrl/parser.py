@@ -222,7 +222,7 @@ class XBRLParser:
             content = Path(file_path).read_text()
             self.parse_schema_content(content)
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing schema file {file_path}: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing schema file {file_path}: {str(e)}") from e
 
     def parse_schema_content(self, content: str) -> None:
         """Parse schema content and extract element information."""
@@ -288,7 +288,7 @@ class XBRLParser:
                     self.parse_definition_content(definition_content)
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing schema content: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing schema content: {str(e)}") from e
 
     def _extract_embedded_linkbases(self, schema_content: str) -> Dict[str, Dict[str, str]]:
         """
@@ -375,7 +375,7 @@ class XBRLParser:
             content = Path(file_path).read_text()
             self.parse_labels_content(content)
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing label file {file_path}: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing label file {file_path}: {str(e)}") from e
 
     def parse_labels_content(self, content: str) -> None:
         """Parse label linkbase content and extract label information."""
@@ -475,7 +475,7 @@ class XBRLParser:
                         )
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing label content: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing label content: {str(e)}") from e
 
     def parse_presentation(self, file_path: Union[str, Path]) -> None:
         """Parse presentation linkbase file and build presentation trees."""
@@ -483,7 +483,7 @@ class XBRLParser:
             content = Path(file_path).read_text()
             self.parse_presentation_content(content)
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing presentation file {file_path}: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing presentation file {file_path}: {str(e)}") from e
 
     def parse_presentation_content(self, content: str) -> None:
         """Parse presentation linkbase content and build presentation trees."""
@@ -574,7 +574,7 @@ class XBRLParser:
                     self._build_presentation_tree(role, relationships)
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing presentation content: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing presentation content: {str(e)}") from e
 
     def _build_presentation_tree(self, role: str, relationships: List[Dict[str, Any]]) -> None:
         """
@@ -684,7 +684,7 @@ class XBRLParser:
             content = Path(file_path).read_text()
             self.parse_calculation_content(content)
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing calculation file {file_path}: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing calculation file {file_path}: {str(e)}") from e
 
     def _parse_order_attribute(self, arc) -> float:
         """Parse order attribute from arc, checking both order and xlink:order."""
@@ -797,7 +797,7 @@ class XBRLParser:
                     self._build_calculation_tree(role, relationships)
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing calculation content: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing calculation content: {str(e)}") from e
 
     def _build_calculation_tree(self, role: str, relationships: List[Dict[str, Any]]) -> None:
         """
@@ -910,7 +910,7 @@ class XBRLParser:
             content = Path(file_path).read_text()
             self.parse_definition_content(content)
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing definition file {file_path}: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing definition file {file_path}: {str(e)}") from e
 
     def parse_definition_content(self, content: str) -> None:
         """Parse definition linkbase content and build dimensional structures."""
@@ -980,7 +980,7 @@ class XBRLParser:
                 self._process_dimensional_relationships(role, relationships)
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing definition content: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing definition content: {str(e)}") from e
 
     def _process_dimensional_relationships(self, role: str, relationships: List[Dict[str, Any]]) -> None:
         """
@@ -1103,7 +1103,7 @@ class XBRLParser:
             content = Path(file_path).read_text()
             self.parse_instance_content(content)
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing instance file {file_path}: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing instance file {file_path}: {str(e)}") from e
 
     def parse_instance_content(self, content: str) -> None:
         """Parse instance document content and extract contexts, facts, and units."""
@@ -1132,7 +1132,7 @@ class XBRLParser:
             self._build_reporting_periods()
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error parsing instance content: {str(e)}")
+            raise XBRLProcessingError(f"Error parsing instance content: {str(e)}") from e
 
     def count_facts(self, content:str) -> tuple:
         """Count the number of facts in the instance document
@@ -1313,7 +1313,7 @@ class XBRLParser:
                 self.contexts[context_id] = context
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error extracting contexts: {str(e)}")
+            raise XBRLProcessingError(f"Error extracting contexts: {str(e)}") from e
 
     def _extract_units(self, root: ET.Element) -> None:
         """Extract units from instance document."""
@@ -1352,7 +1352,7 @@ class XBRLParser:
                         }
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error extracting units: {str(e)}")
+            raise XBRLProcessingError(f"Error extracting units: {str(e)}") from e
 
     def _extract_facts(self, root: ET.Element) -> None:
         """Extract facts from instance document."""
@@ -1526,7 +1526,7 @@ class XBRLParser:
             self._apply_calculation_weights()
 
         except Exception as e:
-            raise XBRLProcessingError(f"Error extracting facts: {str(e)}")
+            raise XBRLProcessingError(f"Error extracting facts: {str(e)}") from e
 
     def _extract_footnotes(self, root: ET.Element) -> None:
         """Extract footnotes from instance document.

@@ -36,7 +36,7 @@ class BaseExtractor:
                     "Failed to parse XML: root element is None even after recovery."
                 )
         except ET.ParseError as e:
-            raise ValueError(f"Error parsing XML bytes during initial check: {e}")
+            raise ValueError(f"Error parsing XML bytes during initial check: {e}") from e
 
     @classmethod
     def from_file(cls, xml_file_path: Path) -> "BaseExtractor":

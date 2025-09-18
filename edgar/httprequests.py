@@ -682,7 +682,7 @@ async def download_bulk_data(
         try:
             await stream_file(url, client=client, path=download_path)
         except Exception as e:
-            raise IOError(f"Failed to download file: {e}")
+            raise IOError(f"Failed to download file: {e}") from e
 
         # Extract based on file extension
         try:
@@ -724,7 +724,7 @@ async def download_bulk_data(
                 raise ValueError(f"Unsupported file format: {filename}")
 
         except (zipfile.BadZipFile, tarfile.TarError) as e:
-            raise type(e)(f"Failed to extract archive {filename}: {e}")
+            raise type(e)(f"Failed to extract archive {filename}: {e}") from e
 
         finally:
             # Always try to clean up the archive file, but don't fail if we can't

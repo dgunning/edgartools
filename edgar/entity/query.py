@@ -226,7 +226,7 @@ class FactQuery:
                 try:
                     return datetime.strptime(date_value, '%Y-%m-%d').date()
                 except ValueError:
-                    raise ValueError(f"Invalid date format '{date_value}'. Expected 'YYYY-MM-DD'")
+                    raise ValueError(f"Invalid date format '{date_value}'. Expected 'YYYY-MM-DD'") from None
             raise ValueError(f"Invalid date type: {type(date_value)}. Expected date object or string")
 
         parsed_start = parse_date(start)

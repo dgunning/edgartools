@@ -127,7 +127,7 @@ def iter_documents(source: Union[str, Path]) -> Iterator[SGMLDocument]:
                 yield document
 
     except (ValueError, ConnectionError, FileNotFoundError) as e:
-        raise type(e)(f"Error processing source {source}: {str(e)}")
+        raise type(e)(f"Error processing source {source}: {str(e)}") from e
 
 def list_documents(source: Union[str, Path]) -> list[SGMLDocument]:
     """

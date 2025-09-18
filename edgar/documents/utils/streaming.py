@@ -113,11 +113,11 @@ class StreamingParser:
             return document
 
         except etree.ParseError as e:
-            raise HTMLParsingError(f"Streaming parse failed: {str(e)}")
+            raise HTMLParsingError(f"Streaming parse failed: {str(e)}") from e
         except Exception as e:
             if isinstance(e, (DocumentTooLargeError, HTMLParsingError)):
                 raise
-            raise HTMLParsingError(f"Unexpected error during streaming parse: {str(e)}")
+            raise HTMLParsingError(f"Unexpected error during streaming parse: {str(e)}") from e
 
     def _process_event(self, event: str, elem: HtmlElement):
         """Process a parse event."""

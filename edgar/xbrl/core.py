@@ -62,7 +62,7 @@ def parse_date(date_str: str) -> datetime.date:
         return date_obj
     except (ValueError, TypeError) as e:
         # Provide more specific error message
-        raise ValueError(f"Invalid date format or value: {date_str} - {str(e)}")
+        raise ValueError(f"Invalid date format or value: {date_str} - {str(e)}") from e
 
 
 def format_date(date_obj: datetime.date) -> str:

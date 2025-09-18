@@ -229,7 +229,7 @@ def ask_for_identity(user_prompt: str = identity_prompt,
         # If the timeout is reached, raise a TimeoutError exception
         message = "You did not enter your Edgar user identity. Try again .. or set environment variable EDGAR_IDENTITY"
         log.warning(message)
-        raise TimeoutError(message)
+        raise TimeoutError(message) from None
     finally:
         # Cancel the timer to prevent it from interrupting the main thread
         timer.cancel()

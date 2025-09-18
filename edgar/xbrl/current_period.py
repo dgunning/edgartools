@@ -462,7 +462,7 @@ class CurrentPeriodView:
                 found_statements=[],
                 entity_name=entity_name,
                 reason=f"Failed to retrieve {statement_type}: {str(e)}"
-            )
+            ) from e
 
     def _get_statement_object(self, statement_type: str) -> 'Statement':
         """
@@ -517,7 +517,7 @@ class CurrentPeriodView:
                 found_statements=[],
                 entity_name=entity_name,
                 reason=f"Failed to retrieve {statement_type} statement: {str(e)}"
-            )
+            ) from e
 
     def _get_concept_name(self, item: Dict[str, Any], raw_concepts: bool) -> str:
         """

@@ -52,7 +52,7 @@ def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
     except httpx.HTTPStatusError as err:
         if err.response.status_code == 404:
             log.warning(f"No company facts found on url {company_facts_url}")
-            raise NoCompanyFactsFound(cik=cik)
+            raise NoCompanyFactsFound(cik=cik) from None
         else:
             raise
 

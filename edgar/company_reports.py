@@ -51,17 +51,17 @@ class CompanyReport:
 
     @property
     def income_statement(self):
-        return self.financials().income_statement() if self.financials() else None
+        return self.financials.income_statement() if self.financials else None
 
     @property
     def balance_sheet(self):
-        return self.financials().balance_sheet() if self.financials() else None
+        return self.financials.balance_sheet() if self.financials else None
 
     @property
     def cash_flow_statement(self):
-        return self.financials().cashflow_statement() if self.financials() else None
+        return self.financials.cashflow_statement() if self.financials else None
 
-    @lru_cache(maxsize=1)
+    @cached_property
     def financials(self):
         """Get the financials for this filing"""
         return Financials.extract(self._filing)
@@ -355,7 +355,7 @@ class TenK(CompanyReport):
                 Padding(" ", (1, 0, 0, 0)),
                 self.get_structure(),
                 Padding(" ", (1, 0, 0, 0)),
-                self.financials() or Text("No financial data available", style="italic")
+                self.financials or Text("No financial data available", style="italic")
             ),
             title=title,
             box=box.ROUNDED,
@@ -501,7 +501,7 @@ class TenQ(CompanyReport):
                 Padding(" ", (1, 0, 0, 0)),
                 self.get_structure(),
                 Padding(" ", (1, 0, 0, 0)),
-                self.financials() or Text("No financial data available", style="italic")
+                self.financials or Text("No financial data available", style="italic")
             ),
             title=title,
             box=box.ROUNDED,

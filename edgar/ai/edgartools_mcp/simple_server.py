@@ -155,7 +155,7 @@ Latest Filing:
         return [TextContent(type="text", text=text_response)]
 
     except Exception as e:
-        raise ValueError(f"Error retrieving company information: {str(e)}")
+        raise ValueError(f"Error retrieving company information: {str(e)}") from e
 
 async def handle_current_filings(args: dict[str, Any]) -> list[TextContent]:
     """Handle current filings requests."""
@@ -186,7 +186,7 @@ async def handle_current_filings(args: dict[str, Any]) -> list[TextContent]:
         return [TextContent(type="text", text=text_response)]
 
     except Exception as e:
-        raise ValueError(f"Error retrieving current filings: {str(e)}")
+        raise ValueError(f"Error retrieving current filings: {str(e)}") from e
 
 @app.list_resources()
 async def list_resources() -> list[Resource]:

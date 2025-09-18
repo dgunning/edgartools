@@ -370,7 +370,7 @@ def find_company_ticker(cik: Union[int, str]) -> Union[str, List[str], None]:
         return None
 
     # Filter out None values from tickers
-    tickers = [ticker for ticker in ticker_series.values if ticker is not None]
+    tickers = [ticker for ticker in ticker_series.to_numpy() if ticker is not None]
 
     # Return a single ticker if only one found
     if len(tickers) == 1:

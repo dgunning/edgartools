@@ -285,8 +285,8 @@ def describe_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     # Create a DataFrame with the information
     description_df = pd.DataFrame({
-        'Data type': all_dtypes.values,
-        'Memory Usage (KB)': memory_usage.values
+        'Data type': all_dtypes.to_numpy(),
+        'Memory Usage (KB)': memory_usage.to_numpy()
     }, index=all_dtypes.index)
 
     # Append the total memory usage as the last row

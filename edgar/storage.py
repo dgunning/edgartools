@@ -475,8 +475,8 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
             log.warning(f"There are no feed files for url {url}")
             return pd.DataFrame(columns=['Name', 'File', 'Size', 'Modified'])
         elif e.response.status_code == 404:
-            raise FileNotFoundError(f"Page not found: {url}")
-        raise ConnectionError(f"Failed to download page: {str(e)}")
+            raise FileNotFoundError(f"Page not found: {url}") from None
+        raise ConnectionError(f"Failed to download page: {str(e)}") from e
 
     if "Directory Browsing Not Allowed" in html:
         log.warning(f"Directory browsing is not allowed for {url}")

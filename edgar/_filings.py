@@ -1220,11 +1220,14 @@ class Filing:
     def view(self):
         """Preview this filing's primary document as markdown. This should display in the console"""
         html_content = self.html()
-        if html_content:
+        if html_content and is_probably_html(html_content):
             document = Document.parse(html_content)
             print_rich(document)
         else:
-            pass
+            # Fallback to text content for forms without HTML (like UPLOAD forms)
+            text_content = self.text()
+            if text_content:
+                print(text_content)
 
     def xbrl(self) -> Optional[XBRL]:
         """

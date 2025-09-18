@@ -235,7 +235,7 @@ class MappingStore:
         try:
             import pandas as pd
         except ImportError:
-            raise ImportError("pandas is required for to_dataframe() but is not installed")
+            raise ImportError("pandas is required for to_dataframe() but is not installed") from None
 
         rows = []
         for standard_concept, company_concepts in self.mappings.items():

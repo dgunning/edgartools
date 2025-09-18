@@ -3,7 +3,11 @@ Enhanced financial statement that combines hierarchical structure with multi-per
 
 This module provides an enhanced statement class that uses learned mappings
 to show multiple periods with proper hierarchical organization.
+
+Note: PD011 violations in this file are false positives - .values refers to
+Dict[str, Optional[float]] on MultiPeriodItem objects, not pandas DataFrames.
 """
+# ruff: noqa: PD011
 
 from collections import defaultdict
 from dataclasses import dataclass, field

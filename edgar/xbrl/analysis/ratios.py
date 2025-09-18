@@ -735,7 +735,7 @@ class FinancialRatios:
                 equivalents_used={k: str(v) for k, v in equivalents_used.items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate current ratio: {str(e)}")
+            raise ValueError(f"Failed to calculate current ratio: {str(e)}") from e
 
     def calculate_return_on_assets(self) -> RatioAnalysis:
         """Calculate return on assets for all periods.
@@ -772,7 +772,7 @@ class FinancialRatios:
                 equivalents_used={k: str(v) for k, v in (equivalents_used or {}).items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate return on assets: {str(e)}")
+            raise ValueError(f"Failed to calculate return on assets: {str(e)}") from e
 
     def calculate_operating_margin(self) -> RatioAnalysis:
         """Calculate operating margin for all periods.
@@ -805,7 +805,7 @@ class FinancialRatios:
                 equivalents_used={k: str(v) for k, v in (equivalents_used or {}).items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate operating margin: {str(e)}")
+            raise ValueError(f"Failed to calculate operating margin: {str(e)}") from e
 
     def calculate_gross_margin(self) -> RatioAnalysis:
         """Calculate gross margin for all periods.
@@ -841,7 +841,7 @@ class FinancialRatios:
                 equivalents_used={k: str(v) for k, v in (equivalents_used or {}).items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate gross margin: {str(e)}")
+            raise ValueError(f"Failed to calculate gross margin: {str(e)}") from e
 
     def calculate_quick_ratio(self) -> RatioAnalysis:
         """Calculate quick ratio for all periods.
@@ -892,7 +892,7 @@ class FinancialRatios:
                 equivalents_used={k: str(v) for k, v in equivalents_used.items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate quick ratio: {str(e)}")
+            raise ValueError(f"Failed to calculate quick ratio: {str(e)}") from e
 
     def calculate_cash_ratio(self) -> RatioAnalysis:
         """Calculate cash ratio for all periods.
@@ -926,7 +926,7 @@ class FinancialRatios:
                 equivalents_used={k: str(v) for k, v in (equivalents_used or {}).items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate cash ratio: {str(e)}")
+            raise ValueError(f"Failed to calculate cash ratio: {str(e)}") from e
 
     def calculate_working_capital(self) -> RatioAnalysis:
         """Calculate working capital for all periods.
@@ -962,7 +962,7 @@ class FinancialRatios:
                 equivalents_used={k: str(v) for k, v in (equivalents_used or {}).items() if v is not None}
             )
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate working capital: {str(e)}")
+            raise ValueError(f"Failed to calculate working capital: {str(e)}") from e
 
     def calculate_profitability_ratios(self) -> RatioAnalysisGroup:
         """Calculate profitability ratios.
@@ -1068,7 +1068,7 @@ class FinancialRatios:
             )
 
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate profitability ratios: {str(e)}")
+            raise ValueError(f"Failed to calculate profitability ratios: {str(e)}") from e
 
     def calculate_efficiency_ratios(self) -> RatioAnalysisGroup:
         """Calculate efficiency ratios.
@@ -1162,7 +1162,7 @@ class FinancialRatios:
             )
 
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate efficiency ratios: {str(e)}")
+            raise ValueError(f"Failed to calculate efficiency ratios: {str(e)}") from e
 
     def calculate_leverage_ratios(self) -> RatioAnalysisGroup:
         """Calculate leverage ratios.
@@ -1260,7 +1260,7 @@ class FinancialRatios:
             )
 
         except (KeyError, ZeroDivisionError) as e:
-            raise ValueError(f"Failed to calculate leverage ratios: {str(e)}")
+            raise ValueError(f"Failed to calculate leverage ratios: {str(e)}") from e
 
     def calculate_liquidity_ratios(self) -> RatioAnalysisGroup:
         """Calculate all liquidity ratios.
@@ -1281,7 +1281,7 @@ class FinancialRatios:
                 ratios=ratios
             )
         except ValueError as e:
-            raise ValueError(f"Failed to calculate liquidity ratios: {str(e)}")
+            raise ValueError(f"Failed to calculate liquidity ratios: {str(e)}") from e
 
     def calculate_all(self) -> Dict[str, Union[Dict[str, RatioAnalysis], RatioAnalysisGroup]]:
         """Calculate all available financial ratios."""
@@ -1293,4 +1293,4 @@ class FinancialRatios:
                 'leverage': self.calculate_leverage_ratios()
             }
         except ValueError as e:
-            raise ValueError(f"Failed to calculate all ratios: {str(e)}")
+            raise ValueError(f"Failed to calculate all ratios: {str(e)}") from e
