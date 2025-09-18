@@ -100,7 +100,7 @@ class XBRLAttachments:
 class XBRL:
     """
     Integrated XBRL parser that combines all linkbase parsers.
-    
+
     This is the top-level object that integrates all components of the XBRL parsing system,
     providing access to facts organized according to presentation hierarchies and
     allowing for dimensional analysis and calculation validation.
@@ -298,7 +298,7 @@ class XBRL:
             calculation_file: Path to calculation linkbase file
             definition_file: Path to definition linkbase file
             label_file: Path to label linkbase file
-            
+
         Returns:
             XBRL object with parsed data
         """
@@ -331,10 +331,10 @@ class XBRL:
     def from_filing(cls, filing) -> Optional['XBRL']:
         """
         Create an XBRL object from a Filing object.
-        
+
         Args:
             filing: Filing object with attachments containing XBRL files
-            
+
         Returns:
             XBRL object with parsed data
         """
@@ -389,14 +389,14 @@ class XBRL:
     def current_period(self):
         """
         Convenient access to current period financial data.
-        
+
         Provides simplified access to the most recent period's financial data
         without comparative information. This addresses common use cases where
         users only need the current period data.
-        
+
         Returns:
             CurrentPeriodView: Interface for accessing current period data
-            
+
         Example:
             >>> xbrl = filing.xbrl()
             >>> current = xbrl.current_period
@@ -427,7 +427,7 @@ class XBRL:
     def get_all_statements(self) -> List[Dict[str, Any]]:
         """
         Get all available financial statements.
-        
+
         Returns:
             List of statement metadata (role, definition, element count)
         """
@@ -528,11 +528,11 @@ class XBRL:
     def get_statement_by_type(self, statement_type: str, include_dimensions: bool = True) -> Optional[Dict[str, Any]]:
         """
         Get the first statement matching the given type.
-        
+
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', 'Notes', etc.)
             include_dimensions: Whether to include dimensional segment data (default: True)
-            
+
         Returns:
             Statement data if found, None otherwise
         """
@@ -577,14 +577,14 @@ class XBRL:
                           standard: bool = True) -> Dict[str, Any]:
         """
         Stitch together statements from multiple XBRL objects.
-        
+
         Args:
             xbrl_list: List of XBRL objects, should be from the same company and ordered by date
             statement_type: Type of statement to stitch ('IncomeStatement', 'BalanceSheet', etc.)
             period_type: Type of period view to generate
             max_periods: Maximum number of periods to include (default: 3)
             standard: Whether to use standardized concept labels (default: True)
-            
+
         Returns:
             Stitched statement data
         """
@@ -596,12 +596,12 @@ class XBRL:
                                   statement_type: str) -> 'RichTable':
         """
         Render a stitched statement.
-        
+
         Args:
             stitched_data: Stitched statement data
             statement_title: Title of the statement
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
-            
+
         Returns:
             RichTable: A formatted table representation of the stitched statement
         """
@@ -613,7 +613,7 @@ class XBRL:
                       should_display_dimensions: Optional[bool] = None) -> List[Dict[str, Any]]:
         """
         Get a financial statement by role URI, statement type, or statement short name.
-        
+
         Args:
             role_or_type: Can be one of:
                 - Extended link role URI (e.g. "http://apple.com/role/ConsolidatedStatementOfIncome")
@@ -622,7 +622,7 @@ class XBRL:
             period_filter: Optional period key to filter facts
             should_display_dimensions: Whether to display dimensions for this statement.
                 If None, the method will determine based on statement type and role.
-            
+
         Returns:
             List of line items with values
         """
@@ -663,7 +663,7 @@ class XBRL:
                              path: List[str] = None, should_display_dimensions: bool = False) -> None:
         """
         Recursively generate line items for a statement.
-        
+
         Args:
             element_id: Current element ID
             nodes: Dictionary of presentation nodes
@@ -1032,7 +1032,7 @@ class XBRL:
         Get available period views for a statement type.
         Args:
             statement_type: Type of statement to get period views for
-            
+
         Returns:
             List of period view options with name, description, and period keys
         """
@@ -1063,7 +1063,7 @@ class XBRL:
         List[Dict[str, Any]], Optional[str], str]:
         """
         Find a statement by type, role, or name.
-        
+
         Args:
             statement_type: Type of statement (e.g., "BalanceSheet") or role URI or statement name
             is_parenthetical: Whether to look for a parenthetical statement
