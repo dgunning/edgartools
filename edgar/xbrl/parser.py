@@ -549,11 +549,8 @@ class XBRLParser:
                     if not from_href or not to_href:
                         continue
                     
-                    # Optimize order extraction with direct try/except
-                    try:
-                        order = float(arc.get('order', '1.0'))
-                    except (ValueError, TypeError):
-                        order = 1.0
+                    # Parse order attribute correctly
+                    order = self._parse_order_attribute(arc)
                     
                     preferred_label = arc.get('preferredLabel')
                     
@@ -671,10 +668,12 @@ class XBRLParser:
                 self._build_presentation_subtree(
                     child_id, element_id, depth + 1, from_map, all_nodes
                 )
-                
-                # Update preferred label after child is built
-                if preferred_label and child_id in all_nodes:
-                    all_nodes[child_id].preferred_label = preferred_label
+
+                # Update preferred label and order after child is built
+                if child_id in all_nodes:
+                    if preferred_label:
+                        all_nodes[child_id].preferred_label = preferred_label
+                    all_nodes[child_id].order = rel['order']
     
     def parse_calculation(self, file_path: Union[str, Path]) -> None:
         """Parse calculation linkbase file and build calculation trees."""
@@ -684,6 +683,27 @@ class XBRLParser:
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing calculation file {file_path}: {str(e)}")
     
+    def _parse_order_attribute(self, arc) -> float:
+        """Parse order attribute from arc, checking both order and xlink:order."""
+        # Try xlink:order first (XBRL standard)
+        order_value = arc.get('{http://www.w3.org/1999/xlink}order')
+        if order_value is None:
+            # Fallback to order attribute
+            order_value = arc.get('order')
+
+        # Debug logging to understand what's in the XBRL document
+        if order_value is not None:
+            log.debug(f"Found order attribute: {order_value}")
+        else:
+            # Log all attributes to see what's actually there
+            all_attrs = dict(arc.attrib) if hasattr(arc, 'attrib') else {}
+            log.debug(f"No order attribute found. Available attributes: {all_attrs}")
+
+        try:
+            return float(order_value) if order_value is not None else 0.0
+        except (ValueError, TypeError):
+            return 0.0
+
     def _safe_parse_xml(self, content: str) -> ET.Element:
         """
         Safely parse XML content with lxml, handling encoding declarations properly.
@@ -738,7 +758,7 @@ class XBRLParser:
                 for arc in arcs:
                     from_ref = arc.get('{http://www.w3.org/1999/xlink}from')
                     to_ref = arc.get('{http://www.w3.org/1999/xlink}to')
-                    order = float(arc.get('order', '1.0'))
+                    order = self._parse_order_attribute(arc)
                     weight = float(arc.get('weight', '1.0'))
                     
                     if not from_ref or not to_ref:
@@ -841,8 +861,16 @@ class XBRLParser:
         )
         
         # Add element information if available
+        elem_info = None
         if element_id in self.element_catalog:
             elem_info = self.element_catalog[element_id]
+        else:
+            # Try alternative element ID formats (colon vs underscore)
+            alt_element_id = element_id.replace(':', '_') if ':' in element_id else element_id.replace('_', ':')
+            if alt_element_id in self.element_catalog:
+                elem_info = self.element_catalog[alt_element_id]
+
+        if elem_info:
             node.balance_type = elem_info.balance
             node.period_type = elem_info.period_type
         
@@ -867,10 +895,11 @@ class XBRLParser:
                 self._build_calculation_subtree(
                     child_id, element_id, from_map, all_nodes
                 )
-                
-                # Update weight after child is built
+
+                # Update weight and order after child is built
                 if child_id in all_nodes:
                     all_nodes[child_id].weight = weight
+                    all_nodes[child_id].order = rel['order']
     
     def parse_definition(self, file_path: Union[str, Path]) -> None:
         """Parse definition linkbase file and build dimensional structures."""
@@ -912,8 +941,8 @@ class XBRLParser:
                 for arc in arcs:
                     from_ref = arc.get('{http://www.w3.org/1999/xlink}from')
                     to_ref = arc.get('{http://www.w3.org/1999/xlink}to')
-                    order = float(arc.get('order', '1.0'))
-                    
+                    order = self._parse_order_attribute(arc)
+
                     # Get the arcrole - this is important for identifying dimensional relationships
                     arcrole = arc.get('{http://www.w3.org/1999/xlink}arcrole')
                     if not from_ref or not to_ref or not arcrole:
