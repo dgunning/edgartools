@@ -11,8 +11,8 @@ from typing import Any, Dict, List, Optional, Union
 
 # Import EdgarTools functionality
 try:
-    from edgar import Company, find_company, get_current_filings, get_filings
-    from edgar.search import search_companies
+    from edgar import Company, find_company, get_current_filings, get_filings  # noqa: F401
+    from edgar.search import search_companies  # noqa: F401
     EDGAR_AVAILABLE = True
 except ImportError:
     EDGAR_AVAILABLE = False

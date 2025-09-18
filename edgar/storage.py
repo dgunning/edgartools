@@ -1,24 +1,22 @@
 import asyncio
 import os
 import re
-from datetime import datetime, date
+from datetime import date, datetime
 from pathlib import Path
-from typing import Optional, Union, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional, Union
 
 if TYPE_CHECKING:
     from edgar._filings import Filings
 
 import pandas as pd
 from bs4 import BeautifulSoup
-from httpx import HTTPStatusError, AsyncClient
+from httpx import AsyncClient, HTTPStatusError
 from tqdm.auto import tqdm
+
+from edgar.core import filing_date_to_year_quarters, get_edgar_data_directory, log, strtobool
 from edgar.dates import extract_dates
-from edgar.core import log, get_edgar_data_directory, filing_date_to_year_quarters, strtobool
 from edgar.httprequests import download_bulk_data, download_datafile, download_text
-from edgar.reference.tickers import (ticker_txt_url,
-                                     company_tickers_json_url,
-                                     mutual_fund_tickers_url,
-                                     company_tickers_exchange_url)
+from edgar.reference.tickers import company_tickers_exchange_url, company_tickers_json_url, mutual_fund_tickers_url, ticker_txt_url
 
 __all__ = ['download_edgar_data',
            'get_edgar_data_directory',

@@ -14,11 +14,11 @@ and handling dimensional qualifiers.
 import datetime
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from edgar.xbrl.facts import FactQuery
-    from edgar.xbrl.models import Footnote, Fact
+    from edgar.xbrl.models import Fact, Footnote
 
 import pandas as pd
 from rich import box
@@ -1342,8 +1342,7 @@ class XBRL:
                         item['statement_type'] = stmt_type
 
                     # Apply standardization
-                    from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, \
-                        standardize_statement
+                    from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, standardize_statement
                     mapper = ConceptMapper(initialize_default_mappings(read_only=True))
                     statement_data = standardize_statement(statement_data, mapper)
 

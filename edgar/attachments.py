@@ -7,7 +7,7 @@ import tempfile
 import time
 import webbrowser
 import zipfile
-from functools import lru_cache, cached_property
+from functools import cached_property, lru_cache
 from pathlib import Path
 from threading import Thread
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union

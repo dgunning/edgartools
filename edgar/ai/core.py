@@ -323,13 +323,13 @@ def check_ai_capabilities():
     }
 
     try:
-        import mcp
+        import mcp  # noqa: F401
         capabilities['mcp'] = True
     except ImportError:
         pass
 
     try:
-        import tiktoken
+        import tiktoken  # noqa: F401
         capabilities['token_optimization'] = True
     except ImportError:
         pass

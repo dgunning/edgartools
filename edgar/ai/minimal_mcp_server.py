@@ -8,8 +8,8 @@ try:
 except ImportError:
     exit(1)
 
-try: 
-    from mcp.types import Resource, TextContent, Tool
+try:
+    from mcp.types import TextContent, Tool
 except ImportError:
     exit(1)
 
