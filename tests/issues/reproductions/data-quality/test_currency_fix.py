@@ -1,14 +1,13 @@
 """
 Simple test to verify currency fix for Deutsche Bank
 """
+import pytest
 
 from edgar import Company, set_identity
 import os
 
-# Use environment identity for tests
-if not os.getenv('EDGAR_IDENTITY'):
-    set_identity("EdgarTools Test test@edgartools.dev")
 
+@pytest.mark.regression
 def test_currency_fix():
     """Test that Deutsche Bank shows EUR symbols instead of USD"""
     print("=== Testing Currency Fix for Deutsche Bank ===\n")

@@ -4,11 +4,9 @@ Test to verify USD currency still works correctly
 
 from edgar import Company, set_identity
 import os
+import pytest
 
-# Use environment identity for tests
-if not os.getenv('EDGAR_IDENTITY'):
-    set_identity("EdgarTools Test test@edgartools.dev")
-
+@pytest.mark.regression
 def test_usd_currency():
     """Test that Apple shows USD symbols correctly"""
     print("=== Testing USD Currency for Apple ===\n")
