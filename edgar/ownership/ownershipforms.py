@@ -11,26 +11,25 @@ import itertools
 from dataclasses import dataclass, field
 from datetime import date
 from functools import lru_cache
-from typing import List, Dict, Tuple, Optional, Union, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from bs4 import BeautifulSoup, ResultSet
-from bs4 import Tag
+from bs4 import BeautifulSoup, ResultSet, Tag
 from rich import box
 from rich.console import Group, Text
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Column, Table
 
 from edgar._party import Address
-from edgar.core import (IntString, get_bool)
+from edgar.core import IntString, get_bool
 from edgar.datatools import convert_to_numeric
 from edgar.entity import Entity
 from edgar.formatting import reverse_name, yes_no
-from edgar.ownership.core import format_amount, format_currency, safe_numeric, format_numeric
+from edgar.ownership.core import format_amount, format_currency, format_numeric, safe_numeric
 from edgar.ownership.html_render import ownership_to_html
-from edgar.richtools import repr_rich, df_to_rich_table
-from edgar.xmltools import (child_text, child_value)
+from edgar.richtools import df_to_rich_table, repr_rich
+from edgar.xmltools import child_text, child_value
 
 __all__ = [
     'Owner',

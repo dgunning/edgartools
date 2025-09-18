@@ -100,7 +100,7 @@ def render_financial_statements(ticker="AAPL"):
             print(f"\n[bold]Income Statement ({period['start_date']} to {period['end_date']} only):[/bold]")
             single_period_is = xbrl.render_statement("IncomeStatement", period_filter=period_key)
             print(single_period_is)
-    
+
 def using_statements_api(ticker="TSLA"):
     """
     Demonstrates the use of the user-friendly Statements API.
@@ -109,45 +109,45 @@ def using_statements_api(ticker="TSLA"):
 
     # Get the latest filing
     filing = company.latest("10-K")
-    
+
     # Create an XBRL object
     xbrl = XBRL.from_filing(filing)
-    
+
     # Create a Statements object for easier access
     statements = Statements(xbrl)
-    
+
     # Display available statements
     print("\n[bold]Available Statements:[/bold]")
     print(statements)
-    
+
     # Display balance sheet
     print("\n[bold]Balance Sheet:[/bold]")
     balance_sheet = statements.balance_sheet()
     print(balance_sheet)
-    
+
     # Display income statement
     print("\n[bold]Income Statement:[/bold]")
     income_statement = statements.income_statement()
     print(income_statement)
-    
+
     # Display cash flow statement
     print("\n[bold]Cash Flow Statement:[/bold]")
     cash_flow = statements.cashflow_statement()
     print(cash_flow)
-    
+
     # Get available period views
     print("\n[bold]Available Period Views for Income Statement:[/bold]")
     period_views = statements.get_period_views("IncomeStatement")
     for view in period_views:
         print(f"- {view['name']}: {view['description']}")
-    
+
     # Display with specific period view if available
     if period_views:
         view_name = period_views[0]['name']
         print(f"\n[bold]Income Statement with {view_name} Period View:[/bold]")
         income_statement_view = statements.income_statement(period_view=view_name)
         print(income_statement_view)
-    
+
     # Display three-column view if available
     print("\n[bold]Three-Column Statement View (if available):[/bold]")
     period_views = statements.get_period_views("BalanceSheet")
@@ -159,7 +159,7 @@ def using_statements_api(ticker="TSLA"):
         print(three_col_bs)
     else:
         print("[yellow]No three-period view available for this filing.[/yellow]")
-    
+
     # Convert to dataframe
     print("\n[bold]Converting to DataFrame:[/bold]")
     df = statements.to_dataframe("IncomeStatement")
@@ -173,18 +173,18 @@ def example_with_real_filing():
     """
     # Using print directly with rich formatting instead of console
     print("[bold]Example with Real Filing[/bold]")
-    
+
     try:
         # Get a filing with XBRL attachments
         filing = Filing.get('0000320193-23-000077')  # Apple 10-K
         print(f"Retrieved filing: {filing.form} for {filing.company} ({filing.filing_date})")
-        
+
         # Parse XBRL data
         xbrl = XBRL.from_filing(filing)
-        
+
         # Create Statements object
         statements = Statements(xbrl)
-        
+
         # Display entity information
         print("\n[bold]Entity Information:[/bold]")
         entity_info = {
@@ -196,12 +196,12 @@ def example_with_real_filing():
         }
         for key, value in entity_info.items():
             print(f"{key}: {value}")
-        
+
         # Display balance sheet
         print("\n[bold]Balance Sheet:[/bold]")
         balance_sheet = statements.balance_sheet()
         print(balance_sheet)
-        
+
     except Exception as e:
         print(f"[bold red]Error loading real filing: {str(e)}[/bold red]")
         print("[yellow]Note: This example requires internet access to fetch filings from SEC EDGAR.[/yellow]")
@@ -213,33 +213,33 @@ def standardized_statements_example():
     """
     # Path to XBRL files
     sample_dir = Path(__file__).parent / "aapl"
-    
+
     # Create an XBRL object by parsing the directory
     xbrl = XBRL.from_directory(sample_dir)
-    
+
     # Create a Statements object for easier access
     statements = Statements(xbrl)
-    
+
     # Display original income statement
     print("\n[bold]Income Statement (Original Labels):[/bold]")
     income_statement = statements.income_statement()
     print(income_statement)
-    
+
     # Display standardized income statement
     print("\n[bold]Income Statement (Standardized Labels):[/bold]")
     income_statement_std = statements.income_statement(standard=True)
     print(income_statement_std)
-    
+
     # Display original balance sheet
     print("\n[bold]Balance Sheet (Original Labels):[/bold]")
     balance_sheet = statements.balance_sheet()
     print(balance_sheet)
-    
+
     # Display standardized balance sheet
     print("\n[bold]Balance Sheet (Standardized Labels):[/bold]")
     balance_sheet_std = statements.balance_sheet(standard=True)
     print(balance_sheet_std)
-    
+
     # Show standardized statement with a specific period view
     period_views = statements.get_period_views("BalanceSheet")
     if period_views:
@@ -247,17 +247,17 @@ def standardized_statements_example():
         print(f"\n[bold]Balance Sheet ({view_name}) with Standardized Labels:[/bold]")
         balance_sheet_view_std = statements.balance_sheet(period_view=view_name, standard=True)
         print(balance_sheet_view_std)
-    
+
     # Demonstrate standardized DataFrames
     print("\n[bold]Converting to DataFrame with Standardized Labels:[/bold]")
-    
+
     # Original DataFrame
     print("\n[bold]Original DataFrame:[/bold]")
     df_orig = statements.to_dataframe("IncomeStatement", standard=False)
     if not df_orig.empty:
         print(f"DataFrame shape: {df_orig.shape}")
         print(df_orig[['concept', 'label']].head(3))
-    
+
     # Standardized DataFrame
     print("\n[bold]Standardized DataFrame:[/bold]")
     df_std = statements.to_dataframe("IncomeStatement", standard=True)
@@ -277,10 +277,10 @@ if __name__ == "__main__":
     print("3. Example with Real Filing (Requires Internet)")
     print("4. Standardized Statements (Concept Standardization)")
     print("5. Run All Examples")
-    
+
     try:
         choice = input("\nEnter your choice (1-5): ")
-        
+
         if choice == "1":
             render_financial_statements()
         elif choice == "2":
@@ -304,7 +304,7 @@ if __name__ == "__main__":
             standardized_statements_example()
         else:
             print("[bold red]Invalid choice. Please run the script again and select a valid option.[/bold red]")
-    
+
     except KeyboardInterrupt:
         print("\n[yellow]Examples cancelled by user.[/yellow]")
     except Exception as e:

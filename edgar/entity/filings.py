@@ -16,11 +16,10 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar._filings import Filing, Filings, PagingState
-from edgar.core import (log, IntString)
-from edgar.formatting import display_size
-from edgar.formatting import accession_number_text
+from edgar.core import IntString, log
+from edgar.formatting import accession_number_text, display_size
 from edgar.reference.forms import describe_form
-from edgar.richtools import df_to_rich_table, repr_rich, Docs
+from edgar.richtools import Docs, df_to_rich_table, repr_rich
 
 __all__ = [
     'EntityFiling',
@@ -33,7 +32,7 @@ __all__ = [
 class EntityFiling(Filing):
     """
     Represents a single SEC filing for an entity.
-    
+
     This extends the base Filing class with additional information
     and methods specific to SEC entities.
     """
@@ -77,7 +76,7 @@ class EntityFiling(Filing):
 class EntityFilings(Filings):
     """
     Collection of SEC filings for an entity.
-    
+
     This extends the base Filings class with additional methods and properties
     specific to entity filings.
     """
@@ -131,7 +130,7 @@ class EntityFilings(Filings):
                accession_number: Union[str, List[str]] = None):
         """
         Filter the filings based on various criteria.
-        
+
         Args:
             form: Filter by form type
             amendments: Include amendments
@@ -140,7 +139,7 @@ class EntityFilings(Filings):
             cik: Filter by CIK
             ticker: Filter by ticker
             accession_number: Filter by accession number
-            
+
         Returns:
             Filtered EntityFilings
         """
@@ -157,10 +156,10 @@ class EntityFilings(Filings):
     def latest(self, n: int = 1):
         """
         Get the latest n filings.
-        
+
         Args:
             n: Number of filings to return
-            
+
         Returns:
             Latest filing(s) - single filing if n=1, otherwise EntityFilings
         """
@@ -180,10 +179,10 @@ class EntityFilings(Filings):
     def head(self, n: int):
         """
         Get the first n filings.
-        
+
         Args:
             n: Number of filings to return
-            
+
         Returns:
             EntityFilings containing the first n filings
         """
@@ -193,10 +192,10 @@ class EntityFilings(Filings):
     def tail(self, n: int):
         """
         Get the last n filings.
-        
+
         Args:
             n: Number of filings to return
-            
+
         Returns:
             EntityFilings containing the last n filings
         """
@@ -206,10 +205,10 @@ class EntityFilings(Filings):
     def sample(self, n: int):
         """
         Get a random sample of n filings.
-        
+
         Args:
             n: Number of filings to sample
-            
+
         Returns:
             EntityFilings containing n random filings
         """
@@ -221,10 +220,10 @@ class EntityFilings(Filings):
     def summarize(data) -> pd.DataFrame:
         """
         Summarize filing data as a pandas DataFrame.
-        
+
         Args:
             data: Filing data to summarize
-            
+
         Returns:
             DataFrame with summarized data
         """
@@ -239,7 +238,7 @@ class EntityFilings(Filings):
     def next(self):
         """
         Show the next page of filings.
-        
+
         Returns:
             EntityFilings with the next page of data, or None if at the end
         """
@@ -257,7 +256,7 @@ class EntityFilings(Filings):
     def previous(self):
         """
         Show the previous page of filings.
-        
+
         Returns:
             EntityFilings with the previous page of data, or None if at the beginning
         """
@@ -415,11 +414,11 @@ COMPANY_FILINGS_SCHEMA = schema = pa.schema([
 def empty_company_filings(cik:IntString, company_name:str):
     """
     Create an empty filings container.
-    
+
     Args:
         cik: The CIK number
         company_name: The company name
-        
+
     Returns:
         EntityFilings: An empty filings container
     """

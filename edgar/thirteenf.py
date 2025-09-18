@@ -2,19 +2,19 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
-from typing import Union, List
+from typing import List, Union
 
 import pandas as pd
 import pyarrow.compute as pc
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Column, Table
 
 from edgar._party import Address
 from edgar.reference import cusip_ticker_mapping
 from edgar.richtools import repr_rich
-from edgar.xmltools import find_element, child_text
+from edgar.xmltools import child_text, find_element
 
 __all__ = [
     'ThirteenF',
@@ -169,72 +169,72 @@ class ThirteenF:
         # This is the person who signed the filing. Could be the Reporting Manager but could be someone else
         # like the CFO
         return self.primary_form_information.signature.name
-    
+
     # Enhanced manager name properties for better clarity
     @property
     def management_company_name(self) -> str:
         """
         The legal name of the investment management company that filed the 13F.
-        
+
         This is the institutional entity (e.g., "Berkshire Hathaway Inc", "Vanguard Group Inc")
         that is legally responsible for managing the assets, not an individual person's name.
-        
+
         Returns:
             str: The legal name of the management company
-            
+
         Example:
             >>> thirteen_f.management_company_name
             'Berkshire Hathaway Inc'
         """
         return self.investment_manager.name
-    
+
     @property 
     def filing_signer_name(self) -> str:
         """
         The name of the individual who signed the 13F filing.
-        
+
         This is typically an administrative officer (CFO, CCO, Compliance Officer, etc.)
         rather than the famous portfolio manager. For example, Berkshire Hathaway's 13F
         is signed by "Marc D. Hamburg" (SVP), not Warren Buffett.
-        
+
         Returns:
             str: The name of the person who signed the filing
-            
+
         Example:
             >>> thirteen_f.filing_signer_name  
             'Marc D. Hamburg'
         """
         return self.signer
-    
+
     @property
     def filing_signer_title(self) -> str:
         """
         The business title of the individual who signed the 13F filing.
-        
+
         Common titles include: CFO, CCO, Senior Vice President, Chief Compliance Officer,
         Secretary, Treasurer, etc. This helps distinguish administrative signers from 
         portfolio managers.
-        
+
         Returns:
             str: The business title of the filing signer
-            
+
         Example:
             >>> thirteen_f.filing_signer_title
             'Senior Vice President'
         """
         return self.primary_form_information.signature.title
-    
+
     @property
     def manager_name(self) -> str:
         """
         DEPRECATED: Use management_company_name instead.
-        
+
         Returns the management company name for backwards compatibility.
         This property name was misleading as it suggested an individual manager's name.
-        
+
         Returns:
             str: The management company name
-            
+
         Warning:
             This property is deprecated and may be removed in future versions.
             Use management_company_name for the company name, or see get_portfolio_managers()
@@ -248,23 +248,23 @@ class ThirteenF:
             stacklevel=2
         )
         return self.management_company_name
-    
+
     def get_portfolio_managers(self, include_approximate: bool = False) -> list[dict]:
         """
         Get information about the actual portfolio managers for this fund.
-        
+
         Note: 13F filings do not contain individual portfolio manager names.
         This method provides a curated mapping for well-known funds based on
         public information. Results may not be current or complete.
-        
+
         Args:
             include_approximate (bool): If True, includes approximate/historical 
                                       manager information even if not current
-        
+
         Returns:
             list[dict]: List of portfolio manager information with keys:
                        'name', 'title', 'status', 'source', 'last_updated'
-                       
+
         Example:
             >>> thirteen_f.get_portfolio_managers()
             [
@@ -281,11 +281,11 @@ class ThirteenF:
             self.management_company_name, 
             include_approximate=include_approximate
         )
-    
+
     def _lookup_portfolio_managers(self, company_name: str, include_approximate: bool = False) -> list[dict]:
         """
         Internal method to lookup portfolio managers for a given company.
-        
+
         This uses a curated database of well-known fund managers loaded from an external JSON file.
         The data is compiled from public sources and may not be complete or current.
         """
@@ -297,7 +297,7 @@ class ThirteenF:
                 managers = self._search_manager_database_by_cik(db, cik, include_approximate)
                 if managers:
                     return managers
-            
+
             # Fallback to name-based search
             return self._search_manager_database(db, company_name, include_approximate)
         except Exception as e:
@@ -305,22 +305,22 @@ class ThirteenF:
             import warnings
             warnings.warn(f"Could not load portfolio manager database: {e}")
             return []
-    
+
     @staticmethod
     @lru_cache(maxsize=1)
     def _load_portfolio_manager_db() -> dict:
         """
         Load the portfolio manager database from external JSON file.
-        
+
         Returns:
             dict: The loaded database, or empty dict if file not found
         """
         import json
         from pathlib import Path
-        
+
         # Try to load from external JSON file
         data_file = Path(__file__).parent / 'reference' / 'data' / 'portfolio_managers.json'
-        
+
         if data_file.exists():
             try:
                 with open(data_file, 'r', encoding='utf-8') as f:
@@ -354,86 +354,86 @@ class ThirteenF:
                     }
                 }
             }
-    
+
     def _search_manager_database(self, db: dict, company_name: str, include_approximate: bool = False) -> list[dict]:
         """
         Search the manager database for a company.
-        
+
         Args:
             db: The loaded database dictionary
             company_name: Company name to search for
             include_approximate: Whether to include non-active managers
-            
+
         Returns:
             list[dict]: List of matching managers
         """
         if not db or 'managers' not in db:
             return []
-            
+
         managers_data = db['managers']
         normalized_name = company_name.lower()
-        
+
         # Search through all companies
         for company_key, company_data in managers_data.items():
             # Check match patterns
             match_patterns = company_data.get('match_patterns', [company_key])
-            
+
             for pattern in match_patterns:
                 if pattern.lower() in normalized_name:
                     managers = company_data.get('managers', [])
-                    
+
                     if include_approximate:
                         return managers
                     else:
                         # Only return active managers unless requested otherwise
                         return [m for m in managers if m.get('status') == 'active']
-        
+
         # No matches found
         return []
-    
+
     @staticmethod
     def _search_manager_database_by_cik(db: dict, cik: int, include_approximate: bool = False) -> list[dict]:
         """
         Search the manager database by CIK (more accurate than name matching).
-        
+
         Args:
             db: The loaded database dictionary
             cik: The CIK to search for
             include_approximate: Whether to include non-active managers
-            
+
         Returns:
             list[dict]: List of matching managers
         """
         if not db or 'managers' not in db:
             return []
-            
+
         managers_data = db['managers']
-        
+
         # Search through all companies for CIK match
-        for company_key, company_data in managers_data.items():
+        for _company_key, company_data in managers_data.items():
             company_cik = company_data.get('cik')
             if company_cik == cik:
                 managers = company_data.get('managers', [])
-                
+
                 if include_approximate:
                     return managers
                 else:
                     # Only return active managers unless requested otherwise
                     return [m for m in managers if m.get('status') == 'active']
-        
+
         # No CIK matches found
         return []
-    
+
     def get_manager_info_summary(self) -> dict:
         """
         Get a comprehensive summary of all available manager information.
-        
+
         This provides a clear breakdown of what information is available from the 13F
         filing versus external sources, helping users understand the data limitations.
-        
+
         Returns:
             dict: Summary with keys 'from_13f_filing', 'external_sources', 'limitations'
-            
+
         Example:
             >>> thirteen_f.get_manager_info_summary()
             {
@@ -455,7 +455,7 @@ class ThirteenF:
             }
         """
         portfolio_managers = self.get_portfolio_managers()
-        
+
         return {
             'from_13f_filing': {
                 'management_company': self.management_company_name,
@@ -475,46 +475,46 @@ class ThirteenF:
                 'Portfolio manager information is sourced from public records and may be outdated'
             ]
         }
-    
+
     def is_filing_signer_likely_portfolio_manager(self) -> bool:
         """
         Determine if the filing signer is likely to be a portfolio manager.
-        
+
         This uses heuristics based on the signer's title to assess whether they
         might be involved in investment decisions rather than just administrative functions.
-        
+
         Returns:
             bool: True if signer appears to be investment-focused, False if administrative
-            
+
         Example:
             >>> thirteen_f.is_filing_signer_likely_portfolio_manager()
             False  # For administrative titles like CFO, CCO, etc.
         """
         title = self.filing_signer_title.upper()
-        
+
         # Investment-focused titles
         investment_titles = [
             'PORTFOLIO MANAGER', 'FUND MANAGER', 'INVESTMENT MANAGER',
             'CHIEF INVESTMENT OFFICER', 'CIO', 'MANAGING DIRECTOR', 
             'CHAIRMAN', 'CEO', 'PRESIDENT', 'FOUNDER'
         ]
-        
+
         # Administrative titles
         admin_titles = [
             'CFO', 'CCO', 'COMPLIANCE', 'SECRETARY', 'TREASURER', 
             'VICE PRESIDENT', 'VP', 'ASSISTANT', 'COUNSEL'
         ]
-        
+
         # Check for investment titles first
         for inv_title in investment_titles:
             if inv_title in title:
                 return True
-                
+
         # Check for administrative titles  
         for admin_title in admin_titles:
             if admin_title in title:
                 return False
-                
+
         # If unclear, err on the side of caution
         return False
 

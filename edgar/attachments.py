@@ -10,7 +10,13 @@ import zipfile
 from functools import lru_cache
 from pathlib import Path
 from threading import Thread
-from typing import List, Optional, Tuple, Dict, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+
+if TYPE_CHECKING:
+    from edgar.company_reports import Report
+    from edgar.sgml.sgml_common import FilingSGML, SGMLDocument
+
+import textwrap
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
@@ -18,19 +24,15 @@ from rich import box
 from rich.columns import Columns
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Column, Table
 from rich.text import Text
-import textwrap
 
-
-from edgar.richtools import repr_rich, print_xml, print_rich, rich_to_text
-from edgar.core import sec_dot_gov, binary_extensions, text_extensions, has_html_content
-from edgar.httprequests import get_with_retry, download_file, download_file_async
-from edgar.httpclient import async_http_client
+from edgar.core import binary_extensions, has_html_content, sec_dot_gov, text_extensions
 from edgar.files.html_documents import get_clean_html
 from edgar.files.markdown import to_markdown
-from edgar._markdown import text_to_markdown
-
+from edgar.httpclient import async_http_client
+from edgar.httprequests import download_file, download_file_async, get_with_retry
+from edgar.richtools import print_rich, print_xml, repr_rich, rich_to_text
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
 
@@ -303,9 +305,9 @@ class Attachment:
                 elif self.is_xml():
                     print_xml(content)
                 else:
-                    print(content)
+                    pass
             else:
-                print(self)
+                pass
 
     def is_report(self):
         return re.match(r"R\d+\.htm", self.document)
@@ -330,30 +332,30 @@ class Attachment:
     def markdown(self, include_page_breaks: bool = False, start_page_number: int = 0) -> Optional[str]:
         """
         Convert the attachment to markdown format if it's HTML content.
-        
+
         Args:
             include_page_breaks: If True, include page break delimiters in the markdown
             start_page_number: Starting page number for page break markers (default: 0)
-            
+
         Returns:
             None if the attachment is not HTML or cannot be converted.
         """
         if not self.is_html():
             return None
-            
+
         content = self.content
         if not content:
             return None
-            
+
         # Check if content has HTML structure
         if not has_html_content(content):
             return None
-            
+
         # Use the same approach as Filing.markdown() but with page break support
         clean_html = get_clean_html(content)
         if clean_html:
             return to_markdown(clean_html, include_page_breaks=include_page_breaks, start_page_number=start_page_number)
-            
+
         return None
 
     def __rich__(self):
@@ -555,14 +557,14 @@ class Attachments:
                 raise ValueError("Path must be a zip file name to create zipfile")
             else:
                 with zipfile.ZipFile(path, 'w') as zipf:
-                    for attachment, downloaded in zip(self._attachments, downloaded_files):
+                    for attachment, downloaded in zip(self._attachments, downloaded_files, strict=False):
                         if isinstance(downloaded, bytes):
                             zipf.writestr(attachment.document, downloaded)
                         else:
                             zipf.writestr(attachment.document, downloaded.encode('utf-8'))
         else:
             if path.is_dir():
-                for attachment, downloaded in zip(self._attachments, downloaded_files):
+                for attachment, downloaded in zip(self._attachments, downloaded_files, strict=False):
                     file_path = path / attachment.document
                     if isinstance(downloaded, bytes):
                         file_path.write_bytes(downloaded)
@@ -600,15 +602,12 @@ class Attachments:
             thread.daemon = True
             thread.start()
 
-            print(f"Serving at port {port}")
             # Wait for the server to start
             time.sleep(1)
 
             def signal_handler(sig, frame):
-                print("Stopping server...")
                 httpd.shutdown()
                 thread.join()
-                print("Server stopped.")
 
             signal.signal(signal.SIGINT, signal_handler)
             webbrowser.open(url)
@@ -622,23 +621,23 @@ class Attachments:
     def markdown(self, include_page_breaks: bool = False, start_page_number: int = 0) -> Dict[str, str]:
         """
         Convert all HTML attachments to markdown format.
-        
+
         Args:
             include_page_breaks: If True, include page break delimiters in the markdown
             start_page_number: Starting page number for page break markers (default: 0)
-            
+
         Returns:
             A dictionary mapping attachment document names to their markdown content.
             Only includes attachments that can be successfully converted to markdown.
         """
         markdown_attachments = {}
-        
+
         for attachment in self._attachments:
             if attachment.is_html():
                 md_content = attachment.markdown(include_page_breaks=include_page_breaks, start_page_number=start_page_number)
                 if md_content:
                     markdown_attachments[attachment.document] = md_content
-                    
+
         return markdown_attachments
 
     def __len__(self):
@@ -705,7 +704,7 @@ class Attachments:
 
             rows = table.find_all('tr')[1:]  # Skip header row
             attachments = []
-            for index, row in enumerate(rows):
+            for _index, row in enumerate(rows):
                 cols = row.find_all('td')
                 sequence_number = cols[0].text.strip().replace('\xa0', '-')
 
@@ -793,7 +792,6 @@ class AttachmentServer:
 
     def start(self):
         self.thread.start()
-        print(f"Serving at port {self.port}")
         webbrowser.open(self.url)
 
         # Keep the main thread alive to handle signals
@@ -801,10 +799,8 @@ class AttachmentServer:
             time.sleep(0.1)
 
     def stop(self):
-        print("Stopping server...")
         self.httpd.shutdown()
         self.thread.join()
-        print("Server stopped.")
 
     def signal_handler(self, sig, frame):
         self.stop()

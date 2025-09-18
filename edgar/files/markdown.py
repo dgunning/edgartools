@@ -1,7 +1,7 @@
 import re
-from typing import List, Tuple, Dict
-from typing import Optional
-from edgar.files.html import Document, BaseNode
+from typing import Dict, List, Optional, Tuple
+
+from edgar.files.html import BaseNode, Document
 from edgar.files.tables import ProcessedTable, TableProcessor
 
 __all__ = ['to_markdown', 'MarkdownRenderer']
@@ -183,12 +183,12 @@ class MarkdownRenderer:
 
 def to_markdown(html_content: str, include_page_breaks: bool = False, start_page_number: int = 0) -> Optional[str]:
     """Convert HTML content to markdown with optional page breaks
-    
+
     Args:
         html_content: HTML string to convert
         include_page_breaks: Whether to include page break markers
         start_page_number: Starting page number for page break markers (default: 0)
-        
+
     Returns:
         Markdown string or None if parsing failed
     """

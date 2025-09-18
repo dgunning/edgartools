@@ -44,18 +44,12 @@ except ImportError:
 AI_AVAILABLE = MCP_AVAILABLE or TIKTOKEN_AVAILABLE
 
 # Core functionality (always available)
-from edgar.ai.core import (
-    AIEnabled,
-    TokenOptimizer,
-    SemanticEnricher,
-    enhance_financial_fact_llm_context,
-    check_ai_capabilities
-)
+from edgar.ai.core import AIEnabled, SemanticEnricher, TokenOptimizer, check_ai_capabilities, enhance_financial_fact_llm_context
 
 # Optional MCP functionality
 if MCP_AVAILABLE:
     try:
-        from edgar.ai.edgartools_mcp import MCPServer, EdgarToolsServer
+        from edgar.ai.edgartools_mcp import EdgarToolsServer, MCPServer
     except ImportError:
         # Fallback - MCP might not be fully working
         MCPServer = None
@@ -76,11 +70,11 @@ __all__ = [
     "SemanticEnricher",
     "enhance_financial_fact_llm_context",
     "check_ai_capabilities",
-    
+
     # MCP
     "MCPServer",
     "EdgarToolsServer",
-    
+
     # Status flags
     "AI_AVAILABLE",
     "MCP_AVAILABLE",

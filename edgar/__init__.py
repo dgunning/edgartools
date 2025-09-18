@@ -2,51 +2,37 @@
 #
 # SPDX-License-Identifier: MIT
 import re
-from functools import lru_cache
-from functools import partial
-from typing import Optional, Union, List
+from functools import lru_cache, partial
+from typing import List, Optional, Union
 
+from edgar._filings import Attachment, Attachments, Filing, FilingHeader, FilingHomepage, Filings, get_by_accession_number, get_filings
+from edgar.core import CAUTION, CRAWL, NORMAL, edgar_mode, get_identity, listify, set_identity
+from edgar.current_filings import CurrentFilings, get_all_current_filings, get_current_filings, iter_current_filings_pages
 from edgar.entity import (
-    Entity,
-    EntityData,
     Company,
     CompanyData,
-    CompanySearchResults,
-    CompanyFilings,
     CompanyFiling,
+    CompanyFilings,
+    CompanySearchResults,
+    Entity,
+    EntityData,
     find_company,
-    get_entity,
+    get_cik_lookup_data,
     get_company_facts,
     get_company_tickers,
-    get_icon_from_ticker,
+    get_entity,
     get_entity_submissions,
+    get_icon_from_ticker,
     get_ticker_to_cik_lookup,
-    get_cik_lookup_data
 )
-from edgar._filings import (Filing,
-                            Filings,
-                            FilingHeader,
-                            Attachment,
-                            Attachments,
-                            get_filings,
-                            get_by_accession_number,
-                            FilingHomepage)
-from edgar.current_filings import CurrentFilings, get_current_filings, iter_current_filings_pages, get_all_current_filings
-from edgar.core import (edgar_mode,
-                        CRAWL,
-                        CAUTION,
-                        NORMAL,
-                        get_identity,
-                        set_identity,
-                        listify)
-from edgar.funds.reports import FundReport, NPORT_FORMS
-from edgar.funds import FundCompany, FundSeries,  FundClass, find_fund
-from edgar.thirteenf import ThirteenF, THIRTEENF_FORMS
-from edgar.xbrl import XBRL
-from edgar.files.html import Document
 from edgar.files import detect_page_breaks, mark_page_breaks
+from edgar.files.html import Document
 from edgar.financials import Financials, MultiFinancials
-from edgar.storage import use_local_storage, is_using_local_storage, set_local_storage_path, download_edgar_data, download_filings
+from edgar.funds import FundClass, FundCompany, FundSeries, find_fund
+from edgar.funds.reports import NPORT_FORMS, FundReport
+from edgar.storage import download_edgar_data, download_filings, is_using_local_storage, set_local_storage_path, use_local_storage
+from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
+from edgar.xbrl import XBRL
 
 # Another name for get_current_filings
 get_latest_filings = get_current_filings
@@ -124,12 +110,12 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :param sec_filing: The filing
     :return:
     """
-    from edgar.company_reports import TenK, TenQ, TwentyF, EightK, CurrentReport
+    from edgar.company_reports import CurrentReport, EightK, TenK, TenQ, TwentyF
     from edgar.effect import Effect
-    from edgar.offerings import FormC, FormD
-    from edgar.ownership import Ownership, Form3, Form4, Form5
     from edgar.form144 import Form144
     from edgar.muniadvisors import MunicipalAdvisorForm
+    from edgar.offerings import FormC, FormD
+    from edgar.ownership import Form3, Form4, Form5, Ownership
 
     if matches_form(sec_filing, "6-K"):
         return CurrentReport(sec_filing)

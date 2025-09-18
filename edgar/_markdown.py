@@ -1,13 +1,13 @@
 import re
 
 from rich import box
-from rich.console import Group, Console
+from rich.console import Console, Group
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.richtools import repr_rich
 from edgar.files.html_documents import HtmlDocument
+from edgar.richtools import repr_rich
 
 __all__ = [
     'convert_table',

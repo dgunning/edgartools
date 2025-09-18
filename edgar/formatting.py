@@ -5,8 +5,8 @@ This module contains various formatting functions for dates, numbers, and string
 """
 import datetime
 import re
-from decimal import Decimal, ROUND_HALF_UP
-from typing import Union, Optional
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Optional, Union
 
 import humanize
 from rich.text import Text
@@ -36,15 +36,15 @@ def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
     result = []
     digits = list(map(str, digits))
     build, next = result.append, digits.pop
-    
+
     # Add trailing zeros if needed
     for i in range(places):
         build(next() if digits else '0')
-    
+
     # Add decimal point if needed
     if places:
         build(dp)
-    
+
     # Add digits before decimal point
     if not digits:
         build('0')
@@ -56,14 +56,14 @@ def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
             if i == 3 and digits:
                 i = 0
                 build(sep)
-    
+
     # Add currency symbol and sign
     build(curr)
     if sign:
         build(neg)
     else:
         build(pos)
-    
+
     return ''.join(reversed(result))
 
 
@@ -112,10 +112,10 @@ def split_camel_case(item):
 
 def yes_no(value: bool) -> str:
     """Convert a boolean to 'Yes' or 'No'.
-    
+
     Args:
         value: Boolean value
-        
+
     Returns:
         'Yes' if True, 'No' if False
     """
@@ -160,10 +160,10 @@ def reverse_name(name):
 
 def accession_number_text(accession: str) -> Text:
     """Format an SEC accession number with color highlighting.
-    
+
     Args:
         accession: SEC accession number (e.g., '0001234567-25-000123')
-        
+
     Returns:
         Rich Text object with colored parts:
         - Leading zeros in grey54
@@ -172,22 +172,22 @@ def accession_number_text(accession: str) -> Text:
     """
     if not accession:
         return Text()
-        
+
     # Split the accession number into its components
     parts = accession.split('-')
     if len(parts) != 3:
         return Text(accession)  # Return unformatted if not in expected format
-        
+
     cik_part, year_part, seq_part = parts
-    
+
     # Find leading zeros in CIK
     cik_zeros = len(cik_part) - len(cik_part.lstrip('0'))
     cik_value = cik_part[cik_zeros:]
-    
+
     # Find leading zeros in sequence
     seq_zeros = len(seq_part) - len(seq_part.lstrip('0'))
     seq_value = seq_part[seq_zeros:]
-    
+
     # Assemble the colored text
     return Text.assemble(
         ("0" * cik_zeros, "dim"),
@@ -202,10 +202,10 @@ def accession_number_text(accession: str) -> Text:
 
 def accepted_time_text(accepted_datetime) -> Text:
     """Format accepted datetime for current filings with visual emphasis.
-    
+
     Args:
         accepted_datetime: datetime object from filing acceptance
-        
+
     Returns:
         Rich Text object with color-coded time components:
         - Date in dim (often the same for recent filings)
@@ -215,20 +215,20 @@ def accepted_time_text(accepted_datetime) -> Text:
 
     if not accepted_datetime:
         return Text("N/A", style="dim")
-    
+
     # Convert to datetime if needed
     if not isinstance(accepted_datetime, datetime.datetime):
         try:
             accepted_datetime = datetime.datetime.fromisoformat(str(accepted_datetime))
         except:
             return Text(str(accepted_datetime))
-    
+
     # Format components
     date_str = accepted_datetime.strftime("%Y-%m-%d")
     hour_str = accepted_datetime.strftime("%H")
     minute_str = accepted_datetime.strftime("%M")
     second_str = accepted_datetime.strftime("%S")
-    
+
     # Determine colors based on time of day
     hour_int = int(hour_str)
     if 16 <= hour_int <= 17:  # 4-5 PM (common filing time)
@@ -239,7 +239,7 @@ def accepted_time_text(accepted_datetime) -> Text:
         hour_color = "bright_cyan"
     else:  # Regular hours
         hour_color = "bright_green"
-    
+
     # Assemble with visual hierarchy
     return Text.assemble(
         (date_str, "dim"),

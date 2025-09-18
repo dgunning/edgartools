@@ -1,9 +1,9 @@
-from rich.text import Text
-from edgar.richtools import repr_rich
-
 from rich.console import Console
 from rich.highlighter import RegexHighlighter
+from rich.text import Text
 from rich.theme import Theme
+
+from edgar.richtools import repr_rich
 
 __all__ = ['PlainDocument', 'XmlDocument', 'JsonDocument', 'print_xml']
 

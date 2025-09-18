@@ -1,6 +1,6 @@
 import re
 from decimal import Decimal
-from typing import Union, Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -139,12 +139,12 @@ def format_price(value: Any, default: str = "N/A") -> str:
 
 def _get_xml_value(elem: etree._Element, xpath: str, with_footnote: bool = True) -> str:
     """Helper to safely get text from XML element with value tag and optional footnote
-    
+
     Args:
         elem: XML element to search within
         xpath: XPath expression to find target element
         with_footnote: Whether to include footnote references in output
-        
+
     Returns:
         Text value with optional footnote reference
     """
@@ -152,9 +152,9 @@ def _get_xml_value(elem: etree._Element, xpath: str, with_footnote: bool = True)
     nodes = elem.xpath(xpath)
     if not nodes:
         return ''
-        
+
     node = nodes[0]
-    
+
     # Try to get text from <value> child first
     value = node.find('value')
     if value is not None:
@@ -162,7 +162,7 @@ def _get_xml_value(elem: etree._Element, xpath: str, with_footnote: bool = True)
     else:
         # If no <value> tag, get direct text content
         text = node.text if node.text else ''
-    
+
     # Add footnote reference if present and requested
     if with_footnote:
         footnote = node.find('footnoteId')
@@ -170,7 +170,7 @@ def _get_xml_value(elem: etree._Element, xpath: str, with_footnote: bool = True)
             footnote_id = footnote.get('id', '')
             if footnote_id:
                 text = f"{text}<sup>({footnote_id})</sup>"
-                
+
     return text.strip()
 
 
@@ -179,7 +179,7 @@ def _parse_name(name: str) -> Tuple[str, str, str]:
     # Remove any extra whitespace
     name = ' '.join(name.split())
     parts = name.split(' ')
-    
+
     if len(parts) == 1:
         return (parts[0], '', '')
     elif len(parts) == 2:

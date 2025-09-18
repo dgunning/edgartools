@@ -1,12 +1,11 @@
 import re
 import textwrap
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import cached_property
-from typing import Optional, List, Dict, Any
-from typing import Union, Literal
+from typing import Any, Dict, List, Literal, Optional, Union
 
-from bs4 import Tag, NavigableString
+from bs4 import NavigableString, Tag
 from rich import box
 from rich.align import Align
 from rich.console import Console, Group, RenderResult
@@ -15,9 +14,9 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.core import log
-from edgar.files.html_documents import HtmlDocument, DocumentData
-from edgar.files.styles import StyleInfo, Width, parse_style, get_heading_level
-from edgar.files.tables import ProcessedTable, TableProcessor, ColumnOptimizer
+from edgar.files.html_documents import DocumentData, HtmlDocument
+from edgar.files.styles import StyleInfo, Width, get_heading_level, parse_style
+from edgar.files.tables import ColumnOptimizer, ProcessedTable, TableProcessor
 from edgar.richtools import repr_rich
 
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode']
@@ -25,7 +24,7 @@ __all__ = ['SECHTMLParser', 'Document', 'DocumentNode']
 
 class BaseNode(ABC):
     """Abstract base class for all document nodes with metadata support"""
-    
+
     def __init__(self):
         self.metadata: Dict[str, Any] = {}
 
@@ -59,7 +58,7 @@ class HeadingNode(BaseNode):
     content: str
     style: StyleInfo
     level: int = 1
-    
+
     def __post_init__(self):
         super().__init__()
 
@@ -127,7 +126,7 @@ class HeadingNode(BaseNode):
 class TextBlockNode(BaseNode):
     content: str
     style: StyleInfo
-    
+
     def __post_init__(self):
         super().__init__()
 
@@ -227,7 +226,7 @@ class TableNode(BaseNode):
     content: List[TableRow]
     style: StyleInfo
     _processed_table: Optional[ProcessedTable] = None
-    
+
     def __post_init__(self):
         super().__init__()
 
@@ -320,7 +319,7 @@ class TableNode(BaseNode):
 class PageBreakNode(BaseNode):
     """Represents a page break in the document"""
     page_number: int
-    
+
     def __post_init__(self):
         super().__init__()
 
@@ -354,11 +353,11 @@ def create_node(
         node = PageBreakNode(page_number=page_number)
     else:
         raise ValueError(f"Unknown node type: {type_}")
-    
+
     # Apply metadata after creation
     if metadata:
         node.metadata.update(metadata)
-    
+
     return node
 
 
@@ -573,7 +572,7 @@ class SECHTMLParser:
             self._mark_page_breaks(body)
 
         nodes = self._parse_element(body)
-        
+
         # If page breaks are enabled, ensure proper page numbering
         if self.include_page_breaks and nodes:
             # Find the first page break node
@@ -582,7 +581,7 @@ class SECHTMLParser:
                 if node.type == 'page_break':
                     first_page_break_idx = i
                     break
-            
+
             if first_page_break_idx is None:
                 # No page breaks found, this shouldn't happen if include_page_breaks is True
                 # but add a document start page break just in case
@@ -608,14 +607,14 @@ class SECHTMLParser:
                 for i in range(1, len(nodes)):
                     if nodes[i].type == 'page_break':
                         nodes[i].page_number = i // 2  # Rough estimate, will be fixed in next loop
-            
+
             # Final pass: renumber all page breaks sequentially
             page_counter = 0
             for node in nodes:
                 if node.type == 'page_break':
                     node.page_number = page_counter
                     page_counter += 1
-        
+
         return Document(nodes=nodes)
 
     def _mark_page_breaks(self, element: Tag) -> None:
@@ -625,7 +624,6 @@ class SECHTMLParser:
 
     def _mark_page_divs(self, element: Tag) -> None:
         """Mark div elements with page-like dimensions as page breaks"""
-        from .page_breaks import PageBreakDetector
         # This is now handled by PageBreakDetector.mark_page_breaks()
         # Keeping this method for backward compatibility
         pass
@@ -639,19 +637,19 @@ class SECHTMLParser:
         """Process the content inside a page div without treating the div itself as a page break"""
         # Parse current element's style
         current_style = parse_style(element.get('style', ''))
-        
+
         # Merge with parent style if there is one
         if self.style_stack:
             current_style = current_style.merge(self.style_stack[-1])
-        
+
         # Track entering ix tags and get metadata
         self.ix_tracker.enter_tag(element)
         ix_metadata = self.ix_tracker.get_current_context(element)
-        
+
         try:
             # Push current style to stack before processing children
             self.style_stack.append(current_style)
-            
+
             try:
                 # Check if this div contains tables
                 if element.get('has_table'):
@@ -660,7 +658,7 @@ class SECHTMLParser:
                 else:
                     # Content-combining mode for divs without tables
                     result = self._process_inline_content(element, current_style)
-                
+
                 # Apply ix metadata if available
                 if result and ix_metadata:
                     if isinstance(result, list):
@@ -670,13 +668,13 @@ class SECHTMLParser:
                     else:
                         if hasattr(result, 'metadata'):
                             result.metadata.update(ix_metadata)
-                
+
                 return result
-                
+
             finally:
                 # Always pop the style from stack when done
                 self.style_stack.pop()
-                
+
         finally:
             # Track exiting ix tags
             self.ix_tracker.exit_tag(element)
@@ -821,7 +819,7 @@ class SECHTMLParser:
             self.current_page = 0
         else:
             self.current_page += 1
-            
+
         page_break_node = create_node(
             type_='page_break',
             content=None,
@@ -829,7 +827,7 @@ class SECHTMLParser:
             page_number=self.current_page,
             metadata={'source_element': element.name}
         )
-        
+
         # Check if this is a container page break or content-bearing page break
         if element.name == 'div' and self._is_page_like_div(element.get('style', '')):
             # This is a page div - return page break AND process content inside
@@ -841,11 +839,11 @@ class SECHTMLParser:
                 else:
                     nodes.append(content_nodes)
             return nodes
-            
+
         elif element.name in ['p', 'div'] and element.get_text(strip=True):
             # This is a content-bearing element with page break style - return page break AND content
             nodes = [page_break_node]
-            
+
             if element.name == 'p':
                 current_style = parse_style(element.get('style', ''))
                 if self.style_stack:
@@ -861,7 +859,7 @@ class SECHTMLParser:
                     else:
                         nodes.append(content_nodes)
             return nodes
-            
+
         else:
             # This is a marker-only page break (hr, empty elements) - return just the page break
             return page_break_node
@@ -870,7 +868,7 @@ class SECHTMLParser:
         """Apply metadata to a node or list of nodes"""
         if not metadata:
             return
-            
+
         if isinstance(nodes, list):
             for node in nodes:
                 if hasattr(node, 'metadata'):
@@ -878,11 +876,11 @@ class SECHTMLParser:
         else:
             if hasattr(nodes, 'metadata'):
                 nodes.metadata.update(metadata)
-    
+
     def _process_element_with_page_breaks(self, element: Tag) -> Optional[Union[BaseNode, List[BaseNode]]]:
         """Process an element that contains page break descendants"""
         nodes = []
-        
+
         for child in element.children:
             if isinstance(child, Tag):
                 # Check if this child is a page break or contains page breaks
@@ -901,7 +899,7 @@ class SECHTMLParser:
                             nodes.extend(child_result)
                         else:
                             nodes.append(child_result)
-        
+
         return nodes[0] if len(nodes) == 1 else nodes if nodes else None
 
     def _dispatch_element_processing(self, element: Tag, current_style: StyleInfo, ix_metadata: Dict[str, Any]) -> Optional[Union[BaseNode, List[BaseNode]]]:
@@ -909,7 +907,7 @@ class SECHTMLParser:
         # Handle ix: tags by processing their content sequentially
         if element.name.startswith('ix:'):
             return self._process_ix_element(element, current_style, ix_metadata)
-        
+
         # Process table elements directly
         if element.name == 'table':
             table_node = self._process_table(element)
@@ -976,7 +974,7 @@ class SECHTMLParser:
                 )
                 self._apply_metadata_to_nodes(node, ix_metadata)
                 return node
-        
+
         para_node = self._process_paragraph(element, current_style)
         self._apply_metadata_to_nodes(para_node, ix_metadata)
         return para_node
@@ -989,7 +987,7 @@ class SECHTMLParser:
         else:
             # Content-combining mode for divs without tables
             block_result = self._process_inline_content(element, current_style)
-        
+
         self._apply_metadata_to_nodes(block_result, ix_metadata)
         return block_result
 
@@ -1013,12 +1011,12 @@ class SECHTMLParser:
         # Handle page break elements first
         if self.include_page_breaks and element.get('_is_page_break') == 'true':
             return self._handle_page_break_element(element)
-        
+
         # Also check if this element contains page break descendants
         if self.include_page_breaks and element.select('[_is_page_break="true"]'):
             # This element contains page breaks, process them individually
             return self._process_element_with_page_breaks(element)
-        
+
         # Phase 1: Mark all ancestors of tables
         tables = element.find_all('table', recursive=True)
         for table in tables:
@@ -1360,7 +1358,7 @@ class SECHTMLParser:
 
         # Process all rows (including those nested in tbody, thead, tfoot)
         rows = []
-        
+
         # First, try to find direct child tr elements
         direct_trs = element.find_all('tr', recursive=False)
         if direct_trs:

@@ -5,16 +5,13 @@ This module provides the core MCP server that exposes EdgarTools functionality
 to AI agents through the Model Context Protocol.
 """
 
-import json
-import sys
-from typing import Dict, Any, List, Optional, Callable
-from datetime import datetime
 import logging
+from typing import Any, Dict
 
 # Handle optional MCP import
 try:
+    from mcp import Resource, Tool
     from mcp.server import Server
-    from mcp import Tool, Resource
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
@@ -27,42 +24,35 @@ except ImportError:
     class Resource:
         pass
 
-from edgar.ai.mcp.tools import (
-    CompanyTool,
-    FilingsTool,
-    FinancialsTool,
-    SearchTool,
-    CurrentFilingsTool,
-    ScreeningTool
-)
+from edgar.ai.mcp.tools import CompanyTool, CurrentFilingsTool, FilingsTool, FinancialsTool, ScreeningTool, SearchTool
 
 logger = logging.getLogger(__name__)
 
 
 class MCPServer:
     """Base MCP Server class."""
-    
+
     def __init__(self, name: str = "edgartools"):
         if not MCP_AVAILABLE:
             raise ImportError(
                 "MCP support requires additional dependencies. "
                 "Install with: pip install edgartools[llm]"
             )
-        
+
         self.server = Server(name)
         self.tools = {}
         self.resources = {}
-        
+
     def add_tool(self, tool: 'Tool'):
         """Add a tool to the server."""
         self.tools[tool.name] = tool
         self.server.add_tool(tool)
-        
+
     def add_resource(self, resource: 'Resource'):
         """Add a resource to the server."""
         self.resources[resource.uri] = resource
         self.server.add_resource(resource)
-        
+
     def run(self):
         """Run the MCP server."""
         self.server.run()
@@ -71,19 +61,19 @@ class MCPServer:
 class EdgarToolsServer(MCPServer):
     """
     MCP Server implementation specifically for EdgarTools.
-    
+
     This server exposes all EdgarTools functionality as MCP tools
     that can be called by AI agents.
     """
-    
+
     def __init__(self, name: str = "edgartools"):
         super().__init__(name)
         self._register_tools()
         self._register_resources()
-        
+
     def _register_tools(self):
         """Register all EdgarTools functionality as MCP tools."""
-        
+
         # Company analysis tools
         self.add_tool(Tool(
             name="edgar_get_company",
@@ -110,7 +100,7 @@ class EdgarToolsServer(MCPServer):
             },
             handler=CompanyTool.get_company
         ))
-        
+
         # Filing retrieval and analysis
         self.add_tool(Tool(
             name="edgar_get_filings",
@@ -147,7 +137,7 @@ class EdgarToolsServer(MCPServer):
             },
             handler=FilingsTool.get_filings
         ))
-        
+
         # Financial statement analysis
         self.add_tool(Tool(
             name="edgar_analyze_financials",
@@ -185,7 +175,7 @@ class EdgarToolsServer(MCPServer):
             },
             handler=FinancialsTool.analyze_financials
         ))
-        
+
         # Search functionality
         self.add_tool(Tool(
             name="edgar_search",
@@ -226,7 +216,7 @@ class EdgarToolsServer(MCPServer):
             },
             handler=SearchTool.search
         ))
-        
+
         # Current filings monitoring
         self.add_tool(Tool(
             name="edgar_current_filings",
@@ -252,7 +242,7 @@ class EdgarToolsServer(MCPServer):
             },
             handler=CurrentFilingsTool.get_current_filings
         ))
-        
+
         # Stock screening
         self.add_tool(Tool(
             name="edgar_screen_stocks",
@@ -287,10 +277,10 @@ class EdgarToolsServer(MCPServer):
             },
             handler=ScreeningTool.screen_stocks
         ))
-        
+
     def _register_resources(self):
         """Register MCP resources for documentation and examples."""
-        
+
         # API documentation resource
         self.add_resource(Resource(
             uri="edgartools://docs/api",
@@ -299,7 +289,7 @@ class EdgarToolsServer(MCPServer):
             mimeType="text/markdown",
             handler=self._get_api_docs
         ))
-        
+
         # Example queries resource
         self.add_resource(Resource(
             uri="edgartools://examples/queries",
@@ -308,7 +298,7 @@ class EdgarToolsServer(MCPServer):
             mimeType="application/json",
             handler=self._get_example_queries
         ))
-        
+
     def _get_api_docs(self) -> str:
         """Return API documentation."""
         return """
@@ -355,7 +345,7 @@ analysis = edgar_analyze_financials(
 )
 ```
 """
-        
+
     def _get_example_queries(self) -> Dict[str, Any]:
         """Return example queries for common use cases."""
         return {

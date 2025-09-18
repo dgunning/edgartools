@@ -10,10 +10,10 @@ from _thread import interrupt_main
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date
-from functools import lru_cache, partial
-from functools import wraps
+from functools import lru_cache, partial, wraps
 from pathlib import Path
-from typing import Union, Optional, Tuple, List, TypeVar, Callable, Iterable
+from typing import Callable, Iterable, List, Optional, Tuple, TypeVar, Union
+
 import httpx
 import pandas as pd
 import pyarrow as pa
@@ -22,9 +22,7 @@ from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
 from rich.prompt import Prompt
 
-from edgar.datatools import (
-    PagingState
-)
+from edgar.datatools import PagingState
 
 log = logging.getLogger(__name__)
 
@@ -313,6 +311,7 @@ class Result:
 
 def get_resource(file: str):
     import importlib
+
     import edgar
     return importlib.resources.path(edgar, file)
 
@@ -591,7 +590,7 @@ def has_html_content(content: str) -> bool:
     """
     if content is None:
         return False
-        
+
     if isinstance(content, bytes):
         content = content.decode('utf-8', errors='ignore')
 
@@ -619,7 +618,7 @@ def has_html_content(content: str) -> bool:
                 'xmlns:ix' in first_1000 or
                 'xmlns:html' in first_1000):
             return True
-        
+
         # If we have an <html> tag, it's likely HTML content
         # This catches cases like <html style="..."> that don't have XBRL namespaces
         return True
@@ -639,24 +638,24 @@ def parallel_thread_map(func: Callable[[T], R],
                         **kwargs) -> List[R]:
     """
     Run a function in parallel across multiple items using ThreadPoolExecutor.
-    
+
     This is a replacement for fastcore's parallel function, supporting only the threadpool
     execution mode. It does not include progress bars.
-    
+
     Args:
         func: The function to apply to each item
         items: The items to process
         **kwargs: Additional keyword arguments to pass to func
-        
+
     Returns:
         List of results from applying func to each item
     """
     # Default to min(32, cores+4) which is a good balance for I/O-bound tasks
     max_workers = kwargs.pop('n_workers', None) or min(32, (os.cpu_count() or 1) + 4)
-    
+
     # Convert items to a list for easier handling
     items_list = list(items)
-    
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         if kwargs:
             # If there are kwargs, create a partial function
@@ -664,7 +663,7 @@ def parallel_thread_map(func: Callable[[T], R],
             results = list(executor.map(partial_func, items_list))
         else:
             results = list(executor.map(func, items_list))
-    
+
     return results
 
 

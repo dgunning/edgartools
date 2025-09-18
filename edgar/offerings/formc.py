@@ -9,15 +9,15 @@ from rich import box
 from rich.columns import Columns
 from rich.console import Group, Text
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Column, Table
 
 from edgar._party import Address
+from edgar.core import get_bool
+from edgar.entity import Company
+from edgar.formatting import yes_no
+from edgar.reference import states
 from edgar.richtools import repr_rich
 from edgar.xmltools import child_text
-from edgar.core import get_bool
-from edgar.formatting import yes_no
-from edgar.entity import Company
-from edgar.reference import states
 
 __all__ = ['FormC', 'Signer', 'FundingPortal']
 
@@ -177,7 +177,7 @@ class AnnualReportDisclosure(BaseModel):
             jurisdiction_table.add_row(juris_description)
         else:
             jurisdiction_lists = split_list(self.offering_jurisdictions, chunk_size=25)
-            for index, jurisdictions in enumerate(jurisdiction_lists):
+            for _index, jurisdictions in enumerate(jurisdiction_lists):
                 jurisdiction_table.add_row(", ".join(jurisdictions))
         return Group(annual_report_table, jurisdiction_table)
 

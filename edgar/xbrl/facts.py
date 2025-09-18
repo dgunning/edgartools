@@ -11,25 +11,26 @@ from __future__ import annotations
 import re
 from decimal import Decimal
 from functools import lru_cache
+from textwrap import dedent
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import pandas as pd
 from rich import box
-from rich.table import Table, Column
-from rich.text import Text
 from rich.console import Group
 from rich.markdown import Markdown
 from rich.panel import Panel
+from rich.table import Column, Table
+from rich.text import Text
+
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, parse_date
 from edgar.xbrl.models import select_display_label
-from textwrap import dedent
 
 
 class FactQuery:
     """
     A query builder for XBRL facts that enables filtering by various attributes.
-    
+
     This class provides a fluent interface for building queries against XBRL facts,
     allowing filtering by concept, value, period, dimensions, and other attributes.
     """
@@ -37,7 +38,7 @@ class FactQuery:
     def __init__(self, facts_view: FactsView):
         """
         Initialize a new fact query.
-        
+
         Args:
             facts_view: The FactsView instance to query against
         """
@@ -56,11 +57,11 @@ class FactQuery:
     def by_concept(self, pattern: str, exact: bool = False) -> FactQuery:
         """
         Filter facts by concept name.
-        
+
         Args:
             pattern: Pattern to match against concept names
             exact: If True, require exact match; otherwise, use regex pattern matching
-            
+
         Returns:
             Self for method chaining
         """
@@ -75,15 +76,15 @@ class FactQuery:
     def by_label(self, pattern: str, exact: bool = False) -> FactQuery:
         """
         Filter facts by element label.
-        
+
         This method searches across different label fields, including both the standardized label 
         (if standardization was applied) and the original label. This ensures you can query by either 
         the standardized label or the original company-specific label.
-        
+
         Args:
             pattern: Pattern to match against element labels
             exact: If True, require exact match; otherwise, use regex pattern matching
-            
+
         Returns:
             Self for method chaining
         """
@@ -111,13 +112,13 @@ class FactQuery:
     def by_value(self, value_filter: Union[Callable, str, int, float, list, tuple]) -> FactQuery:
         """
         Filter facts by value.
-        
+
         Args:
             value_filter: Can be:
                 - A callable predicate that takes a value and returns bool
                 - A specific value to match exactly
                 - A tuple or list of (min, max) for range filtering
-                
+
         Returns:
             Self for method chaining
         """
@@ -149,10 +150,10 @@ class FactQuery:
     def by_period_type(self, period_type: str) -> FactQuery:
         """
         Filter facts by period type ('instant' or 'duration').
-        
+
         Args:
             period_type: Period type to filter by
-            
+
         Returns:
             Self for method chaining
         """
@@ -166,10 +167,10 @@ class FactQuery:
     def by_period_key(self, period_key: str) -> FactQuery:
         """
         Filter facts by a specific period key.
-        
+
         Args:
             period_key: Period key to filter by (e.g., "instant_2023-12-31")
-            
+
         Returns:
             Self for method chaining
         """
@@ -179,10 +180,10 @@ class FactQuery:
     def by_period_keys(self, period_keys: List[str]) -> FactQuery:
         """
         Filter facts by a list of period keys.
-        
+
         Args:
             period_keys: List of period keys to filter by
-            
+
         Returns:
             Self for method chaining
         """
@@ -192,11 +193,11 @@ class FactQuery:
     def by_instant_date(self, date_str: str, exact: bool = True) -> FactQuery:
         """
         Filter facts by instant date.
-        
+
         Args:
             date_str: Date string in YYYY-MM-DD format
             exact: If True, require exact match; if False, match facts with date less than or equal to date_str
-            
+
         Returns:
             Self for method chaining
         """
@@ -212,11 +213,11 @@ class FactQuery:
                       end_date: Optional[str] = None) -> FactQuery:
         """
         Filter facts by date range.
-        
+
         Args:
             start_date: Optional start date string in YYYY-MM-DD format
             end_date: Optional end date string in YYYY-MM-DD format
-            
+
         Returns:
             Self for method chaining
         """
@@ -245,20 +246,20 @@ class FactQuery:
     def by_dimension(self, dimension: Optional[str], value: Optional[str] = None) -> FactQuery:
         """
         Filter facts by dimension with flexible matching.
-        
+
         This method provides intelligent matching for dimension names and values, handling
         common XBRL formatting variations including:
         - Namespace prefixes (us-gaap:, srt:, etc.)
         - Underscore vs colon separators  
         - Partial dimension names
-        
+
         Args:
             dimension: Dimension name (supports multiple formats), or None to filter for facts with no dimensions
             value: Optional dimension value to filter by (supports multiple formats)
-            
+
         Returns:
             Self for method chaining
-            
+
         Examples:
             # These are all equivalent:
             .by_dimension("srt_ProductOrServiceAxis", "us-gaap:ServiceMember")
@@ -269,31 +270,31 @@ class FactQuery:
             # Filter for facts with no dimensions
             self._filters.append(lambda f: not any(key.startswith('dim_') for key in f.keys()))
             return self
-        
+
         # Normalize the input dimension to match stored format
         normalized_dim = self._normalize_dimension_key(dimension)
-        
+
         if value is not None:
             # Normalize the value as well
             normalized_value = self._normalize_dimension_value(value)
-            
+
             def dimension_filter_with_value(f):
                 # Try exact match first
                 if f'dim_{normalized_dim}' in f and f[f'dim_{normalized_dim}'] == normalized_value:
                     return True
-                
+
                 # Try flexible matching for dimensions
                 for dim_key, dim_value in f.items():
                     if not dim_key.startswith('dim_'):
                         continue
-                    
+
                     # Check if this dimension key matches (flexible)
                     if self._dimension_key_matches(dim_key, dimension):
                         # Check if the value matches (flexible)
                         if self._dimension_value_matches(dim_value, value):
                             return True
                 return False
-            
+
             self._filters.append(dimension_filter_with_value)
         else:
             # Filter for facts that have this dimension (any value)
@@ -301,49 +302,49 @@ class FactQuery:
                 # Try exact match first
                 if f'dim_{normalized_dim}' in f:
                     return True
-                
+
                 # Try flexible matching
                 for dim_key in f.keys():
                     if dim_key.startswith('dim_') and self._dimension_key_matches(dim_key, dimension):
                         return True
                 return False
-            
+
             self._filters.append(dimension_filter_exists)
-        
+
         return self
-    
+
     def _normalize_dimension_key(self, dimension: str) -> str:
         """Normalize dimension key to the format used internally (underscores)."""
         # Replace colons with underscores (us-gaap:Axis -> us-gaap_Axis)
         return dimension.replace(':', '_')
-    
+
     def _normalize_dimension_value(self, value: str) -> str:
         """Normalize dimension value to the format used internally."""
         # Replace underscores with colons for values (us-gaap_Member -> us-gaap:Member)
         return value.replace('_', ':')
-    
+
     def _dimension_key_matches(self, stored_key: str, query_key: str) -> bool:
         """
         Check if a stored dimension key matches a query key with flexible matching.
-        
+
         Args:
             stored_key: The dimension key as stored (e.g., 'dim_us-gaap_ProductAxis')
             query_key: The dimension key from the query (e.g., 'ProductAxis' or 'us-gaap:ProductAxis')
-        
+
         Returns:
             True if the keys match
         """
         # Remove 'dim_' prefix from stored key
         stored_clean = stored_key[4:] if stored_key.startswith('dim_') else stored_key
-        
+
         # Normalize both keys
         stored_normalized = stored_clean.replace(':', '_').replace('-', '_')
         query_normalized = query_key.replace(':', '_').replace('-', '_')
-        
+
         # Try exact match
         if stored_normalized == query_normalized:
             return True
-        
+
         # Try partial match (query might be just the local name without namespace)
         if '_' in stored_normalized:
             # Extract local name (part after last underscore)
@@ -351,47 +352,47 @@ class FactQuery:
             query_local = query_normalized.split('_')[-1]
             if stored_local == query_local:
                 return True
-        
+
         return False
-    
+
     def _dimension_value_matches(self, stored_value: str, query_value: str) -> bool:
         """
         Check if a stored dimension value matches a query value with flexible matching.
-        
+
         Args:
             stored_value: The dimension value as stored (e.g., 'us-gaap:ServiceMember')
             query_value: The dimension value from query (e.g., 'ServiceMember' or 'us-gaap_ServiceMember')
-        
+
         Returns:
             True if the values match
         """
         if not stored_value or not query_value:
             return stored_value == query_value
-        
+
         # Normalize both values (handle colon/underscore variations)
         stored_normalized = stored_value.replace('_', ':').replace('-', '_')
         query_normalized = query_value.replace('_', ':').replace('-', '_')
-        
+
         # Try exact match
         if stored_normalized == query_normalized:
             return True
-        
+
         # Try partial match (query might be just the local name without namespace)
         if ':' in stored_normalized:
             stored_local = stored_normalized.split(':')[-1]
             query_local = query_normalized.split(':')[-1] if ':' in query_normalized else query_normalized
             if stored_local == query_local:
                 return True
-        
+
         return False
 
     def by_statement_type(self, statement_type: str) -> FactQuery:
         """
         Filter facts by statement type.
-        
+
         Args:
             statement_type: Statement type ('BalanceSheet', 'IncomeStatement', etc.)
-            
+
         Returns:
             Self for method chaining
         """
@@ -401,10 +402,10 @@ class FactQuery:
     def by_fiscal_period(self, fiscal_period: str) -> FactQuery:
         """
         Filter facts by fiscal period (FY, Q1, Q2, Q3, Q4).
-        
+
         Args:
             fiscal_period: Fiscal period identifier
-            
+
         Returns:
             Self for method chaining
         """
@@ -414,10 +415,10 @@ class FactQuery:
     def by_fiscal_year(self, fiscal_year: Union[int, str]) -> FactQuery:
         """
         Filter facts by fiscal year.
-        
+
         Args:
             fiscal_year: Fiscal year to filter by
-            
+
         Returns:
             Self for method chaining
         """
@@ -427,10 +428,10 @@ class FactQuery:
     def by_unit(self, unit: str) -> FactQuery:
         """
         Filter facts by unit reference.
-        
+
         Args:
             unit: Unit reference to filter by
-            
+
         Returns:
             Self for method chaining
         """
@@ -440,10 +441,10 @@ class FactQuery:
     def by_custom(self, filter_func: Callable) -> FactQuery:
         """
         Add a custom filter function.
-        
+
         Args:
             filter_func: Custom filter function that takes a fact dict and returns bool
-            
+
         Returns:
             Self for method chaining
         """
@@ -453,13 +454,13 @@ class FactQuery:
     def by_text(self, pattern: str) -> FactQuery:
         """
         Search across concept names, labels, and element names for a pattern.
-        
+
         This is a flexible search that looks for the pattern in all text fields, including
         both standardized labels and original labels when standardization has been applied.
-        
+
         Args:
             pattern: Pattern to search for in various text fields
-            
+
         Returns:
             Self for method chaining
         """
@@ -494,7 +495,7 @@ class FactQuery:
     def exclude_dimensions(self) -> FactQuery:
         """
         Exclude dimension columns from results.
-        
+
         Returns:
             Self for method chaining
         """
@@ -504,7 +505,7 @@ class FactQuery:
     def exclude_contexts(self) -> FactQuery:
         """
         Exclude context information from results.
-        
+
         Returns:
             Self for method chaining
         """
@@ -514,7 +515,7 @@ class FactQuery:
     def exclude_element_info(self) -> FactQuery:
         """
         Exclude element catalog information from results.
-        
+
         Returns:
             Self for method chaining
         """
@@ -524,11 +525,11 @@ class FactQuery:
     def sort_by(self, column: str, ascending: bool = True) -> FactQuery:
         """
         Set sorting for results.
-        
+
         Args:
             column: Column name to sort by
             ascending: Sort order (True for ascending, False for descending)
-            
+
         Returns:
             Self for method chaining
         """
@@ -539,10 +540,10 @@ class FactQuery:
     def limit(self, n: int) -> FactQuery:
         """
         Limit the number of results.
-        
+
         Args:
             n: Maximum number of results to return
-            
+
         Returns:
             Self for method chaining
         """
@@ -552,10 +553,10 @@ class FactQuery:
     def from_statement(self, statement_type: str) -> 'FactQuery':
         """
         Filter facts to only those from a specific statement.
-        
+
         Args:
             statement_type: Type of statement (e.g., 'BalanceSheet', 'IncomeStatement')
-            
+
         Returns:
             Self for method chaining
         """
@@ -566,10 +567,10 @@ class FactQuery:
     def transform(self, transform_fn: Callable[[Any], Any]) -> 'FactQuery':
         """
         Transform fact values using a custom function.
-        
+
         Args:
             transform_fn: Function to transform values
-            
+
         Returns:
             Self for method chaining
         """
@@ -579,10 +580,10 @@ class FactQuery:
     def scale(self, scale_factor: int) -> 'FactQuery':
         """
         Scale numeric values by a factor.
-        
+
         Args:
             scale_factor: The scaling factor (e.g., 1000 for thousands)
-            
+
         Returns:
             Self for method chaining
         """
@@ -597,11 +598,11 @@ class FactQuery:
     def aggregate(self, dimension: str, func: str = 'sum') -> 'FactQuery':
         """
         Aggregate values by a dimension.
-        
+
         Args:
             dimension: The dimension to aggregate by
             func: Aggregation function ('sum' or 'average')
-            
+
         Returns:
             Self for method chaining
         """
@@ -614,7 +615,7 @@ class FactQuery:
     def execute(self) -> List[Dict[str, Any]]:
         """
         Execute the query and return matching facts.
-        
+
         Returns:
             List of fact dictionaries
         """
@@ -676,7 +677,7 @@ class FactQuery:
         """
         Execute the query and return results as a DataFrame.
             :param columns: List of columns to include in the DataFrame
-        
+
         Returns:
             pandas DataFrame with query results
         """
@@ -742,9 +743,9 @@ class FactQuery:
         description = Markdown(
             dedent(f"""
             Use *to_dataframe(columns)* to get a DataFrame of the results.
-            
+
             e.g. `query.to_dataframe('concept', 'value', 'period_end')`
-            
+
             Available columns:
             '{', '.join(columns)}'
             """)
@@ -779,7 +780,7 @@ class FactsView:
     def __init__(self, xbrl):
         """
         Initialize the FactsView with an XBRL instance.
-        
+
         Args:
             xbrl: XBRL instance containing facts, contexts, and elements
         """
@@ -801,7 +802,7 @@ class FactsView:
     def get_facts(self) -> List[Dict[str, Any]]:
         """
         Get all facts with enriched context and element information.
-        
+
         Returns:
             List of enriched fact dictionaries
         """
@@ -958,7 +959,7 @@ class FactsView:
     def query(self) -> FactQuery:
         """
         Start building a query against facts.
-        
+
         Returns:
             FactQuery: A new query builder
         """
@@ -967,7 +968,7 @@ class FactsView:
     def to_dataframe(self) -> pd.DataFrame:
         """
         Convert all facts to a DataFrame.
-        
+
         Returns:
             pandas DataFrame containing all facts
         """
@@ -982,10 +983,10 @@ class FactsView:
     def get_statement_facts(self, statement_type: str) -> pd.DataFrame:
         """
         Get facts belonging to a specific statement.
-        
+
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
-            
+
         Returns:
             pandas DataFrame with facts for the specified statement
         """
@@ -994,11 +995,11 @@ class FactsView:
     def get_facts_by_concept(self, concept_pattern: str, exact: bool = False) -> pd.DataFrame:
         """
         Get facts matching a concept name pattern.
-        
+
         Args:
             concept_pattern: Pattern to match against concept names
             exact: If True, perform exact matching; otherwise, use regex
-            
+
         Returns:
             pandas DataFrame with matching facts
         """
@@ -1007,13 +1008,13 @@ class FactsView:
     def search_facts(self, text_pattern: str) -> pd.DataFrame:
         """
         Search for facts containing a text pattern in any text field.
-        
+
         This is a flexible search that looks across concept names, labels,
         and element names for matching text.
-        
+
         Args:
             text_pattern: Text pattern to search for
-            
+
         Returns:
             pandas DataFrame with matching facts
         """
@@ -1022,7 +1023,7 @@ class FactsView:
     def get_facts_with_dimensions(self) -> pd.DataFrame:
         """
         Get facts that have dimensional qualifiers.
-        
+
         Returns:
             pandas DataFrame with dimensionally-qualified facts
         """
@@ -1033,10 +1034,10 @@ class FactsView:
     def get_facts_by_period(self, period_key: str) -> pd.DataFrame:
         """
         Get facts for a specific reporting period.
-        
+
         Args:
             period_key: Period key from reporting_periods
-            
+
         Returns:
             pandas DataFrame with facts for the specified period
         """
@@ -1045,11 +1046,11 @@ class FactsView:
     def get_facts_by_period_view(self, statement_type: str, period_view_name: str) -> pd.DataFrame:
         """
         Get facts for a specific period view (e.g., "Annual Comparison", "Three-Year Comparison").
-        
+
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
             period_view_name: Name of the period view as defined in get_period_views
-            
+
         Returns:
             pandas DataFrame with facts for the specified period view
         """
@@ -1082,11 +1083,11 @@ class FactsView:
                                    fiscal_period: str) -> pd.DataFrame:
         """
         Get facts for a specific fiscal period.
-        
+
         Args:
             fiscal_year: Fiscal year
             fiscal_period: Fiscal period ('FY', 'Q1', 'Q2', 'Q3', 'Q4')
-            
+
         Returns:
             pandas DataFrame with facts for the specified fiscal period
         """
@@ -1095,7 +1096,7 @@ class FactsView:
     def summarize(self) -> Dict[str, Any]:
         """
         Generate a summary of facts in the XBRL instance.
-        
+
         Returns:
             Dictionary with fact summary statistics
         """
@@ -1147,7 +1148,7 @@ class FactsView:
     def get_unique_concepts(self) -> List[str]:
         """
         Get list of unique concept names in the facts.
-        
+
         Returns:
             List of unique concept names
         """
@@ -1158,7 +1159,7 @@ class FactsView:
     def get_unique_dimensions(self) -> Dict[str, Set[str]]:
         """
         Get unique dimensions and their values.
-        
+
         Returns:
             Dictionary mapping dimension names to sets of possible values
         """
@@ -1178,12 +1179,12 @@ class FactsView:
     def get_available_period_views(self, statement_type: str) -> List[Dict[str, Any]]:
         """
         Get available period views for a statement type.
-        
+
         This method returns the period views that can be used with get_facts_by_period_view.
-        
+
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
-            
+
         Returns:
             List of period view metadata with name, description, and period keys
         """
@@ -1208,11 +1209,11 @@ class FactsView:
                         statement_type: str = None) -> pd.DataFrame:
         """
         Create a pivoted view of facts by period.
-        
+
         Args:
             concept_pattern: Optional concept pattern to filter by
             statement_type: Optional statement type to filter by
-            
+
         Returns:
             pandas DataFrame with concepts as rows and periods as columns
         """
@@ -1250,12 +1251,12 @@ class FactsView:
                            period_key: str = None) -> pd.DataFrame:
         """
         Create a pivoted view of facts by dimension values.
-        
+
         Args:
             dimension: Dimension to pivot by
             concept_pattern: Optional concept pattern to filter by
             period_key: Optional period key to filter by
-            
+
         Returns:
             pandas DataFrame with concepts as rows and dimension values as columns
         """
@@ -1297,11 +1298,11 @@ class FactsView:
     def time_series(self, concept: str, exact: bool = True) -> pd.DataFrame:
         """
         Create a time series view for a specific concept.
-        
+
         Args:
             concept: Concept name to create time series for
             exact: If True, require exact concept match; otherwise, use pattern matching
-            
+
         Returns:
             pandas DataFrame with time series data for the concept
         """
@@ -1345,12 +1346,12 @@ class FactsView:
                       include_dimensions: bool = True) -> pd.DataFrame:
         """
         Get the history of a concept across time, optionally including dimensions.
-        
+
         Args:
             concept: Concept name to track
             date_col: Date column to use for time series ('period_end', 'period_instant')
             include_dimensions: Whether to include dimensional breakdowns
-            
+
         Returns:
             pandas DataFrame with time series data
         """
@@ -1418,10 +1419,10 @@ class FactsView:
 def add_facts_view(xbrl):
     """
     Add a FactsView instance to an XBRL object.
-    
+
     Args:
         xbrl: XBRL instance
-    
+
     Returns:
         FactsView instance
     """

@@ -22,14 +22,15 @@ from edgar.xbrl.core import determine_dominant_scale, format_date, format_value,
 
 # Import color schemes from entity package
 try:
-    from edgar.entity.terminal_styles import get_color_scheme
     import os
-    
+
+    from edgar.entity.terminal_styles import get_color_scheme
+
     def get_xbrl_color_scheme():
         """Get XBRL-specific color scheme with filing as default."""
         scheme_name = os.environ.get("EDGAR_FINANCIALS_COLOR_SCHEME", "filing")  # Default to filing for XBRL
         return get_color_scheme(scheme_name)
-        
+
 except ImportError:
     # Fallback if terminal_styles not available
     def get_xbrl_color_scheme():
@@ -52,7 +53,7 @@ except ImportError:
 def get_xbrl_styles():
     """Get XBRL rendering styles based on current color scheme."""
     colors = get_xbrl_color_scheme()
-    
+
     return {
         'header': {
             'company_name': colors['company_name'],
@@ -94,24 +95,24 @@ COMPARISON_CONFIG = {
 
 def _apply_style(text: str, style_config: dict) -> str:
     """Apply rich text styling based on configuration.
-    
+
     Args:
         text: Text to style
         style_config: Style configuration dictionary with 'style' and optional 'color' keys
-        
+
     Returns:
         str: Styled text with rich markup
     """
     style = style_config.get('style', 'none')
     color = style_config.get('color', 'default')
     case = style_config.get('case', 'none')
-    
+
     # Apply text case transformation
     if case == 'upper':
         text = text.upper()
     elif case == 'title':
         text = text.title()
-    
+
     # Build style tags
     tags = []
     if style == 'bold':
@@ -122,7 +123,7 @@ def _apply_style(text: str, style_config: dict) -> str:
         tags.append('dim')
     if color != 'default':
         tags.append(color)
-    
+
     # Apply styling
     if tags:
         return f"[{' '.join(tags)}]{text}[/{' '.join(tags)}]"
@@ -130,11 +131,11 @@ def _apply_style(text: str, style_config: dict) -> str:
 
 def _calculate_comparison(current_value: Any, previous_value: Any) -> Optional[Tuple[float, str]]:
     """Calculate the percentage change between two values.
-    
+
     Args:
         current_value: Current period value
         previous_value: Previous period value
-        
+
     Returns:
         Tuple of (percentage_change, comparison_symbol) or None if comparison not possible
     """
@@ -143,14 +144,14 @@ def _calculate_comparison(current_value: Any, previous_value: Any) -> Optional[T
             current_value = float(current_value.replace(',', ''))
         if isinstance(previous_value, str):
             previous_value = float(previous_value.replace(',', ''))
-            
+
         if previous_value == 0:
             if current_value == 0:
                 return (0.0, 'unchanged')
             return (float('inf'), 'increase' if current_value > 0 else 'decrease')
-            
+
         pct_change = (current_value - previous_value) / abs(previous_value)
-        
+
         if abs(pct_change) < COMPARISON_CONFIG['threshold']:
             return (0.0, 'unchanged')
         return (pct_change, 'increase' if pct_change > 0 else 'decrease')
@@ -224,24 +225,24 @@ class RenderedStatement:
         """Render as a rich table with professional styling"""
         # Get professional color scheme
         styles = get_xbrl_styles()
-        
+
         # Clean up title - remove internal terminology like "(Standardized)"
         clean_title = self.title.replace("(Standardized)", "").strip()
-        
+
         # Build title hierarchy with improved visual design
         title_parts = []
-        
+
         # Main title (bold, prominent)
         title_parts.append(f"[{styles['header']['statement_title']}]{clean_title}[/{styles['header']['statement_title']}]")
-        
+
         # Subtitle: fiscal period indicator (normal weight)
         if self.fiscal_period_indicator:
             title_parts.append(f"{self.fiscal_period_indicator}")
-        
+
         # Units note (dim, subtle)
         if self.units_note:
             title_parts.append(f"[{styles['structure']['separator']}]{self.units_note}[/{styles['structure']['separator']}]")
-        
+
         # Create the table with clean title hierarchy
         table = RichTable(title="\n".join(title_parts), 
                          box=box.SIMPLE, 
@@ -262,7 +263,7 @@ class RenderedStatement:
         for row in self.rows:
             # Format the label based on level and properties with professional colors
             indent = "  " * row.level
-            
+
             if row.is_dimension:
                 # Format dimension items with italic style
                 label_text = f"{indent}{row.label}"
@@ -308,7 +309,7 @@ class RenderedStatement:
                     # Format the cell value first
                     cell_value = cell.formatter(cell.value)
                     cell_str = str(cell_value)
-                    
+
                     # Determine the style to apply based on content
                     if row.is_abstract or "Total" in row.label:
                         # Totals get special styling
@@ -319,27 +320,27 @@ class RenderedStatement:
                     else:
                         # Positive values
                         style = styles['value']['positive']
-                    
+
                     # Create Rich Text object with proper styling
                     if style:
                         # Apply the style directly to the Text object
                         text_obj = Text(cell_str, style=style, justify="right")
                     else:
                         text_obj = Text(cell_str, justify="right")
-                    
+
                     cell_values.append(text_obj)
 
             table.add_row(styled_label, *cell_values)
 
         # Add footer metadata as table caption
         footer_parts = []
-        
+
         # Extract metadata if available
         company_name = self.metadata.get('company_name')
         form_type = self.metadata.get('form_type')
         period_end = self.metadata.get('period_end')
         fiscal_period = self.metadata.get('fiscal_period')
-        
+
         # Build footer with available information
         if company_name:
             footer_parts.append(company_name)
@@ -349,10 +350,10 @@ class RenderedStatement:
             footer_parts.append(f"Period ending {period_end}")
         if fiscal_period:
             footer_parts.append(f"Fiscal {fiscal_period}")
-        
+
         # Always add source
         footer_parts.append("Source: SEC XBRL")
-        
+
         # Apply dim styling to footer
         if footer_parts:
             footer_text = " • ".join(footer_parts)
@@ -362,7 +363,7 @@ class RenderedStatement:
 
     def __repr__(self):
         return repr_rich(self.__rich__())
-    
+
     def __str__(self) -> str:
         """Convert to string with proper width to avoid truncation."""
         from edgar.richtools import rich_to_text
@@ -473,23 +474,23 @@ class RenderedStatement:
 
 def _format_comparison(pct_change: float, comparison_type: str) -> str:
     """Format a comparison indicator with the appropriate symbol and color.
-    
+
     Args:
         pct_change: Percentage change value
         comparison_type: Type of comparison ('increase', 'decrease', or 'unchanged')
-        
+
     Returns:
         str: Formatted comparison indicator with rich markup
     """
     style = DEFAULT_STYLES['comparison'][comparison_type]
     color = style['color']
     symbol = style['symbol']
-    
+
     if comparison_type != 'unchanged':
         pct_text = f" {abs(pct_change):.1%}"
     else:
         pct_text = ""
-        
+
     return f"[{color}]{symbol}{pct_text}[/{color}]"
 
 share_concepts = [
@@ -514,16 +515,16 @@ eps_concepts = [
 def _is_html(text: str) -> bool:
     """
     Simple check to determine if a string contains HTML content.
-    
+
     Args:
         text: The string to check
-        
+
     Returns:
         bool: True if the string appears to contain HTML, False otherwise
     """
     html_tags = ['<p', '<div', '<span', '<br', '<table', '<tr', '<td', '<th',
                 '<ul>', '<li', '<ol>', '<h1>', '<h2>', '<h3>', '<h4>', '<h5>', '<h6>']
-    
+
     text_lower = text.lower()
     return any(tag in text_lower for tag in html_tags)
 
@@ -531,10 +532,10 @@ def _is_html(text: str) -> bool:
 def html_to_text(html: str) -> str:
     """
     Convert HTML to plain text.
-    
+
     Args:
         html: HTML content to convert
-        
+
     Returns:
         str: Plain text representation of the HTML
     """
@@ -552,44 +553,44 @@ def _format_period_labels(
 ) -> Tuple[List[PeriodData], Optional[str]]:
     """
     Format period labels for display and determine fiscal period indicator.
-    
+
     This function processes period keys and labels to create human-readable period labels
     for financial statements. When show_date_range=True, duration periods are displayed
     with both start and end dates (e.g., "Jan 1, 2023 - Mar 31, 2023"). When 
     show_date_range=False (default), only the end date is shown (e.g., "Mar 31, 2023").
-    
+
     The function handles various input formats:
     1. Period keys in standard format (instant_YYYY-MM-DD or duration_YYYY-MM-DD_YYYY-MM-DD)
     2. Original labels with full or abbreviated month names
     3. Special formatted labels with date range information
-    
+
     For quarterly periods, quarter numbers (Q1-Q4) are added to provide additional context.
-    
+
     Args:
         periods_to_display: List of period keys and original labels
         entity_info: Entity information dictionary
         statement_type: Type of statement (BalanceSheet, IncomeStatement, etc.)
         show_date_range: Whether to show full date ranges for duration periods
-        
+
     Returns:
         Tuple of (formatted_periods, fiscal_period_indicator)
         where formatted_periods is a list of PeriodData objects containing detailed period information
     """
     formatted_periods = []
     fiscal_period_indicator = None
-    
+
     # We get entity_info but don't currently use document_period_end_date
     # Uncomment if needed: doc_period_end_date = entity_info.get('document_period_end_date')
-    
+
     # Analyze ALL periods to detect mixed period types (not just the first one)
     period_types = []
     is_balance_sheet = False
-    
+
     if periods_to_display:
         # Check if this is a balance sheet (instant periods)
         first_period_key = periods_to_display[0][0]
         is_balance_sheet = first_period_key.startswith('instant_')
-        
+
         if is_balance_sheet:
             # For Balance Sheet - simple "As of" indicator
             fiscal_period_indicator = "As of"
@@ -602,7 +603,7 @@ def _format_period_labels(
                             date_str = period_key.split('_')[1]
                             date_obj = parse_date(date_str)
                             dates.append(date_obj.strftime("%B %d, %Y"))
-                    
+
                     if len(dates) == 2:
                         fiscal_period_indicator = f"As of {dates[0]} and {dates[1]}"
                     else:
@@ -619,7 +620,7 @@ def _format_period_labels(
                             start_date = parse_date(parts[1])
                             end_date = parse_date(parts[2])
                             duration_days = (end_date - start_date).days
-                            
+
                             # Categorize by duration
                             if 85 <= duration_days <= 95:
                                 period_types.append("quarterly")
@@ -633,10 +634,10 @@ def _format_period_labels(
                                 period_types.append("other")
                     except (ValueError, TypeError, IndexError):
                         period_types.append("other")
-            
+
             # Generate fiscal period indicator based on detected types
             unique_types = list(set(period_types))
-            
+
             if len(unique_types) == 1:
                 # Single period type
                 period_type = unique_types[0]
@@ -664,7 +665,7 @@ def _format_period_labels(
                 fiscal_period_indicator = "Multiple Periods Ended"
             else:
                 fiscal_period_indicator = "Period Ended"
-    
+
     # Create formatted period columns
     for period_key, original_label in periods_to_display:
         # Extract start/end dates from duration periods for date range display
@@ -675,7 +676,7 @@ def _format_period_labels(
         is_duration = False
         duration_days = 0
         q_num = None
-        
+
         # Parse dates from period key for duration periods
         if not period_key.startswith('instant_') and '_' in period_key and len(period_key.split('_')) >= 3:
             parts = period_key.split('_')
@@ -686,7 +687,7 @@ def _format_period_labels(
                 end_date_obj = parse_date(end_date_str)
                 is_duration = True
                 duration_days = (end_date_obj - start_date_obj).days
-                
+
                 # Determine quarter number for quarterly periods
                 if 80 <= duration_days <= 100:  # Quarterly period
                     month = end_date_obj.month
@@ -710,7 +711,7 @@ def _format_period_labels(
 
         # Start with the original label or an empty string
         final_label = ""
-        
+
         # First check for date range labels with "to" - prioritize this check
         if original_label and 'to' in original_label:
             # Handle date range labels like "Annual: September 25, 2022 to September 30, 2023"
@@ -729,7 +730,7 @@ def _format_period_labels(
                                 if end_date_obj:
                                     end_date_str = end_date_obj.strftime('%Y-%m-%d')
                             final_label = format_date(end_date_obj)
-                            
+
                             # Add quarter info if available
                             if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
                                 final_label = f"{final_label} ({q_num})"
@@ -742,7 +743,7 @@ def _format_period_labels(
                         except (ValueError, TypeError):
                             # If we can't parse the end date, use the original label
                             final_label = end_date_display_str
-                            
+
                     # Try to parse start date if we're dealing with a duration
                     if is_duration and not start_date_str and 'to' in original_label:
                         try:
@@ -755,7 +756,7 @@ def _format_period_labels(
             except (ValueError, TypeError, IndexError):
                 # If any parsing fails, leave label unchanged
                 final_label = original_label
-        
+
         # Case 1: If we still don't have a final label and have a date with commas, process it
         elif not final_label and original_label and ',' in original_label:
             for full_month, abbr in [
@@ -773,14 +774,14 @@ def _format_period_labels(
                         day = int(''.join(c for c in day_part.split(',')[0] if c.isdigit()))
                         month_num = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
                                    'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}[abbr]
-                        
+
                         try:
                             date_obj = datetime(year, month_num, day).date()
                             # If we don't already have an end date from the period key
                             if not end_date_obj:
                                 end_date_obj = date_obj
                                 end_date_str = date_obj.strftime('%Y-%m-%d')
-                                
+
                             final_label = format_date(date_obj)
                             # If showing date range and we have start_date for duration, use it
                             if show_date_range and is_duration and start_date_obj:
@@ -801,7 +802,7 @@ def _format_period_labels(
                                     if not end_date_obj:
                                         end_date_obj = date_obj
                                         end_date_str = date_obj.strftime('%Y-%m-%d')
-                                        
+
                                     final_label = format_date(date_obj)
                                     # If showing date range and we have start_date for duration, use it
                                     if show_date_range and is_duration and start_date_obj:
@@ -811,18 +812,18 @@ def _format_period_labels(
                                     pass
                     except (ValueError, IndexError):
                         pass
-            
+
             # If we couldn't extract a date but label has abbreviated month, use the original
             if not final_label:
                 for abbr in ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']:
                     if abbr in original_label:
                         final_label = original_label
                         break
-                
+
                 # If no month abbreviation was found, use original label
                 if not final_label:
                     final_label = original_label
-        
+
         # Case 2: Handle other special formatted period labels like those with colons
         elif original_label and len(original_label) > 4 and not final_label:
             if ':' in original_label:
@@ -831,7 +832,7 @@ def _format_period_labels(
             else:
                 # Any other labels we couldn't handle
                 final_label = original_label
-        
+
         # Case 3: Either use existing final_label (possibly from Case 1/2) or extract from period key
         # If final_label is set but we want date range for a duration period, check if we need to add the start date
         if final_label and show_date_range and is_duration and start_date_obj and end_date_obj:
@@ -847,7 +848,7 @@ def _format_period_labels(
                 else:
                     # If we can't detect the end date pattern, prepend the start date
                     final_label = f"{format_date(start_date_obj)} - {final_label}"
-                    
+
                 # If we have quarter info, ensure it's present for income/cash flow statements
                 if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement'] and f"({q_num})" not in final_label:
                     final_label = f"{final_label} ({q_num})"
@@ -857,7 +858,7 @@ def _format_period_labels(
                         final_label = f"{final_label} (YTD)"
                     elif 265 <= duration_days <= 285:  # ~9 months
                         final_label = f"{final_label} (YTD)"
-        
+
         # If we don't have a final_label yet, process based on period key
         if not final_label:
             if period_key.startswith('instant_'):
@@ -870,7 +871,7 @@ def _format_period_labels(
                 # For duration periods, format based on show_date_range
                 if show_date_range and start_date_obj and end_date_obj:
                     final_label = f"{format_date(start_date_obj)} - {format_date(end_date_obj)}"
-                    
+
                     # Add quarter info if available
                     if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
                         final_label = f"{final_label} ({q_num})"
@@ -882,7 +883,7 @@ def _format_period_labels(
                             final_label = f"{final_label} (YTD)"
                 elif end_date_obj:
                     final_label = format_date(end_date_obj)
-                    
+
                     # Add quarter info if available
                     if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
                         final_label = f"{final_label} ({q_num})"
@@ -897,7 +898,7 @@ def _format_period_labels(
             else:
                 # Fall back to original label for anything else
                 final_label = original_label
-        
+
         # Create PeriodData object with all the information
         period_data = PeriodData(
             key=period_key,
@@ -907,10 +908,10 @@ def _format_period_labels(
             is_duration=is_duration,
             quarter=q_num
         )
-        
+
         # Add the formatted period to the result
         formatted_periods.append(period_data)
-    
+
     return formatted_periods, fiscal_period_indicator
 
 
@@ -921,18 +922,18 @@ def _create_units_note(
 ) -> str:
     """
     Create the units note for the statement title.
-    
+
     Args:
         is_monetary_statement: Whether the statement contains monetary values
         dominant_scale: The dominant scale for monetary values
         shares_scale: The scale for share values, if present
-        
+
     Returns:
         str: Formatted units note or empty string
     """
     if not is_monetary_statement:
         return ""
-        
+
     monetary_scale_text = ""
     if dominant_scale == -3:
         monetary_scale_text = "thousands"
@@ -940,7 +941,7 @@ def _create_units_note(
         monetary_scale_text = "millions"
     elif dominant_scale == -9:
         monetary_scale_text = "billions"
-    
+
     shares_scale_text = ""
     if shares_scale is not None:
         if shares_scale == -3:
@@ -957,7 +958,7 @@ def _create_units_note(
             scale_factor = 10 ** (-shares_scale)
             if scale_factor >= 1000:
                 shares_scale_text = f"scaled by {scale_factor:,}"
-    
+
     # Construct appropriate units note
     if monetary_scale_text and shares_scale_text and shares_scale != dominant_scale:
         return f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text} and per share data)[/italic]"
@@ -979,7 +980,7 @@ def _format_value_for_display_as_string(
 ) -> str:
     """
     Format a value for display in a financial statement, returning a string.
-    
+
     Args:
         value: The value to format
         item: The statement line item containing the value
@@ -988,26 +989,26 @@ def _format_value_for_display_as_string(
         dominant_scale: The dominant scale for monetary values
         shares_scale: The scale for share values, if present
         comparison_info: Optional comparison information for showing trends
-        
+
     Returns:
         str: Formatted value as a string
     """
     # Fast path for empty values
     if not value or value == "":
         return ""
-    
+
     # Type check without multiple isinstance calls
     value_type = type(value)
     if value_type not in (int, float, str):
         return ""
-        
+
     # Extract only needed metadata
     concept = item.get('concept', '')
-    
+
     # Fast check for common share and EPS concepts
     is_share_value = concept in share_concepts
     is_eps_value = concept in eps_concepts
-    
+
     # Only perform expensive label operations if needed for monetary determination
     is_monetary = is_monetary_statement
     if is_eps_value or is_share_value:
@@ -1020,14 +1021,14 @@ def _format_value_for_display_as_string(
         label = item.get('label', '').lower()
         if any(keyword in label for keyword in ('ratio', 'percentage', 'per cent')):
             is_monetary = False
-    
+
     # Get decimals with a default value to avoid conditional logic later
     fact_decimals = 0
     if period_key:
         decimals_dict = item.get('decimals', {})
         if decimals_dict:
             fact_decimals = decimals_dict.get(period_key, 0) or 0
-    
+
     # Format numeric values efficiently
     if value_type in (int, float):
         # Handle EPS values with decimal precision
@@ -1089,7 +1090,7 @@ def _format_value_for_display(
 ) -> Text:
     """
     Format a value for display in a financial statement, returning a Rich Text object.
-    
+
     Args:
         value: The value to format
         item: The statement line item containing the value
@@ -1098,7 +1099,7 @@ def _format_value_for_display(
         dominant_scale: The dominant scale for monetary values
         shares_scale: The scale for share values, if present
         comparison_info: Optional comparison information for showing trends
-        
+
     Returns:
         Text: Formatted value as a Rich Text object
     """
@@ -1106,7 +1107,7 @@ def _format_value_for_display(
     formatted_str = _format_value_for_display_as_string(
         value, item, period_key, is_monetary_statement, dominant_scale, shares_scale, comparison_info, xbrl_instance
     )
-    
+
     # Convert to Rich Text object with right justification
     return Text(formatted_str, justify="right")
 
@@ -1124,7 +1125,7 @@ def render_statement(
 ) -> RenderedStatement:
     """
     Render a financial statement as a structured intermediate representation.
-    
+
     Args:
         statement_data: Statement data with items and values
         periods_to_display: List of period keys and labels
@@ -1134,7 +1135,7 @@ def render_statement(
         standard: Whether to use standardized concept labels (default: True)
         show_date_range: Whether to show full date ranges for duration periods (default: False)
         show_comparisons: Whether to show period-to-period comparisons (default: True)
-        
+
     Returns:
         RenderedStatement: A structured representation of the statement that can be rendered
                            in various formats
@@ -1146,14 +1147,14 @@ def render_statement(
     if standard:
         # Create a concept mapper with default mappings
         mapper = standardization.ConceptMapper(standardization.initialize_default_mappings())
-        
+
         # Add statement type to context for better mapping
         for item in statement_data:
             item['statement_type'] = statement_type
-        
+
         # Standardize the statement data
         statement_data = standardization.standardize_statement(statement_data, mapper)
-        
+
         # Update facts with standardized labels if XBRL instance is available
         entity_xbrl_instance = entity_info.get('xbrl_instance')
         # Use passed xbrl_instance or fall back to entity info
@@ -1161,7 +1162,7 @@ def render_statement(
         if facts_xbrl_instance and hasattr(facts_xbrl_instance, 'facts_view'):
             facts_view = facts_xbrl_instance.facts_view
             facts = facts_view.get_facts()
-            
+
             # Create a mapping of concept -> standardized label from statement data
             standardization_map = {}
             for item in statement_data:
@@ -1172,7 +1173,7 @@ def render_statement(
                         'label': item['label'],
                         'original_label': item['original_label']
                     }
-            
+
             # Update facts with standardized labels
             for fact in facts:
                 if 'concept' in fact and fact['concept'] in standardization_map:
@@ -1183,26 +1184,26 @@ def render_statement(
                             fact['original_label'] = fact['label']
                         # Update with standardized label
                         fact['label'] = mapping['label']
-            
+
             # Clear the cache to ensure it's rebuilt with updated facts
             facts_view.clear_cache()
-        
+
         # Indicate that standardization is being used in the title
         statement_title = f"{statement_title} (Standardized)"
-    
+
     # Determine if this is likely a monetary statement
     is_monetary_statement = statement_type in ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement']
-    
+
     # Format period headers, but keep original tuples for now (we'll use the fully parsed objects later)
     # These are now PeriodData objects but we'll continue with string period_keys for compatibility 
     formatted_period_objects_initial, fiscal_period_indicator = _format_period_labels(
         periods_to_display, entity_info, statement_type, show_date_range
     )
     formatted_periods = [(p.key, p.label) for p in formatted_period_objects_initial]
-    
+
     # Determine the dominant scale for monetary values in this statement
     dominant_scale = determine_dominant_scale(statement_data, periods_to_display)
-    
+
     # Determine the scale used for share amounts if present
     shares_scale = None
     # Look for share-related concepts to determine their scaling from the decimals attribute
@@ -1220,10 +1221,10 @@ def render_statement(
                     break
             if shares_scale is not None:
                 break
-    
+
     # Create the units note
     units_note = _create_units_note(is_monetary_statement, dominant_scale, shares_scale)
-                
+
     # Extract period metadata for each period for better filtering
     period_metadatas = []
     for period_key, period_label in formatted_periods:
@@ -1263,7 +1264,7 @@ def render_statement(
                 continue
             except (ValueError, TypeError, IndexError):
                 pass
-        
+
         # If we get here, we couldn't extract meaningful metadata
         period_metadatas.append({
             'key': period_key,
@@ -1271,11 +1272,11 @@ def render_statement(
             'type': 'unknown',
             'has_metadata': False
         })
-        
+
     # Calculate data density and prepare comparison data
     period_value_counts = {period_key: 0 for period_key, _ in formatted_periods}
     period_item_counts = {period_key: 0 for period_key, _ in formatted_periods}
-    
+
     # Prepare comparison data if enabled and appropriate for statement type
     comparison_data = {}
     if show_comparisons and statement_type in COMPARISON_CONFIG['enabled_types']:
@@ -1285,50 +1286,50 @@ def render_statement(
             key=lambda x: x['end_date'],
             reverse=True
         )
-        
+
         # For each item, calculate comparisons between consecutive periods
         for item in statement_data:
             if item.get('is_abstract') or not item.get('has_values'):
                 continue
-                
+
             concept = item.get('concept')
             if not concept or concept in COMPARISON_CONFIG['excluded_concepts']:
                 continue
-                
+
             item_comparisons = {}
             for i in range(len(sorted_periods) - 1):
                 current_period = sorted_periods[i]
                 prev_period = sorted_periods[i + 1]
-                
+
                 current_value = item['values'].get(current_period['key'])
                 prev_value = item['values'].get(prev_period['key'])
-                
+
                 comparison = _calculate_comparison(current_value, prev_value)
                 if comparison:
                     item_comparisons[current_period['key']] = comparison
-            
+
             if item_comparisons:
                 comparison_data[item['concept']] = item_comparisons
-    
+
     # Count non-empty values for each period
     for item in statement_data:
         # Skip abstract items as they typically don't have values
         if item.get('is_abstract', False):
             continue
-        
+
         # Skip items with brackets in labels (usually axis/dimension items)
         if any(bracket in item['label'] for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
             continue
-        
+
         for period_key, _ in formatted_periods:
             # Count this item for the period
             period_item_counts[period_key] += 1
-            
+
             # Check if it has a value
             value = item['values'].get(period_key)
             if value not in (None, "", 0):  # Consider 0 as a value for financial statements
                 period_value_counts[period_key] += 1
-    
+
     # Calculate percentage of non-empty values for each period
     for metadata in period_metadatas:
         period_key = metadata['key']
@@ -1337,16 +1338,16 @@ def render_statement(
             data_density = period_value_counts.get(period_key, 0) / count
         else:
             data_density = 0
-            
+
         metadata['data_density'] = data_density
         metadata['num_values'] = period_value_counts.get(period_key, 0)
         metadata['total_items'] = count
-        
+
     # Get the PeriodData objects from _format_period_labels
     formatted_period_objects, fiscal_period_indicator = _format_period_labels(
         periods_to_display, entity_info, statement_type, show_date_range
     )
-    
+
     # Create the RenderedStatement and its header
     header = StatementHeader(
         columns=[period.label for period in formatted_period_objects],
@@ -1359,16 +1360,16 @@ def render_statement(
             'period_metadatas': period_metadatas
         }
     )
-    
+
     # Extract footer information from XBRL and entity info
     footer_metadata = {}
-    
+
     # Extract company name
     if hasattr(xbrl_instance, 'entity_name') and xbrl_instance.entity_name:
         footer_metadata['company_name'] = xbrl_instance.entity_name
     elif hasattr(xbrl_instance, 'company_name') and xbrl_instance.company_name:
         footer_metadata['company_name'] = xbrl_instance.company_name
-    
+
     # Extract form type and periods
     if hasattr(xbrl_instance, 'form_type') and xbrl_instance.form_type:
         footer_metadata['form_type'] = xbrl_instance.form_type
@@ -1376,7 +1377,7 @@ def render_statement(
         footer_metadata['period_end'] = str(xbrl_instance.period_of_report)
     if entity_info and entity_info.get('fiscal_period'):
         footer_metadata['fiscal_period'] = entity_info.get('fiscal_period')
-    
+
     rendered_statement = RenderedStatement(
         title=statement_title,
         header=header,
@@ -1392,23 +1393,23 @@ def render_statement(
         fiscal_period_indicator=fiscal_period_indicator,
         units_note=units_note
     )
-    
+
     # Process and add rows
-    for index, item in enumerate(statement_data):
+    for _index, item in enumerate(statement_data):
         # Skip rows with no values if they're abstract (headers without data)
         # But keep abstract items with children (section headers)
         has_children = len(item.get('children', [])) > 0 or item.get('has_dimension_children', False)
         if not item.get('has_values', False) and item.get('is_abstract') and not has_children:
             continue
-            
+
         # Skip axis/dimension items (they contain brackets in their labels)
         if any(bracket in item['label'] for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
             continue
-            
+
         # Remove [Abstract] from label if present
         label = item['label'].replace(' [Abstract]', '')
         level = item['level']
-        
+
         # Create the row with metadata
         row = StatementRow(
             label=label,
@@ -1424,7 +1425,7 @@ def render_statement(
             is_dimension=item.get('is_dimension', False),
             has_dimension_children=item.get('has_dimension_children', False)
         )
-        
+
         # Add values for each period
         for period in formatted_period_objects:
             period_key = period.key
@@ -1438,14 +1439,14 @@ def render_statement(
             # Clone item at the time of creating this function to prevent it from changing later
             current_item = dict(item)
             current_period_key = period_key
-            
+
             def format_func(value, item=current_item, pk=current_period_key):
                 return _format_value_for_display_as_string(
                     value, item, pk,
                     is_monetary_statement, dominant_scale, shares_scale,
                     comparison_info, xbrl_instance
                 )
-            
+
             # Create a cell and add it to the row
             cell = StatementCell(
                 value=value,  # Store the plain value
@@ -1454,25 +1455,25 @@ def render_statement(
                 comparison=comparison_info
             )
             row.cells.append(cell)
-        
+
         # Add the row to the statement
         rendered_statement.rows.append(row)
-    
+
     return rendered_statement
 
 
 def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
     """
     Generate a rich representation of the XBRL document.
-    
+
     Args:
         xbrl: XBRL object
-        
+
     Returns:
         Panel: A formatted panel with XBRL document information
     """
     components = []
-    
+
     # Entity information
     if xbrl.entity_info:
         if RichTable is None or box is None:
@@ -1480,12 +1481,12 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
         entity_table = RichTable(title="Entity Information", box=box.SIMPLE)
         entity_table.add_column("Property")
         entity_table.add_column("Value")
-        
+
         for key, value in xbrl.entity_info.items():
             entity_table.add_row(key, str(value))
-        
+
         components.append(entity_table)
-    
+
     # Statements summary
     statements = xbrl.get_all_statements()
     if statements:
@@ -1495,42 +1496,42 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
         statement_table.add_column("Type")
         statement_table.add_column("Definition")
         statement_table.add_column("Elements")
-        
+
         for stmt in statements:
             statement_table.add_row(
                 stmt['type'] or "Other",
                 stmt['definition'],
                 str(stmt['element_count'])
             )
-        
+
         components.append(statement_table)
-    
+
     # Facts summary
     if RichTable is None or box is None:
         return "Rich rendering not available - install 'rich' package"
     fact_table = RichTable(title="Facts Summary", box=box.SIMPLE)
     fact_table.add_column("Category")
     fact_table.add_column("Count")
-    
+
     fact_table.add_row("Total Facts", str(len(xbrl._facts)))
     fact_table.add_row("Contexts", str(len(xbrl.contexts)))
     fact_table.add_row("Units", str(len(xbrl.units)))
     fact_table.add_row("Elements", str(len(xbrl.element_catalog)))
-    
+
     components.append(fact_table)
-    
+
     # Reporting periods
     if xbrl.reporting_periods:
         period_table = RichTable(title="Reporting Periods", box=box.SIMPLE)
         period_table.add_column("Type")
         period_table.add_column("Period")
-        
+
         for period in xbrl.reporting_periods:
             if period['type'] == 'instant':
                 period_table.add_row("Instant", period['date'])
             else:
                 period_table.add_row("Duration", f"{period['start_date']} to {period['end_date']}")
-        
+
         components.append(period_table)
-    
+
     return Panel(Group(*components), title="XBRL Document", border_style="green")

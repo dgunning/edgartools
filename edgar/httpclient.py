@@ -1,12 +1,14 @@
-from httpxthrottlecache import HttpxThrottleCache
-from edgar.core import get_identity, strtobool
 import os
 from contextlib import asynccontextmanager, contextmanager
-import httpx
-from typing import AsyncGenerator, Optional, Generator
 from pathlib import Path
-from .core import edgar_data_dir
+from typing import AsyncGenerator, Generator, Optional
 
+import httpx
+from httpxthrottlecache import HttpxThrottleCache
+
+from edgar.core import get_identity, strtobool
+
+from .core import edgar_data_dir
 
 MAX_SUBMISSIONS_AGE_SECONDS = 10 * 60  # Check for submissions every 10 minutes
 MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes

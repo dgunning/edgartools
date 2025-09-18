@@ -18,7 +18,7 @@ import pandas as pd
 class StandardConcept(str, Enum):
     """
     Standardized concept names for financial statements.
-    
+
     The enum value (string) is the display label used for presentation.
     These labels should match keys in concept_mappings.json.
     """
@@ -32,7 +32,7 @@ class StandardConcept(str, Enum):
     GOODWILL = "Goodwill"
     INTANGIBLE_ASSETS = "Intangible Assets"
     TOTAL_ASSETS = "Total Assets"
-    
+
     # Balance Sheet - Liabilities
     ACCOUNTS_PAYABLE = "Accounts Payable"
     ACCRUED_LIABILITIES = "Accrued Liabilities"
@@ -41,12 +41,12 @@ class StandardConcept(str, Enum):
     LONG_TERM_DEBT = "Long Term Debt"
     DEFERRED_REVENUE = "Deferred Revenue"
     TOTAL_LIABILITIES = "Total Liabilities"
-    
+
     # Balance Sheet - Equity
     COMMON_STOCK = "Common Stock"
     RETAINED_EARNINGS = "Retained Earnings"
     TOTAL_EQUITY = "Total Stockholders' Equity"
-    
+
     # Income Statement - Revenue Hierarchy
     REVENUE = "Revenue"
     CONTRACT_REVENUE = "Contract Revenue"
@@ -54,7 +54,7 @@ class StandardConcept(str, Enum):
     SERVICE_REVENUE = "Service Revenue"
     SUBSCRIPTION_REVENUE = "Subscription Revenue"
     LEASING_REVENUE = "Leasing Revenue"
-    
+
     # Industry-Specific Revenue Concepts
     AUTOMOTIVE_REVENUE = "Automotive Revenue"
     AUTOMOTIVE_LEASING_REVENUE = "Automotive Leasing Revenue"
@@ -62,7 +62,7 @@ class StandardConcept(str, Enum):
     SOFTWARE_REVENUE = "Software Revenue"
     HARDWARE_REVENUE = "Hardware Revenue"
     PLATFORM_REVENUE = "Platform Revenue"
-    
+
     # Income Statement - Expenses
     COST_OF_REVENUE = "Cost of Revenue"
     COST_OF_GOODS_SOLD = "Cost of Goods Sold"
@@ -73,14 +73,14 @@ class StandardConcept(str, Enum):
     GROSS_PROFIT = "Gross Profit"
     OPERATING_EXPENSES = "Operating Expenses"
     RESEARCH_AND_DEVELOPMENT = "Research and Development Expense"
-    
+
     # Enhanced Expense Hierarchy
     SELLING_GENERAL_ADMIN = "Selling, General and Administrative Expense"
     SELLING_EXPENSE = "Selling Expense"
     GENERAL_ADMIN_EXPENSE = "General and Administrative Expense"
     MARKETING_EXPENSE = "Marketing Expense"
     SALES_EXPENSE = "Sales Expense"
-    
+
     # Other Income Statement
     OPERATING_INCOME = "Operating Income"
     INTEREST_EXPENSE = "Interest Expense"
@@ -91,21 +91,21 @@ class StandardConcept(str, Enum):
     NET_INCOME_CONTINUING_OPS = "Net Income from Continuing Operations"
     NET_INCOME_NONCONTROLLING = "Net Income Attributable to Noncontrolling Interest"
     PROFIT_OR_LOSS = "Profit or Loss"
-    
+
     # Cash Flow Statement
     CASH_FROM_OPERATIONS = "Net Cash from Operating Activities"
     CASH_FROM_INVESTING = "Net Cash from Investing Activities"
     CASH_FROM_FINANCING = "Net Cash from Financing Activities"
     NET_CHANGE_IN_CASH = "Net Change in Cash"
-    
+
     @classmethod
     def get_from_label(cls, label: str) -> Optional['StandardConcept']:
         """
         Get a StandardConcept enum by its label value.
-        
+
         Args:
             label: The label string to look up
-            
+
         Returns:
             The corresponding StandardConcept or None if not found
         """
@@ -113,12 +113,12 @@ class StandardConcept(str, Enum):
             if concept.value == label:
                 return concept
         return None
-    
+
     @classmethod
     def get_all_values(cls) -> Set[str]:
         """
         Get all label values defined in the enum.
-        
+
         Returns:
             Set of all label strings
         """
@@ -128,37 +128,37 @@ class StandardConcept(str, Enum):
 class MappingStore:
     """
     Storage for mappings between company-specific concepts and standard concepts.
-    
+
     Attributes:
         source (str): Path to the JSON file storing the mappings
         mappings (Dict[str, Set[str]]): Dictionary mapping standard concepts to sets of company concepts
         company_mappings (Dict[str, Dict]): Company-specific mappings loaded from company_mappings/
         merged_mappings (Dict[str, List[Tuple]]): Merged mappings with priority scoring
     """
-    
+
     def __init__(self, source: Optional[str] = None, validate_with_enum: bool = False, read_only: bool = False):
         """
         Initialize the mapping store.
-        
+
         Args:
             source: Path to the JSON file storing the mappings. If None, uses default location.
             validate_with_enum: Whether to validate JSON keys against StandardConcept enum
             read_only: If True, never save changes back to the file (used in testing)
         """
         self.read_only = read_only
-        
-        
+
+
         if source is None:
             # Try a few different ways to locate the file, handling both development
             # and installed package scenarios
             self.source = None
-            
+
             # Default to a file in the same directory as this module (development mode)
             module_dir = os.path.dirname(os.path.abspath(__file__))
             potential_path = os.path.join(module_dir, "concept_mappings.json")
             if os.path.exists(potential_path):
                 self.source = potential_path
-            
+
             # If not found, try to load from package data (installed package)
             if self.source is None:
                 try:
@@ -179,56 +179,56 @@ class MappingStore:
                             pass
                 except ImportError:
                     pass
-            
+
             # If we still haven't found the file, use the default path anyway
             # (it will fail gracefully in _load_mappings)
             if self.source is None:
                 self.source = potential_path
         else:
             self.source = source
-            
+
         self.mappings = self._load_mappings()
-        
+
         # Load company-specific mappings (always enabled)
         self.company_mappings = self._load_all_company_mappings()
         self.merged_mappings = self._create_merged_mappings()
         self.hierarchy_rules = self._load_hierarchy_rules()
-        
+
         # Validate the loaded mappings against StandardConcept enum
         if validate_with_enum:
             self.validate_against_enum()
-    
+
     def validate_against_enum(self) -> Tuple[bool, List[str]]:
         """
         Validate that all keys in the mappings exist in StandardConcept enum.
-        
+
         Returns:
             Tuple of (is_valid, list_of_missing_keys)
         """
         standard_values = StandardConcept.get_all_values()
         json_keys = set(self.mappings.keys())
-        
+
         # Find keys in JSON that aren't in enum
         missing_in_enum = json_keys - standard_values
-        
+
         # Find enum values not in JSON (just for information)
         missing_in_json = standard_values - json_keys
-        
+
         import logging
         logger = logging.getLogger(__name__)
-        
+
         if missing_in_enum:
             logger.warning(f"Found {len(missing_in_enum)} keys in concept_mappings.json that don't exist in StandardConcept enum: {sorted(missing_in_enum)}")
-        
+
         if missing_in_json:
             logger.info(f"Found {len(missing_in_json)} StandardConcept values without mappings in concept_mappings.json: {sorted(missing_in_json)}")
-        
+
         return len(missing_in_enum) == 0, list(missing_in_enum)
-    
+
     def to_dataframe(self) -> pd.DataFrame:
         """
         Convert mappings to a pandas DataFrame for analysis and visualization.
-        
+
         Returns:
             DataFrame with columns for standard_concept and company_concept
         """
@@ -236,7 +236,7 @@ class MappingStore:
             import pandas as pd
         except ImportError:
             raise ImportError("pandas is required for to_dataframe() but is not installed")
-        
+
         rows = []
         for standard_concept, company_concepts in self.mappings.items():
             for company_concept in company_concepts:
@@ -244,7 +244,7 @@ class MappingStore:
                     'standard_concept': standard_concept,
                     'company_concept': company_concept
                 })
-        
+
         return pd.DataFrame(rows)
 
 
@@ -252,7 +252,7 @@ class MappingStore:
         """Load all company-specific mapping files from company_mappings/ directory."""
         mappings = {}
         company_dir = os.path.join(os.path.dirname(self.source or __file__), "company_mappings")
-        
+
         if os.path.exists(company_dir):
             for file in os.listdir(company_dir):
                 if file.endswith("_mappings.json"):
@@ -265,52 +265,52 @@ class MappingStore:
                         import logging
                         logger = logging.getLogger(__name__)
                         logger.warning(f"Failed to load {file}: {e}")
-        
+
         return mappings
-    
+
     def _create_merged_mappings(self) -> Dict[str, List[Tuple[str, str, int]]]:
         """Create merged mappings with priority scoring.
-        
+
         Priority levels:
         1. Core mappings (lowest)
         2. Company mappings (higher)
         3. Company-specific matches (highest when company detected)
-        
+
         Returns:
             Dict mapping standard concepts to list of (company_concept, source, priority) tuples
         """
         merged = {}
-        
+
         # Add core mappings (priority 1 - lowest)
         for std_concept, company_concepts in self.mappings.items():
             merged[std_concept] = []
             for concept in company_concepts:
                 merged[std_concept].append((concept, "core", 1))
-        
+
         # Add company mappings (priority 2 - higher)
         for entity_id, company_data in self.company_mappings.items():
             concept_mappings = company_data.get("concept_mappings", {})
             priority_level = 2
-            
+
             for std_concept, company_concepts in concept_mappings.items():
                 if std_concept not in merged:
                     merged[std_concept] = []
                 for concept in company_concepts:
                     merged[std_concept].append((concept, entity_id, priority_level))
-        
+
         return merged
-    
+
     def _load_hierarchy_rules(self) -> Dict[str, Dict]:
         """Load hierarchy rules from company mappings."""
         all_rules = {}
-        
+
         # Add company hierarchy rules
-        for entity_id, company_data in self.company_mappings.items():
+        for _entity_id, company_data in self.company_mappings.items():
             hierarchy_rules = company_data.get("hierarchy_rules", {})
             all_rules.update(hierarchy_rules)
-        
+
         return all_rules
-    
+
     def _detect_entity_from_concept(self, concept: str) -> Optional[str]:
         """Detect entity identifier from concept name prefix."""
         if '_' in concept:
@@ -323,12 +323,12 @@ class MappingStore:
     def _load_mappings(self) -> Dict[str, Set[str]]:
         """
         Load mappings from the JSON file.
-        
+
         Returns:
             Dictionary mapping standard concepts to sets of company concepts
         """
         data = None
-        
+
         # First try direct file access
         try:
             with open(self.source, 'r') as f:
@@ -355,64 +355,64 @@ class MappingStore:
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.warning("Could not load concept_mappings.json. Standardization will be limited.")
-        
+
         # If we have data, process it based on its structure
         if data:
             # Check if the structure is flat or nested
             if any(isinstance(value, dict) for value in data.values()):
                 # Nested structure by statement type
                 flattened = {}
-                for statement_type, concepts in data.items():
+                for _statement_type, concepts in data.items():
                     for standard_concept, company_concepts in concepts.items():
                         flattened[standard_concept] = set(company_concepts)
                 return flattened
             else:
                 # Flat structure
                 return {k: set(v) for k, v in data.items()}
-        
+
         # If all methods fail, return empty mappings
         # The initialize_default_mappings function will create a file if needed
         return {}
-    
+
     def _save_mappings(self) -> None:
         """Save mappings to the JSON file, unless in read_only mode."""
         # Skip saving if in read_only mode
         if self.read_only:
             return
-            
+
         # Ensure directory exists
         directory = os.path.dirname(self.source)
         if directory and not os.path.exists(directory):
             os.makedirs(directory, exist_ok=True)
-        
+
         # Convert sets to lists for JSON serialization
         serializable_mappings = {k: list(v) for k, v in self.mappings.items()}
-        
+
         with open(self.source, 'w') as f:
             json.dump(serializable_mappings, f, indent=2)
-    
+
     def add(self, company_concept: str, standard_concept: str) -> None:
         """
         Add a mapping from a company concept to a standard concept.
-        
+
         Args:
             company_concept: The company-specific concept
             standard_concept: The standard concept
         """
         if standard_concept not in self.mappings:
             self.mappings[standard_concept] = set()
-        
+
         self.mappings[standard_concept].add(company_concept)
         self._save_mappings()
-    
+
     def get_standard_concept(self, company_concept: str, context: Dict = None) -> Optional[str]:
         """
         Get the standard concept for a given company concept with priority-based resolution.
-        
+
         Args:
             company_concept: The company-specific concept
             context: Optional context information (not used in current implementation)
-            
+
         Returns:
             The standard concept or None if not found
         """
@@ -420,10 +420,10 @@ class MappingStore:
         if self.merged_mappings:
             # Detect company from concept prefix (e.g., 'tsla:Revenue' -> 'tsla')
             detected_entity = self._detect_entity_from_concept(company_concept)
-            
+
             # Search through merged mappings with priority
             candidates = []
-            
+
             for std_concept, mapping_list in self.merged_mappings.items():
                 for concept, source, priority in mapping_list:
                     if concept == company_concept:
@@ -431,9 +431,9 @@ class MappingStore:
                         effective_priority = priority
                         if detected_entity and source == detected_entity:
                             effective_priority = 4  # Highest priority for exact company match
-                        
+
                         candidates.append((std_concept, effective_priority, source))
-            
+
             # Return highest priority match
             if candidates:
                 best_match = max(candidates, key=lambda x: x[1])
@@ -441,20 +441,20 @@ class MappingStore:
                 logger = logging.getLogger(__name__)
                 logger.debug(f"Mapping applied: {company_concept} -> {best_match[0]} (source: {best_match[2]}, priority: {best_match[1]})")
                 return best_match[0]
-        
+
         # Fallback to core mappings
         for standard_concept, company_concepts in self.mappings.items():
             if company_concept in company_concepts:
                 return standard_concept
         return None
-    
+
     def get_company_concepts(self, standard_concept: str) -> Set[str]:
         """
         Get all company concepts mapped to a standard concept.
-        
+
         Args:
             standard_concept: The standard concept
-            
+
         Returns:
             Set of company concepts mapped to the standard concept
         """
@@ -464,17 +464,17 @@ class MappingStore:
 class ConceptMapper:
     """
     Maps company-specific concepts to standard concepts using various techniques.
-    
+
     Attributes:
         mapping_store (MappingStore): Storage for concept mappings
         pending_mappings (Dict): Low-confidence mappings pending review
         _cache (Dict): In-memory cache of mapped concepts
     """
-    
+
     def __init__(self, mapping_store: MappingStore):
         """
         Initialize the concept mapper.
-        
+
         Args:
             mapping_store: Storage for concept mappings
         """
@@ -484,21 +484,21 @@ class ConceptMapper:
         self._cache = {}
         # Precompute lowercased standard concept values for faster comparison
         self._std_concept_values = [(concept, concept.value.lower()) for concept in StandardConcept]
-        
+
         # Statement-specific keyword sets for faster contextual matching
         self._bs_keywords = {'assets', 'liabilities', 'equity', 'cash', 'debt', 'inventory', 'receivable', 'payable'}
         self._is_keywords = {'revenue', 'sales', 'income', 'expense', 'profit', 'loss', 'tax', 'earnings'}
         self._cf_keywords = {'cash', 'operating', 'investing', 'financing', 'activities'}
-        
+
     def map_concept(self, company_concept: str, label: str, context: Dict[str, Any]) -> Optional[str]:
         """
         Map a company concept to a standard concept.
-        
+
         Args:
             company_concept: The company-specific concept
             label: The label for the concept
             context: Additional context information (statement type, calculation relationships, etc.)
-            
+
         Returns:
             The standard concept or None if no mapping found
         """
@@ -506,13 +506,13 @@ class ConceptMapper:
         cache_key = (company_concept, context.get('statement_type', ''))
         if cache_key in self._cache:
             return self._cache[cache_key]
-        
+
         # Check if we already have a mapping in the store
         standard_concept = self.mapping_store.get_standard_concept(company_concept)
         if standard_concept:
             self._cache[cache_key] = standard_concept
             return standard_concept
-            
+
         # Cache negative results too to avoid repeated inference
         self._cache[cache_key] = None
         return None
@@ -613,11 +613,11 @@ class ConceptMapper:
             return None, 0.0
 
         return best_match, best_score
-    
+
     def learn_mappings(self, filings: List[Dict[str, Any]]) -> None:
         """
         Learn mappings from a list of filings.
-        
+
         Args:
             filings: List of dicts with XBRL data
         """
@@ -625,13 +625,13 @@ class ConceptMapper:
         mapped_concepts = set()
         for std_concept, company_concepts in self.mapping_store.mappings.items():
             mapped_concepts.update(company_concepts)
-        
+
         # Process only unmapped filings
         unmapped_filings = [f for f in filings if f.get("concept") not in mapped_concepts]
-        
+
         # Create a batch of mappings to add
         mappings_to_add = {}
-        
+
         for filing in unmapped_filings:
             concept = filing["concept"]
             label = filing["label"]
@@ -640,10 +640,10 @@ class ConceptMapper:
                 "calculation_parent": filing.get("calculation_parent", ""),
                 "position": filing.get("position", "")
             }
-            
+
             # Infer mapping and confidence
             standard_concept, confidence = self._infer_mapping(concept, label, context)
-            
+
             # Handle based on confidence
             if standard_concept and confidence >= 0.9:
                 if standard_concept not in mappings_to_add:
@@ -653,7 +653,7 @@ class ConceptMapper:
                 if standard_concept not in self.pending_mappings:
                     self.pending_mappings[standard_concept] = []
                 self.pending_mappings[standard_concept].append((concept, confidence, label))
-        
+
         # Batch add all mappings at once
         for std_concept, concepts in mappings_to_add.items():
             for concept in concepts:
@@ -661,11 +661,11 @@ class ConceptMapper:
                 # Update cache
                 cache_key = (concept, filing.get("statement_type", ""))
                 self._cache[cache_key] = std_concept
-    
+
     def save_pending_mappings(self, destination: str) -> None:
         """
         Save pending mappings to a file.
-        
+
         Args:
             destination: Path to save the pending mappings
         """
@@ -676,7 +676,7 @@ class ConceptMapper:
                 {"concept": c, "confidence": conf, "label": lbl} 
                 for c, conf, lbl in mappings
             ]
-            
+
         with open(destination, 'w') as f:
             json.dump(serializable_mappings, f, indent=2)
 
@@ -684,11 +684,11 @@ class ConceptMapper:
 def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptMapper) -> List[Dict[str, Any]]:
     """
     Standardize labels in a statement using the concept mapper.
-    
+
     Args:
         statement_data: List of statement line items
         mapper: ConceptMapper instance
-        
+
     Returns:
         Statement data with standardized labels where possible
     """
@@ -696,53 +696,53 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
     # This avoids unnecessary copying and processing
     items_to_standardize = []
     statement_type = statement_data[0].get("statement_type", "") if statement_data else ""
-    
+
     # First pass - identify which items need standardization and prepare context
     for i, item in enumerate(statement_data):
         # Skip abstract elements and dimensions as they don't need standardization
         if item.get("is_abstract", False) or item.get("is_dimension", False):
             continue
-            
+
         concept = item.get("concept", "")
         if not concept:
             continue
-            
+
         label = item.get("label", "")
         if not label:
             continue
-            
+
         # Build minimal context once, reuse for multiple calls
         context = {
             "statement_type": item.get("statement_type", "") or statement_type,
             "level": item.get("level", 0),
             "is_total": "total" in label.lower() or item.get("is_total", False)
         }
-        
+
         items_to_standardize.append((i, concept, label, context))
-    
+
     # If no items need standardization, return early with unchanged data
     if not items_to_standardize:
         return statement_data
-        
+
     # Second pass - create result list with standardized items
     result = []
-    
+
     # Track which indices need standardization for faster lookup
     standardize_indices = {i for i, _, _, _ in items_to_standardize}
-    
+
     # Process all items
     for i, item in enumerate(statement_data):
         if i not in standardize_indices:
             # Items that don't need standardization are used as-is
             result.append(item)
             continue
-            
+
         # Get the prepared data for this item
         _, concept, label, context = next((x for x in items_to_standardize if x[0] == i), (None, None, None, None))
-        
+
         # Try to map the concept
         standard_label = mapper.map_concept(concept, label, context)
-        
+
         # If we found a mapping, create a modified copy
         if standard_label:
             # Create a shallow copy only when needed
@@ -753,7 +753,7 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
         else:
             # No mapping found, use original item
             result.append(item)
-    
+
     return result
 
 
@@ -761,7 +761,7 @@ def create_default_mappings_file(file_path: str) -> None:
     """
     Create the initial concept_mappings.json file with default mappings.
     This can be called during package installation or initialization.
-    
+
     Args:
         file_path: Path where to create the file
     """
@@ -769,11 +769,11 @@ def create_default_mappings_file(file_path: str) -> None:
     directory = os.path.dirname(file_path)
     if directory and not os.path.exists(directory):
         os.makedirs(directory, exist_ok=True)
-    
+
     # The file already exists, don't overwrite it
     if os.path.exists(file_path):
         return
-        
+
     # Create a minimal set of mappings to get started
     minimal_mappings = {
         StandardConcept.REVENUE.value: [
@@ -791,7 +791,7 @@ def create_default_mappings_file(file_path: str) -> None:
             "us-gaap_AssetsTotal"
         ]
     }
-    
+
     # Write the file
     with open(file_path, 'w') as f:
         json.dump(minimal_mappings, f, indent=2)
@@ -800,18 +800,18 @@ def create_default_mappings_file(file_path: str) -> None:
 def initialize_default_mappings(read_only: bool = False) -> MappingStore:
     """
     Initialize a MappingStore with mappings from the concept_mappings.json file.
-    
+
     Args:
         read_only: If True, prevent writing changes back to the file (used in testing)
-    
+
     Returns:
         MappingStore initialized with mappings from JSON file
     """
     store = MappingStore(read_only=read_only)
-    
+
     # If JSON file doesn't exist, create it with minimal default mappings
     # Only do this in non-read_only mode to avoid test-initiated file creation
     if not read_only and not os.path.exists(store.source):
         create_default_mappings_file(store.source)
-    
+
     return store

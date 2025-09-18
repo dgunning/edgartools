@@ -1,15 +1,16 @@
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 from bs4 import Tag
-from rich.console import Group
-from rich.table import Table
-from rich.panel import Panel
-from rich.text import Text
-from rich.columns import Columns
 from pydantic import BaseModel
+from rich.columns import Columns
+from rich.console import Group
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
+
+from edgar.core import IntString
 from edgar.richtools import repr_rich
 from edgar.xmltools import child_text, child_value
-from edgar.core import IntString
 
 __all__ = [
     'Address',

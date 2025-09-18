@@ -1,5 +1,5 @@
 import re
-from typing import List, Callable, Tuple
+from typing import Callable, List, Tuple
 
 import pandas as pd
 from rich import box
@@ -230,7 +230,7 @@ class BM25Search:
                tables: bool = True):
         preprocessed_query = preprocess(query)
         scores = self.bm25.get_scores(preprocessed_query)
-        doc_scores = zip(self.document_objs, scores)
+        doc_scores = zip(self.document_objs, scores, strict=False)
         # doc_scores_sorted = sorted([doc for doc in doc_scores if doc[1] > 0], key=lambda t: t[1])[::-1]
         # Return the list of location and document
         return SearchResults(query=query,

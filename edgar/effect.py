@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from rich.console import Group, Text
 
 from edgar._party import Filer
-from edgar.richtools import repr_rich, df_to_rich_table
+from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.xmltools import child_text
 
 __all__ = [

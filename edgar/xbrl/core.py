@@ -26,24 +26,24 @@ NAMESPACES = {
 def parse_date(date_str: str) -> datetime.date:
     """
     Parse an XBRL date string to a date object.
-    
+
     Args:
         date_str: Date string in YYYY-MM-DD format
-        
+
     Returns:
         datetime.date object
     """
     if not date_str:
         raise ValueError("Empty date string provided")
-        
+
     try:
         # Parse the date string
         date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-        
+
         # Additional validation - some dates in XBRL can have invalid day values
         # (e.g. September 31, which doesn't exist)
         year, month, day = map(int, date_str.split('-'))
-        
+
         # Validate day of month
         if month == 2:  # February
             if day > 29:
@@ -58,7 +58,7 @@ def parse_date(date_str: str) -> datetime.date:
         elif day > 31:
             # No month has more than 31 days
             raise ValueError(f"Invalid day {day}")
-            
+
         return date_obj
     except (ValueError, TypeError) as e:
         # Provide more specific error message
@@ -68,31 +68,31 @@ def parse_date(date_str: str) -> datetime.date:
 def format_date(date_obj: datetime.date) -> str:
     """
     Format a date object to a human-readable string.
-    
+
     Args:
         date_obj: datetime.date object
-        
+
     Returns:
         Formatted date string (e.g., "Sep 30, 2023")
     """
     # Use abbreviated month format (%b) instead of full month (%B)
     formatted_date = date_obj.strftime('%b %d, %Y')
-    
+
     # Remove leading zeros from day
     if formatted_date.split()[1].startswith('0'):
         day_part = formatted_date.split()[1].lstrip('0')
         formatted_date = f"{formatted_date.split()[0]} {day_part} {formatted_date.split()[2]}"
-    
+
     return formatted_date
 
 
 def extract_element_id(href: str) -> str:
     """
     Extract element ID from an XLink href.
-    
+
     Args:
         href: XLink href attribute value
-        
+
     Returns:
         Element ID
     """
@@ -102,10 +102,10 @@ def extract_element_id(href: str) -> str:
 def classify_duration(days: int) -> str:
     """
     Classify a duration in days as quarterly, semi-annual, annual, etc.
-    
+
     Args:
         days: Duration in days
-        
+
     Returns:
         Description of the duration (e.g., "Quarterly", "Annual")
     """
@@ -125,14 +125,14 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
                              periods_to_display: List[Tuple[str, str]]) -> int:
     """
     Determine the dominant scale (thousands, millions, billions) for a statement.
-    
+
     This looks at all monetary values in the statement and determines the most appropriate
     scale to use for the "In millions/billions/thousands" note.
-    
+
     Args:
         statement_data: The statement data with items and values
         periods_to_display: List of period keys and labels to consider
-        
+
     Returns:
         int: The dominant scale (-3 for thousands, -6 for millions, -9 for billions, 0 for no scaling)
     """
@@ -142,7 +142,7 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
         # Skip non-monetary items or items without values
         if not item.get('has_values', False) or not item.get('values'):
             continue
-            
+
         # Skip items that appear to be share counts or ratios
         label_lower = item['label'].lower()
         if any(keyword in label_lower for keyword in [
@@ -152,14 +152,14 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
             'ratio', 'margin', 'percentage', 'rate', 'per cent'
         ]):
             continue
-        
+
         # Get all decimals values for this item
         for period_key, _ in periods_to_display:
             if period_key in item.get('decimals', {}):
                 decimals = item['decimals'][period_key]
                 if isinstance(decimals, int):
                     all_decimals.append(decimals)
-    
+
     # If we have decimals information, use that to determine the scale
     if all_decimals:
         # Count the occurrences of each scale
@@ -169,7 +169,7 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
             -3: 0,  # thousands
             0: 0    # no scaling
         }
-        
+
         for decimals in all_decimals:
             if decimals <= -9:
                 scale_counts[-9] += 1
@@ -179,24 +179,24 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
                 scale_counts[-3] += 1
             else:
                 scale_counts[0] += 1
-        
+
         # Find the most common scale (excluding no scaling)
         most_common_scale = 0
         max_count = 0
-        
+
         for scale, count in scale_counts.items():
             if scale != 0 and count > max_count:  # Prioritize scaling over no scaling
                 max_count = count
                 most_common_scale = scale
-        
+
         return most_common_scale
-    
+
     # If no decimals information, examine the magnitude of values
     all_values = []
     for item in statement_data:
         if not item.get('has_values', False) or not item.get('values'):
             continue
-            
+
         # Skip items that appear to be share counts or ratios
         label_lower = item['label'].lower()
         if any(keyword in label_lower for keyword in [
@@ -206,26 +206,26 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
             'ratio', 'margin', 'percentage', 'rate', 'per cent'
         ]):
             continue
-        
+
         # Get all values for this item
         for period_key, _ in periods_to_display:
             value = item['values'].get(period_key)
             if isinstance(value, (int, float)) and value != 0:
                 all_values.append(abs(value))
-    
+
     # Determine the appropriate scale based on the magnitude of values
     if all_values:
         # Calculate median value to avoid outliers affecting the scale
         all_values.sort()
         median_value = all_values[len(all_values) // 2]
-        
+
         if median_value >= 1_000_000_000:
             return -9  # billions
         elif median_value >= 1_000_000:
             return -6  # millions
         elif median_value >= 1_000:
             return -3  # thousands
-    
+
     # Default to millions if we couldn't determine a scale
     return -6
 
@@ -302,7 +302,7 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
     # Handle non-numeric or zero values
     if not isinstance(value, (int, float)) or value == 0:
         return "" if value == 0 else str(value)
-    
+
     # Apply scaling
     scaled_value = value
     if scale <= -9:  # Billions
@@ -311,7 +311,7 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
         scaled_value = value / 1_000_000
     elif scale <= -3:  # Thousands
         scaled_value = value / 1_000
-    
+
     # Determine decimal places to show
     if isinstance(decimals, int):
         if decimals >= 0:
@@ -340,10 +340,10 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
                 decimal_places = 0  # Effectively whole numbers
             else:
                 decimal_places = 2  # Show 2 decimals for actual fractional values
-    
+
     # Apply formatting
     decimal_format = f",.{decimal_places}f"
-    
+
     # Format with currency symbol if monetary, otherwise just format the number
     if is_monetary:
         # Use the provided currency symbol or default to '$'
@@ -366,13 +366,13 @@ def find_previous_fiscal_year_period(instant_periods: List[Dict[str, Any]],
                                     fiscal_day: int) -> Optional[Dict[str, Any]]:
     """
     Find the previous fiscal year period using simple matching logic.
-    
+
     Args:
         instant_periods: List of instant periods sorted by date (most recent first)
         prev_fiscal_year: Previous fiscal year to find
         fiscal_month: Fiscal year end month
         fiscal_day: Fiscal year end day
-        
+
     Returns:
         Previous fiscal year period or None if not found
     """

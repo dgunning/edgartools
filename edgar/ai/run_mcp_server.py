@@ -10,7 +10,7 @@ Usage:
 
 Claude Desktop Configuration:
     Add this to your claude_desktop_config.json:
-    
+
     {
       "mcpServers": {
         "edgartools": {
@@ -21,9 +21,9 @@ Claude Desktop Configuration:
     }
 """
 
-import sys
 import asyncio
 import logging
+import sys
 from pathlib import Path
 
 # Add the project root to Python path so imports work
@@ -32,33 +32,26 @@ sys.path.insert(0, str(project_root))
 
 def main():
     """Run the MCP server."""
-    
+
     # Set up logging
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
+
     try:
         # Import the standalone server module
         import edgar.ai.edgartools_mcp_server as server_module
-        
-        print("Starting EdgarTools MCP server...", file=sys.stderr)
-        print("Use Ctrl+C to stop", file=sys.stderr)
-        
+
+
         # Run the async server
         asyncio.run(server_module.main())
-        
-    except ImportError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        print("Please install EdgarTools with AI support:", file=sys.stderr)
-        print("  pip install edgartools[ai]", file=sys.stderr)
+
+    except ImportError:
         sys.exit(1)
     except KeyboardInterrupt:
-        print("\nServer stopped", file=sys.stderr)
         sys.exit(0)
-    except Exception as e:
-        print(f"Error running server: {e}", file=sys.stderr)
+    except Exception:
         sys.exit(1)
 
 if __name__ == "__main__":

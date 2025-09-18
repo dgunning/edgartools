@@ -24,10 +24,10 @@ Usage:
     result = UnitNormalizer.get_normalized_value(fact, target_unit="USD")
 """
 
-from dataclasses import dataclass
-from typing import Optional, Dict, List, Set, Tuple, Any
 import logging
+from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Optional
 
 from edgar.entity.models import FinancialFact
 

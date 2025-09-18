@@ -1,21 +1,19 @@
 import re
 import warnings
 from dataclasses import dataclass
-from functools import lru_cache
-from functools import partial
+from functools import lru_cache, partial
 from io import StringIO
-from typing import Any, Optional, Dict, Callable
-from typing import List
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 from rich import box
 from rich.panel import Panel
 from rich.table import Table
-from edgar.core import pandas_version
 
+from edgar.core import pandas_version
 from edgar.datatools import compress_dataframe
-from edgar.files.html_documents import HtmlDocument, Block, TableBlock, LinkBlock, table_to_markdown
+from edgar.files.html_documents import Block, HtmlDocument, LinkBlock, TableBlock, table_to_markdown
 from edgar.richtools import repr_rich
 
 __all__ = [
@@ -393,22 +391,22 @@ class ChunkedDocument:
         index_list = mask[mask].index.to_list()
         if not index_list:
             return
-        
+
         continuous_segments = []
         current_segment = [index_list[0]]
-        
+
         for i in range(1, len(index_list)):
             if index_list[i] <= current_segment[-1] + 5:
                 current_segment.append(index_list[i])
             else:
                 continuous_segments.append(current_segment)
                 current_segment = [index_list[i]]
-        
+
         continuous_segments.append(current_segment)
-        
+
         # retain only the longest continuous segment
         longest_segment = max(continuous_segments, key=len)
-        
+
         # warning dity content
         if len(continuous_segments) > 1:
             discarded_indices = []
@@ -428,10 +426,10 @@ class ChunkedDocument:
     def chunks_for_item(self, item: str):
         """
         Returns chunks of text for a given item from the document.
-        
+
         Args:
             item (str): The item name to retrieve chunks for.
-        
+
         Returns:
             List[str]: List of text chunks corresponding to the specified item.
         """
@@ -448,7 +446,7 @@ class ChunkedDocument:
             for block in chunk:
                 if isinstance(block, TableBlock):
                     yield block
-    
+
     def assemble_block_text(self, chunks: List[Block]):
 
         if self.prefix_src:
@@ -489,7 +487,7 @@ class ChunkedDocument:
         if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
             res = res.rstrip(last_line).rstrip()
         return res
-    
+
     def get_signature(self, markdown:bool=False):
         sig_index = self._chunked_data[self._chunked_data.Signature].index
         if markdown:
@@ -506,11 +504,11 @@ class ChunkedDocument:
                 )])
         return self.clean_part_line(res)
 
-    
+
     def get_introduction(self, markdown:bool=False):
         """
         Extract and return the introduction section of the filing document.
-        
+
         The introduction is defined as all content before the first valid Part or Item.
 
         Returns:
@@ -546,10 +544,10 @@ class ChunkedDocument:
                         [self.chunks[idx] for idx in range(intro_index)]
                 )])
         return self.clean_part_line(res)
-        
+
     def __len__(self):
         return len(self.chunks)
-    
+
     def __getitem__(self, item, markdown:bool=False):
         if isinstance(item, int):
             chunks = [self.chunks[item]]

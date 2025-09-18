@@ -6,11 +6,11 @@ import webbrowser
 from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import datetime
-from functools import lru_cache, cached_property
+from functools import cached_property, lru_cache
 from io import BytesIO
 from os import PathLike
 from pathlib import Path
-from typing import Tuple, List, Dict, Union, Optional, Any, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import httpx
 import numpy as np
@@ -29,47 +29,41 @@ from rich.text import Text
 
 from edgar._markdown import text_to_markdown
 from edgar._party import Address
-from edgar.attachments import FilingHomepage, Attachment, Attachments, AttachmentServer
-from edgar.core import (log, sec_edgar,
-                        listify,
-                        cache_except_none,
-                        is_start_of_quarter,
-                        is_probably_html,
-                        IntString,
-                        current_year_and_quarter,
-                        Years,
-                        Quarters,
-                        YearAndQuarter,
-                        YearAndQuarters,
-                        quarters_in_year,
-                        filing_date_to_year_quarters,
-                        DataPager,
-                        PagingState,
-                        parallel_thread_map)
+from edgar.attachments import Attachment, Attachments, AttachmentServer, FilingHomepage
+from edgar.core import (
+    DataPager,
+    IntString,
+    PagingState,
+    Quarters,
+    YearAndQuarter,
+    YearAndQuarters,
+    Years,
+    cache_except_none,
+    current_year_and_quarter,
+    filing_date_to_year_quarters,
+    is_probably_html,
+    is_start_of_quarter,
+    listify,
+    log,
+    parallel_thread_map,
+    quarters_in_year,
+    sec_edgar,
+)
 from edgar.dates import InvalidDateException
 from edgar.files.html import Document
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
-from edgar.filtering import (
-    filter_by_date,
-    filter_by_form,
-    filter_by_cik,
-    filter_by_exchange,
-    filter_by_ticker,
-    filter_by_accession_number
-)
-from edgar.formatting import accession_number_text
-from edgar.formatting import display_size
+from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_exchange, filter_by_form, filter_by_ticker
+from edgar.formatting import accession_number_text, display_size
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.reference import describe_form
-from edgar.reference.tickers import Exchange
-from edgar.reference.tickers import find_ticker, find_ticker_safe
-from edgar.richtools import repr_rich, print_rich, rich_to_text, Docs
+from edgar.reference.tickers import Exchange, find_ticker, find_ticker_safe
+from edgar.richtools import Docs, print_rich, repr_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
-from edgar.sgml import FilingSGML, Reports, Statements, FilingHeader
-from edgar.storage import local_filing_path, is_using_local_storage
+from edgar.sgml import FilingHeader, FilingSGML, Reports, Statements
+from edgar.storage import is_using_local_storage, local_filing_path
 from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -193,7 +187,7 @@ class FileSpecs:
 
     def __init__(self, specs: List[Tuple[str, Tuple[int, int], pa.lib.DataType]]):
         self._spec_type = specs[0][0].title()
-        self.splits = list(zip(*specs))[1]
+        self.splits = list(zip(*specs, strict=False))[1]
         self.schema = pa.schema(
             [
                 pa.field(name, datatype)
@@ -467,14 +461,14 @@ class Filings:
     def save(self, location: str):
         """Save the filing index as parquet"""
         self.save_parquet(location)
-        
+
     def download(self, data_directory: Optional[str] = None):
         """
         Download the filings based on the accession numbers in this Filings object.
-        
+
         This is a convenience method that calls `download_filings` with this object
         as the `filings` parameter.
-        
+
         Args:
             data_directory: Directory to save the downloaded files. Defaults to the Edgar data directory.
         """
@@ -972,10 +966,10 @@ def get_filings(year: Optional[Years] = None,
     if len(year_and_quarters) == 0:
         log.warning(f"""
     Provide a year between 1994 and {datetime.now().year} and optionally a quarter (1-4) for which the SEC has filings. 
-    
+
         e.g. filings = get_filings(2023) OR
              filings = get_filings(2023, 1)
-    
+
     (You specified the year {year} and quarter {quarter})   
         """)
         return None
@@ -1210,7 +1204,7 @@ class Filing:
     def markdown(self, include_page_breaks: bool = False, start_page_number: int = 0) -> str:
         """
         Return the markdown version of this filing html
-        
+
         Args:
             include_page_breaks: If True, include page break delimiters in the markdown
             start_page_number: Starting page number for page break markers (default: 0)
@@ -1230,7 +1224,7 @@ class Filing:
             document = Document.parse(html_content)
             print_rich(document)
         else:
-            print(self.text())
+            pass
 
     def xbrl(self) -> Optional[XBRL]:
         """

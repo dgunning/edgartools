@@ -1,5 +1,6 @@
-from edgar import *
 from rich import print
+
+from edgar import *
 
 # 1. Getting your first filings
 

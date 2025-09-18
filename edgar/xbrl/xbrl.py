@@ -14,7 +14,11 @@ and handling dimensional qualifiers.
 import datetime
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from edgar.xbrl.facts import FactQuery
+    from edgar.xbrl.models import Footnote, Fact
 
 import pandas as pd
 from rich import box

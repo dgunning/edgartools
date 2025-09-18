@@ -8,26 +8,30 @@ analytics and AI-ready interfaces.
 from collections import defaultdict
 from datetime import date
 from functools import lru_cache
-from typing import Dict, List, Optional, Iterator, Any
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
+
+if TYPE_CHECKING:
+    from edgar.entity.query import FactQuery
+
+from typing import Union
 
 import httpx
 import orjson as json
 import pandas as pd
 from pandas.core.interchange.dataframe_protocol import DataFrame
-
-from edgar.core import log
-from edgar.entity.models import FinancialFact
-from edgar.httprequests import download_json
-from edgar.storage import is_using_local_storage, get_edgar_data_directory
-from rich.box import SIMPLE_HEAVY, SIMPLE
-from rich.console import Group
+from rich.box import SIMPLE, SIMPLE_HEAVY
 from rich.columns import Columns
+from rich.console import Group
 from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from typing import Union
+
+from edgar.core import log
 from edgar.entity.enhanced_statement import MultiPeriodStatement
+from edgar.entity.models import FinancialFact
+from edgar.httprequests import download_json
+from edgar.storage import get_edgar_data_directory, is_using_local_storage
 
 
 class NoCompanyFactsFound(Exception):
@@ -92,7 +96,7 @@ def get_company_facts(cik: int):
 class EntityFacts:
     """
     AI-ready company facts with investment-focused analytics.
-    
+
     This class provides a comprehensive interface for analyzing company financial data,
     with support for both traditional DataFrame-based workflows and modern AI/LLM
     consumption patterns.
@@ -101,7 +105,7 @@ class EntityFacts:
     def __init__(self, cik: int, name: str, facts: List[FinancialFact]):
         """
         Initialize EntityFacts with company information and facts.
-        
+
         Args:
             cik: Company CIK number
             name: Company name
@@ -154,11 +158,11 @@ class EntityFacts:
     def __iter__(self) -> Iterator[FinancialFact]:
         """Iterate over all facts"""
         return iter(self._facts)
-    
+
     def get_all_facts(self) -> List[FinancialFact]:
         """
         Get all facts for this entity.
-        
+
         Returns:
             List of all FinancialFact objects
         """
@@ -172,12 +176,12 @@ class EntityFacts:
             (self.name, "bold green"),
             " Financial Facts"
         )
-        
+
         # Summary Statistics Table
         stats = Table(box=SIMPLE_HEAVY, show_header=False, padding=(0, 1))
         stats.add_column("Metric", style="dim")
         stats.add_column("Value", style="bold")
-        
+
         # Get date range
         dates = [f.filing_date for f in self._facts if f.filing_date]
         if dates:
@@ -186,41 +190,41 @@ class EntityFacts:
             date_range = f"{min_date.strftime('%Y-%m-%d')} to {max_date.strftime('%Y-%m-%d')}"
         else:
             date_range = "No dates available"
-        
+
         # Count unique concepts
         unique_concepts = len(set(f.concept for f in self._facts))
-        
+
         # Count by form type
         form_counts = defaultdict(int)
         for fact in self._facts:
             form_counts[fact.form_type] += 1
-        
+
         # Get fiscal years covered
         fiscal_years = sorted(set(f.fiscal_year for f in self._facts if f.fiscal_year))
         if fiscal_years:
             year_range = f"{min(fiscal_years)} - {max(fiscal_years)}"
         else:
             year_range = "N/A"
-        
+
         stats.add_row("CIK", str(self.cik))
         stats.add_row("Total Facts", f"{len(self._facts):,}")
         stats.add_row("Unique Concepts", f"{unique_concepts:,}")
         stats.add_row("Date Range", date_range)
         stats.add_row("Fiscal Years", year_range)
-        
+
         stats_panel = Panel(
             stats,
             title="📈 Summary Statistics",
             border_style="bright_black"
         )
-        
+
         # Key Financial Metrics Table
         metrics = Table(box=SIMPLE, show_header=True, padding=(0, 1))
         metrics.add_column("Metric", style="bold")
         metrics.add_column("Value", justify="right")
         metrics.add_column("Period")
         metrics.add_column("Quality", style="dim")
-        
+
         # Try to get key metrics
         key_metrics = [
             ('Revenue', 'Revenue'),
@@ -232,7 +236,7 @@ class EntityFacts:
             ('Public Float', 'dei:EntityPublicFloat'),
             ('Shares Outstanding', 'dei:EntityCommonStockSharesOutstanding')
         ]
-        
+
         has_metrics = False
         for label, concept in key_metrics:
             fact = self.get_fact(concept)
@@ -246,11 +250,11 @@ class EntityFacts:
                         value = f"${fact.numeric_value:,.0f}"
                 else:
                     value = str(fact.value)
-                
+
                 period = f"{fact.fiscal_period} {fact.fiscal_year}"
                 quality = fact.data_quality.value if fact.data_quality else "N/A"
                 metrics.add_row(label, value, period, quality)
-        
+
         if has_metrics:
             metrics_panel = Panel(
                 metrics,
@@ -263,21 +267,21 @@ class EntityFacts:
                 title="💰 Key Financial Metrics",
                 border_style="bright_black"
             )
-        
+
         # Available Statements
         statement_counts = defaultdict(int)
         for fact in self._facts:
             if fact.statement_type:
                 statement_counts[fact.statement_type] += 1
-        
+
         if statement_counts:
             statements = Table(box=SIMPLE, show_header=True, padding=(0, 1))
             statements.add_column("Statement Type", style="bold")
             statements.add_column("Fact Count", justify="right")
-            
+
             for stmt_type, count in sorted(statement_counts.items()):
                 statements.add_row(stmt_type, f"{count:,}")
-            
+
             statements_panel = Panel(
                 statements,
                 title="📋 Available Statements",
@@ -289,7 +293,7 @@ class EntityFacts:
                 title="📋 Available Statements",
                 border_style="bright_black"
             )
-        
+
         # Recent Filings
         filing_info = defaultdict(lambda: {'count': 0, 'date': None})
         for fact in self._facts:
@@ -298,56 +302,56 @@ class EntityFacts:
             if fact.filing_date:
                 if filing_info[key]['date'] is None or fact.filing_date > filing_info[key]['date']:
                     filing_info[key]['date'] = fact.filing_date
-        
+
         filings = Table(box=SIMPLE, show_header=True, padding=(0, 1))
         filings.add_column("Form", style="bold")
         filings.add_column("Latest Filing")
         filings.add_column("Facts", justify="right")
-        
+
         # Sort by most recent filing date
         sorted_filings = sorted(
             filing_info.items(),
             key=lambda x: x[1]['date'] or date.min,
             reverse=True
         )[:5]  # Show top 5
-        
+
         for form_type, info in sorted_filings:
             date_str = info['date'].strftime('%Y-%m-%d') if info['date'] else "N/A"
             filings.add_row(form_type, date_str, f"{info['count']:,}")
-        
+
         filings_panel = Panel(
             filings,
             title="📄 Recent Filings",
             border_style="bright_black"
         )
-        
+
         # Data Quality Summary
         quality_counts = defaultdict(int)
         audited_count = sum(1 for f in self._facts if f.is_audited)
-        
+
         for fact in self._facts:
             if fact.data_quality:
                 quality_counts[fact.data_quality.value] += 1
-        
+
         quality = Table(box=SIMPLE, show_header=False, padding=(0, 1))
         quality.add_column("Metric", style="dim")
         quality.add_column("Value", style="bold")
-        
+
         if quality_counts:
             for q_level, count in sorted(quality_counts.items()):
                 percentage = (count / len(self._facts)) * 100
                 quality.add_row(f"{q_level} Quality", f"{count:,} ({percentage:.1f}%)")
-        
+
         if audited_count > 0:
             audit_percentage = (audited_count / len(self._facts)) * 100
             quality.add_row("Audited Facts", f"{audited_count:,} ({audit_percentage:.1f}%)")
-        
+
         quality_panel = Panel(
             quality,
             title="✅ Data Quality",
             border_style="bright_black"
         )
-        
+
         # Combine all sections
         content_renderables = [
             Padding("", (1, 0, 0, 0)),
@@ -355,9 +359,9 @@ class EntityFacts:
             Columns([metrics_panel, statements_panel], equal=True, expand=True),
             Columns([filings_panel, quality_panel], equal=True, expand=True)
         ]
-        
+
         content = Group(*content_renderables)
-        
+
         # Create the main panel
         return Panel(
             content,
@@ -375,10 +379,10 @@ class EntityFacts:
     def query(self) -> 'FactQuery':
         """
         Start building a facts query.
-        
+
         Returns:
             FactQuery: A new query builder instance
-            
+
         Example:
             >>> facts.query().by_concept('Revenue').latest(4).to_dataframe()
         """
@@ -389,11 +393,11 @@ class EntityFacts:
     def get_fact(self, concept: str, period: Optional[str] = None) -> Optional[FinancialFact]:
         """
         Get a single fact by concept and optional period.
-        
+
         Args:
             concept: Concept name or label
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            
+
         Returns:
             The most recent matching fact, or None if not found
         """
@@ -420,11 +424,11 @@ class EntityFacts:
     def time_series(self, concept: str, periods: int = 20) -> pd.DataFrame:
         """
         Get time series data for a concept.
-        
+
         Args:
             concept: Concept name or label
             periods: Number of periods to retrieve
-            
+
         Returns:
             DataFrame with time series data
         """
@@ -442,20 +446,20 @@ class EntityFacts:
     def dei_facts(self, as_of: Optional[date] = None) -> pd.DataFrame:
         """
         Get Document and Entity Information (DEI) facts.
-        
+
         DEI facts contain company metadata like entity name, trading symbol,
         fiscal year-end, shares outstanding, public float, etc.
-        
+
         Args:
             as_of: Optional date for point-in-time view (gets latest if not specified)
-            
+
         Returns:
             DataFrame with DEI facts
-            
+
         Example:
             # Get latest DEI facts
             dei = facts.dei_facts()
-            
+
             # Get DEI facts as of specific date
             dei = facts.dei_facts(as_of=date(2024, 12, 31))
         """
@@ -501,10 +505,10 @@ class EntityFacts:
     def entity_info(self) -> Dict[str, Any]:
         """
         Get key entity information as a clean dictionary.
-        
+
         Returns:
             Dictionary with entity name, shares outstanding, public float, etc.
-            
+
         Example:
             info = facts.entity_info()
             print(f"Company: {info.get('entity_name', 'Unknown')}")
@@ -736,10 +740,10 @@ class EntityFacts:
     def shares_outstanding(self) -> Optional[float]:
         """
         Get the most recent shares outstanding value.
-        
+
         Returns:
             Number of shares outstanding as float, or None if not available
-            
+
         Example:
             shares = facts.shares_outstanding
             if shares:
@@ -752,10 +756,10 @@ class EntityFacts:
     def public_float(self) -> Optional[float]:
         """
         Get the most recent public float value.
-        
+
         Returns:
             Public float value as float, or None if not available
-            
+
         Example:
             float_val = facts.public_float
             if float_val:
@@ -768,10 +772,10 @@ class EntityFacts:
     def shares_outstanding_fact(self) -> Optional[FinancialFact]:
         """
         Get the most recent shares outstanding fact with full context.
-        
+
         Returns:
             FinancialFact object with shares outstanding data, or None
-            
+
         Example:
             fact = facts.shares_outstanding_fact
             if fact:
@@ -783,10 +787,10 @@ class EntityFacts:
     def public_float_fact(self) -> Optional[FinancialFact]:
         """
         Get the most recent public float fact with full context.
-        
+
         Returns:
             FinancialFact object with public float data, or None
-            
+
         Example:
             fact = facts.public_float_fact
             if fact:
@@ -799,28 +803,28 @@ class EntityFacts:
                          annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
         """
         Get income statement facts for recent periods.
-        
+
         Args:
             periods: Number of periods to retrieve
             period_length: Optional filter for period length in months (3=quarterly, 12=annual)
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: If True, prefer annual (FY) periods over interim periods
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
-            
+
         Returns:
             MultiPeriodStatement or DataFrame with income statement data
-            
+
         Example:
             # Get hierarchical multi-period statement (default)
             stmt = facts.income_statement(periods=4, annual=True)
             print(stmt)  # Rich display with hierarchy
-            
+
             # Get with concise format
             stmt = facts.income_statement(periods=4, concise_format=True)
-            
+
             # Get DataFrame for analysis
             df = facts.income_statement(periods=4, as_dataframe=True)
-            
+
             # Convert statement to DataFrame later
             stmt = facts.income_statement(periods=4)
             df = stmt.to_dataframe()
@@ -837,36 +841,36 @@ class EntityFacts:
         enhanced_stmt.company_name = self.name
         enhanced_stmt.cik = str(self.cik)
         enhanced_stmt.concise_format = concise_format
-        
+
         # Return DataFrame if requested
         if as_dataframe:
             return enhanced_stmt.to_dataframe()
-        
+
         return enhanced_stmt
 
     def balance_sheet(self, periods: int = 4, as_of: Optional[date] = None, as_dataframe: bool = False,
                       annual: bool = True, concise_format: bool = False) -> Union[pd.DataFrame, MultiPeriodStatement]:
         """
         Get balance sheet facts for recent periods or as of a specific date.
-        
+
         Args:
             periods: Number of periods to retrieve (ignored if as_of is specified)
             as_of: Optional date for point-in-time view; if specified, gets single snapshot
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: If True, prefer annual (FY) periods over interim periods
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
-            
+
         Returns:
             MultiPeriodStatement or DataFrame with balance sheet data
-            
+
         Example:
             # Get hierarchical multi-period statement (default)
             stmt = facts.balance_sheet(periods=4, annual=True)
             print(stmt)  # Rich display with hierarchy
-            
+
             # Get DataFrame for analysis
             df = facts.balance_sheet(periods=4, as_dataframe=True)
-            
+
             # Convert statement to DataFrame later
             stmt = facts.balance_sheet(periods=4)
             df = stmt.to_dataframe()
@@ -884,11 +888,11 @@ class EntityFacts:
             enhanced_stmt.company_name = self.name
             enhanced_stmt.cik = str(self.cik)
             enhanced_stmt.concise_format = concise_format
-            
+
             # Return DataFrame if requested
             if as_dataframe:
                 return enhanced_stmt.to_dataframe()
-            
+
             return enhanced_stmt
         from edgar.entity.query import FactQuery
         query = FactQuery(self._facts, self._fact_index)
@@ -965,25 +969,25 @@ class EntityFacts:
                   annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
         """
         Get cash flow statement facts.
-        
+
         Args:
             periods: Number of periods to retrieve
             period_length: Optional filter for period length in months (3=quarterly, 12=annual)
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: If True, prefer annual (FY) periods over interim periods
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
-            
+
         Returns:
             MultiPeriodStatement or DataFrame with cash flow data
-            
+
         Example:
             # Get hierarchical multi-period statement (default)
             stmt = facts.cash_flow(periods=4, annual=True)
             print(stmt)  # Rich display with hierarchy
-            
+
             # Get DataFrame for analysis
             df = facts.cash_flow(periods=4, as_dataframe=True)
-            
+
             # Convert statement to DataFrame later
             stmt = facts.cash_flow(periods=4)
             df = stmt.to_dataframe()
@@ -1000,18 +1004,18 @@ class EntityFacts:
         enhanced_stmt.company_name = self.name
         enhanced_stmt.cik = str(self.cik)
         enhanced_stmt.concise_format = concise_format
-        
+
         # Return DataFrame if requested
         if as_dataframe:
             return enhanced_stmt.to_dataframe()
-        
+
         return enhanced_stmt
 
     # Investment analytics
     def calculate_ratios(self) -> Dict[str, float]:
         """
         Calculate common financial ratios.
-        
+
         Returns:
             Dictionary of ratio names to values
         """
@@ -1025,11 +1029,11 @@ class EntityFacts:
                         metrics: Optional[List[str]] = None) -> pd.DataFrame:
         """
         Compare key metrics with peer companies.
-        
+
         Args:
             peer_ciks: List of peer company CIKs
             metrics: Optional list of specific metrics to compare
-            
+
         Returns:
             DataFrame with comparative analysis
         """
@@ -1042,7 +1046,7 @@ class EntityFacts:
     def detect_anomalies(self) -> List[Dict[str, Any]]:
         """
         Detect unusual patterns or potential red flags.
-        
+
         Returns:
             List of detected anomalies with descriptions
         """
@@ -1059,11 +1063,11 @@ class EntityFacts:
                        time_period: str = "recent") -> Dict[str, Any]:
         """
         Generate comprehensive context for LLM analysis.
-        
+
         Args:
             focus_areas: Specific areas to emphasize (e.g., ['profitability', 'growth'])
             time_period: Time period to analyze ('recent', '5Y', '10Y', 'all')
-            
+
         Returns:
             Dictionary with structured context for LLM consumption
         """
@@ -1104,7 +1108,7 @@ class EntityFacts:
     def to_agent_tools(self) -> List[Dict[str, Any]]:
         """
         Export facts as tools for AI agents (MCP-compatible).
-        
+
         Returns:
             List of tool definitions for agent consumption
         """
@@ -1306,7 +1310,7 @@ class EntityFacts:
         Returns:
             Numeric value or None if not found (or UnitResult if return_detailed=True)
         """
-        from edgar.entity.unit_handling import UnitNormalizer, UnitResult, apply_scale_factor
+        from edgar.entity.unit_handling import UnitNormalizer, UnitResult
 
         # Default to USD if no unit specified
         target_unit = unit or 'USD'
@@ -1363,7 +1367,7 @@ class EntityFacts:
                 original_unit=target_unit or "",
                 success=False,
                 error_reason="No matching concept found",
-                suggestions=[f"Try checking if company uses alternative concept names"]
+                suggestions=["Try checking if company uses alternative concept names"]
             )
 
         return None
@@ -1570,7 +1574,7 @@ class EntityFacts:
             ... else:
             ...     print(f"Unit issue: {compat['issue']}")
         """
-        from edgar.entity.unit_handling import UnitNormalizer, format_unit_error
+        from edgar.entity.unit_handling import UnitNormalizer
 
         fact1 = self.get_fact(concept1, period)
         fact2 = self.get_fact(concept2, period)

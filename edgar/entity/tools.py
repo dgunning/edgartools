@@ -1,9 +1,10 @@
 from edgar import Company
 
+
 def income_statement(ticker:str, annual:bool=True, periods:int=4):
     company = Company(ticker)
     if company:
-        return c.income_statement(annual=annual, periods=periods)
+        return company.income_statement(annual=annual, periods=periods)
 
 def balance_sheet(ticker:str, annual:bool=True, periods:int=4):
     company = Company(ticker)
@@ -13,4 +14,4 @@ def balance_sheet(ticker:str, annual:bool=True, periods:int=4):
 def cash_flow_statement(ticker:str, annual:bool=True, periods:int=4):
     company = Company(ticker)
     if company:
-        return c.cash_flow(annual=annual, periods=periods)
+        return company.cash_flow_statement(annual=annual, periods=periods)

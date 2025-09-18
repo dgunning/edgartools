@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
-from typing import Optional
+from typing import List, Optional
 
 from bs4 import BeautifulSoup
 from rich import box
@@ -12,7 +11,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar import Filing
-from edgar._party import Name, Address
+from edgar._party import Address, Name
 from edgar.richtools import repr_rich
 from edgar.xmltools import child_text, child_texts, child_value
 

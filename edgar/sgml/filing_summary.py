@@ -1,8 +1,8 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Dict, Set, Tuple
-from typing import Optional, Union
+from functools import lru_cache
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -13,12 +13,10 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from edgar.core import strtobool, DataPager, PagingState, log
+from edgar.core import DataPager, PagingState, log, strtobool
 from edgar.files.html import Document
-from edgar.richtools import print_rich
-from edgar.richtools import repr_rich, rich_to_text
+from edgar.richtools import print_rich, repr_rich, rich_to_text
 from edgar.xmltools import child_text
-from functools import lru_cache
 
 __all__ = ['Report', 'Reports', 'File', 'FilingSummary']
 
@@ -272,15 +270,15 @@ class Report:
         table = self._get_report_table()
         if table:
             print_rich(table.render(500))
-    
+
     def to_dataframe(self):
         """
         Extract the report's financial table as a pandas DataFrame.
-        
+
         Returns:
             pd.DataFrame: Financial data with periods as columns and line items as index.
                          Returns empty DataFrame if no tables found.
-                         
+
         The DataFrame includes metadata attributes:
         - currency: The currency used (e.g., 'USD')
         - units: The units description (e.g., 'thousands')
@@ -288,11 +286,11 @@ class Report:
         - period_type: 'instant' or 'duration' for the time periods
         """
         from edgar.sgml.table_to_dataframe import extract_statement_dataframe
-        
+
         content = self.content
         if content:
             return extract_statement_dataframe(content)
-        
+
         import pandas as pd
         return pd.DataFrame()
 

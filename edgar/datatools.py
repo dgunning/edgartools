@@ -1,9 +1,10 @@
-import pandas as pd
+from dataclasses import dataclass
+from typing import Union
+
 import numpy as np
+import pandas as pd
 import pyarrow as pa
 from lxml import html as lxml_html
-from typing import Union
-from dataclasses import dataclass
 
 __all__ = [
     "compress_dataframe",
@@ -37,10 +38,10 @@ def clean_column_text(text: str):
 
 def compress_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """Remove empty rows and columns from a DataFrame.
-    
+
     Args:
         df: DataFrame to compress
-        
+
     Returns:
         Compressed DataFrame with empty rows and columns removed
     """
@@ -55,11 +56,11 @@ def compress_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 def repr_df(df: pd.DataFrame, hide_index: bool = True) -> str:
     """Return a string representation of a DataFrame.
-    
+
     Args:
         df: DataFrame to represent as string
         hide_index: Whether to hide the index in the output
-        
+
     Returns:
         String representation of the DataFrame
     """
@@ -74,17 +75,17 @@ class PagingState:
     page: int = 1
     page_size: int = 50
     total_items: int = 0
-    
+
     @property
     def start_idx(self) -> int:
         """Get the start index for the current page."""
         return (self.page - 1) * self.page_size
-    
+
     @property
     def end_idx(self) -> int:
         """Get the end index for the current page."""
         return min(self.start_idx + self.page_size, self.total_items)
-    
+
     @property
     def has_more(self) -> bool:
         """Check if there are more pages."""
@@ -95,20 +96,20 @@ class DataPager:
     """Class for paginating through data."""
     def __init__(self, data: Union[pd.DataFrame, pa.Table], page_size: int = 50):
         """Initialize the pager.
-        
+
         Args:
             data: Data to paginate through
             page_size: Number of items per page
         """
         self.data = data
         self.state = PagingState(page_size=page_size, total_items=len(data))
-    
+
     def get_page(self, page: int = 1) -> Union[pd.DataFrame, pa.Table]:
         """Get a specific page of data.
-        
+
         Args:
             page: Page number to get (1-based)
-            
+
         Returns:
             Slice of data for the requested page
         """
@@ -137,7 +138,7 @@ def should_promote_to_header(df: pd.DataFrame) -> bool:
 
             # Check distinctiveness compared to the second row (simple heuristic)
             second_row = df.iloc[1]
-            difference_count = sum(1 for f, s in zip(first_row, second_row) if f != s)
+            difference_count = sum(1 for f, s in zip(first_row, second_row, strict=False) if f != s)
             if difference_count > len(first_row) / 2:  # Arbitrary threshold: more than half are different
                 return True
 
@@ -240,7 +241,7 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
             text_output += f"{index_label:<{index_width}}\t"
 
         # Create and add the header row
-        headers = [f"{col:<{width}}" for col, width in zip(df.columns, column_widths)]
+        headers = [f"{col:<{width}}" for col, width in zip(df.columns, column_widths, strict=False)]
         text_output += '\t'.join(headers) + '\n'
 
     # Loop through each row of the dataframe
@@ -250,7 +251,7 @@ def dataframe_to_text(df, include_index=False, include_headers=False):
             text_output += f"{index:<{index_width}}\t"
 
         # Format each value according to the column width and concatenate
-        row_values = [f"{val:<{width}}" for val, width in zip(row.astype(str), column_widths)]
+        row_values = [f"{val:<{width}}" for val, width in zip(row.astype(str), column_widths, strict=False)]
         text_output += '\t'.join(row_values) + '\n'
 
     return text_output

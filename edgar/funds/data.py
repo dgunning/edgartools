@@ -7,19 +7,20 @@ accessing and manipulating fund data.
 import logging
 import re
 from functools import lru_cache
-from typing import List, Dict, Optional, Union, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+
+if TYPE_CHECKING:
+    from bs4 import Tag
 
 import pandas as pd
 import pyarrow as pa
-
-from edgar.entity.data import EntityData
-from edgar._filings import Filings
-from edgar.httprequests import download_text
-from edgar.datatools import drop_duplicates_pyarrow
-
 from bs4 import BeautifulSoup
 
-from edgar.funds.core import FundCompany, FundClass, FundSeries
+from edgar._filings import Filings
+from edgar.datatools import drop_duplicates_pyarrow
+from edgar.entity.data import EntityData
+from edgar.funds.core import FundClass, FundCompany, FundSeries
+from edgar.httprequests import download_text
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ class _FundDTO:
 
     Internal class used to return fund data from direct implementations.
     This is not part of the public API and should not be used directly.
-    
+
     Use the Fund class from edgar.funds.core instead.
     """
     def __init__(self, company_cik, company_name, name, series, ticker,
@@ -61,13 +62,13 @@ class _FundDTO:
 def parse_fund_data(series_sgml_data: str) -> pd.DataFrame:
     """
     Parse the SGML text containing fund series and class information.
-    
+
     Args:
         series_sgml_data: SGML text with SERIES-AND-CLASSES-CONTRACTS-DATA
-        
+
     Returns:
         DataFrame with parsed fund information
-        
+
     Example SGML data:
     <SERIES-AND-CLASSES-CONTRACTS-DATA>
     <EXISTING-SERIES-AND-CLASSES-CONTRACTS>
@@ -112,7 +113,7 @@ def parse_fund_data(series_sgml_data: str) -> pd.DataFrame:
         # Merge SERIES and CLASS-CONTRACT data
         row_data = {**data_dict, **class_contract_data}
         rows.append(row_data)
-    
+
     # Create DataFrame and select relevant columns
     df = pd.DataFrame(rows, columns=columns).iloc[:, :6]
 
@@ -133,7 +134,7 @@ class _FundCompanyInfo:
     """
     Internal helper class representing the fund company.
     This is parsed from the results page when we get the fund class or series.
-    
+
     Not part of the public API - use the Fund class from edgar.funds.core instead.
     """
     def __init__(self,
@@ -170,7 +171,7 @@ class _FundCompanyInfo:
 
     @classmethod
     def from_html(cls, company_info_html: Union[str, 'Tag']):
-        
+
         soup = BeautifulSoup(company_info_html, features="html.parser")
 
         # Parse the fund company info
@@ -214,9 +215,10 @@ class _FundCompanyInfo:
 
     @classmethod
     def _extract_filings(cls, soup, company_name: str, cik: str):
-        import pyarrow as pa
         from datetime import datetime
-        
+
+        import pyarrow as pa
+
         filings_table = soup.find("table", class_="tableFile2")
         rows = filings_table.find_all("tr")[1:]
 
@@ -260,7 +262,7 @@ class _FundCompanyInfo:
 class _FundClassOrSeries:
     """
     Internal base class for fund classes and series.
-    
+
     Not part of the public API - use the FundClass and FundSeries classes 
     from edgar.funds.core instead.
     """
@@ -314,7 +316,7 @@ class _FundClassOrSeries:
 class _FundClass(_FundClassOrSeries):
     """
     Internal implementation of fund class (contract) information.
-    
+
     Not part of the public API - use the FundClass class from edgar.funds.core instead.
     """
     def __init__(self, company_info: '_FundCompanyInfo'):
@@ -332,7 +334,7 @@ class _FundClass(_FundClassOrSeries):
 class _FundSeries(_FundClassOrSeries):
     """
     Internal implementation of fund series information.
-    
+
     Not part of the public API - use the FundSeries class from edgar.funds.core instead.
     """
     def __init__(self, company_info: '_FundCompanyInfo'):
@@ -343,21 +345,21 @@ class _FundSeries(_FundClassOrSeries):
 def direct_get_fund_with_filings(contract_or_series_id: str):
     """
     Get fund class or series information including filings from the SEC website.
-    
+
     Args:
         contract_or_series_id: Series ID (S...) or Class ID (C...)
-        
+
     Returns:
         FundClass or FundSeries object, or None if not found
     """
 
-    
+
     # URL template to search for a fund by class or series ID
     fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}"
-    
+
     if not re.match(r"[CS]\d+", contract_or_series_id):
         return None
-        
+
     base_url = fund_class_or_series_search_url.format(contract_or_series_id)
     # Start at 0 and download 100
     search_url = base_url + "&start=0&count=100"
@@ -402,10 +404,10 @@ def direct_get_fund_with_filings(contract_or_series_id: str):
 def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, FundCompany]]:
     """
     Get a Fund related object by it's identifier.
-    
+
     Args:
         identifier: A CIK, a series  id (e.g. 'S000001234') or class id or Fund ticker (e.g. 'VFINX')
-        
+
     Returns:
         A FundCompany or FundSeries or FundClass
     """
@@ -431,12 +433,12 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
         return None
 
     tables = soup.find_all("table")
-        
+
      # The fund table is the 6th table on the page
     if len(tables) < 6:
         log.warning(f"Expected fund table not found for {identifier}")
         return None
-            
+
     fund_table = tables[5]
 
     all_series = []
@@ -472,10 +474,10 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
 def is_fund_ticker(identifier: str) -> bool:
     """
     Check if an identifier is a fund ticker.
-    
+
     Args:
         identifier: The identifier to check
-    
+
     Returns:
         True if it's a fund ticker, False otherwise
     """
@@ -488,7 +490,7 @@ def is_fund_ticker(identifier: str) -> bool:
 class FundData(EntityData):
     """
     Fund-specific data container.
-    
+
     Contains specialized properties and methods for fund entities.
     """
     def __init__(self, **kwargs):
@@ -496,7 +498,7 @@ class FundData(EntityData):
         self.series_id = kwargs.get('series_id')
         self.class_ids = kwargs.get('class_ids', [])
         self._fund_classes = kwargs.get('fund_classes', [])
-        
+
     @property
     def is_fund(self) -> bool:
         """Check if entity is a fund."""
@@ -506,10 +508,10 @@ class FundData(EntityData):
 def resolve_fund_identifier(identifier):
     """
     Convert fund tickers or series IDs to CIK.
-    
+
     Args:
         identifier: Fund ticker, Series ID, or CIK
-        
+
     Returns:
         CIK as integer or original identifier if conversion not possible
     """
@@ -523,7 +525,7 @@ def resolve_fund_identifier(identifier):
                     return int(fund_info.fund_cik)
             except Exception as e:
                 log.warning(f"Error resolving series ID {identifier}: {e}")
-                
+
         # Handle Class ID (C000XXXXX)
         if identifier.startswith('C') and identifier[1:].isdigit():
             try:
@@ -533,7 +535,7 @@ def resolve_fund_identifier(identifier):
                     return int(fund_info.fund_cik)
             except Exception as e:
                 log.warning(f"Error resolving class ID {identifier}: {e}")
-                
+
         # Handle fund ticker
         if is_fund_ticker(identifier):
             try:
@@ -543,26 +545,26 @@ def resolve_fund_identifier(identifier):
                     return int(fund_info.company_cik)
             except Exception as e:
                 log.warning(f"Error resolving fund ticker {identifier}: {e}")
-    
+
     return identifier
 
 
 def get_fund_information(header):
     """
     Extract fund information from a filing header.
-    
+
     Args:
         header: Filing header
-        
+
     Returns:
         Fund series and contract information
     """
     # Import FundSeriesAndContracts here to avoid circular imports
     from edgar.funds import FundSeriesAndContracts
-    
+
     if not header or not hasattr(header, 'text'):
         return FundSeriesAndContracts()
-    
+
     try:
         # Try our direct implementation first
         header_text = header.text
@@ -571,15 +573,15 @@ def get_fund_information(header):
             header_text, 
             re.DOTALL
         )
-        
+
         if series_and_classes_contracts_text:
             # Use our directly implemented parse_fund_data
             df = parse_fund_data(series_and_classes_contracts_text.group(1))
             return FundSeriesAndContracts(df)
-            
+
     except Exception as e:
         log.debug(f"Error parsing fund information directly: {e}")
-    
+
     # Fallback implementation - extract fund information from header directly using regex
     try:
         # Try to extract fund information from the header text with regex
@@ -589,7 +591,7 @@ def get_fund_information(header):
             contract_matches = re.findall(r'CONTRACT-ID[^>]*>([^<]+)', str(header.text))
             name_matches = re.findall(r'FILER[^>]*>.*?COMPANY-DATA[^>]*>.*?CONFORMED-NAME[^>]*>([^<]+)', str(header.text))
             ticker_matches = re.findall(r'TICKER-SYMBOL[^>]*>([^<]+)', str(header.text))
-            
+
             # If we found any matches, create a DataFrame with the information
             if series_matches or contract_matches:
                 data = []
@@ -599,7 +601,7 @@ def get_fund_information(header):
                     contract_id = contract_matches[i] if i < len(contract_matches) else None
                     fund_name = name_matches[0] if name_matches else None
                     ticker = ticker_matches[0] if ticker_matches else None
-                    
+
                     data.append({
                         'SeriesID': series_id,
                         'ContractID': contract_id,
@@ -607,13 +609,13 @@ def get_fund_information(header):
                         'Ticker': ticker,
                         'Class': f"Class {contract_id[-1].upper()}" if contract_id else None
                     })
-                
+
                 if data:
                     return FundSeriesAndContracts(pd.DataFrame(data))
-    
+
     except Exception as e:
         log.warning(f"Error in fallback get_fund_information: {e}")
-    
+
     # Return an empty container if everything else fails
     return FundSeriesAndContracts()
 
@@ -621,32 +623,33 @@ def get_fund_information(header):
 def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]:
     """
     Parse series and class information from the SEC series listing HTML page.
-    
+
     This parses HTML content from the URL https://www.sec.gov/cgi-bin/browse-edgar?CIK=XXXX&scd=series
     which contains a structured listing of all series and classes for a fund company.
-    
+
     Args:
         html_content: HTML content from the SEC webpage
         fund: Fund entity to associate with the series/classes
-        
+
     Returns:
         List of dictionaries containing series and class information
     """
-    from bs4 import BeautifulSoup
     import re
-    
+
+    from bs4 import BeautifulSoup
+
     soup = BeautifulSoup(html_content, 'html.parser')
     series_data = []
-    
+
     # Debug information
     log.debug(f"Parsing series HTML content for fund {cik}")
-    
+
     # The table structure in this specific page has series and classes
     # organized in a specific way with indentation levels
     try:
         # Find the main table - in Kinetics HTML, it's the main table in the content area
         tables = soup.find_all('table')
-        
+
         # Find the table that's likely to contain the series information
         # In SEC pages, it's typically the one with class/contract and series information
         table = None
@@ -655,31 +658,31 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
             if t.find('tr') and re.search(r'Series|Class/Contract', str(t)):
                 table = t
                 break
-                
+
         if not table:
             log.warning("No suitable table found in series HTML content")
             return []
-            
+
         current_series = None
         series_data = []
-        
+
         # Loop through all rows and process them
         rows = table.find_all('tr')
-        
+
         # Debug information
         log.debug(f"Found {len(rows)} rows in the table")
-        
+
         # Process all rows since the table structure might vary
-        for row_idx, row in enumerate(rows):
+        for _row_idx, row in enumerate(rows):
             cells = row.find_all('td')
             if not cells or len(cells) < 3:
                 continue
-            
+
             # Check if this is a series row - marked by an S000 ID in a cell with a link
             series_cell = None
             series_id = None
             series_name = None
-            
+
             # Series IDs are normally in the form S######
             for cell in cells:
                 # Look for <a> tags with S IDs
@@ -691,7 +694,7 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
                         break
                 if series_cell:
                     break
-            
+
             # If we found a series ID, extract its name and create a series entry
             if series_id:
                 # Try to find the series name in the next cell or in the same row
@@ -704,11 +707,11 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
                         if link_text and series_id not in link_text:
                             series_name = link_text
                             break
-                
+
                 # If we couldn't find a name, use a default
                 if not series_name:
                     series_name = f"Series {series_id}"
-                
+
                 # Create a new series entry
                 current_series = {
                     'series_id': series_id,
@@ -717,14 +720,14 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
                 }
                 series_data.append(current_series)
                 log.debug(f"Found series: {series_id} - {series_name}")
-                
+
             # Check if this row contains a class - marked by a C000 ID
             # Classes appear after a series and are indented
             elif current_series:
                 class_id = None
                 class_name = None
                 class_ticker = ""
-                
+
                 # Look for class IDs in the form C######
                 for cell in cells:
                     # Search for C IDs in links
@@ -735,7 +738,7 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
                             break
                     if class_id:
                         break
-                
+
                 if class_id:
                     # Find the class name - usually in a cell after the ID
                     for cell_idx, cell in enumerate(cells):
@@ -748,11 +751,11 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
                     class_name = parts[1]
                     if len(parts) > 2:
                         class_ticker = parts[2].strip()
-                    
+
                     # If we couldn't find a name, use a default
                     if not class_name:
                         class_name = f"Class {class_id}"
-                    
+
                     # Add this class to the current series
                     current_series['classes'].append({
                         'class_id': class_id,
@@ -760,39 +763,39 @@ def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]
                         'ticker': class_ticker
                     })
                     log.debug(f"Found class: {class_id} - {class_name} ({class_ticker})")
-        
+
         # Debug information
         log.debug(f"Found {len(series_data)} series with classes")
-        
+
     except Exception as e:
         log.warning(f"Error parsing series HTML: {e}")
         import traceback
         log.debug(traceback.format_exc())
-        
+
     return series_data
 
 
 def get_series_and_classes_from_sec(cik: Union[str, int]) -> List[Dict]:
     """
     Directly fetch and parse series and class information from the SEC website.
-    
+
     This uses the SEC's series listing page which provides a comprehensive view
     of all series and classes for a fund company.
-    
+
     Args:
         cik: The CIK of the fund company
-        
+
     Returns:
         List of dictionaries containing parsed series and class information
     """
-    
+
     # Format CIK properly for URL
     cik_str = str(cik).zfill(10)
     url = fund_series_direct_url.format(cik_str)
-        
+
     # Download the HTML content
     html_content = download_text(url)
-        
+
     # Check if we received valid content
     if 'No matching' in html_content or 'series for cik' not in html_content.lower():
         log.debug(f"No series information found for CIK {cik}")

@@ -1,18 +1,18 @@
 import json
 import os
 import re
+from enum import Enum
 from functools import lru_cache
 from io import StringIO
-from typing import Optional, Union, List, Dict, Any
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 import pyarrow as pa
 from httpx import HTTPStatusError
-from enum import Enum
 
-from edgar.core import log, get_edgar_data_directory, listify
+from edgar.core import get_edgar_data_directory, listify, log
 from edgar.httprequests import download_file, download_json
-from edgar.reference.data.common import read_parquet_from_package, read_csv_from_package
+from edgar.reference.data.common import read_csv_from_package, read_parquet_from_package
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange', 'popular_us_stocks',
@@ -202,7 +202,7 @@ def get_company_cik_lookup():
     df = get_cik_tickers()
 
     lookup = {}
-    for ticker, cik in zip(df['ticker'], df['cik']):
+    for ticker, cik in zip(df['ticker'], df['cik'], strict=False):
         # Add original ticker
         lookup[ticker] = cik
 
@@ -268,17 +268,17 @@ def find_ticker_safe(cik: Union[int, str]) -> Optional[str]:
         if (get_cik_ticker_lookup.cache_info().currsize > 0 and
             get_company_cik_lookup.cache_info().currsize > 0 and
             get_cik_tickers.cache_info().currsize > 0):
-            
+
             # If we have cached data, try to use it
             cik = int(str(cik).lstrip('0'))
-            
+
             # This should be fast since data is cached
             lookup_dict = get_cik_ticker_lookup()
             return lookup_dict.get(cik, "")
         else:
             # Not all required data is cached, return None to avoid network calls
             return None
-        
+
     except Exception:
         # Any error (including potential network errors) returns None
         # This ensures we never trigger network calls
@@ -320,7 +320,7 @@ def get_mutual_fund_tickers():
 @lru_cache(maxsize=None)
 def get_mutual_fund_lookup():
     df = get_mutual_fund_tickers()
-    return dict(zip(df['ticker'], df['cik']))
+    return dict(zip(df['ticker'], df['cik'], strict=False))
 
 
 def find_mutual_fund_cik(ticker):

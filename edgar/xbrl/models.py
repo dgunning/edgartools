@@ -26,14 +26,14 @@ def select_display_label(
     """
     Select the most appropriate label for display, following a consistent priority order.
     Includes standardization mapping to provide consistent labels across companies.
-    
+
     Args:
         labels: Dictionary of available labels
         preferred_label: Role of the preferred label (if specified in presentation linkbase)
         standard_label: The standard label content (if available)
         element_id: Element ID (fallback)
         element_name: Element name (alternative fallback)
-        
+
     Returns:
         The selected label according to priority rules, with standardization applied if available
     """
@@ -96,7 +96,7 @@ def select_display_label(
 class ElementCatalog:
     """
     A catalog of XBRL elements with their properties.
-    
+
     This is the base data structure for element metadata as described in the design document.
 
     Attributes:
@@ -130,7 +130,7 @@ class ElementCatalog:
 class Context(BaseModel):
     """
     An XBRL context defining entity, period, and dimensional information.
-    
+
     This corresponds to the Context Registry in the design document.
     """
     context_id: str
@@ -152,13 +152,13 @@ class Context(BaseModel):
 class Fact(BaseModel):
     """
     An XBRL fact with value and references to context, unit, and element.
-    
+
     This corresponds to the Fact Database in the design document.
-    
+
     The instance_id field is used to differentiate between duplicate facts
     that share the same element_id and context_ref. When a fact has no
     duplicates, instance_id will be None.
-    
+
     The fact_id field preserves the original id attribute from the XML element,
     enabling linkage with footnotes.
     """
@@ -176,7 +176,7 @@ class Fact(BaseModel):
 class Footnote(BaseModel):
     """
     Represents an XBRL footnote with its text content and related facts.
-    
+
     Footnotes are linked to facts via footnoteArc elements that connect
     fact IDs to footnote IDs using xlink:from and xlink:to attributes.
     """
@@ -190,7 +190,7 @@ class Footnote(BaseModel):
 class PresentationNode(BaseModel):
     """
     A node in the presentation hierarchy.
-    
+
     This corresponds to the Presentation Node in the design document.
     """
     element_id: str
@@ -210,7 +210,7 @@ class PresentationNode(BaseModel):
     def display_label(self) -> str:
         """
         Return the appropriate label for display, prioritizing user-friendly options.
-        
+
         Label selection priority:
         1. Preferred label (if specified in presentation linkbase)
         2. Terse label (for more concise display)
@@ -228,7 +228,7 @@ class PresentationNode(BaseModel):
 class PresentationTree(BaseModel):
     """
     A presentation tree for a specific role.
-    
+
     This corresponds to the Presentation Hierarchy in the design document.
     """
     role_uri: str
@@ -241,7 +241,7 @@ class PresentationTree(BaseModel):
 class CalculationNode(BaseModel):
     """
     A node in the calculation hierarchy.
-    
+
     This corresponds to the Calculation Node in the design document.
     """
     element_id: str
@@ -258,7 +258,7 @@ class CalculationNode(BaseModel):
 class CalculationTree(BaseModel):
     """
     A calculation tree for a specific role.
-    
+
     This corresponds to the Calculation Network in the design document.
     """
     role_uri: str
@@ -270,7 +270,7 @@ class CalculationTree(BaseModel):
 class Axis(BaseModel):
     """
     A dimensional axis (dimension) in XBRL.
-    
+
     This corresponds to the Axis (Dimension) in the design document.
     """
     element_id: str
@@ -284,7 +284,7 @@ class Axis(BaseModel):
 class Domain(BaseModel):
     """
     A domain in an XBRL dimensional structure.
-    
+
     This corresponds to the Domain in the design document.
     """
     element_id: str
@@ -296,7 +296,7 @@ class Domain(BaseModel):
 class Table(BaseModel):
     """
     A dimensional table (hypercube) in XBRL.
-    
+
     This corresponds to the Table (Hypercube) in the design document.
     """
     element_id: str

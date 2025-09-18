@@ -22,58 +22,45 @@ This package provides a more organized, intuitive API for working with fund enti
 """
 
 # Keep backward compatibility for now
-from edgar.funds.core import (
-    Fund,
-    FundCompany,
-    FundSeries,
-    FundClass,
-    find_fund,
-
-    get_fund_company,
-    get_fund_series,
-    get_fund_class,
-)
-
-from edgar.funds.data import (
-    FundData,
-    resolve_fund_identifier,
-    is_fund_ticker,
-    get_fund_information,
-    parse_fund_data
-)
-
-from edgar.funds.reports import (
-    FundReport,
-    CurrentMetric,
-    NPORT_FORMS,
-    get_fund_portfolio_from_filing
-)
-
 # Note: We don't import from reports and thirteenf modules directly here
 # to avoid circular imports. These will be imported directly by clients.
-
 from functools import lru_cache
+
+from edgar.funds.core import (
+    Fund,
+    FundClass,
+    FundCompany,
+    FundSeries,
+    find_fund,
+    get_fund_class,
+    get_fund_company,
+    get_fund_series,
+)
+from edgar.funds.data import FundData, get_fund_information, is_fund_ticker, parse_fund_data, resolve_fund_identifier
+from edgar.funds.reports import NPORT_FORMS, CurrentMetric, FundReport, get_fund_portfolio_from_filing
+
 
 # Backward compatibility function for code that relies on the old API
 def get_fund_with_filings(identifier: str):
     """
     Get fund with filings for backward compatibility.
-    
+
     This function is maintained for backward compatibility with the 
     legacy funds.py module. New code should use:
-    
+
     - Fund.get_filings() to get filings for a fund
     - get_fund() factory function to create fund objects
-    
+
     Args:
         identifier: Fund identifier (class ID, series ID, or CIK)
-        
+
     Returns:
         Fund object with filings information
     """
-    from edgar.funds.data import direct_get_fund_with_filings
     import logging
-    
+
+    from edgar.funds.data import direct_get_fund_with_filings
+
     if identifier:
         try:
             result = direct_get_fund_with_filings(identifier)
@@ -81,14 +68,14 @@ def get_fund_with_filings(identifier: str):
                 return result
         except Exception as e:
             logging.warning(f"Error in get_fund_with_filings: {e}")
-    
+
     # Create a minimal object with the expected interface as a last resort
     class MinimalFundInfo:
         def __init__(self, identifier):
             self.id = "C000000"
             self.name = f"Unknown Fund {identifier}"
             self.fund_cik = 0
-            
+
     return MinimalFundInfo(identifier or "Unknown")
 
 # Define FundSeriesAndContracts for backward compatibility
@@ -109,34 +96,34 @@ class FundSeriesAndContracts:
 __all__ = [
     # Primary user-facing class
     'Fund',
-    
+
     # Domain entity classes
     'FundCompany',
     'FundSeries',
     'FundClass',
-    
+
     # Access functions
     'find_fund',
     'get_fund_company',
     'get_fund_series',
     'get_fund_class',
 
-    
+
     # Data classes
     'FundData',
     'resolve_fund_identifier',
-    
+
     # Functions now implemented directly in the package
     'get_fund_information', 
     'is_fund_ticker',
     'parse_fund_data',
-    
+
     # Portfolio and report functionality
     'FundReport',
     'CurrentMetric',
     'NPORT_FORMS',
     'get_fund_portfolio_from_filing',
-    
+
     # Legacy compatibility
     'get_fund_with_filings',
     'FundSeriesAndContracts',

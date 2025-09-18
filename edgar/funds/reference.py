@@ -3,7 +3,7 @@ import urllib.parse
 from dataclasses import dataclass
 from functools import lru_cache
 from io import StringIO
-from typing import Dict, List, Optional, Union, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -48,22 +48,22 @@ class FundReferenceData:
     """
     A memory-efficient container for fund reference data that provides fast lookups
     while minimizing data duplication.
-    
+
     Internally, this class normalizes the data into separate tables for companies,
     series, and classes, with relationships maintained through IDs.
-    
+
     Lookups are accelerated through indices on common lookup patterns
     like ticker, CIK, series ID, and class ID.
     """
-    
+
     def __init__(self, data: pd.DataFrame = None):
         """
         Initialize with a DataFrame of fund data.
-        
+
         The DataFrame should have columns similar to the SEC fund data file:
         - 'Reporting File Number', 'CIK Number', 'Entity Name', 'Entity Org Type',
         - 'Series ID', 'Series Name', 'Class ID', 'Class Name', 'Class Ticker', etc.
-        
+
         Args:
             data: DataFrame containing fund reference data
         """
@@ -71,20 +71,20 @@ class FundReferenceData:
         self._companies: Dict[str, FundCompanyRecord] = {}
         self._series: Dict[str, FundSeriesRecord] = {}
         self._classes: Dict[str, FundClassRecord] = {}
-        
+
         # Indexes for fast lookups
         self._ticker_to_class: Dict[str, str] = {}  # ticker -> class_id
         self._series_by_company: Dict[str, Set[str]] = {}  # cik -> set of series_ids
         self._classes_by_series: Dict[str, Set[str]] = {}  # series_id -> set of class_ids
-        
+
         # Load data if provided
         if data is not None:
             self._load_data(data)
-    
+
     def _load_data(self, data: pd.DataFrame):
         """
         Load and normalize data from a DataFrame into the internal data structures.
-        
+
         Args:
             data: DataFrame containing fund reference data
         """
@@ -105,19 +105,19 @@ class FundReferenceData:
             'State': 'state',
             'Zip Code': 'zip_code'
         }
-        
+
         # Rename columns if they don't match our expected names
         df = data.copy()
         rename_dict = {k: v for k, v in col_map.items() if k in df.columns and v not in df.columns}
         if rename_dict:
             df = df.rename(columns=rename_dict)
-        
+
         # Process companies (distinct CIKs)
         company_df = df.drop_duplicates(subset=['cik'])[
             ['cik', 'company_name', 'entity_org_type', 'file_number', 
              'address_1', 'address_2', 'city', 'state', 'zip_code']
         ].fillna('')
-        
+
         for _, row in company_df.iterrows():
             cik = str(row['cik']).zfill(10)  # Ensure CIK is properly formatted
             self._companies[cik] = FundCompanyRecord(
@@ -133,122 +133,122 @@ class FundReferenceData:
             )
             # Initialize empty set for series in this company
             self._series_by_company[cik] = set()
-        
+
         # Process series (distinct series IDs)
         series_df = df.dropna(subset=['series_id']).drop_duplicates(subset=['series_id'])[
             ['series_id', 'series_name', 'cik']
         ]
-        
+
         for _, row in series_df.iterrows():
             series_id = row['series_id']
             cik = str(row['cik']).zfill(10)
-            
+
             # Skip if parent company doesn't exist
             if cik not in self._companies:
                 continue
-                
+
             self._series[series_id] = FundSeriesRecord(
                 series_id=series_id,
                 name=row['series_name'],
                 cik=cik
             )
-            
+
             # Add to company's series set
             self._series_by_company[cik].add(series_id)
-            
+
             # Initialize empty set for classes in this series
             self._classes_by_series[series_id] = set()
-        
+
         # Process classes (distinct class IDs)
         class_df = df.dropna(subset=['class_id']).drop_duplicates(subset=['class_id'])[
             ['class_id', 'class_name', 'ticker', 'series_id']
         ]
-        
+
         for _, row in class_df.iterrows():
             class_id = row['class_id']
             series_id = row['series_id']
-            
+
             # Skip if parent series doesn't exist
             if series_id not in self._series:
                 continue
-                
+
             # Handle potentially missing ticker
             ticker = row['ticker'] if pd.notna(row['ticker']) else None
-            
+
             self._classes[class_id] = FundClassRecord(
                 class_id=class_id,
                 name=row['class_name'],
                 ticker=ticker,
                 series_id=series_id
             )
-            
+
             # Add to series' classes set
             self._classes_by_series[series_id].add(class_id)
-            
+
             # Add ticker to lookup index if available
             if ticker:
                 self._ticker_to_class[ticker] = class_id
-    
+
     @property
     def companies_count(self) -> int:
         """Get the total number of fund companies."""
         return len(self._companies)
-        
+
     @property
     def series_count(self) -> int:
         """Get the total number of fund series."""
         return len(self._series)
-        
+
     @property
     def classes_count(self) -> int:
         """Get the total number of fund classes."""
         return len(self._classes)
-    
+
     def get_company(self, cik: str) -> Optional[FundCompanyRecord]:
         """
         Get company information by CIK.
-        
+
         Args:
             cik: Company CIK
-            
+
         Returns:
             FundCompanyRecord or None if not found
         """
         # Ensure consistent formatting of CIK
         cik = str(cik).zfill(10)
         return self._companies.get(cik)
-    
+
     def get_series(self, series_id: str) -> Optional[FundSeriesRecord]:
         """
         Get series information by series ID.
-        
+
         Args:
             series_id: Series ID
-            
+
         Returns:
             FundSeriesRecord or None if not found
         """
         return self._series.get(series_id)
-    
+
     def get_class(self, class_id: str) -> Optional[FundClassRecord]:
         """
         Get class information by class ID.
-        
+
         Args:
             class_id: Class ID
-            
+
         Returns:
             FundClassRecord or None if not found
         """
         return self._classes.get(class_id)
-    
+
     def get_class_by_ticker(self, ticker: str) -> Optional[FundClassRecord]:
         """
         Get class information by ticker symbol.
-        
+
         Args:
             ticker: Ticker symbol
-            
+
         Returns:
             FundClassRecord or None if not found
         """
@@ -256,47 +256,47 @@ class FundReferenceData:
         if class_id:
             return self._classes.get(class_id)
         return None
-    
+
     def get_series_for_company(self, cik: str) -> List[FundSeriesRecord]:
         """
         Get all series for a company.
-        
+
         Args:
             cik: Company CIK
-            
+
         Returns:
             List of FundSeriesRecord objects
         """
         cik = str(cik).zfill(10)
         series_ids = self._series_by_company.get(cik, set())
         return [self._series[s_id] for s_id in series_ids if s_id in self._series]
-    
+
     def get_classes_for_series(self, series_id: str) -> List[FundClassRecord]:
         """
         Get all classes for a series.
-        
+
         Args:
             series_id: Series ID
-            
+
         Returns:
             List of FundClassRecord objects
         """
         class_ids = self._classes_by_series.get(series_id, set())
         return [self._classes[c_id] for c_id in class_ids if c_id in self._classes]
-    
+
     def find_by_name(self, name_fragment: str, search_type: str = 'company') -> List[Union[FundCompanyRecord, FundSeriesRecord, FundClassRecord]]:
         """
         Find entities containing the name fragment.
-        
+
         Args:
             name_fragment: Case-insensitive fragment to search for
             search_type: Type of entity to search ('company', 'series', or 'class')
-            
+
         Returns:
             List of matching records
         """
         name_fragment = name_fragment.lower()
-        
+
         if search_type == 'company':
             return [company for company in self._companies.values() 
                     if name_fragment in company.name.lower()]
@@ -308,14 +308,14 @@ class FundReferenceData:
                    if name_fragment in cls.name.lower()]
         else:
             raise ValueError(f"Invalid search_type: {search_type}")
-    
+
     def get_company_for_series(self, series_id: str) -> Optional[FundCompanyRecord]:
         """
         Get the parent company for a series.
-        
+
         Args:
             series_id: Series ID
-            
+
         Returns:
             FundCompanyRecord or None if not found
         """
@@ -323,14 +323,14 @@ class FundReferenceData:
         if series:
             return self._companies.get(series.cik)
         return None
-    
+
     def get_series_for_class(self, class_id: str) -> Optional[FundSeriesRecord]:
         """
         Get the parent series for a class.
-        
+
         Args:
             class_id: Class ID
-            
+
         Returns:
             FundSeriesRecord or None if not found
         """
@@ -338,14 +338,14 @@ class FundReferenceData:
         if class_record:
             return self._series.get(class_record.series_id)
         return None
-    
+
     def get_company_for_class(self, class_id: str) -> Optional[FundCompanyRecord]:
         """
         Get the parent company for a class (traversing through series).
-        
+
         Args:
             class_id: Class ID
-            
+
         Returns:
             FundCompanyRecord or None if not found
         """
@@ -353,35 +353,35 @@ class FundReferenceData:
         if series:
             return self._companies.get(series.cik)
         return None
-    
+
     def get_hierarchical_info(self, identifier: str) -> Tuple[Optional[FundCompanyRecord], Optional[FundSeriesRecord], Optional[FundClassRecord]]:
         """
         Get the complete hierarchy for an identifier (CIK, series ID, class ID, or ticker).
-        
+
         Args:
             identifier: Any identifier (CIK, series ID, class ID, or ticker)
-            
+
         Returns:
             Tuple of (company, series, class) records, with None for levels not applicable
         """
         company = None
         series = None
         class_record = None
-        
+
         # Check if it's a CIK (10 digits with leading zeros)
         if isinstance(identifier, str) and (identifier.isdigit() or identifier.startswith('0')):
             cik = str(identifier).zfill(10)
             company = self.get_company(cik)
             if company:
                 return company, None, None
-        
+
         # Check if it's a series ID (starts with S)
         if isinstance(identifier, str) and identifier.upper().startswith('S'):
             series = self.get_series(identifier)
             if series:
                 company = self.get_company(series.cik)
                 return company, series, None
-        
+
         # Check if it's a class ID (starts with C)
         if isinstance(identifier, str) and identifier.upper().startswith('C'):
             class_record = self.get_class(identifier)
@@ -390,7 +390,7 @@ class FundReferenceData:
                 if series:
                     company = self.get_company(series.cik)
                 return company, series, class_record
-        
+
         # Check if it's a ticker
         class_record = self.get_class_by_ticker(identifier)
         if class_record:
@@ -398,32 +398,32 @@ class FundReferenceData:
             if series:
                 company = self.get_company(series.cik)
             return company, series, class_record
-        
+
         # Nothing found
         return None, None, None
-    
+
     def to_dataframe(self) -> pd.DataFrame:
         """
         Convert the normalized data back to a flat DataFrame.
-        
+
         Returns:
             DataFrame containing all fund data
         """
         records = []
-        
-        for class_id, class_record in self._classes.items():
+
+        for _class_id, class_record in self._classes.items():
             series_id = class_record.series_id
             series_record = self._series.get(series_id)
-            
+
             if not series_record:
                 continue
-                
+
             cik = series_record.cik
             company_record = self._companies.get(cik)
-            
+
             if not company_record:
                 continue
-                
+
             records.append({
                 'cik': company_record.cik,
                 'company_name': company_record.name,
@@ -440,7 +440,7 @@ class FundReferenceData:
                 'state': company_record.state,
                 'zip_code': company_record.zip_code
             })
-        
+
         return pd.DataFrame(records)
 
 
@@ -522,7 +522,7 @@ def get_bulk_fund_data() -> pd.DataFrame:
 def get_fund_reference_data() -> FundReferenceData:
     """
     Get a normalized reference data object for all funds, series, and classes.
-    
+
     Returns:
         FundReferenceData: An object providing efficient lookups for fund entities
     """
@@ -534,42 +534,32 @@ if __name__ == "__main__":
     try:
         # Get the fund reference data
         fund_ref_data = get_fund_reference_data()
-        
+
         # Print summary statistics
-        print("Successfully loaded fund reference data:")
-        print(f"Companies: {fund_ref_data.companies_count}")
-        print(f"Series: {fund_ref_data.series_count}")
-        print(f"Classes: {fund_ref_data.classes_count}")
-        
+
         # Show sample lookups
-        print("\nSample lookups:")
-        
+
         # Look up a well-known fund
         vfinx_class = fund_ref_data.get_class_by_ticker('VFIAX')
         if vfinx_class:
-            print(f"\nFound fund class by ticker 'VFIAX': {vfinx_class.name}")
-            
+
             # Get parent series
             vfinx_series = fund_ref_data.get_series_for_class(vfinx_class.class_id)
             if vfinx_series:
-                print(f"Parent series: {vfinx_series.name}")
-                
+
                 # Get all classes in the series
                 series_classes = fund_ref_data.get_classes_for_series(vfinx_series.series_id)
-                print(f"All classes in series ({len(series_classes)}):")
-                for i, cls in enumerate(series_classes[:5]):
-                    print(f"  {i+1}. {cls.name} ({cls.ticker or 'No ticker'})")
+                for _i, _cls in enumerate(series_classes[:5]):
+                    pass
                 if len(series_classes) > 5:
-                    print(f"  ... and {len(series_classes) - 5} more")
-                
+                    pass
+
                 # Get parent company
                 vanguard = fund_ref_data.get_company_for_series(vfinx_series.series_id)
                 if vanguard:
-                    print(f"Parent company: {vanguard.name}")
-                    
+
                     # Get all series for the company
                     company_series = fund_ref_data.get_series_for_company(vanguard.cik)
-                    print(f"Company has {len(company_series)} series")
-        
-    except Exception as e:
-        print(f"An error occurred: {e}")
+
+    except Exception:
+        pass

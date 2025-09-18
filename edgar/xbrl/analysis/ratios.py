@@ -9,8 +9,8 @@ DataFrame operations for handling multiple periods efficiently.
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Mapping, Optional, Tuple, Union
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from pandas import Index
 from rich import box
 from rich.console import Group
@@ -25,71 +25,71 @@ from edgar.xbrl.standardization import MappingStore, StandardConcept
 def _clean_series_data(series: pd.Series) -> pd.Series:
     """
     Clean pandas Series data by converting empty strings and invalid values to NaN.
-    
+
     Args:
         series: Input pandas Series that may contain empty strings or invalid values
-        
+
     Returns:
         Cleaned pandas Series with empty strings converted to NaN and proper numeric dtype
     """
     if series is None:
         return series
-    
+
     # Create a copy to avoid modifying the original
     cleaned = series.copy()
-    
+
     # Convert empty strings to NaN
     if cleaned.dtype == object:
         # Replace empty strings and whitespace-only strings with NaN
         cleaned = cleaned.replace(r'^\s*$', np.nan, regex=True).infer_objects(copy=False)
         cleaned = cleaned.replace('', np.nan).infer_objects(copy=False)
-        
+
         # Try to convert to numeric, coercing errors to NaN
         cleaned = pd.to_numeric(cleaned, errors='coerce')
-    
+
     return cleaned
 
 
 def _safe_divide(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
     """
     Safely divide two pandas Series, handling NaN and zero denominators.
-    
+
     Args:
         numerator: Series to be divided
         denominator: Series to divide by
-        
+
     Returns:
         Series with division results, NaN where division is invalid
     """
     # Clean both series first
     clean_num = _clean_series_data(numerator)
     clean_denom = _clean_series_data(denominator)
-    
+
     # Use pandas division which handles NaN and division by zero appropriately
     with np.errstate(divide='ignore', invalid='ignore'):
         result = clean_num / clean_denom
-    
+
     return result
 
 
 def _safe_subtract(minuend: pd.Series, subtrahend: pd.Series) -> pd.Series:
     """
     Safely subtract two pandas Series, handling NaN values.
-    
+
     Args:
         minuend: Series to subtract from
         subtrahend: Series to subtract
-        
+
     Returns:
         Series with subtraction results, NaN where subtraction is invalid
     """
     # Clean both series first
     clean_minuend = _clean_series_data(minuend)
     clean_subtrahend = _clean_series_data(subtrahend)
-    
+
     # Use pandas subtraction which handles NaN appropriately
     result = clean_minuend - clean_subtrahend
-    
+
     return result
 
 
@@ -105,7 +105,7 @@ class ConceptEquivalent:
 @dataclass
 class RatioAnalysisGroup:
     """Container for a group of related ratio analyses.
-    
+
     Attributes:
         name: Name of the ratio group (e.g. 'Profitability Ratios')
         description: Description of what these ratios measure
@@ -138,7 +138,7 @@ class RatioAnalysisGroup:
 @dataclass
 class RatioData:
     """Container for financial ratio calculation data.
-    
+
     Attributes:
         calculation_df: DataFrame containing the raw data for calculation
         periods: List of available reporting periods
@@ -151,35 +151,35 @@ class RatioData:
     equivalents_used: Dict[str, str]
     required_concepts: List[str]
     optional_concepts: Dict[str, float]
-    
+
     def has_concept(self, concept: str) -> bool:
         """Check if a concept is available in the calculation DataFrame.
-        
+
         Args:
             concept: The concept to check
-            
+
         Returns:
             True if the concept exists and has at least one non-NaN, non-empty string value
         """
         if concept not in self.calculation_df.index:
             return False
-        
+
         # Get the raw series and clean it to properly check for valid data
         raw_series = self.calculation_df.loc[concept]
         cleaned_series = _clean_series_data(raw_series)
         # Check if we have at least one valid (non-NaN) value
         return not cleaned_series.isna().all() and len(cleaned_series.dropna()) > 0
-    
+
     def get_concept(self, concept: str, default_value: Optional[float] = None) -> pd.Series:
         """Get a concept's values for all periods.
-        
+
         Args:
             concept: The concept to retrieve
             default_value: Default value to use if concept is not found (only for optional concepts)
-            
+
         Returns:
             Series containing the concept values indexed by period, with empty strings converted to NaN
-            
+
         Raises:
             KeyError: If concept is required but not found and no default is provided
         """
@@ -188,31 +188,31 @@ class RatioData:
             # Clean the series data to convert empty strings to NaN
             cleaned_series = _clean_series_data(raw_series)
             return cleaned_series
-            
+
         # Concept not found or all NaN
         if concept in self.required_concepts and default_value is None:
             raise KeyError(f"Required concept {concept} not found")
-            
+
         # Optional concept with default value or required concept with default override
         if default_value is not None:
             # Create Series of default values for all periods
             return pd.Series(default_value, index=self.periods)
-            
+
         # Check if we have a predefined default for this optional concept
         if concept in self.optional_concepts:
             return pd.Series(self.optional_concepts[concept], index=self.periods)
-            
+
         raise KeyError(f"Concept {concept} not found and no default value provided")
-        
+
     def get_concepts(self, concepts: List[str]) -> Dict[str, pd.Series]:
         """Get multiple concepts at once.
-        
+
         Args:
             concepts: List of concepts to retrieve
-            
+
         Returns:
             Dictionary mapping concepts to their value Series
-            
+
         Raises:
             KeyError: If any required concept is not found
         """
@@ -221,7 +221,7 @@ class RatioData:
 @dataclass
 class RatioAnalysis:
     """Container for ratio calculation results with metadata.
-    
+
     Attributes:
         name: Name of the ratio
         description: Description of what the ratio measures
@@ -260,7 +260,7 @@ class FinancialRatios:
 
     def __init__(self, xbrl):
         """Initialize with an XBRL instance.
-        
+
         Args:
             xbrl: XBRL instance containing financial statements
         """
@@ -291,31 +291,33 @@ class FinancialRatios:
         ))
 
     def _prepare_ratio_df(self, required_concepts: List[str], statement_dfs: List[Tuple[pd.DataFrame, str]],
-                          optional_concepts: List[str] = []) -> Tuple[pd.DataFrame, Dict[str, str]]:
+                          optional_concepts: List[str] = None) -> Tuple[pd.DataFrame, Dict[str, str]]:
         """Prepare DataFrame for ratio calculations.
-        
+
         Args:
             required_concepts: List of concepts required for the ratio calculation
             statement_dfs: List of tuples containing statement DataFrames and their types
             optional_concepts: List of concepts that are optional for the calculation
-            
+
         Returns:
             Tuple containing:
                 - DataFrame with required concepts as columns
                 - Dictionary mapping concepts to their equivalent descriptions (non-None values only)
         """
         """Prepare a DataFrame for ratio calculation.
-        
+
         Args:
             required_concepts: List of concepts required for the ratio
             statement_dfs: List of (DataFrame, statement_type) tuples to search for concepts
-            
+
         Returns:
             Tuple containing:
             - DataFrame with concepts as index and periods as columns
             - Dictionary mapping concepts to their equivalent descriptions if used
         """
         # Get the set of periods available in each statement
+        if optional_concepts is None:
+            optional_concepts = []
         available_periods = set()
         for df, _ in statement_dfs:
             # Get columns that are periods (exclude 'concept', 'label', etc)
@@ -341,7 +343,7 @@ class FinancialRatios:
             # First try to find matching company concepts from the mapping store
             if concept in self._mapping_store.mappings:
                 company_concepts = self._mapping_store.mappings[concept]
-                for df, statement_type in statement_dfs:
+                for df, _statement_type in statement_dfs:
                     # Check each possible company concept
                     for company_concept in company_concepts:
                         mask = df['concept'] == company_concept
@@ -356,7 +358,7 @@ class FinancialRatios:
 
             # If not found via mappings, try direct concept match
             if not found:
-                for df, statement_type in statement_dfs:
+                for df, _statement_type in statement_dfs:
                     mask = df['concept'] == concept
                     if mask.any():
                         matching_row = df[mask].iloc[0]
@@ -367,7 +369,7 @@ class FinancialRatios:
 
             # If still not found, try matching by label
             if not found:
-                for df, statement_type in statement_dfs:
+                for df, _statement_type in statement_dfs:
                     # Get label column if it exists
                     if 'label' in df.columns:
                         mask = df['label'].str.contains(concept, case=False, na=False)
@@ -411,10 +413,10 @@ class FinancialRatios:
 
     def _initialize_concept_equivalents(self) -> Dict[str, List[ConceptEquivalent]]:
         """Initialize the concept equivalents mapping.
-        
+
         Enhanced to work with the new standardization hierarchy that separates
         different revenue and cost types into distinct concepts.
-        
+
         Returns:
             Dictionary mapping concepts to their possible equivalent calculations.
         """
@@ -473,7 +475,7 @@ class FinancialRatios:
                     description="Revenue - Cost and Expenses (telecom/service companies)"
                 )
             ],
-            
+
             # Operating Income calculation 
             StandardConcept.OPERATING_INCOME: [
                 ConceptEquivalent(
@@ -489,7 +491,7 @@ class FinancialRatios:
                     description="Gross Profit - Operating Expenses"
                 )
             ],
-            
+
             # Revenue equivalents with enhanced hierarchy support
             StandardConcept.REVENUE: [
                 # Mixed companies: Product + Service revenue
@@ -520,7 +522,7 @@ class FinancialRatios:
                     description="Product Revenue (manufacturing companies)"
                 )
             ],
-            
+
             # Cost of Revenue fallbacks for different business models
             StandardConcept.COST_OF_REVENUE: [
                 # Manufacturing companies fallback
@@ -549,16 +551,16 @@ class FinancialRatios:
 
     def _get_concept_value(self, concept: str, calc_df: pd.DataFrame) -> Tuple[pd.Series, Optional[str]]:
         """Get a concept value from the calculation DataFrame.
-        
+
         If the concept is not directly available or is all NaN, try to calculate it using equivalents.
-        
+
         Args:
             concept: The concept to retrieve
             calc_df: DataFrame containing the raw data
-            
+
         Returns:
             Tuple of (value Series, equivalent description if used)
-            
+
         Raises:
             KeyError: If concept is not found and no valid equivalents are available
         """
@@ -603,13 +605,13 @@ class FinancialRatios:
 
     def get_ratio_data(self, ratio_type: str) -> RatioData:
         """Get the prepared ratio data for a specific ratio calculation.
-        
+
         This allows inspection of the raw data before ratio calculation.
-        
+
         Args:
             ratio_type: Type of ratio to get data for ('current', 'operating_margin', 
                        'return_on_assets', 'gross_margin', 'leverage')
-                       
+
         Returns:
             RatioData object containing calculation data and helper methods for accessing concepts
         """
@@ -617,7 +619,7 @@ class FinancialRatios:
         default_values = {
             StandardConcept.INVENTORY: 0.0,  # For quick ratio when inventory not found
         }
-        
+
         ratio_configs = {
             'current': {
                 'concepts': [
@@ -685,14 +687,14 @@ class FinancialRatios:
                 concept: default_values.get(concept, 0.0) 
                 for concept in optional_concepts_dict
             }
-            
+
         # Get the concepts and equivalents using the old method
         calc_df, equivalents = self._prepare_ratio_df(
             required_concepts=config['concepts'],
             statement_dfs=config['statements'],
             optional_concepts=list(optional_concepts_dict.keys())
         )
-        
+
         # Create and return the RatioData object
         return RatioData(
             calculation_df=calc_df,
@@ -704,7 +706,7 @@ class FinancialRatios:
 
     def calculate_current_ratio(self) -> RatioAnalysis:
         """Calculate current ratio for all periods.
-        
+
         Current Ratio = Current Assets / Current Liabilities
         """
         ratio_data = self.get_ratio_data('current')
@@ -737,7 +739,7 @@ class FinancialRatios:
 
     def calculate_return_on_assets(self) -> RatioAnalysis:
         """Calculate return on assets for all periods.
-        
+
         ROA = Net Income / Average Total Assets
         """
         calc_df, equivalents = self.get_ratio_data('return_on_assets')
@@ -774,7 +776,7 @@ class FinancialRatios:
 
     def calculate_operating_margin(self) -> RatioAnalysis:
         """Calculate operating margin for all periods.
-        
+
         Operating Margin = Operating Income / Revenue
         """
         calc_df, equivalents = self.get_ratio_data('operating_margin')
@@ -807,9 +809,9 @@ class FinancialRatios:
 
     def calculate_gross_margin(self) -> RatioAnalysis:
         """Calculate gross margin for all periods.
-        
+
         Gross Margin = Gross Profit / Revenue
-        
+
         Note: If Gross Profit is not directly available, it will be calculated as
         Revenue - Cost of Revenue.
         """
@@ -843,10 +845,10 @@ class FinancialRatios:
 
     def calculate_quick_ratio(self) -> RatioAnalysis:
         """Calculate quick ratio for all periods.
-        
+
         Quick Ratio = (Current Assets - Inventory) / Current Liabilities
         Also known as the Acid Test Ratio.
-        
+
         Note:
             If inventory is not found in the financial statements, it will be treated as 0.
             This is appropriate for service companies or companies that do not carry inventory.
@@ -858,10 +860,10 @@ class FinancialRatios:
             # Get concepts with defaults handling
             current_assets = ratio_data.get_concept(StandardConcept.TOTAL_CURRENT_ASSETS)
             current_liab = ratio_data.get_concept(StandardConcept.TOTAL_CURRENT_LIABILITIES)
-            
+
             # Get inventory with default 0 - the RatioData class handles missing inventory
             inventory = ratio_data.get_concept(StandardConcept.INVENTORY)
-            
+
             # Calculate quick assets using safe subtraction
             quick_assets = _safe_subtract(current_assets, inventory)
 
@@ -894,7 +896,7 @@ class FinancialRatios:
 
     def calculate_cash_ratio(self) -> RatioAnalysis:
         """Calculate cash ratio for all periods.
-        
+
         Cash Ratio = Cash / Current Liabilities
         Measures ability to pay short-term obligations using only cash.
         """
@@ -928,7 +930,7 @@ class FinancialRatios:
 
     def calculate_working_capital(self) -> RatioAnalysis:
         """Calculate working capital for all periods.
-        
+
         Working Capital = Current Assets - Current Liabilities
         Measures short-term financial health.
         """
@@ -964,7 +966,7 @@ class FinancialRatios:
 
     def calculate_profitability_ratios(self) -> RatioAnalysisGroup:
         """Calculate profitability ratios.
-        
+
         Returns:
             RatioAnalysisGroup containing:
             - gross_margin
@@ -1070,7 +1072,7 @@ class FinancialRatios:
 
     def calculate_efficiency_ratios(self) -> RatioAnalysisGroup:
         """Calculate efficiency ratios.
-        
+
         Returns:
             RatioAnalysisGroup containing:
             - asset_turnover
@@ -1164,7 +1166,7 @@ class FinancialRatios:
 
     def calculate_leverage_ratios(self) -> RatioAnalysisGroup:
         """Calculate leverage ratios.
-        
+
         Returns:
             RatioAnalysisGroup containing:
             - debt_to_equity

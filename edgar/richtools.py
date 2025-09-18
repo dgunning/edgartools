@@ -1,16 +1,16 @@
-from typing import Union, Optional
+import itertools
+import re
+from io import StringIO
+from typing import Optional, Union
 
 import pandas as pd
 import pyarrow as pa
 from rich import box
+from rich.console import Console
+from rich.highlighter import RegexHighlighter
 from rich.table import Table
 from rich.text import Text
-from rich.console import Console
-from io import StringIO
-import itertools
-from rich.highlighter import RegexHighlighter
 from rich.theme import Theme
-import re
 
 __all__ = [
     'repr_rich',
@@ -79,7 +79,7 @@ def df_to_rich_table(
 
     data_for_display = data_for_display.reset_index()
 
-    for index, value_list in enumerate(data_for_display.values.tolist()):
+    for _index, value_list in enumerate(data_for_display.values.tolist()):
         # row = [str(index)] if show_index else []
         row = [str(x) for x in value_list]
         rich_table.add_row(*row)
@@ -305,7 +305,7 @@ class Docs:
     def __init__(self, obj, docs_content: str = None):
         """
         Initialize the Docs class with an object and optional documentation content.
-        
+
         Args:
             obj: The object to document
             docs_content: Optional documentation content string. If not provided,
@@ -313,7 +313,7 @@ class Docs:
         """
         self.obj = obj
         self.docs_content = docs_content
-        
+
         # If no docs_content provided, try to get from various sources in order of preference
         if not self.docs_content:
             # 1. Try to find markdown file with class name
@@ -325,76 +325,76 @@ class Docs:
                 self.docs_content = obj.__doc__
             else:
                 self.docs_content = f"No documentation available for {type(obj).__name__}"
-    
+
     def _find_markdown_docs(self) -> Optional[str]:
         """
         Look for a markdown file with the same name as the class in a docs directory
         in the same package as the class.
-        
+
         Returns:
             Optional[str]: The content of the markdown file if found, None otherwise
         """
-        import os
         import inspect
-        
+        import os
+
         # Get the class name
         class_name = getattr(self.obj, '__name__', None) or type(self.obj).__name__
-        
+
         # Get the module where the object is defined
         try:
             if hasattr(self.obj, '__module__'):
                 module = inspect.getmodule(self.obj)
             else:
                 module = inspect.getmodule(type(self.obj))
-            
+
             if not module or not hasattr(module, '__file__') or not module.__file__:
                 return None
-                
+
             # Get the directory containing the module
             module_dir = os.path.dirname(os.path.abspath(module.__file__))
-            
+
             # Look for docs directory in the same package
             docs_dir = os.path.join(module_dir, 'docs')
-            
+
             if not os.path.exists(docs_dir):
                 return None
-                
+
             # Look for markdown file with class name
             markdown_file = os.path.join(docs_dir, f"{class_name}.md")
-            
+
             if os.path.exists(markdown_file):
                 try:
                     with open(markdown_file, 'r', encoding='utf-8') as f:
                         return f.read()
                 except (IOError, OSError):
                     return None
-                    
+
         except Exception:
             # If anything goes wrong, silently return None
             return None
-            
+
         return None
 
     def __rich__(self):
         """
         Return a Rich renderable representation of the documentation.
         """
-        from rich.panel import Panel
         from rich.markdown import Markdown
+        from rich.panel import Panel
         from rich.text import Text
-        
+
         # Get the object name for the title
         obj_name = getattr(self.obj, '__name__', None) or type(self.obj).__name__
-        
+
         # Create the title
         title = Text.assemble((obj_name, "bold white"))
-        
+
         # Try to render as markdown if it looks like markdown, otherwise as plain text
         if self.docs_content and ('```' in self.docs_content or '#' in self.docs_content or '*' in self.docs_content):
             content = Markdown(self.docs_content)
         else:
             content = Text(self.docs_content or "No documentation available")
-        
+
         # Create a panel with the documentation
         return Panel(
             content,

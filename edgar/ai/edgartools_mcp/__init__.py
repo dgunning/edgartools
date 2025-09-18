@@ -6,13 +6,8 @@ capabilities to AI agents and assistants.
 """
 
 try:
-    from edgar.ai.mcp.server import MCPServer, EdgarToolsServer
-    from edgar.ai.mcp.tools import (
-        CompanyTool,
-        FilingsTool,
-        FinancialsTool,
-        SearchTool
-    )
+    from edgar.ai.mcp.server import EdgarToolsServer, MCPServer
+    from edgar.ai.mcp.tools import CompanyTool, FilingsTool, FinancialsTool, SearchTool
 except ImportError:
     # Fallback if complex server doesn't work
     MCPServer = None

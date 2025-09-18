@@ -2,10 +2,10 @@
 Type definitions for the HTML parser.
 """
 
-from typing import Protocol, TypedDict, Literal, Union, Optional, Dict, Any, List
-from enum import Enum, auto
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Protocol, Union
 
 
 class NodeType(Enum):
@@ -71,7 +71,7 @@ class Style:
     width: Optional[Union[float, str]] = None
     height: Optional[Union[float, str]] = None
     line_height: Optional[float] = None
-    
+
     def merge(self, other: 'Style') -> 'Style':
         """Merge this style with another, with other taking precedence."""
         merged = Style()
@@ -82,17 +82,17 @@ class Style:
             else:
                 setattr(merged, field, getattr(self, field))
         return merged
-    
+
     @property
     def is_bold(self) -> bool:
         """Check if style represents bold text."""
         return self.font_weight in ('bold', '700', '800', '900')
-    
+
     @property
     def is_italic(self) -> bool:
         """Check if style represents italic text."""
         return self.font_style == 'italic'
-    
+
     @property
     def is_centered(self) -> bool:
         """Check if text is centered."""
@@ -108,7 +108,7 @@ class NodeProtocol(Protocol):
     style: Style
     parent: Optional['NodeProtocol']
     children: List['NodeProtocol']
-    
+
     def text(self) -> str: ...
     def html(self) -> str: ...
     def find(self, predicate) -> List['NodeProtocol']: ...
@@ -123,17 +123,17 @@ class HeaderInfo:
     detection_method: str
     is_item: bool = False
     item_number: Optional[str] = None
-    
+
     @classmethod
     def from_text(cls, text: str, level: int, confidence: float, method: str) -> 'HeaderInfo':
         """Create HeaderInfo from text, detecting if it's an item header."""
         # Check for item patterns
         item_pattern = re.compile(r'^(Item|ITEM)\s+(\d+[A-Z]?\.?)', re.IGNORECASE)
         match = item_pattern.match(text.strip())
-        
+
         is_item = bool(match)
         item_number = match.group(2).rstrip('.') if match else None
-        
+
         return cls(
             level=level,
             confidence=confidence,
@@ -155,14 +155,14 @@ class XBRLFact:
     scale: Optional[str] = None
     format: Optional[str] = None
     sign: Optional[str] = None
-    
+
     # Resolved references
     context: Optional[Dict[str, Any]] = None
     unit: Optional[str] = None
-    
+
     # Additional metadata
     metadata: Optional[Dict[str, Any]] = None
-    
+
     @property
     def numeric_value(self) -> Optional[float]:
         """Get numeric value if applicable."""
@@ -172,12 +172,12 @@ class XBRLFact:
             return float(clean_value)
         except (ValueError, AttributeError):
             return None
-    
+
     @property
     def is_numeric(self) -> bool:
         """Check if this is a numeric fact."""
         return self.numeric_value is not None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert XBRLFact to dictionary."""
         return {
@@ -215,25 +215,25 @@ class ParseContext:
     in_list: bool = False
     depth: int = 0
     style_stack: List[Style] = None
-    
+
     def __post_init__(self):
         if self.style_stack is None:
             self.style_stack = []
-    
+
     def push_style(self, style: Style):
         """Push style onto stack."""
         self.style_stack.append(style)
-    
+
     def pop_style(self):
         """Pop style from stack."""
         if self.style_stack:
             self.style_stack.pop()
-    
+
     def get_current_style(self) -> Style:
         """Get combined style from stack."""
         if not self.style_stack:
             return Style()
-        
+
         result = self.style_stack[0]
         for style in self.style_stack[1:]:
             result = result.merge(style)

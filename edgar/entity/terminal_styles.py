@@ -3,7 +3,7 @@ Terminal-friendly color schemes for financial statement display.
 Provides better contrast and readability in various terminal environments.
 """
 
-from typing import Dict, Any
+from typing import Dict
 
 # Default scheme - the current implementation
 DEFAULT_SCHEME = {
@@ -114,10 +114,10 @@ SCHEMES: Dict[str, Dict[str, str]] = {
 def get_color_scheme(scheme_name: str = "professional") -> Dict[str, str]:
     """
     Get a color scheme by name.
-    
+
     Args:
         scheme_name: Name of the scheme (default, high_contrast, professional, minimal, accessible, filing)
-        
+
     Returns:
         Dictionary of style mappings
     """
@@ -126,10 +126,11 @@ def get_color_scheme(scheme_name: str = "professional") -> Dict[str, str]:
 # Environment variable support
 import os
 
+
 def get_current_scheme() -> Dict[str, str]:
     """
     Get the current color scheme based on environment variable or default.
-    
+
     Environment variable: EDGAR_FINANCIALS_COLOR_SCHEME
     Values: default, high_contrast, professional, minimal, accessible, filing
     """

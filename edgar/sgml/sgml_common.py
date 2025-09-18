@@ -3,16 +3,17 @@ import zipfile
 from collections import defaultdict
 from functools import cached_property
 from pathlib import Path
-from typing import Iterator, Dict, DefaultDict
-from typing import List, Union, Optional, Tuple
+from typing import TYPE_CHECKING, DefaultDict, Dict, Iterator, List, Optional, Tuple, Union
 
-from edgar.attachments import Attachments, Attachment, get_document_type
+if TYPE_CHECKING:
+    from edgar._filings import Filing
+
+from edgar.attachments import Attachment, Attachments, get_document_type
 from edgar.httprequests import stream_with_retry
-from edgar.sgml.sgml_header import FilingHeader
-from edgar.sgml.sgml_parser import SGMLParser, SGMLFormatType, SGMLDocument
 from edgar.sgml.filing_summary import FilingSummary
+from edgar.sgml.sgml_header import FilingHeader
+from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser
 from edgar.sgml.tools import is_xml
-
 
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
@@ -62,7 +63,7 @@ def read_content(source: Union[str, Path]) -> Iterator[str]:
     else:
         # Handle file path
         path = Path(source)
-        
+
         # Check if the file is gzip-compressed
         if str(path).endswith('.gz'):
             import gzip
@@ -403,7 +404,7 @@ class FilingSGML:
 
         # Create FilingSGML instance
         return cls(header=header, documents=documents)
-    
+
     @classmethod
     def from_text(cls, full_text_submission: str) -> "FilingSGML":
         """

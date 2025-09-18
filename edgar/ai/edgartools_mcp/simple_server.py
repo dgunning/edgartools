@@ -6,19 +6,14 @@ This demonstrates the core functionality without the complex tool registration.
 """
 
 import asyncio
-from typing import Any, Sequence
 import logging
+from typing import Any
 
-from mcp.server import Server
 from mcp import Resource, Tool
+from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import (
-    CallToolRequest,
-    CallToolResult, 
-    ListResourcesResult,
-    ListToolsResult,
-    ReadResourceResult,
     TextContent,
 )
 
@@ -75,10 +70,10 @@ async def list_tools() -> list[Tool]:
 @app.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextContent]:
     """Handle tool calls."""
-    
+
     if arguments is None:
         arguments = {}
-    
+
     try:
         if name == "edgar_get_company":
             return await handle_get_company(arguments)
@@ -86,7 +81,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
             return await handle_current_filings(arguments)
         else:
             raise ValueError(f"Unknown tool: {name}")
-            
+
     except Exception as e:
         logger.error(f"Error in tool {name}: {e}")
         return [TextContent(
@@ -98,24 +93,24 @@ async def handle_get_company(args: dict[str, Any]) -> list[TextContent]:
     """Handle company information requests."""
     identifier = args.get("identifier", "")
     include_financials = args.get("include_financials", False)
-    
+
     if not identifier:
         raise ValueError("identifier is required")
-    
+
     try:
         # Import EdgarTools here to avoid import errors if not available
         from edgar import Company
-        
+
         # Get company
         company = Company(identifier)
-        
+
         # Build response
         response = {
             "name": company.name,
             "cik": company.cik,
             "description": getattr(company, 'description', 'No description available')
         }
-        
+
         # Add ticker if available
         if hasattr(company, 'ticker'):
             response["ticker"] = company.ticker
@@ -123,7 +118,7 @@ async def handle_get_company(args: dict[str, Any]) -> list[TextContent]:
             response["ticker"] = company.tickers[0]
         else:
             response["ticker"] = "Not available"
-            
+
         if include_financials:
             try:
                 # Get recent filing for financial data
@@ -137,14 +132,14 @@ async def handle_get_company(args: dict[str, Any]) -> list[TextContent]:
                     }
             except Exception as e:
                 response["financials_error"] = str(e)
-        
+
         text_response = f"""Company Information for {response['name']}:
 
 CIK: {response['cik']}
 Ticker: {response['ticker']}
 Description: {response['description']}
 """
-        
+
         if 'latest_filing' in response:
             filing = response['latest_filing']
             text_response += f"""
@@ -153,12 +148,12 @@ Latest Filing:
 - Filing Date: {filing['filing_date']}
 - Period: {filing['period']}
 """
-        
+
         if 'financials_error' in response:
             text_response += f"\nNote: Could not retrieve financial data: {response['financials_error']}"
-        
+
         return [TextContent(type="text", text=text_response)]
-        
+
     except Exception as e:
         raise ValueError(f"Error retrieving company information: {str(e)}")
 
@@ -166,30 +161,30 @@ async def handle_current_filings(args: dict[str, Any]) -> list[TextContent]:
     """Handle current filings requests."""
     limit = args.get("limit", 20)
     form_type = args.get("form_type")
-    
+
     try:
         from edgar import get_current_filings
-        
+
         # Get current filings
         filings = get_current_filings(
             form=form_type or "",
             page_size=min(limit, 100)
         )
-        
+
         # Convert to list
         filing_data = filings.data.to_pylist()
-        
+
         # Build response
         text_response = f"Current SEC Filings (showing {len(filing_data)} filings)"
         if form_type:
             text_response += f" filtered by form type: {form_type}"
         text_response += "\n\n"
-        
+
         for i, filing in enumerate(filing_data[:limit], 1):
             text_response += f"{i:2d}. {filing['form']:<6} - {filing['company'][:50]:<50} - {filing['filing_date']}\n"
-        
+
         return [TextContent(type="text", text=text_response)]
-        
+
     except Exception as e:
         raise ValueError(f"Error retrieving current filings: {str(e)}")
 

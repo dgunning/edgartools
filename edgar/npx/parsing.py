@@ -1,18 +1,20 @@
-from typing import Optional, Any, Dict, Generator
-from pathlib import Path
-from lxml import etree as ET
 import io
 import logging
+from pathlib import Path
+from typing import Any, Dict, Generator, Optional
+
+from lxml import etree as ET
+
 from .data import (
     ClassInfo,
     IncludedManager,
     PrimaryDoc,
+    ProxyTable,
+    ProxyVoteTable,
     ReportSeriesClassInfo,
     SeriesReport,
-    ProxyTable,
     VoteCategory,
     VoteRecord,
-    ProxyVoteTable,
 )
 
 log = logging.getLogger(__name__)

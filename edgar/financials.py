@@ -1,10 +1,10 @@
-from typing import Optional, Union, Dict, Any
+from typing import Any, Dict, Optional, Union
+
 import pandas as pd
 
+from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
-from edgar.core import log
-
 from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
 
@@ -55,23 +55,23 @@ class Financials:
     # Standardized Financial Data Accessor Methods
     # These methods provide easy access to common financial metrics
     # using standardized labels across different companies
-    
+
     def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list, 
                                       period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Helper method to extract standardized concept values from financial statements.
-        
+
         Args:
             statement_type: Type of statement ('income', 'balance', 'cashflow')
             concept_patterns: List of label patterns to search for (case-insensitive)
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             The concept value if found, None otherwise
         """
         if self.xb is None:
             return None
-            
+
         try:
             # Get the appropriate statement
             if statement_type == 'income':
@@ -82,28 +82,28 @@ class Financials:
                 statement = self.cashflow_statement()
             else:
                 return None
-                
+
             if statement is None:
                 return None
-                
+
             # Render with standardization enabled
             rendered = statement.render(standard=True)
             df = rendered.to_dataframe()
-            
+
             if df.empty:
                 return None
-                
+
             # Find the concept using pattern matching
             for pattern in concept_patterns:
                 matches = df[df['label'].str.contains(pattern, case=False, na=False)]
                 if not matches.empty:
                     # Get available period columns (excluding metadata columns)
                     period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
-                    
+
                     if len(period_columns) > period_offset:
                         period_col = period_columns[period_offset]
                         value = matches.iloc[0][period_col]
-                        
+
                         # Convert to numeric if possible
                         if pd.notna(value) and value != '':
                             try:
@@ -111,9 +111,9 @@ class Financials:
                             except (ValueError, TypeError):
                                 return value
                         return value
-                        
+
             return None
-            
+
         except Exception as e:
             log.debug(f"Error getting standardized concept value: {e}")
             return None
@@ -121,13 +121,13 @@ class Financials:
     def get_revenue(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get revenue from the income statement using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Revenue value if found, None otherwise
-            
+
         Example:
             >>> company = Company('AAPL')
             >>> financials = company.get_financials()
@@ -147,13 +147,13 @@ class Financials:
     def get_net_income(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get net income from the income statement using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Net income value if found, None otherwise
-            
+
         Example:
             >>> company = Company('AAPL')  
             >>> financials = company.get_financials()
@@ -172,13 +172,13 @@ class Financials:
     def get_total_assets(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get total assets from the balance sheet using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Total assets value if found, None otherwise
-            
+
         Example:
             >>> company = Company('AAPL')
             >>> financials = company.get_financials()  
@@ -194,10 +194,10 @@ class Financials:
     def get_total_liabilities(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get total liabilities from the balance sheet using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Total liabilities value if found, None otherwise
         """
@@ -211,10 +211,10 @@ class Financials:
     def get_stockholders_equity(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get stockholders' equity from the balance sheet using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Stockholders' equity value if found, None otherwise
         """
@@ -230,10 +230,10 @@ class Financials:
     def get_operating_cash_flow(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get operating cash flow from the cash flow statement using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Operating cash flow value if found, None otherwise
         """
@@ -248,16 +248,16 @@ class Financials:
     def get_free_cash_flow(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Calculate free cash flow (Operating Cash Flow - Capital Expenditures).
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Free cash flow if both components found, None otherwise
         """
         operating_cf = self.get_operating_cash_flow(period_offset)
         capex = self.get_capital_expenditures(period_offset)
-        
+
         if operating_cf is not None and capex is not None:
             # CapEx is usually negative, so we subtract it (making FCF = OCF - |CapEx|)
             return operating_cf - abs(capex)
@@ -266,10 +266,10 @@ class Financials:
     def get_capital_expenditures(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get capital expenditures from the cash flow statement using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Capital expenditures value if found, None otherwise
         """
@@ -285,10 +285,10 @@ class Financials:
     def get_current_assets(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get current assets from the balance sheet using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Current assets value if found, None otherwise
         """
@@ -302,10 +302,10 @@ class Financials:
     def get_current_liabilities(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get current liabilities from the balance sheet using standardized labels.
-        
+
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
-            
+
         Returns:
             Current liabilities value if found, None otherwise
         """
@@ -319,10 +319,10 @@ class Financials:
     def get_financial_metrics(self) -> Dict[str, Any]:
         """
         Get a dictionary of common financial metrics using standardized labels.
-        
+
         Returns:
             Dictionary containing available financial metrics
-            
+
         Example:
             >>> company = Company('AAPL')
             >>> financials = company.get_financials()
@@ -330,23 +330,23 @@ class Financials:
             >>> print(f"Revenue: ${metrics.get('revenue', 'N/A'):,}")
         """
         metrics = {}
-        
+
         # Income Statement Metrics
         metrics['revenue'] = self.get_revenue()
         metrics['net_income'] = self.get_net_income()
-        
+
         # Balance Sheet Metrics  
         metrics['total_assets'] = self.get_total_assets()
         metrics['total_liabilities'] = self.get_total_liabilities()
         metrics['stockholders_equity'] = self.get_stockholders_equity()
         metrics['current_assets'] = self.get_current_assets()
         metrics['current_liabilities'] = self.get_current_liabilities()
-        
+
         # Cash Flow Metrics
         metrics['operating_cash_flow'] = self.get_operating_cash_flow()
         metrics['capital_expenditures'] = self.get_capital_expenditures()
         metrics['free_cash_flow'] = self.get_free_cash_flow()
-        
+
         # Calculate basic ratios if we have the data
         if metrics['current_assets'] and metrics['current_liabilities']:
             try:
@@ -355,7 +355,7 @@ class Financials:
                 metrics['current_ratio'] = None
         else:
             metrics['current_ratio'] = None
-                
+
         if metrics['total_liabilities'] and metrics['total_assets']:
             try:
                 metrics['debt_to_assets'] = metrics['total_liabilities'] / metrics['total_assets'] 
@@ -363,7 +363,7 @@ class Financials:
                 metrics['debt_to_assets'] = None
         else:
             metrics['debt_to_assets'] = None
-        
+
         return metrics
 
     def __rich__(self):

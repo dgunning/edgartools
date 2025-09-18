@@ -1,14 +1,14 @@
 import re
 import warnings
 from functools import lru_cache
-from typing import Optional, Union, Dict, List, Any, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
-from bs4 import BeautifulSoup, Tag, Comment, XMLParsedAsHTMLWarning, NavigableString
+from bs4 import BeautifulSoup, Comment, NavigableString, Tag, XMLParsedAsHTMLWarning
 from rich import box
 from rich.table import Table
 
-from edgar.datatools import table_html_to_dataframe, clean_column_text
+from edgar.datatools import clean_column_text, table_html_to_dataframe
 from edgar.richtools import repr_rich
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
@@ -243,7 +243,7 @@ class Block:
         return self.text
 
 class LinkBlock(Block):
-    
+
     def __init__(self, text: str, tag:str, alt:str, src:str, **tags):
         super().__init__(text, **tags)
         self.tag = tag
@@ -256,7 +256,7 @@ class LinkBlock(Block):
 
     def to_markdown(self, prefix_src:str=""):
         return f"![alt  {self.alt}]({prefix_src}/{self.src})\n"
-    
+
     def get_complete_text(self, prefix_src:str):
         return f'<{self.tag} alt="{self.alt}" src="{prefix_src}/{self.src}">\n'
 
@@ -343,7 +343,7 @@ class HtmlDocument:
     def text(self) -> str:
         _text = ""
 
-        for i, block in enumerate(self.blocks):
+        for _i, block in enumerate(self.blocks):
             _text += block.get_text()
 
         return _text
@@ -379,7 +379,7 @@ class HtmlDocument:
         """
         compressed_blocks = []
         current_block = None
-        for i, block in enumerate(blocks):
+        for _i, block in enumerate(blocks):
             if isinstance(block, TableBlock):
                 if current_block:
                     compressed_blocks.append(current_block)
@@ -831,7 +831,7 @@ def fixup_soup(soup):
             # If there's a single div, use it directly
             pre.replace_with(divs[0])
             continue
-            
+
         # Otherwise create a new div and preserve all content
         raw_content = str(pre)
         content = raw_content.replace('<pre>', '').replace('</pre>', '')
@@ -1151,7 +1151,6 @@ def table_to_text(table_tag):
 
         return '\n'.join(rendered_table)
 
-    except Exception as e:
+    except Exception:
         # Log the error or handle it as appropriate for your use case
-        print(f"Error processing table: {str(e)}")
         return ""  # Return an empty string in case of any error

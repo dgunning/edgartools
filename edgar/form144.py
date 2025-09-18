@@ -6,12 +6,11 @@ from bs4 import BeautifulSoup, Tag
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Column, Table
 from rich.text import Text
 
+from edgar._party import Address, Contact, Filer
 from edgar.entity import Company
-from edgar._party import Address
-from edgar._party import Filer, Contact
 from edgar.richtools import repr_rich
 from edgar.xmltools import child_text, child_texts
 

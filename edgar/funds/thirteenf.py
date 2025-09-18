@@ -29,10 +29,10 @@ def ThirteenF():
 def get_thirteenf_portfolio(filing) -> pd.DataFrame:
     """
     Extract portfolio holdings from a 13F filing.
-    
+
     Args:
         filing: The 13F filing to extract data from
-        
+
     Returns:
         DataFrame containing portfolio holdings
     """
@@ -40,21 +40,21 @@ def get_thirteenf_portfolio(filing) -> pd.DataFrame:
         # Create a ThirteenF from the filing
         thirteenf_class = get_ThirteenF()
         thirteenf = thirteenf_class(filing, use_latest_period_of_report=True)
-        
+
         # Check if the filing has an information table
         if not thirteenf.has_infotable():
             log.info(f"Filing {filing.accession_no} does not have an information table")
             return pd.DataFrame()
-            
+
         # Extract the information table
         infotable = thirteenf.infotable
         if infotable is None:
             log.warning(f"Could not extract information table from filing {filing.accession_no}")
             return pd.DataFrame()
-            
+
         # Convert to DataFrame
         df = pd.DataFrame(infotable)
-        
+
         # Clean up and organize data
         if not df.empty:
             # Update column names for consistency
@@ -69,7 +69,7 @@ def get_thirteenf_portfolio(filing) -> pd.DataFrame:
                     'investmentDiscretion': 'investment_discretion',
                     'votingAuthority': 'voting_authority'
                 })
-                
+
             # Add ticker mapping if possible
             try:
                 from edgar.reference import cusip_ticker_mapping
@@ -78,7 +78,7 @@ def get_thirteenf_portfolio(filing) -> pd.DataFrame:
             except Exception as e:
                 log.warning(f"Error adding ticker mappings: {e}")
                 df['ticker'] = None
-            
+
             # Calculate percent of portfolio
             if 'value_usd' in df.columns:
                 total_value = df['value_usd'].sum()
@@ -86,15 +86,15 @@ def get_thirteenf_portfolio(filing) -> pd.DataFrame:
                     df['pct_value'] = df['value_usd'] / total_value * 100
                 else:
                     df['pct_value'] = 0
-                    
+
             # Sort by value
             df = df.sort_values('value_usd', ascending=False).reset_index(drop=True)
-            
+
         return df
-            
+
     except Exception as e:
         log.warning(f"Error extracting holdings from 13F filing: {e}")
-    
+
     # Return empty DataFrame if extraction failed
     return pd.DataFrame()
 

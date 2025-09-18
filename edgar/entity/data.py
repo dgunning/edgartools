@@ -6,18 +6,16 @@ addresses, facts, and other structured data from SEC filings.
 """
 import re
 from functools import cached_property
-from typing import List, Dict, Optional, Union, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pyarrow as pa
 import pyarrow.compute as pc
 
+from edgar.core import listify, log
 from edgar.dates import InvalidDateException
-from edgar.filtering import filter_by_date
-from edgar.formatting import reverse_name
-from edgar.core import listify
-from edgar.filtering import filter_by_year_quarter, filter_by_form
 from edgar.entity.filings import EntityFilings
-from edgar.core import log
+from edgar.filtering import filter_by_date, filter_by_form, filter_by_year_quarter
+from edgar.formatting import reverse_name
 from edgar.storage import is_using_local_storage
 
 # Module-level import cache for lazy imports
@@ -27,10 +25,10 @@ _IMPORT_CACHE = {}
 def lazy_import(module_path):
     """
     Lazily import a module or attribute and cache the result to avoid repeated imports.
-    
+
     Args:
         module_path: String path to the module or attribute
-        
+
     Returns:
         The imported module or attribute
     """
@@ -65,10 +63,10 @@ __all__ = [
 def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
     """
     Extract company filings from the json response.
-    
+
     Args:
         filings_json: The JSON data containing filings
-        
+
     Returns:
         A PyArrow Table containing the filings data
     """
@@ -127,12 +125,12 @@ def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
 def create_company_filings(filings_json: Dict[str, Any], cik: int, company_name: str) -> EntityFilings:
     """
     Extract company filings from the json response.
-    
+
     Args:
         filings_json: The JSON data containing filings
         cik: The company CIK
         company_name: The company name
-        
+
     Returns:
         An EntityFilings object containing the filings
     """
@@ -143,10 +141,10 @@ def create_company_filings(filings_json: Dict[str, Any], cik: int, company_name:
 def parse_entity_submissions(cjson: Dict[str, Any]) -> 'CompanyData':
     """
     Parse entity submissions from the SEC API.
-    
+
     Args:
         cjson: The JSON data from the SEC submissions API
-        
+
     Returns:
         A CompanyData object representing the entity
     """
@@ -205,7 +203,7 @@ def parse_entity_submissions(cjson: Dict[str, Any]) -> 'CompanyData':
 class Address:
     """
     Represents a physical address.
-    
+
     This class is optimized for memory usage and performance.
     """
     __slots__ = ('street1', 'street2', 'city', 'state_or_country', 'zipcode', 'state_or_country_desc', '_str_cache')
@@ -220,7 +218,7 @@ class Address:
                  ):
         """
         Initialize an Address object.
-        
+
         Args:
             street1: First line of street address
             street2: Second line of street address (optional)
@@ -294,7 +292,7 @@ class Address:
 class EntityData:
     """
     Container for entity data loaded from SEC submissions API.
-    
+
     This class provides access to entity metadata and filings.
     """
 
@@ -315,7 +313,7 @@ class EntityData:
                  **kwargs):
         """
         Initialize a new EntityData instance.
-        
+
         Args:
             cik: The CIK number
             name: The entity name
@@ -356,7 +354,7 @@ class EntityData:
     def _load_older_filings(self):
         """
         Load older filings that were not included in the initial data.
-        
+
         This method implements the lazy loading behavior of filings.
         When first creating an entity, only the most recent filings are loaded
         to keep API response times fast. When more filings are needed, this
@@ -399,7 +397,7 @@ class EntityData:
                     ) -> EntityFilings:
         """
         Get entity filings with lazy loading behavior.
-        
+
         Args:
             year: Filter by year(s) (e.g. 2023, [2022, 2023])
             quarter: Filter by quarter(s) (1-4, e.g. 4, [3, 4])
@@ -413,7 +411,7 @@ class EntityData:
             is_inline_xbrl: Filter by inline XBRL status
             sort_by: Sort criteria
             trigger_full_load: Whether to load all historical filings if not already loaded
-            
+
         Returns:
             Filtered filings
         """
@@ -480,7 +478,7 @@ class EntityData:
     def is_individual(self) -> bool:
         """
         Determine if this entity is an individual.
-        
+
         Tricky logic to detect if a company is an individual or a company.
         Companies have an ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
         There may be other edge cases.
@@ -762,7 +760,7 @@ class EntityData:
 class CompanyData(EntityData):
     """
     Specialized container for company data loaded from SEC submissions API.
-    
+
     This is a specialized version of EntityData specifically for companies.
     It adds company-specific methods and properties.
     """
@@ -804,10 +802,10 @@ def preprocess_company(company: str) -> str:
 def create_default_entity_data(cik: int) -> 'EntityData':
     """
     Create a default EntityData instance for when entity data cannot be found.
-    
+
     Args:
         cik: The CIK number to use for the entity
-        
+
     Returns:
         A minimal EntityData instance with default values
     """

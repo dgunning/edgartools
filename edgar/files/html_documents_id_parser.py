@@ -1,15 +1,15 @@
 import re
-from typing import List, Dict
-from bs4 import BeautifulSoup, Tag, NavigableString
+from typing import Dict, List
 
+from bs4 import BeautifulSoup, NavigableString, Tag
 
 from edgar.files.html_documents import (
+    Block,
     HtmlDocument,
+    LinkBlock,
     clean_html_root,
     decompose_page_numbers,
     extract_and_format_content,
-    Block,
-    LinkBlock,
 )
 from edgar.files.htmltools import ChunkedDocument
 
@@ -69,7 +69,7 @@ class AssembleText:
                 ]
             )
         )
-    
+
     @staticmethod
     def find_block_level_parent(tag, all_link_tag: list):
         ori_tag = tag
@@ -86,7 +86,7 @@ class AssembleText:
                 return tag
             tag = parent
         return tag if tag else ori_tag
-    
+
     @staticmethod
     def assemble_items(
         html_content: str, item_links: List, markdown: bool = False
@@ -99,7 +99,7 @@ class AssembleText:
 
             link_ids = [item_id for item_name, item_id in item_links]
             items = {}
-            
+
             # Helper method to extract content up to a specific element
             def get_intro_content(first_item_id: str) -> List[Tag]:
                 intro_content = []
@@ -108,7 +108,7 @@ class AssembleText:
                 )
                 if current:
                     container = AssembleText.find_block_level_parent(current, link_ids)
-                    
+
                     if container:
                         for sibling in container.previous_siblings:
                             if isinstance(sibling, Tag):
@@ -132,7 +132,7 @@ class AssembleText:
             # Step 2: Extract items
             id_to_content = {}
             for idx, (item_name, item_id) in enumerate(item_links):
-                
+
                 if idx < len(item_links)-1:
                     n_item_id = item_links[idx+1][1]
                 else:
@@ -190,7 +190,7 @@ class AssembleText:
                     items["Signature"] = ""
 
             return items
-        except Exception as e:
+        except Exception:
             return {}
 
 class ParsedHtml10K:
@@ -671,7 +671,7 @@ class ParsedHtml10Q:
         """Extract 10-Q items from HTML content, handling same item numbers in different parts."""
         index_table = self.extract_html_link_info(html_content)
         item_links = self.extract_item_and_split(index_table)
-        
+
         # Assemble items with part information preserved
         item_result = AssembleText.assemble_items(html_content, item_links, markdown=markdown)
         res = {

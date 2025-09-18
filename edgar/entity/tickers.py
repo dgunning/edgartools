@@ -3,17 +3,14 @@ Ticker-related functionality for the entity package.
 This module re-exports ticker-related functions from edgar.reference.tickers.
 """
 
-from edgar.reference.tickers import (
-    get_icon_from_ticker,
-    get_company_tickers,
-    find_cik,
-    find_ticker
-)
-
 # We need to create our own implementation of these functions
 from functools import lru_cache
+
 import pandas as pd
+
 from edgar.httprequests import download_text
+from edgar.reference.tickers import find_cik, find_ticker, get_company_tickers, get_icon_from_ticker
+
 
 @lru_cache(maxsize=1)
 def get_ticker_to_cik_lookup():

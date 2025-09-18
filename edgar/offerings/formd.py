@@ -5,11 +5,11 @@ from bs4 import BeautifulSoup, Tag
 from pydantic import BaseModel
 from rich import box
 from rich.columns import Columns
-from rich.console import Group, Text, RenderableType
+from rich.console import Group, RenderableType, Text
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar._party import Issuer, Person, Address
+from edgar._party import Address, Issuer, Person
 from edgar.richtools import repr_rich
 from edgar.xmltools import child_text, child_value
 

@@ -8,7 +8,7 @@ to show multiple periods with proper hierarchical organization.
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 from rich import box
@@ -47,53 +47,53 @@ from edgar.richtools import repr_rich
 class MultiPeriodStatement:
     """
     A financial statement showing multiple periods with hierarchical structure.
-    
+
     Combines the best of both worlds:
     - Multiple periods side-by-side (like current pivot tables)
     - Hierarchical organization (from StructuredStatement)
     - Learned concept mappings for better coverage
     """
-    
+
     statement_type: str
     periods: List[str]  # Period labels like ["Q1 2024", "Q2 2024"]
-    
+
     # Hierarchical items with multi-period values
     items: List['MultiPeriodItem']
-    
+
     # Metadata
     company_name: Optional[str] = None
     cik: Optional[str] = None
     canonical_coverage: float = 0.0
-    
+
     # Display format control
     concise_format: bool = False  # If True, display as $1.0B, if False display as $1,000,000,000
-    
+
     def __rich__(self):
         """Create a rich representation with multiple periods."""
         # Get color scheme at the start
         colors = get_current_scheme()
-        
+
         # Statement type mapping
         statement_names = {
             'IncomeStatement': 'Income Statement',
             'BalanceSheet': 'Balance Sheet',
             'CashFlow': 'Cash Flow Statement'
         }
-        
+
         # Title
         title_parts = []
         if self.company_name:
             title_parts.append((self.company_name, colors["company_name"]))
         else:
             title_parts.append(("Financial Statement", colors["total_item"]))
-        
+
         title = Text.assemble(*title_parts)
-        
+
         # Subtitle
         statement_display = statement_names.get(self.statement_type, self.statement_type)
         period_range = f"{self.periods[-1]} to {self.periods[0]}" if len(self.periods) > 1 else self.periods[0] if self.periods else ""
         subtitle = f"{statement_display} • {period_range}"
-        
+
         # Main table with multiple period columns
         stmt_table = Table(
             box=box.SIMPLE,
@@ -101,21 +101,21 @@ class MultiPeriodStatement:
             padding=(0, 1),
             expand=True
         )
-        
+
         # Add concept column
         stmt_table.add_column("", style="", ratio=2)
-        
+
         # Add period columns
         for period in self.periods:
             stmt_table.add_column(period, justify="right", style="bold", ratio=1)
-        
+
         def add_item_to_table(item: 'MultiPeriodItem', depth: int = 0):
             """Add an item row to the table."""
             indent = "  " * depth
-            
+
             # Prepare row values
             row = []
-            
+
             # Concept label
             if item.is_abstract:
                 row.append(Text(f"{indent}{item.label}", style=colors["abstract_item"]))
@@ -132,9 +132,9 @@ class MultiPeriodStatement:
                     'Operating Expenses', 'Total Operating Expenses',
                     'Earnings Per Share', 'EPS'
                 ]
-                
+
                 is_important = any(label in item.label for label in important_labels)
-                
+
                 # Don't mark important items as low confidence even if score is low
                 if is_important:
                     style = colors["total_item"]  # Use bold styling for important items
@@ -142,9 +142,9 @@ class MultiPeriodStatement:
                 else:
                     style = colors["low_confidence_item"] if item.confidence < 0.8 else colors["regular_item"]
                     confidence_marker = " ◦" if item.confidence < 0.8 else ""
-                
+
                 row.append(Text(f"{indent}{item.label}{confidence_marker}", style=style))
-            
+
             # Period values
             for period in self.periods:
                 value_str = item.get_display_value(period, concise_format=self.concise_format)
@@ -155,7 +155,7 @@ class MultiPeriodStatement:
                         value_style = colors["negative_value"] if value < 0 else colors["positive_value"]
                     else:
                         value_style = ""
-                    
+
                     if item.is_total:
                         # Combine total style with value color if present
                         total_style = colors["total_value_prefix"]
@@ -166,34 +166,34 @@ class MultiPeriodStatement:
                         row.append(Text(value_str, style=value_style))
                 else:
                     row.append("")
-            
+
             stmt_table.add_row(*row)
-            
+
             # Add separator line after totals
             if item.is_total and depth == 0:
                 separator_row = [Text("─" * 40, style=colors["separator"])]
                 for _ in self.periods:
                     separator_row.append(Text("─" * 15, style=colors["separator"]))
                 stmt_table.add_row(*separator_row)
-            
+
             # Add children
             for child in item.children:
                 if depth < 3:
                     add_item_to_table(child, depth + 1)
-        
+
         # Add all items
         for item in self.items:
             add_item_to_table(item)
 
-        
+
         # Combine content
         content_parts = [
             Padding("", (1, 0, 0, 0)),
             stmt_table
         ]
-        
+
         content = Group(*content_parts)
-        
+
         return Panel(
             content,
             title=title,
@@ -201,16 +201,16 @@ class MultiPeriodStatement:
             border_style=colors["panel_border"],
             expand=True
         )
-    
+
     def to_dataframe(self) -> pd.DataFrame:
         """
         Convert the multi-period statement to a DataFrame.
-        
+
         Returns:
             DataFrame with concepts as rows and periods as columns
         """
         data = []
-        
+
         def collect_items(item: 'MultiPeriodItem', depth: int = 0):
             """Recursively collect items into flat structure."""
             # Create row data
@@ -223,49 +223,49 @@ class MultiPeriodStatement:
                 'section': item.section,
                 'confidence': item.confidence
             }
-            
+
             # Add period values
             for period in self.periods:
                 row[period] = item.values.get(period)
-            
+
             data.append(row)
-            
+
             # Process children
             for child in item.children:
                 collect_items(child, depth + 1)
-        
+
         # Collect all items
         for item in self.items:
             collect_items(item)
-        
+
         # Create DataFrame
         df = pd.DataFrame(data)
-        
+
         # Set concept as index
         if not df.empty:
             df = df.set_index('concept')
-        
+
         return df
-    
+
     def to_llm_context(self, 
                        include_metadata: bool = True,
                        include_hierarchy: bool = False,
                        flatten_values: bool = True) -> Dict[str, Any]:
         """
         Generate structured context optimized for LLM consumption.
-        
+
         This method creates a clean, structured representation of financial data
         that LLMs can easily parse and reason about, avoiding complex hierarchies
         and focusing on key-value pairs with clear semantics.
-        
+
         Args:
             include_metadata: Include metadata about data quality and coverage
             include_hierarchy: Include parent-child relationships (default False for simplicity)
             flatten_values: Flatten multi-period values into period-prefixed keys (default True)
-            
+
         Returns:
             Dictionary with structured financial data for LLM analysis
-            
+
         Example Output:
             {
                 "company": "Apple Inc.",
@@ -292,7 +292,7 @@ class MultiPeriodStatement:
             }
         """
         from datetime import datetime
-        
+
         context = {
             "company": self.company_name or "Unknown",
             "cik": self.cik or "Unknown",
@@ -302,11 +302,11 @@ class MultiPeriodStatement:
             "scale": "actual",  # Values are in actual amounts
             "generated_at": datetime.now().isoformat()
         }
-        
+
         # Prepare main data section
         data = {}
         hierarchical_data = [] if include_hierarchy else None
-        
+
         def process_item(item: 'MultiPeriodItem', parent_path: str = ""):
             """Process an item and its children."""
             # Skip abstract items unless they have values
@@ -315,10 +315,10 @@ class MultiPeriodStatement:
                 for child in item.children:
                     process_item(child, parent_path)
                 return
-            
+
             # Create a clean concept key (lowercase, underscored)
             concept_key = self._create_llm_key(item.concept)
-            
+
             if flatten_values:
                 # Create period-specific keys
                 for period in self.periods:
@@ -328,7 +328,7 @@ class MultiPeriodStatement:
                         period_key = period.lower().replace(' ', '_').replace('-', '_')
                         full_key = f"{concept_key}_{period_key}"
                         data[full_key] = value
-                        
+
                         # Also store with label for better readability
                         label_key = f"{self._create_llm_key(item.label)}_{period_key}"
                         if label_key != full_key and label_key not in data:
@@ -341,7 +341,7 @@ class MultiPeriodStatement:
                         "values": {p: v for p, v in item.values.items() if v is not None},
                         "is_total": item.is_total
                     }
-            
+
             # Add to hierarchical data if requested
             if include_hierarchy and hierarchical_data is not None:
                 hierarchical_data.append({
@@ -352,26 +352,26 @@ class MultiPeriodStatement:
                     "is_total": item.is_total,
                     "values": {p: v for p, v in item.values.items() if v is not None}
                 })
-            
+
             # Process children
             current_path = f"{parent_path}/{item.concept}" if parent_path else item.concept
             for child in item.children:
                 process_item(child, current_path)
-        
+
         # Process all top-level items
         for item in self.items:
             process_item(item)
-        
+
         context["data"] = data
-        
+
         if include_hierarchy and hierarchical_data:
             context["hierarchy"] = hierarchical_data
-        
+
         # Calculate key metrics and ratios
         key_metrics = self._calculate_key_metrics(data)
         if key_metrics:
             context["key_metrics"] = key_metrics
-        
+
         # Add metadata if requested
         if include_metadata:
             metadata = {
@@ -381,7 +381,7 @@ class MultiPeriodStatement:
                 "has_comparisons": len(self.periods) > 1,
                 "coverage_ratio": self.coverage if hasattr(self, 'coverage') else None
             }
-            
+
             # Add data quality indicators
             quality_indicators = []
             if metadata["total_concepts"] > 100:
@@ -390,15 +390,15 @@ class MultiPeriodStatement:
                 quality_indicators.append("detailed")
             else:
                 quality_indicators.append("basic")
-            
+
             if metadata["has_comparisons"]:
                 quality_indicators.append("comparable")
-            
+
             metadata["quality_indicators"] = quality_indicators
             context["metadata"] = metadata
-        
+
         return context
-    
+
     def _get_statement_type_name(self) -> str:
         """Get clean statement type name for LLM context."""
         type_map = {
@@ -408,7 +408,7 @@ class MultiPeriodStatement:
             "CashFlowStatement": "cash_flow"
         }
         return type_map.get(self.statement_type, self.statement_type.lower())
-    
+
     def _create_llm_key(self, text: str) -> str:
         """Create a clean key from concept or label text."""
         import re
@@ -416,25 +416,25 @@ class MultiPeriodStatement:
         text = re.sub(r'[^\w\s]', '', text)
         text = re.sub(r'\s+', '_', text.strip())
         return text.lower()
-    
+
     def _flatten_items(self) -> List['MultiPeriodItem']:
         """Flatten all items into a single list."""
         result = []
-        
+
         def collect(item: 'MultiPeriodItem'):
             result.append(item)
             for child in item.children:
                 collect(child)
-        
+
         for item in self.items:
             collect(item)
-        
+
         return result
-    
+
     def _calculate_key_metrics(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate important financial metrics from the data."""
         metrics = {}
-        
+
         # Try to calculate based on statement type
         if "income" in self.statement_type.lower():
             metrics.update(self._calculate_income_metrics(data))
@@ -442,25 +442,25 @@ class MultiPeriodStatement:
             metrics.update(self._calculate_balance_metrics(data))
         elif "cash" in self.statement_type.lower():
             metrics.update(self._calculate_cashflow_metrics(data))
-        
+
         return metrics
-    
+
     def _calculate_income_metrics(self, data: Dict[str, Any]) -> Dict[str, float]:
         """Calculate income statement metrics."""
         metrics = {}
-        
+
         # Find revenue and net income for each period
         for period in self.periods:
             period_key = period.lower().replace(' ', '_').replace('-', '_')
-            
+
             # Find revenue
             revenue_keys = [k for k in data.keys() if 'revenue' in k.lower() and period_key in k and 'total' in k.lower()]
             if not revenue_keys:
                 revenue_keys = [k for k in data.keys() if 'revenue' in k.lower() and period_key in k]
-            
+
             if revenue_keys:
                 revenue = data[revenue_keys[0]]
-                
+
                 # Find net income
                 income_keys = [k for k in data.keys() if 'net_income' in k.lower() and period_key in k]
                 if income_keys:
@@ -468,90 +468,90 @@ class MultiPeriodStatement:
                     # Calculate profit margin
                     if revenue and revenue != 0:
                         metrics[f"profit_margin_{period_key}"] = round(net_income / revenue, 4)
-                
+
                 # Find operating income
                 op_income_keys = [k for k in data.keys() if 'operating_income' in k.lower() and period_key in k]
                 if op_income_keys:
                     op_income = data[op_income_keys[0]]
                     if revenue and revenue != 0:
                         metrics[f"operating_margin_{period_key}"] = round(op_income / revenue, 4)
-        
+
         # Calculate growth rates if we have multiple periods
         if len(self.periods) >= 2:
             # Get the two most recent periods
             recent_period = self.periods[0].lower().replace(' ', '_').replace('-', '_')
             prior_period = self.periods[1].lower().replace(' ', '_').replace('-', '_')
-            
+
             # Revenue growth
             recent_rev_keys = [k for k in data.keys() if 'revenue' in k.lower() and recent_period in k and 'total' in k.lower()]
             prior_rev_keys = [k for k in data.keys() if 'revenue' in k.lower() and prior_period in k and 'total' in k.lower()]
-            
+
             if recent_rev_keys and prior_rev_keys:
                 recent_rev = data[recent_rev_keys[0]]
                 prior_rev = data[prior_rev_keys[0]]
                 if prior_rev and prior_rev != 0:
                     metrics["revenue_growth_rate"] = round((recent_rev - prior_rev) / prior_rev, 4)
-        
+
         return metrics
-    
+
     def _calculate_balance_metrics(self, data: Dict[str, Any]) -> Dict[str, float]:
         """Calculate balance sheet metrics."""
         metrics = {}
-        
+
         for period in self.periods:
             period_key = period.lower().replace(' ', '_').replace('-', '_')
-            
+
             # Find key balance sheet items
             assets_keys = [k for k in data.keys() if 'total_assets' in k.lower() and period_key in k]
             liabilities_keys = [k for k in data.keys() if 'total_liabilities' in k.lower() and period_key in k]
             equity_keys = [k for k in data.keys() if 'stockholders_equity' in k.lower() and period_key in k]
-            
+
             if assets_keys and liabilities_keys:
                 assets = data[assets_keys[0]]
                 liabilities = data[liabilities_keys[0]]
-                
+
                 # Debt to assets ratio
                 if assets and assets != 0:
                     metrics[f"debt_to_assets_{period_key}"] = round(liabilities / assets, 4)
-                
+
                 # Equity ratio
                 if equity_keys:
                     equity = data[equity_keys[0]]
                     if assets and assets != 0:
                         metrics[f"equity_ratio_{period_key}"] = round(equity / assets, 4)
-        
+
         return metrics
-    
+
     def _calculate_cashflow_metrics(self, data: Dict[str, Any]) -> Dict[str, float]:
         """Calculate cash flow metrics."""
         metrics = {}
-        
+
         for period in self.periods:
             period_key = period.lower().replace(' ', '_').replace('-', '_')
-            
+
             # Find operating cash flow
             ocf_keys = [k for k in data.keys() if 'operating_activities' in k.lower() and 'net_cash' in k.lower() and period_key in k]
             if ocf_keys:
                 ocf = data[ocf_keys[0]]
-                
+
                 # Find capital expenditures
                 capex_keys = [k for k in data.keys() if 'capital_expenditure' in k.lower() and period_key in k]
                 if not capex_keys:
                     capex_keys = [k for k in data.keys() if 'property_plant_equipment' in k.lower() and 'acquire' in k.lower() and period_key in k]
-                
+
                 if capex_keys:
                     capex = abs(data[capex_keys[0]])  # Capex is usually negative
                     # Calculate free cash flow
                     metrics[f"free_cash_flow_{period_key}"] = ocf - capex
-        
+
         return metrics
-    
+
     def __iter__(self):
         """
         Iterate over all items in the statement (flat iteration).
-        
+
         Yields items in display order (depth-first traversal).
-        
+
         Example:
             for item in statement:
                 print(f"{item.label}: {item.values}")
@@ -560,16 +560,16 @@ class MultiPeriodStatement:
             yield item
             for child in item.children:
                 yield from traverse(child)
-        
+
         for item in self.items:
             yield from traverse(item)
-    
+
     def iter_hierarchy(self):
         """
         Iterate over items with hierarchy information.
-        
+
         Yields tuples of (item, depth, parent) for each item.
-        
+
         Example:
             for item, depth, parent in statement.iter_hierarchy():
                 indent = "  " * depth
@@ -579,16 +579,16 @@ class MultiPeriodStatement:
             yield (item, depth, parent)
             for child in item.children:
                 yield from traverse(child, depth + 1, item)
-        
+
         for item in self.items:
             yield from traverse(item)
-    
+
     def iter_with_values(self):
         """
         Iterate over items that have actual values (skip abstract/empty items).
-        
+
         Yields only items with at least one non-None value.
-        
+
         Example:
             for item in statement.iter_with_values():
                 for period in statement.periods:
@@ -599,17 +599,17 @@ class MultiPeriodStatement:
         for item in self:
             if any(v is not None for v in item.values.values()):
                 yield item
-    
+
     def get_items_by_depth(self, max_depth: int = None) -> List['MultiPeriodItem']:
         """
         Get all items up to a specified depth level.
-        
+
         Args:
             max_depth: Maximum depth to include (None for all depths)
-            
+
         Returns:
             List of items up to the specified depth
-            
+
         Example:
             # Get only top-level and first-level items
             top_items = statement.get_items_by_depth(1)
@@ -619,18 +619,18 @@ class MultiPeriodStatement:
             if max_depth is None or depth <= max_depth:
                 result.append(item)
         return result
-    
+
     def find_item(self, concept: str = None, label: str = None) -> Optional['MultiPeriodItem']:
         """
         Find a specific item by concept name or label.
-        
+
         Args:
             concept: Concept name to search for (case-insensitive)
             label: Label text to search for (case-insensitive)
-            
+
         Returns:
             First matching item or None if not found
-            
+
         Example:
             revenue = statement.find_item(label="Total Revenue")
             if revenue:
@@ -638,24 +638,24 @@ class MultiPeriodStatement:
         """
         if not concept and not label:
             return None
-        
+
         for item in self:
             if concept and item.concept.lower() == concept.lower():
                 return item
             if label and item.label.lower() == label.lower():
                 return item
         return None
-    
+
     def to_dict(self, include_empty: bool = False) -> Dict[str, Any]:
         """
         Convert statement to a simple dictionary structure for JSON serialization.
-        
+
         Args:
             include_empty: Include items with no values
-            
+
         Returns:
             Dictionary representation suitable for web APIs
-            
+
         Example:
             data = statement.to_dict()
             json.dumps(data)  # Ready for web API response
@@ -664,7 +664,7 @@ class MultiPeriodStatement:
             # Skip items with no values unless requested
             if not include_empty and not any(v is not None for v in item.values.values()):
                 return None
-            
+
             result = {
                 'concept': item.concept,
                 'label': item.label,
@@ -674,7 +674,7 @@ class MultiPeriodStatement:
                 'depth': item.depth,
                 'confidence': item.confidence
             }
-            
+
             # Add children if they exist
             if item.children:
                 children = []
@@ -684,15 +684,15 @@ class MultiPeriodStatement:
                         children.append(child_dict)
                 if children:
                     result['children'] = children
-            
+
             return result
-        
+
         items_data = []
         for item in self.items:
             item_dict = item_to_dict(item)
             if item_dict:
                 items_data.append(item_dict)
-        
+
         return {
             'company': self.company_name,
             'cik': self.cik,
@@ -705,14 +705,14 @@ class MultiPeriodStatement:
                 'concise_format': self.concise_format
             }
         }
-    
+
     def to_flat_list(self) -> List[Dict[str, Any]]:
         """
         Convert statement to a flat list of items for table rendering.
-        
+
         Returns:
             List of dictionaries, each representing one row
-            
+
         Example:
             rows = statement.to_flat_list()
             # Perfect for rendering in HTML tables or data grids
@@ -720,12 +720,12 @@ class MultiPeriodStatement:
                 print(f"{row['label']}: {row['values']}")
         """
         result = []
-        
+
         for item, depth, parent in self.iter_hierarchy():
             # Skip empty abstract items
             if item.is_abstract and not any(v is not None for v in item.values.values()):
                 continue
-            
+
             row = {
                 'concept': item.concept,
                 'label': item.label,
@@ -735,28 +735,28 @@ class MultiPeriodStatement:
                 'is_total': item.is_total,
                 'confidence': item.confidence
             }
-            
+
             # Add period values
             for period in self.periods:
                 row[period] = item.values.get(period)
                 # Also add formatted version
                 row[f"{period}_formatted"] = item.get_display_value(period, self.concise_format)
-            
+
             result.append(row)
-        
+
         return result
-    
+
     def get_period_comparison(self, period1: str, period2: str) -> List[Dict[str, Any]]:
         """
         Get comparison data between two periods.
-        
+
         Args:
             period1: First period to compare
             period2: Second period to compare
-            
+
         Returns:
             List of items with values, changes, and percentages
-            
+
         Example:
             comparison = statement.get_period_comparison("FY 2024", "FY 2023")
             for item in comparison:
@@ -765,13 +765,13 @@ class MultiPeriodStatement:
         """
         if period1 not in self.periods or period2 not in self.periods:
             raise ValueError(f"Periods must be in {self.periods}")
-        
+
         result = []
-        
+
         for item in self.iter_with_values():
             val1 = item.values.get(period1)
             val2 = item.values.get(period2)
-            
+
             comparison = {
                 'concept': item.concept,
                 'label': item.label,
@@ -781,7 +781,7 @@ class MultiPeriodStatement:
                 f"{period1}_formatted": item.get_display_value(period1, self.concise_format),
                 f"{period2}_formatted": item.get_display_value(period2, self.concise_format)
             }
-            
+
             # Calculate change if both values exist
             if val1 is not None and val2 is not None and val2 != 0:
                 change = val1 - val2
@@ -793,11 +793,11 @@ class MultiPeriodStatement:
                 comparison['change'] = None
                 comparison['change_percent'] = None
                 comparison['change_formatted'] = None
-            
+
             result.append(comparison)
-        
+
         return result
-    
+
     def __repr__(self) -> str:
         """String representation using rich formatting."""
         return repr_rich(self.__rich__())
@@ -809,36 +809,36 @@ class MultiPeriodItem:
     concept: str
     label: str
     values: Dict[str, Optional[float]]  # Period -> Value mapping
-    
+
     # Hierarchy
     depth: int
     parent_concept: Optional[str]
     children: List['MultiPeriodItem'] = field(default_factory=list)
-    
+
     # Metadata
     is_abstract: bool = False
     is_total: bool = False
     section: Optional[str] = None
     confidence: float = 1.0
-    
+
     def get_display_value(self, period: str, concise_format: bool = False) -> str:
         """
         Get formatted value for a specific period.
-        
+
         Args:
             period: The period to get value for
             concise_format: If True, use concise format ($1.0B), if False use full numbers with commas
-        
+
         Returns:
             Formatted value string
         """
         value = self.values.get(period)
-        
+
         if value is not None:
             # Check if this is a per-share amount
             is_per_share = any(indicator in self.concept.lower() or indicator in self.label.lower() 
                              for indicator in ['pershare', 'per share', 'earnings per', 'eps'])
-            
+
             if is_per_share:
                 # Format per-share amounts with 2 decimal places, no dollar sign
                 return f"{value:.2f}"
@@ -873,7 +873,7 @@ class EnhancedStatementBuilder:
     """
     Builds multi-period statements with hierarchical structure using learned mappings.
     """
-    
+
     # Essential concepts that should always be shown if they have data
     ESSENTIAL_CONCEPTS = {
         'BalanceSheet': {
@@ -912,7 +912,7 @@ class EnhancedStatementBuilder:
             'IncreaseDecreaseInAccountsPayable'
         }
     }
-    
+
     # Common concept name variations that should be normalized
     CONCEPT_NORMALIZATIONS = {
         # Cost concepts
@@ -942,26 +942,26 @@ class EnhancedStatementBuilder:
         # Share repurchase
         'PaymentsForRepurchaseOfEquity': 'PaymentsForRepurchaseOfCommonStock'
     }
-    
+
     def __init__(self):
         self.learned_mappings = load_learned_mappings()
         self.virtual_trees = load_virtual_trees()
-    
+
     def _normalize_concept(self, concept: str) -> str:
         """Normalize concept names for matching."""
         # Remove namespace prefix
         if ':' in concept:
             concept = concept.split(':')[-1]
-        
+
         # Apply normalization mappings
         return self.CONCEPT_NORMALIZATIONS.get(concept, concept)
-    
+
     def _is_essential_concept(self, concept: str, statement_type: str) -> bool:
         """Check if concept is essential for this statement type."""
         essential = self.ESSENTIAL_CONCEPTS.get(statement_type, set())
         normalized = self._normalize_concept(concept)
         return normalized in essential or concept in essential
-    
+
     def build_multi_period_statement(self,
                                     facts: List[FinancialFact],
                                     statement_type: str,
@@ -969,36 +969,36 @@ class EnhancedStatementBuilder:
                                     annual: bool = True) -> MultiPeriodStatement:
         """
         Build a multi-period statement with hierarchical structure.
-        
+
         Args:
             facts: List of all facts
             statement_type: Type of statement
             periods: Number of periods to include
             annual: Prefer annual periods over quarterly
-        
+
         Returns:
             MultiPeriodStatement with hierarchical structure and multiple periods
         """
-        
+
         # Filter facts by statement type
         # Handle both 'CashFlow' and 'CashFlowStatement' for compatibility
         if statement_type == 'CashFlow':
             stmt_facts = [f for f in facts if f.statement_type in ['CashFlow', 'CashFlowStatement']]
         else:
             stmt_facts = [f for f in facts if f.statement_type == statement_type]
-        
+
         # Use the same logic as FactQuery.latest_periods for consistency
         # Group facts by unique periods and calculate period info
         # FIX: Use period_end as part of the key to keep all variations
         period_info = {}
         period_facts = defaultdict(list)
-        
+
         for fact in stmt_facts:
             # Include period_end in the key to avoid losing different period_end variations
             period_key = (fact.fiscal_year, fact.fiscal_period, fact.period_end)
             # Make period label unique by including period_end when there are duplicates
             period_label = f"{fact.fiscal_period} {fact.fiscal_year}"
-            
+
             # Store period metadata for each unique combination
             if period_key not in period_info:
                 period_info[period_key] = {
@@ -1009,28 +1009,28 @@ class EnhancedStatementBuilder:
                     'fiscal_year': fact.fiscal_year,
                     'fiscal_period': fact.fiscal_period
                 }
-            
+
             # Store facts by the unique period key instead of label
             period_facts[period_key].append(fact)
-        
+
         # Create list of periods with their metadata
         period_list = []
         for period_key, info in period_info.items():
             period_list.append((period_key, info))
-        
+
         if annual:
             # When annual=True, filter for TRUE annual periods using duration
             # Some facts are marked as FY but are actually quarterly (90 days vs 363+ days)
             true_annual_periods = []
-            
+
             for pk, info in period_list:
                 if not info['is_annual']:
                     continue
-                    
+
                 # pk is now (fiscal_year, fiscal_period, period_end)
                 fiscal_year = pk[0]
                 period_end_date = pk[2]
-                
+
                 # Allow fiscal_year to be within 0-3 years of period_end.year
                 # This handles current year data and comparative periods
                 if not period_end_date:
@@ -1038,7 +1038,7 @@ class EnhancedStatementBuilder:
                 year_diff = fiscal_year - period_end_date.year
                 if year_diff < -1 or year_diff > 3:
                     continue  # Too far off to be valid
-                
+
                 # Get a fact from this period to check duration
                 period_fact_list = period_facts.get(pk, [])
                 if period_fact_list:
@@ -1053,18 +1053,18 @@ class EnhancedStatementBuilder:
                         # If no period_start, assume it's annual if marked as FY
                         # (this handles instant facts like balance sheet items)
                         true_annual_periods.append((pk, info))
-            
+
             # Group by period year and select most recent comprehensive filing
             # This approach combines availability (comprehensive data) with recency (latest corrections)
             annual_by_period_year = {}
             for pk, info in true_annual_periods:
                 period_end_date = pk[2]
                 period_year = period_end_date.year if period_end_date else None
-                
+
                 if period_year:
                     facts_for_period = period_facts.get(pk, [])
                     filing_date = info.get('filing_date')
-                    
+
                     # Only consider periods with substantial data (≥5 facts) to avoid sparse comparative data
                     if len(facts_for_period) >= 5:
                         if (period_year not in annual_by_period_year or 
@@ -1072,7 +1072,7 @@ class EnhancedStatementBuilder:
                              annual_by_period_year[period_year][1].get('filing_date') and
                              filing_date > annual_by_period_year[period_year][1]['filing_date'])):
                             annual_by_period_year[period_year] = (pk, info)
-            
+
             # Sort by period year (descending) and select
             sorted_periods = sorted(annual_by_period_year.items(), key=lambda x: x[0], reverse=True)
             selected_period_info = [period_info for year, period_info in sorted_periods[:periods]]
@@ -1080,7 +1080,7 @@ class EnhancedStatementBuilder:
             # Sort all periods by end date (newest first)
             period_list.sort(key=lambda x: x[1]['end_date'], reverse=True)
             selected_period_info = period_list[:periods]
-        
+
         # Extract period labels and build a mapping for the selected periods
         # For annual periods, use the actual period end year in the label
         selected_periods = []
@@ -1091,14 +1091,14 @@ class EnhancedStatementBuilder:
             else:
                 label = info['label']
             selected_periods.append(label)
-        
+
         # Create a new period_facts dict with labels as keys for the selected periods
         # CRITICAL: For annual periods, filter facts to only include those with duration > 300 days
         period_facts_by_label = defaultdict(list)
         for i, (period_key, info) in enumerate(selected_period_info):
             label = selected_periods[i]  # Use the corrected label
             facts_for_period = period_facts.get(period_key, [])
-            
+
             # If this is an annual period, filter to only include annual facts
             if annual and info.get('is_annual'):
                 filtered_facts = []
@@ -1114,7 +1114,7 @@ class EnhancedStatementBuilder:
                 period_facts_by_label[label] = filtered_facts
             else:
                 period_facts_by_label[label] = facts_for_period
-        
+
         # Build hierarchical structure using canonical template
         # Handle statement type naming inconsistencies
         # Map fact statement types to virtual tree keys
@@ -1125,28 +1125,28 @@ class EnhancedStatementBuilder:
             'ComprehensiveIncome': 'ComprehensiveIncome',
             'StatementOfEquity': 'StatementOfEquity'
         }
-        
+
         virtual_tree_key = statement_type_mapping.get(statement_type, statement_type)
-        
+
         # Also try the exact statement type if mapping doesn't exist
         if virtual_tree_key not in self.virtual_trees and statement_type in self.virtual_trees:
             virtual_tree_key = statement_type
-        
+
         if virtual_tree_key in self.virtual_trees:
             items = self._build_with_canonical(period_facts_by_label, selected_periods, virtual_tree_key)
             canonical_coverage = self._calculate_coverage(stmt_facts, virtual_tree_key)
         else:
             items = self._build_from_facts(period_facts_by_label, selected_periods)
             canonical_coverage = 0.0
-        
+
         return MultiPeriodStatement(
             statement_type=statement_type,
             periods=selected_periods,
             items=items,
             canonical_coverage=canonical_coverage
         )
-    
-    
+
+
     def _build_with_canonical(self, 
                              period_facts: Dict[str, List[FinancialFact]],
                              periods: List[str],
@@ -1154,12 +1154,12 @@ class EnhancedStatementBuilder:
         """Build items using canonical structure."""
         virtual_tree = self.virtual_trees[virtual_tree_key]
         items = []
-        
+
         # Create fact maps for each period
         period_maps = {}
         for period in periods:
             period_maps[period] = self._create_fact_map(period_facts.get(period, []))
-        
+
         # For Income Statement, promote essential concepts to top level for visibility
         if virtual_tree_key == 'IncomeStatement':
             items = self._build_with_promoted_concepts(
@@ -1178,7 +1178,7 @@ class EnhancedStatementBuilder:
                 )
                 if item:
                     items.append(item)
-        
+
         # Add orphan facts that have values but aren't in the virtual tree
         orphan_section = self._add_orphan_facts(
             period_maps, 
@@ -1188,22 +1188,22 @@ class EnhancedStatementBuilder:
         )
         if orphan_section:
             items.append(orphan_section)
-        
+
         # Add calculated metrics for Income Statement
         if virtual_tree_key == 'IncomeStatement':
             calculated_items = self._add_calculated_metrics(period_maps, periods, items)
             if calculated_items:
                 items.extend(calculated_items)
-        
+
         # Apply smart aggregation to parent nodes
         for item in items:
             self._apply_smart_aggregation(item)
-        
+
         # Remove redundant table duplicates for cleaner presentation
         items = self._deduplicate_table_items(items)
-        
+
         return items
-    
+
     def _build_with_promoted_concepts(self,
                                      virtual_tree: Dict,
                                      period_maps: Dict[str, Dict[str, FinancialFact]],
@@ -1212,7 +1212,7 @@ class EnhancedStatementBuilder:
         """Build Income Statement with essential concepts promoted to top level."""
         items = []
         nodes = virtual_tree['nodes']
-        
+
         # Essential revenue/income concepts to promote
         ESSENTIAL_CONCEPTS = [
             # Revenue concepts (in priority order)
@@ -1230,14 +1230,14 @@ class EnhancedStatementBuilder:
             'EarningsPerShareBasic',
             'EarningsPerShareDiluted'
         ]
-        
+
         # Revenue concepts for deduplication (in priority order)
         REVENUE_CONCEPTS = [
             'RevenueFromContractWithCustomerExcludingAssessedTax',
             'SalesRevenueNet',
             'Revenues'
         ]
-        
+
         # First, add the abstract root for structure
         for root_concept in virtual_tree.get('roots', []):
             if 'Abstract' in root_concept:
@@ -1252,7 +1252,7 @@ class EnhancedStatementBuilder:
                 if item:
                     # Clear children to rebuild with promoted concepts
                     item.children = []
-                    
+
                     # Handle revenue deduplication first
                     promoted_added = set()
                     revenue_item = self._create_deduplicated_revenue_item(
@@ -1262,7 +1262,7 @@ class EnhancedStatementBuilder:
                         item.children.append(revenue_item)
                         # Mark all revenue concepts as processed
                         promoted_added.update(REVENUE_CONCEPTS)
-                    
+
                     # Add other promoted concepts that have values
                     for concept in ESSENTIAL_CONCEPTS:
                         if concept not in promoted_added and concept in nodes:
@@ -1283,11 +1283,11 @@ class EnhancedStatementBuilder:
                                     # Override label for better display
                                     if concept == 'CostOfGoodsAndServicesSold':
                                         promoted_item.label = 'Cost of Revenue'
-                                    
+
                                     promoted_item.children = []  # Don't show deep hierarchy
                                     item.children.append(promoted_item)
                                     promoted_added.add(concept)
-                    
+
                     # Then add other important concepts not in essential list
                     for child_concept in nodes.get(root_concept, {}).get('children', []):
                         if child_concept not in promoted_added:
@@ -1301,10 +1301,10 @@ class EnhancedStatementBuilder:
                             )
                             if child_item:
                                 item.children.append(child_item)
-                    
+
                     items.append(item)
                     break
-        
+
         # If no abstract root, just build normally
         if not items:
             for root_concept in virtual_tree.get('roots', []):
@@ -1318,9 +1318,9 @@ class EnhancedStatementBuilder:
                 )
                 if item:
                     items.append(item)
-        
+
         return items
-    
+
     def _create_deduplicated_revenue_item(self,
                                         revenue_concepts: List[str],
                                         nodes: Dict[str, Any],
@@ -1329,19 +1329,19 @@ class EnhancedStatementBuilder:
                                         statement_type: str) -> Optional[MultiPeriodItem]:
         """
         Create a single deduplicated revenue item by combining multiple revenue concepts.
-        
+
         This method implements revenue deduplication for the Facts API path, similar to 
         what was done for XBRL processing. It combines revenue from different concepts
         across periods to show comprehensive revenue data. When no explicit revenue
         concepts exist, it attempts to calculate revenue from GrossProfit + CostOfRevenue.
-        
+
         Args:
             revenue_concepts: List of revenue concepts in priority order
             nodes: Virtual tree nodes
             period_maps: Period-mapped fact data
             periods: List of periods
             statement_type: Statement type
-            
+
         Returns:
             Single MultiPeriodItem with deduplicated revenue data or None if no revenue found
         """
@@ -1349,14 +1349,14 @@ class EnhancedStatementBuilder:
         consolidated_values = {}
         best_label = "Total Revenue"  # Default label
         has_any_revenue = False
-        
+
         # Track which concept provides data for each period (for debugging/transparency)
         source_tracking = {}
-        
+
         for period in periods:
             period_value = None
             source_concept = None
-            
+
             # Try explicit revenue concepts in priority order for this period
             for concept in revenue_concepts:
                 if concept in period_maps[period]:
@@ -1365,28 +1365,28 @@ class EnhancedStatementBuilder:
                         period_value = fact.numeric_value
                         source_concept = concept
                         has_any_revenue = True
-                        
+
                         # Use the label from the first concept we find
                         if period_value is not None and not source_tracking:
                             best_label = fact.label if fact.label else "Total Revenue"
-                        
+
                         break  # Found value for this period, use highest priority
-            
+
             # If no explicit revenue found, try to calculate from GrossProfit + CostOfRevenue
             if period_value is None:
                 gross_profit = None
                 cost_of_revenue = None
-                
+
                 # Look for GrossProfit
                 if 'GrossProfit' in period_maps[period]:
                     gross_profit_fact = period_maps[period]['GrossProfit']
                     gross_profit = gross_profit_fact.numeric_value
-                
+
                 # Look for CostOfRevenue
                 if 'CostOfRevenue' in period_maps[period]:
                     cost_fact = period_maps[period]['CostOfRevenue']
                     cost_of_revenue = cost_fact.numeric_value
-                
+
                 # Calculate revenue if both components are available
                 if gross_profit is not None and cost_of_revenue is not None:
                     period_value = gross_profit + cost_of_revenue
@@ -1394,28 +1394,28 @@ class EnhancedStatementBuilder:
                     has_any_revenue = True
                     # Debug output (disabled)
                     # print(f"DEBUG: Calculated revenue for {period}: ${period_value:,} (GP: ${gross_profit:,} + CoR: ${cost_of_revenue:,})")
-            
+
             consolidated_values[period] = period_value
             if source_concept:
                 source_tracking[period] = source_concept
-        
+
         if not has_any_revenue:
             return None
-        
+
         # Override label to be more descriptive
         best_label = "Total Revenue"
-        
+
         # Find the highest priority concept that has data to determine other properties
         primary_concept = None
         for concept in revenue_concepts:
             if any(concept in period_maps[p] for p in periods):
                 primary_concept = concept
                 break
-        
+
         # If no explicit revenue concepts, use a calculated concept identifier
         if not primary_concept:
             primary_concept = 'TotalRevenue_Consolidated'
-        
+
         # Create the deduplicated revenue item
         revenue_item = MultiPeriodItem(
             concept=primary_concept,  # Use the highest priority concept as the base
@@ -1429,9 +1429,9 @@ class EnhancedStatementBuilder:
             confidence=0.95,  # High confidence for deduplicated revenue
             children=[]
         )
-        
+
         return revenue_item
-    
+
     def _build_canonical_item(self,
                              concept: str,
                              nodes: Dict[str, Any],
@@ -1441,7 +1441,7 @@ class EnhancedStatementBuilder:
                              statement_type: str = None) -> Optional[MultiPeriodItem]:
         """Build a single canonical item with multi-period values."""
         node = nodes.get(concept, {})
-        
+
         # Get values for each period
         # Check both original concept and normalized version
         values = {}
@@ -1453,13 +1453,13 @@ class EnhancedStatementBuilder:
             if not fact:
                 normalized = self._normalize_concept(concept)
                 fact = period_maps[period].get(normalized)
-            
+
             if fact:
                 values[period] = fact.numeric_value
                 has_any_value = True
             else:
                 values[period] = None
-        
+
         # Get label from first fact or node
         label = None
         for period in periods:
@@ -1469,7 +1469,7 @@ class EnhancedStatementBuilder:
                 break
         if not label:
             label = node.get('label', concept)
-        
+
         # Process children first to see if any have values
         children_items = []
         for child_concept in node.get('children', []):
@@ -1483,7 +1483,7 @@ class EnhancedStatementBuilder:
             )
             if child_item:
                 children_items.append(child_item)
-        
+
         # Determine if we should include this node
         # Include if ANY of these are true:
         # 1. It has values
@@ -1491,9 +1491,9 @@ class EnhancedStatementBuilder:
         # 3. It has children with values
         # 4. It's an essential concept for investors
         # 5. It has reasonable occurrence rate (>= 0.3)
-        
+
         is_essential = statement_type and self._is_essential_concept(concept, statement_type)
-        
+
         if not has_any_value and not node.get('is_abstract'):
             # Skip only if ALL of these are true:
             # - Not essential
@@ -1501,7 +1501,7 @@ class EnhancedStatementBuilder:
             # - No children with values
             if not is_essential and node.get('occurrence_rate', 0) < 0.3 and not children_items:
                 return None
-        
+
         item = MultiPeriodItem(
             concept=concept,
             label=label,
@@ -1514,16 +1514,16 @@ class EnhancedStatementBuilder:
             confidence=node.get('occurrence_rate', 1.0),
             children=children_items
         )
-        
+
         return item
-    
+
     def _add_orphan_facts(self,
                          period_maps: Dict[str, Dict[str, FinancialFact]],
                          virtual_tree_nodes: Dict[str, Any],
                          periods: List[str],
                          statement_type: str) -> Optional[MultiPeriodItem]:
         """Add valuable facts not in virtual tree as 'Additional Items' section."""
-        
+
         # Find all concepts that have values but aren't in the virtual tree
         orphan_concepts = set()
         for period_map in period_maps.values():
@@ -1533,10 +1533,10 @@ class EnhancedStatementBuilder:
                     # Check if this is an essential or important concept
                     if self._is_important_orphan(concept, statement_type):
                         orphan_concepts.add(concept)
-        
+
         if not orphan_concepts:
             return None
-        
+
         # Create orphan section
         orphan_section = MultiPeriodItem(
             concept='AdditionalItems',
@@ -1549,14 +1549,14 @@ class EnhancedStatementBuilder:
             section='Additional',
             confidence=1.0
         )
-        
+
         # Add each orphan concept as a child
         for concept in sorted(orphan_concepts):
             # Get values for each period
             values = {}
             label = None
             has_values = False
-            
+
             for period in periods:
                 fact = period_maps[period].get(concept)
                 if fact:
@@ -1566,7 +1566,7 @@ class EnhancedStatementBuilder:
                         label = fact.label
                 else:
                     values[period] = None
-            
+
             if has_values:
                 orphan_item = MultiPeriodItem(
                     concept=concept,
@@ -1580,22 +1580,22 @@ class EnhancedStatementBuilder:
                     confidence=0.5  # Lower confidence for orphan facts
                 )
                 orphan_section.children.append(orphan_item)
-        
+
         # Only return if we have actual orphan items
         return orphan_section if orphan_section.children else None
-    
+
     def _is_important_orphan(self, concept: str, statement_type: str) -> bool:
         """Determine if an orphan concept is important enough to display."""
-        
+
         # Check if it's an essential concept
         if self._is_essential_concept(concept, statement_type):
             return True
-        
+
         # Check if it's a normalized version of an essential concept
         normalized = self._normalize_concept(concept)
         if normalized != concept and self._is_essential_concept(normalized, statement_type):
             return True
-        
+
         # Additional important concepts not in essential list but valuable
         important_keywords = [
             # Balance Sheet
@@ -1608,38 +1608,38 @@ class EnhancedStatementBuilder:
             'Depreciation', 'Amortization', 'Capital', 'Dividend', 'Acquisition',
             'Repurchase', 'Proceeds', 'Payments', 'Working'
         ]
-        
+
         concept_lower = concept.lower()
         return any(keyword.lower() in concept_lower for keyword in important_keywords)
-    
+
     def _is_total_concept(self, concept: str, label: str = None) -> bool:
         """Determine if a concept represents a total."""
         indicators = ['total', 'net', 'gross', 'subtotal', 'aggregate']
         concept_lower = concept.lower()
         label_lower = (label or '').lower()
         return any(ind in concept_lower or ind in label_lower for ind in indicators)
-    
+
     def _add_calculated_metrics(self, 
                                period_maps: Dict[str, Dict[str, FinancialFact]],
                                periods: List[str],
                                existing_items: List[MultiPeriodItem]) -> List[MultiPeriodItem]:
         """Add calculated metrics like Gross Profit if not already present."""
         calculated_items = []
-        
+
         # Check if GrossProfit exists in items
         has_gross_profit = any(
             self._find_item_by_concept(item, 'GrossProfit') 
             for item in existing_items
         )
-        
+
         if not has_gross_profit:
             # Try to calculate Gross Profit = Revenue - Cost of Revenue
             gross_profit_values = {}
             has_values = False
-            
+
             for period in periods:
                 period_map = period_maps[period]
-                
+
                 # Find revenue (try various concepts)
                 revenue = None
                 revenue_concepts = [
@@ -1650,7 +1650,7 @@ class EnhancedStatementBuilder:
                     if concept in period_map:
                         revenue = period_map[concept].numeric_value
                         break
-                
+
                 # Find cost of revenue
                 cost = None
                 cost_concepts = [
@@ -1661,14 +1661,14 @@ class EnhancedStatementBuilder:
                     if concept in period_map:
                         cost = period_map[concept].numeric_value
                         break
-                
+
                 # Calculate if both available
                 if revenue is not None and cost is not None:
                     gross_profit_values[period] = revenue - cost
                     has_values = True
                 else:
                     gross_profit_values[period] = None
-            
+
             if has_values:
                 gross_profit_item = MultiPeriodItem(
                     concept='GrossProfit_Calculated',
@@ -1682,9 +1682,9 @@ class EnhancedStatementBuilder:
                     confidence=0.8
                 )
                 calculated_items.append(gross_profit_item)
-        
+
         return calculated_items
-    
+
     def _find_item_by_concept(self, item: MultiPeriodItem, concept: str) -> Optional[MultiPeriodItem]:
         """Recursively find an item by concept name."""
         if item.concept == concept:
@@ -1694,20 +1694,20 @@ class EnhancedStatementBuilder:
             if found:
                 return found
         return None
-    
+
     def _apply_smart_aggregation(self, item: MultiPeriodItem):
         """Apply smart aggregation to calculate parent values from children."""
         # Recursively process children first
         for child in item.children:
             self._apply_smart_aggregation(child)
-        
+
         # Only aggregate if:
         # 1. Parent has no values
         # 2. Parent is not abstract (or is a total)
         # 3. Has children with values
-        
+
         has_any_value = any(v is not None for v in item.values.values())
-        
+
         if not has_any_value and item.children:
             # Check if this should be aggregated
             should_aggregate = (
@@ -1715,13 +1715,13 @@ class EnhancedStatementBuilder:
                 'total' in item.label.lower() or
                 (not item.is_abstract and self._should_aggregate_children(item))
             )
-            
+
             if should_aggregate:
                 # Aggregate values from children
                 for period in item.values.keys():
                     child_sum = 0
                     has_child_values = False
-                    
+
                     for child in item.children:
                         child_value = child.values.get(period)
                         if child_value is not None:
@@ -1729,57 +1729,57 @@ class EnhancedStatementBuilder:
                             if not child.is_abstract or child.is_total:
                                 child_sum += child_value
                                 has_child_values = True
-                    
+
                     if has_child_values:
                         item.values[period] = child_sum
                         # Mark as aggregated
                         if not item.label.endswith(' (Aggregated)'):
                             item.label = item.label + ' (Aggregated)'
-    
+
     def _deduplicate_table_items(self, items: List[MultiPeriodItem]) -> List[MultiPeriodItem]:
         """
         Remove redundant items from Statement [Table] structures when they duplicate primary items.
-        
+
         This handles the XBRL quirk where the same concepts appear both:
         1. At the top level (primary context)
         2. Under Statement [Table] -> Statement [Line Items] (dimensional context)
-        
+
         When there are no actual dimensions, these are pure duplicates.
         """
         # First, collect all concepts and their values from non-table contexts
         primary_concepts = {}
-        
+
         def collect_primary_concepts(item: MultiPeriodItem, in_table: bool = False):
             """Collect concepts that are not in table structures."""
             # Check if we're entering a table
             if 'Table' in item.label and 'Statement' in item.label:
                 in_table = True
-            
+
             if not in_table and item.concept and item.values:
                 # Store the concept and its values
                 if any(v is not None for v in item.values.values()):
                     primary_concepts[item.concept] = item.values
-            
+
             # Recurse through children
             for child in item.children:
                 collect_primary_concepts(child, in_table)
-        
+
         # Collect all primary (non-table) concepts
         for item in items:
             collect_primary_concepts(item)
-        
+
         def remove_duplicate_table_items(item: MultiPeriodItem, in_table: bool = False) -> Optional[MultiPeriodItem]:
             """Remove items from table structures that duplicate primary items."""
             # Check if we're entering a table
             if 'Table' in item.label and 'Statement' in item.label:
                 in_table = True
-                
+
                 # For table structures, check if ALL children are duplicates
                 # If so, we might want to skip the entire table
                 cleaned_children = []
                 total_children = 0
                 duplicate_children = 0
-                
+
                 for child in item.children:
                     total_children += 1
                     cleaned_child = remove_duplicate_table_items(child, in_table)
@@ -1787,7 +1787,7 @@ class EnhancedStatementBuilder:
                         cleaned_children.append(cleaned_child)
                     else:
                         duplicate_children += 1
-                
+
                 # If most children are duplicates and we have few remaining items,
                 # consider removing the table entirely
                 if cleaned_children and len(cleaned_children) > 2:
@@ -1800,7 +1800,7 @@ class EnhancedStatementBuilder:
                 else:
                     # Table has very little unique content, remove it
                     return None
-            
+
             # For items within tables, check if they're duplicates
             if in_table and item.concept in primary_concepts:
                 # Check if values match
@@ -1809,7 +1809,7 @@ class EnhancedStatementBuilder:
                     # in case they have unique dimensional breakdowns)
                     has_unique_children = False
                     cleaned_children = []
-                    
+
                     for child in item.children:
                         cleaned_child = remove_duplicate_table_items(child, in_table)
                         if cleaned_child:
@@ -1818,7 +1818,7 @@ class EnhancedStatementBuilder:
                             if cleaned_child.concept not in primary_concepts or \
                                cleaned_child.values != primary_concepts.get(cleaned_child.concept):
                                 has_unique_children = True
-                    
+
                     if has_unique_children:
                         # Keep this item as a container for unique children
                         item.children = cleaned_children
@@ -1826,39 +1826,39 @@ class EnhancedStatementBuilder:
                     else:
                         # Pure duplicate with no unique children
                         return None
-            
+
             # For non-duplicate items, clean their children
             cleaned_children = []
             for child in item.children:
                 cleaned_child = remove_duplicate_table_items(child, in_table)
                 if cleaned_child:
                     cleaned_children.append(cleaned_child)
-            
+
             item.children = cleaned_children
             return item
-        
+
         # Process all top-level items
         cleaned_items = []
         for item in items:
             cleaned_item = remove_duplicate_table_items(item)
             if cleaned_item:
                 cleaned_items.append(cleaned_item)
-        
+
         return cleaned_items
-    
+
     def _should_aggregate_children(self, item: MultiPeriodItem) -> bool:
         """Determine if children should be aggregated for this parent."""
         # Don't aggregate if children are heterogeneous (mix of assets/liabilities etc)
         # This is a simplified check - could be more sophisticated
-        
+
         aggregatable_parents = [
             'CurrentAssets', 'NonCurrentAssets', 'TotalAssets',
             'CurrentLiabilities', 'NonCurrentLiabilities', 'TotalLiabilities',
             'OperatingExpenses', 'TotalExpenses', 'TotalRevenue'
         ]
-        
+
         return any(parent in item.concept for parent in aggregatable_parents)
-    
+
     def _build_from_facts(self,
                          period_facts: Dict[str, List[FinancialFact]],
                          periods: List[str]) -> List[MultiPeriodItem]:
@@ -1866,13 +1866,13 @@ class EnhancedStatementBuilder:
         # Simple approach - just list all unique concepts
         all_concepts = set()
         concept_labels = {}
-        
+
         for period_facts_list in period_facts.values():
             for fact in period_facts_list:
                 concept = fact.concept.split(':', 1)[-1] if ':' in fact.concept else fact.concept
                 all_concepts.add(concept)
                 concept_labels[concept] = fact.label
-        
+
         items = []
         for concept in sorted(all_concepts):
             values = {}
@@ -1885,7 +1885,7 @@ class EnhancedStatementBuilder:
                         break
                 else:
                     values[period] = None
-            
+
             item = MultiPeriodItem(
                 concept=concept,
                 label=concept_labels.get(concept, concept),
@@ -1894,45 +1894,45 @@ class EnhancedStatementBuilder:
                 parent_concept=None
             )
             items.append(item)
-        
+
         return items
-    
+
     def _create_fact_map(self, facts: List[FinancialFact]) -> Dict[str, FinancialFact]:
         """Create concept -> fact mapping with normalization."""
         fact_map = {}
         for fact in facts:
             # Get clean concept name without namespace
             concept = fact.concept.split(':', 1)[-1] if ':' in fact.concept else fact.concept
-            
+
             # Store under both original and normalized names
             # This allows matching both variants
             fact_map[concept] = fact
-            
+
             normalized = self._normalize_concept(concept)
             if normalized != concept:
                 # Also store under normalized name if different
                 # Prefer normalized if not already present
                 if normalized not in fact_map:
                     fact_map[normalized] = fact
-            
+
             # Use most recent fact for duplicates
             if concept not in fact_map or fact.filing_date > fact_map[concept].filing_date:
                 fact_map[concept] = fact
         return fact_map
-    
+
     def _calculate_coverage(self, facts: List[FinancialFact], virtual_tree_key: str) -> float:
         """Calculate canonical coverage."""
         if virtual_tree_key not in self.virtual_trees:
             return 0.0
-        
+
         canonical_concepts = set(self.virtual_trees[virtual_tree_key].get('nodes', {}).keys())
         if not canonical_concepts:
             return 0.0
-        
+
         fact_concepts = set()
         for fact in facts:
             concept = fact.concept.split(':', 1)[-1] if ':' in fact.concept else fact.concept
             fact_concepts.add(concept)
-        
+
         matched = len(fact_concepts & canonical_concepts)
         return matched / len(canonical_concepts)

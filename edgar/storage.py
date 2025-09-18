@@ -3,7 +3,10 @@ import os
 import re
 from datetime import datetime, date
 from pathlib import Path
-from typing import Optional, Union, List
+from typing import Optional, Union, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from edgar._filings import Filings
 
 import pandas as pd
 from bs4 import BeautifulSoup

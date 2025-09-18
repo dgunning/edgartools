@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import List, Optional
 
 
 # Dataclasses for raw data from primary_doc.xml files in all filings

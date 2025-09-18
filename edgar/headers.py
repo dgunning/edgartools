@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 import orjson as json
 import pandas as pd
@@ -8,15 +8,15 @@ from pydantic import BaseModel
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Column, Table
 from rich.text import Text
 
 from edgar._party import Address, get_addresses_as_columns
-from edgar.richtools import repr_rich
 from edgar.core import sec_dot_gov
 from edgar.formatting import display_size
 from edgar.httprequests import download_file
 from edgar.reference import describe_form
+from edgar.richtools import repr_rich
 
 __all__ = ['FilingDirectory', 'IndexHeaders', 'ReportingOwner', 'CompanyData', 'FilingValues', 'FormerCompany']
 
@@ -77,7 +77,7 @@ class FilingDirectory:
 
 """
  Represent the SEC filing headers of a filing.
- 
+
  The headers are extracted from the HTML file of the filing. This is the file  `<accession-number>-index-headers.html` 
 
 """
@@ -483,8 +483,7 @@ class IndexHeaders(BaseModel):
         soup = BeautifulSoup(pre_tag.text)
         document_tags = soup.find_all("document")
         for document_tag in document_tags:
-            type_tag = document_tag.find("type")
-            print(type_tag)
+            document_tag.find("type")
 
 
     @staticmethod

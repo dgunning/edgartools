@@ -1,13 +1,13 @@
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table, Column
+from rich.table import Column, Table
 from rich.text import Text
 
 from edgar._party import Address, get_addresses_as_columns
@@ -628,48 +628,48 @@ class FilingHeader:
     def _is_valid_sgml_tag(line: str) -> bool:
         """
         Check if line contains a valid SGML header tag (not HTML/XBRL content).
-        
+
         SGML header tags are uppercase with no namespace prefixes.
         HTML/XBRL tags often have lowercase letters or namespace prefixes like 'ix:'.
-        
+
         Args:
             line: The line to check
-            
+
         Returns:
             bool: True if line contains a valid SGML tag, False otherwise
         """
         stripped = line.strip()
         if not stripped.startswith('<'):
             return False
-        
+
         # Find the end of the tag
         tag_end = stripped.find('>')
         if tag_end == -1:
             return False
-            
+
         # Extract tag name (without the < >)
         tag = stripped[1:tag_end]
-        
+
         # Skip closing tags
         if tag.startswith('/'):
             return False
-        
+
         # SGML header tags characteristics:
         # 1. No namespace prefixes (no ':' character)
         # 2. Uppercase letters, numbers, and hyphens only
         # 3. Should not contain attributes or spaces
         if ':' in tag or ' ' in tag:
             return False
-            
+
         # Check if tag is uppercase (SGML convention)
         if tag != tag.upper():
             return False
-            
+
         # Additional check: Should contain only letters, numbers, and hyphens
         import re
         if not re.match(r'^[A-Z0-9\-]+$', tag):
             return False
-            
+
         return True
 
     @classmethod
@@ -728,7 +728,7 @@ class FilingHeader:
                     # Only process valid SGML header tags, skip HTML/XBRL content
                     if not cls._is_valid_sgml_tag(line):
                         continue
-                        
+
                     # The line looks like this <KEY>VALUE
                     # Handle lines with multiple '>' characters (e.g., XBRL inline content)
                     split_parts = line.split('>', 1)  # Split only on first '>' character

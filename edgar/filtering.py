@@ -5,12 +5,13 @@ This module provides functions for filtering pyarrow Tables containing SEC EDGAR
 based on various criteria like dates, forms, CIK numbers, etc.
 """
 import datetime
-from typing import Union, List
+from typing import List, Union
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from edgar.dates import extract_dates
+
 from edgar.core import IntString, listify
+from edgar.dates import extract_dates
 
 
 def filter_by_date(data: pa.Table,
@@ -94,26 +95,26 @@ def filter_by_year(data: pa.Table,
                    year: Union[int, List[int]], 
                    date_col: str = 'filing_date') -> pa.Table:
     """Filter data by year(s)
-    
+
     Args:
         data: PyArrow table to filter
         year: Year or list of years to filter by
         date_col: Name of the date column to filter on
-        
+
     Returns:
         Filtered PyArrow table
     """
     years = listify(year)
-    
+
     # Get the data type of the date column
     date_column_type = data.schema.field(date_col).type
-    
+
     # Create year-based filters
     year_filters = []
     for y in years:
         start_date = f"{y}-01-01"
         end_date = f"{y}-12-31"
-        
+
         # Convert dates to appropriate type for comparison
         if pa.types.is_date32(date_column_type) or pa.types.is_timestamp(date_column_type):
             # For date/timestamp columns, cast the date column to string for comparison
@@ -124,9 +125,9 @@ def filter_by_year(data: pa.Table,
             # For string dates, use direct comparison
             year_filter = (pc.field(date_col) >= pc.scalar(start_date)) & \
                          (pc.field(date_col) <= pc.scalar(end_date))
-        
+
         year_filters.append(year_filter)
-    
+
     # Combine with OR logic
     if len(year_filters) == 1:
         combined_filter = year_filters[0]
@@ -134,7 +135,7 @@ def filter_by_year(data: pa.Table,
         combined_filter = year_filters[0]
         for f in year_filters[1:]:
             combined_filter = combined_filter | f
-    
+
     return data.filter(combined_filter)
 
 
@@ -143,19 +144,19 @@ def filter_by_quarter(data: pa.Table,
                       quarter: Union[int, List[int]], 
                       date_col: str = 'filing_date') -> pa.Table:
     """Filter data by specific year-quarter combinations
-    
+
     Args:
         data: PyArrow table to filter
         year: Year or list of years
         quarter: Quarter or list of quarters (1-4)
         date_col: Name of the date column to filter on
-        
+
     Returns:
         Filtered PyArrow table
     """
     years = listify(year)
     quarters = listify(quarter)
-    
+
     # Quarter date ranges
     quarter_ranges = {
         1: ("01-01", "03-31"),
@@ -163,10 +164,10 @@ def filter_by_quarter(data: pa.Table,
         3: ("07-01", "09-30"),
         4: ("10-01", "12-31")
     }
-    
+
     # Get the data type of the date column
     date_column_type = data.schema.field(date_col).type
-    
+
     # Create filters for each year-quarter combination
     filters = []
     for y in years:
@@ -176,7 +177,7 @@ def filter_by_quarter(data: pa.Table,
             start_month_day, end_month_day = quarter_ranges[q]
             start_date = f"{y}-{start_month_day}"
             end_date = f"{y}-{end_month_day}"
-            
+
             # Convert dates to appropriate type for comparison
             if pa.types.is_date32(date_column_type) or pa.types.is_timestamp(date_column_type):
                 # For date/timestamp columns, cast the date column to string for comparison
@@ -188,15 +189,15 @@ def filter_by_quarter(data: pa.Table,
                 quarter_filter = (pc.field(date_col) >= pc.scalar(start_date)) & \
                                (pc.field(date_col) <= pc.scalar(end_date))
             filters.append(quarter_filter)
-    
+
     # Combine with OR logic
     if not filters:
         return data
-    
+
     combined_filter = filters[0]
     for f in filters[1:]:
         combined_filter = combined_filter | f
-    
+
     return data.filter(combined_filter)
 
 
@@ -205,19 +206,19 @@ def filter_by_year_quarter(data: pa.Table,
                           quarter: Union[int, List[int]] = None,
                           date_col: str = 'filing_date') -> pa.Table:
     """Filter by year and optionally quarter
-    
+
     Args:
         data: PyArrow table to filter
         year: Year or list of years to filter by
         quarter: Quarter or list of quarters (1-4). If None, filters by full year(s)
         date_col: Name of the date column to filter on
-        
+
     Returns:
         Filtered PyArrow table
     """
     if year is None:
         return data
-        
+
     if quarter is None:
         return filter_by_year(data, year, date_col)
     else:

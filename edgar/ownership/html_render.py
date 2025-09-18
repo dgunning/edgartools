@@ -2,7 +2,10 @@
 
 import os
 import re
-from typing import Optional, Any
+from typing import Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from edgar.ownership.core import Ownership
 
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader

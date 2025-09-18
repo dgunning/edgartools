@@ -1,8 +1,7 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Dict, Any, Tuple
-from typing import Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 from bs4 import Tag
 
@@ -360,11 +359,6 @@ def is_heading(element: Tag, style: StyleInfo) -> bool:
                 debug_evidence.append("+1 for medium parent margin")
 
     # Debug output
-    print(f"\nHeading detection for: '{text[:50]}{'...' if len(text) > 50 else ''}'")
-    print(f"Score: {score}/{max_score}")
-    print("Evidence:", "\n  ".join([''] + debug_evidence))
-    print(
-            f"Style details: font_size={style.font_size}, font_weight={style.font_weight}, text_align={style.text_align}")
 
     return score >= max_score
 
@@ -372,10 +366,7 @@ def is_heading(element: Tag, style: StyleInfo) -> bool:
 def _get_effective_style(element: Tag, base_style: StyleInfo, debug: bool = False) -> StyleInfo:
     """Get combined styles with parent-first approach and semantic tag handling"""
     if debug:
-        print("\nStyle Computation:")
-        print(f"Base style: {_format_style_debug(base_style)}")
-        print(f"Element: {element.name}")
-        print(f"Element style attr: {element.get('style', 'None')}")
+        pass
 
     # Start with base style
     effective_style = base_style or StyleInfo()
@@ -385,7 +376,7 @@ def _get_effective_style(element: Tag, base_style: StyleInfo, debug: bool = Fals
         if parent.name == 'div':
             parent_style = parse_style(parent.get('style', ''))
             if debug:
-                print(f"Parent {parent.name} style: {_format_style_debug(parent_style)}")
+                pass
             if parent_style:
                 effective_style = effective_style.merge(parent_style)
         # Stop at first div to avoid going too far up
@@ -397,7 +388,7 @@ def _get_effective_style(element: Tag, base_style: StyleInfo, debug: bool = Fals
     if span_parent:
         span_style = parse_style(span_parent.get('style', ''))
         if debug:
-            print(f"Span parent style: {_format_style_debug(span_style)}")
+            pass
         if span_style:
             effective_style = effective_style.merge(span_style)
 
@@ -421,7 +412,7 @@ def _get_effective_style(element: Tag, base_style: StyleInfo, debug: bool = Fals
         )
 
     if debug:
-        print(f"Final effective style: {_format_style_debug(effective_style)}")
+        pass
 
     return effective_style
 
@@ -458,7 +449,6 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
 
     def log_decision(stage: str, result: bool, reason: str):
         if debug:
-            print(f"{stage}: {'✓' if result else '✗'} - {reason}")
             debug_info['decisions'].append({
                 'stage': stage,
                 'result': result,
@@ -468,7 +458,7 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
     # Early return for empty or whitespace-only text
     if not text.strip():
         if debug:
-            print("\nEmpty Content Check: Text is empty or whitespace-only")
+            pass
         return None
 
     # Special handling for elements inside a div
@@ -499,9 +489,7 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
                     )
 
                 if debug:
-                    print("\nProcessing split heading:")
-                    print(f"Combined text: '{combined_text}'")
-                    print(f"Has bold span: {has_bold}")
+                    pass
 
                 # Process the combined heading
                 return get_heading_level(parent_div, div_style, combined_text, debug)
@@ -509,17 +497,13 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
     # Get complete style for the element
     complete_style = _get_effective_style(element, style, debug)
     if debug:
-        print("\nStyle Analysis:")
-        print(f"Text: '{text}'")
-        print(f"Element: {element.name}")
-        print(f"Complete style: {_format_style_debug(complete_style)}")
+        pass
 
     # Check minimum heading traits
     has_min_traits, trait_details = _has_minimum_heading_traits(complete_style, text, return_details=True)
     if debug:
-        print("\nHeading Traits:")
-        for trait, value in trait_details.items():
-            print(f"  {trait}: {value}")
+        for _trait, _value in trait_details.items():
+            pass
 
     if not has_min_traits:
         log_decision("Style Check", False, "Does not meet minimum heading traits")
@@ -533,8 +517,7 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
 
     # Level 1 check (PART headers)
     if debug:
-        print(f"\nChecking Level 1 pattern against: '{text_to_check}'")
-        print(f"Pattern: {HEADING_PATTERNS['l1'].pattern}")
+        pass
 
     if HEADING_PATTERNS['l1'].match(text_to_check):
         log_decision("Pattern Check", True, "Matches Level 1 (PART) pattern")
@@ -542,10 +525,10 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
 
     # Level 2 check (Items, Articles)
     if debug:
-        print("\nChecking Level 2 patterns:")
+        pass
     for pattern in HEADING_PATTERNS['l2']:
         if debug:
-            print(f"Testing pattern: {pattern.pattern}")
+            pass
         if pattern.match(text_to_check):
             log_decision("Pattern Check", True, f"Matches Level 2 pattern: {pattern.pattern}")
             return 2
@@ -553,10 +536,10 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
     # Level 3 check (requires prominence)
     if is_prominent:
         if debug:
-            print("\nChecking Level 3 patterns (prominence check passed):")
+            pass
         for pattern in HEADING_PATTERNS['l3']:
             if debug:
-                print(f"Testing pattern: {pattern.pattern}")
+                pass
             if pattern.match(text_to_check):
                 log_decision("Pattern Check", True, f"Matches Level 3 pattern: {pattern.pattern}")
                 return 3
@@ -566,7 +549,7 @@ def get_heading_level(element: Tag, style: StyleInfo, text: str, debug: bool = F
             log_decision("Pattern Check", True, "Matches section heading criteria")
             return 3
     elif debug:
-        print("\nSkipping Level 3 patterns (prominence check failed)")
+        pass
 
     # Level 4 check (minor subsections)
     # Check for basic heading traits that didn't match higher level patterns
@@ -636,7 +619,7 @@ def _is_prominently_styled(style: StyleInfo, debug: bool = False) -> bool:
     """Check for prominent styling with detailed debug output"""
     if not style:
         if debug:
-            print("No style provided to prominence check")
+            pass
         return False
 
     prominence_checks = {
@@ -647,15 +630,13 @@ def _is_prominently_styled(style: StyleInfo, debug: bool = False) -> bool:
     }
 
     if debug:
-        print("\nProminent Style Check:")
-        for check, result in prominence_checks.items():
-            print(f"  {check}: {result}")
+        for _check, result in prominence_checks.items():
             if result:
-                print(f"    - {_get_prominence_detail(style, check)}")
+                pass
 
     result = any(prominence_checks.values())
     if debug:
-        print(f"Final prominence result: {result}")
+        pass
 
     return result
 

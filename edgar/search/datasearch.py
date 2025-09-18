@@ -1,7 +1,7 @@
 import hashlib
 import re
 from functools import lru_cache
-from typing import List, Dict, Callable, Any
+from typing import Any, Callable, Dict, List
 
 import pyarrow as pa
 from rapidfuzz import fuzz

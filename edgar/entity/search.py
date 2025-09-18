@@ -3,11 +3,11 @@ Search functionality for SEC entities.
 This module provides functions and classes for searching for SEC entities.
 """
 from functools import lru_cache
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 import pandas as pd
 from rich import box
-from rich.table import Table, Column
+from rich.table import Column, Table
 
 from edgar.entity import Company
 from edgar.entity.tickers import get_company_tickers
@@ -105,11 +105,11 @@ def _get_company_search_index():
 def find_company(company: str, top_n: int = 10):
     """
     Find a company by name.
-    
+
     Args:
         company: The company name or ticker to search for
         top_n: The maximum number of results to return
-        
+
     Returns:
         CompanySearchResults: The search results
     """

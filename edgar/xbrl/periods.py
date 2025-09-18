@@ -118,13 +118,13 @@ def filter_periods_by_document_end_date(periods: List[Dict], document_period_end
     """Filter periods to only include those that end on or before the document period end date."""
     if not document_period_end_date:
         return periods
-        
+
     try:
         doc_end_date = datetime.strptime(document_period_end_date, '%Y-%m-%d').date()
     except (ValueError, TypeError):
         # If we can't parse the document end date, return all periods
         return periods
-    
+
     filtered_periods = []
     for period in periods:
         try:
@@ -139,7 +139,7 @@ def filter_periods_by_document_end_date(periods: List[Dict], document_period_end
         except (ValueError, TypeError):
             # If we can't parse the period date, include it to be safe
             filtered_periods.append(period)
-    
+
     return filtered_periods
 
 def filter_periods_by_type(periods: List[Dict], period_type: str) -> List[Dict]:
@@ -159,22 +159,22 @@ def calculate_fiscal_alignment_score(end_date: datetime.date, fiscal_month: int,
 
 def generate_period_view(view_config: Dict[str, Any], periods: List[Dict], is_annual: bool = False) -> Optional[Dict[str, Any]]:
     """Generate a period view based on configuration and available periods.
-    
+
     Args:
         view_config: Configuration for the view (from STATEMENT_TYPE_CONFIG)
         periods: List of periods to choose from
         is_annual: Whether this is an annual report
-        
+
     Returns:
         Dictionary with view name, description, and period keys if view is valid,
         None if view cannot be generated with available periods
     """
     if len(periods) < view_config['requires_min_periods']:
         return None
-        
+
     if view_config.get('annual_only', False) and not is_annual:
         return None
-        
+
     max_periods = min(view_config['max_periods'], len(periods))
     return {
         'name': view_config['name'],
@@ -186,79 +186,79 @@ def generate_period_view(view_config: Dict[str, Any], periods: List[Dict], is_an
 def generate_mixed_view(view_config: Dict[str, Any], ytd_periods: List[Dict], 
                        quarterly_periods: List[Dict]) -> Optional[Dict[str, Any]]:
     """Generate a mixed view combining YTD and quarterly periods.
-    
+
     Args:
         view_config: Configuration for the view
         ytd_periods: List of year-to-date periods
         quarterly_periods: List of quarterly periods
-        
+
     Returns:
         Dictionary with view configuration if valid, None otherwise
     """
     if not ytd_periods or not quarterly_periods:
         return None
-        
+
     mixed_keys = []
-    
+
     # Add current YTD
     mixed_keys.append(ytd_periods[0]['key'])
-    
+
     # Add recent quarters
     for q in quarterly_periods[:min(4, len(quarterly_periods))]:
         if q['key'] not in mixed_keys:
             mixed_keys.append(q['key'])
-    
+
     if len(mixed_keys) >= view_config['requires_min_periods']:
         return {
             'name': view_config['name'],
             'description': view_config['description'],
             'period_keys': mixed_keys[:view_config['max_periods']]
         }
-    
+
     return None
 
 
 def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]:
     """
     Get available period views for a statement type.
-    
+
     Args:
         xbrl_instance: XBRL instance with context and entity information
         statement_type: Type of statement to get period views for
-        
+
     Returns:
         List of period view options with name, description, and period keys
     """
     period_views = []
-    
+
     # Get statement configuration
     config = STATEMENT_TYPE_CONFIG.get(statement_type)
     if not config:
         return period_views
-        
+
     # Get useful entity info for period selection
     entity_info = xbrl_instance.entity_info
     fiscal_period_focus = entity_info.get('fiscal_period')
     annual_report = fiscal_period_focus == 'FY'
-    
+
     # Get all periods
     all_periods = xbrl_instance.reporting_periods
     document_period_end_date = xbrl_instance.period_of_report
-    
+
     # Filter and sort periods by type
     period_type = config['period_type']
     periods = filter_periods_by_type(all_periods, period_type)
     # Filter by document period end date to exclude periods after the reporting period
     periods = filter_periods_by_document_end_date(periods, document_period_end_date, period_type)
     periods = sort_periods(periods, period_type)
-    
+
     # If this statement type allows annual comparison and this is an annual report,
     # filter for annual periods
     annual_periods = []
     if config.get('allow_annual_comparison') and annual_report:
         fiscal_month = entity_info.get('fiscal_year_end_month')
         fiscal_day = entity_info.get('fiscal_year_end_day')
-        
+
         if fiscal_month is not None and fiscal_day is not None:
             for period in periods:
                 try:
@@ -269,7 +269,7 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
                         annual_periods.append(period)
                 except (ValueError, TypeError):
                     continue
-    
+
     # Generate views based on configuration
     for view_config in config.get('views', []):
         if view_config.get('mixed_view'):
@@ -283,12 +283,12 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
         else:
             # Standard views using all periods
             view = generate_period_view(view_config, periods, annual_report)
-            
+
         if view:
             period_views.append(view)
-    
+
     return period_views
-                
+
 def determine_periods_to_display(
     xbrl_instance,
     statement_type: str,
@@ -297,21 +297,21 @@ def determine_periods_to_display(
 ) -> List[Tuple[str, str]]:
     """
     Determine which periods should be displayed for a statement.
-    
+
     Uses smart period selection, which balances investor needs
     with data availability for optimal financial analysis.
-    
+
     Args:
         xbrl_instance: XBRL instance with context and entity information
         statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
         period_filter: Optional period key to filter by specific reporting period
         period_view: Optional name of a predefined period view
-        
+
     Returns:
         List of tuples with period keys and labels to display
     """
     periods_to_display = []
-    
+
     # If a specific period is requested, use only that
     if period_filter:
         for period in xbrl_instance.reporting_periods:
@@ -319,12 +319,12 @@ def determine_periods_to_display(
                 periods_to_display.append((period_filter, period['label']))
                 break
         return periods_to_display
-    
+
     # If a period view is specified, use that
     if period_view:
         available_views = get_period_views(xbrl_instance, statement_type)
         matching_view = next((view for view in available_views if view['name'] == period_view), None)
-        
+
         if matching_view:
             for period_key in matching_view['period_keys']:
                 for period in xbrl_instance.reporting_periods:
@@ -332,7 +332,7 @@ def determine_periods_to_display(
                         periods_to_display.append((period_key, period['label']))
                         break
             return periods_to_display
-    
+
     # Use smart period selection with fallback to legacy logic
     try:
         from edgar.xbrl.smart_periods import select_smart_periods
@@ -342,36 +342,36 @@ def determine_periods_to_display(
         import logging
         logging.warning(f"Smart period selection failed, using legacy logic: {e}")
         # Continue to legacy logic below
-    
+
     # If no specific periods requested, use default logic based on statement type
     all_periods = xbrl_instance.reporting_periods
     entity_info = xbrl_instance.entity_info
     fiscal_period_focus = entity_info.get('fiscal_period')
     document_period_end_date = xbrl_instance.period_of_report
-    
+
     # Filter periods by statement type
     if statement_type == 'BalanceSheet':
         instant_periods = filter_periods_by_type(all_periods, 'instant')
         # Filter by document period end date to exclude periods after the reporting period
         instant_periods = filter_periods_by_document_end_date(instant_periods, document_period_end_date, 'instant')
         instant_periods = sort_periods(instant_periods, 'instant')
-        
+
         # Get fiscal information for better period matching
         fiscal_period_focus = entity_info.get('fiscal_period')
         fiscal_year_focus = entity_info.get('fiscal_year')
         fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
         fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
-        
+
         if instant_periods:
             # Take latest instant period that is not later than document_period_end_date
             current_period = instant_periods[0]  # Most recent
             period_key = current_period['key']
             periods_to_display.append((period_key, current_period['label']))
-            
+
             # Try to find appropriate comparison period
             try:
                 current_date = datetime.strptime(current_period['date'], '%Y-%m-%d').date()
-                
+
                 # Use fiscal information if available for better matching
                 if fiscal_year_end_month is not None and fiscal_year_end_day is not None:
                     # Check if this is a fiscal year end report
@@ -380,13 +380,13 @@ def determine_periods_to_display(
                             current_date.month == fiscal_year_end_month and
                             abs(current_date.day - fiscal_year_end_day) <= 7):
                         is_fiscal_year_end = True
-                    
+
                     if is_fiscal_year_end and fiscal_year_focus:
                         # For fiscal year end, find the previous fiscal year end period
                         prev_fiscal_year = int(fiscal_year_focus) - 1 if isinstance(fiscal_year_focus, 
                                                                                (int, str)) and str(
                             fiscal_year_focus).isdigit() else current_date.year - 1
-                        
+
                         # Look for a comparable period from previous fiscal year
                         for period in instant_periods[1:]:  # Skip the current one
                             try:
@@ -399,12 +399,12 @@ def determine_periods_to_display(
                                     break
                             except (ValueError, TypeError):
                                 continue
-                
+
                 # If no appropriate period found yet, try generic date-based comparison
                 if len(periods_to_display) == 1:
                     # Look for a period from previous year with similar date pattern
                     prev_year = current_date.year - 1
-                    
+
                     for period in instant_periods[1:]:  # Skip the current one
                         try:
                             period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
@@ -414,30 +414,30 @@ def determine_periods_to_display(
                                 break
                         except (ValueError, TypeError):
                             continue
-                
+
                 # Only add additional comparable periods (up to a total of 3)
                 # For annual reports, only add periods that are also fiscal year ends
                 is_annual_report = (fiscal_period_focus == 'FY')
                 added_period_keys = [key for key, _ in periods_to_display]
-                
+
                 for period in instant_periods[1:]:  # Skip current period
                     if len(periods_to_display) >= 3:
                         break  # Stop when we have 3 periods
-                    
+
                     # For annual reports, only add periods that are fiscal year ends
                     # ENHANCED: Ensure we're selecting true annual period ends, not quarterly
                     if is_annual_report and fiscal_year_end_month is not None and fiscal_year_end_day is not None:
                         try:
                             # Check if this period is close to the fiscal year end
                             period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
-                            
+
                             # STRICT CHECK: For annual reports, be more selective
                             # The period should be within a reasonable range of fiscal year end
                             is_fiscal_year_end = (
                                     period_date.month == fiscal_year_end_month and
                                     abs(period_date.day - fiscal_year_end_day) <= 15  # Allow some flexibility
                             )
-                            
+
                             # Additional check: Ensure this is approximately 1 year before previous periods
                             if is_fiscal_year_end and len(periods_to_display) > 0:
                                 prev_date_str = periods_to_display[-1][0].split('_')[-1] if '_' in periods_to_display[-1][0] else None
@@ -450,31 +450,31 @@ def determine_periods_to_display(
                                             is_fiscal_year_end = False
                                     except (ValueError, TypeError):
                                         pass
-                            
+
                             # Only include this period if it's a fiscal year end
                             if not is_fiscal_year_end:
                                 continue  # Skip non-fiscal-year-end periods
                         except (ValueError, TypeError):
                             continue  # Skip periods with invalid dates
-                    
+
                     # Don't add periods we've already added
                     period_key = period['key']
                     if period_key not in added_period_keys:
                         periods_to_display.append((period_key, period['label']))
-                        
+
             except (ValueError, TypeError):
                 # If date parsing failed, still try to select appropriate periods
                 # For annual reports, we should only show fiscal year end periods
                 is_annual_report = (fiscal_period_focus == 'FY')
-                
+
                 added_count = 0
                 for i, period in enumerate(instant_periods):
                     if i == 0:
                         continue  # Skip first period which should already be added
-                    
+
                     if added_count >= 2:  # Already added 2 more (for a total of 3)
                         break
-                    
+
                     # For annual reports, only add periods that are close to fiscal year end
                     if (is_annual_report and fiscal_year_end_month is not None and 
                             fiscal_year_end_day is not None):
@@ -486,10 +486,10 @@ def determine_periods_to_display(
                                 continue  # Skip periods that aren't fiscal year ends
                         except (ValueError, TypeError):
                             continue  # Skip periods with invalid dates
-                    
+
                     periods_to_display.append((period['key'], period['label']))
                     added_count += 1
-    
+
     elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
         duration_periods = filter_periods_by_type(all_periods, 'duration')
         # Filter by document period end date to exclude periods after the reporting period
@@ -501,7 +501,7 @@ def determine_periods_to_display(
                 # Get fiscal year end information if available
                 fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
                 fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
-                
+
                 # First pass: Find all periods that are approximately a year long
                 # CRITICAL FIX: Apply strict duration filtering to ensure we only get annual periods
                 # Some facts are marked as FY but are actually quarterly (90 days vs 363+ days)
@@ -522,14 +522,14 @@ def determine_periods_to_display(
                             candidate_annual_periods.append(period_with_score)
                     except (ValueError, TypeError):
                         continue
-                
+
                 # Second pass: Score periods based on alignment with fiscal year pattern
                 if fiscal_year_end_month is not None and fiscal_year_end_day is not None:
                     for period in candidate_annual_periods:
                         try:
                             # Check how closely the end date aligns with fiscal year end
                             end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
-                            
+
                             # Perfect match: Same month and day as fiscal year end
                             if end_date.month == fiscal_year_end_month and end_date.day == fiscal_year_end_day:
                                 period['fiscal_alignment_score'] = 100
@@ -541,34 +541,34 @@ def determine_periods_to_display(
                                 period['fiscal_alignment_score'] = 50
                         except (ValueError, TypeError):
                             continue
-                
+
                 # Sort periods by fiscal alignment (higher score first) and then by recency (end date)
                 annual_periods = sorted(
                     candidate_annual_periods,
                     key=lambda x: (x['fiscal_alignment_score'], x['end_date']),
                     reverse=True  # Highest score and most recent first
                 )
-                
+
                 if annual_periods:
                     # Take up to 3 best matching annual periods (prioritizing fiscal year alignment)
                     for period in annual_periods[:3]:
                         periods_to_display.append((period['key'], period['label']))
                     return periods_to_display
-            
+
             # For quarterly reports, apply intelligent period selection
             else:
                 # First, categorize periods by duration to identify meaningful financial periods
                 quarterly_periods = []  # 85-95 days (one quarter)
                 ytd_periods = []        # 175-185 days (two quarters), 265-275 days (three quarters)
                 annual_periods = []     # 350-380 days (full year for comparisons)
-                
+
                 current_year = None
                 if document_period_end_date:
                     try:
                         current_year = datetime.strptime(document_period_end_date, '%Y-%m-%d').year
                     except (ValueError, TypeError):
                         pass
-                
+
                 # Categorize all duration periods by their length
                 # ENHANCED: More strict duration checking to avoid misclassification
                 for period in duration_periods:
@@ -576,11 +576,11 @@ def determine_periods_to_display(
                         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
                         end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
                         days = (end_date - start_date).days
-                        
+
                         # Skip single-day or very short periods (less than 30 days)
                         if days < 30:
                             continue
-                            
+
                         # Categorize by duration with stricter checks
                         if 80 <= days <= 100:  # Quarterly period (~90 days), slightly wider range
                             period['period_type'] = 'quarterly'
@@ -600,16 +600,16 @@ def determine_periods_to_display(
                             annual_periods.append(period)
                     except (ValueError, TypeError):
                         continue
-                
+
                 # Build the optimal set of periods for quarterly reporting
                 selected_periods = []
-                
+
                 # 1. Add the most recent quarterly period (current quarter)
                 if quarterly_periods:
                     # Find the most recent quarterly period
                     recent_quarterly = quarterly_periods[0]  # Already sorted by end date
                     selected_periods.append(recent_quarterly)
-                    
+
                     # Try to find the same quarter from previous year for comparison
                     if current_year:
                         for qp in quarterly_periods[1:]:
@@ -624,36 +624,36 @@ def determine_periods_to_display(
                                     break
                             except (ValueError, TypeError):
                                 continue
-                
+
                 # 2. Add the most recent YTD period if available
                 if ytd_periods:
                     # Find the YTD period that ends closest to the document period end
                     selected_periods.append(ytd_periods[0])
-                
+
                 # 3. If we don't have enough periods yet, add more quarterly periods
                 if len(selected_periods) < 3:
                     for period in quarterly_periods:
                         if period not in selected_periods and len(selected_periods) < 3:
                             selected_periods.append(period)
-                
+
                 # 4. If still not enough, consider annual periods for year-over-year comparison
                 if len(selected_periods) < 3 and annual_periods:
                     for period in annual_periods:
                         if len(selected_periods) < 3:
                             selected_periods.append(period)
-                
+
                 # Convert selected periods to display format
                 for period in selected_periods[:3]:  # Limit to 3 periods
                     periods_to_display.append((period['key'], period['label']))
-    
+
     # For other statement types (not covered by specific logic above)
     else:
         # Get configuration for this statement type, or use defaults
         statement_info = STATEMENT_TYPE_CONFIG.get(statement_type, {})
-        
+
         if not statement_info:
             # For unknown statement types, use heuristics based on available periods
-            
+
             # For unknown statement types, determine preferences based on fiscal period
             if fiscal_period_focus == 'FY':
                 # For annual reports, prefer duration periods and show comparisons
@@ -669,11 +669,11 @@ def determine_periods_to_display(
                     'max_periods': 1,
                     'allow_annual_comparison': False
                 }
-        
+
         # Select periods based on determined preferences
         period_type = statement_info.get('period_type', 'either')
         max_periods = statement_info.get('max_periods', 1)
-        
+
         if period_type == 'instant' or period_type == 'either':
             instant_periods = filter_periods_by_type(all_periods, 'instant')
             instant_periods = filter_periods_by_document_end_date(instant_periods, document_period_end_date, 'instant')
@@ -681,7 +681,7 @@ def determine_periods_to_display(
             if instant_periods:
                 for period in instant_periods[:max_periods]:
                     periods_to_display.append((period['key'], period['label']))
-                    
+
         if (period_type == 'duration' or (period_type == 'either' and not periods_to_display)):
             duration_periods = filter_periods_by_type(all_periods, 'duration')
             duration_periods = filter_periods_by_document_end_date(duration_periods, document_period_end_date, 'duration')
@@ -689,5 +689,5 @@ def determine_periods_to_display(
             if duration_periods:
                 for period in duration_periods[:max_periods]:
                     periods_to_display.append((period['key'], period['label']))
-    
+
     return periods_to_display

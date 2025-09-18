@@ -1,5 +1,5 @@
-import re
 import base64
+import re
 
 __all__ = ['extract_text_between_tags', 'get_content_between_tags', 'strip_tags', 'is_xml', 'decode_uu']
 
