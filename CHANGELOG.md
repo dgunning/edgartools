@@ -7,6 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.13.0 - 2025-09-18
+
+### Added
+- **FEAT-411: Standardized Financial Concepts API** - Complete implementation of standardized financial concept access
+  - **New Methods in EntityFacts**: 7 standardized getter methods for consistent financial data access
+    - `get_revenue()` - handles various revenue concept names across companies
+    - `get_net_income()` - standardizes net income access
+    - `get_total_assets()` - consistent asset reporting
+    - `get_total_liabilities()` - standardized liability access
+    - `get_shareholders_equity()` - equity across entity types
+    - `get_operating_income()` - operating income normalization
+    - `get_gross_profit()` - gross profit with fallback calculation
+  - **Advanced Features**: Priority-based concept matching, XBRL namespace handling, period-specific access, intelligent fallback calculations
+  - **Validation**: 100% success rate tested across 40+ companies including FAANG, Tech Giants, and Mega-Cap companies
+  - **User Impact**: Eliminates need for company-specific XBRL knowledge when accessing key financial metrics
+
+- **Comprehensive Unit Handling System** - Enhanced unit compatibility and conversion logic
+  - **UnitCompatibilityMode**: Configurable unit handling with Strict, Lenient, and Convert modes
+  - **Unit Analysis Tools**: Built-in unit compatibility checking and conversion utilities
+  - **Entity Facts Integration**: Seamless unit handling within standardized financial concept API
+
+### Fixed
+- **Issue #439**: Fixed XBRL order and balance_type parsing in linkbases
+  - **Problem**: XBRL parser failed to properly handle both 'xlink:order' (XBRL standard) and 'order' attributes in calculation, presentation, and definition linkbases
+  - **Solution**: Added robust `_parse_order_attribute()` method with proper fallback handling for both attribute formats
+  - **Impact**: Improves XBRL data structure parsing accuracy and prevents parsing failures in diverse XBRL document formats
+
+- **Issue #441**: Improved error handling in CurrentFilings
+  - **Problem**: Assertion errors when handling malformed filing data
+  - **Solution**: Replaced assertions with proper error handling and logging
+  - **Impact**: More robust filing data processing with graceful error recovery
+
+### Enhanced
+- **Currency Display Performance** - Optimized currency display performance and memory usage
+  - Reduced memory footprint for financial statement rendering
+  - Improved performance when displaying large datasets with currency formatting
+
+- **Test Infrastructure** - Enhanced test configuration and coverage
+  - Added comprehensive regression tests for new standardized concepts API
+  - Improved test configuration for currency and filing access tests
+  - Added unit compatibility mode testing with extensive validation scenarios
+
+### Technical Details
+- **New Files Added** (22 files, 10,464+ lines):
+  - `edgar/entity/entity_facts.py`: Extended with standardized financial concept methods (327 lines)
+  - `edgar/entity/unit_handling.py`: Comprehensive unit handling system (419 lines)
+  - `edgar/entity/tools.py`: Enhanced entity analysis tools (16 lines)
+  - `tests/test_standardized_concepts.py`: Complete test suite for new API (354 lines)
+  - `tests/test_unit_handling.py`: Unit handling validation tests (538 lines)
+  - Additional test files for company groups and compatibility modes
+
+- **Core Improvements**:
+  - Enhanced `edgar/xbrl/parser.py` with robust order attribute parsing (57 lines modified)
+  - Optimized currency display components for better performance
+  - Improved error handling patterns across multiple modules
+  - Zero breaking changes - all existing functionality preserved and enhanced
+
 ## Release 4.12.2 - 2025-09-14
 
 ### Fixed
