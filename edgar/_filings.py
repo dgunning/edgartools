@@ -1383,7 +1383,6 @@ class Filing:
             data = json.load(file)
             return cls.from_dict(data)
 
-    @property
     @cached_property
     def header(self):
         _sgml = self.sgml()

@@ -61,7 +61,6 @@ class CompanyReport:
     def cash_flow_statement(self):
         return self.financials.cashflow_statement() if self.financials else None
 
-    @property
     @cached_property
     def financials(self):
         return Financials.extract(self._filing)
@@ -70,7 +69,6 @@ class CompanyReport:
     def period_of_report(self):
         return self._filing.header.period_of_report
 
-    @property
     @cached_property
     def chunked_document(self):
         return ChunkedDocument(self._filing.html())
@@ -269,7 +267,6 @@ class TenK(CompanyReport):
     def directors_officers_and_governance(self):
         return self['Item 10']
 
-    @property
     @cached_property
     def chunked_document(self):
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
@@ -445,7 +442,6 @@ class TenQ(CompanyReport):
         from edgar.files.html_documents_id_parser import ParsedHtml10Q
         return ParsedHtml10Q().extract_html(self._filing.html(), self.structure, markdown=markdown)
 
-    @property
     @cached_property
     def chunked_document(self):
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
@@ -720,7 +716,6 @@ class CurrentReport(CompanyReport):
         if press_release_results:
             return PressReleases(press_release_results)
 
-    @property
     @cached_property
     def chunked_document(self):
         html = self._filing.html()
