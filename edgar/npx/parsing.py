@@ -726,7 +726,7 @@ class ProxyVoteTableExtractor(BaseExtractor):
 
             except (ValueError, TypeError) as e:
                 log.error(
-                    f"Skipping proxyTable due to missing/invalid data or parsing error: {e} on element {element.tag if element is not None else 'Unknown Element'}"
+                    "Skipping proxyTable due to missing/invalid data or parsing error: %s on element %s", e, element.tag if element is not None else 'Unknown Element'
                 )
 
             if element is not None:

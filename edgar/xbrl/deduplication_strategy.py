@@ -80,11 +80,11 @@ class RevenueDeduplicator:
             if i not in items_to_remove:
                 result.append(item)
             else:
-                log.debug(f"Removed duplicate revenue item: {item.get('label', 'Unknown')} = {item.get('values', {})}")
+                log.debug("Removed duplicate revenue item: %s = %s", item.get('label', 'Unknown'), item.get('values', {}))
 
         removed_count = len(statement_items) - len(result)
         if removed_count > 0:
-            log.info(f"Revenue deduplication: removed {removed_count} duplicate items")
+            log.info("Revenue deduplication: removed %d duplicate items", removed_count)
 
         return result
 

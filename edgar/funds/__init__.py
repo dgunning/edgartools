@@ -67,7 +67,7 @@ def get_fund_with_filings(identifier: str):
             if result:
                 return result
         except Exception as e:
-            logging.warning(f"Error in get_fund_with_filings: {e}")
+            logging.warning("Error in get_fund_with_filings: %s", e)
 
     # Create a minimal object with the expected interface as a last resort
     class MinimalFundInfo:

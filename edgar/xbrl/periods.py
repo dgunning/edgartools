@@ -340,7 +340,7 @@ def determine_periods_to_display(
     except Exception as e:
         # Log the error and fall back to legacy logic
         import logging
-        logging.warning(f"Smart period selection failed, using legacy logic: {e}")
+        logging.warning("Smart period selection failed, using legacy logic: %s", e)
         # Continue to legacy logic below
 
     # If no specific periods requested, use default logic based on statement type

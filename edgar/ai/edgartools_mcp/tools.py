@@ -314,7 +314,7 @@ class FinancialsTool(BaseTool):
                     result["periods_analyzed"] += 1
 
                 except Exception as e:
-                    logger.warning(f"Error processing filing: {e}")
+                    logger.warning("Error processing filing: %s", e)
                     continue
 
             # Calculate ratios if requested
@@ -453,7 +453,7 @@ class SearchTool(BaseTool):
                             })
 
                 except Exception as e:
-                    logger.warning(f"Company search error: {e}")
+                    logger.warning("Company search error: %s", e)
 
             # Add context
             result["total_found"] = len(result["results"])

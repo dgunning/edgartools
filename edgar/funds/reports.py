@@ -2132,7 +2132,7 @@ def get_fund_portfolio_from_filing(filing) -> pd.DataFrame:
         if fund_report and hasattr(fund_report, 'investment_data'):
             return fund_report.investment_data()
     except Exception as e:
-        log.warning(f"Error extracting portfolio from NPORT filing: {e}")
+        log.warning("Error extracting portfolio from NPORT filing: %s", e)
 
     # Return empty DataFrame if extraction failed
     return pd.DataFrame()
