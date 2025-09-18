@@ -1383,8 +1383,9 @@ class Filing:
             data = json.load(file)
             return cls.from_dict(data)
 
-    @cached_property
+    @lru_cache(maxsize=1)
     def header(self):
+        """Get the header for the filing"""
         _sgml = self.sgml()
         return _sgml.header
 
@@ -1427,8 +1428,8 @@ class Filing:
                regex=False):
         """Search for the query string in the filing HTML"""
         if regex:
-            return self.__get_regex_search_index().search(query)
-        return self.__get_bm25_search_index().search(query)
+            return self.__get_regex_search_index.search(query)
+        return self.__get_bm25_search_index.search(query)
 
     @property
     def filing_url(self) -> str:
@@ -1469,14 +1470,14 @@ class Filing:
         """Alias for homepage"""
         return self.homepage
 
-    @cached_property
+    @lru_cache(maxsize=1)
     def get_entity(self):
         """Get the company to which this filing belongs"""
         "Get the company for cik. Cache for performance"
         from edgar.entity import Company
         return Company(self.cik)
 
-    @cached_property
+    @lru_cache(maxsize=1)
     def as_company_filing(self):
         """Get this filing as a company filing. Company Filings have more information"""
         company = self.get_entity()
@@ -1488,7 +1489,7 @@ class Filing:
             return filings[0]
         return None
 
-    @cached_property
+    @lru_cache(maxsize=1)
     def related_filings(self):
         """Get all the filings related to this one
         There is no file number on this base Filing class so first get the company,

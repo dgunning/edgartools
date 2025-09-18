@@ -7,7 +7,7 @@ import tempfile
 import time
 import webbrowser
 import zipfile
-from functools import cached_property, lru_cache
+from functools import lru_cache
 from pathlib import Path
 from threading import Thread
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
@@ -857,7 +857,7 @@ class FilingHomepage:
             if datafile.description in xbrl_document_types:
                 return datafile
 
-    @cached_property
+    @lru_cache(maxsize=1)
     def get_filers(self):
         filer_divs = self._soup.find_all("div", id="filerDiv")
         filer_infos = []

@@ -51,23 +51,24 @@ class CompanyReport:
 
     @property
     def income_statement(self):
-        return self.financials.income_statement() if self.financials else None
+        return self.financials().income_statement() if self.financials() else None
 
     @property
     def balance_sheet(self):
-        return self.financials.balance_sheet() if self.financials else None
+        return self.financials().balance_sheet() if self.financials() else None
 
     @property
     def cash_flow_statement(self):
-        return self.financials.cashflow_statement() if self.financials else None
+        return self.financials().cashflow_statement() if self.financials() else None
 
-    @cached_property
+    @lru_cache(maxsize=1)
     def financials(self):
+        """Get the financials for this filing"""
         return Financials.extract(self._filing)
 
     @property
     def period_of_report(self):
-        return self._filing.header.period_of_report
+        return self._filing.header().period_of_report
 
     @cached_property
     def chunked_document(self):
@@ -96,7 +97,7 @@ class CompanyReport:
         return Panel(
             Group(
                 self._filing.__rich__(),
-                self.financials or Text("No financial data available")
+                self.financials() or Text("No financial data available")
             )
         )
 
@@ -354,7 +355,7 @@ class TenK(CompanyReport):
                 Padding(" ", (1, 0, 0, 0)),
                 self.get_structure(),
                 Padding(" ", (1, 0, 0, 0)),
-                self.financials or Text("No financial data available", style="italic")
+                self.financials() or Text("No financial data available", style="italic")
             ),
             title=title,
             box=box.ROUNDED,
@@ -500,7 +501,7 @@ class TenQ(CompanyReport):
                 Padding(" ", (1, 0, 0, 0)),
                 self.get_structure(),
                 Padding(" ", (1, 0, 0, 0)),
-                self.financials or Text("No financial data available", style="italic")
+                self.financials() or Text("No financial data available", style="italic")
             ),
             title=title,
             box=box.ROUNDED,
@@ -753,7 +754,7 @@ class CurrentReport(CompanyReport):
     @property
     def date_of_report(self):
         """Return the period of report for this filing"""
-        period_of_report_str = self._filing.header.period_of_report
+        period_of_report_str = self._filing.header().period_of_report
         if period_of_report_str:
             period_of_report = datetime.strptime(period_of_report_str, "%Y-%m-%d")
             return period_of_report.strftime("%B %d, %Y")
