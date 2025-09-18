@@ -491,14 +491,14 @@ class Company(Entity):
         """Get financial statements for this company."""
         tenk_filing = self.latest_tenk
         if tenk_filing is not None:
-            return tenk_filing.financials
+            return tenk_filing.financials()
         return None
 
     def get_quarterly_financials(self) -> Optional[Financials]:
         """Get quarterly financial statements for this company."""
         tenq_filing = self.latest_tenq
         if tenq_filing is not None:
-            return tenq_filing.financials
+            return tenq_filing.financials()
         return None
 
     @property

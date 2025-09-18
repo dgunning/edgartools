@@ -68,7 +68,7 @@ class CompanyReport:
 
     @property
     def period_of_report(self):
-        return self._filing.header().period_of_report
+        return self._filing.header.period_of_report
 
     @cached_property
     def chunked_document(self):
@@ -754,7 +754,7 @@ class CurrentReport(CompanyReport):
     @property
     def date_of_report(self):
         """Return the period of report for this filing"""
-        period_of_report_str = self._filing.header().period_of_report
+        period_of_report_str = self._filing.header.period_of_report
         if period_of_report_str:
             period_of_report = datetime.strptime(period_of_report_str, "%Y-%m-%d")
             return period_of_report.strftime("%B %d, %Y")

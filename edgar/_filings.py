@@ -1383,7 +1383,7 @@ class Filing:
             data = json.load(file)
             return cls.from_dict(data)
 
-    @lru_cache(maxsize=1)
+    @cached_property
     def header(self):
         """Get the header for the filing"""
         _sgml = self.sgml()
