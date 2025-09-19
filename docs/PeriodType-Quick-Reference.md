@@ -23,7 +23,7 @@ Enhanced developer experience through IDE autocomplete and parameter validation 
 
 ### Import
 ```python
-from edgar.enums import PeriodType, PeriodInput
+from edgar.enums import PeriodType, PeriodInput, validate_period_type
 ```
 
 ### Function Parameters (New Style)
@@ -31,18 +31,28 @@ from edgar.enums import PeriodType, PeriodInput
 from edgar import Company
 from edgar.enums import PeriodType
 
-# Enhanced with autocomplete
+# Enhanced with autocomplete for financial statements
 company = Company("AAPL")
-facts = company.get_facts(period=PeriodType.ANNUAL)       # IDE autocomplete!
-quarterly_data = company.get_facts(period=PeriodType.QUARTERLY)
-ttm_data = company.get_facts(period=PeriodType.TTM)
+facts = company.get_facts()
+
+# Period filtering through statement methods
+annual_income = facts.income_statement(annual=True)       # Annual periods
+quarterly_income = facts.income_statement(annual=False)   # Quarterly periods
+
+# Using query interface with PeriodType
+annual_facts = facts.query().by_period_length(12).get()  # Annual (12 months)
+quarterly_facts = facts.query().by_period_length(3).get() # Quarterly (3 months)
 ```
 
 ### Backwards Compatibility (Existing Style)
 ```python
 # Still works - no breaking changes
-facts = company.get_facts(period="annual")
-quarterly_data = company.get_facts(period="quarterly")
+from edgar import Company
+
+company = Company("AAPL")
+facts = company.get_facts()
+annual_income = facts.income_statement(annual=True)
+quarterly_income = facts.income_statement(annual=False)
 ```
 
 ## 🛡️ Enhanced Validation
@@ -55,20 +65,20 @@ from edgar.enums import validate_period_type
 try:
     validate_period_type("anual")  # misspelled
 except ValueError as e:
-    # Error: "Invalid period type 'anual'. Did you mean: annual?"
-    
+    print(e)  # Error: "Invalid period type 'anual'. Did you mean: annual?"
+
 # Invalid input
 try:
     validate_period_type("invalid")
 except ValueError as e:
-    # Error: "Invalid period type 'invalid'. Use PeriodType enum for autocomplete..."
+    print(e)  # Error: "Invalid period type 'invalid'. Use PeriodType enum for autocomplete..."
 ```
 
 ## 🔧 Function Integration
 
 ### Type Hints
 ```python
-from edgar.enums import PeriodInput
+from edgar.enums import PeriodInput, PeriodType, validate_period_type
 
 def analyze_financials(ticker: str, period: PeriodInput = PeriodType.ANNUAL) -> str:
     """Function with PeriodType parameter."""
@@ -76,12 +86,14 @@ def analyze_financials(ticker: str, period: PeriodInput = PeriodType.ANNUAL) -> 
     return f"Analyzing {ticker} {validated_period} financials"
 
 # Usage
-result = analyze_financials("AAPL", PeriodType.QUARTERLY)  # IDE autocomplete
-result = analyze_financials("MSFT", "ttm")                 # String still works
+result1 = analyze_financials("AAPL", PeriodType.QUARTERLY)  # IDE autocomplete
+result2 = analyze_financials("MSFT", "ttm")                 # String still works
 ```
 
 ### Migration from Boolean Annual
 ```python
+from edgar.enums import PeriodInput, PeriodType, validate_period_type
+
 # Old pattern
 def old_style(annual: bool = True) -> str:
     period = "annual" if annual else "quarterly"
@@ -121,16 +133,37 @@ for period in ALL_PERIODS:
 
 ### Financial Analysis
 ```python
+from edgar.enums import PeriodInput
+
 def compare_performance(ticker: str, periods: list[PeriodInput]) -> dict:
     """Compare company performance across different periods."""
+    from edgar import Company
+    from edgar.enums import validate_period_type
+
+    company = Company(ticker)
+    facts = company.get_facts()
     results = {}
+
     for period in periods:
         period_str = validate_period_type(period)
-        # Mock analysis
-        results[period_str] = f"{ticker} performance for {period_str}"
+        data = None  # Initialize data variable
+
+        if period_str == "annual":
+            data = facts.income_statement(annual=True, periods=1)
+        elif period_str == "quarterly":
+            data = facts.income_statement(annual=False, periods=1)
+        elif period_str == "ttm":
+            # Get last 4 quarters for TTM calculation
+            data = facts.income_statement(annual=False, periods=4)
+
+        if data is not None:
+            results[period_str] = data
+
     return results
 
 # Usage with mixed types
+from edgar.enums import PeriodType
+
 analysis = compare_performance("AAPL", [
     PeriodType.ANNUAL,    # Enum
     "quarterly",          # String
@@ -140,27 +173,62 @@ analysis = compare_performance("AAPL", [
 
 ### Batch Processing
 ```python
-def process_companies(tickers: list[str], 
-                     period: PeriodInput = PeriodType.QUARTERLY) -> str:
+from edgar.enums import PeriodInput, PeriodType
+
+def process_companies(tickers: list[str],
+                     period: PeriodInput = PeriodType.QUARTERLY) -> dict:
     """Process multiple companies for specified period."""
+    from edgar import Company
+    from edgar.enums import validate_period_type
+
     period_str = validate_period_type(period)
-    return f"Processing {len(tickers)} companies for {period_str} data"
+    results = {}
+
+    for ticker in tickers:
+        company = Company(ticker)
+        facts = company.get_facts()
+        statement = None  # Initialize statement variable
+
+        if period_str == "annual":
+            statement = facts.income_statement(annual=True, periods=1)
+        elif period_str == "quarterly":
+            statement = facts.income_statement(annual=False, periods=1)
+
+        if statement is not None:
+            results[ticker] = statement
+
+    return results
 
 # Usage
+from edgar.enums import PeriodType
+
 tech_stocks = ["AAPL", "MSFT", "GOOGL"]
-result = process_companies(tech_stocks, PeriodType.TTM)
+result = process_companies(tech_stocks, PeriodType.QUARTERLY)
 ```
 
 ### Period Iteration
 ```python
 def comprehensive_analysis(ticker: str) -> dict:
     """Analyze company across all standard periods."""
+    from edgar import Company
+    from edgar.enums import STANDARD_PERIODS
+
+    company = Company(ticker)
+    facts = company.get_facts()
     results = {}
-    
+
     for period in STANDARD_PERIODS:
         # Each period provides IDE autocomplete when used
-        results[period.value] = f"Analysis for {period.value}"
-        
+        statement = None  # Initialize statement variable
+
+        if period.value == "annual":
+            statement = facts.income_statement(annual=True, periods=2)
+        elif period.value == "quarterly":
+            statement = facts.income_statement(annual=False, periods=4)
+
+        if statement is not None:
+            results[period.value] = statement
+
     return results
 ```
 
@@ -197,21 +265,33 @@ Your IDE will warn about:
 **Before:**
 ```python
 # Limited to annual/quarterly only
-company.get_facts(annual=True)    # Annual data
-company.get_facts(annual=False)   # Quarterly data
+from edgar import Company
+
+company = Company("AAPL")
+facts = company.get_facts()
+annual_income = facts.income_statement(annual=True)    # Annual data
+quarterly_income = facts.income_statement(annual=False)   # Quarterly data
 ```
 
 **After:**
 ```python
-# Rich period support with autocomplete
-company.get_facts(period=PeriodType.ANNUAL)     # Annual
-company.get_facts(period=PeriodType.QUARTERLY)  # Quarterly
-company.get_facts(period=PeriodType.TTM)        # Trailing twelve months
-company.get_facts(period=PeriodType.YTD)        # Year to date
+# Rich period support with enhanced querying
+from edgar import Company
 
-# String compatibility maintained
-company.get_facts(period="annual")     # Still works
-company.get_facts(period="quarterly")  # Still works
+company = Company("AAPL")
+facts = company.get_facts()
+
+# Financial statement methods with boolean parameters
+annual_income = facts.income_statement(annual=True)     # Annual
+quarterly_income = facts.income_statement(annual=False) # Quarterly
+
+# Advanced period filtering with query interface
+ttm_facts = facts.query().by_period_length(12).get()   # Trailing twelve months
+quarterly_facts = facts.query().by_period_length(3).get() # Quarterly periods
+
+# Individual fact retrieval with period specification
+revenue_2023 = facts.get_fact("Revenue", period="2023-FY")
+revenue_q4 = facts.get_fact("Revenue", period="2023-Q4")
 ```
 
 ### From String Parameters
@@ -219,6 +299,9 @@ company.get_facts(period="quarterly")  # Still works
 **Before:**
 ```python
 # Typo-prone, no autocomplete
+def analyze_data(period: str) -> str:
+    return f"Analyzing {period} data"
+
 analyze_data("annual")     # Could typo as "anual"
 analyze_data("quarterly")  # Could typo as "quartly"
 ```
@@ -226,6 +309,12 @@ analyze_data("quarterly")  # Could typo as "quartly"
 **After:**
 ```python
 # Autocomplete prevents typos
+from edgar.enums import PeriodType, PeriodInput, validate_period_type
+
+def analyze_data(period: PeriodInput) -> str:
+    validated_period = validate_period_type(period)
+    return f"Analyzing {validated_period} data"
+
 analyze_data(PeriodType.ANNUAL)     # IDE autocomplete
 analyze_data(PeriodType.QUARTERLY)  # IDE autocomplete
 
@@ -251,31 +340,43 @@ PeriodType follows the same design pattern as FormType:
 ### 1. Use Enums for New Code
 ```python
 # Recommended: Enhanced developer experience
-def analyze_trends(period: PeriodInput = PeriodType.ANNUAL):
-    ...
+from edgar.enums import PeriodInput, PeriodType
+
+def analyze_trends(period: PeriodInput = PeriodType.ANNUAL) -> str:
+    return f"Analyzing trends for {period}"
 ```
 
-### 2. Maintain String Compatibility  
+### 2. Maintain String Compatibility
 ```python
 # Support both for flexibility
-def flexible_function(period: PeriodInput):
+from edgar.enums import PeriodInput, validate_period_type
+
+def flexible_function(period: PeriodInput) -> str:
     validated = validate_period_type(period)  # Handles both
-    ...
+    return f"Processing {validated} data"
 ```
 
 ### 3. Leverage Collections
 ```python
 # Use predefined collections
+from edgar.enums import STANDARD_PERIODS
+
+def process_period(period_type):
+    return f"Processing {period_type}"
+
 for period in STANDARD_PERIODS:
-    process_period(period)
+    result = process_period(period)
+    print(result)
 ```
 
 ### 4. Provide Good Defaults
 ```python
 # Use meaningful defaults
-def get_financials(period: PeriodInput = PeriodType.ANNUAL):
+from edgar.enums import PeriodInput, PeriodType
+
+def get_financials(period: PeriodInput = PeriodType.ANNUAL) -> str:
     """Default to annual for most financial analysis."""
-    ...
+    return f"Getting {period} financials"
 ```
 
 ## 🚦 Error Handling
@@ -293,9 +394,9 @@ except ValueError as e:
 
 # Wrong type
 try:
-    validate_period_type(123)
-except TypeError as e:
-    print(e)  # "Period must be PeriodType or str"
+    validate_period_type("123")  # Use string instead of int
+except ValueError as e:
+    print(e)  # "Invalid period type '123'..."
 
 # Completely invalid
 try:
