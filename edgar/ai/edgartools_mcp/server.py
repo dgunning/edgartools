@@ -18,7 +18,7 @@ except ImportError:
     # Stub classes for when MCP is not installed
     class Server:
         def __init__(self, name: str):
-            raise ImportError("MCP not installed. Install with: pip install edgartools[llm]")
+            raise ImportError("MCP not installed. Install with: pip install edgartools[ai]")
     class Tool:
         pass
     class Resource:
@@ -36,7 +36,7 @@ class MCPServer:
         if not MCP_AVAILABLE:
             raise ImportError(
                 "MCP support requires additional dependencies. "
-                "Install with: pip install edgartools[llm]"
+                "Install with: pip install edgartools[ai]"
             )
 
         self.server = Server(name)

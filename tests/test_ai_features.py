@@ -221,7 +221,7 @@ class TestWithoutAIPackage:
         
         # Should have install command if any deps are missing
         if info['missing_dependencies']:
-            assert "pip install edgartools[llm]" in info['install_command']
+            assert "pip install edgartools[ai]" in info['install_command']
 
 
 # Integration test for MCP server (if available)

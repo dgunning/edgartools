@@ -8,13 +8,10 @@ The AI features are optional. Install them with:
 
 ```bash
 # Basic AI features
-pip install edgartools[llm]
+pip install edgartools[ai]
 
-# Full AI stack with all integrations
-pip install edgartools[llm-full]
-
-# For development
-pip install -e ".[llm,llm-dev]"
+# For development (includes mocking and testing tools)
+pip install -e ".[ai,ai-dev]"
 ```
 
 ## Features
@@ -150,7 +147,7 @@ To contribute to the AI features:
 
 1. Install development dependencies:
    ```bash
-   pip install -e ".[llm,llm-dev]"
+   pip install -e ".[ai,ai-dev]"
    ```
 
 2. Run tests:
