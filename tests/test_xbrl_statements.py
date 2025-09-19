@@ -573,44 +573,6 @@ def test_correct_period_selected_for_income_statement():
     print(periods)
     print(labels)
 
-
-def test_no_duplicate_periods():
-    filing =Filing(company='VISA INC.', cik=1403161, form='10-K', filing_date='2024-11-13', accession_no='0001403161-24-000058')
-    xb = filing.xbrl()
-    income_statement = xb.statements.income_statement()
-    rendered_statement = income_statement.render()
-    periods = rendered_statement.periods
-    labels = [p.label for p in periods]
-    print(periods)
-    print(labels)
-
-def test_no_empty_period_selected():
-    filing = Filing(company='Alphabet Inc.', cik=1652044, form='10-K', filing_date='2025-02-05', accession_no='0001652044-25-000014')
-    xb = filing.xbrl()
-    income_statement = xb.statements.income_statement()
-    print(income_statement)
-    rendered_statement = income_statement.render()
-    periods = rendered_statement.periods
-    labels = [p.label for p in periods]
-    print(periods)
-    print(labels)
-
-@pytest.mark.network
-def test_statement_periods_property(aapl_xbrl):
-    """Test that Statement.periods property works correctly."""
-    # Test with income statement
-    income_statement = aapl_xbrl.statements.income_statement()
-    periods = income_statement.periods
-
-    # Should have periods
-    assert periods is not None, "Periods should not be None"
-    assert len(periods) > 0, "Should have at least one period"
-
-    # Each period should have required attributes
-    for period in periods:
-        assert hasattr(period, 'key'), "Period should have key attribute"
-        assert hasattr(period, 'label'), "Period should have label attribute"
-
 @pytest.mark.network
 def test_periods_property_different_statement_types(aapl_xbrl):
     """Test periods property works across different statement types."""

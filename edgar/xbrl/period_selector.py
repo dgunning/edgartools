@@ -150,9 +150,101 @@ def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], m
             scored_periods = _score_fiscal_alignment(annual_periods, fiscal_year_end_month, fiscal_year_end_day)
             return [(p['key'], p['label']) for p in scored_periods[:max_periods]]
 
-    # For quarterly reports or if no annual periods found, use the most recent duration periods
-    duration_periods = _sort_periods_by_date(duration_periods, 'duration')
-    return [(p['key'], p['label']) for p in duration_periods[:max_periods]]
+    # For quarterly reports or if no annual periods found, use sophisticated quarterly logic
+    return _select_quarterly_periods(duration_periods, max_periods)
+
+
+def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int) -> List[Tuple[str, str]]:
+    """
+    Select quarterly periods with intelligent investor-focused logic.
+
+    For quarterly filings, investors typically want:
+    1. Current quarter (most recent quarterly period)
+    2. Same quarter from prior year (YoY comparison)
+    3. Year-to-date current year (6-month, 9-month YTD)
+    4. Year-to-date prior year (comparative YTD)
+    """
+    if not duration_periods:
+        return []
+
+    # Categorize periods by duration to identify types
+    quarterly_periods = []  # ~90 days (80-100)
+    ytd_periods = []       # 180-280 days (semi-annual, 9-month YTD)
+
+    for period in duration_periods:
+        try:
+            start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
+            end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+            duration_days = (end_date - start_date).days
+
+            if 80 <= duration_days <= 100:  # Quarterly
+                quarterly_periods.append(period)
+            elif 150 <= duration_days <= 285:  # YTD (semi-annual to 9-month)
+                ytd_periods.append(period)
+            # Skip periods that are too short (<80 days) or too long (>285 days but <300)
+
+        except (ValueError, TypeError, KeyError):
+            continue
+
+    # Sort periods by end date (most recent first)
+    quarterly_periods = _sort_periods_by_date(quarterly_periods, 'duration')
+    ytd_periods = _sort_periods_by_date(ytd_periods, 'duration')
+
+    selected_periods = []
+
+    # 1. Add current quarter (most recent quarterly period)
+    if quarterly_periods:
+        current_quarter = quarterly_periods[0]
+        selected_periods.append((current_quarter['key'], current_quarter['label']))
+
+        # 2. Find same quarter from prior year for YoY comparison
+        try:
+            current_end = datetime.strptime(current_quarter['end_date'], '%Y-%m-%d').date()
+            target_year = current_end.year - 1
+
+            for period in quarterly_periods[1:]:
+                period_end = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                # Same quarter if same month and within 15 days, previous year
+                if (period_end.year == target_year and
+                    period_end.month == current_end.month and
+                    abs(period_end.day - current_end.day) <= 15):
+                    selected_periods.append((period['key'], period['label']))
+                    break
+        except (ValueError, TypeError, KeyError):
+            pass
+
+    # 3. Add current year YTD (most recent YTD period)
+    if ytd_periods:
+        current_ytd = ytd_periods[0]
+        # Avoid duplicates - check if this YTD period is already selected as quarterly
+        if not any(current_ytd['key'] == key for key, _ in selected_periods):
+            selected_periods.append((current_ytd['key'], current_ytd['label']))
+
+            # 4. Find prior year YTD for comparison
+            try:
+                ytd_end = datetime.strptime(current_ytd['end_date'], '%Y-%m-%d').date()
+                target_year = ytd_end.year - 1
+
+                for period in ytd_periods[1:]:
+                    period_end = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
+                    # Same YTD period from previous year
+                    if (period_end.year == target_year and
+                        period_end.month == ytd_end.month and
+                        abs(period_end.day - ytd_end.day) <= 15):
+                        selected_periods.append((period['key'], period['label']))
+                        break
+            except (ValueError, TypeError, KeyError):
+                pass
+
+    # If we still don't have enough periods, add other quarterly periods
+    if len(selected_periods) < max_periods:
+        added_keys = {key for key, _ in selected_periods}
+        for period in quarterly_periods:
+            if period['key'] not in added_keys and len(selected_periods) < max_periods:
+                selected_periods.append((period['key'], period['label']))
+                added_keys.add(period['key'])
+
+    return selected_periods[:max_periods]
 
 
 def _get_annual_periods(duration_periods: List[Dict]) -> List[Dict]:

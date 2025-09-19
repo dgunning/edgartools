@@ -63,6 +63,8 @@ def test_annual_period_selection():
 def test_periods_for_quarterly_filing(mara_xbrl):
     """Test that quarterly filings select appropriate periods, not arbitrary short periods."""
     xb = mara_xbrl
+    income_statement = xb.statements.income_statement()
+    print(income_statement)
     periods = determine_periods_to_display(xb, "IncomeStatement")
     print(periods)
     
