@@ -31,7 +31,8 @@ from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL
 from edgar.xbrl.models import PresentationNode
 from edgar.xbrl.parsers import XBRLParser
-from edgar.xbrl.periods import determine_periods_to_display, get_period_views
+from edgar.xbrl.period_selector import select_periods
+from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import statement_to_concepts
@@ -1188,9 +1189,9 @@ class XBRL:
         if parenthetical:
             statement_title = f"{statement_title} (Parenthetical)"
 
-        # Get periods to display using smart selection with legacy fallback
-        periods_to_display = determine_periods_to_display(
-            self, actual_statement_type, period_filter, period_view
+        # Get periods to display using unified period selection
+        periods_to_display = select_periods(
+            self, actual_statement_type, max_periods=4
         )
 
         # Render the statement

@@ -240,10 +240,10 @@ def determine_investor_preferred_periods(xbrl_instance, statement_type: str) -> 
 
     Only includes periods with sufficient data.
     """
-    from edgar.xbrl.periods import determine_periods_to_display
+    from edgar.xbrl.period_selector import select_periods
 
-    # Start with the standard period selection
-    base_periods = determine_periods_to_display(xbrl_instance, statement_type)
+    # Start with the unified period selection
+    base_periods = select_periods(xbrl_instance, statement_type)
 
     # Filter for data availability
     periods_with_data = filter_periods_with_data(

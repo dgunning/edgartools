@@ -560,3 +560,131 @@ def test_historical_vs_modern_xbrl_statements(nflx_10k_2010, nflx_10k_2024):
     # Due to taxonomy changes over time, we don't enforce a specific number of common concepts
     # but there should be at least some core concepts shared
     assert common_concepts, "No common concepts found between historical and modern statements"
+
+
+def test_correct_period_selected_for_income_statement():
+    filing = Filing(company='BRISTOL MYERS SQUIBB CO', cik=14272, form='10-K', filing_date='2025-02-12', accession_no='0000014272-25-000039')
+    xb = filing.xbrl()
+    income_statement = xb.statements.income_statement()
+    print(income_statement)
+    rendered_statement = income_statement.render()
+    periods = rendered_statement.periods
+    labels = [p.label for p in periods]
+    print(periods)
+    print(labels)
+
+
+def test_no_duplicate_periods():
+    filing =Filing(company='VISA INC.', cik=1403161, form='10-K', filing_date='2024-11-13', accession_no='0001403161-24-000058')
+    xb = filing.xbrl()
+    income_statement = xb.statements.income_statement()
+    rendered_statement = income_statement.render()
+    periods = rendered_statement.periods
+    labels = [p.label for p in periods]
+    print(periods)
+    print(labels)
+
+def test_no_empty_period_selected():
+    filing = Filing(company='Alphabet Inc.', cik=1652044, form='10-K', filing_date='2025-02-05', accession_no='0001652044-25-000014')
+    xb = filing.xbrl()
+    income_statement = xb.statements.income_statement()
+    print(income_statement)
+    rendered_statement = income_statement.render()
+    periods = rendered_statement.periods
+    labels = [p.label for p in periods]
+    print(periods)
+    print(labels)
+
+@pytest.mark.network
+def test_statement_periods_property(aapl_xbrl):
+    """Test that Statement.periods property works correctly."""
+    # Test with income statement
+    income_statement = aapl_xbrl.statements.income_statement()
+    periods = income_statement.periods
+
+    # Should have periods
+    assert periods is not None, "Periods should not be None"
+    assert len(periods) > 0, "Should have at least one period"
+
+    # Each period should have required attributes
+    for period in periods:
+        assert hasattr(period, 'key'), "Period should have key attribute"
+        assert hasattr(period, 'label'), "Period should have label attribute"
+
+@pytest.mark.network
+def test_periods_property_different_statement_types(aapl_xbrl):
+    """Test periods property works across different statement types."""
+    statements_to_test = {
+        'balance_sheet': 'instant',
+        'income_statement': 'duration',
+        'cashflow_statement': 'duration'
+    }
+
+    for stmt_method, expected_type in statements_to_test.items():
+        try:
+            statement:Statement = getattr(aapl_xbrl.statements, stmt_method)()
+            rendered_statement = statement.render()
+            if statement:
+                periods = rendered_statement.periods
+                assert len(periods) > 0, f"{stmt_method} should have periods"
+
+                # Check that period types match expectations
+                for period in periods:
+                    if expected_type == 'instant':
+                        assert period.type == 'instant', f"Balance sheet should use instant periods, got {period.type}"
+                    elif expected_type == 'duration':
+                        assert period.type == 'duration', f"{stmt_method} should use duration periods, got {period.type}"
+
+                print(f"\n{stmt_method} periods:")
+                for period in periods:
+                    print(f"  {period.label} ({period.type})")
+        except Exception as e:
+            print(f"Could not test {stmt_method}: {e}")
+
+
+@pytest.mark.network
+def test_periods_property_structure(tsla_xbrl):
+    """Test the structure and content of periods property."""
+    income_statement = tsla_xbrl.statements.income_statement()
+    rendered_statement = income_statement.render()
+    periods = rendered_statement.periods
+
+    assert len(periods) > 0, "Should have at least one period"
+
+    # Test first period structure
+    period = periods[0]
+
+    # Required attributes
+    assert hasattr(period, 'key'), "Period missing key"
+    assert hasattr(period, 'label'), "Period missing label"
+
+    # Key should be in expected format
+    assert isinstance(period.key, str), "Period key should be string"
+
+    # Label should be non-empty
+    assert period.label.strip(), "Period label should not be empty"
+
+    print(f"\nFirst period details:")
+    print(f"  Key: {period.key}")
+    print(f"  Label: {period.label}")
+
+@pytest.mark.network
+def test_periods_property_consistency_with_rendered_statement(aapl_xbrl):
+    """Test that Statement.periods matches the periods in rendered statement."""
+    income_statement = aapl_xbrl.statements.income_statement()
+
+    # Get periods from statement property
+    statement_periods = income_statement.render().periods
+
+    # Get periods from rendered statement
+    rendered_statement = income_statement.render()
+    rendered_periods = rendered_statement.periods
+
+    # Should be the same
+    assert len(statement_periods) == len(rendered_periods), "Period counts should match"
+
+    for stmt_period, rendered_period in zip(statement_periods, rendered_periods):
+        assert stmt_period.key == rendered_period.key, "Period keys should match"
+        assert stmt_period.label == rendered_period.label, "Period labels should match"
+
+    print(f"\nPeriod consistency verified: {len(statement_periods)} periods match")

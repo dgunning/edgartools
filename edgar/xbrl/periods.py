@@ -333,14 +333,14 @@ def determine_periods_to_display(
                         break
             return periods_to_display
 
-    # Use smart period selection with fallback to legacy logic
+    # Use unified period selection system with fallback to legacy logic
     try:
-        from edgar.xbrl.smart_periods import select_smart_periods
-        return select_smart_periods(xbrl_instance, statement_type)
+        from edgar.xbrl.period_selector import select_periods
+        return select_periods(xbrl_instance, statement_type)
     except Exception as e:
         # Log the error and fall back to legacy logic
         import logging
-        logging.warning("Smart period selection failed, using legacy logic: %s", e)
+        logging.warning("Unified period selection failed, using legacy logic: %s", e)
         # Continue to legacy logic below
 
     # If no specific periods requested, use default logic based on statement type
