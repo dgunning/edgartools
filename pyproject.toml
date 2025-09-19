@@ -220,4 +220,5 @@ markers = [
     "performance: Performance and benchmarking tests",
     "reproduction: Tests that reproduce specific issues",
     "integration: Integration tests",
+    "data_quality: Data quality validation tests",
 ]
