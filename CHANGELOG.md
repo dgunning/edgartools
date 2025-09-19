@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.14.0 - 2025-09-19
+
+### Added
+- **Unified XBRL Period Selection System** - Complete architectural improvement with 85% code reduction
+  - **New PeriodSelector class**: Centralized, sophisticated period selection logic replacing scattered implementations
+  - **Intelligent Quarterly Period Logic**: Enhanced quarterly period selection with sophisticated investor logic for accurate quarterly data access
+  - **Fiscal Year Alignment**: Advanced fiscal year alignment scoring for proper period matching across different company fiscal calendars
+  - **Document Date Filtering**: Robust filtering of future-dated periods to prevent Bristol Myers future date bugs
+  - **Statement Type Optimization**: Period selection optimized for specific statement types (balance sheet instant periods, income statement duration periods)
+  - **Coverage**: Unified system handles all XBRL period selection scenarios across entity facts, statements, and financial data access
+  - **Key Benefits**: Eliminates inconsistent period selection, improves data accuracy, and provides reliable quarterly/annual financial data access
+
+- **Large File Architecture Refactoring** - Major code organization and maintainability improvements
+  - **Entity Package Restructuring**: Reorganized entity/core.py with improved separation of concerns and better code organization
+  - **Funds Package Enhancement**: Refactored funds/reports.py with enhanced 13F handling and better data structure organization
+  - **XBRL Parser Modularization**: Complete restructuring of xbrl/parser.py into specialized parser modules for improved maintainability
+  - **New Parser Architecture**: Created specialized parsers for instance, calculation, presentation, definition, labels, and schema handling
+  - **Improved Code Organization**: Better separation of parsing concerns with coordinator pattern for parser orchestration
+
+### Fixed
+- **Critical Period Selection Bug (Bristol Myers Case)**: Fixed future-dated period selection causing incorrect financial data display
+  - **Problem**: Period selector included future-dated periods in financial statements, leading to inaccurate data presentation
+  - **Solution**: Implemented robust document date filtering in PeriodSelector to exclude periods dated after filing document date
+  - **Impact**: Ensures financial statements only display data from periods actually covered by the filing
+
+- **Multi-Year Period Selection (Visa Case)**: Resolved incorrect handling of multi-year period spans in quarterly reports
+  - **Problem**: Quarterly filings incorrectly included multi-year duration periods alongside quarterly periods
+  - **Solution**: Enhanced period detection logic to filter out multi-year periods when quarterly data is expected
+  - **Impact**: Provides accurate quarterly financial data without contamination from multi-year period aggregates
+
+- **API Documentation Accuracy**: Fixed PeriodType documentation with correct API usage examples
+  - **Problem**: Documentation showed outdated API patterns that no longer match current implementation
+  - **Solution**: Updated all PeriodType documentation examples to reflect current API usage patterns
+  - **Impact**: Eliminates user confusion and provides accurate implementation guidance
+
+### Enhanced
+- **GitHub Actions CI/CD Pipeline**: Significant improvements to automated testing and build processes
+  - **Hatch JSON Filter Fix**: Resolved GitHub Actions hatch JSON filter issues preventing proper build automation
+  - **Workflow Optimization**: Enhanced python-smoke-recent-filings.yml workflow for better reliability
+  - **Test Dependencies**: Fixed missing test dependencies and pytest markers for consistent test execution
+  - **Build Process**: Improved build reliability by addressing workflow configuration issues
+
+- **Code Quality and Hygiene**: Comprehensive code improvement program across the entire codebase
+  - **Logging Standards (G004)**: Fixed 1000+ logging f-string usage issues for better performance and consistency
+  - **Exception Handling**: Enhanced exception chaining and error handling patterns throughout the codebase
+  - **Pandas Modernization**: Updated pandas usage patterns for better performance and current best practices
+  - **Import Organization**: Cleaned up and organized imports across all modules for better maintainability
+  - **Memory Management**: Fixed memory leak risks from cached instance methods
+  - **Code Style**: Comprehensive cleanup of whitespace, formatting, and code organization issues
+
+### Technical
+- **XBRL Processing Architecture**: 85% reduction in XBRL period selection code through unified architecture
+  - **Removed Legacy Code**: Eliminated obsolete smart_periods.py module (558 lines) in favor of unified PeriodSelector
+  - **Modular Parser Design**: Created specialized XBRL parser modules replacing monolithic parser implementation
+  - **Enhanced Test Coverage**: Added comprehensive test suite for PeriodSelector with 34 test cases covering edge cases and integration scenarios
+  - **Performance Improvements**: Optimized period selection performance through better algorithms and reduced code complexity
+
+- **Documentation and Developer Experience**: Enhanced internal documentation and development workflows
+  - **Architecture Documentation**: Added comprehensive XBRL period selection architecture documentation
+  - **Code Organization**: Better separation of concerns across entity, funds, and XBRL packages
+  - **Error Handling**: Improved error messages and exception handling for better debugging experience
+
+### Maintenance
+- **Dependency Management**: Updated and cleaned up package dependencies for better compatibility
+- **Test Infrastructure**: Enhanced test configuration and coverage across all major features
+- **Development Tools**: Improved development workflow with better CI/CD automation and code quality tools
+
 ## Release 4.13.0 - 2025-09-18
 
 ### Added
