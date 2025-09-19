@@ -1,0 +1,3489 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+        <link rel="prev" href="../filing/">
+      
+      
+        <link rel="next" href="../xbrl/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
+    
+    
+      
+        <title>Filings - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e53b48f4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#filings-api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Filings
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How to Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Filings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Search for Specific Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filter Filings by Date/Type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Access Filing Attachments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/current-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Finding the most recent filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Companies
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Companies
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting company facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/multi-year-financial-data-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Creating a Multi Year Financials Data Api
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting a list of company insiders
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting subsets of companies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Financial Analysis
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Financial Analysis
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extract Financial Statements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Using Local Data Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SSL Issues and Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parsing SGML
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    XBRL and Financials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            XBRL and Financials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting XBRL from Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Querying XBRL Facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting footnotes from XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Data Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Insider Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ThirteenF Holding Reports
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding SEC Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#class-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructor
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Constructor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filingsfiling_index-original_statenone" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filings(filing_index, original_state=None)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Properties
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#collection-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Collection Information
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Collection Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#empty" class="md-nav__link">
+    <span class="md-ellipsis">
+      empty
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#date_range" class="md-nav__link">
+    <span class="md-ellipsis">
+      date_range
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start_date-end_date" class="md-nav__link">
+    <span class="md-ellipsis">
+      start_date / end_date
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collection-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Collection Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Collection Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#size-and-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      Size and Access
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Size and Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#len-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      len() / count
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#indexing-and-iteration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Indexing and Iteration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    <span class="md-ellipsis">
+      get()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subset-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Subset Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Subset Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#latest" class="md-nav__link">
+    <span class="md-ellipsis">
+      latest()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#head" class="md-nav__link">
+    <span class="md-ellipsis">
+      head()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tail" class="md-nav__link">
+    <span class="md-ellipsis">
+      tail()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample" class="md-nav__link">
+    <span class="md-ellipsis">
+      sample()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering-and-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering and Search
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtering and Search">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      filter()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find" class="md-nav__link">
+    <span class="md-ellipsis">
+      find()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#navigation-and-pagination" class="md-nav__link">
+    <span class="md-ellipsis">
+      Navigation and Pagination
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Navigation and Pagination">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current" class="md-nav__link">
+    <span class="md-ellipsis">
+      current()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      next()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#previous" class="md-nav__link">
+    <span class="md-ellipsis">
+      previous()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-export-and-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Export and Persistence
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Export and Persistence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#to_pandas" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_pandas()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#save_parquet-save" class="md-nav__link">
+    <span class="md-ellipsis">
+      save_parquet() / save()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_dict()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#download" class="md-nav__link">
+    <span class="md-ellipsis">
+      download()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#specialized-filing-collections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Specialized Filing Collections
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Specialized Filing Collections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entityfilings" class="md-nav__link">
+    <span class="md-ellipsis">
+      EntityFilings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#currentfilings" class="md-nav__link">
+    <span class="md-ellipsis">
+      CurrentFilings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-usage-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Usage Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Usage Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chaining-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chaining Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Batch Processing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#efficient-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Efficient Filtering
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pagination-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pagination Strategies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complete Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Resources
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Common Issues & Solutions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Performance Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SEC Rate Limits & Compliance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#class-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructor
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Constructor">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filingsfiling_index-original_statenone" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filings(filing_index, original_state=None)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Properties
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#collection-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Collection Information
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Collection Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#empty" class="md-nav__link">
+    <span class="md-ellipsis">
+      empty
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#date_range" class="md-nav__link">
+    <span class="md-ellipsis">
+      date_range
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start_date-end_date" class="md-nav__link">
+    <span class="md-ellipsis">
+      start_date / end_date
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collection-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Collection Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Collection Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#size-and-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      Size and Access
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Size and Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#len-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      len() / count
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#indexing-and-iteration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Indexing and Iteration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    <span class="md-ellipsis">
+      get()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subset-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Subset Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Subset Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#latest" class="md-nav__link">
+    <span class="md-ellipsis">
+      latest()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#head" class="md-nav__link">
+    <span class="md-ellipsis">
+      head()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tail" class="md-nav__link">
+    <span class="md-ellipsis">
+      tail()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample" class="md-nav__link">
+    <span class="md-ellipsis">
+      sample()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering-and-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering and Search
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtering and Search">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      filter()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find" class="md-nav__link">
+    <span class="md-ellipsis">
+      find()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#navigation-and-pagination" class="md-nav__link">
+    <span class="md-ellipsis">
+      Navigation and Pagination
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Navigation and Pagination">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current" class="md-nav__link">
+    <span class="md-ellipsis">
+      current()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      next()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#previous" class="md-nav__link">
+    <span class="md-ellipsis">
+      previous()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-export-and-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Export and Persistence
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Export and Persistence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#to_pandas" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_pandas()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#save_parquet-save" class="md-nav__link">
+    <span class="md-ellipsis">
+      save_parquet() / save()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      to_dict()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#download" class="md-nav__link">
+    <span class="md-ellipsis">
+      download()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#specialized-filing-collections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Specialized Filing Collections
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Specialized Filing Collections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#entityfilings" class="md-nav__link">
+    <span class="md-ellipsis">
+      EntityFilings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#currentfilings" class="md-nav__link">
+    <span class="md-ellipsis">
+      CurrentFilings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-usage-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Usage Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Usage Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chaining-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chaining Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Batch Processing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#efficient-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Efficient Filtering
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pagination-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pagination Strategies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complete Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="filings-api-reference">Filings API Reference</h1>
+<p>The <code>Filings</code> class represents a collection of SEC filings with powerful filtering, navigation, and data manipulation capabilities. It serves as the primary interface for working with multiple filings in EdgarTools.</p>
+<h2 id="class-overview">Class Overview</h2>
+<pre><code class="language-python">from edgar import Filings, get_filings
+
+class Filings:
+    &quot;&quot;&quot;Collection of SEC filings with filtering and pagination capabilities.&quot;&quot;&quot;
+</code></pre>
+<p><strong>Backend:</strong> Uses PyArrow tables for efficient data handling</p>
+<h2 id="constructor">Constructor</h2>
+<h3 id="filingsfiling_index-original_statenone">Filings(filing_index, original_state=None)</h3>
+<p>Create a Filings collection from a PyArrow table.</p>
+<pre><code class="language-python">Filings(
+    filing_index: pa.Table,
+    original_state: Optional[PagingState] = None)
+</code></pre>
+<p><strong>Parameters:</strong>
+- <code>filing_index</code> (pa.Table): PyArrow table containing filing data
+- <code>original_state</code> (Optional[PagingState]): Pagination state for navigation</p>
+<p><strong>Note:</strong> Typically created via <code>get_filings()</code> function rather than direct instantiation.</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python">from edgar import get_filings
+
+# Get filings collection
+filings = get_filings(year=2023, quarter=1)
+print(type(filings))  # &lt;class 'edgar._filings.Filings'&gt;
+</code></pre>
+<h2 id="core-properties">Core Properties</h2>
+<h3 id="collection-information">Collection Information</h3>
+<h4 id="empty">empty</h4>
+<pre><code class="language-python">@property
+def empty(self) -&gt; bool:
+</code></pre>
+<p>Whether the collection contains any filings.</p>
+<pre><code class="language-python">filings = get_filings(form=&quot;INVALID&quot;)
+if filings.empty:
+    print(&quot;No filings found&quot;)
+</code></pre>
+<h4 id="date_range">date_range</h4>
+<pre><code class="language-python">@property
+def date_range(self) -&gt; Tuple[str, str]:
+</code></pre>
+<p>Start and end dates for filings in the collection.</p>
+<pre><code class="language-python">start_date, end_date = filings.date_range
+print(f&quot;Filings from {start_date} to {end_date}&quot;)
+</code></pre>
+<h4 id="start_date-end_date">start_date / end_date</h4>
+<pre><code class="language-python">@property
+def start_date(self) -&gt; str:
+    ...
+
+@property  
+def end_date(self) -&gt; str:
+    ...
+</code></pre>
+<p>Individual start and end dates.</p>
+<pre><code class="language-python">print(f&quot;Collection spans from {filings.start_date} to {filings.end_date}&quot;)
+</code></pre>
+<h4 id="summary">summary</h4>
+<pre><code class="language-python">@property
+def summary(self) -&gt; str:
+</code></pre>
+<p>Summary string describing the current page/collection.</p>
+<pre><code class="language-python">print(filings.summary)
+# &quot;Page 1 of 10 filings from 2023-01-01 to 2023-03-31&quot;
+</code></pre>
+<h2 id="collection-operations">Collection Operations</h2>
+<h3 id="size-and-access">Size and Access</h3>
+<h4 id="len-count">len() / count</h4>
+<pre><code class="language-python">def __len__(self) -&gt; int:
+</code></pre>
+<p>Number of filings in the current collection/page.</p>
+<pre><code class="language-python">print(f&quot;Collection contains {len(filings)} filings&quot;)
+</code></pre>
+<h4 id="indexing-and-iteration">Indexing and Iteration</h4>
+<pre><code class="language-python">def __getitem__(self, item: int) -&gt; Filing:
+    ...
+def __iter__(self) -&gt; Iterator[Filing]:
+    ...
+</code></pre>
+<p>Access individual filings by index or iterate through collection.</p>
+<pre><code class="language-python"># Index access
+first_filing = filings[0]
+last_filing = filings[-1]
+
+# Iteration
+for filing in filings:
+    print(f&quot;{filing.form}: {filing.company} ({filing.filing_date})&quot;)
+
+# Slicing
+first_five = filings[:5]
+</code></pre>
+<h4 id="get">get()</h4>
+<pre><code class="language-python">def get(self, index_or_accession_number: Union[int, str]) -&gt; Filing
+</code></pre>
+<p>Get a filing by index or accession number.</p>
+<p><strong>Parameters:</strong>
+- <code>index_or_accession_number</code>: Integer index or accession number string</p>
+<p><strong>Returns:</strong> <code>Filing</code> object</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python"># Get by index
+filing = filings.get(0)
+
+# Get by accession number
+filing = filings.get(&quot;0001234567-23-000001&quot;)
+</code></pre>
+<h3 id="subset-operations">Subset Operations</h3>
+<h4 id="latest">latest()</h4>
+<pre><code class="language-python">def latest(self, n: int = 1) -&gt; Union[Filing, 'Filings']
+</code></pre>
+<p>Get the most recent filing(s).</p>
+<p><strong>Parameters:</strong>
+- <code>n</code> (int): Number of latest filings to return (default: 1)</p>
+<p><strong>Returns:</strong>
+- Single <code>Filing</code> if n=1
+- <code>Filings</code> collection if n&gt;1</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python"># Get latest single filing
+latest_filing = filings.latest()
+
+# Get latest 5 filings
+latest_five = filings.latest(5)
+print(f&quot;Latest 5 filings: {len(latest_five)}&quot;)
+</code></pre>
+<h4 id="head">head()</h4>
+<pre><code class="language-python">def head(self, n: int) -&gt; 'Filings'
+</code></pre>
+<p>Get the first n filings from the collection.</p>
+<p><strong>Parameters:</strong>
+- <code>n</code> (int): Number of filings to return</p>
+<p><strong>Returns:</strong> <code>Filings</code> collection</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python">first_ten = filings.head(10)
+print(f&quot;First 10 filings: {len(first_ten)}&quot;)
+</code></pre>
+<h4 id="tail">tail()</h4>
+<pre><code class="language-python">def tail(self, n: int) -&gt; 'Filings'
+</code></pre>
+<p>Get the last n filings from the collection.</p>
+<p><strong>Parameters:</strong>
+- <code>n</code> (int): Number of filings to return</p>
+<p><strong>Returns:</strong> <code>Filings</code> collection</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python">last_ten = filings.tail(10)
+print(f&quot;Last 10 filings: {len(last_ten)}&quot;)
+</code></pre>
+<h4 id="sample">sample()</h4>
+<pre><code class="language-python">def sample(self, n: int) -&gt; 'Filings'
+</code></pre>
+<p>Get a random sample of n filings.</p>
+<p><strong>Parameters:</strong>
+- <code>n</code> (int): Number of filings to sample</p>
+<p><strong>Returns:</strong> <code>Filings</code> collection</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python">random_sample = filings.sample(5)
+print(f&quot;Random sample: {len(random_sample)} filings&quot;)
+</code></pre>
+<h2 id="filtering-and-search">Filtering and Search</h2>
+<h3 id="filter">filter()</h3>
+<pre><code class="language-python">def filter(
+    self,
+    *,
+    form: Optional[Union[str, List[str]]] = None,
+    amendments: bool = None,
+    filing_date: Optional[str] = None,
+    date: Optional[str] = None,
+    cik: Union[int, str, List[Union[int, str]]] = None,
+    exchange: Union[str, List[str]] = None,
+    ticker: Union[str, List[str]] = None,
+    accession_number: Union[str, List[str]] = None
+) -&gt; 'Filings'
+</code></pre>
+<p>Filter the collection by various criteria.</p>
+<p><strong>Parameters:</strong>
+- <code>form</code>: SEC form type(s) - e.g., "10-K", ["10-K", "10-Q"]
+- <code>amendments</code>: Include/exclude amendments (default: include)
+- <code>filing_date</code> / <code>date</code>: Date filter (YYYY-MM-DD or YYYY-MM-DD:YYYY-MM-DD)
+- <code>cik</code>: Central Index Key(s)
+- <code>exchange</code>: Stock exchange(s) - "NASDAQ", "NYSE", "CBOE", "OTC"
+- <code>ticker</code>: Stock ticker symbol(s)
+- <code>accession_number</code>: SEC accession number(s)</p>
+<p><strong>Returns:</strong> Filtered <code>Filings</code> collection</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-python"># Filter by form type
+annual_reports = filings.filter(form=&quot;10-K&quot;)
+financial_reports = filings.filter(form=[&quot;10-K&quot;, &quot;10-Q&quot;])
+
+# Filter by date range
+q1_filings = filings.filter(date=&quot;2023-01-01:2023-03-31&quot;)
+recent_filings = filings.filter(date=&quot;2023-01-01:&quot;)
+
+# Filter by company
+apple_filings = filings.filter(ticker=&quot;AAPL&quot;)
+apple_by_cik = filings.filter(cik=320193)
+
+# Filter by exchange
+nasdaq_filings = filings.filter(exchange=&quot;NASDAQ&quot;)
+major_exchanges = filings.filter(exchange=[&quot;NASDAQ&quot;, &quot;NYSE&quot;])
+
+# Exclude amendments
+original_only = filings.filter(amendments=False)
+
+# Chain filters
+filtered = filings.filter(form=&quot;10-K&quot;).filter(exchange=&quot;NASDAQ&quot;).filter(date=&quot;2023-01-01:&quot;)
+</code></pre>
+<h3 id="find">find()</h3>
+<pre><code class="language-python">def find(self, company_search_str: str) -&gt; 'Filings'
+</code></pre>
+<p>Search for filings by company name.</p>
+<p><strong>Parameters:</strong>
+- <code>company_search_str</code> (str): Company name search string</p>
+<p><strong>Returns:</strong> <code>Filings</code> collection matching the search</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python"># Search for companies with &quot;Apple&quot; in name
+apple_filings = filings.find(&quot;Apple&quot;)
+
+# Search for technology companies
+tech_filings = filings.find(&quot;Technology&quot;)
+</code></pre>
+<h2 id="navigation-and-pagination">Navigation and Pagination</h2>
+<h3 id="current">current()</h3>
+<pre><code class="language-python">def current(self) -&gt; 'Filings'
+</code></pre>
+<p>Get the current page of filings.</p>
+<p><strong>Returns:</strong> Current <code>Filings</code> page</p>
+<h3 id="next">next()</h3>
+<pre><code class="language-python">def next(self) -&gt; Optional['Filings']
+</code></pre>
+<p>Navigate to the next page of filings.</p>
+<p><strong>Returns:</strong> Next page <code>Filings</code> or None if no more pages</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python"># Navigate through pages
+current_page = filings.current()
+next_page = filings.next()
+
+if next_page:
+    print(f&quot;Next page has {len(next_page)} filings&quot;)
+else:
+    print(&quot;No more pages available&quot;)
+</code></pre>
+<h3 id="previous">previous()</h3>
+<pre><code class="language-python">def previous(self) -&gt; Optional['Filings']
+</code></pre>
+<p>Navigate to the previous page of filings.</p>
+<p><strong>Returns:</strong> Previous page <code>Filings</code> or None if on first page</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python"># Go back to previous page
+prev_page = filings.previous()
+
+if prev_page:
+    print(f&quot;Previous page has {len(prev_page)} filings&quot;)
+else:
+    print(&quot;Already on first page&quot;)
+</code></pre>
+<h2 id="data-export-and-persistence">Data Export and Persistence</h2>
+<h3 id="to_pandas">to_pandas()</h3>
+<pre><code class="language-python">def to_pandas(self, *columns: str) -&gt; pd.DataFrame
+</code></pre>
+<p>Convert the collection to a pandas DataFrame.</p>
+<p><strong>Parameters:</strong>
+- <code>*columns</code>: Specific columns to include (optional)</p>
+<p><strong>Returns:</strong> <code>pd.DataFrame</code> with filing data</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python"># Convert all data
+df = filings.to_pandas()
+print(df.columns.tolist())
+
+# Convert specific columns only
+summary_df = filings.to_pandas('form', 'company', 'filing_date')
+print(summary_df.head())
+</code></pre>
+<h3 id="save_parquet-save">save_parquet() / save()</h3>
+<pre><code class="language-python">def save_parquet(self, location: str)
+def save(self, location: str)  # Alias
+</code></pre>
+<p>Save the collection as a Parquet file.</p>
+<p><strong>Parameters:</strong>
+- <code>location</code> (str): File path to save to</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python"># Save collection
+filings.save_parquet(&quot;my_filings.parquet&quot;)
+
+# Load back later
+import pandas as pd
+df = pd.read_parquet(&quot;my_filings.parquet&quot;)
+</code></pre>
+<h3 id="to_dict">to_dict()</h3>
+<pre><code class="language-python">def to_dict(self, max_rows: int = 1000) -&gt; Dict[str, Any]
+</code></pre>
+<p>Convert to dictionary representation.</p>
+<p><strong>Parameters:</strong>
+- <code>max_rows</code> (int): Maximum number of rows to include (default: 1000)</p>
+<p><strong>Returns:</strong> Dictionary with filing data</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python">filings_dict = filings.to_dict(max_rows=100)
+print(filings_dict.keys())
+</code></pre>
+<h3 id="download">download()</h3>
+<pre><code class="language-python">def download(self, data_directory: Optional[str] = None)
+</code></pre>
+<p>Download all filings in the collection to local storage.</p>
+<p><strong>Parameters:</strong>
+- <code>data_directory</code> (Optional[str]): Directory to save files (optional)</p>
+<p><strong>Example:</strong></p>
+<pre><code class="language-python"># Download to current directory
+filings.download()
+
+# Download to specific directory
+filings.download(&quot;./edgar_data/&quot;)
+</code></pre>
+<h2 id="specialized-filing-collections">Specialized Filing Collections</h2>
+<h3 id="entityfilings">EntityFilings</h3>
+<p>Enhanced filings collection for company-specific filings:</p>
+<pre><code class="language-python">from edgar import Company
+
+company = Company(&quot;AAPL&quot;)
+entity_filings = company.get_filings()
+
+print(type(entity_filings))  # &lt;class 'edgar.entity.filings.EntityFilings'&gt;
+
+# Additional properties
+print(entity_filings.cik)          # Company CIK
+print(entity_filings.company_name) # Company name
+
+# Enhanced methods return EntityFilings
+filtered = entity_filings.filter(form=&quot;10-K&quot;)  # Returns EntityFilings
+latest = entity_filings.latest(3)              # Returns EntityFilings
+</code></pre>
+<h3 id="currentfilings">CurrentFilings</h3>
+<p>Real-time filings with enhanced pagination:</p>
+<pre><code class="language-python">from edgar import get_current_filings
+
+current = get_current_filings()
+print(type(current))  # &lt;class 'edgar._filings.CurrentFilings'&gt;
+
+# Additional properties
+print(current.form)   # Form filter
+print(current.owner)  # Owner filter
+
+# Real-time pagination
+next_page = current.next()
+</code></pre>
+<h2 id="advanced-usage-patterns">Advanced Usage Patterns</h2>
+<h3 id="chaining-operations">Chaining Operations</h3>
+<pre><code class="language-python"># Complex filtering and processing pipeline
+result = (filings
+    .filter(form=[&quot;10-K&quot;, &quot;10-Q&quot;])
+    .filter(exchange=&quot;NASDAQ&quot;) 
+    .filter(date=&quot;2023-01-01:&quot;)
+    .latest(50)
+)
+
+print(f&quot;Final result: {len(result)} filings&quot;)
+</code></pre>
+<h3 id="batch-processing">Batch Processing</h3>
+<pre><code class="language-python"># Process filings in batches
+batch_size = 100
+total_processed = 0
+
+while not filings.empty:
+    batch = filings.head(batch_size)
+
+    # Process each filing in batch
+    for filing in batch:
+        # Extract data, analyze, etc.
+        text = filing.text()
+        # ... processing logic
+
+    total_processed += len(batch)
+
+    # Move to next batch
+    filings = filings.tail(len(filings) - batch_size)
+
+print(f&quot;Processed {total_processed} filings&quot;)
+</code></pre>
+<h3 id="data-analysis">Data Analysis</h3>
+<pre><code class="language-python"># Convert to DataFrame for analysis
+df = filings.to_pandas()
+
+# Analyze filing patterns
+form_counts = df.groupby('form').size().sort_values(ascending=False)
+print(&quot;Most common forms:&quot;)
+print(form_counts.head())
+
+# Monthly filing trends
+df['filing_date'] = pd.to_datetime(df['filing_date'])
+monthly_filings = df.groupby(df['filing_date'].dt.to_period('M')).size()
+print(&quot;Monthly filing counts:&quot;)
+print(monthly_filings)
+
+# Company analysis
+top_filers = df.groupby('company').size().sort_values(ascending=False)
+print(&quot;Top 10 filing companies:&quot;)
+print(top_filers.head(10))
+</code></pre>
+<h2 id="performance-optimization">Performance Optimization</h2>
+<h3 id="efficient-filtering">Efficient Filtering</h3>
+<pre><code class="language-python"># More efficient: specific filtering upfront
+efficient = get_filings(
+    year=2023,
+    form=&quot;10-K&quot;,
+    limit=100
+)
+
+# Less efficient: get all then filter
+inefficient = get_filings(year=2023, limit=10000).filter(form=&quot;10-K&quot;)
+</code></pre>
+<h3 id="pagination-strategies">Pagination Strategies</h3>
+<pre><code class="language-python"># Process large datasets with pagination
+def process_all_filings(filings):
+    current_page = filings
+    total_processed = 0
+
+    while current_page and not current_page.empty:
+        # Process current page
+        for filing in current_page:
+            # Process individual filing
+            pass
+
+        total_processed += len(current_page)
+        print(f&quot;Processed {total_processed} filings so far...&quot;)
+
+        # Move to next page
+        current_page = current_page.next()
+
+    return total_processed
+
+# Usage
+filings = get_filings(year=2023)
+total = process_all_filings(filings)
+</code></pre>
+<h2 id="error-handling">Error Handling</h2>
+<pre><code class="language-python">try:
+    # Filter operations
+    filtered = filings.filter(form=&quot;10-K&quot;, date=&quot;2023-01-01:&quot;)
+
+    if filtered.empty:
+        print(&quot;No filings match the criteria&quot;)
+    else:
+        # Process results
+        for filing in filtered:
+            try:
+                text = filing.text()
+                # Process text
+            except Exception as e:
+                print(f&quot;Error processing filing {filing.accession_no}: {e}&quot;)
+                continue
+
+except Exception as e:
+    print(f&quot;Error filtering filings: {e}&quot;)
+
+# Navigation error handling
+next_page = filings.next()
+if next_page is None:
+    print(&quot;No more pages available&quot;)
+</code></pre>
+<h2 id="complete-example">Complete Example</h2>
+<pre><code class="language-python">from edgar import get_filings
+import pandas as pd
+
+# Get filings for analysis
+filings = get_filings(year=2023, quarter=1)
+print(f&quot;Initial collection: {len(filings)} filings&quot;)
+
+# Filter to focus on annual reports from major exchanges
+annual_reports = filings.filter(
+    form=&quot;10-K&quot;,
+    exchange=[&quot;NASDAQ&quot;, &quot;NYSE&quot;]
+)
+print(f&quot;Annual reports from major exchanges: {len(annual_reports)}&quot;)
+
+# Get latest 20 for detailed analysis
+latest_reports = annual_reports.latest(20)
+
+# Convert to DataFrame for analysis
+df = latest_reports.to_pandas()
+
+# Analyze companies and dates
+print(&quot;\nCompanies with recent 10-K filings:&quot;)
+for _, row in df.iterrows():
+    print(f&quot;  {row['company']}: {row['filing_date']}&quot;)
+
+# Export for further analysis
+latest_reports.save_parquet(&quot;annual_reports_q1_2023.parquet&quot;)
+
+# Process individual filings
+for filing in latest_reports:
+    try:
+        # Extract structured data
+        tenk = filing.obj()
+        if tenk and tenk.financials:
+            financials = tenk.financials
+            revenue = financials.income.loc['Revenue'].iloc[0] if 'Revenue' in financials.income.index else None
+            if revenue:
+                print(f&quot;{filing.company}: Revenue ${revenue/1e9:.1f}B&quot;)
+    except Exception as e:
+        print(f&quot;Error processing {filing.company}: {e}&quot;)
+
+# Navigate through additional pages if needed
+next_page = filings.next()
+if next_page:
+    print(f&quot;\nNext page available with {len(next_page)} more filings&quot;)
+</code></pre>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><strong><a href="../filing/">Filing API Reference</a></strong> - Working with individual filings</li>
+<li><strong><a href="../company/">Company API Reference</a></strong> - Company-specific filing collections</li>
+<li><strong><a href="../../guides/filtering-filings/">Filtering Filings Guide</a></strong> - Advanced filtering techniques</li>
+<li><strong><a href="../../guides/searching-filings/">Search Filings Guide</a></strong> - Finding specific filings</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

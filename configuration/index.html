@@ -1,0 +1,3352 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../quickstart/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
+    
+    
+      
+        <title>Configuration - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.e53b48f4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href=".." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../guides/working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href=".." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Required Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar_identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_IDENTITY
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-and-access-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance and Access Control
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance and Access Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar_access_mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_ACCESS_MODE
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-data-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Data Storage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local Data Storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar_use_local_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_USE_LOCAL_DATA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar_local_data_dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_LOCAL_DATA_DIR
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-and-ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security and SSL
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security and SSL">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar_verify_ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_VERIFY_SSL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      HTTP Rate Limiting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-distributed-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced: Distributed Rate Limiting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      HTTP Caching
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP Caching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cache-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache Directory
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Caching Rules
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-alternative-storage-caches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced: Alternative Storage Caches
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar_use_rich_logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_USE_RICH_LOGGING
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#programmatic-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Programmatic Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Programmatic Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setting-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setting Identity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-storage-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Storage Control
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-client-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      HTTP Client Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Profiles
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Profiles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#research-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Research Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-processing-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bulk Processing Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development Profile
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File Setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration File Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#env-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      .env File
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shell-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shell Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-storage-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Storage Benefits
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#storage-space-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Storage Space Considerations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-current-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check Current Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identity-not-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      Identity Not Set
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssl-verification-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSL Verification Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-timeouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connection Timeouts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Best Practices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Validation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How to Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Filings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Search for Specific Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filter Filings by Date/Type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Access Filing Attachments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/current-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Finding the most recent filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Companies
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Companies
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting company facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/multi-year-financial-data-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Creating a Multi Year Financials Data Api
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting a list of company insiders
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting subsets of companies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Financial Analysis
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Financial Analysis
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extract Financial Statements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Using Local Data Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SSL Issues and Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parsing SGML
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    XBRL and Financials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            XBRL and Financials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting XBRL from Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Querying XBRL Facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting footnotes from XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Data Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Insider Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ThirteenF Holding Reports
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding SEC Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Resources
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Common Issues & Solutions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Performance Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SEC Rate Limits & Compliance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Setup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Required Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar_identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_IDENTITY
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-and-access-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance and Access Control
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance and Access Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar_access_mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_ACCESS_MODE
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-data-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Data Storage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local Data Storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar_use_local_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_USE_LOCAL_DATA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar_local_data_dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_LOCAL_DATA_DIR
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-and-ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security and SSL
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security and SSL">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgar_verify_ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_VERIFY_SSL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      HTTP Rate Limiting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-distributed-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced: Distributed Rate Limiting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      HTTP Caching
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP Caching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cache-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache Directory
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Caching Rules
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-alternative-storage-caches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced: Alternative Storage Caches
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edgar_use_rich_logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      EDGAR_USE_RICH_LOGGING
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#programmatic-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Programmatic Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Programmatic Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setting-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setting Identity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-storage-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Storage Control
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-client-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      HTTP Client Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Profiles
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Profiles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#research-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Research Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-processing-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bulk Processing Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development Profile
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration File Setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration File Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#env-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      .env File
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shell-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shell Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-storage-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Storage Benefits
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#storage-space-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Storage Space Considerations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-current-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Check Current Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identity-not-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      Identity Not Set
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssl-verification-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSL Verification Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-timeouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connection Timeouts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Best Practices
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Validation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      See Also
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="configuration">Configuration</h1>
+<p>EdgarTools provides extensive configuration options through environment variables and programmatic settings to customize behavior, optimize performance, and ensure SEC compliance.</p>
+<h2 id="quick-setup">Quick Setup</h2>
+<p>For most users, you only need to set your identity:</p>
+<pre><code class="language-bash">export EDGAR_IDENTITY=&quot;Your Name your.email@company.com&quot;
+</code></pre>
+<p>Or in Python:</p>
+<pre><code class="language-python">from edgar import set_identity
+set_identity(&quot;Your Name your.email@company.com&quot;)
+</code></pre>
+<h2 id="environment-variables">Environment Variables</h2>
+<h3 id="required-configuration">Required Configuration</h3>
+<h4 id="edgar_identity">EDGAR_IDENTITY</h4>
+<p><strong>Required for all SEC requests</strong></p>
+<p>Sets the User-Agent string for SEC EDGAR requests. Required by SEC to identify your application.</p>
+<pre><code class="language-bash">export EDGAR_IDENTITY=&quot;John Doe john.doe@company.com&quot;
+</code></pre>
+<p><strong>Format Options:</strong>
+- <code>"Name email@domain.com"</code> - Full name and email (recommended)
+- <code>"email@domain.com"</code> - Email only (acceptable)
+- <code>"Company Name contact@company.com"</code> - Company identification</p>
+<p><strong>Python Alternative:</strong></p>
+<pre><code class="language-python">from edgar import set_identity
+set_identity(&quot;John Doe john.doe@company.com&quot;)
+</code></pre>
+<h3 id="performance-and-access-control">Performance and Access Control</h3>
+<h4 id="edgar_access_mode">EDGAR_ACCESS_MODE</h4>
+<p>Controls HTTP request behavior and connection limits to manage SEC server load.</p>
+<pre><code class="language-bash">export EDGAR_ACCESS_MODE=&quot;NORMAL&quot;
+</code></pre>
+<p><strong>Available Modes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Timeout</th>
+<th>Max Connections</th>
+<th>Retries</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NORMAL</code></td>
+<td>15s</td>
+<td>10</td>
+<td>3</td>
+<td>Default - balanced performance</td>
+</tr>
+<tr>
+<td><code>CAUTION</code></td>
+<td>20s</td>
+<td>5</td>
+<td>3</td>
+<td>Conservative - reduces server load</td>
+</tr>
+<tr>
+<td><code>CRAWL</code></td>
+<td>25s</td>
+<td>2</td>
+<td>2</td>
+<td>Minimal impact - bulk processing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-bash"># High-performance research (default)
+export EDGAR_ACCESS_MODE=&quot;NORMAL&quot;
+
+# Conservative access for production
+export EDGAR_ACCESS_MODE=&quot;CAUTION&quot;
+
+# Bulk data processing with minimal server impact
+export EDGAR_ACCESS_MODE=&quot;CRAWL&quot;
+</code></pre>
+<h3 id="local-data-storage">Local Data Storage</h3>
+<h4 id="edgar_use_local_data">EDGAR_USE_LOCAL_DATA</h4>
+<p>Enables local caching of SEC data for improved performance and reduced API calls.</p>
+<pre><code class="language-bash">export EDGAR_USE_LOCAL_DATA=&quot;True&quot;
+</code></pre>
+<p><strong>Values:</strong>
+- <code>"True"</code>, <code>"true"</code>, <code>"1"</code> - Enable local storage
+- <code>"False"</code>, <code>"false"</code>, <code>"0"</code> - Disable local storage (default)</p>
+<p><strong>Benefits of Local Storage:</strong>
+- Faster repeated access to same data
+- Reduced SEC API calls
+- Offline access to cached data
+- Better performance for bulk operations</p>
+<p><strong>Python Alternative:</strong></p>
+<pre><code class="language-python">from edgar import use_local_storage
+use_local_storage(True)
+</code></pre>
+<h4 id="edgar_local_data_dir">EDGAR_LOCAL_DATA_DIR</h4>
+<p>Sets the directory for local data storage.</p>
+<pre><code class="language-bash">export EDGAR_LOCAL_DATA_DIR=&quot;/path/to/your/edgar/data&quot;
+</code></pre>
+<p><strong>Default:</strong> <code>~/.edgar</code> (user's home directory)</p>
+<p><strong>Directory Structure:</strong></p>
+<pre><code>~/.edgar/                    # Root data directory
+├── requestcache/            # HTTP response cache
+├── filings/                 # Downloaded filing data
+│   └── YYYYMMDD/            # Organized by date
+├── submissions/             # Company submissions data
+├── companyfacts/            # Company facts data
+└── reference/               # Reference data (tickers, etc.)
+</code></pre>
+<p><strong>Example Setup:</strong></p>
+<pre><code class="language-bash"># Custom data directory for project
+export EDGAR_LOCAL_DATA_DIR=&quot;/project/edgar_data&quot;
+export EDGAR_USE_LOCAL_DATA=&quot;True&quot;
+</code></pre>
+<h3 id="security-and-ssl">Security and SSL</h3>
+<h4 id="edgar_verify_ssl">EDGAR_VERIFY_SSL</h4>
+<p>Controls SSL certificate verification for HTTPS requests.</p>
+<pre><code class="language-bash">export EDGAR_VERIFY_SSL=&quot;true&quot;
+</code></pre>
+<p><strong>Values:</strong>
+- <code>"true"</code> (default) - Verify SSL certificates (recommended)
+- <code>"false"</code>, <code>"0"</code>, <code>"no"</code>, <code>"n"</code>, <code>"off"</code> - Disable SSL verification</p>
+<p><strong>⚠️ Security Warning:</strong> Only disable SSL verification in controlled environments. This reduces security by allowing man-in-the-middle attacks.</p>
+<p><strong>Use Cases for Disabling:</strong>
+- Corporate proxy environments with custom certificates
+- Development environments with self-signed certificates
+- Network environments with SSL inspection</p>
+<h3 id="http-rate-limiting">HTTP Rate Limiting</h3>
+<p>Rate limiting is implemented in <code>httpclient_ratelimiting</code>. </p>
+<p>The default rate limit is 9 requests per second. SEC has a maximum of 10 requests per second. To change the rate limit, call: <code>httpclient.update_rate_limiter(requests_per_second: int)</code>.</p>
+<h3 id="advanced-distributed-rate-limiting">Advanced: Distributed Rate Limiting</h3>
+<p>Distributed Rate Limiting: rate limiting is implemented using <a href="https://pypi.org/project/pyrate-limiter/">pyrate_limiter</a>. To use a distributed rate limiter, such as for multiprocessing, define an httpclient._RATE_LIMITER. See the pyrate_limiter documentation and examples for details. </p>
+<h3 id="http-caching">HTTP Caching</h3>
+<p>Web requests are cached by default, according to the rules defined in httpclient_cache. </p>
+<h4 id="cache-directory">Cache Directory</h4>
+<p>The cache directory is set in <code>httpclient.CACHE_DIRECTORY</code>, set to <code>_cache</code> by default. Set CACHE_DIRECTORY=None to disable cache. Call <code>httpclient.close_client()</code> after any changes to the CACHE_DIRECTORY variable. </p>
+<h4 id="caching-rules">Caching Rules</h4>
+<p>The SEC marks all requests as either NO-STORE or NO-CACHE, therefore a custom cache controller was implemented with the following rules: 
+- <code>/submissions</code> URLs for up to 10 minutes by default, set in <code>MAX_SUBMISSIONS_AGE_SECONDS</code>
+- <code>.*index/.*</code> URLs for up to 30 minutes by default, set in <code>MAX_INDEX_AGE_SECONDS</code>
+- <code>/Archives/edgar/data</code> URLs indefinitely (forever)</p>
+<p>See <code>httpclient_cache</code> for implementation. </p>
+<h4 id="advanced-alternative-storage-caches">Advanced: Alternative Storage Caches</h4>
+<ul>
+<li>The underlying cache is a FileStorage cache. While not implemented, it's feasible to replace this with a S3Storage cache by overriding get_transport and get_async_storage. See S3Storage and AsyncS3Storage at https://hishel.com/ for details.</li>
+</ul>
+<h4 id="edgar_use_rich_logging">EDGAR_USE_RICH_LOGGING</h4>
+<p>Enables enhanced console logging with rich formatting.</p>
+<pre><code class="language-bash">export EDGAR_USE_RICH_LOGGING=&quot;1&quot;
+</code></pre>
+<p><strong>Values:</strong>
+- <code>"1"</code> - Enable rich logging with colors and formatting
+- <code>"0"</code> (default) - Standard logging</p>
+<p><strong>Benefits:</strong>
+- Color-coded log levels
+- Enhanced readability
+- Progress bars and status indicators
+- Better debugging information</p>
+<h2 id="programmatic-configuration">Programmatic Configuration</h2>
+<h3 id="setting-identity">Setting Identity</h3>
+<pre><code class="language-python">from edgar import set_identity
+
+# Set identity programmatically
+set_identity(&quot;Research Team research@university.edu&quot;)
+
+# Verify identity is set
+from edgar.core import get_identity
+print(f&quot;Current identity: {get_identity()}&quot;)
+</code></pre>
+<h3 id="local-storage-control">Local Storage Control</h3>
+<pre><code class="language-python">from edgar import use_local_storage
+
+# Enable local storage
+use_local_storage(True)
+
+# Disable local storage
+use_local_storage(False)
+
+# Check current setting
+from edgar.storage import using_local_storage
+print(f&quot;Using local storage: {using_local_storage()}&quot;)
+</code></pre>
+<h3 id="http-client-configuration">HTTP Client Configuration</h3>
+<pre><code class="language-python">from edgar.core import EdgarSettings
+
+# Custom access mode
+custom_settings = EdgarSettings(
+    http_timeout=30,        # 30 second timeout
+    max_connections=3,      # Maximum 3 concurrent connections
+    retries=5              # 5 retry attempts
+)
+
+# Apply custom settings (requires restarting client)
+</code></pre>
+<h2 id="configuration-profiles">Configuration Profiles</h2>
+<h3 id="research-profile">Research Profile</h3>
+<p>Optimized for interactive research and analysis:</p>
+<pre><code class="language-bash">export EDGAR_IDENTITY=&quot;Researcher researcher@university.edu&quot;
+export EDGAR_ACCESS_MODE=&quot;NORMAL&quot;
+export EDGAR_USE_LOCAL_DATA=&quot;True&quot;
+export EDGAR_USE_RICH_LOGGING=&quot;1&quot;
+</code></pre>
+<h3 id="production-profile">Production Profile</h3>
+<p>Conservative settings for production environments:</p>
+<pre><code class="language-bash">export EDGAR_IDENTITY=&quot;Production System api@company.com&quot;
+export EDGAR_ACCESS_MODE=&quot;CAUTION&quot;
+export EDGAR_USE_LOCAL_DATA=&quot;True&quot;
+export EDGAR_LOCAL_DATA_DIR=&quot;/var/lib/edgar&quot;
+export EDGAR_VERIFY_SSL=&quot;true&quot;
+</code></pre>
+<h3 id="bulk-processing-profile">Bulk Processing Profile</h3>
+<p>Minimal server impact for large-scale data processing:</p>
+<pre><code class="language-bash">export EDGAR_IDENTITY=&quot;Bulk Processor batch@company.com&quot;
+export EDGAR_ACCESS_MODE=&quot;CRAWL&quot;
+export EDGAR_USE_LOCAL_DATA=&quot;True&quot;
+export EDGAR_LOCAL_DATA_DIR=&quot;/data/edgar&quot;
+</code></pre>
+<h3 id="development-profile">Development Profile</h3>
+<p>Flexible settings for development and testing:</p>
+<pre><code class="language-bash">export EDGAR_IDENTITY=&quot;Developer dev@company.com&quot;
+export EDGAR_ACCESS_MODE=&quot;NORMAL&quot;
+export EDGAR_USE_LOCAL_DATA=&quot;True&quot;
+export EDGAR_USE_RICH_LOGGING=&quot;1&quot;
+export EDGAR_VERIFY_SSL=&quot;false&quot;  # Only if needed for proxy
+</code></pre>
+<h2 id="configuration-file-setup">Configuration File Setup</h2>
+<h3 id="env-file">.env File</h3>
+<p>Create a <code>.env</code> file in your project root:</p>
+<pre><code class="language-bash"># .env file
+EDGAR_IDENTITY=John Doe john.doe@company.com
+EDGAR_ACCESS_MODE=NORMAL
+EDGAR_USE_LOCAL_DATA=True
+EDGAR_LOCAL_DATA_DIR=./edgar_data
+EDGAR_USE_RICH_LOGGING=1
+</code></pre>
+<p>Load with python-dotenv:</p>
+<pre><code class="language-python">from dotenv import load_dotenv
+load_dotenv()
+
+# Now EdgarTools will use the environment variables
+from edgar import Company
+company = Company(&quot;AAPL&quot;)
+</code></pre>
+<h3 id="shell-configuration">Shell Configuration</h3>
+<p>Add to your shell profile (<code>.bashrc</code>, <code>.zshrc</code>, etc.):</p>
+<pre><code class="language-bash"># Edgar Tools Configuration
+export EDGAR_IDENTITY=&quot;Your Name your.email@company.com&quot;
+export EDGAR_ACCESS_MODE=&quot;NORMAL&quot;
+export EDGAR_USE_LOCAL_DATA=&quot;True&quot;
+export EDGAR_LOCAL_DATA_DIR=&quot;$HOME/.edgar&quot;
+</code></pre>
+<h2 id="data-management">Data Management</h2>
+<h3 id="local-storage-benefits">Local Storage Benefits</h3>
+<p>When <code>EDGAR_USE_LOCAL_DATA="True"</code>:</p>
+<ol>
+<li><strong>Caching</strong>: HTTP responses cached locally</li>
+<li><strong>Offline Access</strong>: Previously accessed data available offline</li>
+<li><strong>Performance</strong>: Faster subsequent access to same data</li>
+<li><strong>Reduced API Calls</strong>: Less load on SEC servers</li>
+</ol>
+<h3 id="storage-space-considerations">Storage Space Considerations</h3>
+<p>Typical storage usage:
+- <strong>Company submissions</strong>: ~100MB for major companies
+- <strong>Company facts</strong>: ~50MB for major companies<br />
+- <strong>HTTP cache</strong>: Varies based on usage
+- <strong>Individual filings</strong>: 1-10MB each</p>
+<h2 id="troubleshooting-configuration">Troubleshooting Configuration</h2>
+<h3 id="check-current-configuration">Check Current Configuration</h3>
+<pre><code class="language-python">import os
+from edgar.core import get_identity
+
+# Check identity
+print(f&quot;Identity: {get_identity()}&quot;)
+
+# Check access mode
+print(f&quot;Access Mode: {os.getenv('EDGAR_ACCESS_MODE', 'NORMAL')}&quot;)
+
+# Check local data settings
+print(f&quot;Use Local Data: {os.getenv('EDGAR_USE_LOCAL_DATA', 'False')}&quot;)
+print(f&quot;Data Directory: {os.getenv('EDGAR_LOCAL_DATA_DIR', '~/.edgar')}&quot;)
+
+# Check SSL verification
+print(f&quot;Verify SSL: {os.getenv('EDGAR_VERIFY_SSL', 'true')}&quot;)
+</code></pre>
+<h3 id="common-issues">Common Issues</h3>
+<h4 id="identity-not-set">Identity Not Set</h4>
+<pre><code class="language-python"># Error: No identity set
+# Solution:
+set_identity(&quot;Your Name your.email@company.com&quot;)
+</code></pre>
+<h4 id="permission-errors">Permission Errors</h4>
+<pre><code class="language-bash"># Error: Permission denied writing to ~/.edgar
+# Solution: Check directory permissions or use custom directory
+export EDGAR_LOCAL_DATA_DIR=&quot;/tmp/edgar&quot;
+</code></pre>
+<h4 id="ssl-verification-errors">SSL Verification Errors</h4>
+<pre><code class="language-bash"># Error: SSL certificate verification failed
+# Solution: Disable SSL verification (only if safe)
+export EDGAR_VERIFY_SSL=&quot;false&quot;
+</code></pre>
+<h4 id="connection-timeouts">Connection Timeouts</h4>
+<pre><code class="language-bash"># Error: Connection timeouts in slow network
+# Solution: Use more conservative settings
+export EDGAR_ACCESS_MODE=&quot;CAUTION&quot;
+</code></pre>
+<h2 id="security-best-practices">Security Best Practices</h2>
+<ol>
+<li><strong>Always set EDGAR_IDENTITY</strong> - Required for SEC compliance</li>
+<li><strong>Keep SSL verification enabled</strong> - Only disable in controlled environments</li>
+<li><strong>Secure data directory</strong> - Ensure appropriate file permissions</li>
+<li><strong>Use least-privilege access</strong> - Don't run with unnecessary elevated permissions</li>
+<li><strong>Monitor data usage</strong> - Be aware of local storage space consumption</li>
+</ol>
+<h2 id="docker-configuration">Docker Configuration</h2>
+<p>For containerized deployments:</p>
+<pre><code class="language-dockerfile"># Dockerfile
+ENV EDGAR_IDENTITY=&quot;Container App app@company.com&quot;
+ENV EDGAR_ACCESS_MODE=&quot;CAUTION&quot;
+ENV EDGAR_USE_LOCAL_DATA=&quot;True&quot;
+ENV EDGAR_LOCAL_DATA_DIR=&quot;/app/edgar_data&quot;
+
+# Create data directory
+RUN mkdir -p /app/edgar_data
+VOLUME /app/edgar_data
+</code></pre>
+<h2 id="configuration-validation">Configuration Validation</h2>
+<p>Validate your configuration before running analysis:</p>
+<pre><code class="language-python">from edgar import Company
+import os
+
+def validate_config():
+    &quot;&quot;&quot;Validate EdgarTools configuration.&quot;&quot;&quot;
+    issues = []
+
+    # Check identity
+    try:
+        from edgar.core import get_identity
+        identity = get_identity()
+        if not identity:
+            issues.append(&quot;EDGAR_IDENTITY not set&quot;)
+        elif &quot;@&quot; not in identity:
+            issues.append(&quot;EDGAR_IDENTITY should include email&quot;)
+    except:
+        issues.append(&quot;Cannot retrieve EDGAR_IDENTITY&quot;)
+
+    # Check data directory
+    if os.getenv('EDGAR_USE_LOCAL_DATA', 'False').lower() in ['true', '1']:
+        data_dir = os.getenv('EDGAR_LOCAL_DATA_DIR', '~/.edgar')
+        expanded_dir = os.path.expanduser(data_dir)
+        if not os.path.exists(expanded_dir):
+            try:
+                os.makedirs(expanded_dir, exist_ok=True)
+            except:
+                issues.append(f&quot;Cannot create data directory: {data_dir}&quot;)
+
+    # Test basic functionality
+    try:
+        company = Company(&quot;AAPL&quot;)
+        print(f&quot;✓ Successfully created company: {company.name}&quot;)
+    except Exception as e:
+        issues.append(f&quot;Basic functionality test failed: {e}&quot;)
+
+    if issues:
+        print(&quot;Configuration Issues:&quot;)
+        for issue in issues:
+            print(f&quot;  ❌ {issue}&quot;)
+        return False
+    else:
+        print(&quot;✓ Configuration validated successfully&quot;)
+        return True
+
+# Run validation
+validate_config()
+</code></pre>
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><strong><a href="../installation/">Installation Guide</a></strong> - Getting started with EdgarTools</li>
+<li><strong><a href="../quickstart/">Quick Start</a></strong> - Your first analysis</li>
+<li><strong><a href="../resources/performance/">Performance Best Practices</a></strong> - Optimization tips</li>
+<li><strong><a href="../resources/troubleshooting/">Troubleshooting</a></strong> - Common issues and solutions</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

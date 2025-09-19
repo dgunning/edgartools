@@ -1,0 +1,3047 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
+    
+    
+      
+        <title>S-4 Target Company Linking Feature Specification - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e53b48f4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#s-4-target-company-linking-feature-specification" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              S-4 Target Company Linking Feature Specification
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How to Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Filings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Search for Specific Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filter Filings by Date/Type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Access Filing Attachments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/current-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Finding the most recent filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Companies
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Companies
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting company facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/multi-year-financial-data-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Creating a Multi Year Financials Data Api
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting a list of company insiders
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting subsets of companies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Financial Analysis
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Financial Analysis
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extract Financial Statements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Using Local Data Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SSL Issues and Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parsing SGML
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    XBRL and Financials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            XBRL and Financials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting XBRL from Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Querying XBRL Facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting footnotes from XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Data Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Insider Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ThirteenF Holding Reports
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding SEC Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Resources
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Common Issues & Solutions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Performance Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SEC Rate Limits & Compliance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Benefits
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="User Benefits">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-value-proposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primary Value Proposition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#target-user-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      Target User Groups
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-implementation-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Implementation Approach
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Implementation Approach">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-s4targetcompanyextractor-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. S4TargetCompanyExtractor Class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-targetcompanyinfo-data-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. TargetCompanyInfo Data Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-core-extraction-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1: Core Extraction Engine
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-public-company-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2: Public Company Linking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-enhanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3: Enhanced Features
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-design-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Design Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Design Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Usage Pattern
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-analysis-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Analysis Pattern
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-with-existing-filing-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration with Existing Filing Class
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-extraction-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Extraction Methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Extraction Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#method-1-co-registrant-table-parsing-primary-high-confidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method 1: Co-Registrant Table Parsing (Primary - High Confidence)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-2-xbrl-business-combination-facts-secondary-medium-confidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method 2: XBRL Business Combination Facts (Secondary - Medium Confidence)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-3-filing-header-patterns-tertiary-low-medium-confidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method 3: Filing Header Patterns (Tertiary - Low-Medium Confidence)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#edge-cases-and-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Edge Cases and Limitations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Edge Cases and Limitations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#known-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known Edge Cases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Limitations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Handling Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-data-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Data Requirements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Documentation Requirements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Documentation Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Documentation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-guide-additions" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Guide Additions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Timeline
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Timeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-4-6-weeks-core-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1 (4-6 weeks): Core Infrastructure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-2-3-weeks-enhanced-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2 (2-3 weeks): Enhanced Extraction
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-3-4-weeks-public-company-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3 (3-4 weeks): Public Company Linking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-2-3-weeks-documentation-and-polish" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 4 (2-3 weeks): Documentation and Polish
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Success Metrics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Success Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technical-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technical Metrics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-experience-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      User Experience Metrics
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#risk-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Risk Assessment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Risk Assessment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-risk-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      High-Risk Areas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mitigation-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mitigation Strategies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future Enhancements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Future Enhancements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#potential-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Potential Extensions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Evolution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="s-4-target-company-linking-feature-specification">S-4 Target Company Linking Feature Specification</h1>
+<h2 id="overview">Overview</h2>
+<p>This specification defines a new feature for EdgarTools that enables automatic extraction and linking of target company information from S-4 merger/acquisition filings. The feature provides structured access to target company identifiers and, when applicable, links to the target company's existing SEC filings.</p>
+<h2 id="user-benefits">User Benefits</h2>
+<h3 id="primary-value-proposition">Primary Value Proposition</h3>
+<ul>
+<li><strong>Automated Target Discovery</strong>: Eliminate manual parsing of S-4 filings to identify merger targets</li>
+<li><strong>Structured Data Access</strong>: Get reliable target company identifiers (EIN, SIC, state) without regex parsing</li>
+<li><strong>Seamless Navigation</strong>: Direct links to target company filings when target is publicly traded</li>
+<li><strong>Due Diligence Support</strong>: Streamlined access to both acquirer and target company information</li>
+</ul>
+<h3 id="target-user-groups">Target User Groups</h3>
+<ol>
+<li><strong>M&amp;A Analysts</strong>: Track merger activity, identify transaction patterns, analyze deal structures</li>
+<li><strong>Investment Researchers</strong>: Monitor SPAC mergers, evaluate target companies, assess deal valuations</li>
+<li><strong>Compliance Officers</strong>: Track beneficial ownership changes, monitor related party transactions</li>
+<li><strong>Academic Researchers</strong>: Study merger trends, analyze market consolidation patterns</li>
+</ol>
+<h2 id="technical-implementation-approach">Technical Implementation Approach</h2>
+<h3 id="core-architecture">Core Architecture</h3>
+<h4 id="1-s4targetcompanyextractor-class">1. S4TargetCompanyExtractor Class</h4>
+<pre><code class="language-python">class S4TargetCompanyExtractor:
+    &quot;&quot;&quot;Extracts target company information from S-4 filings using multiple structured data sources.&quot;&quot;&quot;
+
+    def __init__(self, filing: Filing):
+        self.filing = filing
+        self._cached_target_info = None
+        self._cached_xbrl_facts = None
+
+    def extract_target_info(self) -&gt; Optional[TargetCompanyInfo]:
+        &quot;&quot;&quot;Primary method to extract comprehensive target company information.&quot;&quot;&quot;
+        pass
+
+    def _extract_from_coregistrant_table(self) -&gt; Optional[Dict]:
+        &quot;&quot;&quot;Extract from Co-Registrant table - highest reliability method.&quot;&quot;&quot;
+        pass
+
+    def _extract_from_xbrl_facts(self) -&gt; Optional[Dict]:
+        &quot;&quot;&quot;Extract from XBRL business combination facts.&quot;&quot;&quot; 
+        pass
+
+    def _extract_from_filing_header(self) -&gt; Optional[Dict]:
+        &quot;&quot;&quot;Extract from structured filing header information.&quot;&quot;&quot;
+        pass
+</code></pre>
+<h4 id="2-targetcompanyinfo-data-structure">2. TargetCompanyInfo Data Structure</h4>
+<pre><code class="language-python">@dataclass
+class TargetCompanyInfo:
+    &quot;&quot;&quot;Structured container for target company information extracted from S-4 filings.&quot;&quot;&quot;
+
+    # Core identifiers
+    name: str
+    ein: Optional[str] = None  # Tax ID (always available for US entities)
+    sic_code: Optional[str] = None  # Standard Industrial Classification
+    incorporation_state: Optional[str] = None
+
+    # Additional structured data
+    address: Optional[Address] = None
+    business_description: Optional[str] = None
+
+    # SEC filing linkage (only for public companies)
+    cik: Optional[int] = None  # Central Index Key for SEC filings
+    ticker: Optional[str] = None  # Stock ticker symbol
+    exchange: Optional[str] = None  # Stock exchange
+
+    # Extraction metadata
+    extraction_method: str  # Which method successfully extracted the data
+    confidence_level: str  # High/Medium/Low based on extraction method
+    extraction_timestamp: datetime = field(default_factory=datetime.now)
+
+    @property
+    def is_public_company(self) -&gt; bool:
+        &quot;&quot;&quot;Returns True if target has a CIK (is publicly traded).&quot;&quot;&quot;
+        return self.cik is not None
+
+    @property 
+    def filings(self) -&gt; Optional[CompanyFilings]:
+        &quot;&quot;&quot;Get target company filings if it's a public company.&quot;&quot;&quot;
+        if self.cik:
+            from edgar.entity import Company
+            return Company(self.cik).get_filings()
+        return None
+</code></pre>
+<h3 id="implementation-strategy">Implementation Strategy</h3>
+<h4 id="phase-1-core-extraction-engine">Phase 1: Core Extraction Engine</h4>
+<ol>
+<li><strong>Co-Registrant Table Parser</strong></li>
+<li>HTML table parsing with BeautifulSoup integration</li>
+<li>Structured field extraction (EIN, SIC, state)</li>
+<li>Error handling for malformed tables</li>
+<li>
+<p>High confidence scoring</p>
+</li>
+<li>
+<p><strong>XBRL Business Combination Facts Parser</strong></p>
+</li>
+<li>Integration with existing XBRL infrastructure</li>
+<li>Business combination taxonomy filtering</li>
+<li>Fact validation and cross-referencing</li>
+<li>
+<p>Medium confidence scoring</p>
+</li>
+<li>
+<p><strong>Filing Header Parser</strong></p>
+</li>
+<li>Extend existing FilingHeader class</li>
+<li>Target company pattern recognition</li>
+<li>Address and contact extraction</li>
+<li>Low-medium confidence scoring</li>
+</ol>
+<h4 id="phase-2-public-company-linking">Phase 2: Public Company Linking</h4>
+<ol>
+<li><strong>CIK Resolution Service</strong></li>
+<li>EIN-to-CIK mapping using SEC company tickers data</li>
+<li>Company name fuzzy matching for disambiguation</li>
+<li>
+<p>Historical name change handling</p>
+</li>
+<li>
+<p><strong>Target Company Integration</strong></p>
+</li>
+<li>Seamless Company object creation for public targets</li>
+<li>Automatic filing retrieval</li>
+<li>Cross-reference validation</li>
+</ol>
+<h4 id="phase-3-enhanced-features">Phase 3: Enhanced Features</h4>
+<ol>
+<li><strong>Deal Timeline Construction</strong></li>
+<li>Link related S-4 amendments</li>
+<li>Track merger completion status</li>
+<li>
+<p>Integration with 8-K current reports</p>
+</li>
+<li>
+<p><strong>Bulk Analysis Tools</strong></p>
+</li>
+<li>Batch processing for multiple S-4 filings</li>
+<li>M&amp;A trend analysis utilities</li>
+<li>Export capabilities for research</li>
+</ol>
+<h3 id="api-design-examples">API Design Examples</h3>
+<h4 id="basic-usage-pattern">Basic Usage Pattern</h4>
+<pre><code class="language-python">from edgar import Company
+
+# Get S-4 filing
+acquirer = Company(&quot;ARES&quot;) # Ares Acquisition Corp II
+s4_filings = acquirer.get_filings(form=&quot;S-4&quot;)
+s4_filing = s4_filings[0]
+
+# Extract target company information
+target_info = s4_filing.target_company
+print(target_info.name)  # &quot;Kodiak Robotics, Inc.&quot;
+print(target_info.ein)   # &quot;82-5086710&quot;
+print(target_info.sic_code)  # &quot;7373&quot;
+print(target_info.incorporation_state)  # &quot;Delaware&quot;
+
+# Check if target is public
+if target_info.is_public_company:
+    target_filings = target_info.filings
+    print(f&quot;Target has {len(target_filings)} SEC filings&quot;)
+else:
+    print(&quot;Target is a private company&quot;)
+</code></pre>
+<h4 id="advanced-analysis-pattern">Advanced Analysis Pattern</h4>
+<pre><code class="language-python"># Batch analysis of recent SPAC mergers
+spac_s4s = get_filings(year=2024, form=&quot;S-4&quot;)
+
+merger_analysis = []
+for filing in spac_s4s:
+    if filing.target_company:
+        target = filing.target_company
+        analysis = {
+            'acquirer': filing.company,
+            'target': target.name,
+            'target_sic': target.sic_code,
+            'target_state': target.incorporation_state,
+            'is_public_target': target.is_public_company,
+            'filing_date': filing.filing_date
+        }
+        merger_analysis.append(analysis)
+
+# Convert to DataFrame for analysis
+import pandas as pd
+df = pd.DataFrame(merger_analysis)
+print(df.target_sic.value_counts())  # Industry distribution
+</code></pre>
+<h4 id="integration-with-existing-filing-class">Integration with Existing Filing Class</h4>
+<pre><code class="language-python">class Filing:
+    # ... existing methods ...
+
+    @cached_property
+    def target_company(self) -&gt; Optional[TargetCompanyInfo]:
+        &quot;&quot;&quot;Extract target company information for S-4 filings.&quot;&quot;&quot;
+        if self.form.startswith('S-4'):
+            extractor = S4TargetCompanyExtractor(self)
+            return extractor.extract_target_info()
+        return None
+
+    @cached_property
+    def is_merger_filing(self) -&gt; bool:
+        &quot;&quot;&quot;Returns True if this is a merger/acquisition related filing.&quot;&quot;&quot;
+        merger_forms = ['S-4', 'S-4/A', 'DEFM14A', 'PREM14A']
+        return self.form in merger_forms
+</code></pre>
+<h2 id="data-extraction-methods">Data Extraction Methods</h2>
+<h3 id="method-1-co-registrant-table-parsing-primary-high-confidence">Method 1: Co-Registrant Table Parsing (Primary - High Confidence)</h3>
+<p><strong>Target HTML Pattern:</strong></p>
+<pre><code class="language-html">&lt;table&gt;
+    &lt;tr&gt;&lt;th colspan=&quot;2&quot;&gt;Table of Co-Registrants&lt;/th&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Exact name of registrant as specified in its charter:&lt;/td&gt;&lt;td&gt;Kodiak Robotics, Inc.&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;State of incorporation:&lt;/td&gt;&lt;td&gt;Delaware&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Primary Standard Industrial Classification Code Number:&lt;/td&gt;&lt;td&gt;7373&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;I.R.S. Employer Identification Number:&lt;/td&gt;&lt;td&gt;82-5086710&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+</code></pre>
+<p><strong>Extraction Logic:</strong></p>
+<pre><code class="language-python">def _extract_from_coregistrant_table(self) -&gt; Optional[Dict]:
+    &quot;&quot;&quot;Extract structured data from Co-Registrant table.&quot;&quot;&quot;
+    html_content = self.filing.html()
+    if not html_content:
+        return None
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # Find tables containing co-registrant information
+    tables = soup.find_all('table')
+
+    for table in tables:
+        table_text = table.get_text().lower()
+        if 'co-registrant' in table_text and 'exact name' in table_text:
+            return self._parse_coregistrant_table(table)
+
+    return None
+
+def _parse_coregistrant_table(self, table) -&gt; Dict:
+    &quot;&quot;&quot;Parse individual co-registrant table for structured data.&quot;&quot;&quot;
+    extracted = {}
+    rows = table.find_all('tr')
+
+    for row in rows:
+        cells = row.find_all(['td', 'th'])
+        if len(cells) == 2:
+            field_name = cells[0].get_text().strip().lower()
+            field_value = cells[1].get_text().strip()
+
+            if 'exact name' in field_name and 'charter' in field_name:
+                extracted['name'] = field_value
+            elif 'state of incorporation' in field_name:
+                extracted['incorporation_state'] = field_value
+            elif 'classification code' in field_name:
+                extracted['sic_code'] = field_value
+            elif 'employer identification' in field_name:
+                ein_match = re.search(r'(\d{2}-\d{7})', field_value)
+                if ein_match:
+                    extracted['ein'] = ein_match.group(1)
+
+    return extracted if extracted else None
+</code></pre>
+<h3 id="method-2-xbrl-business-combination-facts-secondary-medium-confidence">Method 2: XBRL Business Combination Facts (Secondary - Medium Confidence)</h3>
+<p><strong>Target XBRL Facts:</strong></p>
+<pre><code class="language-python">business_combination_concepts = [
+    'aact:BusinessCombinationConsiderationTransferredEquityInterestsIssuedAndIssuableValueOfAssetsGiven',
+    'aact:BusinessCombinationFairValueOfIdentifiableAssetsAcquiredAndLiabilitiesAssumedAtAcquisitionDate',
+    'aact:BusinessCombinationAcquiredEntityName',  # Target company name
+    'aact:BusinessCombinationAcquisitionDate',
+]
+</code></pre>
+<p><strong>Extraction Logic:</strong></p>
+<pre><code class="language-python">def _extract_from_xbrl_facts(self) -&gt; Optional[Dict]:
+    &quot;&quot;&quot;Extract business combination facts from XBRL data.&quot;&quot;&quot;
+    xbrl = self.filing.xbrl()
+    if not xbrl:
+        return None
+
+    facts = xbrl.facts.get_facts()
+    bc_facts = {}
+
+    for fact in facts:
+        concept = fact.get('concept', '')
+
+        # Target company name from XBRL
+        if 'AcquiredEntityName' in concept:
+            bc_facts['name'] = fact.get('value')
+        elif 'AcquisitionDate' in concept:
+            bc_facts['acquisition_date'] = fact.get('value')
+        elif 'BusinessCombination' in concept:
+            # Store all business combination facts for context
+            bc_facts[concept] = fact.get('value')
+
+    return bc_facts if bc_facts else None
+</code></pre>
+<h3 id="method-3-filing-header-patterns-tertiary-low-medium-confidence">Method 3: Filing Header Patterns (Tertiary - Low-Medium Confidence)</h3>
+<p><strong>Target Header Patterns:</strong></p>
+<pre><code>FILER:
+    COMPANY DATA:
+        COMPANY CONFORMED NAME: Kodiak Robotics, Inc.
+        CENTRAL INDEX KEY: [Not available for private companies]
+        IRS NUMBER: 82-5086710
+        STATE OF INCORPORATION: DE
+</code></pre>
+<p><strong>Extraction Logic:</strong></p>
+<pre><code class="language-python">def _extract_from_filing_header(self) -&gt; Optional[Dict]:
+    &quot;&quot;&quot;Extract target company information from filing header structures.&quot;&quot;&quot;
+    header = self.filing.header
+    if not header:
+        return None
+
+    # Check for multiple filers (registrant + target)
+    filers = header.filers
+    if len(filers) &gt; 1:
+        # Second filer is typically the target company
+        target_filer = filers[1]
+        return {
+            'name': target_filer.company_information.name,
+            'ein': target_filer.company_information.irs_number,
+            'incorporation_state': target_filer.company_information.state_of_incorporation,
+            'cik': target_filer.company_information.cik
+        }
+
+    return None
+</code></pre>
+<h2 id="edge-cases-and-limitations">Edge Cases and Limitations</h2>
+<h3 id="known-edge-cases">Known Edge Cases</h3>
+<ol>
+<li><strong>Multiple Target Companies</strong>: Some S-4 filings involve multiple acquisition targets</li>
+<li><strong>Cross-Border Mergers</strong>: Foreign target companies may have different identifier formats</li>
+<li><strong>Shell Company Mergers</strong>: SPAC transactions have unique disclosure patterns</li>
+<li><strong>Amendment Filings</strong>: S-4/A amendments may have different structured data locations</li>
+<li><strong>Historical Format Variations</strong>: Older filings (pre-2010) may use different table formats</li>
+</ol>
+<h3 id="technical-limitations">Technical Limitations</h3>
+<ol>
+<li><strong>Private Company CIK Resolution</strong>: Private companies don't have SEC CIKs</li>
+<li><strong>EIN Availability</strong>: Some foreign entities may not have US Tax IDs</li>
+<li><strong>HTML Parsing Sensitivity</strong>: Malformed HTML can break table parsing</li>
+<li><strong>False Positive Management</strong>: Generic company name patterns may match unrelated entities</li>
+</ol>
+<h3 id="handling-strategy">Handling Strategy</h3>
+<pre><code class="language-python">class S4TargetCompanyExtractor:
+    def extract_target_info(self) -&gt; Optional[TargetCompanyInfo]:
+        &quot;&quot;&quot;Primary extraction method with fallback strategy.&quot;&quot;&quot;
+
+        # Try highest confidence method first
+        target_data = self._extract_from_coregistrant_table()
+        confidence = &quot;high&quot;
+        method = &quot;coregistrant_table&quot;
+
+        # Fallback to medium confidence methods
+        if not target_data:
+            target_data = self._extract_from_xbrl_facts()
+            confidence = &quot;medium&quot;
+            method = &quot;xbrl_facts&quot;
+
+        if not target_data:
+            target_data = self._extract_from_filing_header()
+            confidence = &quot;medium&quot;
+            method = &quot;filing_header&quot;
+
+        # No reliable extraction possible
+        if not target_data:
+            return None
+
+        # Attempt CIK resolution for public companies
+        cik = self._resolve_cik(target_data) if target_data.get('name') else None
+
+        return TargetCompanyInfo(
+            name=target_data.get('name'),
+            ein=target_data.get('ein'),
+            sic_code=target_data.get('sic_code'),
+            incorporation_state=target_data.get('incorporation_state'),
+            cik=cik,
+            extraction_method=method,
+            confidence_level=confidence
+        )
+</code></pre>
+<h2 id="testing-strategy">Testing Strategy</h2>
+<h3 id="unit-tests">Unit Tests</h3>
+<ol>
+<li><strong>Parser Validation Tests</strong></li>
+<li>Test Co-Registrant table parsing with known good HTML</li>
+<li>Test XBRL fact extraction with sample business combination facts</li>
+<li>
+<p>Test header parsing with various filer configurations</p>
+</li>
+<li>
+<p><strong>Edge Case Tests</strong></p>
+</li>
+<li>Malformed HTML handling</li>
+<li>Missing data field scenarios</li>
+<li>Multiple target company scenarios</li>
+<li>
+<p>Foreign entity identifier patterns</p>
+</li>
+<li>
+<p><strong>Integration Tests</strong></p>
+</li>
+<li>End-to-end extraction from real S-4 filings</li>
+<li>CIK resolution accuracy testing</li>
+<li>Cross-validation with manual extraction</li>
+</ol>
+<h3 id="test-data-requirements">Test Data Requirements</h3>
+<pre><code class="language-python"># Sample test cases covering different scenarios
+TEST_CASES = [
+    {
+        'accession': '0001104659-24-123456',  # SPAC merger
+        'expected_target': 'Kodiak Robotics, Inc.',
+        'expected_ein': '82-5086710',
+        'expected_sic': '7373',
+        'is_public': False
+    },
+    {
+        'accession': '0001193125-24-234567',  # Public-to-public merger
+        'expected_target': 'ExampleCorp Inc.',
+        'expected_cik': 1234567,
+        'is_public': True
+    },
+    {
+        'accession': '0000950103-24-345678',  # Multiple target scenario
+        'expected_targets_count': 2,
+        'extraction_complexity': 'high'
+    }
+]
+</code></pre>
+<h3 id="performance-tests">Performance Tests</h3>
+<ol>
+<li><strong>Extraction Speed</strong>: Target &lt; 2 seconds per S-4 filing</li>
+<li><strong>Memory Usage</strong>: Efficient HTML parsing without excessive memory consumption</li>
+<li><strong>Batch Processing</strong>: Handle 100+ S-4 filings efficiently</li>
+</ol>
+<h2 id="documentation-requirements">Documentation Requirements</h2>
+<h3 id="api-documentation">API Documentation</h3>
+<ul>
+<li>Complete docstrings for all public methods</li>
+<li>Usage examples for common scenarios</li>
+<li>Edge case handling documentation</li>
+<li>Performance considerations</li>
+</ul>
+<h3 id="user-guide-additions">User Guide Additions</h3>
+<pre><code class="language-markdown">## Working with S-4 Merger Filings
+
+S-4 filings contain information about merger and acquisition transactions. EdgarTools can automatically extract target company information from these filings.
+
+### Basic Usage
+```python
+# Find recent SPAC mergers
+spac_filings = get_filings(year=2024, form=&quot;S-4&quot;)
+
+for filing in spac_filings:
+    if filing.target_company:
+        print(f&quot;Acquirer: {filing.company}&quot;)
+        print(f&quot;Target: {filing.target_company.name}&quot;)
+        print(f&quot;Target Industry (SIC): {filing.target_company.sic_code}&quot;)
+
+        if filing.target_company.is_public_company:
+            print(&quot;Target is publicly traded&quot;)
+            target_filings = filing.target_company.filings
+        else:
+            print(&quot;Target is a private company&quot;)
+</code></pre>
+<h3 id="advanced-analysis">Advanced Analysis</h3>
+<pre><code class="language-python"># Analyze merger trends by industry
+merger_data = []
+for filing in get_filings(year=2024, form=&quot;S-4&quot;):
+    if filing.target_company and filing.target_company.sic_code:
+        merger_data.append({
+            'target_sic': filing.target_company.sic_code,
+            'target_state': filing.target_company.incorporation_state,
+            'filing_date': filing.filing_date
+        })
+
+import pandas as pd
+df = pd.DataFrame(merger_data)
+print(&quot;Top merger target industries:&quot;)
+print(df.target_sic.value_counts().head())
+</code></pre>
+<h2 id="implementation-timeline">Implementation Timeline</h2>
+<h3 id="phase-1-4-6-weeks-core-infrastructure">Phase 1 (4-6 weeks): Core Infrastructure</h3>
+<ul>
+<li>[ ] S4TargetCompanyExtractor class implementation</li>
+<li>[ ] TargetCompanyInfo data structure</li>
+<li>[ ] Co-Registrant table parser (primary method)</li>
+<li>[ ] Basic unit tests and validation</li>
+<li>[ ] Integration with Filing class</li>
+</ul>
+<h3 id="phase-2-2-3-weeks-enhanced-extraction">Phase 2 (2-3 weeks): Enhanced Extraction</h3>
+<ul>
+<li>[ ] XBRL business combination facts parser</li>
+<li>[ ] Filing header parser</li>
+<li>[ ] Confidence scoring system</li>
+<li>[ ] Comprehensive test suite</li>
+</ul>
+<h3 id="phase-3-3-4-weeks-public-company-linking">Phase 3 (3-4 weeks): Public Company Linking</h3>
+<ul>
+<li>[ ] CIK resolution service</li>
+<li>[ ] Company object integration</li>
+<li>[ ] Cross-reference validation</li>
+<li>[ ] Performance optimization</li>
+</ul>
+<h3 id="phase-4-2-3-weeks-documentation-and-polish">Phase 4 (2-3 weeks): Documentation and Polish</h3>
+<ul>
+<li>[ ] Complete API documentation</li>
+<li>[ ] User guide updates</li>
+<li>[ ] Example notebooks</li>
+<li>[ ] Performance benchmarking</li>
+</ul>
+<h2 id="success-metrics">Success Metrics</h2>
+<h3 id="technical-metrics">Technical Metrics</h3>
+<ul>
+<li><strong>Extraction Accuracy</strong>: &gt;95% for structured data fields (EIN, SIC, state)</li>
+<li><strong>Coverage</strong>: Successfully extract target info from &gt;90% of S-4 filings</li>
+<li><strong>Performance</strong>: &lt;2 seconds extraction time per filing</li>
+<li><strong>Reliability</strong>: &lt;1% false positive rate for target company identification</li>
+</ul>
+<h3 id="user-experience-metrics">User Experience Metrics</h3>
+<ul>
+<li><strong>API Simplicity</strong>: Single property access (<code>filing.target_company</code>)</li>
+<li><strong>Error Handling</strong>: Graceful degradation with clear error messages</li>
+<li><strong>Documentation Quality</strong>: Complete examples for all common use cases</li>
+<li><strong>Integration Smoothness</strong>: No breaking changes to existing Filing API</li>
+</ul>
+<h2 id="risk-assessment">Risk Assessment</h2>
+<h3 id="high-risk-areas">High-Risk Areas</h3>
+<ol>
+<li><strong>HTML Parsing Fragility</strong>: SEC filing HTML formats may vary significantly</li>
+<li><strong>Private Company CIK Resolution</strong>: Limited ability to link private companies to SEC data</li>
+<li><strong>Historical Data Compatibility</strong>: Older filings may require different parsing approaches</li>
+</ol>
+<h3 id="mitigation-strategies">Mitigation Strategies</h3>
+<ol>
+<li><strong>Robust Parser Design</strong>: Multiple extraction methods with fallback logic</li>
+<li><strong>Conservative Matching</strong>: Prefer high-confidence extractions, fail gracefully</li>
+<li><strong>Extensive Testing</strong>: Validate across multiple filing years and formats</li>
+<li><strong>User Feedback Loop</strong>: Monitor extraction accuracy and adjust algorithms</li>
+</ol>
+<h2 id="future-enhancements">Future Enhancements</h2>
+<h3 id="potential-extensions">Potential Extensions</h3>
+<ol>
+<li><strong>Machine Learning Enhancement</strong>: Train models on successful extractions to improve accuracy</li>
+<li><strong>Real-Time Monitoring</strong>: Track new S-4 filings and automatically extract target information  </li>
+<li><strong>Deal Tracking</strong>: Monitor merger completion through subsequent 8-K filings</li>
+<li><strong>Industry Analysis Tools</strong>: Built-in utilities for M&amp;A trend analysis</li>
+<li><strong>International Support</strong>: Extend to cross-border merger filings</li>
+</ol>
+<h3 id="api-evolution">API Evolution</h3>
+<pre><code class="language-python"># Future enhanced API possibilities
+class MergerTransaction:
+    &quot;&quot;&quot;Represents a complete merger transaction across multiple filings.&quot;&quot;&quot;
+
+    def __init__(self, s4_filing: Filing):
+        self.s4_filing = s4_filing
+        self.target_company = s4_filing.target_company
+
+    @property
+    def completion_filing(self) -&gt; Optional[Filing]:
+        &quot;&quot;&quot;Find the 8-K filing announcing merger completion.&quot;&quot;&quot;
+        pass
+
+    @property
+    def amendments(self) -&gt; List[Filing]:
+        &quot;&quot;&quot;All S-4/A amendment filings for this transaction.&quot;&quot;&quot;
+        pass
+
+    @property
+    def timeline(self) -&gt; List[MergerEvent]:
+        &quot;&quot;&quot;Complete timeline of merger-related filings and events.&quot;&quot;&quot;
+        pass
+</code></pre>
+<p>This comprehensive specification provides the foundation for implementing a robust, user-friendly S-4 target company linking feature that aligns with EdgarTools' philosophy of making complex SEC data simple and accessible.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
