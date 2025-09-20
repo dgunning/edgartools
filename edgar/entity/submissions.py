@@ -24,20 +24,45 @@ __all__ = [
 
 def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
     """
-    Load company submissions from local data
+    Load company submissions from local data.
+
+    If the cached file is corrupted or empty, it will be re-downloaded automatically.
     """
     submissions_dir = get_edgar_data_directory() / "submissions"
     if not submissions_dir.exists():
         return None
     submissions_file = submissions_dir / f"CIK{cik:010}.json"
+
+    # If file doesn't exist, download it
     if not submissions_file.exists():
         submissions_json = download_entity_submissions_from_sec(cik)
-        with open(submissions_file, "wb") as f:
-            f.write(json.dumps(submissions_json))
-            f.flush()
-            f.close()
+        if submissions_json:
+            with open(submissions_file, "w", encoding='utf-8') as f:
+                json.dump(submissions_json, f)
         return submissions_json
-    return json.loads(submissions_file.read_text())
+
+    # File exists, try to parse it
+    try:
+        return json.loads(submissions_file.read_text())
+    except (json.JSONDecodeError, UnicodeDecodeError) as e:
+        # File is corrupted, log warning and re-download
+        log.warning(f"Corrupted submissions cache file for CIK {cik}: {e}. Re-downloading...")
+        try:
+            submissions_json = download_entity_submissions_from_sec(cik)
+            if submissions_json:
+                # Write the fresh data to cache
+                with open(submissions_file, "w", encoding='utf-8') as f:
+                    json.dump(submissions_json, f)
+                return submissions_json
+            else:
+                # If download failed, remove the corrupted file
+                submissions_file.unlink(missing_ok=True)
+                return None
+        except Exception as download_error:
+            log.error(f"Failed to re-download submissions for CIK {cik}: {download_error}")
+            # Remove the corrupted file so it can be retried later
+            submissions_file.unlink(missing_ok=True)
+            return None
 
 
 @lru_cache(maxsize=32)
