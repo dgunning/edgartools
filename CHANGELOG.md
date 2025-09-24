@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.14.1 - 2025-09-23
+
+### Fixed
+- **Issue #446**: Fixed missing values in 20-F filings by adding IFRS taxonomy support
+  - **Problem**: 20-F filings using IFRS taxonomy showed sparse financial data due to missing concept mappings
+  - **Solution**: Added comprehensive IFRS taxonomy support with proper concept recognition and mapping
+  - **Impact**: Enables accurate financial data extraction from international companies filing 20-F forms with IFRS standards
+
+- **JSONDecodeError from corrupted submissions cache files**: Resolved cache corruption issues causing parsing failures
+  - **Problem**: Corrupted cache files were causing JSONDecodeError exceptions when accessing company submissions data
+  - **Solution**: Enhanced cache validation and error handling to detect and recover from corrupted cache entries
+  - **Impact**: Improved reliability of company data access with graceful handling of cache corruption
+
+### Enhanced
+- **Early September CUSIP Tickers Update**: Updated CUSIP to ticker mappings with latest September data
+  - **Coverage**: Refreshed ticker mappings to ensure accurate company identification and symbol resolution
+  - **Impact**: Maintains accuracy of company lookups and ensures current ticker symbols are properly recognized
+
 ## Release 4.14.0 - 2025-09-19
 
 ### Added
