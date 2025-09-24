@@ -92,14 +92,20 @@ statement_registry = {
         name="BalanceSheet",
         category=StatementCategory.FINANCIAL_STATEMENT,
         primary_concepts=["us-gaap_StatementOfFinancialPositionAbstract"],
-        alternative_concepts=["us-gaap_BalanceSheetAbstract"],
+        alternative_concepts=[
+            "us-gaap_BalanceSheetAbstract",
+            "ifrs-full_StatementOfFinancialPositionAbstract"  # IFRS equivalent
+        ],
         concept_patterns=[
             r".*_StatementOfFinancialPositionAbstract$",
             r".*_BalanceSheetAbstract$",
             r".*_ConsolidatedBalanceSheetsAbstract$",
             r".*_CondensedConsolidatedBalanceSheetsUnauditedAbstract$"
         ],
-        key_concepts=["us-gaap_Assets", "us-gaap_Liabilities", "us-gaap_StockholdersEquity"],
+        key_concepts=[
+            "us-gaap_Assets", "us-gaap_Liabilities", "us-gaap_StockholdersEquity",
+            "ifrs-full_Assets", "ifrs-full_Liabilities", "ifrs-full_Equity"  # IFRS equivalents
+        ],
         role_patterns=[
             r".*[Bb]alance[Ss]heet.*",
             r".*[Ss]tatement[Oo]f[Ff]inancial[Pp]osition.*",
@@ -114,14 +120,20 @@ statement_registry = {
         name="IncomeStatement",
         category=StatementCategory.FINANCIAL_STATEMENT,
         primary_concepts=["us-gaap_IncomeStatementAbstract"],
-        alternative_concepts=["us-gaap_StatementOfIncomeAbstract"],
+        alternative_concepts=[
+            "us-gaap_StatementOfIncomeAbstract",
+            "ifrs-full_IncomeStatementAbstract"  # IFRS equivalent
+        ],
         concept_patterns=[
             r".*_IncomeStatementAbstract$",
             r".*_StatementOfIncomeAbstract$",
-            r".*_ConsolidatedStatementsOfIncomeAbstract$", 
+            r".*_ConsolidatedStatementsOfIncomeAbstract$",
             r".*_CondensedConsolidatedStatementsOfIncomeUnauditedAbstract$"
         ],
-        key_concepts=["us-gaap_Revenues", "us-gaap_NetIncomeLoss"],
+        key_concepts=[
+            "us-gaap_Revenues", "us-gaap_NetIncomeLoss",
+            "ifrs-full_Revenue", "ifrs-full_ProfitLoss"  # IFRS equivalents
+        ],
         role_patterns=[
             r".*[Ii]ncome[Ss]tatement.*",
             r".*[Ss]tatement[Oo]f[Ii]ncome.*",
@@ -137,6 +149,7 @@ statement_registry = {
         name="CashFlowStatement",
         category=StatementCategory.FINANCIAL_STATEMENT,
         primary_concepts=["us-gaap_StatementOfCashFlowsAbstract"],
+        alternative_concepts=["ifrs-full_StatementOfCashFlowsAbstract"],  # IFRS equivalent
         concept_patterns=[
             r".*_StatementOfCashFlowsAbstract$",
             r".*_CashFlowsAbstract$",
@@ -145,7 +158,9 @@ statement_registry = {
         ],
         key_concepts=[
             "us-gaap_NetCashProvidedByUsedInOperatingActivities",
-            "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease"
+            "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
+            "ifrs-full_CashFlowsFromUsedInOperatingActivities",  # IFRS equivalents
+            "ifrs-full_IncreaseDecreaseInCashAndCashEquivalents"
         ],
         role_patterns=[
             r".*[Cc]ash[Ff]low.*",
