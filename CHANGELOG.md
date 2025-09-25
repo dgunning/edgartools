@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.14.2 - 2025-09-24
+
+### Enhanced
+- **Enhanced SEC Error Handling in SGML Parsing**: Improved error reporting with specific, actionable exceptions
+  - **Problem**: When SEC returns error responses (HTML/XML), users received generic "Unknown SGML format" errors that provided no guidance
+  - **Solution**: Added custom exception classes (`SECIdentityError`, `SECFilingNotFoundError`, `SECHTMLResponseError`) with specific error detection and actionable error messages
+  - **Coverage**: Handles SEC identity errors, AWS S3 NoSuchKey errors, and other HTML/XML error responses
+  - **Impact**: Users now receive clear guidance on how to resolve SEC API issues, including proper EDGAR_IDENTITY setup and filing availability checks
+
 ## Release 4.14.1 - 2025-09-23
 
 ### Fixed
