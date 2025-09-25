@@ -4,7 +4,7 @@ from pathlib import Path
 
 from edgar import *
 from edgar.sgml import iter_documents, list_documents, FilingSGML, Filer
-from edgar.sgml.sgml_parser import SGMLDocument, SGMLParser, SGMLFormatType
+from edgar.sgml.sgml_parser import SGMLDocument, SGMLParser, SGMLFormatType, SECIdentityError, SECFilingNotFoundError, SECHTMLResponseError
 from edgar.sgml.tools import get_content_between_tags
 import hashlib
 from io import BytesIO
@@ -415,3 +415,79 @@ def test_parse_tsla_sgml_with_embedded_ixbrl():
     content = Path("data/sgml/0001564590-20-004475-minimal.txt").read_text()
     filing_header = FilingHeader.parse_from_sgml_text(content)
     assert filing_header
+
+def test_detect_sec_identity_error():
+    """Test that SEC identity error HTML is properly detected"""
+    html_content = Path("data/html/SEC.AutomatedTool.html").read_text()
+    parser = SGMLParser()
+
+    # Should now raise SECIdentityError with helpful message
+    with pytest.raises(SECIdentityError, match="SEC rejected request due to invalid or missing EDGAR_IDENTITY"):
+        parser.detect_format(html_content)
+
+
+def test_sec_identity_error_message_quality():
+    """Test that the error message is helpful and actionable"""
+    html_content = Path("data/html/SEC.AutomatedTool.html").read_text()
+    parser = SGMLParser()
+
+    try:
+        parser.detect_format(html_content)
+        assert False, "Expected SECIdentityError to be raised"
+    except SECIdentityError as e:
+        error_msg = str(e)
+        # Ensure the error message contains helpful information
+        assert "set_identity" in error_msg
+        assert "sec.gov" in error_msg
+        assert "EDGAR_IDENTITY" in error_msg
+        assert "your.email@domain.com" in error_msg
+
+
+def test_generic_html_error():
+    """Test that generic HTML content raises SECHTMLResponseError"""
+    generic_html = """
+    <!DOCTYPE html>
+    <html>
+    <head><title>Some Random HTML</title></head>
+    <body><h1>This is not SGML</h1></body>
+    </html>
+    """
+    parser = SGMLParser()
+
+    # Should raise SECHTMLResponseError for generic HTML
+    with pytest.raises(SECHTMLResponseError, match="SEC returned HTML or XML content instead of expected SGML"):
+        parser.detect_format(generic_html)
+
+
+def test_nosuchkey_error():
+    """Test that AWS S3 NoSuchKey XML error is properly detected"""
+    xml_error = """<?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message><Key>edgar/data/320193/000078901925000033/0000789019-25-000033.txt</Key><RequestId>V69KE626D814ADQ3</RequestId><HostId>6tCOv+xG9XpkfYSota8rmKe8j0JedY04gPqTGHoV29NyKSnTUH2ETAdw6HTinc/At8JgpHyFjic=</HostId></Error>"""
+
+    parser = SGMLParser()
+
+    # Should raise SECFilingNotFoundError with specific message for NoSuchKey
+    with pytest.raises(SECFilingNotFoundError, match="SEC filing not found - the specified key does not exist"):
+        parser.detect_format(xml_error)
+
+
+def test_handle_sec_error_message_in_sgml_with_invalid_identity():
+    """Test that an invalid identity causes appropriate error handling"""
+    set_identity("harvey")  # Invalid identity - not email format
+    filing = Filing(company='Walmart Inc.', cik=104169, form='4', filing_date='2025-09-24', accession_no='0000104169-25-000155')
+
+    # This should fail when trying to parse the HTML error response
+    with pytest.raises(SECIdentityError):
+        filing.sgml()
+
+
+def test_handle_sec_error_message_with_nonexistent_filing():
+    """Test behavior when requesting a non-existent filing"""
+    # Use a proper identity but invalid accession number
+    set_identity("Test User test@example.com")
+    filing = Filing(company='Walmart Inc.', cik=104169, form='4', filing_date='2025-09-24', accession_no='0000104169-25-999999')
+
+    # This should fail when SEC returns error content
+    # Could be either SECFilingNotFoundError or SECHTMLResponseError depending on SEC's response
+    with pytest.raises((SECFilingNotFoundError, SECHTMLResponseError)):
+        filing.sgml()

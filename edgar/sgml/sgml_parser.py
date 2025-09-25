@@ -5,10 +5,26 @@ from enum import Enum
 from io import BytesIO
 from typing import Iterator, Optional
 
+from edgar.core import has_html_content
 from edgar.sgml.tools import get_content_between_tags
 from edgar.vendored import uu
 
-__all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument']
+__all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument', 'SECIdentityError', 'SECFilingNotFoundError', 'SECHTMLResponseError']
+
+
+class SECIdentityError(Exception):
+    """Raised when SEC rejects request due to invalid or missing EDGAR_IDENTITY"""
+    pass
+
+
+class SECFilingNotFoundError(Exception):
+    """Raised when SEC returns error for non-existent filing"""
+    pass
+
+
+class SECHTMLResponseError(Exception):
+    """Raised when SEC returns HTML content instead of expected SGML"""
+    pass
 
 class SGMLFormatType(Enum):
     SEC_DOCUMENT = "sec_document"  # <SEC-DOCUMENT>...<SEC-HEADER> style
@@ -91,10 +107,58 @@ class SGMLDocument:
             return 'xbrl'
         return 'text'
 
+def _raise_sec_html_error(content: str):
+    """
+    Analyze HTML/XML error content from SEC and raise appropriate specific exception.
+
+    Args:
+        content: HTML or XML content received from SEC
+
+    Raises:
+        SECIdentityError: For identity-related errors
+        SECFilingNotFoundError: For missing filing errors
+        SECHTMLResponseError: For other HTML/XML responses
+    """
+    # Check for identity error
+    if "Your Request Originates from an Undeclared Automated Tool" in content:
+        raise SECIdentityError(
+            "SEC rejected request due to invalid or missing EDGAR_IDENTITY. "
+            "Please set a valid identity using set_identity('Your Name your.email@domain.com'). "
+            "See https://www.sec.gov/os/accessing-edgar-data"
+        )
+
+    # Check for AWS S3 NoSuchKey error (XML format)
+    if "<Code>NoSuchKey</Code>" in content and "<Message>The specified key does not exist.</Message>" in content:
+        raise SECFilingNotFoundError(
+            "SEC filing not found - the specified key does not exist in EDGAR archives. "
+            "Check that the accession number and filing date are correct."
+        )
+
+    # Check for general not found errors
+    if "Not Found" in content or "404" in content:
+        raise SECFilingNotFoundError(
+            "SEC filing not found. Check that the accession number and filing date are correct."
+        )
+
+    # Generic HTML/XML response error
+    raise SECHTMLResponseError(
+        "SEC returned HTML or XML content instead of expected SGML filing data. "
+        "This may indicate an invalid request or temporary SEC server issue."
+    )
+
+
 class SGMLParser:
     @staticmethod
     def detect_format(content: str) -> SGMLFormatType:
         """Detect SGML format based on root element"""
+        # Check if we received HTML error content instead of SGML
+        if has_html_content(content):
+            _raise_sec_html_error(content)
+
+        # Check if we received XML error content (like AWS S3 NoSuchKey errors)
+        if content.lstrip().startswith('<?xml') and '<Error>' in content:
+            _raise_sec_html_error(content)
+
         if content.lstrip().startswith('<SUBMISSION>'):
             return SGMLFormatType.SUBMISSION
         elif '<SEC-DOCUMENT>' in content:
