@@ -471,9 +471,10 @@ def test_nosuchkey_error():
         parser.detect_format(xml_error)
 
 
-def test_handle_sec_error_message_in_sgml_with_invalid_identity():
+def test_handle_sec_error_message_in_sgml_with_invalid_identity(monkeypatch):
     """Test that an invalid identity causes appropriate error handling"""
-    set_identity("harvey")  # Invalid identity - not email format
+    # Use monkeypatch to set invalid identity without affecting other tests
+    monkeypatch.setenv("EDGAR_IDENTITY", "harvey")  # Invalid identity - not email format
     filing = Filing(company='Walmart Inc.', cik=104169, form='4', filing_date='2025-09-24', accession_no='0000104169-25-000155')
 
     # This should fail when trying to parse the HTML error response
@@ -481,10 +482,10 @@ def test_handle_sec_error_message_in_sgml_with_invalid_identity():
         filing.sgml()
 
 
-def test_handle_sec_error_message_with_nonexistent_filing():
+def test_handle_sec_error_message_with_nonexistent_filing(monkeypatch):
     """Test behavior when requesting a non-existent filing"""
-    # Use a proper identity but invalid accession number
-    set_identity("Test User test@example.com")
+    # Use monkeypatch to set proper identity without affecting other tests
+    monkeypatch.setenv("EDGAR_IDENTITY", "Test User test@example.com")
     filing = Filing(company='Walmart Inc.', cik=104169, form='4', filing_date='2025-09-24', accession_no='0000104169-25-999999')
 
     # This should fail when SEC returns error content
