@@ -151,15 +151,11 @@ class SGMLParser:
     @staticmethod
     def detect_format(content: str) -> SGMLFormatType:
         """Detect SGML format based on root element"""
-        # Check if we received HTML error content instead of SGML
-        if has_html_content(content):
-            _raise_sec_html_error(content)
+        # First check for valid SGML structure before checking for HTML content
+        content_stripped = content.lstrip()
 
-        # Check if we received XML error content (like AWS S3 NoSuchKey errors)
-        if content.lstrip().startswith('<?xml') and '<Error>' in content:
-            _raise_sec_html_error(content)
-
-        if content.lstrip().startswith('<SUBMISSION>'):
+        # Check for valid SGML formats first
+        if content_stripped.startswith('<SUBMISSION>'):
             return SGMLFormatType.SUBMISSION
         elif '<SEC-DOCUMENT>' in content:
             return SGMLFormatType.SEC_DOCUMENT
@@ -169,6 +165,16 @@ class SGMLParser:
         elif '<DOCUMENT>' in content[:1000]:
             # For old filings from the 1990's
             return SGMLFormatType.SEC_DOCUMENT
+
+        # Only check for HTML content if it's not valid SGML structure
+        # This prevents false positives when SGML contains HTML within <TEXT> sections
+        if has_html_content(content):
+            _raise_sec_html_error(content)
+
+        # Check if we received XML error content (like AWS S3 NoSuchKey errors)
+        if content_stripped.startswith('<?xml') and '<Error>' in content:
+            _raise_sec_html_error(content)
+
         raise ValueError("Unknown SGML format")
 
     def parse(self, content) -> dict:
