@@ -167,10 +167,3 @@ def test_issue_412_solution_demonstrates_fix():
     except Exception as e:
         pytest.skip(f"Solution demo test skipped: {e}")
 
-
-if __name__ == "__main__":
-    # Run the tests individually for debugging
-    test_tsla_xbrl_data_accessible_2019_2022()
-    test_tsla_revenue_data_extractable() 
-    test_tsla_financial_statements_accessible()
-    print("✅ All TSLA Issue #412 regression tests passed!")
