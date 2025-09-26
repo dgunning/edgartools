@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
 
 if TYPE_CHECKING:
     from edgar.entity.query import FactQuery
+    from edgar.enums import PeriodType
 
 from typing import Union
 
@@ -167,6 +168,31 @@ class EntityFacts:
             List of all FinancialFact objects
         """
         return self._facts
+
+    def filter_by_period_type(self, period_type: Union[str, 'PeriodType']) -> 'EntityFacts':
+        """
+        Filter facts by period type and return a new EntityFacts instance.
+
+        Args:
+            period_type: Period type to filter by - either PeriodType enum or string
+                        ('annual', 'quarterly', 'monthly')
+
+        Returns:
+            New EntityFacts instance with filtered facts
+
+        Example:
+            >>> annual_facts = facts.filter_by_period_type('annual')
+            >>> quarterly_facts = facts.filter_by_period_type(PeriodType.QUARTERLY)
+        """
+        # Use the query interface to filter facts
+        filtered_facts = self.query().by_period_type(period_type).execute()
+
+        # Create a new EntityFacts instance with the filtered facts
+        return EntityFacts(
+            cik=self.cik,
+            name=self.name,
+            facts=filtered_facts
+        )
 
     def __rich__(self):
         """Creates a rich representation providing an at-a-glance view of company facts."""

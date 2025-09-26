@@ -33,15 +33,19 @@ from edgar.enums import PeriodType
 
 # Enhanced with autocomplete for financial statements
 company = Company("AAPL")
-facts = company.get_facts()
 
-# Period filtering through statement methods
+# NEW: Direct period type filtering in get_facts()
+annual_facts = company.get_facts(period_type=PeriodType.ANNUAL)
+quarterly_facts = company.get_facts(period_type=PeriodType.QUARTERLY)
+
+# NEW: Query interface with PeriodType enum
+facts = company.get_facts()
+annual_facts = facts.query().by_period_type(PeriodType.ANNUAL).execute()
+quarterly_facts = facts.query().by_period_type(PeriodType.QUARTERLY).execute()
+
+# Existing methods still work (backward compatibility)
 annual_income = facts.income_statement(annual=True)       # Annual periods
 quarterly_income = facts.income_statement(annual=False)   # Quarterly periods
-
-# Using query interface with PeriodType
-annual_facts = facts.query().by_period_length(12).get()  # Annual (12 months)
-quarterly_facts = facts.query().by_period_length(3).get() # Quarterly (3 months)
 ```
 
 ### Backwards Compatibility (Existing Style)
@@ -133,42 +137,51 @@ for period in ALL_PERIODS:
 
 ### Financial Analysis
 ```python
-from edgar.enums import PeriodInput
+from edgar.enums import PeriodInput, PeriodType
 
 def compare_performance(ticker: str, periods: list[PeriodInput]) -> dict:
     """Compare company performance across different periods."""
     from edgar import Company
-    from edgar.enums import validate_period_type
 
     company = Company(ticker)
-    facts = company.get_facts()
     results = {}
 
     for period in periods:
-        period_str = validate_period_type(period)
-        data = None  # Initialize data variable
-
-        if period_str == "annual":
-            data = facts.income_statement(annual=True, periods=1)
-        elif period_str == "quarterly":
-            data = facts.income_statement(annual=False, periods=1)
-        elif period_str == "ttm":
-            # Get last 4 quarters for TTM calculation
-            data = facts.income_statement(annual=False, periods=4)
-
-        if data is not None:
-            results[period_str] = data
+        # NEW: Direct period filtering in get_facts()
+        try:
+            period_facts = company.get_facts(period_type=period)
+            if period_facts:
+                # Get income statement data from filtered facts
+                income_stmt = period_facts.income_statement(periods=1)
+                results[str(period)] = income_stmt
+        except NotImplementedError:
+            # Handle TTM/YTD (not yet implemented)
+            facts = company.get_facts()
+            if str(period) == "ttm":
+                # Get last 4 quarters for TTM calculation
+                data = facts.income_statement(annual=False, periods=4)
+                results["ttm"] = data
 
     return results
 
 # Usage with mixed types
-from edgar.enums import PeriodType
-
 analysis = compare_performance("AAPL", [
-    PeriodType.ANNUAL,    # Enum
-    "quarterly",          # String
-    PeriodType.TTM        # Enum
+    PeriodType.ANNUAL,     # Enum
+    "quarterly",           # String
+    PeriodType.MONTHLY     # Enum - now supported!
 ])
+
+# NEW: Enhanced query combinations
+company = Company("AAPL")
+facts = company.get_facts()
+
+# Combine period filtering with concept filtering
+annual_revenue = facts.query().by_period_type(PeriodType.ANNUAL).by_concept("Revenue").execute()
+quarterly_revenue = facts.query().by_period_type("quarterly").by_concept("Revenue").execute()
+
+# Filter specific period types directly
+annual_facts = facts.filter_by_period_type(PeriodType.ANNUAL)
+quarterly_facts = facts.filter_by_period_type(PeriodType.QUARTERLY)
 ```
 
 ### Batch Processing
@@ -407,18 +420,57 @@ except ValueError as e:
 
 ---
 
+## 🆕 API Enhancements
+
+**Period-Type Filtering Feature** adds direct filtering capabilities:
+
+### New Methods
+```python
+# Direct filtering in get_facts()
+annual_facts = company.get_facts(period_type=PeriodType.ANNUAL)
+
+# Query interface filtering
+facts.query().by_period_type(PeriodType.QUARTERLY)
+
+# EntityFacts filtering
+facts.filter_by_period_type(PeriodType.ANNUAL)
+```
+
+### Enhanced Workflow
+```python
+from edgar import Company
+from edgar.enums import PeriodType
+
+# Before: Multi-step process
+company = Company("AAPL")
+facts = company.get_facts()
+annual_income = facts.income_statement(annual=True)
+
+# After: Direct, intuitive filtering
+annual_facts = company.get_facts(period_type=PeriodType.ANNUAL)
+annual_income = annual_facts.income_statement()
+
+# Advanced: Query combinations
+revenue_annual = company.get_facts().query()\
+    .by_concept("Revenue")\
+    .by_period_type(PeriodType.ANNUAL)\
+    .execute()
+```
+
 ## 📈 Impact Summary
 
-**FEAT-003 delivers on EdgarTools principles:**
+**Period-Type Filtering delivers on EdgarTools principles:**
 
-- ✅ **Simple yet powerful**: Easy enum usage with rich functionality
-- ✅ **Beginner-friendly**: IDE autocomplete helps discovery
-- ✅ **Joyful UX**: Prevents typos, provides helpful errors
-- ✅ **Accurate financials**: Validation ensures correct period specification
+- ✅ **Simple yet powerful**: Direct filtering eliminates multi-step processes
+- ✅ **Beginner-friendly**: IDE autocomplete reveals filtering options
+- ✅ **Joyful UX**: Intuitive API that works as expected
+- ✅ **Accurate financials**: Type-safe period specification
 
 **Key improvements:**
 - 🎯 IDE autocomplete for period types
-- 🛡️ Enhanced validation with smart error messages  
+- 🛡️ Enhanced validation with smart error messages
+- ⚡ Direct period filtering in get_facts()
+- 🔍 Query interface period filtering
 - 🔧 Seamless integration with existing API
 - 🔄 Clear migration path from boolean parameters
 - ⚖️ Consistent design with FormType enum

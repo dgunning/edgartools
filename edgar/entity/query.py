@@ -22,6 +22,7 @@ from edgar.entity.models import DataQuality, FinancialFact
 
 if TYPE_CHECKING:
     from edgar.entity.statement import FinancialStatement
+    from edgar.enums import PeriodType
 
 
 class FactQuery:
@@ -198,6 +199,69 @@ class FactQuery:
 
         self._filters.append(matches_period_length)
         return self
+
+    def by_period_type(self, period_type: Union[str, 'PeriodType']) -> 'FactQuery':
+        """
+        Filter by period type using PeriodType enum for enhanced developer experience.
+
+        This method provides a convenient way to filter facts by common period types
+        like annual, quarterly, and monthly periods using either PeriodType enum values
+        or string equivalents.
+
+        Args:
+            period_type: Period type - either PeriodType enum or string equivalent
+                        ('annual', 'quarterly', 'monthly')
+
+        Returns:
+            Self for method chaining
+
+        Example:
+            # Using PeriodType enum (recommended)
+            from edgar.enums import PeriodType
+            annual_facts = facts.query().by_period_type(PeriodType.ANNUAL).get()
+            quarterly_facts = facts.query().by_period_type(PeriodType.QUARTERLY).get()
+
+            # Using string equivalents (also supported)
+            annual_facts = facts.query().by_period_type('annual').get()
+            quarterly_facts = facts.query().by_period_type('quarterly').get()
+
+        Note:
+            TTM and YTD period types require special calculation logic and are not yet
+            supported by this method. Use .by_period_length(12) for 12-month periods
+            or implement custom TTM/YTD calculation logic.
+        """
+        # Import here to avoid circular imports
+        try:
+            from edgar.enums import validate_period_type
+        except ImportError:
+            # Fallback if enums not available
+            def validate_period_type(p):
+                if isinstance(p, str) and p.lower() in ['annual', 'quarterly', 'monthly']:
+                    return p.lower()
+                raise ValueError(f"Invalid period type: {p}")
+
+        validated_period = validate_period_type(period_type)
+
+        # Map period types to period lengths (in months)
+        period_mapping = {
+            'annual': 12,
+            'quarterly': 3,
+            'monthly': 1
+        }
+
+        if validated_period in period_mapping:
+            # Delegate to existing by_period_length method
+            return self.by_period_length(period_mapping[validated_period])
+        elif validated_period in ['ttm', 'ytd']:
+            # TTM and YTD require special calculation logic not yet implemented
+            raise NotImplementedError(
+                f"Period type '{validated_period}' requires calculation logic not yet implemented. "
+                f"For trailing twelve months data, use .by_period_length(12) to get 12-month periods, "
+                f"or use facts.income_statement(annual=False, periods=4) for quarterly aggregation."
+            )
+        else:
+            # This shouldn't happen if validate_period_type works correctly
+            raise ValueError(f"Unsupported period type: {validated_period}")
 
     def date_range(self, start: Union[date, str, None] = None, end: Union[date, str, None] = None) -> 'FactQuery':
         """

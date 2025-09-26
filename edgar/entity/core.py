@@ -13,9 +13,7 @@ if TYPE_CHECKING:
 
     from edgar.entity.enhanced_statement import StructuredStatement
     from edgar.entity.filings import EntityFilings
-
-# Import FormType for type hints (with TYPE_CHECKING to avoid circular imports)
-from typing import TYPE_CHECKING
+    from edgar.enums import FormType, PeriodType
 
 from rich import box
 from rich.columns import Columns
@@ -252,10 +250,23 @@ class Entity(SecFiler):
             trigger_full_load=trigger_full_load
         )
 
-    def get_facts(self) -> Optional[EntityFacts]:
-        """Get structured facts about this entity."""
+    def get_facts(self, period_type: Optional[Union[str, 'PeriodType']] = None) -> Optional[EntityFacts]:
+        """
+        Get structured facts about this entity.
+
+        Args:
+            period_type: Optional filter by period type. Can be PeriodType enum
+                        or string ('annual', 'quarterly', 'monthly').
+
+        Returns:
+            EntityFacts object, optionally filtered by period type
+        """
         try:
-            return get_company_facts(self.cik)
+            facts = get_company_facts(self.cik)
+            if facts and period_type:
+                # Apply period type filtering to the facts
+                return facts.filter_by_period_type(period_type)
+            return facts
         except NoCompanyFactsFound:
             return None
 
