@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 """
-Reproduction script for Issue #436: Offline XBRL Access
+Reproduction script for Issue #436: Offline XBRL Access - SGML Parsing Issue
 
-User reports that after downloading Edgar data with download_edgar_data(),
-calling filing.xbrl() still attempts network requests and fails when offline.
+User reports that even after enabling use_local_storage(True), calling filing.xbrl()
+still attempts network requests and fails with ConnectTimeout when offline.
 
-Expected behavior: XBRL should be accessible from locally downloaded data without network requests.
-Actual behavior: Network requests are made, causing ConnectTimeout errors when offline.
+Latest user comment shows the specific stack trace:
+filing.xbrl() -> XBRL.from_filing(self) -> XBRLAttachments(filing.attachments)
+-> filing.attachments -> self.sgml() -> FilingSGML.from_filing(self)
+-> cls.from_source(filing.text_url) -> read_content_as_string(source)
+-> stream_with_retry(source) -> Network request
 
-Root cause investigation:
-- XBRL.from_filing() → XBRLAttachments(filing.attachments) → attachment.content
-- The attachment.content property triggers downloads even when data exists locally
+ROOT CAUSE: FilingSGML.from_filing() always uses filing.text_url (network URL)
+instead of checking for local storage mode and using local file paths.
+
+Expected behavior: SGML parsing should respect local storage mode and use local files.
+Actual behavior: SGML parsing always makes network requests, ignoring local storage.
 """
 
 import os
@@ -21,77 +26,106 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from edgar import set_identity, Company
-from edgar.storage import is_using_local_storage
+from edgar import set_identity, Company, use_local_storage
+from edgar.storage import is_using_local_storage, local_filing_path
 
 def test_offline_xbrl_access():
-    """Test accessing XBRL data when local storage is available."""
+    """Test reproducing the specific SGML parsing issue in offline mode."""
 
     # Set proper identity for SEC API (required)
-    set_identity("EdgarTools Test Suite test@edgartools.dev")
+    set_identity("GitHub Issue 436 Reproduction test@example.com")
 
-    print("=== Issue #436 Reproduction: Offline XBRL Access ===")
+    print("=== Issue #436 Reproduction: Offline XBRL Access - SGML Parsing Issue ===")
     print()
 
-    # Check if we're using local storage
+    # Force enable local storage mode as user did
+    print("1. Enabling local storage mode (as user did)...")
+    use_local_storage(True)
     using_local = is_using_local_storage()
-    print(f"Using local storage: {using_local}")
+    print(f"   ✓ Local storage enabled: {using_local}")
 
     if not using_local:
-        print("⚠️  No local storage detected. This test requires downloaded Edgar data.")
-        print("   Run `from edgar import download_edgar_data; download_edgar_data()` first.")
+        print("❌ Failed to enable local storage!")
         return False
 
     print()
-    print("📊 Testing XBRL access with Microsoft (MSFT)...")
+    print("2. Testing XBRL access with Microsoft (MSFT)...")
+    print("   This will demonstrate that FilingSGML.from_filing() ignores local storage...")
 
     try:
         # Get Microsoft company
         company = Company("msft")
-        print(f"✓ Company loaded: {company.name}")
+        print(f"   ✓ Company loaded: {company.name}")
 
         # Get latest 10-K filing
         filing = company.latest("10-K")
-        print(f"✓ Latest 10-K: {filing.accession_no} ({filing.filing_date})")
+        print(f"   ✓ Latest 10-K: {filing.accession_no} from {filing.filing_date}")
 
-        # Try to access XBRL - this should work offline but currently fails
-        print("🔍 Attempting to access XBRL data...")
+        # Show the text_url that will be used (this is the network URL)
+        print(f"   📁 Filing text_url: {filing.text_url}")
 
-        # This is where the issue occurs - network requests are made
+        # Check if local file exists for this filing
+        local_path = local_filing_path(str(filing.filing_date), filing.accession_no)
+        local_exists = local_path.exists()
+        print(f"   📂 Local file path: {local_path}")
+        print(f"   📂 Local file exists: {local_exists}")
+
+        print()
+        print("3. The problem: filing.xbrl() will call FilingSGML.from_filing()...")
+        print("   which ALWAYS uses filing.text_url instead of checking local storage!")
+        print()
+        print("   Expected flow: Check local storage -> Use local file if exists")
+        print("   Actual flow: Always use filing.text_url -> Network request")
+        print()
+        print("4. Attempting to access XBRL (this will make network request)...")
+
+        # This is where the issue occurs - FilingSGML.from_filing() makes network request
         xbrl = filing.xbrl()
 
         if xbrl:
-            print(f"✓ XBRL loaded successfully!")
-            print(f"  - Facts: {len(xbrl._facts)}")
-            print(f"  - Contexts: {len(xbrl.contexts)}")
-            print(f"  - Presentation trees: {len(xbrl.presentation_trees)}")
-
-            # Try to get an income statement
-            income_stmt = xbrl.get_statement_by_type("IncomeStatement")
-            if income_stmt:
-                print(f"  - Income statement data: {len(income_stmt.get('data', []))} line items")
-            else:
-                print("  - No income statement found")
-
+            print("   ✅ XBRL loaded successfully (network was available)")
             return True
         else:
-            print("❌ XBRL is None - no XBRL data found in filing")
+            print("   ❌ XBRL is None - no XBRL data found")
             return False
 
     except Exception as e:
-        print(f"❌ Error accessing XBRL: {type(e).__name__}: {e}")
+        print(f"   ❌ Error accessing XBRL: {type(e).__name__}: {e}")
 
-        # Check if this is the expected network timeout error
-        if "ConnectTimeout" in str(e) or "handshake operation timed out" in str(e):
+        # Check if this is the expected network timeout error from user's report
+        if any(error_type in str(e) for error_type in [
+            "ConnectTimeout", "handshake operation timed out",
+            "_ssl.c:975", "Connection refused"
+        ]):
             print()
-            print("🎯 ROOT CAUSE IDENTIFIED:")
-            print("   - XBRL.from_filing() triggers network requests via attachment.content")
-            print("   - This happens even when data should be available locally")
-            print("   - XBRLAttachments.__init__ calls attachment.content to check for XBRL data")
-            print("   - attachment.content property downloads content even in offline mode")
+            print("🎯 ISSUE CONFIRMED - This matches the user's error!")
+            print()
+            print("📋 EXECUTION PATH THAT FAILED:")
+            print("   1. filing.xbrl()")
+            print("   2. -> XBRL.from_filing(self)")
+            print("   3. -> XBRLAttachments(filing.attachments)")
+            print("   4. -> filing.attachments")
+            print("   5. -> self.sgml()")
+            print("   6. -> FilingSGML.from_filing(self)")
+            print("   7. -> cls.from_source(filing.text_url)  # ⚠️  PROBLEM: Always uses URL")
+            print("   8. -> read_content_as_string(source)")
+            print("   9. -> read_content(source)")
+            print("   10. -> stream_with_retry(source)  # ❌ Network request fails")
+            print()
+            print("🔧 ROOT CAUSE:")
+            print("   FilingSGML.from_filing() at line 449 in sgml/sgml_common.py:")
+            print("   filing_sgml = cls.from_source(filing.text_url)")
+            print()
+            print("   This ALWAYS uses the network URL, never checks local storage!")
+            print("   Even when use_local_storage(True) is enabled.")
+            print()
+            print("💡 SOLUTION:")
+            print("   Modify FilingSGML.from_filing() to check local storage first:")
+            print("   - If local storage enabled and local file exists -> use local file")
+            print("   - Otherwise -> fall back to network URL")
             return False
         else:
-            print(f"❌ Unexpected error: {e}")
+            print(f"   ❌ Unexpected error (not the network timeout we expected): {e}")
             return False
 
 def simulate_offline_mode():

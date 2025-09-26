@@ -297,7 +297,7 @@ def test_stateement_matching_for_old_filing():
     rendered_statement = income_statement.render()
     print(rendered_statement)
 
-
+@pytest.mark.network
 def test_canonical_statement_type_preservation(unp_xbrl):
     """Test that canonical statement types are preserved when finding statements."""
     # Test basic statement finding
@@ -319,7 +319,7 @@ def test_canonical_statement_type_preservation(unp_xbrl):
     # Role URI should be different from the type
     assert found_role != "IncomeStatement"
 
-
+@pytest.mark.network
 def test_render_statement_preserves_types(tsla_xbrl):
     """Test that the render_statement method correctly uses preserved types."""
     # Render an income statement
@@ -337,7 +337,7 @@ def test_render_statement_preserves_types(tsla_xbrl):
         # Not all test data has parenthetical statements
         pytest.skip("No parenthetical balance sheet found in test data")
 
-
+@pytest.mark.network
 def test_statement_with_canonical_type(tsla_xbrl):
     """Test that a Statement created with a canonical type preserves it."""
     # Create a statement with a canonical type
@@ -349,7 +349,7 @@ def test_statement_with_canonical_type(tsla_xbrl):
     # The role_or_type should still be the original role
     assert stmt.role_or_type == "SomeRoleURI"
 
-
+@pytest.mark.network
 def test_balance_sheet_statement(tsla_xbrl):
     """Test that a balance sheet statement created via the accessor has the right canonical type."""
     # Get a balance sheet using the accessor method
@@ -363,7 +363,7 @@ def test_balance_sheet_statement(tsla_xbrl):
     rendering_type = balance_sheet.canonical_type if balance_sheet.canonical_type else balance_sheet.role_or_type
     assert rendering_type == "BalanceSheet"
 
-
+@pytest.mark.network
 def test_parenthetical_balance_sheet(tsla_xbrl):
     """Test that a parenthetical balance sheet preserves the canonical type."""
     # Try to get a parenthetical balance sheet
@@ -385,7 +385,7 @@ def test_parenthetical_balance_sheet(tsla_xbrl):
         # Not all test data has parenthetical statements
         pytest.skip("No parenthetical balance sheet in test data")
 
-
+@pytest.mark.network
 def test_canonical_type_preservation(tsla_xbrl):
     """Test that the statement type is preserved during validation and access."""
     # Get an income statement, skipping concept validation for test data
@@ -409,6 +409,7 @@ def test_canonical_type_preservation(tsla_xbrl):
 
 # ===== Enhanced Statement Tests from Fixture-Based Testing =====
 
+@pytest.mark.slow
 def test_standard_statement_resolution(cached_companies):
     """Test that standard financial statements are correctly resolved for multiple companies."""
     if not cached_companies:
@@ -449,7 +450,7 @@ def test_standard_statement_resolution(cached_companies):
     for ticker, found_statements in results.items():
         print(f"  {ticker}: {', '.join(found_statements)}")
 
-
+@pytest.mark.slow
 def test_statement_accessor_methods(cached_companies):
     """Test statement accessor methods on Statements class across companies."""
     if not cached_companies:
@@ -494,7 +495,7 @@ def test_statement_accessor_methods(cached_companies):
     for ticker, found_statements in results.items():
         print(f"  {ticker}: {', '.join(found_statements)}")
 
-
+@pytest.mark.slow
 def test_parenthetical_statement_resolution(cached_companies):
     """Test resolution of parenthetical statements across companies."""
     if not cached_companies:
@@ -517,6 +518,7 @@ def test_parenthetical_statement_resolution(cached_companies):
     for ticker in results:
         print(f"  {ticker}")
 
+@pytest.mark.slow
 def test_historical_vs_modern_xbrl_statements(nflx_10k_2010, nflx_10k_2024):
     """Compare statement structure between historical and modern XBRL filings."""
     if nflx_10k_2010 is None or nflx_10k_2024 is None:
@@ -561,7 +563,7 @@ def test_historical_vs_modern_xbrl_statements(nflx_10k_2010, nflx_10k_2024):
     # but there should be at least some core concepts shared
     assert common_concepts, "No common concepts found between historical and modern statements"
 
-
+@pytest.mark.network
 def test_correct_period_selected_for_income_statement():
     filing = Filing(company='BRISTOL MYERS SQUIBB CO', cik=14272, form='10-K', filing_date='2025-02-12', accession_no='0000014272-25-000039')
     xb = filing.xbrl()

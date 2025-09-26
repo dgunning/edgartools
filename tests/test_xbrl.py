@@ -25,14 +25,17 @@ def aapl_xbrl():
 def msft_xbrl():
     return XBRL.from_directory(Path("data/xbrl/datafiles/msft"))
 
+@pytest.mark.network
 def test_get_all_statements(aapl_xbrl):
     statements = aapl_xbrl.get_all_statements()
     assert statements
     assert len(statements) == 78
 
+@pytest.mark.network
 def test_get_entity_data(aapl_xbrl):
     assert aapl_xbrl.period_of_report == '2023-09-30'
 
+@pytest.mark.network
 def test_dei_info(aapl_xbrl:XBRL):
     assert aapl_xbrl.entity_info.get('entity_name') == 'Apple Inc.'
     assert aapl_xbrl.entity_info.get('identifier') == '320193'
@@ -40,17 +43,20 @@ def test_dei_info(aapl_xbrl:XBRL):
     assert aapl_xbrl.entity_info.get('fiscal_year') == '2023'
     assert aapl_xbrl.entity_info.get('fiscal_period') == 'FY'
 
+@pytest.mark.network
 def test_get_coverpage(aapl_xbrl:XBRL):
     print()
     cover_page = aapl_xbrl.render_statement('BalanceSheet')
     print(cover_page)
     assert cover_page
 
+@pytest.mark.network
 def test_xbrl_statements(aapl_xbrl:XBRL):
     print()
     statements = Statements(aapl_xbrl)
     assert statements
 
+@pytest.mark.network
 def test_render_balance_sheet_using_short_name_or_standard_name(aapl_xbrl:XBRL):
     print()
     # Standard Name
@@ -61,7 +67,7 @@ def test_render_balance_sheet_using_short_name_or_standard_name(aapl_xbrl:XBRL):
     statement = aapl_xbrl.render_statement('CONSOLIDATEDBALANCESHEETS')
     print(statement)
 
-
+@pytest.mark.network
 def test_filtering_of_mostly_empty_columns(aapl_xbrl:XBRL):
     print()
     # Standard Name
@@ -103,7 +109,7 @@ def test_period_views_for_balance_sheet(aapl_xbrl:XBRL):
     for view in balance_sheet_views:
         print(f"- {view['name']}: {view['description']}")
         print(f"  Keys: {view['period_keys']}")
-    
+
 
 
 def test_period_views_for_income_statement(aapl_xbrl:XBRL):
@@ -117,20 +123,20 @@ def test_period_views_for_income_statement(aapl_xbrl:XBRL):
 def test_to_pandas(aapl_xbrl:XBRL):
     print()
     print("[bold]Converting XBRL to pandas DataFrames:[/bold]")
-    
+
     # Convert to pandas DataFrames
     dataframes = aapl_xbrl.to_pandas()
-    
+
     # Display available DataFrames
     print(f"Available DataFrames: {list(dataframes.keys())}")
-    
+
     # Show sample of facts DataFrame
     if 'facts' in dataframes:
         print("\n[bold]Facts DataFrame Sample:[/bold]")
         facts_df = dataframes['facts']
         print(f"Shape: {facts_df.shape}")
         print(facts_df.head(3))
-    
+
     # Convert specific statement to DataFrame
     balance_sheet_df = aapl_xbrl.to_pandas('BalanceSheet')
     if 'statement' in balance_sheet_df:
@@ -140,7 +146,7 @@ def test_to_pandas(aapl_xbrl:XBRL):
         print(statement_df.head(3))
 
 
-
+@pytest.mark.network
 def test_get_entity_info(aapl_xbrl):
     entity_info = aapl_xbrl.entity_info
     print()
@@ -153,20 +159,20 @@ def test_parse_directory():
     """Test parsing a directory of XBRL files."""
     # Get the path to the test files
     data_dir = Path("data/xbrl/datafiles/aapl")
-    
+
     # Parse the directory
     xbrl = XBRL.from_directory(data_dir)
     print()
     # Print information about the parsed XBRL
     console = Console()
     console.print(xbrl)
-    
+
     # Get all available statements
     statements = xbrl.get_all_statements()
     console.print("[bold]Available Statements:[/bold]")
     for stmt in statements:
         console.print(f"- [{stmt['type'] or 'Other'}] {stmt['definition']}")
-    
+
     # Debug information to understand the element name / ID issue
     console.print("\n[bold]Debug: Element Catalog vs Facts[/bold]")
     # Get first 5 facts
@@ -174,13 +180,13 @@ def test_parse_directory():
     for key in fact_keys:
         fact = xbrl._facts[key]
         console.print(f"Fact: element_id={fact.element_id}, context={fact.context_ref}, value={fact.value}")
-    
+
     # Get first 5 elements from catalog
     element_keys = list(xbrl.element_catalog.keys())[:5]
     for key in element_keys:
         elem = xbrl.element_catalog[key]
         console.print(f"Element: id={key}, name={elem.name}")
-    
+
     # Get first 5 nodes from first presentation tree
     if xbrl.presentation_trees:
         first_tree = next(iter(xbrl.presentation_trees.values()))
@@ -188,12 +194,12 @@ def test_parse_directory():
         for key in node_keys:
             node = first_tree.all_nodes[key]
             console.print(f"Node: id={key}, element_name={node.element_name}, label={node.standard_label}")
-    
+
     # Demonstrate new statement rendering feature
     console.print("\n[bold]Rendering Balance Sheet:[/bold]")
     balance_sheet = xbrl.render_statement("BalanceSheet")
     console.print(balance_sheet)
-    
+
     # Debug: Print sample statement data to see what's happening
     statement_data = xbrl.get_statement("BalanceSheet")
     console.print("\n[bold]Debug: Sample Statement Data[/bold]")
@@ -201,31 +207,31 @@ def test_parse_directory():
         console.print(f"Item {i}: concept={item['concept']}, all_names={item.get('all_names')}, has_values={item.get('has_values')}")
         if item.get('values'):
             console.print(f"   Values: {item['values']}")
-    
+
     # If available, show stats on line items with values vs. without
     has_values_count = len([item for item in statement_data if item.get('has_values')])
     console.print(f"\nItems with values: {has_values_count} / {len(statement_data)} ({has_values_count/len(statement_data)*100:.1f}%)")
-    
+
     console.print("\n[bold]Rendering Income Statement:[/bold]")
     income_statement = xbrl.render_statement("IncomeStatement")
     console.print(income_statement)
-    
+
     console.print("\n[bold]Rendering Cash Flow Statement:[/bold]")
     cash_flow = xbrl.render_statement("CashFlowStatement")
     console.print(cash_flow)
-    
+
     # Get a specific statement data and display sample line items
     if statements:
         # Find a balance sheet statement if available
         balance_sheet_role = next(
-            (stmt['role'] for stmt in statements 
+            (stmt['role'] for stmt in statements
              if stmt['type'] == 'BalanceSheet'),
             statements[0]['role']  # Fallback to first statement if no balance sheet
         )
-        
+
         # Get the statement data
         statement_data = xbrl.get_statement(balance_sheet_role)
-        
+
         console.print(f"\n[bold]Sample line items from {statements[0]['definition']}:[/bold]")
         for i, item in enumerate(statement_data[:10]):  # Show first 10 items
             is_abstract = "[abstract]" if item['is_abstract'] else ""
@@ -236,17 +242,17 @@ def test_parse_directory():
             if item['values'] and not item['is_abstract']:
                 for period, value in item['values'].items():
                     console.print(f"  {'  ' * item['level']}{period}: {value}")
-        
+
         # Convert to pandas DataFrame
         dfs = xbrl.to_pandas(balance_sheet_role)
         console.print("\n[bold]Facts DataFrame Sample:[/bold]")
         console.print(dfs['facts'].head(5))
-        
+
         if 'statement' in dfs:
             console.print("\n[bold]Statement DataFrame Sample:[/bold]")
             console.print(dfs['statement'].head(5))
 
-
+@pytest.mark.network
 def test_period_views_for_AAPL():
     c = Company("AAPL")
     filing = Filing(company='Apple Inc.', cik=320193, form='10-K', filing_date='2024-11-01', accession_no='0000320193-24-000123')

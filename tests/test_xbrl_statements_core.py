@@ -19,7 +19,7 @@ from edgar.xbrl.rendering import RenderedStatement
 
 
 # ===== Statement Resolution Tests =====
-
+@pytest.mark.network
 def test_statement_resolution(cached_companies):
     """Test that statements are correctly identified."""
     # Test all companies except those known to have issues
@@ -56,7 +56,7 @@ def test_statement_resolution(cached_companies):
 
 
 # ===== Statement Data Tests =====
-
+@pytest.mark.network
 def test_balance_sheet_data(balance_sheets):
     """Test balance sheet data structure and content."""
     for ticker, statement in balance_sheets.items():
@@ -83,7 +83,7 @@ def test_balance_sheet_data(balance_sheets):
         assert len(liability_concepts) > 0, f"{ticker} balance sheet missing liability concepts"
         assert len(equity_concepts) > 0, f"{ticker} balance sheet missing equity concepts"
 
-
+@pytest.mark.network
 def test_income_statement_data(income_statements):
     """Test income statement data structure and content."""
     for ticker, statement in income_statements.items():
@@ -110,7 +110,7 @@ def test_income_statement_data(income_statements):
         assert len(expense_concepts) > 0, f"{ticker} income statement missing expense concepts"
         assert len(income_concepts) > 0, f"{ticker} income statement missing income concepts"
 
-
+@pytest.mark.network
 def test_cash_flow_statement_data(cash_flow_statements):
     """Test cash flow statement data structure and content."""
     for ticker, statement in cash_flow_statements.items():
@@ -139,7 +139,7 @@ def test_cash_flow_statement_data(cash_flow_statements):
 
 
 # ===== Statement Rendering Tests =====
-
+@pytest.mark.network
 def test_statement_rendering(balance_sheets):
     """Test rendering statements."""
     for ticker, statement in balance_sheets.items():
@@ -175,7 +175,7 @@ def test_statement_rendering(balance_sheets):
 
 
 # ===== Statement to DataFrame Conversion Tests =====
-
+@pytest.mark.network
 def test_statement_to_dataframe(balance_sheets, income_statements, cash_flow_statements):
     """Test converting statements to dataframes."""
     all_statements = {
@@ -210,7 +210,7 @@ def test_statement_to_dataframe(balance_sheets, income_statements, cash_flow_sta
 
 
 # ===== Statement Accessor Tests =====
-
+@pytest.mark.network
 def test_statement_accessor_methods(cached_companies):
     """Test all statement accessor methods."""
     statement_methods = [
@@ -253,7 +253,7 @@ def test_statement_accessor_methods(cached_companies):
 
 
 # ===== Statement Period Tests =====
-
+@pytest.mark.network
 def test_statement_periods(balance_sheets):
     """Test that statements have correct period information."""
     for ticker, statement in balance_sheets.items():

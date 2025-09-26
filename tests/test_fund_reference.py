@@ -37,6 +37,7 @@ def fund_reference_data():
 
 class TestFundReferenceData:
 
+    @pytest.mark.fast
     def test_initialization(self, fund_reference_data):
         """Test that the FundReferenceData is initialized correctly."""
         # Check counts
@@ -44,6 +45,7 @@ class TestFundReferenceData:
         assert fund_reference_data.series_count == 5
         assert fund_reference_data.classes_count == 11
 
+    @pytest.mark.fast
     def test_company_lookup(self, fund_reference_data):
         """Test company lookup by CIK."""
         # Valid lookup
@@ -65,6 +67,7 @@ class TestFundReferenceData:
         invalid_company = fund_reference_data.get_company("9999999999")
         assert invalid_company is None
 
+    @pytest.mark.fast
     def test_series_lookup(self, fund_reference_data):
         """Test series lookup by series ID."""
         # Valid lookup
@@ -78,6 +81,7 @@ class TestFundReferenceData:
         invalid_series = fund_reference_data.get_series("S999999999")
         assert invalid_series is None
 
+    @pytest.mark.fast
     def test_class_lookup(self, fund_reference_data):
         """Test class lookup by class ID."""
         # Valid lookup
@@ -92,6 +96,7 @@ class TestFundReferenceData:
         invalid_class = fund_reference_data.get_class("C999999999")
         assert invalid_class is None
 
+    @pytest.mark.fast
     def test_ticker_lookup(self, fund_reference_data):
         """Test class lookup by ticker."""
         # Valid lookup
@@ -104,6 +109,7 @@ class TestFundReferenceData:
         invalid_ticker = fund_reference_data.get_class_by_ticker("NONEXISTENT")
         assert invalid_ticker is None
 
+    @pytest.mark.fast
     def test_hierarchical_navigation(self, fund_reference_data):
         """Test navigating up and down the hierarchy."""
         # Start with a company and navigate down
@@ -136,6 +142,7 @@ class TestFundReferenceData:
         assert parent_company is not None
         assert parent_company.name == "VANGUARD INDEX FUNDS"
 
+    @pytest.mark.fast
     def test_hierarchical_info(self, fund_reference_data):
         """Test getting hierarchical info for different identifiers."""
         # Test with CIK
@@ -177,6 +184,7 @@ class TestFundReferenceData:
         assert series is None
         assert class_record is None
 
+    @pytest.mark.fast
     def test_name_search(self, fund_reference_data):
         """Test searching by name fragment."""
         # Search companies
@@ -204,6 +212,7 @@ class TestFundReferenceData:
         with pytest.raises(ValueError):
             fund_reference_data.find_by_name("test", "invalid_type")
 
+    @pytest.mark.fast
     def test_to_dataframe(self, fund_reference_data):
         """Test converting back to DataFrame."""
         df = fund_reference_data.to_dataframe()
@@ -247,6 +256,7 @@ class TestFundReferenceDataWithActualData:
         """Create FundReferenceData with actual fund data."""
         return FundReferenceData(actual_fund_data)
 
+    @pytest.mark.fast
     def test_data_load(self, actual_fund_data):
         """Test that the actual data loads correctly."""
         assert actual_fund_data is not None
@@ -260,6 +270,7 @@ class TestFundReferenceDataWithActualData:
         for col in expected_columns:
             assert col in actual_fund_data.columns
 
+    @pytest.mark.fast
     def test_reference_data_initialization(self, actual_fund_reference_data):
         """Test FundReferenceData with actual data."""
         assert actual_fund_reference_data.companies_count > 50
@@ -283,6 +294,7 @@ class TestFundReferenceDataWithActualData:
         assert vfiax is not None
         assert "ADMIRAL" in vfiax.name.upper()
 
+    @pytest.mark.fast
     def test_find_fund_families(self, actual_fund_reference_data):
         """Test finding major fund families."""
         # Test finding multiple major fund families by name
