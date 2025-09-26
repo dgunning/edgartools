@@ -432,11 +432,11 @@ class Fund:
         # Get base filings
         filings = None
         if hasattr(self._entity, 'get_filings'):
-            filings = self._entity.get_filings(**kwargs)
+            filings = self._entity.get_filings(series_only=series_only, **kwargs)
         elif self._series and hasattr(self._series, 'get_filings'):
-            filings = self._series.get_filings(**kwargs)
+            filings = self._series.get_filings(series_only=series_only, **kwargs)
         elif self._company and hasattr(self._company, 'get_filings'):
-            filings = self._company.get_filings(**kwargs)
+            filings = self._company.get_filings(series_only=series_only, **kwargs)
 
         if not filings:
             from edgar._filings import Filings

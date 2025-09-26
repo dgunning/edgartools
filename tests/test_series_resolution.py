@@ -11,6 +11,7 @@ from edgar.funds.series_resolution import SeriesInfo, TickerSeriesResolver
 class TestSeriesInfo:
     """Test SeriesInfo dataclass"""
 
+    @pytest.mark.fast
     def test_series_info_creation(self):
         """Test creating SeriesInfo with all fields"""
         series_info = SeriesInfo(
@@ -27,6 +28,7 @@ class TestSeriesInfo:
         assert series_info.class_id == "C000005678"
         assert series_info.class_name == "Test Class"
 
+    @pytest.mark.fast
     def test_series_info_minimal_creation(self):
         """Test creating SeriesInfo with minimal fields"""
         series_info = SeriesInfo(
@@ -45,6 +47,7 @@ class TestSeriesInfo:
 class TestTickerSeriesResolver:
     """Test TickerSeriesResolver functionality"""
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     def test_resolve_ticker_single_series(self, mock_get_tickers):
         """Test resolving ticker to single series"""
@@ -66,9 +69,13 @@ class TestTickerSeriesResolver:
         assert result[0].ticker == "TESTX"
         assert result[0].class_id == "C000005678"
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     def test_resolve_ticker_multiple_series(self, mock_get_tickers):
         """Test resolving ticker to multiple series"""
+        # Clear cache to prevent contamination from other tests
+        TickerSeriesResolver.resolve_ticker_to_series.cache_clear()
+
         # Mock data with multiple matches
         mock_df = pd.DataFrame([
             {
@@ -93,6 +100,7 @@ class TestTickerSeriesResolver:
         assert result[1].series_id == "S000002345"
         assert all(info.ticker == "GRID" for info in result)
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     def test_resolve_ticker_no_match(self, mock_get_tickers):
         """Test resolving ticker with no matches"""
@@ -111,6 +119,7 @@ class TestTickerSeriesResolver:
 
         assert len(result) == 0
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     def test_resolve_ticker_case_insensitive(self, mock_get_tickers):
         """Test ticker resolution is case insensitive"""
@@ -131,6 +140,7 @@ class TestTickerSeriesResolver:
         assert len(result) == 1
         assert result[0].ticker == "TESTX"
 
+    @pytest.mark.fast
     def test_resolve_ticker_empty_input(self):
         """Test handling of empty ticker input"""
         result = TickerSeriesResolver.resolve_ticker_to_series("")
@@ -139,6 +149,7 @@ class TestTickerSeriesResolver:
         result = TickerSeriesResolver.resolve_ticker_to_series(None)
         assert len(result) == 0
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     def test_resolve_ticker_exception_handling(self, mock_get_tickers):
         """Test graceful handling of exceptions"""
@@ -153,6 +164,7 @@ class TestTickerSeriesResolver:
             assert len(result) == 0
             mock_log.warning.assert_called_once()
 
+    @pytest.mark.fast
     @patch('edgar.funds.series_resolution.TickerSeriesResolver.resolve_ticker_to_series')
     def test_get_primary_series_single_match(self, mock_resolve):
         """Test getting primary series with single match"""
@@ -164,6 +176,7 @@ class TestTickerSeriesResolver:
 
         assert result == "S000001234"
 
+    @pytest.mark.fast
     @patch('edgar.funds.series_resolution.TickerSeriesResolver.resolve_ticker_to_series')
     def test_get_primary_series_multiple_matches(self, mock_resolve):
         """Test getting primary series with multiple matches"""
@@ -177,6 +190,7 @@ class TestTickerSeriesResolver:
         # Should return the first series
         assert result == "S000001234"
 
+    @pytest.mark.fast
     @patch('edgar.funds.series_resolution.TickerSeriesResolver.resolve_ticker_to_series')
     def test_get_primary_series_no_match(self, mock_resolve):
         """Test getting primary series with no matches"""
@@ -186,6 +200,7 @@ class TestTickerSeriesResolver:
 
         assert result is None
 
+    @pytest.mark.fast
     @patch('edgar.funds.series_resolution.TickerSeriesResolver.resolve_ticker_to_series')
     def test_has_multiple_series_true(self, mock_resolve):
         """Test has_multiple_series returns True for multiple matches"""
@@ -198,6 +213,7 @@ class TestTickerSeriesResolver:
 
         assert result is True
 
+    @pytest.mark.fast
     @patch('edgar.funds.series_resolution.TickerSeriesResolver.resolve_ticker_to_series')
     def test_has_multiple_series_false(self, mock_resolve):
         """Test has_multiple_series returns False for single match"""
@@ -209,6 +225,7 @@ class TestTickerSeriesResolver:
 
         assert result is False
 
+    @pytest.mark.fast
     @patch('edgar.funds.series_resolution.TickerSeriesResolver.resolve_ticker_to_series')
     def test_has_multiple_series_no_match(self, mock_resolve):
         """Test has_multiple_series returns False for no matches"""
@@ -218,6 +235,7 @@ class TestTickerSeriesResolver:
 
         assert result is False
 
+    @pytest.mark.fast
     def test_caching_behavior(self):
         """Test that results are cached properly"""
         # Clear cache first

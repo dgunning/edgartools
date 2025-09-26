@@ -14,10 +14,14 @@ from edgar.funds.ticker_resolution import TickerResolutionResult
 class TestETFFeaturesIntegration:
     """Integration tests for both ETF series search and ticker resolution"""
 
-    @patch('edgar.funds.series_resolution.get_mutual_fund_tickers')
+    @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     @patch('edgar.funds.core.find_fund')
     def test_fund_with_ticker_resolves_to_series(self, mock_find_fund, mock_get_tickers):
         """Test FEAT-417: Fund created with ticker resolves to correct series"""
+        # Clear cache to prevent contamination from other tests
+        from edgar.funds.series_resolution import TickerSeriesResolver
+        TickerSeriesResolver.resolve_ticker_to_series.cache_clear()
+
         # Mock ticker to series resolution
         mock_df = pd.DataFrame([
             {
@@ -38,7 +42,7 @@ class TestETFFeaturesIntegration:
         assert fund._original_identifier == "GRID"
         assert fund._target_series_id == "S000001234"
 
-    @patch('edgar.funds.series_resolution.get_mutual_fund_tickers')
+    @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     def test_fund_get_series_method(self, mock_get_tickers):
         """Test Fund.get_series() method"""
         # Mock ticker to series resolution
@@ -119,13 +123,15 @@ class TestFundReportTickerResolution:
         )
 
         # Mock the ticker resolution
-        with patch.object(investment, 'ticker_resolution_info') as mock_resolution:
-            mock_resolution.return_value = TickerResolutionResult(
-                ticker=resolved_ticker,
-                method="cusip" if not direct_ticker else "direct",
-                confidence=0.85 if not direct_ticker else 1.0
-            )
-            yield investment
+        mock_resolution = TickerResolutionResult(
+            ticker=resolved_ticker,
+            method="cusip" if not direct_ticker else "direct",
+            confidence=0.85 if not direct_ticker else 1.0
+        )
+
+        # Use patch to mock the ticker_resolution_info property
+        with patch.object(type(investment), 'ticker_resolution_info', new_callable=lambda: mock_resolution):
+            return investment
 
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     def test_fund_report_get_ticker_for_series(self, mock_get_tickers):
@@ -191,57 +197,78 @@ class TestFundReportTickerResolution:
     def test_investment_data_with_ticker_metadata(self):
         """Test investment_data() with ticker resolution metadata"""
         # Create mock investments
-        with self.create_mock_investment(
+        investment = self.create_mock_investment(
             name="Apple Inc",
             cusip="037833100",
             direct_ticker=None,
             resolved_ticker="AAPL"
-        ) as investment:
+        )
 
-            fund_report = FundReport(
-                header=MagicMock(),
-                general_info=MagicMock(),
-                fund_info=MagicMock(),
-                investments=[investment]
-            )
+        # Create proper general_info with valid CIK
+        general_info = GeneralInfo(
+            name="Test Fund",
+            cik="0000012345",
+            file_number="811-12345",
+            reg_lei=None,
+            street1="123 Main St",
+            street2=None,
+            city="New York",
+            state="NY",
+            country="US",
+            zip_or_postal_code="10001",
+            phone=None,
+            series_name="Test Series",
+            series_lei=None,
+            series_id="S000001234",
+            fiscal_year_end="12-31",
+            rep_period_date="2024-03-31",
+            is_final_filing=True
+        )
 
-            # Test without metadata
-            df = fund_report.investment_data(include_ticker_metadata=False)
-            assert "ticker" in df.columns
-            assert "ticker_resolution_method" not in df.columns
-            assert "ticker_resolution_confidence" not in df.columns
+        fund_report = FundReport(
+            header=MagicMock(),
+            general_info=general_info,
+            fund_info=MagicMock(),
+            investments=[investment]
+        )
 
-            # Test with metadata
-            df_with_meta = fund_report.investment_data(include_ticker_metadata=True)
-            assert "ticker" in df_with_meta.columns
-            assert "ticker_resolution_method" in df_with_meta.columns
-            assert "ticker_resolution_confidence" in df_with_meta.columns
+        # Test without metadata
+        df = fund_report.investment_data(include_ticker_metadata=False)
+        assert "ticker" in df.columns
+        assert "ticker_resolution_method" not in df.columns
+        assert "ticker_resolution_confidence" not in df.columns
+
+        # Test with metadata
+        df_with_meta = fund_report.investment_data(include_ticker_metadata=True)
+        assert "ticker" in df_with_meta.columns
+        assert "ticker_resolution_method" in df_with_meta.columns
+        assert "ticker_resolution_confidence" in df_with_meta.columns
 
     def test_investment_ticker_property_uses_resolution(self):
         """Test that InvestmentOrSecurity.ticker uses resolution service"""
-        with self.create_mock_investment(
+        investment = self.create_mock_investment(
             name="Microsoft Corp",
             cusip="594918104",
             direct_ticker=None,
             resolved_ticker="MSFT"
-        ) as investment:
+        )
 
-            # The ticker property should return the resolved ticker
-            assert investment.ticker == "MSFT"
+        # The ticker property should return the resolved ticker
+        assert investment.ticker == "MSFT"
 
     def test_investment_ticker_resolution_info(self):
         """Test InvestmentOrSecurity.ticker_resolution_info property"""
-        with self.create_mock_investment(
+        investment = self.create_mock_investment(
             name="Tesla Inc",
             cusip="88160R101",
             direct_ticker=None,
             resolved_ticker="TSLA"
-        ) as investment:
+        )
 
-            resolution_info = investment.ticker_resolution_info
-            assert resolution_info.ticker == "TSLA"
-            assert resolution_info.method == "cusip"
-            assert resolution_info.confidence == 0.85
+        resolution_info = investment.ticker_resolution_info
+        assert resolution_info.ticker == "TSLA"
+        assert resolution_info.method == "cusip"
+        assert resolution_info.confidence == 0.85
 
 
 class TestBackwardCompatibility:
@@ -262,9 +289,30 @@ class TestBackwardCompatibility:
 
     def test_investment_data_backward_compatible(self):
         """Test that investment_data() maintains backward compatibility"""
+        # Create proper general_info with valid CIK
+        general_info = GeneralInfo(
+            name="Test Fund",
+            cik="0000012345",
+            file_number="811-12345",
+            reg_lei=None,
+            street1="123 Main St",
+            street2=None,
+            city="New York",
+            state="NY",
+            country="US",
+            zip_or_postal_code="10001",
+            phone=None,
+            series_name="Test Series",
+            series_lei=None,
+            series_id="S000001234",
+            fiscal_year_end="12-31",
+            rep_period_date="2024-03-31",
+            is_final_filing=True
+        )
+
         fund_report = FundReport(
             header=MagicMock(),
-            general_info=MagicMock(),
+            general_info=general_info,
             fund_info=MagicMock(),
             investments=[]
         )

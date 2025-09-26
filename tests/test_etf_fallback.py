@@ -12,6 +12,7 @@ from edgar.funds.core import Fund
 class TestETFFallback:
     """Test ETF company fallback in series resolution"""
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     @patch('edgar.reference.tickers.find_cik')
     @patch('edgar.reference.tickers.get_company_tickers')
@@ -40,6 +41,7 @@ class TestETFFallback:
         assert result[0].ticker == "SPY"
         assert result[0].class_id == "ETF_CLASS_884394"
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     @patch('edgar.reference.tickers.find_cik')
     def test_mutual_fund_priority_over_etf_fallback(self, mock_find_cik, mock_get_mf_tickers):
@@ -60,6 +62,7 @@ class TestETFFallback:
         # CIK lookup should not be called since mutual fund data was found
         mock_find_cik.assert_not_called()
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     @patch('edgar.reference.tickers.find_cik')
     def test_no_fallback_when_cik_not_found(self, mock_find_cik, mock_get_mf_tickers):
@@ -78,6 +81,7 @@ class TestETFFallback:
         # Should return empty list
         assert len(result) == 0
 
+    @pytest.mark.fast
     def test_get_primary_series_with_etf(self):
         """Test get_primary_series works with ETF synthetic series IDs"""
         with patch.object(TickerSeriesResolver, 'resolve_ticker_to_series') as mock_resolve:
@@ -92,6 +96,7 @@ class TestETFFallback:
 class TestFundETFIntegration:
     """Test Fund class integration with ETF fallback"""
 
+    @pytest.mark.fast
     @patch('edgar.funds.series_resolution.TickerSeriesResolver.resolve_ticker_to_series')
     @patch('edgar.funds.core.find_fund')
     def test_fund_etf_series_creation(self, mock_find_fund, mock_resolve):
@@ -117,6 +122,7 @@ class TestFundETFIntegration:
         assert series.series_id == "ETF_884394"
         assert series.name == "SPDR S&P 500 ETF TRUST"
 
+    @pytest.mark.fast
     @patch('edgar.funds.series_resolution.TickerSeriesResolver.resolve_ticker_to_series')
     @patch('edgar.funds.core.find_fund')
     def test_fund_resolution_diagnostics_etf(self, mock_find_fund, mock_resolve):
@@ -141,6 +147,7 @@ class TestFundETFIntegration:
         assert diagnostics['cik'] == 884394
         assert diagnostics['original_identifier'] == 'SPY'
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.find_cik')
     @patch('edgar.funds.core.find_fund')
     def test_fund_resolution_diagnostics_partial_success(self, mock_find_fund, mock_find_cik):
@@ -163,6 +170,7 @@ class TestFundETFIntegration:
         assert diagnostics['cik'] == 884394
         assert 'suggestion' in diagnostics
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.find_cik')
     @patch('edgar.funds.core.find_fund')
     def test_fund_resolution_diagnostics_failed(self, mock_find_fund, mock_find_cik):
@@ -188,13 +196,17 @@ class TestFundETFIntegration:
 class TestETFFallbackEdgeCases:
     """Test edge cases in ETF fallback"""
 
+    @pytest.mark.fast
     @patch('edgar.reference.tickers.get_mutual_fund_tickers')
     @patch('edgar.reference.tickers.find_cik')
     @patch('edgar.reference.tickers.get_company_tickers')
     def test_etf_fallback_with_missing_company_data(self, mock_get_company_tickers, mock_find_cik, mock_get_mf_tickers):
         """Test ETF fallback when company data doesn't match CIK"""
-        # Mock mutual fund data (empty)
-        mock_get_mf_tickers.return_value = pd.DataFrame([])
+        # Clear cache to prevent contamination from other tests
+        TickerSeriesResolver.resolve_ticker_to_series.cache_clear()
+
+        # Mock mutual fund data (empty with proper columns)
+        mock_get_mf_tickers.return_value = pd.DataFrame(columns=['cik', 'seriesId', 'classId', 'ticker'])
 
         # Mock CIK lookup (found)
         mock_find_cik.return_value = 884394
@@ -210,6 +222,7 @@ class TestETFFallbackEdgeCases:
         # Should return empty since company data doesn't match
         assert len(result) == 0
 
+    @pytest.mark.fast
     def test_etf_fallback_caching(self):
         """Test that ETF fallback results are cached properly"""
         # Clear cache
@@ -219,8 +232,8 @@ class TestETFFallbackEdgeCases:
              patch('edgar.reference.tickers.find_cik') as mock_cik, \
              patch('edgar.reference.tickers.get_company_tickers') as mock_company:
 
-            # Setup mocks
-            mock_mf.return_value = pd.DataFrame([])
+            # Setup mocks - empty DataFrame with proper columns
+            mock_mf.return_value = pd.DataFrame(columns=['cik', 'seriesId', 'classId', 'ticker'])
             mock_cik.return_value = 884394
             mock_company.return_value = pd.DataFrame([
                 {'cik': 884394, 'ticker': 'SPY', 'company': 'SPDR S&P 500 ETF TRUST'}
