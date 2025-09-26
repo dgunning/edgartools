@@ -7,7 +7,7 @@ This module provides the main classes used to interact with investment funds:
 - FundSeries: Represents a fund series
 """
 import logging
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union, Dict, Any
 
 from rich import box
 from rich.console import Group
@@ -345,6 +345,16 @@ class Fund:
         Args:
             identifier: Any fund identifier (ticker, series ID, class ID, or CIK)
         """
+        self._original_identifier = str(identifier)
+        self._target_series_id = None  # New: specific series if determinable
+
+        # Handle ticker resolution to series
+        if isinstance(identifier, str) and self._is_fund_ticker(identifier):
+            from edgar.funds.series_resolution import TickerSeriesResolver
+            target_series_id = TickerSeriesResolver.get_primary_series(identifier)
+            if target_series_id:
+                self._target_series_id = target_series_id
+
         # Use existing find_fund to get the appropriate entity
         self._entity = find_fund(identifier)
 
@@ -361,6 +371,12 @@ class Fund:
             self._class = None
             self._series = None
             self._company = self._entity
+
+    def _is_fund_ticker(self, identifier: str) -> bool:
+        """Check if an identifier appears to be a fund ticker"""
+        from edgar.funds.series_resolution import TickerSeriesResolver
+        series_list = TickerSeriesResolver.resolve_ticker_to_series(identifier)
+        return len(series_list) > 0
 
     @property
     def company(self) -> Optional[FundCompany]:
@@ -400,31 +416,121 @@ class Fund:
             return self._class.ticker
         return None
 
-    def get_filings(self, **kwargs) -> 'Filings':
+    def get_filings(self, series_only: bool = False, **kwargs) -> 'Filings':
         """
         Get filings for this fund entity.
 
         This delegates to the appropriate entity's get_filings method.
 
         Args:
+            series_only: If True and we have target series context, filter to only relevant series
             **kwargs: Filtering parameters passed to get_filings
 
         Returns:
             Filings object with filtered filings
         """
+        # Get base filings
+        filings = None
         if hasattr(self._entity, 'get_filings'):
-            return self._entity.get_filings(**kwargs)
+            filings = self._entity.get_filings(**kwargs)
+        elif self._series and hasattr(self._series, 'get_filings'):
+            filings = self._series.get_filings(**kwargs)
+        elif self._company and hasattr(self._company, 'get_filings'):
+            filings = self._company.get_filings(**kwargs)
 
-        # If the entity doesn't have get_filings, try to find a parent that does
-        if self._series and hasattr(self._series, 'get_filings'):
-            return self._series.get_filings(**kwargs)
+        if not filings:
+            from edgar._filings import Filings
+            return Filings([])
 
-        if self._company and hasattr(self._company, 'get_filings'):
-            return self._company.get_filings(**kwargs)
+        # Apply series filtering if requested and we have target series context
+        if series_only and self._target_series_id and kwargs.get('form') in ['NPORT-P', 'NPORT-EX', 'N-PORT', 'N-PORT/A']:
+            # For now, return the original filings as we'd need to parse each filing
+            # to determine series match. This could be enhanced in the future.
+            pass
 
-        # Import here to avoid circular imports
-        from edgar._filings import Filings
-        return Filings([])
+        return filings
+
+    def get_series(self) -> Optional[FundSeries]:
+        """
+        Get the specific series for the original ticker if determinable.
+
+        Returns:
+            FundSeries if we can determine a specific series, None otherwise
+        """
+        if self._target_series_id:
+            # Handle ETF synthetic series IDs
+            if self._target_series_id.startswith("ETF_"):
+                # Extract CIK from ETF series ID
+                cik = self._target_series_id.replace("ETF_", "")
+                try:
+                    # Create ETF-specific series
+                    from edgar.funds.series_resolution import TickerSeriesResolver
+                    series_list = TickerSeriesResolver.resolve_ticker_to_series(self._original_identifier)
+                    if series_list and len(series_list) > 0:
+                        series_info = series_list[0]  # Get the ETF series info
+
+                        # Create FundSeries for ETF
+                        etf_company = FundCompany(cik_or_identifier=int(cik), fund_name=series_info.series_name)
+                        return FundSeries(
+                            series_id=self._target_series_id,
+                            name=series_info.series_name or f"ETF Series for {self._original_identifier}",
+                            fund_company=etf_company
+                        )
+                except Exception as e:
+                    log.debug(f"Failed to create ETF series for {self._target_series_id}: {e}")
+            else:
+                # Regular mutual fund series - try to get by ID
+                try:
+                    return get_fund_series(self._target_series_id)
+                except Exception as e:
+                    log.debug(f"Failed to get fund series {self._target_series_id}: {e}")
+
+        # Fallback to current series if available
+        return self._series
+
+    def get_resolution_diagnostics(self) -> Dict[str, Any]:
+        """Get detailed information about how this Fund was resolved."""
+        if self._target_series_id:
+            if self._target_series_id.startswith("ETF_"):
+                cik = self._target_series_id.replace("ETF_", "")
+                return {
+                    'status': 'success',
+                    'method': 'etf_company_fallback',
+                    'series_id': self._target_series_id,
+                    'cik': int(cik),
+                    'original_identifier': self._original_identifier,
+                    'message': f"'{self._original_identifier}' resolved as ETF company ticker"
+                }
+            else:
+                return {
+                    'status': 'success',
+                    'method': 'mutual_fund_lookup',
+                    'series_id': self._target_series_id,
+                    'original_identifier': self._original_identifier,
+                    'message': f"'{self._original_identifier}' resolved as mutual fund ticker"
+                }
+
+        # Check if it's a company ticker (ETF) that we didn't resolve
+        from edgar.reference.tickers import find_cik
+        cik = find_cik(self._original_identifier)
+
+        if cik:
+            return {
+                'status': 'partial_success',
+                'method': 'company_lookup_unresolved',
+                'cik': cik,
+                'original_identifier': self._original_identifier,
+                'message': f"'{self._original_identifier}' found as company ticker but series resolution failed",
+                'suggestion': f"Try using CIK {cik} directly: Fund({cik})"
+            }
+
+        return {
+            'status': 'failed',
+            'method': 'no_resolution',
+            'original_identifier': self._original_identifier,
+            'message': f"'{self._original_identifier}' not found in SEC ticker databases",
+            'suggestion': "Verify ticker spelling or try with CIK/series ID directly"
+        }
 
     def list_series(self) -> List[FundSeries]:
         """

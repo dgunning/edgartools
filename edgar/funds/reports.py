@@ -18,7 +18,6 @@ from rich.table import Table
 from edgar.core import get_bool
 from edgar.formatting import moneyfmt
 from edgar.funds import FundCompany, FundSeries
-from edgar.reference import cusip_ticker_mapping
 from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.xmltools import child_text, find_element, optional_decimal
 
@@ -319,8 +318,22 @@ class InvestmentOrSecurity(BaseModel):
     derivative_info: Optional[DerivativeInfo]  # New field
 
     @property
-    def ticker(self):
-        return self.identifiers.ticker
+    def ticker(self) -> Optional[str]:
+        """Return resolved ticker with fallback logic"""
+        result = self.ticker_resolution_info
+        return result.ticker
+
+    @property
+    def ticker_resolution_info(self) -> 'TickerResolutionResult':
+        """Provide full resolution metadata"""
+        from edgar.funds.ticker_resolution import TickerResolutionService
+
+        return TickerResolutionService.resolve_ticker(
+            ticker=self.identifiers.ticker,
+            cusip=self.cusip,
+            isin=self.identifiers.isin,
+            company_name=self.name
+        )
 
     @property
     def isin(self):
@@ -429,6 +442,24 @@ class FundReport:
                           name=self.general_info.series_name,
                           fund_company=self.fund_company)
 
+    def get_ticker_for_series(self) -> Optional[str]:
+        """Get the ticker that corresponds to this report's series."""
+        if not self.general_info.series_id:
+            return None
+
+        from edgar.reference.tickers import get_mutual_fund_tickers
+        mf_data = get_mutual_fund_tickers()
+        matches = mf_data[mf_data['seriesId'] == self.general_info.series_id]
+
+        if len(matches) == 1:
+            return matches.iloc[0]['ticker']
+        return None
+
+    def matches_ticker(self, ticker: str) -> bool:
+        """Check if this report's series matches the given ticker."""
+        series_ticker = self.get_ticker_for_series()
+        return series_ticker and series_ticker.upper() == ticker.upper()
+
     @property
     def reporting_period(self):
         return self.general_info.rep_period_date
@@ -452,10 +483,16 @@ class FundReport:
         return [inv for inv in self.investments if not inv.is_derivative]
 
     @lru_cache(maxsize=2)
-    def investment_data(self, include_derivatives=True) -> pd.DataFrame:
+    def investment_data(self, include_derivatives=True, include_ticker_metadata=False) -> pd.DataFrame:
         """
-        :param include_derivatives: Whether to include derivative positions
-        :return: The investments as a pandas dataframe
+        Enhanced to optionally include ticker resolution information
+
+        Args:
+            include_derivatives: Whether to include derivative positions
+            include_ticker_metadata: Add columns for ticker resolution method and confidence
+
+        Returns:
+            DataFrame with investment data, optionally including ticker resolution metadata
         """
         if len(self.investments) == 0:
             return pd.DataFrame(columns=['name', 'title', 'cusip', 'ticker', 'balance', 'units'])
@@ -467,16 +504,16 @@ class FundReport:
         if len(investments_to_process) == 0:
             return pd.DataFrame(columns=['name', 'title', 'cusip', 'ticker', 'balance', 'units', 'value_usd'])
 
-        # This is for adding Ticker to the investments in case it is None
-        cusip_mapping = cusip_ticker_mapping(allow_duplicate_cusips=False)
 
-        investment_df = pd.DataFrame(
-            [{
+        # Build data rows
+        data = []
+        for investment in investments_to_process:
+            row_data = {
                 "name": investment.name,
                 "title": investment.title,
                 "lei": investment.lei,
                 "cusip": investment.cusip,
-                "ticker": investment.identifiers.ticker,
+                "ticker": investment.ticker,  # Now uses resolved ticker
                 "isin": investment.identifiers.isin,
                 "balance": investment.balance,
                 "units": investment.units,
@@ -502,9 +539,18 @@ class FundReport:
                 "notional_amount": self._get_notional_amount(investment),
                 "counterparty": self._get_counterparty(investment),
             }
-                for investment in investments_to_process
-            ]
-        )
+
+            # Add metadata columns if requested
+            if include_ticker_metadata:
+                ticker_info = investment.ticker_resolution_info
+                row_data.update({
+                    "ticker_resolution_method": ticker_info.method,
+                    "ticker_resolution_confidence": ticker_info.confidence
+                })
+
+            data.append(row_data)
+
+        investment_df = pd.DataFrame(data)
 
         # Sort by absolute value using a temporary column
         investment_df = pd.DataFrame(investment_df)
@@ -512,11 +558,6 @@ class FundReport:
         investment_df = investment_df.sort_values(['_sort_value', 'name', 'title'], ascending=[False, True, True]).reset_index(drop=True)
         investment_df = investment_df.drop(columns=['_sort_value'])
 
-        # Step 1: Map CUSIP to Ticker using the cusip_mapping
-        mapped_tickers = investment_df.cusip.map(cusip_mapping.Ticker)
-
-        # Step 2: Fill NaN values in the ticker column with mapped tickers
-        investment_df['ticker'] = investment_df['ticker'].astype(str).fillna(mapped_tickers).fillna("")
 
         return investment_df
 
