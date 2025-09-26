@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.15.0 - 2025-09-26
+
+### Added
+- **Period Type Filtering API** - Intuitive period filtering for enhanced developer experience
+  - **New get_facts() parameter**: Direct period type filtering with `company.get_facts(period_type=PeriodType.ANNUAL)`
+  - **FactQuery.by_period_type()**: Chainable period filtering in query interface
+  - **EntityFacts.filter_by_period_type()**: Direct filtering on facts objects
+  - **Coverage**: Supports ANNUAL, QUARTERLY, MONTHLY period types with automatic period length mapping
+  - **Impact**: Transforms period filtering from "knowledge-required" to "intuitive" for common EdgarTools operations
+
+- **Enhanced ETF Support** - Comprehensive ETF ticker and series resolution
+  - **ETF Series Search (FEAT-417)**: Enhanced Fund class with ticker-to-series resolution
+  - **ETF Ticker Holdings (FEAT-418)**: Intelligent ticker resolution with CUSIP fallback for NPORT-P filings
+  - **Smart ETF Fallback**: 100% success rate with popular ETFs (SPY, QQQ) via company ticker resolution
+  - **New Services**: TickerResolutionService and TickerSeriesResolver with comprehensive caching
+  - **Coverage**: Automatic ticker resolution in holdings data with clear diagnostics
+  - **Impact**: Fund("SPY") now works perfectly, enabling seamless ETF analysis
+
+### Fixed
+- **SGML Parser Regression with HTML Content Detection** - Resolved false positive HTML detection in valid SGML
+  - **Problem**: Valid SGML containing HTML/XBRL content within `<TEXT>` sections was incorrectly flagged as HTML
+  - **Solution**: Reordered detection logic to check for valid SGML structure before HTML content detection
+  - **Coverage**: Maintains protection against SEC HTML error responses while fixing inline XBRL parsing
+  - **Impact**: Fixes regression in SGML parsing for filings with inline XBRL content
+
+### Enhanced
+- **Test Infrastructure Improvements** - Enhanced test reliability and isolation
+  - **Cache Contamination Fixes**: Proper cache clearing to prevent test interference
+  - **Test Isolation**: Monkeypatch-based EDGAR_IDENTITY handling for better test isolation
+  - **Pytest Marks**: More accurate test categorization for selective test execution
+  - **Coverage**: All 51 ETF feature tests pass consistently in isolation and full suite
+  - **Impact**: Improved test reliability and developer experience
+
 ## Release 4.14.2 - 2025-09-24
 
 ### Enhanced
