@@ -1112,6 +1112,57 @@ def _format_value_for_display(
     return Text(formatted_str, justify="right")
 
 
+def _filter_empty_string_periods(statement_data: List[Dict[str, Any]], periods_to_display: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
+    """
+    Filter out periods that contain only empty strings in their values.
+
+    This addresses Issue #408 specifically - periods that have facts but only empty string values.
+    This is a lighter filter than the full data availability system, targeting the specific problem.
+
+    Args:
+        statement_data: Statement data with items and values
+        periods_to_display: List of period keys and labels
+
+    Returns:
+        Filtered list of periods that contain meaningful financial data
+    """
+    if not statement_data or not periods_to_display:
+        return periods_to_display
+
+    filtered_periods = []
+
+    for period_key, period_label in periods_to_display:
+        has_meaningful_value = False
+
+        # Check all statement items for this period
+        for item in statement_data:
+            values = item.get('values', {})
+            value = values.get(period_key)
+
+            if value is not None:
+                # Convert to string and check if it's meaningful
+                str_value = str(value).strip()
+                # Check for actual content (not just empty strings)
+                if str_value and str_value.lower() not in ['', 'nan', 'none']:
+                    # Try to parse as numeric - if successful, it's meaningful
+                    try:
+                        numeric_value = pd.to_numeric(str_value, errors='coerce')
+                        if not pd.isna(numeric_value):
+                            has_meaningful_value = True
+                            break
+                    except:
+                        # If not numeric but has content, still count as meaningful
+                        if len(str_value) > 0:
+                            has_meaningful_value = True
+                            break
+
+        # Only include periods that have at least some meaningful values
+        if has_meaningful_value:
+            filtered_periods.append((period_key, period_label))
+
+    return filtered_periods
+
+
 def render_statement(
     statement_data: List[Dict[str, Any]],
     periods_to_display: List[Tuple[str, str]],
@@ -1142,6 +1193,11 @@ def render_statement(
     """
     if entity_info is None:
         entity_info = {}
+
+    # Filter out periods with only empty strings (Fix for Issue #408)
+    # Apply to all major financial statement types that could have empty periods
+    if statement_type in ['CashFlowStatement', 'IncomeStatement', 'BalanceSheet']:
+        periods_to_display = _filter_empty_string_periods(statement_data, periods_to_display)
 
     # Apply standardization if requested
     if standard:

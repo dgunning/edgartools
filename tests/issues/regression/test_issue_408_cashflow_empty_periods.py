@@ -1,0 +1,170 @@
+"""
+Regression test for Issue #408: Cash flow statement missing values
+
+Ensures that cash flow statements filter out periods containing only empty strings,
+showing only periods with meaningful financial data.
+"""
+
+import pytest
+from edgar import *
+import pandas as pd
+
+
+class TestCashFlowEmptyPeriods:
+    """Test cash flow statement handling of empty periods"""
+
+
+    def test_recent_filing_shows_all_periods_with_data(self):
+        """Recent filings should show all periods that have meaningful data"""
+        # Test recent Apple filing that works correctly
+        filing = Filing(form='10-Q', filing_date='2025-08-01', company='Apple Inc.', cik=320193, accession_no='0000320193-25-000073')  # Apple Q2 2025
+        print(str(filing))
+        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        print(cashflow_stmt)
+        df = cashflow_stmt.to_dataframe()
+
+        # Get data columns (excluding metadata)
+        data_cols = [col for col in df.columns
+                    if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+
+        # All periods should have meaningful numeric data
+        for col in data_cols:
+            numeric_values = pd.to_numeric(df[col], errors='coerce').notna().sum()
+            assert numeric_values > 0, f"Period {col} should have numeric data"
+
+    def test_problematic_filing_empty_period_filtering(self):
+        """Problematic filings should have empty periods filtered out by Issue #408 fix"""
+        # Test filing that previously had empty string periods - now they should be filtered out
+        filing = get_by_accession_number('0000320193-18-000070')  # Apple Q1 2018
+        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        df = cashflow_stmt.to_dataframe()
+
+        # Get data columns
+        data_cols = [col for col in df.columns
+                    if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+
+        # Check that all remaining periods have meaningful data
+        empty_periods = []
+        meaningful_periods = []
+
+        for col in data_cols:
+            numeric_values = pd.to_numeric(df[col], errors='coerce').notna().sum()
+            if numeric_values == 0:
+                empty_periods.append(col)
+            else:
+                meaningful_periods.append(col)
+
+        # After the fix, empty periods should be filtered out
+        assert len(empty_periods) == 0, f"Empty periods should be filtered out, but found: {empty_periods}"
+        assert len(meaningful_periods) > 0, "Should still have some meaningful periods"
+
+        # The previously empty period '2017-09-30 (Q3)' should no longer appear
+        assert '2017-09-30 (Q3)' not in data_cols, "Previously empty period should be filtered out"
+
+        # Should have 3 meaningful periods (was 4 before filtering)
+        assert len(data_cols) == 3, f"Expected 3 periods after filtering, got {len(data_cols)}: {data_cols}"
+
+    def test_empty_period_filtering_logic(self):
+        """Test the logic for identifying periods that should be filtered"""
+        # Test multiple problematic filings
+        test_cases = [
+            {
+                'accession': '0000320193-18-000070',  # Apple Q1 2018
+                'expected_empty': ['2017-09-30 (Q3)'],
+                'should_have_meaningful': True
+            },
+            {
+                'accession': '0000320193-17-000009',  # Apple Q3 2017
+                'expected_empty': ['2017-04-01 (Q2)', '2016-12-31 (Q1)'],
+                'should_have_meaningful': True
+            }
+        ]
+
+        for case in test_cases:
+            filing = get_by_accession_number(case['accession'])
+            cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+            df = cashflow_stmt.to_dataframe()
+
+            data_cols = [col for col in df.columns
+                        if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+
+            # Identify empty periods
+            empty_periods = []
+            for col in data_cols:
+                numeric_values = pd.to_numeric(df[col], errors='coerce').notna().sum()
+                if numeric_values == 0:
+                    empty_periods.append(col)
+
+            # After the fix, no periods should be empty (they should be filtered out)
+            assert len(empty_periods) == 0, f"Empty periods should be filtered out in {case['accession']}, but found: {empty_periods}"
+
+            # Previously empty periods should no longer appear in the dataframe
+            for expected_empty in case['expected_empty']:
+                assert expected_empty not in data_cols, \
+                    f"Previously empty period {expected_empty} should be filtered out in {case['accession']}"
+
+            # Should still have some meaningful data
+            assert len(data_cols) > 0, \
+                f"Should have meaningful periods remaining in {case['accession']}"
+
+    def test_filter_periods_with_only_empty_strings(self):
+        """Test that the fix automatically filters periods with only empty strings"""
+
+        # Test on previously problematic filing
+        filing = get_by_accession_number('0000320193-18-000070')
+        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        df = cashflow_stmt.to_dataframe()
+
+        # Get data columns
+        data_cols = [col for col in df.columns
+                     if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+
+        # After the fix, should only have 3 meaningful periods (empty period filtered out)
+        assert len(data_cols) == 3, f"Expected 3 periods after filtering, got {len(data_cols)}: {data_cols}"
+
+        # All remaining periods should have meaningful data
+        for col in data_cols:
+            numeric_values = pd.to_numeric(df[col], errors='coerce').notna().sum()
+            assert numeric_values > 0, f"Period {col} should have meaningful data after filtering"
+
+        # The previously empty period should not be included
+        assert '2017-09-30 (Q3)' not in data_cols, "Previously empty period should be filtered out"
+
+        # Should include the meaningful periods
+        expected_periods = ['2018-03-31 (Q1)', '2018-03-31', '2017-12-30 (Q1)']
+        for expected in expected_periods:
+            assert expected in data_cols, f"Expected meaningful period {expected} should be included"
+
+    def test_baseline_filing_unchanged_by_filtering(self):
+        """Ensure that good filings are not affected by empty period filtering"""
+
+        def filter_meaningful_periods(dataframe):
+            """Same filtering logic as above"""
+            data_cols = [col for col in dataframe.columns
+                        if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+
+            meaningful_cols = ['concept', 'label', 'level', 'abstract', 'dimension']
+
+            for col in data_cols:
+                numeric_values = pd.to_numeric(dataframe[col], errors='coerce').notna().sum()
+                if numeric_values > 0:
+                    meaningful_cols.append(col)
+
+            return dataframe[meaningful_cols]
+
+        # Test on recent working filing
+        filing = get_by_accession_number('0000320193-25-000073')  # Apple Q2 2025
+        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        original_df = cashflow_stmt.to_dataframe()
+
+        # Apply filtering
+        filtered_df = filter_meaningful_periods(original_df)
+
+        # Should be unchanged - all periods have data
+        original_data_cols = [col for col in original_df.columns
+                             if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+        filtered_data_cols = [col for col in filtered_df.columns
+                             if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+
+        assert len(original_data_cols) == len(filtered_data_cols)
+        assert set(original_data_cols) == set(filtered_data_cols)

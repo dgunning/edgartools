@@ -115,12 +115,17 @@ def check_period_data_quality(xbrl_instance, period_key: str, statement_type: st
     Returns:
         Dictionary with quality metrics:
         - fact_count: Total number of facts
+        - meaningful_fact_count: Number of facts with meaningful (non-empty) values
         - essential_coverage: Percentage of essential concepts found
         - has_sufficient_data: Boolean indicating if period should be displayed
         - missing_essentials: List of missing essential concepts
+        - has_meaningful_data: Boolean indicating if period has meaningful values (fixes Issue #408)
     """
     # Count total facts
     fact_count = count_facts_for_period(xbrl_instance, period_key, statement_type)
+
+    # Count meaningful facts (non-empty values) - Fix for Issue #408
+    meaningful_fact_count = 0
 
     # Get essential concepts
     essential_concepts = get_essential_concepts_for_statement(statement_type)
@@ -177,6 +182,39 @@ def check_period_data_quality(xbrl_instance, period_key: str, statement_type: st
         if not concept_found:
             missing_essentials.add(concept)
 
+    # Count meaningful facts (non-empty values) - Fix for Issue #408
+    for _fact_key, fact in xbrl_instance._facts.items():
+        # Check if it's for our period
+        context = xbrl_instance.contexts.get(fact.context_ref)
+        if context:
+            period_data = context.model_dump().get('period', {})
+            period_matches = False
+
+            if period_type == 'instant':
+                if period_data.get('type') == 'instant' and period_data.get('instant') == period_date:
+                    period_matches = True
+            else:
+                if (period_data.get('type') == 'duration' and
+                    period_data.get('startDate') == start_date and
+                    period_data.get('endDate') == end_date):
+                    period_matches = True
+
+            if period_matches:
+                # Check if fact has meaningful value
+                fact_value = getattr(fact, 'value', None)
+                if fact_value is not None:
+                    str_value = str(fact_value).strip()
+                    if str_value and str_value.lower() not in ['', 'nan', 'none']:
+                        try:
+                            import pandas as pd
+                            numeric_value = pd.to_numeric(str_value, errors='coerce')
+                            if not pd.isna(numeric_value):
+                                meaningful_fact_count += 1
+                        except:
+                            # If not numeric but not empty, might still be meaningful
+                            if len(str_value) > 0:
+                                meaningful_fact_count += 1
+
     # Calculate coverage
     essential_coverage = len(found_essentials) / len(essential_concepts) if essential_concepts else 0.0
 
@@ -184,10 +222,16 @@ def check_period_data_quality(xbrl_instance, period_key: str, statement_type: st
     # Require at least 50% essential coverage or 20+ facts
     has_sufficient_data = essential_coverage >= 0.5 or fact_count >= 20
 
+    # Determine if has meaningful data (fixes Issue #408)
+    # A period has meaningful data if it has at least some facts with non-empty values
+    has_meaningful_data = meaningful_fact_count > 0
+
     return {
         'fact_count': fact_count,
+        'meaningful_fact_count': meaningful_fact_count,
         'essential_coverage': essential_coverage,
         'has_sufficient_data': has_sufficient_data,
+        'has_meaningful_data': has_meaningful_data,
         'missing_essentials': list(missing_essentials),
         'found_essentials': list(found_essentials)
     }
@@ -213,8 +257,10 @@ def filter_periods_with_data(xbrl_instance, periods: List[Tuple[str, str]],
     for period_key, label in periods:
         quality = check_period_data_quality(xbrl_instance, period_key, statement_type)
 
-        # Include period if it has sufficient data
-        if quality['has_sufficient_data'] and quality['fact_count'] >= min_fact_count:
+        # Include period if it has sufficient data AND meaningful data (fixes Issue #408)
+        if (quality['has_sufficient_data'] and
+            quality['fact_count'] >= min_fact_count and
+            quality['has_meaningful_data']):
             filtered_periods.append((period_key, label))
         else:
             # Log why period was excluded
