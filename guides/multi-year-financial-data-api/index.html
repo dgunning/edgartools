@@ -1,0 +1,3673 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+        <link rel="prev" href="../company-facts/">
+      
+      
+        <link rel="next" href="../company-insiders/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
+    
+    
+      
+        <title>Creating a Multi Year Financials Data Api - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e53b48f4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#multi-year-financial-data-api-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Creating a Multi Year Financials Data Api
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    How to Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Filings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Search for Specific Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filter Filings by Date/Type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Access Filing Attachments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../current-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Finding the most recent filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Companies
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Companies
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting company facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Creating a Multi Year Financials Data Api
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Creating a Multi Year Financials Data Api
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-data-retrieval-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Data Retrieval Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Data Retrieval Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-year-annual-statements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Year Annual Statements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-period-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mixed Period Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fastapi-endpoint-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      FastAPI Endpoint Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FastAPI Endpoint Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-financial-data-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Financial Data Endpoints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comprehensive-multi-statement-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comprehensive Multi-Statement Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#historical-trend-analysis-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Historical Trend Analysis Endpoints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-company-comparison-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bulk Company Comparison Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-api-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running the API Server
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Usage Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-7-years-of-income-statement-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get 7 Years of Income Statement Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-complete-financial-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get Complete Financial Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyze-revenue-trends" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analyze Revenue Trends
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compare-multiple-companies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compare Multiple Companies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-integration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Client Integration Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Client Integration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Client
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javascriptnodejs-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      JavaScript/Node.js Client
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#building-a-financial-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building a Financial Dashboard
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-export-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Export and Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-handling-and-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling and Resilience
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching-for-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Caching for Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#batch-processing-multiple-companies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Batch Processing Multiple Companies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#production-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-for-api-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Tests for API Endpoints
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting a list of company insiders
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting subsets of companies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Financial Analysis
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Financial Analysis
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extract Financial Statements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Using Local Data Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SSL Issues and Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parsing SGML
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    XBRL and Financials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            XBRL and Financials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting XBRL from Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Querying XBRL Facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting footnotes from XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Data Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Insider Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ThirteenF Holding Reports
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding SEC Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Resources
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Common Issues & Solutions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Performance Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SEC Rate Limits & Compliance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-data-retrieval-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Data Retrieval Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Data Retrieval Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-year-annual-statements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Year Annual Statements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-period-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mixed Period Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fastapi-endpoint-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      FastAPI Endpoint Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FastAPI Endpoint Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-financial-data-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Financial Data Endpoints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comprehensive-multi-statement-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comprehensive Multi-Statement Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#historical-trend-analysis-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Historical Trend Analysis Endpoints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-company-comparison-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bulk Company Comparison Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-api-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running the API Server
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Usage Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-7-years-of-income-statement-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get 7 Years of Income Statement Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-complete-financial-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get Complete Financial Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyze-revenue-trends" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analyze Revenue Trends
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compare-multiple-companies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compare Multiple Companies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#client-integration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Client Integration Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Client Integration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Client
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javascriptnodejs-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      JavaScript/Node.js Client
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#building-a-financial-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building a Financial Dashboard
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-export-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Export and Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-handling-and-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling and Resilience
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching-for-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Caching for Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#batch-processing-multiple-companies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Batch Processing Multiple Companies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#production-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-for-api-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Tests for API Endpoints
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="multi-year-financial-data-api-guide">Multi-Year Financial Data API Guide</h1>
+<p>Learn how to access multiple years of financial statements and serve them through FastAPI endpoints for web applications and data analysis.</p>
+<h2 id="overview">Overview</h2>
+<p>This guide demonstrates how to retrieve historical financial data (income statement, balance sheet, and cash flow) for multiple years and expose it through professional FastAPI endpoints. Perfect for building financial dashboards, analysis tools, or data APIs.</p>
+<h2 id="quick-start">Quick Start</h2>
+<pre><code class="language-python">from edgar import Company
+from fastapi import FastAPI, HTTPException
+from typing import List, Dict, Any
+import pandas as pd
+
+app = FastAPI(title=&quot;Financial Data API&quot;)
+
+# Get multi-year financial data
+company = Company('AAPL')
+
+# Income statement - 5 years of annual data
+income_stmt = company.income_statement(periods=5, annual=True)
+
+# Balance sheet - 5 years of annual data  
+balance_sheet = company.balance_sheet(periods=5, annual=True)
+
+# Cash flow - 5 years of annual data
+cash_flow = company.cash_flow(periods=5, annual=True)
+
+print(f&quot;Retrieved {len(income_stmt.periods)} periods of data&quot;)
+</code></pre>
+<h2 id="core-data-retrieval-patterns">Core Data Retrieval Patterns</h2>
+<h3 id="multi-year-annual-statements">Multi-Year Annual Statements</h3>
+<pre><code class="language-python">def get_multi_year_financials(ticker: str, years: int = 5):
+    &quot;&quot;&quot;Get multiple years of financial statements&quot;&quot;&quot;
+    company = Company(ticker)
+
+    if not company.facts:
+        return None
+
+    # Get annual data for specified years
+    financial_data = {
+        'company': {
+            'name': company.name,
+            'ticker': ticker,
+            'shares_outstanding': company.shares_outstanding,
+            'public_float': company.public_float
+        },
+        'income_statement': company.income_statement(periods=years, annual=True),
+        'balance_sheet': company.balance_sheet(periods=years, annual=True),
+        'cash_flow': company.cash_flow(periods=years, annual=True)
+    }
+
+    return financial_data
+
+# Example usage
+aapl_data = get_multi_year_financials('AAPL', 7)
+print(f&quot;Retrieved data for periods: {aapl_data['income_statement'].periods}&quot;)
+</code></pre>
+<h3 id="mixed-period-analysis">Mixed Period Analysis</h3>
+<pre><code class="language-python">def get_comprehensive_data(ticker: str):
+    &quot;&quot;&quot;Get both annual and quarterly data for trend analysis&quot;&quot;&quot;
+    company = Company(ticker)
+
+    if not company.facts:
+        return None
+
+    return {
+        'annual': {
+            'income': company.income_statement(periods=5, annual=True),
+            'balance': company.balance_sheet(periods=5, annual=True),
+            'cashflow': company.cash_flow(periods=5, annual=True)
+        },
+        'quarterly': {
+            'income': company.income_statement(periods=12, annual=False),
+            'balance': company.balance_sheet(periods=12, annual=False), 
+            'cashflow': company.cash_flow(periods=12, annual=False)
+        }
+    }
+
+# Get comprehensive view
+comprehensive = get_comprehensive_data('MSFT')
+</code></pre>
+<h2 id="fastapi-endpoint-implementation">FastAPI Endpoint Implementation</h2>
+<h3 id="basic-financial-data-endpoints">Basic Financial Data Endpoints</h3>
+<pre><code class="language-python">from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel
+from typing import Optional, Dict, Any, List
+from edgar import Company
+import json
+
+app = FastAPI(
+    title=&quot;Financial Data API&quot;,
+    description=&quot;Access multi-year financial statements from SEC data&quot;,
+    version=&quot;1.0.0&quot;
+)
+
+class FinancialResponse(BaseModel):
+    company_info: Dict[str, Any]
+    periods: List[str]
+    data: Dict[str, Any]
+    metadata: Dict[str, Any]
+
+@app.get(&quot;/financial/{ticker}/income&quot;, response_model=FinancialResponse)
+async def get_income_statement(
+    ticker: str,
+    periods: int = Query(4, description=&quot;Number of periods&quot;, ge=1, le=20),
+    annual: bool = Query(True, description=&quot;Annual (True) or Quarterly (False)&quot;),
+    concise_format: bool = Query(False, description=&quot;Use concise formatting ($1.0B vs $1,000,000,000)&quot;)
+):
+    &quot;&quot;&quot;Get income statement data for multiple periods&quot;&quot;&quot;
+    try:
+        company = Company(ticker.upper())
+
+        if not company.facts:
+            raise HTTPException(status_code=404, detail=f&quot;No financial data available for {ticker}&quot;)
+
+        # Get income statement
+        stmt = company.income_statement(periods=periods, annual=annual, concise_format=concise_format)
+
+        if not stmt:
+            raise HTTPException(status_code=404, detail=f&quot;No income statement data for {ticker}&quot;)
+
+        # Convert to API response format
+        response_data = {
+            'company_info': {
+                'name': company.name,
+                'ticker': ticker.upper(),
+                'shares_outstanding': company.shares_outstanding,
+                'public_float': company.public_float
+            },
+            'periods': stmt.periods,
+            'data': _convert_statement_to_dict(stmt),
+            'metadata': {
+                'period_type': 'annual' if annual else 'quarterly',
+                'concise_format': concise_format,
+                'total_items': len(list(stmt.iter_with_values()))
+            }
+        }
+
+        return FinancialResponse(**response_data)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get(&quot;/financial/{ticker}/balance&quot;, response_model=FinancialResponse)  
+async def get_balance_sheet(
+    ticker: str,
+    periods: int = Query(4, description=&quot;Number of periods&quot;, ge=1, le=20),
+    annual: bool = Query(True, description=&quot;Annual (True) or Quarterly (False)&quot;),
+    concise_format: bool = Query(False, description=&quot;Use concise formatting&quot;)
+):
+    &quot;&quot;&quot;Get balance sheet data for multiple periods&quot;&quot;&quot;
+    try:
+        company = Company(ticker.upper())
+
+        if not company.facts:
+            raise HTTPException(status_code=404, detail=f&quot;No financial data available for {ticker}&quot;)
+
+        stmt = company.balance_sheet(periods=periods, annual=annual, concise_format=concise_format)
+
+        if not stmt:
+            raise HTTPException(status_code=404, detail=f&quot;No balance sheet data for {ticker}&quot;)
+
+        response_data = {
+            'company_info': {
+                'name': company.name,
+                'ticker': ticker.upper(),
+                'shares_outstanding': company.shares_outstanding,
+                'public_float': company.public_float
+            },
+            'periods': stmt.periods,
+            'data': _convert_statement_to_dict(stmt),
+            'metadata': {
+                'period_type': 'annual' if annual else 'quarterly',
+                'concise_format': concise_format,
+                'total_items': len(list(stmt.iter_with_values()))
+            }
+        }
+
+        return FinancialResponse(**response_data)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get(&quot;/financial/{ticker}/cashflow&quot;, response_model=FinancialResponse)
+async def get_cash_flow(
+    ticker: str,
+    periods: int = Query(4, description=&quot;Number of periods&quot;, ge=1, le=20),
+    annual: bool = Query(True, description=&quot;Annual (True) or Quarterly (False)&quot;),
+    concise_format: bool = Query(False, description=&quot;Use concise formatting&quot;)
+):
+    &quot;&quot;&quot;Get cash flow statement data for multiple periods&quot;&quot;&quot;
+    try:
+        company = Company(ticker.upper())
+
+        if not company.facts:
+            raise HTTPException(status_code=404, detail=f&quot;No financial data available for {ticker}&quot;)
+
+        stmt = company.cash_flow(periods=periods, annual=annual, concise_format=concise_format)
+
+        if not stmt:
+            raise HTTPException(status_code=404, detail=f&quot;No cash flow data for {ticker}&quot;)
+
+        response_data = {
+            'company_info': {
+                'name': company.name,
+                'ticker': ticker.upper(),
+                'shares_outstanding': company.shares_outstanding,
+                'public_float': company.public_float
+            },
+            'periods': stmt.periods,
+            'data': _convert_statement_to_dict(stmt),
+            'metadata': {
+                'period_type': 'annual' if annual else 'quarterly',
+                'concise_format': concise_format,
+                'total_items': len(list(stmt.iter_with_values()))
+            }
+        }
+
+        return FinancialResponse(**response_data)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def _convert_statement_to_dict(stmt):
+    &quot;&quot;&quot;Convert statement to API-friendly dictionary format&quot;&quot;&quot;
+    data = {}
+
+    for item in stmt.iter_with_values():
+        # Create item data with all periods
+        item_data = {
+            'label': item.label,
+            'concept': item.concept,
+            'values': {},
+            'is_total': getattr(item, 'is_total', False),
+            'depth': getattr(item, 'depth', 0)
+        }
+
+        # Add values for each period
+        for period in stmt.periods:
+            value = item.values.get(period)
+            if value is not None:
+                item_data['values'][period] = {
+                    'raw_value': value,
+                    'display_value': item.get_display_value(period)
+                }
+
+        data[item.concept] = item_data
+
+    return data
+</code></pre>
+<h3 id="comprehensive-multi-statement-endpoint">Comprehensive Multi-Statement Endpoint</h3>
+<pre><code class="language-python">class ComprehensiveFinancialResponse(BaseModel):
+    company_info: Dict[str, Any]
+    periods: List[str]
+    income_statement: Dict[str, Any]
+    balance_sheet: Dict[str, Any]
+    cash_flow: Dict[str, Any]
+    key_metrics: Dict[str, Any]
+    metadata: Dict[str, Any]
+
+@app.get(&quot;/financial/{ticker}/comprehensive&quot;, response_model=ComprehensiveFinancialResponse)
+async def get_comprehensive_financials(
+    ticker: str,
+    periods: int = Query(5, description=&quot;Number of periods&quot;, ge=1, le=10),
+    annual: bool = Query(True, description=&quot;Annual (True) or Quarterly (False)&quot;),
+    concise_format: bool = Query(False, description=&quot;Use concise formatting&quot;),
+    include_ratios: bool = Query(True, description=&quot;Calculate financial ratios&quot;)
+):
+    &quot;&quot;&quot;Get comprehensive financial data including all statements and key metrics&quot;&quot;&quot;
+    try:
+        company = Company(ticker.upper())
+
+        if not company.facts:
+            raise HTTPException(status_code=404, detail=f&quot;No financial data available for {ticker}&quot;)
+
+        # Get all three statements
+        income_stmt = company.income_statement(periods=periods, annual=annual, concise_format=concise_format)
+        balance_sheet = company.balance_sheet(periods=periods, annual=annual, concise_format=concise_format)
+        cash_flow = company.cash_flow(periods=periods, annual=annual, concise_format=concise_format)
+
+        # Get periods from the first available statement
+        available_periods = []
+        if income_stmt:
+            available_periods = income_stmt.periods
+        elif balance_sheet:
+            available_periods = balance_sheet.periods
+        elif cash_flow:
+            available_periods = cash_flow.periods
+
+        if not available_periods:
+            raise HTTPException(status_code=404, detail=f&quot;No financial statement data available for {ticker}&quot;)
+
+        # Calculate key metrics if requested
+        key_metrics = {}
+        if include_ratios and income_stmt and balance_sheet:
+            key_metrics = _calculate_financial_ratios(income_stmt, balance_sheet, cash_flow)
+
+        response_data = {
+            'company_info': {
+                'name': company.name,
+                'ticker': ticker.upper(),
+                'shares_outstanding': company.shares_outstanding,
+                'public_float': company.public_float
+            },
+            'periods': available_periods,
+            'income_statement': _convert_statement_to_dict(income_stmt) if income_stmt else {},
+            'balance_sheet': _convert_statement_to_dict(balance_sheet) if balance_sheet else {},
+            'cash_flow': _convert_statement_to_dict(cash_flow) if cash_flow else {},
+            'key_metrics': key_metrics,
+            'metadata': {
+                'period_type': 'annual' if annual else 'quarterly',
+                'concise_format': concise_format,
+                'statements_available': {
+                    'income_statement': income_stmt is not None,
+                    'balance_sheet': balance_sheet is not None,
+                    'cash_flow': cash_flow is not None
+                }
+            }
+        }
+
+        return ComprehensiveFinancialResponse(**response_data)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def _calculate_financial_ratios(income_stmt, balance_sheet, cash_flow):
+    &quot;&quot;&quot;Calculate key financial ratios from statements&quot;&quot;&quot;
+    ratios = {}
+
+    try:
+        # Get latest period
+        if not income_stmt.periods:
+            return ratios
+
+        latest_period = income_stmt.periods[0]
+
+        # Find key items
+        revenue_item = income_stmt.find_item('Revenue')
+        net_income_item = income_stmt.find_item('Net Income')
+        total_assets_item = balance_sheet.find_item('Assets') if balance_sheet else None
+        total_equity_item = balance_sheet.find_item('Equity') if balance_sheet else None
+
+        # Calculate ratios for latest period
+        if revenue_item and net_income_item:
+            revenue = revenue_item.values.get(latest_period)
+            net_income = net_income_item.values.get(latest_period)
+
+            if revenue and net_income and revenue != 0:
+                ratios[f'profit_margin_{latest_period.lower().replace(&quot; &quot;, &quot;_&quot;)}'] = net_income / revenue
+
+        if net_income_item and total_assets_item:
+            net_income = net_income_item.values.get(latest_period)
+            total_assets = total_assets_item.values.get(latest_period)
+
+            if net_income and total_assets and total_assets != 0:
+                ratios[f'roa_{latest_period.lower().replace(&quot; &quot;, &quot;_&quot;)}'] = net_income / total_assets
+
+        if net_income_item and total_equity_item:
+            net_income = net_income_item.values.get(latest_period)
+            total_equity = total_equity_item.values.get(latest_period)
+
+            if net_income and total_equity and total_equity != 0:
+                ratios[f'roe_{latest_period.lower().replace(&quot; &quot;, &quot;_&quot;)}'] = net_income / total_equity
+
+    except Exception as e:
+        # Log error but don't fail the request
+        print(f&quot;Error calculating ratios: {e}&quot;)
+
+    return ratios
+</code></pre>
+<h3 id="historical-trend-analysis-endpoints">Historical Trend Analysis Endpoints</h3>
+<pre><code class="language-python">from datetime import datetime, timedelta
+
+@app.get(&quot;/financial/{ticker}/trends&quot;)
+async def get_financial_trends(
+    ticker: str,
+    metric: str = Query(..., description=&quot;Metric to analyze (revenue, net_income, assets)&quot;),
+    years: int = Query(5, description=&quot;Number of years&quot;, ge=2, le=10)
+):
+    &quot;&quot;&quot;Get historical trends for specific financial metrics&quot;&quot;&quot;
+    try:
+        company = Company(ticker.upper())
+
+        if not company.facts:
+            raise HTTPException(status_code=404, detail=f&quot;No financial data available for {ticker}&quot;)
+
+        # Determine which statement to use based on metric
+        if metric.lower() in ['revenue', 'net_income', 'operating_income']:
+            stmt = company.income_statement(periods=years, annual=True)
+        elif metric.lower() in ['assets', 'liabilities', 'equity']:
+            stmt = company.balance_sheet(periods=years, annual=True)
+        elif metric.lower() in ['operating_cash_flow', 'free_cash_flow']:
+            stmt = company.cash_flow(periods=years, annual=True)
+        else:
+            raise HTTPException(status_code=400, detail=f&quot;Unknown metric: {metric}&quot;)
+
+        if not stmt:
+            raise HTTPException(status_code=404, detail=f&quot;No data available for metric: {metric}&quot;)
+
+        # Find the requested metric
+        metric_item = stmt.find_item(metric)
+        if not metric_item:
+            # Try alternative names
+            alt_names = {
+                'revenue': ['Revenues', 'Total Revenue', 'Net Sales'],
+                'net_income': ['Net Income', 'Net Earnings', 'Net Income (Loss)'],
+                'assets': ['Total Assets', 'Assets'],
+                'equity': ['Total Equity', 'Stockholders Equity', 'Total Stockholders Equity']
+            }
+
+            for alt_name in alt_names.get(metric.lower(), []):
+                metric_item = stmt.find_item(alt_name)
+                if metric_item:
+                    break
+
+        if not metric_item:
+            raise HTTPException(status_code=404, detail=f&quot;Metric '{metric}' not found in financial statements&quot;)
+
+        # Calculate trends
+        trend_data = []
+        values = []
+
+        for period in reversed(stmt.periods):  # Chronological order
+            value = metric_item.values.get(period)
+            if value is not None:
+                trend_data.append({
+                    'period': period,
+                    'value': value,
+                    'display_value': metric_item.get_display_value(period)
+                })
+                values.append(value)
+
+        # Calculate growth rates
+        growth_rates = []
+        if len(values) &gt; 1:
+            for i in range(1, len(values)):
+                if values[i-1] != 0:
+                    growth = ((values[i] - values[i-1]) / abs(values[i-1])) * 100
+                    growth_rates.append(growth)
+
+        return {
+            'company': company.name,
+            'ticker': ticker.upper(),
+            'metric': metric,
+            'periods_analyzed': len(trend_data),
+            'trend_data': trend_data,
+            'analytics': {
+                'average_growth_rate': sum(growth_rates) / len(growth_rates) if growth_rates else None,
+                'total_growth': ((values[-1] - values[0]) / abs(values[0])) * 100 if len(values) &gt; 1 and values[0] != 0 else None,
+                'compound_annual_growth_rate': (((values[-1] / values[0]) ** (1/(len(values)-1))) - 1) * 100 if len(values) &gt; 1 and values[0] &gt; 0 else None
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+</code></pre>
+<h3 id="bulk-company-comparison-endpoint">Bulk Company Comparison Endpoint</h3>
+<pre><code class="language-python">@app.post(&quot;/financial/compare&quot;)
+async def compare_companies(
+    tickers: List[str],
+    periods: int = Query(3, description=&quot;Number of periods&quot;, ge=1, le=5),
+    metrics: List[str] = Query(['revenue', 'net_income'], description=&quot;Metrics to compare&quot;)
+):
+    &quot;&quot;&quot;Compare financial metrics across multiple companies&quot;&quot;&quot;
+    try:
+        comparison_data = []
+
+        for ticker in tickers:
+            try:
+                company = Company(ticker.upper())
+
+                if not company.facts:
+                    continue
+
+                company_data = {
+                    'ticker': ticker.upper(),
+                    'name': company.name,
+                    'metrics': {}
+                }
+
+                # Get statements based on requested metrics
+                income_stmt = company.income_statement(periods=periods, annual=True)
+                balance_sheet = company.balance_sheet(periods=periods, annual=True)
+
+                for metric in metrics:
+                    if metric.lower() in ['revenue', 'net_income']:
+                        stmt = income_stmt
+                    else:
+                        stmt = balance_sheet
+
+                    if stmt:
+                        metric_item = stmt.find_item(metric)
+                        if metric_item:
+                            company_data['metrics'][metric] = {
+                                'periods': stmt.periods,
+                                'values': metric_item.values
+                            }
+
+                comparison_data.append(company_data)
+
+            except Exception as e:
+                print(f&quot;Error processing {ticker}: {e}&quot;)
+                continue
+
+        return {
+            'comparison': comparison_data,
+            'metadata': {
+                'companies_compared': len(comparison_data),
+                'periods_requested': periods,
+                'metrics_requested': metrics
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+</code></pre>
+<h2 id="running-the-api-server">Running the API Server</h2>
+<pre><code class="language-python"># Save the above code as financial_api.py and run:
+
+if __name__ == &quot;__main__&quot;:
+    import uvicorn
+
+    uvicorn.run(
+        &quot;financial_api:app&quot;,
+        host=&quot;0.0.0.0&quot;,
+        port=8000,
+        reload=True,
+        title=&quot;Financial Data API&quot;
+    )
+
+# Or run from command line:
+# uvicorn financial_api:app --reload --host 0.0.0.0 --port 8000
+</code></pre>
+<h2 id="api-usage-examples">API Usage Examples</h2>
+<h3 id="get-7-years-of-income-statement-data">Get 7 Years of Income Statement Data</h3>
+<pre><code class="language-bash"># Get comprehensive income statement data
+curl &quot;http://localhost:8000/financial/AAPL/income?periods=7&amp;annual=true&amp;concise_format=false&quot;
+
+# Get quarterly data for recent periods
+curl &quot;http://localhost:8000/financial/AAPL/income?periods=12&amp;annual=false&amp;concise_format=true&quot;
+</code></pre>
+<h3 id="get-complete-financial-profile">Get Complete Financial Profile</h3>
+<pre><code class="language-bash"># Get all three statements plus ratios
+curl &quot;http://localhost:8000/financial/AAPL/comprehensive?periods=5&amp;include_ratios=true&quot;
+</code></pre>
+<h3 id="analyze-revenue-trends">Analyze Revenue Trends</h3>
+<pre><code class="language-bash"># Get 10-year revenue trend analysis
+curl &quot;http://localhost:8000/financial/AAPL/trends?metric=revenue&amp;years=10&quot;
+</code></pre>
+<h3 id="compare-multiple-companies">Compare Multiple Companies</h3>
+<pre><code class="language-bash"># Compare revenue and profits across companies
+curl -X POST &quot;http://localhost:8000/financial/compare&quot; \
+     -H &quot;Content-Type: application/json&quot; \
+     -d '{&quot;tickers&quot;: [&quot;AAPL&quot;, &quot;MSFT&quot;, &quot;GOOGL&quot;], &quot;periods&quot;: 5, &quot;metrics&quot;: [&quot;revenue&quot;, &quot;net_income&quot;]}'
+</code></pre>
+<h2 id="client-integration-examples">Client Integration Examples</h2>
+<h3 id="python-client">Python Client</h3>
+<pre><code class="language-python">import requests
+import pandas as pd
+
+class FinancialDataClient:
+    def __init__(self, base_url=&quot;http://localhost:8000&quot;):
+        self.base_url = base_url
+
+    def get_income_statement(self, ticker, periods=5, annual=True):
+        &quot;&quot;&quot;Get income statement data&quot;&quot;&quot;
+        response = requests.get(
+            f&quot;{self.base_url}/financial/{ticker}/income&quot;,
+            params={'periods': periods, 'annual': annual}
+        )
+        return response.json() if response.status_code == 200 else None
+
+    def get_comprehensive_data(self, ticker, periods=5):
+        &quot;&quot;&quot;Get all financial statements&quot;&quot;&quot;
+        response = requests.get(
+            f&quot;{self.base_url}/financial/{ticker}/comprehensive&quot;,
+            params={'periods': periods, 'include_ratios': True}
+        )
+        return response.json() if response.status_code == 200 else None
+
+    def get_trends(self, ticker, metric, years=5):
+        &quot;&quot;&quot;Get trend analysis&quot;&quot;&quot;
+        response = requests.get(
+            f&quot;{self.base_url}/financial/{ticker}/trends&quot;,
+            params={'metric': metric, 'years': years}
+        )
+        return response.json() if response.status_code == 200 else None
+
+# Usage
+client = FinancialDataClient()
+
+# Get Apple's financial data
+aapl_data = client.get_comprehensive_data('AAPL', periods=7)
+print(f&quot;Retrieved data for periods: {aapl_data['periods']}&quot;)
+
+# Get revenue trends
+revenue_trends = client.get_trends('AAPL', 'revenue', years=10)
+print(f&quot;10-year revenue CAGR: {revenue_trends['analytics']['compound_annual_growth_rate']:.1f}%&quot;)
+</code></pre>
+<h3 id="javascriptnodejs-client">JavaScript/Node.js Client</h3>
+<pre><code class="language-javascript">class FinancialDataClient {
+    constructor(baseUrl = 'http://localhost:8000') {
+        this.baseUrl = baseUrl;
+    }
+
+    async getIncomeStatement(ticker, periods = 5, annual = true) {
+        const response = await fetch(
+            `${this.baseUrl}/financial/${ticker}/income?periods=${periods}&amp;annual=${annual}`
+        );
+        return response.ok ? response.json() : null;
+    }
+
+    async getComprehensiveData(ticker, periods = 5) {
+        const response = await fetch(
+            `${this.baseUrl}/financial/${ticker}/comprehensive?periods=${periods}&amp;include_ratios=true`
+        );
+        return response.ok ? response.json() : null;
+    }
+
+    async compareCompanies(tickers, periods = 3, metrics = ['revenue', 'net_income']) {
+        const response = await fetch(`${this.baseUrl}/financial/compare`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({tickers, periods, metrics})
+        });
+        return response.ok ? response.json() : null;
+    }
+}
+
+// Usage
+const client = new FinancialDataClient();
+
+// Get multi-year data
+const msftData = await client.getComprehensiveData('MSFT', 7);
+console.log(`Retrieved data for periods:`, msftData.periods);
+
+// Compare tech giants
+const comparison = await client.compareCompanies(['AAPL', 'MSFT', 'GOOGL', 'AMZN']);
+console.log('Comparison data:', comparison);
+</code></pre>
+<h2 id="advanced-use-cases">Advanced Use Cases</h2>
+<h3 id="building-a-financial-dashboard">Building a Financial Dashboard</h3>
+<pre><code class="language-python"># dashboard.py - Streamlit financial dashboard
+import streamlit as st
+import requests
+import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
+
+st.title(&quot;Multi-Year Financial Analysis Dashboard&quot;)
+
+# Input controls
+ticker = st.text_input(&quot;Company Ticker&quot;, value=&quot;AAPL&quot;)
+years = st.slider(&quot;Years of Data&quot;, min_value=2, max_value=10, value=5)
+
+if st.button(&quot;Analyze&quot;):
+    # Get data from our API
+    client = FinancialDataClient()
+    data = client.get_comprehensive_data(ticker, periods=years)
+
+    if data:
+        st.subheader(f&quot;{data['company_info']['name']} ({ticker})&quot;)
+
+        # Revenue trend chart
+        income_data = data['income_statement']
+        revenue_concept = next((k for k in income_data.keys() if 'revenue' in k.lower()), None)
+
+        if revenue_concept:
+            revenue_item = income_data[revenue_concept]
+            periods = data['periods']
+            values = [revenue_item['values'][p]['raw_value'] for p in periods if p in revenue_item['values']]
+
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=periods, y=values, mode='lines+markers', name='Revenue'))
+            fig.update_layout(title='Revenue Trend', xaxis_title='Period', yaxis_title='Revenue ($)')
+            st.plotly_chart(fig)
+
+        # Key metrics
+        if data['key_metrics']:
+            st.subheader(&quot;Key Financial Ratios&quot;)
+            for metric, value in data['key_metrics'].items():
+                if isinstance(value, (int, float)):
+                    st.metric(metric.replace('_', ' ').title(), f&quot;{value:.2%}&quot; if 'margin' in metric or 'ro' in metric else f&quot;{value:.2f}&quot;)
+
+# Run with: streamlit run dashboard.py
+</code></pre>
+<h3 id="data-export-and-analysis">Data Export and Analysis</h3>
+<pre><code class="language-python">def export_financial_data_to_excel(tickers, periods=5, filename=&quot;financial_data.xlsx&quot;):
+    &quot;&quot;&quot;Export multi-company financial data to Excel&quot;&quot;&quot;
+    import pandas as pd
+    from openpyxl import Workbook
+    from openpyxl.utils.dataframe import dataframe_to_rows
+
+    client = FinancialDataClient()
+
+    with pd.ExcelWriter(filename, engine='openpyxl') as writer:
+        for ticker in tickers:
+            data = client.get_comprehensive_data(ticker, periods)
+
+            if data:
+                # Income Statement
+                income_df = _convert_api_data_to_dataframe(data['income_statement'], data['periods'])
+                income_df.to_excel(writer, sheet_name=f'{ticker}_Income')
+
+                # Balance Sheet
+                balance_df = _convert_api_data_to_dataframe(data['balance_sheet'], data['periods'])
+                balance_df.to_excel(writer, sheet_name=f'{ticker}_Balance')
+
+                # Cash Flow
+                cashflow_df = _convert_api_data_to_dataframe(data['cash_flow'], data['periods'])
+                cashflow_df.to_excel(writer, sheet_name=f'{ticker}_CashFlow')
+
+    print(f&quot;Financial data exported to {filename}&quot;)
+
+def _convert_api_data_to_dataframe(statement_data, periods):
+    &quot;&quot;&quot;Convert API response to pandas DataFrame&quot;&quot;&quot;
+    rows = []
+    for concept, item_data in statement_data.items():
+        row = {'concept': concept, 'label': item_data['label']}
+        for period in periods:
+            if period in item_data['values']:
+                row[period] = item_data['values'][period]['raw_value']
+        rows.append(row)
+
+    return pd.DataFrame(rows)
+
+# Export data for analysis
+export_financial_data_to_excel(['AAPL', 'MSFT', 'GOOGL', 'AMZN'], periods=7)
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="error-handling-and-resilience">Error Handling and Resilience</h3>
+<pre><code class="language-python">import logging
+from functools import wraps
+
+def handle_api_errors(f):
+    &quot;&quot;&quot;Decorator for consistent API error handling&quot;&quot;&quot;
+    @wraps(f)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await f(*args, **kwargs)
+        except Exception as e:
+            logging.error(f&quot;API error in {f.__name__}: {str(e)}&quot;)
+            raise HTTPException(status_code=500, detail=f&quot;Internal server error: {str(e)}&quot;)
+    return wrapper
+
+@app.get(&quot;/financial/{ticker}/income&quot;)
+@handle_api_errors
+async def get_income_statement_safe(ticker: str, periods: int = 4):
+    # Implementation with automatic error handling
+    pass
+</code></pre>
+<h3 id="caching-for-performance">Caching for Performance</h3>
+<pre><code class="language-python">from functools import lru_cache
+from typing import Optional
+import time
+
+class CachedFinancialAPI:
+    def __init__(self):
+        self._cache = {}
+        self._cache_ttl = 3600  # 1 hour
+
+    def _get_cache_key(self, ticker: str, statement_type: str, periods: int, annual: bool):
+        return f&quot;{ticker}_{statement_type}_{periods}_{annual}&quot;
+
+    def _is_cache_valid(self, timestamp: float) -&gt; bool:
+        return time.time() - timestamp &lt; self._cache_ttl
+
+    @lru_cache(maxsize=100)
+    def get_cached_company(self, ticker: str):
+        &quot;&quot;&quot;Cache Company objects to avoid repeated API calls&quot;&quot;&quot;
+        return Company(ticker)
+
+    def get_financial_data(self, ticker: str, statement_type: str, periods: int, annual: bool):
+        cache_key = self._get_cache_key(ticker, statement_type, periods, annual)
+
+        # Check cache
+        if cache_key in self._cache:
+            data, timestamp = self._cache[cache_key]
+            if self._is_cache_valid(timestamp):
+                return data
+
+        # Fetch new data
+        company = self.get_cached_company(ticker)
+
+        if statement_type == 'income':
+            data = company.income_statement(periods=periods, annual=annual)
+        elif statement_type == 'balance':
+            data = company.balance_sheet(periods=periods, annual=annual)
+        elif statement_type == 'cashflow':
+            data = company.cash_flow(periods=periods, annual=annual)
+
+        # Cache the result
+        self._cache[cache_key] = (data, time.time())
+
+        return data
+
+# Use cached API in endpoints
+cached_api = CachedFinancialAPI()
+
+@app.get(&quot;/financial/{ticker}/income&quot;)
+async def get_cached_income_statement(ticker: str, periods: int = 4, annual: bool = True):
+    data = cached_api.get_financial_data(ticker, 'income', periods, annual)
+    # ... rest of endpoint logic
+</code></pre>
+<h2 id="performance-optimization">Performance Optimization</h2>
+<h3 id="batch-processing-multiple-companies">Batch Processing Multiple Companies</h3>
+<pre><code class="language-python">import asyncio
+import aiohttp
+from concurrent.futures import ThreadPoolExecutor
+
+async def process_companies_batch(tickers: List[str], periods: int = 5):
+    &quot;&quot;&quot;Process multiple companies in parallel&quot;&quot;&quot;
+
+    def get_company_data(ticker):
+        try:
+            company = Company(ticker)
+            if company.facts:
+                return {
+                    'ticker': ticker,
+                    'income': company.income_statement(periods=periods, annual=True),
+                    'balance': company.balance_sheet(periods=periods, annual=True),
+                    'cashflow': company.cash_flow(periods=periods, annual=True)
+                }
+        except Exception as e:
+            print(f&quot;Error processing {ticker}: {e}&quot;)
+        return None
+
+    # Use ThreadPoolExecutor for I/O bound operations
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        loop = asyncio.get_event_loop()
+        tasks = [
+            loop.run_in_executor(executor, get_company_data, ticker) 
+            for ticker in tickers
+        ]
+        results = await asyncio.gather(*tasks)
+
+    return [r for r in results if r is not None]
+
+@app.post(&quot;/financial/batch&quot;)
+async def process_batch(tickers: List[str], periods: int = Query(5, le=10)):
+    &quot;&quot;&quot;Process multiple companies in parallel&quot;&quot;&quot;
+    results = await process_companies_batch(tickers, periods)
+    return {
+        'processed': len(results),
+        'requested': len(tickers),
+        'data': results
+    }
+</code></pre>
+<h2 id="deployment-considerations">Deployment Considerations</h2>
+<h3 id="production-setup">Production Setup</h3>
+<pre><code class="language-python"># production_config.py
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+import logging
+
+def create_production_app():
+    app = FastAPI(
+        title=&quot;Financial Data API&quot;,
+        description=&quot;Production financial data service&quot;,
+        version=&quot;1.0.0&quot;,
+        docs_url=&quot;/docs&quot; if settings.DEBUG else None
+    )
+
+    # Add middleware
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[&quot;https://yourdomain.com&quot;],
+        allow_credentials=True,
+        allow_methods=[&quot;GET&quot;, &quot;POST&quot;],
+        allow_headers=[&quot;*&quot;],
+    )
+
+    # Configure logging
+    logging.basicConfig(level=logging.INFO)
+
+    return app
+
+app = create_production_app()
+
+# Add rate limiting
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.get(&quot;/financial/{ticker}/income&quot;)
+@limiter.limit(&quot;10/minute&quot;)
+async def rate_limited_income_statement(request: Request, ticker: str):
+    # Rate-limited endpoint implementation
+    pass
+</code></pre>
+<h2 id="testing">Testing</h2>
+<h3 id="unit-tests-for-api-endpoints">Unit Tests for API Endpoints</h3>
+<pre><code class="language-python"># test_financial_api.py
+import pytest
+from fastapi.testclient import TestClient
+from financial_api import app
+
+client = TestClient(app)
+
+def test_get_income_statement():
+    &quot;&quot;&quot;Test income statement endpoint&quot;&quot;&quot;
+    response = client.get(&quot;/financial/AAPL/income?periods=3&amp;annual=true&quot;)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data['company_info']['ticker'] == 'AAPL'
+    assert len(data['periods']) &lt;= 3
+    assert 'income_statement' in data or 'data' in data
+
+def test_comprehensive_endpoint():
+    &quot;&quot;&quot;Test comprehensive financial data endpoint&quot;&quot;&quot;
+    response = client.get(&quot;/financial/MSFT/comprehensive?periods=2&amp;include_ratios=true&quot;)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert 'income_statement' in data
+    assert 'balance_sheet' in data
+    assert 'cash_flow' in data
+    assert 'key_metrics' in data
+
+def test_trends_analysis():
+    &quot;&quot;&quot;Test trends endpoint&quot;&quot;&quot;
+    response = client.get(&quot;/financial/GOOGL/trends?metric=revenue&amp;years=5&quot;)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert 'trend_data' in data
+    assert 'analytics' in data
+    assert data['metric'] == 'revenue'
+
+def test_company_comparison():
+    &quot;&quot;&quot;Test company comparison endpoint&quot;&quot;&quot;
+    payload = {
+        &quot;tickers&quot;: [&quot;AAPL&quot;, &quot;MSFT&quot;],
+        &quot;periods&quot;: 2,
+        &quot;metrics&quot;: [&quot;revenue&quot;]
+    }
+    response = client.post(&quot;/financial/compare&quot;, json=payload)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data['comparison']) &lt;= 2
+
+def test_invalid_ticker():
+    &quot;&quot;&quot;Test handling of invalid ticker&quot;&quot;&quot;
+    response = client.get(&quot;/financial/INVALIDTICKER/income&quot;)
+    assert response.status_code == 404
+
+# Run with: pytest test_financial_api.py -v
+</code></pre>
+<p>This comprehensive guide provides everything needed to build a production-ready FastAPI service for accessing multi-year financial statement data using EdgarTools. The implementation includes error handling, caching, rate limiting, and extensive examples for building financial analysis applications.
+]</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

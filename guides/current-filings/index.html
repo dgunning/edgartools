@@ -1,0 +1,3255 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+        <link rel="prev" href="../filing-attachments/">
+      
+      
+        <link rel="next" href="../finding-companies/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
+    
+    
+      
+        <title>Finding the most recent filings - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e53b48f4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#working-with-current-filings" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Finding the most recent filings
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    How to Guides
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Filings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Search for Specific Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filter Filings by Date/Type
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Access Filing Attachments
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Finding the most recent filings
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Finding the most recent filings
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-by-form-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter by Form Type
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-current-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Current Filings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Current Filings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-current-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Are Current Filings?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pagination-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pagination System
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_current_filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_current_filings()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iter_current_filings_pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      iter_current_filings_pages()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_all_current_filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_all_current_filings()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtering Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#by-form-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      By Form Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-owner-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      By Owner Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-page-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      By Page Size
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-world-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Real-World Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-monitor-recent-8-k-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 1: Monitor Recent 8-K Events
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-track-insider-trading-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 2: Track Insider Trading Activity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-real-time-filing-feed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 3: Real-Time Filing Feed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Memory Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Network Efficiency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rate Limiting
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choosing-the-right-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing the Right Function
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing the Right Function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-get_current_filings-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use get_current_filings() when:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-iter_current_filings_pages-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use iter_current_filings_pages() when:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-get_all_current_filings-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use get_all_current_filings() when:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues-and-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues and Solutions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-appropriate-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Use Appropriate Filters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-handle-pagination-properly" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Handle Pagination Properly
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-be-respectful-of-sec-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Be Respectful of SEC Resources
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#research-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Research and Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#application-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Development
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#academic-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      Academic Research
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Companies
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Companies
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Working with a company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting company facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-year-financial-data-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Creating a Multi Year Financials Data Api
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting a list of company insiders
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting subsets of companies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Financial Analysis
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Financial Analysis
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Extract Financial Statements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Using Local Data Storage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SSL Issues and Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parsing SGML
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    XBRL and Financials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            XBRL and Financials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting XBRL from Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Querying XBRL Facts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting footnotes from XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Data Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Insider Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ThirteenF Holding Reports
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding SEC Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Understanding Data Objects
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Objects
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            Core Objects
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Company
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Filings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    XBRL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Resources
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Common Issues & Solutions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Performance Best Practices
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SEC Rate Limits & Compliance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-by-form-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter by Form Type
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-current-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Current Filings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Current Filings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-current-filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Are Current Filings?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pagination-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pagination System
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Functions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_current_filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_current_filings()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iter_current_filings_pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      iter_current_filings_pages()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_all_current_filings" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_all_current_filings()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtering Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#by-form-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      By Form Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-owner-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      By Owner Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-page-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      By Page Size
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-world-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-World Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Real-World Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-monitor-recent-8-k-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 1: Monitor Recent 8-K Events
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-track-insider-trading-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 2: Track Insider Trading Activity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-real-time-filing-feed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 3: Real-Time Filing Feed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Memory Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Network Efficiency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rate Limiting
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choosing-the-right-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing the Right Function
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing the Right Function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-get_current_filings-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use get_current_filings() when:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-iter_current_filings_pages-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use iter_current_filings_pages() when:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-get_all_current_filings-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use get_all_current_filings() when:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues-and-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues and Solutions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-appropriate-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Use Appropriate Filters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-handle-pagination-properly" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Handle Pagination Properly
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-be-respectful-of-sec-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Be Respectful of SEC Resources
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#research-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Research and Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#application-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Development
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#academic-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      Academic Research
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="working-with-current-filings">Working with Current Filings</h1>
+<h2 id="overview">Overview</h2>
+<p>Current filings represent the most recently submitted documents to the SEC, updated in real-time as companies file their reports. This guide shows you how to access, filter, and efficiently process current filings using edgartools.</p>
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="basic-usage">Basic Usage</h3>
+<pre><code class="language-python">from edgar import get_current_filings
+
+# Get the most recent filings (default: 100 filings)
+current = get_current_filings()
+print(f&quot;Found {len(current)} recent filings&quot;)
+
+# Display the first few filings
+for filing in current[:5]:
+    print(f&quot;{filing.form}: {filing.company} - {filing.filing_date}&quot;)
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code class="language-plaintext">Found 100 recent filings
+8-K: Apple Inc. - 2025-01-14
+10-Q: Microsoft Corporation - 2025-01-14
+4: BEZOS JEFFREY P - 2025-01-14
+13F-HR: Berkshire Hathaway Inc - 2025-01-14
+S-3: Tesla, Inc. - 2025-01-14
+</code></pre>
+<h3 id="filter-by-form-type">Filter by Form Type</h3>
+<pre><code class="language-python"># Get only Form 8-K current events
+current_8k = get_current_filings(form='8-K')
+
+# Get only insider trading forms (Forms 3, 4, 5)
+current_insider = get_current_filings(form='4')
+
+# Get quarterly and annual reports
+current_reports = get_current_filings(form='10-K')
+</code></pre>
+<h2 id="understanding-current-filings">Understanding Current Filings</h2>
+<h3 id="what-are-current-filings">What Are Current Filings?</h3>
+<p>Current filings are the most recently submitted documents to the SEC, typically updated every few minutes during business hours. They include:</p>
+<ul>
+<li><strong>Form 8-K</strong>: Current events and corporate changes</li>
+<li><strong>Forms 3, 4, 5</strong>: Insider trading transactions</li>
+<li><strong>10-K/10-Q</strong>: Annual and quarterly reports</li>
+<li><strong>13F</strong>: Institutional investment manager holdings</li>
+<li><strong>S-1, S-3</strong>: Registration statements</li>
+<li><strong>And many more...</strong></li>
+</ul>
+<h3 id="pagination-system">Pagination System</h3>
+<p>Current filings are delivered in pages to manage large volumes:</p>
+<pre><code class="language-python"># Default: Get first 100 filings
+current = get_current_filings(page_size=100)
+
+# Get more filings per page (up to 100)
+current = get_current_filings(page_size=80)
+
+# Navigate to next page
+next_page = current.next()
+if next_page:
+    print(f&quot;Next page has {len(next_page)} filings&quot;)
+</code></pre>
+<h2 id="core-functions">Core Functions</h2>
+<h3 id="get_current_filings"><code>get_current_filings()</code></h3>
+<p>Get a single page of current filings with filtering options.</p>
+<pre><code class="language-python">def get_current_filings(form: str = '', 
+                       owner: str = 'include', 
+                       page_size: int = 100) -&gt; CurrentFilings:
+</code></pre>
+<p><strong>Parameters:</strong>
+- <code>form</code> (str): Filter by form type (e.g., "8-K", "10-K", "4")
+- <code>owner</code> (str): Owner filter - "include", "exclude", or "only"
+- <code>page_size</code> (int): Filings per page (10, 20, 40, 80, or 100)</p>
+<p><strong>Returns:</strong> <code>CurrentFilings</code> object with pagination capabilities</p>
+<h3 id="iter_current_filings_pages"><code>iter_current_filings_pages()</code></h3>
+<p>Iterator that yields pages of current filings until exhausted.</p>
+<pre><code class="language-python">from edgar import iter_current_filings_pages
+
+# Process all current 8-K filings page by page
+for page in iter_current_filings_pages(form=&quot;8-K&quot;):
+    print(f&quot;Processing {len(page)} 8-K filings&quot;)
+
+    for filing in page:
+        # Process each filing
+        print(f&quot;  {filing.company}: {filing.filing_date}&quot;)
+
+    # Break after first few pages for demo
+    if page.current_page &gt;= 3:
+        break
+</code></pre>
+<h3 id="get_all_current_filings"><code>get_all_current_filings()</code></h3>
+<p>Get ALL current filings by automatically iterating through all pages.</p>
+<pre><code class="language-python">from edgar import get_all_current_filings
+
+# Get all current Form 4 filings (may be thousands)
+all_form4 = get_all_current_filings(form=&quot;4&quot;)
+print(f&quot;Total Form 4 filings: {len(all_form4)}&quot;)
+
+# Get all current filings (no form filter)
+all_current = get_all_current_filings()
+print(f&quot;Total current filings: {len(all_current)}&quot;)
+</code></pre>
+<p><strong>⚠️ Performance Note:</strong> This function downloads ALL available current filings, which can be thousands of documents. Use with appropriate filters.</p>
+<h2 id="filtering-options">Filtering Options</h2>
+<h3 id="by-form-type">By Form Type</h3>
+<pre><code class="language-python"># Specific form types
+form_8k = get_current_filings(form=&quot;8-K&quot;)
+form_10k = get_current_filings(form=&quot;10-K&quot;) 
+form_4 = get_current_filings(form=&quot;4&quot;)
+
+# Form families work too
+quarterly_reports = get_current_filings(form=&quot;10-Q&quot;)
+</code></pre>
+<h3 id="by-owner-type">By Owner Type</h3>
+<p>Control whether to include filings from investment managers:</p>
+<pre><code class="language-python"># Include all filings (default)
+all_filings = get_current_filings(owner=&quot;include&quot;)
+
+# Exclude ownership filings (e.g., Form 4, 144)
+public_only = get_current_filings(owner=&quot;exclude&quot;)
+
+# Only ownership filings (e.g., Form 4, 144)
+managers_only = get_current_filings(owner=&quot;only&quot;)
+</code></pre>
+<h3 id="by-page-size">By Page Size</h3>
+<p>Choose how many filings to get per request:</p>
+<pre><code class="language-python"># Small batches for quick processing
+small_batch = get_current_filings(page_size=20)
+
+# Large batches for efficiency
+large_batch = get_current_filings(page_size=100)  # Maximum
+</code></pre>
+<h2 id="real-world-examples">Real-World Examples</h2>
+<h3 id="example-1-monitor-recent-8-k-events">Example 1: Monitor Recent 8-K Events</h3>
+<pre><code class="language-python">from edgar import get_all_current_filings
+from datetime import datetime
+
+def monitor_current_events():
+    &quot;&quot;&quot;Monitor recent 8-K filings for significant events.&quot;&quot;&quot;
+
+    # Get recent 8-K filings
+    current_8k = get_all_current_filings(form=&quot;8-K&quot;)
+
+    print(f&quot;📈 Monitoring {len(current_8k)} recent 8-K filings&quot;)
+    print(f&quot;Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}&quot;)
+    print(&quot;-&quot; * 60)
+
+    for filing in current_8k:
+        # Show key information
+        print(f&quot;{filing.company}&quot;)
+        print(f&quot;  Form: {filing.form}&quot;)
+        print(f&quot;  Filed: {filing.filing_date}&quot;)
+        print(f&quot;  URL: {filing.document_url}&quot;)
+        print()
+
+monitor_current_events()
+</code></pre>
+<h3 id="example-2-track-insider-trading-activity">Example 2: Track Insider Trading Activity</h3>
+<pre><code class="language-python">from edgar import get_all_current_filings
+import pandas as pd
+
+def analyze_insider_activity():
+    &quot;&quot;&quot;Analyze current insider trading patterns.&quot;&quot;&quot;
+
+    # Get all current Form 4 filings
+    print(&quot;📊 Downloading all current Form 4 filings...&quot;)
+    insider_filings = get_all_current_filings(form=&quot;4&quot;)
+
+    print(f&quot;Found {len(insider_filings)} insider trading filings&quot;)
+
+    # Convert to DataFrame for analysis
+    df = insider_filings.to_pandas()
+
+    # Analyze by company
+    company_counts = df['company'].value_counts().head(10)
+
+    print(&quot;\n🏢 Top 10 Companies by Filing Volume:&quot;)
+    for company, count in company_counts.items():
+        print(f&quot;  {company}: {count} filings&quot;)
+
+    # Analyze by filing date
+    daily_counts = df['filing_date'].value_counts().sort_index()
+
+    print(f&quot;\n📅 Daily Filing Counts (last {len(daily_counts)} days):&quot;)
+    for date, count in daily_counts.tail(7).items():
+        print(f&quot;  {date}: {count} filings&quot;)
+
+    return df
+
+# Run the analysis
+insider_df = analyze_insider_activity()
+</code></pre>
+<h3 id="example-3-real-time-filing-feed">Example 3: Real-Time Filing Feed</h3>
+<pre><code class="language-python">from edgar import get_current_filings
+import time
+
+def real_time_filing_feed(max_iterations=10):
+    &quot;&quot;&quot;Create a real-time feed of new filings.&quot;&quot;&quot;
+
+    seen_filings = set()
+    iteration = 0
+
+    print(&quot;🔄 Starting real-time filing feed...&quot;)
+    print(&quot;Press Ctrl+C to stop\n&quot;)
+
+    try:
+        while iteration &lt; max_iterations:
+            # Get latest filings
+            current = get_current_filings(page_size=20)
+            new_filings = []
+
+            for filing in current:
+                filing_id = filing.accession_no
+                if filing_id not in seen_filings:
+                    new_filings.append(filing)
+                    seen_filings.add(filing_id)
+
+            if new_filings:
+                print(f&quot;🆕 {len(new_filings)} new filings detected:&quot;)
+                for filing in new_filings:
+                    print(f&quot;  {filing.form}: {filing.company}&quot;)
+                print()
+            else:
+                print(&quot;⏳ No new filings found, waiting...&quot;)
+
+            # Wait before next check
+            time.sleep(30)  # Check every 30 seconds
+            iteration += 1
+
+    except KeyboardInterrupt:
+        print(&quot;\n✋ Feed stopped by user&quot;)
+
+# Run the feed (limited iterations for demo)
+real_time_filing_feed()
+</code></pre>
+<h2 id="performance-considerations">Performance Considerations</h2>
+<h3 id="memory-usage">Memory Usage</h3>
+<pre><code class="language-python"># Memory efficient: Process page by page
+total_processed = 0
+for page in iter_current_filings_pages(form=&quot;8-K&quot;):
+    # Process this page
+    total_processed += len(page)
+
+    # Page goes out of scope, memory is freed
+    print(f&quot;Processed {total_processed} total filings&quot;)
+
+# Memory intensive: Load all at once
+all_filings = get_all_current_filings()  # May use significant memory
+</code></pre>
+<h3 id="network-efficiency">Network Efficiency</h3>
+<pre><code class="language-python"># Efficient: Larger page sizes reduce requests
+efficient = get_current_filings(page_size=100)  # 1 request
+
+# Less efficient: Smaller pages mean more requests  
+less_efficient = get_current_filings(page_size=10)  # May need 10 requests for same data
+</code></pre>
+<h3 id="rate-limiting">Rate Limiting</h3>
+<p>The SEC imposes rate limits, so avoid rapid consecutive requests:</p>
+<pre><code class="language-python">import time
+
+# Good: Natural pacing between requests
+for page in iter_current_filings_pages():
+    # Process page
+    time.sleep(0.1)  # Brief pause between pages
+
+# Bad: Rapid fire requests (may hit rate limits)
+for i in range(100):
+    page = get_current_filings()  # Don't do this!
+</code></pre>
+<h2 id="choosing-the-right-function">Choosing the Right Function</h2>
+<h3 id="use-get_current_filings-when">Use <code>get_current_filings()</code> when:</h3>
+<ul>
+<li>✅ You want a quick sample of recent filings</li>
+<li>✅ Building pagination in your own interface</li>
+<li>✅ Memory usage is a concern</li>
+<li>✅ You only need the first page or two</li>
+</ul>
+<h3 id="use-iter_current_filings_pages-when">Use <code>iter_current_filings_pages()</code> when:</h3>
+<ul>
+<li>✅ You want to process all filings but control memory usage</li>
+<li>✅ You need page-by-page processing logic</li>
+<li>✅ You want to limit total pages processed</li>
+<li>✅ Building streaming or incremental processing</li>
+</ul>
+<h3 id="use-get_all_current_filings-when">Use <code>get_all_current_filings()</code> when:</h3>
+<ul>
+<li>✅ You need the complete dataset for analysis</li>
+<li>✅ Memory usage is not a constraint</li>
+<li>✅ You want to convert to pandas DataFrame</li>
+<li>✅ Building bulk analysis or reporting</li>
+</ul>
+<h2 id="error-handling">Error Handling</h2>
+<h3 id="common-issues-and-solutions">Common Issues and Solutions</h3>
+<pre><code class="language-python">from edgar import get_current_filings
+import time
+
+def robust_current_filings(form=&quot;&quot;, max_retries=3):
+    &quot;&quot;&quot;Get current filings with error handling.&quot;&quot;&quot;
+
+    for attempt in range(max_retries):
+        try:
+            return get_current_filings(form=form)
+
+        except ConnectionError as e:
+            print(f&quot;⚠️ Connection error (attempt {attempt + 1}): {e}&quot;)
+            if attempt &lt; max_retries - 1:
+                time.sleep(2 ** attempt)  # Exponential backoff
+            else:
+                raise
+
+        except Exception as e:
+            print(f&quot;❌ Unexpected error: {e}&quot;)
+            raise
+
+# Usage
+try:
+    filings = robust_current_filings(form=&quot;8-K&quot;)
+    print(f&quot;✅ Successfully retrieved {len(filings)} filings&quot;)
+except Exception as e:
+    print(f&quot;💥 Failed to get filings: {e}&quot;)
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-use-appropriate-filters">1. Use Appropriate Filters</h3>
+<pre><code class="language-python"># Good: Specific filtering reduces data and improves performance
+insider_filings = get_current_filings(form=&quot;4&quot;)
+corporate_events = get_current_filings(form=&quot;8-K&quot;)
+
+# Okay: General purpose but processes more data
+all_filings = get_current_filings()
+</code></pre>
+<h3 id="2-handle-pagination-properly">2. Handle Pagination Properly</h3>
+<pre><code class="language-python"># Good: Check for None before processing next page
+current_page = get_current_filings()
+while current_page is not None:
+    # Process current page
+    for filing in current_page:
+        print(f&quot;Processing {filing.company}&quot;)
+
+    # Get next page
+    current_page = current_page.next()
+
+# Bad: Assuming next() always returns data
+# This could cause infinite loops or errors
+</code></pre>
+<h3 id="3-be-respectful-of-sec-resources">3. Be Respectful of SEC Resources</h3>
+<pre><code class="language-python"># Good: Process in reasonable batches with pauses
+for page in iter_current_filings_pages(page_size=100):
+    # Process page
+    time.sleep(0.1)  # Brief pause
+
+# Good: Cache results when possible
+cached_filings = get_all_current_filings(form=&quot;8-K&quot;)
+# Reuse cached_filings instead of re-downloading
+</code></pre>
+<h2 id="common-use-cases">Common Use Cases</h2>
+<h3 id="research-and-analysis">Research and Analysis</h3>
+<ul>
+<li><strong>Market surveillance</strong>: Monitor 8-K filings for material events</li>
+<li><strong>Insider tracking</strong>: Analyze Form 4 patterns for trading insights  </li>
+<li><strong>Compliance monitoring</strong>: Track filing compliance across companies</li>
+</ul>
+<h3 id="application-development">Application Development</h3>
+<ul>
+<li><strong>Filing alerts</strong>: Build notifications for specific form types</li>
+<li><strong>Data pipelines</strong>: Integrate current filings into larger workflows</li>
+<li><strong>Dashboard feeds</strong>: Power real-time filing displays</li>
+</ul>
+<h3 id="academic-research">Academic Research</h3>
+<ul>
+<li><strong>Event studies</strong>: Analyze market reactions to filing events</li>
+<li><strong>Disclosure analysis</strong>: Study timing and content patterns</li>
+<li><strong>Regulatory compliance</strong>: Research filing behavior patterns</li>
+</ul>
+<h2 id="summary">Summary</h2>
+<p>Current filings provide real-time access to the latest SEC documents, enabling immediate analysis of corporate events, insider trading, and regulatory submissions. The three main functions offer flexibility for different use cases:</p>
+<ul>
+<li><strong><code>get_current_filings()</code></strong>: Single page access with pagination control</li>
+<li><strong><code>iter_current_filings_pages()</code></strong>: Memory-efficient iteration through all pages  </li>
+<li><strong><code>get_all_current_filings()</code></strong>: Bulk access to complete current filing dataset</li>
+</ul>
+<p>Choose the approach that best fits your memory constraints, processing requirements, and analysis goals.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><strong>Guide</strong>: <a href="working-with-filings.md">Working with Filings</a></li>
+<li><strong>API Reference</strong>: <a href="../../api/filings/">Filings API</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
