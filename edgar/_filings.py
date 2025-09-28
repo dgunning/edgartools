@@ -477,14 +477,39 @@ class Filings:
                          overwrite_existing=True,
                          filings=self)
 
-    def get_filing_at(self, item: int):
-        """Get the filing at the specified index"""
+    def get_filing_at(self, item: int, enrich: bool = True):
+        """Get filing at index, optionally enriching with related entities"""
+        # Get the primary filing data
+        accession_no = self.data['accession_number'][item].as_py()
+
+        related_entities = []
+        if enrich:
+            # Use PyArrow to find all entities with same accession number
+            # Limit search to nearby entries for performance (+/- 10 positions)
+            start = max(0, item - 10)
+            end = min(len(self.data), item + 11)
+
+            # Slice the data and search efficiently
+            slice_data = self.data.slice(start, end - start)
+            mask = pc.equal(slice_data['accession_number'], accession_no)
+
+            for idx in range(len(mask)):
+                if mask[idx].as_py():
+                    actual_idx = start + idx
+                    if actual_idx != item:  # Skip the primary filing
+                        related_entities.append({
+                            'cik': slice_data['cik'][idx].as_py(),
+                            'company': slice_data['company'][idx].as_py()
+                        })
+
+        # Create Filing with related entities
         return Filing(
             cik=self.data['cik'][item].as_py(),
             company=self.data['company'][item].as_py(),
             form=self.data['form'][item].as_py(),
             filing_date=self.data['filing_date'][item].as_py(),
-            accession_no=self.data['accession_number'][item].as_py(),
+            accession_no=accession_no,
+            related_entities=related_entities
         )
 
     @property
@@ -1068,7 +1093,8 @@ class Filing:
                  company: str,
                  form: str,
                  filing_date: str,
-                 accession_no: str):
+                 accession_no: str,
+                 related_entities: List[Dict] = None):
         self.cik = cik
         self.company = company
         self.form = form
@@ -1077,6 +1103,9 @@ class Filing:
         self._filing_homepage = None
         self._sgml = None
 
+        # New: Store related entities from index
+        self._related_entities = related_entities or []
+
     @property
     def docs(self):
         return Docs(self)
@@ -1084,6 +1113,25 @@ class Filing:
     @property
     def accession_number(self):
         return self.accession_no
+
+    @property
+    def all_ciks(self) -> List[int]:
+        """Get all CIKs including related entities"""
+        ciks = [self.cik]
+        ciks.extend(e['cik'] for e in self._related_entities)
+        return sorted(list(set(ciks)))
+
+    @property
+    def all_entities(self) -> List[Dict[str, Any]]:
+        """Get all entity information"""
+        entities = [{'cik': self.cik, 'company': self.company}]
+        entities.extend(self._related_entities)
+        return entities
+
+    @property
+    def is_multi_entity(self) -> bool:
+        """Check if this filing has multiple entities"""
+        return len(self._related_entities) > 0
 
     @property
     def document(self):
@@ -1648,6 +1696,54 @@ def get_filing_by_accession(accession_number: str, year: int):
             return filing
 
     return None
+
+
+def get_by_accession_number_enriched(accession_number: str):
+    """Get filing with all related entities populated using PyArrow"""
+    year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
+
+    # Find all entities with this accession number
+    all_entities = []
+    for quarter in range(1, 5):
+        filings = _get_cached_filings(year=year, quarter=quarter)
+        if filings:
+            # Use PyArrow filtering (same pattern as Filings.get())
+            mask = pc.equal(filings.data['accession_number'], accession_number)
+            # Convert mask to indices
+            indices = []
+            for i in range(len(mask)):
+                if mask[i].as_py():
+                    indices.append(i)
+
+            if len(indices) > 0:
+                # Extract all matching entities efficiently
+                for idx in indices:
+                    all_entities.append({
+                        'cik': filings.data['cik'][idx].as_py(),
+                        'company': filings.data['company'][idx].as_py(),
+                        'form': filings.data['form'][idx].as_py(),
+                        'filing_date': filings.data['filing_date'][idx].as_py()
+                    })
+                break  # Found matches, no need to check other quarters
+
+    if all_entities:
+        # Return first entity as primary, with others as related
+        primary = all_entities[0]
+        related = all_entities[1:] if len(all_entities) > 1 else []
+
+        # Create enriched Filing
+        filing = Filing(
+            cik=primary['cik'],
+            company=primary['company'],
+            form=primary['form'],
+            filing_date=primary['filing_date'],
+            accession_no=accession_number,
+            related_entities=related
+        )
+        return filing
+
+    # Fall back to current behavior if not found
+    return get_by_accession_number(accession_number)
 
 
 def get_by_accession_number(accession_number: str, show_progress: bool = False):

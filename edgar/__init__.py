@@ -5,7 +5,7 @@ import re
 from functools import lru_cache, partial
 from typing import List, Optional, Union
 
-from edgar._filings import Attachment, Attachments, Filing, FilingHeader, FilingHomepage, Filings, get_by_accession_number, get_filings
+from edgar._filings import Attachment, Attachments, Filing, FilingHeader, FilingHomepage, Filings, get_by_accession_number, get_by_accession_number_enriched, get_filings
 from edgar.core import CAUTION, CRAWL, NORMAL, edgar_mode, get_identity, listify, set_identity
 from edgar.current_filings import CurrentFilings, get_all_current_filings, get_current_filings, iter_current_filings_pages
 from edgar.entity import (
@@ -67,10 +67,10 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
     if isinstance(search_id, int):
         return Entity(search_id)
     elif re.match(r"\d{10}-\d{2}-\d{6}", search_id):
-        return get_by_accession_number(search_id)
+        return get_by_accession_number_enriched(search_id)
     elif re.match(r"^\d{18}$", search_id): # accession number with no dashes
         accession_number = search_id[:10] + "-" + search_id[10:12] + "-" + search_id[12:]
-        return get_by_accession_number(accession_number)
+        return get_by_accession_number_enriched(accession_number)
     elif re.match(r"\d{4,10}$", search_id):
         return Entity(search_id)
     elif re.match(r"^[A-WYZ]{1,5}([.-][A-Z])?$", search_id):  # Ticker (including dot or hyphenated)
