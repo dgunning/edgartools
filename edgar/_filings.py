@@ -814,12 +814,33 @@ class Filings:
         table.add_column("Company", style="bold green", width=38, no_wrap=True)
         table.add_column("Filing Date", width=11)
         table.add_column("Accession Number", width=20)
+        table.add_column(" ", width=1, style="cyan dim")  # Group indicator column
 
         # Get current page from data pager
         current_page = self.data_pager.current()
 
         # Calculate start index for proper indexing
         start_idx = self._original_state.page_start if self._original_state else self.data_pager.start_index
+
+        # Identify groups of consecutive filings with same accession number
+        groups = {}
+        accession_numbers = [current_page['accession_number'][i].as_py() for i in range(len(current_page))]
+
+        for i in range(len(accession_numbers)):
+            acc_no = accession_numbers[i]
+
+            # Check previous and next accession numbers
+            prev_acc = accession_numbers[i-1] if i > 0 else None
+            next_acc = accession_numbers[i+1] if i < len(accession_numbers)-1 else None
+
+            if acc_no != prev_acc and acc_no == next_acc:
+                groups[i] = '┐'  # Start of group
+            elif acc_no == prev_acc and acc_no == next_acc:
+                groups[i] = '│'  # Middle of group
+            elif acc_no == prev_acc and acc_no != next_acc:
+                groups[i] = '┘'  # End of group
+            else:
+                groups[i] = ' '   # Standalone filing
 
         # Iterate through rows in current page
         for i in range(len(current_page)):
@@ -833,7 +854,8 @@ class Filings:
                 ticker,
                 current_page['company'][i].as_py(),
                 str(current_page['filing_date'][i].as_py()),
-                accession_number_text(current_page['accession_number'][i].as_py())
+                accession_number_text(current_page['accession_number'][i].as_py()),
+                groups.get(i, ' ')  # Add group indicator
             ]
             table.add_row(*row)
 
