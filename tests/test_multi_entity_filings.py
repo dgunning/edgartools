@@ -22,6 +22,22 @@ class TestMultiEntityFilings:
         print(filing)
 
     @pytest.mark.network
+    def test_filing_with_related_entities_rich_shows_multiple_entities(self):
+        """Test Filing object with related entities"""
+        # Create filing with related entities
+        filing = find('0001208646-25-000057')
+
+        assert filing.is_multi_entity is True
+        assert filing.all_ciks == [1551964, 1552111]  # Sorted
+        assert len(filing.all_entities) == 2
+        print()
+        print(filing)
+        filing_rich = repr(filing)
+        assert "All Entities:" in filing_rich
+        assert "Barclays Dryrock Issuance Trust" in filing_rich
+
+
+    @pytest.mark.network
     def test_filing_without_related_entities(self):
         """Test Filing object without related entities"""
         filing = Filing(form='8-K', filing_date='2025-09-26', company='Audax Private Credit Fund,LLC', cik=2033362, accession_no='0001193125-25-220404')
