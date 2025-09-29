@@ -1680,13 +1680,31 @@ class Filing:
         ticker = find_ticker_safe(self.cik)
         ticker = f"{ticker}" if ticker else ""
 
+        # Check for multi-entity (without triggering header lookup)
+        has_related = hasattr(self, '_related_entities') and self._related_entities
+
+        # Build the title components
+        title_parts = [
+            (f"Form {self.form} ", "bold"),
+            (self.company, "bold green"),
+            " ",
+            (f"[{self.cik}] ", "dim"),
+        ]
+
+        if ticker:
+            title_parts.append((ticker, "bold yellow"))
+
+        # Add multi-entity indicator if present
+        if has_related:
+            num_related = len(self._related_entities)
+            title_parts.extend([
+                " ",
+                (f"(+{num_related} {'entity' if num_related == 1 else 'entities'})", "cyan dim")
+            ])
+
         # The title of the panel
-        title = Text.assemble((f"Form {self.form} ", "bold"),
-                              (self.company, "bold green"),
-                              " ",
-                              (f"[{self.cik}] ", "dim"),
-                              (ticker, "bold yellow")
-                              )
+        title = Text.assemble(*title_parts)
+
         # The subtitle of the panel
         subtitle = Text(describe_form(self.form, False), "dim")
 
@@ -1699,12 +1717,45 @@ class Filing:
                                   Text(str(self.filing_date), "bold"),
                                   Text(self.period_of_report or "-", "bold"),
                                   f"{len(attachments)}")
+
+        # Build content elements
+        elements = [filing_info_table]
+
+        # Add entities table if multi-entity filing
+        if has_related:
+            # Add spacing and header
+            elements.append(Text())  # Empty line for spacing
+            elements.append(Text("All Entities:", style="bold dim"))
+
+            # Create entities table
+            entities_table = Table(
+                "CIK", "Company",
+                header_style="dim",
+                box=box.SIMPLE,
+                show_edge=False,
+                padding=(0, 1)
+            )
+
+            # Add primary entity
+            entities_table.add_row(
+                Text(str(self.cik), style="dim"),
+                Text(self.company, style="bold green")
+            )
+
+            # Add related entities
+            for entity in self._related_entities:
+                entities_table.add_row(
+                    Text(str(entity.get('cik', '')), style="dim"),
+                    Text(entity.get('company', ''), style="green")
+                )
+
+            elements.append(entities_table)
+
         return Panel(
-            Group(filing_info_table),
+            Group(*elements),
             title=title,
             subtitle=subtitle,
             box=box.ROUNDED,
-            height=8,
             expand=False
         )
 
