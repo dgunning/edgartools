@@ -1,18 +1,15 @@
 from edgar import *
 
-filings = ["0000320193-17-00000"
+filings = ["0000320193-17-000009",
 "0001628280-17-004790",
 "0001628280-16-017809"]
 
 
 def show_cashflow(accession_number):
     """Display the cash flow statement for a given filing accession number."""
-    filing = get_by_accession_number(accession_number)
+    filing = find(accession_number)
     cashflow_stmt = filing.xbrl().statements.cashflow_statement()
     print(cashflow_stmt)
-    df = cashflow_stmt.to_dataframe()
-    print(df)
-    return df
 
 
 if __name__ == '__main__':

@@ -1117,21 +1117,91 @@ class Filing:
     @property
     def all_ciks(self) -> List[int]:
         """Get all CIKs including related entities"""
-        ciks = [self.cik]
-        ciks.extend(e['cik'] for e in self._related_entities)
-        return sorted(list(set(ciks)))
+        # If we have related entities from the index, use those
+        if self._related_entities:
+            ciks = [self.cik]
+            ciks.extend(e['cik'] for e in self._related_entities)
+            return sorted(list(set(ciks)))
+
+        # Otherwise, check the header for all filers
+        try:
+            header = self.header
+            if header and header.filers and len(header.filers) > 1:
+                # Multiple filers in header
+                ciks = []
+                for filer in header.filers:
+                    if filer.company_information and filer.company_information.cik:
+                        # Convert CIK string to int, removing leading zeros
+                        cik_int = int(filer.company_information.cik.lstrip('0'))
+                        ciks.append(cik_int)
+                if ciks:
+                    return sorted(list(set(ciks)))
+        except Exception as e:
+            # Log warning when header access fails
+            log.warning(
+                f"Could not access header for multi-entity detection in Filing "
+                f"(accession_no={self.accession_no}, cik={self.cik}): {str(e)}. "
+                f"This may occur if the accession number is invalid or the filing doesn't exist on EDGAR."
+            )
+
+        return [self.cik]
 
     @property
     def all_entities(self) -> List[Dict[str, Any]]:
         """Get all entity information"""
-        entities = [{'cik': self.cik, 'company': self.company}]
-        entities.extend(self._related_entities)
-        return entities
+        # If we have related entities from the index, use those
+        if self._related_entities:
+            entities = [{'cik': self.cik, 'company': self.company}]
+            entities.extend(self._related_entities)
+            return entities
+
+        # Otherwise, check the header for all filers
+        try:
+            header = self.header
+            if header and header.filers and len(header.filers) > 1:
+                # Multiple filers in header
+                entities = []
+                for filer in header.filers:
+                    if filer.company_information and filer.company_information.cik:
+                        # Convert CIK string to int, removing leading zeros
+                        cik_int = int(filer.company_information.cik.lstrip('0'))
+                        entities.append({
+                            'cik': cik_int,
+                            'company': filer.company_information.name or f'CIK {cik_int}'
+                        })
+                if entities:
+                    return entities
+        except Exception as e:
+            # Log warning when header access fails
+            log.warning(
+                f"Could not access header for entity information in Filing "
+                f"(accession_no={self.accession_no}, cik={self.cik}): {str(e)}. "
+                f"This may occur if the accession number is invalid or the filing doesn't exist on EDGAR."
+            )
+
+        return [{'cik': self.cik, 'company': self.company}]
 
     @property
     def is_multi_entity(self) -> bool:
         """Check if this filing has multiple entities"""
-        return len(self._related_entities) > 0
+        # First check if we have related entities from the index
+        if len(self._related_entities) > 0:
+            return True
+
+        # Otherwise, check the header for multiple filers
+        try:
+            header = self.header
+            if header and header.filers and len(header.filers) > 1:
+                return True
+        except Exception as e:
+            # Log warning when header access fails
+            log.warning(
+                f"Could not access header for multi-entity check in Filing "
+                f"(accession_no={self.accession_no}, cik={self.cik}): {str(e)}. "
+                f"This may occur if the accession number is invalid or the filing doesn't exist on EDGAR."
+            )
+
+        return False
 
     @property
     def document(self):
