@@ -7,6 +7,7 @@ from datetime import date, datetime
 from typing import List
 import json
 from pathlib import Path
+import pandas as pd
 from edgar.entity.models import FinancialFact, DataQuality, ConceptMetadata
 from edgar.entity.entity_facts import EntityFacts
 from edgar.entity.query import FactQuery
@@ -235,11 +236,73 @@ class TestEntityFacts:
     def test_time_series(self, entity_facts):
         """Test getting time series data"""
         df = entity_facts.time_series("Revenue", periods=4)
-        
+
         assert not df.empty
         assert len(df) <= 4
         assert "numeric_value" in df.columns
         assert "fiscal_period" in df.columns
+
+    def test_to_dataframe_basic(self, entity_facts):
+        """Test basic DataFrame export"""
+        df = entity_facts.to_dataframe()
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+
+        # Check standard columns are present
+        expected_columns = ['concept', 'label', 'value', 'numeric_value', 'unit',
+                           'period_type', 'period_start', 'period_end',
+                           'fiscal_year', 'fiscal_period']
+        for col in expected_columns:
+            assert col in df.columns, f"Expected column '{col}' not found"
+
+        # Check sorting (by concept, then period_end)
+        assert df['concept'].is_monotonic_increasing or len(df['concept'].unique()) == 1
+
+    def test_to_dataframe_with_metadata(self, entity_facts):
+        """Test DataFrame export with metadata"""
+        df = entity_facts.to_dataframe(include_metadata=True)
+
+        # Check metadata columns are present
+        metadata_columns = ['accession', 'filing_date', 'form_type', 'statement_type',
+                           'taxonomy', 'scale', 'data_quality', 'is_audited', 'confidence_score']
+        for col in metadata_columns:
+            assert col in df.columns, f"Expected metadata column '{col}' not found"
+
+    def test_to_dataframe_custom_columns(self, entity_facts):
+        """Test DataFrame with custom columns"""
+        columns = ['concept', 'fiscal_year', 'numeric_value']
+        df = entity_facts.to_dataframe(columns=columns)
+
+        assert list(df.columns) == columns
+        assert len(df) > 0
+
+    def test_to_dataframe_empty_facts(self):
+        """Test DataFrame export with no facts"""
+        empty_facts = EntityFacts(cik=123, name="Test", facts=[])
+        df = empty_facts.to_dataframe()
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 0
+        assert isinstance(df.columns, pd.Index)
+
+    def test_to_dataframe_filtering(self, entity_facts):
+        """Test that exported DataFrame can be filtered and analyzed"""
+        df = entity_facts.to_dataframe()
+
+        # Filter by concept
+        revenue_df = df[df['concept'] == 'us-gaap:Revenue']
+        assert len(revenue_df) > 0
+        assert all(revenue_df['concept'] == 'us-gaap:Revenue')
+
+        # Filter by fiscal year
+        fy_2024 = df[df['fiscal_year'] == 2024]
+        assert len(fy_2024) > 0
+        assert all(fy_2024['fiscal_year'] == 2024)
+
+        # Group by fiscal year
+        grouped = df.groupby('fiscal_year')['numeric_value'].count()
+        assert len(grouped) > 0
     
     def test_income_statement(self, entity_facts):
         """Test getting income statement data"""

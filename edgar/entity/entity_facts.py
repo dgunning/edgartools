@@ -169,6 +169,90 @@ class EntityFacts:
         """
         return self._facts
 
+    def to_dataframe(self,
+                     include_metadata: bool = False,
+                     columns: Optional[List[str]] = None) -> pd.DataFrame:
+        """
+        Export all facts to a pandas DataFrame for analysis.
+
+        This method provides direct access to all financial facts in a tabular format,
+        enabling custom analysis, filtering, and integration with data science workflows.
+
+        Args:
+            include_metadata: Include filing references and data quality metadata (default: False)
+            columns: Specific columns to include. If None, includes standard columns.
+
+        Returns:
+            DataFrame with one row per fact, sorted by concept and period_end
+
+        Example:
+            Basic export for exploration:
+            >>> facts = company.get_facts()
+            >>> df = facts.to_dataframe()
+            >>> print(df.head())
+
+            Export with metadata for audit trail:
+            >>> df_full = facts.to_dataframe(include_metadata=True)
+
+            Custom columns for specific analysis:
+            >>> df_slim = facts.to_dataframe(columns=['concept', 'fiscal_year', 'numeric_value'])
+
+            Filter and analyze:
+            >>> df = annual_facts.to_dataframe()
+            >>> revenue = df[df['concept'].str.contains('Revenue')]
+            >>> print(revenue[['fiscal_year', 'numeric_value']])
+        """
+        # Build records from facts
+        records = []
+        for fact in self._facts:
+            record = {
+                'concept': fact.concept,
+                'label': fact.label,
+                'value': fact.value,
+                'numeric_value': fact.numeric_value,
+                'unit': fact.unit,
+                'period_type': fact.period_type,
+                'period_start': fact.period_start,
+                'period_end': fact.period_end,
+                'fiscal_year': fact.fiscal_year,
+                'fiscal_period': fact.fiscal_period
+            }
+
+            # Add metadata if requested
+            if include_metadata:
+                record.update({
+                    'accession': fact.accession,
+                    'filing_date': fact.filing_date,
+                    'form_type': fact.form_type,
+                    'statement_type': fact.statement_type,
+                    'taxonomy': fact.taxonomy,
+                    'scale': fact.scale,
+                    'data_quality': fact.data_quality.value if fact.data_quality else None,
+                    'is_audited': fact.is_audited,
+                    'confidence_score': fact.confidence_score
+                })
+
+            records.append(record)
+
+        # Create DataFrame
+        df = pd.DataFrame(records)
+
+        # Filter to specific columns if requested
+        if columns is not None:
+            df = df[columns]
+
+        # Sort for consistency
+        if not df.empty:
+            sort_cols = []
+            if 'concept' in df.columns:
+                sort_cols.append('concept')
+            if 'period_end' in df.columns:
+                sort_cols.append('period_end')
+            if sort_cols:
+                df = df.sort_values(sort_cols).reset_index(drop=True)
+
+        return df
+
     def filter_by_period_type(self, period_type: Union[str, 'PeriodType']) -> 'EntityFacts':
         """
         Filter facts by period type and return a new EntityFacts instance.

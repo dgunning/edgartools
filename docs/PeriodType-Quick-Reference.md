@@ -38,6 +38,14 @@ company = Company("AAPL")
 annual_facts = company.get_facts(period_type=PeriodType.ANNUAL)
 quarterly_facts = company.get_facts(period_type=PeriodType.QUARTERLY)
 
+# NEW: Export facts to DataFrame for custom analysis
+df = annual_facts.to_dataframe()
+print(df.head())
+
+# Filter and analyze
+revenue_facts = df[df['concept'].str.contains('Revenue')]
+print(revenue_facts[['fiscal_year', 'numeric_value']])
+
 # NEW: Query interface with PeriodType enum
 facts = company.get_facts()
 annual_facts = facts.query().by_period_type(PeriodType.ANNUAL).execute()
