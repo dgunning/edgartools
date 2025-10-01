@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.16.0 - 2025-09-30
+
+### Added
+- **EntityFacts DataFrame Export** - Direct DataFrame export capability for custom analysis
+  - **New EntityFacts.to_dataframe() method**: Convert entity facts directly to pandas DataFrame for custom analysis
+  - **Parameters**: `include_metadata` (bool) to control metadata columns, `columns` (list) for custom column selection
+  - **Coverage**: Exports all fact data with configurable metadata (labels, units, decimals) and custom column filtering
+  - **Impact**: Transforms EntityFacts from view-only to analysis-ready data structure, enabling seamless integration with pandas workflows
+  - **Example**:
+    ```python
+    facts = company.get_facts()
+    df = facts.to_dataframe(include_metadata=True)
+    # Now use df with standard pandas operations
+    ```
+
+- **Multi-Entity Filing Support (Issue #400)** - Comprehensive support for filings covering multiple entities
+  - **New Filing properties**: `is_multi_entity`, `all_ciks`, `all_entities` for multi-entity detection and access
+  - **New enriched access method**: `get_by_accession_number_enriched()` provides full entity information for multi-entity filings
+  - **Enhanced find() function**: Updated to handle multi-entity filings with proper entity resolution
+  - **Visual indicators**: Rich display shows clear grouping for multi-entity filings with visual separators
+  - **Coverage**: Complete multi-entity workflow from detection through entity-specific data access
+  - **Impact**: Enables proper handling of investment fund filings and other multi-entity submissions that previously appeared incomplete
+
+### Fixed
+- **Issue #408**: Filter empty string periods in financial statements
+  - **Problem**: Older XBRL filings (2016-2018) included empty period columns causing confusing blank columns in financial statements
+  - **Solution**: Enhanced period filtering to detect and remove periods containing only empty string values
+  - **Coverage**: Automatically filters empty periods while preserving all valid data columns
+  - **Impact**: Cleaner financial statement displays for historical filings without confusing empty columns
+
+### Enhanced
+- **Multi-Entity Visual Grouping** - Improved display clarity for multi-entity filings
+  - **Rich Display Enhancement**: Added visual grouping indicators to clearly separate multiple entities in filing displays
+  - **Coverage**: Automatic visual separation in terminal/notebook displays when viewing multi-entity filings
+  - **Impact**: Improved clarity when reviewing filings that cover multiple related entities
+
+- **Header Access Logging** - Informative diagnostics for filing header issues
+  - **Enhancement**: Added clear logging messages when filing header access fails
+  - **Coverage**: Provides actionable diagnostic information for troubleshooting filing access issues
+  - **Impact**: Easier debugging of filing access problems with clear error context
+
 ## Release 4.15.0 - 2025-09-26
 
 ### Added
