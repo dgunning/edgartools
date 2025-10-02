@@ -28,6 +28,10 @@ from edgar.xbrl.models import (
     Table,
     XBRLProcessingError,
 )
+from edgar.xbrl.parsers.concepts import (
+    CONSISTENT_POSITIVE_CONCEPTS,
+    LEGITIMATE_NEGATIVE_CONCEPTS,
+)
 
 
 class XBRLParser:
@@ -1626,91 +1630,9 @@ class XBRLParser:
 
             # Concepts that should remain consistently positive across companies
             # These are expense concepts that represent costs/spending amounts
-            consistent_positive_concepts = {
-                # Research and Development Expenses
-                'us-gaap_ResearchAndDevelopmentExpense',
-                'us_gaap_ResearchAndDevelopmentExpense', 
-                'ResearchAndDevelopmentExpense',
-
-                # Selling, General & Administrative Expenses
-                'us-gaap_SellingGeneralAndAdministrativeExpense',
-                'us_gaap_SellingGeneralAndAdministrativeExpense',
-                'SellingGeneralAndAdministrativeExpense',
-
-                # General and Administrative Expenses (separate from SG&A)
-                'us-gaap_GeneralAndAdministrativeExpense',
-                'us_gaap_GeneralAndAdministrativeExpense',
-                'GeneralAndAdministrativeExpense',
-
-                # Selling Expenses
-                'us-gaap_SellingExpense',
-                'us_gaap_SellingExpense',
-                'SellingExpense',
-
-                # Marketing and Advertising Expenses
-                'us-gaap_SellingAndMarketingExpense',
-                'us_gaap_SellingAndMarketingExpense',
-                'SellingAndMarketingExpense',
-                'us-gaap_MarketingExpense',
-                'us_gaap_MarketingExpense',
-                'MarketingExpense',
-                'us-gaap_AdvertisingExpense',
-                'us_gaap_AdvertisingExpense',
-                'AdvertisingExpense',
-
-                # Share-based Compensation Expenses
-                'us-gaap_AllocatedShareBasedCompensationExpense',
-                'us_gaap_AllocatedShareBasedCompensationExpense',
-                'AllocatedShareBasedCompensationExpense',
-                'us-gaap_ShareBasedCompensationArrangementByShareBasedPaymentAwardExpenseRecognized',
-                'us_gaap_ShareBasedCompensationArrangementByShareBasedPaymentAwardExpenseRecognized',
-                'ShareBasedCompensationArrangementByShareBasedPaymentAwardExpenseRecognized',
-
-                # Operating Expenses (general)
-                'us-gaap_OperatingExpenses',
-                'us_gaap_OperatingExpenses',
-                'OperatingExpenses',
-
-                # Professional Services Expenses
-                'us-gaap_ProfessionalServiceFees',
-                'us_gaap_ProfessionalServiceFees',
-                'ProfessionalServiceFees',
-
-                # Compensation and Benefits
-                'us-gaap_LaborAndRelatedExpense',
-                'us_gaap_LaborAndRelatedExpense',
-                'LaborAndRelatedExpense',
-                'us-gaap_EmployeeBenefitsExpense',
-                'us_gaap_EmployeeBenefitsExpense',
-                'EmployeeBenefitsExpense'
-            }
-
-            # Concepts that can legitimately be negative (benefits, credits, reversals)
-            # These should NOT be forced positive even if they have negative calculation weights
-            legitimate_negative_concepts = {
-                # Tax benefits and credits
-                'us-gaap_IncomeTaxExpenseBenefit',
-                'us_gaap_IncomeTaxExpenseBenefit',
-                'IncomeTaxExpenseBenefit',
-                'us-gaap_IncomeTaxRecoveryExpense',
-                'us_gaap_IncomeTaxRecoveryExpense',
-                'IncomeTaxRecoveryExpense',
-
-                # Interest expense/income that can be net negative
-                'us-gaap_InterestIncomeExpenseNet',
-                'us_gaap_InterestIncomeExpenseNet',
-                'InterestIncomeExpenseNet',
-
-                # Foreign exchange gains/losses
-                'us-gaap_ForeignCurrencyTransactionGainLossBeforeTax',
-                'us_gaap_ForeignCurrencyTransactionGainLossBeforeTax',
-                'ForeignCurrencyTransactionGainLossBeforeTax',
-
-                # Restructuring reversals/credits
-                'us-gaap_RestructuringChargesAndReversals',
-                'us_gaap_RestructuringChargesAndReversals',
-                'RestructuringChargesAndReversals'
-            }
+            # Use shared concept definitions from concepts.py
+            consistent_positive_concepts = CONSISTENT_POSITIVE_CONCEPTS
+            legitimate_negative_concepts = LEGITIMATE_NEGATIVE_CONCEPTS
 
             # Apply calculation weights to facts
             adjusted_count = 0

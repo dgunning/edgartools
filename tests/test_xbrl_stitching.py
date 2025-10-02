@@ -534,7 +534,8 @@ def test_stitch_aapl_statements_from_2019(aapl_company):
     income_statement = xbrls.render_statement("IncomeStatement")
     _repr = rich_to_text(income_statement)
     print(_repr)
-    assert '$(161,782)' in _repr
+    # Cost of Goods Sold should be consistently positive (Issues #290, #451)
+    assert '$161,782' in _repr
 
 
 def test_stitch_statements_using_max_periods(aapl_company):
