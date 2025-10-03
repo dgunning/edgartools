@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.16.1 - 2025-10-03
+
+### Technical
+- **XBRL Code Refactoring** - Eliminated duplication and improved maintainability
+  - **Created Shared Concepts Module**: New `edgar/xbrl/parsers/concepts.py` centralizes positive value concepts and legitimate negative concepts
+  - **Eliminated Duplication**: Removed ~240 lines of duplicated concept definitions across parser.py, calculation.py, and instance.py
+  - **Enhanced Financing Concepts**: Added PaymentsForRepurchaseOfCommonStock and PaymentsOfDividends to financing activity concepts
+  - **Improved Consistency**: Single source of truth for XBRL concept sign handling across all parsers
+  - **Test Alignment**: Updated test expectations for cost of goods sold to align with issues #290 and #451
+  - **Impact**: Better code maintainability, reduced risk of inconsistent behavior across XBRL parsing components
+
 ## Release 4.16.0 - 2025-09-30
 
 ### Added
