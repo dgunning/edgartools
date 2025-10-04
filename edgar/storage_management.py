@@ -447,3 +447,230 @@ def analyze_storage(force_refresh: bool = False) -> StorageAnalysis:
         recommendations=recommendations,
         potential_savings_bytes=potential_savings
     )
+
+
+def optimize_storage(dry_run: bool = True) -> Dict[str, int]:
+    """
+    Compress uncompressed files to save disk space.
+
+    Compresses .json, .xml, .txt, and .nc files in filings, companyfacts,
+    and submissions directories using gzip. Original files are replaced with
+    .gz versions.
+
+    Args:
+        dry_run: If True, only report what would be done without making changes
+
+    Returns:
+        Dict with 'files_compressed', 'bytes_saved', 'errors'
+
+    Example:
+        >>> from edgar.storage_management import optimize_storage
+        >>> # First see what would happen
+        >>> result = optimize_storage(dry_run=True)
+        >>> print(f"Would compress {result['files_compressed']} files")
+        >>> # Then do it
+        >>> result = optimize_storage(dry_run=False)
+        >>> print(f"Saved {result['bytes_saved'] / 1e9:.1f} GB")
+    """
+    import gzip
+    import shutil
+    from edgar.core import get_edgar_data_directory
+
+    storage_path = get_edgar_data_directory()
+    files_compressed = 0
+    bytes_saved = 0
+    errors = 0
+
+    for subdir in ['filings', 'companyfacts', 'submissions']:
+        subdir_path = storage_path / subdir
+        if not subdir_path.exists():
+            continue
+
+        for file_path in subdir_path.rglob('*'):
+            if not file_path.is_file():
+                continue
+
+            # Check if file should be compressed
+            if file_path.suffix in ['.json', '.xml', '.txt', '.nc'] and not str(file_path).endswith('.gz'):
+                try:
+                    original_size = file_path.stat().st_size
+
+                    if not dry_run:
+                        # Compress file
+                        gz_path = Path(str(file_path) + '.gz')
+                        with open(file_path, 'rb') as f_in:
+                            with gzip.open(gz_path, 'wb') as f_out:
+                                shutil.copyfileobj(f_in, f_out)
+
+                        # Verify compressed file exists
+                        if gz_path.exists():
+                            compressed_size = gz_path.stat().st_size
+                            bytes_saved += (original_size - compressed_size)
+                            file_path.unlink()  # Remove original
+                        else:
+                            errors += 1
+                            continue
+                    else:
+                        # Estimate 70% compression
+                        bytes_saved += int(original_size * 0.7)
+
+                    files_compressed += 1
+
+                except Exception as e:
+                    errors += 1
+                    continue
+
+    return {
+        'files_compressed': files_compressed,
+        'bytes_saved': bytes_saved,
+        'errors': errors
+    }
+
+
+def cleanup_storage(days: int = 365, dry_run: bool = True) -> Dict[str, int]:
+    """
+    Remove old filings from local storage.
+
+    Deletes filing files older than the specified number of days. This helps
+    free up space for users who only need recent filings.
+
+    Args:
+        days: Remove filings older than this many days (default: 365)
+        dry_run: If True, only report what would be deleted without making changes
+
+    Returns:
+        Dict with 'files_deleted', 'bytes_freed', 'errors'
+
+    Example:
+        >>> from edgar.storage_management import cleanup_storage
+        >>> # First see what would be deleted
+        >>> result = cleanup_storage(days=365, dry_run=True)
+        >>> print(f"Would delete {result['files_deleted']} files")
+        >>> # Then do it
+        >>> result = cleanup_storage(days=365, dry_run=False)
+        >>> print(f"Freed {result['bytes_freed'] / 1e9:.1f} GB")
+    """
+    from datetime import datetime, timedelta
+    from edgar.core import get_edgar_data_directory
+
+    storage_path = get_edgar_data_directory()
+    cutoff_date = datetime.now() - timedelta(days=days)
+
+    files_deleted = 0
+    bytes_freed = 0
+    errors = 0
+
+    filings_dir = storage_path / 'filings'
+    if not filings_dir.exists():
+        return {'files_deleted': 0, 'bytes_freed': 0, 'errors': 0}
+
+    for date_dir in filings_dir.iterdir():
+        if not date_dir.is_dir():
+            continue
+
+        # Parse date from directory name (YYYYMMDD)
+        if len(date_dir.name) == 8 and date_dir.name.isdigit():
+            try:
+                dir_date = datetime.strptime(date_dir.name, '%Y%m%d')
+
+                if dir_date < cutoff_date:
+                    # Delete all files in this directory
+                    for file_path in date_dir.rglob('*'):
+                        if file_path.is_file():
+                            try:
+                                file_size = file_path.stat().st_size
+                                bytes_freed += file_size
+
+                                if not dry_run:
+                                    file_path.unlink()
+
+                                files_deleted += 1
+                            except Exception:
+                                errors += 1
+                                continue
+
+                    # Remove empty directory
+                    if not dry_run:
+                        try:
+                            # Remove all empty subdirectories
+                            for subdir in reversed(list(date_dir.rglob('*'))):
+                                if subdir.is_dir() and not list(subdir.iterdir()):
+                                    subdir.rmdir()
+                            # Remove date directory if empty
+                            if not list(date_dir.iterdir()):
+                                date_dir.rmdir()
+                        except Exception:
+                            errors += 1
+
+            except ValueError:
+                continue
+
+    return {
+        'files_deleted': files_deleted,
+        'bytes_freed': bytes_freed,
+        'errors': errors
+    }
+
+
+def clear_cache(dry_run: bool = True) -> Dict[str, int]:
+    """
+    Clear HTTP cache directories to free up space.
+
+    Removes cached HTTP responses from _cache, _pcache, and _tcache directories.
+    This is safe to do as the cache will rebuild on demand.
+
+    Args:
+        dry_run: If True, only report what would be deleted without making changes
+
+    Returns:
+        Dict with 'files_deleted', 'bytes_freed', 'errors'
+
+    Example:
+        >>> from edgar.storage_management import clear_cache
+        >>> # First see what would be cleared
+        >>> result = clear_cache(dry_run=True)
+        >>> print(f"Would free {result['bytes_freed'] / 1e9:.1f} GB")
+        >>> # Then do it
+        >>> result = clear_cache(dry_run=False)
+        >>> print(f"Cleared {result['files_deleted']} cache files")
+    """
+    from edgar.core import get_edgar_data_directory
+
+    storage_path = get_edgar_data_directory()
+    files_deleted = 0
+    bytes_freed = 0
+    errors = 0
+
+    for cache_dir_name in ['_cache', '_pcache', '_tcache']:
+        cache_dir = storage_path / cache_dir_name
+        if not cache_dir.exists():
+            continue
+
+        for file_path in cache_dir.rglob('*'):
+            if file_path.is_file():
+                try:
+                    file_size = file_path.stat().st_size
+                    bytes_freed += file_size
+
+                    if not dry_run:
+                        file_path.unlink()
+
+                    files_deleted += 1
+                except Exception:
+                    errors += 1
+                    continue
+
+        # Remove empty directories
+        if not dry_run:
+            try:
+                for subdir in reversed(list(cache_dir.rglob('*'))):
+                    if subdir.is_dir() and not list(subdir.iterdir()):
+                        subdir.rmdir()
+            except Exception:
+                errors += 1
+
+    return {
+        'files_deleted': files_deleted,
+        'bytes_freed': bytes_freed,
+        'errors': errors
+    }

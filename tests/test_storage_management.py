@@ -162,3 +162,51 @@ def test_analyze_storage_rich_display():
     output = console.file.getvalue()
     assert "Storage Analysis" in output
     assert "Current Size" in output or "GB" in output
+
+
+# Phase 4: Storage Optimization
+
+
+def test_optimize_storage_dry_run():
+    """Test optimize_storage with dry_run=True"""
+    from edgar.storage_management import optimize_storage
+
+    result = optimize_storage(dry_run=True)
+
+    assert isinstance(result, dict)
+    assert 'files_compressed' in result
+    assert 'bytes_saved' in result
+    assert 'errors' in result
+    assert result['files_compressed'] >= 0
+    assert result['bytes_saved'] >= 0
+    assert result['errors'] >= 0
+
+
+def test_cleanup_storage_dry_run():
+    """Test cleanup_storage with dry_run=True"""
+    from edgar.storage_management import cleanup_storage
+
+    result = cleanup_storage(days=365, dry_run=True)
+
+    assert isinstance(result, dict)
+    assert 'files_deleted' in result
+    assert 'bytes_freed' in result
+    assert 'errors' in result
+    assert result['files_deleted'] >= 0
+    assert result['bytes_freed'] >= 0
+    assert result['errors'] >= 0
+
+
+def test_clear_cache_dry_run():
+    """Test clear_cache with dry_run=True"""
+    from edgar.storage_management import clear_cache
+
+    result = clear_cache(dry_run=True)
+
+    assert isinstance(result, dict)
+    assert 'files_deleted' in result
+    assert 'bytes_freed' in result
+    assert 'errors' in result
+    assert result['files_deleted'] >= 0
+    assert result['bytes_freed'] >= 0
+    assert result['errors'] >= 0

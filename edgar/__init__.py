@@ -38,6 +38,9 @@ from edgar.storage_management import (
     availability_summary,
     check_filing,
     check_filings_batch,
+    cleanup_storage,
+    clear_cache,
+    optimize_storage,
     storage_info,
 )
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
