@@ -31,6 +31,7 @@ from edgar.financials import Financials, MultiFinancials
 from edgar.funds import FundClass, FundCompany, FundSeries, find_fund
 from edgar.funds.reports import NPORT_FORMS, FundReport
 from edgar.storage import download_edgar_data, download_filings, is_using_local_storage, set_local_storage_path, use_local_storage
+from edgar.storage_management import StorageInfo, storage_info
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
 
