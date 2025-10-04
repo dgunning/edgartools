@@ -117,7 +117,7 @@ class StorageInfo:
 
         # Create statistics table
         stats = Table(show_header=False, box=None, padding=(0, 2))
-        stats.add_column(style="dim")
+        stats.add_column(style="dim", justify="right")
         stats.add_column(style="bold")
 
         # Format sizes
@@ -125,18 +125,18 @@ class StorageInfo:
         compressed_gb = self.total_size_compressed / (1024**3)
         savings_gb = self.compression_savings_bytes / (1024**3)
 
-        stats.add_row("📊 Total Size:", f"{total_gb:.2f} GB (uncompressed)")
-        stats.add_row("💾 Disk Usage:", f"{compressed_gb:.2f} GB (compressed)")
-        stats.add_row("🗜️ Space Saved:", f"{savings_gb:.2f} GB ({self.compression_ratio:.1%})")
-        stats.add_row("📁 Total Files:", f"{self.file_count:,}")
-        stats.add_row("📄 Filings:", f"{self.filing_count:,}")
-        stats.add_row("📍 Location:", str(self.storage_path))
+        stats.add_row("Total Size:", f"{total_gb:.2f} GB (uncompressed)")
+        stats.add_row("Disk Usage:", f"{compressed_gb:.2f} GB (compressed)")
+        stats.add_row("Space Saved:", f"{savings_gb:.2f} GB ({self.compression_ratio:.1%})")
+        stats.add_row("Total Files:", f"{self.file_count:,}")
+        stats.add_row("Filings:", f"{self.filing_count:,}")
+        stats.add_row("Location:", str(self.storage_path))
 
         # Create breakdown by type
         if self.by_type:
             stats.add_row("", "")  # Spacer
             for data_type, count in sorted(self.by_type.items()):
-                stats.add_row(f"  {data_type}:", f"{count:,} files")
+                stats.add_row(f"{data_type}:", f"{count:,} files")
 
         return Panel(
             stats,
