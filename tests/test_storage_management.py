@@ -126,3 +126,39 @@ def test_availability_summary():
     assert "of 10 filings" in summary
     assert "offline" in summary
     assert "%" in summary
+
+
+# Phase 3: Storage Analysis
+
+
+def test_analyze_storage_returns_analysis():
+    """Test that analyze_storage returns StorageAnalysis"""
+    from edgar.storage_management import analyze_storage, StorageAnalysis
+
+    analysis = analyze_storage()
+
+    assert isinstance(analysis, StorageAnalysis)
+    assert hasattr(analysis, 'storage_info')
+    assert hasattr(analysis, 'issues')
+    assert hasattr(analysis, 'recommendations')
+    assert hasattr(analysis, 'potential_savings_bytes')
+    assert isinstance(analysis.issues, list)
+    assert isinstance(analysis.recommendations, list)
+    assert analysis.potential_savings_bytes >= 0
+
+
+def test_analyze_storage_rich_display():
+    """Test that StorageAnalysis has working __rich__ method"""
+    from rich.console import Console
+    from io import StringIO
+    from edgar.storage_management import analyze_storage
+
+    analysis = analyze_storage()
+
+    # Render to string
+    console = Console(file=StringIO(), width=80)
+    console.print(analysis)
+
+    output = console.file.getvalue()
+    assert "Storage Analysis" in output
+    assert "Current Size" in output or "GB" in output

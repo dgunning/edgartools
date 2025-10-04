@@ -32,7 +32,9 @@ from edgar.funds import FundClass, FundCompany, FundSeries, find_fund
 from edgar.funds.reports import NPORT_FORMS, FundReport
 from edgar.storage import download_edgar_data, download_filings, is_using_local_storage, set_local_storage_path, use_local_storage
 from edgar.storage_management import (
+    StorageAnalysis,
     StorageInfo,
+    analyze_storage,
     availability_summary,
     check_filing,
     check_filings_batch,

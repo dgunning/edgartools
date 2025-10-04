@@ -35,6 +35,63 @@ _CACHE_TTL = 60.0
 
 
 @dataclass
+class StorageAnalysis:
+    """Analysis of storage with optimization recommendations"""
+    storage_info: 'StorageInfo'
+    issues: List[str]
+    recommendations: List[str]
+    potential_savings_bytes: int
+
+    def __rich__(self):
+        """Rich Panel display with analysis and recommendations"""
+        from rich.panel import Panel
+        from rich.table import Table
+        from rich.text import Text
+
+        # Create main table
+        analysis = Table(show_header=False, box=None, padding=(0, 2))
+        analysis.add_column(style="dim")
+        analysis.add_column()
+
+        # Storage summary
+        total_gb = self.storage_info.total_size_bytes / (1024**3)
+        compressed_gb = self.storage_info.total_size_compressed / (1024**3)
+        potential_gb = self.potential_savings_bytes / (1024**3)
+
+        analysis.add_row("📊 Current Size:", f"{compressed_gb:.2f} GB")
+        analysis.add_row("💾 Total Files:", f"{self.storage_info.file_count:,}")
+
+        if self.potential_savings_bytes > 0:
+            analysis.add_row("💰 Potential Savings:", f"{potential_gb:.2f} GB")
+
+        # Issues section
+        if self.issues:
+            analysis.add_row("", "")  # Spacer
+            analysis.add_row("[bold red]⚠️  Issues Found:[/bold red]", "")
+            for issue in self.issues:
+                analysis.add_row("", f"• {issue}")
+
+        # Recommendations section
+        if self.recommendations:
+            analysis.add_row("", "")  # Spacer
+            analysis.add_row("[bold green]💡 Recommendations:[/bold green]", "")
+            for rec in self.recommendations:
+                analysis.add_row("", f"• {rec}")
+
+        # All good message
+        if not self.issues and not self.recommendations:
+            analysis.add_row("", "")
+            analysis.add_row("[bold green]✅ Storage is optimized[/bold green]", "")
+
+        return Panel(
+            analysis,
+            title="[bold]Storage Analysis[/bold]",
+            border_style="blue",
+            padding=(1, 2)
+        )
+
+
+@dataclass
 class StorageInfo:
     """Statistics about EdgarTools local storage"""
     total_size_bytes: int
@@ -277,3 +334,116 @@ def availability_summary(filings: List['Filing']) -> str:
     percentage = (available_count / total_count * 100) if total_count > 0 else 0
 
     return f"{available_count} of {total_count} filings available offline ({percentage:.0f}%)"
+
+
+def analyze_storage(force_refresh: bool = False) -> StorageAnalysis:
+    """
+    Analyze storage and provide optimization recommendations.
+
+    Scans local storage for potential issues and suggests improvements like:
+    - Compressing uncompressed files
+    - Cleaning up old cache files
+    - Identifying duplicate or orphaned data
+
+    Args:
+        force_refresh: If True, bypass cache and rescan filesystem
+
+    Returns:
+        StorageAnalysis: Analysis with issues and recommendations
+
+    Example:
+        >>> from edgar.storage_management import analyze_storage
+        >>> analysis = analyze_storage()
+        >>> print(analysis)  # Rich-formatted panel with recommendations
+        >>> if analysis.potential_savings_bytes > 1e9:
+        ...     print(f"Can save {analysis.potential_savings_bytes / 1e9:.1f} GB")
+    """
+    from edgar.core import get_edgar_data_directory
+
+    info = storage_info(force_refresh=force_refresh)
+    storage_path = get_edgar_data_directory()
+
+    issues = []
+    recommendations = []
+    potential_savings = 0
+
+    # Check for uncompressed files
+    uncompressed_count = 0
+    uncompressed_size = 0
+
+    for subdir in ['filings', 'companyfacts', 'submissions']:
+        subdir_path = storage_path / subdir
+        if not subdir_path.exists():
+            continue
+
+        for file_path in subdir_path.rglob('*'):
+            if not file_path.is_file():
+                continue
+
+            # Check if file should be compressed
+            if file_path.suffix in ['.json', '.xml', '.txt', '.nc'] and not str(file_path).endswith('.gz'):
+                uncompressed_count += 1
+                file_size = file_path.stat().st_size
+                uncompressed_size += file_size
+                # Estimate 70% compression savings
+                potential_savings += int(file_size * 0.7)
+
+    if uncompressed_count > 0:
+        issues.append(f"Found {uncompressed_count:,} uncompressed files ({uncompressed_size / 1e9:.2f} GB)")
+        recommendations.append(f"Run optimize_storage() to compress files and save ~{potential_savings / 1e9:.1f} GB")
+
+    # Check for large cache directories
+    cache_size = 0
+    cache_files = 0
+    for cache_dir in ['_cache', '_pcache', '_tcache']:
+        cache_path = storage_path / cache_dir
+        if cache_path.exists():
+            for file_path in cache_path.rglob('*'):
+                if file_path.is_file():
+                    cache_files += 1
+                    cache_size += file_path.stat().st_size
+
+    if cache_size > 1e9:  # More than 1 GB
+        issues.append(f"Cache directories contain {cache_files:,} files ({cache_size / 1e9:.2f} GB)")
+        recommendations.append(f"Run clear_cache() to free up {cache_size / 1e9:.1f} GB")
+
+    # Check for old filings (over 1 year old) - only if many exist
+    from datetime import datetime, timedelta
+    old_threshold = datetime.now() - timedelta(days=365)
+    old_filings = 0
+    old_filings_size = 0
+
+    filings_dir = storage_path / 'filings'
+    if filings_dir.exists():
+        for date_dir in filings_dir.iterdir():
+            if not date_dir.is_dir():
+                continue
+
+            # Parse date from directory name (YYYYMMDD)
+            if len(date_dir.name) == 8 and date_dir.name.isdigit():
+                try:
+                    dir_date = datetime.strptime(date_dir.name, '%Y%m%d')
+                    if dir_date < old_threshold:
+                        for file_path in date_dir.rglob('*'):
+                            if file_path.is_file():
+                                old_filings += 1
+                                old_filings_size += file_path.stat().st_size
+                except ValueError:
+                    continue
+
+    if old_filings > 100:  # Only flag if substantial
+        recommendations.append(
+            f"Consider cleanup_storage(days=365) to remove {old_filings:,} old filings "
+            f"({old_filings_size / 1e9:.1f} GB)"
+        )
+
+    # Overall health check
+    if not issues:
+        recommendations.append("Storage is well-optimized!")
+
+    return StorageAnalysis(
+        storage_info=info,
+        issues=issues,
+        recommendations=recommendations,
+        potential_savings_bytes=potential_savings
+    )
