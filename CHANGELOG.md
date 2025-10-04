@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Storage Management Dashboard (FEAT-436)** - Comprehensive tools for local storage visibility, analytics, and optimization
+  - **Storage Analytics**: New `storage_info()` function and `StorageInfo` dataclass provide comprehensive storage statistics
+    - Total size, disk usage, compression ratios, file counts, and breakdown by data type
+    - 60-second caching for performance on large storage directories
+    - Beautiful Rich Panel display with automatic REPL rendering
+  - **Filing Availability Checks**: Efficient offline filing detection
+    - `check_filing()`: Check if single filing is available locally
+    - `check_filings_batch()`: Efficiently check multiple filings at once
+    - `availability_summary()`: Get formatted availability summary strings
+  - **Storage Analysis**: Intelligent recommendations with `analyze_storage()` and `StorageAnalysis`
+    - Detects uncompressed files and estimates potential savings
+    - Identifies large cache directories consuming space
+    - Flags old filings (over 1 year) when substantial
+    - Provides actionable optimization recommendations
+  - **Storage Optimization Operations**: Safe storage management with dry-run defaults
+    - `optimize_storage()`: Compress uncompressed files (typically 70% space savings)
+    - `cleanup_storage()`: Remove old filings beyond specified age
+    - `clear_cache()`: Clear HTTP cache directories (safe, rebuilds on demand)
+  - **Safety Features**: All destructive operations default to `dry_run=True` for safety
+  - **Documentation**: Comprehensive guide with workflows, examples, and best practices
+  - **Coverage**: 12 tests with full coverage for all storage management functionality
+  - **Impact**: Enables users to understand, monitor, and optimize their local SEC filing storage
+  - **Example**:
+    ```python
+    from edgar import storage_info, analyze_storage, optimize_storage
+
+    # View storage statistics
+    info = storage_info()  # Beautiful Rich panel display
+
+    # Get optimization recommendations
+    analysis = analyze_storage()
+
+    # Compress files to save space (dry-run first)
+    result = optimize_storage(dry_run=True)
+    result = optimize_storage(dry_run=False)
+    ```
+
 ## Release 4.16.1 - 2025-10-03
 
 ### Technical
