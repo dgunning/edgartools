@@ -69,3 +69,60 @@ def test_storage_info_rich_display():
     output = console.file.getvalue()
     assert "EdgarTools Local Storage" in output
     assert "Total Size" in output or "GB" in output
+
+
+# Phase 2: Filing Availability Checks
+
+
+def test_check_filing_not_exists():
+    """Test check_filing returns False for non-existing filing"""
+    from edgar._filings import Filing
+    from edgar.storage_management import check_filing
+
+    filing = Filing(
+        cik=9999999,
+        company="Nonexistent Company",
+        form="10-K",
+        filing_date="2099-12-31",
+        accession_no="9999999999-99-999999"
+    )
+
+    assert check_filing(filing) is False
+
+
+def test_check_filings_batch():
+    """Test check_filings_batch returns dict with availability"""
+    from edgar import get_filings, set_identity
+    from edgar.storage_management import check_filings_batch
+    import time
+
+    set_identity("Test Suite test@example.com")
+
+    # Get some filings
+    filings = list(get_filings(filing_date="2025-01-15").head(10))
+
+    start = time.time()
+    availability = check_filings_batch(filings)
+    elapsed = time.time() - start
+
+    # Check results
+    assert len(availability) == 10
+    assert all(isinstance(v, bool) for v in availability.values())
+    # Should be fast
+    assert elapsed < 1.0  # Under 1 second for 10 filings
+
+
+def test_availability_summary():
+    """Test availability_summary returns formatted string"""
+    from edgar import get_filings, set_identity
+    from edgar.storage_management import availability_summary
+
+    set_identity("Test Suite test@example.com")
+
+    filings = list(get_filings(filing_date="2025-01-15").head(10))
+    summary = availability_summary(filings)
+
+    assert isinstance(summary, str)
+    assert "of 10 filings" in summary
+    assert "offline" in summary
+    assert "%" in summary

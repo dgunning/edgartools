@@ -194,3 +194,86 @@ def storage_info(force_refresh: bool = False) -> StorageInfo:
         >>> print(f"Total size: {info.total_size_bytes / 1e9:.2f} GB")
     """
     return _scan_storage(force_refresh=force_refresh)
+
+
+def check_filing(filing: 'Filing') -> bool:
+    """
+    Check if a filing is available in local storage.
+
+    Args:
+        filing: Filing object to check
+
+    Returns:
+        bool: True if filing exists locally, False otherwise
+
+    Example:
+        >>> from edgar import Company
+        >>> from edgar.storage_management import check_filing
+        >>> filing = Company("AAPL").latest("10-K")
+        >>> if check_filing(filing):
+        ...     print("Available offline!")
+    """
+    from edgar.storage import local_filing_path
+
+    local_path = local_filing_path(
+        filing_date=str(filing.filing_date),
+        accession_number=filing.accession_no
+    )
+
+    return local_path.exists()
+
+
+def check_filings_batch(filings: List['Filing']) -> Dict[str, bool]:
+    """
+    Efficiently check availability of multiple filings.
+
+    Args:
+        filings: List of Filing objects to check
+
+    Returns:
+        Dict mapping accession number to availability (True/False)
+
+    Example:
+        >>> from edgar import get_filings
+        >>> from edgar.storage_management import check_filings_batch
+        >>> filings = get_filings(filing_date="2025-01-15").sample(10)
+        >>> availability = check_filings_batch(filings)
+        >>> available = [f for f in filings if availability[f.accession_no]]
+        >>> print(f"{len(available)} of {len(filings)} available offline")
+    """
+    from edgar.storage import local_filing_path
+
+    availability = {}
+    for filing in filings:
+        local_path = local_filing_path(
+            filing_date=str(filing.filing_date),
+            accession_number=filing.accession_no
+        )
+        availability[filing.accession_no] = local_path.exists()
+
+    return availability
+
+
+def availability_summary(filings: List['Filing']) -> str:
+    """
+    Get a summary string of filing availability.
+
+    Args:
+        filings: List of Filing objects
+
+    Returns:
+        str: Summary like "45 of 100 filings available offline (45%)"
+
+    Example:
+        >>> from edgar import get_filings
+        >>> from edgar.storage_management import availability_summary
+        >>> filings = get_filings(filing_date="2025-01-15").head(100)
+        >>> print(availability_summary(filings))
+        45 of 100 filings available offline (45%)
+    """
+    availability = check_filings_batch(filings)
+    available_count = sum(availability.values())
+    total_count = len(filings)
+    percentage = (available_count / total_count * 100) if total_count > 0 else 0
+
+    return f"{available_count} of {total_count} filings available offline ({percentage:.0f}%)"
