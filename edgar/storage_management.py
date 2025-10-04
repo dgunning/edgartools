@@ -25,6 +25,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 import time
+from edgar.richtools import repr_rich
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
@@ -90,6 +91,9 @@ class StorageAnalysis:
             padding=(1, 2)
         )
 
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
 
 @dataclass
 class StorageInfo:
@@ -141,6 +145,8 @@ class StorageInfo:
             padding=(1, 2)
         )
 
+    def __repr__(self):
+        return repr_rich(self.__rich__())
 
 def _scan_storage(force_refresh: bool = False) -> StorageInfo:
     """

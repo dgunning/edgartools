@@ -8,7 +8,7 @@ from edgar.storage_management import storage_info, StorageInfo, _scan_storage
 from edgar.core import get_edgar_data_directory
 import time
 
-
+@pytest.mark.fast
 def test_storage_info_returns_valid_data():
     """Test that storage_info returns StorageInfo with valid data"""
     info = storage_info()
@@ -23,6 +23,7 @@ def test_storage_info_returns_valid_data():
     assert isinstance(info.storage_path, Path)
 
 
+@pytest.mark.fast
 def test_storage_info_caching():
     """Test that storage_info caches results"""
     # Clear cache
@@ -42,6 +43,7 @@ def test_storage_info_caching():
     assert timestamp1 == timestamp2  # Same object from cache
 
 
+@pytest.mark.fast
 def test_storage_info_force_refresh():
     """Test that force_refresh bypasses cache"""
     info1 = storage_info()
@@ -54,7 +56,7 @@ def test_storage_info_force_refresh():
 
     assert timestamp1 != timestamp2  # Different scan
 
-
+@pytest.mark.fast
 def test_storage_info_rich_display():
     """Test that StorageInfo has working __rich__ method"""
     from rich.console import Console
@@ -73,7 +75,7 @@ def test_storage_info_rich_display():
 
 # Phase 2: Filing Availability Checks
 
-
+@pytest.mark.fast
 def test_check_filing_not_exists():
     """Test check_filing returns False for non-existing filing"""
     from edgar._filings import Filing
@@ -89,7 +91,7 @@ def test_check_filing_not_exists():
 
     assert check_filing(filing) is False
 
-
+@pytest.mark.fast
 def test_check_filings_batch():
     """Test check_filings_batch returns dict with availability"""
     from edgar import get_filings, set_identity
@@ -111,7 +113,7 @@ def test_check_filings_batch():
     # Should be fast
     assert elapsed < 1.0  # Under 1 second for 10 filings
 
-
+@pytest.mark.fast
 def test_availability_summary():
     """Test availability_summary returns formatted string"""
     from edgar import get_filings, set_identity
@@ -130,7 +132,7 @@ def test_availability_summary():
 
 # Phase 3: Storage Analysis
 
-
+@pytest.mark.fast
 def test_analyze_storage_returns_analysis():
     """Test that analyze_storage returns StorageAnalysis"""
     from edgar.storage_management import analyze_storage, StorageAnalysis
@@ -146,7 +148,7 @@ def test_analyze_storage_returns_analysis():
     assert isinstance(analysis.recommendations, list)
     assert analysis.potential_savings_bytes >= 0
 
-
+@pytest.mark.fast
 def test_analyze_storage_rich_display():
     """Test that StorageAnalysis has working __rich__ method"""
     from rich.console import Console
@@ -166,7 +168,7 @@ def test_analyze_storage_rich_display():
 
 # Phase 4: Storage Optimization
 
-
+@pytest.mark.fast
 def test_optimize_storage_dry_run():
     """Test optimize_storage with dry_run=True"""
     from edgar.storage_management import optimize_storage
@@ -181,7 +183,7 @@ def test_optimize_storage_dry_run():
     assert result['bytes_saved'] >= 0
     assert result['errors'] >= 0
 
-
+@pytest.mark.fast
 def test_cleanup_storage_dry_run():
     """Test cleanup_storage with dry_run=True"""
     from edgar.storage_management import cleanup_storage
@@ -196,7 +198,7 @@ def test_cleanup_storage_dry_run():
     assert result['bytes_freed'] >= 0
     assert result['errors'] >= 0
 
-
+@pytest.mark.fast
 def test_clear_cache_dry_run():
     """Test clear_cache with dry_run=True"""
     from edgar.storage_management import clear_cache
