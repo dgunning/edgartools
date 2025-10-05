@@ -22,6 +22,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.core import log
 from edgar.entity.mappings_loader import load_learned_mappings, load_virtual_trees
 from edgar.entity.models import FinancialFact
 
@@ -873,6 +874,58 @@ class MultiPeriodItem:
             return "-"
 
 
+def validate_fiscal_year_period_end(fiscal_year: int, period_end: date) -> bool:
+    """
+    Validate that fiscal_year is reasonable given period_end.
+
+    This handles SEC Facts API data quality issues where comparative periods
+    are mislabeled with incorrect fiscal_year values (Issue #452).
+
+    Args:
+        fiscal_year: The fiscal year from the fact
+        period_end: The period end date
+
+    Returns:
+        True if the fiscal_year/period_end combination is valid, False otherwise
+
+    Examples:
+        >>> # Early January period (52/53-week calendar)
+        >>> validate_fiscal_year_period_end(2022, date(2023, 1, 1))
+        True
+        >>> validate_fiscal_year_period_end(2023, date(2023, 1, 1))
+        True
+        >>> validate_fiscal_year_period_end(2024, date(2023, 1, 1))
+        False
+
+        >>> # Late December period
+        >>> validate_fiscal_year_period_end(2023, date(2023, 12, 31))
+        True
+        >>> validate_fiscal_year_period_end(2024, date(2023, 12, 31))
+        True
+
+        >>> # Normal period
+        >>> validate_fiscal_year_period_end(2023, date(2023, 6, 30))
+        True
+        >>> validate_fiscal_year_period_end(2025, date(2023, 6, 30))
+        False
+    """
+    year_diff = fiscal_year - period_end.year
+
+    # Early January (Jan 1-7): fiscal_year should be year-1 (52/53-week calendar) or year
+    # Example: Period ending Jan 1, 2023 → FY 2022 (most common) or FY 2023 (edge case)
+    if period_end.month == 1 and period_end.day <= 7:
+        return year_diff in (-1, 0)
+
+    # Late December (Dec 25-31): fiscal_year should be year or year+1
+    # Example: Period ending Dec 31, 2023 → FY 2023 (most common) or FY 2024 (year-end shifts)
+    elif period_end.month == 12 and period_end.day >= 25:
+        return year_diff in (0, 1)
+
+    # All other dates: fiscal_year should match period_end.year exactly
+    else:
+        return year_diff == 0
+
+
 class EnhancedStatementBuilder:
     """
     Builds multi-period statements with hierarchical structure using learned mappings.
@@ -1035,13 +1088,18 @@ class EnhancedStatementBuilder:
                 fiscal_year = pk[0]
                 period_end_date = pk[2]
 
-                # Allow fiscal_year to be within 0-3 years of period_end.year
-                # This handles current year data and comparative periods
+                # Validate fiscal_year against period_end to filter out mislabeled comparative data
+                # Issue #452: SEC Facts API has inconsistent fiscal_year values for comparatives
                 if not period_end_date:
                     continue
-                year_diff = fiscal_year - period_end_date.year
-                if year_diff < -1 or year_diff > 3:
-                    continue  # Too far off to be valid
+
+                # Use strict validation to reject invalid fiscal_year/period_end combinations
+                if not validate_fiscal_year_period_end(fiscal_year, period_end_date):
+                    log.debug(
+                        f"Skipping invalid fiscal_year={fiscal_year} for period_end={period_end_date} "
+                        f"(likely mislabeled comparative data - Issue #452)"
+                    )
+                    continue  # Skip mislabeled comparative data
 
                 # Get a fact from this period to check duration
                 period_fact_list = period_facts.get(pk, [])
@@ -1060,8 +1118,11 @@ class EnhancedStatementBuilder:
 
             # Group by period year and select most recent comprehensive filing
             # This approach combines availability (comprehensive data) with recency (latest corrections)
+            # Issue #452: When multiple periods exist for same year (e.g., Jan 1 and Dec 31 both in 2023),
+            # prefer the period where fiscal_year best matches expected value
             annual_by_period_year = {}
             for pk, info in true_annual_periods:
+                fiscal_year = pk[0]
                 period_end_date = pk[2]
                 period_year = period_end_date.year if period_end_date else None
 
@@ -1071,10 +1132,36 @@ class EnhancedStatementBuilder:
 
                     # Only consider periods with substantial data (≥5 facts) to avoid sparse comparative data
                     if len(facts_for_period) >= 5:
-                        if (period_year not in annual_by_period_year or 
-                            (filing_date and 
-                             annual_by_period_year[period_year][1].get('filing_date') and
-                             filing_date > annual_by_period_year[period_year][1]['filing_date'])):
+                        should_replace = False
+
+                        if period_year not in annual_by_period_year:
+                            should_replace = True
+                        else:
+                            existing_pk, existing_info = annual_by_period_year[period_year]
+                            existing_fiscal_year = existing_pk[0]
+                            existing_period_end = existing_pk[2]
+                            existing_filing_date = existing_info.get('filing_date')
+
+                            # Prefer period where fiscal_year matches expected value
+                            # For early January: expect fiscal_year = year - 1
+                            # For normal dates: expect fiscal_year = year
+                            is_early_jan = period_end_date.month == 1 and period_end_date.day <= 7
+                            existing_is_early_jan = existing_period_end.month == 1 and existing_period_end.day <= 7
+
+                            expected_fy = period_year - 1 if is_early_jan else period_year
+                            existing_expected_fy = period_year - 1 if existing_is_early_jan else period_year
+
+                            # Score: 0 = matches expected, 1 = doesn't match
+                            score = 0 if fiscal_year == expected_fy else 1
+                            existing_score = 0 if existing_fiscal_year == existing_expected_fy else 1
+
+                            # Replace if current period has better score, or same score but newer filing
+                            if score < existing_score:
+                                should_replace = True
+                            elif score == existing_score and filing_date and existing_filing_date and filing_date > existing_filing_date:
+                                should_replace = True
+
+                        if should_replace:
                             annual_by_period_year[period_year] = (pk, info)
 
             # Sort by period year (descending) and select
@@ -1086,12 +1173,22 @@ class EnhancedStatementBuilder:
             selected_period_info = period_list[:periods]
 
         # Extract period labels and build a mapping for the selected periods
-        # For annual periods, use the actual period end year in the label
+        # For annual periods, use the fiscal year from facts (most reliable)
         selected_periods = []
         for pk, info in selected_period_info:
             if annual and info.get('is_annual') and pk[2]:  # pk[2] is period_end
-                # Use the actual period year instead of fiscal year in the label
-                label = f"FY {pk[2].year}"
+                # Use fiscal_year from facts if available (handles 52/53-week calendars correctly)
+                # Falls back to period_end.year with early January adjustment for edge cases
+                if 'fiscal_year' in info and info['fiscal_year']:
+                    label = f"FY {info['fiscal_year']}"
+                else:
+                    period_end = pk[2]
+                    # For periods ending Jan 1-7, use prior year (52/53-week calendar convention)
+                    # This handles cases like fiscal year ending Jan 1, 2023 being FY 2022
+                    if period_end.month == 1 and period_end.day <= 7:
+                        label = f"FY {period_end.year - 1}"
+                    else:
+                        label = f"FY {period_end.year}"
             else:
                 label = info['label']
             selected_periods.append(label)

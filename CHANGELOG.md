@@ -45,6 +45,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     result = optimize_storage(dry_run=False)
     ```
 
+### Fixed
+- **Issue #452**: Incorrect revenue values for companies with fiscal year-end changes
+  - **Problem**: EdgarTools showed $1.530B for DNUT's FY 2023 revenue instead of correct $1.686B
+  - **Root Cause**: SEC Company Facts API provides duplicate periods with inconsistent fiscal_year values when companies change fiscal year-ends. Krispy Kreme's transition from January to December FYE created mislabeled comparative periods.
+  - **Solution**: Added fiscal year validation in `enhanced_statement.py` to filter invalid fiscal_year/period_end combinations:
+    - Validates fiscal_year aligns with period_end (early January → year-1, normal dates → year)
+    - Enhanced deduplication to prefer periods where fiscal_year matches expected value
+    - Rejects mislabeled comparative data from SEC API
+  - **Impact**: Fixes incorrect financial values for companies during fiscal year-end transitions
+  - **Testing**: Regression test added for DNUT FY 2023 revenue verification
+
 ## Release 4.16.1 - 2025-10-03
 
 ### Technical
