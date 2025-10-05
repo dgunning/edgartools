@@ -46,6 +46,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     ```
 
 ### Fixed
+- **Quarterly Balance Sheets**: Fixed duplicate fiscal periods appearing in quarterly balance sheets
+  - **Problem**: Quarterly statements showed duplicate periods (e.g., "Q3 2025" appearing twice with different values: $331.2B and $365.0B)
+  - **Root Cause**: SEC Facts API includes comparative period data from filings and tags ALL facts with the filing's fiscal_year and fiscal_period, regardless of which period the data actually represents. For example, Apple's Q3 2025 10-Q filing includes both current Q3 2025 data AND prior year Q4 2024 comparative data, but both are tagged as fiscal_period='Q3'
+  - **Solution**: Enhanced quarterly period selection logic in `enhanced_statement.py`:
+    - Added `validate_quarterly_period_end()` to verify period_end matches expected month for fiscal_period
+    - Added `detect_fiscal_year_end()` to automatically detect company's fiscal year end from FY facts
+    - Validates Q1-Q4 periods end in appropriate months based on fiscal year end (Q3 for Sept FYE should end in June, not Sept)
+    - Allows ±1 month flexibility for 52/53-week calendars
+    - Groups by period label and keeps most recent filing when duplicates exist
+  - **Impact**: Eliminates confusing duplicate columns in quarterly financial statements, ensures correct quarterly values are displayed
+  - **Coverage**: Comprehensive regression tests for Apple, Microsoft, Google, Amazon covering balance sheets, income statements, and cash flow statements
+  - **Example**: `Company("AAPL").balance_sheet(annual=False)` now shows unique Q3 2025 with correct $331B assets (June 2025 data) instead of duplicate Q3 2025 columns
+
 - **Issue #452**: Incorrect revenue values for companies with fiscal year-end changes
   - **Problem**: EdgarTools showed $1.530B for DNUT's FY 2023 revenue instead of correct $1.686B
   - **Root Cause**: SEC Company Facts API provides duplicate periods with inconsistent fiscal_year values when companies change fiscal year-ends. Krispy Kreme's transition from January to December FYE created mislabeled comparative periods.

@@ -926,6 +926,93 @@ def validate_fiscal_year_period_end(fiscal_year: int, period_end: date) -> bool:
         return year_diff == 0
 
 
+def validate_quarterly_period_end(fiscal_period: str,
+                                  period_end: date,
+                                  fiscal_year_end_month: int = 12) -> bool:
+    """
+    Validate that period_end matches the expected month for the fiscal_period.
+
+    This filters out comparative period data that's mislabeled with incorrect
+    fiscal_period values in the SEC Facts API.
+
+    Args:
+        fiscal_period: The fiscal period (Q1, Q2, Q3, Q4, FY)
+        period_end: The period end date
+        fiscal_year_end_month: Company's fiscal year end month (default: 12)
+
+    Returns:
+        True if period_end matches expected month for fiscal_period
+
+    Examples:
+        >>> # Apple (fiscal year ends in September, month 9)
+        >>> validate_quarterly_period_end('Q3', date(2025, 6, 28), 9)
+        True  # Q3 should end in June (3 months before Sept)
+
+        >>> validate_quarterly_period_end('Q3', date(2024, 9, 28), 9)
+        False  # This is Q4, not Q3
+    """
+    if fiscal_period == 'FY':
+        # FY should match fiscal year end month
+        return period_end.month == fiscal_year_end_month
+
+    # Calculate expected month for each quarter based on fiscal year end
+    # Q4 ends in fiscal year end month
+    # Q3 ends 3 months before that
+    # Q2 ends 6 months before that
+    # Q1 ends 9 months before that
+
+    quarter_offsets = {
+        'Q1': -9,  # 9 months before fiscal year end
+        'Q2': -6,  # 6 months before fiscal year end
+        'Q3': -3,  # 3 months before fiscal year end
+        'Q4': 0    # Fiscal year end month
+    }
+
+    if fiscal_period not in quarter_offsets:
+        return False
+
+    # Calculate expected month
+    offset = quarter_offsets[fiscal_period]
+    expected_month = fiscal_year_end_month + offset
+
+    # Handle month wrapping
+    if expected_month <= 0:
+        expected_month += 12
+    elif expected_month > 12:
+        expected_month -= 12
+
+    # Allow ±1 month flexibility for 52/53-week calendars
+    month_diff = abs(period_end.month - expected_month)
+
+    # Handle wrap-around (e.g., month 12 vs month 1 is only 1 month apart)
+    if month_diff > 6:
+        month_diff = 12 - month_diff
+
+    return month_diff <= 1
+
+
+def detect_fiscal_year_end(facts: List[FinancialFact]) -> int:
+    """
+    Detect company's fiscal year end month from FY period_end dates.
+
+    Returns:
+        Most common month from FY period_end dates (default: 12)
+    """
+    from collections import Counter
+
+    # Get all FY facts with period_end
+    fy_facts = [f for f in facts if f.fiscal_period == 'FY' and f.period_end]
+
+    if not fy_facts:
+        return 12  # Default to December
+
+    # Find most common period_end month
+    months = [f.period_end.month for f in fy_facts]
+    most_common = Counter(months).most_common(1)
+
+    return most_common[0][0] if most_common else 12
+
+
 class EnhancedStatementBuilder:
     """
     Builds multi-period statements with hierarchical structure using learned mappings.
@@ -1168,9 +1255,51 @@ class EnhancedStatementBuilder:
             sorted_periods = sorted(annual_by_period_year.items(), key=lambda x: x[0], reverse=True)
             selected_period_info = [period_info for year, period_info in sorted_periods[:periods]]
         else:
-            # Sort all periods by end date (newest first)
-            period_list.sort(key=lambda x: x[1]['end_date'], reverse=True)
-            selected_period_info = period_list[:periods]
+            # Quarterly mode: Filter out comparative data by validating period_end
+            # Detect fiscal year end month from the statement facts
+            fiscal_year_end_month = detect_fiscal_year_end(stmt_facts)
+
+            valid_quarterly_periods = []
+
+            for pk, info in period_list:
+                fiscal_period = info['fiscal_period']
+                period_end_date = pk[2]  # pk is (fiscal_year, fiscal_period, period_end)
+
+                # Skip if no period_end
+                if not period_end_date:
+                    continue
+
+                # Validate period_end matches expected month for fiscal_period
+                if validate_quarterly_period_end(fiscal_period, period_end_date, fiscal_year_end_month):
+                    valid_quarterly_periods.append((pk, info))
+                else:
+                    log.debug(
+                        f"Skipping invalid period_end={period_end_date} for fiscal_period={fiscal_period} "
+                        f"(likely comparative data)"
+                    )
+
+            # Group by fiscal period label and keep most recent
+            quarterly_by_period = {}
+            for pk, info in valid_quarterly_periods:
+                fiscal_year = pk[0]
+                fiscal_period = pk[1]
+                period_label = f"{fiscal_period} {fiscal_year}"
+
+                if period_label not in quarterly_by_period:
+                    quarterly_by_period[period_label] = (pk, info)
+                else:
+                    # If duplicate valid periods exist, prefer most recent filing_date
+                    existing_pk, existing_info = quarterly_by_period[period_label]
+                    if info['filing_date'] > existing_info['filing_date']:
+                        quarterly_by_period[period_label] = (pk, info)
+
+            # Sort by period end date (newest first) and select requested number
+            sorted_periods = sorted(
+                quarterly_by_period.values(),
+                key=lambda x: x[1]['end_date'],
+                reverse=True
+            )
+            selected_period_info = sorted_periods[:periods]
 
         # Extract period labels and build a mapping for the selected periods
         # For annual periods, use the fiscal year from facts (most reliable)
