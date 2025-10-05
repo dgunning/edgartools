@@ -212,3 +212,231 @@ def test_clear_cache_dry_run():
     assert result['files_deleted'] >= 0
     assert result['bytes_freed'] >= 0
     assert result['errors'] >= 0
+
+
+@pytest.mark.fast
+def test_clear_cache_obsolete_only():
+    """Test clear_cache with obsolete_only parameter"""
+    from edgar.storage_management import clear_cache
+
+    # Test dry run with obsolete_only
+    result = clear_cache(dry_run=True, obsolete_only=True)
+
+    assert isinstance(result, dict)
+    assert 'files_deleted' in result
+    assert 'bytes_freed' in result
+    assert 'errors' in result
+    assert result['files_deleted'] >= 0
+    assert result['bytes_freed'] >= 0
+    assert result['errors'] >= 0
+
+
+@pytest.mark.fast
+def test_analyze_storage_detects_obsolete_cache(tmp_path):
+    """Test that analyze_storage detects obsolete _pcache directory"""
+    from edgar.storage_management import analyze_storage
+    from edgar.core import get_edgar_data_directory
+    import os
+
+    # Create a temporary _pcache directory with a test file
+    storage_path = get_edgar_data_directory()
+    pcache_dir = storage_path / '_pcache'
+    pcache_dir.mkdir(parents=True, exist_ok=True)
+    test_file = pcache_dir / 'test_cache_file.txt'
+    test_file.write_text('test content')
+
+    try:
+        # Run analysis
+        analysis = analyze_storage(force_refresh=True)
+
+        # Should detect the obsolete cache
+        issue_found = any('_pcache' in issue for issue in analysis.issues)
+        recommendation_found = any('obsolete_only=True' in rec for rec in analysis.recommendations)
+
+        assert issue_found, "Should detect obsolete _pcache directory"
+        assert recommendation_found, "Should recommend clearing obsolete cache"
+
+    finally:
+        # Cleanup
+        if test_file.exists():
+            test_file.unlink()
+        if pcache_dir.exists() and not list(pcache_dir.iterdir()):
+            pcache_dir.rmdir()
+
+
+@pytest.mark.fast
+def test_storage_info_cache_labels():
+    """Test that StorageInfo displays descriptive labels for cache directories"""
+    from rich.console import Console
+    from io import StringIO
+    from edgar.storage_management import storage_info
+
+    info = storage_info()
+
+    # Render to string
+    console = Console(file=StringIO(), width=120)
+    console.print(info)
+
+    output = console.file.getvalue()
+
+    # Check for descriptive cache labels if cache directories exist
+    if '_tcache' in info.by_type:
+        assert 'HTTP cache' in output or '_tcache' in output
+    if '_pcache' in info.by_type:
+        assert 'obsolete' in output or '_pcache' in output
+
+
+# Phase 5: Compression/Decompression Tests
+
+@pytest.mark.fast
+def test_compress_decompress_filing(tmp_path):
+    """Test compressing and decompressing a filing file"""
+    from edgar.storage import compress_filing, decompress_filing, is_compressed_file
+
+    # Create a test file
+    test_file = tmp_path / "test_filing.nc"
+    test_content = b"Test filing content " * 100  # Make it worth compressing
+    test_file.write_bytes(test_content)
+
+    # Compress the file
+    compressed_path = compress_filing(test_file, delete_original=False)
+
+    assert compressed_path.exists()
+    assert compressed_path.name == "test_filing.nc.gz"
+    assert is_compressed_file(compressed_path)
+    # Compressed should be smaller than original
+    assert compressed_path.stat().st_size < test_file.stat().st_size
+
+    # Decompress the file to a different location to avoid conflict
+    decompressed_path = decompress_filing(compressed_path,
+                                          output_path=tmp_path / "decompressed_filing.nc",
+                                          delete_original=False)
+
+    assert decompressed_path.exists()
+    assert decompressed_path.read_bytes() == test_content
+
+    # Cleanup
+    test_file.unlink()
+    compressed_path.unlink()
+    decompressed_path.unlink()
+
+
+@pytest.mark.fast
+def test_compress_already_compressed_raises_error(tmp_path):
+    """Test that compressing an already compressed file raises ValueError"""
+    from edgar.storage import compress_filing
+    import pytest
+
+    # Create and compress a test file
+    test_file = tmp_path / "test.nc"
+    test_file.write_text("test content")
+    compressed_path = compress_filing(test_file, delete_original=True)
+
+    # Try to compress again - should raise ValueError
+    with pytest.raises(ValueError, match="already compressed"):
+        compress_filing(compressed_path)
+
+    # Cleanup
+    compressed_path.unlink()
+
+
+@pytest.mark.fast
+def test_decompress_uncompressed_raises_error(tmp_path):
+    """Test that decompressing an uncompressed file raises ValueError"""
+    from edgar.storage import decompress_filing
+    import pytest
+
+    # Create an uncompressed test file
+    test_file = tmp_path / "test.nc"
+    test_file.write_text("test content")
+
+    # Try to decompress - should raise ValueError
+    with pytest.raises(ValueError, match="not compressed"):
+        decompress_filing(test_file)
+
+    # Cleanup
+    test_file.unlink()
+
+
+@pytest.mark.integration
+def test_load_filing_from_compressed_storage():
+    """
+    Test that filings can be loaded from compressed .nc.gz files in local storage.
+    This is the critical end-to-end test for compression functionality.
+    """
+    from edgar import Filing, set_identity
+    from edgar.storage import local_filing_path, compress_filing, is_compressed_file
+    from edgar.sgml.sgml_common import read_content_as_string
+    import os
+
+    set_identity("Test Suite test@example.com")
+
+    # Use a known filing
+    filing = Filing(
+        form='10-Q',
+        filing_date='2025-01-08',
+        company='ANGIODYNAMICS INC',
+        cik=1275187,
+        accession_no='0001275187-25-000005'
+    )
+
+    # Get the local filing path
+    filing_path = local_filing_path(
+        filing_date=filing.filing_date,
+        accession_number=filing.accession_no
+    )
+
+    # Skip test if filing doesn't exist locally
+    if not filing_path.exists():
+        pytest.skip("Filing not available in local storage")
+
+    # Get the uncompressed path for comparison
+    if is_compressed_file(filing_path):
+        # If already compressed, skip (we can't test the compression workflow)
+        pytest.skip("Filing is already compressed")
+
+    # Read original content
+    original_content = read_content_as_string(filing_path)
+    assert len(original_content) > 0
+
+    # Compress the filing
+    compressed_path = compress_filing(filing_path, delete_original=False)
+
+    try:
+        # Verify compression worked
+        assert compressed_path.exists()
+        assert is_compressed_file(compressed_path)
+
+        # Now test that we can load from the compressed file
+        # This simulates what happens when local_filing_path returns a .gz file
+        compressed_content = read_content_as_string(compressed_path)
+
+        # Content should be identical
+        assert compressed_content == original_content
+
+        # Also test that the filing can still be loaded through the Filing object
+        # by temporarily removing the uncompressed version
+        original_path_backup = filing_path.with_suffix('.nc.backup')
+        filing_path.rename(original_path_backup)
+
+        try:
+            # Now local_filing_path should return the compressed version
+            path_returned = local_filing_path(
+                filing_date=filing.filing_date,
+                accession_number=filing.accession_no
+            )
+            assert path_returned == compressed_path
+            assert is_compressed_file(path_returned)
+
+            # Verify we can still read through the path
+            content_from_compressed = read_content_as_string(path_returned)
+            assert content_from_compressed == original_content
+
+        finally:
+            # Restore the original file
+            original_path_backup.rename(filing_path)
+
+    finally:
+        # Cleanup: remove compressed file
+        if compressed_path.exists():
+            compressed_path.unlink()

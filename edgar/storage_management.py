@@ -13,7 +13,7 @@ Functions:
     analyze_storage() - Analyze storage with optimization recommendations
     optimize_storage() - Compress uncompressed files
     cleanup_storage() - Remove old files (dry-run by default)
-    clear_cache() - Clear HTTP cache directories
+    clear_cache() - Clear HTTP cache directories (with obsolete cache detection)
 
 Classes:
     StorageInfo - Storage statistics dataclass with Rich display
@@ -132,11 +132,21 @@ class StorageInfo:
         stats.add_row("Filings:", f"{self.filing_count:,}")
         stats.add_row("Location:", str(self.storage_path))
 
-        # Create breakdown by type
+        # Create breakdown by type with descriptive labels
         if self.by_type:
             stats.add_row("", "")  # Spacer
+
+            # Define labels for cache directories
+            cache_labels = {
+                '_tcache': '_tcache (HTTP cache):',
+                '_pcache': '_pcache (obsolete cache):',
+                '_cache': '_cache (legacy cache):'
+            }
+
             for data_type, count in sorted(self.by_type.items()):
-                stats.add_row(f"{data_type}:", f"{count:,} files")
+                # Use descriptive label for cache directories
+                label = cache_labels.get(data_type, f"{data_type}:")
+                stats.add_row(label, f"{count:,} files")
 
         return Panel(
             stats,
@@ -398,10 +408,24 @@ def analyze_storage(force_refresh: bool = False) -> StorageAnalysis:
         issues.append(f"Found {uncompressed_count:,} uncompressed files ({uncompressed_size / 1e9:.2f} GB)")
         recommendations.append(f"Run optimize_storage() to compress files and save ~{potential_savings / 1e9:.1f} GB")
 
+    # Check for obsolete _pcache directory (replaced by _tcache in commit 3bfba7e)
+    pcache_path = storage_path / '_pcache'
+    pcache_size = 0
+    pcache_files = 0
+    if pcache_path.exists():
+        for file_path in pcache_path.rglob('*'):
+            if file_path.is_file():
+                pcache_files += 1
+                pcache_size += file_path.stat().st_size
+
+        if pcache_files > 0:
+            issues.append(f"Obsolete _pcache directory contains {pcache_files:,} files ({pcache_size / 1e9:.2f} GB)")
+            recommendations.append(f"Run clear_cache(obsolete_only=True) to remove old cache and free {pcache_size / 1e9:.1f} GB")
+
     # Check for large cache directories
     cache_size = 0
     cache_files = 0
-    for cache_dir in ['_cache', '_pcache', '_tcache']:
+    for cache_dir in ['_cache', '_tcache']:  # Only check active cache directories
         cache_path = storage_path / cache_dir
         if cache_path.exists():
             for file_path in cache_path.rglob('*'):
@@ -618,25 +642,27 @@ def cleanup_storage(days: int = 365, dry_run: bool = True) -> Dict[str, int]:
     }
 
 
-def clear_cache(dry_run: bool = True) -> Dict[str, int]:
+def clear_cache(dry_run: bool = True, obsolete_only: bool = False) -> Dict[str, int]:
     """
     Clear HTTP cache directories to free up space.
 
-    Removes cached HTTP responses from _cache, _pcache, and _tcache directories.
-    This is safe to do as the cache will rebuild on demand.
+    Removes cached HTTP responses from cache directories. By default clears all
+    cache directories (_cache, _tcache). Use obsolete_only=True to only remove
+    the obsolete _pcache directory (replaced by _tcache in Aug 2025).
 
     Args:
         dry_run: If True, only report what would be deleted without making changes
+        obsolete_only: If True, only clear obsolete _pcache directory
 
     Returns:
         Dict with 'files_deleted', 'bytes_freed', 'errors'
 
     Example:
         >>> from edgar.storage_management import clear_cache
-        >>> # First see what would be cleared
-        >>> result = clear_cache(dry_run=True)
-        >>> print(f"Would free {result['bytes_freed'] / 1e9:.1f} GB")
-        >>> # Then do it
+        >>> # Clear obsolete cache only
+        >>> result = clear_cache(obsolete_only=True, dry_run=False)
+        >>> print(f"Freed {result['bytes_freed'] / 1e9:.1f} GB")
+        >>> # Clear all caches
         >>> result = clear_cache(dry_run=False)
         >>> print(f"Cleared {result['files_deleted']} cache files")
     """
@@ -647,7 +673,13 @@ def clear_cache(dry_run: bool = True) -> Dict[str, int]:
     bytes_freed = 0
     errors = 0
 
-    for cache_dir_name in ['_cache', '_pcache', '_tcache']:
+    # Determine which cache directories to clear
+    if obsolete_only:
+        cache_dirs = ['_pcache']  # Only obsolete cache
+    else:
+        cache_dirs = ['_cache', '_tcache']  # Active caches only
+
+    for cache_dir_name in cache_dirs:
         cache_dir = storage_path / cache_dir_name
         if not cache_dir.exists():
             continue
@@ -672,6 +704,9 @@ def clear_cache(dry_run: bool = True) -> Dict[str, int]:
                 for subdir in reversed(list(cache_dir.rglob('*'))):
                     if subdir.is_dir() and not list(subdir.iterdir()):
                         subdir.rmdir()
+                # Remove the cache directory itself if empty
+                if not list(cache_dir.iterdir()):
+                    cache_dir.rmdir()
             except Exception:
                 errors += 1
 
