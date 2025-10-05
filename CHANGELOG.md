@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.17.0 - 2025-10-05
+
 ### Added
 - **Storage Management Dashboard (FEAT-436)** - Comprehensive tools for local storage visibility, analytics, and optimization
   - **Storage Analytics**: New `storage_info()` function and `StorageInfo` dataclass provide comprehensive storage statistics
