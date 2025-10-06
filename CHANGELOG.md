@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Dimensional Member Display (Issue #416 Regression)** - Fixed regression where segment member concepts were incorrectly filtered from dimensional displays
+  - **Problem**: After Issue #450 fix, dimensional member concepts (like `us-gaap_ProductMember`, `us-gaap_ServiceOtherMember`) were being filtered from Income Statements with dimensional breakdowns
+  - **Root Cause**: Member filtering logic was too aggressive, removing Members without values even in dimensional display contexts where they serve as category headers
+  - **Solution**: Enhanced filtering logic in `edgar/xbrl/rendering.py` to:
+    - Detect dimensional display mode by checking for dimensional items in statement data
+    - Keep Member concepts in dimensional displays even without values (they're category headers)
+    - Continue filtering Members from Statement of Equity (where they're structural column headers)
+  - **Impact**: Product and service segment values now correctly appear in dimensional income statements
+  - **Verification**: Issue #416 regression tests pass; Issue #450 Statement of Equity still works correctly
+
 - **Statement of Equity Rendering (Issue #450)** - Fixed three critical rendering issues plus added clearer labeling
 
   **Issue #1: Missing Total Stockholders' Equity Values**

@@ -1460,6 +1460,9 @@ def render_statement(
 
     concept_current_index = {}
 
+    # Detect if this statement has dimensional display (for Member filtering logic)
+    has_dimensional_display = any(item.get('is_dimension', False) for item in statement_data)
+
     # Process and add rows
     for _index, item in enumerate(statement_data):
         # Skip rows with no values if they're abstract (headers without data)
@@ -1474,9 +1477,12 @@ def render_statement(
         if any(bracket in item['label'] for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
             continue
         if any(concept.endswith(suffix) for suffix in ['Axis', 'Domain', 'Member', 'LineItems', 'Table']):
-            # Exception: Don't filter if this item has actual values (it's data, not just structure)
-            # But for Statement of Equity, Members are always structural (column headers), never data
-            if statement_type == 'StatementOfEquity' or not item.get('has_values', False):
+            # Issue #450: For Statement of Equity, Members are always structural (column headers), never data
+            if statement_type == 'StatementOfEquity':
+                continue
+            # Issue #416: For dimensional displays, keep Members even without values (they're category headers)
+            # For non-dimensional displays, only filter if no values
+            if not has_dimensional_display and not item.get('has_values', False):
                 continue
 
         # Track which occurrence of this concept we're on
