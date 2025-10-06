@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.17.1 - 2025-10-06
+
 ### Fixed
 - **Dimensional Member Display (Issue #416 Regression)** - Fixed regression where segment member concepts were incorrectly filtered from dimensional displays
   - **Problem**: After Issue #450 fix, dimensional member concepts (like `us-gaap_ProductMember`, `us-gaap_ServiceOtherMember`) were being filtered from Income Statements with dimensional breakdowns
