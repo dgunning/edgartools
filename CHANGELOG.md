@@ -7,6 +7,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Statement of Equity Rendering (Issue #450)** - Fixed three critical rendering issues plus added clearer labeling
+
+  **Issue #1: Missing Total Stockholders' Equity Values**
+  - **Problem**: Total Stockholders' Equity rows appeared twice (beginning and ending balance) but both showed empty values, or later both showed the same ending balance value
+  - **Root Cause**: Statement of Equity shows duration periods (quarters) but Total Stockholders' Equity is an instant fact. Initial fix matched instant facts at end_date for both occurrences, causing both rows to show ending balance instead of distinct beginning/ending balances
+  - **Solution**: Enhanced instant fact matching in `edgar/xbrl/rendering.py` (lines 1511-1531) to distinguish concept occurrences:
+    - First occurrence: Match instant at `start_date - 1 day` (beginning balance)
+    - Later occurrences: Match instant at `end_date` (ending balance)
+    - Tracks concept occurrence count to determine position in roll-forward structure
+  - **Impact**: Total Stockholders' Equity displays correct values for both beginning and ending balances
+
+  **Issue #2: Wrong Abstract Positioning**
+  - **Problem**: Abstract headers (like RollForward) appeared AFTER their children instead of before them
+  - **Root Cause**: Dimensional axis members (`CommonStockMember`, `RetainedEarningsMember`) were being rendered as regular rows before abstract headers
+  - **Solution**: Enhanced filtering in `edgar/xbrl/rendering.py` (lines 1471-1480) to skip dimensional members based on:
+    - Concept name suffix patterns (Member, Axis, Domain, LineItems, Table)
+    - Special handling for Statement of Equity where dimensional members are always structural
+  - **Impact**: Abstract headers now appear at the top of their hierarchical sections, before their children
+
+  **Issue #3: Incorrect Abstract Flagging**
+  - **Root Cause**: US-GAAP taxonomy schemas are referenced externally and not parsed, causing standard taxonomy concepts to be added to the element catalog without abstract attribute information (defaulting to `abstract=False`)
+  - **Solution**: Implemented multi-tier abstract detection strategy:
+    - Pattern-based matching for common abstract concepts (endings: Abstract, RollForward, Table, Axis, Domain, LineItems)
+    - Known abstract concepts list for explicitly marked abstracts in US-GAAP taxonomy
+    - Schema abstract attribute fallback (when available)
+    - Structural heuristics for edge cases
+  - **Changes**:
+    - Added `edgar/xbrl/abstract_detection.py` module
+    - Updated `edgar/xbrl/parsers/presentation.py` to use enhanced abstract detection
+    - Updated `edgar/xbrl/parser.py` to use enhanced abstract detection
+    - Fixed `edgar/xbrl/xbrl.py` line 798 to use `node.is_abstract` instead of hardcoding `False`
+  - **Impact**: Abstract concepts like `IncreaseDecreaseInStockholdersEquityRollForward` are now correctly marked as `abstract=True`
+
+  **Enhancement: Clearer Beginning/Ending Balance Labels**
+  - **Feature**: Automatically appends " - Beginning balance" and " - Ending balance" to labels for concepts that appear multiple times in Statement of Equity (like Total Stockholders' Equity)
+  - **Implementation**: Added label enhancement in `edgar/xbrl/rendering.py` (lines 1490-1500)
+  - **Impact**: Users can immediately distinguish between beginning and ending balances without examining values
+
+  **Testing**: Comprehensive regression tests in `tests/issues/regression/test_issue_450_equity_statement_abstract_flags.py` validate all fixes
+
+  **Example**:
+    ```python
+    from edgar import Company
+    c = Company("AAPL")
+    equity = c.get_filings(form="10-Q").latest(1).xbrl().statements.statement_of_equity()
+    df = equity.to_dataframe()
+
+    # Issue #3: RollForward concepts now correctly marked as abstract
+    rollforward = df[df['concept'] == 'us-gaap_IncreaseDecreaseInStockholdersEquityRollForward']
+    assert rollforward['abstract'].iloc[0] == True
+
+    # Issue #2: RollForward appears at index 0 (before its children)
+    assert rollforward.index[0] == 0
+
+    # Issue #1: Total Stockholders' Equity shows distinct beginning and ending values
+    equity_rows = df[df['concept'] == 'us-gaap_StockholdersEquity']
+    assert len(equity_rows) >= 2  # Beginning and ending balance rows
+    # Labels now clearly indicate: "Total Stockholders' Equity - Beginning balance"
+    #                              "Total Stockholders' Equity - Ending balance"
+    ```
+
 ## Release 4.17.0 - 2025-10-05
 
 ### Added

@@ -651,7 +651,17 @@ class XBRLParser:
             elem_info = self.element_catalog[element_id]
             node.element_name = elem_info.name
             node.standard_label = elem_info.labels.get('http://www.xbrl.org/2003/role/label', elem_info.name)
-            node.is_abstract = elem_info.abstract
+
+            # Use enhanced abstract detection (Issue #450 fix)
+            # The element catalog may not have correct abstract info for standard taxonomy concepts
+            from edgar.xbrl.abstract_detection import is_abstract_concept
+            node.is_abstract = is_abstract_concept(
+                concept_name=elem_info.name,
+                schema_abstract=elem_info.abstract,
+                has_children=False,  # Will be updated after children are processed
+                has_values=False     # Will be determined later when facts are loaded
+            )
+
             node.labels = elem_info.labels
 
         # Add to collection

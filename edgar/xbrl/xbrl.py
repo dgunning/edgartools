@@ -784,7 +784,7 @@ class XBRL:
         # For dimensional statements with dimension data, handle the parent item specially
         if should_display_dimensions and dimensioned_facts:
             # Create parent line item with total values AND dimensional children
-            # This ensures users see both the total (e.g., Total Revenue = $25,500M) 
+            # This ensures users see both the total (e.g., Total Revenue = $25,500M)
             # and the dimensional breakdown (e.g., Auto Revenue = $19,878M, Energy = $3,014M)
             line_item = {
                 'concept': element_id,
@@ -795,7 +795,7 @@ class XBRL:
                 'decimals': decimals,  # Include decimals for formatting
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
-                'is_abstract': False,  # Not abstract since it has values
+                'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
                 'children': node.children,
                 'has_values': len(values) > 0,  # True if we have total values
                 'has_dimension_children': True  # Mark as having dimension children

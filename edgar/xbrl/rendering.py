@@ -1450,6 +1450,16 @@ def render_statement(
         units_note=units_note
     )
 
+    # Issue #450: For Statement of Equity, track concept occurrences to determine beginning vs ending balances
+    concept_occurrence_count = {}
+    if statement_type == 'StatementOfEquity':
+        for item in statement_data:
+            concept = item.get('concept', '')
+            if concept:
+                concept_occurrence_count[concept] = concept_occurrence_count.get(concept, 0) + 1
+
+    concept_current_index = {}
+
     # Process and add rows
     for _index, item in enumerate(statement_data):
         # Skip rows with no values if they're abstract (headers without data)
@@ -1458,13 +1468,36 @@ def render_statement(
         if not item.get('has_values', False) and item.get('is_abstract') and not has_children:
             continue
 
-        # Skip axis/dimension items (they contain brackets in their labels)
+        # Skip axis/dimension items (they contain brackets in their labels OR concept ends with these suffixes)
+        # Issue #450: Also filter based on concept name to catch dimensional members without bracket labels
+        concept = item.get('concept', '')
         if any(bracket in item['label'] for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
             continue
+        if any(concept.endswith(suffix) for suffix in ['Axis', 'Domain', 'Member', 'LineItems', 'Table']):
+            # Exception: Don't filter if this item has actual values (it's data, not just structure)
+            # But for Statement of Equity, Members are always structural (column headers), never data
+            if statement_type == 'StatementOfEquity' or not item.get('has_values', False):
+                continue
+
+        # Track which occurrence of this concept we're on
+        if concept:
+            concept_current_index[concept] = concept_current_index.get(concept, 0) + 1
 
         # Remove [Abstract] from label if present
         label = item['label'].replace(' [Abstract]', '')
         level = item['level']
+
+        # Issue #450: For Statement of Equity, add "Beginning balance" / "Ending balance"
+        # to labels when concept appears multiple times (e.g., Total Stockholders' Equity)
+        if statement_type == 'StatementOfEquity' and concept:
+            total_occurrences = concept_occurrence_count.get(concept, 1)
+            current_occurrence = concept_current_index.get(concept, 1)
+
+            if total_occurrences > 1:
+                if current_occurrence == 1:
+                    label = f"{label} - Beginning balance"
+                elif current_occurrence == total_occurrences:
+                    label = f"{label} - Ending balance"
 
         # Create the row with metadata
         row = StatementRow(
@@ -1486,6 +1519,29 @@ def render_statement(
         for period in formatted_period_objects:
             period_key = period.key
             value = item['values'].get(period_key, "")
+
+            # Issue #450: For Statement of Equity with duration periods, match instant facts
+            # at the appropriate date based on position in roll-forward structure
+            if value == "" and period.end_date and statement_type == 'StatementOfEquity':
+                # Determine if this is beginning balance (first occurrence) or ending balance (later occurrences)
+                is_first_occurrence = concept_current_index.get(concept, 1) == 1
+
+                if is_first_occurrence and hasattr(period, 'start_date') and period.start_date:
+                    # Beginning balance: Try instant at day before start_date
+                    from datetime import datetime, timedelta
+                    try:
+                        start_dt = datetime.strptime(period.start_date, '%Y-%m-%d')
+                        beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+                        instant_key = f"instant_{beginning_date}"
+                        value = item['values'].get(instant_key, "")
+                    except (ValueError, AttributeError):
+                        pass  # Fall through to try end_date
+
+                # If still no value, try instant at end_date (ending balance)
+                if value == "":
+                    instant_key = f"instant_{period.end_date}"
+                    value = item['values'].get(instant_key, "")
+
             # Get comparison info for this item and period if available
             comparison_info = None
             if show_comparisons and item.get('concept') in comparison_data:
