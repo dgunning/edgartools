@@ -97,7 +97,11 @@ class StreamingParser:
                 # Clean up processed elements to save memory
                 elem.clear()
                 while elem.getprevious() is not None:
-                    del elem.getparent()[0]
+                    parent = elem.getparent()
+                    if parent is not None:
+                        del parent[0]
+                    else:
+                        break
 
             # Final flush
             self._flush_buffer()
