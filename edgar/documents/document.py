@@ -58,12 +58,25 @@ class Section:
     Document section representation.
 
     Represents a logical section of the document (e.g., Risk Factors, MD&A).
+
+    Attributes:
+        name: Section identifier (e.g., 'business', 'risk_factors')
+        title: Human-readable section title
+        node: SectionNode containing section content
+        start_offset: Character offset where section starts
+        end_offset: Character offset where section ends
+        confidence: Detection confidence score (0.0-1.0)
+        detection_method: Method used to detect section ('toc', 'heading', 'pattern')
+        validated: Whether section was cross-validated by multiple methods
     """
     name: str
     title: str
     node: SectionNode
     start_offset: int = 0
     end_offset: int = 0
+    confidence: float = 1.0
+    detection_method: str = 'unknown'
+    validated: bool = False
 
     def text(self, **kwargs) -> str:
         """Extract text from section."""

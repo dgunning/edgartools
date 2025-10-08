@@ -116,6 +116,9 @@ class ParserConfig:
     enable_profiling: bool = False
     log_performance: bool = False
 
+    # Hybrid section detection thresholds
+    detection_thresholds: Optional['DetectionThresholds'] = None
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
@@ -181,4 +184,65 @@ class ParserConfig:
                 'semantic_analysis': True,
                 'smart_text_extraction': True
             }
+        )
+
+
+@dataclass
+class DetectionThresholds:
+    """
+    Configuration for section detection confidence thresholds.
+
+    Controls the hybrid section detection system's confidence scoring
+    and validation behavior.
+
+    Attributes:
+        min_confidence: Minimum confidence threshold for accepting sections (0.0-1.0)
+        enable_cross_validation: Enable cross-validation of sections (slower but more accurate)
+        cross_validation_boost: Confidence multiplier when multiple methods agree
+        disagreement_penalty: Confidence multiplier when methods disagree
+        boundary_overlap_penalty: Confidence penalty for overlapping sections
+        thresholds_by_filing_type: Filing-type-specific confidence thresholds
+    """
+    # Global thresholds
+    min_confidence: float = 0.6  # Minimum acceptable confidence
+
+    # Cross-validation settings (expensive, disabled by default)
+    enable_cross_validation: bool = False
+    cross_validation_boost: float = 1.15  # 15% boost when methods agree
+    disagreement_penalty: float = 0.95  # 5% penalty when methods disagree
+
+    # Boundary validation
+    boundary_overlap_penalty: float = 0.9  # 10% penalty for overlapping sections
+
+    # Filing-type-specific thresholds
+    thresholds_by_filing_type: Dict[str, Dict[str, float]] = field(default_factory=lambda: {
+        '10-K': {
+            'min_confidence': 0.65,  # Stricter for annual reports
+        },
+        '10-Q': {
+            'min_confidence': 0.60,  # Standard for quarterly reports
+        },
+        '8-K': {
+            'min_confidence': 0.55,  # More lenient for current reports
+        }
+    })
+
+    @classmethod
+    def strict(cls) -> 'DetectionThresholds':
+        """Create strict thresholds for high-precision detection."""
+        return cls(
+            min_confidence=0.75,
+            enable_cross_validation=True,
+            cross_validation_boost=1.2,
+            disagreement_penalty=0.85
+        )
+
+    @classmethod
+    def lenient(cls) -> 'DetectionThresholds':
+        """Create lenient thresholds for high-recall detection."""
+        return cls(
+            min_confidence=0.50,
+            enable_cross_validation=False,
+            cross_validation_boost=1.1,
+            disagreement_penalty=0.98
         )

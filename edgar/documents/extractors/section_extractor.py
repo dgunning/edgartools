@@ -355,7 +355,9 @@ class SectionExtractor:
                 title=title,
                 node=section_node,
                 start_offset=start_pos,
-                end_offset=end_pos
+                end_offset=end_pos,
+                confidence=0.7,  # Pattern-based detection = moderate confidence
+                detection_method='pattern'  # Method: regex pattern matching
             )
 
             sections[section_name] = section
