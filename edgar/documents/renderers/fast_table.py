@@ -142,7 +142,14 @@ class FastTableRenderer:
             row_texts = [cell.text().strip() if cell else '' for cell in expanded_row]
             rows.append(row_texts)
 
-        return self.render_table_data(headers, rows)
+        # Render the table
+        table_text = self.render_table_data(headers, rows)
+
+        # Add caption if present (matches Rich renderer behavior)
+        if hasattr(table_node, 'caption') and table_node.caption:
+            return f"{table_node.caption}\n{table_text}"
+
+        return table_text
     
     def render_table_data(self, headers: List[List[str]], rows: List[List[str]]) -> str:
         """
