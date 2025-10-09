@@ -331,12 +331,37 @@ class SECSectionExtractor:
         }
     
     def _get_subsections(self, parent_section: str) -> List[str]:
-        """Get subsections of a parent section."""
+        """
+        Get subsections of a parent section.
+
+        For example:
+        - "Item 1" has subsections "Item 1A", "Item 1B" (valid)
+        - "Item 1" does NOT have subsection "Item 10" (invalid - different item)
+        """
         subsections = []
-        
+
         # Look for sections that start with the parent name
         for section_name in self.section_boundaries:
-            if section_name.startswith(parent_section) and section_name != parent_section:
-                subsections.append(section_name)
-        
+            if section_name == parent_section:
+                continue
+
+            if section_name.startswith(parent_section):
+                # Check if this is a true subsection (e.g., Item 1A)
+                # vs a different section that happens to start with same prefix (e.g., Item 10)
+                remainder = section_name[len(parent_section):]
+
+                # Valid subsection patterns:
+                # - "Item 1A" (remainder: "A") - letter suffix
+                # - "Item 1 - Business" (remainder: " - Business") - has separator
+                # Invalid patterns:
+                # - "Item 10" (remainder: "0") - digit continues the number
+
+                if remainder and remainder[0].isalpha():
+                    # Letter suffix like "A", "B" - valid subsection
+                    subsections.append(section_name)
+                elif remainder and remainder[0] in [' ', '-', '.', ':']:
+                    # Has separator - could be descriptive title
+                    subsections.append(section_name)
+                # If remainder starts with digit, it's NOT a subsection (e.g., "Item 10")
+
         return sorted(subsections)

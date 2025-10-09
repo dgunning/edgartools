@@ -114,6 +114,9 @@ class StreamingParser:
 
             # Create document
             document = Document(root=self.root, metadata=self.metadata)
+
+            # Store config reference (required for section detection)
+            document._config = self.config
             
             # Apply post-processing
             from edgar.documents.processors.postprocessor import DocumentPostprocessor

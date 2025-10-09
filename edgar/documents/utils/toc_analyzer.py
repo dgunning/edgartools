@@ -138,20 +138,41 @@ class TOCAnalyzer:
 
                 current = parent
 
-            # If we found a <td>, check its preceding sibling
+            # If we found a <td>, check ALL preceding siblings in the row
+            # This handles TOCs where item number is not in the immediately adjacent cell
+            # Example: ['Business', 'I', '1', '5'] where '1' is the item number
             if td_element is not None:
+                # Check all preceding siblings (rightmost to leftmost)
                 prev_sibling = td_element.getprevious()
-                if prev_sibling is not None and prev_sibling.tag in ['td', 'th']:
-                    prev_text = (prev_sibling.text_content() or '').strip()
+                while prev_sibling is not None:
+                    if prev_sibling.tag in ['td', 'th']:
+                        prev_text = (prev_sibling.text_content() or '').strip()
 
-                    # Look for "Item X" or "Part Y" pattern
-                    item_match = re.match(r'(Item\s+\d+[A-Z]?)\.?\s*$', prev_text, re.IGNORECASE)
-                    if item_match:
-                        return item_match.group(1)
+                        # Look for "Item X" or just "X" (bare number) pattern
+                        # Match full format: "Item 1A"
+                        item_match = re.match(r'(Item\s+\d+[A-Z]?)\.?\s*$', prev_text, re.IGNORECASE)
+                        if item_match:
+                            return item_match.group(1)
 
-                    part_match = re.match(r'(Part\s+[IVX]+)\.?\s*$', prev_text, re.IGNORECASE)
-                    if part_match:
-                        return part_match.group(1)
+                        # Match bare item number: "1A" or "1" (only valid 10-K item numbers: 1-15)
+                        # This prevents page numbers (50, 108, etc.) from being treated as items
+                        bare_item_match = re.match(r'^([1-9]|1[0-5])([A-Z]?)\.?\s*$', prev_text, re.IGNORECASE)
+                        if bare_item_match:
+                            item_num = bare_item_match.group(1)
+                            item_letter = bare_item_match.group(2)
+                            return f"Item {item_num}{item_letter}"
+
+                        # Match part: "Part I" or just "I"
+                        part_match = re.match(r'(Part\s+[IVX]+)\.?\s*$', prev_text, re.IGNORECASE)
+                        if part_match:
+                            return part_match.group(1)
+
+                        # Match bare part: "I", "II", etc.
+                        bare_part_match = re.match(r'^([IVX]+)\.?\s*$', prev_text)
+                        if bare_part_match:
+                            return f"Part {bare_part_match.group(1)}"
+
+                    prev_sibling = prev_sibling.getprevious()
 
             # Also check immediate parent's text for inline patterns (div/span structures)
             parent = link_element.getparent()
