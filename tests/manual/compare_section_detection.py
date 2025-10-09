@@ -37,16 +37,38 @@ TEST_COMPANIES = [
     ('JPM', 'JPMorgan Chase & Co.'),
     ('KO', 'The Coca-Cola Company'),
     ('NFLX', 'Netflix Inc.'),
-    # Additional companies for broader coverage
+    # Additional tech companies
     ('GOOGL', 'Alphabet Inc.'),
     ('AMZN', 'Amazon.com Inc.'),
     ('META', 'Meta Platforms Inc.'),
-    ('WMT', 'Walmart Inc.'),
-    ('JNJ', 'Johnson & Johnson'),
-    ('V', 'Visa Inc.'),
-    # Known problematic cases
+    ('ORCL', 'Oracle Corp.'),
+    ('ADBE', 'Adobe Inc.'),
+    ('CRM', 'Salesforce Inc.'),
+    # Financial sector
     ('MS', 'Morgan Stanley'),  # Known issue with old parser
     ('GS', 'Goldman Sachs'),
+    ('BAC', 'Bank of America Corp.'),
+    ('C', 'Citigroup Inc.'),
+    ('WFC', 'Wells Fargo & Co.'),
+    # Healthcare & Pharma
+    ('JNJ', 'Johnson & Johnson'),
+    ('PFE', 'Pfizer Inc.'),
+    ('UNH', 'UnitedHealth Group'),
+    ('ABBV', 'AbbVie Inc.'),
+    # Retail & Consumer
+    ('WMT', 'Walmart Inc.'),
+    ('HD', 'The Home Depot Inc.'),
+    ('PG', 'Procter & Gamble Co.'),
+    ('NKE', 'Nike Inc.'),
+    # Industrial & Energy
+    ('BA', 'Boeing Co.'),
+    ('CAT', 'Caterpillar Inc.'),
+    ('XOM', 'Exxon Mobil Corp.'),
+    ('CVX', 'Chevron Corp.'),
+    # Payment & Finance
+    ('V', 'Visa Inc.'),
+    ('MA', 'Mastercard Inc.'),
+    ('AXP', 'American Express Co.'),
 ]
 
 
