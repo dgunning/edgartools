@@ -47,7 +47,7 @@ class ParserConfig:
     """
     
     # Performance settings
-    max_document_size: int = 50 * 1024 * 1024  # 50MB
+    max_document_size: int = 100 * 1024 * 1024  # 100MB (handles large filings like JPM)
     streaming_threshold: int = 10 * 1024 * 1024  # 10MB
     cache_size: int = 1000
     enable_parallel: bool = True
