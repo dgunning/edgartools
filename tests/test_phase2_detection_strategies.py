@@ -93,14 +93,14 @@ class TestHeadingSectionDetector:
         assert sections is None
 
     def test_detect_headings_low_confidence(self):
-        """Test detection filters out low-confidence headings."""
+        """Test detection with low-confidence headings."""
         root = DocumentNode()
 
-        # Add heading with low confidence
+        # Add heading with low confidence (0.5)
         heading = HeadingNode(level=1, content="Item 1 - Business")
         heading.header_info = HeaderInfo(
             level=1,
-            confidence=0.5,  # Below 0.7 threshold
+            confidence=0.5,  # At default threshold
             text="Item 1 - Business",
             detection_method='style',
             is_item=True,
@@ -110,11 +110,16 @@ class TestHeadingSectionDetector:
 
         doc = Document(root=root, metadata=DocumentMetadata())
 
+        # Default min_confidence is 0.5, so should detect
         detector = HeadingSectionDetector(doc)
         sections = detector.detect()
+        assert sections is not None
+        assert len(sections) == 1
 
-        # Should return None when all headings below confidence threshold
-        assert sections is None
+        # With higher min_confidence, should not detect
+        detector_strict = HeadingSectionDetector(doc, min_confidence=0.7)
+        sections_strict = detector_strict.detect()
+        assert sections_strict is None
 
     def test_detect_non_item_headings(self):
         """Test detection ignores non-item headings."""

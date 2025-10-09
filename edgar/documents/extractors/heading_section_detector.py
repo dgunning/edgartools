@@ -29,16 +29,23 @@ class HeadingSectionDetector:
     Provides moderate confidence (0.7-0.9) detection.
     """
 
-    def __init__(self, document: Document, filing_type: Optional[str] = None):
+    def __init__(
+        self,
+        document: Document,
+        filing_type: Optional[str] = None,
+        min_confidence: float = 0.5  # Lower threshold, let hybrid detector filter
+    ):
         """
         Initialize heading-based detector.
 
         Args:
             document: Document to analyze
             filing_type: Optional filing type for context ('10-K', '10-Q', '8-K')
+            min_confidence: Minimum confidence for headings (default 0.5)
         """
         self.document = document
         self.filing_type = filing_type
+        self.min_confidence = min_confidence
 
     def detect(self) -> Optional[Dict[str, Section]]:
         """
@@ -64,7 +71,7 @@ class HeadingSectionDetector:
                 header_info = heading.header_info
 
                 # Only use headings with sufficient confidence
-                if header_info.confidence < 0.7:
+                if header_info.confidence < self.min_confidence:
                     continue
 
                 # Check if it's an item header
