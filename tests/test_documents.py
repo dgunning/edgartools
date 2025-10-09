@@ -102,7 +102,7 @@ of Directors or Certain Officers; Election of Directors;</b></span>
 
 
 def test_parse_complicated_htmldocument():
-    html_str = Path("data/Nvidia.10-K.html").read_text()
+    html_str = Path("data/html/Nvidia.10-K.html").read_text()
     html_document = HtmlDocument.from_html(html_str)
 
     assert "NVIDIA has a platform strategy" in html_document.text

@@ -135,7 +135,8 @@ class TestSectionDetection:
         </html>
         """
         
-        config = ParserConfig(detect_sections=True)
+        config = ParserConfig(detect_sections=True, filing_type="10-K")
+
         doc = parse_html(html, config)
         
         sections = doc.sections
@@ -154,7 +155,7 @@ class TestSectionDetection:
         <p>We own facilities.</p>
         """
         
-        config = ParserConfig(detect_sections=True)
+        config = ParserConfig(detect_sections=True, filing_type="10-K")
         doc = parse_html(html, config)
         
         business_section = doc.sections.get('business')

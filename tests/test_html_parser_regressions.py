@@ -175,7 +175,7 @@ class TestSectionDetectionRegressions:
             pytest.skip("Apple 10-Q test file not found")
 
         html = html_path.read_text()
-        doc = parse_html(html)
+        doc = parse_html(html,ParserConfig(filing_type='10-Q'))
 
         sections = doc.sections
 
