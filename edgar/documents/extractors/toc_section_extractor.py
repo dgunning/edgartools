@@ -207,24 +207,39 @@ class SECSectionExtractor:
             return ""
         
         start_element = start_elements[0]
-        
+
         # Collect content until we hit the end boundary (if specified)
         content_elements = []
+
+        # If anchor has no siblings (nested in empty container), traverse up to find content container
+        # This handles cases like <div id="item7"><div></div></div> where content is after the container
         current = start_element.getnext()
-        
-        while current is not None:
-            # Check if we've reached the end boundary
-            if boundary.end_element_id:
-                current_id = current.get('id', '')
-                if current_id == boundary.end_element_id:
-                    break
-                
-                # Also check if this is a sibling section we should stop at
-                if not include_subsections and self._is_sibling_section(current_id, boundary.name):
-                    break
-            
-            content_elements.append(current)
-            current = current.getnext()
+        if current is None:
+            # No sibling - traverse up to find a container with siblings
+            container = start_element.getparent()
+            while container is not None and container.getnext() is None:
+                container = container.getparent()
+
+            # Start from the container's next sibling if found
+            if container is not None:
+                current = container.getnext()
+
+        # Collect content from siblings
+        if current is not None:
+            # Normal case - anchor has siblings
+            while current is not None:
+                # Check if we've reached the end boundary
+                if boundary.end_element_id:
+                    current_id = current.get('id', '')
+                    if current_id == boundary.end_element_id:
+                        break
+
+                    # Also check if this is a sibling section we should stop at
+                    if not include_subsections and self._is_sibling_section(current_id, boundary.name):
+                        break
+
+                content_elements.append(current)
+                current = current.getnext()
         
         # Extract text from collected elements
         section_texts = []

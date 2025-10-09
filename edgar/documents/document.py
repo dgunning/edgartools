@@ -158,7 +158,7 @@ class Document:
             base_filing_type = filing_type.replace('/A', '') if filing_type else None
 
             if base_filing_type and base_filing_type in ['10-K', '10-Q', '8-K']:
-                from edgar.documents.hybrid_section_detector import HybridSectionDetector
+                from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
                 # Pass thresholds from config if available
                 thresholds = self._config.detection_thresholds if self._config else None
                 # Use base filing type for detection (10-K/A → 10-K)
@@ -166,7 +166,7 @@ class Document:
                 self._sections = detector.detect_sections()
             else:
                 # Fallback to pattern-based for other types or unknown
-                from edgar.documents.extractors.section_extractor import SectionExtractor
+                from edgar.documents.extractors.pattern_section_extractor import SectionExtractor
                 extractor = SectionExtractor(filing_type) if filing_type else SectionExtractor()
                 self._sections = extractor.extract(self)
 
@@ -295,7 +295,7 @@ class Document:
         """
         # Lazy-load section extractor
         if not hasattr(self, '_section_extractor'):
-            from edgar.documents.section_extractor import SECSectionExtractor
+            from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
             self._section_extractor = SECSectionExtractor(self)
         
         return self._section_extractor.get_section_text(
@@ -315,7 +315,7 @@ class Document:
             ['Part I', 'Item 1', 'Item 1A', 'Item 1B', 'Item 2', ...]
         """
         if not hasattr(self, '_section_extractor'):
-            from edgar.documents.section_extractor import SECSectionExtractor
+            from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
             self._section_extractor = SECSectionExtractor(self)
         
         return self._section_extractor.get_available_sections()
@@ -331,7 +331,7 @@ class Document:
             Dict with section metadata including anchor info
         """
         if not hasattr(self, '_section_extractor'):
-            from edgar.documents.section_extractor import SECSectionExtractor
+            from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
             self._section_extractor = SECSectionExtractor(self)
         
         return self._section_extractor.get_section_info(section_name)

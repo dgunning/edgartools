@@ -6,7 +6,7 @@ import pytest
 
 from edgar.documents import parse_html
 from edgar.documents.config import ParserConfig
-from edgar.documents.hybrid_section_detector import HybridSectionDetector
+from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
 
 
 def test_missing_toc():
