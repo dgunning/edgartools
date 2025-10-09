@@ -128,35 +128,51 @@ class SECSectionExtractor:
         return sorted(self.section_boundaries.keys(), 
                      key=lambda x: self.section_boundaries[x].anchor_id)
     
-    def get_section_text(self, section_name: str, 
+    def get_section_text(self, section_name: str,
                         include_subsections: bool = True,
                         clean: bool = True) -> Optional[str]:
         """
         Extract text content for a specific section.
-        
+
         Args:
             section_name: Name of section (e.g., "Item 1", "Item 1A", "Part I")
             include_subsections: Whether to include subsections
             clean: Whether to apply text cleaning
-            
+
         Returns:
             Section text content or None if section not found
         """
         # Normalize section name
         normalized_name = self._normalize_section_name(section_name)
-        
+
         if normalized_name not in self.section_boundaries:
             return None
-        
+
         boundary = self.section_boundaries[normalized_name]
-        
+
         # Extract content between boundaries using HTML parsing
         html_content = getattr(self.document.metadata, 'original_html', None)
         if not html_content:
             return None
-        
+
         try:
-            return self._extract_section_content(html_content, boundary, include_subsections, clean)
+            section_text = self._extract_section_content(html_content, boundary, include_subsections, clean)
+
+            # If no direct content but include_subsections=True, aggregate subsection text
+            if not section_text and include_subsections:
+                subsections = self._get_subsections(normalized_name)
+                if subsections:
+                    # Recursively get text from all subsections
+                    subsection_texts = []
+                    for subsection_name in subsections:
+                        subsection_text = self.get_section_text(subsection_name, include_subsections=True, clean=clean)
+                        if subsection_text:
+                            subsection_texts.append(subsection_text)
+
+                    if subsection_texts:
+                        section_text = '\n\n'.join(subsection_texts)
+
+            return section_text
         except Exception as e:
             # Fallback to simple text extraction
             return self._extract_section_fallback(section_name, clean)

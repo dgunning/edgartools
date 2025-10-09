@@ -71,21 +71,37 @@ class TOCSectionDetector:
 
             # Extract each section
             for section_name in available:
-                # Get section text
-                section_text = self.extractor.get_section_text(section_name)
-                if not section_text:
-                    # Skip sections that can't be extracted
-                    logger.debug(f"Skipping {section_name}: no text extracted")
-                    continue
-
-                # Get section metadata
+                # Get section metadata first to check for subsections
                 section_info = self.extractor.get_section_info(section_name)
                 if not section_info:
                     logger.debug(f"Skipping {section_name}: no section info")
                     continue
 
+                # Get section text (may be empty for container sections)
+                section_text = self.extractor.get_section_text(section_name, include_subsections=True)
+
+                # Check if this section has subsections
+                has_subsections = section_info.get('subsections', [])
+
+                if not section_text and not has_subsections:
+                    # Skip only if no text AND no subsections
+                    logger.debug(f"Skipping {section_name}: no text and no subsections")
+                    continue
+
                 # Create section node (placeholder - actual content extracted lazily)
                 section_node = SectionNode(section_name=section_name)
+
+                # For container sections (Item 1, Item 10), text will include all subsections
+                section_length = len(section_text) if section_text else 0
+
+                # Create text extractor callback for lazy loading
+                def make_text_extractor(extractor, name):
+                    """Create a closure that captures extractor and section name."""
+                    def extract_text(section_name=None, **kwargs):
+                        # Use captured name, ignore passed section_name
+                        clean = kwargs.get('clean', True)
+                        return extractor.get_section_text(name, include_subsections=True, clean=clean) or ""
+                    return extract_text
 
                 # Create Section with TOC confidence
                 section = Section(
@@ -93,9 +109,10 @@ class TOCSectionDetector:
                     title=section_info.get('canonical_name', section_name),
                     node=section_node,
                     start_offset=0,  # Would need actual offsets from parsing
-                    end_offset=len(section_text),
+                    end_offset=section_length,
                     confidence=0.95,  # TOC-based = high confidence
-                    detection_method='toc'
+                    detection_method='toc',
+                    _text_extractor=make_text_extractor(self.extractor, section_name)
                 )
 
                 sections[section_name] = section

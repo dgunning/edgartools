@@ -66,6 +66,7 @@ class Section:
         confidence: Detection confidence score (0.0-1.0)
         detection_method: How section was detected ('toc', 'heading', 'pattern')
         validated: Whether section has been cross-validated
+        _text_extractor: Optional callback for lazy text extraction (for TOC-based sections)
     """
     name: str
     title: str
@@ -75,9 +76,15 @@ class Section:
     confidence: float = 1.0  # Detection confidence (0.0-1.0)
     detection_method: str = 'unknown'  # 'toc', 'heading', 'pattern', or 'unknown'
     validated: bool = False  # Cross-validated flag
-    
+    _text_extractor: Optional[Any] = field(default=None, repr=False)  # Callback for lazy text extraction
+
     def text(self, **kwargs) -> str:
         """Extract text from section."""
+        # If we have a text extractor callback (TOC-based sections), use it
+        if self._text_extractor is not None:
+            return self._text_extractor(self.name, **kwargs)
+
+        # Otherwise extract from node (heading/pattern-based sections)
         from edgar.documents.extractors.text_extractor import TextExtractor
         extractor = TextExtractor(**kwargs)
         return extractor.extract_from_node(self.node)
