@@ -3,14 +3,35 @@ Configuration for the HTML parser.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import List, Dict, Any, Optional
+
+
+@dataclass
+class DetectionThresholds:
+    """
+    Configurable thresholds for section detection strategies.
+
+    Attributes:
+        min_confidence: Minimum confidence score to include a section (0.0-1.0)
+        cross_validation_boost: Multiplier when multiple methods agree (>1.0)
+        disagreement_penalty: Multiplier when methods disagree (<1.0)
+        boundary_overlap_penalty: Multiplier for overlapping sections (<1.0)
+        enable_cross_validation: Whether to run cross-validation (slower but more accurate)
+        thresholds_by_filing_type: Filing-specific threshold overrides
+    """
+    min_confidence: float = 0.6
+    cross_validation_boost: float = 1.2
+    disagreement_penalty: float = 0.8
+    boundary_overlap_penalty: float = 0.9
+    enable_cross_validation: bool = False  # Disabled by default for performance
+    thresholds_by_filing_type: Dict[str, Dict[str, float]] = field(default_factory=dict)
 
 
 @dataclass
 class ParserConfig:
     """
     Configuration for HTML parser.
-
+    
     Attributes:
         max_document_size: Maximum document size in bytes
         streaming_threshold: Document size threshold for streaming mode
@@ -24,14 +45,14 @@ class ParserConfig:
         max_token_estimation: Maximum estimated tokens for AI optimization
         features: Feature flags for optional functionality
     """
-
+    
     # Performance settings
     max_document_size: int = 50 * 1024 * 1024  # 50MB
     streaming_threshold: int = 10 * 1024 * 1024  # 10MB
     cache_size: int = 1000
     enable_parallel: bool = True
     max_workers: Optional[int] = None  # None = use CPU count
-
+    
     # Parsing settings
     strict_mode: bool = False
     extract_xbrl: bool = True
@@ -40,20 +61,24 @@ class ParserConfig:
     normalize_text: bool = True
     extract_links: bool = True
     extract_images: bool = False
-
+    
     # AI optimization
     optimize_for_ai: bool = True
     max_token_estimation: int = 100_000
     chunk_size: int = 512
     chunk_overlap: int = 128
-
+    
     # Table processing
     table_extraction: bool = True
     detect_table_types: bool = True
     extract_table_relationships: bool = True
-
+    fast_table_rendering: bool = True  # Fast renderer is now production-ready (7-10x faster than Rich)
+    
     # Section detection
     detect_sections: bool = True
+    eager_section_extraction: bool = False  # Extract sections during parsing vs. on first access (default: lazy)
+    filing_type: Optional[str] = None  # Required for section detection (e.g. '10-K', '10-Q', '8-K')
+    detection_thresholds: DetectionThresholds = field(default_factory=DetectionThresholds)
     section_patterns: Dict[str, List[str]] = field(default_factory=lambda: {
         'business': [
             r'item\s+1\.?\s*business',
@@ -85,7 +110,7 @@ class ParserConfig:
             r'financial\s+statements'
         ]
     })
-
+    
     # Feature flags
     features: Dict[str, bool] = field(default_factory=lambda: {
         'ml_header_detection': True,
@@ -97,7 +122,7 @@ class ParserConfig:
         'footnote_linking': True,
         'cross_reference_resolution': True
     })
-
+    
     # Header detection settings
     header_detection_threshold: float = 0.6  # Minimum confidence
     header_detection_methods: List[str] = field(default_factory=lambda: [
@@ -106,19 +131,16 @@ class ParserConfig:
         'structural',
         'contextual'
     ])
-
+    
     # Text extraction settings
     min_text_length: int = 10  # Minimum text length to keep
     merge_adjacent_nodes: bool = True
     merge_distance: int = 2  # Max distance between nodes to merge
-
+    
     # Performance monitoring
     enable_profiling: bool = False
     log_performance: bool = False
-
-    # Hybrid section detection thresholds
-    detection_thresholds: Optional['DetectionThresholds'] = None
-
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
@@ -133,7 +155,7 @@ class ParserConfig:
             'optimize_for_ai': self.optimize_for_ai,
             'features': self.features.copy()
         }
-
+    
     @classmethod
     def for_performance(cls) -> 'ParserConfig':
         """Create config optimized for performance."""
@@ -142,6 +164,8 @@ class ParserConfig:
             extract_xbrl=False,
             enable_parallel=True,
             cache_size=5000,
+            eager_section_extraction=False,  # Skip expensive section extraction
+            fast_table_rendering=True,  # Fast renderer (enabled by default now)
             features={
                 'ml_header_detection': False,
                 'semantic_analysis': False,
@@ -149,7 +173,7 @@ class ParserConfig:
                 'xbrl_validation': False
             }
         )
-
+    
     @classmethod
     def for_accuracy(cls) -> 'ParserConfig':
         """Create config optimized for accuracy."""
@@ -169,7 +193,7 @@ class ParserConfig:
                 'cross_reference_resolution': True
             }
         )
-
+    
     @classmethod
     def for_ai(cls) -> 'ParserConfig':
         """Create config optimized for AI/LLM processing."""
@@ -184,65 +208,4 @@ class ParserConfig:
                 'semantic_analysis': True,
                 'smart_text_extraction': True
             }
-        )
-
-
-@dataclass
-class DetectionThresholds:
-    """
-    Configuration for section detection confidence thresholds.
-
-    Controls the hybrid section detection system's confidence scoring
-    and validation behavior.
-
-    Attributes:
-        min_confidence: Minimum confidence threshold for accepting sections (0.0-1.0)
-        enable_cross_validation: Enable cross-validation of sections (slower but more accurate)
-        cross_validation_boost: Confidence multiplier when multiple methods agree
-        disagreement_penalty: Confidence multiplier when methods disagree
-        boundary_overlap_penalty: Confidence penalty for overlapping sections
-        thresholds_by_filing_type: Filing-type-specific confidence thresholds
-    """
-    # Global thresholds
-    min_confidence: float = 0.6  # Minimum acceptable confidence
-
-    # Cross-validation settings (expensive, disabled by default)
-    enable_cross_validation: bool = False
-    cross_validation_boost: float = 1.15  # 15% boost when methods agree
-    disagreement_penalty: float = 0.95  # 5% penalty when methods disagree
-
-    # Boundary validation
-    boundary_overlap_penalty: float = 0.9  # 10% penalty for overlapping sections
-
-    # Filing-type-specific thresholds
-    thresholds_by_filing_type: Dict[str, Dict[str, float]] = field(default_factory=lambda: {
-        '10-K': {
-            'min_confidence': 0.65,  # Stricter for annual reports
-        },
-        '10-Q': {
-            'min_confidence': 0.60,  # Standard for quarterly reports
-        },
-        '8-K': {
-            'min_confidence': 0.55,  # More lenient for current reports
-        }
-    })
-
-    @classmethod
-    def strict(cls) -> 'DetectionThresholds':
-        """Create strict thresholds for high-precision detection."""
-        return cls(
-            min_confidence=0.75,
-            enable_cross_validation=True,
-            cross_validation_boost=1.2,
-            disagreement_penalty=0.85
-        )
-
-    @classmethod
-    def lenient(cls) -> 'DetectionThresholds':
-        """Create lenient thresholds for high-recall detection."""
-        return cls(
-            min_confidence=0.50,
-            enable_cross_validation=False,
-            cross_validation_boost=1.1,
-            disagreement_penalty=0.98
         )

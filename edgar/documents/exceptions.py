@@ -2,12 +2,12 @@
 Custom exceptions for the HTML parser.
 """
 
-from typing import Any, Dict, Optional
+from typing import Optional, Dict, Any
 
 
 class ParsingError(Exception):
     """Base exception for parsing errors."""
-
+    
     def __init__(self, 
                  message: str, 
                  context: Optional[Dict[str, Any]] = None,
@@ -16,7 +16,7 @@ class ParsingError(Exception):
         self.message = message
         self.context = context or {}
         self.suggestions = suggestions or []
-
+    
     def __str__(self):
         result = self.message
         if self.context:
@@ -53,7 +53,7 @@ class SectionDetectionError(ParsingError):
 
 class DocumentTooLargeError(ParsingError):
     """Document exceeds maximum size."""
-
+    
     def __init__(self, size: int, max_size: int):
         super().__init__(
             f"Document size ({size:,} bytes) exceeds maximum ({max_size:,} bytes)",
