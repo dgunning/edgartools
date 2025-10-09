@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
-    from edgar.documents.nodes import BaseNode
+    from edgar.files.html import BaseNode
 import re
 from functools import lru_cache
 
