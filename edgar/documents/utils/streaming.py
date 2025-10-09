@@ -58,18 +58,21 @@ class StreamingParser:
     def parse(self, html: str) -> Document:
         """
         Parse HTML in streaming mode.
-        
+
         Args:
             html: HTML content to parse
-            
+
         Returns:
             Parsed Document
-            
+
         Raises:
             DocumentTooLargeError: If document exceeds size limit
             HTMLParsingError: If parsing fails
         """
         self._reset_state()
+
+        # Store original HTML BEFORE parsing (needed for TOC-based section detection)
+        original_html = html
         
         try:
             # Create streaming parser
@@ -105,7 +108,10 @@ class StreamingParser:
             
             # Final flush
             self._flush_buffer()
-            
+
+            # Store original HTML in metadata for section detection (TOC analysis)
+            self.metadata.original_html = original_html
+
             # Create document
             document = Document(root=self.root, metadata=self.metadata)
             
