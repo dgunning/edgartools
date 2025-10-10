@@ -3,21 +3,22 @@ Main HTML parser implementation.
 """
 
 import time
-from typing import List, Optional, Dict, Any, Union
-from edgar.documents.types import XBRLFact
+from typing import List, Union
+
 import lxml.html
 from lxml import etree
 from lxml.html import HtmlElement
 
 from edgar.documents.config import ParserConfig
 from edgar.documents.document import Document, DocumentMetadata
-from edgar.documents.nodes import DocumentNode
 from edgar.documents.exceptions import (
     HTMLParsingError, DocumentTooLargeError, InvalidConfigurationError
 )
-from edgar.documents.strategies.document_builder import DocumentBuilder
-from edgar.documents.processors.preprocessor import HTMLPreprocessor
+from edgar.documents.nodes import DocumentNode
 from edgar.documents.processors.postprocessor import DocumentPostprocessor
+from edgar.documents.processors.preprocessor import HTMLPreprocessor
+from edgar.documents.strategies.document_builder import DocumentBuilder
+from edgar.documents.types import XBRLFact
 from edgar.documents.utils import get_cache_manager
 from edgar.documents.utils.html_utils import remove_xml_declaration, create_lxml_parser
 

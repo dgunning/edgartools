@@ -5,7 +5,6 @@ Document model for parsed HTML.
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Iterator
 
-from rich.console import Console
 from rich.table import Table as RichTable
 from rich.console import Group
 from rich.text import Text

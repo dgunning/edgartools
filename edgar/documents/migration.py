@@ -6,9 +6,9 @@ It is intentionally not used internally but kept for user convenience.
 Do not remove without versioning consideration.
 """
 
-from typing import Optional, List, Dict, Any, Union
+from typing import Optional, List, Dict, Any
 import warnings
-from edgar.documents import HTMLParser, Document, ParserConfig, parse_html
+from edgar.documents import HTMLParser, Document, ParserConfig
 from edgar.documents.search import DocumentSearch
 
 
