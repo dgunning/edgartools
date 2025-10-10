@@ -212,8 +212,8 @@ class HTMLParser:
         metadata = DocumentMetadata()
         
         # Use filing type from config if provided (avoids expensive detection)
-        if self.config.filing_type:
-            metadata.filing_type = self.config.filing_type
+        if self.config.form:
+            metadata.form = self.config.form
         
         # Try to extract from meta tags
         for meta in tree.xpath('//meta'):
@@ -223,7 +223,7 @@ class HTMLParser:
             if name == 'company':
                 metadata.company = content
             elif name == 'filing-type':
-                metadata.filing_type = content
+                metadata.form = content
             elif name == 'cik':
                 metadata.cik = content
             elif name == 'filing-date':
@@ -241,16 +241,16 @@ class HTMLParser:
             if len(parts) >= 2:
                 if not metadata.company:
                     metadata.company = parts[0].strip()
-                if not metadata.filing_type:
-                    metadata.filing_type = parts[1].strip()
+                if not metadata.form:
+                    metadata.form = parts[1].strip()
         
         # Try to extract from document content
-        if not metadata.filing_type:
+        if not metadata.form:
             # Look for form type in first 1000 chars
             text_start = html[:1000].upper()
             for form_type in ['10-K', '10-Q', '8-K', 'DEF 14A', 'S-1']:
                 if form_type in text_start:
-                    metadata.filing_type = form_type
+                    metadata.form = form_type
                     break
         
         return metadata

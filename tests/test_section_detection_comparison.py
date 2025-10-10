@@ -60,13 +60,13 @@ def get_old_parser_sections(cik: str, filing_date: str) -> Set[str]:
         pytest.skip(f"Could not get sections from old parser: {e}")
 
 
-def get_new_parser_sections(html_path: Path, filing_type: str = '10-K') -> Dict[str, float]:
+def get_new_parser_sections(html_path: Path, form: str = '10-K') -> Dict[str, float]:
     """
     Get sections from new hybrid parser.
 
     Args:
         html_path: Path to HTML file
-        filing_type: Filing type (10-K, 10-Q, etc.)
+        form: Form type (10-K, 10-Q, etc.)
 
     Returns:
         Dict mapping section names to confidence scores
@@ -75,7 +75,7 @@ def get_new_parser_sections(html_path: Path, filing_type: str = '10-K') -> Dict[
         pytest.skip(f"HTML fixture not found: {html_path}")
 
     html = html_path.read_text()
-    config = ParserConfig(filing_type=filing_type)
+    config = ParserConfig(form=form)
     doc = parse_html(html, config)
 
     sections = doc.sections
@@ -306,7 +306,7 @@ class TestDetectionMethodDistribution:
             pytest.skip("Apple 10-K fixture not found")
 
         html = html_path.read_text()
-        config = ParserConfig(filing_type='10-K')
+        config = ParserConfig(form='10-K')
         doc = parse_html(html, config)
 
         sections = doc.sections

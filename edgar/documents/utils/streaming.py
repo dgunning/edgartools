@@ -353,7 +353,7 @@ class StreamingParser:
         parts = title.split(' - ')
         if len(parts) >= 2:
             self.metadata.company = parts[0].strip()
-            self.metadata.filing_type = parts[1].strip()
+            self.metadata.form = parts[1].strip()
             if len(parts) >= 3:
                 self.metadata.filing_date = parts[2].strip()
     
@@ -366,7 +366,7 @@ class StreamingParser:
             if name == 'company':
                 self.metadata.company = content
             elif name == 'filing-type':
-                self.metadata.filing_type = content
+                self.metadata.form = content
             elif name == 'cik':
                 self.metadata.cik = content
             elif name == 'filing-date':

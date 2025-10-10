@@ -18,7 +18,7 @@ def aapl_10q_doc():
         pytest.skip(f"Fixture not found: {fixture_path}")
 
     html_content = fixture_path.read_text()
-    config = ParserConfig(filing_type='10-Q', detect_sections=True)
+    config = ParserConfig(form='10-Q', detect_sections=True)
     return parse_html(html_content, config=config)
 
 

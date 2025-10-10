@@ -17,14 +17,14 @@ class DetectionThresholds:
         disagreement_penalty: Multiplier when methods disagree (<1.0)
         boundary_overlap_penalty: Multiplier for overlapping sections (<1.0)
         enable_cross_validation: Whether to run cross-validation (slower but more accurate)
-        thresholds_by_filing_type: Filing-specific threshold overrides
+        thresholds_by_form: Filing-specific threshold overrides
     """
     min_confidence: float = 0.6
     cross_validation_boost: float = 1.2
     disagreement_penalty: float = 0.8
     boundary_overlap_penalty: float = 0.9
     enable_cross_validation: bool = False  # Disabled by default for performance
-    thresholds_by_filing_type: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    thresholds_by_form: Dict[str, Dict[str, float]] = field(default_factory=dict)
 
 
 @dataclass
@@ -77,7 +77,7 @@ class ParserConfig:
     # Section detection
     detect_sections: bool = True
     eager_section_extraction: bool = False  # Extract sections during parsing vs. on first access (default: lazy)
-    filing_type: Optional[str] = None  # Required for section detection (e.g. '10-K', '10-Q', '8-K')
+    form: Optional[str] = None  # Required for section detection (e.g. '10-K', '10-Q', '8-K')
     detection_thresholds: DetectionThresholds = field(default_factory=DetectionThresholds)
     section_patterns: Dict[str, List[str]] = field(default_factory=lambda: {
         'business': [

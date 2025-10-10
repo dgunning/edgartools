@@ -14,11 +14,11 @@ from edgar.documents.types import XBRLFact, SearchResult
 class DocumentMetadata:
     """
     Document metadata.
-    
+
     Contains information about the source document and parsing process.
     """
     source: Optional[str] = None
-    filing_type: Optional[str] = None
+    form: Optional[str] = None
     company: Optional[str] = None
     cik: Optional[str] = None
     accession_number: Optional[str] = None
@@ -31,12 +31,12 @@ class DocumentMetadata:
     xbrl_data: Optional[List[XBRLFact]] = None
     preserve_whitespace: bool = False
     original_html: Optional[str] = None  # Store original HTML for anchor analysis
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary."""
         return {
             'source': self.source,
-            'filing_type': self.filing_type,
+            'form': self.form,
             'company': self.company,
             'cik': self.cik,
             'accession_number': self.accession_number,
@@ -202,28 +202,28 @@ class Document:
         Each section includes confidence score and detection method.
         """
         if self._sections is None:
-            # Get filing type from config or metadata
-            filing_type = None
-            if self._config and hasattr(self._config, 'filing_type'):
-                filing_type = self._config.filing_type
-            elif self.metadata and self.metadata.filing_type:
-                filing_type = self.metadata.filing_type
+            # Get form type from config or metadata
+            form = None
+            if self._config and hasattr(self._config, 'form'):
+                form = self._config.form
+            elif self.metadata and self.metadata.form:
+                form = self.metadata.form
 
-            # Only detect sections for supported filing types (including amendments)
-            # Normalize filing type by removing /A suffix for amendments
-            base_filing_type = filing_type.replace('/A', '') if filing_type else None
+            # Only detect sections for supported form types (including amendments)
+            # Normalize form type by removing /A suffix for amendments
+            base_form = form.replace('/A', '') if form else None
 
-            if base_filing_type and base_filing_type in ['10-K', '10-Q', '8-K']:
+            if base_form and base_form in ['10-K', '10-Q', '8-K']:
                 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
                 # Pass thresholds from config if available
                 thresholds = self._config.detection_thresholds if self._config else None
-                # Use base filing type for detection (10-K/A → 10-K)
-                detector = HybridSectionDetector(self, base_filing_type, thresholds)
+                # Use base form type for detection (10-K/A → 10-K)
+                detector = HybridSectionDetector(self, base_form, thresholds)
                 self._sections = detector.detect_sections()
             else:
                 # Fallback to pattern-based for other types or unknown
                 from edgar.documents.extractors.pattern_section_extractor import SectionExtractor
-                extractor = SectionExtractor(filing_type) if filing_type else SectionExtractor()
+                extractor = SectionExtractor(form) if form else SectionExtractor()
                 self._sections = extractor.extract(self)
 
         return self._sections
@@ -554,7 +554,7 @@ class Document:
         """Extract key information from document."""
         return {
             'company': self.metadata.company,
-            'filing_type': self.metadata.filing_type,
+            'form': self.metadata.form,
             'filing_date': self.metadata.filing_date,
             'sections': list(self.sections.keys()),
             'financial_tables': sum(1 for t in self.tables if t.is_financial_table),
@@ -640,7 +640,7 @@ class Document:
             issues.append("No sections detected")
         
         # Check for common sections in filings
-        if self.metadata.filing_type in ['10-K', '10-Q']:
+        if self.metadata.form in ['10-K', '10-Q']:
             expected_sections = ['business', 'risk_factors', 'mda']
             missing = [s for s in expected_sections if s not in self.sections]
             if missing:
@@ -688,7 +688,7 @@ class LLMDocument:
         parts = []
         
         # Add metadata context
-        parts.append(f"Document: {self.metadata.get('filing_type', 'Unknown')}")
+        parts.append(f"Document: {self.metadata.get('form', 'Unknown')}")
         parts.append(f"Company: {self.metadata.get('company', 'Unknown')}")
         parts.append(f"Date: {self.metadata.get('filing_date', 'Unknown')}")
         parts.append("")

@@ -68,7 +68,7 @@ class TestFilingIntegration:
     def test_sections_access(self, sample_filing):
         """Sections should be accessible."""
         html = sample_filing.html()
-        doc = parse_html(html, ParserConfig(filing_type='10-K'))
+        doc = parse_html(html, ParserConfig(form='10-K'))
         sections = doc.sections
 
         assert isinstance(sections, dict)
@@ -326,7 +326,7 @@ class TestSpecificFilingTypes:
         company = Company('AAPL')
         filing = company.get_filings(form='10-K').latest(1)
         html = filing.html()
-        doc = parse_html(html, ParserConfig(filing_type='10-K'))
+        doc = parse_html(html, ParserConfig(form='10-K'))
 
         # 10-K specific checks
         sections = doc.sections

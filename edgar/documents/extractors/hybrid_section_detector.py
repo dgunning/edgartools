@@ -37,22 +37,22 @@ class HybridSectionDetector:
         ...     print(f"{name}: {section.confidence:.2f} ({section.detection_method})")
     """
 
-    def __init__(self, document: Document, filing_type: str, thresholds: Optional[DetectionThresholds] = None):
+    def __init__(self, document: Document, form: str, thresholds: Optional[DetectionThresholds] = None):
         """
         Initialize hybrid detector.
 
         Args:
             document: Document to extract sections from
-            filing_type: Filing type ('10-K', '10-Q', '8-K')
+            form: Filing type ('10-K', '10-Q', '8-K')
             thresholds: Detection thresholds configuration
         """
         self.document = document
-        self.filing_type = filing_type
+        self.form = form
         self.thresholds = thresholds or DetectionThresholds()
 
         # Initialize detection strategies
         self.toc_detector = TOCSectionDetector(document)
-        self.pattern_extractor = SectionExtractor(filing_type)
+        self.pattern_extractor = SectionExtractor(form)
 
     def detect_sections(self) -> Dict[str, Section]:
         """
@@ -475,8 +475,8 @@ class HybridSectionDetector:
         """
         # Check for filing-specific thresholds
         min_conf = self.thresholds.min_confidence
-        if self.filing_type in self.thresholds.thresholds_by_filing_type:
-            filing_thresholds = self.thresholds.thresholds_by_filing_type[self.filing_type]
+        if self.form in self.thresholds.thresholds_by_form:
+            filing_thresholds = self.thresholds.thresholds_by_form[self.form]
             min_conf = filing_thresholds.get('min_confidence', min_conf)
 
         filtered = {}

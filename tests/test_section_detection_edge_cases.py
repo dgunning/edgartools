@@ -18,7 +18,7 @@ def test_missing_toc():
         <p>We face various risks...</p>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     detector = HybridSectionDetector(doc, '10-K')
@@ -37,7 +37,7 @@ def test_malformed_headers():
         <p>Risk factors content...</p>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     sections = doc.sections
@@ -55,7 +55,7 @@ def test_empty_sections():
         <h1>Item 2. Properties</h1>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     sections = doc.sections
@@ -75,7 +75,7 @@ def test_overlapping_sections():
         <div id="s2">Item 2 content at position 100</div>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     detector = HybridSectionDetector(doc, '10-K')
@@ -96,7 +96,7 @@ def test_api_vs_legacy_html():
     if Path('tests/fixtures/html/aapl/10k/aapl-10-k-2024-11-01.html').exists():
         apple_html = Path('tests/fixtures/html/aapl/10k/aapl-10-k-2024-11-01.html').read_text()
 
-        config = ParserConfig(filing_type='10-K')
+        config = ParserConfig(form='10-K')
         doc = parse_html(apple_html, config)
 
         sections = doc.sections
@@ -114,7 +114,7 @@ def test_no_sections_in_document():
         <p>Contact us for more information.</p>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     sections = doc.sections
@@ -134,7 +134,7 @@ def test_mixed_case_item_headers():
         <p>Content...</p>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     sections = doc.sections
@@ -155,7 +155,7 @@ def test_sections_with_unicode():
         <p>We face risks including: • Market volatility • Competition</p>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     sections = doc.sections
@@ -179,7 +179,7 @@ def test_nested_sections():
         </div>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     sections = doc.sections
@@ -195,7 +195,7 @@ def test_large_document_performance():
         import time
 
         apple_html = Path('tests/fixtures/html/aapl/10k/aapl-10-k-2024-11-01.html').read_text()
-        config = ParserConfig(filing_type='10-K')
+        config = ParserConfig(form='10-K')
 
         start = time.time()
         doc = parse_html(apple_html, config)
@@ -218,7 +218,7 @@ def test_sections_with_tables():
         <p>None.</p>
     </body></html>"""
 
-    config = ParserConfig(filing_type='10-K')
+    config = ParserConfig(form='10-K')
     doc = parse_html(html, config)
 
     sections = doc.sections

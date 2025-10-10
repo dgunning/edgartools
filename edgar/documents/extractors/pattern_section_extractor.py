@@ -121,14 +121,14 @@ class SectionExtractor:
         }
     }
     
-    def __init__(self, filing_type: Optional[str] = None):
+    def __init__(self, form: Optional[str] = None):
         """
         Initialize section extractor.
         
         Args:
-            filing_type: Type of filing (10-K, 10-Q, 8-K, etc.)
+            form: Type of filing (10-K, 10-Q, 8-K, etc.)
         """
-        self.filing_type = filing_type
+        self.form = form
     
     def extract(self, document: Document) -> Dict[str, Section]:
         """
@@ -142,21 +142,21 @@ class SectionExtractor:
         """
         # Get filing type from instance, metadata, or document config
         # NOTE: We no longer auto-detect filing type (expensive and unnecessary)
-        filing_type = None
+        form = None
 
-        if self.filing_type:
-            filing_type = self.filing_type
-        elif document.metadata and document.metadata.filing_type:
-            filing_type = document.metadata.filing_type
-        elif hasattr(document, '_config') and document._config and document._config.filing_type:
-            filing_type = document._config.filing_type
+        if self.form:
+            form = self.form
+        elif document.metadata and document.metadata.form:
+            form = document.metadata.form
+        elif hasattr(document, '_config') and document._config and document._config.form:
+            form = document._config.form
 
         # Only extract sections for forms that have standard sections
-        if not filing_type or filing_type not in ['10-K', '10-Q', '8-K']:
+        if not form or form not in ['10-K', '10-Q', '8-K']:
             return {}  # No filing type or unsupported form = no section detection
 
         # Get patterns for filing type
-        patterns = self.SECTION_PATTERNS.get(filing_type, {})
+        patterns = self.SECTION_PATTERNS.get(form, {})
         if not patterns:
             return {}  # No patterns defined for this form type
 
@@ -165,7 +165,7 @@ class SectionExtractor:
 
         # For 10-Q, detect Part I/Part II boundaries
         part_context = None
-        if filing_type == '10-Q':
+        if form == '10-Q':
             part_context = self._detect_10q_parts(headers)
 
         # Match headers to sections
@@ -174,12 +174,12 @@ class SectionExtractor:
         # Create section objects
         return self._create_sections(sections, document)
     
-    # NOTE: _detect_filing_type() removed - form type should be known from context
+    # NOTE: _detect_form() removed - form type should be known from context
     # Filing metadata should be set by the caller (Filing class, TenK/TenQ, etc.)
 
-    # NOTE: _infer_filing_type_from_headers() kept for backward compatibility but not used
+    # NOTE: _infer_form_from_headers() kept for backward compatibility but not used
     # in normal flow anymore. Form type should always be provided explicitly.
-    def _infer_filing_type_from_headers(self, document: Document) -> str:
+    def _infer_form_from_headers(self, document: Document) -> str:
         """
         Infer filing type from section headers.
 

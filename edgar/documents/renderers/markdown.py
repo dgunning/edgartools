@@ -384,8 +384,8 @@ class MarkdownRenderer:
         
         if document.metadata.company:
             lines.append(f"company: {document.metadata.company}")
-        if document.metadata.filing_type:
-            lines.append(f"filing_type: {document.metadata.filing_type}")
+        if document.metadata.form:
+            lines.append(f"form: {document.metadata.form}")
         if document.metadata.filing_date:
             lines.append(f"filing_date: {document.metadata.filing_date}")
         if document.metadata.cik:

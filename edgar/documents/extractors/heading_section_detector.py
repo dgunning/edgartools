@@ -32,7 +32,7 @@ class HeadingSectionDetector:
     def __init__(
         self,
         document: Document,
-        filing_type: Optional[str] = None,
+        form: Optional[str] = None,
         min_confidence: float = 0.5  # Lower threshold, let hybrid detector filter
     ):
         """
@@ -40,11 +40,11 @@ class HeadingSectionDetector:
 
         Args:
             document: Document to analyze
-            filing_type: Optional filing type for context ('10-K', '10-Q', '8-K')
+            form: Optional filing type for context ('10-K', '10-Q', '8-K')
             min_confidence: Minimum confidence for headings (default 0.5)
         """
         self.document = document
-        self.filing_type = filing_type
+        self.form = form
         self.min_confidence = min_confidence
 
     def detect(self) -> Optional[Dict[str, Section]]:
