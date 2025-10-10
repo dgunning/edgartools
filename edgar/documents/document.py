@@ -5,6 +5,12 @@ Document model for parsed HTML.
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Iterator
 
+from rich.console import Console
+from rich.table import Table as RichTable
+from rich.console import Group
+from rich.text import Text
+from edgar.richtools import repr_rich
+
 from edgar.documents.nodes import Node, SectionNode
 from edgar.documents.table_nodes import TableNode
 from edgar.documents.types import XBRLFact, SearchResult
@@ -167,6 +173,227 @@ class Section:
         return (None, None)
 
 
+class Sections(Dict[str, Section]):
+    """
+    Dictionary wrapper for sections with rich display support.
+
+    Behaves like a normal dict but provides beautiful terminal display
+    via __rich__() method when printed in rich-enabled environments.
+    """
+
+    def __rich__(self):
+        """Return rich representation for display."""
+        if not self:
+            return Text("No sections detected", style="dim")
+
+        # Create summary table
+        table = RichTable(title="Document Sections", show_header=True, header_style="bold magenta")
+        table.add_column("Section", style="cyan", no_wrap=True)
+        table.add_column("Title", style="white")
+        table.add_column("Confidence", justify="right", style="green")
+        table.add_column("Method", style="yellow")
+        table.add_column("Part/Item", style="blue")
+
+        # Sort sections by part (roman numeral) and item number
+        def sort_key(item):
+            name, section = item
+            # Convert roman numerals to integers for sorting
+            roman_to_int = {'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5}
+
+            part = section.part.lower() if section.part else ''
+            item_str = section.item if section.item else ''
+
+            # Extract part number
+            part_num = roman_to_int.get(part, 0)
+
+            # Extract item number and letter
+            import re
+            if item_str:
+                match = re.match(r'(\d+)([a-z]?)', item_str.lower())
+                if match:
+                    item_num = int(match.group(1))
+                    item_letter = match.group(2) or ''
+                    return (part_num, item_num, item_letter)
+
+            # Fallback to name sorting
+            return (part_num, 999, name)
+
+        sorted_sections = sorted(self.items(), key=sort_key)
+
+        # Add rows for each section
+        for name, section in sorted_sections:
+            # Format confidence as percentage
+            confidence = f"{section.confidence:.1%}"
+
+            # Format part/item info
+            part_item = ""
+            if section.part and section.item:
+                part_item = f"Part {section.part}, Item {section.item}"
+            elif section.item:
+                part_item = f"Item {section.item}"
+            elif section.part:
+                part_item = f"Part {section.part}"
+
+            # Truncate title if too long
+            title = section.title
+            if len(title) > 50:
+                title = title[:47] + "..."
+
+            table.add_row(
+                name,
+                title,
+                confidence,
+                section.detection_method,
+                part_item
+            )
+
+        # Create summary stats
+        total = len(self)
+        high_conf = sum(1 for s in self.values() if s.confidence >= 0.8)
+        methods = {}
+        for section in self.values():
+            methods[section.detection_method] = methods.get(section.detection_method, 0) + 1
+
+        summary = Text()
+        summary.append(f"\nTotal: {total} sections | ", style="dim")
+        summary.append(f"High confidence (≥80%): {high_conf} | ", style="dim")
+        summary.append(f"Methods: {', '.join(f'{m}={c}' for m, c in methods.items())}", style="dim")
+
+        return Group(table, summary)
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    def get_item(self, item: str, part: str = None) -> Optional[Section]:
+        """
+        Get section by item number with optional part specification.
+
+        Args:
+            item: Item identifier (e.g., "1", "1A", "7", "Item 1", "Item 7A")
+            part: Optional part specification (e.g., "I", "II", "Part I", "Part II")
+                  If not specified and multiple parts contain the item, returns first match.
+
+        Returns:
+            Section object if found, None otherwise
+
+        Examples:
+            >>> sections.get_item("1")           # Returns first Item 1 (any part)
+            >>> sections.get_item("1", "I")      # Returns Part I, Item 1
+            >>> sections.get_item("Item 1A")     # Returns first Item 1A
+            >>> sections.get_item("7A", "II")    # Returns Part II, Item 7A
+        """
+        # Normalize item string - remove "Item " prefix if present
+        item_clean = item.replace("Item ", "").replace("item ", "").strip().upper()
+
+        # Normalize part string if provided
+        part_clean = None
+        if part:
+            part_clean = part.replace("Part ", "").replace("part ", "").replace("PART ", "").strip().upper()
+
+        # Search through sections
+        for name, section in self.items():
+            if section.item and section.item.upper() == item_clean:
+                if part_clean is None:
+                    # No part specified - return first match
+                    return section
+                elif section.part and section.part.upper() == part_clean:
+                    # Part matches
+                    return section
+
+        return None
+
+    def get_part(self, part: str) -> Dict[str, Section]:
+        """
+        Get all sections in a specific part.
+
+        Args:
+            part: Part identifier (e.g., "I", "II", "Part I", "Part II")
+
+        Returns:
+            Dictionary of sections in that part
+
+        Examples:
+            >>> sections.get_part("I")        # All Part I sections
+            >>> sections.get_part("Part II")  # All Part II sections
+        """
+        # Normalize part string
+        part_clean = part.replace("Part ", "").replace("part ", "").replace("PART ", "").strip().upper()
+
+        result = {}
+        for name, section in self.items():
+            if section.part and section.part.upper() == part_clean:
+                result[name] = section
+
+        return result
+
+    def get(self, key, default=None):
+        """
+        Enhanced get method that supports flexible key formats.
+
+        Supports:
+        - Standard dict key: "part_i_item_1"
+        - Item number: "Item 1", "1", "1A"
+        - Part+Item: ("I", "1"), ("Part II", "7A")
+
+        Args:
+            key: Section key (string or tuple)
+            default: Default value if not found
+
+        Returns:
+            Section object or default value
+        """
+        # Try standard dict lookup first
+        if isinstance(key, str):
+            result = super().get(key, None)
+            if result is not None:
+                return result
+
+            # Try as item number
+            result = self.get_item(key)
+            if result is not None:
+                return result
+
+        # Try as (part, item) tuple
+        elif isinstance(key, tuple) and len(key) == 2:
+            part, item = key
+            result = self.get_item(item, part)
+            if result is not None:
+                return result
+
+        return default
+
+    def __getitem__(self, key):
+        """
+        Enhanced __getitem__ that supports flexible key formats.
+
+        Supports:
+        - Standard dict key: sections["part_i_item_1"]
+        - Item number: sections["Item 1"], sections["1A"]
+        - Part+Item tuple: sections[("I", "1")], sections[("II", "7A")]
+
+        Raises KeyError if not found (standard dict behavior).
+        """
+        # Try standard dict lookup first
+        if isinstance(key, str):
+            try:
+                return super().__getitem__(key)
+            except KeyError:
+                # Try as item number
+                result = self.get_item(key)
+                if result is not None:
+                    return result
+
+        # Try as (part, item) tuple
+        elif isinstance(key, tuple) and len(key) == 2:
+            part, item = key
+            result = self.get_item(item, part)
+            if result is not None:
+                return result
+
+        # Not found - raise KeyError
+        raise KeyError(key)
+
+
 @dataclass
 class Document:
     """
@@ -181,7 +408,7 @@ class Document:
     metadata: DocumentMetadata = field(default_factory=DocumentMetadata)
 
     # Cached extractions
-    _sections: Optional[Dict[str, Section]] = field(default=None, init=False, repr=False)
+    _sections: Optional[Sections] = field(default=None, init=False, repr=False)
     _tables: Optional[List[TableNode]] = field(default=None, init=False, repr=False)
     _headings: Optional[List[Node]] = field(default=None, init=False, repr=False)
     _xbrl_facts: Optional[List[XBRLFact]] = field(default=None, init=False, repr=False)
@@ -189,7 +416,7 @@ class Document:
     _config: Optional[Any] = field(default=None, init=False, repr=False)  # ParserConfig reference
     
     @property
-    def sections(self) -> Dict[str, Section]:
+    def sections(self) -> Sections:
         """
         Get document sections using hybrid multi-strategy detection.
 
@@ -198,8 +425,8 @@ class Document:
         2. Heading-based (0.7-0.9 confidence)
         3. Pattern-based (0.6 confidence)
 
-        Returns a dictionary mapping section names to Section objects.
-        Each section includes confidence score and detection method.
+        Returns a Sections dictionary wrapper that provides rich terminal display
+        via __rich__() method. Each section includes confidence score and detection method.
         """
         if self._sections is None:
             # Get form type from config or metadata
@@ -219,12 +446,15 @@ class Document:
                 thresholds = self._config.detection_thresholds if self._config else None
                 # Use base form type for detection (10-K/A → 10-K)
                 detector = HybridSectionDetector(self, base_form, thresholds)
-                self._sections = detector.detect_sections()
+                detected_sections = detector.detect_sections()
             else:
                 # Fallback to pattern-based for other types or unknown
                 from edgar.documents.extractors.pattern_section_extractor import SectionExtractor
                 extractor = SectionExtractor(form) if form else SectionExtractor()
-                self._sections = extractor.extract(self)
+                detected_sections = extractor.extract(self)
+
+            # Wrap detected sections in Sections class for rich display
+            self._sections = Sections(detected_sections)
 
         return self._sections
     
