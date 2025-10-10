@@ -19,6 +19,7 @@ from edgar.documents.strategies.document_builder import DocumentBuilder
 from edgar.documents.processors.preprocessor import HTMLPreprocessor
 from edgar.documents.processors.postprocessor import DocumentPostprocessor
 from edgar.documents.utils import get_cache_manager
+from edgar.documents.utils.html_utils import remove_xml_declaration, create_lxml_parser
 
 
 class HTMLParser:
@@ -178,12 +179,9 @@ class HTMLParser:
         """Parse HTML with lxml."""
         try:
             # Remove XML declaration if present
-            if html.strip().startswith('<?xml'):
-                end_of_decl = html.find('?>')
-                if end_of_decl != -1:
-                    html = html[end_of_decl + 2:].lstrip()
-            
-            parser = lxml.html.HTMLParser(
+            html = remove_xml_declaration(html)
+
+            parser = create_lxml_parser(
                 remove_blank_text=not self.config.preserve_whitespace,
                 remove_comments=True,
                 recover=True,
@@ -284,7 +282,7 @@ class HTMLParser:
         """
         try:
             # Parse HTML without preprocessing to preserve all XBRL content
-            parser = lxml.html.HTMLParser(
+            parser = create_lxml_parser(
                 remove_blank_text=False,
                 remove_comments=False,
                 recover=True,
@@ -292,11 +290,8 @@ class HTMLParser:
             )
             
             # Remove XML declaration if present
-            if html.strip().startswith('<?xml'):
-                end_of_decl = html.find('?>')
-                if end_of_decl != -1:
-                    html = html[end_of_decl + 2:].lstrip()
-            
+            html = remove_xml_declaration(html)
+
             tree = lxml.html.fromstring(html, parser=parser)
             
             # Use XBRL extractor

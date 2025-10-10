@@ -1,5 +1,9 @@
 """
 Migration and compatibility layer for transitioning from old parser to new.
+
+NOTE: This compatibility layer is documented for user migration from v1.x → v2.0
+It is intentionally not used internally but kept for user convenience.
+Do not remove without versioning consideration.
 """
 
 from typing import Optional, List, Dict, Any, Union

@@ -7,6 +7,8 @@ import lxml.html
 from edgar.documents.document import Document, DocumentMetadata
 from edgar.documents.nodes import DocumentNode, HeadingNode, ParagraphNode, TextNode, ContainerNode
 from edgar.documents.table_nodes import TableNode, Row, Cell
+# html_utils moved to utils/, maintained there
+from edgar.documents.utils.html_utils import remove_xml_declaration, create_lxml_parser
 
 
 class SimpleHTMLParser:
@@ -15,24 +17,22 @@ class SimpleHTMLParser:
     def parse(self, html: str) -> Document:
         """Parse HTML into document."""
         # Parse with lxml
-        parser = lxml.html.HTMLParser(
+        parser = create_lxml_parser(
             remove_blank_text=True,
             remove_comments=True,
-            recover=True
+            recover=True,
+            encoding=None  # Simple parser doesn't specify encoding
         )
-        
+
         if not html.strip():
             # Return empty document
             root = DocumentNode()
             metadata = DocumentMetadata()
             return Document(root=root, metadata=metadata)
-        
+
         # Remove XML declaration if present
-        if html.startswith('<?xml'):
-            end_of_decl = html.find('?>')
-            if end_of_decl != -1:
-                html = html[end_of_decl + 2:]
-        
+        html = remove_xml_declaration(html)
+
         tree = lxml.html.fromstring(html, parser=parser)
         
         # Create document
