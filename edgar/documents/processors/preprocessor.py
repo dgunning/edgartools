@@ -5,6 +5,7 @@ HTML preprocessor for cleaning and normalizing HTML before parsing.
 import re
 
 from edgar.documents.config import ParserConfig
+from edgar.documents.utils.html_utils import remove_xml_declaration
 
 
 class HTMLPreprocessor:
@@ -95,10 +96,7 @@ class HTMLPreprocessor:
             html = html[1:]
         
         # Remove XML declaration if present
-        if html.strip().startswith('<?xml'):
-            end_of_decl = html.find('?>')
-            if end_of_decl != -1:
-                html = html[end_of_decl + 2:].lstrip()
+        html = remove_xml_declaration(html)
         
         # Fix common character encoding issues
         html = self._fix_encoding_issues(html)

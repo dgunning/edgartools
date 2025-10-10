@@ -3,16 +3,19 @@ Streaming parser for large HTML documents.
 """
 
 import io
-from typing import Dict, Any
+from typing import Dict, Any, TYPE_CHECKING
 
 from lxml import etree
 from lxml.html import HtmlElement
 
 from edgar.documents.config import ParserConfig
-from edgar.documents.document import Document, DocumentMetadata
 from edgar.documents.exceptions import HTMLParsingError, DocumentTooLargeError
-from edgar.documents.nodes import DocumentNode, HeadingNode, ParagraphNode, TextNode, SectionNode, ContainerNode
-from edgar.documents.table_nodes import TableNode
+
+# Use TYPE_CHECKING to avoid circular imports
+if TYPE_CHECKING:
+    from edgar.documents.document import Document, DocumentMetadata
+    from edgar.documents.nodes import DocumentNode, HeadingNode, ParagraphNode, TextNode, SectionNode, ContainerNode
+    from edgar.documents.table_nodes import TableNode
 from edgar.documents.types import SemanticType
 
 
@@ -44,6 +47,10 @@ class StreamingParser:
     
     def _reset_state(self):
         """Reset parser state."""
+        # Import here to avoid circular import
+        from edgar.documents.document import DocumentMetadata
+        from edgar.documents.nodes import DocumentNode
+
         self.current_section = None
         self.node_buffer = []
         self.metadata = DocumentMetadata()
@@ -54,8 +61,8 @@ class StreamingParser:
         self.in_table = False
         self.table_buffer = []
         self.bytes_processed = 0
-    
-    def parse(self, html: str) -> Document:
+
+    def parse(self, html: str) -> "Document":
         """
         Parse HTML in streaming mode.
 
@@ -112,7 +119,8 @@ class StreamingParser:
             # Store original HTML in metadata for section detection (TOC analysis)
             self.metadata.original_html = original_html
 
-            # Create document
+            # Create document (import here to avoid circular import)
+            from edgar.documents.document import Document
             document = Document(root=self.root, metadata=self.metadata)
 
             # Store config reference (required for section detection)
@@ -141,17 +149,20 @@ class StreamingParser:
     
     def _handle_start_tag(self, elem: HtmlElement):
         """Handle opening tag."""
+        # Import node types at runtime to avoid circular imports
+        from edgar.documents.nodes import ContainerNode
+
         tag = elem.tag.lower()
-        
+
         # Track tag stack
         self.tag_stack.append(tag)
-        
+
         # Extract metadata from early elements
         if tag == 'title' and elem.text:
             self._extract_title_metadata(elem.text)
         elif tag == 'meta':
             self._extract_meta_metadata(elem)
-        
+
         # Handle specific tags
         if tag == 'body':
             # Create a container for body content
@@ -196,9 +207,12 @@ class StreamingParser:
     
     def _start_heading(self, elem: HtmlElement):
         """Start processing a heading."""
+        # Import node types at runtime to avoid circular imports
+        from edgar.documents.nodes import HeadingNode
+
         level = int(elem.tag[1])
         text = self._get_text_content(elem)
-        
+
         # Create heading node
         heading = HeadingNode(
             level=level,
@@ -215,28 +229,37 @@ class StreamingParser:
     
     def _end_heading(self, elem: HtmlElement):
         """End processing a heading."""
+        # Import node types at runtime to avoid circular imports
+        from edgar.documents.nodes import HeadingNode
+
         # Get text content from element
         text = self._get_text_content(elem)
         if text and self.node_buffer and isinstance(self.node_buffer[-1], HeadingNode):
             self.node_buffer[-1].content = text
-        
+
         # Clear any accumulated text buffer
         self.text_buffer.clear()
     
     def _start_paragraph(self, elem: HtmlElement):
         """Start processing a paragraph."""
+        # Import node types at runtime to avoid circular imports
+        from edgar.documents.nodes import ParagraphNode
+
         para = ParagraphNode()
-        
+
         # Get style if present
         style_attr = elem.get('style')
         if style_attr and self.strategies.get('style_parser'):
             style_parser = self.strategies['style_parser']
             para.style = style_parser.parse(style_attr)
-        
+
         self.node_buffer.append(para)
     
     def _end_paragraph(self, elem: HtmlElement):
         """End processing a paragraph."""
+        # Import node types at runtime to avoid circular imports
+        from edgar.documents.nodes import ParagraphNode, TextNode
+
         # Get text content from element
         text = self._get_text_content(elem)
         if text and self.node_buffer and isinstance(self.node_buffer[-1], ParagraphNode):
@@ -256,8 +279,11 @@ class StreamingParser:
     
     def _end_table(self, elem: HtmlElement):
         """End processing a table."""
+        # Import node types at runtime to avoid circular imports
+        from edgar.documents.table_nodes import TableNode
+
         self.in_table = False
-        
+
         # Process table with table processor if available
         if self.strategies.get('table_processing'):
             processor = self.strategies['table_processing']
@@ -268,22 +294,25 @@ class StreamingParser:
             # Basic table node
             table = TableNode()
             self.node_buffer.append(table)
-        
+
         self.table_buffer.clear()
     
     def _start_section(self, elem: HtmlElement):
         """Start processing a section."""
+        # Import node types at runtime to avoid circular imports
+        from edgar.documents.nodes import SectionNode
+
         section = SectionNode()
-        
+
         # Get section attributes
         section_id = elem.get('id')
         if section_id:
             section.metadata['id'] = section_id
-        
+
         section_class = elem.get('class')
         if section_class:
             section.metadata['class'] = section_class
-        
+
         self.current_section = section
         self.node_buffer.append(section)
     
@@ -354,7 +383,7 @@ class ChunkedStreamingParser(StreamingParser):
     parse might use too much memory.
     """
     
-    def parse(self, html: str) -> Document:
+    def parse(self, html: str) -> "Document":
         """
         Parse HTML in chunks.
         
@@ -371,14 +400,18 @@ class ChunkedStreamingParser(StreamingParser):
             chunk = html[i:i + self.CHUNK_SIZE]
             self._process_chunk(chunk, is_last=(i + self.CHUNK_SIZE >= len(html)))
         
-        # Create document
+        # Create document (import here to avoid circular import)
+        from edgar.documents.document import Document
         return Document(root=self.root, metadata=self.metadata)
     
     def _process_chunk(self, chunk: str, is_last: bool):
         """Process a single chunk of HTML."""
+        # Import node types at runtime to avoid circular imports
+        from edgar.documents.nodes import TextNode
+
         # This is a simplified implementation
         # In practice, would need to handle tags that span chunks
-        
+
         # Extract text and basic structure
         text = self._extract_text_from_chunk(chunk)
         if text:

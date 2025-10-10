@@ -10,6 +10,8 @@ from rich.table import Table as RichTable
 from edgar.richtools import rich_to_text
 from edgar.documents.nodes import Node
 from edgar.documents.types import NodeType, TableType
+from edgar.documents.cache_mixin import CacheableMixin
+from edgar.documents.table_utils import process_table_matrix
 
 
 @dataclass
@@ -134,10 +136,10 @@ class Row:
 
 
 @dataclass
-class TableNode(Node):
+class TableNode(Node, CacheableMixin):
     """
     Table node with structured data.
-    
+
     Supports complex table structures with multi-level headers,
     merged cells, and semantic understanding.
     """
@@ -146,44 +148,34 @@ class TableNode(Node):
     rows: List[Row] = field(default_factory=list)
     footer: List[Row] = field(default_factory=list)
     table_type: TableType = TableType.GENERAL
-    
+
     # Table metadata
     caption: Optional[str] = None
     summary: Optional[str] = None
-    
+
     @property
     def semantic_type(self) -> TableType:
         """Get semantic type of table (alias for table_type)."""
         return self.table_type
-    
+
     @semantic_type.setter
     def semantic_type(self, value: TableType):
         """Set semantic type of table."""
         self.table_type = value
-    
+
     def text(self) -> str:
         """Convert table to text representation with caching for performance."""
-        # Use cached result if available
-        if hasattr(self, '_text_cache') and self._text_cache is not None:
-            return self._text_cache
-        
-        # Check if we should use fast rendering
-        config = getattr(self, '_config', None)
-        if config and getattr(config, 'fast_table_rendering', False):
-            result = self._fast_text_rendering()
-        else:
-            # Use Rich renderer (current behavior)
-            rich_table = self.render(width=195)
-            result = rich_to_text(rich_table)
-        
-        # Cache for future calls
-        self._text_cache = result
-        return result
-    
-    def clear_text_cache(self):
-        """Clear cached text representation if table data changes."""
-        if hasattr(self, '_text_cache'):
-            self._text_cache = None
+        def _generate_text():
+            # Check if we should use fast rendering
+            config = getattr(self, '_config', None)
+            if config and getattr(config, 'fast_table_rendering', False):
+                return self._fast_text_rendering()
+            else:
+                # Use Rich renderer (current behavior)
+                rich_table = self.render(width=195)
+                return rich_to_text(rich_table)
+
+        return self._get_cached_text(_generate_text)
     
     def _fast_text_rendering(self) -> str:
         """
@@ -246,17 +238,7 @@ class TableNode(Node):
         # Build matrix to handle colspan/rowspan WITHOUT merging currencies
         # Old parser keeps $ as separate cells to maintain alignment
         matrix = TableMatrix()
-        matrix.build_from_rows(self.headers, self.rows)
-        
-        # Remove spacing columns
-        analyzer = ColumnAnalyzer(matrix)
-        clean_matrix = matrix.filter_spacing_columns()
-        
-        # Merge currency columns
-        currency_merger = CurrencyColumnMerger(clean_matrix)
-        currency_merger.detect_currency_pairs()
-        if currency_merger.merge_pairs:
-            clean_matrix = currency_merger.apply_merges()
+        clean_matrix = process_table_matrix(matrix, self.headers, self.rows)
         
         # Create rich table with styling (following old parser approach)
         # Use minimal padding when we have symbol columns
@@ -897,23 +879,12 @@ class TableNode(Node):
     
     def to_dataframe(self) -> pd.DataFrame:
         """Convert table to pandas DataFrame with proper colspan/rowspan handling."""
-        from edgar.documents.utils.table_matrix import TableMatrix, ColumnAnalyzer
-        from edgar.documents.utils.currency_merger import CurrencyColumnMerger
-        
+        from edgar.documents.utils.table_matrix import TableMatrix
+
         # Build matrix to handle colspan/rowspan WITHOUT merging currencies
         # Old parser keeps $ as separate cells to maintain alignment
         matrix = TableMatrix()
-        matrix.build_from_rows(self.headers, self.rows)
-        
-        # Remove spacing columns
-        analyzer = ColumnAnalyzer(matrix)
-        clean_matrix = matrix.filter_spacing_columns()
-        
-        # Merge currency columns ($ + value)
-        currency_merger = CurrencyColumnMerger(clean_matrix)
-        currency_merger.detect_currency_pairs()
-        if currency_merger.merge_pairs:
-            clean_matrix = currency_merger.apply_merges()
+        clean_matrix = process_table_matrix(matrix, self.headers, self.rows)
         
         # Extract headers with proper alignment
         if self.headers:
