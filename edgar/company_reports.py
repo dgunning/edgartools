@@ -154,8 +154,12 @@ class TenK(CompanyReport):
             },
             "ITEM 1B": {
                 "Title": "Unresolved Staff Comments",
-                "Description": "Any comments from the SEC staff on the company’s previous filings" +
+                "Description": "Any comments from the SEC staff on the company's previous filings" +
                                "that remain unresolved."
+            },
+            "ITEM 1C": {
+                "Title": "Cybersecurity",
+                "Description": "Cybersecurity risk management, strategy, and governance disclosures."
             },
             "ITEM 2": {
                 "Title": "Properties",
