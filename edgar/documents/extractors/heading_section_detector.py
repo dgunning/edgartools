@@ -147,6 +147,9 @@ class HeadingSectionDetector:
                 # Add child to section
                 section_node.add_child(child)
 
+            # Parse section name to extract part and item identifiers
+            part, item = Section.parse_section_name(section_name)
+
             # Create Section object
             section = Section(
                 name=section_name,
@@ -155,7 +158,9 @@ class HeadingSectionDetector:
                 start_offset=0,  # Would need actual text position
                 end_offset=0,  # Would need actual text position
                 confidence=header_info.confidence,
-                detection_method='heading'
+                detection_method='heading',
+                part=part,
+                item=item
             )
 
             return section

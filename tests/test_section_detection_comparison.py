@@ -271,21 +271,24 @@ class TestSectionDetectionComparison:
         sections = get_new_parser_sections(html_path, '10-K')
         section_names_lower = {name.lower() for name in sections.keys()}
 
-        # Standard 10-K item numbers
+        # Standard 10-K item numbers (support both formats: "item_1" and "part_i_item_1")
         expected_items = [
-            'item 1',      # Business
-            'item 1a',     # Risk Factors
-            'item 2',      # Properties
-            'item 7',      # MD&A
-            'item 8',      # Financial Statements
+            ('1', 'item_1'),      # Business
+            ('1a', 'item_1a'),    # Risk Factors
+            ('2', 'item_2'),      # Properties
+            ('7', 'item_7'),      # MD&A
+            ('8', 'item_8'),      # Financial Statements
         ]
 
         found = []
-        for item in expected_items:
-            if any(item in name for name in section_names_lower):
-                found.append(item)
+        for item_num, item_name in expected_items:
+            # Check for either simple format (item_1) or part-aware format (part_i_item_1)
+            if any(item_name in name for name in section_names_lower) or \
+               any(f'item_{item_num}' in name for name in section_names_lower):
+                found.append(item_name)
 
         print(f"\nFound standard items: {found}")
+        print(f"Section names: {sorted(section_names_lower)[:10]}")
 
         # Should find at least half of expected items
         assert len(found) >= len(expected_items) // 2, \

@@ -103,6 +103,9 @@ class TOCSectionDetector:
                         return extractor.get_section_text(name, include_subsections=True, clean=clean) or ""
                     return extract_text
 
+                # Parse section name to extract part and item identifiers
+                part, item = Section.parse_section_name(section_name)
+
                 # Create Section with TOC confidence
                 section = Section(
                     name=section_name,
@@ -112,6 +115,8 @@ class TOCSectionDetector:
                     end_offset=section_length,
                     confidence=0.95,  # TOC-based = high confidence
                     detection_method='toc',
+                    part=part,
+                    item=item,
                     _text_extractor=make_text_extractor(self.extractor, section_name)
                 )
 

@@ -384,6 +384,9 @@ class SectionExtractor:
                     section_node.add_child(n)
                 position += 1
             
+            # Parse section name to extract part and item identifiers
+            part, item = Section.parse_section_name(section_name)
+
             # Create Section object
             section = Section(
                 name=section_name,
@@ -392,7 +395,9 @@ class SectionExtractor:
                 start_offset=start_pos,
                 end_offset=end_pos,
                 confidence=0.7,  # Pattern-based detection = moderate confidence
-                detection_method='pattern'  # Method: regex pattern matching
+                detection_method='pattern',  # Method: regex pattern matching
+                part=part,
+                item=item
             )
             
             sections[section_name] = section

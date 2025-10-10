@@ -18,6 +18,7 @@ class TOCSection:
     normalized_name: str
     section_type: str  # 'item', 'part', 'other'
     order: int
+    part: Optional[str] = None  # NEW: "Part I", "Part II", or None for 10-K
 
 
 class TOCAnalyzer:
@@ -47,30 +48,41 @@ class TOCAnalyzer:
     def analyze_toc_structure(self, html_content: str) -> Dict[str, str]:
         """
         Analyze HTML content to extract section mappings from TOC.
-        
+
         Args:
             html_content: Raw HTML content
-            
+
         Returns:
             Dict mapping normalized section names to anchor IDs
         """
         section_mapping = {}
-        
+
         try:
             # Handle XML declaration issues
             if html_content.startswith('<?xml'):
                 html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-            
+
             tree = lxml_html.fromstring(html_content)
-            
+
             # Find all anchor links that could be TOC links
             anchor_links = tree.xpath('//a[@href]')
-            
+
             toc_sections = []
-            
+            current_part = None  # Track current part context for 10-Q filings
+            part_pattern = re.compile(r'^\s*Part\s+([IVX]+)\b', re.IGNORECASE)
+
             for link in anchor_links:
                 href = link.get('href', '').strip()
                 text = (link.text_content() or '').strip()
+
+                # Check if this link or its row represents a part header
+                # Part headers in 10-Q TOCs typically appear as separate rows: "Part I", "Part II"
+                part_match = part_pattern.match(text)
+                if part_match:
+                    # Update current part context
+                    current_part = f"Part {part_match.group(1).upper()}"
+                    # Don't create a section for the part header itself
+                    continue
 
                 # Look for internal anchor links
                 if href.startswith('#') and text:
@@ -93,17 +105,18 @@ class TOCAnalyzer:
                                 anchor_id=anchor_id,
                                 normalized_name=normalized_name,
                                 section_type=section_type,
-                                order=order
+                                order=order,
+                                part=current_part  # Assign current part context
                             )
                             toc_sections.append(toc_section)
-            
+
             # Build mapping prioritizing the most standard section names
             section_mapping = self._build_section_mapping(toc_sections)
-            
+
         except Exception as e:
             # Return empty mapping on error - fallback to other methods
             pass
-        
+
         return section_mapping
 
     def _extract_preceding_item_label(self, link_element) -> str:
@@ -374,23 +387,37 @@ class TOCAnalyzer:
         return result
     
     def _build_section_mapping(self, toc_sections: List[TOCSection]) -> Dict[str, str]:
-        """Build final section mapping, handling duplicates intelligently."""
+        """Build final section mapping, handling duplicates intelligently.
+
+        For 10-Q filings with part context, generates part-aware section names
+        like "part_i_item_1" and "part_ii_item_1" to distinguish sections
+        with the same item number across different parts.
+        """
         # Sort sections by order
         toc_sections.sort(key=lambda x: x.order)
-        
+
         mapping = {}
         seen_names = set()
-        
+
         for section in toc_sections:
-            normalized = section.normalized_name
-            
+            # Generate part-aware section name for 10-Q filings
+            if section.part:
+                # Convert "Part I" -> "part_i", "Part II" -> "part_ii"
+                part_key = section.part.lower().replace(' ', '_')
+                # Convert "Item 1" -> "item_1", "Item 1A" -> "item_1a"
+                item_key = section.normalized_name.lower().replace(' ', '_')
+                section_name = f"{part_key}_{item_key}"
+            else:
+                # 10-K filings: use normalized name as-is
+                section_name = section.normalized_name
+
             # Skip if we already have this section (prefer first occurrence)
-            if normalized in seen_names:
+            if section_name in seen_names:
                 continue
-            
-            mapping[normalized] = section.anchor_id
-            seen_names.add(normalized)
-        
+
+            mapping[section_name] = section.anchor_id
+            seen_names.add(section_name)
+
         return mapping
     
     def get_section_suggestions(self, html_content: str) -> List[str]:

@@ -58,7 +58,7 @@ class Section:
     Represents a logical section of the document (e.g., Risk Factors, MD&A).
 
     Attributes:
-        name: Section identifier (e.g., "item_1", "risk_factors")
+        name: Section identifier (e.g., "item_1", "part_i_item_1", "risk_factors")
         title: Display title (e.g., "Item 1 - Business")
         node: Node containing section content
         start_offset: Character position where section starts
@@ -66,6 +66,8 @@ class Section:
         confidence: Detection confidence score (0.0-1.0)
         detection_method: How section was detected ('toc', 'heading', 'pattern')
         validated: Whether section has been cross-validated
+        part: Optional part identifier for 10-Q filings ("I", "II", or None for 10-K)
+        item: Optional item identifier (e.g., "1", "1A", "2")
         _text_extractor: Optional callback for lazy text extraction (for TOC-based sections)
     """
     name: str
@@ -76,6 +78,8 @@ class Section:
     confidence: float = 1.0  # Detection confidence (0.0-1.0)
     detection_method: str = 'unknown'  # 'toc', 'heading', 'pattern', or 'unknown'
     validated: bool = False  # Cross-validated flag
+    part: Optional[str] = None  # Part identifier for 10-Q: "I", "II", or None for 10-K
+    item: Optional[str] = None  # Item identifier: "1", "1A", "2", etc.
     _text_extractor: Optional[Any] = field(default=None, repr=False)  # Callback for lazy text extraction
 
     def text(self, **kwargs) -> str:
@@ -114,8 +118,53 @@ class Section:
                 snippet=snippet,
                 section=self.name
             ))
-        
+
         return results
+
+    @staticmethod
+    def parse_section_name(section_name: str) -> tuple[Optional[str], Optional[str]]:
+        """
+        Parse section name to extract part and item identifiers.
+
+        Handles both 10-Q part-aware names and 10-K simple names.
+
+        Args:
+            section_name: Section identifier (e.g., "part_i_item_1", "item_1a", "risk_factors")
+
+        Returns:
+            Tuple of (part, item) where:
+            - part: "I", "II", or None for 10-K sections
+            - item: "1", "1A", "2", etc. or None if not an item section
+
+        Examples:
+            >>> Section.parse_section_name("part_i_item_1")
+            ("I", "1")
+            >>> Section.parse_section_name("part_ii_item_1a")
+            ("II", "1A")
+            >>> Section.parse_section_name("item_7")
+            (None, "7")
+            >>> Section.parse_section_name("risk_factors")
+            (None, None)
+        """
+        import re
+
+        section_lower = section_name.lower()
+
+        # Match 10-Q format: "part_i_item_1", "part_ii_item_1a"
+        part_item_match = re.match(r'part_([ivx]+)_item_(\d+[a-z]?)', section_lower)
+        if part_item_match:
+            part_roman = part_item_match.group(1).upper()
+            item_num = part_item_match.group(2).upper()
+            return (part_roman, item_num)
+
+        # Match 10-K format: "item_1", "item_1a", "item_7"
+        item_match = re.match(r'item_(\d+[a-z]?)', section_lower)
+        if item_match:
+            item_num = item_match.group(1).upper()
+            return (None, item_num)
+
+        # Not a structured item section
+        return (None, None)
 
 
 @dataclass
@@ -271,9 +320,58 @@ class Document:
         searcher = DocumentSearch(self)
         return searcher.search(query, top_k=top_k)
     
-    def get_section(self, section_name: str) -> Optional[Section]:
-        """Get section by name."""
-        return self.sections.get(section_name)
+    def get_section(self, section_name: str, part: Optional[str] = None) -> Optional[Section]:
+        """
+        Get section by name with optional part specification for 10-Q filings.
+
+        Args:
+            section_name: Section identifier (e.g., "item_1", "part_i_item_1")
+            part: Optional part specification for 10-Q ("I", "II", "i", "ii")
+                  If provided, searches for "part_{part}_{section_name}"
+
+        Returns:
+            Section object if found, None otherwise
+
+        Examples:
+            # 10-K usage (unchanged)
+            >>> doc.get_section("item_1")  # Returns Item 1
+
+            # 10-Q usage with explicit part
+            >>> doc.get_section("item_1", part="I")  # Returns Part I Item 1
+            >>> doc.get_section("item_1", part="II")  # Returns Part II Item 1
+
+            # 10-Q usage with full name
+            >>> doc.get_section("part_i_item_1")  # Returns Part I Item 1
+        """
+        # If part is specified, construct part-aware name
+        if part:
+            part_normalized = part.upper()
+            # Remove "item_" prefix if present in section_name
+            item_name = section_name.replace("item_", "") if section_name.startswith("item_") else section_name
+            full_name = f"part_{part_normalized.lower()}_item_{item_name.lower()}"
+            return self.sections.get(full_name)
+
+        # Direct lookup (works for both 10-K "item_1" and 10-Q "part_i_item_1")
+        section = self.sections.get(section_name)
+        if section:
+            return section
+
+        # If not found and looks like an item without part, check if we have multiple parts
+        # In that case, raise a helpful error
+        if section_name.startswith("item_") or section_name.replace("_", "").startswith("item"):
+            # Check if we have part-aware sections (10-Q)
+            matching_sections = [name for name in self.sections.keys()
+                               if section_name in name and "part_" in name]
+            if matching_sections:
+                # Multiple parts available - user needs to specify which one
+                parts = sorted(set(s.split("_")[1] for s in matching_sections if s.startswith("part_")))
+                raise ValueError(
+                    f"Ambiguous section '{section_name}' in 10-Q filing. "
+                    f"Found in parts: {parts}. "
+                    f"Please specify part: get_section('{section_name}', part='I') or part='II'"
+                )
+
+        return None
     
     def extract_section_text(self, section_name: str) -> Optional[str]:
         """Extract text from specific section."""
