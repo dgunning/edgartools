@@ -12,8 +12,7 @@ from edgar.documents.utils.cache import (
     CacheStats
 )
 from edgar.documents.utils.streaming import (
-    StreamingParser,
-    ChunkedStreamingParser
+    StreamingParser
 )
 from edgar.documents.utils.table_matrix import (
     TableMatrix,
@@ -41,7 +40,6 @@ __all__ = [
     'cached',
     'CacheStats',
     'StreamingParser',
-    'ChunkedStreamingParser',
     'TableMatrix',
     'ColumnAnalyzer',
     'MatrixCell',
