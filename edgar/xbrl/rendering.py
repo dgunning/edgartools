@@ -508,7 +508,12 @@ eps_concepts = [
     'us-gaap_IncomeLossFromContinuingOperationsPerBasicShare',
     'us-gaap_IncomeLossFromContinuingOperationsPerDilutedShare',
     'us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerBasicShare',
-    'us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerDilutedShare'
+    'us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerDilutedShare',
+    'us-gaap_NetAssetValuePerShare',
+    'us-gaap_BookValuePerShare',
+    'us-gaap_CommonStockDividendsPerShareDeclared',
+    'us-gaap_CommonStockDividendsPerShareCashPaid',
+    'us-gaap_CommonStockParOrStatedValuePerShare',
 ]
 
 
