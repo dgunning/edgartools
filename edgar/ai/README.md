@@ -62,7 +62,10 @@ edgartools-mcp
   "mcpServers": {
     "edgartools": {
       "command": "python",
-      "args": ["-m", "edgar.ai"]
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
     }
   }
 }
@@ -74,11 +77,16 @@ edgartools-mcp
   "mcpServers": {
     "edgartools": {
       "command": "python",
-      "args": ["-m", "edgar.ai"]
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
     }
   }
 }
 ```
+
+**Note:** The `EDGAR_IDENTITY` environment variable is required by the SEC for API requests.
 
 After configuration, restart your MCP client and try: *"Get information about Apple Inc"*
 

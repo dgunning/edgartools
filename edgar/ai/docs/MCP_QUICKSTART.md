@@ -39,11 +39,16 @@ Both methods work identically and will start the MCP server listening on stdin/s
   "mcpServers": {
     "edgartools": {
       "command": "python",
-      "args": ["-m", "edgar.ai"]
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
     }
   }
 }
 ```
+
+**Note**: The `EDGAR_IDENTITY` environment variable is required by the SEC for API requests. Replace with your actual name and email.
 
 **After configuring:**
 1. Restart Claude Desktop
@@ -59,7 +64,10 @@ Both methods work identically and will start the MCP server listening on stdin/s
   "mcpServers": {
     "edgartools": {
       "command": "python",
-      "args": ["-m", "edgar.ai"]
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
     }
   }
 }
@@ -74,7 +82,10 @@ Both methods work identically and will start the MCP server listening on stdin/s
   "mcpServers": {
     "edgartools": {
       "command": "python",
-      "args": ["-m", "edgar.ai"]
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
     }
   }
 }
@@ -110,14 +121,35 @@ Get the most recent SEC filings across all companies.
 
 ## Environment Variables
 
-Set your SEC identity (recommended):
+### EDGAR_IDENTITY (Recommended)
 
-```bash
-# Add to your ~/.bashrc or ~/.zshrc
-export EDGAR_IDENTITY="Your Name your.email@company.com"
+The SEC requires proper identification for all API requests. You can configure this in two ways:
+
+**Option 1: In MCP Client Configuration (Recommended)**
+
+Set it in your MCP client config as shown in the examples above:
+```json
+"env": {
+  "EDGAR_IDENTITY": "Your Name your.email@example.com"
+}
 ```
 
-Without this, EdgarTools uses a default identity. The SEC requires proper identification for API requests.
+**Option 2: Shell Environment Variable**
+
+Add to your `~/.bashrc` or `~/.zshrc`:
+```bash
+export EDGAR_IDENTITY="Your Name your.email@example.com"
+```
+
+**What happens if not set:**
+- Server starts with a warning message
+- SEC API may rate-limit or return errors
+- The server will log helpful instructions for configuring it
+
+**SEC Requirements:**
+- Format: "Full Name email@domain.com"
+- Must be a valid email you monitor
+- Used by SEC to contact you if issues arise with your API usage
 
 ## Troubleshooting
 

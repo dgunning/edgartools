@@ -12,6 +12,7 @@ Usage:
 
 import asyncio
 import logging
+import os
 from typing import Any
 
 from mcp import Resource, Tool
@@ -26,6 +27,34 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger("edgartools-mcp")
+
+
+def setup_edgar_identity():
+    """Configure SEC identity from environment variable.
+
+    The SEC requires proper identification for API requests. This function
+    checks for the EDGAR_IDENTITY environment variable and configures it.
+    If not set, logs a warning but continues (API errors will guide user).
+    """
+    try:
+        from edgar import set_identity
+
+        identity = os.environ.get('EDGAR_IDENTITY')
+        if not identity:
+            logger.warning(
+                "EDGAR_IDENTITY environment variable not set. "
+                "The SEC requires proper identification for API requests.\n"
+                "Add to your MCP client configuration:\n"
+                '  "env": {"EDGAR_IDENTITY": "Your Name your.email@example.com"}\n'
+                "Or set in your shell: export EDGAR_IDENTITY=\"Your Name your.email@example.com\""
+            )
+            return
+
+        set_identity(identity)
+        logger.info(f"SEC identity configured: {identity}")
+
+    except Exception as e:
+        logger.error(f"Error setting up EDGAR identity: {e}")
 
 # Create the server
 app = Server("edgartools")
@@ -247,6 +276,9 @@ def main():
     try:
         # Get package version for server version
         from edgar.__about__ import __version__
+
+        # Configure EDGAR identity from environment
+        setup_edgar_identity()
 
         async def run_server():
             """Run the async MCP server."""
