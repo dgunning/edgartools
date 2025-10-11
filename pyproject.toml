@@ -19,6 +19,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "License :: OSI Approved :: MIT License",
@@ -49,7 +50,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 ai = [
     "mcp==1.12.3; python_version>='3.10'",  # Model Context Protocol (Python 3.10+ only)
-    "tiktoken>=0.10.0",                      # Token counting for OpenAI models
+    "tiktoken>=0.10.0",                     # Token counting for OpenAI models
 ]
 
 ai-dev = [
@@ -61,6 +62,9 @@ ai-dev = [
 Documentation = "https://dgunning.github.io/edgartools/"
 Issues = "https://github.com/dgunning/edgartools/issues"
 Source = "https://github.com/dgunning/edgartools"
+
+[project.scripts]
+edgartools-mcp = "edgar.ai.mcp_server:main"
 
 [tool.hatch.version]
 path = "edgar/__about__.py"
