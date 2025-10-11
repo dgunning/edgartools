@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.18.0 - 2025-10-10
+
+### Added
+- **Sections Wrapper Class**: New convenient interface for accessing filing sections
+  - `Sections` class provides rich display of all available sections in a filing
+  - Flexible access patterns: by item number, by part, or by full section identifier
+  - Supports multiple key formats (e.g., "Item 1", "item1", "1" all work)
+  - Convenient properties for common sections: `business`, `risk_factors`, `mda`, `financials`
+  - Integrated with filing objects for seamless section navigation
+  - Example:
+    ```python
+    filing = Company("AAPL").get_filings(form="10-K").latest()
+    sections = filing.sections  # Rich display shows all available sections
+    business = sections.business  # Access by property
+    item1 = sections["Item 1"]   # Access by item number
+    ```
+
+### Fixed
+- **Issue #455: Per-Share Metric Scaling in XBRL Balance Sheets** - Fixed incorrect scaling of per-share metrics
+  - **Problem**: MainStreet Capital's NAV per share displayed as $0.03 instead of correct $31.65
+  - **Root Cause**: Per-share metrics were incorrectly treated as regular monetary values, applying standard scaling (millions/thousands) when they should remain as-is
+  - **Solution**: Enhanced XBRL rendering to detect per-share concepts and preserve their original scale
+  - **Impact**: All per-share metrics (NAV per share, book value per share, etc.) now display with correct values
+  - **Verification**: Tested against SEC filings and company-reported values
+
+- **Issue #453: Missing Item 1C (Cybersecurity) in 10-K Structure** - Added support for Cybersecurity disclosure section
+  - **Problem**: Item 1C (Cybersecurity) was missing from 10-K filing structure definition
+  - **Solution**: Added Item 1C to TenK FilingStructure to support SEC's cybersecurity disclosure requirements
+  - **Impact**: Enables access to cybersecurity disclosures in 10-K filings filed after the SEC rule effective date
+  - **Coverage**: Properly handles both filings with and without Item 1C for backwards compatibility
+
+### Enhanced
+- **Code Quality**: Import optimizations and code hygiene improvements across multiple modules
+  - Removed unused imports and dead code
+  - Consolidated duplicate utilities to improve maintainability
+  - Enhanced test coverage and documentation
+  - Improved code organization in documents package
+
+### Technical
+- **HTML Parsing Infrastructure**: Comprehensive rewrite of HTML parsing and section detection
+  - Replaced legacy parsing with high-performance streaming parser
+  - Implemented confidence-based section detection with multiple strategies
+  - Added hybrid orchestration for robust section identification
+  - Enhanced table rendering with FastTableRenderer for improved performance
+  - Support for both TOC-based and pattern-based section detection
+  - Increased default max_document_size from 50MB to 100MB for large filings
+  - Added comprehensive HTML fixtures and test coverage
+
 ## Release 4.17.1 - 2025-10-06
 
 ### Fixed
