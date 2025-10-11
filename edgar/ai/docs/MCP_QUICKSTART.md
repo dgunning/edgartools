@@ -238,6 +238,47 @@ If any checks fail, the test will show specific error messages and installation 
 4. **Check server logs:**
    The server logs to stderr. Check your MCP client's developer console for any errors.
 
+## Migration from Legacy Setup
+
+If you're currently using the old `run_mcp_server.py` entry point, here's how to migrate:
+
+### Old Configuration (Deprecated):
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python",
+      "args": ["/absolute/path/to/edgartools/edgar/ai/run_mcp_server.py"]
+    }
+  }
+}
+```
+
+### New Configuration:
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python",
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your@email.com"
+      }
+    }
+  }
+}
+```
+
+### Benefits of Migrating:
+- ✅ No absolute file paths required
+- ✅ Works from any directory
+- ✅ Proper SEC identity configuration
+- ✅ Simpler configuration
+- ✅ Better error messages
+- ✅ Verification tool support (`--test` flag)
+
+**Note:** The old entry point still works but shows a deprecation warning. It will be removed in a future version.
+
 ## Next Steps
 
 - Read the [full MCP documentation](./edgartools-mcp-ai-support.md) for advanced features
