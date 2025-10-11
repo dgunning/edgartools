@@ -45,28 +45,42 @@ context = enhance_financial_fact_llm_context(
 Run EdgarTools as an MCP server for AI agents:
 
 ```bash
-# Start the MCP server
-python edgar/ai/run_mcp_server.py
+# Using Python module (recommended)
+python -m edgar.ai
 
-# Or run directly:
-python edgar/ai/mcp/simple_server.py
+# Using console script (after pip install)
+edgartools-mcp
 ```
 
-Configure in Claude Desktop:
+**Quick Setup:** See [MCP Quickstart Guide](docs/MCP_QUICKSTART.md) for complete setup instructions.
+
+#### Client Configuration Examples
+
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 ```json
 {
-  "tools": [
-    {
-      "type": "mcp",
-      "name": "edgartools",
-      "config": {
-        "command": "python",
-        "args": ["edgar/ai/run_mcp_server.py"]
-      }
+  "mcpServers": {
+    "edgartools": {
+      "command": "python",
+      "args": ["-m", "edgar.ai"]
     }
-  ]
+  }
 }
 ```
+
+**Cline/Continue.dev**:
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python",
+      "args": ["-m", "edgar.ai"]
+    }
+  }
+}
+```
+
+After configuration, restart your MCP client and try: *"Get information about Apple Inc"*
 
 ### 3. Semantic Enrichment
 
@@ -172,6 +186,7 @@ To contribute to the AI features:
 ## Documentation
 
 For more detailed documentation, see:
+- [MCP Quickstart Guide](docs/MCP_QUICKSTART.md) - Get started in 5 minutes
 - [AI Function Patterns](docs/ai-function-patterns.md)
 - [MCP Support Plan](docs/edgartools-mcp-ai-support.md)
 - [Package Structure](docs/ai-mcp-package-structure-plan.md)
