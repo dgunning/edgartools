@@ -718,7 +718,10 @@ async def download_bulk_data(
                                 raise ValueError(f"Attempted path traversal in tar file: {member.name}")
 
                             # Extract file and update progress
-                            tar.extract(member, str(download_path))
+                            try:
+                                tar.extract(member, str(download_path), filter="tar")
+                            except TypeError:
+                                tar.extract(member, str(download_path))
                             pbar.update(member.size)
             else:
                 raise ValueError(f"Unsupported file format: {filename}")
