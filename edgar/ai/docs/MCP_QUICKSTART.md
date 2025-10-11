@@ -200,7 +200,29 @@ brew install python@3.11
 
 ## Verification
 
-Test that everything is working:
+### Quick Test
+
+Before configuring your MCP client, verify the server is working:
+
+```bash
+python -m edgar.ai --test
+```
+
+**Expected output:**
+```
+Testing EdgarTools MCP Server Configuration...
+
+✓ EdgarTools v4.18.0 imports successfully
+✓ MCP framework available
+✓ EDGAR_IDENTITY configured: Your Name your@email.com
+✓ Core EdgarTools functionality available
+
+✓ All checks passed - MCP server is ready to run
+```
+
+If any checks fail, the test will show specific error messages and installation instructions.
+
+### Full Integration Test
 
 1. **Start the server manually:**
    ```bash
@@ -208,10 +230,12 @@ Test that everything is working:
    ```
    You should see: `Starting EdgarTools MCP Server v4.18.0`
 
-2. **Test in your MCP client:**
+2. **Configure your MCP client** (see configurations above)
+
+3. **Test in your MCP client:**
    Ask: "Get information about Apple Inc including financials"
 
-3. **Check server logs:**
+4. **Check server logs:**
    The server logs to stderr. Check your MCP client's developer console for any errors.
 
 ## Next Steps

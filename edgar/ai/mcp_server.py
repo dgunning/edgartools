@@ -308,5 +308,73 @@ def main():
         raise
 
 
+def test_server():
+    """Test that MCP server is properly configured and ready to run.
+
+    Returns:
+        bool: True if all checks pass, False otherwise
+    """
+    import sys
+
+    print("Testing EdgarTools MCP Server Configuration...\n")
+
+    all_passed = True
+
+    # Test 1: EdgarTools import check
+    try:
+        from edgar import Company
+        from edgar.__about__ import __version__
+        print(f"✓ EdgarTools v{__version__} imports successfully")
+    except ImportError as e:
+        print(f"✗ EdgarTools import error: {e}")
+        print("  Install with: pip install edgartools")
+        all_passed = False
+
+    # Test 2: MCP framework check
+    try:
+        from mcp.server import Server
+        print("✓ MCP framework available")
+    except ImportError as e:
+        print(f"✗ MCP framework not installed: {e}")
+        print("  Install with: pip install edgartools[ai]")
+        all_passed = False
+
+    # Test 3: Identity configuration check
+    identity = os.environ.get('EDGAR_IDENTITY')
+    if identity:
+        print(f"✓ EDGAR_IDENTITY configured: {identity}")
+    else:
+        print("⚠ EDGAR_IDENTITY not set (recommended)")
+        print("  Set with: export EDGAR_IDENTITY=\"Your Name your@email.com\"")
+        print("  Or configure in MCP client's env settings")
+
+    # Test 4: Quick functionality test
+    try:
+        from edgar import get_current_filings
+        print("✓ Core EdgarTools functionality available")
+    except Exception as e:
+        print(f"✗ EdgarTools functionality check failed: {e}")
+        all_passed = False
+
+    # Summary
+    print()
+    if all_passed:
+        print("✓ All checks passed - MCP server is ready to run")
+        print("\nTo start the server:")
+        print("  python -m edgar.ai")
+        print("  or")
+        print("  edgartools-mcp")
+        return True
+    else:
+        print("✗ Some checks failed - please fix the issues above")
+        return False
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+
+    # Check for --test flag
+    if "--test" in sys.argv or "-t" in sys.argv:
+        sys.exit(0 if test_server() else 1)
+    else:
+        main()
