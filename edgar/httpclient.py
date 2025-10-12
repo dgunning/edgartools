@@ -1,9 +1,23 @@
+import locale
 import os
 from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 from typing import AsyncGenerator, Generator, Optional
 
 import httpx
+
+# Fix for issue #457: Force C locale for httpxthrottlecache to avoid locale-dependent date parsing
+# httpxthrottlecache uses time.strptime() which is locale-dependent. On non-English systems
+# (Chinese, Japanese, German, etc.), HTTP date headers fail to parse because month/day names
+# are in the local language. Setting LC_TIME to 'C' ensures English date parsing.
+# See: https://github.com/dgunning/edgartools/issues/457
+try:
+    locale.setlocale(locale.LC_TIME, 'C')
+except (locale.Error, ValueError):
+    # If 'C' locale is not available, try to continue anyway
+    # This shouldn't happen on most systems, but better safe than sorry
+    pass
+
 from httpxthrottlecache import HttpxThrottleCache
 
 from edgar.core import get_identity, strtobool
