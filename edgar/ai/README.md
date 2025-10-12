@@ -195,6 +195,6 @@ To contribute to the AI features:
 
 For more detailed documentation, see:
 - [MCP Quickstart Guide](docs/MCP_QUICKSTART.md) - Get started in 5 minutes
-- [AI Function Patterns](docs/ai-function-patterns.md)
-- [MCP Support Plan](docs/edgartools-mcp-ai-support.md)
-- [Package Structure](docs/ai-mcp-package-structure-plan.md)
+- [AI Function Patterns](../../docs-internal/features/ai-function-patterns.md)
+- [MCP Support Plan](../../docs-internal/features/edgartools-mcp-ai-support.md)
+- [Package Structure](../../docs-internal/features/ai-mcp-package-structure-plan.md)

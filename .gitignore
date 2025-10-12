@@ -20,3 +20,4 @@ reinstall.sh
 # Generated from testing
 ratelimiter.sqlite*
 *_generated.html
+/coverage.xml
