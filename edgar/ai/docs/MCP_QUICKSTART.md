@@ -29,11 +29,27 @@ Both methods work identically and will start the MCP server listening on stdin/s
 
 ### Claude Desktop
 
-**Configuration File Location:**
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+**Step 1: Install Claude Desktop**
+- Download from https://claude.ai/download (macOS or Windows)
 
-**Configuration:**
+**Step 2: Configure the Server**
+
+You can configure EdgarTools MCP in two ways:
+
+**Option A: Using Claude Desktop Settings (Easier)**
+1. Open Claude Desktop
+2. Go to Settings (macOS: `Cmd+,` / Windows: `Ctrl+,`)
+3. Navigate to **Developer** tab
+4. Click **Edit Config** button
+5. This will open `claude_desktop_config.json` in your default editor
+
+**Option B: Edit Configuration File Directly**
+
+Configuration file location:
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Configuration (macOS):**
 ```json
 {
   "mcpServers": {
@@ -48,12 +64,31 @@ Both methods work identically and will start the MCP server listening on stdin/s
 }
 ```
 
-**Note**: The `EDGAR_IDENTITY` environment variable is required by the SEC for API requests. Replace with your actual name and email.
+**Configuration (Windows):**
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python",
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
+```
 
-**After configuring:**
-1. Restart Claude Desktop
-2. Look for the hammer icon (🔨) indicating MCP tools are available
-3. Try asking: "Get information about Apple Inc"
+**Important Notes:**
+- Replace `"Your Name your.email@example.com"` with your actual name and email
+- The `EDGAR_IDENTITY` is required by the SEC for API requests
+- Use forward slashes in paths, even on Windows
+
+**Step 3: Restart and Verify**
+1. Save the configuration file
+2. Restart Claude Desktop
+3. Look for the MCP server indicator (🔨) in the bottom-right corner of the chat input
+4. Try asking: "Research Apple Inc with financials"
 
 ### Cline (VS Code Extension)
 
@@ -93,21 +128,65 @@ Both methods work identically and will start the MCP server listening on stdin/s
 
 ## Available Tools
 
-Once connected, AI agents have access to:
+Once connected, AI agents have access to workflow-oriented tools designed for real-world research tasks:
 
-### 1. edgar_get_company
-Get comprehensive company information from SEC filings.
+### Workflow Tools (Recommended)
+
+#### 1. edgar_company_research
+Comprehensive company intelligence combining profile, financials, recent activity, and ownership in a single workflow.
+
+**Example prompts:**
+- "Research Tesla including financials and recent filings"
+- "Give me a detailed analysis of Apple Inc"
+- "Show me Microsoft's company profile with ownership data"
+
+**Parameters:**
+- `identifier` (required): Company ticker, CIK, or name
+- `include_financials` (default: true): Include latest financial statements
+- `include_filings` (default: true): Include recent filing activity summary
+- `include_ownership` (default: false): Include insider/institutional ownership highlights
+- `detail_level` (default: "standard"): Response detail - "minimal", "standard", or "detailed"
+
+**What it provides:**
+- Company profile (name, CIK, ticker, industry)
+- Latest financial metrics and statements
+- Recent filing activity summary
+- Ownership highlights (when requested)
+
+#### 2. edgar_analyze_financials
+Multi-period financial statement analysis for trend analysis and comparisons.
+
+**Example prompts:**
+- "Analyze Apple's income statement for the last 4 years"
+- "Show me Tesla's quarterly cash flow for the last 8 quarters"
+- "Compare Microsoft's income, balance sheet, and cash flow statements"
+
+**Parameters:**
+- `company` (required): Company ticker, CIK, or name
+- `periods` (default: 4): Number of periods to analyze
+- `annual` (default: true): Annual (true) or quarterly (false) periods
+- `statement_types` (default: ["income"]): Statements to include - "income", "balance", "cash_flow"
+
+**What it provides:**
+- Multi-period income statements
+- Multi-period balance sheets
+- Multi-period cash flow statements
+- Formatted for AI analysis and comparison
+
+### Basic Tools (Backward Compatibility)
+
+#### 3. edgar_get_company
+Get basic company information from SEC filings.
 
 **Example prompts:**
 - "Get information about Tesla"
-- "Show me Apple's company details with financials"
-- "Tell me about Microsoft using ticker MSFT"
+- "Show me Apple's company details"
 
 **Parameters:**
 - `identifier` (required): Company ticker, CIK, or name
 - `include_financials` (optional): Include latest financial statements
 
-### 2. edgar_current_filings
+#### 4. edgar_current_filings
 Get the most recent SEC filings across all companies.
 
 **Example prompts:**
@@ -233,10 +312,17 @@ If any checks fail, the test will show specific error messages and installation 
 2. **Configure your MCP client** (see configurations above)
 
 3. **Test in your MCP client:**
-   Ask: "Get information about Apple Inc including financials"
+
+   Try these example prompts:
+   - "Research Apple Inc with financials and recent filings"
+   - "Analyze Tesla's quarterly income statement for the last 4 quarters"
+   - "Get the latest 10-K filings"
 
 4. **Check server logs:**
    The server logs to stderr. Check your MCP client's developer console for any errors.
+
+5. **Verify tool availability:**
+   In Claude Desktop, look for the MCP indicator (🔨) in the bottom-right corner of the chat input. Clicking it should show available EdgarTools tools.
 
 ## Migration from Legacy Setup
 
