@@ -456,8 +456,8 @@ If you're currently using the old `run_mcp_server.py` entry point, here's how to
 
 ## Next Steps
 
-- Read the [full MCP documentation](./edgartools-mcp-ai-support.md) for advanced features
-- See [AI package structure](./ai-mcp-package-structure-plan.md) for architecture details
+- Read the [full MCP documentation](../../../docs-internal/features/edgartools-mcp-ai-support.md) for advanced features
+- See [AI package structure](../../../docs-internal/features/ai-mcp-package-structure-plan.md) for architecture details
 - Explore example notebooks showing MCP workflows
 
 ## Support
