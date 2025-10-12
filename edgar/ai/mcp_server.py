@@ -64,6 +64,73 @@ app = Server("edgartools")
 async def list_tools() -> list[Tool]:
     """List available tools."""
     return [
+        # New workflow-oriented tools
+        Tool(
+            name="edgar_company_research",
+            description="Comprehensive company intelligence including profile, financials, recent activity, and ownership",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "identifier": {
+                        "type": "string",
+                        "description": "Company ticker, CIK, or name"
+                    },
+                    "include_financials": {
+                        "type": "boolean",
+                        "description": "Include latest financial metrics and statements",
+                        "default": True
+                    },
+                    "include_filings": {
+                        "type": "boolean",
+                        "description": "Include recent filing activity summary",
+                        "default": True
+                    },
+                    "include_ownership": {
+                        "type": "boolean",
+                        "description": "Include insider and institutional ownership highlights",
+                        "default": False
+                    },
+                    "detail_level": {
+                        "type": "string",
+                        "enum": ["minimal", "standard", "detailed"],
+                        "description": "Level of detail in response (affects token usage)",
+                        "default": "standard"
+                    }
+                },
+                "required": ["identifier"]
+            }
+        ),
+        Tool(
+            name="edgar_analyze_financials",
+            description="Multi-period financial statement analysis",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "company": {
+                        "type": "string",
+                        "description": "Company ticker, CIK, or name"
+                    },
+                    "periods": {
+                        "type": "integer",
+                        "description": "Number of periods to analyze",
+                        "default": 4
+                    },
+                    "annual": {
+                        "type": "boolean",
+                        "description": "Annual (true) or quarterly (false) periods",
+                        "default": True
+                    },
+                    "statement_types": {
+                        "type": "array",
+                        "items": {"type": "string", "enum": ["income", "balance", "cash_flow"]},
+                        "description": "Financial statements to include",
+                        "default": ["income"]
+                    }
+                },
+                "required": ["company"]
+            }
+        ),
+        # Existing tools (backward compatibility)
         Tool(
             name="edgar_get_company",
             description="Get comprehensive company information from SEC filings",
@@ -111,7 +178,15 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
         arguments = {}
 
     try:
-        if name == "edgar_get_company":
+        # New workflow tools
+        if name == "edgar_company_research":
+            from edgar.ai.tools.company_research import handle_company_research
+            return await handle_company_research(arguments)
+        elif name == "edgar_analyze_financials":
+            from edgar.ai.tools.financial_analysis import handle_analyze_financials
+            return await handle_analyze_financials(arguments)
+        # Existing tools (backward compatibility)
+        elif name == "edgar_get_company":
             return await handle_get_company(arguments)
         elif name == "edgar_current_filings":
             return await handle_current_filings(arguments)
