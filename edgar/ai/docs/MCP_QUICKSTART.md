@@ -54,7 +54,7 @@ Configuration file location:
 {
   "mcpServers": {
     "edgartools": {
-      "command": "python",
+      "command": "python3",
       "args": ["-m", "edgar.ai"],
       "env": {
         "EDGAR_IDENTITY": "Your Name your.email@example.com"
@@ -79,6 +79,8 @@ Configuration file location:
 }
 ```
 
+**Important:** On macOS, use `python3` (not `python`) as the command. On Windows, use `python`.
+
 **Important Notes:**
 - Replace `"Your Name your.email@example.com"` with your actual name and email
 - The `EDGAR_IDENTITY` is required by the SEC for API requests
@@ -98,7 +100,7 @@ Configuration file location:
 {
   "mcpServers": {
     "edgartools": {
-      "command": "python",
+      "command": "python3",
       "args": ["-m", "edgar.ai"],
       "env": {
         "EDGAR_IDENTITY": "Your Name your.email@example.com"
@@ -107,6 +109,8 @@ Configuration file location:
   }
 }
 ```
+
+**Note:** Use `python3` on macOS/Linux, or `python` on Windows.
 
 ### Continue.dev
 
@@ -116,7 +120,7 @@ Configuration file location:
 {
   "mcpServers": {
     "edgartools": {
-      "command": "python",
+      "command": "python3",
       "args": ["-m", "edgar.ai"],
       "env": {
         "EDGAR_IDENTITY": "Your Name your.email@example.com"
@@ -125,6 +129,8 @@ Configuration file location:
   }
 }
 ```
+
+**Note:** Use `python3` on macOS/Linux, or `python` on Windows.
 
 ## Available Tools
 
@@ -232,6 +238,72 @@ export EDGAR_IDENTITY="Your Name your.email@example.com"
 
 ## Troubleshooting
 
+### Finding Logs
+
+Claude Desktop logs MCP server activity to help diagnose issues:
+
+**Log Locations:**
+- **macOS**: `~/Library/Logs/Claude/`
+  - Main log: `mcp.log`
+  - Server-specific: `mcp-server-edgartools.log`
+- **Windows**: `%APPDATA%\Claude\logs\`
+
+**Viewing logs:**
+```bash
+# macOS - watch logs in real-time
+tail -f ~/Library/Logs/Claude/mcp-server-edgartools.log
+
+# macOS - view recent errors
+tail -50 ~/Library/Logs/Claude/mcp-server-edgartools.log | grep error
+```
+
+### "spawn python ENOENT" Error
+
+**Issue:** Claude Desktop logs show `spawn python ENOENT` error
+
+**Where to check:** View logs at `~/Library/Logs/Claude/mcp-server-edgartools.log`
+
+**Cause:** The `python` command is not found in your system PATH. This is the most common issue on macOS.
+
+**Solution:**
+
+1. **Use `python3` instead of `python` (macOS/Linux):**
+   ```json
+   {
+     "mcpServers": {
+       "edgartools": {
+         "command": "python3",
+         "args": ["-m", "edgar.ai"]
+       }
+     }
+   }
+   ```
+
+2. **Or specify the full Python path:**
+
+   Find your Python path:
+   ```bash
+   which python3
+   ```
+
+   Then use the full path in your configuration:
+   ```json
+   {
+     "mcpServers": {
+       "edgartools": {
+         "command": "/opt/homebrew/bin/python3",
+         "args": ["-m", "edgar.ai"]
+       }
+     }
+   }
+   ```
+
+3. **Verify Python is accessible:**
+   ```bash
+   python3 --version
+   # Should show: Python 3.11.x or higher
+   ```
+
 ### Server won't start
 
 **Issue:** `ModuleNotFoundError: No module named 'mcp'`
@@ -239,6 +311,8 @@ export EDGAR_IDENTITY="Your Name your.email@example.com"
 **Solution:** Install AI dependencies
 ```bash
 pip install edgartools[ai]
+# or with pip3
+pip3 install edgartools[ai]
 ```
 
 ### Client can't find server
@@ -247,7 +321,7 @@ pip install edgartools[ai]
 
 **Solution:** Verify the command works from terminal first
 ```bash
-python -m edgar.ai
+python3 -m edgar.ai
 # Should show: Starting EdgarTools MCP Server v...
 # Press Ctrl+C to stop
 ```
@@ -340,7 +414,22 @@ If you're currently using the old `run_mcp_server.py` entry point, here's how to
 }
 ```
 
-### New Configuration:
+### New Configuration (macOS):
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python3",
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your@email.com"
+      }
+    }
+  }
+}
+```
+
+### New Configuration (Windows):
 ```json
 {
   "mcpServers": {
