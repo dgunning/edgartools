@@ -3,7 +3,7 @@ Search for Kodiak Robotics financial data in S-4 filing exhibits.
 Focus on exhibits that might contain target company financial statements.
 """
 
-from edgar import Company, set_identity
+from edgar import Company
 import sys
 import traceback
 

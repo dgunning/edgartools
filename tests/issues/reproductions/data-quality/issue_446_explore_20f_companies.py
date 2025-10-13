@@ -9,7 +9,7 @@ Created: 2025-09-23
 Related to Issue #446
 """
 
-from edgar import Company, set_identity, get_filings
+from edgar import Company, get_filings
 import traceback
 
 
@@ -132,8 +132,6 @@ def test_20f_with_working_company():
 
 
 if __name__ == "__main__":
-    # Set proper identity for SEC API
-    set_identity("Edgar Research Team research@edgartools.ai")
 
     print("Exploring 20-F filing patterns for Issue #446")
     print("="*80)

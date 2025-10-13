@@ -14,8 +14,6 @@ from edgar import set_identity, Company
 from rich.console import Console
 import traceback
 
-# Set proper identity (CRITICAL for SEC API access)
-set_identity("Research Team research@edgartools-investigation.com")
 
 console = Console()
 

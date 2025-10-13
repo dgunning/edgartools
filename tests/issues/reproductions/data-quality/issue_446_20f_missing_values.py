@@ -13,7 +13,7 @@ Created: 2025-09-23
 Issue: https://github.com/dgunning/edgartools/issues/446
 """
 
-from edgar import Company, set_identity
+from edgar import Company
 import pandas as pd
 import traceback
 
@@ -178,8 +178,6 @@ def reproduce_issue():
 
 
 if __name__ == "__main__":
-    # Set proper identity for SEC API
-    set_identity("Edgar Research Team research@edgartools.ai")
 
     print("Reproducing GitHub Issue #446: Missing values in 20-F filings")
     print("="*80)

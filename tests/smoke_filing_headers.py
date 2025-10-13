@@ -3,7 +3,6 @@ from edgar import *
 from rich import print
 from rich.text import Text
 if __name__ == '__main__':
-    set_identity('Mark Townsend marktownsend@towns.com')
     for filing in get_filings().sample(100):
         try:
             print(Text(filing.header.header_text))

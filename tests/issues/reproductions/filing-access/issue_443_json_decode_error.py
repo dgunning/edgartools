@@ -105,8 +105,6 @@ def investigate_cache_files():
     return False  # No issue found
 
 if __name__ == "__main__":
-    # Set proper identity for SEC API
-    set_identity("Research Team research@edgartools.dev")
 
     # Reproduce the issue
     success = reproduce_issue_443()

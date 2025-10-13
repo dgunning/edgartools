@@ -94,11 +94,9 @@ def test_check_filing_not_exists():
 @pytest.mark.fast
 def test_check_filings_batch():
     """Test check_filings_batch returns dict with availability"""
-    from edgar import get_filings, set_identity
+    from edgar import get_filings
     from edgar.storage_management import check_filings_batch
     import time
-
-    set_identity("Test Suite test@example.com")
 
     # Get some filings
     filings = list(get_filings(filing_date="2025-01-15").head(10))
@@ -116,10 +114,9 @@ def test_check_filings_batch():
 @pytest.mark.fast
 def test_availability_summary():
     """Test availability_summary returns formatted string"""
-    from edgar import get_filings, set_identity
+    from edgar import get_filings
     from edgar.storage_management import availability_summary
 
-    set_identity("Test Suite test@example.com")
 
     filings = list(get_filings(filing_date="2025-01-15").head(10))
     summary = availability_summary(filings)
@@ -364,12 +361,10 @@ def test_load_filing_from_compressed_storage():
     Test that filings can be loaded from compressed .nc.gz files in local storage.
     This is the critical end-to-end test for compression functionality.
     """
-    from edgar import Filing, set_identity
+    from edgar import Filing
     from edgar.storage import local_filing_path, compress_filing, is_compressed_file
     from edgar.sgml.sgml_common import read_content_as_string
     import os
-
-    set_identity("Test Suite test@example.com")
 
     # Use a known filing
     filing = Filing(

@@ -115,5 +115,4 @@ def main():
         investigate_cashflow_display(case['accession'], case['description'])
 
 if __name__ == "__main__":
-    set_identity("Research Team research@edgartools-investigation.com")
     main()

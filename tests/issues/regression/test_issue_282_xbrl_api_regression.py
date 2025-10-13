@@ -16,11 +16,6 @@ from edgar import Company, set_identity
 from edgar.xbrl.xbrl import XBRL
 
 
-@pytest.fixture(scope="module", autouse=True)
-def setup_identity():
-    """Set identity for SEC API access."""
-    set_identity("edgartools-testing testing@edgartools.com")
-
 
 class TestIssue282XBRLAPIRegression:
     """Test that XBRL API works for extracting diluted shares data."""

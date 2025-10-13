@@ -32,8 +32,6 @@ from edgar.storage import is_using_local_storage, local_filing_path
 def test_offline_xbrl_access():
     """Test reproducing the specific SGML parsing issue in offline mode."""
 
-    # Set proper identity for SEC API (required)
-    set_identity("GitHub Issue 436 Reproduction test@example.com")
 
     print("=== Issue #436 Reproduction: Offline XBRL Access - SGML Parsing Issue ===")
     print()

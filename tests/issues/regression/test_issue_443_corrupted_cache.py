@@ -12,18 +12,13 @@ from unittest.mock import patch
 
 import pytest
 
-from edgar import find, set_identity
+from edgar import find
 from edgar.entity.submissions import load_company_submissions_from_local
 from edgar.storage import get_edgar_data_directory
 
 
 class TestCorruptedSubmissionsCache:
     """Test cases for handling corrupted submissions cache files"""
-
-    @pytest.fixture(autouse=True)
-    def setup_identity(self):
-        """Set up SEC API identity for tests"""
-        set_identity("Test Suite test@edgartools.dev")
 
     def test_empty_cache_file_recovery(self):
         """Test that an empty cache file is detected and data re-downloaded"""

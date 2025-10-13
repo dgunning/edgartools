@@ -232,8 +232,6 @@ def investigate_statement_building_logic():
 
 
 if __name__ == "__main__":
-    # Set proper identity for SEC API
-    set_identity("Edgar Research Team research@edgartools.ai")
 
     print("Root Cause Investigation for Issue #446")
     print("="*80)

@@ -2,7 +2,6 @@ from edgar import *
 
 if __name__ == '__main__':
     # Get filings with default values
-    set_identity('Mark Townsend marktownsend@towns.com')
     filings = get_filings()
     print(filings)
 

@@ -21,8 +21,6 @@ Updated code (working):
 from edgar import *
 from edgar.xbrl.xbrl import XBRL  # Correct import path
 
-# Set proper identity per SEC requirements
-set_identity("edgartools-testing testing@edgartools.com")
 
 key = "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
 c = Company("AAPL")

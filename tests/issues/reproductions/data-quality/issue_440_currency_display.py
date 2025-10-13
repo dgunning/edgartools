@@ -11,12 +11,8 @@ Actual: 29,493 million $ (Dollar)
 GitHub Issue: https://github.com/dgunning/edgartools/issues/440
 """
 
-from edgar import Company, set_identity
-import os
+from edgar import Company
 
-# Use environment identity for tests
-if not os.getenv('EDGAR_IDENTITY'):
-    set_identity("EdgarTools Test test@edgartools.dev")
 
 def reproduce_currency_issue():
     """Reproduce the currency display issue with Deutsche Bank"""

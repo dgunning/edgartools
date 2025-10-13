@@ -19,11 +19,6 @@ from edgar import Company, set_identity
 class TestIssue446_20F_IFRS_Statements:
     """Regression tests for 20-F IFRS statement resolution."""
 
-    @classmethod
-    def setup_class(cls):
-        """Set up test class with proper SEC identity."""
-        set_identity("Edgar Test Suite test@edgartools.ai")
-
     def test_bntx_20f_statements_have_data(self):
         """Test that BioNTech 20-F statements return data with IFRS concepts.
 

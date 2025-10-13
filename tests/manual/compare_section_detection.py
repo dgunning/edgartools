@@ -549,17 +549,6 @@ def main():
         border_style="blue"
     ))
 
-    # Set identity for SEC requests
-    try:
-        import os
-        identity = os.getenv('EDGAR_IDENTITY')
-        if identity:
-            set_identity(identity)
-        else:
-            console.print("[yellow]Warning: EDGAR_IDENTITY not set, using generic identity[/yellow]")
-            set_identity("Section Detection Test test@example.com")
-    except:
-        pass
 
     # Determine which companies to test
     if args.tickers:

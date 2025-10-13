@@ -19,9 +19,6 @@ import pandas as pd
 def reproduce_issue_451():
     """Reproduce the expense sign inconsistency issue with Apple filings."""
 
-    # Set proper identity for SEC API
-    set_identity("Research Team research@edgartools.dev")
-
     print("=== Issue #451: Expense Sign Inconsistency Reproduction ===\n")
 
     # Test cases from the issue report

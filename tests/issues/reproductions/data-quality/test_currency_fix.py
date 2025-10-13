@@ -3,7 +3,7 @@ Simple test to verify currency fix for Deutsche Bank
 """
 import pytest
 
-from edgar import Company, set_identity
+from edgar import Company
 import os
 
 

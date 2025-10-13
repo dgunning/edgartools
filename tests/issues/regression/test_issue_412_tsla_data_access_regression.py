@@ -10,7 +10,7 @@ Tesla's financial data that was previously completely inaccessible.
 """
 
 import pytest
-from edgar import Company, set_identity
+from edgar import Company
 from edgar.sgml.sgml_parser import SGMLParser
 
 

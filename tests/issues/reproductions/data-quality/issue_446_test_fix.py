@@ -127,8 +127,6 @@ def test_statement_resolution_fix():
 
 
 if __name__ == "__main__":
-    # Set proper identity for SEC API
-    set_identity("Edgar Research Team research@edgartools.ai")
 
     success = test_statement_resolution_fix()
 

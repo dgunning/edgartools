@@ -8,18 +8,12 @@ GitHub Issue: https://github.com/dgunning/edgartools/issues/440
 """
 
 import pytest
-from edgar import Company, set_identity
+from edgar import Company
 import os
 
 
 class TestCurrencyDisplay:
     """Tests for proper currency symbol display in financial statements."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up test environment."""
-        if not os.getenv('EDGAR_IDENTITY'):
-            set_identity("EdgarTools Test test@edgartools.dev")
 
     @pytest.mark.data_quality
     @pytest.mark.slow

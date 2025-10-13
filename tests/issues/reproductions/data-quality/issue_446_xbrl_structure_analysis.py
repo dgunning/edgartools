@@ -217,8 +217,6 @@ def compare_20f_vs_10k():
 
 
 if __name__ == "__main__":
-    # Set proper identity for SEC API
-    set_identity("Edgar Research Team research@edgartools.ai")
 
     print("XBRL Structure Analysis for Issue #446")
     print("="*80)

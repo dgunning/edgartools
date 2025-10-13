@@ -8,8 +8,6 @@ import pytest
 
 from edgar import set_identity
 
-# Configure identity for tests
-set_identity("EdgarTools Test Suite tests@edgartools.dev")
 
 
 class TestCompanyResearchTool:

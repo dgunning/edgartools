@@ -20,7 +20,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..
 sys.path.insert(0, project_root)
 
 import edgar
-from edgar import Company, set_identity
+from edgar import Company
 import pandas as pd
 from datetime import datetime, date
 
