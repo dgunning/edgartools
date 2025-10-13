@@ -1013,6 +1013,62 @@ def detect_fiscal_year_end(facts: List[FinancialFact]) -> int:
     return most_common[0][0] if most_common else 12
 
 
+def calculate_fiscal_year_for_label(period_end: date, fiscal_year_end_month: int) -> int:
+    """
+    Calculate the fiscal year for period labels based on period_end date.
+
+    This function addresses Issue #460 where quarterly labels showed incorrect fiscal years
+    because the SEC Facts API provides forward-looking fiscal_year values (the year the
+    quarter contributes to), not the year for labeling purposes.
+
+    For quarterly periods, the fiscal year label should reflect when the period occurred,
+    not which fiscal year it contributes to. This mirrors the logic from
+    validate_fiscal_year_period_end() but calculates the appropriate fiscal year for labels.
+
+    Args:
+        period_end: The period end date
+        fiscal_year_end_month: Company's fiscal year end month (1-12)
+
+    Returns:
+        The fiscal year to use for labeling this period
+
+    Examples:
+        >>> # Apple (fiscal year ends in September)
+        >>> # Q3 ending June 28, 2024
+        >>> calculate_fiscal_year_for_label(date(2024, 6, 28), 9)
+        2024  # Q3 2024, not Q3 2025
+
+        >>> # Q4 ending September 28, 2024
+        >>> calculate_fiscal_year_for_label(date(2024, 9, 28), 9)
+        2024  # Q4 2024 (fiscal year end)
+
+        >>> # Q1 ending December 30, 2023
+        >>> calculate_fiscal_year_for_label(date(2023, 12, 30), 9)
+        2024  # Q1 2024 (first quarter of FY 2024)
+
+        >>> # Early January period (52/53-week calendar edge case)
+        >>> calculate_fiscal_year_for_label(date(2023, 1, 1), 12)
+        2022  # FY 2022 (52/53-week calendar convention)
+    """
+    # Early January (Jan 1-7): Use prior year (52/53-week calendar convention)
+    if period_end.month == 1 and period_end.day <= 7:
+        return period_end.year - 1
+
+    # If period_end is in a month AFTER fiscal year end, it's the NEXT fiscal year
+    # Example: Apple FY ends Sept (month 9)
+    #   - Period ending Oct 2023 (month 10) → FY 2024 (first quarter of new fiscal year)
+    #   - Period ending Sept 2023 (month 9) → FY 2023 (end of fiscal year)
+    #   - Period ending June 2024 (month 6) → FY 2024 (third quarter)
+
+    if period_end.month > fiscal_year_end_month:
+        # Period is after fiscal year end, so it's in the next fiscal year
+        # Example: Sept FY end, period ends in Oct/Nov/Dec → next year
+        return period_end.year + 1
+    else:
+        # Period is at or before fiscal year end, use calendar year
+        return period_end.year
+
+
 class EnhancedStatementBuilder:
     """
     Builds multi-period statements with hierarchical structure using learned mappings.
@@ -1162,6 +1218,10 @@ class EnhancedStatementBuilder:
         for period_key, info in period_info.items():
             period_list.append((period_key, info))
 
+        # Detect fiscal year end month for label calculation (Issue #460)
+        # This needs to be calculated before the annual/quarterly split so it's available for both paths
+        fiscal_year_end_month = detect_fiscal_year_end(stmt_facts)
+
         if annual:
             # When annual=True, filter for TRUE annual periods using duration
             # Some facts are marked as FY but are actually quarterly (90 days vs 363+ days)
@@ -1256,8 +1316,7 @@ class EnhancedStatementBuilder:
             selected_period_info = [period_info for year, period_info in sorted_periods[:periods]]
         else:
             # Quarterly mode: Filter out comparative data by validating period_end
-            # Detect fiscal year end month from the statement facts
-            fiscal_year_end_month = detect_fiscal_year_end(stmt_facts)
+            # fiscal_year_end_month was already calculated at line 1223 and is in scope here
 
             valid_quarterly_periods = []
 
@@ -1267,6 +1326,10 @@ class EnhancedStatementBuilder:
 
                 # Skip if no period_end
                 if not period_end_date:
+                    continue
+
+                # Skip FY periods - we only want Q1/Q2/Q3/Q4 for quarterly mode
+                if fiscal_period == 'FY':
                     continue
 
                 # Validate period_end matches expected month for fiscal_period
@@ -1279,19 +1342,32 @@ class EnhancedStatementBuilder:
                     )
 
             # Group by fiscal period label and keep most recent
+            # FIX for Issue #460: Calculate fiscal_year from period_end for quarterly labels
             quarterly_by_period = {}
             for pk, info in valid_quarterly_periods:
-                fiscal_year = pk[0]
                 fiscal_period = pk[1]
-                period_label = f"{fiscal_period} {fiscal_year}"
+                period_end_date = pk[2]
+
+                # Calculate correct fiscal year for label based on period_end
+                # This fixes Issue #460 where SEC's forward-looking fiscal_year caused
+                # quarterly labels to show 1 year ahead (Q3 2025 instead of Q3 2024)
+                calculated_fiscal_year = calculate_fiscal_year_for_label(
+                    period_end_date,
+                    fiscal_year_end_month
+                )
+                period_label = f"{fiscal_period} {calculated_fiscal_year}"
+
+                # Store the calculated fiscal year in info for later use
+                info_with_calculated_fy = info.copy()
+                info_with_calculated_fy['calculated_fiscal_year'] = calculated_fiscal_year
 
                 if period_label not in quarterly_by_period:
-                    quarterly_by_period[period_label] = (pk, info)
+                    quarterly_by_period[period_label] = (pk, info_with_calculated_fy)
                 else:
                     # If duplicate valid periods exist, prefer most recent filing_date
                     existing_pk, existing_info = quarterly_by_period[period_label]
                     if info['filing_date'] > existing_info['filing_date']:
-                        quarterly_by_period[period_label] = (pk, info)
+                        quarterly_by_period[period_label] = (pk, info_with_calculated_fy)
 
             # Sort by period end date (newest first) and select requested number
             sorted_periods = sorted(
@@ -1303,6 +1379,7 @@ class EnhancedStatementBuilder:
 
         # Extract period labels and build a mapping for the selected periods
         # For annual periods, use the fiscal year from facts (most reliable)
+        # For quarterly periods, calculate fiscal year from period_end (Issue #460)
         selected_periods = []
         for pk, info in selected_period_info:
             if annual and info.get('is_annual') and pk[2]:  # pk[2] is period_end
@@ -1318,6 +1395,21 @@ class EnhancedStatementBuilder:
                         label = f"FY {period_end.year - 1}"
                     else:
                         label = f"FY {period_end.year}"
+            elif not annual and pk[2]:
+                # FIX for Issue #460: For quarterly periods, use the calculated fiscal year
+                # that was stored during grouping (avoids recalculation)
+                fiscal_period = pk[1]
+                period_end = pk[2]
+                calculated_fiscal_year = info.get('calculated_fiscal_year')
+                if calculated_fiscal_year is not None:
+                    label = f"{fiscal_period} {calculated_fiscal_year}"
+                else:
+                    # Fallback: calculate if not found (shouldn't happen for quarterly)
+                    calculated_fiscal_year = calculate_fiscal_year_for_label(
+                        period_end,
+                        fiscal_year_end_month
+                    )
+                    label = f"{fiscal_period} {calculated_fiscal_year}"
             else:
                 label = info['label']
             selected_periods.append(label)

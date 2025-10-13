@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Issue #460: Quarterly Income Statement Fiscal Period Labels** - Fixed quarterly period labels showing fiscal years 1 year ahead
+  - **Problem**: Quarterly statements displayed fiscal periods 1 year in the future (e.g., "Q3 2025" instead of "Q3 2024")
+  - **Root Cause**: SEC Facts API provides forward-looking fiscal_year values for quarterly facts (indicating which fiscal year the quarter contributes to, not for labeling purposes)
+  - **Solution**: Enhanced quarterly label calculation in `enhanced_statement.py`:
+    - Added `calculate_fiscal_year_for_label()` to calculate fiscal year from period_end date based on company's fiscal year end month
+    - Added `detect_fiscal_year_end()` to automatically determine fiscal year end from FY facts
+    - Filters out FY periods from quarterly output to prevent confusion
+    - Handles 52/53-week calendar edge cases (early January periods)
+  - **Impact**: Quarterly financial statements now show correct fiscal year labels that match the actual period dates
+  - **Coverage**: Comprehensive regression tests for Apple (Sept FYE), Microsoft (June FYE), and Walmart (Jan FYE)
+  - **Verification**: All statement types (income, balance sheet, cash flow) display correct quarterly labels
+
 ## Release 4.18.0 - 2025-10-10
 
 ### Added
