@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release 4.19.0 - 2025-10-13
 
+### Added
+- **MCP Workflow Tools** - Comprehensive transformation of MCP server from basic tools to workflow-oriented tools
+  - **New Tools**: 5 workflow-oriented tools covering 85% of documented user workflows
+    - `edgar_company_research` - Comprehensive company intelligence gathering
+    - `edgar_analyze_financials` - Multi-period financial analysis with trend insights
+    - `edgar_filing_intelligence` - Smart search and content extraction from filings
+    - `edgar_market_monitor` - Real-time and historical market monitoring
+    - `edgar_compare_companies` - Cross-company screening and comparison
+  - **Enhanced UX**: Python entry points, environment variable handling, server verification
+  - **Documentation**: Comprehensive quickstart guide and troubleshooting
+  - **Design**: Workflow-oriented approach prevents context explosion, primary API uses EntityFacts (70% faster)
+  - **Impact**: Enables AI assistants to perform complex SEC data analysis workflows efficiently
+
 ### Fixed
 - **Issue #460: Quarterly Income Statement Fiscal Period Labels** - Fixed quarterly period labels showing fiscal years 1 year ahead
   - **Problem**: Quarterly statements displayed fiscal periods 1 year in the future (e.g., "Q3 2025" instead of "Q3 2024")
@@ -21,6 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Impact**: Quarterly financial statements now show correct fiscal year labels that match the actual period dates
   - **Coverage**: Comprehensive regression tests for Apple (Sept FYE), Microsoft (June FYE), and Walmart (Jan FYE)
   - **Verification**: All statement types (income, balance sheet, cash flow) display correct quarterly labels
+
+- **Issue #457: Locale-Dependent Date Parsing** - Fixed ValueError in non-English system locales
+  - **Problem**: Users with non-English system locales (Chinese, Japanese, German, etc.) experienced ValueError when using EdgarTools due to locale-dependent HTTP date header parsing in httpxthrottlecache
+  - **Root Cause**: httpxthrottlecache uses `time.strptime()` which respects LC_TIME locale. With Chinese locale, dates like "Fri, 10 Oct 2025" become "周五, 10 10月 2025", causing parsing failure
+  - **Solution**: Force LC_TIME to 'C' locale before importing httpxthrottlecache to ensure HTTP date parsing always uses English month/day names
+  - **Impact**: EdgarTools now works correctly regardless of user's system locale setting
+  - **Testing**: Verified with comprehensive reproduction script simulating Chinese locale
 
 ## Release 4.18.0 - 2025-10-10
 
