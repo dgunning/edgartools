@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.19.0 - 2025-10-13
+
 ### Fixed
 - **Issue #460: Quarterly Income Statement Fiscal Period Labels** - Fixed quarterly period labels showing fiscal years 1 year ahead
   - **Problem**: Quarterly statements displayed fiscal periods 1 year in the future (e.g., "Q3 2025" instead of "Q3 2024")
