@@ -46,6 +46,15 @@ from edgar.storage_management import (
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
 
+# Fix for Issue #457: Clear locale-corrupted cache files on first import
+# This is a one-time operation that only runs if the marker file doesn't exist
+try:
+    from edgar.httpclient import clear_locale_corrupted_cache
+    clear_locale_corrupted_cache()
+except Exception:
+    # Silently continue if cache clearing fails - it's not critical
+    pass
+
 # Another name for get_current_filings
 get_latest_filings = get_current_filings
 latest_filings = get_current_filings

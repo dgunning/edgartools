@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.19.1 - 2025-10-13
+
+### Fixed
+- **Issue #457: Locale Cache Deserialization Failure (Reopened)** - Fixed persistent cache corruption for international users
+  - **Problem**: Users with non-English system locales (Chinese, Japanese, German, etc.) continued experiencing ValueError after upgrading to 4.19.0 because OLD cache files created BEFORE the fix still contained locale-dependent timestamps that couldn't be deserialized
+  - **Root Cause**: The 4.19.0 fix prevented NEW cache corruption by forcing LC_TIME='C' before importing httpxthrottlecache, but didn't address existing corrupted cache files from pre-4.19.0 installations
+  - **Solution**: Implemented automatic one-time cache clearing on first import:
+    - New `clear_locale_corrupted_cache()` function in `edgar/httpclient.py`
+    - Checks for marker file `.locale_fix_457_applied` to prevent repeated clearing
+    - Automatically called on `import edgar` (one-time operation)
+    - Safe to call multiple times - only clears cache once per installation
+  - **Impact**: International users upgrading from pre-4.19.0 now have locale-corrupted cache files automatically cleared on first use, eliminating ValueError exceptions
+  - **Testing**: Comprehensive test suite with 10 test cases covering cache clearing, marker file behavior, error handling, and user upgrade workflows
+  - **User Experience**: Seamless - cache clearing happens automatically and silently on first import after upgrade
+
 ## Release 4.19.0 - 2025-10-13
 
 ### Added

@@ -102,3 +102,61 @@ def close_clients():
 
 
 HTTP_MGR = get_http_mgr()
+
+
+def clear_locale_corrupted_cache():
+    """
+    One-time cache clearing function to remove locale-corrupted cache files from Issue #457.
+
+    This function addresses a specific issue where cache files created with non-English locales
+    (Chinese, Japanese, German, etc.) contain timestamps that cannot be deserialized after
+    the locale fix was applied in v4.19.0.
+
+    The function:
+    1. Checks for a marker file to avoid repeated clearing
+    2. Clears the HTTP cache directory if marker doesn't exist
+    3. Creates a marker file to prevent future clearing
+
+    This is safe to call multiple times - it will only clear cache once per installation.
+
+    Returns:
+        bool: True if cache was cleared, False if already cleared previously
+    """
+    import logging
+    import shutil
+    from pathlib import Path
+
+    try:
+        cache_dir = Path(get_cache_directory())
+        marker_file = cache_dir / ".locale_fix_457_applied"
+
+        # If marker exists, cache was already cleared
+        try:
+            if marker_file.exists():
+                return False
+        except (PermissionError, OSError):
+            # If we can't check marker file, assume we need to proceed
+            pass
+
+        # Clear the cache directory if it exists
+        if cache_dir.exists():
+            # Remove all cache files
+            shutil.rmtree(cache_dir)
+            # Recreate the directory
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            # Create marker file
+            marker_file.touch()
+            return True
+        else:
+            # No cache exists, just create marker
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            marker_file.touch()
+            return False
+
+    except Exception as e:
+        # Log error but don't fail - worst case user still has cache issues
+        logging.getLogger(__name__).warning(
+            f"Failed to clear locale-corrupted cache: {e}. "
+            "You may need to manually delete ~/.edgar/_tcache directory."
+        )
+        return False
