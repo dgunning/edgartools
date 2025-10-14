@@ -67,7 +67,7 @@ async def list_tools() -> list[Tool]:
         # New workflow-oriented tools
         Tool(
             name="edgar_company_research",
-            description="Comprehensive company intelligence including profile, financials, recent activity, and ownership",
+            description="Comprehensive company intelligence including profile, key financial metrics, recent filing activity, and ownership highlights",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -102,7 +102,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="edgar_analyze_financials",
-            description="Multi-period financial statement analysis",
+            description="Multi-period financial statement analysis including income statement, balance sheet, and cash flow statements across multiple quarters or years",
             inputSchema={
                 "type": "object",
                 "properties": {

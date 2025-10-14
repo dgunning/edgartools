@@ -125,17 +125,17 @@ def extract_latest_financials(company: Any, detail_level: str = "standard") -> s
         Formatted financial summary
     """
     try:
-        # Get latest income statement (annual)
-        stmt = company.income_statement(periods=1, annual=True)
+        # Get income statement with 3 periods for trend analysis (annual) with concise format for LLM
+        stmt = company.income_statement(periods=3, annual=True, concise_format=True)
 
         if detail_level == "minimal":
             # Just key metrics
             parts = ["Latest Annual Period"]
             # TODO: Extract specific metrics once we understand the API better
-            return str(stmt)
+            return stmt.to_llm_string()
         else:
             # Standard or detailed
-            return str(stmt)
+            return stmt.to_llm_string()
 
     except Exception as e:
         logger.warning(f"Could not extract financials: {e}")

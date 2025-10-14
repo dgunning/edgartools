@@ -803,6 +803,149 @@ class MultiPeriodStatement:
 
         return result
 
+    def _create_table(self, for_llm: bool = False) -> Table:
+        """
+        Create the statement table without Panel wrapper.
+
+        Args:
+            for_llm: If True, use minimal formatting for LLM consumption
+
+        Returns:
+            Rich Table object
+        """
+        # Get color scheme
+        colors = get_current_scheme()
+
+        # Choose box style based on context
+        box_style = box.MINIMAL if for_llm else box.SIMPLE
+
+        # Main table with multiple period columns
+        stmt_table = Table(
+            box=box_style,
+            show_header=True,
+            padding=(0, 1),
+            expand=True
+        )
+
+        # Add concept column
+        stmt_table.add_column("", style="", ratio=2)
+
+        # Add period columns
+        for period in self.periods:
+            stmt_table.add_column(period, justify="right", style="bold", ratio=1)
+
+        def add_item_to_table(item: 'MultiPeriodItem', depth: int = 0):
+            """Add an item row to the table."""
+            indent = "  " * depth
+
+            # Prepare row values
+            row = []
+
+            # Concept label
+            if item.is_abstract:
+                row.append(Text(f"{indent}{item.label}", style=colors["abstract_item"]))
+            elif item.is_total:
+                row.append(Text(f"{indent}{item.label}", style=colors["total_item"]))
+            else:
+                # Check if this is a key financial item that should always be prominent
+                important_labels = [
+                    'Total Revenue', 'Revenue', 'Net Sales', 'Total Net Sales',
+                    'Operating Income', 'Operating Income (Loss)', 'Operating Profit',
+                    'Net Income', 'Net Income (Loss)', 'Net Earnings',
+                    'Gross Profit', 'Gross Margin',
+                    'Cost of Revenue', 'Cost of Goods Sold',
+                    'Operating Expenses', 'Total Operating Expenses',
+                    'Earnings Per Share', 'EPS'
+                ]
+
+                is_important = any(label in item.label for label in important_labels)
+
+                # Don't mark important items as low confidence even if score is low
+                if is_important:
+                    style = colors["total_item"]  # Use bold styling for important items
+                    confidence_marker = ""
+                else:
+                    style = colors["low_confidence_item"] if item.confidence < 0.8 else colors["regular_item"]
+                    confidence_marker = " ◦" if item.confidence < 0.8 else ""
+
+                row.append(Text(f"{indent}{item.label}{confidence_marker}", style=style))
+
+            # Period values
+            for period in self.periods:
+                value_str = item.get_display_value(period, concise_format=self.concise_format)
+                if value_str and value_str != "-":
+                    # Color code values
+                    value = item.values.get(period)
+                    if value and isinstance(value, (int, float)):
+                        value_style = colors["negative_value"] if value < 0 else colors["positive_value"]
+                    else:
+                        value_style = ""
+
+                    if item.is_total:
+                        # Combine total style with value color if present
+                        total_style = colors["total_value_prefix"]
+                        if value_style:
+                            total_style = f"{total_style} {value_style}"
+                        row.append(Text(value_str, style=total_style))
+                    else:
+                        row.append(Text(value_str, style=value_style))
+                else:
+                    row.append("")
+
+            stmt_table.add_row(*row)
+
+            # Add separator line after totals (skip for LLM to save characters)
+            if item.is_total and depth == 0 and not for_llm:
+                separator_row = [Text("─" * 40, style=colors["separator"])]
+                for _ in self.periods:
+                    separator_row.append(Text("─" * 15, style=colors["separator"]))
+                stmt_table.add_row(*separator_row)
+
+            # Add children
+            for child in item.children:
+                if depth < 3:
+                    add_item_to_table(child, depth + 1)
+
+        # Add all items
+        for item in self.items:
+            add_item_to_table(item)
+
+        return stmt_table
+
+    def to_llm_string(self) -> str:
+        """
+        Generate LLM-optimized string representation.
+
+        Uses minimal formatting optimized for LLM consumption:
+        - No Panel borders (saves ~200 characters)
+        - Minimal table box style (saves ~100 characters per row)
+        - No ANSI color codes (plain text)
+        - Assumes concise_format is already set for number formatting
+        - Omits separator lines after totals
+
+        Returns:
+            String representation optimized for LLM token usage
+        """
+        from io import StringIO
+        from rich.console import Console
+
+        buffer = StringIO()
+        # Disable color/formatting codes for plain text output
+        console = Console(
+            file=buffer,
+            force_terminal=False,  # No ANSI codes
+            no_color=True,         # Plain text only
+            width=120,
+            legacy_windows=False
+        )
+
+        # Create table without Panel wrapper
+        table = self._create_table(for_llm=True)
+        console.print(table)
+
+        output = buffer.getvalue()
+        return output
+
     def __repr__(self) -> str:
         """String representation using rich formatting."""
         return repr_rich(self.__rich__())

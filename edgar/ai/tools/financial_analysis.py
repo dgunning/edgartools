@@ -59,9 +59,9 @@ async def handle_analyze_financials(args: dict[str, Any]) -> list[TextContent]:
         # Process each requested statement type
         if "income" in statement_types:
             try:
-                stmt = company.income_statement(periods=periods, annual=annual)
+                stmt = company.income_statement(periods=periods, annual=annual, concise_format=True)
                 response_parts.append("=== Income Statement ===")
-                response_parts.append(str(stmt))
+                response_parts.append(stmt.to_llm_string())
                 response_parts.append("")
             except Exception as e:
                 logger.warning(f"Could not retrieve income statement: {e}")
@@ -70,9 +70,9 @@ async def handle_analyze_financials(args: dict[str, Any]) -> list[TextContent]:
 
         if "balance" in statement_types:
             try:
-                stmt = company.balance_sheet(periods=periods, annual=annual)
+                stmt = company.balance_sheet(periods=periods, annual=annual, concise_format=True)
                 response_parts.append("=== Balance Sheet ===")
-                response_parts.append(str(stmt))
+                response_parts.append(stmt.to_llm_string())
                 response_parts.append("")
             except Exception as e:
                 logger.warning(f"Could not retrieve balance sheet: {e}")
@@ -81,9 +81,9 @@ async def handle_analyze_financials(args: dict[str, Any]) -> list[TextContent]:
 
         if "cash_flow" in statement_types:
             try:
-                stmt = company.cash_flow(periods=periods, annual=annual)
+                stmt = company.cash_flow(periods=periods, annual=annual, concise_format=True)
                 response_parts.append("=== Cash Flow Statement ===")
-                response_parts.append(str(stmt))
+                response_parts.append(stmt.to_llm_string())
                 response_parts.append("")
             except Exception as e:
                 logger.warning(f"Could not retrieve cash flow: {e}")
