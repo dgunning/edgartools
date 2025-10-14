@@ -64,36 +64,35 @@ app = Server("edgartools")
 async def list_tools() -> list[Tool]:
     """List available tools."""
     return [
-        # New workflow-oriented tools
         Tool(
             name="edgar_company_research",
-            description="Comprehensive company intelligence including profile, key financial metrics, recent filing activity, and ownership highlights",
+            description="Get company overview and background. Returns profile, 3-year financial trends, and recent filing activity. Use this for initial company research or to get a snapshot of recent performance.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "identifier": {
                         "type": "string",
-                        "description": "Company ticker, CIK, or name"
+                        "description": "Company ticker (AAPL), CIK (0000320193), or name (Apple Inc)"
                     },
                     "include_financials": {
                         "type": "boolean",
-                        "description": "Include latest financial metrics and statements",
+                        "description": "Include 3-year income statement showing revenue and profit trends",
                         "default": True
                     },
                     "include_filings": {
                         "type": "boolean",
-                        "description": "Include recent filing activity summary",
+                        "description": "Include summary of last 5 SEC filings",
                         "default": True
                     },
                     "include_ownership": {
                         "type": "boolean",
-                        "description": "Include insider and institutional ownership highlights",
+                        "description": "Include insider and institutional ownership data (currently not implemented)",
                         "default": False
                     },
                     "detail_level": {
                         "type": "string",
                         "enum": ["minimal", "standard", "detailed"],
-                        "description": "Level of detail in response (affects token usage)",
+                        "description": "Response detail: 'minimal' (key metrics only), 'standard' (balanced), 'detailed' (comprehensive data)",
                         "default": "standard"
                     }
                 },
@@ -102,17 +101,17 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="edgar_analyze_financials",
-            description="Multi-period financial statement analysis including income statement, balance sheet, and cash flow statements across multiple quarters or years",
+            description="Detailed financial statement analysis across multiple periods. Use this for trend analysis, growth calculations, or comparing financial performance over time.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "company": {
                         "type": "string",
-                        "description": "Company ticker, CIK, or name"
+                        "description": "Company ticker (TSLA), CIK (0001318605), or name (Tesla Inc)"
                     },
                     "periods": {
                         "type": "integer",
-                        "description": "Number of periods to analyze",
+                        "description": "Number of periods: 4-5 for trends, 8-10 for patterns (max 10)",
                         "default": 4
                     },
                     "annual": {
@@ -123,50 +122,12 @@ async def list_tools() -> list[Tool]:
                     "statement_types": {
                         "type": "array",
                         "items": {"type": "string", "enum": ["income", "balance", "cash_flow"]},
-                        "description": "Financial statements to include",
+                        "description": "Statements to include: 'income' (revenue, profit, growth), 'balance' (assets, liabilities, equity), 'cash_flow' (operating, investing, financing cash flows)",
                         "default": ["income"]
                     }
                 },
                 "required": ["company"]
             }
-        ),
-        # Existing tools (backward compatibility)
-        Tool(
-            name="edgar_get_company",
-            description="Get comprehensive company information from SEC filings",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "identifier": {
-                        "type": "string",
-                        "description": "Company ticker symbol, CIK, or name"
-                    },
-                    "include_financials": {
-                        "type": "boolean",
-                        "description": "Include latest financial statements",
-                        "default": False
-                    }
-                },
-                "required": ["identifier"]
-            },
-        ),
-        Tool(
-            name="edgar_current_filings",
-            description="Get the most recent SEC filings",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "description": "Number of filings to return",
-                        "default": 20
-                    },
-                    "form_type": {
-                        "type": "string",
-                        "description": "Filter by form type (e.g., '10-K', '10-Q')"
-                    }
-                }
-            },
         )
     ]
 
@@ -178,18 +139,12 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
         arguments = {}
 
     try:
-        # New workflow tools
         if name == "edgar_company_research":
             from edgar.ai.tools.company_research import handle_company_research
             return await handle_company_research(arguments)
         elif name == "edgar_analyze_financials":
             from edgar.ai.tools.financial_analysis import handle_analyze_financials
             return await handle_analyze_financials(arguments)
-        # Existing tools (backward compatibility)
-        elif name == "edgar_get_company":
-            return await handle_get_company(arguments)
-        elif name == "edgar_current_filings":
-            return await handle_current_filings(arguments)
         else:
             raise ValueError(f"Unknown tool: {name}")
 
@@ -199,97 +154,6 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
             type="text",
             text=f"Error: {str(e)}"
         )]
-
-
-async def handle_get_company(args: dict[str, Any]) -> list[TextContent]:
-    """Handle company information requests."""
-    identifier = args.get("identifier", "")
-    include_financials = args.get("include_financials", False)
-
-    if not identifier:
-        raise ValueError("identifier is required")
-
-    try:
-        # Import EdgarTools here to avoid import errors if not available
-        from edgar import Company
-
-        # Get company
-        company = Company(identifier)
-
-        # Build response text
-        response_text = f"Company Information for {company.name}:\n\n"
-        response_text += f"CIK: {company.cik}\n"
-
-        # Add ticker if available
-        if hasattr(company, 'ticker'):
-            response_text += f"Ticker: {company.ticker}\n"
-        elif hasattr(company, 'tickers') and company.tickers:
-            response_text += f"Ticker: {company.tickers[0]}\n"
-        elif hasattr(company, 'get_ticker'):
-            try:
-                ticker = company.get_ticker()
-                response_text += f"Ticker: {ticker}\n"
-            except:
-                response_text += "Ticker: Not available\n"
-        else:
-            response_text += "Ticker: Not available\n"
-
-        # Add description if available
-        if hasattr(company, 'description'):
-            response_text += f"Description: {company.description}\n"
-        else:
-            response_text += "Description: No description available\n"
-
-        if include_financials:
-            try:
-                # Get recent filing for financial data
-                filings = company.get_filings(form=["10-K", "10-Q"], limit=1)
-                if filings:
-                    latest_filing = filings[0]
-                    response_text += "\nLatest Filing:\n"
-                    response_text += f"- Form: {latest_filing.form}\n"
-                    response_text += f"- Filing Date: {latest_filing.filing_date}\n"
-                    if hasattr(latest_filing, 'period_of_report'):
-                        response_text += f"- Period: {latest_filing.period_of_report}\n"
-            except Exception as e:
-                response_text += f"\nNote: Could not retrieve financial data: {str(e)}\n"
-
-        return [TextContent(type="text", text=response_text)]
-
-    except Exception as e:
-        raise ValueError(f"Error retrieving company information: {str(e)}") from e
-
-
-async def handle_current_filings(args: dict[str, Any]) -> list[TextContent]:
-    """Handle current filings requests."""
-    limit = args.get("limit", 20)
-    form_type = args.get("form_type")
-
-    try:
-        from edgar import get_current_filings
-
-        # Get current filings
-        filings = get_current_filings(
-            form=form_type or "",
-            page_size=min(limit, 100)
-        )
-
-        # Convert to list
-        filing_data = filings.data.to_pylist()
-
-        # Build response
-        response_text = f"Current SEC Filings (showing {len(filing_data)} filings)"
-        if form_type:
-            response_text += f" filtered by form type: {form_type}"
-        response_text += "\n\n"
-
-        for i, filing in enumerate(filing_data[:limit], 1):
-            response_text += f"{i:2d}. {filing['form']:<6} - {filing['company'][:50]:<50} - {filing['filing_date']}\n"
-
-        return [TextContent(type="text", text=response_text)]
-
-    except Exception as e:
-        raise ValueError(f"Error retrieving current filings: {str(e)}") from e
 
 
 @app.list_resources()
