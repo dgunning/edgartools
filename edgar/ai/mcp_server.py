@@ -117,7 +117,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "annual": {
                         "type": "boolean",
-                        "description": "Annual (true) or quarterly (false) periods",
+                        "description": "Use annual periods (true) for long-term trends and year-over-year comparisons, or quarterly periods (false) for recent performance and current earnings. Quarterly provides more recent data but may show seasonal volatility.",
                         "default": True
                     },
                     "statement_types": {
