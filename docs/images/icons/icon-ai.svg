@@ -1,0 +1,33 @@
+<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer hexagon frame -->
+  <polygon points="40,5 70,22.5 70,57.5 40,75 10,57.5 10,22.5"
+           fill="none" stroke="#3d5875" stroke-width="2.5" opacity="0.3"/>
+
+  <!-- Inner hexagon -->
+  <defs>
+    <linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#FFB700;stop-opacity:0.7" />
+    </linearGradient>
+  </defs>
+  <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
+           fill="url(#aiGradient)" opacity="0.25"/>
+  <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
+           fill="none" stroke="#FFD700" stroke-width="2"/>
+
+  <!-- Neural network / circuit representation -->
+  <!-- Top node -->
+  <circle cx="40" cy="28" r="4" fill="#3d5875" stroke="#3d5875" stroke-width="1.5"/>
+  <!-- Bottom left node -->
+  <circle cx="30" cy="48" r="4" fill="#3d5875" stroke="#3d5875" stroke-width="1.5"/>
+  <!-- Bottom right node -->
+  <circle cx="50" cy="48" r="4" fill="#3d5875" stroke="#3d5875" stroke-width="1.5"/>
+  <!-- Bottom center node -->
+  <circle cx="40" cy="58" r="4" fill="#3d5875" stroke="#3d5875" stroke-width="1.5"/>
+
+  <!-- Connection lines -->
+  <line x1="40" y1="32" x2="30" y2="44" stroke="#3d5875" stroke-width="1.5" opacity="0.6"/>
+  <line x1="40" y1="32" x2="50" y2="44" stroke="#3d5875" stroke-width="1.5" opacity="0.6"/>
+  <line x1="30" y1="52" x2="40" y2="54" stroke="#3d5875" stroke-width="1.5" opacity="0.6"/>
+  <line x1="50" y1="52" x2="40" y2="54" stroke="#3d5875" stroke-width="1.5" opacity="0.6"/>
+</svg>

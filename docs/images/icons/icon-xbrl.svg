@@ -1,0 +1,27 @@
+<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer hexagon frame -->
+  <polygon points="40,5 70,22.5 70,57.5 40,75 10,57.5 10,22.5"
+           fill="none" stroke="#3d5875" stroke-width="2.5" opacity="0.3"/>
+
+  <!-- Inner hexagon -->
+  <defs>
+    <linearGradient id="xbrlGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#FFB700;stop-opacity:0.7" />
+    </linearGradient>
+  </defs>
+  <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
+           fill="url(#xbrlGradient)" opacity="0.25"/>
+  <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
+           fill="none" stroke="#FFD700" stroke-width="2"/>
+
+  <!-- XML brackets symbol -->
+  <g stroke="#3d5875" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <!-- Left bracket < -->
+    <polyline points="35,30 28,40 35,50"/>
+    <!-- Right bracket > -->
+    <polyline points="45,30 52,40 45,50"/>
+    <!-- Slash / -->
+    <line x1="38" y1="48" x2="42" y2="32"/>
+  </g>
+</svg>
