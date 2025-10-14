@@ -28,6 +28,10 @@
   <b>The only SEC EDGAR library built from the ground up for AI agents and LLMs. Extract financial data in 3 lines of code instead of 100+. Production-ready MCP server included.</b>
 </p>
 
+<p align="center">
+  <sub>Built with AI-assisted development • 3-10x faster velocity • <a href="#-support-ai-powered-development">Support this project</a></sub>
+</p>
+
 ![EdgarTools SEC filing data extraction demo](docs/images/edgartools-demo.gif)
 
 <p align="center">
@@ -314,6 +318,101 @@ Benchmarks run on standard laptop. Alternative = typical web scraping implementa
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
+## 💛 Support AI-Powered Development
+
+**EdgarTools is built and maintained solo using AI-assisted development.** Your support directly funds the Claude Max subscription that makes this extraordinary velocity possible.
+
+### The Virtuous Cycle
+
+<table align="center">
+<tr>
+  <td align="center" width="25%">
+    <b>1️⃣ You Support</b><br><br>
+    Buy Me A Coffee<br>
+    contributions fund<br>
+    Claude Max ($40/mo)
+  </td>
+  <td align="center" width="25%">
+    <b>2️⃣ AI Acceleration</b><br><br>
+    Specialized agents<br>
+    deliver <b>3-10x faster</b><br>
+    development
+  </td>
+  <td align="center" width="25%">
+    <b>3️⃣ Rapid Delivery</b><br><br>
+    Features in <b>days</b><br>
+    instead of weeks<br>
+    24 releases / 60 days
+  </td>
+  <td align="center" width="25%">
+    <b>4️⃣ You Benefit</b><br><br>
+    More features,<br>
+    faster fixes,<br>
+    free forever
+  </td>
+</tr>
+</table>
+
+### Real Impact: Last 60 Days
+
+<table align="center">
+<tr>
+  <td align="center" width="25%">
+    <h3>🚀 24</h3>
+    <b>Releases</b><br>
+    <sub>1 every 2.5 days</sub>
+  </td>
+  <td align="center" width="25%">
+    <h3>⚡ 322</h3>
+    <b>Commits</b><br>
+    <sub>5.4 per day</sub>
+  </td>
+  <td align="center" width="25%">
+    <h3>🎯 3-10x</h3>
+    <b>Velocity</b><br>
+    <sub>vs traditional dev</sub>
+  </td>
+  <td align="center" width="25%">
+    <h3>⏱️ Days</h3>
+    <b>Not Weeks</b><br>
+    <sub>for major features</sub>
+  </td>
+</tr>
+</table>
+
+### Recent Examples
+
+| Feature | Traditional Estimate | With AI | Speedup |
+|---------|---------------------|---------|---------|
+| XBRL Period Selection | 3-4 weeks | 5 days | **7x faster** |
+| MCP Workflow Tools | 2-3 weeks | 2 days | **10x faster** |
+| HTML Parsing Rewrite | 2 weeks | 3 days | **4x faster** |
+| Standardized Concepts API | 2 weeks | 2-3 days | **5x faster** |
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/edgartools" target="_blank">
+    <img src="docs/images/badges/badge-support-development.svg" alt="Support Development" height="50">
+  </a>
+</p>
+
+**What your $5/month enables:**
+- ✅ Claude Max subscription (AI agents that write, test, and document code)
+- ✅ Continued 3-10x development velocity (features in days, not weeks)
+- ✅ Rapid response to SEC format changes and bug reports
+- ✅ New features based on community needs
+- ✅ Free access for everyone, forever (no API keys, no rate limits)
+
+**Alternative ways to support:**
+- ⭐ Star the repo on GitHub
+- 🐛 Report bugs and contribute fixes
+- 📖 Improve documentation
+- 💬 Answer questions in Discussions
+- 🔗 Share EdgarTools with colleagues
+
+<p align="center">
+  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+</p>
+
 <p align="center">
   <img src="docs/images/sections/section-community.svg" alt="Community & Support">
 </p>
@@ -340,20 +439,6 @@ We welcome contributions from the community! Here's how you can help:
 - **Spread the Word**: Star the repo, share with colleagues
 
 See our [Contributing Guide](CONTRIBUTING.md) for details.
-
-<p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
-</p>
-
-## Support the Project
-
-If you find EdgarTools valuable, please consider supporting its development:
-
-<a href="https://www.buymeacoffee.com/edgartools" target="_blank">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 144px !important;" >
-</a>
-
-Your support helps maintain and improve EdgarTools for the entire community!
 
 ---
 
