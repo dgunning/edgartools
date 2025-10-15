@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.20.0 - 2025-10-15
+
+### Added
+- **XBRL DataFrame Unit and Point-in-Time Support** - Enhanced XBRL DataFrame exports with comprehensive unit and temporal information
+  - **Unit Information**: DataFrame exports now include `unit` column showing the measurement units for each fact (USD, shares, pure numbers, etc.)
+  - **Point-in-Time Data**: Added `point_in_time` boolean column to distinguish instant facts (point-in-time balances) from duration facts (period aggregates)
+  - **Enhanced Analysis**: Enables precise financial analysis by identifying which values represent snapshots (assets, liabilities) vs. period totals (revenue, expenses)
+  - **API Integration**: Available through `to_dataframe()` method on XBRL statements and facts
+  - **Use Cases**:
+    - Filter balance sheet items (point_in_time=True) from income statement items (point_in_time=False)
+    - Identify unit mismatches when comparing metrics across companies
+    - Separate per-share metrics from absolute values
+    - Validate data quality by checking expected units
+  - **Example**:
+    ```python
+    from edgar import Company
+
+    # Get income statement with unit information
+    company = Company("AAPL")
+    filing = company.get_filings(form="10-K").latest()
+    income_stmt = filing.xbrl().statements.income_statement()
+    df = income_stmt.to_dataframe()
+
+    # Filter by unit type
+    monetary_items = df[df['unit'] == 'USD']
+    per_share_items = df[df['unit'].str.contains('shares')]
+
+    # Identify instant vs duration facts
+    balances = df[df['point_in_time'] == True]
+    period_totals = df[df['point_in_time'] == False]
+    ```
+  - **Impact**: Provides critical context for financial data analysis, enabling users to properly interpret and compare XBRL facts
+
+### Enhanced
+- **MCP Server Token Efficiency** - Optimized financial statement display for AI agents
+  - **Token Savings**: 8-12% reduction per statement (53-73 tokens saved on average)
+  - **New Method**: Added `to_llm_string()` for plain text, borderless output optimized for LLM consumption
+  - **Performance**: AAPL statements reduced from 607→544 tokens (10.4%), TSLA 627→574 tokens (8.4%), COIN 587→514 tokens (12.4%)
+  - **Data Integrity**: 100% of numeric values preserved with no ellipsis or truncation
+  - **Design**: Removed ANSI color codes (51% overhead reduction) while maintaining all financial data
+  - **Impact**: Enables more efficient context usage in AI assistant workflows
+
+- **MCP Tool Clarity and Focus** - Streamlined MCP server to 2 core workflow-oriented tools
+  - **Tool Consolidation**: Removed legacy tools (`edgar_get_company`, `edgar_current_filings`) in favor of workflow-focused tools
+  - **Enhanced Descriptions**: Added concrete examples for all parameters (ticker, CIK, company name formats)
+  - **Inline Guidance**: Statement type explanations (income=revenue/profit, balance=assets/liabilities) directly in tool descriptions
+  - **Period Recommendations**: Clear guidance on period selection (4-5 for trends, 8-10 for patterns)
+  - **Parameter Clarity**: Improved `detail_level` and `annual` parameter descriptions for better LLM agent understanding
+  - **Impact**: Reduced tool confusion and improved LLM agent tool selection accuracy
+
+### Changed
+- **Documentation Structure**: Removed legacy `ai_docs/` directory (1,469 lines) in favor of unified documentation approach
+- **Code Cleanup**: Removed obsolete portfolio manager CIK update script
+
 ## Release 4.19.1 - 2025-10-13
 
 ### Fixed
