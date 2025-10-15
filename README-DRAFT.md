@@ -330,7 +330,7 @@ Benchmarks run on standard laptop. Alternative = typical web scraping implementa
     <b>1️⃣ You Support</b><br><br>
     Buy Me A Coffee<br>
     contributions fund<br>
-    Claude Max ($40/mo)
+    Claude Max ($200/mo)
   </td>
   <td align="center" width="25%">
     <b>2️⃣ AI Acceleration</b><br><br>
