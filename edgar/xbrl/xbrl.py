@@ -691,6 +691,8 @@ class XBRL:
         # Get values and decimals across periods
         values = {}
         decimals = {}  # Store decimals info for each period
+        units = {}  # Store unit_ref for each period
+        period_types = {}  # Store period_type ('instant' or 'duration') for each period
 
         # Find facts for any of these concept names
         all_relevant_facts = self._find_facts_for_element(node.element_name, period_filter)
@@ -747,6 +749,16 @@ class XBRL:
                                 except (ValueError, TypeError):
                                     decimals[period_key] = 0  # Default
 
+                            # Store unit_ref for this period
+                            units[period_key] = fact.unit_ref
+
+                            # Store period_type from context
+                            if context_id in self.contexts:
+                                context = self.contexts[context_id]
+                                if hasattr(context, 'period') and context.period:
+                                    pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                                    period_types[period_key] = pt
+
             else:
                 # For standard financial statements, prefer non-dimensioned facts
                 # If only one fact, use it
@@ -781,6 +793,16 @@ class XBRL:
                     except (ValueError, TypeError):
                         decimals[period_key] = 0  # Default if decimals can't be converted
 
+                # Store unit_ref for this period
+                units[period_key] = fact.unit_ref
+
+                # Store period_type from context
+                if context_id in self.contexts:
+                    context = self.contexts[context_id]
+                    if hasattr(context, 'period') and context.period:
+                        pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                        period_types[period_key] = pt
+
         # For dimensional statements with dimension data, handle the parent item specially
         if should_display_dimensions and dimensioned_facts:
             # Create parent line item with total values AND dimensional children
@@ -793,6 +815,8 @@ class XBRL:
                 'label': label,  # Keep original label, don't add colon
                 'values': values,  # Show the total values
                 'decimals': decimals,  # Include decimals for formatting
+                'units': units,  # Include unit_ref for each period
+                'period_types': period_types,  # Include period_type for each period
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
@@ -809,6 +833,8 @@ class XBRL:
                 'label': label,
                 'values': values,
                 'decimals': decimals,  # Add decimals info for formatting
+                'units': units,  # Include unit_ref for each period
+                'period_types': period_types,  # Include period_type for each period
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,
@@ -825,6 +851,8 @@ class XBRL:
             for dim_key, facts_list in dimensioned_facts.items():
                 dim_values = {}
                 dim_decimals = {}
+                dim_units = {}  # Store unit_ref for each period
+                dim_period_types = {}  # Store period_type for each period
                 dim_metadata = None  # Store metadata from the first fact
 
                 # Collect values for each period
@@ -861,6 +889,17 @@ class XBRL:
                         except (ValueError, TypeError):
                             dim_decimals[period_key] = 0
 
+                    # Store unit_ref for this period
+                    dim_units[period_key] = fact.unit_ref
+
+                    # Store period_type from context
+                    context_id = fact.context_ref
+                    if context_id in self.contexts:
+                        context = self.contexts[context_id]
+                        if hasattr(context, 'period') and context.period:
+                            pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                            dim_period_types[period_key] = pt
+
                 # For better display, use the member label for dimension items,
                 # but make sure we don't add the parent concept name as well
 
@@ -888,6 +927,8 @@ class XBRL:
                     'full_dimension_label': dim_key,  # Keep full dimension notation for reference
                     'values': dim_values,
                     'decimals': dim_decimals,
+                    'units': dim_units,  # Include unit_ref for each period
+                    'period_types': dim_period_types,  # Include period_type for each period
                     'level': node.depth + 1,  # Increase depth by 1
                     'preferred_label': node.preferred_label,
                     'is_abstract': False,
