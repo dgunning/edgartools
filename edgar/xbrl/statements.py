@@ -171,18 +171,22 @@ class Statement:
                      period_filter:str=None,
                      period_view:str=None,
                      standard:bool=True,
-                     include_dimensions:bool=True ) -> Any:
+                     include_dimensions:bool=True,
+                     include_unit:bool=False,
+                     include_point_in_time:bool=False) -> Any:
         """Convert statement to pandas DataFrame.
             period_filter: Optional period key to filter facts
             period_view: Optional name of a predefined period view
             standard: Whether to use standardized concept labels
             include_dimensions: Whether to include dimensional segment data
+            include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
+            include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
 
         Returns:
             DataFrame if pandas is available, else None
         """
         rendered_statement:RenderedStatement = self.render(period_filter=period_filter, period_view=period_view, standard=standard, include_dimensions=include_dimensions)
-        return rendered_statement.to_dataframe()
+        return rendered_statement.to_dataframe(include_unit=include_unit, include_point_in_time=include_point_in_time)
 
     def _validate_statement(self, skip_concept_check: bool = False) -> None:
         """

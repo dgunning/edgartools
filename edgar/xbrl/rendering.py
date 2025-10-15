@@ -369,9 +369,18 @@ class RenderedStatement:
         from edgar.richtools import rich_to_text
         return rich_to_text(self.__rich__(), width=150)
 
-    def to_dataframe(self) -> Any:
-        """Convert to a pandas DataFrame"""
+    def to_dataframe(self, include_unit: bool = False, include_point_in_time: bool = False) -> Any:
+        """Convert to a pandas DataFrame
+
+        Args:
+            include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
+            include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
+
+        Returns:
+            pd.DataFrame: DataFrame with statement data and optional unit/point-in-time columns
+        """
         try:
+            from edgar.xbrl.core import get_unit_display_name, is_point_in_time as get_is_point_in_time
 
             # Create rows for the DataFrame
             df_rows = []
@@ -395,6 +404,32 @@ class RenderedStatement:
                     'concept': row.metadata.get('concept', ''),
                     'label': row.label
                 }
+
+                # Add unit column if requested
+                if include_unit:
+                    # Get units from row metadata
+                    units_dict = row.metadata.get('units', {})
+                    # Get the first non-None unit (all periods should have same unit for a given concept)
+                    unit_ref = None
+                    for period_key in self.header.period_keys:
+                        if period_key in units_dict and units_dict[period_key] is not None:
+                            unit_ref = units_dict[period_key]
+                            break
+                    # Convert to display name
+                    df_row['unit'] = get_unit_display_name(unit_ref)
+
+                # Add point_in_time column if requested
+                if include_point_in_time:
+                    # Get period_types from row metadata
+                    period_types_dict = row.metadata.get('period_types', {})
+                    # Get the first non-None period_type (all periods should have same type structure)
+                    period_type = None
+                    for period_key in self.header.period_keys:
+                        if period_key in period_types_dict and period_types_dict[period_key] is not None:
+                            period_type = period_types_dict[period_key]
+                            break
+                    # Convert to boolean
+                    df_row['point_in_time'] = get_is_point_in_time(period_type)
 
                 # Add cell values using date string column names where available
                 for i, cell in enumerate(row.cells):
@@ -1519,7 +1554,9 @@ def render_statement(
                 'concept': item.get('concept', ''),
                 'has_values': item.get('has_values', False),
                 'children': item.get('children', []),
-                'dimension_metadata': item.get('dimension_metadata', {})
+                'dimension_metadata': item.get('dimension_metadata', {}),
+                'units': item.get('units', {}),  # Pass through unit_ref for each period
+                'period_types': item.get('period_types', {})  # Pass through period_type for each period
             },
             is_abstract=item.get('is_abstract', False),
             is_dimension=item.get('is_dimension', False),

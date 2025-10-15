@@ -360,9 +360,9 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
             return f"{scaled_value:{decimal_format}}"
 
 
-def find_previous_fiscal_year_period(instant_periods: List[Dict[str, Any]], 
-                                    prev_fiscal_year: int, 
-                                    fiscal_month: int, 
+def find_previous_fiscal_year_period(instant_periods: List[Dict[str, Any]],
+                                    prev_fiscal_year: int,
+                                    fiscal_month: int,
                                     fiscal_day: int) -> Optional[Dict[str, Any]]:
     """
     Find the previous fiscal year period using simple matching logic.
@@ -381,9 +381,97 @@ def find_previous_fiscal_year_period(instant_periods: List[Dict[str, Any]],
             period_date = parse_date(period['date'])
             # Check if this period is from the previous fiscal year and around fiscal year end
             if (period_date.year == prev_fiscal_year and
-                period_date.month == fiscal_month and 
+                period_date.month == fiscal_month and
                 abs(period_date.day - fiscal_day) <= 7):
                 return period
         except (ValueError, TypeError):
             continue
     return None
+
+
+def get_unit_display_name(unit_ref: Optional[str]) -> Optional[str]:
+    """
+    Convert unit_ref to human-readable unit name.
+
+    Maps XBRL unit references to standard display names:
+    - 'U-Monetary' / 'iso4217:USD' -> 'usd'
+    - 'U-Shares' / 'shares' -> 'shares'
+    - 'U-USD-per-shares' -> 'usdPerShare'
+    - etc.
+
+    Args:
+        unit_ref: XBRL unit reference string
+
+    Returns:
+        Human-readable unit name or None if unit_ref is None
+
+    Examples:
+        >>> get_unit_display_name('U-Monetary')
+        'usd'
+        >>> get_unit_display_name('U-Shares')
+        'shares'
+        >>> get_unit_display_name('U-USD-per-shares')
+        'usdPerShare'
+    """
+    if not unit_ref:
+        return None
+
+    # Common unit patterns and their standard names
+    unit_ref_lower = unit_ref.lower()
+
+    # Per-share units (ratios) - Check FIRST before simple monetary/share checks
+    if 'per' in unit_ref_lower and 'share' in unit_ref_lower:
+        if 'usd' in unit_ref_lower or 'monetary' in unit_ref_lower:
+            return 'usdPerShare'
+        elif 'eur' in unit_ref_lower:
+            return 'eurPerShare'
+        elif 'gbp' in unit_ref_lower:
+            return 'gbpPerShare'
+        else:
+            return 'perShare'
+
+    # Share units (but not per-share)
+    if 'share' in unit_ref_lower:
+        return 'shares'
+
+    # Monetary units
+    if 'monetary' in unit_ref_lower or 'iso4217:usd' in unit_ref_lower or unit_ref_lower == 'usd':
+        return 'usd'
+    elif 'eur' in unit_ref_lower or 'iso4217:eur' in unit_ref_lower:
+        return 'eur'
+    elif 'gbp' in unit_ref_lower or 'iso4217:gbp' in unit_ref_lower:
+        return 'gbp'
+    elif 'jpy' in unit_ref_lower or 'iso4217:jpy' in unit_ref_lower:
+        return 'jpy'
+
+    # Pure numbers / ratios (no unit)
+    if 'pure' in unit_ref_lower or 'number' in unit_ref_lower:
+        return 'number'
+
+    # Default: return a simplified version of the unit_ref
+    # Remove common prefixes and normalize
+    simplified = unit_ref.replace('U-', '').replace('iso4217:', '')
+    return simplified.lower()
+
+
+def is_point_in_time(period_type: Optional[str]) -> Optional[bool]:
+    """
+    Determine if a period type represents a point-in-time value.
+
+    Args:
+        period_type: XBRL period type ('instant' or 'duration')
+
+    Returns:
+        True for 'instant' periods, False for 'duration' periods, None if period_type is None
+
+    Examples:
+        >>> is_point_in_time('instant')
+        True
+        >>> is_point_in_time('duration')
+        False
+        >>> is_point_in_time(None)
+        None
+    """
+    if period_type is None:
+        return None
+    return period_type == 'instant'
