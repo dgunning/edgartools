@@ -409,6 +409,8 @@ Benchmarks run on standard laptop. Alternative = typical web scraping implementa
 - 💬 Answer questions in Discussions
 - 🔗 Share EdgarTools with colleagues
 
+**Corporate users**: If your organization depends on EdgarTools for SEC compliance or regulatory reporting, [learn about Strategic Sponsorship options](https://github.com/sponsors/dgunning) designed for mission-critical dependencies.
+
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
