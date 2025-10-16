@@ -435,5 +435,200 @@ def test_multiple_searches_same_engine(sample_nodes):
     assert len(results1) == len(results3)
 
 
+# Cache Tests
+
+
+def test_cache_initialization():
+    """Test SearchIndexCache initialization."""
+    from edgar.documents.ranking.cache import SearchIndexCache
+
+    cache = SearchIndexCache(memory_cache_size=5, ttl_hours=12)
+    assert cache.memory_cache_size == 5
+    assert cache.ttl.total_seconds() == 12 * 3600
+
+
+def test_cache_compute_document_hash():
+    """Test document hash computation."""
+    from edgar.documents.ranking.cache import SearchIndexCache
+
+    cache = SearchIndexCache()
+    hash1 = cache.compute_document_hash("doc1", "sample content")
+    hash2 = cache.compute_document_hash("doc1", "sample content")
+    hash3 = cache.compute_document_hash("doc2", "sample content")
+
+    # Same inputs should produce same hash
+    assert hash1 == hash2
+    # Different inputs should produce different hash
+    assert hash1 != hash3
+    # Hash should be 16 characters
+    assert len(hash1) == 16
+
+
+def test_cache_put_and_get():
+    """Test basic cache put and get operations."""
+    from edgar.documents.ranking.cache import SearchIndexCache, CacheEntry
+    from datetime import datetime
+
+    cache = SearchIndexCache(disk_cache_enabled=False)
+    cache.clear()
+
+    # Create entry
+    entry = CacheEntry(
+        document_hash="test123",
+        index_data={'tokenized_corpus': [['test', 'data']], 'k1': 1.5, 'b': 0.75},
+        created_at=datetime.now()
+    )
+
+    # Put and get
+    cache.put("test123", entry)
+    retrieved = cache.get("test123")
+
+    assert retrieved is not None
+    assert retrieved.document_hash == "test123"
+    assert retrieved.access_count == 1
+
+
+def test_cache_miss():
+    """Test cache miss scenario."""
+    from edgar.documents.ranking.cache import SearchIndexCache
+
+    cache = SearchIndexCache(disk_cache_enabled=False)
+    cache.clear()
+
+    result = cache.get("nonexistent")
+    assert result is None
+
+
+def test_cache_lru_eviction():
+    """Test LRU eviction when cache is full."""
+    from edgar.documents.ranking.cache import SearchIndexCache, CacheEntry
+    from datetime import datetime
+
+    cache = SearchIndexCache(memory_cache_size=2, disk_cache_enabled=False)
+    cache.clear()
+
+    # Fill cache
+    entry1 = CacheEntry("hash1", {'data': 1}, datetime.now())
+    entry2 = CacheEntry("hash2", {'data': 2}, datetime.now())
+    entry3 = CacheEntry("hash3", {'data': 3}, datetime.now())
+
+    cache.put("hash1", entry1)
+    cache.put("hash2", entry2)
+
+    # Cache should have 2 entries
+    stats = cache.get_stats()
+    assert stats['memory_entries'] == 2
+
+    # Add third entry - should evict oldest
+    cache.put("hash3", entry3)
+
+    # Should still have 2 entries
+    stats = cache.get_stats()
+    assert stats['memory_entries'] == 2
+
+    # First entry should be evicted
+    assert cache.get("hash1") is None
+    # Second and third should still be there
+    assert cache.get("hash2") is not None
+    assert cache.get("hash3") is not None
+
+
+def test_cache_statistics():
+    """Test cache statistics tracking."""
+    from edgar.documents.ranking.cache import SearchIndexCache, CacheEntry
+    from datetime import datetime
+
+    cache = SearchIndexCache(disk_cache_enabled=False)
+    cache.clear()
+
+    entry = CacheEntry("test", {'data': 1}, datetime.now())
+    cache.put("test", entry)
+
+    # Hit
+    cache.get("test")
+
+    # Miss
+    cache.get("nonexistent")
+
+    stats = cache.get_stats()
+    assert stats['cache_hits'] == 1
+    assert stats['cache_misses'] == 1
+    assert stats['hit_rate'] == 0.5
+
+
+def test_bm25_index_serialization(sample_nodes):
+    """Test BM25 index can be serialized and deserialized."""
+    engine = BM25Engine()
+
+    # Build index
+    results = engine.rank("revenue", sample_nodes)
+    assert len(results) > 0
+
+    # Get index data
+    index_data = engine.get_index_data()
+    assert 'tokenized_corpus' in index_data
+    assert 'k1' in index_data
+    assert 'b' in index_data
+
+    # Create new engine and load index
+    new_engine = BM25Engine()
+    new_engine.load_index_data(index_data, sample_nodes)
+
+    # Should produce same results
+    new_results = new_engine.rank("revenue", sample_nodes)
+    assert len(new_results) == len(results)
+    assert new_results[0].node == results[0].node
+
+
+def test_cache_clear():
+    """Test cache clearing."""
+    from edgar.documents.ranking.cache import SearchIndexCache, CacheEntry
+    from datetime import datetime
+
+    cache = SearchIndexCache(disk_cache_enabled=False)
+
+    # Add entries
+    entry = CacheEntry("test", {'data': 1}, datetime.now())
+    cache.put("test", entry)
+
+    assert len(cache._memory_cache) > 0
+
+    # Clear
+    cache.clear()
+
+    assert len(cache._memory_cache) == 0
+
+
+def test_global_cache_singleton():
+    """Test global cache is singleton."""
+    from edgar.documents.ranking.cache import get_search_cache
+
+    cache1 = get_search_cache()
+    cache2 = get_search_cache()
+
+    assert cache1 is cache2
+
+
+def test_set_global_cache():
+    """Test setting custom global cache."""
+    from edgar.documents.ranking.cache import (
+        SearchIndexCache,
+        get_search_cache,
+        set_search_cache
+    )
+
+    # Create custom cache
+    custom_cache = SearchIndexCache(memory_cache_size=20)
+    set_search_cache(custom_cache)
+
+    # Get global cache
+    cache = get_search_cache()
+    assert cache is custom_cache
+    assert cache.memory_cache_size == 20
+
+    # Reset to default
+    set_search_cache(None)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

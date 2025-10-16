@@ -177,6 +177,40 @@ class BM25Engine(RankingEngine):
             b=self.b
         )
 
+    def get_index_data(self) -> Dict[str, Any]:
+        """
+        Serialize index data for caching.
+
+        Returns:
+            Dictionary with serializable index data
+        """
+        return {
+            'tokenized_corpus': self._tokenized_corpus,
+            'k1': self.k1,
+            'b': self.b,
+            'algorithm': 'BM25'
+        }
+
+    def load_index_data(self, index_data: Dict[str, Any], nodes: List['Node']) -> None:
+        """
+        Load index from cached data.
+
+        Args:
+            index_data: Serialized index data
+            nodes: Nodes corresponding to the index
+        """
+        self._corpus_nodes = nodes
+        self._tokenized_corpus = index_data['tokenized_corpus']
+        self.k1 = index_data['k1']
+        self.b = index_data['b']
+
+        # Rebuild BM25 index from tokenized corpus
+        self._bm25 = BM25Okapi(
+            self._tokenized_corpus,
+            k1=self.k1,
+            b=self.b
+        )
+
     def get_algorithm_name(self) -> str:
         """Get algorithm name."""
         return "BM25"
