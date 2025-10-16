@@ -132,6 +132,7 @@ financials = latest_10k.obj().financials()
 - Build predictive models with financial data
 - Automate document analysis workflows
 - Create training datasets for financial AI
+- **Advanced ranking search** with BM25 and semantic structure awareness
 
 ## Why Choose EdgarTools?
 
@@ -178,6 +179,10 @@ Complete documentation of all classes and methods
 **[Examples & Recipes](examples.md)**
 
 Real-world analysis patterns and code templates
+
+**[Advanced Search](advanced-search.md)**
+
+BM25 ranking, semantic search, and intelligent caching
 
 ---
 
