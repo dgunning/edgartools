@@ -198,12 +198,46 @@ class XBRLFact:
 
 @dataclass
 class SearchResult:
-    """Result from document search."""
+    """
+    Result from document search.
+
+    Designed for agent-friendly investigation workflows - provides access to
+    full section context rather than fragmented chunks.
+    """
     node: 'NodeProtocol'
     score: float
     snippet: str
     section: Optional[str] = None
     context: Optional[str] = None
+    _section_obj: Optional[Any] = None  # Hidden Section object for agent navigation
+
+    @property
+    def section_object(self) -> Optional[Any]:
+        """
+        Get full Section object for agent navigation.
+
+        Enables multi-step investigation by providing access to complete
+        section content, not just the matched fragment.
+
+        Returns:
+            Section object with text(), tables(), and search() methods
+        """
+        return self._section_obj
+
+    @property
+    def full_context(self) -> str:
+        """
+        Get complete section text for agent investigation.
+
+        Returns full section content instead of fragmented chunks.
+        This supports the post-RAG "investigation not retrieval" pattern.
+
+        Returns:
+            Complete section text if section available, else snippet
+        """
+        if self._section_obj and hasattr(self._section_obj, 'text'):
+            return self._section_obj.text()
+        return self.snippet
 
 
 @dataclass

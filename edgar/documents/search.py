@@ -1,16 +1,22 @@
 """
 Search functionality for parsed documents.
+
+Provides both traditional search modes (TEXT, REGEX, SEMANTIC, XPATH) and
+advanced BM25-based ranking with semantic structure awareness.
 """
 
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, TYPE_CHECKING
 
 from edgar.documents.document import Document
 from edgar.documents.nodes import Node, HeadingNode
 from edgar.documents.table_nodes import TableNode
 from edgar.documents.types import NodeType, SemanticType
+
+if TYPE_CHECKING:
+    from edgar.documents.types import SearchResult as TypesSearchResult
 
 
 class SearchMode(Enum):
@@ -477,30 +483,145 @@ class DocumentSearch:
                      pattern: Optional[str] = None) -> List[HeadingNode]:
         """
         Find headings matching criteria.
-        
+
         Args:
             level: Heading level (1-6)
             pattern: Regex pattern for heading text
-            
+
         Returns:
             List of matching headings
         """
         headings = []
-        
+
         for node in self.type_index.get(NodeType.HEADING, []):
             if not isinstance(node, HeadingNode):
                 continue
-            
+
             # Check level
             if level and node.level != level:
                 continue
-            
+
             # Check pattern
             if pattern:
                 heading_text = node.text()
                 if not heading_text or not re.search(pattern, heading_text, re.IGNORECASE):
                     continue
-            
+
             headings.append(node)
-        
+
         return headings
+
+    def ranked_search(self,
+                     query: str,
+                     algorithm: str = "hybrid",
+                     top_k: int = 10,
+                     node_types: Optional[List[NodeType]] = None,
+                     in_section: Optional[str] = None,
+                     boost_sections: Optional[List[str]] = None) -> List['TypesSearchResult']:
+        """
+        Advanced search with BM25-based ranking and semantic structure awareness.
+
+        This provides relevance-ranked results better suited for financial documents
+        than simple substring matching. Uses BM25 for exact term matching combined
+        with semantic structure boosting for gateway content detection.
+
+        Args:
+            query: Search query
+            algorithm: Ranking algorithm ("bm25", "hybrid", "semantic")
+            top_k: Maximum results to return
+            node_types: Limit search to specific node types
+            in_section: Limit search to specific section
+            boost_sections: Section names to boost (e.g., ["Risk Factors"])
+
+        Returns:
+            List of SearchResult objects with relevance scores (from types.py)
+
+        Examples:
+            >>> searcher = DocumentSearch(document)
+            >>> results = searcher.ranked_search("revenue growth", algorithm="hybrid", top_k=5)
+            >>> for result in results:
+            >>>     print(f"Score: {result.score:.3f}")
+            >>>     print(f"Text: {result.snippet}")
+            >>>     print(f"Full context: {result.full_context[:200]}...")
+        """
+        from edgar.documents.ranking.ranking import (
+            BM25Engine,
+            HybridEngine,
+            SemanticEngine
+        )
+        from edgar.documents.types import SearchResult as TypesSearchResult
+
+        # Get all leaf nodes for ranking (avoid duplicates from parent nodes)
+        nodes = []
+        for node in self.document.root.walk():
+            # Only include leaf nodes with text
+            if hasattr(node, 'children') and node.children:
+                continue  # Skip parent nodes
+            if hasattr(node, 'text'):
+                text = node.text()
+                if text and len(text.strip()) > 0:
+                    nodes.append(node)
+
+        # Filter by node types if specified
+        if node_types:
+            nodes = [n for n in nodes if n.type in node_types]
+
+        # Filter by section if specified
+        if in_section:
+            section_nodes = self._get_section_nodes(in_section)
+            nodes = [n for n in nodes if n in section_nodes]
+
+        if not nodes:
+            return []
+
+        # Select ranking engine
+        algorithm_lower = algorithm.lower()
+        if algorithm_lower == "bm25":
+            engine = BM25Engine()
+        elif algorithm_lower == "hybrid":
+            engine = HybridEngine(boost_sections=boost_sections)
+        elif algorithm_lower == "semantic":
+            engine = SemanticEngine(boost_sections=boost_sections)
+        else:
+            raise ValueError(f"Unknown algorithm: {algorithm}. Use 'bm25', 'hybrid', or 'semantic'")
+
+        # Rank nodes
+        ranked_results = engine.rank(query, nodes)
+
+        # Convert to types.SearchResult format and add section context
+        search_results = []
+        for ranked in ranked_results[:top_k]:
+            # Try to find which section this node belongs to
+            section_obj = self._find_node_section(ranked.node)
+
+            search_results.append(TypesSearchResult(
+                node=ranked.node,
+                score=ranked.score,
+                snippet=ranked.snippet,
+                section=section_obj.name if section_obj else None,
+                context=ranked.text if len(ranked.text) <= 500 else ranked.text[:497] + "...",
+                _section_obj=section_obj  # Agent navigation support
+            ))
+
+        return search_results
+
+    def _find_node_section(self, node: Node):
+        """
+        Find which section a node belongs to.
+
+        Returns:
+            Section object or None
+        """
+        # Walk up the tree to find section markers
+        current = node
+        while current:
+            # Check if any section contains this node
+            for section_name, section in self.document.sections.items():
+                # Check if node is in section's subtree
+                for section_node in section.node.walk():
+                    if section_node is current or section_node is node:
+                        return section
+
+            current = current.parent if hasattr(current, 'parent') else None
+
+        return None
