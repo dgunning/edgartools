@@ -721,7 +721,8 @@ class FactQuery:
 
         # order columns
         first_columns = [col for col in
-                         ['concept', 'label', 'value', 'numeric_value', 'period_start', 'period_end', 'period_instant',
+                         ['concept', 'label', 'balance', 'preferred_sign', 'weight', 'value', 'numeric_value',
+                          'period_start', 'period_end', 'period_instant',
                           'decimals', 'statement_type', 'statement_name']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns
@@ -917,7 +918,7 @@ class FactsView:
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
 
-                # First look up preferred_label from presentation trees 
+                # First look up preferred_label from presentation trees
                 # to ensure label consistency between rendering and facts
                 preferred_label = None
                 for role, tree in self.xbrl.presentation_trees.items():
@@ -942,6 +943,36 @@ class FactsView:
                 # Store original label (will be used for standardization comparison)
                 fact_dict['original_label'] = label
 
+                # Add balance from element catalog (Issue #463)
+                # Balance indicates accounting classification (debit/credit)
+                # Try element catalog first, then fall back to static US-GAAP mapping
+                balance = element.balance
+                if balance is None:
+                    # Import here to avoid circular dependencies
+                    from edgar.xbrl.parsers.concepts import get_balance_type
+                    # Try to get balance from static mapping using the original concept ID
+                    balance = get_balance_type(fact.element_id)
+                fact_dict['balance'] = balance  # "debit", "credit", or None
+
+                # Add preferred_sign from presentation linkbase (Issue #463)
+                # Convert preferredLabel to a numeric sign multiplier for display
+                # -1 means "negate for display", 1 means "use as-is", None means "not specified"
+                if preferred_label:
+                    # Common preferredLabel values that indicate negation
+                    negation_labels = [
+                        'negatedLabel',
+                        'http://www.xbrl.org/2003/role/negatedLabel',
+                        'negatedTerseLabel',
+                        'http://www.xbrl.org/2003/role/negatedTerseLabel',
+                        'negatedPeriodStartLabel',
+                        'http://www.xbrl.org/2003/role/negatedPeriodStartLabel',
+                        'negatedPeriodEndLabel',
+                        'http://www.xbrl.org/2003/role/negatedPeriodEndLabel'
+                    ]
+                    fact_dict['preferred_sign'] = -1 if preferred_label in negation_labels else 1
+                else:
+                    fact_dict['preferred_sign'] = None
+
                 # Determine statement type by checking presentation trees using our precomputed mapping
                 for role, tree in self.xbrl.presentation_trees.items():
                     if element_id in tree.all_nodes and role in role_to_statement_type:
@@ -949,6 +980,12 @@ class FactsView:
                         fact_dict['statement_type'] = statement_type
                         fact_dict['statement_role'] = statement_role
                         break
+
+            # Add weight from calculation tree (Issue #463)
+            # Weight indicates calculation role (1.0 = add, -1.0 = subtract)
+            # Note: Weight is role-specific, use primary statement role when available
+            statement_type = fact_dict.get('statement_type')
+            fact_dict['weight'] = self._get_primary_weight(element_id, statement_type)
 
             enriched_facts.append(fact_dict)
 
@@ -1399,6 +1436,50 @@ class FactsView:
             result['fiscal_year'] = df['fiscal_year']
 
         return result
+
+    def _get_primary_weight(self, element_id: str, statement_type: Optional[str]) -> Optional[float]:
+        """
+        Get calculation weight for element from primary statement role.
+
+        Weight is role-specific (same concept can have different weights in different statements).
+        Returns weight from primary statement role if available.
+
+        Args:
+            element_id: Normalized element ID (e.g., 'us_gaap_Revenue')
+            statement_type: Statement type ('IncomeStatement', 'BalanceSheet', etc.)
+
+        Returns:
+            Weight value (typically 1.0 or -1.0) or None if not in calculations
+        """
+        if not hasattr(self.xbrl, 'calculation_trees'):
+            return None
+
+        # Try to find weight in calculation trees
+        for role_uri, calc_tree in self.xbrl.calculation_trees.items():
+            # Prefer calculation tree matching the statement type
+            if statement_type:
+                role_lower = role_uri.lower()
+                if statement_type == "IncomeStatement" and "income" in role_lower:
+                    node = calc_tree.all_nodes.get(element_id)
+                    if node:
+                        return node.weight
+                elif statement_type == "BalanceSheet" and ("balance" in role_lower or "position" in role_lower):
+                    node = calc_tree.all_nodes.get(element_id)
+                    if node:
+                        return node.weight
+                elif statement_type == "CashFlowStatement" and "cash" in role_lower:
+                    node = calc_tree.all_nodes.get(element_id)
+                    if node:
+                        return node.weight
+
+        # Fallback: return first weight found in any role
+        for calc_tree in self.xbrl.calculation_trees.values():
+            node = calc_tree.all_nodes.get(element_id)
+            if node:
+                return node.weight
+
+        # Not found in any calculation tree
+        return None
 
     def clear_cache(self) -> None:
         """Clear cached data."""
