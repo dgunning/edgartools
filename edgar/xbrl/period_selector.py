@@ -357,6 +357,151 @@ def _sort_periods_by_date(periods: List[Dict], period_type: str) -> List[Dict]:
     return sorted(periods, key=get_sort_key, reverse=True)
 
 
+def _calculate_dynamic_thresholds(facts_by_period: Dict, statement_type: str) -> int:
+    """
+    Calculate minimum fact threshold based on actual data distribution.
+
+    This adapts to company size - small companies get lower thresholds,
+    large companies maintain high standards.
+
+    Args:
+        facts_by_period: Pre-grouped facts by period key
+        statement_type: Statement type to analyze
+
+    Returns:
+        Minimum fact count threshold for this company/statement
+    """
+    # Collect fact counts for this statement type across all periods
+    statement_fact_counts = []
+
+    for period_key, period_facts in facts_by_period.items():
+        statement_facts = [
+            f for f in period_facts
+            if f.get('statement_type') == statement_type
+        ]
+        if statement_facts:
+            statement_fact_counts.append(len(statement_facts))
+
+    if not statement_fact_counts:
+        # No data for this statement type - use conservative default
+        return 10
+
+    # Sort to find the richest periods
+    statement_fact_counts.sort(reverse=True)
+
+    # Strategy: Use 40% of the richest period's fact count as minimum
+    # This adapts to company size while still filtering sparse periods
+    richest_period_facts = statement_fact_counts[0]
+
+    # Calculate adaptive threshold
+    adaptive_threshold = int(richest_period_facts * 0.4)
+
+    # Apply floor and ceiling
+    MIN_FLOOR = 10   # Never go below 10 facts
+    MAX_CEILING = {
+        'BalanceSheet': 40,
+        'IncomeStatement': 25,
+        'CashFlowStatement': 20
+    }
+
+    threshold = max(MIN_FLOOR, min(adaptive_threshold, MAX_CEILING.get(statement_type, 30)))
+
+    logger.debug("Dynamic threshold for %s: %d (richest period: %d facts, 40%% = %d)",
+                statement_type, threshold, richest_period_facts, adaptive_threshold)
+
+    return threshold
+
+
+def _calculate_dynamic_concept_diversity(facts_by_period: Dict, statement_type: str) -> int:
+    """
+    Calculate minimum concept diversity based on actual data.
+
+    Returns:
+        Minimum unique concept count for this company/statement
+    """
+    if statement_type != 'BalanceSheet':
+        return 0  # Only apply to Balance Sheets for now
+
+    # Find maximum concept diversity across periods
+    max_concepts = 0
+    for period_facts in facts_by_period.values():
+        statement_facts = [
+            f for f in period_facts
+            if f.get('statement_type') == statement_type
+        ]
+        unique_concepts = len(set(f.get('concept') for f in statement_facts if f.get('concept')))
+        max_concepts = max(max_concepts, unique_concepts)
+
+    # Require 30% of maximum concept diversity, but at least 5
+    diversity_threshold = max(5, int(max_concepts * 0.3))
+
+    logger.debug("Dynamic concept diversity for %s: %d (max concepts: %d)",
+                statement_type, diversity_threshold, max_concepts)
+
+    return diversity_threshold
+
+
+# Enhanced essential concept patterns with multiple variations
+ESSENTIAL_CONCEPT_PATTERNS = {
+    'BalanceSheet': [
+        # Pattern groups - any match in group counts as finding that concept
+        ['Assets', 'AssetsCurrent', 'AssetsNoncurrent', 'AssetsFairValueDisclosure'],
+        ['Liabilities', 'LiabilitiesCurrent', 'LiabilitiesNoncurrent', 'LiabilitiesAndStockholdersEquity'],
+        ['Equity', 'StockholdersEquity', 'ShareholdersEquity', 'PartnersCapital',
+         'MembersEquity', 'ShareholdersEquityIncludingPortionAttributableToNoncontrollingInterest']
+    ],
+    'IncomeStatement': [
+        ['Revenue', 'Revenues', 'SalesRevenue', 'SalesRevenueNet', 'RevenueFromContractWithCustomer'],
+        ['NetIncome', 'NetIncomeLoss', 'ProfitLoss', 'NetIncomeLossAvailableToCommonStockholdersBasic'],
+        ['OperatingIncome', 'OperatingIncomeLoss', 'IncomeLossFromOperations']
+    ],
+    'CashFlowStatement': [
+        ['OperatingCashFlow', 'NetCashProvidedByUsedInOperatingActivities',
+         'CashProvidedByUsedInOperatingActivities'],
+        ['InvestingCashFlow', 'NetCashProvidedByUsedInInvestingActivities',
+         'CashProvidedByUsedInInvestingActivities'],
+        ['FinancingCashFlow', 'NetCashProvidedByUsedInFinancingActivities',
+         'CashProvidedByUsedInFinancingActivities']
+    ]
+}
+
+
+def _check_essential_concepts_flexible(statement_facts: List[Dict], statement_type: str) -> int:
+    """
+    Check for essential concepts using flexible pattern matching.
+
+    Returns count of essential concept groups found (not individual patterns).
+    """
+    concept_groups = ESSENTIAL_CONCEPT_PATTERNS.get(statement_type, [])
+
+    if not concept_groups:
+        return 0
+
+    # Extract all concepts from facts once
+    fact_concepts = [f.get('concept', '').lower() for f in statement_facts if f.get('concept')]
+
+    essential_concept_count = 0
+
+    # For each concept group, check if ANY pattern matches
+    for pattern_group in concept_groups:
+        group_matched = False
+
+        for pattern in pattern_group:
+            pattern_lower = pattern.lower()
+
+            # Check if this pattern appears in any fact concept
+            if any(pattern_lower in concept for concept in fact_concepts):
+                group_matched = True
+                logger.debug("Essential concept matched: %s (from group %s)",
+                           pattern, pattern_group[0])
+                break
+
+        if group_matched:
+            essential_concept_count += 1
+
+    return essential_concept_count
+
+
 def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str, str]], statement_type: str) -> List[Tuple[str, str]]:
     """
     Filter periods to only include those with sufficient financial data.
@@ -366,82 +511,92 @@ def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str
 
     Issue #464: Added statement-specific fact count checks and concept diversity
     requirements to prevent showing sparse historical periods with only 1-2 concepts.
+
+    Performance optimization: Retrieves all facts once and works with in-memory data
+    instead of creating 40+ DataFrames per statement rendering.
     """
     MIN_FACTS_THRESHOLD = 10  # Minimum facts needed for a period to be considered viable
 
-    # Statement-specific minimum fact counts (more stringent for statements with more detail)
-    MIN_STATEMENT_FACTS = {
-        'BalanceSheet': 30,      # Balance sheets typically have 50-90 facts for complete periods
-        'IncomeStatement': 20,   # Income statements vary but should have at least 20 facts
-        'CashFlowStatement': 15  # Cash flow can be more concise
-    }
+    # PERFORMANCE FIX: Get all facts once at the start (single operation)
+    all_facts = xbrl.facts.get_facts()  # Returns List[Dict] - fast!
 
-    # Define essential concepts by statement type
-    essential_concepts = {
-        'IncomeStatement': ['Revenue', 'NetIncome', 'OperatingIncome'],
-        'BalanceSheet': ['Assets', 'Liabilities', 'Equity'],
-        'CashFlowStatement': ['OperatingCashFlow', 'InvestingCashFlow', 'FinancingCashFlow']
-    }
+    # Pre-group facts by period_key (O(n) operation, done once)
+    facts_by_period = {}
+    for fact in all_facts:
+        period_key = fact.get('period_key')
+        if period_key:
+            if period_key not in facts_by_period:
+                facts_by_period[period_key] = []
+            facts_by_period[period_key].append(fact)
 
-    required_concepts = essential_concepts.get(statement_type, [])
-    statement_min_facts = MIN_STATEMENT_FACTS.get(statement_type, MIN_FACTS_THRESHOLD)
+    # Pre-group facts by statement type within each period
+    statement_facts_by_period = {}
+    for period_key, period_facts in facts_by_period.items():
+        statement_facts_by_period[period_key] = [
+            f for f in period_facts
+            if f.get('statement_type') == statement_type
+        ]
+
+    # DYNAMIC THRESHOLDS: Calculate based on this company's data distribution
+    statement_min_facts = _calculate_dynamic_thresholds(facts_by_period, statement_type)
+    min_concept_diversity = _calculate_dynamic_concept_diversity(facts_by_period, statement_type)
+
+    # Get essential concept groups for this statement type
+    required_concept_groups = len(ESSENTIAL_CONCEPT_PATTERNS.get(statement_type, []))
+
     periods_with_data = []
 
+    # Loop through candidates using pre-computed groups (no DataFrame conversions!)
     for period_key, period_label in candidate_periods:
         try:
-            # Check statement-specific fact count
-            statement_facts = xbrl.facts.query().by_period_key(period_key).by_statement_type(statement_type).to_dataframe()
-            statement_fact_count = len(statement_facts)
+            # Get pre-grouped facts (fast list access, not DataFrame query)
+            statement_facts = statement_facts_by_period.get(period_key, [])
+            period_facts = facts_by_period.get(period_key, [])
 
-            # Also check total fact count for this period (used for non-specific statements)
-            period_facts = xbrl.facts.query().by_period_key(period_key).to_dataframe()
+            statement_fact_count = len(statement_facts)
             total_fact_count = len(period_facts)
 
-            # Use statement-specific threshold if we have it, otherwise use general threshold
+            # Check statement-specific threshold
             if statement_fact_count < statement_min_facts:
                 logger.debug("Period %s has insufficient %s facts (%d < %d)",
                            period_label, statement_type, statement_fact_count, statement_min_facts)
                 continue
 
-            # Fallback check for total facts if statement filtering didn't work
+            # Fallback check for total facts
             if total_fact_count < MIN_FACTS_THRESHOLD:
-                logger.debug("Period %s has insufficient facts (%d < %d)", period_label, total_fact_count, MIN_FACTS_THRESHOLD)
+                logger.debug("Period %s has insufficient facts (%d < %d)",
+                           period_label, total_fact_count, MIN_FACTS_THRESHOLD)
                 continue
 
-            # Check concept diversity for Balance Sheets (Issue #464)
-            # Periods with only 1-2 concepts (just totals) should be excluded
+            # Check concept diversity (Issue #464)
             if statement_type == 'BalanceSheet':
-                unique_concepts = statement_facts['concept'].nunique()
-                MIN_CONCEPT_DIVERSITY = 10  # Require at least 10 unique concepts
+                unique_concepts = len(set(f.get('concept') for f in statement_facts if f.get('concept')))
 
-                if unique_concepts < MIN_CONCEPT_DIVERSITY:
+                if unique_concepts < min_concept_diversity:
                     logger.debug("Period %s lacks concept diversity (%d < %d unique concepts)",
-                               period_label, unique_concepts, MIN_CONCEPT_DIVERSITY)
+                               period_label, unique_concepts, min_concept_diversity)
                     continue
 
-            # Check for essential concepts
-            essential_concept_count = 0
-            for concept in required_concepts:
-                concept_facts = xbrl.facts.query().by_period_key(period_key).by_concept(concept).to_dataframe()
-                if len(concept_facts) > 0:
-                    essential_concept_count += 1
+            # FLEXIBLE CONCEPT MATCHING: Check essential concepts using pattern groups
+            essential_concept_count = _check_essential_concepts_flexible(statement_facts, statement_type)
 
-            # Require at least half the essential concepts to be present
-            min_essential_required = max(1, len(required_concepts) // 2)
+            # Require at least half the essential concept groups
+            min_essential_required = max(1, required_concept_groups // 2)
             if essential_concept_count >= min_essential_required:
                 periods_with_data.append((period_key, period_label))
+                unique_concepts_count = len(set(f.get('concept') for f in statement_facts if f.get('concept')))
                 logger.debug("Period %s has sufficient data: %d %s facts, %d unique concepts, %d/%d essential concepts",
                            period_label, statement_fact_count, statement_type,
-                           statement_facts['concept'].nunique() if len(statement_facts) > 0 else 0,
-                           essential_concept_count, len(required_concepts))
+                           unique_concepts_count,
+                           essential_concept_count, required_concept_groups)
             else:
                 logger.debug("Period %s lacks essential concepts: %d/%d present",
-                           period_label, essential_concept_count, len(required_concepts))
+                           period_label, essential_concept_count, required_concept_groups)
 
         except Exception as e:
-            logger.debug("Error checking data for period %s: %s", period_label, e)
-            # If we can't check, include it to be safe
-            periods_with_data.append((period_key, period_label))
+            logger.warning("Error checking data for period %s: %s", period_label, e)
+            # Be more conservative - don't include if we can't verify
+            continue
 
     return periods_with_data
 
