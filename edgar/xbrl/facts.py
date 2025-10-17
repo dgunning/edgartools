@@ -710,7 +710,8 @@ class FactQuery:
             columns = [col for col in columns if col in df.columns]
             df = df[list(columns)]
         # skip these columns
-        skip_columns = ['fact_key', 'original_label', 'period_key']
+        # Note: period_key is now included for time series analysis (Issue #464)
+        skip_columns = ['fact_key', 'original_label']
 
         if 'statement_role' in df.columns:
             # Change the statement_role to statement name
@@ -722,7 +723,7 @@ class FactQuery:
         # order columns
         first_columns = [col for col in
                          ['concept', 'label', 'balance', 'preferred_sign', 'weight', 'value', 'numeric_value',
-                          'period_start', 'period_end', 'period_instant',
+                          'period_key', 'period_start', 'period_end', 'period_instant',
                           'decimals', 'statement_type', 'statement_name']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns

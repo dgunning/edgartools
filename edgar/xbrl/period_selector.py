@@ -116,10 +116,17 @@ def _select_balance_sheet_periods(periods: List[Dict], max_periods: int) -> List
     # Sort by date (most recent first)
     instant_periods = _sort_periods_by_date(instant_periods, 'instant')
 
-    # Take the most recent instant periods
+    # Take more candidate periods initially (up to 10) to ensure we capture fiscal year ends
+    # Many filings have several instant periods (quarterly, mid-year, etc.) with minimal data
+    # We need to cast a wider net initially and let data filtering select the best ones
+    # Issue #464: Was only checking first 4 periods, missing prior fiscal year ends
+    candidate_count = min(10, len(instant_periods))
+
     selected_periods = []
-    for period in instant_periods[:max_periods]:
+    for period in instant_periods[:candidate_count]:
         selected_periods.append((period['key'], period['label']))
+        if len(selected_periods) >= max_periods * 3:  # Check up to 3x max_periods
+            break
 
     return selected_periods
 
@@ -356,8 +363,18 @@ def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str
 
     This prevents selection of periods that exist in the taxonomy but have
     no meaningful financial facts (like the Alphabet 2019 case).
+
+    Issue #464: Added statement-specific fact count checks and concept diversity
+    requirements to prevent showing sparse historical periods with only 1-2 concepts.
     """
     MIN_FACTS_THRESHOLD = 10  # Minimum facts needed for a period to be considered viable
+
+    # Statement-specific minimum fact counts (more stringent for statements with more detail)
+    MIN_STATEMENT_FACTS = {
+        'BalanceSheet': 30,      # Balance sheets typically have 50-90 facts for complete periods
+        'IncomeStatement': 20,   # Income statements vary but should have at least 20 facts
+        'CashFlowStatement': 15  # Cash flow can be more concise
+    }
 
     # Define essential concepts by statement type
     essential_concepts = {
@@ -367,17 +384,40 @@ def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str
     }
 
     required_concepts = essential_concepts.get(statement_type, [])
+    statement_min_facts = MIN_STATEMENT_FACTS.get(statement_type, MIN_FACTS_THRESHOLD)
     periods_with_data = []
 
     for period_key, period_label in candidate_periods:
         try:
-            # Check total fact count for this period
-            period_facts = xbrl.facts.query().by_period_key(period_key).to_dataframe()
-            fact_count = len(period_facts)
+            # Check statement-specific fact count
+            statement_facts = xbrl.facts.query().by_period_key(period_key).by_statement_type(statement_type).to_dataframe()
+            statement_fact_count = len(statement_facts)
 
-            if fact_count < MIN_FACTS_THRESHOLD:
-                logger.debug("Period %s has insufficient facts (%d < %d)", period_label, fact_count, MIN_FACTS_THRESHOLD)
+            # Also check total fact count for this period (used for non-specific statements)
+            period_facts = xbrl.facts.query().by_period_key(period_key).to_dataframe()
+            total_fact_count = len(period_facts)
+
+            # Use statement-specific threshold if we have it, otherwise use general threshold
+            if statement_fact_count < statement_min_facts:
+                logger.debug("Period %s has insufficient %s facts (%d < %d)",
+                           period_label, statement_type, statement_fact_count, statement_min_facts)
                 continue
+
+            # Fallback check for total facts if statement filtering didn't work
+            if total_fact_count < MIN_FACTS_THRESHOLD:
+                logger.debug("Period %s has insufficient facts (%d < %d)", period_label, total_fact_count, MIN_FACTS_THRESHOLD)
+                continue
+
+            # Check concept diversity for Balance Sheets (Issue #464)
+            # Periods with only 1-2 concepts (just totals) should be excluded
+            if statement_type == 'BalanceSheet':
+                unique_concepts = statement_facts['concept'].nunique()
+                MIN_CONCEPT_DIVERSITY = 10  # Require at least 10 unique concepts
+
+                if unique_concepts < MIN_CONCEPT_DIVERSITY:
+                    logger.debug("Period %s lacks concept diversity (%d < %d unique concepts)",
+                               period_label, unique_concepts, MIN_CONCEPT_DIVERSITY)
+                    continue
 
             # Check for essential concepts
             essential_concept_count = 0
@@ -390,8 +430,10 @@ def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str
             min_essential_required = max(1, len(required_concepts) // 2)
             if essential_concept_count >= min_essential_required:
                 periods_with_data.append((period_key, period_label))
-                logger.debug("Period %s has sufficient data: %d facts, %d/%d essential concepts",
-                           period_label, fact_count, essential_concept_count, len(required_concepts))
+                logger.debug("Period %s has sufficient data: %d %s facts, %d unique concepts, %d/%d essential concepts",
+                           period_label, statement_fact_count, statement_type,
+                           statement_facts['concept'].nunique() if len(statement_facts) > 0 else 0,
+                           essential_concept_count, len(required_concepts))
             else:
                 logger.debug("Period %s lacks essential concepts: %d/%d present",
                            period_label, essential_concept_count, len(required_concepts))
