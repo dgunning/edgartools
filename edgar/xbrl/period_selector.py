@@ -29,21 +29,21 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
     Returns:
         List of (period_key, period_label) tuples, most recent first
     """
+    # Step 1: Always filter by document date first (prevents future date bugs)
+    all_periods = xbrl.reporting_periods
+    document_end_date = xbrl.period_of_report
+
+    if not all_periods:
+        logger.warning("No reporting periods available for %s", xbrl.entity_name)
+        return []
+
+    filtered_periods = _filter_by_document_date(all_periods, document_end_date)
+
+    if not filtered_periods:
+        logger.warning("No valid periods found after document date filtering for %s", xbrl.entity_name)
+        return [(p['key'], p['label']) for p in all_periods[:max_periods]]  # Fallback to unfiltered
+
     try:
-        # Step 1: Always filter by document date first (prevents future date bugs)
-        all_periods = xbrl.reporting_periods
-        document_end_date = xbrl.period_of_report
-
-        if not all_periods:
-            logger.warning("No reporting periods available for %s", xbrl.entity_name)
-            return []
-
-        filtered_periods = _filter_by_document_date(all_periods, document_end_date)
-
-        if not filtered_periods:
-            logger.warning("No valid periods found after document date filtering for %s", xbrl.entity_name)
-            return [(p['key'], p['label']) for p in all_periods[:max_periods]]  # Fallback to unfiltered
-
         # Step 2: Statement-specific logic
         if statement_type == 'BalanceSheet':
             candidate_periods = _select_balance_sheet_periods(filtered_periods, max_periods)
@@ -62,8 +62,8 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
 
     except Exception as e:
         logger.error("Period selection failed for %s %s: %s", xbrl.entity_name, statement_type, e)
-        # Final fallback: return first few periods
-        return [(p['key'], p['label']) for p in xbrl.reporting_periods[:max_periods]]
+        # Final fallback: return filtered periods (document date filter already applied)
+        return [(p['key'], p['label']) for p in filtered_periods[:max_periods]]
 
 
 def _filter_by_document_date(periods: List[Dict], document_end_date: Optional[str]) -> List[Dict]:
