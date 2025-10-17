@@ -74,22 +74,26 @@ class SchemaParser(BaseParser):
                 # Extract element properties
                 data_type = element.get('type', '')
 
-                # Check for balance and period type in child annotations
-                balance_type = None
-                period_type = None
+                # Check for balance and period type
+                # First check as attributes on the element (modern XBRL style)
+                balance_type = element.get('{http://www.xbrl.org/2003/instance}balance')
+                period_type = element.get('{http://www.xbrl.org/2003/instance}periodType')
                 abstract = element.get('abstract', 'false').lower() == 'true'
 
-                # Look for balance and period type
-                annotation = element.find('.//{http://www.w3.org/2001/XMLSchema}annotation')
-                if annotation is not None:
-                    for appinfo in annotation.findall('.//{http://www.w3.org/2001/XMLSchema}appinfo'):
-                        balance_element = appinfo.find('.//{http://www.xbrl.org/2003/instance}balance')
-                        if balance_element is not None:
-                            balance_type = balance_element.text
+                # If not found as attributes, look in nested annotations (legacy style)
+                if not balance_type or not period_type:
+                    annotation = element.find('.//{http://www.w3.org/2001/XMLSchema}annotation')
+                    if annotation is not None:
+                        for appinfo in annotation.findall('.//{http://www.w3.org/2001/XMLSchema}appinfo'):
+                            if not balance_type:
+                                balance_element = appinfo.find('.//{http://www.xbrl.org/2003/instance}balance')
+                                if balance_element is not None:
+                                    balance_type = balance_element.text
 
-                        period_element = appinfo.find('.//{http://www.xbrl.org/2003/instance}periodType')
-                        if period_element is not None:
-                            period_type = period_element.text
+                            if not period_type:
+                                period_element = appinfo.find('.//{http://www.xbrl.org/2003/instance}periodType')
+                                if period_element is not None:
+                                    period_type = period_element.text
 
                 # Create element catalog entry
                 self.element_catalog[element_id] = ElementCatalog(

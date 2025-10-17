@@ -694,6 +694,20 @@ class XBRL:
         units = {}  # Store unit_ref for each period
         period_types = {}  # Store period_type ('instant' or 'duration') for each period
 
+        # Calculate preferred_sign from preferred_label (for Issue #463)
+        # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
+        preferred_sign_value = None
+        if node.preferred_label:
+            # Check if this is a negatedLabel (indicates value should be negated for display)
+            # Use pattern matching to support any XBRL namespace version (2003, 2009, future versions)
+            # Matches: 'negatedLabel', 'negatedTerseLabel', 'http://www.xbrl.org/YYYY/role/negated*Label', etc.
+            label_lower = node.preferred_label.lower()
+            is_negated = 'negated' in label_lower and (
+                label_lower.startswith('negated') or  # Short form: 'negatedLabel'
+                '/role/negated' in label_lower        # Full URI: 'http://www.xbrl.org/*/role/negated*'
+            )
+            preferred_sign_value = -1 if is_negated else 1
+
         # Find facts for any of these concept names
         all_relevant_facts = self._find_facts_for_element(node.element_name, period_filter)
 
@@ -803,6 +817,12 @@ class XBRL:
                         pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
                         period_types[period_key] = pt
 
+        # Create preferred_signs dict for all periods (same value for all periods of this concept)
+        preferred_signs = {}
+        if preferred_sign_value is not None:
+            for period_key in values.keys():
+                preferred_signs[period_key] = preferred_sign_value
+
         # For dimensional statements with dimension data, handle the parent item specially
         if should_display_dimensions and dimensioned_facts:
             # Create parent line item with total values AND dimensional children
@@ -817,6 +837,7 @@ class XBRL:
                 'decimals': decimals,  # Include decimals for formatting
                 'units': units,  # Include unit_ref for each period
                 'period_types': period_types,  # Include period_type for each period
+                'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
@@ -835,6 +856,7 @@ class XBRL:
                 'decimals': decimals,  # Add decimals info for formatting
                 'units': units,  # Include unit_ref for each period
                 'period_types': period_types,  # Include period_type for each period
+                'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,
@@ -918,6 +940,12 @@ class XBRL:
                         if member_labels:
                             display_label = " - ".join(member_labels)
 
+                # Create preferred_signs dict for dimensional line items (same value for all periods)
+                dim_preferred_signs = {}
+                if preferred_sign_value is not None:
+                    for period_key in dim_values.keys():
+                        dim_preferred_signs[period_key] = preferred_sign_value
+
                 # Create dimension line item
                 dim_line_item = {
                     'concept': element_id,  # Use same concept
@@ -929,6 +957,7 @@ class XBRL:
                     'decimals': dim_decimals,
                     'units': dim_units,  # Include unit_ref for each period
                     'period_types': dim_period_types,  # Include period_type for each period
+                    'preferred_signs': dim_preferred_signs,  # Include preferred_sign for display (Issue #463)
                     'level': node.depth + 1,  # Increase depth by 1
                     'preferred_label': node.preferred_label,
                     'is_abstract': False,
