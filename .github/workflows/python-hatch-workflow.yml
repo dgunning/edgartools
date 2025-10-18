@@ -33,18 +33,23 @@ jobs:
     - name: Run ${{ matrix.test-group }} tests
       run: |
         # Run specific test group directly with pytest (bypassing hatch)
+        # Strategy: Parallelize only fast tests (no network calls) to avoid SEC rate limits
         case "${{ matrix.test-group }}" in
           fast)
-            pytest --cov --cov-report=xml -m 'fast and not regression'
+            # Parallelize fast tests - safe, no SEC API calls
+            pytest -n auto --cov --cov-report=xml -m 'fast and not regression'
             ;;
           network)
+            # Sequential - respects SEC rate limits (10 req/sec)
             pytest --cov --cov-report=xml -m 'network and not slow and not regression'
             ;;
           slow)
+            # Sequential - often network-heavy
             pytest --cov --cov-report=xml -m 'slow and not regression'
             ;;
           core)
-            pytest --cov --cov-report=xml -m 'not (fast or network or slow or regression or performance or batch)' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression
+            # Limited parallelization for mixed tests
+            pytest -n 2 --cov --cov-report=xml -m 'not (fast or network or slow or regression or performance or batch)' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression
             ;;
         esac
         

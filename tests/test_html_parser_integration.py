@@ -301,6 +301,7 @@ class TestErrorHandling:
         assert len(doc.tables) == 0
 
     @pytest.mark.network
+    @pytest.mark.slow
     def test_large_filing_handling(self):
         """Should handle large filings."""
         from edgar.documents.config import ParserConfig

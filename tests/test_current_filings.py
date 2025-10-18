@@ -91,6 +91,7 @@ def test_current_filings_get_accession_number():
     assert filing.accession_no == accession_number
 
 @pytest.mark.network
+@pytest.mark.slow
 def test_current_filings_get_accession_number_not_found():
     filings:CurrentFilings = get_current_filings().next()
     accession_number = '0000000900-24-000000'

@@ -1,3 +1,4 @@
+import pytest
 from edgar.xbrl import XBRL
 from edgar.xbrl.parsers import XBRLParser
 from pathlib import Path
@@ -33,6 +34,7 @@ def test_instance_parsing_xoxo():
     assert xb
 
 
+@pytest.mark.slow
 def test_extract_context_typed_member():
     """
     https://github.com/dgunning/edgartools/issues/364

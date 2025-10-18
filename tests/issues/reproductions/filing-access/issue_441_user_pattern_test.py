@@ -19,6 +19,7 @@ from edgar import get_latest_filings  # This is an alias for get_current_filings
 import pytest
 
 @pytest.mark.regression
+@pytest.mark.slow
 def test_user_pattern_exact():
     """Test the exact pattern the user reported in Issue #441"""
     print("Testing user's exact code pattern...")

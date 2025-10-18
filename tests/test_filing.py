@@ -70,6 +70,7 @@ def test_read_form_filing_index_year_and_quarter():
 
 
 @pytest.mark.network
+@pytest.mark.slow
 def test_read_form_filing_index_year():
     filings: Filings = get_filings(2021)
     assert filings
@@ -696,6 +697,7 @@ def test_search_for_text_with_regex():
     print(results)
 
 @pytest.mark.network
+@pytest.mark.slow
 def test_get_by_accession_number():
     filing = get_by_accession_number("0000072333-23-000015")
     assert filing.company == "NORDSTROM INC"
@@ -839,6 +841,7 @@ def test_filing_date_to_year_quarter():
     ('2023-02-01:2024-01-02:2025-01-02', None, None, None, False),       # Invalid format
     ("01-02-2023", None, None, None, False),                             # Invalid date format
 ])
+@pytest.mark.slow
 def test_get_filings_by_filing_date(filing_date, year, expected_start, expected_end, should_succeed):
     """Test get_filings with various filing date parameters"""
     kwargs = {'filing_date': filing_date}
@@ -976,6 +979,7 @@ def test_year_extraction_parametrized(accession_number, expected_year):
     assert year == expected_year
 
 @pytest.mark.network
+@pytest.mark.slow
 def test_get_filings_by_range():
     filings = get_filings(year=range(2022, 2024))
     assert not filings.empty
