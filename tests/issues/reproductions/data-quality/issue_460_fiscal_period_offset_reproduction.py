@@ -25,10 +25,6 @@ import os
 console = Console()
 
 def main():
-    # Set identity from environment or use test identity
-    identity = os.getenv('EDGAR_IDENTITY')
-    if identity:
-        set_identity(identity)
 
     console.print("\n[bold]Issue #460: AAPL Income Statement Fiscal Period Offset[/bold]\n")
 

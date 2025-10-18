@@ -65,9 +65,6 @@ def cleanup_corruption():
         print(f"Cleaned up corrupted file: {submissions_file}")
 
 if __name__ == "__main__":
-    # Set proper identity for SEC API
-    set_identity("Research Team research@edgartools.dev")
-
     try:
         # Simulate the corruption
         reproduced = simulate_corruption()
