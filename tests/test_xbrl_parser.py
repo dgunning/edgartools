@@ -39,7 +39,7 @@ def test_extract_context_typed_member():
     
     Test validates that typed member parsing extracts the text content, not just the tag.
     """
-    instance_content = Path("tests/fixtures/xbrl2/gbdc/gbdc-20250331_htm.xml").read_text()
+    instance_content = Path("tests/fixtures/xbrl/gbdc/gbdc-20250331_htm.xml").read_text()
     parser = XBRLParser()
     parser.parse_instance_content(instance_content)
     

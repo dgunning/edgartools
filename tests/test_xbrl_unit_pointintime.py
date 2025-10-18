@@ -100,7 +100,7 @@ class TestUnitHelperFunctions:
 @pytest.fixture
 def aapl_xbrl():
     """Apple 10-K XBRL fixture."""
-    data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2023")
+    data_dir = Path("tests/fixtures/xbrl/aapl/10k_2023")
     return XBRL.from_directory(data_dir)
 
 

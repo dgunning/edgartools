@@ -24,12 +24,12 @@ def tsla_xbrl():
 
 @pytest.fixture
 def aapl_xbrl():
-    data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2023")
+    data_dir = Path("tests/fixtures/xbrl/aapl/10k_2023")
     return XBRL.from_directory(data_dir)
 
 @pytest.fixture
 def aapl_xbrl_2022():
-    data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2022")
+    data_dir = Path("tests/fixtures/xbrl/aapl/10k_2022")
     return XBRL.from_directory(data_dir)
 
 @pytest.fixture

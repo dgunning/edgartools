@@ -14,7 +14,7 @@ def main():
     print()
 
     # Load Apple 10-K XBRL data
-    data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2023")
+    data_dir = Path("tests/fixtures/xbrl/aapl/10k_2023")
     if not data_dir.exists():
         print(f"ERROR: Test data not found at {data_dir}")
         return

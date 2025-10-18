@@ -30,7 +30,7 @@ def test_companies():
     result = {}
     
     # Define fixture paths
-    fixture_dir = Path("tests/fixtures/xbrl2")
+    fixture_dir = Path("tests/fixtures/xbrl")
 
     result['aapl'] = XBRL.from_directory(fixture_dir / "aapl/10k_2023")
     result['msft'] = XBRL.from_directory(fixture_dir / "msft/10k_2024")
@@ -72,7 +72,7 @@ def test_cash_flow_statements(test_companies):
 @pytest.fixture
 def test_dimensional_data():
     """Try to find company data with dimensional statements."""
-    fixture_dir = Path("tests/fixtures/xbrl2/special_cases/dimensional/ko")
+    fixture_dir = Path("tests/fixtures/xbrl/special_cases/dimensional/ko")
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
         try:
             return XBRL.from_directory(fixture_dir)

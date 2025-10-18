@@ -31,7 +31,7 @@ def test_balance_sheet_matches_online():
     """
 
 def test_sign_of_cashflow_values():
-    xb = XBRL.from_directory("tests/fixtures/xbrl2/ibm/10k_2024")
+    xb = XBRL.from_directory("tests/fixtures/xbrl/ibm/10k_2024")
     ic = xb.statements.income_statement()
     print()
     print(ic)
