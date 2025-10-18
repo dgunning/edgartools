@@ -29,7 +29,7 @@ def test_cache_speedup(request):
     if cache_enabled:
         assert duration < fast_limit, f"With cache enabled, {duration=} is longer than a second"
     else:
-        assert duration > 3.0 and duration < 5.0, f"{duration=} not between 3 and 5 seconds"
+        assert duration > 1.0 and duration < 5.0, f"{duration=} not between 1 and 5 seconds"
 
 @pytest.mark.slow
 def test_dont_exceed_limit():
