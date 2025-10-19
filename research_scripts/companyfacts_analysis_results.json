@@ -1,0 +1,134 @@
+[
+  {
+    "concept": "ResearchAndDevelopmentExpense",
+    "company": "AAPL",
+    "cik": "0000320193",
+    "companyfacts_value": 21914000000,
+    "instance_value": 31370000000.0,
+    "calculation_weight": 1.0,
+    "schema_balance": null,
+    "signs_match": "True",
+    "transformation_applied": "different_value"
+  },
+  {
+    "concept": "CostOfRevenue",
+    "company": "AAPL",
+    "cik": "0000320193",
+    "companyfacts_value": null,
+    "instance_value": null,
+    "calculation_weight": null,
+    "schema_balance": null,
+    "signs_match": null,
+    "transformation_applied": "unknown"
+  },
+  {
+    "concept": "IncomeTaxExpenseBenefit",
+    "company": "AAPL",
+    "cik": "0000320193",
+    "companyfacts_value": 14527000000,
+    "instance_value": 29749000000.0,
+    "calculation_weight": -1.0,
+    "schema_balance": null,
+    "signs_match": "True",
+    "transformation_applied": "different_value"
+  },
+  {
+    "concept": "PaymentsOfDividends",
+    "company": "AAPL",
+    "cik": "0000320193",
+    "companyfacts_value": 14467000000,
+    "instance_value": 15234000000.0,
+    "calculation_weight": -1.0,
+    "schema_balance": null,
+    "signs_match": "True",
+    "transformation_applied": "different_value"
+  },
+  {
+    "concept": "ResearchAndDevelopmentExpense",
+    "company": "MSFT",
+    "cik": "0000789019",
+    "companyfacts_value": 20716000000,
+    "instance_value": 29510000000.0,
+    "calculation_weight": -1.0,
+    "schema_balance": null,
+    "signs_match": "True",
+    "transformation_applied": "different_value"
+  },
+  {
+    "concept": "CostOfRevenue",
+    "company": "MSFT",
+    "cik": "0000789019",
+    "companyfacts_value": null,
+    "instance_value": null,
+    "calculation_weight": null,
+    "schema_balance": null,
+    "signs_match": null,
+    "transformation_applied": "unknown"
+  },
+  {
+    "concept": "IncomeTaxExpenseBenefit",
+    "company": "MSFT",
+    "cik": "0000789019",
+    "companyfacts_value": 9831000000,
+    "instance_value": 19651000000.0,
+    "calculation_weight": -1.0,
+    "schema_balance": null,
+    "signs_match": "True",
+    "transformation_applied": "different_value"
+  },
+  {
+    "concept": "PaymentsOfDividends",
+    "company": "MSFT",
+    "cik": "0000789019",
+    "companyfacts_value": null,
+    "instance_value": 21771000000.0,
+    "calculation_weight": -1.0,
+    "schema_balance": null,
+    "signs_match": null,
+    "transformation_applied": "unknown"
+  },
+  {
+    "concept": "ResearchAndDevelopmentExpense",
+    "company": "GOOGL",
+    "cik": "0001652044",
+    "companyfacts_value": 31562000000,
+    "instance_value": 31562000000.0,
+    "calculation_weight": 1.0,
+    "schema_balance": null,
+    "signs_match": "True",
+    "transformation_applied": "none"
+  },
+  {
+    "concept": "CostOfRevenue",
+    "company": "GOOGL",
+    "cik": "0001652044",
+    "companyfacts_value": 110939000000,
+    "instance_value": 110939000000.0,
+    "calculation_weight": 1.0,
+    "schema_balance": null,
+    "signs_match": "True",
+    "transformation_applied": "none"
+  },
+  {
+    "concept": "IncomeTaxExpenseBenefit",
+    "company": "GOOGL",
+    "cik": "0001652044",
+    "companyfacts_value": 14701000000,
+    "instance_value": 18000000.0,
+    "calculation_weight": -1.0,
+    "schema_balance": null,
+    "signs_match": "True",
+    "transformation_applied": "different_value"
+  },
+  {
+    "concept": "PaymentsOfDividends",
+    "company": "GOOGL",
+    "cik": "0001652044",
+    "companyfacts_value": null,
+    "instance_value": null,
+    "calculation_weight": null,
+    "schema_balance": null,
+    "signs_match": null,
+    "transformation_applied": "unknown"
+  }
+]

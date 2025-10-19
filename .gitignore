@@ -13,7 +13,6 @@ dist/
 data/.DS_Store
 **/**/.DS_Store
 **/**/**/.DS_Store
-CLAUDE.md
 internal/*
 gists/bugs/*
 reinstall.sh

@@ -170,6 +170,10 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int) ->
     2. Same quarter from prior year (YoY comparison)
     3. Year-to-date current year (6-month, 9-month YTD)
     4. Year-to-date prior year (comparative YTD)
+
+    Issue #464 Fix: Cast wider net by checking more quarterly periods and returning
+    more candidates (max_periods * 3) to let data quality filtering select the best ones.
+    This mirrors the successful Balance Sheet fix from v4.20.1.
     """
     if not duration_periods:
         return []
@@ -205,11 +209,14 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int) ->
         selected_periods.append((current_quarter['key'], current_quarter['label']))
 
         # 2. Find same quarter from prior year for YoY comparison
+        # Issue #464: Check more quarterly periods to find prior year matches
         try:
             current_end = datetime.strptime(current_quarter['end_date'], '%Y-%m-%d').date()
             target_year = current_end.year - 1
 
-            for period in quarterly_periods[1:]:
+            # Check up to 12 quarterly periods instead of just a few
+            check_count = min(12, len(quarterly_periods) - 1)
+            for period in quarterly_periods[1:check_count + 1]:
                 period_end = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
                 # Same quarter if same month and within 15 days, previous year
                 if (period_end.year == target_year and
@@ -227,31 +234,32 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int) ->
         if not any(current_ytd['key'] == key for key, _ in selected_periods):
             selected_periods.append((current_ytd['key'], current_ytd['label']))
 
-            # 4. Find prior year YTD for comparison
-            try:
-                ytd_end = datetime.strptime(current_ytd['end_date'], '%Y-%m-%d').date()
-                target_year = ytd_end.year - 1
-
-                for period in ytd_periods[1:]:
-                    period_end = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
-                    # Same YTD period from previous year
-                    if (period_end.year == target_year and
-                        period_end.month == ytd_end.month and
-                        abs(period_end.day - ytd_end.day) <= 15):
+            # 4. Add additional YTD candidates for data quality filtering to choose from
+            # Issue #464: Cast wider net instead of strict matching to handle fiscal year differences
+            # Example: AAPL current YTD ends June 29, prior YTD ends July 1 (different months)
+            # Let data quality filtering choose the best periods based on fact counts
+            if len(selected_periods) < max_periods * 3:
+                added_keys = {key for key, _ in selected_periods}
+                check_count = min(8, len(ytd_periods) - 1)
+                for period in ytd_periods[1:check_count + 1]:  # Skip first (already added as current_ytd)
+                    if period['key'] not in added_keys and len(selected_periods) < max_periods * 3:
                         selected_periods.append((period['key'], period['label']))
-                        break
-            except (ValueError, TypeError, KeyError):
-                pass
+                        added_keys.add(period['key'])
 
     # If we still don't have enough periods, add other quarterly periods
-    if len(selected_periods) < max_periods:
+    # Issue #464: Check more periods and return more candidates
+    if len(selected_periods) < max_periods * 3:
         added_keys = {key for key, _ in selected_periods}
-        for period in quarterly_periods:
-            if period['key'] not in added_keys and len(selected_periods) < max_periods:
+        check_count = min(12, len(quarterly_periods))
+        for period in quarterly_periods[:check_count]:
+            if period['key'] not in added_keys and len(selected_periods) < max_periods * 3:
                 selected_periods.append((period['key'], period['label']))
                 added_keys.add(period['key'])
 
-    return selected_periods[:max_periods]
+    # Issue #464: Return max_periods * 3 candidates instead of just max_periods
+    # Let data quality filtering in _filter_periods_with_sufficient_data choose the best ones
+    # This mirrors the successful Balance Sheet fix from v4.20.1 (line 128)
+    return selected_periods[:max_periods * 3]
 
 
 def _get_annual_periods(duration_periods: List[Dict]) -> List[Dict]:
