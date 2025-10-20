@@ -694,6 +694,29 @@ class XBRL:
         units = {}  # Store unit_ref for each period
         period_types = {}  # Store period_type ('instant' or 'duration') for each period
 
+        # Issue #463: Get balance and weight from element catalog and calculation trees
+        # (same approach as FactsView.get_facts())
+        balance = None  # Debit/credit classification from XBRL schema
+        weight = None   # Calculation weight from calculation linkbase
+
+        # Get balance from element catalog
+        element_id_normalized = element_id.replace(':', '_')
+        if element_id_normalized in self.element_catalog:
+            element = self.element_catalog[element_id_normalized]
+            balance = element.balance
+            if balance is None:
+                # Fallback to static US-GAAP mapping
+                from edgar.xbrl.parsers.concepts import get_balance_type
+                balance = get_balance_type(element_id)
+
+        # Get weight from calculation trees (Issue #463)
+        if hasattr(self, 'calculation_trees') and self.calculation_trees:
+            for calc_tree in self.calculation_trees.values():
+                if element_id_normalized in calc_tree.all_nodes:
+                    calc_node = calc_tree.all_nodes[element_id_normalized]
+                    weight = calc_node.weight
+                    break  # Use first weight found
+
         # Calculate preferred_sign from preferred_label (for Issue #463)
         # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
         preferred_sign_value = None
@@ -838,6 +861,8 @@ class XBRL:
                 'units': units,  # Include unit_ref for each period
                 'period_types': period_types,  # Include period_type for each period
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
+                'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
+                'weight': weight,  # Include calculation weight for metadata (Issue #463)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
@@ -857,6 +882,8 @@ class XBRL:
                 'units': units,  # Include unit_ref for each period
                 'period_types': period_types,  # Include period_type for each period
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
+                'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
+                'weight': weight,  # Include calculation weight for metadata (Issue #463)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,

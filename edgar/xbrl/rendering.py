@@ -1069,12 +1069,24 @@ def _format_value_for_display_as_string(
         if decimals_dict:
             fact_decimals = decimals_dict.get(period_key, 0) or 0
 
-    # Apply preferred_sign transformation for display (Issue #463)
-    # This matches how companies display values in official filings (preferredLabel from XBRL)
+    # Apply presentation logic for display (Issue #463)
+    # Matches SEC HTML filing display - uses preferred_sign from presentation linkbase
     if value_type in (int, float) and period_key:
-        preferred_sign = item.get('preferred_signs', {}).get(period_key)
-        if preferred_sign is not None and preferred_sign != 0:
-            value = value * preferred_sign
+        # Get statement context
+        statement_type = item.get('statement_type')
+
+        # For Income Statement and Cash Flow Statement: Use preferred_sign
+        # preferred_sign comes from preferredLabel in presentation linkbase
+        # -1 = negate for display (e.g., expenses, dividends, outflows)
+        # 1 = show as-is
+        # None = no transformation specified
+        if statement_type in ('IncomeStatement', 'CashFlowStatement'):
+            preferred_sign = item.get('preferred_signs', {}).get(period_key)
+            if preferred_sign is not None and preferred_sign != 0:
+                value = value * preferred_sign
+
+        # Balance Sheet: No transformation (use as-is)
+        # else: pass
 
     # Format numeric values efficiently
     if value_type in (int, float):

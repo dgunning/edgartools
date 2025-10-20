@@ -173,20 +173,300 @@ class Statement:
                      standard:bool=True,
                      include_dimensions:bool=True,
                      include_unit:bool=False,
-                     include_point_in_time:bool=False) -> Any:
+                     include_point_in_time:bool=False,
+                     presentation:bool=False,
+                     normalize:bool=False) -> Any:
         """Convert statement to pandas DataFrame.
+
+        Args:
             period_filter: Optional period key to filter facts
             period_view: Optional name of a predefined period view
             standard: Whether to use standardized concept labels
             include_dimensions: Whether to include dimensional segment data
             include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
             include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
+            presentation: If True, apply HTML-matching presentation logic (Issue #463)
+                         Cash Flow: outflows (balance='credit') shown as negative
+                         Income: apply preferred_sign transformations
+                         Default: False (raw instance values)
+            normalize: If True, apply cross-company normalization (Issue #463)
+                      Forces expenses/dividends to positive using semantic matching
+                      Default: False (raw instance values)
 
         Returns:
-            DataFrame if pandas is available, else None
+            DataFrame with raw values + metadata (balance, weight, preferred_sign) by default
         """
-        rendered_statement:RenderedStatement = self.render(period_filter=period_filter, period_view=period_view, standard=standard, include_dimensions=include_dimensions)
-        return rendered_statement.to_dataframe(include_unit=include_unit, include_point_in_time=include_point_in_time)
+        try:
+            # Build DataFrame from raw data (Issue #463)
+            df = self._build_dataframe_from_raw_data(
+                period_filter=period_filter,
+                period_view=period_view,
+                standard=standard,
+                include_dimensions=include_dimensions,
+                include_unit=include_unit,
+                include_point_in_time=include_point_in_time
+            )
+
+            if df is None or isinstance(df, str) or df.empty:
+                return df
+
+            # Add metadata columns (balance, weight, preferred_sign) - Issue #463
+            df = self._add_metadata_columns(df)
+
+            # Apply transformations in order (Issue #463)
+            # First normalize (makes values consistent), then apply presentation (for display)
+            if normalize:
+                df = self._apply_normalization(df)
+
+            if presentation:
+                df = self._apply_presentation(df)
+
+            return df
+
+        except ImportError:
+            return "Pandas is required for DataFrame conversion"
+
+    def _build_dataframe_from_raw_data(
+        self,
+        period_filter: Optional[str] = None,
+        period_view: Optional[str] = None,
+        standard: bool = True,
+        include_dimensions: bool = True,
+        include_unit: bool = False,
+        include_point_in_time: bool = False
+    ) -> pd.DataFrame:
+        """
+        Build DataFrame directly from raw statement data (Issue #463).
+
+        This bypasses the rendering pipeline to get raw instance values.
+        """
+        from edgar.xbrl.core import get_unit_display_name, is_point_in_time as get_is_point_in_time
+        from edgar.xbrl.periods import determine_periods_to_display
+
+        # Get raw statement data
+        raw_data = self.get_raw_data(period_filter=period_filter)
+        if not raw_data:
+            return pd.DataFrame()
+
+        # Determine which periods to display
+        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+
+        if period_view:
+            # Use specified period view
+            from edgar.xbrl.periods import get_period_views
+            period_views = get_period_views(self.xbrl, statement_type)
+            periods_to_display = period_views.get(period_view, [])
+            if not periods_to_display:
+                # Fallback to default
+                periods_to_display = determine_periods_to_display(self.xbrl, statement_type)
+        else:
+            # Use default period selection
+            periods_to_display = determine_periods_to_display(self.xbrl, statement_type)
+
+        if not periods_to_display:
+            return pd.DataFrame()
+
+        # Build DataFrame rows
+        df_rows = []
+
+        for item in raw_data:
+            # Skip if filtering by dimensions
+            if not include_dimensions and item.get('dimension'):
+                continue
+
+            # Build base row
+            row = {
+                'concept': item.get('concept', ''),
+                'label': item.get('label', '')
+            }
+
+            # Add period values (raw from instance document)
+            values_dict = item.get('values', {})
+            for period_key, period_label in periods_to_display:
+                # Use end date as column name (more concise than full label)
+                # Extract date from period_key (e.g., "duration_2016-09-25_2017-09-30" → "2017-09-30")
+                if '_' in period_key:
+                    parts = period_key.split('_')
+                    if len(parts) >= 2:
+                        # Use end date for duration periods, or the date for instant periods
+                        column_name = parts[-1] if len(parts) > 2 else parts[1]
+                    else:
+                        column_name = period_label
+                else:
+                    column_name = period_label
+
+                # Use raw value from instance document
+                row[column_name] = values_dict.get(period_key)
+
+            # Add unit if requested
+            if include_unit:
+                units_dict = item.get('units', {})
+                # Get first available unit (should be same for all periods)
+                unit_ref = None
+                for period_key, _ in periods_to_display:
+                    if period_key in units_dict and units_dict[period_key] is not None:
+                        unit_ref = units_dict[period_key]
+                        break
+                row['unit'] = get_unit_display_name(unit_ref)
+
+            # Add point_in_time if requested
+            if include_point_in_time:
+                period_types_dict = item.get('period_types', {})
+                # Get first available period type
+                period_type = None
+                for period_key, _ in periods_to_display:
+                    if period_key in period_types_dict and period_types_dict[period_key] is not None:
+                        period_type = period_types_dict[period_key]
+                        break
+                row['point_in_time'] = get_is_point_in_time(period_type)
+
+            # Add structural columns
+            row['level'] = item.get('level', 0)
+            row['abstract'] = item.get('is_abstract', False)
+            row['dimension'] = item.get('dimension', False)
+
+            df_rows.append(row)
+
+        return pd.DataFrame(df_rows)
+
+    def _add_metadata_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Add metadata columns (balance, weight, preferred_sign) to DataFrame.
+
+        Issue #463: Users need access to XBRL metadata to understand value transformations.
+
+        Note: preferred_sign comes from statement's raw data (presentation linkbase),
+        not from facts. It's period-specific in raw data, but we use a representative
+        value (from first period) for the metadata column.
+        """
+        if df.empty or 'concept' not in df.columns:
+            return df
+
+        # Get statement type for fact filtering
+        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+
+        # Get statement's raw data to access preferred_signs
+        raw_data = self.get_raw_data()
+        raw_data_by_concept = {item.get('concept'): item for item in raw_data}
+
+        # Create metadata dictionaries to populate
+        balance_map = {}
+        weight_map = {}
+        preferred_sign_map = {}
+
+        # For each unique concept in the DataFrame
+        for concept in df['concept'].unique():
+            if not concept:
+                continue
+
+            # Get balance and weight from facts (concept-level attributes)
+            facts_df = self.xbrl.facts.query().by_concept(concept, exact=True).limit(1).to_dataframe()
+
+            if not facts_df.empty:
+                fact = facts_df.iloc[0]
+                balance_map[concept] = fact.get('balance')
+                weight_map[concept] = fact.get('weight')
+
+            # Get preferred_sign from statement raw data (presentation linkbase)
+            # preferred_sign is period-specific, so we take the first available value
+            if concept in raw_data_by_concept:
+                item = raw_data_by_concept[concept]
+                preferred_signs = item.get('preferred_signs', {})
+                if preferred_signs:
+                    # Use first period's preferred_sign as representative value
+                    preferred_sign_map[concept] = next(iter(preferred_signs.values()))
+
+        # Add metadata columns
+        df['balance'] = df['concept'].map(balance_map)
+        df['weight'] = df['concept'].map(weight_map)
+        df['preferred_sign'] = df['concept'].map(preferred_sign_map)
+
+        return df
+
+    def _apply_presentation(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Apply presentation logic to match SEC HTML display.
+
+        Issue #463: Transform values to match how they appear in official SEC filings.
+        Uses preferred_sign from presentation linkbase (not balance attribute).
+        - preferred_sign = -1: negate for display (expenses, dividends, outflows)
+        - preferred_sign = 1: show as-is
+        - preferred_sign = None: no transformation
+        """
+        if df.empty:
+            return df
+
+        result = df.copy()
+
+        # Get period columns (exclude metadata and structural columns)
+        metadata_cols = ['concept', 'label', 'balance', 'weight', 'preferred_sign',
+                        'level', 'abstract', 'dimension', 'unit', 'point_in_time']
+        period_cols = [col for col in df.columns if col not in metadata_cols]
+
+        # Get statement type
+        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+
+        # For Income Statement and Cash Flow Statement: Use preferred_sign
+        if statement_type in ('IncomeStatement', 'CashFlowStatement'):
+            if 'preferred_sign' in result.columns:
+                for col in period_cols:
+                    if col in result.columns and pd.api.types.is_numeric_dtype(result[col]):
+                        # Apply preferred_sign where it's not None and not 0
+                        mask = result['preferred_sign'].notna() & (result['preferred_sign'] != 0)
+                        result.loc[mask, col] = result.loc[mask, col] * result.loc[mask, 'preferred_sign']
+
+        # Balance Sheet: no transformation
+
+        return result
+
+    def _apply_normalization(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Apply cross-company normalization using semantic matching.
+
+        Issue #463: Ensure consistent signs across companies for analysis.
+        Uses hybrid approach: balance-based + semantic name matching.
+        """
+        if df.empty:
+            return df
+
+        from edgar.xbrl.parsers.concepts import CONSISTENT_POSITIVE_CONCEPTS
+
+        result = df.copy()
+
+        # Get period columns
+        metadata_cols = ['concept', 'label', 'balance', 'weight', 'preferred_sign',
+                        'level', 'abstract', 'dimension', 'unit', 'point_in_time']
+        period_cols = [col for col in df.columns if col not in metadata_cols]
+
+        # Get statement type
+        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+
+        # 1. Balance-based (works for any concept with proper schema)
+        if statement_type == 'CashFlowStatement' and 'balance' in result.columns:
+            credit_mask = result['balance'] == 'credit'
+            for col in period_cols:
+                if col in result.columns and pd.api.types.is_numeric_dtype(result[col]):
+                    result.loc[credit_mask, col] = abs(result.loc[credit_mask, col])
+
+        # 2. Semantic name matching (catches custom concepts)
+        if 'concept' in result.columns:
+            for concept_pattern in CONSISTENT_POSITIVE_CONCEPTS:
+                # Extract base concept name (remove namespace prefix and underscores)
+                if ':' in concept_pattern:
+                    base = concept_pattern.split(':')[-1]
+                else:
+                    base = concept_pattern
+                base = base.replace('_', '')
+
+                # Match if concept contains base pattern (case-insensitive)
+                # This catches both us-gaap:PaymentsOfDividends and aapl:PaymentsOfDividendsAnd...
+                mask = result['concept'].str.contains(base, case=False, na=False)
+
+                for col in period_cols:
+                    if col in result.columns and pd.api.types.is_numeric_dtype(result[col]):
+                        result.loc[mask, col] = abs(result.loc[mask, col])
+
+        return result
 
     def _validate_statement(self, skip_concept_check: bool = False) -> None:
         """
