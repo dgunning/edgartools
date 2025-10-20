@@ -174,8 +174,7 @@ class Statement:
                      include_dimensions:bool=True,
                      include_unit:bool=False,
                      include_point_in_time:bool=False,
-                     presentation:bool=False,
-                     normalize:bool=False) -> Any:
+                     presentation:bool=False) -> Any:
         """Convert statement to pandas DataFrame.
 
         Args:
@@ -189,9 +188,6 @@ class Statement:
                          Cash Flow: outflows (balance='credit') shown as negative
                          Income: apply preferred_sign transformations
                          Default: False (raw instance values)
-            normalize: If True, apply cross-company normalization (Issue #463)
-                      Forces expenses/dividends to positive using semantic matching
-                      Default: False (raw instance values)
 
         Returns:
             DataFrame with raw values + metadata (balance, weight, preferred_sign) by default
@@ -213,11 +209,7 @@ class Statement:
             # Add metadata columns (balance, weight, preferred_sign) - Issue #463
             df = self._add_metadata_columns(df)
 
-            # Apply transformations in order (Issue #463)
-            # First normalize (makes values consistent), then apply presentation (for display)
-            if normalize:
-                df = self._apply_normalization(df)
-
+            # Apply presentation transformation if requested (Issue #463)
             if presentation:
                 df = self._apply_presentation(df)
 
@@ -419,54 +411,6 @@ class Statement:
 
         return result
 
-    def _apply_normalization(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Apply cross-company normalization using semantic matching.
-
-        Issue #463: Ensure consistent signs across companies for analysis.
-        Uses hybrid approach: balance-based + semantic name matching.
-        """
-        if df.empty:
-            return df
-
-        from edgar.xbrl.parsers.concepts import CONSISTENT_POSITIVE_CONCEPTS
-
-        result = df.copy()
-
-        # Get period columns
-        metadata_cols = ['concept', 'label', 'balance', 'weight', 'preferred_sign',
-                        'level', 'abstract', 'dimension', 'unit', 'point_in_time']
-        period_cols = [col for col in df.columns if col not in metadata_cols]
-
-        # Get statement type
-        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
-
-        # 1. Balance-based (works for any concept with proper schema)
-        if statement_type == 'CashFlowStatement' and 'balance' in result.columns:
-            credit_mask = result['balance'] == 'credit'
-            for col in period_cols:
-                if col in result.columns and pd.api.types.is_numeric_dtype(result[col]):
-                    result.loc[credit_mask, col] = abs(result.loc[credit_mask, col])
-
-        # 2. Semantic name matching (catches custom concepts)
-        if 'concept' in result.columns:
-            for concept_pattern in CONSISTENT_POSITIVE_CONCEPTS:
-                # Extract base concept name (remove namespace prefix and underscores)
-                if ':' in concept_pattern:
-                    base = concept_pattern.split(':')[-1]
-                else:
-                    base = concept_pattern
-                base = base.replace('_', '')
-
-                # Match if concept contains base pattern (case-insensitive)
-                # This catches both us-gaap:PaymentsOfDividends and aapl:PaymentsOfDividendsAnd...
-                mask = result['concept'].str.contains(base, case=False, na=False)
-
-                for col in period_cols:
-                    if col in result.columns and pd.api.types.is_numeric_dtype(result[col]):
-                        result.loc[mask, col] = abs(result.loc[mask, col])
-
-        return result
 
     def _validate_statement(self, skip_concept_check: bool = False) -> None:
         """

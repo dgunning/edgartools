@@ -15,7 +15,6 @@ from edgar.core import log
 from edgar.xbrl.core import NAMESPACES, classify_duration
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
 from .base import BaseParser
-from .concepts import CONSISTENT_POSITIVE_CONCEPTS, LEGITIMATE_NEGATIVE_CONCEPTS
 
 
 class InstanceParser(BaseParser):

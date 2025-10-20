@@ -1,17 +1,31 @@
 """
-Shared XBRL concept definitions for sign normalization and balance types.
+Shared XBRL concept definitions for balance types and deprecated normalization lists.
 
-This module contains sets of XBRL concepts used across multiple parsers
-to ensure consistent handling of sign normalization when applying calculation weights.
-
-It also contains balance type mappings for common US-GAAP concepts to support
+This module contains balance type mappings for common US-GAAP concepts to support
 the balance column in DataFrame exports without parsing full taxonomy schemas.
+
+DEPRECATED: Static normalization concept lists (CONSISTENT_POSITIVE_CONCEPTS,
+LEGITIMATE_NEGATIVE_CONCEPTS) are kept for historical reference but no longer used.
+Testing confirmed that SEC XBRL instance data is already consistent across companies.
+See Issue #463 analysis for details.
 """
 
-# Concepts that should always be positive (expenses, costs)
-# These concepts represent actual expenses/costs that companies incur.
-# Even if they have negative calculation weights in the taxonomy, we force them positive
-# because a negative value would mean a credit/benefit, not an expense.
+# =============================================================================
+# DEPRECATED CONCEPT LISTS (No longer used as of Issue #463)
+# =============================================================================
+# These lists were created to work around perceived inconsistencies in XBRL data.
+# Testing revealed that raw SEC instance data is ALREADY consistent across companies.
+#
+# Historical context:
+# - Issues #290, #334, #451 reported negative values for expenses
+# - Root cause: EdgarTools was misusing calculation weights for display logic
+# - These lists fixed symptoms but not the actual problem
+# - Issue #463 removed calculation weight application during parsing
+# - Result: Raw values preserved as-is (matching SEC CompanyFacts API)
+#
+# Kept for historical reference and potential future use cases.
+# =============================================================================
+
 CONSISTENT_POSITIVE_CONCEPTS = {
     # Research and Development Expenses
     'us-gaap_ResearchAndDevelopmentExpense',
@@ -108,9 +122,8 @@ CONSISTENT_POSITIVE_CONCEPTS = {
     'PaymentsOfDividendsPreferredStockAndPreferenceStock'
 }
 
-# Concepts that can legitimately be negative (benefits, credits, reversals)
-# These should NOT be forced positive even if they have negative calculation weights
-# Note: Income tax concepts moved to consistent_positive_concepts for issue #451
+# DEPRECATED: Concepts that can legitimately be negative
+# This list is no longer used but kept for historical reference.
 LEGITIMATE_NEGATIVE_CONCEPTS = {
     # Interest expense/income that can be net negative
     'us-gaap_InterestIncomeExpenseNet',
