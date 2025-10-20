@@ -25,7 +25,8 @@ class TestCashFlowEmptyPeriods:
 
         # Get data columns (excluding metadata)
         data_cols = [col for col in df.columns
-                    if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+                    if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
+                                   'balance', 'weight', 'preferred_sign']]
 
         # All periods should have meaningful numeric data
         for col in data_cols:
@@ -41,7 +42,8 @@ class TestCashFlowEmptyPeriods:
 
         # Get data columns
         data_cols = [col for col in df.columns
-                    if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+                    if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
+                                   'balance', 'weight', 'preferred_sign']]
 
         # Check that all remaining periods have meaningful data
         empty_periods = []
@@ -87,7 +89,8 @@ class TestCashFlowEmptyPeriods:
             df = cashflow_stmt.to_dataframe()
 
             data_cols = [col for col in df.columns
-                        if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+                        if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
+                                       'balance', 'weight', 'preferred_sign']]
 
             # Identify empty periods
             empty_periods = []
@@ -118,7 +121,8 @@ class TestCashFlowEmptyPeriods:
 
         # Get data columns
         data_cols = [col for col in df.columns
-                     if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+                     if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
+                                    'balance', 'weight', 'preferred_sign']]
 
         # After v4.20.1 dynamic thresholds, we filter more intelligently - not just empty periods
         # but also periods with insufficient data quality. Expect at least 1 meaningful period.
@@ -144,9 +148,11 @@ class TestCashFlowEmptyPeriods:
         def filter_meaningful_periods(dataframe):
             """Same filtering logic as above"""
             data_cols = [col for col in dataframe.columns
-                        if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+                        if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
+                                       'balance', 'weight', 'preferred_sign']]
 
-            meaningful_cols = ['concept', 'label', 'level', 'abstract', 'dimension']
+            meaningful_cols = ['concept', 'label', 'level', 'abstract', 'dimension',
+                              'balance', 'weight', 'preferred_sign']
 
             for col in data_cols:
                 numeric_values = pd.to_numeric(dataframe[col], errors='coerce').notna().sum()
@@ -165,9 +171,11 @@ class TestCashFlowEmptyPeriods:
 
         # Should be unchanged - all periods have data
         original_data_cols = [col for col in original_df.columns
-                             if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+                             if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
+                                            'balance', 'weight', 'preferred_sign']]
         filtered_data_cols = [col for col in filtered_df.columns
-                             if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+                             if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
+                                            'balance', 'weight', 'preferred_sign']]
 
         assert len(original_data_cols) == len(filtered_data_cols)
         assert set(original_data_cols) == set(filtered_data_cols)
