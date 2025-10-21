@@ -432,6 +432,10 @@ class PeriodOptimizer:
         all_periods = []
 
         for i, xbrl in enumerate(xbrl_list):
+            # Skip None XBRLs (pre-XBRL era filings before 2009)
+            if xbrl is None:
+                continue
+
             # Skip XBRLs with no reporting periods
             if not xbrl.reporting_periods:
                 continue

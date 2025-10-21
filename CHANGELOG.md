@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Issue #459: XBRLS Pre-XBRL Filing Handling** - Fixed crash when stitching filings including pre-2009 filings
+  - **Problem**: When stitching 18+ years of filings (back to 2001), pre-XBRL era filings caused `AttributeError: 'NoneType' object has no attribute 'reporting_periods'`
+  - **Root Cause**: `XBRLS.from_filings()` correctly skips pre-XBRL filings but period extraction didn't handle None values
+  - **Solution**: Added defensive None filtering in `_extract_all_periods()` before accessing `xbrl.reporting_periods`
+  - **Impact**: Enables historical analysis going back to 2001, gracefully skips pre-XBRL era filings
+  - **User Value**: Unblocks users performing long-term historical company analysis
+  - **Example**:
+    ```python
+    from edgar import Company
+    from edgar.xbrl import XBRLS
+
+    company = Company('AAPL')
+    # Now works with 18+ years including pre-2009 filings
+    filings_ten_k = company.get_filings(form="10-K").head(18)
+    xbrls = XBRLS.from_filings(filings_ten_k)
+    income_statements = xbrls.statements.income_statement().to_dataframe()
+    # Pre-XBRL filings are silently skipped, XBRL-era data returned
+    ```
+
 ## Release 4.21.1 - 2025-10-21
 
 ### Documentation
