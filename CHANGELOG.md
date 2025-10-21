@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release 4.21.1 - 2025-10-21
 
+### Documentation
+
+- **Issue #462: 8-K Items Metadata Documentation** - Added documentation clarifying `items` field data source
+  - Added comprehensive docstring to `EntityFiling.items` attribute explaining it sources from SEC metadata
+  - Documented that legacy SGML filings (1999-2001) may have incorrect SEC metadata
+  - Noted that modern XML filings (2005+) have accurate item metadata
+  - Provided workaround guidance for extracting items from legacy filing text
+  - **User Value**: Clarifies common misunderstanding, prevents confusion about legacy filing data
+  - **Impact**: Documentation only - zero code changes, zero risk
+
 ### Technical Debt
 
 - **XBRL Parser Dead Code Cleanup** - Removed ~1,988 lines of unreachable dead code from XBRL parsing subsystem
