@@ -922,7 +922,7 @@ class FactsView:
                 # First look up preferred_label from presentation trees
                 # to ensure label consistency between rendering and facts
                 preferred_label = None
-                for role, tree in self.xbrl.presentation_trees.items():
+                for _role, tree in self.xbrl.presentation_trees.items():
                     if element_id in tree.all_nodes:
                         # Get presentation node to find preferred_label
                         pres_node = tree.all_nodes[element_id]

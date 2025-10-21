@@ -13,7 +13,6 @@ from rich.table import Table
 
 from edgar.richtools import repr_rich
 from edgar.xbrl.exceptions import StatementNotFound
-from edgar.xbrl.rendering import RenderedStatement
 
 
 @dataclass
@@ -232,7 +231,8 @@ class Statement:
 
         This bypasses the rendering pipeline to get raw instance values.
         """
-        from edgar.xbrl.core import get_unit_display_name, is_point_in_time as get_is_point_in_time
+        from edgar.xbrl.core import get_unit_display_name
+        from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
         from edgar.xbrl.periods import determine_periods_to_display
 
         # Get raw statement data
@@ -333,9 +333,6 @@ class Statement:
         """
         if df.empty or 'concept' not in df.columns:
             return df
-
-        # Get statement type for fact filtering
-        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
 
         # Get statement's raw data to access preferred_signs
         raw_data = self.get_raw_data()

@@ -265,7 +265,7 @@ class StatementStitcher:
             # Find the most recent quarters (for income statements)
             quarterly_periods = []
 
-            for pid, date in durations:
+            for pid, _date in durations:
                 # Check if this appears to be a quarterly period
                 if not pid.startswith('duration_'):
                     continue
@@ -292,7 +292,7 @@ class StatementStitcher:
             # Find annual periods (for income statements)
             annual_periods = []
 
-            for pid, date in durations:
+            for pid, _date in durations:
                 # Check if this appears to be an annual period
                 if not pid.startswith('duration_'):
                     continue

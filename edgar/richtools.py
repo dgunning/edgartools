@@ -15,6 +15,7 @@ from rich.theme import Theme
 __all__ = [
     'repr_rich',
     'rich_to_text',
+    'strip_ansi_text',
     'df_to_rich_table',
     'colorize_words',
     'print_xml',

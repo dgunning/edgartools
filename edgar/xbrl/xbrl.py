@@ -550,7 +550,7 @@ class XBRL:
             # Extract periods from the statement data
             periods = {}
             for item in statement_data:
-                for period_id, value in item.get('values', {}).items():
+                for period_id, _value in item.get('values', {}).items():
                     if period_id not in periods:
                         # Get period label from reporting_periods
                         period_label = period_id

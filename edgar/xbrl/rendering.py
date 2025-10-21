@@ -380,7 +380,8 @@ class RenderedStatement:
             pd.DataFrame: DataFrame with statement data and optional unit/point-in-time columns
         """
         try:
-            from edgar.xbrl.core import get_unit_display_name, is_point_in_time as get_is_point_in_time
+            from edgar.xbrl.core import get_unit_display_name
+            from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
 
             # Create rows for the DataFrame
             df_rows = []
@@ -1209,7 +1210,7 @@ def _filter_empty_string_periods(statement_data: List[Dict[str, Any]], periods_t
                         if not pd.isna(numeric_value):
                             has_meaningful_value = True
                             break
-                    except:
+                    except Exception:
                         # If not numeric but has content, still count as meaningful
                         if len(str_value) > 0:
                             has_meaningful_value = True

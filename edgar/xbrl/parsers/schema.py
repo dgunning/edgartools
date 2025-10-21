@@ -6,12 +6,13 @@ creation with element definitions and properties.
 """
 
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Dict, Union
 
 from lxml import etree as ET
 
 from edgar.core import log
 from edgar.xbrl.models import ElementCatalog, XBRLProcessingError
+
 from .base import BaseParser
 
 

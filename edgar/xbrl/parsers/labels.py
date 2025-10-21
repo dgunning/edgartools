@@ -12,6 +12,7 @@ from lxml import etree as ET
 
 from edgar.xbrl.core import STANDARD_LABEL, extract_element_id
 from edgar.xbrl.models import ElementCatalog, XBRLProcessingError
+
 from .base import BaseParser
 
 

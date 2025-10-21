@@ -623,7 +623,7 @@ class ConceptMapper:
         """
         # Pre-filter to only process unmapped concepts
         mapped_concepts = set()
-        for std_concept, company_concepts in self.mapping_store.mappings.items():
+        for _std_concept, company_concepts in self.mapping_store.mappings.items():
             mapped_concepts.update(company_concepts)
 
         # Process only unmapped filings

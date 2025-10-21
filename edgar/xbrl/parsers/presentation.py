@@ -10,9 +10,9 @@ from typing import Any, Dict, List, Optional, Union
 
 from lxml import etree as ET
 
-from edgar.core import log
 from edgar.xbrl.core import extract_element_id
 from edgar.xbrl.models import ElementCatalog, PresentationNode, PresentationTree, XBRLProcessingError
+
 from .base import BaseParser
 
 

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Release 4.21.1 - 2025-10-21
+
+### Technical Debt
+
+- **XBRL Parser Dead Code Cleanup** - Removed ~1,988 lines of unreachable dead code from XBRL parsing subsystem
+  - **Removed**: Legacy monolithic parser (`edgar/xbrl/parser.py`, 1,903 lines) - completely replaced by modular parser architecture in `edgar/xbrl/parsers/`
+  - **Removed**: Dead method `apply_calculation_weights()` from `edgar/xbrl/parsers/calculation.py` (85 lines) - unused after Issue #463 removed weight application during parsing
+  - **Impact**: Zero user impact - purely internal cleanup. All 846 tests passing (338 fast + 307 network + 201 regression)
+  - **Benefits**: Clearer codebase architecture, reduced maintenance burden, eliminated parser confusion
+
+- **XBRL Package Code Quality Improvements** - Fixed 38 linting issues in edgar/xbrl package
+  - **Auto-fixed** (31 issues): Import ordering, unused imports, missing newlines at end of files
+  - **Manual fixes** (7 issues): Renamed unused loop variables to underscore-prefixed, fixed bare `except:` clause, removed unused variable
+  - **Remaining** (24 issues): Acceptable patterns (exception naming, intentional caching, constants naming)
+  - **Impact**: Improved code maintainability and consistency. All tests passing (338 fast + 31 XBRL network tests)
+
 ## Release 4.21.0 - 2025-10-20
 
 ### Fixed

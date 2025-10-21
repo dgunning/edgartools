@@ -23,7 +23,7 @@ See: Issue #450 - Statement of Equity rendering problems
 """
 
 import re
-from typing import Set, List, Optional
+from typing import List, Set
 
 # Known abstract concepts from US-GAAP taxonomy
 # These are explicitly marked abstract="true" in the US-GAAP taxonomy schemas
