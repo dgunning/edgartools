@@ -7,18 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [4.21.2] - 2025-10-23
+## [4.21.3] - 2025-10-23
 
 ### Fixed
-
-- **Issue #466: Dimension column always False in XBRL statements (REGRESSION)** - Fixed dimension metadata incorrectly showing False for all rows
-  - **Problem**: The `dimension` column in statement DataFrames always showed `False`, even for dimensional line items (Revenue by Product/Geography)
-  - **Root Cause**: Key name mismatch in Issue #463 DataFrame refactoring - code looked for `'dimension'` key but XBRL parser uses `'is_dimension'`
-  - **Solution**: Changed `item.get('dimension', False)` to `item.get('is_dimension', False)` in `edgar/xbrl/statements.py:318`
-  - **Impact**: Dimensional data (Revenue by Product/Geography/Segment) now correctly tagged with `dimension=True`
-  - **Regression**: Introduced in v4.21.0, fixed in v4.21.2
-  - **Tests**: Un-skipped Issue #416 regression tests, added Issue #466 regression test suite
-  - **User Value**: Restores ability to filter and analyze dimensional financial data
 
 - **Current Filings Module: Multiple bug fixes and improvements** - Fixed critical bugs and improved error handling
   - **Bug 1 - Regex Greedy Matching**: Company names containing " - " (dash) were incorrectly split
@@ -60,6 +51,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Performance maintained - benchmarks show identical performance (9.6ms avg, 210KB for 40-100 items)
   - **Benchmark tool**: Added `tests/manual/bench_current_filings_display.py` for performance validation
   - **Impact**: Code quality improvement with no performance regression
+
+## [4.21.2] - 2025-10-22
+
+### Fixed
+
+- **Issue #466: Dimension column always False in XBRL statements (REGRESSION)** - Fixed dimension metadata incorrectly showing False for all rows
+  - **Problem**: The `dimension` column in statement DataFrames always showed `False`, even for dimensional line items (Revenue by Product/Geography)
+  - **Root Cause**: Key name mismatch in Issue #463 DataFrame refactoring - code looked for `'dimension'` key but XBRL parser uses `'is_dimension'`
+  - **Solution**: Changed `item.get('dimension', False)` to `item.get('is_dimension', False)` in `edgar/xbrl/statements.py:318`
+  - **Impact**: Dimensional data (Revenue by Product/Geography/Segment) now correctly tagged with `dimension=True`
+  - **Regression**: Introduced in v4.21.0, fixed in v4.21.2
+  - **Tests**: Un-skipped Issue #416 regression tests, added Issue #466 regression test suite
+  - **User Value**: Restores ability to filter and analyze dimensional financial data
 
 ## [4.21.1] - 2025-10-21
 
