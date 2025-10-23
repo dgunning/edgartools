@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Current Filings Parser: Company names with dashes incorrectly split** - Fixed parsing bug in current filings display
+  - **Problem**: Company names containing " - " (dash) were incorrectly split, with part of the name appearing in the Form column
+  - **Example**: "Greenbird Intelligence Fund, LLC Series U - Shield Ai" incorrectly parsed as Form="D - Greenbird..." and Company="Shield Ai"
+  - **Root Cause**: Greedy regex pattern `(.*)` matched up to the last dash instead of the first dash
+  - **Solution**: Changed regex to non-greedy `(.*?)` in `edgar/current_filings.py:31` to match only to first dash
+  - **Impact**: Current filings now correctly display form type and full company name for companies with dashes
+  - **Tests**: Added comprehensive test suite for edge cases in `tests/test_current_filings_parsing.py`
+
 ## [4.21.2] - 2025-10-22
 
 ### Fixed

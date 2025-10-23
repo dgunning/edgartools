@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 summary_regex = re.compile(r'<b>([^<]+):</b>\s+([^<\s]+)')
-title_regex = re.compile(r"(.*) - (.*) \((\d+)\) \((.*)\)")
+title_regex = re.compile(r"(.*?) - (.*) \((\d+)\) \((.*)\)")
 
 """
 Get the current filings from the SEC. Use this to get the filings filed after the 5:30 deadline
