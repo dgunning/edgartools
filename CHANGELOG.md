@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.21.2] - 2025-10-22
+
 ### Fixed
 
 - **Issue #466: Dimension column always False in XBRL statements (REGRESSION)** - Fixed dimension metadata incorrectly showing False for all rows
@@ -18,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tests**: Un-skipped Issue #416 regression tests, added Issue #466 regression test suite
   - **User Value**: Restores ability to filter and analyze dimensional financial data
 
-## Release 4.21.1 - 2025-10-21
+## [4.21.1] - 2025-10-21
 
 ### Documentation
 
