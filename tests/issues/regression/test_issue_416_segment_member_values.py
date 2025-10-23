@@ -12,7 +12,7 @@ from edgar import *
 
 
 @pytest.mark.regression
-@pytest.mark.skip(reason="Dimensional display feature needs investigation - Issue #463 metadata columns may have affected this")
+@pytest.mark.network
 def test_msft_segment_member_values():
     """Test that Microsoft's product and service segment values appear in income statement"""
 
@@ -78,7 +78,8 @@ def test_dimension_display_detection():
     assert not should_display_bs, "Balance sheets should not enable dimensional display by default"
 
 
-@pytest.mark.skip(reason="Dimensional display feature needs investigation - Issue #463 metadata columns may have affected this")
+@pytest.mark.regression
+@pytest.mark.network
 def test_dimensional_revenue_breakdown():
     """Test that dimensional revenue breakdown includes expected segments"""
 

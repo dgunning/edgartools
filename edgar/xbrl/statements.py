@@ -315,7 +315,7 @@ class Statement:
             # Add structural columns
             row['level'] = item.get('level', 0)
             row['abstract'] = item.get('is_abstract', False)
-            row['dimension'] = item.get('dimension', False)
+            row['dimension'] = item.get('is_dimension', False)
 
             df_rows.append(row)
 
