@@ -9,13 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Current Filings Parser: Company names with dashes incorrectly split** - Fixed parsing bug in current filings display
-  - **Problem**: Company names containing " - " (dash) were incorrectly split, with part of the name appearing in the Form column
-  - **Example**: "Greenbird Intelligence Fund, LLC Series U - Shield Ai" incorrectly parsed as Form="D - Greenbird..." and Company="Shield Ai"
-  - **Root Cause**: Greedy regex pattern `(.*)` matched up to the last dash instead of the first dash
-  - **Solution**: Changed regex to non-greedy `(.*?)` in `edgar/current_filings.py:31` to match only to first dash
-  - **Impact**: Current filings now correctly display form type and full company name for companies with dashes
-  - **Tests**: Added comprehensive test suite for edge cases in `tests/test_current_filings_parsing.py`
+- **Current Filings Module: Multiple bug fixes and improvements** - Fixed critical bugs and improved error handling
+  - **Bug 1 - Regex Greedy Matching**: Company names containing " - " (dash) were incorrectly split
+    - **Problem**: "Greenbird Intelligence Fund, LLC Series U - Shield Ai" parsed as Form="D - Greenbird..." and Company="Shield Ai"
+    - **Root Cause**: Greedy regex pattern `(.*)` matched to last dash instead of first
+    - **Fix**: Changed to non-greedy `(.*?)` in `edgar/current_filings.py:31`
+
+  - **Bug 2 - Missing Owner Filter in Pagination** (CRITICAL)
+    - **Problem**: `next()` and `previous()` methods lost the `owner` filter when paginating
+    - **Impact**: Filtering by owner ('include', 'exclude', 'only') broke after first page
+    - **Root Cause**: Missing `owner=self.owner` parameter in `get_current_entries_on_page()` calls
+    - **Fix**: Added `owner=self.owner` parameter in lines 154 and 166
+
+  - **Bug 3 - AssertionError in Production**
+    - **Problem**: `parse_title()` used `assert` which can be disabled with `-O` flag
+    - **Fix**: Changed to `raise ValueError()` with descriptive message (line 68)
+
+  - **Bug 4 - Missing Error Handling in parse_summary()**
+    - **Problem**: Empty or missing 'Filed' date or 'AccNo' caused crash with unclear error
+    - **Fix**: Added explicit validation and descriptive ValueError messages (lines 87-98)
+
+  - **Bug 5 - Crash in Accession Number Search**
+    - **Problem**: `_get_current_filing_by_accession_number()` crashed when accession not found
+    - **Root Cause**: `mask.index(True)` raises ValueError if True not in mask
+    - **Fix**: Wrapped in try/except to gracefully return None (lines 244-256)
+
+  - **Tests**: Added comprehensive test suite with 10 tests covering all fixes in `tests/test_current_filings_parsing.py`
+  - **Impact**: Current filings pagination now works correctly, better error messages, no production crashes
+
+### Code Quality
+
+- **Current Filings Display: Eliminated pandas dependency** - Refactored to use PyArrow direct access
+  - **Before**: `self.data.to_pandas()` created unnecessary pandas DataFrame conversion
+  - **After**: Direct PyArrow table access using zero-copy column operations
+  - **Benefits**:
+    - Cleaner code - eliminated unnecessary pandas dependency in display method
+    - More consistent - uses PyArrow throughout CurrentFilings class
+    - Simpler logic - direct index calculations instead of pandas index manipulation
+    - Performance maintained - benchmarks show identical performance (9.6ms avg, 210KB for 40-100 items)
+  - **Benchmark tool**: Added `tests/manual/bench_current_filings_display.py` for performance validation
+  - **Impact**: Code quality improvement with no performance regression
 
 ## [4.21.2] - 2025-10-22
 

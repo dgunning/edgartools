@@ -65,7 +65,8 @@ def parse_title(title: str):
     parse into a tuple of form type, company name, CIK, and status using regex
     """
     match = title_regex.match(title)
-    assert match, f"Could not parse title: {title} using regex: {title_regex}"
+    if not match:
+        raise ValueError(f"Could not parse title: {title} using regex: {title_regex}")
     return match.groups()
 
 def parse_summary(summary: str):
@@ -83,7 +84,20 @@ def parse_summary(summary: str):
     # Convert matches into a dictionary
     fields = {k.strip(): (int(v) if v.isdigit() else v) for k, v in matches}
 
-    return datetime.strptime(str(fields.get('Filed', '')), '%Y-%m-%d').date(), fields.get('AccNo')
+    filed_date = fields.get('Filed')
+    if not filed_date:
+        raise ValueError(f"Could not find 'Filed' date in summary: {summary}")
+
+    accession_no = fields.get('AccNo')
+    if not accession_no:
+        raise ValueError(f"Could not find 'AccNo' in summary: {summary}")
+
+    try:
+        filing_date = datetime.strptime(str(filed_date), '%Y-%m-%d').date()
+    except ValueError as e:
+        raise ValueError(f"Invalid date format in summary: {filed_date}") from e
+
+    return filing_date, accession_no
 
 
 def get_current_url(atom: bool = True,
@@ -150,7 +164,7 @@ class CurrentFilings(Filings):
         if len(self.data) < self._page_size:
             return None
         start = self._start + len(self.data)
-        next_entries = get_current_entries_on_page(start=start-1, count=self._page_size, form=self.form)
+        next_entries = get_current_entries_on_page(start=start-1, count=self._page_size, form=self.form, owner=self.owner)
         if next_entries:
             # Copy the values to this Filings object and return it
             self.data = pa.Table.from_pylist(next_entries)
@@ -162,7 +176,7 @@ class CurrentFilings(Filings):
         if self._start == 1:
             return None
         start = max(1, self._start - self._page_size)
-        previous_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form)
+        previous_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form, owner=self.owner)
         if previous_entries:
             # Copy the values to this Filings object and return it
             self.data = pa.Table.from_pylist(previous_entries)
@@ -227,15 +241,19 @@ class CurrentFilings(Filings):
     def _get_current_filing_by_accession_number(data: pa.Table, accession_number: str):
         from edgar import Filing
         mask = pc.equal(data['accession_number'], accession_number)
-        idx = mask.index(True).as_py()
-        if idx > -1:
-            return Filing(
-                cik=data['cik'][idx].as_py(),
-                company=data['company'][idx].as_py(),
-                form=data['form'][idx].as_py(),
-                filing_date=data['filing_date'][idx].as_py(),
-                accession_no=data['accession_number'][idx].as_py(),
-            )
+        try:
+            idx = mask.index(True).as_py()
+            if idx > -1:
+                return Filing(
+                    cik=data['cik'][idx].as_py(),
+                    company=data['company'][idx].as_py(),
+                    form=data['form'][idx].as_py(),
+                    filing_date=data['filing_date'][idx].as_py(),
+                    accession_no=data['accession_number'][idx].as_py(),
+                )
+        except ValueError:
+            # Accession number not found in this batch
+            pass
         return None
 
     def __rich__(self):
@@ -261,15 +279,15 @@ class CurrentFilings(Filings):
         table.add_column(" ", width=1, style="cyan dim")  # Group indicator column
 
 
-        # Get current page from data pager
-        current_page = self.data.to_pandas()
+        # Access data directly from PyArrow table (zero-copy)
+        num_rows = len(self.data)
+        start_idx = self._start - 1
 
-        # compute the index from the start and page_size and set it as the index of the page
-        current_page.index = range(self._start - 1, self._start - 1 + len(current_page))
+        # Get accession numbers for grouping (zero-copy access)
+        accession_numbers = self.data.column('accession_number').to_pylist()
 
         # Identify groups of consecutive filings with same accession number
         groups = {}
-        accession_numbers = current_page['accession_number'].tolist()
 
         for i in range(len(accession_numbers)):
             acc_no = accession_numbers[i]
@@ -287,19 +305,20 @@ class CurrentFilings(Filings):
             else:
                 groups[i] = ' '   # Standalone filing
 
-        # Iterate through rows in current page
-        for idx, t in enumerate(current_page.itertuples()):
-            cik = t.cik
+        # Iterate through PyArrow table directly (zero-copy)
+        for idx in range(num_rows):
+            row_index = start_idx + idx
+            cik = self.data['cik'][idx].as_py()
             ticker = find_ticker(cik)
 
             row = [
-                str(t.Index),
-                t.form,
+                str(row_index),
+                self.data['form'][idx].as_py(),
                 str(cik),
                 ticker,
-                t.company,
-                accepted_time_text(t.accepted),
-                accession_number_text(t.accession_number),
+                self.data['company'][idx].as_py(),
+                accepted_time_text(self.data['accepted'][idx].as_py()),
+                accession_number_text(self.data['accession_number'][idx].as_py()),
                 groups.get(idx, ' ')  # Add group indicator
             ]
             table.add_row(*row)
@@ -309,9 +328,9 @@ class CurrentFilings(Filings):
 
         page_info = Text.assemble(
             ("Showing ", "dim"),
-            (f"{current_page.index.min():,}", "bold red"),
+            (f"{start_idx:,}", "bold red"),
             (" to ", "dim"),
-            (f"{current_page.index.max():,}", "bold red"),
+            (f"{start_idx + num_rows - 1:,}", "bold red"),
             (" most recent filings.", "dim"),
             (" Page using ", "dim"),
             ("← prev()", "bold gray54"),

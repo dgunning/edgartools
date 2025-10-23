@@ -2,7 +2,7 @@
 Test current filings parsing, especially edge cases with company names containing dashes
 """
 import pytest
-from edgar.current_filings import parse_title
+from edgar.current_filings import parse_title, parse_summary
 
 
 @pytest.mark.fast
@@ -64,3 +64,50 @@ def test_parse_title_filed_by_status():
     assert company == "Example Company, Inc. - Series A"
     assert cik == "0009876543"
     assert status == "Filed by"
+
+
+@pytest.mark.fast
+def test_parse_title_invalid_format():
+    """Test that invalid title format raises ValueError"""
+    invalid_title = "Invalid format without proper structure"
+
+    with pytest.raises(ValueError, match="Could not parse title"):
+        parse_title(invalid_title)
+
+
+@pytest.mark.fast
+def test_parse_summary_valid():
+    """Test parsing a valid summary"""
+    summary = "<b>Filed:</b> 2021-09-30 <b>AccNo:</b> 0001845338-21-000002 <b>Size:</b> 1 MB"
+    filing_date, accession_no = parse_summary(summary)
+
+    from datetime import date
+    assert filing_date == date(2021, 9, 30)
+    assert accession_no == "0001845338-21-000002"
+
+
+@pytest.mark.fast
+def test_parse_summary_missing_filed_date():
+    """Test that missing Filed date raises ValueError"""
+    summary = "<b>AccNo:</b> 0001845338-21-000002 <b>Size:</b> 1 MB"
+
+    with pytest.raises(ValueError, match="Could not find 'Filed' date"):
+        parse_summary(summary)
+
+
+@pytest.mark.fast
+def test_parse_summary_missing_accession_number():
+    """Test that missing AccNo raises ValueError"""
+    summary = "<b>Filed:</b> 2021-09-30 <b>Size:</b> 1 MB"
+
+    with pytest.raises(ValueError, match="Could not find 'AccNo'"):
+        parse_summary(summary)
+
+
+@pytest.mark.fast
+def test_parse_summary_invalid_date_format():
+    """Test that invalid date format raises ValueError"""
+    summary = "<b>Filed:</b> invalid-date <b>AccNo:</b> 0001845338-21-000002 <b>Size:</b> 1 MB"
+
+    with pytest.raises(ValueError, match="Invalid date format"):
+        parse_summary(summary)
