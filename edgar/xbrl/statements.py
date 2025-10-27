@@ -162,6 +162,25 @@ class Statement:
         return str(rendered_statement)  # Delegates to RenderedStatement.__str__()
 
     @property
+    def docs(self):
+        """
+        Get comprehensive documentation for the Statement class.
+
+        Returns a Docs object with detailed API documentation including usage patterns,
+        examples, and guidance for working with financial statement data. The documentation
+        is searchable using the .search() method.
+
+        Returns:
+            Docs: Documentation object with rich display and search capabilities
+
+        Example:
+            >>> statement.docs  # Display full documentation
+            >>> statement.docs.search("convert to dataframe")  # Search for specific topics
+        """
+        from edgar.richtools import Docs
+        return Docs(self)
+
+    @property
     def primary_concept(self):
         data = self.get_raw_data()
         return data[0]['all_names'][0]
@@ -600,6 +619,99 @@ class Statements:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
 
+    @staticmethod
+    def classify_statement(stmt: dict) -> str:
+        """
+        Classify a statement into a category based on its type.
+
+        Categories:
+        - 'statement': Core financial statements (Income Statement, Balance Sheet, etc.)
+        - 'note': Notes to financial statements
+        - 'disclosure': Disclosure sections
+        - 'document': Document sections (like CoverPage)
+        - 'other': Everything else
+
+        Args:
+            stmt: Statement dictionary with 'type' and optional 'category' fields
+
+        Returns:
+            str: Category name ('statement', 'note', 'disclosure', 'document', or 'other')
+
+        Example:
+            >>> stmt = {'type': 'IncomeStatement', 'title': 'Income Statement'}
+            >>> Statements.classify_statement(stmt)
+            'statement'
+
+            >>> stmt = {'type': 'DebtDisclosure', 'title': 'Debt Disclosure'}
+            >>> Statements.classify_statement(stmt)
+            'disclosure'
+        """
+        # Use explicit category if provided
+        category = stmt.get('category')
+        if category:
+            return category
+
+        # Infer from type
+        stmt_type = stmt.get('type', '')
+        if not stmt_type:
+            return 'other'
+
+        if 'Note' in stmt_type:
+            return 'note'
+        elif 'Disclosure' in stmt_type:
+            return 'disclosure'
+        elif stmt_type == 'CoverPage':
+            return 'document'
+        elif stmt_type in ('BalanceSheet', 'IncomeStatement', 'CashFlowStatement',
+                           'StatementOfEquity', 'ComprehensiveIncome') or 'Statement' in stmt_type:
+            return 'statement'
+        else:
+            return 'other'
+
+    def get_statements_by_category(self) -> dict:
+        """
+        Get statements organized by category.
+
+        Returns a dictionary with statements grouped into categories:
+        - 'statement': Core financial statements
+        - 'note': Notes to financial statements
+        - 'disclosure': Disclosure sections
+        - 'document': Document sections
+        - 'other': Other sections
+
+        Each statement in the lists includes an 'index' field for positional reference.
+
+        Returns:
+            dict: Dictionary with category keys, each containing a list of statement dicts
+
+        Example:
+            >>> categories = xbrl.statements.get_statements_by_category()
+            >>> # Get all disclosures
+            >>> disclosures = categories['disclosure']
+            >>> for disc in disclosures:
+            ...     print(f"{disc['index']}: {disc['title']}")
+            >>>
+            >>> # Get all notes
+            >>> notes = categories['note']
+            >>> # Get core financial statements
+            >>> statements = categories['statement']
+        """
+        categories = {
+            'statement': [],
+            'note': [],
+            'disclosure': [],
+            'document': [],
+            'other': []
+        }
+
+        for index, stmt in enumerate(self.statements):
+            category = self.classify_statement(stmt)
+            stmt_with_index = dict(stmt)
+            stmt_with_index['index'] = index
+            categories[category].append(stmt_with_index)
+
+        return categories
+
     def _handle_statement_error(self, e: Exception, statement_type: str) -> Optional[Statement]:
         """
         Common error handler for statement resolution failures.
@@ -749,43 +861,8 @@ class Statements:
         from rich.console import Group
         from rich.text import Text
 
-        # Group statements by category
-        statements_by_category = {
-            'statement': [],
-            'note': [],
-            'disclosure': [],
-            'document': [],
-            'other': []
-        }
-
-        # The 'type' field will always exist, but 'category' may not
-        for index, stmt in enumerate(self.statements):
-            # Determine category based on either explicit category or infer from type
-            category = stmt.get('category')
-            if not category:
-                # Fallback logic - infer category from type
-                stmt_type = stmt.get('type', '')
-                if stmt_type:
-                    if 'Note' in stmt_type:
-                        category = 'note'
-                    elif 'Disclosure' in stmt_type:
-                        category = 'disclosure'
-                    elif stmt_type == 'CoverPage':
-                        category = 'document'
-                    elif stmt_type in ('BalanceSheet', 'IncomeStatement', 'CashFlowStatement', 
-                                      'StatementOfEquity', 'ComprehensiveIncome') or 'Statement' in stmt_type:
-                        category = 'statement'
-                    else:
-                        category = 'other'
-                else:
-                    category = 'other'
-
-            # Include the index in the statement for reference
-            stmt_with_index = dict(stmt)  # Make a copy to avoid modifying the original
-            stmt_with_index['index'] = index
-
-            # Add to the appropriate category
-            statements_by_category[category].append(stmt_with_index)
+        # Group statements by category using the extracted method
+        statements_by_category = self.get_statements_by_category()
 
         # Create a table for each category that has statements
         tables = []

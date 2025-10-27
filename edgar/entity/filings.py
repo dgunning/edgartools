@@ -364,7 +364,13 @@ class EntityFilings(Filings):
 
         # Get the subtitle
         start_date, end_date = self.date_range
-        subtitle = f"Company filings between {start_date:%Y-%m-%d} and {end_date:%Y-%m-%d}" if start_date else ""
+        date_range_text = f"Company filings between {start_date:%Y-%m-%d} and {end_date:%Y-%m-%d}" if start_date else "Company filings"
+        subtitle = Text.assemble(
+            (date_range_text, "dim"),
+            " • ",
+            ("filings.docs", "cyan dim"),
+            (" for usage guide", "dim")
+        )
         return Panel(
             Group(*elements),
             title=title,
