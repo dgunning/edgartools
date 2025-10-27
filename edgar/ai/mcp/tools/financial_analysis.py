@@ -10,7 +10,7 @@ from typing import Any
 from mcp.types import TextContent
 
 from edgar import Company
-from edgar.ai.tools.utils import (
+from edgar.ai.mcp.tools.utils import (
     check_output_size,
     format_error_with_suggestions,
 )

@@ -410,3 +410,77 @@ class Docs:
         Return a string representation of the Docs object.
         """
         return repr_rich(self.__rich__())
+
+    def _split_into_sections(self):
+        """
+        Split markdown content into sections by ## headings.
+
+        Returns:
+            List[str]: List of document sections, each starting with a ## heading
+        """
+        if not self.docs_content:
+            return []
+
+        lines = self.docs_content.split('\n')
+        sections = []
+        current_section = []
+
+        for line in lines:
+            # Check if this is a ## heading (but not # or ### or ####)
+            if line.startswith('## ') and not line.startswith('### '):
+                # Save previous section if it exists
+                if current_section:
+                    sections.append('\n'.join(current_section))
+                # Start new section with this heading
+                current_section = [line]
+            else:
+                # Add line to current section
+                current_section.append(line)
+
+        # Don't forget the last section
+        if current_section:
+            sections.append('\n'.join(current_section))
+
+        return sections
+
+    def search(self, query: str, use_bm25: bool = True):
+        """
+        Search documentation content for relevant sections.
+
+        Uses BM25 semantic search by default to find sections matching the query.
+        Splits documentation by ## headings and returns matching sections with scores.
+
+        Args:
+            query: Search query (e.g., "extract revenue", "query by period")
+            use_bm25: Use semantic BM25 search (True) or regex pattern matching (False)
+
+        Returns:
+            SearchResults: Matching documentation sections with scores
+
+        Example:
+            >>> filing.docs.search("get attachments")
+            # Returns sections about accessing filing attachments
+
+            >>> xbrl.docs.search("extract revenue")
+            # Returns sections about extracting revenue from statements
+
+            >>> xbrl.docs.search("\.to_dataframe\(\)", use_bm25=False)
+            # Regex search for exact pattern
+        """
+        from edgar.search.textsearch import BM25Search, RegexSearch
+
+        # Split content into searchable sections
+        sections = self._split_into_sections()
+
+        if not sections:
+            # Return empty results if no content
+            from edgar.search.textsearch import SearchResults
+            return SearchResults(query=query, sections=[], tables=False)
+
+        # Use appropriate search method
+        if use_bm25:
+            searcher = BM25Search(sections)
+        else:
+            searcher = RegexSearch(sections)
+
+        return searcher.search(query, tables=False)

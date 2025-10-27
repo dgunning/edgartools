@@ -61,6 +61,8 @@ class XBRLS:
 
         if filter_amendments:
             filtered_filings = filings.filter(amendments=False)
+        else:
+            filtered_filings = filings
 
         # Sort filings by date (newest first)
         sorted_filings = sorted(filtered_filings, key=lambda f: f.filing_date, reverse=True)

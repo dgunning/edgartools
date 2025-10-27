@@ -27,7 +27,7 @@ from rich.table import Table as RichTable
 
 from edgar.attachments import Attachments
 from edgar.core import log
-from edgar.richtools import repr_rich
+from edgar.richtools import repr_rich, strip_ansi_text
 from edgar.xbrl.core import STANDARD_LABEL
 from edgar.xbrl.models import PresentationNode
 from edgar.xbrl.parsers import XBRLParser
@@ -1560,9 +1560,45 @@ class XBRL:
         return generate_rich_representation(self)
 
     def __repr__(self):
-        return repr_rich(self)
+        return repr_rich(self.__rich__())
 
-    def __str__(self):
-        """String representation."""
-        footnote_info = f", {len(self.footnotes)} footnotes" if self.footnotes else ""
-        return f"XBRL Document with {len(self._facts)} facts, {len(self.contexts)} contexts, {len(self.presentation_trees)} statements{footnote_info}"
+
+    def text(self, max_tokens: int = 2000) -> str:
+        """
+        Get text representation of XBRL document.
+
+        Returns the same rich-formatted display as print(xbrl), which includes
+        entity information, filing details, period coverage, and common usage examples,
+        with ANSI escape codes stripped for AI consumption.
+
+        Args:
+            max_tokens: Ignored (kept for API compatibility)
+
+        Returns:
+            Text representation of XBRL document without ANSI formatting
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> text = xbrl.text()
+            >>> print(text)
+        """
+        return strip_ansi_text(repr(self))
+
+    @property
+    def docs(self):
+        """
+        Get comprehensive documentation for the XBRL class.
+
+        Returns a Docs object with detailed API documentation including usage patterns,
+        examples, and guidance for working with XBRL data. The documentation is searchable
+        using the .search() method.
+
+        Returns:
+            Docs: Documentation object with rich display and search capabilities
+
+        Example:
+            >>> xbrl.docs  # Display full documentation
+            >>> xbrl.docs.search("extract revenue")  # Search for specific topics
+        """
+        from edgar.richtools import Docs
+        return Docs(self)

@@ -16,7 +16,7 @@ class TestCompanyResearchTool:
     @pytest.mark.asyncio
     async def test_company_research_minimal(self):
         """Test company research with minimal detail level."""
-        from edgar.ai.tools.company_research import handle_company_research
+        from edgar.ai.mcp.tools.company_research import handle_company_research
 
         args = {
             "identifier": "AAPL",
@@ -36,7 +36,7 @@ class TestCompanyResearchTool:
     @pytest.mark.asyncio
     async def test_company_research_standard(self):
         """Test company research with standard detail level."""
-        from edgar.ai.tools.company_research import handle_company_research
+        from edgar.ai.mcp.tools.company_research import handle_company_research
 
         args = {
             "identifier": "MSFT",
@@ -58,7 +58,7 @@ class TestCompanyResearchTool:
     @pytest.mark.asyncio
     async def test_company_research_detailed(self):
         """Test company research with detailed level."""
-        from edgar.ai.tools.company_research import handle_company_research
+        from edgar.ai.mcp.tools.company_research import handle_company_research
 
         args = {
             "identifier": "TSLA",
@@ -77,7 +77,7 @@ class TestCompanyResearchTool:
     @pytest.mark.asyncio
     async def test_company_research_missing_identifier(self):
         """Test company research with missing identifier."""
-        from edgar.ai.tools.company_research import handle_company_research
+        from edgar.ai.mcp.tools.company_research import handle_company_research
 
         args = {}
 
@@ -94,7 +94,7 @@ class TestFinancialAnalysisTool:
     @pytest.mark.asyncio
     async def test_financial_analysis_income_statement(self):
         """Test financial analysis with income statement only."""
-        from edgar.ai.tools.financial_analysis import handle_analyze_financials
+        from edgar.ai.mcp.tools.financial_analysis import handle_analyze_financials
 
         args = {
             "company": "AAPL",
@@ -114,7 +114,7 @@ class TestFinancialAnalysisTool:
     @pytest.mark.asyncio
     async def test_financial_analysis_multiple_statements(self):
         """Test financial analysis with multiple statement types."""
-        from edgar.ai.tools.financial_analysis import handle_analyze_financials
+        from edgar.ai.mcp.tools.financial_analysis import handle_analyze_financials
 
         args = {
             "company": "MSFT",
@@ -132,7 +132,7 @@ class TestFinancialAnalysisTool:
     @pytest.mark.asyncio
     async def test_financial_analysis_quarterly(self):
         """Test financial analysis with quarterly periods."""
-        from edgar.ai.tools.financial_analysis import handle_analyze_financials
+        from edgar.ai.mcp.tools.financial_analysis import handle_analyze_financials
 
         args = {
             "company": "GOOGL",
@@ -150,7 +150,7 @@ class TestFinancialAnalysisTool:
     @pytest.mark.asyncio
     async def test_financial_analysis_missing_company(self):
         """Test financial analysis with missing company parameter."""
-        from edgar.ai.tools.financial_analysis import handle_analyze_financials
+        from edgar.ai.mcp.tools.financial_analysis import handle_analyze_financials
 
         args = {}
 
@@ -166,7 +166,7 @@ class TestUtilityFunctions:
 
     def test_check_output_size_under_limit(self):
         """Test output size check when under token limit."""
-        from edgar.ai.tools.utils import check_output_size
+        from edgar.ai.mcp.tools.utils import check_output_size
 
         data = "Short text" * 10
         result = check_output_size(data, max_tokens=1000)
@@ -176,7 +176,7 @@ class TestUtilityFunctions:
 
     def test_check_output_size_over_limit(self):
         """Test output size check when over token limit."""
-        from edgar.ai.tools.utils import check_output_size
+        from edgar.ai.mcp.tools.utils import check_output_size
 
         # Create text that exceeds limit (1 token ≈ 4 chars)
         data = "x" * 10000  # ~2500 tokens
@@ -187,7 +187,7 @@ class TestUtilityFunctions:
 
     def test_format_error_with_suggestions(self):
         """Test error formatting with suggestions."""
-        from edgar.ai.tools.utils import format_error_with_suggestions
+        from edgar.ai.mcp.tools.utils import format_error_with_suggestions
 
         error = ValueError("Invalid ticker symbol")
         result = format_error_with_suggestions(error)
@@ -199,7 +199,7 @@ class TestUtilityFunctions:
     def test_build_company_profile_minimal(self):
         """Test company profile building with minimal detail."""
         from edgar import Company
-        from edgar.ai.tools.utils import build_company_profile
+        from edgar.ai.mcp.tools.utils import build_company_profile
 
         company = Company("AAPL")
         profile = build_company_profile(company, detail_level="minimal")
@@ -210,7 +210,7 @@ class TestUtilityFunctions:
     def test_build_company_profile_standard(self):
         """Test company profile building with standard detail."""
         from edgar import Company
-        from edgar.ai.tools.utils import build_company_profile
+        from edgar.ai.mcp.tools.utils import build_company_profile
 
         company = Company("MSFT")
         profile = build_company_profile(company, detail_level="standard")
@@ -221,7 +221,7 @@ class TestUtilityFunctions:
     def test_build_company_profile_detailed(self):
         """Test company profile building with detailed level."""
         from edgar import Company
-        from edgar.ai.tools.utils import build_company_profile
+        from edgar.ai.mcp.tools.utils import build_company_profile
 
         company = Company("GOOGL")
         profile = build_company_profile(company, detail_level="detailed")

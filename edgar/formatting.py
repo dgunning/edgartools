@@ -200,6 +200,48 @@ def accession_number_text(accession: str) -> Text:
     )
 
 
+def cik_text(cik: Union[str, int]) -> Text:
+    """Format a CIK number with color highlighting for leading zeros.
+
+    Args:
+        cik: CIK number as string or int (e.g., '320193' or 320193)
+
+    Returns:
+        Rich Text object with colored parts:
+        - Leading zeros in dim grey
+        - CIK value in bold white
+
+    Examples:
+        >>> cik_text(320193)
+        Text('0000320193') with leading zeros dimmed
+        >>> cik_text('0000320193')
+        Text('0000320193') with leading zeros dimmed
+    """
+    if cik is None or cik == '':
+        return Text()
+
+    # Convert to string and pad to 10 digits
+    cik_str = str(cik).zfill(10)
+
+    # Find leading zeros
+    leading_zeros = len(cik_str) - len(cik_str.lstrip('0'))
+    cik_value = cik_str[leading_zeros:]
+
+    # Assemble the colored text
+    if leading_zeros > 0 and cik_value:
+        # Normal case: some leading zeros and a value
+        return Text.assemble(
+            ("0" * leading_zeros, "dim"),
+            (cik_value, "bold")
+        )
+    elif leading_zeros == len(cik_str):
+        # All zeros - show them all dimmed
+        return Text(cik_str, "dim")
+    else:
+        # No leading zeros
+        return Text(cik_str, "bold white")
+
+
 def accepted_time_text(accepted_datetime) -> Text:
     """Format accepted datetime for current filings with visual emphasis.
 

@@ -16,6 +16,7 @@ from rich.table import Table as RichTable
 from rich.text import Text
 
 from edgar.files.html import Document
+from edgar.formatting import cik_text
 from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
 from edgar.xbrl.core import determine_dominant_scale, format_date, format_value, parse_date
@@ -1644,74 +1645,177 @@ def render_statement(
 
 def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
     """
-    Generate a rich representation of the XBRL document.
+    Generate a clean, human-focused representation of the XBRL document.
 
     Args:
         xbrl: XBRL object
 
     Returns:
-        Panel: A formatted panel with XBRL document information
+        Panel: A formatted panel focused on statement availability and usage
     """
     components = []
 
-    # Entity information
+    # Header: Clean, crisp information hierarchy
     if xbrl.entity_info:
-        if RichTable is None or box is None:
-            return "Rich rendering not available - install 'rich' package"
-        entity_table = RichTable(title="Entity Information", box=box.SIMPLE)
-        entity_table.add_column("Property")
-        entity_table.add_column("Value")
+        entity_name = xbrl.entity_info.get('entity_name', 'Unknown Entity')
+        ticker = xbrl.entity_info.get('ticker', '')
+        cik = xbrl.entity_info.get('identifier', '')
+        doc_type = xbrl.entity_info.get('document_type', '')
+        fiscal_year = xbrl.entity_info.get('fiscal_year', '')
+        fiscal_period = xbrl.entity_info.get('fiscal_period', '')
+        period_end = xbrl.entity_info.get('document_period_end_date', '')
 
-        for key, value in xbrl.entity_info.items():
-            entity_table.add_row(key, str(value))
+        # Company name with ticker (bold yellow) and CIK on same line
+        from rich.text import Text as RichText
+        company_line = RichText()
+        company_line.append(entity_name, style="bold cyan")
+        if ticker:
+            company_line.append(" (", style="bold cyan")
+            company_line.append(ticker, style="bold yellow")
+            company_line.append(")", style="bold cyan")
+        if cik:
+            # Format CIK with leading zeros dimmed
+            company_line.append(" • CIK ", style="dim")
+            company_line.append(cik_text(cik))
 
-        components.append(entity_table)
+        components.append(company_line)
+        components.append(Text(""))  # Spacing
 
-    # Statements summary
-    statements = xbrl.get_all_statements()
-    if statements:
-        if RichTable is None or box is None:
-            return "Rich rendering not available - install 'rich' package"
-        statement_table = RichTable(title="Financial Statements", box=box.SIMPLE)
-        statement_table.add_column("Type")
-        statement_table.add_column("Definition")
-        statement_table.add_column("Elements")
+        # Filing information - crisp, key-value style
+        filing_table = RichTable.grid(padding=(0, 2))
+        filing_table.add_column(style="bold", justify="right")
+        filing_table.add_column(style="default")
 
-        for stmt in statements:
-            statement_table.add_row(
-                stmt['type'] or "Other",
-                stmt['definition'],
-                str(stmt['element_count'])
-            )
+        if doc_type:
+            filing_table.add_row("Form:", doc_type)
 
-        components.append(statement_table)
+        # Combine fiscal period and end date on one line (they're related!)
+        if fiscal_period and fiscal_year:
+            period_display = f"Fiscal Year {fiscal_year}" if fiscal_period == 'FY' else f"{fiscal_period} {fiscal_year}"
+            if period_end:
+                # Format date more readably
+                from datetime import datetime
+                try:
+                    date_obj = datetime.strptime(str(period_end), '%Y-%m-%d')
+                    period_display += f" (ended {date_obj.strftime('%b %d, %Y')})"
+                except:
+                    period_display += f" (ended {period_end})"
+            filing_table.add_row("Fiscal Period:", period_display)
 
-    # Facts summary
-    if RichTable is None or box is None:
-        return "Rich rendering not available - install 'rich' package"
-    fact_table = RichTable(title="Facts Summary", box=box.SIMPLE)
-    fact_table.add_column("Category")
-    fact_table.add_column("Count")
+        # Data volume
+        filing_table.add_row("Data:", f"{len(xbrl._facts):,} facts • {len(xbrl.contexts):,} contexts")
 
-    fact_table.add_row("Total Facts", str(len(xbrl._facts)))
-    fact_table.add_row("Contexts", str(len(xbrl.contexts)))
-    fact_table.add_row("Units", str(len(xbrl.units)))
-    fact_table.add_row("Elements", str(len(xbrl.element_catalog)))
+        components.append(filing_table)
 
-    components.append(fact_table)
-
-    # Reporting periods
+    # Period coverage - cleaner, more scannable format
     if xbrl.reporting_periods:
-        period_table = RichTable(title="Reporting Periods", box=box.SIMPLE)
-        period_table.add_column("Type")
-        period_table.add_column("Period")
+        components.append(Text(""))  # Spacing
+        components.append(Text("Available Data Coverage:", style="bold"))
 
-        for period in xbrl.reporting_periods:
-            if period['type'] == 'instant':
-                period_table.add_row("Instant", period['date'])
+        # Parse periods into annual and quarterly
+        annual_periods = []
+        quarterly_periods = []
+        other_periods = []
+
+        for period in xbrl.reporting_periods[:10]:  # Show more periods
+            label = period.get('label', '')
+            if not label:
+                continue
+
+            # Categorize by label content
+            if 'Annual:' in label or 'FY' in label.upper():
+                # Extract just the fiscal year or simplified label
+                if 'Annual:' in label:
+                    # Extract dates and format as FY YYYY
+                    try:
+                        import re
+                        year_match = re.search(r'to .* (\d{4})', label)
+                        if year_match:
+                            year = year_match.group(1)
+                            annual_periods.append(f"FY {year}")
+                        else:
+                            annual_periods.append(label)
+                    except:
+                        annual_periods.append(label)
+                else:
+                    annual_periods.append(label)
+            elif 'Quarterly:' in label or any(q in label for q in ['Q1', 'Q2', 'Q3', 'Q4']):
+                # Remove "Quarterly:" prefix if present for cleaner display
+                clean_label = label.replace('Quarterly:', '').strip()
+                quarterly_periods.append(clean_label)
             else:
-                period_table.add_row("Duration", f"{period['start_date']} to {period['end_date']}")
+                other_periods.append(label)
 
-        components.append(period_table)
+        # Display periods in organized way
+        if annual_periods:
+            components.append(Text(f"  Annual: {', '.join(annual_periods[:3])}", style="default"))
+        if quarterly_periods:
+            components.append(Text(f"  Quarterly: {', '.join(quarterly_periods[:3])}", style="default"))
 
-    return Panel(Group(*components), title="XBRL Document", border_style="green")
+    statements = xbrl.get_all_statements()
+    statement_types = {stmt['type'] for stmt in statements if stmt['type']}
+
+    # Common Actions section - expanded and instructive
+    components.append(Text(""))  # Spacing
+    components.append(Text("Common Actions", style="bold"))
+    components.append(Text("─" * 60, style="dim"))
+
+    # Build actions list dynamically
+    actions = [
+        ("# List all available statements", ""),
+        ("xbrl.statements", ""),
+        ("", ""),
+        ("# Access statements by name or index", ""),
+        ("stmt = xbrl.statements['CoverPage']", ""),
+        ("stmt = xbrl.statements[6]", ""),
+        ("", ""),
+        ("# View core financial statements", ""),
+    ]
+
+    # Add available core statements dynamically
+    core_statement_methods = {
+        'IncomeStatement': 'income_statement()',
+        'BalanceSheet': 'balance_sheet()',
+        'CashFlowStatement': 'cash_flow_statement()',
+        'StatementOfEquity': 'statement_of_equity()',
+        'ComprehensiveIncome': 'comprehensive_income()'
+    }
+
+    for stmt_type, method in core_statement_methods.items():
+        if stmt_type in statement_types:
+            actions.append((f"stmt = xbrl.statements.{method}", ""))
+
+    # Continue with other actions
+    actions.extend([
+        ("", ""),
+        ("# Get current period only", ""),
+        ("current = xbrl.current_period", ""),
+        ("stmt = current.income_statement()", ""),
+        ("", ""),
+        ("# Convert statement to DataFrame", ""),
+        ("df = stmt.to_dataframe()", ""),
+        ("", ""),
+        ("# Query specific facts", ""),
+        ("revenue = xbrl.facts.query().by_concept('Revenue').to_dataframe()", ""),
+    ])
+
+    for code, comment in actions:
+        if not code and not comment:
+            # Blank line for spacing
+            components.append(Text(""))
+        elif code.startswith("#"):
+            # Comment line - bold
+            components.append(Text(code, style="bold"))
+        else:
+            # Code line
+            action_line = Text()
+            action_line.append(f"  {code}", style="cyan")
+            if comment:
+                action_line.append(f"  {comment}", style="dim")
+            components.append(action_line)
+
+    # Add hint about comprehensive docs
+    components.append(Text(""))
+    components.append(Text("💡 Tip: Use xbrl.docs for comprehensive usage guide", style="dim italic"))
+
+    return Panel(Group(*components), title="XBRL Document", border_style="blue")

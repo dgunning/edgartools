@@ -6,6 +6,124 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- **AI-Native Object Documentation** - Comprehensive `.docs` property for interactive learning and AI agent integration
+  - **Feature**: Every major EdgarTools object (Company, Filing, XBRL, Statement) now includes rich, searchable documentation accessible via `.docs` property
+  - **Documentation Scope**: 3,450+ lines of markdown documentation covering complete API reference with methods, parameters, return types, and examples
+  - **Search Capability**: Built-in BM25 search for finding relevant documentation instantly
+  - **AI Integration**: `.text()` methods provide token-efficient context for AI agents using research-backed markdown-kv format
+  - **Progressive Disclosure**: Three detail levels (minimal/standard/detailed) for different use cases
+  - **User Value**: Makes EdgarTools the most learner-friendly and AI-agent-friendly SEC data library - documentation always at your fingertips
+  - **Impact**: Zero breaking changes - leverages existing `__rich__()` display infrastructure
+  - **Example**:
+    ```python
+    from edgar import Company
+
+    company = Company("AAPL")
+
+    # Interactive rich documentation display
+    company.docs
+
+    # Search for specific functionality
+    company.docs.search("get financials")
+
+    # AI-optimized text output for LLM context
+    context = company.text(detail='standard', max_tokens=500)
+    # Returns markdown-kv format optimized for AI comprehension
+    ```
+  - **Technical Details**:
+    - Documentation stored as markdown files in `entity/docs/` and `xbrl/docs/` directories
+    - BM25 search algorithm for semantic relevance ranking
+    - Token counting and limiting for LLM context windows
+    - Supports both visual display (rich) and text export (AI agents)
+
+- **AI Skills Infrastructure** - Extensible skill system for specialized SEC analysis and AI tool integration
+  - **Feature**: New skill packaging system allowing both EdgarTools and external packages to create specialized analysis capabilities for AI agents
+  - **BaseSkill Abstract Class**: Extensible framework for creating portable skill packages with documentation, helper functions, and examples
+  - **SEC Filing Analysis Skill**: Comprehensive 2,500+ line skill covering filing access, financial statement analysis, and multi-company workflows
+  - **Progressive Disclosure Documentation**: Skills follow Anthropic Claude Desktop Skills format with Quick Start → Core → Advanced structure
+  - **Helper Functions**: Pre-built workflow wrappers for common analysis patterns (company research, revenue trends, financial comparison)
+  - **Claude Desktop Export**: Built-in export to Claude Desktop Skills format with YAML frontmatter and two-tier documentation
+  - **Two-Tier Documentation**: Tutorial docs (skill.md, workflows.md, objects.md) + API reference docs (3,450+ lines from centralized docs)
+  - **User Value**: Enables specialized analysis packages to integrate seamlessly with AI agents; provides curated workflows for common SEC analysis tasks
+  - **Ecosystem Impact**: Creates foundation for third-party skill development and specialized analysis tools
+  - **Example**:
+    ```python
+    from edgar.ai import list_skills, get_skill, export_skill
+
+    # List available skills
+    skills = list_skills()
+    # [SECAnalysisSkill(name='SEC Filing Analysis')]
+
+    # Get specific skill
+    skill = get_skill("SEC Filing Analysis")
+
+    # Access helper functions
+    helpers = skill.get_helpers()
+    revenue_trend = helpers['get_revenue_trend']
+    income = revenue_trend("AAPL", periods=3)
+
+    # Export to Claude Desktop format
+    export_skill(skill, format="claude-desktop", output_dir="~/.config/claude/skills")
+    ```
+  - **Technical Details**:
+    - Skill content in `edgar/ai/skills/sec_analysis/` directory
+    - Extensible via `BaseSkill` abstract class for external packages
+    - Export formats: Claude Desktop (with plans for MCP, ChatGPT plugins)
+    - Documentation automatically includes centralized API docs in `api-reference/` subdirectory
+
+### Changed
+
+- **MCP Server Architecture Consolidation** - Streamlined MCP implementation into dedicated subpackage
+  - **Problem**: EdgarTools had 3 duplicate MCP server implementations scattered across `edgar/ai/` directory, causing maintenance burden and confusion
+  - **Solution**: Consolidated all MCP code into unified `edgar/ai/mcp/` subpackage with clear structure
+  - **Removed** (net -1,544 lines):
+    - `edgar/ai/edgartools_mcp/__init__.py` (37 lines)
+    - `edgar/ai/edgartools_mcp/server.py` (395 lines)
+    - `edgar/ai/edgartools_mcp/simple_server.py` (261 lines)
+    - `edgar/ai/edgartools_mcp/tools.py` (593 lines)
+    - `edgar/ai/edgartools_mcp_server.py` (258 lines)
+    - `edgar/ai/minimal_mcp_server.py` (39 lines)
+  - **New Structure**:
+    - `edgar/ai/mcp/server.py` - Production MCP server (single source of truth)
+    - `edgar/ai/mcp/tools/` - Workflow-oriented tool handlers
+    - `edgar/ai/mcp/docs/` - MCP documentation
+  - **Backward Compatibility**: Deprecated stubs in `edgar/ai/__init__.py` maintain old import paths with deprecation warnings
+  - **Impact**: Zero breaking changes - old imports still work but emit deprecation warnings
+  - **User Value**: Cleaner codebase, easier maintenance, single MCP implementation to understand and extend
+  - **Migration**:
+    ```python
+    # Old imports (still work, but deprecated)
+    from edgar.ai.mcp_server import EdgarToolsServer  # DeprecationWarning
+
+    # New imports (recommended)
+    from edgar.ai.mcp import EdgarToolsServer  # Clean import path
+
+    # Or use the recommended entry point
+    python -m edgar.ai  # Starts MCP server
+    ```
+
+### Fixed
+
+- **Issue #459: XBRLS Pre-XBRL Filing Handling** - Fixed crash when stitching filings including pre-2009 filings
+  - **Problem**: When stitching 18+ years of filings (back to 2001), pre-XBRL era filings caused `AttributeError: 'NoneType' object has no attribute 'reporting_periods'`
+  - **Root Cause**: `XBRLS.from_filings()` correctly skips pre-XBRL filings but period extraction didn't handle None values
+  - **Solution**: Added defensive None filtering in `_extract_all_periods()` before accessing `xbrl.reporting_periods`
+  - **Impact**: Enables historical analysis going back to 2001, gracefully skips pre-XBRL era filings
+  - **User Value**: Unblocks users performing long-term historical company analysis
+  - **Example**:
+    ```python
+    from edgar import Company
+    from edgar.xbrl import XBRLS
+
+    company = Company('AAPL')
+    # Now works with 18+ years including pre-2009 filings
+    filings_ten_k = company.get_filings(form="10-K").head(18)
+    xbrls = XBRLS.from_filings(filings_ten_k)
+    income_statements = xbrls.statements.income_statement().to_dataframe()
+    # Pre-XBRL filings are silently skipped, XBRL-era data returned
+    ```
 
 ## [4.21.3] - 2025-10-23
 
