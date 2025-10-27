@@ -69,6 +69,17 @@ def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: 
     for md_file in markdown_files:
         _copy_and_validate_markdown(md_file, skill_output_dir)
 
+    # Copy centralized object documentation (API reference)
+    object_docs = skill.get_object_docs()
+    if object_docs:
+        api_ref_dir = skill_output_dir / "api-reference"
+        api_ref_dir.mkdir(exist_ok=True)
+
+        for doc_path in object_docs:
+            if doc_path.exists():
+                shutil.copy2(doc_path, api_ref_dir / doc_path.name)
+            # Silently skip missing docs (allows for optional docs)
+
     # Create zip archive if requested
     if create_zip:
         zip_path = output_dir / f"{skill_dir_name}.zip"

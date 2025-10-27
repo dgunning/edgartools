@@ -213,3 +213,70 @@ def test_skill_export_method():
 
         assert skill_dir.exists()
         assert (skill_dir / "skill.md").exists()
+
+
+@pytest.mark.fast
+def test_export_skill_includes_object_docs():
+    """Test that exported skill includes centralized object documentation."""
+    from edgar.ai import sec_analysis_skill, export_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir)
+
+        # Export skill
+        skill_dir = export_skill(sec_analysis_skill, format="claude-desktop", output_dir=output_dir)
+
+        # Check that api-reference directory was created
+        api_ref_dir = skill_dir / "api-reference"
+        assert api_ref_dir.exists(), "api-reference directory should exist"
+        assert api_ref_dir.is_dir()
+
+        # Check that expected object docs are present
+        expected_docs = [
+            "Company.md",
+            "EntityFiling.md",
+            "EntityFilings.md",
+            "XBRL.md",
+            "Statement.md",
+        ]
+
+        for doc_name in expected_docs:
+            doc_path = api_ref_dir / doc_name
+            assert doc_path.exists(), f"{doc_name} should exist in api-reference/"
+
+            # Verify file has content
+            content = doc_path.read_text(encoding='utf-8')
+            assert len(content) > 100, f"{doc_name} should have substantial content"
+
+            # Verify it's markdown documentation
+            assert "##" in content or "#" in content, f"{doc_name} should contain markdown headers"
+
+
+@pytest.mark.fast
+def test_export_skill_with_zip_includes_object_docs():
+    """Test that zipped skill export includes object documentation."""
+    from edgar.ai import sec_analysis_skill, export_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir)
+
+        # Export skill as zip
+        zip_path = export_skill(
+            sec_analysis_skill,
+            format="claude-desktop",
+            output_dir=output_dir,
+            create_zip=True
+        )
+
+        # Check that zip file was created
+        assert zip_path.exists()
+        assert zip_path.suffix == ".zip"
+
+        # Verify contents of zip
+        with zipfile.ZipFile(zip_path, 'r') as zipf:
+            namelist = zipf.namelist()
+
+            # Check for api-reference files
+            assert any("api-reference/Company.md" in name for name in namelist)
+            assert any("api-reference/XBRL.md" in name for name in namelist)
+            assert any("api-reference/Statement.md" in name for name in namelist)

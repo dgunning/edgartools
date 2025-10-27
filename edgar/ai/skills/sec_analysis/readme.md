@@ -12,6 +12,36 @@ This package provides AI-friendly documentation and helper functions for working
 - **Object reference** - Token estimates and output format documentation
 - **Workflows** - End-to-end analysis examples
 
+## Documentation Structure
+
+This skill provides **two-tier documentation** optimized for AI agents:
+
+### Tier 1: Skill Documentation (Getting Started)
+Tutorial-level documentation for learning patterns and workflows:
+- **skill.md** - Main tutorial with progressive disclosure (Quick Start → Core → Advanced)
+- **workflows.md** - End-to-end analysis examples showing complete workflows
+- **objects.md** - Object overview with token estimates and output formats
+
+**Use when**: Learning EdgarTools patterns, understanding workflows, estimating token usage
+
+### Tier 2: API Reference (Detailed Usage)
+Comprehensive method-level documentation from EdgarTools centralized docs:
+- **api-reference/Company.md** - Complete Company class reference (~1,070 lines)
+- **api-reference/EntityFiling.md** - Complete Filing class reference (~557 lines)
+- **api-reference/EntityFilings.md** - Complete Filings collection reference (~671 lines)
+- **api-reference/XBRL.md** - Complete XBRL class reference (~587 lines)
+- **api-reference/Statement.md** - Complete Statement class reference (~567 lines)
+
+**Use when**: Looking up specific methods, parameters, return types, or advanced features
+
+### How to Use Both Tiers
+1. Start with **skill.md** to learn the basic patterns (e.g., "How do I get company filings?")
+2. Reference **workflows.md** for complete examples (e.g., multi-company revenue comparison)
+3. Consult **api-reference/** for detailed method signatures and advanced options
+4. Use **objects.md** for token optimization and output format planning
+
+**Example workflow**: Learn filing access patterns from skill.md → Find revenue analysis example in workflows.md → Look up `Company.get_filings()` parameters in api-reference/Company.md → Check token estimates in objects.md
+
 ## Compatibility
 
 **Designed for Anthropic Claude Desktop Skills compatibility**:

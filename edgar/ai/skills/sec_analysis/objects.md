@@ -11,6 +11,17 @@ EdgarTools objects use `repr()` to display information in the terminal. All repr
 
 **Token Estimation**: All estimates use a 4 characters/token heuristic (conservative approximation).
 
+**Documentation Tiers**:
+1. **This Guide** - Quick reference with token estimates and output formats
+2. **API Reference** - Detailed method documentation (see `api-reference/` directory)
+   - [Company API](./api-reference/Company.md) - Complete Company class reference
+   - [Filing API](./api-reference/EntityFiling.md) - Complete Filing reference
+   - [Filings Collection API](./api-reference/EntityFilings.md) - Filings collection reference
+   - [XBRL API](./api-reference/XBRL.md) - Complete XBRL class reference
+   - [Statement API](./api-reference/Statement.md) - Complete Statement class reference
+
+Use this guide to understand object structure and token costs, then reference the API docs for detailed method usage.
+
 ## AI-Optimized Access Methods
 
 EdgarTools provides multiple ways to access information, each optimized for different use cases:

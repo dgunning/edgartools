@@ -113,6 +113,28 @@ class BaseSkill(ABC):
 
     # Non-abstract methods with default implementations
 
+    def get_object_docs(self) -> List[Path]:
+        """
+        Return paths to centralized object documentation files to include in exports.
+
+        Override this method to specify which centralized API reference docs
+        should be included when exporting the skill. These docs are copied to
+        an 'api-reference/' subdirectory in the exported skill package.
+
+        Returns:
+            List of Path objects pointing to markdown documentation files
+
+        Example:
+            >>> def get_object_docs(self) -> List[Path]:
+            ...     from pathlib import Path
+            ...     root = Path(__file__).parent.parent.parent
+            ...     return [
+            ...         root / "entity/docs/Company.md",
+            ...         root / "xbrl/docs/XBRL.md",
+            ...     ]
+        """
+        return []  # Default: no object docs
+
     def get_documents(self) -> List[str]:
         """
         List of markdown documents in this skill.

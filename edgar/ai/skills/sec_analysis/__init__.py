@@ -68,6 +68,27 @@ class SECAnalysisSkill(BaseSkill):
         """Path to skill documentation directory."""
         return Path(__file__).parent
 
+    def get_object_docs(self) -> list[Path]:
+        """
+        Return centralized object documentation to include in skill exports.
+
+        Returns paths to detailed API reference docs that complement the
+        skill's tutorial documentation.
+
+        Returns:
+            List of Path objects to centralized markdown documentation files
+        """
+        # Navigate from edgar/ai/skills/sec_analysis/ to edgar/ root
+        edgar_root = Path(__file__).parent.parent.parent.parent
+
+        return [
+            edgar_root / "entity/docs/Company.md",
+            edgar_root / "entity/docs/EntityFiling.md",
+            edgar_root / "entity/docs/EntityFilings.md",
+            edgar_root / "xbrl/docs/XBRL.md",
+            edgar_root / "xbrl/docs/Statement.md",
+        ]
+
     def get_helpers(self) -> Dict[str, Callable]:
         """
         Return helper functions provided by this skill.
