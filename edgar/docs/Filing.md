@@ -4,6 +4,43 @@
 
 The `Filing` class is the core object in edgartools for working with individual SEC filings. It provides comprehensive access to filing content, metadata, documents, and related functionality, making it easy to analyze and extract data from SEC filings.
 
+## Common Actions
+
+Quick reference for the most frequently used Filing methods:
+
+### Access Filing Content
+```python
+# Get HTML content
+html = filing.html()
+
+# Get plain text
+text = filing.text()
+
+# Get markdown formatted content
+markdown = filing.markdown()
+```
+
+### Get Structured Data
+```python
+# Get form-specific object (10-K, 10-Q, 8-K, etc.)
+report = filing.obj()
+
+# Get XBRL financial data
+xbrl = filing.xbrl()
+```
+
+### View in Browser
+```python
+# Open filing in web browser
+filing.open()
+```
+
+### Get Attachments
+```python
+# Access all filing attachments
+attachments = filing.attachments
+```
+
 ## Constructor
 
 ```python
