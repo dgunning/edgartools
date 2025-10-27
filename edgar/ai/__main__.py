@@ -7,10 +7,10 @@ Enables running the server via: python -m edgar.ai
 
 if __name__ == "__main__":
     import sys
-    from edgar.ai import mcp_server
+    from edgar.ai.mcp import main, test_server
 
     # Check for --test flag before starting server
     if "--test" in sys.argv or "-t" in sys.argv:
-        sys.exit(0 if mcp_server.test_server() else 1)
+        sys.exit(0 if test_server() else 1)
     else:
-        mcp_server.main()
+        main()
