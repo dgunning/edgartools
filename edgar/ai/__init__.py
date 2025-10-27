@@ -73,13 +73,23 @@ from edgar.ai.skills.sec_analysis import sec_analysis_skill
 from edgar.ai.exporters import export_skill
 
 # Optional MCP functionality
+# Note: The class-based MCPServer and EdgarToolsServer are deprecated.
+# Use the function-based API instead: from edgar.ai.mcp import main, test_server
 if MCP_AVAILABLE:
-    try:
-        from edgar.ai.edgartools_mcp import EdgarToolsServer, MCPServer
-    except ImportError:
-        # Fallback - MCP might not be fully working
-        MCPServer = None
-        EdgarToolsServer = None
+    # Provide stub classes for backward compatibility
+    class MCPServer:
+        def __init__(self, *args, **kwargs):
+            raise DeprecationWarning(
+                "MCPServer class is deprecated. "
+                "Use function-based API: from edgar.ai.mcp import main, test_server"
+            )
+
+    class EdgarToolsServer:
+        def __init__(self, *args, **kwargs):
+            raise DeprecationWarning(
+                "EdgarToolsServer class is deprecated. "
+                "Use function-based API: from edgar.ai.mcp import main, test_server"
+            )
 else:
     def MCPServer(*args, **kwargs):
         raise ImportError(
