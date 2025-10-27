@@ -22,6 +22,7 @@ User Impact:
 - Allows stitching across XBRL and pre-XBRL eras
 """
 import pytest
+from datetime import date
 from edgar import Company
 from edgar.xbrl import XBRLS
 
@@ -75,10 +76,11 @@ def test_issue_459_workaround_filtering_to_xbrl_era():
     filings_ten_k = company.get_filings(form="10-K")
 
     # Workaround: Filter to XBRL-era only (2009+)
-    filings_xbrl = [f for f in filings_ten_k if f.filing_date >= "2009-01-01"]
+    xbrl_era_start = date(2009, 1, 1)
+    filings_xbrl = [f for f in filings_ten_k if f.filing_date >= xbrl_era_start]
 
-    # Should work without issues
-    xbrls = XBRLS.from_filings(filings_xbrl)
+    # Should work without issues (filter_amendments=False since we already filtered manually)
+    xbrls = XBRLS.from_filings(filings_xbrl, filter_amendments=False)
     stitched_statements = xbrls.statements
     income_statements = stitched_statements.income_statement()
 
