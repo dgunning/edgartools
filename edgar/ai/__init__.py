@@ -2,6 +2,8 @@
 EdgarTools AI: AI and LLM integration for SEC financial data analysis.
 
 This package provides AI capabilities for EdgarTools including:
+- AI Skills: Portable documentation packages for Claude Desktop and other AI tools
+- AI-optimized text methods (.text()) with research-backed formats (Markdown-KV, TSV)
 - LLM context generation with token optimization
 - Model Context Protocol (MCP) server for Claude Desktop integration
 - Semantic enrichment of financial data
@@ -14,12 +16,30 @@ Dependencies included:
     - mcp: Model Context Protocol server support
     - tiktoken: Token counting and optimization
 
-Example:
+Skills API:
+    >>> from edgar.ai import sec_analysis_skill, export_skill
+    >>>
+    >>> # Export skill for Claude Desktop
+    >>> export_skill(sec_analysis_skill, format="claude-desktop")
+    PosixPath('sec-filing-analysis')
+
+    >>> # List available skills
+    >>> from edgar.ai import list_skills
+    >>> skills = list_skills()
+
+AI-Optimized Objects:
     >>> from edgar import Company
-    >>> from edgar.ai import enhance_financial_fact_llm_context
-    >>> 
     >>> company = Company("AAPL")
-    >>> # Enhanced context generation with token optimization
+    >>>
+    >>> # Get AI-optimized text representation (Markdown-KV format)
+    >>> text = company.text(max_tokens=2000)
+    >>> print(text)
+    **Company:** Apple Inc.
+    **CIK:** 0000320193
+    **Ticker:** AAPL
+
+Context Generation:
+    >>> from edgar.ai import enhance_financial_fact_llm_context
     >>> context = enhance_financial_fact_llm_context(fact, detail_level='detailed')
 """
 
@@ -46,6 +66,12 @@ AI_AVAILABLE = MCP_AVAILABLE or TIKTOKEN_AVAILABLE
 # Core functionality (always available)
 from edgar.ai.core import AIEnabled, SemanticEnricher, TokenOptimizer, check_ai_capabilities, enhance_financial_fact_llm_context
 
+# Skills infrastructure (always available)
+from edgar.ai.skills.base import BaseSkill
+from edgar.ai.skills import list_skills, get_skill
+from edgar.ai.skills.sec_analysis import sec_analysis_skill
+from edgar.ai.exporters import export_skill
+
 # Optional MCP functionality
 if MCP_AVAILABLE:
     try:
@@ -66,10 +92,17 @@ else:
 __all__ = [
     # Core
     "AIEnabled",
-    "TokenOptimizer", 
+    "TokenOptimizer",
     "SemanticEnricher",
     "enhance_financial_fact_llm_context",
     "check_ai_capabilities",
+
+    # Skills
+    "BaseSkill",
+    "list_skills",
+    "get_skill",
+    "sec_analysis_skill",
+    "export_skill",
 
     # MCP
     "MCPServer",
