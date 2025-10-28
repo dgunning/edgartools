@@ -24,7 +24,7 @@ from edgar.core import get_identity, strtobool
 
 from .core import edgar_data_dir
 
-MAX_SUBMISSIONS_AGE_SECONDS = 10 * 60  # Check for submissions every 10 minutes
+MAX_SUBMISSIONS_AGE_SECONDS = 30  # Check for submissions every 30 seconds (reduced from 10 min for Issue #471)
 MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes
 
 # rules are regular expressions matching the request url path: 
