@@ -20,3 +20,5 @@ reinstall.sh
 ratelimiter.sqlite*
 *_generated.html
 /coverage.xml
+research_scripts
+.pyscn/
