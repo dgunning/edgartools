@@ -99,7 +99,11 @@ class ThirteenF:
         else:
             # Use the exact filing that was passed in
             self.filing = self._actual_filing
-        self.primary_form_information = ThirteenF.parse_primary_document_xml(self.filing.xml())
+
+        # Parse primary document if XML is available (2013+ filings)
+        # For older TXT-only filings (2012 and earlier), primary_form_information will be None
+        primary_xml = self.filing.xml()
+        self.primary_form_information = ThirteenF.parse_primary_document_xml(primary_xml) if primary_xml else None
 
     def has_infotable(self):
         return self.filing.form in ['13F-HR', "13F-HR/A"]
@@ -111,19 +115,43 @@ class ThirteenF:
     @property
     @lru_cache(maxsize=1)
     def infotable_xml(self):
+        """Returns XML content if available (2013+ filings)"""
         if self.has_infotable():
-            infotable_content = self._get_infotable_from_attachment()
-            if "informationTable" in infotable_content:
-                return infotable_content
+            result = self._get_infotable_from_attachment()
+            if result and result[0] and result[1] == 'xml' and "informationTable" in result[0]:
+                return result[0]
+        return None
 
     def _get_infotable_from_attachment(self):
         """
-        Use the filing homepage to get the infotable file
+        Use the filing homepage to get the infotable file.
+        Returns a tuple of (content, format) where format is 'xml' or 'txt'.
         """
         if self.has_infotable():
+            # Try XML format first (2013+)
             query = "document_type=='INFORMATION TABLE' and document.lower().endswith('.xml')"
             attachments = self.filing.attachments.query(query)
-            return attachments.get_by_index(0).download()
+            if len(attachments) > 0:
+                return (attachments.get_by_index(0).download(), 'xml')
+
+            # Fall back to TXT format (2012 and earlier)
+            # The primary document itself contains the table in TXT format
+            query = "description=='FORM 13F'"
+            attachments = self.filing.attachments.query(query)
+            if len(attachments) > 0:
+                return (attachments.get_by_index(0).download(), 'txt')
+
+            return (None, None)
+
+    @property
+    @lru_cache(maxsize=1)
+    def infotable_txt(self):
+        """Returns TXT content if available (pre-2013 filings)"""
+        if self.has_infotable():
+            result = self._get_infotable_from_attachment()
+            if result and result[0] and result[1] == 'txt':
+                return result[0]
+        return None
 
     @property
     @lru_cache(maxsize=1)
@@ -136,8 +164,18 @@ class ThirteenF:
     @property
     @lru_cache(maxsize=1)
     def infotable(self):
+        """
+        Returns the information table as a pandas DataFrame.
+        Supports both XML format (2013+) and TXT format (2012 and earlier).
+        """
         if self.has_infotable():
-            return ThirteenF.parse_infotable_xml(self.infotable_xml)
+            # Try XML format first
+            if self.infotable_xml:
+                return ThirteenF.parse_infotable_xml(self.infotable_xml)
+            # Fall back to TXT format
+            elif self.infotable_txt:
+                return ThirteenF.parse_infotable_txt(self.infotable_txt)
+        return None
 
     @property
     def accession_number(self):
@@ -145,15 +183,35 @@ class ThirteenF:
 
     @property
     def total_value(self):
-        return self.primary_form_information.summary_page.total_value
+        """Total value of holdings in thousands of dollars"""
+        if self.primary_form_information:
+            return self.primary_form_information.summary_page.total_value
+        # For TXT-only filings, calculate from infotable
+        infotable = self.infotable
+        if infotable is not None and len(infotable) > 0:
+            return Decimal(int(infotable['Value'].sum()))
+        return None
 
     @property
     def total_holdings(self):
-        return self.primary_form_information.summary_page.total_holdings
+        """Total number of holdings"""
+        if self.primary_form_information:
+            return self.primary_form_information.summary_page.total_holdings
+        # For TXT-only filings, count from infotable
+        infotable = self.infotable
+        if infotable is not None:
+            return len(infotable)
+        return None
 
     @property
     def report_period(self):
-        return format_date(self.primary_form_information.report_period)
+        """Report period end date"""
+        if self.primary_form_information:
+            return format_date(self.primary_form_information.report_period)
+        # For TXT-only filings, use CONFORMED_PERIOD_OF_REPORT from filing header
+        if hasattr(self.filing, 'period_of_report') and self.filing.period_of_report:
+            return format_date(self.filing.period_of_report)
+        return None
 
     @property
     def filing_date(self):
@@ -162,13 +220,17 @@ class ThirteenF:
     @property
     def investment_manager(self):
         # This is really the firm e.g. Spark Growth Management Partners II, LLC
-        return self.primary_form_information.cover_page.filing_manager
+        if self.primary_form_information:
+            return self.primary_form_information.cover_page.filing_manager
+        return None
 
     @property
     def signer(self):
         # This is the person who signed the filing. Could be the Reporting Manager but could be someone else
         # like the CFO
-        return self.primary_form_information.signature.name
+        if self.primary_form_information:
+            return self.primary_form_information.signature.name
+        return None
 
     # Enhanced manager name properties for better clarity
     @property
@@ -180,13 +242,16 @@ class ThirteenF:
         that is legally responsible for managing the assets, not an individual person's name.
 
         Returns:
-            str: The legal name of the management company
+            str: The legal name of the management company, or company name from filing if not available
 
         Example:
             >>> thirteen_f.management_company_name
             'Berkshire Hathaway Inc'
         """
-        return self.investment_manager.name
+        if self.investment_manager:
+            return self.investment_manager.name
+        # For TXT-only filings, use company name from filing
+        return self.filing.company
 
     @property 
     def filing_signer_name(self) -> str:
@@ -212,17 +277,19 @@ class ThirteenF:
         The business title of the individual who signed the 13F filing.
 
         Common titles include: CFO, CCO, Senior Vice President, Chief Compliance Officer,
-        Secretary, Treasurer, etc. This helps distinguish administrative signers from 
+        Secretary, Treasurer, etc. This helps distinguish administrative signers from
         portfolio managers.
 
         Returns:
-            str: The business title of the filing signer
+            str: The business title of the filing signer, or None if not available
 
         Example:
             >>> thirteen_f.filing_signer_title
             'Senior Vice President'
         """
-        return self.primary_form_information.signature.title
+        if self.primary_form_information:
+            return self.primary_form_information.signature.title
+        return None
 
     @property
     def manager_name(self) -> str:
@@ -657,6 +724,203 @@ class ThirteenF:
         table = pd.DataFrame(rows)
 
         # Add the ticker symbol
+        cusip_mapping = cusip_ticker_mapping(allow_duplicate_cusips=False)
+        table['Ticker'] = table.Cusip.map(cusip_mapping.Ticker)
+
+        return table
+
+    @staticmethod
+    def parse_infotable_txt(infotable_txt: str) -> pd.DataFrame:
+        """
+        Parse the TXT format infotable (SGML table format used in 2012 and earlier).
+
+        The TXT format uses SGML tags:
+        - <TABLE> ... </TABLE> wraps each table
+        - <CAPTION> contains column headers
+        - First line has <S> and <C> tags marking column positions
+        - Data rows have company names (may span 2 lines) followed by data fields
+
+        Holdings data may be split across multiple tables. This parser combines all
+        holdings tables after the "other managers" table.
+
+        Returns a DataFrame with the same structure as parse_infotable_xml().
+        """
+        import re
+
+        # Find the Form 13F Information Table section
+        table_start = infotable_txt.find("Form 13F Information Table")
+        if table_start == -1:
+            return pd.DataFrame()
+
+        # Extract all table content between <TABLE> and </TABLE> tags
+        table_pattern = r'<TABLE>(.*?)</TABLE>'
+        tables = re.findall(table_pattern, infotable_txt[table_start:], re.DOTALL)
+
+        if len(tables) < 2:  # Need at least the managers table and one holdings table
+            return pd.DataFrame()
+
+        # Skip the first table (list of other managers) and process the rest
+        # Holdings data may be split across multiple tables
+        holdings_tables = tables[1:]  # Skip first table
+
+        parsed_rows = []
+
+        for holdings_table in holdings_tables:
+            # Skip if this is the totals table (very short, < 200 chars)
+            if len(holdings_table.strip()) < 200:
+                continue
+
+            # Reset pending issuer parts for each table
+            pending_issuer_parts = []
+
+            lines = holdings_table.split('\n')
+
+            for line in lines:
+                orig_line = line
+                line = line.strip()
+
+                # Skip empty lines, CAPTION lines, header rows
+                if not line or '<CAPTION>' in line or '<S>' in line or '<C>' in line:
+                    continue
+
+                if line.startswith(('Total', 'Title', 'Name of Issuer', 'of', 'Market Value')):
+                    continue
+
+                # Try to parse as a data row
+                # CUSIP is a reliable anchor - it's always 9 digits
+                cusip_match = re.search(r'\b(\d{9})\b', line)
+
+                if cusip_match:
+                    # This line contains a CUSIP, so it has the main data
+                    cusip = cusip_match.group(1)
+                    cusip_pos = cusip_match.start()
+
+                    # Everything before CUSIP is issuer name + class
+                    before_cusip = line[:cusip_pos].strip()
+                    # Everything after CUSIP is the numeric data
+                    after_cusip = line[cusip_pos + 9:].strip()
+
+                    # Split before_cusip into issuer parts
+                    # Combine with any pending issuer parts from previous line
+                    before_parts = before_cusip.split()
+
+                    # If we have pending parts, this completes a multi-line company name
+                    if pending_issuer_parts:
+                        before_parts = pending_issuer_parts + before_parts
+                        pending_issuer_parts = []
+
+                    if len(before_parts) < 2:
+                        # Not enough data, skip
+                        continue
+
+                    # Extract class and issuer name
+                    # Common patterns:
+                    # - "COMPANY NAME COM" → class="COM", issuer="COMPANY NAME"
+                    # - "COMPANY NAME SPONSORED ADR" → class="SPONSORED ADR", issuer="COMPANY NAME"
+                    # - "COMPANY NAME CL A" → class="CL A", issuer="COMPANY NAME"
+
+                    if len(before_parts) >= 3 and before_parts[-2] == 'SPONSORED' and before_parts[-1] == 'ADR':
+                        title_class = 'SPONSORED ADR'
+                        issuer_parts = before_parts[:-2]
+                    elif len(before_parts) >= 3 and before_parts[-2] == 'CL':
+                        title_class = 'CL ' + before_parts[-1]
+                        issuer_parts = before_parts[:-2]
+                    elif len(before_parts) >= 5 and ' '.join(before_parts[-4:]).startswith('LIB CAP COM'):
+                        # "LIBERTY MEDIA CORPORATION LIB CAP COM A"
+                        title_class = ' '.join(before_parts[-4:])
+                        issuer_parts = before_parts[:-4]
+                    elif len(before_parts) >= 2:
+                        # Default: last word/token is the class
+                        title_class = before_parts[-1]
+                        issuer_parts = before_parts[:-1]
+                    else:
+                        # Only one part - skip this row
+                        continue
+
+                    issuer_name = ' '.join(issuer_parts)
+
+                    # Skip if issuer name is empty
+                    if not issuer_name:
+                        continue
+
+                    # Parse the numeric data after CUSIP
+                    # Expected format: VALUE SHARES DISCRETION MANAGERS SOLE SHARED NONE
+                    # Example: "110,999     1,952,142 Shared-Defined 4           1,952,142       -   -"
+                    data_parts = after_cusip.split()
+
+                    if len(data_parts) < 7:
+                        continue
+
+                    try:
+                        # Parse voting columns (always last 3 fields)
+                        none_voting_str = data_parts[-1].replace(',', '')
+                        shared_voting_str = data_parts[-2].replace(',', '')
+                        sole_voting_str = data_parts[-3].replace(',', '')
+
+                        non_voting = int(none_voting_str) if none_voting_str and none_voting_str != '-' else 0
+                        shared_voting = int(shared_voting_str) if shared_voting_str and shared_voting_str != '-' else 0
+                        sole_voting = int(sole_voting_str) if sole_voting_str and sole_voting_str != '-' else 0
+
+                        # Find investment discretion by looking for non-numeric field
+                        # It's typically "Shared-Defined", "Sole", "Defined", etc.
+                        # Work backwards from position -4 (after voting columns)
+                        discretion_idx = -4
+                        for i in range(len(data_parts) - 4, -1, -1):
+                            part = data_parts[i]
+                            # Investment discretion contains letters (not just digits, commas, dashes)
+                            if part and part not in ['-'] and not part.replace(',', '').isdigit():
+                                discretion_idx = i
+                                break
+
+                        investment_discretion = data_parts[discretion_idx] if discretion_idx >= 0 else ''
+
+                        # Value and Shares are the two fields before discretion
+                        shares_idx = discretion_idx - 1
+                        value_idx = discretion_idx - 2
+
+                        if value_idx < 0 or shares_idx < 0:
+                            continue  # Not enough fields
+
+                        shares_str = data_parts[shares_idx].replace(',', '')
+                        value_str = data_parts[value_idx].replace(',', '')
+
+                        shares = int(shares_str) if shares_str and shares_str != '-' else 0
+                        value = int(value_str) if value_str and value_str != '-' else 0
+
+                        # Create row dict
+                        row_dict = {
+                            'Issuer': issuer_name,
+                            'Class': title_class,
+                            'Cusip': cusip,
+                            'Value': value,
+                            'SharesPrnAmount': shares,
+                            'Type': 'Shares',
+                            'PutCall': '',
+                            'InvestmentDiscretion': investment_discretion,
+                            'SoleVoting': sole_voting,
+                            'SharedVoting': shared_voting,
+                            'NonVoting': non_voting
+                        }
+
+                        parsed_rows.append(row_dict)
+
+                    except (ValueError, IndexError):
+                        # Skip rows that don't parse correctly
+                        continue
+
+                else:
+                    # No CUSIP on this line - might be first part of a multi-line company name
+                    # Store it for the next line
+                    if line and not line.startswith(('Total', 'Title')):
+                        pending_issuer_parts = line.split()
+
+        # Create DataFrame
+        if not parsed_rows:
+            return pd.DataFrame()
+
+        table = pd.DataFrame(parsed_rows)
+
+        # Add ticker symbols using CUSIP mapping
         cusip_mapping = cusip_ticker_mapping(allow_duplicate_cusips=False)
         table['Ticker'] = table.Cusip.map(cusip_mapping.Ticker)
 

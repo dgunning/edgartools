@@ -149,8 +149,8 @@ def obj(sec_filing: Filing) -> Optional[object]:
     elif matches_form(sec_filing, "20-F"):
         return TwentyF(sec_filing)
     elif matches_form(sec_filing, THIRTEENF_FORMS):
-        if sec_filing.xml():
-            return ThirteenF(sec_filing)
+        # ThirteenF can work with either XML (2013+) or TXT (2012 and earlier) format
+        return ThirteenF(sec_filing)
     elif matches_form(sec_filing, "144"):
         return Form144.from_filing(sec_filing)
     elif matches_form(sec_filing, "MA-I"):
