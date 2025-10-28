@@ -218,6 +218,7 @@ class SubmissionFormatParser:
             'ISSUER',
             'DEPOSITOR',
             'SECURITIZER',
+            'UNDERWRITER',
             'ISSUING_ENTITY',
             'FORMER-COMPANY',
             'SUBJECT-COMPANY',
@@ -244,6 +245,7 @@ class SubmissionFormatParser:
         self.REPEATABLE_TAGS = {
             'FILER',
             'REPORTING-OWNER',
+            'UNDERWRITER',
             'SERIES',
             'CLASS-CONTRACT',
             'FORMER-COMPANY',
