@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.23.0] - 2025-10-28
+### Fixed
+
+- **Fresh Filing Cache Optimization** (#471)
+  - Reduced submissions cache TTL from 10 minutes to 30 seconds for faster access to fresh filings
+  - Removed session-level @lru_cache decorators that prevented cache expiration
+  - **Impact**: Users can now see fresh 8-K earnings filings within 30 seconds instead of waiting up to 10 minutes
+  - **Use Case**: Critical for earnings season when fresh filings need immediate access
+  - **Performance**: HttpxThrottleCache still provides 30-second caching to prevent excessive API calls
+  - **Files**: `edgar/httpclient.py`, `edgar/entity/submissions.py`
+  - **Workaround Removed**: Previously required kernel restart or using `get_current_filings()` API
+
+- **SGML Parser UNDERWRITER Tag Support** (#472)
+  - Added 'UNDERWRITER' to SECTION_TAGS in SubmissionFormatParser
+  - Added 'UNDERWRITER' to REPEATABLE_TAGS for multiple underwriter handling
+  - Enables parsing of registration statements (S-1, S-3, ABS-15G) with underwriter information
+  - Fixes parsing failures when encountering UNDERWRITER sections in filing headers
+  - **Impact**: Enables IPO/offering analysis and underwriter identification workflows
+  - **Files**: `edgar/sgml/sgml_parser.py`
+  - **Tests**: 3 comprehensive regression tests added
+
+- **13F TXT Format Parser** (#469)
+  - Added TXT format parser for historical 13F filings (2012-2013 era)
+  - Enables parsing of pre-XML 13F filings that only contain "Form 13F Information Table" in text format
+  - Fixes filing.obj() returning None for older Berkshire Hathaway and other institutional holdings
+  - **Impact**: Enables historical institutional holdings analysis going back to 2012
+  - **Files**: `edgar/thirteenf.py`
+  - **Tests**: Comprehensive regression tests for TXT format parsing
+
 ## [4.22.0] - 2025-10-27
 ### Added
 
