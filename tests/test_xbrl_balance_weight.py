@@ -79,7 +79,7 @@ class TestDataFrameMetadataColumns:
     def apple_xbrl(self):
         """Get AAPL 10-K XBRL for testing."""
         company = Company('AAPL')
-        filing = company.get_filings(form='10-K').latest(1)
+        filing = company.get_filings(form='10-K', year=2024).latest(1)
         return filing.xbrl()
 
     def test_balance_column_present(self, apple_xbrl):
