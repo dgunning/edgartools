@@ -2,7 +2,7 @@ import locale
 import os
 from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
-from typing import AsyncGenerator, Generator, Optional
+from typing import AsyncGenerator, Generator, Literal, Optional
 
 import httpx
 
@@ -66,6 +66,7 @@ def get_edgar_verify_ssl():
 
 
 def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> HttpxThrottleCache:
+    cache_mode: Literal[False, "Disabled", "Hishel-S3", "Hishel-File", "FileCache"]
     if cache_enabled:
         cache_dir = get_cache_directory()
         cache_mode = "Hishel-File"
@@ -77,7 +78,7 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
         user_agent_factory=get_identity, cache_dir=cache_dir, cache_mode=cache_mode, request_per_sec_limit=request_per_sec_limit,
         cache_rules = CACHE_RULES
     )
-    http_mgr.httpx_params["verify"] = get_edgar_verify_ssl
+    http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
     return http_mgr
 
 

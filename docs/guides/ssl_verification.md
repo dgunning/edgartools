@@ -6,14 +6,14 @@ This document outlines the design and recommendations for configuring SSL verifi
 ## Implementation
 
 ### 1. Environment Variable Control
-The primary method is using the `EDGARTOOLS_VERIFY_SSL` environment variable:
+The primary method is using the `EDGAR_VERIFY_SSL` environment variable:
 
 ```python
-verify = os.environ.get("EDGARTOOLS_VERIFY_SSL", "true").lower() != "false"
+verify = os.environ.get("EDGAR_VERIFY_SSL", "true").lower() != "false"
 ```
 
 - Default: SSL verification enabled (safer default)
-- To disable: Set `EDGARTOOLS_VERIFY_SSL=false`
+- To disable: Set `EDGAR_VERIFY_SSL=false`
 
 ### 2. Internal Configuration
 The library's HTTP client layer can be configured to disable SSL verification when needed. This is handled internally by the library and doesn't require direct interaction with the HTTP clients.
@@ -23,11 +23,11 @@ The library's HTTP client layer can be configured to disable SSL verification wh
 ### Using Environment Variable
 ```bash
 # Disable SSL verification
-export EDGARTOOLS_VERIFY_SSL=false
+export EDGAR_VERIFY_SSL=false
 python your_script.py
 
 # Enable SSL verification (default)
-export EDGARTOOLS_VERIFY_SSL=true
+export EDGAR_VERIFY_SSL=true
 python your_script.py
 ```
 
