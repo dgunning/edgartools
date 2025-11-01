@@ -177,6 +177,107 @@ print(f"Fiscal Year: {xbrl.fiscal_year}")
 print(f"Period: {xbrl.fiscal_period}")
 ```
 
+### Searching Filing Content
+
+**⚠️ IMPORTANT**: Filing has TWO different search methods. Use the right one!
+
+#### Content Search: `filing.search(query)` ⭐ Find Text in Filings
+
+**Search the actual filing document** - find keywords, topics, or sections within SEC filings.
+
+```python
+from edgar import Company
+
+company = Company("AAPL")
+filing = company.get_filings(form="DEF 14A")[0]  # Proxy statement
+
+# Search for content IN the filing
+results = filing.search("executive compensation")
+
+# Process results
+print(f"Found {len(results)} matches")
+for match in results[:5]:  # Top 5 matches
+    print(f"Relevance score: {match.score:.2f}")
+    print(f"Excerpt: {str(match)[:200]}...")
+    print()
+```
+
+**Features**:
+- BM25 relevance ranking (best matches first)
+- Searches parsed HTML sections
+- Returns `DocSection` objects with scores
+- Index cached for performance (~1-2 seconds per filing)
+
+**Use cases**:
+- Find mentions of specific topics ("revenue recognition", "risk factors")
+- Locate sections in large filings
+- Screen filings for relevant content
+- Extract context around keywords
+
+**Example: Find proxy statements mentioning compensation changes**
+
+```python
+from edgar import get_filings
+from datetime import datetime, timedelta
+
+# Get recent proxy statements
+start_date = datetime.now() - timedelta(days=30)
+filings = get_filings(form="DEF 14A")
+recent = filings.filter(filing_date=f"{start_date.strftime('%Y-%m-%d')}:")
+
+# Search each filing
+companies_with_matches = []
+for filing in recent:
+    matches = filing.search("executive compensation changes")
+
+    if matches and len(matches) > 0:
+        companies_with_matches.append({
+            'company': filing.company,
+            'date': filing.filing_date,
+            'matches': len(matches),
+            'top_score': matches[0].score,
+            'excerpt': str(matches[0])[:200]
+        })
+
+print(f"Found {len(companies_with_matches)} companies")
+```
+
+#### API Documentation Search: `filing.docs.search(query)` 📚 Find Methods
+
+**Search the Filing API documentation** - discover how to use the Filing class.
+
+```python
+# Find how to use Filing API
+help_text = filing.docs.search("how to get XBRL")
+print(help_text)  # Shows documentation about filing.xbrl() method
+
+help_text = filing.docs.search("convert to markdown")
+print(help_text)  # Shows documentation about filing.markdown() method
+```
+
+**Use cases**:
+- Learning the Filing API
+- Discovering available methods
+- Finding parameter details
+
+#### Quick Reference
+
+| What are you searching? | Method | Returns |
+|-------------------------|--------|---------|
+| Text **in** the filing (content) | `filing.search("keyword")` | List of DocSection matches with scores |
+| How to **use** Filing API (methods) | `filing.docs.search("how to")` | API documentation snippets |
+
+**⚠️ Common Mistake**:
+```python
+# WRONG - Searches API docs, not filing content!
+matches = filing.docs.search("executive compensation")  # ❌
+# Returns empty - API docs don't mention "executive compensation"
+
+# CORRECT - Searches the actual filing document
+matches = filing.search("executive compensation")  # ✅
+# Returns 50+ matches from proxy statement
+```
+
 ## Common Questions
 
 Natural language questions mapped to code patterns.
@@ -358,6 +459,161 @@ tech_filings = filings.filter(ticker=tech_tickers)
 print(f"Found {len(tech_filings)} tech 10-K filings in January 2023")
 print(tech_filings)
 ```
+
+### "How many crowdfunding filings were released in the past week?"
+
+**Form Type**: Form C (Regulation Crowdfunding)
+
+```python
+from edgar import get_filings
+from datetime import datetime, timedelta
+
+# Calculate date range for past week
+end_date = datetime.now().date()
+start_date = end_date - timedelta(days=7)
+
+print(f"Searching for crowdfunding filings from {start_date} to {end_date}")
+
+# Get Form C filings and filter by date using .filter() method
+# (More efficient than Python list comprehension)
+filings = get_filings(form="C")
+recent_filings = filings.filter(filing_date=f"{start_date}:")
+
+# Count
+count = len(recent_filings)
+print(f"Found {count} crowdfunding filings in the past week")
+
+# Show sample
+if recent_filings:
+    print("\nSample filings:")
+    print(recent_filings.head(5))
+```
+
+**Why this approach?**
+- Form C = Crowdfunding offerings (see [form-types-reference.md](form-types-reference.md))
+- Can't use `get_today_filings()` (only ~24h)
+- Use `.filter(filing_date="start:")` for open-ended date range (more efficient than Python loops)
+- Works even when date range spans quarters
+
+**Alternative (if you know the quarter)**:
+```python
+# If past week is entirely within Q4 2024, filter in one call
+filings = get_filings(
+    2024, 4,
+    form="C",
+    filing_date=f"{start_date}:"  # Open-ended range
+)
+count = len(filings)
+```
+
+### "When to use .filter() vs Python filtering"
+
+**IMPORTANT**: Always prefer `.filter()` method over Python list comprehensions when possible!
+
+#### ✅ Use `.filter()` method (EFFICIENT)
+
+The `.filter()` method is optimized and should be your first choice:
+
+```python
+from edgar import get_filings
+
+filings = get_filings(2024, 1, form="10-K")
+
+# Date filtering - use .filter()!
+recent = filings.filter(filing_date="2024-02-01:")
+
+# Ticker filtering - use .filter()!
+apple = filings.filter(ticker="AAPL")
+
+# Multiple tickers - use .filter()!
+tech = filings.filter(ticker=["AAPL", "MSFT", "GOOGL"])
+
+# Exchange filtering - use .filter()!
+nasdaq = filings.filter(exchange="NASDAQ")
+
+# CIK filtering - use .filter()!
+by_cik = filings.filter(cik="0000320193")
+
+# Combine multiple filters
+filtered = filings.filter(
+    ticker=["AAPL", "MSFT"],
+    filing_date="2024-01-15:",
+    amendments=False
+)
+```
+
+**Available `.filter()` parameters:**
+- `form`: Form type(s)
+- `filing_date` / `date`: Date range
+- `ticker`: Ticker symbol(s)
+- `cik`: CIK number(s)
+- `exchange`: Exchange name(s)
+- `accession_number`: Accession number(s)
+- `amendments`: Include/exclude amendments
+
+See [filtering-filings.md](../../guides/filtering-filings.md) for complete reference.
+
+#### ⚠️ Use Python filtering ONLY when necessary (INEFFICIENT)
+
+Only use Python list comprehensions when `.filter()` doesn't support your criteria:
+
+```python
+from edgar import get_filings
+
+filings = get_filings(2024, 1, form="10-K")
+
+# Complex string matching (not supported by .filter())
+tech_companies = [
+    f for f in filings
+    if "tech" in f.company.lower() or "software" in f.company.lower()
+]
+
+# Custom business logic (not supported by .filter())
+short_names = [
+    f for f in filings
+    if len(f.company) < 30 and f.ticker  # Has ticker and short name
+]
+
+# Complex date logic (not supported by .filter())
+weekdays_only = [
+    f for f in filings
+    if f.filing_date.weekday() < 5  # Monday-Friday only
+]
+```
+
+**Use Python filtering for**:
+- Company name pattern matching
+- Complex multi-field logic
+- Custom calculations
+- Conditions not supported by `.filter()`
+
+**Pattern**: `[f for f in filings if <condition>]`
+
+### "Don't know the form type? Look it up!"
+
+**Problem**: You need to map natural language to form codes
+
+**Solution**: Use the form types reference or `describe_form()`
+
+```python
+from edgar.reference import describe_form
+
+# Look up form descriptions
+print(describe_form("C"))        # Form C: Offering statement
+print(describe_form("10-K"))     # Form 10-K: Annual report for public companies
+print(describe_form("S-1"))      # Form S-1: Securities registration
+print(describe_form("4"))        # Form 4: Statement of changes in beneficial ownership
+```
+
+**Complete reference**: See [form-types-reference.md](form-types-reference.md)
+
+**Common mappings**:
+- "crowdfunding" → **Form C**
+- "IPO" → **S-1** (or F-1 for foreign)
+- "insider trading" → **Form 4**
+- "proxy statement" → **DEF 14A**
+- "institutional holdings" → **13F-HR**
+- "private placement" → **Form D**
 
 ## Advanced Patterns
 

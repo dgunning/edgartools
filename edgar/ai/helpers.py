@@ -13,6 +13,7 @@ __all__ = [
     'get_revenue_trend',
     'get_filing_statement',
     'compare_companies_revenue',
+    'filter_by_industry',
 ]
 
 
@@ -274,3 +275,125 @@ def compare_companies_revenue(
         company = Company(ticker)
         results[ticker] = company.income_statement(periods=periods)
     return results
+
+
+def filter_by_industry(
+    filings: 'Filings',
+    sic_range: Union[tuple, List[int]],
+    progress_callback: Optional[callable] = None
+) -> 'Filings':
+    """
+    Filter filings by SIC code industry classification.
+
+    This helper bridges a gap in the API: Filing objects don't have SIC attributes,
+    and .filter() doesn't support SIC parameter. This function optimizes the process
+    by:
+    1. Getting unique CIKs from filings using PyArrow (instant)
+    2. Looking up Company SIC for each unique CIK (one SEC API call per company)
+    3. Filtering filings using .filter(cik=...) with matching CIKs (instant)
+
+    This is MUCH faster than iterating through all filings, as it makes only
+    N API calls where N = number of unique companies (vs. total number of filings).
+
+    Args:
+        filings: Filings collection to filter (from get_filings() or similar)
+        sic_range: SIC code range as tuple (min, max) or list [min, max]
+            - Technology: (7300, 7400) or (7370, 7380) for software
+            - Healthcare: (8000, 8100)
+            - Finance: (6000, 6300)
+            - Pharmaceuticals: (2834, 2835)
+            See: https://www.sec.gov/corpfin/division-of-corporation-finance-standard-industrial-classification-sic-code-list
+        progress_callback: Optional callback function(current, total, company_name)
+            called for each company lookup to report progress
+
+    Returns:
+        Filtered Filings collection containing only filings from companies
+        within the specified SIC range
+
+    Raises:
+        ValueError: If sic_range is invalid or filings is empty
+        HTTPError: If SEC Company API requests fail
+
+    Performance:
+        - Time depends on number of unique companies in the filing set
+        - SEC rate limit: ~10 requests/second = ~600 companies/minute
+        - Q4 2023 8-K example: ~17k filings, ~5.4k unique companies = ~9 minutes
+        - Narrower date ranges or form types = fewer companies = faster
+        - Company data is cached locally after first lookup
+
+    Examples:
+        >>> from edgar import get_filings
+        >>> from edgar.ai.helpers import filter_by_industry
+        >>>
+        >>> # Get all 8-K filings from Q4 2023
+        >>> filings = get_filings(2023, 4, form="8-K")
+        >>> print(f"Total filings: {len(filings)}")
+        Total filings: 17445
+        >>>
+        >>> # Filter to technology companies (SIC 7300-7400)
+        >>> tech_filings = filter_by_industry(filings, (7300, 7400))
+        >>> print(f"Technology company filings: {len(tech_filings)}")
+        Technology company filings: 245
+        >>>
+        >>> # Filter to pharmaceutical companies
+        >>> pharma_filings = filter_by_industry(filings, (2834, 2835))
+        >>>
+        >>> # With progress callback
+        >>> def show_progress(current, total, company):
+        ...     if current % 100 == 0 or current == total:
+        ...         print(f"Processing {current}/{total}: {company}")
+        >>> tech_filings = filter_by_industry(
+        ...     filings,
+        ...     (7300, 7400),
+        ...     progress_callback=show_progress
+        ... )
+        >>>
+        >>> # Tip: Use narrower date range for faster results
+        >>> # Instead of whole quarter, use one month:
+        >>> filings = get_filings(2023, 4, form="8-K")
+        >>> oct_filings = filings.filter(filing_date="2023-10-01:2023-10-31")
+        >>> tech_oct = filter_by_industry(oct_filings, (7300, 7400))  # Faster!
+
+    See Also:
+        - Filings.filter() - The underlying filter method (supports cik parameter)
+        - Company.sic - Company SIC code attribute
+        - SEC SIC codes: https://www.sec.gov/corpfin/division-of-corporation-finance-standard-industrial-classification-sic-code-list
+    """
+    # Validate inputs
+    if len(filings) == 0:
+        return filings
+
+    if not isinstance(sic_range, (tuple, list)) or len(sic_range) != 2:
+        raise ValueError("sic_range must be tuple or list of [min, max]")
+
+    sic_min, sic_max = sic_range
+
+    # Step 1: Get unique CIKs from filings using PyArrow (fast)
+    unique_ciks = filings.data['cik'].unique().to_pylist()
+
+    # Step 2: Look up Company SIC for each unique CIK
+    matching_ciks = []
+    total_companies = len(unique_ciks)
+
+    for idx, cik in enumerate(unique_ciks, 1):
+        try:
+            company = Company(cik)
+
+            # Report progress if callback provided
+            if progress_callback:
+                progress_callback(idx, total_companies, company.name)
+
+            # Check if company SIC is in range
+            if company.sic and sic_min <= company.sic < sic_max:
+                matching_ciks.append(cik)
+
+        except Exception:
+            # Skip companies that can't be looked up
+            continue
+
+    # Step 3: Filter filings using matching CIKs (fast)
+    if not matching_ciks:
+        # Return empty Filings collection of same type
+        return filings.filter(cik=[])
+
+    return filings.filter(cik=matching_ciks)

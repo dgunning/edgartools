@@ -140,12 +140,76 @@ xbrl.docs.search("statements")     # How to access statements
 
 ## Summary of Access Methods
 
+**Recommended Pattern**: `repr()` + `.docs` + `.docs.search()`
+
+This is the current recommended approach for API discovery and working with EdgarTools objects. The `.text()` method is only available on Company and XBRL for specialized AI data extraction.
+
 | Method | Available On | Purpose | Token Range |
 |--------|--------------|---------|-------------|
 | `print(obj)` or `repr()` | All objects | Quick visual overview | 125-2,500 |
-| `obj.text(max_tokens)` | Company, XBRL only | AI-optimized data extraction | 500-2,000 |
-| `obj.docs` | All major objects | API discovery & learning | 2,000-5,000 |
-| `obj.docs.search(query)` | All major objects | Find specific functionality | 200-500 |
+| `obj.docs` | All major objects | **Primary:** API discovery & learning | 2,000-5,000 |
+| `obj.docs.search(query)` | All major objects | **Primary:** Find specific functionality | 200-500 |
+| `obj.text(max_tokens)` | Company, XBRL only | **Specialized:** AI-optimized data extraction | 500-2,000 |
+
+---
+
+### ⚠️ IMPORTANT: Two Different Search Methods
+
+Filing has **TWO search methods** with different purposes. Don't confuse them!
+
+#### Content Search: `filing.search(query)` ⭐ Most Common Use Case
+
+**Search the actual filing document text** (10-K content, proxy statements, 8-K reports, etc.)
+
+```python
+from edgar import Company
+
+company = Company("AAPL")
+filing = company.get_filings(form="DEF 14A")[0]  # Proxy statement
+
+# Search for text IN the filing document
+results = filing.search("executive compensation")
+results = filing.search("risk factors")
+results = filing.search("revenue recognition")
+
+# Returns: List of DocSection objects with BM25 relevance scores
+print(f"Found {len(results)} matches")
+for match in results[:3]:  # Top 3 matches
+    print(f"Score {match.score:.2f}: {str(match)[:100]}...")
+```
+
+**When to use**: Finding content, keywords, or topics within SEC filings
+
+**Performance**: ~1-2 seconds per filing (BM25 index cached)
+
+#### API Documentation Search: `filing.docs.search(query)` 📚 Developer Helper
+
+**Search the Filing class API documentation** to discover methods and usage
+
+```python
+# Find how to use the Filing API
+help_text = filing.docs.search("how to get XBRL")
+help_text = filing.docs.search("convert to markdown")
+help_text = filing.docs.search("list attachments")
+
+# Returns: Documentation snippets about Filing methods
+print(help_text)
+```
+
+**When to use**: Learning the API, discovering available methods
+
+#### Quick Reference
+
+| Search What? | Method | Example |
+|--------------|--------|---------|
+| Filing content (text inside 10-K, proxy, etc.) | `filing.search("keyword")` | `filing.search("risk factors")` |
+| API documentation (how to use Filing class) | `filing.docs.search("how to")` | `filing.docs.search("get xbrl")` |
+
+**Rule of thumb**:
+- Looking for content **IN** the filing? → `filing.search()`
+- Looking for how to **USE** the Filing API? → `filing.docs.search()`
+
+---
 
 ## Company Object
 
@@ -301,21 +365,22 @@ Showing 3 of 1,245 filings
 
 ## XBRL Object
 
-**Typical Size**: ~10,000 characters (but shows Common Actions in display)
-**Token Estimate**: ~2,500 tokens
-**Format**: Unicode box drawing with multiple panels
+**Typical Size (repr)**: ~3,000 characters (visual box drawing)
+**Typical Size (.text())**: ~1,100 characters (AI-optimized)
+**Token Estimate (repr)**: ~750 tokens
+**Token Estimate (.text())**: ~275 tokens
+**Format**: Markdown-KV (AI-optimized) via .text(), Unicode box drawing via repr()
 **Has .docs**: ✅ Yes
 **Has .text()**: ✅ Yes (AI-optimized Markdown-KV)
 
 **Contains**:
 - Entity information (name, ticker, CIK)
 - Document metadata (type, fiscal year/period)
-- Statement availability indicators
-- Common Actions section (built into display)
-- Context information (reporting periods)
-- Period summary
-- XBRL taxonomy information
-- Docs hint at bottom
+- Fact and context counts
+- Available data coverage (annual/quarterly periods)
+- Core financial statements availability
+- Common usage patterns
+- Docs hint
 
 **Example**:
 ```python
@@ -324,46 +389,68 @@ from edgar import Company
 company = Company("AAPL")
 filing = company.get_filings(form="10-K")[0]
 xbrl = filing.xbrl()
-print(xbrl)  # Shows comprehensive XBRL structure with Common Actions
+
+# Visual display (Unicode box drawing)
+print(xbrl)  # Shows comprehensive XBRL structure
+
+# AI-optimized text (Markdown-KV format)
+text = xbrl.text()  # Compact, token-efficient
+print(text)
 
 # Access documentation
 xbrl.docs  # Comprehensive XBRL API guide
 xbrl.docs.search("statements")  # How to access statements
 xbrl.docs.search("facts")  # How to query facts
-
-# Get AI-optimized text
-xbrl.text(max_tokens=2000)  # Markdown-KV format
 ```
 
-**Sample Output Structure**:
+**Sample .text() Output (AI-Optimized)**:
 ```
-╭──────────────────────────────────────────╮
-│ XBRL Filing                              │
-│ Apple Inc. (AAPL)                        │
-│ CIK: 0000320193                          │
-├──────────────────────────────────────────┤
-│ Document: 10-K                           │
-│ Fiscal Year: 2023                        │
-│ Fiscal Period: FY                        │
-│ Period End: 2023-09-30                   │
-├──────────────────────────────────────────┤
-│ Available Statements:                    │
-│ ✓ Income Statement                       │
-│ ✓ Balance Sheet                          │
-│ ✓ Cash Flow Statement                    │
-│ ✓ Stockholders Equity                    │
-├──────────────────────────────────────────┤
-│ Contexts: 245                            │
-│ Facts: 1,834                             │
-╰──────────────────────────────────────────╯
+**Entity:** Apple Inc. (AAPL)
+**CIK:** 320193
+**Form:** 10-K
+**Fiscal Period:** Fiscal Year 2025 (ended 2025-09-27)
+**Facts:** 1,131
+**Contexts:** 182
+
+**Available Data Coverage:**
+  Annual: FY 2025, FY 2024, FY 2023
+  Quarterly: June 29, 2025 to September 27, 2025, June 30, 2024 to September 28, 2024
+
+**Available Statements:**
+  Core: IncomeStatement, ComprehensiveIncome, BalanceSheet, StatementOfEquity, CashFlowStatement
+  Other: 12 additional statements
+
+**Common Actions:**
+  # List all available statements
+  xbrl.statements
+
+  # View core financial statements
+  stmt = xbrl.statements.income_statement()
+  stmt = xbrl.statements.balance_sheet()
+  stmt = xbrl.statements.cash_flow_statement()
+  stmt = xbrl.statements.statement_of_equity()
+  stmt = xbrl.statements.comprehensive_income()
+
+  # Get current period only (returns XBRL with filtered context)
+  current = xbrl.current_period
+  stmt = current.income_statement()
+
+  # Convert statement to DataFrame
+  df = stmt.to_dataframe()
+
+  # Query specific facts
+  revenue = xbrl.facts.query().by_concept('Revenue').to_dataframe()
+
+💡 Use xbrl.docs for comprehensive API guide
 ```
 
 **When to Use**:
 - Understanding XBRL filing structure
 - Checking statement availability
 - Getting fiscal period information
+- AI analysis requiring XBRL metadata
 
-**Important**: This is a large output. Consider using specific statements instead of printing the full XBRL object.
+**Token Efficiency**: The .text() method uses 66% fewer tokens than repr() while retaining all essential information including specific method names for AI agents.
 
 ## Statement Object
 
@@ -469,27 +556,36 @@ EdgarTools provides three methods for accessing information, each optimized for 
 
 | Method | Purpose | Token Usage | Available On |
 |--------|---------|-------------|--------------|
-| `print(obj)` | Quick visual overview | 125-2,500 | All objects |
-| `obj.text()` | AI-optimized data format | 25% less than JSON | Company, XBRL only |
-| `obj.docs` | API discovery & learning | 2,000-5,000 | All major objects |
+| `print(obj)` or `repr()` | Quick visual overview | 125-2,500 | All objects |
+| `obj.docs` | **Primary:** API discovery & learning | 2,000-5,000 | All major objects |
+| `obj.docs.search()` | **Primary:** Find specific methods | 200-500 | All major objects |
+| `obj.text()` | **Specialized:** AI data extraction | 25% less than JSON | Company, XBRL only |
+
+**Recommended Pattern for API Discovery**:
+1. **Start with `repr(object)`** - Quick visual overview
+2. **Use `object.docs`** - Comprehensive API reference
+3. **Use `object.docs.search("keyword")`** - Find specific functionality
 
 **When to Use Each**:
-- **`print(obj)`**: Quick overview, see structure, visual verification
-- **`obj.text()`**: Extract data for AI analysis (when available)
-- **`obj.docs`**: Learn API, discover methods, find workflow examples
+- **`repr(obj)` or `print(obj)`**: Quick overview, see structure, visual verification
+- **`obj.docs`**: **PRIMARY METHOD** - Learn API, discover methods, find workflow examples
+- **`obj.docs.search()`**: **PRIMARY METHOD** - Search for specific functionality
+- **`obj.text()`**: **SPECIALIZED** - Only for Company/XBRL when extracting data for AI analysis
 
 ### Token Estimates by Object and Method
 
 | Object Type | repr() | .text() | .docs (full) | .docs (search) |
 |-------------|--------|---------|--------------|----------------|
-| Company | ~750 | ~560 | ~3,500 | ~300 |
+| Company | ~750 | ~75 | ~3,500 | ~300 |
 | Filing | ~125 | N/A* | ~2,500 | ~250 |
 | Filings (3 items) | ~300 | N/A | ~3,000 | ~250 |
-| XBRL | ~2,500 | ~1,875 | ~4,000 | ~350 |
+| XBRL | ~750 | ~275 | ~4,000 | ~350 |
 | Statement | ~1,250 | N/A | ~2,800 | ~300 |
 | MultiPeriodStatement | ~500 | N/A | ~2,800 | ~300 |
 
 *Filing has `.text()` but it returns full document text (potentially 50K+ tokens), not AI-optimized metadata.
+
+**Note**: XBRL.text() was recently optimized to use Markdown-KV format with all essential method names (66% token reduction from previous ~810 tokens).
 
 ### Tips for Token Efficiency
 
