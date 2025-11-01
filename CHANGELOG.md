@@ -28,9 +28,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Source File Renamed to Match Anthropic Standard**
   - Renamed `edgar/ai/skills/core/skill.md` → `SKILL.md` (uppercase)
   - **Rationale**: Source file now matches Anthropic's official specification
-  - **Benefits**: Eliminates confusion, simplifies claude-skills exporter (no rename needed)
-  - **Backward Compatibility**: claude-desktop exporter automatically renames SKILL.md → skill.md
+  - **Benefits**: Eliminates confusion, both export formats now use SKILL.md
   - **Files**: `edgar/ai/skills/core/SKILL.md`, exporters updated, tests updated
+
+- **Claude Desktop Format Now Creates ZIP with SKILL.md**
+  - `claude-desktop` format now defaults to creating ZIP files (was: directories)
+  - Uses SKILL.md (uppercase) per Claude Desktop upload requirements
+  - **Rationale**: Claude Desktop upload UI requires ZIP with SKILL.md at root
+  - **Usage**: `export_skill(skill, format="claude-desktop")` → creates ZIP
+  - **Directory export**: Use `create_zip=False` for directory output
+  - **Impact**: Direct compatibility with Claude Desktop's skill upload interface
+  - **Files**: `edgar/ai/exporters/claude_desktop.py`, `edgar/ai/skills/base.py`
+  - **Tests**: Updated all claude-desktop tests
 
 - **Skill Package Renamed: sec_analysis → core** (Brand Alignment)
   - Renamed skill directory from `edgar/ai/skills/sec_analysis/` to `edgar/ai/skills/core/`

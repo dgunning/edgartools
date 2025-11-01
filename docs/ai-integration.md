@@ -304,19 +304,20 @@ path = export_skill(
     install=False
 )
 
-# Portable format (for sharing or manual installation)
-path = export_skill(
+# Claude Desktop upload format (creates ZIP with SKILL.md)
+zip_path = export_skill(
     edgartools_skill,
     format="claude-desktop",
     output_dir="~/exports"
 )
+# Ready to upload via Claude Desktop's skill upload UI
 
-# Export as zip archive
-zip_path = export_skill(
+# Export as directory (not ZIP)
+path = export_skill(
     edgartools_skill,
     format="claude-desktop",
     output_dir="~/exports",
-    create_zip=True
+    create_zip=False
 )
 ```
 
@@ -330,12 +331,12 @@ zip_path = export_skill(
 - YAML frontmatter with name and description
 - Ready for Claude Desktop and Claude Code
 
-**claude-desktop** (Portable Format):
-- Exports to current directory by default
-- Main file: `skill.md` (lowercase)
-- All supporting files included
-- Can create zip archives for sharing
-- Manual installation to any location
+**claude-desktop** (Claude Desktop Upload Format):
+- Creates ZIP file by default (required by Claude Desktop upload UI)
+- Main file: `SKILL.md` (uppercase, per Anthropic spec)
+- All supporting files and API reference included
+- Ready for upload via Claude Desktop's skill upload interface
+- Can export as directory with `create_zip=False`
 
 Exported skills include:
 - Tutorial documentation (skill.md/SKILL.md, workflows.md, objects.md)

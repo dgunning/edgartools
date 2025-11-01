@@ -98,21 +98,21 @@ def test_get_skill_not_found():
 
 @pytest.mark.fast
 def test_export_skill_to_directory():
-    """Test exporting skill to a directory."""
+    """Test exporting skill to a directory (create_zip=False)."""
     from edgar.ai import edgartools_skill, export_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
-        # Export skill
-        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir)
+        # Export skill as directory (not ZIP)
+        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir, create_zip=False)
 
         # Check that directory was created
         assert skill_dir.exists()
         assert skill_dir.is_dir()
 
-        # Check that markdown files were copied
-        skill_md = skill_dir / "skill.md"
+        # Check that SKILL.md was copied (uppercase)
+        skill_md = skill_dir / "SKILL.md"
         assert skill_md.exists()
 
         # Verify content was copied correctly
@@ -122,27 +122,29 @@ def test_export_skill_to_directory():
 
 
 @pytest.mark.fast
-def test_export_skill_default_directory():
-    """Test exporting skill to current directory (default)."""
+def test_export_skill_default_zip():
+    """Test exporting skill as ZIP (default for claude-desktop)."""
     from edgar.ai import edgartools_skill, export_skill
 
-    # Export to current directory
-    skill_dir = export_skill(edgartools_skill, format="claude-desktop")
+    # Export to current directory as ZIP (default)
+    zip_path = export_skill(edgartools_skill, format="claude-desktop")
 
     try:
-        # Check that directory was created
-        assert skill_dir.exists()
-        assert skill_dir.is_dir()
-        assert skill_dir.name == "edgartools"
+        # Check that ZIP was created
+        assert zip_path.exists()
+        assert zip_path.suffix == ".zip"
+        assert zip_path.name == "edgartools.zip"
 
-        # Check files
-        skill_md = skill_dir / "skill.md"
-        assert skill_md.exists()
+        # Verify ZIP contents
+        with zipfile.ZipFile(zip_path, 'r') as zipf:
+            namelist = zipf.namelist()
+            # Check for SKILL.md at root
+            assert any("SKILL.md" in name for name in namelist)
 
     finally:
         # Clean up
-        if skill_dir.exists():
-            shutil.rmtree(skill_dir)
+        if zip_path.exists():
+            zip_path.unlink()
 
 
 @pytest.mark.fast
@@ -153,8 +155,8 @@ def test_export_skill_validates_frontmatter():
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
-        # This should succeed with valid frontmatter
-        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir)
+        # This should succeed with valid frontmatter (directory export)
+        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir, create_zip=False)
 
         assert skill_dir.exists()
 
@@ -208,11 +210,11 @@ def test_skill_export_method():
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
-        # Use the skill's export method directly
-        skill_dir = edgartools_skill.export(format="claude-desktop", output_dir=output_dir)
+        # Use the skill's export method directly (directory export)
+        skill_dir = edgartools_skill.export(format="claude-desktop", output_dir=output_dir, create_zip=False)
 
         assert skill_dir.exists()
-        assert (skill_dir / "skill.md").exists()
+        assert (skill_dir / "SKILL.md").exists()
 
 
 @pytest.mark.fast
@@ -223,8 +225,8 @@ def test_export_skill_includes_object_docs():
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
-        # Export skill
-        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir)
+        # Export skill as directory
+        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir, create_zip=False)
 
         # Check that api-reference directory was created
         api_ref_dir = skill_dir / "api-reference"
@@ -405,40 +407,41 @@ def test_claude_skills_includes_all_markdown():
 
 
 @pytest.mark.fast
-def test_claude_skills_backward_compatibility():
-    """Test that claude-desktop format still works (backward compatibility)."""
+def test_claude_desktop_uses_uppercase_skill():
+    """Test that claude-desktop format now uses SKILL.md (uppercase) per Claude Desktop requirements."""
     from edgar.ai import edgartools_skill, export_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
-        # Export using old format
+        # Export using claude-desktop format (directory, not ZIP)
         skill_dir = export_skill(
             edgartools_skill,
             format="claude-desktop",
-            output_dir=output_dir
+            output_dir=output_dir,
+            create_zip=False
         )
 
-        # Check that it works as before
+        # Check that it works
         assert skill_dir.exists()
         assert skill_dir.is_dir()
 
-        # Old format should have skill.md (lowercase)
-        skill_md = skill_dir / "skill.md"
-        assert skill_md.exists(), "claude-desktop format should have skill.md (lowercase)"
+        # Claude Desktop format now requires SKILL.md (uppercase)
+        skill_md = skill_dir / "SKILL.md"
+        assert skill_md.exists(), "claude-desktop format should have SKILL.md (uppercase)"
 
-        # Verify the actual filename is skill.md (not SKILL.md)
+        # Verify the actual filename is SKILL.md (not skill.md)
         # On case-insensitive filesystems, check the actual directory listing
         md_files = list(skill_dir.glob("*.md"))
         md_filenames = [f.name for f in md_files]
 
-        # skill.md should exist in directory listing
-        assert "skill.md" in md_filenames, "skill.md should exist in directory"
+        # SKILL.md should exist in directory listing
+        assert "SKILL.md" in md_filenames, "SKILL.md should exist in directory"
 
-        # Should have exactly one skill file and it should be lowercase
+        # Should have exactly one skill file and it should be uppercase
         skill_variants = [name for name in md_filenames if name.lower() == "skill.md"]
         assert len(skill_variants) == 1, f"Should have exactly 1 skill file, found: {skill_variants}"
-        assert skill_variants[0] == "skill.md", f"Skill file should be skill.md, not {skill_variants[0]}"
+        assert skill_variants[0] == "SKILL.md", f"Skill file should be SKILL.md, not {skill_variants[0]}"
 
 
 @pytest.mark.fast

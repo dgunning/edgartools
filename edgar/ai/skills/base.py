@@ -171,29 +171,31 @@ class BaseSkill(ABC):
 
         return doc_path.read_text()
 
-    def export(self, format: str = "claude-desktop", output_dir: Optional[Path] = None) -> Path:
+    def export(self, format: str = "claude-desktop", output_dir: Optional[Path] = None, **kwargs) -> Path:
         """
         Export skill in specified format.
 
         Args:
             format: Export format (default: "claude-desktop")
-                - "claude-desktop": Claude Desktop Skills format
-                - Future: "mcp", "chatgpt-plugin", etc.
+                - "claude-desktop": Claude Desktop Skills format (ZIP)
+                - "claude-skills": Official Claude Skills format (~/.claude/skills/)
             output_dir: Where to create export (default: ./skills_export/)
+            **kwargs: Additional format-specific parameters
+                - create_zip (bool): For claude-desktop format (default: True)
+                - install (bool): For claude-skills format (default: True)
 
         Returns:
             Path to exported skill directory or archive
 
         Example:
-            >>> skill = SECAnalysisSkill()
-            >>> path = skill.export(
-            ...     format="claude-desktop",
-            ...     output_dir=Path("~/.config/claude/skills")
-            ... )
-            >>> print(f"Exported to: {path}")
+            >>> skill = EdgarToolsSkill()
+            >>> # Export as ZIP for Claude Desktop upload
+            >>> path = skill.export(format="claude-desktop")
+            >>> # Export to ~/.claude/skills/ for automatic discovery
+            >>> path = skill.export(format="claude-skills")
         """
         from edgar.ai.exporters import export_skill
-        return export_skill(self, format=format, output_dir=output_dir)
+        return export_skill(self, format=format, output_dir=output_dir, **kwargs)
 
     def __repr__(self) -> str:
         """String representation of the skill."""

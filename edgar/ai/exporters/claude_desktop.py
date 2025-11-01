@@ -1,10 +1,10 @@
 """
 Claude Desktop skill exporter.
 
-Exports EdgarTools skills in Claude Desktop format:
-- Copies markdown files with YAML frontmatter
-- Validates frontmatter structure
-- Creates portable skill packages
+Exports EdgarTools skills for Claude Desktop upload:
+- Creates ZIP file with SKILL.md at root (required by Claude Desktop)
+- Validates YAML frontmatter structure
+- Includes all supporting markdown files and API reference
 """
 
 import shutil
@@ -14,28 +14,31 @@ from typing import Optional
 import re
 
 
-def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: bool = False) -> Path:
+def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: bool = True) -> Path:
     """
-    Export a skill in Claude Desktop format.
+    Export a skill for Claude Desktop upload.
 
-    Copies all markdown files from the skill's content directory to an output directory,
-    validating YAML frontmatter and creating a portable skill package.
+    Creates a ZIP file with SKILL.md at the root level, as required by Claude Desktop's
+    upload interface. The ZIP includes all supporting markdown files and API reference.
 
     Args:
         skill: BaseSkill instance to export
         output_dir: Optional output directory (defaults to current directory)
-        create_zip: If True, create a zip archive of the exported skill
+        create_zip: If True (default), create a zip archive; if False, create directory
 
     Returns:
-        Path: Path to exported skill directory (or zip file if create_zip=True)
+        Path: Path to exported ZIP file (or directory if create_zip=False)
 
     Examples:
         >>> from edgar.ai.skills import edgartools_skill
-        >>> export_claude_desktop(edgartools_skill)
-        PosixPath('edgartools')
 
-        >>> export_claude_desktop(edgartools_skill, create_zip=True)
+        >>> # Create ZIP for Claude Desktop upload (default)
+        >>> export_claude_desktop(edgartools_skill)
         PosixPath('edgartools.zip')
+
+        >>> # Create directory for manual installation
+        >>> export_claude_desktop(edgartools_skill, create_zip=False)
+        PosixPath('edgartools')
     """
     from edgar.ai.skills.base import BaseSkill
 
@@ -66,12 +69,9 @@ def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: 
         raise ValueError(f"No markdown files found in {content_dir}")
 
     # Copy and validate each markdown file
+    # Claude Desktop requires SKILL.md (uppercase) at root
     for md_file in markdown_files:
-        # Rename SKILL.md to skill.md for portable format
-        if md_file.name == 'SKILL.md':
-            _copy_and_validate_markdown(md_file, skill_output_dir, rename_to='skill.md')
-        else:
-            _copy_and_validate_markdown(md_file, skill_output_dir)
+        _copy_and_validate_markdown(md_file, skill_output_dir)
 
     # Copy centralized object documentation (API reference)
     object_docs = skill.get_object_docs()
@@ -95,26 +95,24 @@ def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: 
     return skill_output_dir
 
 
-def _copy_and_validate_markdown(source: Path, destination_dir: Path, rename_to: str = None) -> None:
+def _copy_and_validate_markdown(source: Path, destination_dir: Path) -> None:
     """
     Copy markdown file and validate YAML frontmatter.
 
     Args:
         source: Source markdown file path
         destination_dir: Destination directory
-        rename_to: Optional new filename (for SKILL.md → skill.md conversion)
 
     Raises:
-        ValueError: If YAML frontmatter is invalid or missing in SKILL.md/skill.md
+        ValueError: If YAML frontmatter is invalid or missing in SKILL.md
     """
-    dest_filename = rename_to if rename_to else source.name
-    dest_file = destination_dir / dest_filename
+    dest_file = destination_dir / source.name
 
     # Read and validate
     content = source.read_text(encoding='utf-8')
 
-    # Only require frontmatter for SKILL.md (or skill.md if renamed)
-    if source.name == 'SKILL.md' or dest_filename == 'skill.md':
+    # Only require frontmatter for SKILL.md
+    if source.name == 'SKILL.md':
         # Check for YAML frontmatter
         if not content.startswith('---'):
             raise ValueError(f"Missing YAML frontmatter in {source.name}")
