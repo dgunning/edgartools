@@ -285,6 +285,17 @@ class TestBuildDatasetReal:
 class TestGetDataset:
     """Tests for get_company_dataset() function."""
 
+    @pytest.fixture(autouse=True)
+    def check_submissions_available(self):
+        """Skip all tests in this class if submissions not available"""
+        from edgar.core import get_edgar_data_directory
+
+        submissions_dir = get_edgar_data_directory() / 'submissions'
+
+        # Skip if submissions not downloaded
+        if not submissions_dir.exists() or len(list(submissions_dir.glob('CIK*.json'))) < 100000:
+            pytest.skip("Submissions data not downloaded - required for get_company_dataset() tests")
+
     def test_get_dataset_basic(self):
         """Get dataset (may build on first use)"""
         companies = get_company_dataset()
@@ -470,6 +481,17 @@ class TestDuckDBIntegration:
 @pytest.mark.performance
 class TestPerformance:
     """Performance tests for dataset operations."""
+
+    @pytest.fixture(autouse=True)
+    def check_submissions_available(self):
+        """Skip all tests in this class if submissions not available"""
+        from edgar.core import get_edgar_data_directory
+
+        submissions_dir = get_edgar_data_directory() / 'submissions'
+
+        # Skip if submissions not downloaded
+        if not submissions_dir.exists() or len(list(submissions_dir.glob('CIK*.json'))) < 100000:
+            pytest.skip("Submissions data not downloaded - required for performance tests")
 
     @pytest.mark.network
     def test_load_performance(self):
