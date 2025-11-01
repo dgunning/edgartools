@@ -95,7 +95,7 @@ python examples/ai/skills_usage.py
 
 **Key concepts:**
 ```python
-from edgar.ai import list_skills, get_skill
+from edgar.ai import list_skills, get_skill, export_skill, edgartools_skill
 from edgar.ai.helpers import get_revenue_trend, compare_companies_revenue
 
 # List skills
@@ -107,6 +107,13 @@ skill = get_skill("EdgarTools")
 # Use helper functions
 income = get_revenue_trend("AAPL", periods=3)
 comparison = compare_companies_revenue(["AAPL", "MSFT"], periods=3)
+
+# Export to Claude Skills format
+path = export_skill(edgartools_skill, format="claude-skills")
+# Installs to ~/.claude/skills/edgartools
+
+# Export portable format
+path = export_skill(edgartools_skill, format="claude-desktop")
 ```
 
 ## Common Workflows

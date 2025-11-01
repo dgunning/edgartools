@@ -283,32 +283,65 @@ print(skill_content)
 
 ### Exporting Skills
 
-Export skills for use with AI tools like Claude Desktop:
+Export skills for use with AI tools like Claude Desktop and Claude Code:
 
 ```python
-from edgar.ai import export_skill
+from edgar.ai import export_skill, edgartools_skill
 
-# Export to Claude Desktop format
+# Official Claude Skills format (installs to ~/.claude/skills/)
 path = export_skill(
-    skill,
-    format="claude-desktop",
-    output_dir="~/.config/claude/skills"
+    edgartools_skill,
+    format="claude-skills"  # Default format
 )
-print(f"Exported to: {path}")
+print(f"Installed to: {path}")
+# Output: /Users/username/.claude/skills/edgartools
+
+# Export to custom location
+path = export_skill(
+    edgartools_skill,
+    format="claude-skills",
+    output_dir="~/my-skills",
+    install=False
+)
+
+# Portable format (for sharing or manual installation)
+path = export_skill(
+    edgartools_skill,
+    format="claude-desktop",
+    output_dir="~/exports"
+)
 
 # Export as zip archive
 zip_path = export_skill(
-    skill,
+    edgartools_skill,
     format="claude-desktop",
     output_dir="~/exports",
     create_zip=True
 )
 ```
 
+#### Export Formats
+
+**claude-skills** (Official Anthropic Format):
+- Installs to `~/.claude/skills/` by default
+- Main file: `SKILL.md` (uppercase, per Anthropic spec)
+- Includes all supporting markdown files
+- Includes API reference documentation in `api-reference/` directory
+- YAML frontmatter with name and description
+- Ready for Claude Desktop and Claude Code
+
+**claude-desktop** (Portable Format):
+- Exports to current directory by default
+- Main file: `skill.md` (lowercase)
+- All supporting files included
+- Can create zip archives for sharing
+- Manual installation to any location
+
 Exported skills include:
-- Tutorial documentation (skill.md, workflows.md, objects.md)
+- Tutorial documentation (skill.md/SKILL.md, workflows.md, objects.md)
 - API reference documentation (api-reference/ directory)
 - YAML frontmatter for tool integration
+- Helper function documentation
 
 ## Model Context Protocol (MCP) Server
 

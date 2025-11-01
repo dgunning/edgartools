@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Official Claude Skills Export Format**
+  - New `claude-skills` export format supporting Anthropic's official Claude Skills specification
+  - Installs to `~/.claude/skills/` by default for Claude Desktop and Claude Code integration
+  - Creates `SKILL.md` (uppercase) as main skill file per Anthropic specification
+  - Validates YAML frontmatter (required: name, description)
+  - Includes all supporting markdown files and API reference documentation
+  - New exporter: `edgar/ai/exporters/claude_skills.py`
+  - **Usage**: `export_skill(edgartools_skill, format="claude-skills")`
+  - **Impact**: Official format for Claude Desktop/Code, automatic skill discovery
+  - **Backward Compatible**: Existing `claude-desktop` format (lowercase skill.md) still supported
+  - **Files**: `edgar/ai/exporters/claude_skills.py`, `edgar/ai/exporters/__init__.py`
+  - **Tests**: 5 comprehensive tests added to `tests/test_ai_skill_export.py`
+  - **Docs**: Updated `docs/ai-integration.md`, `edgar/ai/README.md`, `examples/ai/README.md`
+
 ### Changed
 
 - **Skill Package Renamed: sec_analysis → core** (Brand Alignment)
@@ -18,6 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Future-proof**: Prevents naming collision when top-level package renames from `edgar` to `edgartools`
   - **Impact**: Better brand recognition, clearer skill installation path
   - **Files**: All skill-related imports, tests, documentation, and examples updated
+
+- **Default Export Format Changed to claude-skills**
+  - `export_skill()` now defaults to `format="claude-skills"` (was `"claude-desktop"`)
+  - Portable format still available via explicit `format="claude-desktop"`
+  - **Rationale**: Official Anthropic format should be default for better integration
+  - **Impact**: Skills auto-install to `~/.claude/skills/` for immediate use
 
 ### Fixed
 

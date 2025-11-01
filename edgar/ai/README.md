@@ -175,7 +175,8 @@ edgar/ai/
 │   └── core/            # EdgarTools skill
 │
 ├── exporters/           # Export capabilities
-│   └── claude_desktop.py
+│   ├── claude_desktop.py    # Portable format exporter
+│   └── claude_skills.py     # Official Claude Skills format exporter
 │
 └── examples/            # Usage examples
     └── basic_usage.py
