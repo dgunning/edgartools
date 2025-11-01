@@ -46,3 +46,24 @@ def mock_comprehensive_dataset(company_sample_table):
     with patch('edgar.reference.company_dataset.get_company_dataset') as mock:
         mock.return_value = company_sample_table
         yield mock
+
+
+@pytest.fixture(scope="session")
+def check_full_dataset_available():
+    """
+    Check if full submissions dataset is available.
+
+    Skip tests that require the full dataset if submissions not downloaded.
+    This is for integration tests marked with @pytest.mark.slow that need
+    the real 562K company dataset.
+    """
+    from edgar.core import get_edgar_data_directory
+
+    submissions_dir = get_edgar_data_directory() / 'submissions'
+
+    # Skip if submissions not downloaded
+    if not submissions_dir.exists() or len(list(submissions_dir.glob('CIK*.json'))) < 100000:
+        pytest.skip(
+            "Full submissions data not downloaded - required for integration tests. "
+            "Run: from edgar.storage import download_submissions; download_submissions()"
+        )
