@@ -69,7 +69,7 @@ def test_filing_text_method(aapl_company):
 
 @pytest.mark.network
 def test_xbrl_text_method(aapl_company):
-    """Test XBRL.text() returns rich display format with ANSI stripped."""
+    """Test XBRL.text() returns Markdown-KV format optimized for AI consumption."""
     filings = aapl_company.get_filings(form="10-K")
     if len(filings) == 0:
         pytest.skip("No 10-K filings available")
@@ -83,21 +83,30 @@ def test_xbrl_text_method(aapl_company):
 
     text = xbrl.text(max_tokens=1000)
 
-    # XBRL.text() wraps repr() with ANSI codes stripped
-    # Check for rich box drawing characters (should be present)
-    assert "╭" in text or "│" in text or "╰" in text  # Box drawing chars
+    # XBRL.text() returns Markdown-KV format (not rich display format)
+    # Check for Markdown-KV markers
+    assert "**Entity:**" in text
+    assert "**CIK:**" in text
+    assert "**Form:**" in text
 
     # Should NOT have ANSI escape codes
     assert "\x1B[" not in text
 
-    # XBRL metadata should be present
-    assert "facts" in text.lower() or "contexts" in text.lower()
+    # Should NOT have box drawing characters (that's the old repr format)
+    assert "╭" not in text and "│" not in text and "╰" not in text
 
-    # Should contain XBRL Document indicator
-    assert "XBRL" in text or "xbrl" in text
+    # XBRL metadata should be present
+    assert "**Facts:**" in text
+    assert "**Contexts:**" in text
+
+    # Should have available statements section
+    assert "**Available Statements:**" in text
+
+    # Should have common actions section
+    assert "**Common Actions:**" in text
 
     # Should be substantial text
-    assert len(text) > 500
+    assert len(text) > 400
 
 
 @pytest.mark.fast

@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.24.0] - 2025-10-31
+### Fixed
+
+- **Comprehensive SSL Error Handling** (dbd5c7c)
+  - Implemented fail-fast retry behavior for SSL errors
+  - Added specific handling for SSL protocol errors (WRONG_VERSION_NUMBER, TLSV1_ALERT_PROTOCOL_VERSION)
+  - Prevents unnecessary retry attempts on unrecoverable SSL errors
+  - **Impact**: Faster failure detection for SSL issues, better error messages
+  - **Files**: `edgar/httpclient.py`
+  - **Tests**: SSL error handling validation tests
+
+- **Critical Skills API Documentation Fixes** (165156f)
+  - **Form4 Wrong API Fix**: Fixed 3 examples showing non-existent `.transactions` attribute
+    - Documented correct DataFrame API: `.common_stock_sales`, `.common_stock_purchases`
+    - Added 80+ lines of comprehensive DataFrame documentation
+    - **Impact**: Q4 test score improvement from 7.0 → 9.5 (+35.7%)
+  - **Search Method Confusion Fix**: Added warnings distinguishing content search vs API search
+    - `filing.search(query)` - search filing text (BM25 content search)
+    - `filing.docs.search(query)` - search Filing API documentation
+    - **Impact**: Q2 test score improvement from 7.6 → 9.4 (+23.7%)
+  - **Overall Impact**: Average Skills API test score improved from 7.5 → 8.1 (+8%)
+  - **Files**:
+    - `edgar/ai/skills/sec_analysis/objects.md` - Search warnings + Form4 fixes
+    - `edgar/ai/skills/sec_analysis/quickstart-by-task.md` - Content search examples
+    - `edgar/ai/skills/sec_analysis/skill.md` - Comprehensive search documentation
+    - `edgar/ai/helpers.py` - Added filter_by_industry() function
+
+### Added
+
+- **New Skills API Documentation Files** (165156f)
+  - `edgar/ai/skills/sec_analysis/data-objects.md` - Comprehensive data objects documentation
+  - `edgar/ai/skills/sec_analysis/form-types-reference.md` - Form types reference
+  - `edgar/ai/skills/sec_analysis/quickstart-by-task.md` - Task-oriented quickstart guide
+
+### Changed
+
+- **XBRL.text() Optimization for AI Consumption** (aff3917)
+  - Replaced visual repr() format with compact Markdown-KV format
+  - **Performance**: 64.7% token reduction (~450 vs ~1,275 tokens)
+  - Added structured sections:
+    - Entity information (name, ticker, CIK, form type)
+    - Fiscal period details (year, period, end date)
+    - Data volume metrics (facts count, contexts count)
+    - Period coverage summary (annual/quarterly periods)
+    - Available statements categorization (core vs other)
+    - Compact common actions section with usage examples
+  - **Rationale**: Aligns text() output with AI consumption use case in Skills API
+  - **Impact**: Improved token efficiency while maintaining information completeness
+  - **Files**: `edgar/xbrl/xbrl.py`
+
 ## [4.23.0] - 2025-10-30
 ### Fixed
 
