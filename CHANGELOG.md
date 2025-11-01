@@ -25,6 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Source File Renamed to Match Anthropic Standard**
+  - Renamed `edgar/ai/skills/core/skill.md` → `SKILL.md` (uppercase)
+  - **Rationale**: Source file now matches Anthropic's official specification
+  - **Benefits**: Eliminates confusion, simplifies claude-skills exporter (no rename needed)
+  - **Backward Compatibility**: claude-desktop exporter automatically renames SKILL.md → skill.md
+  - **Files**: `edgar/ai/skills/core/SKILL.md`, exporters updated, tests updated
+
 - **Skill Package Renamed: sec_analysis → core** (Brand Alignment)
   - Renamed skill directory from `edgar/ai/skills/sec_analysis/` to `edgar/ai/skills/core/`
   - Updated skill name from "SEC Filing Analysis" to "EdgarTools"

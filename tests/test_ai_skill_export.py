@@ -31,32 +31,32 @@ def test_skill_has_markdown_files():
     content_dir = edgartools_skill.content_dir
 
     # Check for main skill file
-    skill_md = content_dir / "skill.md"
-    assert skill_md.exists(), "skill.md should exist"
+    skill_md = content_dir / "SKILL.md"
+    assert skill_md.exists(), "SKILL.md should exist"
 
     # Check for supporting files
     readme = content_dir / "readme.md"
     objects_md = content_dir / "objects.md"
     workflows_md = content_dir / "workflows.md"
 
-    # At least skill.md should exist
+    # At least SKILL.md should exist
     assert skill_md.exists()
 
 
 @pytest.mark.fast
 def test_skill_markdown_has_frontmatter():
-    """Test that skill.md has valid YAML frontmatter."""
+    """Test that SKILL.md has valid YAML frontmatter."""
     from edgar.ai.skills.core import edgartools_skill
 
-    skill_md = edgartools_skill.content_dir / "skill.md"
+    skill_md = edgartools_skill.content_dir / "SKILL.md"
     content = skill_md.read_text(encoding='utf-8')
 
     # Check frontmatter structure
-    assert content.startswith('---'), "skill.md should start with ---"
+    assert content.startswith('---'), "SKILL.md should start with ---"
 
     # Extract frontmatter
     parts = content.split('---', 2)
-    assert len(parts) >= 3, "skill.md should have complete frontmatter"
+    assert len(parts) >= 3, "SKILL.md should have complete frontmatter"
 
     frontmatter = parts[1].strip()
 

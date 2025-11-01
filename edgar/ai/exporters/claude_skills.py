@@ -74,12 +74,11 @@ def export_claude_skills(skill, output_dir: Optional[Path] = None, install: bool
     if not markdown_files:
         raise ValueError(f"No markdown files found in {content_dir}")
 
-    # Copy and rename markdown files
+    # Copy markdown files
     skill_md_found = False
     for md_file in markdown_files:
-        if md_file.name == 'skill.md':
-            # Rename skill.md → SKILL.md (uppercase, per Anthropic spec)
-            # Only create SKILL.md, skip copying skill.md itself
+        if md_file.name == 'SKILL.md':
+            # Validate and copy SKILL.md
             _copy_and_validate_skill_md(md_file, skill_output_dir)
             skill_md_found = True
         else:
@@ -88,7 +87,7 @@ def export_claude_skills(skill, output_dir: Optional[Path] = None, install: bool
             shutil.copy2(md_file, dest_file)
 
     if not skill_md_found:
-        raise ValueError("No skill.md found in skill content directory")
+        raise ValueError("No SKILL.md found in skill content directory")
 
     # Copy centralized object documentation (API reference)
     object_docs = skill.get_object_docs()
@@ -106,17 +105,16 @@ def export_claude_skills(skill, output_dir: Optional[Path] = None, install: bool
 
 def _copy_and_validate_skill_md(source: Path, destination_dir: Path) -> None:
     """
-    Copy skill.md as SKILL.md (uppercase) and validate YAML frontmatter.
+    Copy SKILL.md and validate YAML frontmatter.
 
     Args:
-        source: Source skill.md file path
+        source: Source SKILL.md file path
         destination_dir: Destination directory
 
     Raises:
         ValueError: If YAML frontmatter is invalid or missing
     """
-    # Destination is SKILL.md (uppercase)
-    dest_file = destination_dir / "SKILL.md"
+    dest_file = destination_dir / source.name
 
     # Read and validate
     content = source.read_text(encoding='utf-8')
@@ -135,7 +133,7 @@ def _copy_and_validate_skill_md(source: Path, destination_dir: Path) -> None:
     # Validate required frontmatter fields
     _validate_skill_frontmatter(frontmatter, source.name)
 
-    # Copy file with new name
+    # Copy file
     dest_file.write_text(content, encoding='utf-8')
 
 

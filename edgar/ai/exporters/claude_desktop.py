@@ -67,7 +67,11 @@ def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: 
 
     # Copy and validate each markdown file
     for md_file in markdown_files:
-        _copy_and_validate_markdown(md_file, skill_output_dir)
+        # Rename SKILL.md to skill.md for portable format
+        if md_file.name == 'SKILL.md':
+            _copy_and_validate_markdown(md_file, skill_output_dir, rename_to='skill.md')
+        else:
+            _copy_and_validate_markdown(md_file, skill_output_dir)
 
     # Copy centralized object documentation (API reference)
     object_docs = skill.get_object_docs()
@@ -91,24 +95,26 @@ def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: 
     return skill_output_dir
 
 
-def _copy_and_validate_markdown(source: Path, destination_dir: Path) -> None:
+def _copy_and_validate_markdown(source: Path, destination_dir: Path, rename_to: str = None) -> None:
     """
     Copy markdown file and validate YAML frontmatter.
 
     Args:
         source: Source markdown file path
         destination_dir: Destination directory
+        rename_to: Optional new filename (for SKILL.md → skill.md conversion)
 
     Raises:
-        ValueError: If YAML frontmatter is invalid or missing in skill.md
+        ValueError: If YAML frontmatter is invalid or missing in SKILL.md/skill.md
     """
-    dest_file = destination_dir / source.name
+    dest_filename = rename_to if rename_to else source.name
+    dest_file = destination_dir / dest_filename
 
     # Read and validate
     content = source.read_text(encoding='utf-8')
 
-    # Only require frontmatter for skill.md
-    if source.name == 'skill.md':
+    # Only require frontmatter for SKILL.md (or skill.md if renamed)
+    if source.name == 'SKILL.md' or dest_filename == 'skill.md':
         # Check for YAML frontmatter
         if not content.startswith('---'):
             raise ValueError(f"Missing YAML frontmatter in {source.name}")
