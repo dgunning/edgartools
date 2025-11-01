@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Delightful Convenience Functions for Skill Export**
+  - New `install_skill()` - Install to ~/.claude/skills/ with one function call
+  - New `package_skill()` - Create ZIP for Claude Desktop upload
+  - Auto-detects edgartools_skill when no skill parameter provided
+  - Simple, intuitive API: `install_skill()` and `package_skill()`
+  - **Usage**: `from edgar.ai import install_skill, package_skill`
+  - **Impact**: Dramatically simpler API, no redundant parameters
+  - **Files**: `edgar/ai/__init__.py`
+  - **Tests**: 4 new tests added to `tests/test_ai_skill_export.py`
+  - **Docs**: Updated `docs/ai-integration.md` with recommended simple API
+
 - **Official Claude Skills Export Format**
   - New `claude-skills` export format supporting Anthropic's official Claude Skills specification
   - Installs to `~/.claude/skills/` by default for Claude Desktop and Claude Code integration
@@ -18,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New exporter: `edgar/ai/exporters/claude_skills.py`
   - **Usage**: `export_skill(edgartools_skill, format="claude-skills")`
   - **Impact**: Official format for Claude Desktop/Code, automatic skill discovery
-  - **Backward Compatible**: Existing `claude-desktop` format (lowercase skill.md) still supported
+  - **Backward Compatible**: Existing `claude-desktop` format still supported
   - **Files**: `edgar/ai/exporters/claude_skills.py`, `edgar/ai/exporters/__init__.py`
   - **Tests**: 5 comprehensive tests added to `tests/test_ai_skill_export.py`
   - **Docs**: Updated `docs/ai-integration.md`, `edgar/ai/README.md`, `examples/ai/README.md`

@@ -283,7 +283,27 @@ print(skill_content)
 
 ### Exporting Skills
 
-Export skills for use with AI tools like Claude Desktop and Claude Code:
+Export skills for use with AI tools like Claude Desktop and Claude Code.
+
+#### Simple API (Recommended)
+
+```python
+from edgar.ai import install_skill, package_skill
+
+# Install to ~/.claude/skills/ for automatic discovery
+install_skill()
+# Output: /Users/username/.claude/skills/edgartools
+
+# Create ZIP for Claude Desktop upload
+package_skill()
+# Output: edgartools.zip (ready to upload)
+
+# Custom locations
+install_skill(to="~/my-skills")
+package_skill(output="~/Desktop")
+```
+
+#### Advanced API
 
 ```python
 from edgar.ai import export_skill, edgartools_skill
@@ -293,8 +313,12 @@ path = export_skill(
     edgartools_skill,
     format="claude-skills"  # Default format
 )
-print(f"Installed to: {path}")
-# Output: /Users/username/.claude/skills/edgartools
+
+# Claude Desktop upload format (creates ZIP with SKILL.md)
+zip_path = export_skill(
+    edgartools_skill,
+    format="claude-desktop"
+)
 
 # Export to custom location
 path = export_skill(
@@ -302,22 +326,6 @@ path = export_skill(
     format="claude-skills",
     output_dir="~/my-skills",
     install=False
-)
-
-# Claude Desktop upload format (creates ZIP with SKILL.md)
-zip_path = export_skill(
-    edgartools_skill,
-    format="claude-desktop",
-    output_dir="~/exports"
-)
-# Ready to upload via Claude Desktop's skill upload UI
-
-# Export as directory (not ZIP)
-path = export_skill(
-    edgartools_skill,
-    format="claude-desktop",
-    output_dir="~/exports",
-    create_zip=False
 )
 ```
 

@@ -451,3 +451,83 @@ def test_claude_skills_invalid_format():
 
     with pytest.raises(ValueError, match="Unknown export format"):
         export_skill(edgartools_skill, format="invalid-format")
+
+
+# ============================================================================
+# Convenience Functions Tests (Delightful API)
+# ============================================================================
+
+
+@pytest.mark.fast
+def test_install_skill_default():
+    """Test install_skill() with defaults (auto-detects edgartools_skill)."""
+    from edgar.ai import install_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir)
+
+        # Install to custom location
+        skill_dir = install_skill(to=output_dir)
+
+        # Check installation
+        assert skill_dir.exists()
+        assert skill_dir.is_dir()
+        assert skill_dir.name == "edgartools"
+        assert (skill_dir / "SKILL.md").exists()
+
+
+@pytest.mark.fast
+def test_package_skill_default():
+    """Test package_skill() with defaults (creates ZIP in current directory)."""
+    from edgar.ai import package_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir)
+
+        # Create ZIP in custom location
+        zip_path = package_skill(output=output_dir)
+
+        # Check ZIP was created
+        assert zip_path.exists()
+        assert zip_path.suffix == ".zip"
+        assert zip_path.name == "edgartools.zip"
+
+        # Verify ZIP contents
+        with zipfile.ZipFile(zip_path, 'r') as zipf:
+            namelist = zipf.namelist()
+            assert any("SKILL.md" in name for name in namelist)
+
+
+@pytest.mark.fast
+def test_install_skill_custom_location():
+    """Test install_skill() with custom location."""
+    from edgar.ai import install_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        custom_dir = Path(tmpdir) / "my-skills"
+
+        # Install to custom location
+        skill_dir = install_skill(to=custom_dir)
+
+        # Check installation
+        assert skill_dir.exists()
+        assert skill_dir.parent == custom_dir
+        assert (skill_dir / "SKILL.md").exists()
+
+
+@pytest.mark.fast
+def test_package_skill_custom_output():
+    """Test package_skill() with custom output directory."""
+    from edgar.ai import package_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        custom_output = Path(tmpdir) / "output"
+        custom_output.mkdir()
+
+        # Create ZIP in custom location
+        zip_path = package_skill(output=custom_output)
+
+        # Check ZIP was created in correct location
+        assert zip_path.exists()
+        assert zip_path.parent == custom_output
+        assert zip_path.name == "edgartools.zip"

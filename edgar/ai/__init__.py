@@ -17,11 +17,15 @@ Dependencies included:
     - tiktoken: Token counting and optimization
 
 Skills API:
-    >>> from edgar.ai import edgartools_skill, export_skill
+    >>> from edgar.ai import install_skill, package_skill
     >>>
-    >>> # Export skill for Claude Desktop
-    >>> export_skill(edgartools_skill, format="claude-desktop")
-    PosixPath('edgartools')
+    >>> # Install skill to ~/.claude/skills/
+    >>> install_skill()
+    PosixPath('/Users/username/.claude/skills/edgartools')
+    >>>
+    >>> # Create ZIP for Claude Desktop upload
+    >>> package_skill()
+    PosixPath('edgartools.zip')
 
     >>> # List available skills
     >>> from edgar.ai import list_skills
@@ -72,6 +76,76 @@ from edgar.ai.skills import list_skills, get_skill
 from edgar.ai.skills.core import edgartools_skill
 from edgar.ai.exporters import export_skill
 
+# Convenience functions for common workflows
+def install_skill(skill=None, to=None):
+    """
+    Install a skill to ~/.claude/skills/ for automatic discovery.
+
+    Simple, delightful API for installing skills to Claude.
+
+    Args:
+        skill: Skill to install (defaults to edgartools_skill)
+        to: Custom installation directory (defaults to ~/.claude/skills/)
+
+    Returns:
+        Path: Path to installed skill directory
+
+    Examples:
+        >>> from edgar.ai import install_skill
+        >>>
+        >>> # Install EdgarTools skill (default)
+        >>> install_skill()
+        PosixPath('/Users/username/.claude/skills/edgartools')
+        >>>
+        >>> # Install to custom location
+        >>> install_skill(to="~/my-skills")
+        PosixPath('/Users/username/my-skills/edgartools')
+    """
+    if skill is None:
+        skill = edgartools_skill
+
+    return export_skill(
+        skill,
+        format="claude-skills",
+        output_dir=to,
+        install=(to is None)  # Only use install flag if no custom dir
+    )
+
+
+def package_skill(skill=None, output=None):
+    """
+    Create a ZIP package for Claude Desktop upload.
+
+    Simple, delightful API for packaging skills as ZIP files.
+
+    Args:
+        skill: Skill to package (defaults to edgartools_skill)
+        output: Output directory (defaults to current directory)
+
+    Returns:
+        Path: Path to created ZIP file
+
+    Examples:
+        >>> from edgar.ai import package_skill
+        >>>
+        >>> # Create ZIP in current directory (default)
+        >>> package_skill()
+        PosixPath('edgartools.zip')
+        >>>
+        >>> # Create ZIP in custom location
+        >>> package_skill(output="~/Desktop")
+        PosixPath('/Users/username/Desktop/edgartools.zip')
+    """
+    if skill is None:
+        skill = edgartools_skill
+
+    return export_skill(
+        skill,
+        format="claude-desktop",
+        output_dir=output,
+        create_zip=True
+    )
+
 # Optional MCP functionality
 # Note: The class-based MCPServer and EdgarToolsServer are deprecated.
 # Use the function-based API instead: from edgar.ai.mcp import main, test_server
@@ -113,6 +187,10 @@ __all__ = [
     "get_skill",
     "edgartools_skill",
     "export_skill",
+
+    # Convenience functions (delightful API)
+    "install_skill",
+    "package_skill",
 
     # MCP
     "MCPServer",
