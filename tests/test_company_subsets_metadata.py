@@ -157,7 +157,7 @@ def test_get_companies_by_industry_description_contains(mock_comprehensive_datas
 
 @pytest.mark.slow
 @pytest.mark.network
-def test_get_companies_by_industry_combined_filters():
+def test_get_companies_by_industry_combined_filters(check_full_dataset_available):
     """Test combining multiple filter criteria."""
     # SIC range + description contains
     companies = get_companies_by_industry(
@@ -182,7 +182,7 @@ def test_get_companies_by_industry_combined_filters():
 
 @pytest.mark.slow
 @pytest.mark.network
-def test_get_companies_by_state_single():
+def test_get_companies_by_state_single(check_full_dataset_available):
     """Test filtering by single state."""
     # Delaware - most common state of incorporation
     de_companies = get_companies_by_state('DE')
@@ -199,7 +199,7 @@ def test_get_companies_by_state_single():
 
 @pytest.mark.slow
 @pytest.mark.network
-def test_get_companies_by_state_multiple():
+def test_get_companies_by_state_multiple(check_full_dataset_available):
     """Test filtering by multiple states."""
     # Delaware and Nevada
     companies = get_companies_by_state(['DE', 'NV'])
@@ -229,7 +229,7 @@ def test_get_companies_by_state_case_insensitive():
 
 @pytest.mark.slow
 @pytest.mark.network
-def test_company_subset_from_industry():
+def test_company_subset_from_industry(check_full_dataset_available):
     """Test CompanySubset.from_industry() method."""
     subset = CompanySubset().from_industry(sic=2834)
     companies = subset.get()
@@ -244,7 +244,7 @@ def test_company_subset_from_industry():
 
 @pytest.mark.slow
 @pytest.mark.network
-def test_company_subset_from_state():
+def test_company_subset_from_state(check_full_dataset_available):
     """Test CompanySubset.from_state() method."""
     subset = CompanySubset().from_state('DE')
     companies = subset.get()
@@ -259,7 +259,7 @@ def test_company_subset_from_state():
 
 @pytest.mark.slow
 @pytest.mark.network
-def test_company_subset_chained_industry_and_sample():
+def test_company_subset_chained_industry_and_sample(check_full_dataset_available):
     """Test chaining industry filter with sampling."""
     subset = CompanySubset().from_industry(sic=2834).sample(10, random_state=42)
     companies = subset.get()
