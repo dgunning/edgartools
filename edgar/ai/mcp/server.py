@@ -128,6 +128,75 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["company"]
             }
+        ),
+        Tool(
+            name="edgar_industry_overview",
+            description="Get overview of an industry sector including company count, major players, and aggregate metrics. Use this to understand industry landscape before diving into specific companies.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "industry": {
+                        "type": "string",
+                        "enum": [
+                            "pharmaceuticals", "biotechnology", "software",
+                            "semiconductors", "banking", "investment",
+                            "insurance", "real_estate", "oil_gas", "retail"
+                        ],
+                        "description": "Industry sector to analyze"
+                    },
+                    "include_top_companies": {
+                        "type": "boolean",
+                        "description": "Include list of major companies in the sector",
+                        "default": True
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Number of top companies to show (by filing activity)",
+                        "default": 10
+                    }
+                },
+                "required": ["industry"]
+            }
+        ),
+        Tool(
+            name="edgar_compare_industry_companies",
+            description="Compare financial performance of companies within an industry sector. Automatically selects top companies or accepts custom company list for side-by-side financial comparison.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "industry": {
+                        "type": "string",
+                        "enum": [
+                            "pharmaceuticals", "biotechnology", "software",
+                            "semiconductors", "banking", "investment",
+                            "insurance", "real_estate", "oil_gas", "retail"
+                        ],
+                        "description": "Industry sector to analyze"
+                    },
+                    "companies": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Optional: Specific tickers to compare (e.g., ['AAPL', 'MSFT', 'GOOGL']). If omitted, uses top companies by market presence.",
+                        "default": None
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Number of companies to compare if not specified (default 5, max 10)",
+                        "default": 5
+                    },
+                    "periods": {
+                        "type": "integer",
+                        "description": "Number of periods for comparison (default 3)",
+                        "default": 3
+                    },
+                    "annual": {
+                        "type": "boolean",
+                        "description": "Annual (true) or quarterly (false) comparison",
+                        "default": True
+                    }
+                },
+                "required": ["industry"]
+            }
         )
     ]
 
@@ -140,11 +209,17 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
 
     try:
         if name == "edgar_company_research":
-            from edgar.ai.tools.company_research import handle_company_research
+            from edgar.ai.mcp.tools.company_research import handle_company_research
             return await handle_company_research(arguments)
         elif name == "edgar_analyze_financials":
-            from edgar.ai.tools.financial_analysis import handle_analyze_financials
+            from edgar.ai.mcp.tools.financial_analysis import handle_analyze_financials
             return await handle_analyze_financials(arguments)
+        elif name == "edgar_industry_overview":
+            from edgar.ai.mcp.tools.industry_analysis import handle_industry_overview
+            return await handle_industry_overview(arguments)
+        elif name == "edgar_compare_industry_companies":
+            from edgar.ai.mcp.tools.industry_analysis import handle_compare_industry_companies
+            return await handle_compare_industry_companies(arguments)
         else:
             raise ValueError(f"Unknown tool: {name}")
 

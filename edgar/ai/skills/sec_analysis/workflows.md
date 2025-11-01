@@ -517,6 +517,130 @@ print(tech_filings)  # Much smaller result set
 
 ---
 
+## Workflow 8: Industry Analysis and Company Filtering
+
+**Goal**: Analyze companies within specific industries and filter filings by industry sector
+
+**Use Case**: Sector research, competitive analysis, industry trends
+
+### Get Companies by Industry
+
+```python
+from edgar.ai.helpers import (
+    get_pharmaceutical_companies,
+    get_software_companies,
+    get_banking_companies,
+    get_companies_by_state
+)
+
+# Get all pharmaceutical companies (SIC 2834)
+pharma = get_pharmaceutical_companies()
+print(f"Found {len(pharma)} pharmaceutical companies")
+print(pharma[['ticker', 'name', 'state_of_incorporation']].head())
+
+# Get all software companies (SIC 7371-7379)
+software = get_software_companies()
+print(f"Found {len(software)} software companies")
+
+# Get Delaware-incorporated companies
+de_companies = get_companies_by_state('DE')
+print(f"Found {len(de_companies)} Delaware companies")
+```
+
+### Filter Filings by Industry
+
+```python
+from edgar import get_filings
+from edgar.ai.helpers import filter_by_industry
+
+# Get all 10-K filings from Q4 2023
+filings = get_filings(2023, 4, form="10-K")
+print(f"Total filings: {len(filings)}")
+
+# Filter to pharmaceutical companies (SIC 2834)
+pharma_10ks = filter_by_industry(filings, sic=2834)
+print(f"Pharmaceutical 10-Ks: {len(pharma_10ks)}")
+
+# Filter to software companies (SIC 7371-7379)
+software_10ks = filter_by_industry(filings, sic_range=(7371, 7380))
+print(f"Software 10-Ks: {len(software_10ks)}")
+
+# Filter using description search
+ai_filings = filter_by_industry(filings, sic_description_contains="software")
+print(f"AI/Software filings: {len(ai_filings)}")
+```
+
+### Complex Filtering with CompanySubset
+
+```python
+from edgar import get_filings
+from edgar.reference import CompanySubset
+from edgar.ai.helpers import filter_by_company_subset
+
+# Get filings
+filings = get_filings(2023, 4, form="10-K")
+
+# Build complex company filter using fluent interface
+companies = (CompanySubset()
+    .from_industry(sic=2834)  # Pharmaceutical companies
+    .from_state('DE')          # Incorporated in Delaware
+    .sample(10, random_state=42))  # Random sample of 10
+
+# Filter filings
+pharma_de = filter_by_company_subset(filings, companies)
+print(f"Delaware pharma 10-Ks (sample): {len(pharma_de)}")
+```
+
+### Analyze Industry Sector
+
+```python
+from edgar import Company
+from edgar.ai.helpers import get_pharmaceutical_companies
+
+# Get all pharmaceutical companies
+pharma = get_pharmaceutical_companies()
+
+# Analyze top public companies
+public_pharma = pharma[pharma['ticker'].notna()].copy()
+
+for _, row in public_pharma.head(5).iterrows():
+    company = Company(row['ticker'])
+
+    # Get 3-year revenue trend
+    income = company.income_statement(periods=3)
+    print(f"\n{row['ticker']} - {row['name']}")
+    print(income)
+```
+
+### Available Industry Functions
+
+EdgarTools provides convenience functions for 10 major industries:
+
+```python
+from edgar.ai.helpers import (
+    get_pharmaceutical_companies,    # SIC 2834
+    get_biotechnology_companies,     # SIC 2833-2836
+    get_software_companies,          # SIC 7371-7379
+    get_semiconductor_companies,     # SIC 3674
+    get_banking_companies,           # SIC 6020-6029
+    get_investment_companies,        # SIC 6200-6299
+    get_insurance_companies,         # SIC 6300-6399
+    get_real_estate_companies,       # SIC 6500-6599
+    get_oil_gas_companies,           # SIC 1300-1399
+    get_retail_companies,            # SIC 5200-5999
+)
+```
+
+### Performance Note
+
+Industry filtering uses the comprehensive company dataset (562K companies) with zero SEC API calls:
+
+- **First time**: ~30 seconds (builds local dataset)
+- **Cached**: < 1 second (uses local .pq file)
+- **100x+ faster** than making API calls per company
+
+---
+
 ## See Also
 
 - [skill.md](skill.md) - Main API documentation
