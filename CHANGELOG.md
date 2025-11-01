@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **SGML Parser ITEM and RULE Tag Support** (#477)
+  - Added 'ITEM' and 'RULE' to SECTION_TAGS in SubmissionFormatParser
+  - Added 'ITEM' to REPEATABLE_TAGS for multiple item handling
+  - Enables parsing of SD (Specialized Disclosure) filings with conflict minerals reporting
+  - Fixes parsing failures when encountering ITEM/RULE sections in SD filing headers
+  - **Impact**: Enables ESG analysis and supply chain transparency reporting workflows
+  - **Files**: `edgar/sgml/sgml_parser.py`
+  - **Tests**: 4 comprehensive regression tests added
+
 ## [4.24.0] - 2025-10-31
 ### Fixed
 
