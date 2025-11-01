@@ -59,6 +59,10 @@ ai-dev = [
     "responses>=0.24.0",         # HTTP response mocking
 ]
 
+data = [
+    "duckdb>=1.0.0",            # SQL interface for company datasets
+]
+
 [project.urls]
 Documentation = "https://dgunning.github.io/edgartools/"
 Issues = "https://github.com/dgunning/edgartools/issues"
