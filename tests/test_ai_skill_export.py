@@ -466,8 +466,8 @@ def test_install_skill_default():
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
-        # Install to custom location
-        skill_dir = install_skill(to=output_dir)
+        # Install to custom location (quiet mode for tests)
+        skill_dir = install_skill(to=output_dir, quiet=True)
 
         # Check installation
         assert skill_dir.exists()
@@ -484,8 +484,8 @@ def test_package_skill_default():
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
-        # Create ZIP in custom location
-        zip_path = package_skill(output=output_dir)
+        # Create ZIP in custom location (quiet mode for tests)
+        zip_path = package_skill(output=output_dir, quiet=True)
 
         # Check ZIP was created
         assert zip_path.exists()
@@ -506,8 +506,8 @@ def test_install_skill_custom_location():
     with tempfile.TemporaryDirectory() as tmpdir:
         custom_dir = Path(tmpdir) / "my-skills"
 
-        # Install to custom location
-        skill_dir = install_skill(to=custom_dir)
+        # Install to custom location (quiet mode for tests)
+        skill_dir = install_skill(to=custom_dir, quiet=True)
 
         # Check installation
         assert skill_dir.exists()
@@ -524,8 +524,8 @@ def test_package_skill_custom_output():
         custom_output = Path(tmpdir) / "output"
         custom_output.mkdir()
 
-        # Create ZIP in custom location
-        zip_path = package_skill(output=custom_output)
+        # Create ZIP in custom location (quiet mode for tests)
+        zip_path = package_skill(output=custom_output, quiet=True)
 
         # Check ZIP was created in correct location
         assert zip_path.exists()
