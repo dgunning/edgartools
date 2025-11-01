@@ -1,9 +1,9 @@
 ---
-name: SEC Filing Analysis
+name: EdgarTools
 description: Query and analyze SEC filings and financial statements using EdgarTools. Get company data, filings, XBRL financials, and perform multi-company analysis.
 ---
 
-# SEC Filing Analysis
+# EdgarTools
 
 Analyze SEC filings and financial statements using EdgarTools - a Python library for accessing and analyzing SEC EDGAR data.
 

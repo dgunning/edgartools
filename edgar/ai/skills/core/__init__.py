@@ -1,5 +1,5 @@
 """
-SEC Filing Analysis Skill - Core EdgarTools AI skill.
+EdgarTools Skill - Core EdgarTools AI skill.
 
 Provides comprehensive documentation and helper functions for analyzing
 SEC filings and financial statements using EdgarTools.
@@ -9,12 +9,12 @@ from pathlib import Path
 from typing import Dict, Callable
 from edgar.ai.skills.base import BaseSkill
 
-__all__ = ['SECAnalysisSkill', 'sec_analysis_skill']
+__all__ = ['EdgarToolsSkill', 'edgartools_skill']
 
 
-class SECAnalysisSkill(BaseSkill):
+class EdgarToolsSkill(BaseSkill):
     """
-    SEC Filing Analysis - EdgarTools' foundational AI skill.
+    EdgarTools - AI skill for SEC filing analysis.
 
     This skill provides:
     - Comprehensive API documentation for SEC filing analysis
@@ -29,22 +29,22 @@ class SECAnalysisSkill(BaseSkill):
     - Object representations optimized for AI
 
     Example:
-        >>> from edgar.ai.skills.sec_analysis import sec_analysis_skill
+        >>> from edgar.ai.skills.core import edgartools_skill
         >>>
         >>> # List available documentation
-        >>> print(sec_analysis_skill.get_documents())
+        >>> print(edgartools_skill.get_documents())
         >>> ['skill', 'objects', 'workflows', 'readme']
         >>>
         >>> # Get main skill documentation
-        >>> guide = sec_analysis_skill.get_document_content("skill")
+        >>> guide = edgartools_skill.get_document_content("skill")
         >>>
         >>> # Access helper functions
-        >>> helpers = sec_analysis_skill.get_helpers()
+        >>> helpers = edgartools_skill.get_helpers()
         >>> get_revenue_trend = helpers['get_revenue_trend']
         >>> income = get_revenue_trend("AAPL", periods=3)
         >>>
         >>> # Export skill for Claude Desktop
-        >>> path = sec_analysis_skill.export(
+        >>> path = edgartools_skill.export(
         ...     format="claude-desktop",
         ...     output_dir="~/.config/claude/skills"
         ... )
@@ -52,8 +52,8 @@ class SECAnalysisSkill(BaseSkill):
 
     @property
     def name(self) -> str:
-        """Skill name: 'SEC Filing Analysis'"""
-        return "SEC Filing Analysis"
+        """Skill name: 'EdgarTools'"""
+        return "EdgarTools"
 
     @property
     def description(self) -> str:
@@ -78,7 +78,7 @@ class SECAnalysisSkill(BaseSkill):
         Returns:
             List of Path objects to centralized markdown documentation files
         """
-        # Navigate from edgar/ai/skills/sec_analysis/ to edgar/ root
+        # Navigate from edgar/ai/skills/core/ to edgar/ root
         edgar_root = Path(__file__).parent.parent.parent.parent
 
         return [
@@ -116,4 +116,4 @@ class SECAnalysisSkill(BaseSkill):
 
 
 # Create singleton instance for convenience
-sec_analysis_skill = SECAnalysisSkill()
+edgartools_skill = EdgarToolsSkill()

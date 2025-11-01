@@ -102,7 +102,7 @@ from edgar.ai.helpers import get_revenue_trend, compare_companies_revenue
 skills = list_skills()
 
 # Get specific skill
-skill = get_skill("SEC Filing Analysis")
+skill = get_skill("EdgarTools")
 
 # Use helper functions
 income = get_revenue_trend("AAPL", periods=3)
@@ -272,7 +272,7 @@ Quick setup:
 
 - [AI Integration Guide](../../docs/ai-integration.md) - Comprehensive guide
 - [EdgarTools Documentation](https://edgartools.readthedocs.io/)
-- [AI Skills README](../../edgar/ai/skills/sec_analysis/readme.md)
+- [AI Skills README](../../edgar/ai/skills/core/readme.md)
 - [GitHub Discussions](https://github.com/dgunning/edgartools/discussions)
 
 ## Contributing

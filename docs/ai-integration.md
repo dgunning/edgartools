@@ -207,7 +207,7 @@ from edgar.ai import list_skills
 # Get all available skills
 skills = list_skills()
 print(skills)
-# [SECAnalysisSkill(name='SEC Filing Analysis')]
+# [EdgarToolsSkill(name='EdgarTools')]
 ```
 
 ### Getting a Specific Skill
@@ -215,9 +215,9 @@ print(skills)
 ```python
 from edgar.ai import get_skill
 
-skill = get_skill("SEC Filing Analysis")
+skill = get_skill("EdgarTools")
 print(skill)
-# Skill: SEC Filing Analysis
+# Skill: EdgarTools
 # Description: Query and analyze SEC filings and financial statements...
 # Documents: 4
 # Helper Functions: 5
@@ -239,7 +239,7 @@ print(income)
 
 ### Available Helper Functions
 
-The SEC Filing Analysis skill includes:
+The EdgarTools skill includes:
 
 ```python
 from edgar.ai.helpers import (
@@ -716,7 +716,7 @@ text = company.text(detail='standard', max_tokens=500)
 
 - [EdgarTools Documentation](https://edgartools.readthedocs.io/)
 - [MCP Quickstart Guide](../edgar/ai/mcp/docs/MCP_QUICKSTART.md)
-- [AI Skills README](../edgar/ai/skills/sec_analysis/readme.md)
+- [AI Skills README](../edgar/ai/skills/core/readme.md)
 - [GitHub Issues](https://github.com/dgunning/edgartools/issues)
 - [GitHub Discussions](https://github.com/dgunning/edgartools/discussions)
 

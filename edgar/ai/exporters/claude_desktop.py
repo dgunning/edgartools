@@ -30,12 +30,12 @@ def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: 
         Path: Path to exported skill directory (or zip file if create_zip=True)
 
     Examples:
-        >>> from edgar.ai.skills import sec_analysis_skill
-        >>> export_claude_desktop(sec_analysis_skill)
-        PosixPath('sec-filing-analysis')
+        >>> from edgar.ai.skills import edgartools_skill
+        >>> export_claude_desktop(edgartools_skill)
+        PosixPath('edgartools')
 
-        >>> export_claude_desktop(sec_analysis_skill, create_zip=True)
-        PosixPath('sec-filing-analysis.zip')
+        >>> export_claude_desktop(edgartools_skill, create_zip=True)
+        PosixPath('edgartools.zip')
     """
     from edgar.ai.skills.base import BaseSkill
 

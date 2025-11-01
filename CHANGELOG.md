@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Skill Package Renamed: sec_analysis → core** (Brand Alignment)
+  - Renamed skill directory from `edgar/ai/skills/sec_analysis/` to `edgar/ai/skills/core/`
+  - Updated skill name from "SEC Filing Analysis" to "EdgarTools"
+  - Updated Python identifiers: `SECAnalysisSkill` → `EdgarToolsSkill`, `sec_analysis_skill` → `edgartools_skill`
+  - Updated export directory name: `sec-filing-analysis` → `edgartools`
+  - **Rationale**: Aligns with EdgarTools brand, creates intuitive skill path `~/.claude/skills/edgartools/`
+  - **Future-proof**: Prevents naming collision when top-level package renames from `edgar` to `edgartools`
+  - **Impact**: Better brand recognition, clearer skill installation path
+  - **Files**: All skill-related imports, tests, documentation, and examples updated
+
 ### Fixed
 
 - **SGML Parser ITEM and RULE Tag Support** (#477)
@@ -40,17 +52,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - **Impact**: Q2 test score improvement from 7.6 → 9.4 (+23.7%)
   - **Overall Impact**: Average Skills API test score improved from 7.5 → 8.1 (+8%)
   - **Files**:
-    - `edgar/ai/skills/sec_analysis/objects.md` - Search warnings + Form4 fixes
-    - `edgar/ai/skills/sec_analysis/quickstart-by-task.md` - Content search examples
-    - `edgar/ai/skills/sec_analysis/skill.md` - Comprehensive search documentation
+    - `edgar/ai/skills/core/objects.md` - Search warnings + Form4 fixes
+    - `edgar/ai/skills/core/quickstart-by-task.md` - Content search examples
+    - `edgar/ai/skills/core/skill.md` - Comprehensive search documentation
     - `edgar/ai/helpers.py` - Added filter_by_industry() function
 
 ### Added
 
 - **New Skills API Documentation Files** (165156f)
-  - `edgar/ai/skills/sec_analysis/data-objects.md` - Comprehensive data objects documentation
-  - `edgar/ai/skills/sec_analysis/form-types-reference.md` - Form types reference
-  - `edgar/ai/skills/sec_analysis/quickstart-by-task.md` - Task-oriented quickstart guide
+  - `edgar/ai/skills/core/data-objects.md` - Comprehensive data objects documentation
+  - `edgar/ai/skills/core/form-types-reference.md` - Form types reference
+  - `edgar/ai/skills/core/quickstart-by-task.md` - Task-oriented quickstart guide
 
 ### Changed
 
@@ -133,7 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **AI Skills Infrastructure** - Extensible skill system for specialized SEC analysis and AI tool integration
   - **Feature**: New skill packaging system allowing both EdgarTools and external packages to create specialized analysis capabilities for AI agents
   - **BaseSkill Abstract Class**: Extensible framework for creating portable skill packages with documentation, helper functions, and examples
-  - **SEC Filing Analysis Skill**: Comprehensive 2,500+ line skill covering filing access, financial statement analysis, and multi-company workflows
+  - **EdgarTools Skill**: Comprehensive 2,500+ line skill covering filing access, financial statement analysis, and multi-company workflows
   - **Progressive Disclosure Documentation**: Skills follow Anthropic Claude Desktop Skills format with Quick Start → Core → Advanced structure
   - **Helper Functions**: Pre-built workflow wrappers for common analysis patterns (company research, revenue trends, financial comparison)
   - **Claude Desktop Export**: Built-in export to Claude Desktop Skills format with YAML frontmatter and two-tier documentation
@@ -146,10 +158,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
     # List available skills
     skills = list_skills()
-    # [SECAnalysisSkill(name='SEC Filing Analysis')]
+    # [EdgarToolsSkill(name='EdgarTools')]
 
     # Get specific skill
-    skill = get_skill("SEC Filing Analysis")
+    skill = get_skill("EdgarTools")
 
     # Access helper functions
     helpers = skill.get_helpers()
@@ -160,7 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     export_skill(skill, format="claude-desktop", output_dir="~/.config/claude/skills")
     ```
   - **Technical Details**:
-    - Skill content in `edgar/ai/skills/sec_analysis/` directory
+    - Skill content in `edgar/ai/skills/core/` directory
     - Extensible via `BaseSkill` abstract class for external packages
     - Export formats: Claude Desktop (with plans for MCP, ChatGPT plugins)
     - Documentation automatically includes centralized API docs in `api-reference/` subdirectory

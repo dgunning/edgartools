@@ -17,11 +17,11 @@ Dependencies included:
     - tiktoken: Token counting and optimization
 
 Skills API:
-    >>> from edgar.ai import sec_analysis_skill, export_skill
+    >>> from edgar.ai import edgartools_skill, export_skill
     >>>
     >>> # Export skill for Claude Desktop
-    >>> export_skill(sec_analysis_skill, format="claude-desktop")
-    PosixPath('sec-filing-analysis')
+    >>> export_skill(edgartools_skill, format="claude-desktop")
+    PosixPath('edgartools')
 
     >>> # List available skills
     >>> from edgar.ai import list_skills
@@ -69,7 +69,7 @@ from edgar.ai.core import AIEnabled, SemanticEnricher, TokenOptimizer, check_ai_
 # Skills infrastructure (always available)
 from edgar.ai.skills.base import BaseSkill
 from edgar.ai.skills import list_skills, get_skill
-from edgar.ai.skills.sec_analysis import sec_analysis_skill
+from edgar.ai.skills.core import edgartools_skill
 from edgar.ai.exporters import export_skill
 
 # Optional MCP functionality
@@ -111,7 +111,7 @@ __all__ = [
     "BaseSkill",
     "list_skills",
     "get_skill",
-    "sec_analysis_skill",
+    "edgartools_skill",
     "export_skill",
 
     # MCP

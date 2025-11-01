@@ -23,13 +23,13 @@ def export_skill(skill, format: str = "claude-desktop", output_dir=None, **kwarg
         Path: Path to exported skill directory or archive
 
     Examples:
-        >>> from edgar.ai.skills import sec_analysis_skill
-        >>> export_skill(sec_analysis_skill, format="claude-desktop")
-        PosixPath('sec-filing-analysis')
+        >>> from edgar.ai.skills import edgartools_skill
+        >>> export_skill(edgartools_skill, format="claude-desktop")
+        PosixPath('edgartools')
 
         >>> # Export as zip archive
-        >>> export_skill(sec_analysis_skill, format="claude-desktop", create_zip=True)
-        PosixPath('sec-filing-analysis.zip')
+        >>> export_skill(edgartools_skill, format="claude-desktop", create_zip=True)
+        PosixPath('edgartools.zip')
     """
     if format == "claude-desktop":
         return export_claude_desktop(skill, output_dir=output_dir, **kwargs)

@@ -172,7 +172,7 @@ edgar/ai/
 │
 ├── skills/              # AI Skills infrastructure
 │   ├── base.py          # BaseSkill abstract class
-│   └── sec_analysis/    # SEC Filing Analysis skill
+│   └── core/            # EdgarTools skill
 │
 ├── exporters/           # Export capabilities
 │   └── claude_desktop.py

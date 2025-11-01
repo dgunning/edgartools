@@ -13,22 +13,22 @@ import zipfile
 
 
 @pytest.mark.fast
-def test_sec_analysis_skill_exists():
-    """Test that the SEC Analysis skill is available."""
-    from edgar.ai.skills.sec_analysis import sec_analysis_skill
+def test_edgartools_skill_exists():
+    """Test that the EdgarTools skill is available."""
+    from edgar.ai.skills.core import edgartools_skill
 
-    assert sec_analysis_skill is not None
-    assert sec_analysis_skill.name == "SEC Filing Analysis"
-    assert len(sec_analysis_skill.description) > 0
-    assert sec_analysis_skill.content_dir.exists()
+    assert edgartools_skill is not None
+    assert edgartools_skill.name == "EdgarTools"
+    assert len(edgartools_skill.description) > 0
+    assert edgartools_skill.content_dir.exists()
 
 
 @pytest.mark.fast
 def test_skill_has_markdown_files():
     """Test that skill content directory contains required markdown files."""
-    from edgar.ai.skills.sec_analysis import sec_analysis_skill
+    from edgar.ai.skills.core import edgartools_skill
 
-    content_dir = sec_analysis_skill.content_dir
+    content_dir = edgartools_skill.content_dir
 
     # Check for main skill file
     skill_md = content_dir / "skill.md"
@@ -46,9 +46,9 @@ def test_skill_has_markdown_files():
 @pytest.mark.fast
 def test_skill_markdown_has_frontmatter():
     """Test that skill.md has valid YAML frontmatter."""
-    from edgar.ai.skills.sec_analysis import sec_analysis_skill
+    from edgar.ai.skills.core import edgartools_skill
 
-    skill_md = sec_analysis_skill.content_dir / "skill.md"
+    skill_md = edgartools_skill.content_dir / "skill.md"
     content = skill_md.read_text(encoding='utf-8')
 
     # Check frontmatter structure
@@ -73,7 +73,7 @@ def test_list_skills():
     skills = list_skills()
 
     assert len(skills) > 0, "Should have at least one skill"
-    assert any(s.name == "SEC Filing Analysis" for s in skills)
+    assert any(s.name == "EdgarTools" for s in skills)
 
 
 @pytest.mark.fast
@@ -81,10 +81,10 @@ def test_get_skill():
     """Test getting specific skill by name."""
     from edgar.ai import get_skill
 
-    skill = get_skill("SEC Filing Analysis")
+    skill = get_skill("EdgarTools")
 
     assert skill is not None
-    assert skill.name == "SEC Filing Analysis"
+    assert skill.name == "EdgarTools"
 
 
 @pytest.mark.fast
@@ -99,13 +99,13 @@ def test_get_skill_not_found():
 @pytest.mark.fast
 def test_export_skill_to_directory():
     """Test exporting skill to a directory."""
-    from edgar.ai import sec_analysis_skill, export_skill
+    from edgar.ai import edgartools_skill, export_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
         # Export skill
-        skill_dir = export_skill(sec_analysis_skill, format="claude-desktop", output_dir=output_dir)
+        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir)
 
         # Check that directory was created
         assert skill_dir.exists()
@@ -124,16 +124,16 @@ def test_export_skill_to_directory():
 @pytest.mark.fast
 def test_export_skill_default_directory():
     """Test exporting skill to current directory (default)."""
-    from edgar.ai import sec_analysis_skill, export_skill
+    from edgar.ai import edgartools_skill, export_skill
 
     # Export to current directory
-    skill_dir = export_skill(sec_analysis_skill, format="claude-desktop")
+    skill_dir = export_skill(edgartools_skill, format="claude-desktop")
 
     try:
         # Check that directory was created
         assert skill_dir.exists()
         assert skill_dir.is_dir()
-        assert skill_dir.name == "sec-filing-analysis"
+        assert skill_dir.name == "edgartools"
 
         # Check files
         skill_md = skill_dir / "skill.md"
@@ -148,13 +148,13 @@ def test_export_skill_default_directory():
 @pytest.mark.fast
 def test_export_skill_validates_frontmatter():
     """Test that export validates YAML frontmatter."""
-    from edgar.ai import sec_analysis_skill, export_skill
+    from edgar.ai import edgartools_skill, export_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
         # This should succeed with valid frontmatter
-        skill_dir = export_skill(sec_analysis_skill, format="claude-desktop", output_dir=output_dir)
+        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir)
 
         assert skill_dir.exists()
 
@@ -162,10 +162,10 @@ def test_export_skill_validates_frontmatter():
 @pytest.mark.fast
 def test_export_skill_unknown_format():
     """Test that unknown export format raises error."""
-    from edgar.ai import sec_analysis_skill, export_skill
+    from edgar.ai import edgartools_skill, export_skill
 
     with pytest.raises(ValueError, match="Unknown export format"):
-        export_skill(sec_analysis_skill, format="unknown-format")
+        export_skill(edgartools_skill, format="unknown-format")
 
 
 @pytest.mark.fast
@@ -181,9 +181,9 @@ def test_base_skill_interface():
 @pytest.mark.fast
 def test_skill_get_helpers():
     """Test that skill provides helper functions."""
-    from edgar.ai.skills.sec_analysis import sec_analysis_skill
+    from edgar.ai.skills.core import edgartools_skill
 
-    helpers = sec_analysis_skill.get_helpers()
+    helpers = edgartools_skill.get_helpers()
 
     assert isinstance(helpers, dict)
     assert len(helpers) > 0
@@ -203,13 +203,13 @@ def test_skill_get_helpers():
 @pytest.mark.fast
 def test_skill_export_method():
     """Test BaseSkill.export() method."""
-    from edgar.ai.skills.sec_analysis import sec_analysis_skill
+    from edgar.ai.skills.core import edgartools_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
         # Use the skill's export method directly
-        skill_dir = sec_analysis_skill.export(format="claude-desktop", output_dir=output_dir)
+        skill_dir = edgartools_skill.export(format="claude-desktop", output_dir=output_dir)
 
         assert skill_dir.exists()
         assert (skill_dir / "skill.md").exists()
@@ -218,13 +218,13 @@ def test_skill_export_method():
 @pytest.mark.fast
 def test_export_skill_includes_object_docs():
     """Test that exported skill includes centralized object documentation."""
-    from edgar.ai import sec_analysis_skill, export_skill
+    from edgar.ai import edgartools_skill, export_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
         # Export skill
-        skill_dir = export_skill(sec_analysis_skill, format="claude-desktop", output_dir=output_dir)
+        skill_dir = export_skill(edgartools_skill, format="claude-desktop", output_dir=output_dir)
 
         # Check that api-reference directory was created
         api_ref_dir = skill_dir / "api-reference"
@@ -255,14 +255,14 @@ def test_export_skill_includes_object_docs():
 @pytest.mark.fast
 def test_export_skill_with_zip_includes_object_docs():
     """Test that zipped skill export includes object documentation."""
-    from edgar.ai import sec_analysis_skill, export_skill
+    from edgar.ai import edgartools_skill, export_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
 
         # Export skill as zip
         zip_path = export_skill(
-            sec_analysis_skill,
+            edgartools_skill,
             format="claude-desktop",
             output_dir=output_dir,
             create_zip=True

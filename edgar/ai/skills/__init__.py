@@ -6,12 +6,12 @@ that enable AI agents to perform domain-specific tasks with EdgarTools.
 """
 
 from edgar.ai.skills.base import BaseSkill
-from edgar.ai.skills.sec_analysis import sec_analysis_skill, SECAnalysisSkill
+from edgar.ai.skills.core import edgartools_skill, EdgarToolsSkill
 
 __all__ = [
     'BaseSkill',
-    'SECAnalysisSkill',
-    'sec_analysis_skill',
+    'EdgarToolsSkill',
+    'edgartools_skill',
     'list_skills',
     'get_skill',
 ]
@@ -32,7 +32,7 @@ def list_skills() -> list:
     """
     # Currently only one built-in skill
     # External packages can register additional skills here
-    return [sec_analysis_skill]
+    return [edgartools_skill]
 
 
 def get_skill(name: str) -> BaseSkill:
@@ -40,7 +40,7 @@ def get_skill(name: str) -> BaseSkill:
     Get skill by name.
 
     Args:
-        name: Skill name (e.g., "SEC Filing Analysis")
+        name: Skill name (e.g., "EdgarTools")
 
     Returns:
         BaseSkill instance
@@ -50,7 +50,7 @@ def get_skill(name: str) -> BaseSkill:
 
     Example:
         >>> from edgar.ai.skills import get_skill
-        >>> skill = get_skill("SEC Filing Analysis")
+        >>> skill = get_skill("EdgarTools")
         >>> docs = skill.get_documents()
     """
     for skill in list_skills():
