@@ -142,9 +142,10 @@ balance_sheet = Company("AAPL").get_financials().balance_sheet()
 # 4. Explore with interactive documentation
 company = Company("MSFT")
 
-# 5. Or explore any filing
-filings = company.get_filings(form="10-K")
-latest_10k = filings[0]
+# 5. Or explore insider transactions
+filings = company.get_filings(form="4")
+form4_filing = filings[0]
+form4 = form4_filing.obj()
 ```
 
 ![Apple SEC Form 4 insider transaction data extraction with Python](docs/images/aapl-insider.png)
