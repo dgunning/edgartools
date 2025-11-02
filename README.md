@@ -4,7 +4,7 @@
 </a>
 </p>
 
-<h3 align="center">The Python Library for SEC EDGAR Data. AI Native</h3>
+<h3 align="center">The AI Native Python library for SEC EDGAR Data</h3>
 
 <p align="center">
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/v/edgartools.svg" alt="PyPI - Version"></a>
@@ -306,9 +306,9 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
-## 💛 Support Development
+## 💛 Support AI Powered Development
 
-**EdgarTools is built and maintained solo using AI-assisted development.** Your support directly funds the Claude Max subscription that makes this extraordinary velocity possible.
+**I build and maintain EdgarTools solo using AI-assisted development.** Your support directly funds the Claude Max subscription that makes this extraordinary velocity possible.
 
 ### The Virtuous Cycle
 
