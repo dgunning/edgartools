@@ -4,7 +4,7 @@
 </a>
 </p>
 
-<h3 align="center">The AI-Native Python Library for SEC EDGAR Data</h3>
+<h3 align="center">The Python Library for SEC EDGAR Data. AI Native</h3>
 
 <p align="center">
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/v/edgartools.svg" alt="PyPI - Version"></a>
