@@ -33,6 +33,6 @@
   <!-- Text -->
   <text x="80" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
         font-size="24" font-weight="700" fill="#FFD700" letter-spacing="1">
-    COMMUNITY & SUPPORT
+    COMMUNITY &amp; SUPPORT
   </text>
 </svg>

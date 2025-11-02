@@ -17,11 +17,11 @@
 
 <p align="center">
   <img src="docs/images/badges/badge-ai-native.svg" alt="AI Native">
-  <img src="docs/images/badges/badge-mcp-ready.svg" alt="MCP Ready">
   <img src="docs/images/badges/badge-10x-faster.svg" alt="10x Faster">
   <img src="docs/images/badges/badge-zero-cost.svg" alt="Zero Cost">
+  <img src="docs/images/badges/badge-production-ready.svg" alt="Production Ready">
   <img src="docs/images/badges/badge-open-source.svg" alt="Open Source">
-  <img src="docs/images/badges/badge-type-safe.svg" alt="Type Safe">
+  <img src="docs/images/badges/badge-financial-data.svg" alt="Financial Data">
 </p>
 
 <p align="center">
@@ -128,32 +128,69 @@ For a comprehensive view of EdgarTools' internal architecture, see the [Architec
   <img src="docs/images/sections/section-ai-integration.svg" alt="AI Integration">
 </p>
 
-### Built for AI Agents & LLMs
+### Use EdgarTools with Claude Code & Claude Desktop
 
-EdgarTools ships with a **production-ready MCP (Model Context Protocol) server** that enables Claude and other AI assistants to analyze SEC filings directly. No API keys, no rate limits, no costs.
+EdgarTools provides **AI Skills** that enable Claude and other AI assistants to perform sophisticated SEC filing analysis. 
 
-```python
-# Start the MCP server for Claude
-uv run mcp-server-edgar
+**What are AI Skills?**
 
-# Or install globally
-pip install edgartools
-mcp-server-edgar
+AI Skills give Claude structured knowledge about EdgarTools' API, including:
+- How to search for and retrieve SEC filings
+- How to extract financial data from 10-K/10-Q reports
+- How to analyze insider transactions (Form 4)
+
+Once configured, you can ask Claude questions like:
+
+- *"How many pharmaceutical companies filed 8-K reports mentioning FDA approval in Q4 2024?"*
+- *"Compare Apple and Microsoft's revenue growth rates over the past 3 years"*
+- *"Which Tesla executives sold more than $1 million in stock in the past 6 months?"*
+- *"Find all technology companies that filed proxy statements with executive compensation changes"*
+
+Claude will write the Python code, execute it, and explain the results - all powered by EdgarTools.
+
+### Setup Option 1: AI Skills (Recommended)
+
+Install the EdgarTools skill for Claude Code or Claude Desktop:
+
+```bash
+pip install edgartools[ai]
+python -c "from edgar.ai import install_skill; install_skill()"
 ```
 
-Once configured, Claude can:
-- Research companies and extract financial metrics
-- Analyze filings and answer complex questions
-- Track insider transactions and fund holdings
-- Compare companies across standardized XBRL data
-- Generate reports with accurate SEC data
+This adds SEC analysis capabilities to Claude, including:
+- 3,450+ lines of API documentation for Claude to reference
+- Code examples for common analysis patterns
+- Form type reference (10-K, 8-K, DEF 14A, Form 4, etc.)
+- Specialized guidance for financial data extraction
 
-**AI-Optimized Features:**
-- Clean text extraction optimized for LLM context windows
-- Markdown conversion preserves document structure
-- Section extraction (MD&A, Risk Factors, etc.)
-- Chunking support for large documents
-- Zero hallucination with direct SEC data access
+### Setup Option 2: MCP Server
+
+Run EdgarTools as an MCP server for Claude Code or Claude Desktop:
+
+```bash
+pip install edgartools[ai]
+python -m edgar.ai
+```
+
+**Configuration:**
+
+Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python",
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
+```
+
+See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
@@ -174,13 +211,12 @@ set_identity("your.name@example.com")
 # 3. Get company financials in 1 line
 balance_sheet = Company("AAPL").get_financials().balance_sheet()
 
-# 4. Or explore any filing
+# 4. Explore with interactive documentation
 company = Company("MSFT")
+
+# 5. Or explore any filing
 filings = company.get_filings(form="10-K")
 latest_10k = filings[0]
-
-# 5. Extract clean text for analysis
-text = latest_10k.markdown()  # LLM-ready format
 ```
 
 ![Apple SEC Form 4 insider transaction data extraction with Python](docs/images/aapl-insider.png)
@@ -199,12 +235,14 @@ text = latest_10k.markdown()  # LLM-ready format
 <tr>
 <td width="50%">
 
-**Financial Statements**
+**Financial Statements (XBRL)**
 - Balance Sheets, Income Statements, Cash Flows
 - Individual line items via XBRL tags
-- Multi-period comparisons
+- Multi-period comparisons with comparative periods
 - Standardized cross-company data
 - Automatic unit conversion
+- Metadata columns (dimensions, members, units)
+- Complete dimensional data support
 
 **Fund Holdings (13F)**
 - Complete 13F filing history
@@ -212,6 +250,13 @@ text = latest_10k.markdown()  # LLM-ready format
 - Position tracking over time
 - Ownership percentages
 - Value calculations
+
+**Company Dataset & Reference Data**
+- Industry and state filtering
+- Company subsets with metadata
+- Standardized industry classifications
+- SEC ticker/CIK lookups
+- Exchange information
 
 **Insider Transactions**
 - Form 3, 4, 5 structured data
@@ -233,8 +278,9 @@ text = latest_10k.markdown()  # LLM-ready format
 **Performance & Reliability**
 - 10-30x faster than alternatives
 - Automatic rate limiting
-- Smart caching
+- Smart caching (30-second fresh filing cache)
 - Robust error handling
+- SSL verification with fail-fast retry
 - Type hints throughout
 
 **Developer Experience**
@@ -254,37 +300,7 @@ text = latest_10k.markdown()  # LLM-ready format
 
 <p align="center">
   <img src="docs/images/sections/section-performance.svg" alt="Performance">
-</p>
-
-### Performance That Matters
-
-| Operation | EdgarTools | Alternative | Speedup |
-|-----------|------------|-------------|---------|
-| Download 10-K filing | 0.5s | 5-15s | <img src="docs/images/icons/compare-check.svg" width="20"> **10-30x** |
-| Parse financial statements | 0.3s | 3-10s | <img src="docs/images/icons/compare-check.svg" width="20"> **10-30x** |
-| Extract XBRL data | 1.2s | 15-45s | <img src="docs/images/icons/compare-check.svg" width="20"> **12-37x** |
-| Text extraction & cleaning | 0.4s | 2-8s | <img src="docs/images/icons/compare-check.svg" width="20"> **5-20x** |
-
-Benchmarks run on standard laptop. Alternative = typical web scraping implementation.
-
-<p align="center">
-  <img src="docs/images/charts/performance-comparison.svg" alt="Performance Comparison Chart" width="700">
-</p>
-
-<details>
-<summary><b>Why is EdgarTools so fast?</b></summary>
-
-1. **Optimized parsing**: Uses `lxml` for HTML/XML parsing instead of BeautifulSoup
-2. **Efficient data structures**: Leverages PyArrow for financial data when available
-3. **Smart caching**: Avoids redundant downloads and parsing
-4. **Minimal dependencies**: Lean dependency tree reduces overhead
-5. **Purpose-built**: Designed specifically for SEC filings, not general web scraping
-
-</details>
-
-<p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
-</p>
+</p>/
 
 ## Comparison with Alternatives
 
@@ -299,20 +315,6 @@ Benchmarks run on standard laptop. Alternative = typical web scraping implementa
 | **Type Hints** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-partial.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
 | **Rate Limiting** | <img src="docs/images/icons/compare-check.svg" width="20"> Auto | N/A (API) | <img src="docs/images/icons/compare-cross.svg" width="20"> Manual | <img src="docs/images/icons/compare-cross.svg" width="20"> Manual |
 | **Open Source** | <img src="docs/images/icons/compare-check.svg" width="20"> MIT | <img src="docs/images/icons/compare-cross.svg" width="20"> Proprietary | <img src="docs/images/icons/compare-check.svg" width="20"> Apache | N/A |
-
-<p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
-</p>
-
-## Real-World Use Cases
-
-### Company Financial Analysis
-
-**Problem:** Need to analyze a company's financial health across multiple periods.
-
-![Microsoft SEC 10-K financial data analysis with EdgarTools](docs/images/MSFT_financial_complex.png)
-
-[See full code](docs/examples.md#company_financial_analysis)
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
@@ -390,12 +392,16 @@ Benchmarks run on standard laptop. Alternative = typical web scraping implementa
 | Standardized Concepts API | 2 weeks | 2-3 days | **5x faster** |
 
 <p align="center">
+  <a href="https://github.com/sponsors/dgunning" target="_blank">
+    <img src="https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA" alt="GitHub Sponsors" height="40">
+  </a>
+  &nbsp;&nbsp;
   <a href="https://www.buymeacoffee.com/edgartools" target="_blank">
-    <img src="docs/images/badges/badge-support-development.svg" alt="Support Development" height="50">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40">
   </a>
 </p>
 
-**What your $5/month enables:**
+**What your support enables:**
 - ✅ Claude Max subscription (AI agents that write, test, and document code)
 - ✅ Continued 3-10x development velocity (features in days, not weeks)
 - ✅ Rapid response to SEC format changes and bug reports
@@ -409,7 +415,7 @@ Benchmarks run on standard laptop. Alternative = typical web scraping implementa
 - 💬 Answer questions in Discussions
 - 🔗 Share EdgarTools with colleagues
 
-**Corporate users**: If your organization depends on EdgarTools for SEC compliance or regulatory reporting, [learn about Strategic Sponsorship options](https://github.com/sponsors/dgunning) designed for mission-critical dependencies.
+**Corporate users**: If your organization depends on EdgarTools for SEC compliance or regulatory reporting, [GitHub Sponsors](https://github.com/sponsors/dgunning) offers strategic sponsorship options designed for mission-critical dependencies.
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
