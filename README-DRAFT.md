@@ -162,7 +162,7 @@ form4 = form4_filing.obj()
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
 **Financial Statements (XBRL)**
 - Balance Sheets, Income Statements, Cash Flows
@@ -195,7 +195,7 @@ form4 = form4_filing.obj()
 - Automatic parsing
 
 </td>
-<td width="50%">
+<td width="50%" valign="top">
 
 **Filing Intelligence**
 - Any form type (10-K, 10-Q, 8-K, S-1, etc.)
