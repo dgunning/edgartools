@@ -250,25 +250,18 @@ latest_10k = filings[0]
 
 ### Use EdgarTools with Claude Code & Claude Desktop
 
-EdgarTools provides **AI Skills** that enable Claude and other AI assistants to perform sophisticated SEC filing analysis.
+EdgarTools provides **AI Skills** that enable Claude and other AI assistants to perform sophisticated SEC filing analysis. Once configured, you can ask Claude questions like:
 
-**What are AI Skills?**
-
-AI Skills give Claude structured knowledge about EdgarTools' API, including:
-- How to search for and retrieve SEC filings
-- How to extract financial data from 10-K/10-Q reports
-- How to analyze insider transactions (Form 4)
-
-Once configured, you can ask Claude questions like:
-
-- *"How many pharmaceutical companies filed 8-K reports mentioning FDA approval in Q4 2024?"*
 - *"Compare Apple and Microsoft's revenue growth rates over the past 3 years"*
 - *"Which Tesla executives sold more than $1 million in stock in the past 6 months?"*
 - *"Find all technology companies that filed proxy statements with executive compensation changes"*
 
 Claude will write the Python code, execute it, and explain the results - all powered by EdgarTools.
 
-### Setup Option 1: AI Skills (Recommended)
+<details>
+<summary><b>Setup Instructions</b></summary>
+
+### Option 1: AI Skills (Recommended)
 
 Install the EdgarTools skill for Claude Code or Claude Desktop:
 
@@ -277,13 +270,9 @@ pip install edgartools[ai]
 python -c "from edgar.ai import install_skill; install_skill()"
 ```
 
-This adds SEC analysis capabilities to Claude, including:
-- 3,450+ lines of API documentation for Claude to reference
-- Code examples for common analysis patterns
-- Form type reference (10-K, 8-K, DEF 14A, Form 4, etc.)
-- Specialized guidance for financial data extraction
+This adds SEC analysis capabilities to Claude, including 3,450+ lines of API documentation, code examples, and form type reference.
 
-### Setup Option 2: MCP Server
+### Option 2: MCP Server
 
 Run EdgarTools as an MCP server for Claude Code or Claude Desktop:
 
@@ -291,8 +280,6 @@ Run EdgarTools as an MCP server for Claude Code or Claude Desktop:
 pip install edgartools[ai]
 python -m edgar.ai
 ```
-
-**Configuration:**
 
 Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
@@ -311,6 +298,8 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 ```
 
 See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
+
+</details>
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
