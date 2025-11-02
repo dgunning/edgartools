@@ -254,6 +254,8 @@ class TestBuildDatasetSmallSample:
 class TestBuildDatasetReal:
     """Tests using real submissions data (requires network/downloads)."""
 
+    @pytest.mark.slow
+    @pytest.mark.manual
     def test_build_real_dataset(self, tmp_path):
         """Build dataset from real submissions (if available)"""
         from edgar.core import get_edgar_data_directory
@@ -322,7 +324,7 @@ class TestGetDataset:
 
         # SIC 2834-2836: Pharmaceutical companies
         pharma = companies.filter(
-            pc.field('sic').between(2834, 2836)
+            (pc.field('sic') >= 2834) & (pc.field('sic') <= 2836)
         )
 
         assert len(pharma) > 0
@@ -441,6 +443,8 @@ class TestDuckDBIntegration:
         con.close()
 
     @pytest.mark.network
+    @pytest.mark.slow
+    @pytest.mark.manual
     def test_build_duckdb_real_data(self, tmp_path):
         """Build DuckDB from real submissions"""
         pytest.importorskip("duckdb")
@@ -521,7 +525,7 @@ class TestPerformance:
         companies = get_company_dataset()
 
         start = time.time()
-        result = companies.filter(pc.field('sic').between(2834, 2836))
+        result = companies.filter((pc.field('sic') >= 2834) & (pc.field('sic') <= 2836))
         elapsed = time.time() - start
 
         assert len(result) > 0

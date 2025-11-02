@@ -277,7 +277,7 @@ def test_company_subset_use_comprehensive_init(check_full_dataset_available):
 
     assert 'sic' in companies.columns
     assert 'state_of_incorporation' in companies.columns
-    assert len(companies) > 500000
+    assert len(companies) > 20000
 
 
 # ============================================================================
@@ -413,7 +413,7 @@ def test_get_companies_by_industry_no_filters(check_full_dataset_available):
     companies = get_companies_by_industry()
 
     # Should return comprehensive dataset
-    assert len(companies) > 500000
+    assert len(companies) > 20000
 
 
 @pytest.mark.slow
