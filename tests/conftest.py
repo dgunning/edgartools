@@ -9,7 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 # Base paths
-FIXTURE_DIR = Path("tests/fixtures/xbrl2")
+FIXTURE_DIR = Path("tests/fixtures/xbrl")
 DATA_DIR = Path("data/xbrl/datafiles")
 
 

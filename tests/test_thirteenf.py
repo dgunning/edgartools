@@ -611,3 +611,143 @@ def test_manager_properties_integration_with_existing_code():
     # Rich display should still work
     rich_repr = thirteenF.__rich__()
     assert rich_repr is not None
+
+@pytest.mark.network
+@pytest.mark.slow
+def test_text_format_13F_has_holdings():
+    """Test that TXT format 13F filings parse holdings correctly."""
+    # Note: JANA Partners 2012 Q4 filing appears to be a notice/amendment without holdings table
+    # Use Berkshire instead as it has holdings
+    filings_2012_q4 = get_filings(2012, 4, form="13F-HR")
+    brk_filings = filings_2012_q4.filter(cik=1067983)  # Berkshire Hathaway
+
+    assert len(brk_filings) > 0, "Should find Berkshire 13F filing in 2012 Q4"
+
+    # Get the first filing
+    thirteenf = brk_filings[0].obj()
+
+    # Should have holdings
+    assert thirteenf is not None
+    assert thirteenf.total_holdings is not None, "Filing should have total_holdings set"
+    assert thirteenf.total_holdings > 0, "Berkshire filing should have holdings"
+
+    # Infotable should be populated
+    infotable = thirteenf.infotable
+    assert infotable is not None
+    assert len(infotable) > 0
+    assert len(infotable) == thirteenf.total_holdings
+
+    # Should have expected columns
+    assert 'Issuer' in infotable.columns
+    assert 'Cusip' in infotable.columns
+    assert 'Value' in infotable.columns
+    assert 'SharesPrnAmount' in infotable.columns
+
+
+@pytest.mark.network
+@pytest.mark.slow
+def test_text_format_13F_repr_renders_holdings():
+    """Test that repr() and __str__() render holdings correctly for TXT format filings."""
+    # Get Berkshire 2012 Q4 filing (multiline format)
+    filings_2012_q4 = get_filings(2012, 4, form="13F-HR")
+    brk_filings = filings_2012_q4.filter(cik=1067983)  # Berkshire Hathaway
+
+    assert len(brk_filings) > 0, "Should find Berkshire 13F filing in 2012 Q4"
+
+    thirteenf = brk_filings[0].obj()
+
+    # Get string representation
+    repr_str = repr(thirteenf)
+
+    # Should contain key information
+    assert 'BERKSHIRE' in repr_str or 'Holdings' in repr_str
+    assert thirteenf.total_holdings > 0
+
+    # Rich display should work
+    rich_repr = thirteenf.__rich__()
+    assert rich_repr is not None
+
+    # String representation should show holdings data
+    str_repr = str(thirteenf)
+    assert str_repr is not None
+    assert len(str_repr) > 0
+    # Should display holdings count somewhere in the output
+    assert str(thirteenf.total_holdings) in str_repr or 'Holdings' in str_repr
+
+
+@pytest.mark.network
+@pytest.mark.slow
+def test_text_format_multiline_vs_columnar():
+    """Test that TXT format parsing works for 2012-era filings."""
+    # Get multiple 2012 Q4 filings - these use the multiline format
+    filings_2012_q4 = get_filings(2012, 4, form="13F-HR")
+
+    # Get Berkshire Hathaway filing (multiline format)
+    brk_filings = filings_2012_q4.filter(cik=1067983)
+    assert len(brk_filings) > 0, "Should find Berkshire filing"
+    berkshire = brk_filings[0].obj()
+
+    # Should have holdings
+    assert berkshire.total_holdings is not None, "Berkshire should have total_holdings"
+    assert berkshire.total_holdings > 0, "Berkshire should have holdings"
+
+    # Should have populated infotable
+    assert berkshire.infotable is not None
+    assert len(berkshire.infotable) == berkshire.total_holdings
+
+    # Should have valid data structure
+    infotable = berkshire.infotable
+    assert 'Issuer' in infotable.columns
+    assert 'Cusip' in infotable.columns
+    assert 'Value' in infotable.columns
+
+    # Check first holding has valid data
+    first_holding = infotable.iloc[0]
+    assert first_holding['Issuer'] is not None
+    assert len(first_holding['Cusip']) == 9  # CUSIPs are 9 characters
+    assert first_holding['Value'] > 0
+
+
+@pytest.mark.network
+def test_text_format_filing_has_value_assigned():
+    filing = Filing(form='13F-HR', filing_date='2012-12-27', company='Sandhill Capital Partners LLC', cik=1556245, accession_no='0001556245-12-000007')
+    print(str(filing))
+    thirteenf = filing.obj()
+    repr_str = repr(thirteenf)
+    assert repr_str
+
+
+def test_thirteenf_loads_holdings():
+    filing = Filing(form='13F-HR', filing_date='2010-01-06', company='WINDSOR FINANCIAL GROUP LLC', cik=1132356, accession_no='0001132356-10-000001')
+
+    #thirteenf:ThirteenF = filing.obj()
+    #assert thirteenf.total_holdings >= 0
+
+    #filing = Filing(form='13F-HR', filing_date='2010-02-08', company='DAVIDSON & GARRARD INC', cik=1082482, accession_no='0001082482-10-000001')
+    #thirteenf: ThirteenF = filing.obj()
+    #assert thirteenf.total_holdings
+
+    filing = Filing(form='13F-HR/A', filing_date='2012-11-26', company='SCOTT & STRINGFELLOW, LLC', cik=802555, accession_no='0000092230-12-000123')
+    thirteenf: ThirteenF = filing.obj()
+    assert thirteenf.total_holdings
+
+    filing = find("0001047469-12-010841")
+    thirteenf: ThirteenF = filing.obj()
+    assert thirteenf.total_holdings
+
+
+
+def test_multiple_older_filings():
+    no_holdings =[
+        "0001107799-12-000004",
+        "0001193125-12-471569",
+        "0001011438-12-000340",
+        "0001011438-12-000346",
+        "0001193125-12-469864",
+        "0000905718-12-000264",
+        "0001193125-12-470239",
+        "0001331693-12-000004",
+        "0001047469-12-010394",
+        "0001193125-12-463019",
+        "0001376474-12-000380"
+    ]

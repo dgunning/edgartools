@@ -23,6 +23,7 @@ class TestIssue439OrderParsing:
         filing = find('000032019324000123')  # AAPL 10-K filed 2024-11-01
         return filing.xbrl()
 
+    @pytest.mark.slow
     def test_calculation_nodes_have_correct_order_values(self, aapl_xbrl):
         """Test that calculation nodes have correct order values from linkbase."""
         calc_trees = aapl_xbrl.calculation_trees

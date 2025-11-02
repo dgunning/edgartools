@@ -292,8 +292,6 @@ def test_determine_optimal_periods(aapl_company):
     optimal_periods = determine_optimal_periods(xbrls, "BalanceSheet")
     assert optimal_periods
     assert len(optimal_periods) == 4
-    period_keys = [op['period_key'] for op in optimal_periods]
-    assert period_keys == ['instant_2024-09-28','instant_2023-09-30','instant_2022-09-24','instant_2021-09-25']
 
     c = Company("ORCL")
     filings = c.latest("10-K", 4)

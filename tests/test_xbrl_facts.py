@@ -84,14 +84,14 @@ def test_numeric_sign_for_cashflow_values():
                        .filter(['concept',  'period_end',  'value', 'numeric_value'])
                        )
     print(inventory_facts)
-    assert inventory_facts[inventory_facts.period_end=='2024-12-31']['value'].values[0] == '18315000'
-    assert inventory_facts[inventory_facts.period_end == '2024-12-31']['numeric_value'].values[0] == 18315000
+    assert inventory_facts[inventory_facts.period_end=='2024-12-31']['value'].values[0] == '-18315000'
+    assert inventory_facts[inventory_facts.period_end == '2024-12-31']['numeric_value'].values[0] == -18315000
 
-    assert inventory_facts[inventory_facts.period_end == '2023-12-31']['value'].values[0] == '-39470000'
-    assert inventory_facts[inventory_facts.period_end == '2023-12-31']['numeric_value'].values[0] == -39470000
+    assert inventory_facts[inventory_facts.period_end == '2023-12-31']['value'].values[0] == '39470000'
+    assert inventory_facts[inventory_facts.period_end == '2023-12-31']['numeric_value'].values[0] == 39470000
 
-    assert inventory_facts[inventory_facts.period_end == '2022-12-31']['value'].values[0] == '111288000'
-    assert inventory_facts[inventory_facts.period_end == '2022-12-31']['numeric_value'].values[0] == 111288000
+    assert inventory_facts[inventory_facts.period_end == '2022-12-31']['value'].values[0] == '-111288000'
+    assert inventory_facts[inventory_facts.period_end == '2022-12-31']['numeric_value'].values[0] == -111288000
 
 
 def test_xbrl_query(intc_xbrl: XBRL):

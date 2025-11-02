@@ -8,10 +8,9 @@ dimensional structures like tables, axes, and domains.
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
-from lxml import etree as ET
-
 from edgar.xbrl.core import NAMESPACES, STANDARD_LABEL, extract_element_id
 from edgar.xbrl.models import Axis, Domain, ElementCatalog, Table, XBRLProcessingError
+
 from .base import BaseParser
 
 

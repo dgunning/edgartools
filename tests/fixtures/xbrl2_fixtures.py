@@ -14,7 +14,7 @@ from edgar import Company, Filing
 from edgar.xbrl import XBRL
 
 # Base paths
-FIXTURE_DIR = Path("tests/fixtures/xbrl2")
+FIXTURE_DIR = Path("tests/fixtures/xbrl")
 DATA_DIR = Path("data/xbrl/datafiles")
 
 

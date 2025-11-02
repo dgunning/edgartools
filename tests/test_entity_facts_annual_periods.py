@@ -31,8 +31,8 @@ class TestAnnualPeriodSelection:
     @pytest.mark.network
     @pytest.mark.slow
     @pytest.mark.parametrize("year,min_revenue_billions", [
+        ("2021", 200),
         ("2020", 200),  # Should be ~$274B, not ~$64B
-        ("2019", 200),  # Should be ~$260B, not ~$64B
     ])
     def test_apple_annual_revenue_by_year(self, aapl_company, year, min_revenue_billions):
         """Bug #408: AAPL revenue was showing quarterly instead of annual values"""

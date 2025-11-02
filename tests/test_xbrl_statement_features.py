@@ -1,12 +1,16 @@
 """
 Tests for XBRL2 statement features.
 
-This module focuses on testing the core statement functionality in XBRL2:
-- Statement resolution
+This module focuses on testing advanced statement functionality in XBRL2:
+- Statement structure and hierarchy
 - Statement rendering
-- Statement structure
-- Period handling
-- Statement transformations
+- Statement to DataFrame conversion
+- Period detection and handling
+- Statement data access methods
+- Statement calculations
+- Dimensional statements
+
+Note: Basic resolution tests are in test_xbrl_statements.py to avoid duplication.
 """
 
 # Import XBRL directly
@@ -26,7 +30,7 @@ def test_companies():
     result = {}
     
     # Define fixture paths
-    fixture_dir = Path("tests/fixtures/xbrl2")
+    fixture_dir = Path("tests/fixtures/xbrl")
 
     result['aapl'] = XBRL.from_directory(fixture_dir / "aapl/10k_2023")
     result['msft'] = XBRL.from_directory(fixture_dir / "msft/10k_2024")
@@ -68,7 +72,7 @@ def test_cash_flow_statements(test_companies):
 @pytest.fixture
 def test_dimensional_data():
     """Try to find company data with dimensional statements."""
-    fixture_dir = Path("tests/fixtures/xbrl2/special_cases/dimensional/ko")
+    fixture_dir = Path("tests/fixtures/xbrl/special_cases/dimensional/ko")
     if fixture_dir.exists() and any(fixture_dir.iterdir()):
         try:
             return XBRL.from_directory(fixture_dir)
@@ -78,114 +82,9 @@ def test_dimensional_data():
 
 
 # ===== Statement Resolution Tests =====
-
-def test_standard_statement_resolution(test_companies):
-    """Test that standard financial statements are correctly resolved."""
-    if not test_companies:
-        pytest.skip("No company fixtures available")
-    
-    # Standard statement types
-    standard_statements = [
-        "BalanceSheet",
-        "IncomeStatement", 
-        "CashFlowStatement",
-        "ChangesInEquity",
-        "ComprehensiveIncome"
-    ]
-    
-    # Test each company
-    results = {}
-    
-    for ticker, xbrl in test_companies.items():
-        statement_found = []
-        
-        for stmt_type in standard_statements:
-            try:
-                statement = xbrl.get_statement(stmt_type)
-                if statement:
-                    statement_found.append(stmt_type)
-            except Exception:
-                pass
-        
-        # Store results
-        if statement_found:
-            results[ticker] = statement_found
-    
-    # Verify that we found at least some statements
-    assert results, "No standard statements found for any company"
-    
-    # Print summary
-    print("\nStandard statements found:")
-    for ticker, found_statements in results.items():
-        print(f"  {ticker}: {', '.join(found_statements)}")
-
-
-def test_statement_accessor_methods(test_companies):
-    """Test statement accessor methods on Statements class."""
-    if not test_companies:
-        pytest.skip("No company fixtures available")
-    
-    # Statement accessor methods
-    accessors = [
-        "balance_sheet",
-        "income_statement", 
-        "cash_flow_statement",
-        "changes_in_equity",
-        "comprehensive_income"
-    ]
-    
-    # Test each company
-    results = {}
-    
-    for ticker, xbrl in test_companies.items():
-        statement_found = []
-        
-        for accessor in accessors:
-            try:
-                # Get the method
-                method = getattr(xbrl.statements, accessor, None)
-                if method and callable(method):
-                    # Call the method
-                    statement = method()
-                    if statement:
-                        statement_found.append(accessor)
-            except Exception:
-                pass
-        
-        # Store results
-        if statement_found:
-            results[ticker] = statement_found
-    
-    # Verify that we found at least some statements
-    assert results, "No statements found via accessor methods"
-    
-    # Print summary
-    print("\nStatements found via accessor methods:")
-    for ticker, found_statements in results.items():
-        print(f"  {ticker}: {', '.join(found_statements)}")
-
-
-def test_parenthetical_statement_resolution(test_companies):
-    """Test resolution of parenthetical statements."""
-    if not test_companies:
-        pytest.skip("No company fixtures available")
-    
-    # Test each company for parenthetical statements
-    results = {}
-    
-    for ticker, xbrl in test_companies.items():
-        try:
-            # Try to get parenthetical balance sheet
-            statement = xbrl.statements.balance_sheet(parenthetical=True)
-            if statement:
-                results[ticker] = True
-        except Exception:
-            pass
-    
-    # Print summary - we don't assert here because not all companies have parenthetical statements
-    print("\nParenthetical statements found:")
-    for ticker in results:
-        print(f"  {ticker}")
+# Note: Basic resolution tests (test_standard_statement_resolution,
+# test_statement_accessor_methods, test_parenthetical_statement_resolution)
+# are in test_xbrl_statements.py to avoid duplication
 
 
 # ===== Statement Structure Tests =====

@@ -31,7 +31,7 @@ from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.formatting import datefmt, reverse_name
 from edgar.reference.tickers import find_cik
-from edgar.richtools import repr_rich
+from edgar.richtools import Docs, repr_rich
 
 if TYPE_CHECKING:
     from edgar.enums import FormType
@@ -451,6 +451,11 @@ class Company(Entity):
         return self.get_facts()
 
     @property
+    def docs(self):
+        """Access comprehensive Company API documentation."""
+        return Docs(self)
+
+    @property
     def public_float(self) -> Optional[float]:
         """Get the public float value for this company."""
         facts = self.facts
@@ -542,6 +547,109 @@ class Company(Entity):
     def __repr__(self):
         # Delegate to the rich representation for consistency with the old implementation
         return repr_rich(self.__rich__())
+
+    def text(self, max_tokens: int = 2000) -> str:
+        """
+        Get AI-optimized plain text representation.
+
+        Uses Markdown-KV format (60.7% accuracy, 25% fewer tokens than JSON) optimized
+        for LLM consumption. For terminal display, use print(company) instead.
+
+        Research basis: improvingagents.com/blog/best-input-data-format-for-llms
+
+        Args:
+            max_tokens: Approximate token limit using 4 chars/token heuristic (default: 2000)
+
+        Returns:
+            Markdown-formatted key-value representation optimized for LLMs
+
+        Example:
+            >>> from edgar import Company
+            >>> company = Company("AAPL")
+            >>> text = company.text()
+            >>> print(text)
+            **Company:** Apple Inc.
+            **CIK:** 0000320193
+            **Ticker:** AAPL
+            **Exchange:** NASDAQ
+            ...
+        """
+        lines = []
+
+        # Basic identification
+        lines.append(f"**Company:** {self.data.name}")
+        lines.append(f"**CIK:** {str(self.cik).zfill(10)}")
+
+        # Ticker and exchange
+        ticker = self.get_ticker()
+        if ticker:
+            lines.append(f"**Ticker:** {ticker}")
+
+        if hasattr(self.data, 'exchanges') and self.data.exchanges:
+            exchanges_str = ", ".join(self.data.exchanges) if isinstance(self.data.exchanges, (list, tuple)) else str(self.data.exchanges)
+            lines.append(f"**Exchange:** {exchanges_str}")
+
+        # Industry classification
+        if hasattr(self.data, 'sic') and self.data.sic:
+            sic_desc = getattr(self.data, 'sic_description', '')
+            if sic_desc:
+                lines.append(f"**Industry:** {sic_desc} (SIC {self.data.sic})")
+            else:
+                lines.append(f"**SIC Code:** {self.data.sic}")
+
+        # Entity type
+        if hasattr(self.data, 'entity_type') and self.data.entity_type:
+            lines.append(f"**Entity Type:** {self.data.entity_type.title()}")
+
+        # Category
+        if hasattr(self.data, 'category') and self.data.category:
+            lines.append(f"**Category:** {self.data.category}")
+
+        # Fiscal year end
+        if hasattr(self.data, 'fiscal_year_end') and self.data.fiscal_year_end:
+            lines.append(f"**Fiscal Year End:** {self._format_fiscal_year_date(self.data.fiscal_year_end)}")
+
+        # Business address
+        if hasattr(self.data, 'business_address') and self.data.business_address:
+            addr = self.data.business_address
+            lines.append("")
+            lines.append("**Business Address:**")
+            if hasattr(addr, 'street1') and addr.street1:
+                lines.append(f"{addr.street1}")
+            if hasattr(addr, 'street2') and addr.street2:
+                lines.append(f"{addr.street2}")
+            if hasattr(addr, 'city') and hasattr(addr, 'state_or_country') and addr.city and addr.state_or_country:
+                zip_code = f" {addr.zip_code}" if hasattr(addr, 'zip_code') and addr.zip_code else ""
+                lines.append(f"{addr.city}, {addr.state_or_country}{zip_code}")
+
+        # Contact information
+        if hasattr(self.data, 'phone') and self.data.phone:
+            lines.append(f"**Phone:** {self.data.phone}")
+
+        # Mailing address (if different from business address)
+        if hasattr(self.data, 'mailing_address') and self.data.mailing_address:
+            mail_addr = self.data.mailing_address
+            if hasattr(self.data, 'business_address'):
+                # Only include if different
+                business_addr = self.data.business_address
+                if (not hasattr(business_addr, 'street1') or
+                    mail_addr.street1 != business_addr.street1):
+                    lines.append("")
+                    lines.append("**Mailing Address:**")
+                    if hasattr(mail_addr, 'street1') and mail_addr.street1:
+                        lines.append(f"{mail_addr.street1}")
+                    if hasattr(mail_addr, 'city') and hasattr(mail_addr, 'state_or_country'):
+                        zip_code = f" {mail_addr.zip_code}" if hasattr(mail_addr, 'zip_code') and mail_addr.zip_code else ""
+                        lines.append(f"{mail_addr.city}, {mail_addr.state_or_country}{zip_code}")
+
+        text = "\n".join(lines)
+
+        # Token limiting (4 chars/token heuristic)
+        max_chars = max_tokens * 4
+        if len(text) > max_chars:
+            text = text[:max_chars] + "\n\n[Truncated for token limit]"
+
+        return text
 
     def __rich__(self):
         """Creates a rich representation of the company with detailed information."""
@@ -696,7 +804,12 @@ class Company(Entity):
         return Panel(
             content,
             title=entity_title,
-            subtitle="SEC Entity Data",
+            subtitle=Text.assemble(
+                ("SEC Entity Data", "dim"),
+                " • ",
+                ("company.docs", "cyan dim"),
+                (" for usage guide", "dim")
+            ),
             border_style="grey50"
         )
 

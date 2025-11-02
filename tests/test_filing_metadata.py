@@ -1,3 +1,4 @@
+import pytest
 from edgar import Filing, find
 
 def test_get_filing_period_from_homepage():
@@ -9,6 +10,7 @@ def test_get_filing_period_from_homepage():
     assert f.period_of_report == '2025-01-02'
 
 
+@pytest.mark.slow
 def test_get_metadata_from_filing():
     filing = Filing(form='144', filing_date='2024-12-27', company='Bissell John', cik=1863704, accession_no='0001971857-24-000904')
     filing = find("0001959173-24-008236")

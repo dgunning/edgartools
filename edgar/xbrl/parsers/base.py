@@ -6,6 +6,7 @@ all XBRL parser components.
 """
 
 from typing import Any, Dict
+
 from lxml import etree as ET
 
 from edgar.core import log

@@ -1,3 +1,4 @@
+import pytest
 from rich import print
 
 from edgar import Filing
@@ -182,11 +183,13 @@ def test_extract_xbrl_from_8k():
     assert xbrl
 
 
+@pytest.mark.slow
 def test_parse_6K():
     filing  = Filing(form='6-K', filing_date='2003-03-31', company='MARCONI CORP PLC', cik=1122135,
            accession_no='0001156973-03-000451')
     assert filing.text()
 
+@pytest.mark.slow
 def test_render_eightk_with_rich_like_markup():
     # One of the exhibits contains [/she]
     filing = Filing(form='8-K/A', filing_date='2013-01-04', company='Cactus Ventures, Inc.', cik=1388320, accession_no='0001213900-13-000029')

@@ -12,21 +12,22 @@ from edgar import *
 
 
 @pytest.mark.regression
+@pytest.mark.network
 def test_msft_segment_member_values():
     """Test that Microsoft's product and service segment values appear in income statement"""
-    
+
     # Get Microsoft filing from issue #416
     filing = Company('MSFT').get_filings().filter(accession_number="0000950170-25-100235").latest()
-    
+
     # Extract income statement
     financials = Financials.extract(filing)
     income_statement = financials.income_statement()
     df = income_statement.to_dataframe()
-    
+
     # Verify dimensional display is enabled
     # The dataframe should have more than the basic 21 rows due to dimensional breakdowns
     assert df.shape[0] > 40, f"Expected more than 40 rows due to dimensional data, got {df.shape[0]}"
-    
+
     # Verify dimensional rows exist
     dimensional_rows = df[df['dimension'] == True]
     assert len(dimensional_rows) > 25, f"Expected dimensional rows, found {len(dimensional_rows)}"
@@ -77,9 +78,11 @@ def test_dimension_display_detection():
     assert not should_display_bs, "Balance sheets should not enable dimensional display by default"
 
 
+@pytest.mark.regression
+@pytest.mark.network
 def test_dimensional_revenue_breakdown():
     """Test that dimensional revenue breakdown includes expected segments"""
-    
+
     # Get Microsoft filing
     filing = Company('MSFT').get_filings().filter(accession_number="0000950170-25-100235").latest()
     financials = Financials.extract(filing)

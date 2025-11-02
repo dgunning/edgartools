@@ -52,7 +52,7 @@ python -m edgar.ai
 edgartools-mcp
 ```
 
-**Quick Setup:** See [MCP Quickstart Guide](docs/MCP_QUICKSTART.md) for complete setup instructions.
+**Quick Setup:** See [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md) for complete setup instructions.
 
 #### Client Configuration Examples
 
@@ -88,7 +88,10 @@ edgartools-mcp
 
 **Note:** The `EDGAR_IDENTITY` environment variable is required by the SEC for API requests.
 
-After configuration, restart your MCP client and try: *"Get information about Apple Inc"*
+After configuration, restart your MCP client and try:
+- *"Research Apple Inc with financials"*
+- *"Analyze Tesla's financial performance over the last 4 quarters"*
+- *"Get Microsoft's latest income statement trends"*
 
 ### 3. Semantic Enrichment
 
@@ -133,12 +136,10 @@ optimized = TokenOptimizer.optimize_for_tokens(
 
 When running as an MCP server, the following tools are available:
 
-- **edgar_get_company**: Get comprehensive company information
-- **edgar_get_filings**: Retrieve SEC filings with filtering
-- **edgar_analyze_financials**: Analyze financial statements
-- **edgar_search**: Search for companies or filings
-- **edgar_current_filings**: Get latest SEC filings
-- **edgar_screen_stocks**: Screen stocks by fundamentals
+- **edgar_company_research**: Get comprehensive company intelligence including profile, financial trends, and recent filing activity. Returns overview with 3-year financial data and last 5 filings.
+- **edgar_analyze_financials**: Detailed financial statement analysis across multiple periods. Supports income statement, balance sheet, and cash flow analysis with annual or quarterly periods.
+
+For detailed tool documentation, see the [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md).
 
 ## Examples
 
@@ -154,13 +155,31 @@ The AI package is organized as follows:
 ```
 edgar/ai/
 ├── __init__.py          # Package initialization and capability detection
+├── __main__.py          # Entry point: python -m edgar.ai
 ├── core.py              # Core AI functionality (AIEnabled, TokenOptimizer, etc.)
+├── formats.py           # Format utilities
+├── helpers.py           # Helper functions for SEC analysis workflows
+│
 ├── mcp/                 # Model Context Protocol implementation
-│   ├── server.py        # MCP server
-│   └── tools.py         # Tool implementations
-├── agents/              # Agent-specific integrations (future)
-├── templates/           # Prompt templates (future)
+│   ├── __init__.py      # MCP package exports (main, test_server)
+│   ├── server.py        # MCP server (production)
+│   ├── tools/           # Workflow-oriented tool handlers
+│   │   ├── company_research.py     # Company intelligence tool
+│   │   ├── financial_analysis.py   # Financial analysis tool
+│   │   └── utils.py                # Tool utilities
+│   └── docs/            # MCP documentation
+│       └── MCP_QUICKSTART.md
+│
+├── skills/              # AI Skills infrastructure
+│   ├── base.py          # BaseSkill abstract class
+│   └── core/            # EdgarTools skill
+│
+├── exporters/           # Export capabilities
+│   ├── claude_desktop.py    # Portable format exporter
+│   └── claude_skills.py     # Official Claude Skills format exporter
+│
 └── examples/            # Usage examples
+    └── basic_usage.py
 ```
 
 ## Development
@@ -174,7 +193,14 @@ To contribute to the AI features:
 
 2. Run tests:
    ```bash
+   # Test MCP tools
+   pytest tests/test_mcp_tools.py
+
+   # Test AI features
    pytest tests/test_ai_features.py
+
+   # Test AI skills
+   pytest tests/test_ai_skill_export.py
    ```
 
 3. Check AI capabilities:
@@ -194,7 +220,5 @@ To contribute to the AI features:
 ## Documentation
 
 For more detailed documentation, see:
-- [MCP Quickstart Guide](docs/MCP_QUICKSTART.md) - Get started in 5 minutes
-- [AI Function Patterns](../../docs-internal/features/ai-function-patterns.md)
-- [MCP Support Plan](../../docs-internal/features/edgartools-mcp-ai-support.md)
-- [Package Structure](../../docs-internal/features/ai-mcp-package-structure-plan.md)
+- [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md) - Get started in 5 minutes
+- [MCP Implementation Review](MCP_IMPLEMENTATION_REVIEW.md) - Architecture analysis and migration details

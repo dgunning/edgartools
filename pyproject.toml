@@ -43,6 +43,7 @@ dependencies = [
   "tqdm>=4.62.0",
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
+  "hishel==0.1.3",
   "httpxthrottlecache>=0.1.6",
 ]
 dynamic = ["version"]
@@ -56,6 +57,10 @@ ai = [
 ai-dev = [
     "pytest-mock>=3.12.0",       # For mocking AI responses
     "responses>=0.24.0",         # HTTP response mocking
+]
+
+data = [
+    "duckdb>=1.0.0",            # SQL interface for company datasets
 ]
 
 [project.urls]
@@ -115,25 +120,34 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar 
 no-cov = "cov --no-cov {args}"
 lint = "ruff check edgar"
 smoke-filings = "python tests/batch/batch_filings.py {args}"
-# Test categorization commands
+# Test categorization commands (sequential execution)
 test-fast = "pytest -m 'fast' {args}"
-test-slow = "pytest -m 'slow' {args}"  
+test-slow = "pytest -m 'slow' {args}"
 test-network = "pytest -m 'network' {args}"
 test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
 
+# Parallel test commands (selective parallelization for SEC rate limit safety)
+# - Fast tests: Full parallelization (no network calls)
+# - Network/slow: Sequential (respects SEC rate limits)
+# - Core: Limited parallelization (mixed tests)
+test-fast-parallel = "pytest -n auto -m 'fast' {args}"
+test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+test-parallel-safe = "pytest -n auto -m 'fast' {args}"
+
 # Parallel CI test strategy (skip regression tests for faster feedback)
-# 
-# HYBRID EXCLUSION STRATEGY:
+#
+# SELECTIVE PARALLELIZATION STRATEGY:
 # 1. Marker-based: -m 'not regression' excludes tests marked as regression
 # 2. Path-based: --ignore=tests/issues/regression excludes entire folder
 # 3. Auto-marking: conftest.py automatically marks tests in regression folders
+# 4. Selective parallel: Only parallelize tests safe from SEC rate limits
 #
-# This ensures regression tests are excluded even if developers/agents forget markers.
+# This ensures regression tests are excluded and network tests respect SEC rate limits.
 
-test-ci-fast = "pytest --cov --cov-report=xml -m 'fast and not regression' {args}"
-test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}" 
+test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast and not regression' {args}"
+test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}"
 test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
-test-ci-core = "pytest --cov --cov-report=xml -m 'not (fast or network or slow or regression or performance or batch)' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
+test-ci-core = "pytest -n 2 --cov --cov-report=xml -m 'not (fast or network or slow or regression or performance or batch)' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
 test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
 
 # Regression tests (run separately/on-demand for comprehensive bug prevention)

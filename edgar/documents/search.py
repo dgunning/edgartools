@@ -1,16 +1,22 @@
 """
 Search functionality for parsed documents.
+
+Provides both traditional search modes (TEXT, REGEX, SEMANTIC, XPATH) and
+advanced BM25-based ranking with semantic structure awareness.
 """
 
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any, TYPE_CHECKING
 
 from edgar.documents.document import Document
 from edgar.documents.nodes import Node, HeadingNode
 from edgar.documents.table_nodes import TableNode
 from edgar.documents.types import NodeType, SemanticType
+
+if TYPE_CHECKING:
+    from edgar.documents.types import SearchResult as TypesSearchResult
 
 
 class SearchMode(Enum):
@@ -50,14 +56,17 @@ class DocumentSearch:
     Supports various search modes and options.
     """
     
-    def __init__(self, document: Document):
+    def __init__(self, document: Document, use_cache: bool = True):
         """
         Initialize search with document.
-        
+
         Args:
             document: Document to search
+            use_cache: Enable index caching for faster repeated searches (default: True)
         """
         self.document = document
+        self.use_cache = use_cache
+        self._ranking_engines: Dict[str, Any] = {}  # Cached ranking engines
         self._build_index()
     
     def _build_index(self):
@@ -477,30 +486,284 @@ class DocumentSearch:
                      pattern: Optional[str] = None) -> List[HeadingNode]:
         """
         Find headings matching criteria.
-        
+
         Args:
             level: Heading level (1-6)
             pattern: Regex pattern for heading text
-            
+
         Returns:
             List of matching headings
         """
         headings = []
-        
+
         for node in self.type_index.get(NodeType.HEADING, []):
             if not isinstance(node, HeadingNode):
                 continue
-            
+
             # Check level
             if level and node.level != level:
                 continue
-            
+
             # Check pattern
             if pattern:
                 heading_text = node.text()
                 if not heading_text or not re.search(pattern, heading_text, re.IGNORECASE):
                     continue
-            
+
             headings.append(node)
-        
+
         return headings
+
+    def ranked_search(self,
+                     query: str,
+                     algorithm: str = "hybrid",
+                     top_k: int = 10,
+                     node_types: Optional[List[NodeType]] = None,
+                     in_section: Optional[str] = None,
+                     boost_sections: Optional[List[str]] = None) -> List['TypesSearchResult']:
+        """
+        Advanced search with BM25-based ranking and semantic structure awareness.
+
+        This provides relevance-ranked results better suited for financial documents
+        than simple substring matching. Uses BM25 for exact term matching combined
+        with semantic structure boosting for gateway content detection.
+
+        Args:
+            query: Search query
+            algorithm: Ranking algorithm ("bm25", "hybrid", "semantic")
+            top_k: Maximum results to return
+            node_types: Limit search to specific node types
+            in_section: Limit search to specific section
+            boost_sections: Section names to boost (e.g., ["Risk Factors"])
+
+        Returns:
+            List of SearchResult objects with relevance scores (from types.py)
+
+        Examples:
+            >>> searcher = DocumentSearch(document)
+            >>> results = searcher.ranked_search("revenue growth", algorithm="hybrid", top_k=5)
+            >>> for result in results:
+            >>>     print(f"Score: {result.score:.3f}")
+            >>>     print(f"Text: {result.snippet}")
+            >>>     print(f"Full context: {result.full_context[:200]}...")
+        """
+        from edgar.documents.ranking.ranking import (
+            BM25Engine,
+            HybridEngine,
+            SemanticEngine
+        )
+        from edgar.documents.types import SearchResult as TypesSearchResult
+
+        # Get all leaf nodes for ranking (avoid duplicates from parent nodes)
+        nodes = []
+        for node in self.document.root.walk():
+            # Only include leaf nodes with text
+            if hasattr(node, 'children') and node.children:
+                continue  # Skip parent nodes
+            if hasattr(node, 'text'):
+                text = node.text()
+                if text and len(text.strip()) > 0:
+                    nodes.append(node)
+
+        # Filter by node types if specified
+        if node_types:
+            nodes = [n for n in nodes if n.type in node_types]
+
+        # Filter by section if specified
+        if in_section:
+            section_nodes = self._get_section_nodes(in_section)
+            nodes = [n for n in nodes if n in section_nodes]
+
+        if not nodes:
+            return []
+
+        # Select ranking engine (with caching)
+        engine = self._get_ranking_engine(algorithm.lower(), nodes, boost_sections)
+
+        # Rank nodes
+        ranked_results = engine.rank(query, nodes)
+
+        # Convert to types.SearchResult format and add section context
+        search_results = []
+        for ranked in ranked_results[:top_k]:
+            # Try to find which section this node belongs to
+            section_obj = self._find_node_section(ranked.node)
+
+            search_results.append(TypesSearchResult(
+                node=ranked.node,
+                score=ranked.score,
+                snippet=ranked.snippet,
+                section=section_obj.name if section_obj else None,
+                context=ranked.text if len(ranked.text) <= 500 else ranked.text[:497] + "...",
+                _section_obj=section_obj  # Agent navigation support
+            ))
+
+        return search_results
+
+    def _get_ranking_engine(self, algorithm: str, nodes: List[Node],
+                            boost_sections: Optional[List[str]] = None):
+        """
+        Get or create ranking engine with caching support.
+
+        Args:
+            algorithm: Ranking algorithm ("bm25", "hybrid", "semantic")
+            nodes: Nodes to index
+            boost_sections: Section names to boost (for hybrid/semantic)
+
+        Returns:
+            Ready-to-use ranking engine
+        """
+        from edgar.documents.ranking.ranking import (
+            BM25Engine,
+            HybridEngine,
+            SemanticEngine
+        )
+        from edgar.documents.ranking.cache import get_search_cache, CacheEntry
+        from datetime import datetime
+
+        # Create cache key
+        # Use document ID, algorithm, and sample of first node for stability
+        content_sample = nodes[0].text()[:200] if nodes and hasattr(nodes[0], 'text') else ""
+        cache_key = f"{self.document.accession_number if hasattr(self.document, 'accession_number') else id(self.document)}_{algorithm}"
+
+        # Check instance cache first (for same search session)
+        if cache_key in self._ranking_engines:
+            engine, cached_nodes = self._ranking_engines[cache_key]
+            # Verify nodes haven't changed
+            if cached_nodes == nodes:
+                return engine
+
+        # Create engine based on algorithm
+        if algorithm == "bm25":
+            engine = BM25Engine()
+        elif algorithm == "hybrid":
+            engine = HybridEngine(boost_sections=boost_sections)
+        elif algorithm == "semantic":
+            engine = SemanticEngine(boost_sections=boost_sections)
+        else:
+            raise ValueError(f"Unsupported algorithm: {algorithm}")
+
+        # Try to load from global cache if enabled
+        if self.use_cache and algorithm == "bm25":  # Only cache BM25 for now
+            search_cache = get_search_cache()
+            document_hash = search_cache.compute_document_hash(
+                document_id=cache_key,
+                content_sample=content_sample
+            )
+
+            cached_entry = search_cache.get(document_hash)
+            if cached_entry:
+                # Load index from cache
+                try:
+                    engine.load_index_data(cached_entry.index_data, nodes)
+                    # Cache in instance
+                    self._ranking_engines[cache_key] = (engine, nodes)
+                    return engine
+                except Exception as e:
+                    # Cache load failed, rebuild
+                    pass
+
+        # Build fresh index
+        # For BM25/Hybrid, index is built lazily on first rank() call
+        # But we can force it here and cache the result
+        if self.use_cache and algorithm == "bm25":
+            # Force index build by doing a dummy rank
+            engine._build_index(nodes)
+
+            # Save to global cache
+            try:
+                search_cache = get_search_cache()
+                document_hash = search_cache.compute_document_hash(
+                    document_id=cache_key,
+                    content_sample=content_sample
+                )
+
+                index_data = engine.get_index_data()
+                cache_entry = CacheEntry(
+                    document_hash=document_hash,
+                    index_data=index_data,
+                    created_at=datetime.now()
+                )
+                search_cache.put(document_hash, cache_entry)
+            except Exception as e:
+                # Cache save failed, not critical
+                pass
+
+        # Cache in instance
+        self._ranking_engines[cache_key] = (engine, nodes)
+
+        return engine
+
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """
+        Get search cache statistics.
+
+        Returns:
+            Dictionary with cache performance metrics including:
+            - memory_entries: Number of indices in memory
+            - disk_entries: Number of indices on disk
+            - cache_hits: Total cache hits
+            - cache_misses: Total cache misses
+            - hit_rate: Cache hit rate (0-1)
+            - memory_size_mb: Estimated memory usage in MB
+
+        Examples:
+            >>> searcher = DocumentSearch(document)
+            >>> searcher.ranked_search("revenue", algorithm="bm25")
+            >>> stats = searcher.get_cache_stats()
+            >>> print(f"Hit rate: {stats['hit_rate']:.1%}")
+        """
+        from edgar.documents.ranking.cache import get_search_cache
+
+        stats = {
+            'instance_cache_entries': len(self._ranking_engines),
+            'global_cache_stats': {}
+        }
+
+        if self.use_cache:
+            cache = get_search_cache()
+            stats['global_cache_stats'] = cache.get_stats()
+
+        return stats
+
+    def clear_cache(self, memory_only: bool = False) -> None:
+        """
+        Clear search caches.
+
+        Args:
+            memory_only: If True, only clear in-memory caches (default: False)
+
+        Examples:
+            >>> searcher = DocumentSearch(document)
+            >>> searcher.clear_cache()  # Clear all caches
+            >>> searcher.clear_cache(memory_only=True)  # Only clear memory
+        """
+        # Clear instance cache
+        self._ranking_engines.clear()
+
+        # Clear global cache if enabled
+        if self.use_cache:
+            from edgar.documents.ranking.cache import get_search_cache
+            cache = get_search_cache()
+            cache.clear(memory_only=memory_only)
+
+    def _find_node_section(self, node: Node):
+        """
+        Find which section a node belongs to.
+
+        Returns:
+            Section object or None
+        """
+        # Walk up the tree to find section markers
+        current = node
+        while current:
+            # Check if any section contains this node
+            for section_name, section in self.document.sections.items():
+                # Check if node is in section's subtree
+                for section_node in section.node.walk():
+                    if section_node is current or section_node is node:
+                        return section
+
+            current = current.parent if hasattr(current, 'parent') else None
+
+        return None

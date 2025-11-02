@@ -2,7 +2,7 @@
 Download HTML fixtures for test companies.
 
 This script downloads recent 10-K and 10-Q HTML filings for companies
-in tests/fixtures/xbrl2/ to augment our HTML parser test corpus.
+in tests/fixtures/xbrl/ to augment our HTML parser test corpus.
 """
 
 import sys

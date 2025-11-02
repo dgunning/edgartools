@@ -1,3 +1,4 @@
+import pytest
 from edgar.xbrl import XBRL
 from edgar.xbrl.parsers import XBRLParser
 from pathlib import Path
@@ -20,19 +21,15 @@ def test_parse_instance_content():
     # Verify total instances matches the SEC site count (899)
     assert total_instances == 899  # This is the count shown on the SEC site
 
-def test_number_of_facts_in_xbrl():
 
-    filing = Filing(form='10-Q', filing_date='2024-02-01', company='SPIRE ALABAMA INC', cik=3146, accession_no='0001437749-24-002776')
-    xb = filing.xbrl()
-    num_facts = len(xb.facts)
-    print(num_facts)
-
+@pytest.mark.network
 def test_instance_parsing_xoxo():
     filing = Filing(form='10-Q', filing_date='2020-05-11', company='ATLANTIC AMERICAN CORP', cik=8177, accession_no='0001140361-20-011243')
     xb = filing.xbrl()
     assert xb
 
 
+@pytest.mark.slow
 def test_extract_context_typed_member():
     """
     https://github.com/dgunning/edgartools/issues/364
@@ -42,16 +39,12 @@ def test_extract_context_typed_member():
     
     Test validates that typed member parsing extracts the text content, not just the tag.
     """
-    instance_content = Path("tests/fixtures/xbrl2/gbdc/gbdc-20250331_htm.xml").read_text()
+    instance_content = Path("tests/fixtures/xbrl/gbdc/gbdc-20250331_htm.xml").read_text()
     parser = XBRLParser()
     parser.parse_instance_content(instance_content)
     
     # Find the context c-689 which has the typed member
-    context_689 = None
-    for context in parser.contexts.values():
-        if context.context_id == 'c-689':
-            context_689 = context
-            break
+    context_689 = parser.contexts.get('c-689')
     
     assert context_689 is not None, "Context c-689 should exist"
     

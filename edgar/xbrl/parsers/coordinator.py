@@ -6,7 +6,6 @@ workflow across all specialized parser components while maintaining
 API compatibility with the original monolithic parser.
 """
 
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 

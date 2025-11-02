@@ -1728,9 +1728,16 @@ class Filing:
         title = Text.assemble(*title_parts)
 
         # The subtitle of the panel
-        subtitle = Text(describe_form(self.form, False), "dim")
+        form_description = describe_form(self.form, False)
+        subtitle = Text.assemble(
+            (form_description, "dim"),
+            " • ",
+            ("filing.docs", "cyan dim"),
+            (" for usage guide", "dim")
+        )
 
         attachments = self.attachments
+
         # The filing information table
         filing_info_table = Table("Accession Number", "Filing Date", "Period of Report", "Documents",
                                   header_style="dim",

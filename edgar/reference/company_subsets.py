@@ -25,19 +25,41 @@ from edgar.core import log
 from edgar.reference.tickers import get_company_ticker_name_exchange, popular_us_stocks
 
 __all__ = [
+    # Classes and Enums
     'CompanySubset',
+    'MarketCapTier',
+    'PopularityTier',
+    # Core Functions
+    'get_all_companies',
     'get_companies_by_exchanges',
-    'get_popular_companies', 
+    'get_popular_companies',
+    # Industry and State Filtering (Comprehensive Mode)
+    'get_companies_by_industry',
+    'get_companies_by_state',
+    # Sampling and Filtering
     'get_random_sample',
     'get_stratified_sample',
     'get_top_companies_by_metric',
     'filter_companies',
     'exclude_companies',
+    # Set Operations
     'combine_company_sets',
     'intersect_company_sets',
-    'get_all_companies',
-    'MarketCapTier',
-    'PopularityTier'
+    # Convenience Functions - General
+    'get_faang_companies',
+    'get_tech_giants',
+    'get_dow_jones_sample',
+    # Convenience Functions - Industry Specific
+    'get_pharmaceutical_companies',
+    'get_biotechnology_companies',
+    'get_software_companies',
+    'get_semiconductor_companies',
+    'get_banking_companies',
+    'get_investment_companies',
+    'get_insurance_companies',
+    'get_real_estate_companies',
+    'get_oil_gas_companies',
+    'get_retail_companies',
 ]
 
 
@@ -68,11 +90,28 @@ class CompanySubset:
                     .exclude_tickers(['JPM', 'GS', 'C'])
                     .sample(50)
                     .get())
+
+        # Get pharmaceutical companies with comprehensive metadata
+        pharma = (CompanySubset(use_comprehensive=True)
+                 .from_industry(sic_range=(2834, 2836))
+                 .sample(100)
+                 .get())
     """
 
-    def __init__(self, companies: Optional[pd.DataFrame] = None):
-        """Initialize with optional starting dataset."""
-        self._companies = companies if companies is not None else get_all_companies()
+    def __init__(self, companies: Optional[pd.DataFrame] = None, use_comprehensive: bool = False):
+        """
+        Initialize with optional starting dataset.
+
+        Args:
+            companies: Optional DataFrame to start with. If None, loads from get_all_companies()
+            use_comprehensive: If True and companies is None, load comprehensive dataset
+                             with rich metadata (SIC, state, entity type, etc.)
+        """
+        if companies is not None:
+            self._companies = companies
+        else:
+            self._companies = get_all_companies(use_comprehensive=use_comprehensive)
+        self._use_comprehensive = use_comprehensive
 
     def from_exchange(self, exchanges: Union[str, List[str]]) -> 'CompanySubset':
         """Filter companies by exchange(s)."""
@@ -82,6 +121,63 @@ class CompanySubset:
     def from_popular(self, tier: Optional[PopularityTier] = None) -> 'CompanySubset':
         """Filter to popular companies."""
         self._companies = get_popular_companies(tier)
+        return self
+
+    def from_industry(
+        self,
+        sic: Optional[Union[int, List[int]]] = None,
+        sic_range: Optional[tuple[int, int]] = None,
+        sic_description_contains: Optional[str] = None
+    ) -> 'CompanySubset':
+        """
+        Filter companies by industry (SIC code).
+
+        Automatically enables comprehensive mode to access industry metadata.
+
+        Args:
+            sic: Single SIC code or list of SIC codes to match exactly
+            sic_range: Tuple of (min_sic, max_sic) for range filtering
+            sic_description_contains: String to search within SIC description
+
+        Returns:
+            CompanySubset with industry filter applied
+
+        Example:
+            >>> # Pharmaceutical companies
+            >>> pharma = CompanySubset().from_industry(sic=2834)
+
+            >>> # Biotech sector
+            >>> biotech = CompanySubset().from_industry(sic_range=(2833, 2836))
+        """
+        self._companies = get_companies_by_industry(
+            sic=sic,
+            sic_range=sic_range,
+            sic_description_contains=sic_description_contains
+        )
+        self._use_comprehensive = True
+        return self
+
+    def from_state(self, states: Union[str, List[str]]) -> 'CompanySubset':
+        """
+        Filter companies by state of incorporation.
+
+        Automatically enables comprehensive mode to access state metadata.
+
+        Args:
+            states: Single state code or list of state codes (e.g., 'DE', 'CA')
+
+        Returns:
+            CompanySubset with state filter applied
+
+        Example:
+            >>> # Delaware corporations
+            >>> de_corps = CompanySubset().from_state('DE')
+
+            >>> # Delaware or Nevada corporations
+            >>> de_nv = CompanySubset().from_state(['DE', 'NV'])
+        """
+        self._companies = get_companies_by_state(states)
+        self._use_comprehensive = True
         return self
 
     def filter_by(self, condition: Callable[[pd.DataFrame], pd.DataFrame]) -> 'CompanySubset':
@@ -143,14 +239,106 @@ class CompanySubset:
         return f"CompanySubset({count} companies: {sample_str})"
 
 
-@lru_cache(maxsize=1)
-def get_all_companies() -> pd.DataFrame:
+def _get_comprehensive_companies() -> pd.DataFrame:
+    """
+    Get comprehensive company dataset from company_dataset module.
+
+    This function loads the full SEC submissions dataset (~562K companies) with rich metadata
+    including SIC codes, state of incorporation, entity types, and more.
+
+    Returns:
+        DataFrame with extended schema:
+        ['cik', 'ticker', 'name', 'exchange', 'sic', 'sic_description',
+         'state_of_incorporation', 'state_of_incorporation_description',
+         'fiscal_year_end', 'entity_type', 'ein']
+
+    Note:
+        - First call may take ~30 seconds to build the dataset
+        - Subsequent calls use cached Parquet file (<100ms load time)
+        - Primary ticker extracted from pipe-delimited tickers field
+        - Primary exchange extracted from pipe-delimited exchanges field
+    """
+    try:
+        from edgar.reference.company_dataset import get_company_dataset
+
+        # Get PyArrow Table from company_dataset
+        table = get_company_dataset()
+
+        # Convert to pandas
+        df = table.to_pandas()
+
+        # Extract primary ticker from pipe-delimited tickers field
+        def extract_primary(value):
+            """Extract first value from pipe-delimited string."""
+            if pd.isna(value) or value is None:
+                return None
+            value_str = str(value)
+            parts = value_str.split('|')
+            return parts[0] if parts and parts[0] else None
+
+        df['ticker'] = df['tickers'].apply(extract_primary)
+        df['exchange'] = df['exchanges'].apply(extract_primary)
+
+        # Drop the original pipe-delimited columns
+        df = df.drop(columns=['tickers', 'exchanges'])
+
+        # Reorder columns to match standard format plus extensions
+        columns = [
+            'cik', 'ticker', 'name', 'exchange',
+            'sic', 'sic_description',
+            'state_of_incorporation', 'state_of_incorporation_description',
+            'fiscal_year_end', 'entity_type', 'ein'
+        ]
+
+        return df[columns]
+
+    except Exception as e:
+        log.error(f"Error fetching comprehensive company data: {e}")
+        # Return empty DataFrame with extended schema
+        return pd.DataFrame(columns=[
+            'cik', 'ticker', 'name', 'exchange',
+            'sic', 'sic_description',
+            'state_of_incorporation', 'state_of_incorporation_description',
+            'fiscal_year_end', 'entity_type', 'ein'
+        ])
+
+
+@lru_cache(maxsize=2)
+def get_all_companies(use_comprehensive: bool = False) -> pd.DataFrame:
     """
     Get all companies from SEC reference data in standardized format.
 
+    Args:
+        use_comprehensive: If True, load comprehensive dataset with ~562K companies
+                          and rich metadata (SIC, state, entity type, etc.).
+                          If False (default), load ticker-only dataset with ~13K companies.
+
     Returns:
         DataFrame with columns ['cik', 'ticker', 'name', 'exchange']
+
+        If use_comprehensive=True, also includes:
+        ['sic', 'sic_description', 'state_of_incorporation',
+         'state_of_incorporation_description', 'fiscal_year_end',
+         'entity_type', 'ein']
+
+    Note:
+        - Default (use_comprehensive=False) maintains backward compatibility
+        - Comprehensive mode adds ~30 second build time on first call
+        - Both modes use caching for fast subsequent calls
+
+    Example:
+        >>> # Standard mode - fast, ticker-only data
+        >>> companies = get_all_companies()
+        >>> len(companies)  # ~13K companies
+
+        >>> # Comprehensive mode - slower first call, rich metadata
+        >>> all_companies = get_all_companies(use_comprehensive=True)
+        >>> len(all_companies)  # ~562K companies
+        >>> 'sic' in all_companies.columns  # True
     """
+    if use_comprehensive:
+        return _get_comprehensive_companies()
+
     try:
         df = get_company_ticker_name_exchange().copy()
         # Reorder columns to match our standard format
@@ -545,6 +733,142 @@ def intersect_company_sets(company_sets: List[pd.DataFrame]) -> pd.DataFrame:
         return company_sets[0].copy() if company_sets else pd.DataFrame(columns=['cik', 'ticker', 'name', 'exchange'])
 
 
+def get_companies_by_industry(
+    sic: Optional[Union[int, List[int]]] = None,
+    sic_range: Optional[tuple[int, int]] = None,
+    sic_description_contains: Optional[str] = None
+) -> pd.DataFrame:
+    """
+    Get companies by industry classification using SIC (Standard Industrial Classification) codes.
+
+    Requires comprehensive company dataset. This function automatically uses use_comprehensive=True.
+
+    Args:
+        sic: Single SIC code or list of SIC codes to match exactly
+        sic_range: Tuple of (min_sic, max_sic) for range filtering (inclusive)
+        sic_description_contains: String to search within SIC description (case-insensitive)
+
+    Returns:
+        DataFrame with companies matching the industry criteria, including comprehensive metadata
+
+    Example:
+        >>> # Pharmaceutical companies (SIC 2834)
+        >>> pharma = get_companies_by_industry(sic=2834)
+
+        >>> # Biotech range (SIC 2833-2836)
+        >>> biotech = get_companies_by_industry(sic_range=(2833, 2836))
+
+        >>> # All companies with "software" in industry description
+        >>> software = get_companies_by_industry(sic_description_contains='software')
+
+        >>> # Multiple specific SIC codes
+        >>> healthcare = get_companies_by_industry(sic=[2834, 2835, 2836])
+
+    Note:
+        SIC Code Ranges:
+        - 0100-0999: Agriculture, Forestry, Fishing
+        - 1000-1499: Mining
+        - 1500-1799: Construction
+        - 2000-3999: Manufacturing
+        - 4000-4999: Transportation, Communications, Utilities
+        - 5000-5199: Wholesale Trade
+        - 5200-5999: Retail Trade
+        - 6000-6799: Finance, Insurance, Real Estate
+        - 7000-8999: Services
+        - 9100-9729: Public Administration
+    """
+    # Auto-enable comprehensive mode for industry filtering
+    companies = get_all_companies(use_comprehensive=True)
+
+    result = companies.copy()
+
+    try:
+        # Filter by exact SIC code(s)
+        if sic is not None:
+            if isinstance(sic, int):
+                sic = [sic]
+            result = result[result['sic'].isin(sic)]
+
+        # Filter by SIC range
+        if sic_range is not None:
+            min_sic, max_sic = sic_range
+            result = result[
+                (result['sic'] >= min_sic) &
+                (result['sic'] <= max_sic)
+            ]
+
+        # Filter by SIC description contains
+        if sic_description_contains is not None:
+            result = result[
+                result['sic_description'].str.contains(
+                    sic_description_contains,
+                    case=False,
+                    na=False
+                )
+            ]
+
+        return result.reset_index(drop=True)
+
+    except Exception as e:
+        log.error(f"Error filtering companies by industry: {e}")
+        return pd.DataFrame(columns=companies.columns)
+
+
+def get_companies_by_state(
+    states: Union[str, List[str]],
+    include_description: bool = True
+) -> pd.DataFrame:
+    """
+    Get companies by state of incorporation.
+
+    Requires comprehensive company dataset. This function automatically uses use_comprehensive=True.
+
+    Args:
+        states: Single state code or list of state codes (e.g., 'DE', 'CA', ['DE', 'NV'])
+        include_description: If True, includes state_of_incorporation_description in output
+
+    Returns:
+        DataFrame with companies incorporated in specified state(s)
+
+    Example:
+        >>> # Delaware corporations
+        >>> de_corps = get_companies_by_state('DE')
+
+        >>> # Delaware and Nevada corporations
+        >>> de_nv = get_companies_by_state(['DE', 'NV'])
+
+        >>> # California corporations
+        >>> ca_corps = get_companies_by_state('CA')
+
+    Note:
+        Common states of incorporation:
+        - DE: Delaware (most common for public companies)
+        - NV: Nevada (popular for tax benefits)
+        - CA: California
+        - NY: New York
+        - TX: Texas
+    """
+    if isinstance(states, str):
+        states = [states]
+
+    # Auto-enable comprehensive mode for state filtering
+    companies = get_all_companies(use_comprehensive=True)
+
+    try:
+        # Normalize state codes to uppercase
+        states_upper = [s.upper() for s in states]
+
+        result = companies[
+            companies['state_of_incorporation'].str.upper().isin(states_upper)
+        ].reset_index(drop=True)
+
+        return result
+
+    except Exception as e:
+        log.error(f"Error filtering companies by state {states}: {e}")
+        return pd.DataFrame(columns=companies.columns)
+
+
 # Convenience functions for common use cases
 
 def get_faang_companies() -> pd.DataFrame:
@@ -572,3 +896,96 @@ def get_dow_jones_sample() -> pd.DataFrame:
         'MMM', 'DOW', 'CSCO', 'VZ', 'INTC', 'WBA', 'CRM', 'HON', 'AMGN', 'PG'
     ]
     return filter_companies(get_all_companies(), ticker_list=dow_tickers)
+
+
+# Industry-specific convenience functions (require comprehensive dataset)
+
+def get_pharmaceutical_companies() -> pd.DataFrame:
+    """
+    Get pharmaceutical preparation companies (SIC 2834).
+
+    Returns companies in the pharmaceutical preparations industry including
+    prescription drugs, biologics, and vaccines.
+    """
+    return get_companies_by_industry(sic=2834)
+
+
+def get_biotechnology_companies() -> pd.DataFrame:
+    """
+    Get biotechnology companies (SIC 2833-2836).
+
+    Returns companies in biotech and related pharmaceutical industries.
+    """
+    return get_companies_by_industry(sic_range=(2833, 2836))
+
+
+def get_software_companies() -> pd.DataFrame:
+    """
+    Get software and computer programming companies (SIC 7371-7379).
+
+    Returns companies in software publishing, programming, and related services.
+    """
+    return get_companies_by_industry(sic_range=(7371, 7379))
+
+
+def get_semiconductor_companies() -> pd.DataFrame:
+    """
+    Get semiconductor and electronic component companies (SIC 3674).
+
+    Returns companies manufacturing semiconductors and related devices.
+    """
+    return get_companies_by_industry(sic=3674)
+
+
+def get_banking_companies() -> pd.DataFrame:
+    """
+    Get commercial banking companies (SIC 6020-6029).
+
+    Returns national and state commercial banks.
+    """
+    return get_companies_by_industry(sic_range=(6020, 6029))
+
+
+def get_investment_companies() -> pd.DataFrame:
+    """
+    Get investment companies and funds (SIC 6200-6299).
+
+    Returns securities brokers, dealers, investment advisors, and funds.
+    """
+    return get_companies_by_industry(sic_range=(6200, 6299))
+
+
+def get_insurance_companies() -> pd.DataFrame:
+    """
+    Get insurance companies (SIC 6300-6399).
+
+    Returns life, health, property, and casualty insurance companies.
+    """
+    return get_companies_by_industry(sic_range=(6300, 6399))
+
+
+def get_real_estate_companies() -> pd.DataFrame:
+    """
+    Get real estate companies (SIC 6500-6599).
+
+    Returns REITs, real estate operators, and developers.
+    """
+    return get_companies_by_industry(sic_range=(6500, 6599))
+
+
+def get_oil_gas_companies() -> pd.DataFrame:
+    """
+    Get oil and gas extraction companies (SIC 1300-1399).
+
+    Returns crude petroleum, natural gas, and oil/gas field services companies.
+    """
+    return get_companies_by_industry(sic_range=(1300, 1399))
+
+
+def get_retail_companies() -> pd.DataFrame:
+    """
+    Get retail trade companies (SIC 5200-5999).
+
+    Returns general merchandise, apparel, food, and other retail stores.
+    """
+    return get_companies_by_industry(sic_range=(5200, 5999))

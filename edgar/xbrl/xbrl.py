@@ -27,7 +27,7 @@ from rich.table import Table as RichTable
 
 from edgar.attachments import Attachments
 from edgar.core import log
-from edgar.richtools import repr_rich
+from edgar.richtools import repr_rich, strip_ansi_text
 from edgar.xbrl.core import STANDARD_LABEL
 from edgar.xbrl.models import PresentationNode
 from edgar.xbrl.parsers import XBRLParser
@@ -550,7 +550,7 @@ class XBRL:
             # Extract periods from the statement data
             periods = {}
             for item in statement_data:
-                for period_id, value in item.get('values', {}).items():
+                for period_id, _value in item.get('values', {}).items():
                     if period_id not in periods:
                         # Get period label from reporting_periods
                         period_label = period_id
@@ -691,6 +691,45 @@ class XBRL:
         # Get values and decimals across periods
         values = {}
         decimals = {}  # Store decimals info for each period
+        units = {}  # Store unit_ref for each period
+        period_types = {}  # Store period_type ('instant' or 'duration') for each period
+
+        # Issue #463: Get balance and weight from element catalog and calculation trees
+        # (same approach as FactsView.get_facts())
+        balance = None  # Debit/credit classification from XBRL schema
+        weight = None   # Calculation weight from calculation linkbase
+
+        # Get balance from element catalog
+        element_id_normalized = element_id.replace(':', '_')
+        if element_id_normalized in self.element_catalog:
+            element = self.element_catalog[element_id_normalized]
+            balance = element.balance
+            if balance is None:
+                # Fallback to static US-GAAP mapping
+                from edgar.xbrl.parsers.concepts import get_balance_type
+                balance = get_balance_type(element_id)
+
+        # Get weight from calculation trees (Issue #463)
+        if hasattr(self, 'calculation_trees') and self.calculation_trees:
+            for calc_tree in self.calculation_trees.values():
+                if element_id_normalized in calc_tree.all_nodes:
+                    calc_node = calc_tree.all_nodes[element_id_normalized]
+                    weight = calc_node.weight
+                    break  # Use first weight found
+
+        # Calculate preferred_sign from preferred_label (for Issue #463)
+        # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
+        preferred_sign_value = None
+        if node.preferred_label:
+            # Check if this is a negatedLabel (indicates value should be negated for display)
+            # Use pattern matching to support any XBRL namespace version (2003, 2009, future versions)
+            # Matches: 'negatedLabel', 'negatedTerseLabel', 'http://www.xbrl.org/YYYY/role/negated*Label', etc.
+            label_lower = node.preferred_label.lower()
+            is_negated = 'negated' in label_lower and (
+                label_lower.startswith('negated') or  # Short form: 'negatedLabel'
+                '/role/negated' in label_lower        # Full URI: 'http://www.xbrl.org/*/role/negated*'
+            )
+            preferred_sign_value = -1 if is_negated else 1
 
         # Find facts for any of these concept names
         all_relevant_facts = self._find_facts_for_element(node.element_name, period_filter)
@@ -747,6 +786,16 @@ class XBRL:
                                 except (ValueError, TypeError):
                                     decimals[period_key] = 0  # Default
 
+                            # Store unit_ref for this period
+                            units[period_key] = fact.unit_ref
+
+                            # Store period_type from context
+                            if context_id in self.contexts:
+                                context = self.contexts[context_id]
+                                if hasattr(context, 'period') and context.period:
+                                    pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                                    period_types[period_key] = pt
+
             else:
                 # For standard financial statements, prefer non-dimensioned facts
                 # If only one fact, use it
@@ -781,6 +830,22 @@ class XBRL:
                     except (ValueError, TypeError):
                         decimals[period_key] = 0  # Default if decimals can't be converted
 
+                # Store unit_ref for this period
+                units[period_key] = fact.unit_ref
+
+                # Store period_type from context
+                if context_id in self.contexts:
+                    context = self.contexts[context_id]
+                    if hasattr(context, 'period') and context.period:
+                        pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                        period_types[period_key] = pt
+
+        # Create preferred_signs dict for all periods (same value for all periods of this concept)
+        preferred_signs = {}
+        if preferred_sign_value is not None:
+            for period_key in values.keys():
+                preferred_signs[period_key] = preferred_sign_value
+
         # For dimensional statements with dimension data, handle the parent item specially
         if should_display_dimensions and dimensioned_facts:
             # Create parent line item with total values AND dimensional children
@@ -793,6 +858,11 @@ class XBRL:
                 'label': label,  # Keep original label, don't add colon
                 'values': values,  # Show the total values
                 'decimals': decimals,  # Include decimals for formatting
+                'units': units,  # Include unit_ref for each period
+                'period_types': period_types,  # Include period_type for each period
+                'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
+                'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
+                'weight': weight,  # Include calculation weight for metadata (Issue #463)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
@@ -809,6 +879,11 @@ class XBRL:
                 'label': label,
                 'values': values,
                 'decimals': decimals,  # Add decimals info for formatting
+                'units': units,  # Include unit_ref for each period
+                'period_types': period_types,  # Include period_type for each period
+                'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
+                'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
+                'weight': weight,  # Include calculation weight for metadata (Issue #463)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,
@@ -825,6 +900,8 @@ class XBRL:
             for dim_key, facts_list in dimensioned_facts.items():
                 dim_values = {}
                 dim_decimals = {}
+                dim_units = {}  # Store unit_ref for each period
+                dim_period_types = {}  # Store period_type for each period
                 dim_metadata = None  # Store metadata from the first fact
 
                 # Collect values for each period
@@ -861,6 +938,17 @@ class XBRL:
                         except (ValueError, TypeError):
                             dim_decimals[period_key] = 0
 
+                    # Store unit_ref for this period
+                    dim_units[period_key] = fact.unit_ref
+
+                    # Store period_type from context
+                    context_id = fact.context_ref
+                    if context_id in self.contexts:
+                        context = self.contexts[context_id]
+                        if hasattr(context, 'period') and context.period:
+                            pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                            dim_period_types[period_key] = pt
+
                 # For better display, use the member label for dimension items,
                 # but make sure we don't add the parent concept name as well
 
@@ -879,6 +967,12 @@ class XBRL:
                         if member_labels:
                             display_label = " - ".join(member_labels)
 
+                # Create preferred_signs dict for dimensional line items (same value for all periods)
+                dim_preferred_signs = {}
+                if preferred_sign_value is not None:
+                    for period_key in dim_values.keys():
+                        dim_preferred_signs[period_key] = preferred_sign_value
+
                 # Create dimension line item
                 dim_line_item = {
                     'concept': element_id,  # Use same concept
@@ -888,6 +982,9 @@ class XBRL:
                     'full_dimension_label': dim_key,  # Keep full dimension notation for reference
                     'values': dim_values,
                     'decimals': dim_decimals,
+                    'units': dim_units,  # Include unit_ref for each period
+                    'period_types': dim_period_types,  # Include period_type for each period
+                    'preferred_signs': dim_preferred_signs,  # Include preferred_sign for display (Issue #463)
                     'level': node.depth + 1,  # Increase depth by 1
                     'preferred_label': node.preferred_label,
                     'is_abstract': False,
@@ -1463,9 +1560,173 @@ class XBRL:
         return generate_rich_representation(self)
 
     def __repr__(self):
-        return repr_rich(self)
+        return repr_rich(self.__rich__())
 
-    def __str__(self):
-        """String representation."""
-        footnote_info = f", {len(self.footnotes)} footnotes" if self.footnotes else ""
-        return f"XBRL Document with {len(self._facts)} facts, {len(self.contexts)} contexts, {len(self.presentation_trees)} statements{footnote_info}"
+
+    def text(self, max_tokens: int = 2000) -> str:
+        """
+        Get AI-optimized text representation of XBRL document.
+
+        Returns a compact Markdown-KV format optimized for LLM consumption,
+        including entity information, filing details, period coverage, available
+        statements, and common usage patterns.
+
+        This format uses 64.7% fewer tokens than the visual repr() format while
+        retaining all essential information.
+
+        Args:
+            max_tokens: Target token budget (currently not enforced, reserved for future use)
+
+        Returns:
+            Compact Markdown-KV text representation optimized for AI consumption
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> text = xbrl.text()
+            >>> print(text)
+            **Entity:** Apple Inc. (AAPL)
+            **CIK:** 0000320193
+            **Form:** 10-K
+            ...
+        """
+        lines = []
+
+        # Entity information
+        if self.entity_info:
+            entity_name = self.entity_info.get('entity_name', 'Unknown Entity')
+            ticker = self.entity_info.get('ticker', '')
+            cik = self.entity_info.get('identifier', '')
+
+            # Entity line with ticker if available
+            entity_line = f"**Entity:** {entity_name}"
+            if ticker:
+                entity_line += f" ({ticker})"
+            lines.append(entity_line)
+
+            if cik:
+                lines.append(f"**CIK:** {cik}")
+
+            # Filing details
+            doc_type = self.entity_info.get('document_type', '')
+            if doc_type:
+                lines.append(f"**Form:** {doc_type}")
+
+            fiscal_year = self.entity_info.get('fiscal_year', '')
+            fiscal_period = self.entity_info.get('fiscal_period', '')
+            period_end = self.entity_info.get('document_period_end_date', '')
+
+            if fiscal_period and fiscal_year:
+                period_display = f"Fiscal Year {fiscal_year}" if fiscal_period == 'FY' else f"{fiscal_period} {fiscal_year}"
+                if period_end:
+                    period_display += f" (ended {period_end})"
+                lines.append(f"**Fiscal Period:** {period_display}")
+
+            # Data volume
+            lines.append(f"**Facts:** {len(self._facts):,}")
+            lines.append(f"**Contexts:** {len(self.contexts):,}")
+
+        # Period coverage
+        if self.reporting_periods:
+            lines.append("")
+            lines.append("**Available Data Coverage:**")
+
+            # Categorize periods
+            annual_periods = []
+            quarterly_periods = []
+
+            for period in self.reporting_periods[:10]:
+                label = period.get('label', '')
+                if not label:
+                    continue
+
+                if 'Annual:' in label or 'FY' in label.upper():
+                    # Extract fiscal year
+                    import re
+                    year_match = re.search(r'to .* (\d{4})', label)
+                    if year_match:
+                        annual_periods.append(f"FY {year_match.group(1)}")
+                    else:
+                        annual_periods.append(label)
+                elif 'Quarterly:' in label or any(q in label for q in ['Q1', 'Q2', 'Q3', 'Q4']):
+                    clean_label = label.replace('Quarterly:', '').strip()
+                    quarterly_periods.append(clean_label)
+
+            if annual_periods:
+                lines.append(f"  Annual: {', '.join(annual_periods[:3])}")
+            if quarterly_periods:
+                lines.append(f"  Quarterly: {', '.join(quarterly_periods[:2])}")
+
+        # Available statements
+        statements = self.get_all_statements()
+        if statements:
+            lines.append("")
+            lines.append("**Available Statements:**")
+            # Group by core vs other statements
+            core_statements = set()
+            other_statements = []
+
+            core_types = {'IncomeStatement', 'BalanceSheet', 'CashFlowStatement',
+                         'StatementOfEquity', 'ComprehensiveIncome'}
+
+            for stmt in statements:
+                stmt_type = stmt.get('type', '')
+                if stmt_type in core_types:
+                    core_statements.add(stmt_type)
+                elif stmt_type:
+                    other_statements.append(stmt_type)
+
+            # Show core statements first (in consistent order)
+            if core_statements:
+                ordered_core = [s for s in ['IncomeStatement', 'ComprehensiveIncome', 'BalanceSheet',
+                                            'StatementOfEquity', 'CashFlowStatement'] if s in core_statements]
+                lines.append(f"  Core: {', '.join(ordered_core)}")
+            if other_statements and len(other_statements) <= 5:
+                lines.append(f"  Other: {', '.join(other_statements)}")
+            elif other_statements:
+                lines.append(f"  Other: {len(other_statements)} additional statements")
+
+        # Common actions (compact version)
+        lines.append("")
+        lines.append("**Common Actions:**")
+        lines.append("  # List all available statements")
+        lines.append("  xbrl.statements")
+        lines.append("")
+        lines.append("  # View core financial statements")
+        lines.append("  stmt = xbrl.statements.income_statement()")
+        lines.append("  stmt = xbrl.statements.balance_sheet()")
+        lines.append("  stmt = xbrl.statements.cash_flow_statement()")
+        lines.append("  stmt = xbrl.statements.statement_of_equity()")
+        lines.append("  stmt = xbrl.statements.comprehensive_income()")
+        lines.append("")
+        lines.append("  # Get current period only (returns XBRL with filtered context)")
+        lines.append("  current = xbrl.current_period")
+        lines.append("  stmt = current.income_statement()")
+        lines.append("")
+        lines.append("  # Convert statement to DataFrame")
+        lines.append("  df = stmt.to_dataframe()")
+        lines.append("")
+        lines.append("  # Query specific facts")
+        lines.append("  revenue = xbrl.facts.query().by_concept('Revenue').to_dataframe()")
+        lines.append("")
+        lines.append("💡 Use xbrl.docs for comprehensive API guide")
+
+        return "\n".join(lines)
+
+    @property
+    def docs(self):
+        """
+        Get comprehensive documentation for the XBRL class.
+
+        Returns a Docs object with detailed API documentation including usage patterns,
+        examples, and guidance for working with XBRL data. The documentation is searchable
+        using the .search() method.
+
+        Returns:
+            Docs: Documentation object with rich display and search capabilities
+
+        Example:
+            >>> xbrl.docs  # Display full documentation
+            >>> xbrl.docs.search("extract revenue")  # Search for specific topics
+        """
+        from edgar.richtools import Docs
+        return Docs(self)

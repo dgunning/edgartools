@@ -13,7 +13,6 @@ dist/
 data/.DS_Store
 **/**/.DS_Store
 **/**/**/.DS_Store
-CLAUDE.md
 internal/*
 gists/bugs/*
 reinstall.sh
@@ -21,3 +20,5 @@ reinstall.sh
 ratelimiter.sqlite*
 *_generated.html
 /coverage.xml
+research_scripts
+.pyscn/

@@ -35,6 +35,21 @@ class EntityFiling(Filing):
 
     This extends the base Filing class with additional information
     and methods specific to SEC entities.
+
+    Attributes:
+        items (str): Filing items from SEC metadata. For 8-K filings, this indicates
+            which items are included (e.g., "2.02,9.01").
+
+            **Data Source**: This value comes from SEC filing metadata, not from parsing
+            the filing document itself.
+
+            **Legacy SGML Limitation**: For legacy SGML filings (1999-2001), the SEC's
+            historical metadata may be incorrect or incomplete. Modern XML filings (2005+)
+            have accurate metadata.
+
+            **Workaround for Legacy Filings**: For accurate item extraction from legacy
+            SGML 8-K filings, parse the filing text directly using regex patterns.
+            See GitHub Issue #462 for example code.
     """
 
     def __init__(self,
@@ -56,7 +71,7 @@ class EntityFiling(Filing):
         self.report_date = report_date
         self.acceptance_datetime = acceptance_datetime
         self.file_number: str = file_number
-        self.items: str = items
+        self.items: str = items  # See class docstring for important notes on data source and limitations
         self.size: int = size
         self.primary_document: str = primary_document
         self.primary_doc_description: str = primary_doc_description
@@ -349,7 +364,13 @@ class EntityFilings(Filings):
 
         # Get the subtitle
         start_date, end_date = self.date_range
-        subtitle = f"Company filings between {start_date:%Y-%m-%d} and {end_date:%Y-%m-%d}" if start_date else ""
+        date_range_text = f"Company filings between {start_date:%Y-%m-%d} and {end_date:%Y-%m-%d}" if start_date else "Company filings"
+        subtitle = Text.assemble(
+            (date_range_text, "dim"),
+            " • ",
+            ("filings.docs", "cyan dim"),
+            (" for usage guide", "dim")
+        )
         return Panel(
             Group(*elements),
             title=title,

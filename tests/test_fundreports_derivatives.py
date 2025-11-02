@@ -195,6 +195,7 @@ def test_forwards_data_extraction():
         assert all('Forward' in subtype for subtype in forwards_df['subtype'].unique())
 
 
+@pytest.mark.slow
 def test_pd_na_handling():
     """Test that pd.NA values don't cause crashes in derivatives table"""
     # Test with both samples to ensure robust NA handling
@@ -248,6 +249,7 @@ def test_securities_data_method():
     assert len(securities_df) + len(derivatives_df) == total_investments
 
 
+@pytest.mark.slow
 def test_derivative_reference_resolution():
     """Test that derivative references are properly resolved"""
     # Test with both samples

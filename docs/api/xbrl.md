@@ -315,9 +315,52 @@ Render the statement with rich formatting.
 
 #### to_dataframe()
 ```python
-def to_dataframe(self) -> pd.DataFrame
+def to_dataframe(
+    self,
+    include_dimensions: bool = True,
+    include_unit: bool = False,
+    include_point_in_time: bool = False,
+    presentation: bool = False
+) -> pd.DataFrame
 ```
-Convert statement to pandas DataFrame.
+Convert statement to pandas DataFrame with optional transformations.
+
+**Parameters:**
+- `include_dimensions`: Include dimensional breakdowns (default: True)
+- `include_unit`: Include unit column (USD, shares, etc.) (default: False)
+- `include_point_in_time`: Include point-in-time column for instant facts (default: False)
+- `presentation`: Apply HTML-matching transformations using preferred_sign (default: False)
+  - False (default): Raw instance values from XML
+  - True: Transform values to match SEC filing HTML display
+
+**Returns:** DataFrame with the following columns:
+- **Core columns**: `concept`, `label`, period columns (dates)
+- **Metadata columns** (always included): `balance`, `weight`, `preferred_sign`
+- **Optional columns**: `dimension`, `unit`, `point_in_time`
+
+**Value Modes:**
+- **Raw mode** (default): Preserves values exactly as reported in instance document
+- **Presentation mode** (`presentation=True`): Applies transformations to match SEC HTML rendering
+  - Cash Flow: outflows with preferred_sign=-1 shown as negative
+  - Income Statement: applies preferred_sign transformations
+
+**Example:**
+```python
+statement = xbrl.statements.income_statement()
+
+# Raw values (default)
+df_raw = statement.to_dataframe()
+# Returns actual XML values + metadata columns
+
+# Presentation mode (matches SEC HTML)
+df_presentation = statement.to_dataframe(presentation=True)
+# Returns transformed values matching 10-K HTML display
+
+# Check metadata
+print(df_raw[['concept', 'balance', 'weight', 'preferred_sign']].head())
+```
+
+**See Also:** Issue #463 - XBRL value transformations and metadata columns
 
 **Returns:** DataFrame with statement data
 
@@ -844,28 +887,71 @@ else:
     print("Income statement not found")
 ```
 
-## XBRL Calculation Weights
+## XBRL Value Transformations (Issue #463)
 
-EdgarTools intelligently handles XBRL calculation weights to ensure consistent financial data presentation:
+EdgarTools provides a two-layer system for XBRL value handling:
 
-### Enhanced Calculation Weight Logic
+### Value Layers
 
-The parser applies calculation weights with enhanced logic for expense concepts:
+1. **Raw Values** (default): Values exactly as reported in the XBRL instance document
+   - Matches SEC CompanyFacts API
+   - Preserves original data for analysis
+   - No transformations applied
 
-1. **Smart Expense Handling**: Major expense categories (R&D, SG&A, Marketing, Depreciation, etc.) are kept positive for consistency across companies
-2. **Cash Flow Precision**: Elements with negative weights (-1.0) in cash flow statements maintain proper sign relationships  
-3. **Exception Handling**: Legitimate negative concepts (tax benefits, foreign exchange gains/losses) preserve their intended signs
-4. **SEC API Consistency**: Aligns with SEC CompanyFacts API presentation while maintaining XBRL calculation integrity
+2. **Presentation Values** (`presentation=True`): Values transformed to match SEC filing HTML display
+   - Applies `preferred_sign` transformations from presentation linkbase
+   - Cash Flow outflows shown as negative when appropriate
+   - Matches how values appear in the official 10-K/10-Q HTML
+
+### Metadata Columns
+
+All statement DataFrames include XBRL metadata columns:
+
+- **`balance`**: Debit or credit classification from schema (accounting semantics)
+- **`weight`**: Calculation weight from calculation linkbase (+1.0 or -1.0)
+- **`preferred_sign`**: Presentation hint from presentation linkbase (+1 or -1)
+
+These columns provide transparency about XBRL semantics and enable custom transformations.
+
+### Usage Examples
 
 ```python
-# Example: Consistent expense presentation across companies
-msft_xbrl = XBRL.from_filing(msft_filing)
-aapl_xbrl = XBRL.from_filing(aapl_filing)
+# Get raw values (default)
+xbrl = filing.xbrl()
+statement = xbrl.statements.cash_flow_statement()
+df_raw = statement.to_dataframe()
 
-# Both show R&D expenses as positive (no longer inconsistent signs)
-msft_rnd = msft_xbrl.statements.income_statement().get_concept_value("ResearchAndDevelopmentExpense")  # Positive
-aapl_rnd = aapl_xbrl.statements.income_statement().get_concept_value("ResearchAndDevelopmentExpense")  # Positive
+# PaymentsOfDividends appears as positive (raw XML value)
+dividends = df_raw[df_raw['concept'].str.contains('PaymentsOfDividends')]
+print(dividends[['concept', 'balance', 'preferred_sign', '2024-09-30']])
+# Output: concept=PaymentsOfDividends, balance=credit, preferred_sign=-1, value=12345000000 (positive)
+
+# Get presentation values (matches SEC HTML)
+df_presentation = statement.to_dataframe(presentation=True)
+dividends_pres = df_presentation[df_presentation['concept'].str.contains('PaymentsOfDividends')]
+print(dividends_pres[['concept', '2024-09-30']])
+# Output: value=-12345000000 (negative, matches HTML display with parentheses)
 ```
+
+### When to Use Each Mode
+
+**Use Raw Values** (default):
+- Cross-company financial analysis
+- Data science and machine learning
+- Comparison with SEC CompanyFacts API
+- When you need unmodified reported values
+
+**Use Presentation Values** (`presentation=True`):
+- Matching SEC filing HTML display
+- Creating investor-facing reports
+- Replicating official financial statement appearance
+- When users expect "traditional" financial statement signs
+
+### Technical Notes
+
+- **Raw values are consistent across companies**: Testing confirmed SEC instance data uses consistent signs
+- **Metadata always included**: All transformations can be recreated using metadata columns
+- **No data loss**: Raw values always preserved, transformations are reversible
 
 ## Performance Tips
 

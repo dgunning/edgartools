@@ -134,6 +134,92 @@ Your support helps maintain and improve EdgarTools for the entire community!
 - **XBRL Support**: Extract and analyze XBRL-tagged data.
 - **Intuitive API**: Simple, consistent interface for all data types.
 
+## 🤖 AI-Native Integration
+
+EdgarTools is designed from the ground up to work seamlessly with AI agents and LLM applications:
+
+### Interactive Documentation
+
+Every major object includes rich, searchable documentation accessible via the `.docs` property:
+
+```python
+from edgar import Company
+
+company = Company("AAPL")
+
+# Beautiful rich display with full API documentation
+company.docs
+
+# Search documentation with BM25 ranking
+company.docs.search("get financials")
+
+# AI-optimized text output for LLM context
+context = company.text(detail='standard', max_tokens=500)
+```
+
+**3,450+ lines of API documentation** covering Company, Filing, XBRL, and Statement objects - always at your fingertips!
+
+### AI Skills System
+
+Extensible skill packages for specialized SEC analysis:
+
+```python
+from edgar.ai import list_skills, export_skill
+
+# List available skills
+skills = list_skills()
+
+# Export to Claude Desktop format
+export_skill("sec-analysis", format="claude-desktop")
+```
+
+Skills include:
+- **Tutorial documentation** (skill.md, workflows.md, objects.md)
+- **API reference** (complete method documentation)
+- **Helper functions** (pre-built analysis workflows)
+
+### Model Context Protocol (MCP) Server
+
+Run EdgarTools as an MCP server for Claude Desktop and other MCP clients:
+
+```bash
+pip install edgartools[ai]
+python -m edgar.ai
+```
+
+Configure in Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python",
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
+```
+
+Then ask Claude:
+- *"Research Apple Inc with financials"*
+- *"Analyze Tesla's revenue trends over the last 4 quarters"*
+- *"Compare Microsoft and Google's cash positions"*
+
+### Why AI-Native Matters
+
+- **Zero Friction**: `.docs` property provides instant learning without leaving your REPL
+- **Token Efficient**: `.text()` methods use research-backed markdown-kv format
+- **Progressive Disclosure**: Three detail levels (minimal/standard/detailed) for different contexts
+- **Searchable**: BM25 semantic search finds relevant information instantly
+- **Extensible**: BaseSkill class enables third-party skill packages
+
+See [AI Integration Guide](docs/ai-integration.md) for complete documentation *(coming soon)*.
+
+---
+
 EdgarTools is distributed under the [MIT License](LICENSE).
 
 ## 📊 Star History

@@ -34,6 +34,7 @@ nav:
     - Financial Analysis:
       - "Extract Financial Statements": guides/extract-statements.md
     - Advanced:
+        - "Advanced Ranking Search": advanced-search.md
         - "Using Local Data Storage": guides/local-storage.md
         - SSL Issues and Configuration: guides/ssl_verification.md
         - Parsing SGML: guides/sgml.md

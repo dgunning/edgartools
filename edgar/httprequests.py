@@ -38,6 +38,7 @@ __all__ = [
     "download_text_between_tags",
     "download_bulk_data",
     "download_datafile",
+    "SSLVerificationError",
 ]
 
 attempts = 6
@@ -57,15 +58,65 @@ BULK_RETRY_ATTEMPTS = 8
 BULK_RETRY_TIMEOUT = None  # unlimited
 BULK_WAIT_MAX = 120  # max 2min delay
 
+# SSL errors - retry once in case of transient issues, then fail with helpful message
+SSL_RETRY_ATTEMPTS = 2  # 1 retry = 2 total attempts
+SSL_WAIT_MAX = 5  # Short delay for SSL retries
+
 # Exception types to retry on - includes both httpx and httpcore exceptions
 RETRYABLE_EXCEPTIONS = (
     # HTTPX exceptions
     RequestError, HTTPError, TimeoutException, ConnectError, ReadTimeout,
     # HTTPCORE exceptions that can slip through
-    httpcore.ReadTimeout, httpcore.WriteTimeout, httpcore.ConnectTimeout, 
+    httpcore.ReadTimeout, httpcore.WriteTimeout, httpcore.ConnectTimeout,
     httpcore.PoolTimeout, httpcore.ConnectError, httpcore.NetworkError,
     httpcore.TimeoutException
 )
+
+
+def is_ssl_error(exc: Exception) -> bool:
+    """
+    Detect if exception is SSL certificate verification related.
+
+    Checks both the exception chain for SSL errors and error messages
+    for SSL-related keywords.
+    """
+    import ssl
+
+    # Check if any httpx/httpcore exception wraps an SSL error
+    if isinstance(exc, (ConnectError, httpcore.ConnectError,
+                       httpcore.NetworkError, httpcore.ProxyError)):
+        cause = exc.__cause__
+        while cause:
+            if isinstance(cause, ssl.SSLError):
+                return True
+            cause = cause.__cause__
+
+    # Check error message for SSL indicators
+    error_msg = str(exc).lower()
+    ssl_indicators = ['ssl', 'certificate', 'verify failed', 'certificate_verify_failed']
+    return any(indicator in error_msg for indicator in ssl_indicators)
+
+
+def should_retry(exc: Exception) -> bool:
+    """
+    Determine if an exception should be retried.
+
+    SSL errors are not retried because they are deterministic failures
+    that won't succeed on retry. All other retryable exceptions are retried.
+
+    Args:
+        exc: The exception to check
+
+    Returns:
+        True if the exception should be retried, False otherwise
+    """
+    # Don't retry SSL errors - fail fast with helpful message
+    if isinstance(exc, (ConnectError, httpcore.ConnectError)):
+        if is_ssl_error(exc):
+            return False
+
+    # Retry all other exceptions in the retryable list
+    return isinstance(exc, RETRYABLE_EXCEPTIONS)
 
 
 class TooManyRequestsError(Exception):
@@ -77,6 +128,49 @@ class TooManyRequestsError(Exception):
 
 class IdentityNotSetException(Exception):
     pass
+
+
+class SSLVerificationError(Exception):
+    """Raised when SSL certificate verification fails"""
+    def __init__(self, original_error, url):
+        self.original_error = original_error
+        self.url = url
+        message = f"""
+SSL Certificate Verification Failed
+====================================
+
+URL: {self.url}
+Error: {str(self.original_error)}
+
+Common Causes:
+  • Corporate network with SSL inspection proxy
+  • Self-signed certificates in development environments
+  • Custom certificate authorities
+
+Solution:
+---------
+If you trust this network, disable SSL verification:
+
+  export EDGAR_VERIFY_SSL="false"
+
+Or in Python:
+
+  import os
+  os.environ['EDGAR_VERIFY_SSL'] = 'false'
+  from edgar import Company  # Import after setting
+
+⚠️  WARNING: Only disable in trusted environments.
+    This makes connections vulnerable to attacks.
+
+Alternative Solutions:
+---------------------
+  • Install your organization's root CA certificate
+  • Contact IT for proper certificate configuration
+  • Use a network without SSL inspection
+
+For details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verification.md
+"""
+        super().__init__(message)
 
 
 def is_redirect(response):
@@ -124,7 +218,7 @@ def async_with_identity(func):
 
 
 @retry(
-    on=RETRYABLE_EXCEPTIONS,
+    on=should_retry,
     attempts=QUICK_RETRY_ATTEMPTS,
     wait_initial=RETRY_WAIT_INITIAL,
     wait_max=QUICK_WAIT_MAX,
@@ -147,18 +241,24 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
+        SSLVerificationError: If SSL certificate verification fails.
     """
-    with http_client() as client:
-        response = client.get(url, **kwargs)
-        if response.status_code == 429:
-            raise TooManyRequestsError(url)
-        elif is_redirect(response):
-            return get_with_retry(url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
-        return response
+    try:
+        with http_client() as client:
+            response = client.get(url, **kwargs)
+            if response.status_code == 429:
+                raise TooManyRequestsError(url)
+            elif is_redirect(response):
+                return get_with_retry(url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
+            return response
+    except ConnectError as e:
+        if is_ssl_error(e):
+            raise SSLVerificationError(e, url) from e
+        raise
 
 
 @retry(
-    on=RETRYABLE_EXCEPTIONS,
+    on=should_retry,
     attempts=QUICK_RETRY_ATTEMPTS,
     wait_initial=RETRY_WAIT_INITIAL,
     wait_max=QUICK_WAIT_MAX,
@@ -181,19 +281,25 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
 
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
+        SSLVerificationError: If SSL certificate verification fails.
     """
-    response = await client.get(url, **kwargs)
-    if response.status_code == 429:
-        raise TooManyRequestsError(url)
-    elif is_redirect(response):
-        return await get_with_retry_async(
-            client=client, url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs
-        )
-    return response
+    try:
+        response = await client.get(url, **kwargs)
+        if response.status_code == 429:
+            raise TooManyRequestsError(url)
+        elif is_redirect(response):
+            return await get_with_retry_async(
+                client=client, url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs
+            )
+        return response
+    except ConnectError as e:
+        if is_ssl_error(e):
+            raise SSLVerificationError(e, url) from e
+        raise
 
 
 @retry(
-    on=RETRYABLE_EXCEPTIONS,
+    on=should_retry,
     attempts=BULK_RETRY_ATTEMPTS,
     timeout=BULK_RETRY_TIMEOUT,
     wait_initial=RETRY_WAIT_INITIAL,
@@ -217,20 +323,26 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
 
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
+        SSLVerificationError: If SSL certificate verification fails.
     """
-    with http_client() as client:
-        with client.stream("GET", url, **kwargs) as response:
-            if response.status_code == 429:
-                raise TooManyRequestsError(url)
-            elif is_redirect(response):
-                response = stream_with_retry(response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
-                yield from response
-            else:
-                yield response
+    try:
+        with http_client() as client:
+            with client.stream("GET", url, **kwargs) as response:
+                if response.status_code == 429:
+                    raise TooManyRequestsError(url)
+                elif is_redirect(response):
+                    response = stream_with_retry(response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
+                    yield from response
+                else:
+                    yield response
+    except ConnectError as e:
+        if is_ssl_error(e):
+            raise SSLVerificationError(e, url) from e
+        raise
 
 
 @retry(
-    on=RETRYABLE_EXCEPTIONS,
+    on=should_retry,
     attempts=QUICK_RETRY_ATTEMPTS,
     wait_initial=RETRY_WAIT_INITIAL,
     wait_max=QUICK_WAIT_MAX,
@@ -255,20 +367,26 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
 
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
+        SSLVerificationError: If SSL certificate verification fails.
     """
-    with http_client() as client:
-        response = client.post(url, data=data, json=json, **kwargs)
-        if response.status_code == 429:
-            raise TooManyRequestsError(url)
-        elif is_redirect(response):
-            return post_with_retry(
-                response.headers["Location"], data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
-            )
-        return response
+    try:
+        with http_client() as client:
+            response = client.post(url, data=data, json=json, **kwargs)
+            if response.status_code == 429:
+                raise TooManyRequestsError(url)
+            elif is_redirect(response):
+                return post_with_retry(
+                    response.headers["Location"], data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
+                )
+            return response
+    except ConnectError as e:
+        if is_ssl_error(e):
+            raise SSLVerificationError(e, url) from e
+        raise
 
 
 @retry(
-    on=RETRYABLE_EXCEPTIONS,
+    on=should_retry,
     attempts=QUICK_RETRY_ATTEMPTS,
     wait_initial=RETRY_WAIT_INITIAL,
     wait_max=QUICK_WAIT_MAX,
@@ -293,15 +411,21 @@ async def post_with_retry_async(client: AsyncClient, url, data=None, json=None, 
 
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
+        SSLVerificationError: If SSL certificate verification fails.
     """
-    response = await client.post(url, data=data, json=json, **kwargs)
-    if response.status_code == 429:
-        raise TooManyRequestsError(url)
-    elif is_redirect(response):
-        return await post_with_retry_async(
-            client, response.headers["Location"], data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
-        )
-    return response
+    try:
+        response = await client.post(url, data=data, json=json, **kwargs)
+        if response.status_code == 429:
+            raise TooManyRequestsError(url)
+        elif is_redirect(response):
+            return await post_with_retry_async(
+                client, response.headers["Location"], data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
+            )
+        return response
+    except ConnectError as e:
+        if is_ssl_error(e):
+            raise SSLVerificationError(e, url) from e
+        raise
 
 
 def inspect_response(response: Response):
@@ -446,7 +570,7 @@ CHUNK_SIZE_DEFAULT = CHUNK_SIZE
 
 
 @retry(
-    on=RETRYABLE_EXCEPTIONS,
+    on=should_retry,
     attempts=BULK_RETRY_ATTEMPTS,
     timeout=BULK_RETRY_TIMEOUT,
     wait_initial=RETRY_WAIT_INITIAL,
@@ -633,7 +757,7 @@ logger = logging.getLogger(__name__)
 
 
 @retry(
-    on=RETRYABLE_EXCEPTIONS,
+    on=should_retry,
     attempts=BULK_RETRY_ATTEMPTS,
     timeout=BULK_RETRY_TIMEOUT,
     wait_initial=RETRY_WAIT_INITIAL,

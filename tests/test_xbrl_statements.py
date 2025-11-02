@@ -24,12 +24,12 @@ def tsla_xbrl():
 
 @pytest.fixture
 def aapl_xbrl():
-    data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2023")
+    data_dir = Path("tests/fixtures/xbrl/aapl/10k_2023")
     return XBRL.from_directory(data_dir)
 
 @pytest.fixture
 def aapl_xbrl_2022():
-    data_dir = Path("tests/fixtures/xbrl2/aapl/10k_2022")
+    data_dir = Path("tests/fixtures/xbrl/aapl/10k_2022")
     return XBRL.from_directory(data_dir)
 
 @pytest.fixture
@@ -171,6 +171,7 @@ def test_xbrls_balancesheet_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     assert 'Total Assets' in labels
 
 
+@pytest.mark.slow
 def test_non_financial_statement():
     f = Filing(company='SOUTHERN COPPER CORP/', cik=1001838, form='10-K', filing_date='2025-03-03',
                accession_no='0001558370-25-002017')

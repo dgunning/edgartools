@@ -218,6 +218,7 @@ class SubmissionFormatParser:
             'ISSUER',
             'DEPOSITOR',
             'SECURITIZER',
+            'UNDERWRITER',
             'ISSUING_ENTITY',
             'FORMER-COMPANY',
             'SUBJECT-COMPANY',
@@ -237,17 +238,21 @@ class SubmissionFormatParser:
             'SERIES-AND-CLASSES-CONTRACTS-DATA',
             'NEW-SERIES-AND-CLASSES-CONTRACTS',
             'MERGER-SERIES-AND-CLASSES-CONTRACTS',
-            'EXISTING-SERIES-AND-CLASSES-CONTRACTS'
+            'EXISTING-SERIES-AND-CLASSES-CONTRACTS',
+            'RULE',
+            'ITEM'
         }
 
         # Tags that can appear multiple times and should be stored as lists
         self.REPEATABLE_TAGS = {
             'FILER',
             'REPORTING-OWNER',
+            'UNDERWRITER',
             'SERIES',
             'CLASS-CONTRACT',
             'FORMER-COMPANY',
-            'SUBJECT-COMPANY'
+            'SUBJECT-COMPANY',
+            'ITEM'
         }
 
     def _get_current_context(self) -> dict:

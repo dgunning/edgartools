@@ -6,12 +6,12 @@ This script provides updated, working code for extracting
 
 Key API changes and solutions:
 1. Company.filings.filter() -> Company.get_filings()
-2. XBRL import path: edgar.xbrl.xbrl (not edgar.xbrl2.xbrl)
+2. XBRL import path: edgar.xbrl.xbrl (not edgar.xbrl.xbrl)
 3. New facts query interface with different column names
 4. Data is available via both statement-level and facts-level APIs
 
 Original user code (broken):
-    from edgar.xbrl2.xbrl import XBRL
+    from edgar.xbrl.xbrl import XBRL
     tenk = c.filings.filter("10-K", filing_date="2014-01-01:")
 
 Updated working code:
@@ -200,7 +200,7 @@ if total_values > 0:
     print(f"  Solution 3 (Direct Search): {len(values_solution3)} values")
 
     print(f"\n📝 KEY API CHANGES IDENTIFIED:")
-    print(f"  1. Import: 'from edgar.xbrl.xbrl import XBRL' (not edgar.xbrl2)")
+    print(f"  1. Import: 'from edgar.xbrl.xbrl import XBRL' (not edgar.xbrl)")
     print(f"  2. Filings: 'Company.get_filings()' (not Company.filings.filter())")
     print(f"  3. Facts API: DataFrame columns are 'period_start', 'period_end', 'numeric_value'")
     print(f"  4. Concept names: Use exact string 'us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding'")

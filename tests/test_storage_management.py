@@ -8,7 +8,7 @@ from edgar.storage_management import storage_info, StorageInfo, _scan_storage
 from edgar.core import get_edgar_data_directory
 import time
 
-@pytest.mark.fast
+@pytest.mark.slow
 def test_storage_info_returns_valid_data():
     """Test that storage_info returns StorageInfo with valid data"""
     info = storage_info()
@@ -23,7 +23,7 @@ def test_storage_info_returns_valid_data():
     assert isinstance(info.storage_path, Path)
 
 
-@pytest.mark.fast
+@pytest.mark.slow
 def test_storage_info_caching():
     """Test that storage_info caches results"""
     # Clear cache
@@ -43,7 +43,7 @@ def test_storage_info_caching():
     assert timestamp1 == timestamp2  # Same object from cache
 
 
-@pytest.mark.fast
+@pytest.mark.slow
 def test_storage_info_force_refresh():
     """Test that force_refresh bypasses cache"""
     info1 = storage_info()
@@ -129,7 +129,7 @@ def test_availability_summary():
 
 # Phase 3: Storage Analysis
 
-@pytest.mark.fast
+@pytest.mark.slow
 def test_analyze_storage_returns_analysis():
     """Test that analyze_storage returns StorageAnalysis"""
     from edgar.storage_management import analyze_storage, StorageAnalysis
@@ -145,7 +145,7 @@ def test_analyze_storage_returns_analysis():
     assert isinstance(analysis.recommendations, list)
     assert analysis.potential_savings_bytes >= 0
 
-@pytest.mark.fast
+@pytest.mark.slow
 def test_analyze_storage_rich_display():
     """Test that StorageAnalysis has working __rich__ method"""
     from rich.console import Console
@@ -228,7 +228,7 @@ def test_clear_cache_obsolete_only():
     assert result['errors'] >= 0
 
 
-@pytest.mark.fast
+@pytest.mark.slow
 def test_analyze_storage_detects_obsolete_cache(tmp_path):
     """Test that analyze_storage detects obsolete _pcache directory"""
     from edgar.storage_management import analyze_storage
@@ -261,7 +261,7 @@ def test_analyze_storage_detects_obsolete_cache(tmp_path):
             pcache_dir.rmdir()
 
 
-@pytest.mark.fast
+@pytest.mark.slow
 def test_storage_info_cache_labels():
     """Test that StorageInfo displays descriptive labels for cache directories"""
     from rich.console import Console
