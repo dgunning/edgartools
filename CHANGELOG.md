@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Issue #475: Multi-Period Cash Flow Statements Missing Data**
+  - Fixed stitched cash flow statements showing limited data for Q2 and Q3
+  - **Root Cause**: Companies like PYPL and KHC tag full detail to YTD (cumulative) periods rather than quarterly periods, but the old deduplication logic incorrectly treated quarterly and YTD as duplicates just because they shared the same end date
+  - **Solution**: Three-part fix:
+    1. Improved deduplication to check BOTH start and end dates (not just end date) so Q2 quarterly (Apr-Jun) and Q2 YTD (Jan-Jun) are correctly kept as distinct periods
+    2. Intelligently prefer YTD when it has more complete data (for companies that tag detail to YTD like PYPL/KHC)
+    3. Enhanced period labels to show "YTD" suffix for cumulative periods (e.g., "Q3 YTD Sep 30, 2025") so users can distinguish YTD from quarterly periods
+  - **Impact**: Multi-period stitched statements now show full detail across Q1, Q2, and Q3, adapting to each company's XBRL tagging practices, with clear labeling
+  - **Affected Companies**: PYPL, KHC, and other companies that tag data to YTD periods
+  - **Files Modified**:
+    - `edgar/xbrl/stitching/periods.py` - Improved deduplication (PeriodDeduplicator.deduplicate_periods) and smart period selection (StatementTypeSelector._select_appropriate_durations)
+    - `edgar/xbrl/stitching/core.py` - Enhanced period labels to indicate YTD vs quarterly (lines 590-611, 202-208)
+  - **Tests Added**: 4 comprehensive tests in `tests/issues/reproductions/xbrl-parsing/test_issue_475_cashflow_multiperiod.py`
+  - **Note**: Some companies (like PYPL) tag data to YTD (cumulative) periods, so Q2/Q3 columns show year-to-date values rather than quarterly activity. Period labels now clearly indicate "YTD" for these cumulative periods.
+  - **GitHub Issue**: [#475](https://github.com/dgunning/edgartools/issues/475)
+
 ## [4.25.0] - 2025-11-02
 
 ### Added

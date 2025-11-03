@@ -199,11 +199,13 @@ class StatementStitcher:
                         # Only replace if this statement is from a more recent filing
                         if i < existing_idx:
                             unique_periods[normalized_key] = (period_id, end_date, i)
-                            self.period_dates[period_id] = display_date
+                            # Use the enhanced label from period_info if available, otherwise fall back to display_date
+                            self.period_dates[period_id] = period_info.get('label', display_date)
                     else:
                         # Add new period
                         unique_periods[normalized_key] = (period_id, end_date, i)
-                        self.period_dates[period_id] = display_date
+                        # Use the enhanced label from period_info if available, otherwise fall back to display_date
+                        self.period_dates[period_id] = period_info.get('label', display_date)
 
                 except (ValueError, TypeError, IndexError):
                     # Skip periods with invalid dates
@@ -595,10 +597,19 @@ def stitch_statements(
                             period_label = display_date
                     else:  # duration
                         # For duration periods, add fiscal quarter/year info if available
+                        # Also indicate if it's YTD (cumulative) vs quarterly (Issue #475)
                         if fiscal_period == 'FY':
                             period_label = f"FY {display_date}"
                         elif fiscal_period in ['Q1', 'Q2', 'Q3', 'Q4']:
-                            period_label = f"{fiscal_period} {display_date}"
+                            # Check if this is a YTD period (longer duration) vs quarterly
+                            # Threshold: 100 days (Q1≈90d, Q2 YTD≈180d, Q3 YTD≈270d)
+                            duration_days = period_metadata.get('duration_days')
+                            if duration_days and duration_days > 100:
+                                # YTD period (cumulative from fiscal year start)
+                                period_label = f"{fiscal_period} YTD {display_date}"
+                            else:
+                                # Regular quarterly period
+                                period_label = f"{fiscal_period} {display_date}"
                         else:
                             period_label = display_date
 
