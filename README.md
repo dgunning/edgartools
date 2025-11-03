@@ -314,25 +314,25 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 <table align="center">
 <tr>
-  <td align="center" width="25%">
+Fix  <td align="center" width="25%" valign="top">
     <b>1️⃣ You Support</b><br><br>
     Buy Me A Coffee<br>
     contributions fund<br>
     Claude Max
   </td>
-  <td align="center" width="25%">
+  <td align="center" width="25%" valign="top">
     <b>2️⃣ AI Acceleration</b><br><br>
     Specialized agents<br>
     deliver <b>3-10x faster</b><br>
     development
   </td>
-  <td align="center" width="25%">
+  <td align="center" width="25%" valign="top">
     <b>3️⃣ Rapid Delivery</b><br><br>
     Features in <b>days</b><br>
     instead of weeks<br>
     24 releases / 60 days
   </td>
-  <td align="center" width="25%">
+  <td align="center" width="25%" valign="top">
     <b>4️⃣ You Benefit</b><br><br>
     More features,<br>
     faster fixes,<br>
@@ -345,22 +345,22 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 <table align="center">
 <tr>
-  <td align="center" width="25%">
+  <td align="center" width="25%" valign="top">
     <h3>🚀 24</h3>
     <b>Releases</b><br>
     <sub>1 every 2.5 days</sub>
   </td>
-  <td align="center" width="25%">
+  <td align="center" width="25%" valign="top">
     <h3>⚡ 322</h3>
     <b>Commits</b><br>
     <sub>5.4 per day</sub>
   </td>
-  <td align="center" width="25%">
+  <td align="center" width="25%" valign="top">
     <h3>🎯 3-10x</h3>
     <b>Velocity</b><br>
     <sub>vs traditional dev</sub>
   </td>
-  <td align="center" width="25%">
+  <td align="center" width="25%" valign="top">
     <h3>⏱️ Days</h3>
     <b>Not Weeks</b><br>
     <sub>for major features</sub>
