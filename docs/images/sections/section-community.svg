@@ -30,9 +30,10 @@
     </g>
   </g>
 
-  <!-- Text -->
+  <!-- Text with subtle outline -->
   <text x="80" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
-        font-size="24" font-weight="700" fill="#FFD700" letter-spacing="1">
+        font-size="24" font-weight="700" fill="#FFD700" letter-spacing="1"
+        stroke="#1a2732" stroke-width="1" paint-order="stroke fill">
     COMMUNITY &amp; SUPPORT
   </text>
 </svg>
