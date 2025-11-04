@@ -794,6 +794,111 @@ class Filings:
             self._hash = hash(tuple(hash_components))
         return self._hash
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        Returns AI-optimized collection summary for language models.
+
+        This method provides structured information about the filings collection in a markdown-KV format
+        that is optimized for AI agent navigation and discovery.
+
+        Args:
+            detail: Level of detail to include:
+                - 'minimal': Basic collection info (~100 tokens)
+                - 'standard': Adds sample entries (~250 tokens)
+                - 'full': Adds form breakdown (~400 tokens)
+
+        Returns:
+            Markdown-KV formatted context string optimized for LLMs
+
+        Example:
+            >>> filings = get_filings(2024, 1, form='C')
+            >>> print(filings.to_context('standard'))
+            FILINGS COLLECTION
+
+            Total: 150 filings
+            Forms: C, C-U, C-AR
+            Date Range: 2024-01-01 to 2024-03-31
+
+            AVAILABLE ACTIONS:
+              - Use .latest() to get most recent filing
+              - Use [index] to access specific filing (e.g., filings[0])
+              - Use .filter(form='C') to narrow by form type
+              - Use .docs for detailed API documentation
+
+            SAMPLE FILINGS:
+              0. Form C - 2024-03-29 - ViiT Health Inc
+              1. Form C - 2024-03-28 - Artisan Creative Inc
+              2. Form C-U - 2024-03-28 - TechStart LLC
+              ... (147 more)
+        """
+        lines = []
+
+        # Header
+        lines.append("FILINGS COLLECTION")
+        lines.append("")
+
+        # Always include count
+        count = len(self)
+        lines.append(f"Total: {count} filings" if count != 1 else "Total: 1 filing")
+
+        # Get unique form types using PyArrow
+        if count > 0:
+            forms_column = self.data['form']
+            unique_forms = sorted(set(forms_column.to_pylist()))
+
+            # Truncate form list if too many to avoid token bloat
+            MAX_FORMS_TO_SHOW = 5
+            if len(unique_forms) > MAX_FORMS_TO_SHOW:
+                shown = ', '.join(unique_forms[:MAX_FORMS_TO_SHOW])
+                remaining = len(unique_forms) - MAX_FORMS_TO_SHOW
+                lines.append(f"Forms: {shown} (+{remaining} more)")
+            else:
+                lines.append(f"Forms: {', '.join(unique_forms)}")
+
+            # Get date range
+            try:
+                start_date, end_date = self.date_range
+                lines.append(f"Date Range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+            except:
+                pass  # Date range not available
+
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  - Use .latest() to get most recent filing")
+        lines.append("  - Use [index] to access specific filing (e.g., filings[0])")
+        lines.append("  - Use .filter(form='C') to narrow by form type")
+        lines.append("  - Use .docs for detailed API documentation")
+
+        if detail in ['standard', 'full'] and count > 0:
+            # Show sample entries
+            lines.append("")
+            lines.append("SAMPLE FILINGS:")
+            sample_size = min(3, count)
+            for i in range(sample_size):
+                try:
+                    form = self.data['form'][i].as_py()
+                    filing_date = self.data['filing_date'][i].as_py()
+                    company = self.data['company'][i].as_py()
+                    lines.append(f"  {i}. Form {form} - {filing_date} - {company}")
+                except:
+                    pass  # Skip if there's an issue with this entry
+
+            if count > sample_size:
+                lines.append(f"  ... ({count - sample_size} more)")
+
+        if detail == 'full' and count > 0:
+            # Form breakdown using PyArrow compute
+            from collections import Counter
+            forms_list = self.data['form'].to_pylist()
+            form_counts = Counter(forms_list)
+
+            lines.append("")
+            lines.append("FORM BREAKDOWN:")
+            for form, cnt in sorted(form_counts.items()):
+                lines.append(f"  {form}: {cnt} {'filing' if cnt == 1 else 'filings'}")
+
+        return "\n".join(lines)
+
     def __rich__(self) -> Panel:
         # Create table with appropriate columns and styling
         table = Table(
@@ -1655,12 +1760,13 @@ class Filing:
 
                 if not filings or filings.empty:
                     # Shouldn't get here
-                    return company.get_empty_filings()
+                    return company._empty_company_filings()
             else:
-                return company.get_empty_filings()
+                return company._empty_company_filings()
         file_number = filings[0].file_number
         return company.get_filings(file_number=file_number,
                                    sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")])
+
 
     def __hash__(self):
         return hash(self.accession_no)
@@ -1677,6 +1783,123 @@ class Filing:
                               "Filing Date": self.filing_date,
                               "Company": self.company,
                               "CIK": self.cik}]).set_index("Accession Number")
+
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        Returns AI-optimized filing metadata for language models.
+
+        This method provides structured information about the filing in a markdown-KV format
+        that is optimized for AI agent navigation and discovery.
+
+        Args:
+            detail: Level of detail to include:
+                - 'minimal': Basic filing info (~100 tokens)
+                - 'standard': Adds available actions and methods (~250 tokens)
+                - 'full': Adds document details and XBRL status (~500 tokens)
+
+        Returns:
+            Markdown-KV formatted context string optimized for LLMs
+
+        Example:
+            >>> filing = filings[0]
+            >>> print(filing.to_context('standard'))
+            FILING: Form C
+
+            Company: ViiT Health Inc
+            CIK: 1881570
+            Filed: 2025-06-11
+            Accession: 0001670254-25-000647
+
+            AVAILABLE ACTIONS:
+              - Use .obj() to parse as structured data
+                Returns: FormC (crowdfunding offering details)
+              - Use .docs for detailed API documentation
+              - Use .xbrl() for financial statements (if available)
+              - Use .document() for structured text extraction
+              - Use .attachments for exhibits (5 documents)
+        """
+        from edgar import get_obj_info
+
+        lines = []
+
+        # Header
+        lines.append(f"FILING: Form {self.form}")
+        lines.append("")
+
+        # Always include basic info
+        lines.append(f"Company: {self.company}")
+        lines.append(f"CIK: {self.cik}")
+        lines.append(f"Filed: {self.filing_date}")
+        lines.append(f"Accession: {self.accession_no}")
+
+        # Add period of report if available and not minimal
+        if detail in ['standard', 'full']:
+            try:
+                period = self.period_of_report
+                if period:
+                    lines.append(f"Period: {period}")
+            except:
+                pass  # Period not available for all filing types
+
+        # Add multi-entity info if present
+        if self.is_multi_entity and detail != 'minimal':
+            num_entities = len(self.all_ciks)
+            lines.append(f"Multi-Entity Filing: {num_entities} entities")
+
+        if detail in ['standard', 'full']:
+            lines.append("")
+            lines.append("AVAILABLE ACTIONS:")
+
+            # Check if this form has a structured data object
+            has_obj, obj_type, obj_desc = get_obj_info(self.form)
+            if has_obj:
+                lines.append(f"  - Use .obj() to parse as structured data")
+                lines.append(f"    Returns: {obj_type} ({obj_desc})")
+
+            # Mention .docs for API documentation
+            lines.append(f"  - Use .docs for detailed API documentation")
+
+            # Check for XBRL availability (non-blocking check)
+            has_xbrl = False
+            if detail == 'full':
+                try:
+                    # Only do full check in 'full' mode
+                    xbrl_data = self.xbrl()
+                    has_xbrl = xbrl_data is not None
+                except:
+                    pass
+
+            xbrl_hint = "for financial statements" if has_xbrl or self.form in ['10-K', '10-Q', '20-F', '8-K', '6-K'] else "(if available)"
+            lines.append(f"  - Use .xbrl() {xbrl_hint}")
+
+            lines.append(f"  - Use .document() for structured text extraction")
+
+            # Add attachments info if available
+            try:
+                num_attachments = len(self.attachments)
+                lines.append(f"  - Use .attachments for exhibits ({num_attachments} documents)")
+            except:
+                lines.append(f"  - Use .attachments for exhibits")
+
+        if detail == 'full':
+            lines.append("")
+            lines.append("DOCUMENTS:")
+            try:
+                primary_docs = self.primary_documents
+                if primary_docs and len(primary_docs) > 0:
+                    lines.append(f"  Primary: {primary_docs[0].document}")
+                else:
+                    lines.append(f"  Primary: N/A")
+            except:
+                lines.append(f"  Primary: N/A")
+
+            # Add XBRL status
+            if has_xbrl:
+                lines.append(f"  XBRL: Available")
+            elif self.form in ['10-K', '10-Q', '20-F', '8-K', '6-K']:
+                lines.append(f"  XBRL: Check with .xbrl()")
+
+        return "\n".join(lines)
 
     def __str__(self):
         """

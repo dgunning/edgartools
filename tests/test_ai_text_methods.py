@@ -1,9 +1,11 @@
 """
-Tests for AI-optimized .text() methods on core EdgarTools objects.
+Tests for AI-optimized .to_context() methods on core EdgarTools objects.
 
 These methods provide research-backed format optimization:
 - Markdown-KV for metadata objects (60.7% accuracy, 25% fewer tokens)
 - TSV for tabular collections (maximum token efficiency)
+
+Note: .text() methods are deprecated in favor of .to_context() for consistency.
 
 Research: https://improvingagents.com/blog/best-input-data-format-for-llms
 """
@@ -12,9 +14,9 @@ import pytest
 
 
 @pytest.mark.network
-def test_company_text_method(aapl_company):
-    """Test Company.text() returns Markdown-KV format."""
-    text = aapl_company.text(max_tokens=2000)
+def test_company_to_context_method(aapl_company):
+    """Test Company.to_context() returns Markdown-KV format."""
+    text = aapl_company.to_context(max_tokens=2000)
 
     # Check format is Markdown-KV (key-value with ** markers)
     assert "**Company:**" in text
@@ -30,9 +32,9 @@ def test_company_text_method(aapl_company):
 
 
 @pytest.mark.network
-def test_company_text_contains_key_fields(aapl_company):
-    """Test Company.text() includes essential company fields."""
-    text = aapl_company.text(max_tokens=2000)
+def test_company_to_context_contains_key_fields(aapl_company):
+    """Test Company.to_context() includes essential company fields."""
+    text = aapl_company.to_context(max_tokens=2000)
 
     # Essential fields that should be present
     assert "**Company:**" in text
@@ -68,8 +70,8 @@ def test_filing_text_method(aapl_company):
 
 
 @pytest.mark.network
-def test_xbrl_text_method(aapl_company):
-    """Test XBRL.text() returns Markdown-KV format optimized for AI consumption."""
+def test_xbrl_to_context_method(aapl_company):
+    """Test XBRL.to_context() returns Markdown-KV format optimized for AI consumption."""
     filings = aapl_company.get_filings(form="10-K")
     if len(filings) == 0:
         pytest.skip("No 10-K filings available")
@@ -81,9 +83,9 @@ def test_xbrl_text_method(aapl_company):
     except Exception:
         pytest.skip("XBRL not available for this filing")
 
-    text = xbrl.text(max_tokens=1000)
+    text = xbrl.to_context(max_tokens=1000)
 
-    # XBRL.text() returns Markdown-KV format (not rich display format)
+    # XBRL.to_context() returns Markdown-KV format (not rich display format)
     # Check for Markdown-KV markers
     assert "**Entity:**" in text
     assert "**CIK:**" in text
@@ -107,6 +109,57 @@ def test_xbrl_text_method(aapl_company):
 
     # Should be substantial text
     assert len(text) > 400
+
+
+@pytest.mark.network
+def test_company_text_deprecated(aapl_company):
+    """Test that Company.text() still works but issues deprecation warning."""
+    import warnings
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        text = aapl_company.text(max_tokens=2000)
+
+        # Should have issued a deprecation warning
+        assert len(w) == 1
+        assert issubclass(w[0].category, DeprecationWarning)
+        assert "deprecated" in str(w[0].message).lower()
+        assert "to_context" in str(w[0].message)
+
+        # But should still return valid output
+        assert "**Company:**" in text
+        assert "Apple" in text or "AAPL" in text
+
+
+@pytest.mark.network
+def test_xbrl_text_deprecated(aapl_company):
+    """Test that XBRL.text() still works but issues deprecation warning."""
+    import warnings
+
+    filings = aapl_company.get_filings(form="10-K")
+    if len(filings) == 0:
+        pytest.skip("No 10-K filings available")
+
+    filing = filings[0]
+
+    try:
+        xbrl = filing.xbrl()
+    except Exception:
+        pytest.skip("XBRL not available for this filing")
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        text = xbrl.text(max_tokens=1000)
+
+        # Should have issued a deprecation warning
+        assert len(w) == 1
+        assert issubclass(w[0].category, DeprecationWarning)
+        assert "deprecated" in str(w[0].message).lower()
+        assert "to_context" in str(w[0].message)
+
+        # But should still return valid output
+        assert "**Entity:**" in text
+        assert "**Form:**" in text
 
 
 @pytest.mark.fast

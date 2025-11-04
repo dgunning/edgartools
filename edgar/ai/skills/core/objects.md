@@ -41,15 +41,17 @@ print(company)  # Shows formatted company profile
 
 **When to Use**: Quick overview, visual verification, understanding structure
 
-### 2. AI-Optimized Text Format (`.text()`)
+### 2. AI-Optimized Context Format (`.to_context()`)
 
-**Available on**: Company, XBRL only
+**Available on**: Company, XBRL, Filing, Filings, EntityFilings, FormC, Offering
 
-**Important**: Not all objects have AI-optimized `.text()` methods. Only Company and XBRL provide this feature.
+**Important**: Use `.to_context()` for AI-optimized metadata. The older `.text()` method is deprecated for Company and XBRL.
 
-Objects with AI-optimized `.text()`:
+Objects with AI-optimized `.to_context()`:
 - **Company**: Markdown-KV format (60.7% accuracy, 25% fewer tokens than JSON)
 - **XBRL**: Markdown-KV format for metadata
+- **Filing, Filings, EntityFilings**: Navigation hints and metadata
+- **FormC, Offering**: Crowdfunding data context
 
 Research basis: [Best Input Data Format for LLMs](https://improvingagents.com/blog/best-input-data-format-for-llms)
 
@@ -60,19 +62,21 @@ from edgar import Company
 
 company = Company("AAPL")
 
-# Get AI-optimized text (Markdown-KV format)
-text = company.text(max_tokens=2000)
+# Get AI-optimized context (Markdown-KV format)
+text = company.to_context(max_tokens=2000)
 print(text)
 # **Company:** Apple Inc.
 # **CIK:** 0000320193
 # **Ticker:** AAPL
 # ...
 
-# XBRL also has AI-optimized text
+# XBRL also has AI-optimized context
 filing = company.get_filings(form="10-K")[0]
 xbrl = filing.xbrl()
-xbrl_text = xbrl.text(max_tokens=2000)
+xbrl_text = xbrl.to_context(max_tokens=2000)
 ```
+
+> **Note**: `Company.text()` and `XBRL.text()` are deprecated. Use `.to_context()` instead for consistent naming across all EdgarTools classes.
 
 **Benefits**:
 - **Token Efficient**: 25% fewer tokens than JSON for same information
@@ -142,14 +146,14 @@ xbrl.docs.search("statements")     # How to access statements
 
 **Recommended Pattern**: `repr()` + `.docs` + `.docs.search()`
 
-This is the current recommended approach for API discovery and working with EdgarTools objects. The `.text()` method is only available on Company and XBRL for specialized AI data extraction.
+This is the current recommended approach for API discovery and working with EdgarTools objects. The `.to_context()` method is available on many objects for AI-optimized data extraction.
 
 | Method | Available On | Purpose | Token Range |
 |--------|--------------|---------|-------------|
 | `print(obj)` or `repr()` | All objects | Quick visual overview | 125-2,500 |
 | `obj.docs` | All major objects | **Primary:** API discovery & learning | 2,000-5,000 |
 | `obj.docs.search(query)` | All major objects | **Primary:** Find specific functionality | 200-500 |
-| `obj.text(max_tokens)` | Company, XBRL only | **Specialized:** AI-optimized data extraction | 500-2,000 |
+| `obj.to_context(max_tokens)` | Company, XBRL, Filing, Filings, etc. | **Specialized:** AI-optimized data extraction | 200-2,000 |
 
 ---
 
@@ -217,7 +221,7 @@ print(help_text)
 **Token Estimate**: ~750 tokens
 **Format**: Unicode box drawing with information panels
 **Has .docs**: ✅ Yes
-**Has .text()**: ✅ Yes (AI-optimized Markdown-KV)
+**Has .to_context()**: ✅ Yes (AI-optimized Markdown-KV)
 
 **Contains**:
 - Entity name and identifiers (CIK, ticker, EIN)
@@ -239,8 +243,8 @@ print(company)  # Shows full company profile with box drawing
 company.docs  # Comprehensive API guide
 company.docs.search("get_filings")  # Find filing methods
 
-# Get AI-optimized text
-company.text(max_tokens=1000)  # Markdown-KV format
+# Get AI-optimized context
+company.to_context(max_tokens=1000)  # Markdown-KV format
 ```
 
 **Sample Output Structure**:
@@ -366,12 +370,12 @@ Showing 3 of 1,245 filings
 ## XBRL Object
 
 **Typical Size (repr)**: ~3,000 characters (visual box drawing)
-**Typical Size (.text())**: ~1,100 characters (AI-optimized)
+**Typical Size (.to_context())**: ~1,100 characters (AI-optimized)
 **Token Estimate (repr)**: ~750 tokens
-**Token Estimate (.text())**: ~275 tokens
-**Format**: Markdown-KV (AI-optimized) via .text(), Unicode box drawing via repr()
+**Token Estimate (.to_context())**: ~275 tokens
+**Format**: Markdown-KV (AI-optimized) via .to_context(), Unicode box drawing via repr()
 **Has .docs**: ✅ Yes
-**Has .text()**: ✅ Yes (AI-optimized Markdown-KV)
+**Has .to_context()**: ✅ Yes (AI-optimized Markdown-KV)
 
 **Contains**:
 - Entity information (name, ticker, CIK)
@@ -393,8 +397,8 @@ xbrl = filing.xbrl()
 # Visual display (Unicode box drawing)
 print(xbrl)  # Shows comprehensive XBRL structure
 
-# AI-optimized text (Markdown-KV format)
-text = xbrl.text()  # Compact, token-efficient
+# AI-optimized context (Markdown-KV format)
+text = xbrl.to_context()  # Compact, token-efficient
 print(text)
 
 # Access documentation
@@ -403,7 +407,7 @@ xbrl.docs.search("statements")  # How to access statements
 xbrl.docs.search("facts")  # How to query facts
 ```
 
-**Sample .text() Output (AI-Optimized)**:
+**Sample .to_context() Output (AI-Optimized)**:
 ```
 **Entity:** Apple Inc. (AAPL)
 **CIK:** 320193
