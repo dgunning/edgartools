@@ -16,7 +16,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar._filings import Filing, Filings, PagingState
-from edgar.core import IntString, log
+from edgar.core import IntString, log, listify
 from edgar.formatting import accession_number_text, display_size
 from edgar.reference.forms import describe_form
 from edgar.richtools import Docs, df_to_rich_table, repr_rich
@@ -142,7 +142,8 @@ class EntityFilings(Filings):
                date: str = None,
                cik: Union[int, str, List[Union[int, str]]] = None,
                ticker: Union[str, List[str]] = None,
-               accession_number: Union[str, List[str]] = None):
+               accession_number: Union[str, List[str]] = None,
+               file_number: Union[str, List[str]] = None):
         """
         Filter the filings based on various criteria.
 
@@ -154,6 +155,7 @@ class EntityFilings(Filings):
             cik: Filter by CIK
             ticker: Filter by ticker
             accession_number: Filter by accession number
+            file_number: Filter by file number
 
         Returns:
             Filtered EntityFilings
@@ -166,7 +168,12 @@ class EntityFilings(Filings):
                              cik=cik,
                              ticker=ticker,
                              accession_number=accession_number)
-        return EntityFilings(data=res.data, cik=self.cik, company_name=self.company_name)
+        if file_number:
+            data  = res.data.filter(
+                pc.is_in(res.data['fileNumber'], pa.array(listify(file_number))))
+        else:
+            data = res.data
+        return EntityFilings(data=data, cik=self.cik, company_name=self.company_name)
 
     def latest(self, n: int = 1):
         """
@@ -288,6 +295,84 @@ class EntityFilings(Filings):
 
     def __repr__(self):
         return repr_rich(self.__rich__())
+
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        Returns AI-optimized entity filings summary for language models.
+
+        This method extends Filings.to_context() with entity-specific context,
+        providing structured information in a markdown-KV format optimized for AI navigation.
+
+        Args:
+            detail: Level of detail to include:
+                - 'minimal': Basic collection info (~150 tokens)
+                - 'standard': Adds sample entries (~300 tokens)
+                - 'full': Adds form breakdown and crowdfunding details (~500 tokens)
+
+        Returns:
+            Markdown-KV formatted context string optimized for LLMs
+
+        Example:
+            >>> company = Company(1881570)
+            >>> filings = company.get_filings(form='C')
+            >>> print(filings.to_context('standard'))
+            FILINGS FOR: ViiT Health Inc
+            CIK: 1881570
+
+            Total: 5 filings
+            Forms: C, C-U, C-AR
+            Date Range: 2024-01-01 to 2025-06-11
+
+            AVAILABLE ACTIONS:
+              - Use .latest() to get most recent filing
+              - Use [index] to access specific filing (e.g., filings[0])
+              - Use .filter(form='C') to narrow by form type
+              - Use .docs for detailed API documentation
+
+            SAMPLE FILINGS:
+              0. Form C - 2025-06-11 - ViiT Health Inc
+              1. Form C-U - 2024-12-15 - ViiT Health Inc
+              2. Form C-AR - 2024-08-20 - ViiT Health Inc
+              ... (2 more)
+
+            CROWDFUNDING FILINGS:
+              C: 1 filing
+              C-U: 2 filings
+              C-AR: 2 filings
+        """
+        lines = []
+
+        # Header with entity info
+        lines.append(f"FILINGS FOR: {self.company_name}")
+        lines.append(f"CIK: {self.cik}")
+        lines.append("")
+
+        # Get base context from parent (without the header lines)
+        base_context = super().to_context(detail=detail)
+        # Skip first 2 lines (header and blank) from parent
+        base_lines = base_context.split('\n')[2:]
+        lines.extend(base_lines)
+
+        # Add entity-specific insights for standard/full
+        if detail in ['standard', 'full'] and len(self) > 0:
+            # Crowdfunding-specific breakdown
+            cf_forms = ['C', 'C/A', 'C-U', 'C-AR', 'C-TR']
+            forms_list = self.data['form'].to_pylist()
+            cf_filings = [f for f in forms_list if f.split('/')[0] in cf_forms]
+
+            if cf_filings:
+                from collections import Counter
+                cf_counts = Counter(cf_filings)
+
+                lines.append("")
+                lines.append("CROWDFUNDING FILINGS:")
+                # Order by typical lifecycle: C, C-U, C-AR, C-TR
+                for form in ['C', 'C/A', 'C-U', 'C-AR', 'C-TR']:
+                    if form in cf_counts:
+                        cnt = cf_counts[form]
+                        lines.append(f"  {form}: {cnt} {'filing' if cnt == 1 else 'filings'}")
+
+        return "\n".join(lines)
 
     def __rich__(self):
         # Create table with appropriate columns and styling

@@ -1563,7 +1563,7 @@ class XBRL:
         return repr_rich(self.__rich__())
 
 
-    def text(self, max_tokens: int = 2000) -> str:
+    def to_context(self, max_tokens: int = 2000) -> str:
         """
         Get AI-optimized text representation of XBRL document.
 
@@ -1582,7 +1582,7 @@ class XBRL:
 
         Example:
             >>> xbrl = filing.xbrl()
-            >>> text = xbrl.text()
+            >>> text = xbrl.to_context()
             >>> print(text)
             **Entity:** Apple Inc. (AAPL)
             **CIK:** 0000320193
@@ -1711,6 +1711,29 @@ class XBRL:
         lines.append("💡 Use xbrl.docs for comprehensive API guide")
 
         return "\n".join(lines)
+
+    def text(self, max_tokens: int = 2000) -> str:
+        """
+        Deprecated: Use to_context() instead.
+
+        Get AI-optimized text representation of XBRL document.
+        This method is deprecated and will be removed in a future version.
+        Use to_context() for consistent naming with other AI-native methods.
+
+        Args:
+            max_tokens: Target token budget (currently not enforced, reserved for future use)
+
+        Returns:
+            Compact Markdown-KV text representation optimized for AI consumption
+        """
+        import warnings
+        warnings.warn(
+            "XBRL.text() is deprecated and will be removed in a future version. "
+            "Use XBRL.to_context() instead for consistent naming.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.to_context(max_tokens=max_tokens)
 
     @property
     def docs(self):

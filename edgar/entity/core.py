@@ -250,6 +250,21 @@ class Entity(SecFiler):
             trigger_full_load=trigger_full_load
         )
 
+    def _empty_company_filings(self):
+        """
+        Create an empty filings container.
+
+        Args:
+            cik: The CIK number
+            company_name: The company name
+
+        Returns:
+            EntityFilings: An empty filings container
+        """
+        from edgar.entity.filings import COMPANY_FILINGS_SCHEMA
+        table = pyarrow.Table.from_arrays([[] for _ in range(13)], schema=COMPANY_FILINGS_SCHEMA)
+        return EntityFilings(table, cik=self.cik, company_name=self.name)
+
     def get_facts(self, period_type: Optional[Union[str, 'PeriodType']] = None) -> Optional[EntityFacts]:
         """
         Get structured facts about this entity.
@@ -548,7 +563,7 @@ class Company(Entity):
         # Delegate to the rich representation for consistency with the old implementation
         return repr_rich(self.__rich__())
 
-    def text(self, max_tokens: int = 2000) -> str:
+    def to_context(self, max_tokens: int = 2000) -> str:
         """
         Get AI-optimized plain text representation.
 
@@ -566,7 +581,7 @@ class Company(Entity):
         Example:
             >>> from edgar import Company
             >>> company = Company("AAPL")
-            >>> text = company.text()
+            >>> text = company.to_context()
             >>> print(text)
             **Company:** Apple Inc.
             **CIK:** 0000320193
@@ -650,6 +665,29 @@ class Company(Entity):
             text = text[:max_chars] + "\n\n[Truncated for token limit]"
 
         return text
+
+    def text(self, max_tokens: int = 2000) -> str:
+        """
+        Deprecated: Use to_context() instead.
+
+        Get AI-optimized plain text representation.
+        This method is deprecated and will be removed in a future version.
+        Use to_context() for consistent naming with other AI-native methods.
+
+        Args:
+            max_tokens: Approximate token limit using 4 chars/token heuristic (default: 2000)
+
+        Returns:
+            Markdown-formatted key-value representation optimized for LLMs
+        """
+        import warnings
+        warnings.warn(
+            "Company.text() is deprecated and will be removed in a future version. "
+            "Use Company.to_context() instead for consistent naming.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.to_context(max_tokens=max_tokens)
 
     def __rich__(self):
         """Creates a rich representation of the company with detailed information."""

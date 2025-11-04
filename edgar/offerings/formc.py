@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import date, datetime
-from functools import lru_cache
-from typing import List, Optional
+from functools import lru_cache, cached_property
+from typing import List, Optional, Dict
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, ConfigDict
@@ -16,10 +16,10 @@ from edgar.core import get_bool
 from edgar.entity import Company
 from edgar.formatting import yes_no
 from edgar.reference import states
-from edgar.richtools import repr_rich
+from edgar.richtools import repr_rich, Docs
 from edgar.xmltools import child_text
 
-__all__ = ['FormC', 'Signer', 'FundingPortal']
+__all__ = ['FormC', 'Signer', 'FundingPortal', 'IssuerCompany']
 
 
 class FilerInformation(BaseModel):
@@ -95,6 +95,60 @@ class OfferingInformation(BaseModel):
     maximum_offering_amount: Optional[float]
     deadline_date: Optional[date]
 
+    @property
+    def security_description(self) -> str:
+        """Combined security type and description for easier access"""
+        if not self.security_offered_type:
+            return "Not specified"
+        sec_type = self.security_offered_type
+        if self.security_offered_other_desc:
+            return f"{sec_type} ({self.security_offered_other_desc})"
+        return sec_type
+
+    @property
+    def target_amount(self) -> Optional[float]:
+        """Alias for offering_amount - more intuitive name"""
+        return self.offering_amount
+
+    @property
+    def price_per_security(self) -> Optional[float]:
+        """Parse price string to float"""
+        if not self.price:
+            return None
+        try:
+            return float(self.price)
+        except (ValueError, TypeError):
+            return None
+
+    @property
+    def number_of_securities(self) -> Optional[int]:
+        """Parse no_of_security_offered string to int"""
+        if not self.no_of_security_offered:
+            return None
+        try:
+            return int(float(self.no_of_security_offered))
+        except (ValueError, TypeError):
+            return None
+
+    @property
+    def percent_to_maximum(self) -> Optional[float]:
+        """Calculate target as percentage of maximum offering amount"""
+        if not self.offering_amount or not self.maximum_offering_amount:
+            return None
+        if self.maximum_offering_amount == 0:
+            return None
+        return (self.offering_amount / self.maximum_offering_amount) * 100
+
+    @property
+    def target_offering_amount(self) -> Optional[float]:
+        """Alias for offering_amount - explicit name"""
+        return self.offering_amount
+
+    @property
+    def offering_deadline(self) -> Optional[date]:
+        """Alias for deadline_date - more intuitive name"""
+        return self.deadline_date
+
 
 class AnnualReportDisclosure(BaseModel):
     """
@@ -145,6 +199,100 @@ class AnnualReportDisclosure(BaseModel):
     @property
     def is_offered_in_all_states(self):
         return set(self.offering_jurisdictions).issuperset(states.keys())
+
+    @property
+    def total_debt_most_recent(self) -> float:
+        """Total debt (short-term + long-term) for most recent fiscal year"""
+        return self.short_term_debt_most_recent_fiscal_year + self.long_term_debt_most_recent_fiscal_year
+
+    @property
+    def total_debt_prior(self) -> float:
+        """Total debt (short-term + long-term) for prior fiscal year"""
+        return self.short_term_debt_prior_fiscal_year + self.long_term_debt_prior_fiscal_year
+
+    @property
+    def debt_to_asset_ratio(self) -> Optional[float]:
+        """Debt-to-asset ratio as percentage for most recent fiscal year"""
+        if self.total_asset_most_recent_fiscal_year == 0:
+            return None
+        return (self.total_debt_most_recent / self.total_asset_most_recent_fiscal_year) * 100
+
+    @property
+    def revenue_growth_yoy(self) -> Optional[float]:
+        """Year-over-year revenue growth as percentage"""
+        if self.revenue_prior_fiscal_year == 0:
+            return None
+        return ((self.revenue_most_recent_fiscal_year - self.revenue_prior_fiscal_year) /
+                self.revenue_prior_fiscal_year) * 100
+
+    @property
+    def is_pre_revenue(self) -> bool:
+        """True if company has no revenue in most recent fiscal year"""
+        return self.revenue_most_recent_fiscal_year == 0
+
+    @property
+    def burn_rate_change(self) -> Optional[float]:
+        """Change in net income (negative values indicate increased burn)"""
+        return self.net_income_most_recent_fiscal_year - self.net_income_prior_fiscal_year
+
+    @property
+    def asset_growth_yoy(self) -> Optional[float]:
+        """Year-over-year asset growth as percentage"""
+        if self.total_asset_prior_fiscal_year == 0:
+            return None
+        return ((self.total_asset_most_recent_fiscal_year - self.total_asset_prior_fiscal_year) /
+                self.total_asset_prior_fiscal_year) * 100
+
+    # Convenience aliases for most recent fiscal year (simpler access)
+    @property
+    def total_assets(self) -> float:
+        """Alias for total_asset_most_recent_fiscal_year"""
+        return self.total_asset_most_recent_fiscal_year
+
+    @property
+    def cash_and_cash_equivalents(self) -> float:
+        """Alias for cash_equi_most_recent_fiscal_year"""
+        return self.cash_equi_most_recent_fiscal_year
+
+    @property
+    def accounts_receivable(self) -> float:
+        """Alias for act_received_most_recent_fiscal_year"""
+        return self.act_received_most_recent_fiscal_year
+
+    @property
+    def short_term_debt(self) -> float:
+        """Alias for short_term_debt_most_recent_fiscal_year"""
+        return self.short_term_debt_most_recent_fiscal_year
+
+    @property
+    def long_term_debt(self) -> float:
+        """Alias for long_term_debt_most_recent_fiscal_year"""
+        return self.long_term_debt_most_recent_fiscal_year
+
+    @property
+    def revenues(self) -> float:
+        """Alias for revenue_most_recent_fiscal_year"""
+        return self.revenue_most_recent_fiscal_year
+
+    @property
+    def cost_of_goods_sold(self) -> float:
+        """Alias for cost_goods_sold_most_recent_fiscal_year"""
+        return self.cost_goods_sold_most_recent_fiscal_year
+
+    @property
+    def taxes_paid(self) -> float:
+        """Alias for tax_paid_most_recent_fiscal_year"""
+        return self.tax_paid_most_recent_fiscal_year
+
+    @property
+    def net_income(self) -> float:
+        """Alias for net_income_most_recent_fiscal_year"""
+        return self.net_income_most_recent_fiscal_year
+
+    @property
+    def number_of_employees(self) -> int:
+        """Alias for current_employees"""
+        return self.current_employees
 
     def __rich__(self):
         annual_report_table = Table(Column("", style='bold'), Column("Current Fiscal Year", style="bold"),
@@ -238,6 +386,138 @@ def maybe_date(value):
         return None
 
 
+def group_offerings_by_file_number(filings) -> Dict[str, 'EntityFilings']:
+    """
+    Group Form C filings by issuer file number.
+
+    This utility efficiently groups crowdfunding filings using PyArrow operations,
+    which is particularly useful for companies with many offerings. Each group
+    represents one complete offering lifecycle (initial C, amendments, updates, etc.).
+
+    Args:
+        filings: EntityFilings containing Form C variant filings
+
+    Returns:
+        Dictionary mapping file numbers (020-XXXXX) to EntityFilings for that offering
+
+    Example:
+        >>> company = Company('1881570')  # ViiT Health
+        >>> all_filings = company.get_filings(form=['C', 'C/A', 'C-U', 'C-AR'])
+        >>> grouped = group_offerings_by_file_number(all_filings)
+        >>> for file_num, offering_filings in grouped.items():
+        ...     print(f"{file_num}: {len(offering_filings)} filings")
+        020-28927: 1 filings
+        020-32444: 3 filings
+        020-36002: 4 filings
+
+    Note:
+        Uses PyArrow for efficient grouping. For small filing sets, a simple loop
+        may be clearer, but this approach scales better for companies with many filings.
+    """
+    # Use PyArrow to get unique file numbers efficiently
+    unique_file_numbers = filings.data['fileNumber'].unique()
+
+    # Create grouped dictionary using filter
+    return {
+        str(fn): filings.filter(file_number=str(fn))
+        for fn in unique_file_numbers.to_pylist()
+    }
+
+
+class IssuerCompany:
+    """
+    Represents the company issuing a crowdfunding offering (Regulation CF).
+
+    This class provides offering-specific methods for companies that have
+    filed Form C crowdfunding offerings. It wraps basic company information
+    and provides convenient access to offerings and related data.
+
+    Attributes:
+        cik: The company's CIK number
+        name: The company's legal name from Form C
+
+    Example:
+        >>> formc = filing.obj()
+        >>> issuer = formc.get_issuer_company()
+        >>> offerings = issuer.get_offerings()
+        >>> print(issuer.name, len(offerings), "offerings")
+    """
+
+    def __init__(self, cik: str, name: str):
+        """
+        Initialize an IssuerCompany.
+
+        Args:
+            cik: The company's CIK number (as string)
+            name: The company's legal name
+        """
+        self.cik = cik
+        self.name = name
+        self._company = None
+
+    def as_company(self) -> Company:
+        """
+        Convert to a full Company object with complete entity data.
+
+        Returns:
+            Company object for this issuer
+
+        Example:
+            >>> issuer = formc.get_issuer_company()
+            >>> company = issuer.as_company()
+            >>> print(company.tickers)  # Full company data available
+        """
+        if self._company is None:
+            self._company = Company(self.cik)
+        return self._company
+
+    def get_offerings(self):
+        """
+        Get all crowdfunding offerings (Form C filings) by this company.
+
+        Returns:
+            EntityFilings containing all Form C variant filings
+
+        Example:
+            >>> issuer = formc.get_issuer_company()
+            >>> offerings = issuer.get_offerings()
+            >>> for filing in offerings:
+            ...     print(filing.form, filing.filing_date)
+        """
+        from edgar.offerings import Offering
+        company = self.as_company()
+        filings = company.get_filings(form=['C', 'C/A', 'C-U', 'C-U/A', 'C-AR', 'C-AR/A', 'C-TR'])
+        grouped_filings = group_offerings_by_file_number(filings)
+        offerings: List[Offering] = []
+        for file_num, _ in grouped_filings.items():
+            offerings.append(Offering(file_num, cik=str(company.cik)))
+        return offerings
+
+    def latest_offering(self)->'Offering':
+        """
+        Get the most recent Form C offering (excludes amendments and reports).
+
+        Returns:
+            Latest Form C filing or None if no offerings found
+
+        Example:
+            >>> issuer = formc.get_issuer_company()
+            >>> latest = issuer.latest_offering()
+            >>> if latest:
+            ...     offering = latest.obj().get_offering(latest)
+        """
+        offerings = self.get_offerings()
+        if len(offerings) >0:
+            return offerings[0]
+
+
+    def __str__(self):
+        return f"IssuerCompany({self.name} [{self.cik}])"
+
+    def __repr__(self):
+        return self.__str__()
+
+
 class FormC:
 
     def __init__(self,
@@ -253,6 +533,7 @@ class FormC:
         self.annual_report_disclosure: Optional[AnnualReportDisclosure] = annual_report_disclosure
         self.signature_info: SignatureInfo = signature_info
         self.form = form
+        self._filing:'Filing' = None
 
     @property
     def description(self):
@@ -273,6 +554,357 @@ class FormC:
             desc = "Form C-TR - Offering Termination Report"
         return desc
 
+    @property
+    def portal_file_number(self) -> Optional[str]:
+        """
+        The funding portal's SEC commission file number (e.g., '007-00033').
+
+        This identifies the PORTAL, not the specific offering. Multiple companies
+        can use the same portal, so this number appears across different offerings.
+
+        To track a specific offering's lifecycle, use the issuer file number from
+        filing.as_company_filing().file_number or Campaign.issuer_file_number.
+
+        Returns None if no funding portal is specified (e.g., in C-AR forms).
+        """
+        if self.issuer_information.funding_portal:
+            return self.issuer_information.funding_portal.file_number
+        return None
+
+    @property
+    def issuer_name(self) -> str:
+        """Convenience property for issuer name"""
+        return self.issuer_information.name
+
+    @property
+    def issuer_cik(self) -> str:
+        """Convenience property for issuer CIK"""
+        return self.filer_information.cik
+
+    @property
+    def portal_name(self) -> Optional[str]:
+        """Convenience property for funding portal name. Returns None if no portal."""
+        if self.issuer_information.funding_portal:
+            return self.issuer_information.funding_portal.name
+        return None
+
+    @property
+    def portal_cik(self) -> Optional[str]:
+        """Convenience property for funding portal CIK. Returns None if no portal."""
+        if self.issuer_information.funding_portal:
+            return self.issuer_information.funding_portal.cik
+        return None
+
+    @property
+    def days_to_deadline(self) -> Optional[int]:
+        """
+        Days remaining until offering deadline.
+        Returns negative number if deadline has passed.
+        Returns None if no deadline is set or no offering information.
+        """
+        if not self.offering_information or not self.offering_information.deadline_date:
+            return None
+        return (self.offering_information.deadline_date - date.today()).days
+
+    @property
+    def is_expired(self) -> bool:
+        """True if offering deadline has passed"""
+        days = self.days_to_deadline
+        return days is not None and days < 0
+
+    @property
+    def campaign_status(self) -> str:
+        """User-friendly status derived from form type"""
+        if self.form == "C-TR":
+            return "Terminated"
+        elif self.form.startswith("C-AR"):
+            return "Annual Report"
+        elif self.form.startswith("C-U"):
+            return "Progress Update"
+        elif self.form.endswith("/A"):
+            return "Active (Amendment)"
+        else:
+            return "Active (Initial)"
+
+    @cached_property
+    def issuer(self) -> 'IssuerCompany':
+        """
+        Get the issuer company for this offering (cached).
+
+        Returns an IssuerCompany object that provides offering-specific methods
+        and can be converted to a full Company object with as_company().
+
+        Returns:
+            IssuerCompany with CIK and name from this Form C
+
+        Example:
+            >>> formc = filing.obj()
+            >>> issuer = formc.issuer
+            >>> print(issuer.name)
+            >>> offerings = issuer.get_offerings()  # All offerings by this company
+            >>> company = issuer.as_company()  # Full Company object
+        """
+        return IssuerCompany(
+            cik=self.filer_information.cik,
+            name=self.issuer_information.name
+        )
+
+    def get_issuer_company(self) -> 'IssuerCompany':
+        """
+        Get the issuer company for this offering.
+
+        .. deprecated::
+            Use the `issuer` property instead. This method is kept for backward compatibility.
+
+        Returns:
+            IssuerCompany with CIK and name from this Form C
+        """
+        return self.issuer
+
+    def get_offering(self):
+        """
+        Get the complete offering lifecycle for this Form C filing.
+
+        Returns an Offering object that provides access to all related filings
+        (initial offering, amendments, updates, annual reports, termination).
+
+        Returns:
+            Offering object for this filing's offering lifecycle
+
+        Raises:
+            ValueError: If filing is not provided or file_number cannot be determined
+
+        Example:
+            >>> filing = company.get_filings(form='C')[0]
+            >>> formc = filing.obj()
+            >>> offering = formc.get_offering()
+            >>> print(offering.timeline())
+        """
+        from edgar.offerings.campaign import Offering
+        return Offering(self._filing)
+
+    def to_context(self, detail: str = 'standard', filing_date: Optional[date] = None) -> str:
+        """
+        Returns a token-efficient, AI-optimized text representation of the Form C filing.
+
+        This method provides a compact alternative to __rich__() that is optimized for
+        LLM context windows. It includes computed fields (status, days remaining, ratios)
+        and only displays populated fields.
+
+        Args:
+            detail: Level of detail to include:
+                - 'minimal': ~100-200 tokens, essential fields only
+                - 'standard': ~300-500 tokens, most important data (default)
+                - 'full': ~600-1000 tokens, comprehensive view
+            filing_date: Optional filing date to include in header
+
+        Returns:
+            Formatted string suitable for AI context
+
+        Example:
+            >>> formc.to_context()  # Standard detail
+            >>> formc.to_context(detail='minimal')  # Minimal tokens
+            >>> formc.to_context(detail='full')  # Everything
+        """
+        lines = []
+
+        # Header (always included)
+        header = f"FORM {self.form} - {self.description.upper()}"
+        if filing_date:
+            header += f" (Filed: {filing_date})"
+        lines.append(header)
+        lines.append("")
+
+        # Issuer (always included)
+        lines.append(f"ISSUER: {self.issuer_information.name}")
+        if detail in ['standard', 'full']:
+            lines.append(f"  CIK: {self.filer_information.cik}")
+            lines.append(f"  Legal: {self.issuer_information.jurisdiction} "
+                        f"{self.issuer_information.legal_status}")
+            if self.issuer_information.website:
+                lines.append(f"  Website: {self.issuer_information.website}")
+            if detail == 'full' and self.issuer_information.address:
+                city = self.issuer_information.address.city
+                state = self.issuer_information.address.state_or_country
+                lines.append(f"  Location: {city}, {state}")
+
+        # Funding Portal (standard+)
+        if self.issuer_information.funding_portal and detail in ['standard', 'full']:
+            portal = self.issuer_information.funding_portal
+            lines.append(f"\nFUNDING PORTAL: {portal.name}")
+            if detail == 'full':
+                lines.append(f"  CIK: {portal.cik} | CRD: {portal.crd or 'N/A'}")
+            lines.append(f"  File Number: {portal.file_number}")
+
+        # Offering (if present)
+        if self.offering_information:
+            lines.append("\nOFFERING:")
+
+            # Security description
+            lines.append(f"  Security: {self.offering_information.security_description}")
+
+            # Amounts
+            if self.offering_information.target_amount and self.offering_information.maximum_offering_amount:
+                target = self.offering_information.target_amount
+                max_amt = self.offering_information.maximum_offering_amount
+                if detail == 'minimal':
+                    # Compact format with K/M abbreviations
+                    target_str = f"${target/1000:.0f}K" if target < 1000000 else f"${target/1000000:.1f}M"
+                    max_str = f"${max_amt/1000:.0f}K" if max_amt < 1000000 else f"${max_amt/1000000:.1f}M"
+                    lines.append(f"  Target: {target_str} → Max: {max_str}")
+                else:
+                    lines.append(f"  Target: ${target:,.0f} | Maximum: ${max_amt:,.0f}")
+                    if self.offering_information.percent_to_maximum:
+                        lines.append(f"  Target is {self.offering_information.percent_to_maximum:.0f}% of maximum")
+
+            # Price and units (standard+)
+            if detail in ['standard', 'full']:
+                if self.offering_information.price_per_security:
+                    price_str = f"${self.offering_information.price_per_security:,.2f}/unit"
+                    if self.offering_information.number_of_securities:
+                        price_str += f" | Units: {self.offering_information.number_of_securities:,}"
+                    lines.append(f"  Price: {price_str}")
+
+            # Deadline with computed days remaining
+            if self.offering_information.deadline_date:
+                days = self.days_to_deadline
+                if days is not None:
+                    if days > 0:
+                        status = f"{days} days remaining"
+                    elif days == 0:
+                        status = "EXPIRES TODAY"
+                    else:
+                        status = f"EXPIRED ({abs(days)} days ago)"
+                else:
+                    status = ""
+
+                if detail == 'minimal':
+                    lines.append(f"  Deadline: {self.offering_information.deadline_date} ({status})")
+                else:
+                    lines.append(f"  Deadline: {self.offering_information.deadline_date}")
+                    if status:
+                        lines.append(f"  Status: {status}")
+
+            # Over-subscription (full only)
+            if detail == 'full' and self.offering_information.over_subscription_accepted == "Y":
+                lines.append(f"  Over-subscription: Accepted")
+
+            # Portal fees (full only)
+            if detail == 'full' and self.offering_information.compensation_amount:
+                lines.append(f"  Portal Fee: {self.offering_information.compensation_amount}")
+
+        # Financials (if present)
+        if self.annual_report_disclosure and detail in ['standard', 'full']:
+            fin = self.annual_report_disclosure
+            lines.append("\nFINANCIALS (Current vs Prior Year):")
+
+            # Employees
+            if detail == 'full':
+                lines.append(f"  Employees: {fin.current_employees}")
+
+            # Assets
+            assets_curr = fin.total_asset_most_recent_fiscal_year
+            assets_prior = fin.total_asset_prior_fiscal_year
+            if assets_curr > 0:
+                if assets_prior > 0 and fin.asset_growth_yoy is not None:
+                    lines.append(f"  Assets: ${assets_curr:,.0f} "
+                               f"({fin.asset_growth_yoy:+.0f}% from ${assets_prior:,.0f})")
+                else:
+                    lines.append(f"  Assets: ${assets_curr:,.0f}")
+
+            # Cash
+            if detail == 'full':
+                cash_curr = fin.cash_equi_most_recent_fiscal_year
+                if cash_curr > 0:
+                    lines.append(f"  Cash: ${cash_curr:,.0f}")
+
+            # Revenue status
+            if fin.is_pre_revenue:
+                lines.append(f"  Revenue: $0 (pre-revenue)")
+            else:
+                rev_curr = fin.revenue_most_recent_fiscal_year
+                rev_prior = fin.revenue_prior_fiscal_year
+                if fin.revenue_growth_yoy is not None and rev_prior > 0:
+                    lines.append(f"  Revenue: ${rev_curr:,.0f} ({fin.revenue_growth_yoy:+.0f}% YoY)")
+                else:
+                    lines.append(f"  Revenue: ${rev_curr:,.0f}")
+
+            # Net income
+            ni_curr = fin.net_income_most_recent_fiscal_year
+            ni_prior = fin.net_income_prior_fiscal_year
+            if ni_curr < 0:
+                if ni_prior < 0 and fin.burn_rate_change:
+                    if fin.burn_rate_change < 0:
+                        trend = "burn rate increasing"
+                    else:
+                        trend = "burn rate decreasing"
+                    lines.append(f"  Net Income: ${ni_curr:,.0f} ({trend})")
+                else:
+                    lines.append(f"  Net Income: ${ni_curr:,.0f}")
+            else:
+                lines.append(f"  Net Income: ${ni_curr:,.0f}")
+
+            # Debt
+            total_debt = fin.total_debt_most_recent
+            if total_debt > 0:
+                debt_str = f"${total_debt:,.0f}"
+                if detail == 'full':
+                    debt_str += f" (short: ${fin.short_term_debt_most_recent_fiscal_year:,.0f}, "
+                    debt_str += f"long: ${fin.long_term_debt_most_recent_fiscal_year:,.0f})"
+                lines.append(f"  Total Debt: {debt_str}")
+
+            # Debt-to-asset ratio (standard+)
+            if fin.debt_to_asset_ratio is not None and detail in ['standard', 'full']:
+                lines.append(f"  Debt-to-Asset Ratio: {fin.debt_to_asset_ratio:.0f}%")
+
+        # Campaign status (always included)
+        lines.append(f"\nCAMPAIGN STATUS: {self.campaign_status}")
+
+        # Jurisdictions (full only)
+        if self.annual_report_disclosure and detail == 'full':
+            if self.annual_report_disclosure.is_offered_in_all_states:
+                lines.append("  Offered in: All 50 states")
+            else:
+                num_states = len(self.annual_report_disclosure.offering_jurisdictions)
+                lines.append(f"  Offered in: {num_states} jurisdictions")
+
+        # Signatures (full only)
+        if detail == 'full' and self.signature_info:
+            num_signers = len(self.signature_info.signers)
+            lines.append(f"\nSIGNATURES: {num_signers} officer{'s' if num_signers != 1 else ''}")
+            if self.signature_info.issuer_signature:
+                lines.append(f"  {self.signature_info.issuer_signature.title}: "
+                           f"{self.signature_info.issuer_signature.signature}")
+
+        # Available actions (standard+)
+        if detail in ['standard', 'full']:
+            lines.append("")
+            lines.append("AVAILABLE ACTIONS:")
+            lines.append("  - Use .get_offering() for complete campaign lifecycle")
+            lines.append("  - Use .issuer for IssuerCompany information")
+            if self.offering_information:
+                lines.append("  - Use .offering_information for offering terms")
+            if self.annual_report_disclosure:
+                lines.append("  - Use .annual_report_disclosure for financial data")
+
+        return "\n".join(lines)
+
+    @property
+    def docs(self):
+        """
+        Access comprehensive FormC API documentation.
+
+        Returns:
+            Docs: Documentation object that displays FormC class reference,
+                  common actions, properties, and usage examples.
+
+        Example:
+            >>> filing = company.get_filings(form='C')[0]
+            >>> formc = filing.obj()
+            >>> formc.docs  # Display comprehensive documentation
+        """
+        return Docs(self)
+
     @staticmethod
     def parse_date(date_str) -> date:
         """
@@ -286,6 +918,14 @@ class FormC:
         Format as April 1, 2021
         """
         return date_value.strftime("%B %d, %Y")
+
+    @classmethod
+    def from_filing(cls, filing: 'Filing'):
+        offering_xml = filing.xml()
+        if offering_xml:
+            formc = FormC.from_xml(offering_xml, filing.form)
+            formc._filing = filing
+            return formc
 
     @classmethod
     def from_xml(cls, offering_xml: str, form: str):

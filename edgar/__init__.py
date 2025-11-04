@@ -123,6 +123,54 @@ class DataObjectException(Exception):
         super().__init__(self.message)
 
 
+def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
+    """
+    Get information about whether a form type has a structured data object.
+
+    Args:
+        form: The form type (e.g., '10-K', 'C', '8-K')
+
+    Returns:
+        Tuple of (has_obj, obj_type_name, description):
+        - has_obj: Whether this form type has a structured data object
+        - obj_type_name: The class name of the data object (e.g., 'TenK', 'FormC')
+        - description: Brief description of what the object contains
+    """
+    # Normalize form to handle amendments (e.g., 'C/A' -> 'C')
+    base_form = form.split('/')[0]
+
+    # Map of form types to (class_name, description)
+    form_map = {
+        '6-K': ('CurrentReport', 'current report with event details'),
+        '8-K': ('EightK', 'current report with event details'),
+        '10-Q': ('TenQ', 'quarterly report with financials'),
+        '10-K': ('TenK', 'annual report with financials'),
+        '20-F': ('TwentyF', 'foreign issuer annual report'),
+        '13F-HR': ('ThirteenF', 'institutional holdings'),
+        '13F-HR/A': ('ThirteenF', 'institutional holdings'),
+        '144': ('Form144', 'restricted stock sale notice'),
+        'MA-I': ('MunicipalAdvisorForm', 'municipal advisor registration'),
+        '3': ('Form3', 'initial insider ownership'),
+        '4': ('Form4', 'insider transaction'),
+        '5': ('Form5', 'annual insider transaction summary'),
+        'EFFECT': ('Effect', 'effectiveness notice'),
+        'D': ('FormD', 'private placement offering'),
+        'C': ('FormC', 'crowdfunding offering details'),
+        'C-U': ('FormC', 'crowdfunding progress update'),
+        'C-AR': ('FormC', 'crowdfunding annual report'),
+        'C-TR': ('FormC', 'crowdfunding termination'),
+        'NPORT-P': ('FundReport', 'fund portfolio holdings'),
+        'NPORT-EX': ('FundReport', 'fund portfolio holdings'),
+    }
+
+    if base_form in form_map:
+        class_name, description = form_map[base_form]
+        return (True, class_name, description)
+
+    # Forms not in map might still have XBRL
+    return (False, None, None)
+
+
 def obj(sec_filing: Filing) -> Optional[object]:
     """
     Depending on the filing return the data object that contains the data for the filing
@@ -176,9 +224,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
         if xml:
             return FormD.from_xml(xml)
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
-        xml = sec_filing.xml()
-        if xml:
-            return FormC.from_xml(xml, form=sec_filing.form)
+        return FormC.from_filing(sec_filing)
 
     elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
         return FundReport.from_filing(sec_filing)

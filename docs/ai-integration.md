@@ -123,10 +123,12 @@ from edgar import Company
 
 company = Company("AAPL")
 
-# Get AI-optimized text output
-context = company.text()
+# Get AI-optimized context output
+context = company.to_context()
 print(context)
 ```
+
+> **Note**: The older `company.text()` method is deprecated. Use `company.to_context()` for consistent naming across all EdgarTools classes.
 
 ### Detail Levels
 
@@ -134,13 +136,13 @@ Three progressive disclosure levels for different use cases:
 
 ```python
 # Minimal - Just the essentials (~100-200 tokens)
-minimal = company.text(detail='minimal')
+minimal = company.to_context(detail='minimal')
 
 # Standard - Balanced overview (~300-500 tokens)
-standard = company.text(detail='standard')
+standard = company.to_context(detail='standard')
 
 # Detailed - Comprehensive information (~800-1200 tokens)
-detailed = company.text(detail='detailed')
+detailed = company.to_context(detail='detailed')
 ```
 
 ### Token Limiting
@@ -149,7 +151,7 @@ Control output size for LLM context windows:
 
 ```python
 # Limit to specific token count
-context = company.text(max_tokens=500)
+context = company.to_context(max_tokens=500)
 
 # Automatically truncates while preserving structure
 ```
@@ -180,7 +182,7 @@ net_income_fy2023: $96,995,000,000
 
 ```python
 # Company context
-company_text = company.text(detail='standard')
+company_text = company.to_context(detail='standard')
 
 # Filing context
 filing = company.get_filings(form="10-K").latest()
@@ -188,7 +190,7 @@ filing_text = filing.text(detail='standard')
 
 # XBRL context
 xbrl = filing.xbrl()
-xbrl_text = xbrl.text(detail='standard')
+xbrl_text = xbrl.to_context(detail='standard')
 
 # Statement context
 income = xbrl.statements.income_statement()
@@ -498,7 +500,7 @@ for ticker, income in comparison.items():
 company.docs.search("get filings")
 
 # For AI context -> Use .text()
-context = company.text(detail='standard')
+context = company.to_context(detail='standard')
 
 # For specialized workflows -> Use helpers
 from edgar.ai.helpers import get_revenue_trend
@@ -511,23 +513,23 @@ income = get_revenue_trend("AAPL", periods=3)
 
 ```python
 # Start minimal, add detail as needed
-overview = company.text(detail='minimal')  # Quick overview
+overview = company.to_context(detail='minimal')  # Quick overview
 
 # Need more context?
-standard = company.text(detail='standard')  # Balanced view
+standard = company.to_context(detail='standard')  # Balanced view
 
 # Need everything?
-detailed = company.text(detail='detailed')  # Comprehensive
+detailed = company.to_context(detail='detailed')  # Comprehensive
 ```
 
 ### 3. Respect Token Limits
 
 ```python
 # Always specify max_tokens for LLM context
-context = company.text(max_tokens=500)
+context = company.to_context(max_tokens=500)
 
 # For multiple objects, budget tokens:
-company_context = company.text(max_tokens=300)
+company_context = company.to_context(max_tokens=300)
 filing_context = filing.text(max_tokens=200)
 total_context = company_context + "\n\n" + filing_context
 # Total: ~500 tokens
@@ -619,10 +621,10 @@ print(xbrl)  # Full XBRL object, ~2,500 tokens
 
 ```python
 # For overview tasks
-overview = company.text(detail='minimal')
+overview = company.to_context(detail='minimal')
 
 # For detailed analysis
-analysis = company.text(detail='detailed')
+analysis = company.to_context(detail='detailed')
 ```
 
 ### Token Counting
@@ -631,7 +633,7 @@ analysis = company.text(detail='detailed')
 from edgar.ai.core import TokenOptimizer
 
 # Estimate tokens before sending to LLM
-content = company.text()
+content = company.to_context()
 token_count = TokenOptimizer.estimate_tokens(content)
 print(f"Estimated tokens: {token_count}")
 
@@ -657,7 +659,7 @@ context_parts = []
 
 # 1. Company overview
 context_parts.append("# Company Overview")
-context_parts.append(company.text(detail='minimal', max_tokens=200))
+context_parts.append(company.to_context(detail='minimal', max_tokens=200))
 
 # 2. Latest filing
 filing = company.get_filings(form="10-K").latest()
@@ -748,10 +750,10 @@ pip install edgartools[ai]
 **Solution**: Use lower detail levels or max_tokens:
 ```python
 # Instead of:
-text = company.text(detail='detailed')
+text = company.to_context(detail='detailed')
 
 # Try:
-text = company.text(detail='standard', max_tokens=500)
+text = company.to_context(detail='standard', max_tokens=500)
 ```
 
 ## Additional Resources
