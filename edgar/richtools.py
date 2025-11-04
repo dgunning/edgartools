@@ -464,7 +464,7 @@ class Docs:
             >>> xbrl.docs.search("extract revenue")
             # Returns sections about extracting revenue from statements
 
-            >>> xbrl.docs.search("\.to_dataframe\(\)", use_bm25=False)
+            >>> xbrl.docs.search(r"\.to_dataframe\(\)", use_bm25=False)
             # Regex search for exact pattern
         """
         from edgar.search.textsearch import BM25Search, RegexSearch

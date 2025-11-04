@@ -183,7 +183,20 @@ class FiscalPeriodClassifier:
 
 
 class StatementTypeSelector:
-    """Handles statement-specific period selection logic"""
+    """
+    Handles statement-specific period selection logic.
+
+    Period Selection Strategy for Quarterly Reports:
+
+    For quarterly 10-Q filings, we prioritize quarterly periods (~90 days) over
+    YTD periods (~180-270 days) to provide users with detailed quarterly breakdowns
+    rather than cumulative summaries. This matches the behavior of regular statement
+    period selection and aligns with investor expectations.
+
+    YTD periods are only used as a fallback when quarterly periods are unavailable.
+
+    See GitHub Issue #475 for background on this design decision.
+    """
 
     def __init__(self, matcher: PeriodMatcher, classifier: FiscalPeriodClassifier):
         self.matcher = matcher
@@ -279,14 +292,23 @@ class StatementTypeSelector:
             if annual_periods:
                 selected_periods.append(annual_periods[0])
         else:
-            # For quarterly reports, select quarterly period
+            # For quarterly reports, select the period with more data (Issue #475)
+            # Some companies (e.g., PYPL) tag full detail to YTD periods rather than
+            # quarterly periods. We should use whichever has more complete data.
             quarterly_periods = self.classifier.classify_quarterly_periods(periods)
-            if quarterly_periods:
-                selected_periods.append(quarterly_periods[0])
-
-            # Also select YTD period if appropriate
             ytd_periods = self.classifier.classify_ytd_periods(periods, fiscal_period)
-            if ytd_periods:
+
+            # If we have both, select the one that appears to have more data
+            # (by checking if it's the longest duration, which typically has more facts tagged)
+            if quarterly_periods and ytd_periods:
+                # YTD has longer duration, so if it exists, it likely has more data
+                # This matches regular statement behavior for companies like PYPL
+                selected_periods.append(ytd_periods[0])
+            elif quarterly_periods:
+                # Only quarterly available
+                selected_periods.append(quarterly_periods[0])
+            elif ytd_periods:
+                # Only YTD available (rare edge case)
                 selected_periods.append(ytd_periods[0])
 
         return selected_periods
@@ -370,18 +392,20 @@ class PeriodDeduplicator:
                 if period['period_type'] != included_period['period_type']:
                     continue
 
-                # Calculate date difference
+                # Check for true duplicates (exact same period)
                 if period['period_type'] == 'instant':
-                    date1 = period['date']
-                    date2 = included_period['date']
+                    # For instant periods, check the date
+                    if period['date'] == included_period['date']:
+                        too_close = True
+                        break
                 else:  # duration
-                    date1 = period['end_date']
-                    date2 = included_period['end_date']
-
-                # Periods are duplicates if they have exactly the same date
-                if date1 == date2:
-                    too_close = True
-                    break
+                    # For duration periods, check BOTH start and end dates
+                    # Q2 quarterly (Apr-Jun) and Q2 YTD (Jan-Jun) have same end date
+                    # but different start dates, so they're NOT duplicates
+                    if (period['start_date'] == included_period['start_date'] and
+                        period['end_date'] == included_period['end_date']):
+                        too_close = True
+                        break
 
             if not too_close:
                 filtered_periods.append(period)
