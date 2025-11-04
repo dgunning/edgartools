@@ -16,7 +16,7 @@ from edgar.core import get_bool
 from edgar.entity import Company
 from edgar.formatting import yes_no
 from edgar.reference import states
-from edgar.richtools import repr_rich
+from edgar.richtools import repr_rich, Docs
 from edgar.xmltools import child_text
 
 __all__ = ['FormC', 'Signer', 'FundingPortal', 'IssuerCompany']
@@ -888,6 +888,22 @@ class FormC:
                 lines.append("  - Use .annual_report_disclosure for financial data")
 
         return "\n".join(lines)
+
+    @property
+    def docs(self):
+        """
+        Access comprehensive FormC API documentation.
+
+        Returns:
+            Docs: Documentation object that displays FormC class reference,
+                  common actions, properties, and usage examples.
+
+        Example:
+            >>> filing = company.get_filings(form='C')[0]
+            >>> formc = filing.obj()
+            >>> formc.docs  # Display comprehensive documentation
+        """
+        return Docs(self)
 
     @staticmethod
     def parse_date(date_str) -> date:

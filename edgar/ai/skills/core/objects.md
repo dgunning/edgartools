@@ -51,7 +51,8 @@ Objects with AI-optimized `.to_context()`:
 - **Company**: Markdown-KV format (60.7% accuracy, 25% fewer tokens than JSON)
 - **XBRL**: Markdown-KV format for metadata
 - **Filing, Filings, EntityFilings**: Navigation hints and metadata
-- **FormC, Offering**: Crowdfunding data context
+- **FormC**: Crowdfunding offering data with 3 detail levels (minimal, standard, full)
+- **Offering**: Complete crowdfunding lifecycle context
 
 Research basis: [Best Input Data Format for LLMs](https://improvingagents.com/blog/best-input-data-format-for-llms)
 
@@ -88,7 +89,7 @@ xbrl_text = xbrl.to_context(max_tokens=2000)
 
 ### 3. Comprehensive Documentation (`.docs`)
 
-**Available on**: All major objects (Company, Filing, EntityFiling, Filings, EntityFilings, XBRL, Statement)
+**Available on**: All major objects (Company, Filing, EntityFiling, Filings, EntityFilings, XBRL, Statement, FormC)
 
 All major EdgarTools objects provide a `.docs` property for comprehensive API documentation with semantic search:
 
@@ -550,6 +551,137 @@ Net Income               97.0B        99.8B        94.7B
 
 **Advantage**: This is the most concise format for financial data - uses TSV-like structure internally for maximum token efficiency.
 
+## FormC Object
+
+**Typical Size (repr)**: ~2,500 characters
+**Typical Size (.to_context())**:
+  - Minimal: ~400 characters (~100 tokens)
+  - Standard: ~1,200 characters (~300 tokens)
+  - Full: ~2,800 characters (~700 tokens)
+**Format**: Unicode box drawing via repr(), Markdown-KV via .to_context()
+**Has .docs**: ✅ Yes
+**Has .to_context()**: ✅ Yes (AI-optimized with 3 detail levels)
+
+**Contains**:
+- Form type (C, C/A, C-U, C-AR, C-TR)
+- Issuer information (company name, CIK, legal status, jurisdiction)
+- Offering information (target amount, maximum, deadline, security type, price)
+- Funding portal details (name, CIK, file number)
+- Financial disclosures (revenue, net income, assets, debt, employees)
+- Campaign status (active, expired, terminated)
+- Signature information
+
+**Form C Variants**:
+- **C** - Initial crowdfunding offering
+- **C/A** - Amendment to offering
+- **C-U** - Progress update (50% or 100% milestone)
+- **C-AR** - Annual report
+- **C-TR** - Termination report
+
+**Example**:
+```python
+from edgar import Company
+
+company = Company("1881570")  # ViiT Health
+filings = company.get_filings(form="C")
+filing = filings[0]
+formc = filing.obj()
+
+# Visual display (Unicode box drawing)
+print(formc)  # Shows full offering with all sections
+
+# AI-optimized context (Markdown-KV format)
+context = formc.to_context()  # Standard detail (~300 tokens)
+context = formc.to_context(detail='minimal')  # ~100 tokens
+context = formc.to_context(detail='full')  # ~700 tokens
+
+# Access documentation
+formc.docs  # Comprehensive FormC API guide
+formc.docs.search("offering")  # How to access offering data
+formc.docs.search("lifecycle")  # Offering lifecycle workflow
+```
+
+**Sample .to_context(detail='standard') Output**:
+```
+FORM C - OFFERING (Filed: 2025-06-11)
+
+ISSUER: ViiT Health Inc
+  CIK: 1881570
+  Legal: Delaware Corporation
+  Website: https://www.viit.health
+
+FUNDING PORTAL: Wefunder Portal LLC
+  File Number: 007-00033
+
+OFFERING:
+  Security: Other (Membership Interests)
+  Target: $50,000 | Maximum: $111,308
+  Target is 45% of maximum
+  Price: $1.00/unit | Units: 50,000
+  Deadline: 2026-04-30
+  Status: 293 days remaining
+
+FINANCIALS (Current vs Prior Year):
+  Revenue: $0 (pre-revenue)
+  Net Income: -$346,594
+  Assets: $25,065
+  Total Debt: $1,688,898
+
+CAMPAIGN STATUS: Active (Initial)
+
+AVAILABLE ACTIONS:
+  - Use .get_offering() for complete campaign lifecycle
+  - Use .issuer for IssuerCompany information
+  - Use .offering_information for offering terms
+  - Use .annual_report_disclosure for financial data
+```
+
+**When to Use**:
+- Analyzing crowdfunding offerings (Regulation CF)
+- Screening offerings by size, status, or deadline
+- Tracking offering lifecycle (initial → updates → annual reports → termination)
+- Assessing company financial health from annual reports
+- Finding offerings by funding portal
+
+**Key Properties**:
+```python
+# Offering terms
+formc.offering_information.target_amount
+formc.offering_information.maximum_offering_amount
+formc.offering_information.deadline_date
+formc.offering_information.price_per_security
+formc.offering_information.number_of_securities
+
+# Financial data (if available)
+formc.annual_report_disclosure.revenues
+formc.annual_report_disclosure.net_income
+formc.annual_report_disclosure.total_assets
+formc.annual_report_disclosure.debt_to_asset_ratio
+formc.annual_report_disclosure.revenue_growth_yoy
+
+# Status
+formc.campaign_status  # "Active (Initial)", "Progress Update", etc.
+formc.days_to_deadline  # Days remaining until deadline
+formc.is_expired  # True if past deadline
+
+# Issuer and portal
+formc.issuer_name
+formc.issuer_cik
+formc.portal_name
+formc.portal_file_number
+
+# Get complete offering lifecycle
+offering = formc.get_offering()
+print(offering.timeline())  # Show all related filings
+```
+
+**Detail Level Guide**:
+- **minimal**: Essential offering info for quick screening (target, max, deadline, status)
+- **standard** (default): Most important data including financials and portal info
+- **full**: Everything including addresses, fees, jurisdictions, signatures
+
+**Token Efficiency**: The .to_context() method provides 60-85% token reduction compared to repr() while retaining all actionable information.
+
 ## Token Planning Guide
 
 Understanding token usage helps you optimize API interactions.
@@ -578,16 +710,19 @@ EdgarTools provides three methods for accessing information, each optimized for 
 
 ### Token Estimates by Object and Method
 
-| Object Type | repr() | .text() | .docs (full) | .docs (search) |
-|-------------|--------|---------|--------------|----------------|
+| Object Type | repr() | .to_context() | .docs (full) | .docs (search) |
+|-------------|--------|---------------|--------------|----------------|
 | Company | ~750 | ~75 | ~3,500 | ~300 |
-| Filing | ~125 | N/A* | ~2,500 | ~250 |
+| Filing | ~125 | N/A | ~2,500 | ~250 |
 | Filings (3 items) | ~300 | N/A | ~3,000 | ~250 |
 | XBRL | ~750 | ~275 | ~4,000 | ~350 |
 | Statement | ~1,250 | N/A | ~2,800 | ~300 |
 | MultiPeriodStatement | ~500 | N/A | ~2,800 | ~300 |
+| FormC | ~625 | ~100-700* | ~3,000 | ~300 |
 
-*Filing has `.text()` but it returns full document text (potentially 50K+ tokens), not AI-optimized metadata.
+*FormC .to_context() supports 3 detail levels: minimal (~100), standard (~300), full (~700)
+
+**Note**: Filing has `.text()` but it returns full document text (potentially 50K+ tokens), not AI-optimized metadata.
 
 **Note**: XBRL.text() was recently optimized to use Markdown-KV format with all essential method names (66% token reduction from previous ~810 tokens).
 
