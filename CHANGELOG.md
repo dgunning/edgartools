@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.26.0] - 2025-11-05
+
+### Added
+
+- **Campaign Lifecycle Tracking for Crowdfunding Filings**
+  - New `Campaign` class for complete offering lifecycle management
+  - Automatic tracking of Form C, C/A, C-U, C-AR, and C-TR filings
+  - Timeline views with status tracking across all campaign stages
+  - Integration with existing filing infrastructure
+  - **Usage**: `campaign = filing.get_campaign()` or `Campaign(filing)`
+  - **Files**: `edgar/offerings/campaign.py` (694 lines)
+  - **Impact**: Complete crowdfunding offering lifecycle analysis
+
+- **AI-Native Documentation for Form C**
+  - Comprehensive AI-native documentation (969 lines) in `FormC.md`
+  - Rich context generation with 3 detail levels (minimal/standard/full)
+  - Improved issuer and offering information extraction
+  - Better portal and annual report data handling
+  - **Files**: `edgar/offerings/docs/FormC.md`
+  - **Impact**: Enhanced AI agent understanding of crowdfunding filings
+
+- **AI-Native Workflow Implementation**
+  - Added AI-native workflow implementation plan documentation
+  - Created crowdfunding research goals documentation
+  - Added offering lifecycle examples
+  - Enhanced AI integration guide
+  - **Files**: `docs/AI_NATIVE_WORKFLOW_IMPLEMENTATION_PLAN.md`, `docs/examples/ai_native_api_patterns.md`, `docs/examples/offering_lifecycle.py`
+
+### Changed
+
+- **Standardized AI-Native API with `.to_context()` Naming Convention**
+  - Migrated `Company.text()` → `Company.to_context()`
+  - Migrated `XBRL.text()` → `XBRL.to_context()`
+  - Enhanced `Filing` and `Filings` classes with context methods
+  - Old `.text()` methods deprecated with warnings but still functional
+  - **Rationale**: Consistent naming across all EdgarTools classes
+  - **Migration**: Replace `.text()` with `.to_context()` in your code
+  - **Timeline**: Deprecated methods will be removed in version 5.0
+  - **Files**: `edgar/entity/core.py`, `edgar/xbrl/xbrl.py`, `edgar/_filings.py`, `edgar/entity/filings.py`
+  - **Tests**: `tests/test_ai_native_context.py` (355 lines)
+  - **Impact**: 58% token reduction for AI workflows, better API discoverability
+
+- **README Modernization with Visual Design System**
+  - Updated README with modern visual design
+  - Added performance comparison visualizations
+  - Enhanced AI-Native positioning
+  - Improved badge organization and layout
+  - **Files**: `README.md`
+
 ### Fixed
 
 - **Issue #475: Multi-Period Cash Flow Statements Missing Data**
@@ -24,6 +73,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tests Added**: 4 comprehensive tests in `tests/issues/reproductions/xbrl-parsing/test_issue_475_cashflow_multiperiod.py`
   - **Note**: Some companies (like PYPL) tag data to YTD (cumulative) periods, so Q2/Q3 columns show year-to-date values rather than quarterly activity. Period labels now clearly indicate "YTD" for these cumulative periods.
   - **GitHub Issue**: [#475](https://github.com/dgunning/edgartools/issues/475)
+
+- **Invalid Escape Sequence in richtools.py Docstring**
+  - Fixed invalid escape sequence warning in docstring
+  - **Files**: `edgar/richtools.py`
 
 ## [4.25.0] - 2025-11-02
 
