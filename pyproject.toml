@@ -79,6 +79,7 @@ include = [
   "edgar/**/*.py",
   "edgar/**/templates/*.html",
   "edgar/**/docs/*.md",
+  "edgar/ai/skills/core/*.md",
   "edgar/reference/data/*",
   "edgar/entity/data/*",
   "edgar/xbrl/standardization/*",
