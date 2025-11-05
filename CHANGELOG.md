@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.26.1] - 2025-11-05
+
+### Fixed
+
+- **Emergency Patch: Missing Skills Files in Wheel Distribution**
+  - Fixed critical packaging issue where skills markdown files were not included in the wheel distribution
+  - Added `edgar/ai/skills/core/*.md` to build includes in `pyproject.toml`
+  - **Impact**: Skills functionality now works correctly when installed from PyPI
+  - **Root Cause**: Build configuration did not include skills directory markdown files
+  - **Credit**: Thanks to @Dev-iL for identifying and fixing this issue
+  - **GitHub PR**: [#479](https://github.com/dgunning/edgartools/pull/479)
+  - **Files Modified**: `pyproject.toml`
+
 ## [4.26.0] - 2025-11-05
 
 ### Added
