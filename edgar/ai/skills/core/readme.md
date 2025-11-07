@@ -2,6 +2,9 @@
 
 EdgarTools skills package for AI agents analyzing SEC filings and financial statements.
 
+> **📖 Looking to use EdgarTools?** Start with **[SKILL.md](SKILL.md)** instead.
+> This readme is meta-documentation about the skill package structure. For analyzing SEC filings, go to [SKILL.md](SKILL.md).
+
 ## Overview
 
 This package provides AI-friendly documentation and helper functions for working with SEC EDGAR filings using EdgarTools.
