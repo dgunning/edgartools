@@ -161,18 +161,18 @@ When edgartools is installed as a package, AI agents should access skill documen
 
 ```python
 from edgar.ai import get_skill, list_skills
-from pathlib import Path
 
 # Get the SEC filing analysis skill
 skill = get_skill("SEC Filing Analysis")
 
-# Access skill documentation directory
-content_dir = skill.content_dir  # Path to skill markdown files
+# Read specific documentation files (recommended for AI agents)
+skill_md = skill.get_document_content("SKILL.md")
+common_questions = skill.get_document_content("common-questions")  # .md optional
+advanced_guide = skill.get_document_content("advanced-guide")
 
-# Read specific documentation files
-skill_md = (content_dir / "SKILL.md").read_text()
-common_questions = (content_dir / "common-questions.md").read_text()
-advanced_guide = (content_dir / "advanced-guide.md").read_text()
+# List all available documents in the skill
+documents = skill.get_documents()  # Returns list of document names
+print(f"Available docs: {documents}")
 
 # List all available skills
 all_skills = list_skills()
@@ -180,14 +180,22 @@ for s in all_skills:
     print(f"{s.name}: {s.description}")
 ```
 
-**Key API methods:**
+**Key API methods for AI agents:**
 - `get_skill(name)` - Get skill by name, returns BaseSkill object
+- `skill.get_document_content(name)` - Read a skill document (recommended)
+- `skill.get_documents()` - List all available documents in the skill
 - `list_skills()` - List all available skills (built-in + external)
-- `skill.content_dir` - Path to skill's markdown documentation
 - `skill.name` - Skill name
 - `skill.description` - Skill description
+- `skill.content_dir` - Path to skill's markdown documentation (advanced)
 
-**Note:** Hyperlinks in markdown files use relative paths (e.g., `[common-questions.md](common-questions.md)`). When navigating, resolve these relative to `skill.content_dir`.
+**Best Practice:** Use `skill.get_document_content()` instead of manual file reads. It handles:
+- File path resolution
+- .md extension (optional)
+- Error messages with available documents
+- Cross-platform compatibility
+
+**Note:** Hyperlinks in markdown files use relative paths (e.g., `[common-questions.md](common-questions.md)`). Use `skill.get_document_content()` to navigate these links.
 
 ## Files in This Skill
 
