@@ -7,7 +7,7 @@ description: Reference guide for EdgarTools object representations - what AI age
 
 ## Overview
 
-EdgarTools objects use `repr()` to display information in the terminal. All representations are plain text with Unicode box drawing characters - no ANSI escape codes, making them AI-friendly.
+EdgarTools objects use `repr()` for terminal display. Plain text with Unicode box drawing - no ANSI codes, AI-friendly.
 
 **Token Estimation**: All estimates use a 4 characters/token heuristic (conservative approximation).
 
@@ -120,23 +120,9 @@ xbrl.docs                          # XBRL API guide
 xbrl.docs.search("statements")     # How to access statements
 ```
 
-**Documentation Features**:
-- **Common Actions**: Quick reference for most frequent operations
-- **Searchable**: BM25 semantic search finds relevant sections
-- **Comprehensive**: Complete API reference with examples
-- **Contextual**: Shows methods, properties, workflows, and best practices
+**Documentation Features**: Common Actions (quick reference), Searchable (BM25 semantic search), Comprehensive (complete API with examples), Contextual (methods, properties, workflows, best practices)
 
-**When to Use .docs**:
-- Discovering available methods and properties
-- Finding usage examples for complex operations
-- Learning API patterns and workflows
-- Searching for specific functionality
-
-**Documentation Features**:
-- **Common Actions**: Quick reference for most frequent operations
-- **Searchable**: BM25 semantic search finds relevant sections
-- **Comprehensive**: Complete API reference with examples
-- **Contextual**: Shows methods, properties, workflows, and best practices
+**When to Use .docs**: Discovering available methods/properties, finding usage examples, learning API patterns, searching for specific functionality
 
 **Token Estimates**:
 - Full `.docs` display: 2,000-5,000 tokens (depending on class)
@@ -246,14 +232,7 @@ print(help_text)
 **Has .docs**: ✅ Yes
 **Has .to_context()**: ✅ Yes (AI-optimized Markdown-KV)
 
-**Contains**:
-- Entity name and identifiers (CIK, ticker, EIN)
-- Exchange listings (NYSE, NASDAQ, OTC, etc.)
-- Business address and mailing address
-- Contact information (phone number, website if available)
-- Former company names (if applicable)
-- SIC code and industry description
-- Docs hint in subtitle
+**Contains**: Entity name/identifiers (CIK, ticker, EIN), exchange listings (NYSE, NASDAQ, OTC), business/mailing address, contact info (phone, website if available), former names (if applicable), SIC code/industry description, docs hint
 
 **Example**:
 ```python
@@ -285,10 +264,7 @@ company.to_context(max_tokens=1000)  # Markdown-KV format
 ╰──────────────────────────────────────────╯
 ```
 
-**When to Use**:
-- Need complete company profile
-- Verifying company identity
-- Getting contact information
+**When to Use**: Need complete company profile, verifying company identity, getting contact information
 
 ## Filing Object
 
@@ -298,14 +274,7 @@ company.to_context(max_tokens=1000)  # Markdown-KV format
 **Has .docs**: ✅ Yes
 **Has .text()**: ⚠️ Yes, but returns filing document text (not AI metadata)
 
-**Contains**:
-- Form type (10-K, 10-Q, 8-K, S-1, etc.)
-- Company name and CIK
-- Accession number (unique filing identifier)
-- Filing date and acceptance datetime
-- Period of report (for periodic filings)
-- Document count
-- Docs hint in subtitle
+**Contains**: Form type (10-K, 10-Q, 8-K, S-1), company name/CIK, accession number (unique identifier), filing date/acceptance datetime, period of report (for periodic filings), document count, docs hint
 
 **Example**:
 ```python
@@ -336,10 +305,7 @@ text = filing.text()  # Returns full filing document text
 ╰──────────────────────────────────────────╯
 ```
 
-**When to Use**:
-- Identifying specific filing
-- Getting filing metadata
-- Verifying filing date/period
+**When to Use**: Identifying specific filing, getting filing metadata, verifying filing date/period
 
 ## Filings Collection
 
@@ -349,12 +315,7 @@ text = filing.text()  # Returns full filing document text
 **Has .docs**: ✅ Yes (EntityFilings has .docs, base Filings has .docs)
 **Has .text()**: ❌ No
 
-**Contains**:
-- Tabular view of multiple filings
-- Company name, CIK, form type
-- Filing date and period of report
-- Pagination information
-- Docs hint in subtitle (EntityFilings only)
+**Contains**: Tabular view of multiple filings, company name/CIK/form type, filing date/period of report, pagination information, docs hint (EntityFilings only)
 
 **Example**:
 ```python
@@ -383,10 +344,7 @@ filings.docs.search("latest")  # How to get latest filing
 Showing 3 of 1,245 filings
 ```
 
-**When to Use**:
-- Browsing multiple filings
-- Comparing filing dates
-- Identifying patterns across companies
+**When to Use**: Browsing multiple filings, comparing filing dates, identifying patterns across companies
 
 **Tip**: Use `.head(n)` to limit output and reduce token usage.
 
@@ -706,7 +664,7 @@ print(offering.timeline())  # Show all related filings
 
 ## Token Planning Guide
 
-Understanding token usage helps you optimize API interactions.
+Optimize API interactions with token planning.
 
 ### Three Ways to Get Information
 
@@ -717,18 +675,14 @@ EdgarTools provides three methods for accessing information, each optimized for 
 | `print(obj)` or `repr()` | Quick visual overview | 125-2,500 | All objects |
 | `obj.docs` | **Primary:** API discovery & learning | 2,000-5,000 | All major objects |
 | `obj.docs.search()` | **Primary:** Find specific methods | 200-500 | All major objects |
-| `obj.text()` | **Specialized:** AI data extraction | 25% less than JSON | Company, XBRL only |
+| `obj.to_context()` | **Specialized:** AI-optimized extraction | 25% less than JSON | Company, XBRL, Filing, Filings, FormC |
 
 **Recommended Pattern for API Discovery**:
 1. **Start with `repr(object)`** - Quick visual overview
 2. **Use `object.docs`** - Comprehensive API reference
 3. **Use `object.docs.search("keyword")`** - Find specific functionality
 
-**When to Use Each**:
-- **`repr(obj)` or `print(obj)`**: Quick overview, see structure, visual verification
-- **`obj.docs`**: **PRIMARY METHOD** - Learn API, discover methods, find workflow examples
-- **`obj.docs.search()`**: **PRIMARY METHOD** - Search for specific functionality
-- **`obj.text()`**: **SPECIALIZED** - Only for Company/XBRL when extracting data for AI analysis
+**When to Use Each**: `repr(obj)` for quick overview/structure, `obj.docs` (PRIMARY) for API discovery/methods/workflows, `obj.docs.search()` (PRIMARY) for specific functionality, `obj.to_context()` (SPECIALIZED) for AI-optimized data extraction
 
 ### Token Estimates by Object and Method
 
@@ -788,13 +742,9 @@ EdgarTools provides three methods for accessing information, each optimized for 
 
 ## Output Format Notes
 
-All EdgarTools object representations:
-- ✅ Are plain text (no ANSI escape codes)
-- ✅ Use Unicode box drawing for visual structure (╭─╮│╰╯)
-- ✅ Are AI-friendly (can be parsed programmatically)
-- ✅ Are designed for terminal display but work well for AI consumption
+All EdgarTools object representations: ✅ Plain text (no ANSI codes), ✅ Unicode box drawing (╭─╮│╰╯), ✅ AI-friendly (programmatically parsable), ✅ Designed for terminal but AI-compatible
 
-For even more token-efficient formats optimized specifically for LLMs, some objects provide a `.text()` method that outputs in Markdown-KV or TSV format. See the main skill.md documentation for details.
+For even more token-efficient formats optimized for LLMs, some objects provide `.to_context()` for AI-optimized Markdown-KV output. See the main skill.md documentation for details.
 
 ## See Also
 
