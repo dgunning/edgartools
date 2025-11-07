@@ -5,26 +5,26 @@ description: Query and analyze SEC filings and financial statements using EdgarT
 
 # EdgarTools
 
-Analyze SEC filings and financial statements using EdgarTools - a Python library for accessing and analyzing SEC EDGAR data.
+Analyze SEC filings and financial statements using EdgarTools
 
 ## Overview
 
-This guide covers essential SEC filing analysis operations. For detailed object representations and token estimates, see [objects.md](./objects.md). For end-to-end analysis workflows, see [workflows.md](./workflows.md). For installation and setup, see [README.md](./README.md).
+Essential SEC filing analysis operations. See [objects.md](./objects.md) for object reference, [workflows.md](./workflows.md) for patterns, [readme.md](./readme.md) for setup.
 
 ## Prerequisites & Setup
 
-**REQUIRED:** Before using EdgarTools, you must set your identity (SEC requirement):
+**REQUIRED:** Set your identity (SEC requirement):
 
 ```python
 from edgar import set_identity
 set_identity("Your Name your@email.com")
 ```
 
-This identifies your application to the SEC. **Without this, all API calls will fail** with `"User-Agent identity is not set"` error.
+**Without this, all API calls fail** with `"User-Agent identity is not set"` error.
 
 ## ⚡ Token-Efficient API Usage
 
-**ALWAYS use `.to_context()` first** to get concise summaries with available actions. This is 5-10x more token-efficient than printing full objects.
+**ALWAYS use `.to_context()` first** for concise summaries with available actions. 5-10x more token-efficient than full objects.
 
 ### Company.to_context()
 
@@ -52,7 +52,7 @@ filings = company.get_filings(form="10-K")
 print(filings.to_context())  # ~95 tokens vs 500-1000 for rich table
 ```
 
-Shows summary + **AVAILABLE ACTIONS** (what methods to call next).
+Shows summary + **AVAILABLE ACTIONS**.
 
 ### Filing.to_context()
 
@@ -76,11 +76,11 @@ print(xbrl.to_context())  # ~275 tokens vs 2,500+ for full statements
 | Filings | ~500-1000 | ~95 tokens | 80-90% |
 | XBRL | ~2,500 tokens | ~275 tokens | 89% |
 
-**Pattern:** Always use `to_context()` first → See what's available → Access specific data as needed.
+**Pattern:** `to_context()` first → see available → access data.
 
 ## Quick Start
 
-Most common patterns for getting started quickly. **Use `.to_context()` for token-efficient exploration.**
+Common starting patterns. **Use `.to_context()` for efficiency.**
 
 ### Get a Company
 
@@ -118,7 +118,7 @@ print(income)  # Full statement
 
 ## Core API Reference
 
-Complete reference for main API functions and approaches.
+Main API functions and approaches.
 
 ### Getting Filings (3 Approaches)
 
@@ -198,10 +198,7 @@ q1_2023_10q = company.get_filings(year=2023, form="10-Q")
 
 **Data source**: SEC Company Facts API
 
-**Advantages**:
-- Very fast (single API call)
-- Pre-aggregated data
-- Multi-period comparison built-in
+**Advantages**: Very fast (single API call), pre-aggregated data, multi-period comparison built-in
 
 ```python
 from edgar import Company
@@ -223,10 +220,7 @@ quarterly_income = company.income_statement(periods=4, annual=False)  # Last 4 q
 
 **Data source**: XBRL files attached to specific filings
 
-**Advantages**:
-- Most comprehensive detail
-- All line items available
-- Exact as-filed data
+**Advantages**: Most comprehensive detail, all line items available, exact as-filed data
 
 ```python
 from edgar import Company
@@ -275,17 +269,9 @@ for match in results[:5]:  # Top 5 matches
     print()
 ```
 
-**Features**:
-- BM25 relevance ranking (best matches first)
-- Searches parsed HTML sections
-- Returns `DocSection` objects with scores
-- Index cached for performance (~1-2 seconds per filing)
+**Features**: BM25 relevance ranking (best matches first), searches parsed HTML sections, returns `DocSection` objects with scores, index cached for performance (~1-2 seconds per filing)
 
-**Use cases**:
-- Find mentions of specific topics ("revenue recognition", "risk factors")
-- Locate sections in large filings
-- Screen filings for relevant content
-- Extract context around keywords
+**Use cases**: Find mentions of specific topics ("revenue recognition", "risk factors"), locate sections in large filings, screen filings for relevant content, extract context around keywords
 
 **Example: Find proxy statements mentioning compensation changes**
 
@@ -353,7 +339,7 @@ matches = filing.search("executive compensation")  # ✅
 
 ## Quick Reference
 
-For complete examples with full code, see **[common-questions.md](common-questions.md)**.
+Complete examples in **[common-questions.md](common-questions.md)**.
 
 | Task | Primary Method | Example |
 |------|----------------|---------|
@@ -372,7 +358,7 @@ For complete examples with full code, see **[common-questions.md](common-questio
 
 ## Advanced Topics
 
-For advanced patterns, helper functions, error handling, and skill exportation, see **[advanced-guide.md](advanced-guide.md)**.
+Advanced patterns, helpers, error handling, skill exportation: **[advanced-guide.md](advanced-guide.md)**.
 
 **Includes:**
 - Filtering and pagination
@@ -384,8 +370,6 @@ For advanced patterns, helper functions, error handling, and skill exportation, 
 - Creating custom external skills
 
 ## Troubleshooting
-
-Common errors and solutions.
 
 ### "User-Agent identity is not set"
 
@@ -415,8 +399,6 @@ AttributeError: 'Company' object has no attribute 'sic_code'
 
 ### Using too many tokens?
 
-**Problem:** Agent consuming excessive tokens for simple queries
-
 **Cause:** Not using `.to_context()` method
 
 **Solution:** Always call `.to_context()` before printing full objects:
@@ -432,10 +414,7 @@ print(company.to_context())  # ~88 tokens
 
 **Problem:** `get_filings()` returns empty list
 
-**Possible causes:**
-1. No filings match the criteria (try broader search)
-2. Wrong quarter/year combination
-3. Form type doesn't exist for that period
+**Possible causes:** No filings match criteria (try broader search), wrong quarter/year combination, or form type doesn't exist for that period
 
 **Solution:**
 ```python
@@ -449,7 +428,7 @@ if len(filings) == 0:
 
 ## Accessing Documentation Programmatically (For AI Agents)
 
-When edgartools is installed, use the skill API to read documentation:
+Use the skill API to read documentation:
 
 ```python
 from edgar.ai import get_skill
