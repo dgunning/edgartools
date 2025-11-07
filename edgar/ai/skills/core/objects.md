@@ -218,6 +218,28 @@ print(help_text)
 
 ## Company Object
 
+### Quick Reference Table
+
+| Attribute/Method | Type | Example | Notes |
+|------------------|------|---------|-------|
+| `.name` | str | "Apple Inc." | Company name |
+| `.cik` | str | "0000320193" | Central Index Key |
+| `.sic` | str | "3571" | Industry code (NOT `sic_code`) |
+| `.sic_description` | str | "Electronic Computers" | Industry description |
+| `.tickers` | list[str] | ["AAPL"] | All ticker symbols |
+| `.ein` | str | "942404110" | Employer ID Number |
+| `.category` | str | "Large accelerated filer" | Filer category |
+| `.phone` | str | "4089961010" | Contact phone |
+| `.get_filings()` | Filings | Collection | Returns filing collection |
+| `.latest(n)` | Filing \| Filings | Single if n=1, collection otherwise | Latest filings |
+| `.income_statement(periods)` | Statement | Multi-period statement | From Entity Facts API |
+| `.balance_sheet(periods)` | Statement | Multi-period statement | From Entity Facts API |
+| `.cash_flow_statement(periods)` | Statement | Multi-period statement | From Entity Facts API |
+| `.to_context()` | str | AI-friendly summary | **Use this first!** Token-efficient |
+| `.docs` | Documentation | API documentation | Search with `.docs.search()` |
+
+**Important**: Use `.to_context()` for token-efficient output (~88 tokens vs ~750 for full repr).
+
 **Typical Size**: ~3,000 characters
 **Token Estimate**: ~750 tokens
 **Format**: Unicode box drawing with information panels

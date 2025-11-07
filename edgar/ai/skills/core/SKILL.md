@@ -5,23 +5,94 @@ description: Query and analyze SEC filings and financial statements using EdgarT
 
 # EdgarTools
 
-Analyze SEC filings and financial statements using EdgarTools - a Python library for accessing and analyzing SEC EDGAR data.
+Analyze SEC filings and financial statements using EdgarTools
 
 ## Overview
 
-This guide covers essential SEC filing analysis operations. For detailed object representations and token estimates, see [objects.md](./objects.md). For end-to-end analysis workflows, see [workflows.md](./workflows.md). For installation and setup, see [README.md](./README.md).
+Essential SEC filing analysis operations. See [objects.md](./objects.md) for object reference, [workflows.md](./workflows.md) for patterns, [readme.md](./readme.md) for setup.
 
-## Quick Start
+## Prerequisites & Setup
 
-Most common patterns for getting started quickly.
+**REQUIRED:** Set your identity (SEC requirement):
 
-### Get a Company
+```python
+from edgar import set_identity
+set_identity("Your Name your@email.com")
+```
+
+**Without this, all API calls fail** with `"User-Agent identity is not set"` error.
+
+## ⚡ Token-Efficient API Usage
+
+**ALWAYS use `.to_context()` first** for concise summaries with available actions. 5-10x more token-efficient than full objects.
+
+### Company.to_context()
 
 ```python
 from edgar import Company
 
 company = Company("AAPL")
-print(company)  # Shows company profile
+print(company.to_context())  # ~88 tokens vs 200+ for full object
+```
+
+**Output:**
+```
+**Company:** Apple Inc.
+**CIK:** 0000320193
+**Ticker:** AAPL
+**Exchange:** Nasdaq
+**Industry:** Electronic Computers (SIC 3571)
+**Fiscal Year End:** Sep 30
+```
+
+### Filings.to_context()
+
+```python
+filings = company.get_filings(form="10-K")
+print(filings.to_context())  # ~95 tokens vs 500-1000 for rich table
+```
+
+Shows summary + **AVAILABLE ACTIONS**.
+
+### Filing.to_context()
+
+```python
+filing = filings.latest()
+print(filing.to_context())  # ~109 tokens, includes available methods
+```
+
+### XBRL.to_context()
+
+```python
+xbrl = filing.xbrl()
+print(xbrl.to_context())  # ~275 tokens vs 2,500+ for full statements
+```
+
+**Token Comparison:**
+
+| Object | Full Output | to_context() | Savings |
+|--------|-------------|--------------|---------|
+| Company | ~200 tokens | ~88 tokens | 56% |
+| Filings | ~500-1000 | ~95 tokens | 80-90% |
+| XBRL | ~2,500 tokens | ~275 tokens | 89% |
+
+**Pattern:** `to_context()` first → see available → access data.
+
+## Quick Start
+
+Common starting patterns. **Use `.to_context()` for efficiency.**
+
+### Get a Company
+
+```python
+from edgar import set_identity, Company
+
+set_identity("Your Name your@email.com")  # Required first!
+
+company = Company("AAPL")
+print(company.to_context())  # Concise profile (~88 tokens)
+# OR for full details:
+# print(company)  # Full object (~200 tokens)
 ```
 
 ### Get Recent Filings
@@ -30,7 +101,9 @@ print(company)  # Shows company profile
 from edgar import get_current_filings
 
 filings = get_current_filings()  # Last ~24 hours
-print(filings.head(5))  # Show first 5
+print(filings.to_context())  # Summary + available actions (~95 tokens)
+# OR to see first 5 in table:
+# print(filings.head(5))  # Rich table (~500-1000 tokens)
 ```
 
 ### Get Financial Statements
@@ -40,12 +113,12 @@ from edgar import Company
 
 company = Company("AAPL")
 income = company.income_statement(periods=3)  # 3 fiscal years
-print(income)
+print(income)  # Full statement
 ```
 
 ## Core API Reference
 
-Complete reference for main API functions and approaches.
+Main API functions and approaches.
 
 ### Getting Filings (3 Approaches)
 
@@ -125,10 +198,7 @@ q1_2023_10q = company.get_filings(year=2023, form="10-Q")
 
 **Data source**: SEC Company Facts API
 
-**Advantages**:
-- Very fast (single API call)
-- Pre-aggregated data
-- Multi-period comparison built-in
+**Advantages**: Very fast (single API call), pre-aggregated data, multi-period comparison built-in
 
 ```python
 from edgar import Company
@@ -150,10 +220,7 @@ quarterly_income = company.income_statement(periods=4, annual=False)  # Last 4 q
 
 **Data source**: XBRL files attached to specific filings
 
-**Advantages**:
-- Most comprehensive detail
-- All line items available
-- Exact as-filed data
+**Advantages**: Most comprehensive detail, all line items available, exact as-filed data
 
 ```python
 from edgar import Company
@@ -202,17 +269,9 @@ for match in results[:5]:  # Top 5 matches
     print()
 ```
 
-**Features**:
-- BM25 relevance ranking (best matches first)
-- Searches parsed HTML sections
-- Returns `DocSection` objects with scores
-- Index cached for performance (~1-2 seconds per filing)
+**Features**: BM25 relevance ranking (best matches first), searches parsed HTML sections, returns `DocSection` objects with scores, index cached for performance (~1-2 seconds per filing)
 
-**Use cases**:
-- Find mentions of specific topics ("revenue recognition", "risk factors")
-- Locate sections in large filings
-- Screen filings for relevant content
-- Extract context around keywords
+**Use cases**: Find mentions of specific topics ("revenue recognition", "risk factors"), locate sections in large filings, screen filings for relevant content, extract context around keywords
 
 **Example: Find proxy statements mentioning compensation changes**
 
@@ -278,573 +337,120 @@ matches = filing.search("executive compensation")  # ✅
 # Returns 50+ matches from proxy statement
 ```
 
-## Common Questions
+## Quick Reference
 
-Natural language questions mapped to code patterns.
+Complete examples in **[common-questions.md](common-questions.md)**.
 
-### "Show all S-1 filings from February 2023"
+| Task | Primary Method | Example |
+|------|----------------|---------|
+| Show S-1 filings from date range | `get_filings(year, quarter, form="S-1", filing_date="...")` | [See example](common-questions.md#show-all-s-1-filings-from-february-2023) |
+| Get today's filings | `get_current_filings()` | [See example](common-questions.md#whats-been-filed-today) |
+| Get company revenue trend | `company.income_statement(periods=3)` | [See example](common-questions.md#get-apples-revenue-for-last-3-fiscal-years) |
+| Get quarterly financials | `company.income_statement(periods=4, annual=False)` | [See example](common-questions.md#teslas-quarterly-net-income-trend-4-quarters) |
+| Get statement from specific filing | `filing.xbrl().statements.income_statement()` | [See example](common-questions.md#full-income-statement-from-apples-2023-10-k) |
+| Compare multiple companies | `compare_companies_revenue(["AAPL", "MSFT"])` | [See example](common-questions.md#compare-apple-and-microsoft-revenue) |
+| Get latest quarterly balance sheet | `company.get_filings(form="10-Q")[0].xbrl()` | [See example](common-questions.md#get-balance-sheet-from-latest-10-q) |
+| Get insider transactions (Form 4) | `company.get_filings(form="4")` | [See example](common-questions.md#get-all-form-4-insider-transactions-for-aapl) |
+| Filter filings efficiently | `filings.filter(ticker="AAPL", filing_date="2024-01-01:")` | [See example](common-questions.md#when-to-use-filter-vs-python-filtering) |
+| Look up form types | `describe_form("C")` or see form-types-reference.md | [See example](common-questions.md#dont-know-the-form-type-look-it-up) |
 
-```python
-from edgar import get_filings
+**Pattern**: For any question, check [common-questions.md](common-questions.md) for full working examples.
 
-filings = get_filings(
-    2023, 1,  # Q1 2023
-    form="S-1",
-    filing_date="2023-02-01:2023-02-28"
-)
-print(f"Found {len(filings)} S-1 filings")
-print(filings.head(5))
+## Advanced Topics
+
+Advanced patterns, helpers, error handling, skill exportation: **[advanced-guide.md](advanced-guide.md)**.
+
+**Includes:**
+- Filtering and pagination
+- Multi-company analysis
+- Error handling patterns
+- Working with filing documents
+- Helper functions reference
+- Exporting skills for Claude Desktop
+- Creating custom external skills
+
+## Troubleshooting
+
+### "User-Agent identity is not set"
+
+**Error:**
+```
+RuntimeError: User-Agent identity is not set. Please call set_identity() first.
 ```
 
-**Using helper function**:
-```python
-from edgar.ai.helpers import get_filings_by_period
+**Cause:** Missing `set_identity()` call (SEC requirement)
 
-filings = get_filings_by_period(2023, 1, form="S-1", filing_date="2023-02-01:2023-02-28")
+**Solution:**
+```python
+from edgar import set_identity
+set_identity("Your Name your@email.com")  # Must call before any API operations
 ```
 
-### "What's been filed today?"
+### AttributeError on Company object
 
-```python
-from edgar import get_current_filings
-
-current = get_current_filings()
-print(f"{len(current)} filings in last 24 hours")
-print(current.head(10))
+**Error:**
+```
+AttributeError: 'Company' object has no attribute 'sic_code'
 ```
 
-**Using helper function**:
-```python
-from edgar.ai.helpers import get_today_filings
+**Cause:** Incorrect attribute name
 
-filings = get_today_filings()
+**Solution:** Check the [API reference in objects.md](objects.md) for correct attribute names (e.g., use `company.sic` instead of `company.sic_code`)
+
+### Using too many tokens?
+
+**Cause:** Not using `.to_context()` method
+
+**Solution:** Always call `.to_context()` before printing full objects:
+```python
+# Instead of:
+print(company)  # 200+ tokens
+
+# Use:
+print(company.to_context())  # ~88 tokens
 ```
 
-### "Get Apple's revenue for last 3 fiscal years"
+### Empty filings result
 
+**Problem:** `get_filings()` returns empty list
+
+**Possible causes:** No filings match criteria (try broader search), wrong quarter/year combination, or form type doesn't exist for that period
+
+**Solution:**
 ```python
-from edgar import Company
-
-company = Company("AAPL")
-income = company.income_statement(periods=3)
-print(income)  # Shows 3-year revenue trend
-```
-
-**Using helper function**:
-```python
-from edgar.ai.helpers import get_revenue_trend
-
-income = get_revenue_trend("AAPL", periods=3)
-```
-
-### "Tesla's quarterly net income trend (4 quarters)"
-
-```python
-from edgar import Company
-
-company = Company("TSLA")
-income = company.income_statement(periods=4, annual=False)
-print(income)
-```
-
-**Using helper function**:
-```python
-from edgar.ai.helpers import get_revenue_trend
-
-income = get_revenue_trend("TSLA", periods=4, quarterly=True)
-```
-
-### "Full income statement from Apple's 2023 10-K"
-
-```python
-from edgar import Company
-
-company = Company("AAPL")
-filing = company.get_filings(year=2023, form="10-K")[0]
-xbrl = filing.xbrl()
-income = xbrl.statements.income_statement()
-print(income)
-```
-
-**Using helper function**:
-```python
-from edgar.ai.helpers import get_filing_statement
-
-income = get_filing_statement("AAPL", 2023, "10-K", "income")
-```
-
-### "Compare Apple and Microsoft revenue"
-
-```python
-from edgar import Company
-
-aapl = Company("AAPL")
-msft = Company("MSFT")
-
-aapl_income = aapl.income_statement(periods=3)
-msft_income = msft.income_statement(periods=3)
-
-print("Apple Revenue Trend:")
-print(aapl_income)
-print("\nMicrosoft Revenue Trend:")
-print(msft_income)
-```
-
-**Using helper function**:
-```python
-from edgar.ai.helpers import compare_companies_revenue
-
-results = compare_companies_revenue(["AAPL", "MSFT"], periods=3)
-print("Apple:")
-print(results["AAPL"])
-print("\nMicrosoft:")
-print(results["MSFT"])
-```
-
-### "Get balance sheet from latest 10-Q"
-
-```python
-from edgar import Company
-
-company = Company("AAPL")
-filing = company.get_filings(form="10-Q")[0]  # Latest 10-Q
-xbrl = filing.xbrl()
-balance = xbrl.statements.balance_sheet()
-print(balance)
-```
-
-### "Search for all 8-K filings with 'Item 5.02' (officer departures)"
-
-```python
-from edgar import Company
-
-company = Company("AAPL")
-eightk_filings = company.get_filings(form="8-K")
-
-# Examine individual filings
-for filing in eightk_filings[:5]:
-    print(f"{filing.filing_date}: {filing.form}")
-    # Access filing document for text search
-    doc = filing.document()
-```
-
-### "Get all Form 4 insider transactions for AAPL"
-
-```python
-from edgar import Company
-
-company = Company("AAPL")
-form4_filings = company.get_filings(form="4")
-
-print(f"Found {len(form4_filings)} Form 4 filings")
-for filing in form4_filings[:5]:
-    print(f"{filing.filing_date} - {filing.company}")
-```
-
-### "Find all tech companies that filed 10-K in January 2023"
-
-```python
-from edgar import get_filings
-
-filings = get_filings(
-    2023, 1,
-    form="10-K",
-    filing_date="2023-01-01:2023-01-31"
-)
-
-# Filter for tech companies (example tickers)
-tech_tickers = ["AAPL", "MSFT", "GOOGL", "META", "AMZN", "NVDA", "TSLA"]
-tech_filings = filings.filter(ticker=tech_tickers)
-
-print(f"Found {len(tech_filings)} tech 10-K filings in January 2023")
-print(tech_filings)
-```
-
-### "How many crowdfunding filings were released in the past week?"
-
-**Form Type**: Form C (Regulation Crowdfunding)
-
-```python
-from edgar import get_filings
-from datetime import datetime, timedelta
-
-# Calculate date range for past week
-end_date = datetime.now().date()
-start_date = end_date - timedelta(days=7)
-
-print(f"Searching for crowdfunding filings from {start_date} to {end_date}")
-
-# Get Form C filings and filter by date using .filter() method
-# (More efficient than Python list comprehension)
-filings = get_filings(form="C")
-recent_filings = filings.filter(filing_date=f"{start_date}:")
-
-# Count
-count = len(recent_filings)
-print(f"Found {count} crowdfunding filings in the past week")
-
-# Show sample
-if recent_filings:
-    print("\nSample filings:")
-    print(recent_filings.head(5))
-```
-
-**Why this approach?**
-- Form C = Crowdfunding offerings (see [form-types-reference.md](form-types-reference.md))
-- Can't use `get_today_filings()` (only ~24h)
-- Use `.filter(filing_date="start:")` for open-ended date range (more efficient than Python loops)
-- Works even when date range spans quarters
-
-**Alternative (if you know the quarter)**:
-```python
-# If past week is entirely within Q4 2024, filter in one call
-filings = get_filings(
-    2024, 4,
-    form="C",
-    filing_date=f"{start_date}:"  # Open-ended range
-)
-count = len(filings)
-```
-
-### "When to use .filter() vs Python filtering"
-
-**IMPORTANT**: Always prefer `.filter()` method over Python list comprehensions when possible!
-
-#### ✅ Use `.filter()` method (EFFICIENT)
-
-The `.filter()` method is optimized and should be your first choice:
-
-```python
-from edgar import get_filings
-
 filings = get_filings(2024, 1, form="10-K")
-
-# Date filtering - use .filter()!
-recent = filings.filter(filing_date="2024-02-01:")
-
-# Ticker filtering - use .filter()!
-apple = filings.filter(ticker="AAPL")
-
-# Multiple tickers - use .filter()!
-tech = filings.filter(ticker=["AAPL", "MSFT", "GOOGL"])
-
-# Exchange filtering - use .filter()!
-nasdaq = filings.filter(exchange="NASDAQ")
-
-# CIK filtering - use .filter()!
-by_cik = filings.filter(cik="0000320193")
-
-# Combine multiple filters
-filtered = filings.filter(
-    ticker=["AAPL", "MSFT"],
-    filing_date="2024-01-15:",
-    amendments=False
-)
-```
-
-**Available `.filter()` parameters:**
-- `form`: Form type(s)
-- `filing_date` / `date`: Date range
-- `ticker`: Ticker symbol(s)
-- `cik`: CIK number(s)
-- `exchange`: Exchange name(s)
-- `accession_number`: Accession number(s)
-- `amendments`: Include/exclude amendments
-
-See [filtering-filings.md](../../guides/filtering-filings.md) for complete reference.
-
-#### ⚠️ Use Python filtering ONLY when necessary (INEFFICIENT)
-
-Only use Python list comprehensions when `.filter()` doesn't support your criteria:
-
-```python
-from edgar import get_filings
-
-filings = get_filings(2024, 1, form="10-K")
-
-# Complex string matching (not supported by .filter())
-tech_companies = [
-    f for f in filings
-    if "tech" in f.company.lower() or "software" in f.company.lower()
-]
-
-# Custom business logic (not supported by .filter())
-short_names = [
-    f for f in filings
-    if len(f.company) < 30 and f.ticker  # Has ticker and short name
-]
-
-# Complex date logic (not supported by .filter())
-weekdays_only = [
-    f for f in filings
-    if f.filing_date.weekday() < 5  # Monday-Friday only
-]
-```
-
-**Use Python filtering for**:
-- Company name pattern matching
-- Complex multi-field logic
-- Custom calculations
-- Conditions not supported by `.filter()`
-
-**Pattern**: `[f for f in filings if <condition>]`
-
-### "Don't know the form type? Look it up!"
-
-**Problem**: You need to map natural language to form codes
-
-**Solution**: Use the form types reference or `describe_form()`
-
-```python
-from edgar.reference import describe_form
-
-# Look up form descriptions
-print(describe_form("C"))        # Form C: Offering statement
-print(describe_form("10-K"))     # Form 10-K: Annual report for public companies
-print(describe_form("S-1"))      # Form S-1: Securities registration
-print(describe_form("4"))        # Form 4: Statement of changes in beneficial ownership
-```
-
-**Complete reference**: See [form-types-reference.md](form-types-reference.md)
-
-**Common mappings**:
-- "crowdfunding" → **Form C**
-- "IPO" → **S-1** (or F-1 for foreign)
-- "insider trading" → **Form 4**
-- "proxy statement" → **DEF 14A**
-- "institutional holdings" → **13F-HR**
-- "private placement" → **Form D**
-
-## Advanced Patterns
-
-Multi-step workflows and advanced use cases.
-
-### Filtering and Pagination
-
-```python
-from edgar import get_filings
-
-# Get large result set
-filings = get_filings(2023, 1)
-
-# Filter by multiple criteria
-filtered = filings.filter(
-    form=["10-K", "10-Q"],
-    ticker=["AAPL", "MSFT", "GOOGL"]
-)
-
-# Pagination
-print(filtered.head(10))  # First 10
-print(filtered[10:20])  # Next 10
-
-# Iterate
-for filing in filtered[:5]:
-    print(f"{filing.company} - {filing.form} - {filing.filing_date}")
-```
-
-### Multi-Company Analysis
-
-```python
-from edgar import Company
-
-tickers = ["AAPL", "MSFT", "GOOGL", "META", "AMZN"]
-
-# Collect revenue data
-revenue_data = {}
-for ticker in tickers:
-    company = Company(ticker)
-    income = company.income_statement(periods=3)
-    revenue_data[ticker] = income
-
-# Display comparisons
-for ticker, statement in revenue_data.items():
-    print(f"\n{ticker} Revenue:")
-    print(statement)
-```
-
-### Error Handling
-
-```python
-from edgar import Company
-
-try:
-    company = Company("INVALID_TICKER")
-    income = company.income_statement(periods=3)
-except Exception as e:
-    print(f"Error: {e}")
-    # Handle error appropriately
-
-# Check data availability
-filings = get_filings(2023, 1, form="RARE-FORM")
 if len(filings) == 0:
-    print("No filings found matching criteria")
-else:
-    print(f"Found {len(filings)} filings")
-
-# Verify XBRL availability
-filing = company.get_filings(form="10-K")[0]
-if hasattr(filing, 'xbrl') and filing.xbrl:
-    xbrl = filing.xbrl()
-    # Process XBRL
-else:
-    print("XBRL data not available")
+    print("No filings found - try different criteria")
+    # Try broader search
+    all_filings = get_filings(2024, 1)
+    print(f"Found {len(all_filings)} total filings in 2024 Q1")
 ```
 
-### Working with Filing Documents
+## Accessing Documentation Programmatically (For AI Agents)
+
+Use the skill API to read documentation:
 
 ```python
-from edgar import Company
+from edgar.ai import get_skill
 
-company = Company("AAPL")
-filing = company.get_filings(form="10-K")[0]
-
-# Get parsed document
-doc = filing.document()
-
-# Access sections (for 10-K/10-Q)
-if hasattr(doc, 'get_section'):
-    item1 = doc.get_section("Item 1")  # Business description
-    item1a = doc.get_section("Item 1A")  # Risk factors
-    item7 = doc.get_section("Item 7")  # MD&A
-
-# Get raw HTML
-html = filing.html()
+skill = get_skill("EdgarTools")
+common_questions = skill.get_document_content("common-questions")
+advanced_guide = skill.get_document_content("advanced-guide")
 ```
 
-## Helper Functions Reference
+**Available documents:** SKILL, common-questions, advanced-guide, quickstart-by-task, objects, workflows, form-types-reference, readme
 
-Convenience functions available in `edgar.ai.helpers`:
-
-```python
-from edgar.ai.helpers import (
-    get_filings_by_period,
-    get_today_filings,
-    get_revenue_trend,
-    get_filing_statement,
-    compare_companies_revenue,
-)
-
-# Get filings for a period
-filings = get_filings_by_period(2023, 1, form="10-K")
-
-# Get today's filings
-current = get_today_filings()
-
-# Get revenue trend (annual or quarterly)
-income = get_revenue_trend("AAPL", periods=3)  # Annual
-quarterly = get_revenue_trend("AAPL", periods=4, quarterly=True)
-
-# Get specific statement from filing
-income = get_filing_statement("AAPL", 2023, "10-K", "income")
-balance = get_filing_statement("AAPL", 2023, "10-K", "balance")
-cash_flow = get_filing_statement("AAPL", 2023, "10-K", "cash_flow")
-
-# Compare multiple companies
-results = compare_companies_revenue(["AAPL", "MSFT", "GOOGL"], periods=3)
-```
-
-## Exporting Skills
-
-EdgarTools AI skills can be exported for use in Claude Desktop and other AI tools.
-
-### Export for Claude Desktop
-
-```python
-from edgar.ai import sec_analysis_skill, export_skill
-
-# Export skill to current directory
-skill_dir = export_skill(sec_analysis_skill, format="claude-desktop")
-print(f"Skill exported to: {skill_dir}")
-# Output: Skill exported to: sec-filing-analysis
-
-# Export with custom output directory
-from pathlib import Path
-output_path = export_skill(
-    sec_analysis_skill,
-    format="claude-desktop",
-    output_dir=Path.home() / "claude-skills"
-)
-
-# Export as zip archive
-zip_path = export_skill(
-    sec_analysis_skill,
-    format="claude-desktop",
-    create_zip=True
-)
-print(f"Skill packaged: {zip_path}")
-# Output: Skill packaged: sec-filing-analysis.zip
-```
-
-### Using in Claude Desktop
-
-After exporting, add the skill to Claude Desktop:
-
-1. Export the skill: `export_skill(sec_analysis_skill)`
-2. Move the `sec-filing-analysis` directory to your Claude Desktop skills folder
-3. Restart Claude Desktop
-4. The skill will appear in your available skills
-
-### Creating External Skills
-
-External packages can extend EdgarTools with custom skills using the `BaseSkill` abstract class:
-
-```python
-from edgar.ai.skills.base import BaseSkill
-from pathlib import Path
-from typing import Dict, Callable
-
-class CustomAnalysisSkill(BaseSkill):
-    """Custom SEC analysis skill with specialized workflows."""
-
-    @property
-    def name(self) -> str:
-        return "Custom SEC Analysis"
-
-    @property
-    def description(self) -> str:
-        return "Specialized SEC filing analysis for XYZ use case"
-
-    @property
-    def content_dir(self) -> Path:
-        return Path(__file__).parent / "content"
-
-    def get_helpers(self) -> Dict[str, Callable]:
-        """Return custom helper functions."""
-        from mypackage import custom_helpers
-        return {
-            'analyze_filing_sentiment': custom_helpers.sentiment_analysis,
-            'extract_risk_factors': custom_helpers.risk_extraction,
-        }
-
-# Register with EdgarTools
-custom_skill = CustomAnalysisSkill()
-
-# Export custom skill
-from edgar.ai import export_skill
-export_skill(custom_skill, format="claude-desktop")
-```
-
-### Skill Discovery
-
-List all available skills (built-in + external):
-
-```python
-from edgar.ai import list_skills, get_skill
-
-# List all skills
-skills = list_skills()
-for skill in skills:
-    print(f"{skill.name}: {skill.description}")
-
-# Get specific skill by name
-sec_skill = get_skill("SEC Filing Analysis")
-```
+See [readme.md](readme.md#accessing-skill-documentation-programmatically-for-ai-agents) for complete API documentation.
 
 ## See Also
 
+- [Common Questions](common-questions.md) - Complete examples with full code for common tasks
+- [Advanced Guide](advanced-guide.md) - Advanced patterns, helper functions, and skill exportation
+- [Quick Start by Task](quickstart-by-task.md) - Fast task routing (< 30 seconds)
 - [Object Reference](objects.md) - Object representations and token size estimates
 - [Workflows](workflows.md) - End-to-end analysis patterns
-- [README](README.md) - Installation and troubleshooting
+- [Form Types Reference](form-types-reference.md) - Complete SEC form catalog (311 forms)
+- [README](readme.md) - Installation and package overview
 
 ## Rate Limiting
 

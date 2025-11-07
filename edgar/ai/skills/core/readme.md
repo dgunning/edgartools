@@ -2,6 +2,9 @@
 
 EdgarTools skills package for AI agents analyzing SEC filings and financial statements.
 
+> **📖 Looking to use EdgarTools?** Start with **[SKILL.md](SKILL.md)** instead.
+> This readme is meta-documentation about the skill package structure. For analyzing SEC filings, go to [SKILL.md](SKILL.md).
+
 ## Overview
 
 This package provides AI-friendly documentation and helper functions for working with SEC EDGAR filings using EdgarTools.
@@ -77,6 +80,27 @@ Comprehensive method-level documentation from EdgarTools centralized docs:
 
 **Note**: While this package is designed to be compatible with Claude Desktop Skills, the actual integration and installation process is not covered in this initial release. The focus is on creating AI-friendly documentation that follows the Anthropic Skills format specification.
 
+## Prerequisites
+
+**REQUIRED:** Before using EdgarTools, you must set your identity (SEC requirement):
+
+```python
+from edgar import set_identity
+set_identity("Your Name your@email.com")
+```
+
+This identifies your application to the SEC. **Without this, all API calls will fail** with `"User-Agent identity is not set"` error.
+
+**Tip:** Always use `.to_context()` for token-efficient output:
+```python
+from edgar import Company
+
+company = Company("AAPL")
+print(company.to_context())  # ~88 tokens vs ~750 for full output
+```
+
+See [SKILL.md](SKILL.md) for complete token-efficient API usage guide.
+
 ## Usage
 
 ### As Python Package
@@ -121,7 +145,9 @@ results = compare_companies_revenue(["AAPL", "MSFT"], periods=3)
 
 The Skills documentation can be consumed directly by AI agents:
 
-- **skill.md** provides comprehensive API documentation with examples
+- **SKILL.md** provides comprehensive API documentation with examples
+- **common-questions.md** complete examples for common tasks
+- **advanced-guide.md** advanced patterns and helper functions
 - **objects.md** documents object representations with token size estimates
 - **workflows.md** provides end-to-end analysis patterns
 - Natural language questions are mapped to code patterns
@@ -132,24 +158,71 @@ AI agents can reference these files to:
 - Find code patterns for common tasks
 - Handle errors gracefully
 
+#### Accessing Skill Documentation Programmatically (For AI Agents)
+
+When edgartools is installed as a package, AI agents should access skill documentation through the API rather than file reads:
+
+```python
+from edgar.ai import get_skill, list_skills
+
+# Get the EdgarTools skill
+skill = get_skill("EdgarTools")
+
+# Read specific documentation files (recommended for AI agents)
+skill_md = skill.get_document_content("SKILL.md")
+common_questions = skill.get_document_content("common-questions")  # .md optional
+advanced_guide = skill.get_document_content("advanced-guide")
+
+# List all available documents in the skill
+documents = skill.get_documents()  # Returns list of document names
+print(f"Available docs: {documents}")
+
+# List all available skills
+all_skills = list_skills()
+for s in all_skills:
+    print(f"{s.name}: {s.description}")
+```
+
+**Key API methods for AI agents:**
+- `get_skill(name)` - Get skill by name, returns BaseSkill object
+- `skill.get_document_content(name)` - Read a skill document (recommended)
+- `skill.get_documents()` - List all available documents in the skill
+- `list_skills()` - List all available skills (built-in + external)
+- `skill.name` - Skill name
+- `skill.description` - Skill description
+- `skill.content_dir` - Path to skill's markdown documentation (advanced)
+
+**Best Practice:** Use `skill.get_document_content()` instead of manual file reads. It handles:
+- File path resolution
+- .md extension (optional)
+- Error messages with available documents
+- Cross-platform compatibility
+
+**Note:** Hyperlinks in markdown files use relative paths (e.g., `[common-questions.md](common-questions.md)`). Use `skill.get_document_content()` to navigate these links.
+
 ## Files in This Skill
 
 | File | Purpose | Token Estimate |
 |------|---------|----------------|
+| **SKILL.md** | Core API reference (optimized) | ~3,500 |
+| **common-questions.md** | Complete examples for common tasks (NEW) | ~2,500 |
+| **advanced-guide.md** | Advanced patterns and exports (NEW) | ~1,650 |
 | **quickstart-by-task.md** | Fast task routing (< 30 sec) | ~5,000 |
 | **form-types-reference.md** | SEC form catalog with 311 forms | ~7,000 |
-| **skill.md** | Main skill documentation with API examples | ~10,000 |
 | **workflows.md** | End-to-end analysis workflows | ~4,000 |
 | **objects.md** | Core EdgarTools objects (Company, Filing, XBRL) | ~3,000 |
 | **data-objects.md** | Form-specific data objects (TenK, Form4, etc.) | ~4,000 |
 | **helpers.py** | Convenience functions for common patterns | N/A (code) |
-| **README.md** | This file - package overview | ~1,200 |
+| **readme.md** | This file - package overview | ~1,500 |
 
-**New in this version:**
-- **data-objects.md** - Complete guide to form-specific data objects (16 types documented)
-- **quickstart-by-task.md** - Decision tree for finding the right approach by task type
-- **form-types-reference.md** - Comprehensive form catalog with natural language mappings
-- **Enhanced skill.md** - Added examples for crowdfunding, relative dates, post-retrieval filtering
+**New in v4.26.2 (THIS VERSION):**
+- **SKILL.md** - Restructured for 65% token reduction (10,200 → 3,500 tokens)
+- **common-questions.md** - NEW file with 13 complete examples extracted from SKILL.md
+- **advanced-guide.md** - NEW file with advanced patterns, helpers, and exportation
+- **Prerequisites sections** - Added critical set_identity() requirement to all entry points
+- **Token-efficient API** - Prominent to_context() examples throughout documentation
+- **Troubleshooting section** - Common errors and solutions added to SKILL.md
+- **API reference table** - Quick reference added to objects.md for Company object
 
 ## Helper Functions Reference
 
