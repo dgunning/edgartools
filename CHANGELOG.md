@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.26.2] - 2025-11-06
+
+### Fixed
+
+- **Critical Documentation Gaps in Skills Package (Issue #480)**
+  - Added missing `set_identity()` requirement to all documentation entry points
+  - Added prominent documentation for `to_context()` method (5-10x token efficiency)
+  - Added Prerequisites & Setup section to SKILL.md with SEC identity requirement
+  - Added Token-Efficient API Usage section with comparison tables
+  - Added Troubleshooting section with 4 common errors and solutions
+  - **Impact**: Agents no longer experience immediate failures, discover token-efficient methods
+  - **Root Cause**: Critical setup step and efficiency feature were buried in documentation
+  - **Files Modified**: `SKILL.md`, `readme.md`, `quickstart-by-task.md`
+  - **Related**: Issue #480
+
+### Changed
+
+- **Skills Documentation Restructuring for Token Efficiency (Issue #481)**
+  - Restructured SKILL.md from 10,200 → 3,400 tokens (65% reduction)
+  - Extracted 13 complete examples to new `common-questions.md` (366 lines)
+  - Extracted advanced patterns to new `advanced-guide.md` (256 lines)
+  - Replaced Common Questions section with Quick Reference table
+  - Added programmatic documentation access guide for AI agents
+  - **Impact**: 60% faster documentation loading for agents, improved navigation
+  - **Files Created**: `common-questions.md`, `advanced-guide.md`
+  - **Files Modified**: `SKILL.md`, `readme.md`, `objects.md`, `quickstart-by-task.md`
+  - **Related**: Issue #481
+
+- **Documentation Token Optimization Across Skills Package**
+  - Optimized `objects.md`: 803 → 753 lines (~200-250 token reduction)
+    - Removed duplicate "Documentation Features" section
+    - Fixed `obj.text()` to `obj.to_context()` in tables
+    - Inlined all bullet lists (Contains, When to Use, Documentation Features)
+  - Optimized `data-objects.md`: 587 → 556 lines (~120-150 token reduction)
+    - Inlined all "Key Features" sections
+    - Inlined Layer 1/Layer 2 descriptions
+    - Inlined Common DataFrame Columns list
+  - Optimized `SKILL.md`: 482 → 460 lines (~150 token reduction)
+    - Conservative rephrasing for reduced verbosity
+    - Converted bullet lists to inline format
+    - Tightened introductory sections
+  - **Total Impact**: ~470-550 token savings across documentation
+  - **Files Modified**: `objects.md`, `data-objects.md`, `SKILL.md`
+
+- **Enhanced Agent Documentation Navigation**
+  - Added routing note to readme.md directing agents to SKILL.md
+  - Documented `skill.get_document_content()` API for programmatic access
+  - Added navigation guidance to all skill entry points
+  - **Impact**: Agents find correct entry point and can navigate documentation programmatically
+  - **Files Modified**: `SKILL.md`, `readme.md`
+
+### Fixed (Documentation)
+
+- Fixed incorrect skill name in API examples ("SEC Filing Analysis" → "EdgarTools")
+- Fixed inconsistent method references (`obj.text()` → `obj.to_context()`)
+- Fixed duplicate documentation sections in objects.md
+- Added API reference table to objects.md for Company object attributes
+
 ## [4.26.1] - 2025-11-05
 
 ### Fixed
