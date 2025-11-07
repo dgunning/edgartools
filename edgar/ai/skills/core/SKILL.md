@@ -454,7 +454,7 @@ When edgartools is installed, use the skill API to read documentation:
 ```python
 from edgar.ai import get_skill
 
-skill = get_skill("SEC Filing Analysis")
+skill = get_skill("EdgarTools")
 common_questions = skill.get_document_content("common-questions")
 advanced_guide = skill.get_document_content("advanced-guide")
 ```

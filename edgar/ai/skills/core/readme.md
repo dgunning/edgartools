@@ -165,8 +165,8 @@ When edgartools is installed as a package, AI agents should access skill documen
 ```python
 from edgar.ai import get_skill, list_skills
 
-# Get the SEC filing analysis skill
-skill = get_skill("SEC Filing Analysis")
+# Get the EdgarTools skill
+skill = get_skill("EdgarTools")
 
 # Read specific documentation files (recommended for AI agents)
 skill_md = skill.get_document_content("SKILL.md")
