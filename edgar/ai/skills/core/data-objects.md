@@ -9,20 +9,12 @@
 EdgarTools provides two layers for working with SEC filings:
 
 ### Layer 1: Filing (Metadata & Documents)
-The `Filing` object provides:
-- Filing metadata (date, form type, company, accession number)
-- Document access (HTML, XML, exhibits)
-- XBRL data access
-- Search and filtering
+The `Filing` object provides: filing metadata (date, form type, company, accession number), document access (HTML, XML, exhibits), XBRL data access, search and filtering
 
 **Use when**: You need metadata, documents, or are filtering/counting filings
 
 ### Layer 2: Data Objects (Parsed Structured Data)
-Data objects provide:
-- Form-specific parsed data
-- Structured fields for the form type
-- Domain-specific methods and properties
-- Type-safe access to form data
+Data objects provide: form-specific parsed data, structured fields for the form type, domain-specific methods/properties, type-safe access to form data
 
 **Use when**: You need structured data specific to the form type
 
@@ -67,10 +59,7 @@ Financial reporting forms with XBRL data
 
 **Module**: `edgar.company_reports`
 
-**Key Features**:
-- XBRL financial statements
-- Structured sections (Item 1, Item 2, etc.)
-- Financial data extraction
+**Key Features**: XBRL financial statements, structured sections (Item 1, Item 2, etc.), financial data extraction
 
 ### Ownership & Insider Trading
 Beneficial ownership and insider transaction forms
@@ -83,11 +72,7 @@ Beneficial ownership and insider transaction forms
 
 **Module**: `edgar.ownership`
 
-**Key Features**:
-- Reporting person details
-- Transaction details (shares, price, dates)
-- Holdings after transaction
-- Derivative securities
+**Key Features**: Reporting person details, transaction details (shares, price, dates), holdings after transaction, derivative securities
 
 #### Form4 Transaction DataFrames
 
@@ -125,14 +110,7 @@ for filing in filings[:5]:
             print(f"  Purchase: {shares:,} shares @ ${price:.2f} = ${value:,.2f} on {date}")
 ```
 
-**Common DataFrame Columns**:
-- `Security` - Security type (e.g., "Common Stock")
-- `Date` - Transaction date
-- `Shares` - Number of shares
-- `Price` - Price per share
-- `Remaining` - Shares remaining after transaction
-- `Code` - Transaction code ('S' = sale, 'P' = purchase, etc.)
-- `AcquiredDisposed` - 'A' = acquired, 'D' = disposed
+**Common DataFrame Columns**: `Security` (security type, e.g., "Common Stock"), `Date` (transaction date), `Shares` (number of shares), `Price` (price per share), `Remaining` (shares remaining after transaction), `Code` (transaction code: 'S' = sale, 'P' = purchase, etc.), `AcquiredDisposed` ('A' = acquired, 'D' = disposed)
 
 **Filtering Large Transactions**:
 ```python
@@ -181,12 +159,7 @@ Regulation D and crowdfunding offerings
 
 **Module**: `edgar.offerings`
 
-**Key Features**:
-- Offering details (amount, type, exemption)
-- Issuer information
-- Use of proceeds
-- Investor information (Form D)
-- Campaign progress (Form C)
+**Key Features**: Offering details (amount, type, exemption), issuer information, use of proceeds, investor information (Form D), campaign progress (Form C)
 
 ### Institutional Holdings
 13F institutional investment manager holdings
@@ -198,11 +171,7 @@ Regulation D and crowdfunding offerings
 
 **Module**: `edgar.thirteenf`
 
-**Key Features**:
-- Holdings table (security, shares, value)
-- Manager information
-- Summary page data
-- Both XML and TXT format support
+**Key Features**: Holdings table (security, shares, value), manager information, summary page data, both XML and TXT format support
 
 ### Other Specialized Forms
 
