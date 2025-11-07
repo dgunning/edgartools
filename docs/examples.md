@@ -2,6 +2,28 @@
 
 This document showcases common workflows and tasks that financial professionals, developers, and researchers can accomplish using EdgarTools. Each journey addresses a specific problem and provides a concise code example.
 
+## Example Resources
+
+### 📓 Interactive Notebooks
+Explore **28 Jupyter notebooks** organized by topic in the [`notebooks/`](../notebooks/) directory:
+- **[Beginner](../notebooks/beginner/)** - Getting started guides
+- **[XBRL](../notebooks/xbrl/)** - Financial statement analysis (18 notebooks)
+- **[Filings](../notebooks/filings/)** - Working with SEC filings
+- **[Funds](../notebooks/funds/)** - Investment fund analysis
+- **[Insiders](../notebooks/insiders/)** - Insider trading data
+- **[See all notebooks](../notebooks/README.md)**
+
+### 💻 Python Scripts
+Browse **8 ready-to-use Python scripts** in the [`examples/`](../examples/) directory:
+- **[Basic](../examples/basic/)** - Simple examples for common tasks
+- **[Advanced](../examples/advanced/)** - Complex use cases
+- **[AI Integration](../examples/ai/)** - AI/LLM workflows
+- **[See all examples](../examples/README.md)**
+
+---
+
+## Use Case Examples
+
 ## 1. Company Financial Analysis
 
 **Problem:** Need to analyze a company's financial health across multiple periods.

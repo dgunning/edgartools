@@ -1,0 +1,1 @@
+Read all changed files in my current git branch to catch up on the recent changes.
