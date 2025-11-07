@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Excessive XBRL Footnote Warning Spam (Issue #482)**
+  - Reduced 100+ duplicate warnings to deduplicated DEBUG messages for old filings (2015 and earlier)
+  - Downgraded "Footnote arc references undefined footnote" from WARNING to DEBUG level
+  - Added summary message for undefined footnote count (non-critical)
+  - **Impact**: Clean console output, no more warning spam on older filings
+  - **Affected**: APD 2015 (121→20 messages), GE 2015 (237→unique count), modern filings unaffected
+  - **Root Cause**: Older filings have inconsistent footnote ID naming conventions
+  - **Files Modified**: `edgar/xbrl/parsers/instance.py`
+  - **Related**: Issue #482, Beads edgartools-9on
+
 ## [4.26.2] - 2025-11-06
 
 ### Fixed

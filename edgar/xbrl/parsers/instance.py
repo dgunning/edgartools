@@ -543,6 +543,7 @@ class InstanceParser(BaseParser):
                     self.footnotes[footnote_id] = footnote
 
                 # Second, process footnoteArc elements to link facts to footnotes
+                undefined_footnotes = set()  # Track undefined footnotes for deduplication
                 for arc_elem in footnote_link.findall('{http://www.xbrl.org/2003/linkbase}footnoteArc'):
                     fact_id = arc_elem.get('{http://www.w3.org/1999/xlink}from')
                     footnote_id = arc_elem.get('{http://www.w3.org/1999/xlink}to')
@@ -552,7 +553,10 @@ class InstanceParser(BaseParser):
                         if footnote_id in self.footnotes:
                             self.footnotes[footnote_id].related_fact_ids.append(fact_id)
                         else:
-                            log.warning(f"Footnote arc references undefined footnote: {footnote_id}")
+                            # Track undefined footnote (common in older filings due to naming inconsistencies)
+                            if footnote_id not in undefined_footnotes:
+                                undefined_footnotes.add(footnote_id)
+                                log.debug(f"Footnote arc references undefined footnote: {footnote_id}")
 
                         # Also update the fact's footnotes list if we can find it
                         # This requires finding the fact by its fact_id
@@ -561,6 +565,10 @@ class InstanceParser(BaseParser):
                                 if footnote_id not in fact.footnotes:
                                     fact.footnotes.append(footnote_id)
                                 break
+
+            # Summary message for undefined footnotes (non-critical)
+            if undefined_footnotes:
+                log.debug(f"{len(undefined_footnotes)} footnote arc references could not be resolved (non-critical)")
 
             log.debug(f"Extracted {len(self.footnotes)} footnotes")
 
