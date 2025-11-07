@@ -10,6 +10,8 @@
 **/__pycache__/
 dist/
 .vscode/
+# Beads issue tracking (local state)
+.beads/
 data/.DS_Store
 **/**/.DS_Store
 **/**/**/.DS_Store
