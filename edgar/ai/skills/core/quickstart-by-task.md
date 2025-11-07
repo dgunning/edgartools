@@ -2,6 +2,17 @@
 
 **Fast routing guide for AI agents** - Find the right approach in < 30 seconds based on your task type.
 
+## Prerequisites
+
+**REQUIRED FIRST STEP:** Set your identity before any API calls:
+
+```python
+from edgar import set_identity
+set_identity("Your Name your@email.com")  # SEC requirement
+```
+
+**Tip:** Use `.to_context()` for token-efficient output (see [SKILL.md](SKILL.md#token-efficient-api-usage)).
+
 ## How to Use This Guide
 
 1. **Identify your task type** from the categories below
