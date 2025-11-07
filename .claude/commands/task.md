@@ -6,251 +6,118 @@ model: "sonnet"
 
 # Task Management Command
 
-Create, update, and manage structured development tasks with **automatic living document integration**. Tasks are tracked in `docs-internal/planning/active-tasks/` and automatically update PRIORITIES.md and VELOCITY-TRACKING.md.
+Create, update, and manage structured development tasks using **Beads** for fast, scalable tracking. This command is a wrapper around `bd` commands with EdgarTools-specific conventions.
 
-> **Living Documents**: PRIORITIES.md, VELOCITY-TRACKING.md
+> **Tracking System**: Beads (`bd` commands)
+> **Documentation**: ROADMAP.md (strategic planning), VELOCITY-TRACKING.md (historical analysis)
 > **Integration**: Coordinates with product-manager for prioritization
 
 ## Usage Examples
 
 ```bash
-# Create a new feature task (auto-updates PRIORITIES.md)
+# Create a new feature task
 /task new feature "Multi-company financial comparison"
 
 # Create a bug fix task from GitHub issue
-/task new bug --github=408 "Cash flow statement missing values"
-
-# Update task status
-/task update FEAT-001 --status=in_progress
+/task new bug "Cash flow statement missing values" --github=408
 
 # List active tasks
 /task list
 
-# Complete a task (auto-updates VELOCITY-TRACKING.md)
-/task complete FEAT-001
+# Show task details
+/task show edgartools-abc
 
-# Create research task
-/task new research "ETF data availability analysis"
+# Mark task as complete
+/task complete edgartools-abc
+```
 
-# View task details
-/task show FEAT-001
+**Note**: This command is a convenience wrapper around `bd` commands. For direct Beads usage:
+```bash
+bd create --title "Feature: X" --status open --priority P1 --labels feature
+bd list --status open
+bd update ISSUE_ID --status in_progress
+bd update ISSUE_ID --status done
 ```
 
 ## Command Implementation
 
-**Step 1: Parse Command Arguments**
-```bash
-action=$1  # new, update, list, complete, show
-shift
-```
-
-**Step 2: Execute Action**
+This command wraps `bd` (Beads) commands with EdgarTools conventions:
 
 ### Creating New Tasks
 
 ```bash
-if [ "$action" = "new" ]; then
-    task_type=$1
-    task_title="$2"
-    github_issue="" # Extract from --github=XXX if provided
+# Map task type to labels
+case $task_type in
+    feature) labels="feature" ;;
+    bug) labels="bug" ;;
+    research) labels="research" ;;
+    refactor) labels="refactor" ;;
+esac
 
-    # Generate task ID (simple counter-based)
-    !mkdir -p docs-internal/planning/active-tasks
-    task_count=$(ls docs-internal/planning/active-tasks/ | grep "^${task_type^^}" | wc -l)
-    task_id=$(printf "%03d" $((task_count + 1)))
-
-    task_filename="${task_type^^}-${task_id}-$(echo "$task_title" | tr ' ' '-' | tr '[:upper:]' '[:lower:]').md"
-
-    echo "Creating new task: $task_filename"
-
-    # Create task file inline (no template dependency)
-    cat > "docs-internal/planning/active-tasks/$task_filename" <<EOF
-# ${task_type^^}-${task_id}: $task_title
-
-**Status**: pending
-**Priority**: [TBD - run /triage or product-manager for scoring]
-**Estimate**: [XS/S/M/L/XL]
-**Created**: $(date +%Y-%m-%d)
-$([ -n "$github_issue" ] && echo "**GitHub Issue**: #$github_issue")
-
-## Description
-
-[Task description here]
-
-## Acceptance Criteria
-
-- [ ] [Criterion 1]
-- [ ] [Criterion 2]
-
-## Implementation Notes
-
-[Technical notes, dependencies, risks]
-
-## Progress Log
-
-- $(date +%Y-%m-%d): Task created
-EOF
-
-    echo "Task created: $task_filename"
-
-    # Update PRIORITIES.md
-    echo "Updating PRIORITIES.md with new task..."
-    # Add to appropriate section based on task_type
-
-    echo ""
-    echo "✅ Task created and added to PRIORITIES.md"
-    echo ""
-    echo "Next steps:"
-    echo "1. Edit task file to add details: $task_filename"
-    echo "2. Run /triage if from GitHub issue for automatic prioritization"
-    echo "3. Mark status as 'in_progress' when starting work"
+# Create in Beads with external ref if from GitHub
+if [ -n "$github_issue" ]; then
+    bd create --title "$task_type: $task_title" \
+              --status open \
+              --external-ref "gh:$github_issue" \
+              --labels "$labels" \
+              --priority P2
+else
+    bd create --title "$task_type: $task_title" \
+              --status open \
+              --labels "$labels" \
+              --priority P2
 fi
+
+# Optionally create detailed plan markdown file for complex tasks
+# (Only create if task requires architectural planning or multiple steps)
 ```
 
 ### Listing Tasks
 
 ```bash
-if [ "$action" = "list" ]; then
-    echo "=== Active Tasks ==="
-    !ls docs-internal/planning/active-tasks/ | grep -E '\.(md)$' | sort
-    
-    echo ""
-    echo "=== Task Status Summary ==="
-    # Parse status from each task file
-    for task_file in docs-internal/planning/active-tasks/*.md; do
-        if [ -f "$task_file" ]; then
-            task_name=$(basename "$task_file" .md)
-            status=$(grep "^\*\*Status\*\*:" "$task_file" | cut -d' ' -f2- || echo "Unknown")
-            echo "$task_name: $status"
-        fi
-    done
-fi
+# List all open tasks
+bd list --status open
+
+# Or filter by type
+bd list --status open --labels feature
+bd list --status open --labels bug
 ```
 
-### Updating Task Status
+### Showing Task Details
 
 ```bash
-if [ "$action" = "update" ]; then
-    task_id=$1
-    shift
-    
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --status=*)
-                new_status="${1#*=}"
-                echo "Updating $task_id status to: $new_status"
-                # Find and update status in task file
-                task_file=$(find docs-internal/planning/active-tasks/ -name "$task_id-*.md" | head -1)
-                if [ -f "$task_file" ]; then
-                    # Update status line in file
-                    echo "Status updated in $task_file"
-                else
-                    echo "Task file not found for: $task_id"
-                fi
-                shift
-                ;;
-            *)
-                shift
-                ;;
-        esac
-    done
-fi
+# Show specific task
+bd show $task_id
 ```
 
 ### Completing Tasks
 
 ```bash
-if [ "$action" = "complete" ]; then
-    task_id=$1
+# Mark task as done
+bd update $task_id --status done
 
-    echo "Completing task: $task_id"
-
-    # Find task file
-    task_file=$(find docs-internal/planning/active-tasks/ -name "$task_id-*.md" | head -1)
-
-    if [ -f "$task_file" ]; then
-        # Extract task metadata for velocity tracking
-        created_date=$(grep "^\*\*Created\*\*:" "$task_file" | cut -d' ' -f2)
-        estimate=$(grep "^\*\*Estimate\*\*:" "$task_file" | cut -d' ' -f2)
-        completed_date=$(date +%Y-%m-%d)
-
-        # Calculate actual time (simplified - days between dates)
-        # In production, could use git commit history for more accuracy
-
-        # Move to completed directory
-        !mkdir -p docs-internal/planning/completed-tasks/$(date +%Y-%m)
-        !mv "$task_file" "docs-internal/planning/completed-tasks/$(date +%Y-%m)/"
-
-        echo "Task completed and archived to completed-tasks/$(date +%Y-%m)/"
-
-        # Update VELOCITY-TRACKING.md
-        echo ""
-        echo "Updating VELOCITY-TRACKING.md with completion data..."
-        # Add entry to velocity tracking with:
-        # - Task ID and title
-        # - Estimate (size)
-        # - Actual time (calculated or manual)
-        # - Multiplier (calculated)
-        # - Date completed
-
-        # Remove from PRIORITIES.md active/queued sections
-        echo "Removing from PRIORITIES.md active queue..."
-
-        echo ""
-        echo "✅ Task completed and velocity data recorded"
-        echo ""
-        echo "Completion checklist:"
-        echo "- [✓] Task archived to completed-tasks/"
-        echo "- [✓] VELOCITY-TRACKING.md updated"
-        echo "- [✓] PRIORITIES.md updated"
-        echo ""
-        echo "Please verify:"
-        echo "- [ ] All acceptance criteria met"
-        echo "- [ ] Tests passing"
-        echo "- [ ] Documentation updated"
-        echo "- [ ] Code reviewed"
-        echo "- [ ] Related GitHub issues closed"
-    else
-        echo "Task file not found for: $task_id"
-    fi
-fi
+# Record velocity data in VELOCITY-TRACKING.md
+# (Extract from Beads metadata: created date, completed date, estimate)
 ```
 
-### Viewing Task Details
+## Integration with Documentation
 
-```bash
-if [ "$action" = "show" ]; then
-    task_id=$1
-    
-    task_file=$(find docs-internal/planning/active-tasks/ -name "$task_id-*.md" | head -1)
-    
-    if [ -f "$task_file" ]; then
-        echo "=== Task Details: $task_id ==="
-        !head -20 "$task_file"
-        echo ""
-        echo "[Full task file: $task_file]"
-    else
-        echo "Task file not found for: $task_id"
-    fi
-fi
-```
+**Hybrid Approach - Beads for tracking, Markdown for planning:**
 
-## Integration with Living Documents
+### Beads (Issue Tracking):
+- **Creating Tasks**: `bd create` adds to Beads database (fast, scalable)
+- **Tracking Progress**: `bd update` changes status (open → in_progress → done)
+- **Viewing Work**: `bd list --status open` shows current work queue
+- **Linking Issues**: `--external-ref 'gh:XXX'` connects to GitHub
 
-This command automatically maintains:
-
-### When Creating Tasks:
-- **PRIORITIES.md**: Adds task to appropriate section (Critical Bugs / Queued / Backlog)
-- Creates task file in `docs-internal/planning/active-tasks/`
-
-### When Completing Tasks:
-- **VELOCITY-TRACKING.md**: Records actual completion time vs estimate
-- **PRIORITIES.md**: Removes from active/queued sections
-- Archives task to `docs-internal/planning/completed-tasks/YYYY-MM/`
-
-### When Updating Tasks:
-- Maintains task file in `active-tasks/`
-- Status changes reflected in task file
+### Markdown (Strategic Planning):
+- **ROADMAP.md**: Long-term version planning and feature grouping
+- **VELOCITY-TRACKING.md**: Historical velocity analysis and trends
+- **Detailed Plans** (optional): Create `docs-internal/planning/` files for:
+  - Complex architectural decisions
+  - Multi-step implementation plans
+  - Design documentation
+  - Only when task requires comprehensive documentation
 
 ## Integration with Other Commands
 
@@ -261,33 +128,40 @@ This command works seamlessly with:
 
 ## Task Lifecycle
 
-1. **Create** → `/task new feature "Description"` (adds to PRIORITIES.md)
-2. **Prioritize** → Use `/triage` or product-manager for priority scoring
-3. **Plan** → Edit task file with requirements and acceptance criteria
-4. **Start** → `/task update TASK-ID --status=in_progress`
-5. **Develop** → Regular progress updates in task file
-6. **Complete** → `/task complete TASK-ID` (updates VELOCITY-TRACKING.md, PRIORITIES.md)
-7. **Archive** → Automatic move to completed-tasks/YYYY-MM/
+1. **Create** → `/task new feature "Description"` creates Beads issue
+2. **Prioritize** → Use `/triage` or product-manager for priority scoring (updates priority in Beads)
+3. **Plan** → Create detailed markdown plan if complex (optional, architectural decisions only)
+4. **Start** → `bd update ISSUE_ID --status in_progress`
+5. **Develop** → Use `bd update` to track progress milestones
+6. **Complete** → `bd update ISSUE_ID --status done`
+7. **Record** → Update VELOCITY-TRACKING.md with actual vs estimated time
 
 ## Best Practices
 
-- Always use descriptive task titles
-- Request priority scoring for feature tasks (use `/triage` or coordinate with product-manager)
-- Fill out acceptance criteria before starting work
-- Update progress regularly during development
-- Reference task IDs in git commits (e.g., "FEAT-001: Add feature X")
-- Complete task documentation before marking complete
-- Use appropriate task types:
-  - **FEAT**: New features or enhancements
-  - **BUG**: Bug fixes (from GitHub issues)
-  - **RES**: Research or investigation tasks
-  - **REF**: Refactoring or code quality improvements
+**Issue Tracking (Beads):**
+- Use descriptive titles: "Feature: Multi-company comparison" not "New feature"
+- Update status regularly: open → in_progress → done
+- Add labels for categorization: `--labels feature,xbrl-parsing`
+- Link to GitHub: `--external-ref 'gh:XXX'`
+- Set priority: P0 (critical), P1 (high), P2 (medium), P3 (low)
 
-## Living Document Consistency
+**Documentation (Markdown):**
+- Create detailed plans only for complex tasks requiring architecture docs
+- Use ROADMAP.md for version planning and feature grouping
+- Use VELOCITY-TRACKING.md for historical analysis
+- Keep task tracking in Beads, not markdown files
 
-The task system ensures:
-- ✅ All active tasks appear in PRIORITIES.md
-- ✅ Completed tasks contribute to VELOCITY-TRACKING.md
-- ✅ Task priorities align with ROADMAP.md version planning
-- ✅ Critical bugs trigger point release sections (coordinated with /triage)
-- ✅ Feature tasks use priority scoring formula for placement
+**Task Types (Labels):**
+- **feature**: New features or enhancements
+- **bug**: Bug fixes (link with `--external-ref 'gh:XXX'`)
+- **research**: Research or investigation tasks
+- **refactor**: Code quality improvements
+
+## System Benefits
+
+The Beads-first approach provides:
+- ✅ **Fast tracking**: `bd list` is instant, no need to parse growing markdown files
+- ✅ **Scalable**: Handles 100s of issues without performance degradation
+- ✅ **Queryable**: Filter by status, priority, labels with simple commands
+- ✅ **GitHub integration**: External refs link to GitHub issues
+- ✅ **Markdown for docs**: Strategic planning stays in ROADMAP.md and architecture docs

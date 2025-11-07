@@ -37,12 +37,14 @@ I'll analyze the specified GitHub issues following the **Issue-PM Integration Pr
 1. **Issue-Handler Coordination**: Reproduction and initial assessment
 2. **Product-Manager Classification**: Critical vs Normal bug severity
 3. **Release Type Decision**: Point release (4.19.X) vs Minor release (4.20.0)
-4. **Living Document Updates**: Automatic updates to PRIORITIES.md and ROADMAP.md
+4. **Beads Issue Creation**: `bd create --external-ref 'gh:XXX' --priority P0/P1 --labels bug`
+5. **ROADMAP.md Update**: Add to release planning section if needed
 
 ### For Feature Requests:
 1. **Product-Manager Priority Scoring**: Using formula `(User Value × Urgency × Feasibility) / Effort`
 2. **Roadmap Placement**: HIGH (>20), MEDIUM (10-20), LOW (5-10), DEFER (<5)
-3. **Living Document Updates**: Add to queued features in PRIORITIES.md and ROADMAP.md
+3. **Beads Issue Creation**: `bd create --external-ref 'gh:XXX' --priority P1/P2/P3 --labels feature`
+4. **ROADMAP.md Update**: Add to target version section for strategic planning
 
 ### Bug Severity Classification:
 **Critical Bugs** (Point Release 4.19.X - Immediate):
@@ -128,20 +130,20 @@ For each issue, provide:
   - Score < 5: DEFER - Reconsider
   ```
 
-## 2. Living Document Updates
+## 2. Issue Tracking & Documentation
 
 **For CRITICAL Bugs**:
-- Add to "Critical Bugs (Point Release Required)" section in PRIORITIES.md
+- Create Beads issue: `bd create --external-ref 'gh:XXX' --priority P0 --labels bug,critical --status open`
 - Add to "Pending Point Release 4.19.X" section in ROADMAP.md
-- Include: Est time, P0 priority, impact description, timeline
+- Include: Est time, impact description, timeline
 
 **For NORMAL Bugs**:
-- Add to "Normal Bugs (Next Minor Release)" section in PRIORITIES.md
-- Add to v4.20.0 section in ROADMAP.md
+- Create Beads issue: `bd create --external-ref 'gh:XXX' --priority P1 --labels bug --status open`
+- Add to v4.20.0 section in ROADMAP.md if affects release planning
 
 **For Feature Requests**:
-- Add to appropriate priority section in PRIORITIES.md (Queued or Backlog)
-- Add to target version section in ROADMAP.md based on priority score
+- Create Beads issue: `bd create --external-ref 'gh:XXX' --priority P1/P2/P3 --labels feature`
+- Add to target version section in ROADMAP.md based on priority score and strategic planning
 
 ## 3. Coordination Requirements
 
@@ -181,19 +183,29 @@ Provide recommended response for each issue based on classification.
 Context: EdgarTools mission - "Simple yet powerful, accurate financials, beginner-friendly, joyful UX, beautiful output"
 ```
 
-**Step 3: Update Living Documents**
+**Step 3: Create Beads Issue**
 
-After product-manager classification, automatically update the living documents:
+After product-manager classification, create Beads issue for tracking:
 
 ```bash
-# PRIORITIES.md - Add to appropriate bug/feature section
-# ROADMAP.md - Add to target release version section
-# Both files should reflect the PM's classification and timeline
+# Critical bug
+bd create --external-ref 'gh:XXX' --priority P0 --labels bug,critical --status open --title "Bug: Description"
+
+# Normal bug
+bd create --external-ref 'gh:XXX' --priority P1 --labels bug --status open --title "Bug: Description"
+
+# Feature request
+bd create --external-ref 'gh:XXX' --priority P1 --labels feature --status open --title "Feature: Description"
+
+# Update ROADMAP.md if affects release planning
 ```
 
-**Step 4: Task Creation (Optional)**
+**Step 4: Detailed Planning (Optional)**
 
-For issues requiring immediate work, optionally create structured tasks in `docs-internal/planning/active-tasks/`.
+For complex tasks, optionally create detailed markdown plan in `docs-internal/planning/` for:
+- Architectural decisions
+- Multi-step implementation plans
+- Design documentation
 
 **Step 5: GitHub Response**
 
@@ -228,17 +240,27 @@ Decision Tree:
     ├─ Normal Bug → Minor Release 4.20.0 (scheduled)
     └─ Feature Request → Priority scored → Roadmap placement
     ↓
-Living Documents Updated:
-    - PRIORITIES.md
-    - ROADMAP.md
+Beads Issue Created:
+    - bd create --external-ref 'gh:XXX' --priority P0/P1/P2
+    - Fast, scalable tracking
+    ↓
+Documentation Updated (if needed):
+    - ROADMAP.md (strategic planning)
 ```
 
-## Living Documents Maintained
+## Tracking System
 
-This command automatically updates:
-- **`PRIORITIES.md`**: Current work queue with new bugs/features
-- **`ROADMAP.md`**: Version-mapped feature timeline
-- **`ISSUE-PM-INTEGRATION-PROTOCOL.md`**: Referenced for workflow
+This command uses a **hybrid approach**:
+
+**Beads (Issue Tracking)**:
+- **Fast**: `bd list --status open` shows current work instantly
+- **Scalable**: Handles 100s of issues without performance issues
+- **Queryable**: Filter by priority, labels, status
+- **GitHub-linked**: External refs connect to GitHub issues
+
+**Markdown (Strategic Planning)**:
+- **`ROADMAP.md`**: Version-mapped feature timeline and release planning
+- **`ISSUE-PM-INTEGRATION-PROTOCOL.md`**: Workflow documentation
 
 ## Success Metrics
 

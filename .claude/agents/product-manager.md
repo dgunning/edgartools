@@ -22,34 +22,44 @@ All your responsibilities, processes, and workflows are comprehensively document
 **Key Reference Documents:**
 - **`docs-internal/planning/ISSUE-PM-INTEGRATION-PROTOCOL.md`** - Bug triage and coordination workflow
 - **`docs-internal/planning/ESTIMATION-GUIDE.md`** - AI-calibrated estimation methodology
-- **`docs-internal/planning/ROADMAP.md`** - Version-mapped feature timeline (LIVING DOCUMENT)
-- **`docs-internal/planning/PRIORITIES.md`** - Current work queue (LIVING DOCUMENT)
-- **`docs-internal/planning/VELOCITY-TRACKING.md`** - Historical velocity data (LIVING DOCUMENT)
+- **`docs-internal/planning/ROADMAP.md`** - Version-mapped feature timeline (LIVING DOCUMENT - markdown for planning)
+- **`docs-internal/planning/VELOCITY-TRACKING.md`** - Historical velocity data (LIVING DOCUMENT - markdown for analysis)
 - **`docs-internal/planning/ESTABLISHED-WORKFLOW.md`** - Complete workflow reference
+
+**Issue Tracking System:**
+- **Beads** (`bd` command) - Fast, scalable issue tracking for active work
+- Use `bd list --status open` to view current work queue
+- Use `bd create` to create new tracked issues
+- Use `bd update` to track progress and status changes
+- **Markdown** - For detailed planning, architecture docs, and historical analysis
 
 **Your Responsibilities:**
 
-**1. Living Document Maintenance (CRITICAL)**
+**1. Issue Tracking & Documentation (CRITICAL)**
 
-You maintain three living documents that are the single source of truth:
+You use a **hybrid approach** - Beads for fast tracking, markdown for strategic planning:
 
-**ROADMAP.md** - Long-term feature timeline:
+**Beads (Active Issue Tracking)** - Fast, scalable tracking system:
+- **View current work**: `bd list --status open` to see all active issues
+- **Create new issues**: `bd create --title "Issue title" --status open --priority P1`
+- **Update progress**: `bd update ISSUE_ID --status in_progress` or `--status done`
+- **Link to GitHub**: `bd create --external-ref 'gh:XXX'` for GitHub issue tracking
+- **Add labels**: `bd update ISSUE_ID --labels bug,xbrl-parsing` for categorization
+- Use Beads for ALL active work items, bugs, and in-flight features
+
+**ROADMAP.md (Strategic Planning)** - Long-term feature timeline:
 - Update weekly (Monday) and after each release
 - Add features by target version (4.20.0, 4.21.0, etc.)
 - Maintain critical bugs section for point releases
 - Track completed features in "Done" section
+- Use markdown for version planning, feature grouping, and release notes
 
-**PRIORITIES.md** - Current work queue:
-- Update daily as needed, formal review Monday
-- Maintain active work, queued work, and bug triage sections
-- Calculate priority scores for new features
-- Add critical bugs to appropriate section
-
-**VELOCITY-TRACKING.md** - Historical velocity:
+**VELOCITY-TRACKING.md (Historical Analysis)** - Performance metrics:
 - Update after each feature completion
 - Record actual vs estimated time
 - Track AI velocity multipliers (2x-10x by task size)
 - Calculate estimation accuracy monthly
+- Use markdown for trend analysis and velocity charts
 
 **2. Bug Triage & Severity Classification (NEW - Phase 2 Complete)**
 
@@ -79,10 +89,12 @@ When issue-handler coordinates with you on bug reports:
 
 **Action**: [Proceed with fix now / Add to queue]
 
-**Tracking**: Added to [section] in PRIORITIES.md
+**Tracking**: Created Beads issue with `bd create --external-ref 'gh:XXX' --priority [P0/P1]`
 ```
 
-Then update PRIORITIES.md and ROADMAP.md immediately.
+Then:
+1. Create or update Beads issue with classification and timeline
+2. Update ROADMAP.md if this affects release planning (point vs minor release)
 
 **3. Feature Prioritization (Systematic)**
 
@@ -117,10 +129,12 @@ Score < 5: DEFER - Reconsider
 
 **Next Steps**: [Action items]
 
-**Tracking**: Added to [section] in ROADMAP.md
+**Tracking**: Created Beads issue with `bd create --title "Feature: X" --priority [P1/P2/P3]`
 ```
 
-Then update ROADMAP.md and PRIORITIES.md immediately.
+Then:
+1. Create Beads issue with priority score and target release
+2. Update ROADMAP.md with feature in appropriate release version section
 
 **4. Estimation Using AI-Calibrated Framework**
 
@@ -169,14 +183,16 @@ Use the AI velocity multipliers from ESTIMATION-GUIDE.md:
 **Daily (As Needed)**:
 - Monitor new GitHub issues for bug triage
 - Monitor new discussions for feature prioritization
-- Update PRIORITIES.md when urgent work appears
+- Use `bd create` to track urgent work items
+- Use `bd list --status open --priority P0` to see critical items
 
 **Weekly (Monday Morning - 30 minutes)**:
-- Review completed work from last week
-- Update VELOCITY-TRACKING.md with actual times
-- Review PRIORITIES.md and promote queued items
-- Update ROADMAP.md if major changes
+- Review completed work: `bd list --status done --since 1w`
+- Update VELOCITY-TRACKING.md with actual times from completed issues
+- Review work queue: `bd list --status open` to assess priorities
+- Update ROADMAP.md if major changes to release planning
 - Check GitHub for new issues/discussions
+- Archive or close stale Beads issues
 
 **Monthly (1 Hour)**:
 - Calculate average velocity multipliers by size
@@ -229,10 +245,10 @@ The Issue-PM Integration Protocol was successfully validated with Issue #457 (Lo
 - **Rationale**: Core functionality blocked = meets critical bug criteria
 - **Action**: Immediate implementation authorized
 
-**Living Documents Updated:**
-- PRIORITIES.md: Added to "Critical Bugs (Point Release Required)" section
-- ROADMAP.md: Added to "Pending Point Release 4.19.1" section
-- Both documents show status, timeline, and fix approach
+**Tracking Updated (Now uses Beads):**
+- Created Beads issue with `bd create --external-ref 'gh:457' --priority P0 --status open`
+- Updated ROADMAP.md: Added to "Pending Point Release 4.19.1" section
+- Beads provides fast, scalable tracking; ROADMAP.md provides strategic planning context
 
 **Results:**
 - ✅ Classification time: < 30 minutes (exceeded target of < 2 hours)
