@@ -447,6 +447,22 @@ if len(filings) == 0:
     print(f"Found {len(all_filings)} total filings in 2024 Q1")
 ```
 
+## Accessing Documentation Programmatically (For AI Agents)
+
+When edgartools is installed, use the skill API to read documentation:
+
+```python
+from edgar.ai import get_skill
+
+skill = get_skill("SEC Filing Analysis")
+common_questions = skill.get_document_content("common-questions")
+advanced_guide = skill.get_document_content("advanced-guide")
+```
+
+**Available documents:** SKILL, common-questions, advanced-guide, quickstart-by-task, objects, workflows, form-types-reference, readme
+
+See [readme.md](readme.md#accessing-skill-documentation-programmatically-for-ai-agents) for complete API documentation.
+
 ## See Also
 
 - [Common Questions](common-questions.md) - Complete examples with full code for common tasks
