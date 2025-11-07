@@ -1,0 +1,195 @@
+================================================================================
+ATLANTA BRAVES (BATRB) RESEARCH
+================================================================================
+
+Step 1: Getting Company Information...
+--------------------------------------------------------------------------------
+
+Company Name: Atlanta Braves Holdings, Inc.
+Ticker: ['BATRA', 'BATRK', 'BATRB']
+CIK: 1958140
+SIC: 7900
+Industry: Services-Amusement & Recreation Services
+Fiscal Year End: 1231
+
+
+Step 2: Getting Recent Filings...
+--------------------------------------------------------------------------------
+
+Found 41 total filings
+
+Most Recent 10 Filings:
+╭──────────── Filings for Atlanta Braves Holdings, Inc. [1958140] ─────────────╮
+│                                                                              │
+│                                                            …   Accession     │
+│       Description                                          …   Number        │
+│  ──────────────────────────────────────────────────────────────────────────  │
+│       Quarterly report for public companies                …   0001104659…   │
+│       Current report                                       …   0001104659…   │
+│       Quarterly report for public companies                …   0001558370…   │
+│       Current report                                       …   0001558370…   │
+│       Current report                                       …   0001958140…   │
+│       Current report                                       …   0001558370…   │
+│       Current report                                       …   0001958140…   │
+│       Quarterly report for public companies                …   0001558370…   │
+│       Current report                                       …   0001558370…   │
+│       Current report                                       …   0001958140…   │
+│                                                                              │
+╰─ Company filings between 2025-04-02 and 2025-11-05 • filings.docs for usage ─╯
+
+
+
+Step 3: Analyzing Latest 10-K Filing...
+--------------------------------------------------------------------------------
+
+Latest 10-K:
+  Filing Date: 2025-03-03
+  Period: 2024-12-31
+  Accession Number: 0001558370-25-002009
+
+
+Step 4: Extracting Financial Statements...
+--------------------------------------------------------------------------------
+
+✓ XBRL data available
+
+✓ Income Statement extracted
+                                                      Consolidated Statement of Income                                                       
+                                                                 Year Ended                                                                  
+                                              (In thousands, except shares and per share data)                                               
+                                                                                                                                             
+                                                                                                 Dec 31, 2024   Dec 31, 2023   Dec 31, 2022  
+ ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+  CONSOLIDATED STATEMENTS OF OPERATIONS                                                                                                      
+    Condensed Consolidated Statements of Operations (unaudited)                                                                              
+      Revenue:                                                                                                                               
+          Contract Revenue:                                                                          $662,748       $640,667       $588,561  
+            Other                                                                                     $33,657        $29,709        $34,643  
+            Broadcasting                                                                             $166,094       $160,944       $154,185  
+            Baseball Event                                                                           $347,925       $339,485       $298,364  
+            Baseball                                                                                 $595,430       $581,671       $534,984  
+            Retail and Licensing                                                                      $47,754        $51,533        $47,792  
+            Mixed-Use Development                                                                     $67,318        $58,996        $53,577  
+      Operating costs and expenses:                                                                                                          
+          Cost of Goods and Services Excluding Depreciation:                                                                                 
+            Mixed-Use Development                                                                      $9,762         $8,834         $8,674  
+            Baseball                                                                                 $504,146       $482,391       $427,832  
+            Operating Segments - Mixed-Use Development                                                 $9,762         $8,834         $8,674  
+            Operating Segments - Baseball                                                            $504,146       $482,391       $427,832  
+          Selling, General and Administrative Expense                                                $125,676       $124,902       $105,512  
+          Impairment of long-lived assets and other related costs, net of insurance recoveries                                       $5,427  
+          Depreciation and Amortization                                                               $62,829        $70,980        $71,697  
+          Operating Expenses                                                                         $702,413       $687,107       $619,142  
+        Operating Income                                                                            $(39,665)      $(46,440)      $(30,581)  
+      Other income (expense):                                                                                                                
+          Interest Expense (non-operating)                                                          $(38,789)      $(37,673)      $(29,582)  
+          Share of earnings (losses) of affiliates, net (note 5):                                     $30,460        $26,985        $28,927  
+            Other                                                                                      $5,298         $5,124         $6,469  
+            MLBAM                                                                                     $20,015        $19,747        $24,386  
+            BELP                                                                                       $5,147         $2,114       $(1,928)  
+          Realized and unrealized gains (losses) on intergroup interests, net                                      $(83,178)      $(35,154)  
+          Realized and unrealized gains (losses) on financial instruments, net                         $3,424         $2,343        $13,067  
+          Gains (losses) on dispositions, net (note 1)                                                                $2,309        $20,132  
+          Other, net                                                                                   $8,629         $6,496         $1,674  
+        Income Before Tax from Continuing Operations:                                                (35,941)      (129,158)       (31,517)  
+          Significant Subsidiary                                                                     $774,862       $651,568       $729,472  
+        Income Tax Expense                                                                             $4,673         $3,864       $(2,655)  
+        Profit or Loss                                                                              $(31,268)     $(125,294)      $(34,172)  
+        Net Income:                                                                                 $(31,268)     $(125,294)      $(34,172)  
+          Retained earnings (deficit)                                                               $(31,268)     $(125,294)      $(34,172)  
+          Significant Subsidiary                                                                     $764,330       $642,333       $722,292  
+        Earnings Per Share (Basic)                                                                      -0.50          -2.03          -0.55  
+        Earnings Per Share (Diluted)                                                                    -0.50          -2.03          -0.55  
+                                                                                                                                             
+                           ATLANTA BRAVES HOLDINGS, INC. • Period ending 2024-12-31 • Fiscal FY • Source: SEC XBRL                           
+
+
+✓ Balance Sheet extracted
+                                                             Consolidated Balance Sheets                                                              
+                                                    As of December 31, 2024 and December 31, 2023                                                     
+                                                   (In thousands, except shares and per share data)                                                   
+                                                                                                                                                      
+                                                                                                                         Dec 31, 2024   Dec 31, 2023  
+ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+  CONSOLIDATED BALANCE SHEETS                                                                                                                         
+      Assets                                                                                                                                          
+        Current assets:                                                                                                                               
+            Cash and Cash Equivalents                                                                                        $110,144       $125,148  
+            Restricted cash                                                                                                    $2,455        $12,569  
+            Accounts receivable and contract assets, net of allowance for credit losses of $238 and $332, respectively        $49,991        $62,922  
+            Other Current Assets                                                                                              $16,556        $17,380  
+            Total Current Assets                                                                                             $179,146       $218,019  
+          Property, Plant and Equipment                                                                                    $1,161,803     $1,091,943  
+          Accumulated depreciation                                                                                           $354,318       $325,196  
+          Property, Plant and Equipment                                                                                      $807,485       $766,747  
+          Investments in affiliates, accounted for using the equity method (note 5)                                          $108,786        $99,213  
+        Intangible assets not subject to amortization:                                                                                                
+            Goodwill                                                                                                         $175,764       $175,764  
+            Franchise rights                                                                                                 $123,703       $123,703  
+            Intangible assets, Total                                                                                         $299,467       $299,467  
+          Other Non Current Assets                                                                                           $128,962       $120,884  
+          Total Assets                                                                                                     $1,523,846     $1,504,330  
+      Liabilities and Equity                                                                                                                          
+        Current liabilities:                                                                                                                          
+            Accounts payable and accrued liabilities                                                                          $63,711        $73,096  
+            Deferred revenue and refundable tickets                                                                          $111,851       $111,985  
+            Short Term Debt                                                                                                  $104,193        $42,153  
+            Other Current Liabilities                                                                                          $6,905         $6,439  
+            Total Current Liabilities                                                                                        $286,660       $233,673  
+          Long Term Debt                                                                                                     $512,927       $527,116  
+          Finance lease liabilities (note 7)                                                                                 $103,845       $103,586  
+          Deferred income tax liabilities (note 9)                                                                            $43,516        $50,415  
+          Pension liability (note 8)                                                                                           $6,558        $15,222  
+          Other Non Current Liabilities                                                                                       $34,116        $33,676  
+          Total Liabilities                                                                                                  $987,622       $963,688  
+        Equity:                                                                                                                                       
+            Preferred Stock                                                                                                                           
+            Common Stock                                                                                                         $103           $103  
+            Additional paid-in capital                                                                                     $1,112,551     $1,089,625  
+            Accumulated Other Comprehensive Income/Loss                                                                      $(3,352)       $(7,271)  
+            Retained Earnings                                                                                              $(585,644)     $(554,376)  
+            Total Stockholders' Equity                                                                                       $524,179       $528,597  
+            Minority Interest                                                                                                 $12,045        $12,045  
+            Total Stockholders' Equity                                                                                       $536,224       $540,642  
+          Commitments and contingencies (note 13)                                                                                                     
+          Total Liabilities and Stockholders' Equity                                                                       $1,523,846     $1,504,330  
+                                                                                                                                                      
+                               ATLANTA BRAVES HOLDINGS, INC. • Period ending 2024-12-31 • Fiscal FY • Source: SEC XBRL                                
+
+
+✗ Cash Flow error: 'Statements' object has no attribute 'cash_flow_statement'
+
+
+Step 5: Multi-Period Financial Analysis...
+--------------------------------------------------------------------------------
+
+✓ Multi-period Income Statement (3 fiscal years):
+╭─────────────────────── ATLANTA BRAVES HOLDINGS, INC. ────────────────────────╮
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                      FY 2024        FY 2023        FY 2023   │
+│  ──────────────────────────────────────────────────────────────────────────  │
+│   Income Statement [Abstract]                                                │
+│     Total Revenue               $662,748,000   $588,561,000   $588,561,000   │
+│     Operating Income (Loss)     $-39,665,000   $-30,581,000   $-30,581,000   │
+│     Net Income (Loss)           $-31,268,000   $-34,172,000   $-34,172,000   │
+│   Attributable to Parent                                                     │
+│     Earnings Per Share, Basic          -0.50          -0.55          -0.55   │
+│     Earnings Per Share,                -0.50          -0.55          -0.55   │
+│   Diluted                                                                    │
+│     Income Tax Expense           $-4,673,000     $2,655,000     $2,655,000   │
+│   (Benefit)                                                                  │
+│     Income (Loss) from          $-35,941,000   $-31,517,000   $-31,517,000   │
+│   Continuing Operations                                                      │
+│   before Income Taxes,                                                       │
+│   Noncontrolling Interest ◦                                                  │
+│   Additional Financial Items                                                 │
+│     Operating Expenses          $702,413,000   $619,142,000   $619,142,000   │
+│                                                                              │
+╰─────────────────── Income Statement • FY 2023 to FY 2024 ────────────────────╯
+
+
+================================================================================
+RESEARCH COMPLETE
+================================================================================

@@ -1,60 +1,103 @@
 # EdgarTools AI
 
-AI and LLM integration for SEC financial data analysis.
+**Two parallel pathways for AI agents to access SEC EDGAR filing data.**
+
+## Overview
+
+`edgar.ai` provides AI-optimized integration for SEC financial data analysis through two approaches:
+
+1. **Skills + Code Execution** (Recommended) - Learn patterns, write Python code, execute directly
+2. **MCP Server** (Alternative) - Structured tool calling for parameter validation
+
+Both integrate directly with the EdgarTools API - choose based on your workflow needs.
 
 ## Installation
 
-The AI features are optional. Install them with:
-
 ```bash
-# Basic AI features
+# Install AI features
 pip install edgartools[ai]
 
-# For development (includes mocking and testing tools)
+# For development
 pip install -e ".[ai,ai-dev]"
 ```
 
-## Features
+---
 
-### 1. LLM Context Generation
+## Integration Path 1: Skills + Code Execution (Primary)
 
-Enhanced context generation for financial facts and entities:
+**Best for:** Complex workflows, learning EdgarTools patterns, maximum performance
+
+### What Are Skills?
+
+Skills are AI-consumable documentation packages that teach agents how to use EdgarTools:
+- Progressive disclosure (4-tier documentation hierarchy)
+- Direct Python code execution (zero protocol overhead)
+- Full composability (variables, chaining, reusable objects)
+- Context-Oriented Programming (COP) aligned
+
+### Installation
+
+**Export to Claude Desktop:**
+```python
+from edgar.ai.skills import edgartools_skill
+
+# Install to ~/.claude/skills/edgartools/
+edgartools_skill.export(format="claude-skills")
+
+# Or create portable ZIP
+edgartools_skill.export(format="claude-desktop", create_zip=True)
+```
+
+**Manual Installation:**
+```bash
+# Copy skill directory
+cp -r edgar/ai/skills/core ~/.claude/skills/edgartools/
+
+# Restart Claude Desktop - skill automatically discovered
+```
+
+### Usage Example
+
+Once installed, agents can read documentation and write code:
 
 ```python
 from edgar import Company
-from edgar.ai import enhance_financial_fact_llm_context
 
-# Get company financials
+# Agent learns from SKILL.md and writes code
 company = Company("AAPL")
-filing = company.latest("10-K")
-xbrl = filing.xbrl()
+income = company.income_statement(periods=3)
+balance = company.balance_sheet(periods=3)
 
-# Get a financial fact
-revenue_fact = xbrl.facts.get("Revenue")
-
-# Generate LLM-optimized context
-context = enhance_financial_fact_llm_context(
-    revenue_fact,
-    detail_level='detailed',  # minimal, standard, or detailed
-    max_tokens=500           # Optional token limit
-)
+print(f"Revenue trend: {income}")
+print(f"Assets: {balance}")
 ```
 
-### 2. Model Context Protocol (MCP) Server
+**See:** `edgar/ai/skills/core/` for complete skill documentation
 
-Run EdgarTools as an MCP server for AI agents:
+---
+
+## Integration Path 2: MCP Server (Specialized for Complex Workflows)
+
+**Best for:** Batch processing, automated pipelines, workflow orchestration (10% of users)
+
+### What is MCP?
+
+Model Context Protocol server that exposes EdgarTools as structured tools for complex workflows:
+- Batch processing across 100+ companies
+- Automated filing monitoring pipelines
+- Scheduled report generation
+- Workflow orchestration (n8n, Zapier, Make)
+- Production data pipelines
+- Parameter validation via JSON schemas
+
+### Running the Server
 
 ```bash
-# Using Python module (recommended)
 python -m edgar.ai
-
-# Using console script (after pip install)
-edgartools-mcp
+# Or: edgartools-mcp (after pip install)
 ```
 
-**Quick Setup:** See [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md) for complete setup instructions.
-
-#### Client Configuration Examples
+### Configuration
 
 **Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 ```json
@@ -86,21 +129,46 @@ edgartools-mcp
 }
 ```
 
-**Note:** The `EDGAR_IDENTITY` environment variable is required by the SEC for API requests.
+**Note:** `EDGAR_IDENTITY` is required by SEC for API requests.
 
-After configuration, restart your MCP client and try:
-- *"Research Apple Inc with financials"*
-- *"Analyze Tesla's financial performance over the last 4 quarters"*
-- *"Get Microsoft's latest income statement trends"*
+### Available Tools
 
-### 3. Semantic Enrichment
+- **edgar_company_research**: Company profile + financials + recent filings
+- **edgar_analyze_financials**: Multi-period financial statement analysis
+- **edgar_industry_overview**: Industry sector analysis
+- **edgar_compare_industry_companies**: Compare companies in sector
 
-Add business context and interpretations to financial data:
+**See:** [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md) for details
+
+### When to Use MCP vs Skills
+
+| Use Case | Recommended Approach |
+|----------|---------------------|
+| **Interactive analysis** | Skills + Code (PRIMARY) |
+| **Learning EdgarTools patterns** | Skills + Code (PRIMARY) |
+| **Ad-hoc research** | Skills + Code (PRIMARY) |
+| **Single-company deep dives** | Skills + Code (PRIMARY) |
+| **Batch processing 100+ companies** | MCP Tools (SPECIALIZED) |
+| **Automated pipelines** | MCP Tools (SPECIALIZED) |
+| **Scheduled reports** | MCP Tools (SPECIALIZED) |
+| **Workflow orchestration** | MCP Tools (SPECIALIZED) |
+
+**Recommendation:** Start with Skills only. Add MCP only if you need workflow automation.
+
+---
+
+## Core AI Infrastructure (Shared)
+
+Both integration paths use these shared components:
+
+### 1. Semantic Enrichment
+
+Add business context to financial data:
 
 ```python
 from edgar.ai import SemanticEnricher
 
-# Get concept definition
+# Get concept definitions
 definition = SemanticEnricher.get_concept_definition("Revenue")
 # "Total income generated from normal business operations"
 
@@ -115,68 +183,70 @@ interpretation = SemanticEnricher.interpret_value(
 # "The company is a billion-dollar business based on revenue"
 ```
 
-### 4. Token Optimization
+### 2. Token Optimization
 
 Optimize content for LLM context windows:
 
 ```python
 from edgar.ai import TokenOptimizer
 
-# Estimate tokens
+# Estimate tokens (~4 chars per token)
 tokens = TokenOptimizer.estimate_tokens(content)
 
 # Optimize for token limit
 optimized = TokenOptimizer.optimize_for_tokens(
-    content, 
-    max_tokens=1000
+    content, max_tokens=1000
 )
 ```
 
-## Available MCP Tools
+### 3. Helper Functions
 
-When running as an MCP server, the following tools are available:
+Convenience wrappers with clear parameter names:
 
-- **edgar_company_research**: Get comprehensive company intelligence including profile, financial trends, and recent filing activity. Returns overview with 3-year financial data and last 5 filings.
-- **edgar_analyze_financials**: Detailed financial statement analysis across multiple periods. Supports income statement, balance sheet, and cash flow analysis with annual or quarterly periods.
+```python
+from edgar.ai.helpers import (
+    get_filings_by_period,
+    get_revenue_trend,
+    compare_companies_revenue
+)
 
-For detailed tool documentation, see the [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md).
+# Get Q1 2023 10-K filings
+filings = get_filings_by_period(2023, 1, form="10-K")
 
-## Examples
+# Get revenue trend (3 fiscal years)
+income = get_revenue_trend("AAPL", periods=3)
 
-See the `examples/` directory for complete examples:
+# Compare multiple companies
+comparison = compare_companies_revenue(["AAPL", "MSFT", "GOOGL"], periods=3)
+```
 
-- `basic_usage.py`: Demonstrates all AI features
-- More examples coming soon...
-
-## Architecture
-
-The AI package is organized as follows:
+## Package Structure
 
 ```
 edgar/ai/
-├── __init__.py          # Package initialization and capability detection
-├── __main__.py          # Entry point: python -m edgar.ai
-├── core.py              # Core AI functionality (AIEnabled, TokenOptimizer, etc.)
-├── formats.py           # Format utilities
-├── helpers.py           # Helper functions for SEC analysis workflows
-│
-├── mcp/                 # Model Context Protocol implementation
-│   ├── __init__.py      # MCP package exports (main, test_server)
-│   ├── server.py        # MCP server (production)
-│   ├── tools/           # Workflow-oriented tool handlers
-│   │   ├── company_research.py     # Company intelligence tool
-│   │   ├── financial_analysis.py   # Financial analysis tool
-│   │   └── utils.py                # Tool utilities
-│   └── docs/            # MCP documentation
-│       └── MCP_QUICKSTART.md
-│
-├── skills/              # AI Skills infrastructure
+├── skills/              # Skills (Primary Integration)
 │   ├── base.py          # BaseSkill abstract class
 │   └── core/            # EdgarTools skill
+│       ├── SKILL.md                  # Main documentation
+│       ├── quickstart-by-task.md     # Quick routing
+│       ├── workflows.md              # End-to-end examples
+│       ├── objects.md                # Object reference
+│       ├── data-objects.md           # Form-specific objects
+│       └── form-types-reference.md   # 311 SEC forms
 │
-├── exporters/           # Export capabilities
-│   ├── claude_desktop.py    # Portable format exporter
-│   └── claude_skills.py     # Official Claude Skills format exporter
+├── mcp/                 # MCP Server (Alternative Integration)
+│   ├── server.py        # MCP server implementation
+│   ├── tools/           # Tool handlers (all call EdgarTools directly)
+│   └── docs/            # MCP documentation
+│
+├── core.py              # Shared AI infrastructure
+│                        # - TokenOptimizer, SemanticEnricher
+│                        # - AIEnabled base class
+├── helpers.py           # Convenience wrappers
+│                        # - get_revenue_trend(), compare_companies_revenue()
+├── exporters/           # Skill export formats
+│   ├── claude_skills.py     # ~/.claude/skills/ format
+│   └── claude_desktop.py    # Portable ZIP format
 │
 └── examples/            # Usage examples
     └── basic_usage.py
@@ -209,16 +279,48 @@ To contribute to the AI features:
    print(check_ai_capabilities())
    ```
 
-## Future Enhancements
-
-- Streaming support for real-time updates
-- Multi-agent collaboration
-- Advanced prompt templates
-- Vector embeddings for semantic search
-- Fine-tuned models for SEC data
-
 ## Documentation
 
-For more detailed documentation, see:
-- [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md) - Get started in 5 minutes
-- [MCP Implementation Review](MCP_IMPLEMENTATION_REVIEW.md) - Architecture analysis and migration details
+**For Architects & Decision-Makers:**
+- [ARCHITECTURE.md](ARCHITECTURE.md) - High-level technical overview, parallel pathways explained
+- [CONTEXT_ORIENTED_ANALYSIS.md](CONTEXT_ORIENTED_ANALYSIS.md) - COP principles analysis, why Skills-first
+
+**For Developers:**
+- [Skills Documentation](skills/core/) - Complete skill package (SKILL.md, workflows.md, etc.)
+- [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md) - MCP server setup in 5 minutes
+- [examples/basic_usage.py](examples/basic_usage.py) - Code examples for all features
+
+**For AI Agents:**
+- Install Skills to `~/.claude/skills/edgartools/` - agents learn patterns automatically
+
+## Key Concepts
+
+### Skills-First Architecture
+
+edgar.ai follows Context-Oriented Programming (COP) principles:
+- **Progressive Disclosure**: 4-tier documentation (30s → 5min → detailed → comprehensive)
+- **Context as Resource**: Token budgets, optimization, estimates for all operations
+- **Direct API Access**: Both Skills and MCP call EdgarTools directly (zero abstraction)
+- **Understanding as Primitive**: Documentation teaches patterns, not just syntax
+
+### Why Skills > MCP?
+
+- **Zero Protocol Overhead**: Direct Python code execution vs JSON-RPC
+- **Full Composability**: Variables, chaining, loops in single code block
+- **Better Learning**: Agents understand patterns, not just tool schemas
+- **Simpler Maintenance**: Documentation only vs server + handlers + schemas
+
+MCP remains available for clients that prefer tool calling or need parameter validation.
+
+## Future Enhancements
+
+**Short-term:**
+- Usage metrics (Skills vs MCP adoption)
+- Code-first API (Python API alongside MCP tools)
+- Resource-based state management (MCP resources for workflow continuity)
+
+**Long-term:**
+- Skill composition framework (combine multiple domain skills)
+- Temporal locality (skill activation/deactivation based on relevance)
+- Vector embeddings for semantic search
+- Multi-agent collaboration patterns

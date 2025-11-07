@@ -61,6 +61,6 @@ https://github.com/dgunning/edgartools
 
 ## See Also
 
-- **examples/** - Python scripts for quick reference
-- **docs/** - Full documentation
+- **[../scripts/](../scripts/)** - Python scripts for quick reference
+- **[../../docs/](../../docs/)** - Full documentation
 - [EdgarTools Documentation](https://edgartools.readthedocs.io/)

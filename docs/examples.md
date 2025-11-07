@@ -4,21 +4,23 @@ This document showcases common workflows and tasks that financial professionals,
 
 ## Example Resources
 
+All examples are in the [`examples/`](../examples/) directory:
+
 ### 📓 Interactive Notebooks
-Explore **28 Jupyter notebooks** organized by topic in the [`notebooks/`](../notebooks/) directory:
-- **[Beginner](../notebooks/beginner/)** - Getting started guides
-- **[XBRL](../notebooks/xbrl/)** - Financial statement analysis (18 notebooks)
-- **[Filings](../notebooks/filings/)** - Working with SEC filings
-- **[Funds](../notebooks/funds/)** - Investment fund analysis
-- **[Insiders](../notebooks/insiders/)** - Insider trading data
-- **[See all notebooks](../notebooks/README.md)**
+Explore **28 Jupyter notebooks** organized by topic in [`examples/notebooks/`](../examples/notebooks/):
+- **[Beginner](../examples/notebooks/beginner/)** - Getting started guides
+- **[XBRL](../examples/notebooks/xbrl/)** - Financial statement analysis (18 notebooks)
+- **[Filings](../examples/notebooks/filings/)** - Working with SEC filings
+- **[Funds](../examples/notebooks/funds/)** - Investment fund analysis
+- **[Insiders](../examples/notebooks/insiders/)** - Insider trading data
+- **[See all notebooks](../examples/notebooks/README.md)**
 
 ### 💻 Python Scripts
-Browse **8 ready-to-use Python scripts** in the [`examples/`](../examples/) directory:
-- **[Basic](../examples/basic/)** - Simple examples for common tasks
-- **[Advanced](../examples/advanced/)** - Complex use cases
-- **[AI Integration](../examples/ai/)** - AI/LLM workflows
-- **[See all examples](../examples/README.md)**
+Browse **8 ready-to-use Python scripts** in [`examples/scripts/`](../examples/scripts/):
+- **[Basic](../examples/scripts/basic/)** - Simple examples for common tasks
+- **[Advanced](../examples/scripts/advanced/)** - Complex use cases
+- **[AI Integration](../examples/scripts/ai/)** - AI/LLM workflows
+- **[See all scripts](../examples/README.md)**
 
 ---
 
