@@ -1,7 +1,5 @@
 # EdgarTools - Agent Navigation Guide
 
-
-
 **edgartools** is a Python library for SEC Edgar filings analysis.
 
 ## Quick Links to Documentation
@@ -23,13 +21,38 @@
 
 ### Beads Commands
 
+**Common Commands:**
 ```bash
-bd list --status open              # View work queue
-bd list --status open --priority P0  # Critical items
-bd create --title "Bug: X" -p P1 -l bug --external-ref 'gh:123'
-bd update ISSUE_ID --status in_progress
-bd update ISSUE_ID --status done
+# List and filter issues
+bd list --status open                    # View open work items
+bd list --status open --priority 0       # Critical items (0-4 or P0-P4)
+bd list --status open -l bug             # Filter by label (use -l or --label, singular)
+bd list --status in_progress             # Currently active work
+bd list -t bug -p 1                      # High priority bugs
+
+# Create issues
+bd create --title "Bug: Description" \
+          --type bug \
+          --priority P1 \
+          --label bug,xbrl-parsing \
+          --external-ref 'gh:123' \
+          --description "Detailed description"
+
+# Update issues
+bd update ISSUE_ID --status in_progress  # Valid: open, in_progress, blocked, closed
+bd update ISSUE_ID --priority P0         # Change priority (0-4 or P0-P4)
+bd update ISSUE_ID --notes "Progress note"  # Add notes (NOT --add-comment)
+bd update ISSUE_ID --assignee "username"
+
+# Show details
+bd show ISSUE_ID                         # View full issue details
 ```
+
+**Valid Status Values**: `open`, `in_progress`, `blocked`, `closed` (NOT "done")
+
+**Valid Priority Values**: 0-4 or P0-P4 (0/P0 = critical, 1/P1 = high, 2/P2 = medium, 3/P3 = low, 4/P4 = backlog)
+
+**Valid Types**: `bug`, `feature`, `task`, `epic`, `chore`
 
 **Use Beads for**: Active work tracking, GitHub issue linking, status updates, priority filtering.
 
