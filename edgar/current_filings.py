@@ -159,6 +159,16 @@ class CurrentFilings(Filings):
         self.owner = owner
         self.form = form
 
+    @property
+    def current_page(self) -> int:
+        """
+        Calculate the current page number (1-indexed).
+
+        Returns:
+            int: The current page number
+        """
+        return ((self._start - 1) // self._page_size) + 1
+
     def next(self):
         # If the number of entries is less than the page size then we are at the end of the data
         if len(self.data) < self._page_size:
