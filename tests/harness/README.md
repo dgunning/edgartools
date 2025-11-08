@@ -16,11 +16,13 @@ The Edgar Test Harness provides a systematic way to test EdgarTools against real
 
 ### Installation
 
-The test harness is included with EdgarTools. Ensure you have the package installed:
+The test harness requires the optional `test-harness` dependency group:
 
 ```bash
-pip install edgartools
+pip install edgartools[test-harness]
 ```
+
+This installs the `edgar-test` CLI command along with the required dependencies.
 
 ### Basic Usage
 

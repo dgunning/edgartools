@@ -45,7 +45,6 @@ dependencies = [
   "jinja2>=3.1.0",
   "hishel==0.1.3",
   "httpxthrottlecache>=0.1.6",
-  "click>=8.0.0",
 ]
 dynamic = ["version"]
 
@@ -62,6 +61,10 @@ ai-dev = [
 
 data = [
     "duckdb>=1.0.0",            # SQL interface for company datasets
+]
+
+test-harness = [
+    "click>=8.0.0",              # CLI interface for test harness
 ]
 
 [project.urls]
