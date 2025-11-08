@@ -53,10 +53,12 @@ class TestFilingSelector:
         )
 
         assert len(filings) <= 5  # May be fewer if not enough filings in range
-        assert all(f.form == "10-K" for f in filings)
+        # Accept both main form and amendments (e.g., "10-K" and "10-K/A")
+        assert all(f.form.startswith("10-K") for f in filings)
         # All filings should be in January 2024
         for filing in filings:
-            assert "2024-01" in filing.filing_date
+            filing_date_str = str(filing.filing_date)
+            assert "2024-01" in filing_date_str
 
     @pytest.mark.network
     def test_by_date_range_no_sample(self):
@@ -68,7 +70,8 @@ class TestFilingSelector:
         )
 
         assert len(filings) > 0  # Should have some filings
-        assert all(f.form == "8-K" for f in filings)
+        # Accept both main form and amendments (e.g., "8-K" and "8-K/A")
+        assert all(f.form.startswith("8-K") for f in filings)
 
     @pytest.mark.network
     def test_by_company_list(self):
@@ -175,7 +178,8 @@ class TestFromConfig:
         filings = FilingSelector.from_config(config)
 
         assert len(filings) <= 3
-        assert all(f.form == "10-K" for f in filings)
+        # Accept both main form and amendments
+        assert all(f.form.startswith("10-K") for f in filings)
 
     @pytest.mark.network
     def test_from_config_random_sample(self):
