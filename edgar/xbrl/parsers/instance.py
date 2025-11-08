@@ -511,8 +511,11 @@ class InstanceParser(BaseParser):
             for footnote_link in root.findall('.//{http://www.xbrl.org/2003/linkbase}footnoteLink'):
                 # First, extract all footnote definitions
                 for footnote_elem in footnote_link.findall('{http://www.xbrl.org/2003/linkbase}footnote'):
-                    # Try both 'id' and 'xlink:label' attributes
-                    footnote_id = footnote_elem.get('id') or footnote_elem.get('{http://www.w3.org/1999/xlink}label')
+                    # Prioritize xlink:label over id attribute for footnote identification.
+                    # FootnoteArcs reference footnotes using xlink:to, which corresponds to xlink:label.
+                    # In pre-2016 filings, these attributes often differ (e.g., xlink:label="lbl_footnote_0"
+                    # vs id="FN_0"), so we must use xlink:label to match arc references correctly.
+                    footnote_id = footnote_elem.get('{http://www.w3.org/1999/xlink}label') or footnote_elem.get('id')
                     if not footnote_id:
                         continue
 
