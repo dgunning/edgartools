@@ -45,15 +45,19 @@ class FilingSelector:
             ...     sample=10
             ... )
         """
-        filings = get_filings(
-            form=form,
-            filing_date=f"{start_date}:{end_date}"
-        )
+        try:
+            filings = get_filings(
+                form=form,
+                filing_date=f"{start_date}:{end_date}"
+            )
 
-        if sample:
-            filings = filings.sample(sample)
+            if sample:
+                filings = filings.sample(sample)
 
-        return list(filings)
+            return list(filings)
+        except Exception:
+            # Return empty list if date range has no filings or causes errors
+            return []
 
     @staticmethod
     def by_company_subset(
@@ -81,20 +85,20 @@ class FilingSelector:
             ... )
         """
         # Get companies from subset
-        companies = get_popular_companies(tier=subset_name)
+        companies_data = get_popular_companies(tier=subset_name)
 
-        # Convert to list if needed (get_popular_companies may return dict-like)
-        companies_list = list(companies) if not isinstance(companies, list) else companies
+        # Convert to list (get_popular_companies returns iterable of dicts)
+        companies_list = list(companies_data)
 
         if sample and len(companies_list) > sample:
             import random
-            companies = random.sample(companies_list, sample)
+            companies_to_use = random.sample(companies_list, sample)
         else:
-            companies = companies_list
+            companies_to_use = companies_list
 
         # Get filings for these companies
         filings = []
-        for company_info in companies:
+        for company_info in companies_to_use:
             try:
                 ticker = company_info.get('ticker') or company_info.get('Ticker')
                 if ticker:
@@ -167,12 +171,19 @@ class FilingSelector:
             ...     seed=42  # For reproducibility
             ... )
         """
+        import random
+
         if seed is not None:
-            import random
             random.seed(seed)
 
         filings = get_filings(form=form, year=year)
-        return list(filings.sample(sample))
+
+        # Convert to list and use random.sample for reproducibility with seed
+        filings_list = list(filings)
+        if len(filings_list) <= sample:
+            return filings_list
+
+        return random.sample(filings_list, sample)
 
     @staticmethod
     def by_company_list(
